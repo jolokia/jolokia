@@ -19,7 +19,7 @@ package org.jolokia.jvmagent.client.command;
 import java.lang.reflect.InvocationTargetException;
 
 import org.jolokia.jvmagent.client.util.OptionsAndArgs;
-import org.jolokia.jvmagent.client.util.VirtualMachineHandler;
+import org.jolokia.jvmagent.client.util.VirtualMachineHandlerOperations;
 
 /**
  * Stop a Jolokia Agent, but only if it is already running (started with 'start').
@@ -40,18 +40,18 @@ public class StopCommand extends AbstractBaseCommand {
     /** {@inheritDoc} */
     @Override
     @SuppressWarnings("PMD.SystemPrintln")
-    int execute(OptionsAndArgs pOpts, Object pVm, VirtualMachineHandler pHandler) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
-        String agentUrl = checkAgentUrl(pVm);
+    int execute(OptionsAndArgs pOpts, Object pVm, VirtualMachineHandlerOperations pHandler) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        String agentUrl = checkAgentUrl(pVm, pHandler);
         boolean quiet = pOpts.isQuiet();
         if (agentUrl != null) {
-            loadAgent(pVm,pOpts,"mode=stop");
+            loadAgent(pVm, pHandler, pOpts, "mode=stop");
             if (!quiet) {
-                System.out.println("Stopped Jolokia for " + getProcessDescription(pOpts,pHandler));
+                System.out.println("Stopped Jolokia for " + getProcessDescription(pHandler, pOpts));
             }
             return 0;
         } else {
             if (!quiet) {
-                System.out.println("Jolokia is not attached to " + getProcessDescription(pOpts,pHandler));
+                System.out.println("Jolokia is not attached to " + getProcessDescription(pHandler, pOpts));
             }
             return 1;
         }

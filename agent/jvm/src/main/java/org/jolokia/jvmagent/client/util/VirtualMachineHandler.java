@@ -16,25 +16,23 @@ package org.jolokia.jvmagent.client.util;
  * limitations under the License.
  */
 
-import java.lang.management.ManagementFactory;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
+import java.util.Properties;
 import java.util.regex.Pattern;
-
 
 /**
  * A handler for dealing with <code>VirtualMachine</code> without directly referencing internally
- * the class type. All lookup is done via reflection.
+ * the class type. All lookup is done via reflection. (Name not changed for compatibility reasons).
  *
  * @author roland
  * @since 12.08.11
  */
-public class VirtualMachineHandler {
+class VirtualMachineHandler implements VirtualMachineHandlerOperations {
 
-    private OptionsAndArgs options;
+    private final OptionsAndArgs options;
 
     /**
      * Constructor with options
@@ -42,7 +40,7 @@ public class VirtualMachineHandler {
      * @param pOptions options for getting e.g. the process id to attach to
      *
      */
-    public VirtualMachineHandler(OptionsAndArgs pOptions) {
+    VirtualMachineHandler(OptionsAndArgs pOptions) {
         options = pOptions;
     }
 
@@ -56,15 +54,16 @@ public class VirtualMachineHandler {
      *
      * @return the create virtual machine of <code>null</code> if none could be created
      */
-    public Object attachVirtualMachine() {
+    @Override
+    public Object attachVirtualMachine() throws ProcessingException {
         if (options.getPid() == null && options.getProcessPattern() == null) {
             return null;
         }
-        Class vmClass = lookupVirtualMachineClass();
+        Class<?> vmClass = lookupVirtualMachineClass();
         String pid = null;
         try {
             Method method = vmClass.getMethod("attach",String.class);
-            pid = getProcessId(options);
+            pid = PlatformUtils.getProcessId(this, options);
             return method.invoke(null, pid);
         } catch (NoSuchMethodException e) {
             throw new ProcessingException("Internal: No method 'attach' found on " + vmClass,e,options);
@@ -77,7 +76,7 @@ public class VirtualMachineHandler {
         }
     }
 
-    private String getPidErrorMesssage(String pid, String label, Class vmClass) {
+    private String getPidErrorMesssage(String pid, String label, Class<?> vmClass) {
         return pid != null ?
             String.format("Cannot attach to process-ID %s (%s %s).\nSee --help for possible reasons.",
                           pid, label, vmClass.getName()) :
@@ -89,10 +88,11 @@ public class VirtualMachineHandler {
      *
      * @param pVm the virtual machine to detach from
      */
+    @Override
     public void detachAgent(Object pVm) {
         try {
             if (pVm != null) {
-                Class clazz = pVm.getClass();
+                Class<?> clazz = pVm.getClass();
                 Method method = clazz.getMethod("detach");
                 method.setAccessible(true); // on J9 you get IllegalAccessException otherwise.
                 method.invoke(pVm);
@@ -109,23 +109,30 @@ public class VirtualMachineHandler {
     /**
      * Return a list of all Java processes
      * @return list of java processes
-     * @throws NoSuchMethodException reflection error
-     * @throws InvocationTargetException reflection error
-     * @throws IllegalAccessException reflection error
+     * @throws ProcessingException reflection error
      */
-    public List<ProcessDescription> listProcesses() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    @Override
+    public List<ProcessDescription> listProcesses() {
         List<ProcessDescription> ret = new ArrayList<ProcessDescription>();
-        Class vmClass = lookupVirtualMachineClass();
-        Method method = vmClass.getMethod("list");
-        List vmDescriptors = (List) method.invoke(null);
-        for (Object descriptor : vmDescriptors) {
-            Method idMethod = descriptor.getClass().getMethod("id");
-            String id = (String) idMethod.invoke(descriptor);
-            Method displayMethod = descriptor.getClass().getMethod("displayName");
-            String display = (String) displayMethod.invoke(descriptor);
-            ret.add(new ProcessDescription(id, display));
+        Class<?> vmClass = lookupVirtualMachineClass();
+        try {
+            Method method = vmClass.getMethod("list");
+            List<?> vmDescriptors = (List<?>) method.invoke(null);
+            for (Object descriptor : vmDescriptors) {
+                Method idMethod = descriptor.getClass().getMethod("id");
+                String id = (String) idMethod.invoke(descriptor);
+                Method displayMethod = descriptor.getClass().getMethod("displayName");
+                String display = (String) displayMethod.invoke(descriptor);
+                ret.add(new ProcessDescription(id, display));
+            }
+            return ret;
+        } catch (NoSuchMethodException e) {
+            throw new ProcessingException("Error while listing JVM processes", e, options);
+        } catch (InvocationTargetException e) {
+            throw new ProcessingException("Error while listing JVM processes", e, options);
+        } catch (IllegalAccessException e) {
+            throw new ProcessingException("Error while listing JVM processes", e, options);
         }
-        return ret;
     }
 
     /**
@@ -137,63 +144,45 @@ public class VirtualMachineHandler {
      * @return a process description of the one process found but never null
      * @throws IllegalArgumentException if more than one or no process has been found.
      */
-    public ProcessDescription findProcess(Pattern pPattern)
-            throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
-        List<ProcessDescription> ret = new ArrayList<ProcessDescription>();
-        String ownId = getOwnProcessId();
+    @Override
+    public ProcessDescription findProcess(Pattern pPattern) {
+        return PlatformUtils.findProcess(pPattern, listProcesses());
+    }
 
-        for (ProcessDescription desc : listProcesses()) {
-            Matcher matcher = pPattern.matcher(desc.getDisplay());
-            if (!desc.getId().equals(ownId) && matcher.find()) {
-                ret.add(desc);
-            }
+    @Override
+    public void loadAgent(Object pVm, String jarFilePath, String args) throws ProcessingException {
+        Class<?> clazz = pVm.getClass();
+        try {
+            Method method = clazz.getMethod("loadAgent",String.class, String.class);
+            method.invoke(pVm, jarFilePath, args);
+        } catch (NoSuchMethodException e) {
+            throw new ProcessingException("Error while loading Jolokia agent to a JVM process", e, options);
+        } catch (InvocationTargetException e) {
+            throw new ProcessingException("Error while loading Jolokia agent to a JVM process", e, options);
+        } catch (IllegalAccessException e) {
+            throw new ProcessingException("Error while loading Jolokia agent to a JVM process", e, options);
         }
-        if (ret.size() == 1) {
-            return ret.get(0);
-        } else if (ret.size() == 0) {
-            throw new IllegalArgumentException("No attachable process found matching \"" + pPattern.pattern() + "\"");
-        } else {
-            StringBuilder buf = new StringBuilder();
-            for (ProcessDescription desc : ret) {
-                buf.append(desc.getId()).append(" (").append(desc.getDisplay()).append("),");
-            }
-            throw new IllegalArgumentException("More than one attachable process found matching \"" +
-                                               pPattern.pattern() + "\": " + buf.substring(0,buf.length()-1));
+    }
+
+    @Override
+    public Properties getSystemProperties(Object pVm) {
+        Class<?> clazz = pVm.getClass();
+        try {
+            Method method = clazz.getMethod("getSystemProperties");
+            return (Properties) method.invoke(pVm);
+        } catch (NoSuchMethodException e) {
+            throw new ProcessingException("Error while getting system properties from a JVM process", e, options);
+        } catch (InvocationTargetException e) {
+            throw new ProcessingException("Error while getting system properties from a JVM process", e, options);
+        } catch (IllegalAccessException e) {
+            throw new ProcessingException("Error while getting system properties from a JVM process", e, options);
         }
     }
 
     // ========================================================================================================
 
-    /**
-     * Get the process id, either directly from option's ID or by looking up a regular expression for java process name
-     * (but not this java process)
-     *
-     * @param pOpts used to get eithe the process Id ({@link OptionsAndArgs#getPid()} or the pattern for matching a
-     *        process name ({@link OptionsAndArgs#getProcessPattern()})
-     * @return the numeric id as string
-     * @throws IllegalArgumentException if a pattern is used and no or more than one process name matches.
-     */
-    private String getProcessId(OptionsAndArgs pOpts) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
-        if (pOpts.getPid() != null) {
-            return pOpts.getPid();
-        } else if (pOpts.getProcessPattern() != null) {
-            return findProcess(pOpts.getProcessPattern()).getId();
-        } else {
-            throw new IllegalArgumentException("No process ID and no process name pattern given");
-        }
-    }
-
-    // Try to find out own process id. This is platform dependent and works on Sun/Oracl/OpeneJDKs like the
-    // whole agent, so it should be safe
-    private String getOwnProcessId() {
-        // Format of name is : <pid>@<host>
-        String name = ManagementFactory.getRuntimeMXBean().getName();
-        int endIdx = name.indexOf('@');
-        return endIdx != -1 ? name.substring(0,endIdx) : name;
-    }
-
     // lookup virtual machine class
-    private Class lookupVirtualMachineClass() {
+    private Class<?> lookupVirtualMachineClass() {
         try {
             return ToolsClassFinder.lookupClass("com.sun.tools.attach.VirtualMachine");
         } catch (ClassNotFoundException exp) {

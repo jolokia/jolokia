@@ -50,7 +50,7 @@ public final class AgentLauncher {
         OptionsAndArgs options;
         try {
             options = new OptionsAndArgs(CommandDispatcher.getAvailableCommands(),args);
-            VirtualMachineHandler vmHandler = new VirtualMachineHandler(options);
+            VirtualMachineHandlerOperations vmHandler = PlatformUtils.createVMAccess(options);
             CommandDispatcher dispatcher = new CommandDispatcher(options);
 
             // Attach a VirtualMachine to a given PID (if PID is given)

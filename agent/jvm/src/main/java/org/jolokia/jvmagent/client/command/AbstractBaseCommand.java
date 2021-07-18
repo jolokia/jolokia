@@ -17,12 +17,11 @@ package org.jolokia.jvmagent.client.command;
  */
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.Properties;
 
 import org.jolokia.jvmagent.JvmAgent;
 import org.jolokia.jvmagent.client.util.OptionsAndArgs;
-import org.jolokia.jvmagent.client.util.VirtualMachineHandler;
+import org.jolokia.jvmagent.client.util.VirtualMachineHandlerOperations;
 
 /**
  * Stateless Base command providing helper functions
@@ -51,25 +50,24 @@ public abstract class AbstractBaseCommand {
      * @throws InvocationTargetException exception occured during startup of the agent. You probably need to examine
      *         the stdout of the instrumented process as well for error messages.
       */
-    abstract int execute(OptionsAndArgs pOpts, Object pVm,VirtualMachineHandler pHandler) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException;
+    abstract int execute(OptionsAndArgs pOpts, Object pVm, VirtualMachineHandlerOperations pHandler) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException;
 
     // =======================================================================================================
 
     /**
-     * Execute {@link com.sun.tools.attach.VirtualMachine#loadAgent(String, String)} via reflection
+     * Execute {@code com.sun.tools.attach.VirtualMachine#loadAgent(String, String)}
      *
      * @param pVm the VirtualMachine object, typeless
+     * @param pHandler platform-specific way to invoke operations on VM
      * @param pOpts options from where to extract the agent path and options
      * @param pAdditionalOpts optional additional options to be appended to the agent options. Must be a CSV string.
      */
-    protected void loadAgent(Object pVm, OptionsAndArgs pOpts,String ... pAdditionalOpts) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        Class clazz = pVm.getClass();
-        Method method = clazz.getMethod("loadAgent",String.class, String.class);
+    protected void loadAgent(Object pVm, VirtualMachineHandlerOperations pHandler, OptionsAndArgs pOpts, String ... pAdditionalOpts) {
         String args = pOpts.toAgentArg();
         if (pAdditionalOpts.length > 0) {
             args = args.length() != 0 ? args + "," + pAdditionalOpts[0] : pAdditionalOpts[0];
         }
-        method.invoke(pVm, pOpts.getJarFilePath(),args.length() > 0 ? args : null);
+        pHandler.loadAgent(pVm, pOpts.getJarFilePath(), args.length() > 0 ? args : null);
     }
 
     /**
@@ -78,10 +76,11 @@ public abstract class AbstractBaseCommand {
      * has been already attached and started. ("start" will set this property, "stop" will remove it).
      *
      * @param pVm the {@link com.sun.tools.attach.VirtualMachine}, but typeless
+     * @param pHandler platform-specific way to invoke operations on VM
      * @return the agent URL if it is was set by a previous 'start' command.
      */
-    protected String checkAgentUrl(Object pVm) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        return checkAgentUrl(pVm, 0);
+    protected String checkAgentUrl(Object pVm, VirtualMachineHandlerOperations pHandler) {
+        return checkAgentUrl(pVm, pHandler, 0);
     }
 
     /**
@@ -90,10 +89,11 @@ public abstract class AbstractBaseCommand {
      * has been already attached and started. ("start" will set this property, "stop" will remove it).
      *
      * @param pVm the {@link com.sun.tools.attach.VirtualMachine}, but typeless
+     * @param pHandler platform-specific way to invoke operations on VM
      * @param delayInMs wait that many ms before fetching the properties
      ** @return the agent URL if it is was set by a previous 'start' command.
      */
-    protected String checkAgentUrl(Object pVm, int delayInMs) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    protected String checkAgentUrl(Object pVm, VirtualMachineHandlerOperations pHandler, int delayInMs) {
         if (delayInMs != 0) {
             try {
                 Thread.sleep(delayInMs);
@@ -101,47 +101,38 @@ public abstract class AbstractBaseCommand {
                 // just continue
             }
         }
-        Properties systemProperties = getAgentSystemProperties(pVm);
+        Properties systemProperties = getAgentSystemProperties(pVm, pHandler);
         return systemProperties.getProperty(JvmAgent.JOLOKIA_AGENT_URL);
     }
 
     /**
      * Execute {@link com.sun.tools.attach.VirtualMachine#getSystemProperties()} via reflection
      * @param pVm the VirtualMachine object, typeless
+     * @param pHandler platform-specific way to invoke operations on VM
      * @return the system properties
      */
-    protected Properties getAgentSystemProperties(Object pVm) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        Class clazz = pVm.getClass();
-        Method method = clazz.getMethod("getSystemProperties");
-        return (Properties) method.invoke(pVm);
+    protected Properties getAgentSystemProperties(Object pVm, VirtualMachineHandlerOperations pHandler) {
+        return pHandler.getSystemProperties(pVm);
     }
 
     /**
      * Get a description of the process attached, either the numeric id only or, if a pattern is given,
      * the pattern and the associated PID
      *
-     * @param pOpts options from where to take the PID or pattern
      * @param pHandler handler for looking up the process in case of a pattern lookup
+     * @param pOpts options from where to take the PID or pattern
      * @return a description of the process
      */
-    protected String getProcessDescription(OptionsAndArgs pOpts, VirtualMachineHandler pHandler) {
+    protected String getProcessDescription(VirtualMachineHandlerOperations pHandler, OptionsAndArgs pOpts) {
         if (pOpts.getPid() != null) {
             return "PID " + pOpts.getPid();
         } else if (pOpts.getProcessPattern() != null) {
             StringBuffer desc = new StringBuffer("process matching \"")
                     .append(pOpts.getProcessPattern().pattern())
                     .append("\"");
-            try {
-                desc.append(" (PID: ")
-                        .append(pHandler.findProcess(pOpts.getProcessPattern()).getId())
-                        .append(")");
-            } catch (InvocationTargetException e) {
-                // ignored
-            } catch (NoSuchMethodException e) {
-                // ignored
-            } catch (IllegalAccessException e) {
-                // ignored
-            }
+            desc.append(" (PID: ")
+                    .append(pHandler.findProcess(pOpts.getProcessPattern()).getId())
+                    .append(")");
             return desc.toString();
         } else {
             return "(null)";
