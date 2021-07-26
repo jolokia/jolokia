@@ -292,9 +292,9 @@ public class JolokiaServerTest {
             /* IBM's VM is technically capable to use SSL but due to POODLE it has been disabled by default for quite a while and throws
              an exception if an attempt is made to use it. Take note that this can lead to a bit of confusion as the cipher suites all
              are prefixed with SSL_ on J9 (compared to TLS_ on OpenJDK/Oracle). */
-            protocolCandidates = new String[]{"TLSv1", "TLSv1.1", "TLSv1.2"};
+            protocolCandidates = new String[]{"TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.3"};
         } else {
-            protocolCandidates = new String[]{"SSLv3", "TLSv1", "TLSv1.1", "TLSv1.2"};
+            protocolCandidates = new String[]{"TLSv1.2", "TLSv1.3"};
         }
         for (String protocol : protocolCandidates) {
             // Make sure at least one connection for this protocol succeeds (if expected to)
