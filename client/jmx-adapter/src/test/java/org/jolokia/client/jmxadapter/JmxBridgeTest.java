@@ -50,6 +50,8 @@ import javax.management.remote.JMXConnectionNotification;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
+
+import org.jolokia.Version;
 import org.jolokia.client.J4pClient;
 import org.jolokia.client.J4pClientBuilder;
 import org.jolokia.client.exception.J4pException;
@@ -322,7 +324,6 @@ public class JmxBridgeTest {
         MBeanExample.class.getName(),
         RemoteJmxAdapter.getObjectName("jolokia.test:name=MBeanExample"));
     JvmAgent.agentmain("port=" + (agentPort = EnvTestUtil.getFreePort()), null);
-
     final J4pClient connector =
         new J4pClientBuilder().url("http://localhost:" + this.agentPort + "/jolokia/").build();
     // wait for agent to be running
@@ -702,8 +703,8 @@ public class JmxBridgeTest {
     Assert.assertEquals(
         this.adapter.getDefaultDomain(), nativeServer.getDefaultDomain(), "Default domain");
 
-    Assert.assertEquals(this.adapter.agentVersion, "1.6.2");
-    Assert.assertEquals(this.adapter.protocolVersion, "7.2");
+    Assert.assertEquals(this.adapter.agentVersion, Version.getAgentVersion());
+    Assert.assertEquals(this.adapter.protocolVersion, Version.getProtocolVersion());
     Assert.assertTrue(this.adapter.getId().endsWith("-jvm"));
 
   }
