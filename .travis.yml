@@ -1,5 +1,5 @@
 language: java
-dist: xenial
+dist: focal
 before_install:
   - echo "127.0.0.1 "`hostname` | sudo tee /etc/hosts
 after_script:
