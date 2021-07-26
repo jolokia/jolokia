@@ -1,5 +1,5 @@
 language: java
-dist: focal
+dist: bionic
 before_install:
   - echo "127.0.0.1 "`hostname` | sudo tee /etc/hosts
 after_script:
