@@ -62,7 +62,7 @@
         <artifactId>maven-release-plugin</artifactId>
         <configuration>
           <autoVersionSubmodules>true</autoVersionSubmodules>
-          <goals>deploy docbkx:generate-html docbkx:generate-pdf package assembly:assembly</goals>
+          <goals>deploy docbkx:generate-html docbkx:generate-pdf package assembly:single</goals>
         </configuration>
       </plugin>
 
