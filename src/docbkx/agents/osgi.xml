@@ -397,9 +397,8 @@
          <td>
            Can be either <literal>basic</literal> (the default), <literal>jaas</literal>,
            <literal>service-all</literal> or <literal>service-any</literal>. If
-           <literal>jaas</literal> is used, the user and password are given in the <literal>Authorization:</literal>
+           <literal>jaas</literal> is used, the user and password which are given in the <literal>Authorization:</literal>
            header are used for login in via JAAS and, if successful, the return subject is used for all Jolokia operation.
-           This has only an effect if a user is set.
            When no user is set and the <literal>authMode</literal> is either <literal>service-all</literal> or
            <literal>service-any</literal> then a <literal>org.jolokia.osgi.security.Authenticator</literal> service is looked up in the
            OSGi service registry. If more then one of such service is registered, <literal>service-all</literal> requires

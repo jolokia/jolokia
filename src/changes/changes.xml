@@ -43,7 +43,7 @@
         Fixes SSL failure to connect using proxy or .war
       </action>
       <action dev="skarsaune" type="add" issue="453">
-        Do not rely on whatever Kubernetes context is current at the client and allow specifying context when connecting with the Kubernetes connector.  
+        Do not rely on whatever Kubernetes context is current at the client and allow specifying context when connecting with the Kubernetes connector.
       </action>
       <action dev="skarsaune" type="add" issue="434">
       JSR-160 connector for connectiong to a Pod in a Kubernetes cluster.
@@ -57,9 +57,10 @@
       <action dev="JLLeitschuh" type="fix" issue="430">
         Use HTTPS to resolve dependencies in Maven Build
       </action>
-      <action dev="graben" type="add" issue="421">
-        Make multicast discovery address and multicast port configurable with configuration, system property or environment variable.
+      <action dev="coheigea" type="add" issue="414">
+       Don't require user to be set when JAAS authentication is configured for the OSGi connector.
       </action>
+
     </release>
     <release version="1.6.2" description="Release 1.6.2" date="2019-06-20">
       <action dev="dsimansk" type="update" issue="403">
