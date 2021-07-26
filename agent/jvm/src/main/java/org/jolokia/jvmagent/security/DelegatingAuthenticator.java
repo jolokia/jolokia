@@ -119,7 +119,8 @@ public class DelegatingAuthenticator extends Authenticator {
 
         @Override
         public HttpPrincipal extract(URLConnection connection) throws IOException, ParseException {
-            try (final InputStreamReader isr = new InputStreamReader(connection.getInputStream())) {
+            final InputStreamReader isr = new InputStreamReader(connection.getInputStream())
+            try {
                 Object payload = new JSONParser().parse(isr);
                 Stack<String> pathElements = EscapeUtil.extractElementsFromPath(path);
                 Object result = payload;
@@ -131,6 +132,8 @@ public class DelegatingAuthenticator extends Authenticator {
                     result = extractValue(result, key);
                 }
                 return new HttpPrincipal(result.toString(), realm);
+            } finally {
+                isr.close();
             }
         }
 
