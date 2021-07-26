@@ -3,8 +3,8 @@ dist: xenial
 before_install:
   - echo "127.0.0.1 "`hostname` | sudo tee /etc/hosts
 after_script:
-  - "[[ $TRAVIS_PULL_REQUEST == false ]] && [[ $TRAVIS_JDK_VERSION == openjdk8 ]] && [[ $TRAVIS_BRANCH == master ]] && mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent package sonar:sonar -Dsonar.host.url=https://sonarqube.com -Dsonar.login=${SONARQUBE_TOKEN}"
-  - "[[ $TRAVIS_PULL_REQUEST == false ]] && [[ $TRAVIS_JDK_VERSION == openjdk8 ]] && [[ $TRAVIS_BRANCH == '2.0' ]] && mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent package sonar:sonar -Dsonar.host.url=https://sonarqube.com -Dsonar.login=${SONARQUBE_TOKEN} -Dsonar.branch=2.0"
+  - "[[ $TRAVIS_PULL_REQUEST == false ]] && [[ $TRAVIS_JDK_VERSION == openjdk11 ]] && [[ $TRAVIS_BRANCH == master ]] && mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent package sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${SONARQUBE_TOKEN} -Dsonar.organisation=rhuss"
+  - "[[ $TRAVIS_PULL_REQUEST == false ]] && [[ $TRAVIS_JDK_VERSION == openjdk11 ]] && [[ $TRAVIS_BRANCH == '2.0' ]] && mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent package sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${SONARQUBE_TOKEN} -Dsonar.organisation=rhuss -Dsonar.branch=2.0"
 jdk:
   - openjdk8
   - openjdk9
