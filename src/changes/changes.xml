@@ -57,10 +57,12 @@
       <action dev="JLLeitschuh" type="fix" issue="430">
         Use HTTPS to resolve dependencies in Maven Build
       </action>
-      <action dev="coheigea" type="add" issue="414">
+      <action dev="coheigea" type="fix" issue="414">
        Don't require user to be set when JAAS authentication is configured for the OSGi connector.
       </action>
-
+<action dev="rhuss" type="fix" issue="388">
+       Fix the usage of JRE 1.8 classes that does not work with Java 6
+      </action>
     </release>
     <release version="1.6.2" description="Release 1.6.2" date="2019-06-20">
       <action dev="dsimansk" type="update" issue="403">
