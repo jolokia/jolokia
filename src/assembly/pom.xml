@@ -20,13 +20,13 @@
   <parent>
     <groupId>org.jolokia</groupId>
     <artifactId>jolokia</artifactId>
-    <version>1.7.0</version>
+    <version>1.7.1-SNAPSHOT</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
   <artifactId>jolokia-assembly</artifactId>
-  <version>1.7.0</version>
+  <version>1.7.1-SNAPSHOT</version>
   <name>jolokia-assembly</name>
   <description>Assembly used for release</description>
   <packaging>pom</packaging>
