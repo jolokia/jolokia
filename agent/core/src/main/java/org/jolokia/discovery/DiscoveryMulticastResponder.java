@@ -20,6 +20,8 @@ public class DiscoveryMulticastResponder {
 
     private final AgentDetailsHolder detailsHolder;
     private final Restrictor restrictor;
+    private final String multicastGroup;
+    private final int multicastPort;
     private final LogHandler logHandler;
 
     private InetAddress hostAddress;
@@ -33,13 +35,17 @@ public class DiscoveryMulticastResponder {
      *
      * @param pDetailsHolder holds the details for an agent
      * @param pRestrictor restrictor used for avoiding responding to sites which are not allowed to connect
+     * @param pMulticastGroup multicast IPv4 address
+     * @param pMulticastPort multicast port
      * @param pLogHandler used for logging and debugging
-     * @throws IOException when the host is not known.
+     * @throws UnknownHostException when the host is not known.
      */
     public DiscoveryMulticastResponder(AgentDetailsHolder pDetailsHolder,
                                        Restrictor pRestrictor,
+                                       String pMulticastGroup,
+                                       int pMulticastPort,
                                        LogHandler pLogHandler) throws UnknownHostException {
-        this(null, pDetailsHolder, pRestrictor, pLogHandler);
+        this(null, pDetailsHolder, pRestrictor, pMulticastGroup, pMulticastPort, pLogHandler);
     }
 
     /**
@@ -48,15 +54,21 @@ public class DiscoveryMulticastResponder {
      * @param pHostAddress host address from which the binding is performed
      * @param pDetailsHolder holds the details for an agent
      * @param pRestrictor restrictor used for avoiding responding to sites which are not allowed to connect
+     * @param pMulticastGroup multicast IPv4 address
+     * @param pMulticastPort multicast port
      * @param pLogHandler used for logging and debugging
      */
     public DiscoveryMulticastResponder(InetAddress pHostAddress,
                                        AgentDetailsHolder pDetailsHolder,
                                        Restrictor pRestrictor,
+                                       String pMulticastGroup,
+                                       int pMulticastPort,
                                        LogHandler pLogHandler) {
         hostAddress = pHostAddress;
         detailsHolder = pDetailsHolder;
         restrictor = pRestrictor;
+        multicastGroup = pMulticastGroup;
+        multicastPort = pMulticastPort;
         logHandler = pLogHandler;
         listenerThreads = new ArrayList<MulticastSocketListenerThread>();
     }
@@ -78,6 +90,8 @@ public class DiscoveryMulticastResponder {
                                                                                             addr,
                                                                                              detailsHolder,
                                                                                              restrictor,
+                                                                                             multicastGroup,
+                                                                                             multicastPort,
                                                                                              logHandler);
                     thread.start();
                     listenerThreads.add(thread);

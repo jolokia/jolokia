@@ -27,7 +27,7 @@ public class JulLogHandler implements LogHandler {
     private final Logger julilogger = Logger.getLogger("org.jolokia");
 
     public void debug(String message) {
-        julilogger.fine(message);;
+        julilogger.fine(message);
     }
 
     public void info(String message) {

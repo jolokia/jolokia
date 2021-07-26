@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright 2009-2013 Roland Huss
+  ~ Copyright 2009-2019 Roland Huss
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -23,7 +23,51 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
-    <release version="1.6.1-SNAPSHOT" description="Release 1.6.1-SNAPSHOT" date="yyyy-mm-dd">
+    <release version="1.7.0-SNAPSHOT" description="Release 1.7.0" date="">
+      <action dev="grgrzybek" type="fix" issue="466">
+        Reimplement self-signed certificate generation without using reflection
+      </action>
+      <action dev="mmelko" type="fix" issue="465">
+        Handle UnsupportedOperationException to allow properly read Runtime MBean on jdk11
+      </action>
+      <action dev="grgrzybek" type="update" issue="464">
+        Provide non-reflective access to JVM Attach API on JDK9+
+      </action>
+      <action dev="ryandgoulding" type="fix" issue="460">
+        Fix possible integer overflow in OperationChecking.java
+      </action>
+      <action dev="sathieu" type="add" issue="445">
+        Debian package: Allow installation with openjdk-8-jre and with headless JREs
+      </action>
+      <action dev="TheWeatherCompany" type="fix" issue="436">
+        Fixes SSL failure to connect using proxy or .war
+      </action>
+      <action dev="skarsaune" type="add" issue="453">
+        Do not rely on whatever Kubernetes context is current at the client and allow specifying context when connecting with the Kubernetes connector.
+      </action>
+      <action dev="skarsaune" type="add" issue="434">
+      JSR-160 connector for connectiong to a Pod in a Kubernetes cluster.
+      </action>
+      <action dev="skarsaune" type="add" issue="431">
+       JSR-160 connector using Jolokia
+      </action>
+       <action dev="graben" type="add" issue="421">
+        Make multicast discovery address and multicast port configurable with configuration, system property or environment variable.
+      </action>
+      <action dev="JLLeitschuh" type="fix" issue="430">
+        Use HTTPS to resolve dependencies in Maven Build
+      </action>
+      <action dev="coheigea" type="add" issue="414">
+       Don't require user to be set when JAAS authentication is configured for the OSGi connector.
+      </action>
+
+    </release>
+    <release version="1.6.2" description="Release 1.6.2" date="2019-06-20">
+      <action dev="dsimansk" type="update" issue="403">
+        Add support to load multiple CA certs from store
+      </action>
+    </release>
+    <release version="1.6.1" description="Release 1.6.1" date="2019-05-01">
       <action dev="nevenr" type="add" issue="344">
         Add configuration option authMatch which explains how to combine multiple authenticators if MultiAuthenticator is used.
       </action>

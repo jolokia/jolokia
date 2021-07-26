@@ -47,10 +47,10 @@
         include the init option <literal>dispatcherClasses</literal> with a value <literal>org.jolokia.jsr160.Jsr160RequestDispatcher</literal>.
       </listitem>
       <listitem>
-        Set the system property <literal>org.jolokia.jsr160ProxyEnabled</literal>
+        Set the system property <literal>org.jolokia.jsr160ProxyEnabled</literal> to <literal>true</literal>
       </listitem>
       <listitem>
-        Set the environment variable <literal>JOLOKIA_JSR160_PROXY_ENABLED</literal>
+        Set the environment variable <literal>JOLOKIA_JSR160_PROXY_ENABLED</literal> to <literal>true</literal>
       </listitem>
     </itemizedlist>
     <para>

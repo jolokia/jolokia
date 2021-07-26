@@ -13,6 +13,7 @@ import javax.net.ssl.*;
 
 import com.sun.net.httpserver.Authenticator;
 import com.sun.net.httpserver.*;
+import org.jolokia.util.AuthorizationHeaderParser;
 import org.jolokia.util.EscapeUtil;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -30,13 +31,14 @@ public class DelegatingAuthenticator extends Authenticator {
     private final URL delegateURL;
     private final PrincipalExtractor principalExtractor;
     private final String realm;
+    private SSLSocketFactory sslSocketFactory;
+    private HostnameVerifier hostnameVerifier;
 
     public DelegatingAuthenticator(String pRealm, String pUrl, String pPrincipalSpec, boolean pDisableCertCheck) {
         this.realm = pRealm;
         try {
             this.delegateURL = new URL(pUrl);
             this.principalExtractor = createPrincipalExtractor(pPrincipalSpec);
-            // REMARK : This might be done on a per-connection basis not globally for everyone
             if (pDisableCertCheck) {
                 disableSSLCertificateChecking();
             }
@@ -49,12 +51,27 @@ public class DelegatingAuthenticator extends Authenticator {
     public Result authenticate(HttpExchange pHttpExchange) {
         try {
             URLConnection connection = delegateURL.openConnection();
+            String authorization = pHttpExchange.getRequestHeaders()
+                .getFirst("Authorization");
+            if(authorization == null){//In case middleware strips Authorization, allow alternate header
+                authorization = pHttpExchange.getRequestHeaders()
+                    .getFirst(AuthorizationHeaderParser.JOLOKIA_ALTERNATE_AUTHORIZATION_HEADER);
+            }
             connection.addRequestProperty("Authorization",
-                                          pHttpExchange.getRequestHeaders().getFirst("Authorization"));
+                authorization);
             connection.setConnectTimeout(2000);
             connection.connect();
             if (connection instanceof HttpURLConnection) {
                 HttpURLConnection httpConnection = (HttpURLConnection) connection;
+                if (connection instanceof HttpsURLConnection) {
+                    HttpsURLConnection httpsConnection = (HttpsURLConnection) connection;
+                    if (sslSocketFactory != null) {
+                        httpsConnection.setSSLSocketFactory(sslSocketFactory);
+                    }
+                    if (hostnameVerifier != null) {
+                        httpsConnection.setHostnameVerifier(hostnameVerifier);
+                    }
+                }
                 return httpConnection.getResponseCode() == 200 ?
                         new Success(principalExtractor.extract(connection)) :
                         new Failure(401);
@@ -102,17 +119,22 @@ public class DelegatingAuthenticator extends Authenticator {
 
         @Override
         public HttpPrincipal extract(URLConnection connection) throws IOException, ParseException {
-            Object payload = new JSONParser().parse(new InputStreamReader(connection.getInputStream()));
-            Stack<String> pathElements = EscapeUtil.extractElementsFromPath(path);
-            Object result = payload;
-            while (!pathElements.isEmpty()) {
-                if (result == null) {
-                    throw new IllegalArgumentException("No path '" + path + "' found in " + payload.toString());
+            final InputStreamReader isr = new InputStreamReader(connection.getInputStream());
+            try {
+                Object payload = new JSONParser().parse(isr);
+                Stack<String> pathElements = EscapeUtil.extractElementsFromPath(path);
+                Object result = payload;
+                while (!pathElements.isEmpty()) {
+                    if (result == null) {
+                        throw new IllegalArgumentException("No path '" + path + "' found in " + payload.toString());
+                    }
+                    String key = pathElements.pop();
+                    result = extractValue(result, key);
                 }
-                String key = pathElements.pop();
-                result = extractValue(result, key);
+                return new HttpPrincipal(result.toString(), realm);
+            } finally {
+                isr.close();
             }
-            return new HttpPrincipal(result.toString(),realm);
         }
 
         private Object extractValue(Object payload, String key) {
@@ -134,7 +156,7 @@ public class DelegatingAuthenticator extends Authenticator {
 
     // ============================================================================================
 
-      private static void disableSSLCertificateChecking() {
+      private void disableSSLCertificateChecking() {
         TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
             public X509Certificate[] getAcceptedIssuers() {
                 return null;
@@ -155,7 +177,7 @@ public class DelegatingAuthenticator extends Authenticator {
             SSLContext sc = SSLContext.getInstance("TLS");
             sc.init(null, trustAllCerts, new java.security.SecureRandom());
 
-            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+            sslSocketFactory = sc.getSocketFactory();
 
             // Create all-trusting host name verifier
             HostnameVerifier allHostsValid = new HostnameVerifier() {
@@ -164,8 +186,7 @@ public class DelegatingAuthenticator extends Authenticator {
                 }
             };
 
-            // Install the all-trusting host verifier
-            HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
+            hostnameVerifier = allHostsValid;
         } catch (KeyManagementException e) {
             throw new IllegalArgumentException("Disabling SSL certificate failed: " + e,e);
         } catch (NoSuchAlgorithmException e) {

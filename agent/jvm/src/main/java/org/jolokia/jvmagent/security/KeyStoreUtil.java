@@ -16,17 +16,26 @@ package org.jolokia.jvmagent.security;/*
  */
 
 import java.io.*;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.security.*;
 import java.security.cert.*;
 import java.security.cert.Certificate;
 import java.security.spec.*;
+import java.util.Collection;
 import java.util.Date;
 
 import org.jolokia.Version;
+import org.jolokia.jvmagent.security.asn1.DERBitString;
+import org.jolokia.jvmagent.security.asn1.DERDirect;
+import org.jolokia.jvmagent.security.asn1.DERInteger;
+import org.jolokia.jvmagent.security.asn1.DERNull;
+import org.jolokia.jvmagent.security.asn1.DERObject;
+import org.jolokia.jvmagent.security.asn1.DERObjectIdentifier;
+import org.jolokia.jvmagent.security.asn1.DEROctetString;
+import org.jolokia.jvmagent.security.asn1.DERSequence;
+import org.jolokia.jvmagent.security.asn1.DERSet;
+import org.jolokia.jvmagent.security.asn1.DERTaggedObject;
+import org.jolokia.jvmagent.security.asn1.DERUtcTime;
 import org.jolokia.util.Base64Util;
-import org.jolokia.util.ClassUtil;
 
 /**
  * Utility class for handling keystores
@@ -35,13 +44,6 @@ import org.jolokia.util.ClassUtil;
  * @since 30/09/15
  */
 public class KeyStoreUtil {
-
-    private static final String KEYGEN_CLASS_JDK8_SUN = "sun.security.tools.keytool.CertAndKeyGen";
-    private static final String KEYGEN_CLASS_JDK7_SUN = "sun.security.x509.CertAndKeyGen";
-    private static final String KEYGEN_CLASS_JDK8_IBM = "com.ibm.security.tools.CertAndKeyGen";
-    private static final String KEYGEN_CLASS_JDK7_IBM = "com.ibm.security.x509.CertAndKeyGen";
-    private static final String X500_NAME_SUN = "sun.security.x509.X500Name";
-    private static final String X500_NAME_IBM = "com.ibm.security.x509.X500Name";
 
     private KeyStoreUtil() {
     }
@@ -57,10 +59,13 @@ public class KeyStoreUtil {
         InputStream is = new FileInputStream(pCaCert);
         try {
             CertificateFactory certFactory = CertificateFactory.getInstance("X509");
-            X509Certificate cert = (X509Certificate) certFactory.generateCertificate(is);
+            Collection<? extends Certificate> certificates = certFactory.generateCertificates(is);
 
-            String alias = cert.getSubjectX500Principal().getName();
-            pTrustStore.setCertificateEntry(alias, cert);
+            for (Certificate c : certificates) {
+                X509Certificate cert = (X509Certificate) c;
+                String alias = cert.getSubjectX500Principal().getName();
+                pTrustStore.setCertificateEntry(alias, cert);
+            }
         } finally {
             is.close();
         }
@@ -110,87 +115,152 @@ public class KeyStoreUtil {
      * @param pKeyStore keystore to update
      */
     public static void updateWithSelfSignedServerCertificate(KeyStore pKeyStore)
-            throws NoSuchProviderException, NoSuchAlgorithmException, IOException,
-                   InvalidKeyException, CertificateException, SignatureException, KeyStoreException {
+            throws NoSuchAlgorithmException, KeyStoreException {
 
-        final Object x500Name;
-        final Object[] certAttributes = { "Jolokia Agent " + Version.getAgentVersion(), // CN
+        final String[] certAttributes = { "Jolokia Agent " + Version.getAgentVersion(), // CN
                                           "JVM",                                        // OU
                                           "jolokia.org",                                // O
                                           "Pegnitz",                                    // L
                                           "Franconia",                                  // ST
                                           "DE" };
-        if (ClassUtil.checkForClass(X500_NAME_SUN)) {
-            x500Name = ClassUtil.newInstance(X500_NAME_SUN, certAttributes);
-        } else if (ClassUtil.checkForClass(X500_NAME_IBM)) {
-            x500Name = ClassUtil.newInstance(X500_NAME_IBM, certAttributes);
-        } else {
-            throw new IllegalStateException("Neither Sun- nor IBM-style JVM found.");
-        }
 
         // Need to do it via reflection because Java8 moved class to a different package
-        Object keypair = createKeyPair();
-        PrivateKey privKey = getPrivateKey(keypair);
+        KeyPair keypair = createKeyPair();
+        PrivateKey privKey = keypair.getPrivate();
 
         X509Certificate[] chain = new X509Certificate[1];
-        chain[0] = getSelfCertificate(keypair, x500Name, new Date(), (long) 3650 * 24 * 60 * 60);
+        chain[0] = getSelfCertificate(keypair, certAttributes, new Date(), (long) 3650 * 24 * 60 * 60);
         pKeyStore.setKeyEntry("jolokia-agent", privKey, new char[0], chain);
     }
 
     // =============================================================================================
     // Reflection based access to KeyGen classes:
 
-    private static Object createKeyPair() throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException {
-        Class keyGenClass = lookupKeyGenClass();
-        Object keypair = ClassUtil.newInstance(keyGenClass, "RSA", "SHA1WithRSA");
-        ClassUtil.applyMethod(keypair, "generate", 2048);
-        return keypair;
+    private static KeyPair createKeyPair() throws NoSuchAlgorithmException {
+        KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
+        kpg.initialize(2048);
+        return kpg.generateKeyPair();
     }
 
-    private static X509Certificate getSelfCertificate(Object keypair, Object x500Name, Date date, long l) {
-        final Class<?> clazz;
-        if (ClassUtil.checkForClass(X500_NAME_SUN)) {
-            clazz = ClassUtil.classForName(X500_NAME_SUN, false);
-        } else {
-            clazz = ClassUtil.classForName(X500_NAME_IBM, false);
-        }
+    private static X509Certificate getSelfCertificate(KeyPair keypair, String[] attributes, Date date, long l) {
+        // https://datatracker.ietf.org/doc/html/rfc5280#section-4.1:
+        // TBSCertificate  ::=  SEQUENCE  {
+        //      version         [0]  EXPLICIT Version DEFAULT v1,
+        //      serialNumber         CertificateSerialNumber,
+        //      signature            AlgorithmIdentifier,
+        //      issuer               Name,
+        //      validity             Validity,
+        //      subject              Name,
+        //      subjectPublicKeyInfo SubjectPublicKeyInfo,
+        //      issuerUniqueID  [1]  IMPLICIT UniqueIdentifier OPTIONAL,
+        //                           -- If present, version MUST be v2 or v3
+        //      subjectUniqueID [2]  IMPLICIT UniqueIdentifier OPTIONAL,
+        //                           -- If present, version MUST be v2 or v3
+        //      extensions      [3]  EXPLICIT Extensions OPTIONAL
+        //                           -- If present, version MUST be v3
+        //      }
+        // Version  ::=  INTEGER  {  v1(0), v2(1), v3(2)  }
+        //
+        // CertificateSerialNumber  ::=  INTEGER
+        //
+        // Validity ::= SEQUENCE {
+        //      notBefore      Time,
+        //      notAfter       Time }
+        //
+        // Time ::= CHOICE {
+        //      utcTime        UTCTime,
+        //      generalTime    GeneralizedTime }
+        //
+        // UniqueIdentifier  ::=  BIT STRING
+        //
+        // SubjectPublicKeyInfo  ::=  SEQUENCE  {
+        //      algorithm            AlgorithmIdentifier,
+        //      subjectPublicKey     BIT STRING  }
+        //
+        // Extensions  ::=  SEQUENCE SIZE (1..MAX) OF Extension
+        //
+        // Extension  ::=  SEQUENCE  {
+        //      extnID      OBJECT IDENTIFIER,
+        //      critical    BOOLEAN DEFAULT FALSE,
+        //      extnValue   OCTET STRING
+        //                  -- contains the DER encoding of an ASN.1 value
+        //                  -- corresponding to the extension type identified
+        //                  -- by extnID
+        //      }
+
+        DERTaggedObject version = new DERTaggedObject(DERTaggedObject.TagClass.ContextSpecific, false, 0, new DERInteger(2));
+        DERInteger serialNumber = new DERInteger(0x051386F6);
+        DERSequence signature = new DERSequence(new DERObject[] {
+                new DERObjectIdentifier(DERObjectIdentifier.OID_sha1WithRSAEncryption),
+                new DERNull()
+        });
+        DERSequence issuerAndSubject = new DERSequence(new DERObject[] {
+                new DERSet(new DERObject[] { new DERSequence(new DERObject[] {
+                        new DERObjectIdentifier(DERObjectIdentifier.OID_countryName),
+                        new DEROctetString(DEROctetString.DER_PRINTABLESTRING_TAG, attributes[5])
+                }) }),
+                new DERSet(new DERObject[] { new DERSequence(new DERObject[] {
+                        new DERObjectIdentifier(DERObjectIdentifier.OID_stateOrProvinceName),
+                        new DEROctetString(DEROctetString.DER_PRINTABLESTRING_TAG, attributes[4])
+                }) }),
+                new DERSet(new DERObject[] { new DERSequence(new DERObject[] {
+                        new DERObjectIdentifier(DERObjectIdentifier.OID_localityName),
+                        new DEROctetString(DEROctetString.DER_PRINTABLESTRING_TAG, attributes[3])
+                }) }),
+                new DERSet(new DERObject[] { new DERSequence(new DERObject[] {
+                        new DERObjectIdentifier(DERObjectIdentifier.OID_organizationName),
+                        new DEROctetString(DEROctetString.DER_PRINTABLESTRING_TAG, attributes[2])
+                }) }),
+                new DERSet(new DERObject[] { new DERSequence(new DERObject[] {
+                        new DERObjectIdentifier(DERObjectIdentifier.OID_organizationalUnitName),
+                        new DEROctetString(DEROctetString.DER_PRINTABLESTRING_TAG, attributes[1])
+                }) }),
+                new DERSet(new DERObject[] { new DERSequence(new DERObject[] {
+                        new DERObjectIdentifier(DERObjectIdentifier.OID_commonName),
+                        new DEROctetString(DEROctetString.DER_PRINTABLESTRING_TAG, attributes[0])
+                }) })
+        });
+        DERSequence validity = new DERSequence(new DERObject[] {
+                new DERUtcTime(date),
+                new DERUtcTime(new Date(date.getTime() + l))
+        });
+
+        DERSequence tbsCertificate = new DERSequence(new DERObject[] {
+                version,
+                serialNumber,
+                signature,
+                issuerAndSubject,
+                validity,
+                issuerAndSubject,
+                new DERDirect(keypair.getPublic().getEncoded())
+        });
 
         try {
-            final Method selfCertMethod = keypair.getClass().getDeclaredMethod("getSelfCertificate", clazz, Date.class, long.class);
-            selfCertMethod.setAccessible(true);
+            Signature sig = Signature.getInstance("SHA1withRSA");
+            sig.initSign(keypair.getPrivate(), SecureRandom.getInstance("SHA1PRNG"));
+            sig.update(tbsCertificate.getEncoded());
+            byte[] signatureBytes = sig.sign();
 
-            return (X509Certificate) selfCertMethod.invoke(keypair, x500Name, date, l);
-        } catch (final NoSuchMethodException e) {
-            throw new IllegalStateException("Found no getSelfCertificate-method with the expected signature.", e);
-        } catch (final IllegalAccessException e) {
-            throw new IllegalStateException("Not allowed to access getSelfCertificate-method.", e);
-        } catch (final InvocationTargetException e) {
+            DERSequence certificate = new DERSequence(new DERObject[] {
+                    tbsCertificate,
+                    new DERSequence(new DERObject[] {
+                            new DERObjectIdentifier(DERObjectIdentifier.OID_sha1WithRSAEncryption),
+                            new DERNull()
+                    }),
+                    new DERBitString(signatureBytes)
+            });
+
+            CertificateFactory cf = CertificateFactory.getInstance("X509");
+            return (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(certificate.getEncoded()));
+        } catch (final InvalidKeyException e) {
+            throw new IllegalStateException("The getSelfCertificate-method threw an error.", e);
+        } catch (final NoSuchAlgorithmException e) {
+            throw new IllegalStateException("The getSelfCertificate-method threw an error.", e);
+        } catch (final SignatureException e) {
+            throw new IllegalStateException("The getSelfCertificate-method threw an error.", e);
+        } catch (final CertificateException e) {
             throw new IllegalStateException("The getSelfCertificate-method threw an error.", e);
         }
-    }
-
-    private static PrivateKey getPrivateKey(Object keypair) {
-        return (PrivateKey) ClassUtil.applyMethod(keypair, "getPrivateKey");
-    }
-
-    private static Class lookupKeyGenClass() {
-        Class keyGenClass = null;
-        for (final String keyGenCandidate :
-                new String[]{ KEYGEN_CLASS_JDK8_SUN, KEYGEN_CLASS_JDK7_SUN, KEYGEN_CLASS_JDK8_IBM, KEYGEN_CLASS_JDK7_IBM }) {
-
-            keyGenClass = ClassUtil.classForName(keyGenCandidate);
-            if (keyGenClass != null) {
-                break;
-            }
-        }
-
-        if (keyGenClass == null) {
-            throw new IllegalStateException(
-                    "Cannot find any key-generator class: Tried Sun Java 8's " + KEYGEN_CLASS_JDK8_SUN + ", Sun Java 7's "
-                    + KEYGEN_CLASS_JDK7_SUN + ", IBM Java 8's " + KEYGEN_CLASS_JDK8_IBM + " and IBM Java 7's " + KEYGEN_CLASS_JDK7_IBM);
-        }
-
-        return keyGenClass;
     }
 
     // This method is inspired and partly taken over from

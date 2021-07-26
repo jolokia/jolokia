@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.jolokia.Version;
+import org.jolokia.config.ConfigKey;
 import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.util.LogHandler;
 import org.jolokia.util.NetworkUtil;
@@ -26,6 +27,8 @@ import static org.testng.Assert.*;
 public class MulticastSocketListenerThreadTest {
 
     public static final String JOLOKIA_URL = "http://localhost:8080/jolokia";
+    public static final String MULTICAST_GROUP = ConfigKey.MULTICAST_GROUP.getDefaultValue();
+    public static final int MULTICAST_PORT = Integer.valueOf(ConfigKey.MULTICAST_PORT.getDefaultValue());
     private URL url;
     private String id;
 
@@ -41,6 +44,8 @@ public class MulticastSocketListenerThreadTest {
         MulticastSocketListenerThread listenerThread = new MulticastSocketListenerThread("ListenerThread", null,
                                                getAgentDetailsHolder(details),
                                                new AllowAllRestrictor(),
+                                               MULTICAST_GROUP,
+                                               MULTICAST_PORT,
                                                new LogHandler.StdoutLogHandler(true));
         listenerThread.start();
         Thread.sleep(500);
@@ -67,7 +72,7 @@ public class MulticastSocketListenerThreadTest {
                     new DiscoveryOutgoingMessage.Builder(QUERY)
                             .agentId(UUID.randomUUID().toString())
                             .build();
-            List<DiscoveryIncomingMessage> discovered = sendQueryAndCollectAnswers(out, 500, new LogHandler.StdoutLogHandler(true));
+            List<DiscoveryIncomingMessage> discovered = sendQueryAndCollectAnswers(out, 500, MULTICAST_GROUP, MULTICAST_PORT, new LogHandler.StdoutLogHandler(true));
             int idCount = 0;
             int urlCount = 0;
             for (DiscoveryIncomingMessage in : discovered) {

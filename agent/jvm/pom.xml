@@ -20,7 +20,7 @@
 
   <groupId>org.jolokia</groupId>
   <artifactId>jolokia-jvm</artifactId>
-  <version>1.6.1-SNAPSHOT</version>
+  <version>1.6.3-SNAPSHOT</version>
   <name>jolokia-jvm</name>
   <packaging>jar</packaging>
   <description>JVM-agent</description>
@@ -28,7 +28,7 @@
   <parent>
     <groupId>org.jolokia</groupId>
     <artifactId>jolokia-agent-parent</artifactId>
-    <version>1.6.1-SNAPSHOT</version>
+    <version>1.6.3-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -101,30 +101,49 @@
         </configuration>
       </plugin>
 
+      <!-- Build a full shaded jar with dependencies -->
       <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <configuration>
-          <descriptors>
-            <descriptor>src/main/assembly/agent.xml</descriptor>
-          </descriptors>
-          <archive>
-            <manifestEntries>
-              <Premain-Class>org.jolokia.jvmagent.JvmAgent</Premain-Class>
-              <Agent-Class>org.jolokia.jvmagent.JvmAgent</Agent-Class>
-              <Main-Class>org.jolokia.jvmagent.client.AgentLauncher</Main-Class>
-              <Can-Redefine-Classes>false</Can-Redefine-Classes>
-              <Can-Retransform-Classes>false</Can-Retransform-Classes>
-              <Can-Set-Native-Method-Prefix>false</Can-Set-Native-Method-Prefix>
-            </manifestEntries>
-          </archive>
-        </configuration>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
         <executions>
           <execution>
-            <id>make-assembly</id>
             <phase>package</phase>
             <goals>
-              <goal>single</goal>
+              <goal>shade</goal>
             </goals>
+            <configuration>
+              <relocations>
+                <relocation>
+                  <shadedPattern>org.jolokia.shaded.</shadedPattern>
+                  <includes>
+                    <include>org.json.simple.**</include>
+                  </includes>
+                  <excludes>
+                    <exclude>org.jolokia.shaded.**</exclude>
+                  </excludes>
+                </relocation>
+              </relocations>
+              <filters>
+                <filter>
+                  <artifact>com.sun:tools</artifact>
+                  <excludes>
+                    <exclude>**</exclude>
+                  </excludes>
+                </filter>
+              </filters>
+              <transformers>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <manifestEntries>
+                    <Premain-Class>org.jolokia.jvmagent.JvmAgent</Premain-Class>
+                    <Agent-Class>org.jolokia.jvmagent.JvmAgent</Agent-Class>
+                    <Main-Class>org.jolokia.jvmagent.client.AgentLauncher</Main-Class>
+                    <Can-Redefine-Classes>false</Can-Redefine-Classes>
+                    <Can-Retransform-Classes>false</Can-Retransform-Classes>
+                    <Can-Set-Native-Method-Prefix>false</Can-Set-Native-Method-Prefix>
+                  </manifestEntries>
+                </transformer>
+              </transformers>
+            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -133,7 +152,8 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <forkMode>always</forkMode>
+          <forkCount>1</forkCount>
+          <reuseForks>false</reuseForks>
           <!--<argLine>-Djava.security.debug=certpath,Provider</argLine>-->
         </configuration>
       </plugin>
@@ -204,49 +224,6 @@
           <systemPath>${java.home}/../lib/tools.jar</systemPath>
         </dependency>
       </dependencies>
-    </profile>
-    <profile>
-      <id>testing-on-ibm-jvm</id>
-      <activation>
-        <property>
-          <name>java.vendor</name>
-          <value>IBM Corporation</value>
-        </property>
-      </activation>
-      <properties>
-        <jvm.algorithm>IBMX509</jvm.algorithm>
-      </properties>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-dependency-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>copy-jmockit-before-test</id>
-                <phase>test-compile</phase>
-                <goals>
-                  <goal>copy-dependencies</goal>
-                </goals>
-                <configuration>
-                  <stripVersion>true</stripVersion>
-                  <includeArtifactIds>jmockit</includeArtifactIds>
-                  <includeGroupIds>org.jmockit</includeGroupIds>
-                  <includeScope>test</includeScope>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-surefire-plugin</artifactId>
-            <configuration>
-              <forkMode>always</forkMode>
-              <argLine>-javaagent:${project.build.directory}/dependency/jmockit.jar</argLine>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
     </profile>
     <profile>
       <id>dist</id>

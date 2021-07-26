@@ -338,8 +338,8 @@
         <td><constant>discoveryEnabled</constant></td>
         <td>
           Is set to <literal>true</literal> then this servlet will
-          listen for multicast request (multicastgroup 239.192.48.84,
-          port 24884). By default this option is disabled in order to
+          listen for multicast request (multicast-group 239.192.48.84,
+          port 24884 by default, but can be changed). By default this option is disabled in order to
           avoid conflicts with an Java EE standards (though this should't
           harm anyways). This option can also be switched on with an
           environment variable
@@ -358,7 +358,7 @@
           given, <constant>discoveryEnabled</constant> is set
           implicetly to true. This URL can also be provied by an
           environment variable
-          <literal>JOLOKIA_DISCOVERY_URL</literal> or the system
+          <literal>JOLOKIA_DISCOVERY_AGENT_URL</literal> or the system
           property <literal>jolokia.discoveryUrl</literal>. Within the value you can use the
           placeholders <literal>${host}</literal> and <literal>${ip}</literal> which gets replaced
           by the autodetected local host name/address. Also with <literal>${env:ENV_VAR}</literal> and
@@ -367,6 +367,16 @@
         <td>
           <constant>http://10.9.11.87:8080/jolokia</constant>
         </td>
+      </tr>
+      <tr>
+        <td><constant>multicastGroup</constant></td>
+        <td>The multicast group IPv4 address. This group IP can be also given as an environment variable <literal>JOLOKIA_MULTICAST_GROUP</literal> or a system property <literal>jolokia.multicastGroup</literal></td>
+        <td><constant>239.192.48.84</constant></td>
+      </tr>
+      <tr>
+        <td>The multicast port. This port can be also given as an environment variable <literal>JOLOKIA_MULTICAST_PORT</literal> or a system property <literal>jolokia.multicastPort</literal></td>
+        <td>The multicast port.</td>
+        <td><constant>24884</constant></td>
       </tr>
       <tr>
         <td><constant>agentId</constant></td>

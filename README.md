@@ -5,6 +5,8 @@
 [![Coverage](https://sonarqube.com/api/badges/measure?key=org.jolokia:jolokia&metric=coverage)](https://sonarqube.com/dashboard?id=org.jolokia%3Ajolokia)
 [![Technical Debt](https://sonarqube.com/api/badges/measure?key=org.jolokia:jolokia&metric=sqale_debt_ratio)](https://sonarqube.com/dashboard?id=org.jolokia%3Ajolokia)
 [![Gitter](https://badges.gitter.im/Join+Chat.svg)](https://gitter.im/rhuss/jolokia?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+[![Code Quality: Java](https://img.shields.io/lgtm/grade/java/g/rhuss/jolokia.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/rhuss/jolokia/context:java)
+[![Total Alerts](https://img.shields.io/lgtm/alerts/g/rhuss/jolokia.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/rhuss/jolokia/alerts)
 
 Jolokia is a fresh way to access JMX MBeans remotely. It is
 different from JSR-160 connectors in that it is an agent-based

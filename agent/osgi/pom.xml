@@ -20,7 +20,7 @@
 
   <groupId>org.jolokia</groupId>
   <artifactId>jolokia-osgi</artifactId>
-  <version>1.6.1-SNAPSHOT</version>
+  <version>1.6.3-SNAPSHOT</version>
   <name>jolokia-osgi</name>
   <packaging>bundle</packaging>
   <description>osgi agent</description>
@@ -28,7 +28,7 @@
   <parent>
     <groupId>org.jolokia</groupId>
     <artifactId>jolokia-agent-parent</artifactId>
-    <version>1.6.1-SNAPSHOT</version>
+    <version>1.6.3-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -77,12 +77,6 @@
     <dependency>
       <groupId>org.easymock</groupId>
       <artifactId>easymock</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.jmockit</groupId>
-      <artifactId>jmockit</artifactId>
-      <scope>test</scope>
     </dependency>
 
     <dependency>
@@ -155,7 +149,7 @@
   <pluginRepositories>
     <pluginRepository>
       <id>ops4j.releases</id>
-      <url>http://repository.ops4j.org/maven2</url>
+      <url>https://repository.ops4j.org/maven2</url>
       <snapshots>
         <enabled>false</enabled>
       </snapshots>

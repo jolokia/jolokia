@@ -83,6 +83,4 @@ public interface LogHandler {
         }
     }
 
-
-    ;
 }

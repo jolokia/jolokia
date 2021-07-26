@@ -171,7 +171,8 @@ public class JBossDetectorTest extends BaseDetectorTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void verifyIsClassLoadedArgumentChecks2NullClassname() {
-        detector.isClassLoaded(null, createMock(Instrumentation.class));
+        Instrumentation inst = mock(Instrumentation.class);
+        detector.isClassLoaded(null, inst);
     }
 
     @Test

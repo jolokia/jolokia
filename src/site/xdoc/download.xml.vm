@@ -44,7 +44,7 @@
           </tr>
           <tr>
             <td>WAR-Agent (unsecured)</td>
-            <td><a href="http://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-war/${currentStableVersion}/jolokia-war-unsecured-${currentStableVersion}.war">jolokia-war-unsecured-${currentStableVersion}.war</a></td>
+            <td><a href="http://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-war-unsecured/${currentStableVersion}/jolokia-war-unsecured-${currentStableVersion}.war">jolokia-war-unsecured-${currentStableVersion}.war</a></td>
           </tr>
           <tr>
             <td>Osgi-Agent</td>

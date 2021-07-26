@@ -75,6 +75,30 @@
       <span style="clear: both;"></span>
     </subsection>
     <section name="News">
+      <subsection name="1.6.2 with support for multiple CAs">
+        <div class="news-date">2019-06-20</div>
+        <p>
+          This summer version 1.6.2 comes with support for multiple CAs when running the Jolokia agent in SSL mode. This is especially useful when used together with newer versions of OpenShift.
+        </p>
+      </subsection>
+      <subsection name="Minor updates coming with 1.6.1">
+        <div class="news-date">2019-05-01</div>
+        <p>
+          1.6.1 is coming quite late although many of its features are available since quite some time. Apologies for that, it was a busy time for me (but not so much for Jolokia).
+        </p>
+        <p>
+          This release contains one relevant security check which hardens the CORS handling a bit further. Additional some minor goodies are added, please check the <a href="changes-report.html">changelog</a> for details.
+        </p>
+        <p>
+          So, what's next? Jolokia is currently not close to the top of my priority list at the moment. It won't be, and I will work on security fixes promptly when reported. However, the most important update to Java 9 as well the release of Jolokia 2.0 with JMX notification support is currently put on ice.
+        </p>
+        <p>
+          Said that it's currently a perfect moment to jump in to boost Jolokia development. We've got the <a href="https://github.com/jolokia/">jolokia</a> donated, so one of the next larger moves would move this personal pet project to a more solid foundation. If you are interested in helping shaping Jolokia 2.0 which is then ready for Java 9 and support for monitoring platforms like Prometheus, then let's talk.
+        </p>
+        <p>
+          In any case, enjoy the summer. Happy hacking ;-)
+        </p>
+      </subsection>
       <subsection name="WAR-Agent secured by default in 1.6.0">
         <div class="news-date">2018-06-25</div>
         <p>

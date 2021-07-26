@@ -20,14 +20,14 @@
   <groupId>org.jolokia</groupId>
   <artifactId>jolokia-roo</artifactId>
   <packaging>bundle</packaging>
-  <version>1.6.1-SNAPSHOT</version>
+  <version>1.6.3-SNAPSHOT</version>
   <name>jolokia-roo</name>
   <description>jolokia roo addon</description>
 
   <parent>
     <groupId>org.jolokia</groupId>
     <artifactId>jolokia</artifactId>
-    <version>1.6.1-SNAPSHOT</version>
+    <version>1.6.3-SNAPSHOT</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
@@ -40,14 +40,14 @@
     <repository>
       <id>spring-roo-repository</id>
       <name>Spring Roo Repository</name>
-      <url>http://spring-roo-repository.springsource.org/release</url>
+      <url>https://spring-roo-repository.springsource.org/release</url>
     </repository>
   </repositories>
   <pluginRepositories>
     <pluginRepository>
       <id>spring-roo-repository</id>
       <name>Spring Roo Repository</name>
-      <url>http://spring-roo-repository.springsource.org/release</url>
+      <url>https://spring-roo-repository.springsource.org/release</url>
     </pluginRepository>
   </pluginRepositories>
   <dependencies>

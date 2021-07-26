@@ -20,7 +20,7 @@
 
   <groupId>org.jolokia</groupId>
   <artifactId>jolokia-client-javascript</artifactId>
-  <version>1.6.1-SNAPSHOT</version>
+  <version>1.6.3-SNAPSHOT</version>
   <name>jolokia-client-javascript</name>
   <packaging>javascript</packaging>
   <description>JavaScript client library for Jolokia agents</description>
@@ -28,7 +28,7 @@
   <parent>
     <groupId>org.jolokia</groupId>
     <artifactId>jolokia-client-parent</artifactId>
-    <version>1.6.1-SNAPSHOT</version>
+    <version>1.6.3-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -69,7 +69,7 @@
   <pluginRepositories>
     <pluginRepository>
       <id>sonatype-oss</id>
-      <url>http://oss.sonatype.org/content/groups/public</url>
+      <url>https://oss.sonatype.org/content/groups/public</url>
     </pluginRepository>
   </pluginRepositories>
 </project>

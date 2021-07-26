@@ -19,7 +19,7 @@ package org.jolokia.jvmagent.client.command;
 import java.lang.reflect.InvocationTargetException;
 
 import org.jolokia.jvmagent.client.util.OptionsAndArgs;
-import org.jolokia.jvmagent.client.util.VirtualMachineHandler;
+import org.jolokia.jvmagent.client.util.VirtualMachineHandlerOperations;
 
 /**
  * Check the status of an agent on the target process.  Prints out the information
@@ -39,23 +39,24 @@ public class StatusCommand extends AbstractBaseCommand {
     /**
      * Checkt the status and print it out (except for <code>--quiet</code>
      * @param pVm the virtual machine
+     * @param pHandler platform-specific way to invoke operations on VM
      * @return the exit code (0: agent is attached, 1: agent is not attached.)
      */
     @Override
     @SuppressWarnings("PMD.SystemPrintln")
-    int execute(OptionsAndArgs pOptions, Object pVm, VirtualMachineHandler pHandler)
+    int execute(OptionsAndArgs pOptions, Object pVm, VirtualMachineHandlerOperations pHandler)
             throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
-        String agentUrl = checkAgentUrl(pVm);
+        String agentUrl = checkAgentUrl(pVm, pHandler);
         boolean quiet = pOptions.isQuiet();
         if (agentUrl != null) {
             if (!quiet) {
-                System.out.println("Jolokia started for " + getProcessDescription(pOptions,pHandler));
+                System.out.println("Jolokia started for " + getProcessDescription(pHandler, pOptions));
                 System.out.println(agentUrl);
             }
             return 0;
         } else {
             if (!quiet) {
-                System.out.println("No Jolokia agent attached to " + getProcessDescription(pOptions,pHandler));
+                System.out.println("No Jolokia agent attached to " + getProcessDescription(pHandler, pOptions));
             }
             return 1;
         }

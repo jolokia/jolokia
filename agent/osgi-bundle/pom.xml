@@ -20,7 +20,7 @@
 
   <groupId>org.jolokia</groupId>
   <artifactId>jolokia-osgi-bundle</artifactId>
-  <version>1.6.1-SNAPSHOT</version>
+  <version>1.6.3-SNAPSHOT</version>
   <packaging>bundle</packaging>
   <name>jolokia-osgi-bundle</name>
   <description>osgi bundle agent</description>
@@ -28,7 +28,7 @@
   <parent>
     <groupId>org.jolokia</groupId>
     <artifactId>jolokia-agent-parent</artifactId>
-    <version>1.6.1-SNAPSHOT</version>
+    <version>1.6.3-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -161,7 +161,7 @@
   <pluginRepositories>
     <pluginRepository>
       <id>ops4j.releases</id>
-      <url>http://repository.ops4j.org/maven2</url>
+      <url>https://repository.ops4j.org/maven2</url>
       <snapshots>
         <enabled>false</enabled>
       </snapshots>

@@ -142,11 +142,13 @@ public class AgentServletTest {
         checkMulticastAvailable();
         String url = "http://localhost:8080/jolokia";
         prepareStandardInitialisation(ConfigKey.DISCOVERY_AGENT_URL.getKeyValue(), url);
+        String multicastGroup = ConfigKey.MULTICAST_GROUP.getDefaultValue();
+        int multicastPort = Integer.valueOf(ConfigKey.MULTICAST_PORT.getDefaultValue());
         // Wait listening thread to warm up
         Thread.sleep(1000);
         try {
             JolokiaDiscovery discovery = new JolokiaDiscovery("test", new QuietLogHandler());
-            List<JSONObject> in = discovery.lookupAgentsWithTimeout(500);
+            List<JSONObject> in = discovery.lookupAgentsWithTimeoutAndMulticastAddress(500, multicastGroup, multicastPort);
             for (JSONObject json : in) {
                 if (json.get("url") != null && json.get("url").equals(url)) {
                     return;

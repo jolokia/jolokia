@@ -108,6 +108,21 @@ class JolokiaMBeanServer extends MBeanServerProxy {
                 }
             } catch (IllegalAccessException e) {
                 // Ignored silently, but we tried it at least
+            } catch (RuntimeException e) {
+                // See https://openjdk.java.net/jeps/403
+                // On JDK9-JDK15 (with --illegal-access=deny) or on JDK-16+ (by default),
+                // java.lang.reflect.InaccessibleObjectException is thrown.
+                // --illegal-access=permit|warn|debug always ends with at least one WARNING message. The only
+                // way to handle the reflection gently is by using:
+                //     --illegal-access=deny \
+                //     --add-opens java.management/javax.management.modelmbean=ALL-UNNAMED
+                // without deny, we can't detect up front (using JDK8 API) if we can safely call setAccessible()...
+                if (e.getClass().getName().equals("java.lang.reflect.InaccessibleObjectException")) {
+                    // ignore
+                    isAccessible = null;
+                } else {
+                    throw e;
+                }
             } finally {
                 if (isAccessible != null) {
                     field.setAccessible(isAccessible);
