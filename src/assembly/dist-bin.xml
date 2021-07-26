@@ -31,7 +31,9 @@
         <outputFileNameMapping>jolokia.war</outputFileNameMapping>
         <outputDirectory>agents</outputDirectory>
         <unpack>false</unpack>
+        <includeDependencies>false</includeDependencies>
       </binaries>
+      <useAllReactorProjects>true</useAllReactorProjects>
     </moduleSet>
     <moduleSet>
       <includes>
@@ -41,7 +43,9 @@
         <outputFileNameMapping>jolokia-unsecured.war</outputFileNameMapping>
         <outputDirectory>agents</outputDirectory>
         <unpack>false</unpack>
+        <includeDependencies>false</includeDependencies>
       </binaries>
+      <useAllReactorProjects>true</useAllReactorProjects>
     </moduleSet>
     <moduleSet>
       <includes>
@@ -52,7 +56,9 @@
         <outputFileNameMapping>jolokia-mule.jar</outputFileNameMapping>
         <outputDirectory>agents</outputDirectory>
         <unpack>false</unpack>
+        <includeDependencies>false</includeDependencies>
       </binaries>
+      <useAllReactorProjects>true</useAllReactorProjects>
     </moduleSet>
     <moduleSet>
       <includes>
@@ -62,7 +68,9 @@
         <outputFileNameMapping>jolokia-osgi.jar</outputFileNameMapping>
         <outputDirectory>agents</outputDirectory>
         <unpack>false</unpack>
+        <includeDependencies>false</includeDependencies>
       </binaries>
+      <useAllReactorProjects>true</useAllReactorProjects>
     </moduleSet>
     <moduleSet>
       <includes>
@@ -72,18 +80,21 @@
         <outputFileNameMapping>jolokia-osgi-bundle.jar</outputFileNameMapping>
         <outputDirectory>agents</outputDirectory>
         <unpack>false</unpack>
+        <includeDependencies>false</includeDependencies>
       </binaries>
+      <useAllReactorProjects>true</useAllReactorProjects>
     </moduleSet>
     <moduleSet>
       <includes>
         <include>org.jolokia:jolokia-jvm</include>
       </includes>
       <binaries>
-        <attachmentClassifier>agent</attachmentClassifier>
         <outputFileNameMapping>jolokia-jvm.jar</outputFileNameMapping>
         <outputDirectory>agents</outputDirectory>
         <unpack>false</unpack>
+        <includeDependencies>false</includeDependencies>
       </binaries>
+      <useAllReactorProjects>true</useAllReactorProjects>
     </moduleSet>
     <moduleSet>
       <includes>
@@ -93,7 +104,9 @@
         <outputFileNameMapping>jolokia-jmx.jar</outputFileNameMapping>
         <outputDirectory>jmx</outputDirectory>
         <unpack>false</unpack>
+        <includeDependencies>false</includeDependencies>
       </binaries>
+      <useAllReactorProjects>true</useAllReactorProjects>
     </moduleSet>
     <moduleSet>
       <includes>
@@ -103,7 +116,9 @@
         <outputFileNameMapping>jolokia-spring.jar</outputFileNameMapping>
         <outputDirectory>jmx</outputDirectory>
         <unpack>false</unpack>
+        <includeDependencies>false</includeDependencies>
       </binaries>
+      <useAllReactorProjects>true</useAllReactorProjects>
     </moduleSet>
     <moduleSet>
       <includes>
@@ -113,12 +128,13 @@
         <outputFileNameMapping>jolokia-client.jar</outputFileNameMapping>
         <outputDirectory>client/java</outputDirectory>
         <unpack>false</unpack>
+        <includeDependencies>true</includeDependencies>
       </binaries>
+      <useAllReactorProjects>true</useAllReactorProjects>
     </moduleSet>
   </moduleSets>
   <fileSets>
     <fileSet>
-      <directory>src/assembly</directory>
       <includes>
         <include>README</include>
       </includes>
@@ -126,33 +142,33 @@
     </fileSet>
     <fileSet>
       <includes>
-        <include>LICENSE</include>
-        <include>NOTICE</include>
+        <include>../../LICENSE</include>
+        <include>../../NOTICE</include>
       </includes>
     </fileSet>
     <fileSet>
-      <directory>target/site/reference/pdf</directory>
+      <directory>../../target/site/reference/pdf</directory>
       <includes>
         <include>*.pdf</include>
       </includes>
       <outputDirectory>reference/pdf</outputDirectory>
     </fileSet>
     <fileSet>
-      <directory>target/site/reference/html</directory>
+      <directory>../../target/site/reference/html</directory>
       <includes>
         <include>**/*</include>
       </includes>
       <outputDirectory>reference/html</outputDirectory>
     </fileSet>
     <fileSet>
-      <directory>client/javascript/target/compressed</directory>
+      <directory>../../client/javascript/target/compressed</directory>
       <includes>
         <include>**/*.js</include>
       </includes>
       <outputDirectory>client/javascript</outputDirectory>
     </fileSet>
     <fileSet>
-      <directory>client/javascript/target/scripts</directory>
+      <directory>../../client/javascript/target/scripts</directory>
       <includes>
         <include>**/*.js</include>
       </includes>

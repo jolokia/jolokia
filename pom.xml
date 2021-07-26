@@ -48,21 +48,11 @@
       </plugin>
 
       <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <configuration>
-          <descriptors>
-            <descriptor>src/assembly/dist-bin.xml</descriptor>
-            <descriptor>src/assembly/dist-source.xml</descriptor>
-          </descriptors>
-        </configuration>
-      </plugin>
-
-      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-release-plugin</artifactId>
         <configuration>
           <autoVersionSubmodules>true</autoVersionSubmodules>
-          <goals>deploy docbkx:generate-html docbkx:generate-pdf package assembly:single</goals>
+          <goals>deploy docbkx:generate-html docbkx:generate-pdf package</goals>
         </configuration>
       </plugin>
 
@@ -640,6 +630,10 @@
     <profile>
       <!-- Distribution to maven central. This is default deployment target -->
       <id>dist</id>
+      <modules>
+        <module>src/assembly</module>
+      </modules>
+
       <build>
         <plugins>
           <plugin>

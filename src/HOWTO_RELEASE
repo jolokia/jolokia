@@ -31,11 +31,11 @@ mvn -Dmaven.repo.local=/tmp/repo -DdevelopmentVersion=1.0.1-SNAPSHOT -DreleaseVe
 # Copy assembly to Github
 
 * Create a new release ("Draft a release" - Button)
-* Upload tar.gz and zip files from target/checkout/target
-* Upload all JavaScript folies in client/javascript/target:
+* Upload tar.gz and zip files from target/checkout/src/assembly/target
+* Upload all JavaScript files in target/checkout/client/javascript/target:
   - compressed/jolokia-*.js
   - scripts/jolokia*.js
-* Upload JVM debian packahe from
+* Upload JVM debian package from
   - agent/jvm/target/*.deb
 
 # Deploy to Sonatype staging
