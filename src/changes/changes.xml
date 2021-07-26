@@ -23,7 +23,7 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
-    <release version="1.7.0-SNAPSHOT" description="Release 1.7.0" date="">
+    <release version="1.7.0" description="Release 1.7.0" date="2021-07-26">
       <action dev="grgrzybek" type="fix" issue="466">
         Reimplement self-signed certificate generation without using reflection
       </action>
@@ -60,7 +60,7 @@
       <action dev="coheigea" type="fix" issue="414">
        Don't require user to be set when JAAS authentication is configured for the OSGi connector.
       </action>
-<action dev="rhuss" type="fix" issue="388">
+      <action dev="rhuss" type="fix" issue="388">
        Fix the usage of JRE 1.8 classes that does not work with Java 6
       </action>
     </release>

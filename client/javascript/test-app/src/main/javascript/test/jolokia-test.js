@@ -355,7 +355,10 @@ $(document).ready(function() {
                     ok(response.value["java.lang:type=Memory"]);
                     ok(response.value["java.lang:type=Memory"].HeapMemoryUsage.used);
                     start();
-                }
+                },
+                 error: function(response, idx) {
+                     start();
+                 }
             });
         });
         asyncTest("Pattern Attribute Read Request with path", function() {
