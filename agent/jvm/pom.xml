@@ -245,7 +245,7 @@
                   <dataSet>
 
                     <data>
-                      <src>${project.build.directory}/${project.build.finalName}-agent.jar</src>
+                      <src>${project.build.directory}/${project.build.finalName}.jar</src>
                       <type>file</type>
                       <mapper>
                         <type>perm</type>
@@ -257,8 +257,8 @@
                     <data>
                       <type>link</type>
                       <symlink>true</symlink>
-                      <linkName>/usr/share/jolokia/jolokia-jvm-agent.jar</linkName>
-                      <linkTarget>/usr/share/jolokia/${project.build.finalName}-agent.jar</linkTarget>
+                      <linkName>/usr/share/jolokia/jolokia-jvm.jar</linkName>
+                      <linkTarget>/usr/share/jolokia/${project.build.finalName}.jar</linkTarget>
                     </data>
 
                   </dataSet>
