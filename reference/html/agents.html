@@ -333,8 +333,8 @@
         <td><code class="constant">discoveryEnabled</code></td>
         <td>
           Is set to <code class="literal">true</code> then this servlet will
-          listen for multicast request (multicastgroup 239.192.48.84,
-          port 24884). By default this option is disabled in order to
+          listen for multicast request (multicast-group 239.192.48.84,
+          port 24884 by default, but can be changed). By default this option is disabled in order to
           avoid conflicts with an Java EE standards (though this should't
           harm anyways). This option can also be switched on with an
           environment variable
@@ -352,7 +352,7 @@
           given, <code class="constant">discoveryEnabled</code> is set
           implicetly to true. This URL can also be provied by an
           environment variable
-          <code class="literal">JOLOKIA_DISCOVERY_URL</code> or the system
+          <code class="literal">JOLOKIA_DISCOVERY_AGENT_URL</code> or the system
           property <code class="literal">jolokia.discoveryUrl</code>. Within the value you can use the
           placeholders <code class="literal">${host}</code> and <code class="literal">${ip}</code> which gets replaced
           by the autodetected local host name/address. Also with <code class="literal">${env:ENV_VAR}</code> and
@@ -361,6 +361,14 @@
         <td>
           <code class="constant">http://10.9.11.87:8080/jolokia</code>
         </td>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+        <td><code class="constant">multicastGroup</code></td>
+        <td>The multicast group IPv4 address. This group IP can be also given as an environment variable <code class="literal">JOLOKIA_MULTICAST_GROUP</code> or a system property <code class="literal">jolokia.multicastGroup</code></td>
+        <td><code class="constant">239.192.48.84</code></td>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+        <td>The multicast port. This port can be also given as an environment variable <code class="literal">JOLOKIA_MULTICAST_PORT</code> or a system property <code class="literal">jolokia.multicastPort</code></td>
+        <td>The multicast port.</td>
+        <td><code class="constant">24884</code></td>
       </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td><code class="constant">agentId</code></td>
         <td>
@@ -473,7 +481,7 @@
       The <code class="classname">org.jolokia.http.Agent</code> can be
       subclassed, too in order to provide a custom restrictor or a
       custom log handler. See <a href="security.html#security-restrictor">Section&nbsp;4.2, &#8220;Jolokia Restrictors&#8221;</a>
-      for details.<sup>[<a name="d0e905" href="#ftn.d0e905">5</a>]</sup>
+      for details.<sup>[<a name="d0e940" href="#ftn.d0e940">5</a>]</sup>
     </p><p>
       Also, multiple Jolokia agents can be deployed in the same JVM
       without problem. However, since the agent deploys some
@@ -763,8 +771,9 @@
         <td>false</td>
         <td>
           Is set to <code class="literal">true</code> then this servlet will
-          listen for multicast request (multicastgroup 239.192.48.84,
-          port 24884). By default this option is disabled in order to
+          listen for multicast request (multicast-group 239.192.48.84,
+          port 24884 by default, but can be configued).
+          By default this option is disabled in order to
           avoid conflicts with an Java EE standards (though this should't
           harm anyways). This option can also be switched on with an
           environment variable
@@ -778,14 +787,22 @@
         <td>
           Sets the URL to respond for multicast discovery requests. If
           given, <code class="constant">discoveryEnabled</code> is set
-          implicetly to true. This URL can also be provied by an
+          implicetly to true. This URL can also be provided by an
           environment variable
-          <code class="literal">JOLOKIA_DISCOVERY_URL</code> or the system
+          <code class="literal">JOLOKIA_DISCOVERY_AGENT_URL</code> or the system
           property <code class="literal">jolokia.discoveryUrl</code>. Within the value you can use the
           placeholders <code class="literal">${host}</code> and <code class="literal">${ip}</code> which gets replaced
           by the autodetected local host name/address. Also with <code class="literal">${env:ENV_VAR}</code> and
           <code class="literal">${sys:property}</code> environment and system properties can be referenced, respectively.
         </td>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+        <td><code class="constant">org.jolokia.multicastGroup</code></td>
+        <td><code class="constant">239.192.48.84</code></td>
+        <td>The multicast group IPv4 address. This group IP can be also given as an environment variable <code class="literal">JOLOKIA_MULTICAST_GROUP</code> or a system property <code class="literal">jolokia.multicastGroup</code></td>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+        <td><code class="constant">org.jolokia.multicastPort</code></td>
+        <td><code class="constant">24884</code></td>
+        <td>The multicast port. This port can be also given as an environment variable <code class="literal">JOLOKIA_MULTICAST_PORT</code> or a system property <code class="literal">jolokia.multicastPort</code></td>
       </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td>org.jolokia.realm</td>
         <td>jolokia</td>
@@ -801,9 +818,8 @@
          <td>
            Can be either <code class="literal">basic</code> (the default), <code class="literal">jaas</code>,
            <code class="literal">service-all</code> or <code class="literal">service-any</code>. If
-           <code class="literal">jaas</code> is used, the user and password are given in the <code class="literal">Authorization:</code>
+           <code class="literal">jaas</code> is used, the user and password which are given in the <code class="literal">Authorization:</code>
            header are used for login in via JAAS and, if successful, the return subject is used for all Jolokia operation.
-           This has only an effect if a user is set.
            When no user is set and the <code class="literal">authMode</code> is either <code class="literal">service-all</code> or
            <code class="literal">service-any</code> then a <code class="literal">org.jolokia.osgi.security.Authenticator</code> service is looked up in the
            OSGi service registry. If more then one of such service is registered, <code class="literal">service-all</code> requires
@@ -908,7 +924,7 @@ org.jolokia.httpServiceFilter=(VirtualServer=__asadmin)
       <code class="literal">org.jolokia.listenForHttpService</code> can be set
       to <code class="literal">false</code> in which case there will be never an
       automatic servlet registration to an HttpService.
-    </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e1677"></a>3.2.5.&nbsp;Restrictor service</h3></div></div></div><p>
+    </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e1748"></a>3.2.5.&nbsp;Restrictor service</h3></div></div></div><p>
       As described in <a href="security.html#security-restrictor">Section&nbsp;4.2, &#8220;Jolokia Restrictors&#8221;</a>, the
       Jolokia agent can use custom restrictors implementing the
       interface
@@ -1110,7 +1126,7 @@ org.jolokia.httpServiceFilter=(VirtualServer=__asadmin)
     dynamically attached (and detached) to an already running Java
     process. This universal agent uses the <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://download.oracle.com/javase/6/docs/technotes/guides/jvmti/index.html" target="_top">JVM
     agent API</a> and is available for every Sun/Oracle JVM 1.6
-    and later. 
+    and later.
   </p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="jvm-agent"></a>3.4.1.&nbsp;Jolokia as JVM Agent</h3></div></div></div><p>
       The JVM agent uses the <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://download.oracle.com/javase/6/docs/technotes/guides/jvmti/index.html" target="_top">JVM
       Agent interface</a> for linking into any JVM. Under the
@@ -1124,7 +1140,7 @@ org.jolokia.httpServiceFilter=(VirtualServer=__asadmin)
       performance. See below for details.
     </div></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="jvm-agent-installation"></a>3.4.1.1.&nbsp;Installation</h4></div></div></div><p>
         This agent gets installed by providing a single startup option
-        <code class="literal">-javaagent</code> when starting the Java process. 
+        <code class="literal">-javaagent</code> when starting the Java process.
       </p><pre class="programlisting">
 java -javaagent:agent.jar=port=7777,host=localhost</pre><p>
         <code class="filename">agent.jar</code> is the filename of the Jolokia
@@ -1135,7 +1151,7 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre><p>
         list. The available options are the same as described in <a href="agents.html#agent-war-init-params" title="Table&nbsp;3.1.&nbsp;Servlet init parameters">Table&nbsp;3.1, &#8220;Servlet init parameters&#8221;</a> plus the one described in
         table <a href="agents.html#agent-jvm-config" title="Table&nbsp;3.6.&nbsp;JVM agent configuration options">Table&nbsp;3.6, &#8220;JVM agent configuration options&#8221;</a>. If an options
         contains a comma, an equal sign or a backslash, it must be
-        escaped with a backslash. 
+        escaped with a backslash.
       </p><div xmlns:xslthl="http://xslthl.sf.net" class="table"><p class="title"><b>Table&nbsp;3.6.&nbsp;JVM agent configuration options</b></p><div class="table-contents"><table id="agent-jvm-config"><thead xmlns:xi="http://www.w3.org/2001/XInclude"><tr>
             <td>Parameter</td>
             <td>Description</td>
@@ -1146,7 +1162,7 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre><p>
             Context under which the agent is deployed. The full URL
             will be <code class="literal">protocol://host:port/agentContext</code>. The default context is
             <code class="constant">/jolokia</code>.
-          </td>        
+          </td>
           <td>
             <code class="constant">/j4p</code>
           </td>
@@ -1159,7 +1175,7 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre><p>
             by the discovery mechanism. It is recommended not to set
             this value. Within the <code class="literal">agentId</code> specification you
             can use the same placeholders as in <code class="literal">discoveryAgentUrl</code>.
-          </td>        
+          </td>
           <td>
             <code class="constant">my-unique-agent-id</code>
           </td>
@@ -1168,7 +1184,7 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre><p>
           <td>
             An optional description which can be used for clients to
             present a human readable label for this agent.
-          </td>        
+          </td>
           <td>
             <code class="constant">Intranet Timebooking Server</code>
           </td>
@@ -1177,7 +1193,7 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre><p>
         <td>
           Hostaddress to which the HTTP server should bind to. If "*" or "0.0.0.0" is
           given, the servers binds to every network interface.
-        </td>        
+        </td>
         <td>
           <code class="constant">localhost</code>
         </td>
@@ -1186,7 +1202,7 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre><p>
           <td>
             Port the HTTP server should listen to. If set to 0, then an arbitrary free port
             will be selected.
-          </td>        
+          </td>
           <td>
             <code class="constant">8778</code>
           </td>
@@ -1194,7 +1210,7 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre><p>
           <td><code class="constant">user</code></td>
           <td>
             User to be used for authentication (along with a <code class="constant">password</code>)
-          </td>        
+          </td>
           <td>
           </td>
         </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
@@ -1291,7 +1307,7 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre><p>
           <td>
             HTTP protocol to use. Should be either <code class="literal">http</code>
             or <code class="literal">https</code>. For the SSL stack there are various
-            additional configuration options. 
+            additional configuration options.
           </td>
           <td>
             <code class="constant">http</code>
@@ -1299,8 +1315,8 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre><p>
         </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">backlog</code></td>
           <td>
-            Size of request backlog before requests get discarded. 
-          </td>        
+            Size of request backlog before requests get discarded.
+          </td>
           <td>
             <code class="constant">10</code>
           </td>
@@ -1318,7 +1334,7 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre><p>
                   </p></dd><dt><span class="term"><code class="literal">single</code></span></dt><dd><p>
                     A single thread only
                   </p></dd></dl></div>
-          </td>        
+          </td>
           <td>
             <code class="constant">single</code>
           </td>
@@ -1334,8 +1350,8 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre><p>
           <td><code class="constant">threadNr</code></td>
           <td>
             Number of threads to be used when the
-            <code class="constant">fixed</code> execution model is chosen. 
-          </td>        
+            <code class="constant">fixed</code> execution model is chosen.
+          </td>
           <td>
             <code class="constant">5</code>
           </td>
@@ -1343,7 +1359,7 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre><p>
           <td><code class="constant">keystore</code></td>
           <td>
             Path to the SSL keystore to use (https only)
-          </td>        
+          </td>
           <td>
           </td>
         </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
@@ -1352,7 +1368,7 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre><p>
             Keystore password (https only). If the password is given embedded in brackets <code class="constant">[[...]]</code>,
             then it is treated as an encrypted password which was encrypted with <code class="code">java -jar jvm-agent.jar
             encrypt</code>. See below for details.
-          </td>        
+          </td>
           <td>
           </td>
         </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
@@ -1361,8 +1377,8 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre><p>
             Whether client certificates should be used for
             authentication. The presented certificate is validated that it is signed by
             a known CA which must be in the keystore (https only). (<code class="constant">true</code> or
-            <code class="constant">false</code>). 
-          </td>        
+            <code class="constant">false</code>).
+          </td>
           <td>
             <code class="constant">false</code>
           </td>
@@ -1436,7 +1452,7 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre><p>
             attached to a Glassfish server, then during startup the
             AMX subsystem is booted so that Glassfish specific MBeans
             are available. Otherwise, if set to
-            <code class="constant">false</code> the AMX system is not booted. 
+            <code class="constant">false</code> the AMX system is not booted.
           </td>
           <td>
             <code class="constant">true</code>
@@ -1449,14 +1465,19 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre><p>
             the configuration options as described here as key value
             pairs (except for the <code class="constant">config</code> property
             of course :)
-          </td>        
+          </td>
           <td></td>
         </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">discoveryEnabled</code></td>
           <td>
             Is set to <code class="literal">false</code> then this agent will
-            not listen for multicast request (multicastgroup 239.192.48.84,
-            port 24884). By default this option is enabled.
+            not listen for multicast request (multicast-group 239.192.48.84,
+            port 24884 by default, but can configured individually).
+            By default this option is enabled. This option can also be switched on with an
+            environment variable
+            <code class="literal">JOLOKIA_DISCOVERY</code> or the system
+            property <code class="literal">jolokia.discoveryEnabled</code> set to
+            <code class="literal">true</code>.
           </td>
           <td>
             Default: <code class="constant">true</code>
@@ -1466,14 +1487,25 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre><p>
           <td>
             Sets the URL to respond for multicast discovery requests. If
             given, <code class="constant">discoveryEnabled</code> is set
-            implicitly to true. Within the value you can use the
+            implicitly to true. This URL can also be provided by an
+            environment variable
+            <code class="literal">JOLOKIA_DISCOVERY_AGENT_URL</code> or the system
+            property <code class="literal">jolokia.discoveryUrl</code>. Within the value you can use the
             placeholders <code class="literal">${host}</code> and <code class="literal">${ip}</code> which gets replaced
             by the autodetected local host name/address. Also with <code class="literal">${env:ENV_VAR}</code> and
             <code class="literal">${sys:property}</code> environment and system properties can be referenced, respectively.
           </td>
-          <td>          
+          <td>
             <code class="constant">http://10.9.11.87:8778/jolokia</code>
           </td>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+          <td><code class="constant">multicastGroup</code></td>
+          <td>The multicast group IPv4 address. This group IP can be also given as an environment variable <code class="literal">JOLOKIA_MULTICAST_GROUP</code> or a system property <code class="literal">jolokia.multicastGroup</code></td>
+          <td><code class="constant">239.192.48.84</code></td>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+          <td><code class="constant">multicastPort</code></td>
+          <td>The multicast port. This port can be also given as an environment variable <code class="literal">JOLOKIA_MULTICAST_PORT</code> or a system property <code class="literal">jolokia.multicastPort</code></td>
+          <td><code class="constant">24884</code></td>
         </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">sslProtocol</code></td>
           <td>
@@ -1508,7 +1540,7 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre><p>
       </p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="jvm-attach"></a>3.4.2.&nbsp;Attaching a Jolokia agent on the fly</h3></div></div></div><p>
       A Jolokia agent can be attached to any running Java process as
       long as the user has sufficient access privileges for
-      accessing the process.  This agent uses the <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://download.oracle.com/javase/6/docs/jdk/api/attach/spec/com/sun/tools/attach/VirtualMachine.html" target="_top">Java 
+      accessing the process.  This agent uses the <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://download.oracle.com/javase/6/docs/jdk/api/attach/spec/com/sun/tools/attach/VirtualMachine.html" target="_top">Java
       attach API</a> for dynamically attaching and detaching to
       and from the process. It works similar to JConsole connecting
       to a local process. The Jolokia advantage is, that after the
@@ -1622,11 +1654,11 @@ For more documentation please visit www.jolokia.org
       is reflected by a command line option for the
       launcher. Additionally, the option <code class="literal">--quiet</code>
       can be used to keep the launcher silent and
-      <code class="literal">--verbose</code> for adding some extra logging. 
+      <code class="literal">--verbose</code> for adding some extra logging.
     </p><p>
       The launcher knows various operational modes, which needs to
       be provided as a non-option argument and possibly require an
-      extra argument. 
+      extra argument.
     </p><div class="variablelist"><dl><dt><span class="term"><code class="literal">start</code></span></dt><dd><p>
             Use this to attach an agent to an already running, local
             Java process. The additional argument is either the
@@ -1710,7 +1742,7 @@ java -jar agent.jar --quiet stop $1</pre></div></div><div class="footnotes"><br>
           </p></div><div class="footnote"><p><sup>[<a name="ftn.d0e209" href="#d0e209">4</a>] </sup>
           You could even instrument a Java EE application server this way,
           however this is not recommended.
-        </p></div><div class="footnote"><p><sup>[<a name="ftn.d0e905" href="#d0e905">5</a>] </sup>
+        </p></div><div class="footnote"><p><sup>[<a name="ftn.d0e940" href="#d0e940">5</a>] </sup>
         Replace
         <code class="classname">org.jolokia.osgi.http.AgentServlet</code> with
         <code class="classname">org.jolokia.http.AgentServlet</code> to use
