@@ -46,7 +46,7 @@
         Do not rely on whatever Kubernetes context is current at the client and allow specifying context when connecting with the Kubernetes connector.
       </action>
       <action dev="skarsaune" type="add" issue="434">
-      JSR-160 connector for connectiong to a Pod in a Kubernetes cluster.
+      JSR-160 connector for connecting to a Pod in a Kubernetes cluster.
       </action>
       <action dev="skarsaune" type="add" issue="431">
        JSR-160 connector using Jolokia
