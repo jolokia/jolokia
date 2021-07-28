@@ -102,21 +102,23 @@
           JSR-160 aware tooling to directly connect to Jolokia. Also, you can use the connector to connect into a
           Kubernetes cluster directly.
           Watch these videos for a short introduction:
-          <ul>
-            <li>
-              <a href="https://www.youtube.com/watch?v=PDf2mqxOeMk">Jolokia from JMC</a>
-            </li>
-            <li>
-              <a href="https://www.youtube.com/watch?v=ALkMdEPPg1U">Connect Visual VM to a JVM running in Kubernetes
-                using Jolokia
-              </a>
-            </li>
-            <li>
-              <a href="https://www.youtube.com/watch?v=IkxDErc23lw">Connect Java Mission Control to a JVM in
-                Kubernetes
-              </a>
-            </li>
-          </ul>
+        </p>
+        <ul>
+          <li>
+            <a href="https://www.youtube.com/watch?v=PDf2mqxOeMk">Jolokia from JMC</a>
+          </li>
+          <li>
+            <a href="https://www.youtube.com/watch?v=ALkMdEPPg1U">Connect Visual VM to a JVM running in Kubernetes
+              using Jolokia
+            </a>
+          </li>
+          <li>
+            <a href="https://www.youtube.com/watch?v=IkxDErc23lw">Connect Java Mission Control to a JVM in
+              Kubernetes
+            </a>
+          </li>
+        </ul>
+        <p>
           All kudos go to <a href="https://github.com/skarsaune">Martin Skarsaune</a> for this great new feature!
         </p>
         <p>
