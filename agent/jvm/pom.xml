@@ -112,6 +112,7 @@
               <goal>shade</goal>
             </goals>
             <configuration>
+              <createDependencyReducedPom>false</createDependencyReducedPom>
               <relocations>
                 <relocation>
                   <shadedPattern>org.jolokia.shaded.</shadedPattern>
