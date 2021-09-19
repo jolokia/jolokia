@@ -20,14 +20,14 @@
 
   <groupId>org.jolokia</groupId>
   <artifactId>jolokia-mule</artifactId>
-  <version>1.7.1-SNAPSHOT</version>
+  <version>1.7.1</version>
   <name>jolokia-mule</name>
   <description>mule agent</description>
 
   <parent>
     <groupId>org.jolokia</groupId>
     <artifactId>jolokia-agent-parent</artifactId>
-    <version>1.7.1-SNAPSHOT</version>
+    <version>1.7.1</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
