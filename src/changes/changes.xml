@@ -23,6 +23,11 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
+    <release version="1.7.1" description="Release 1.7.1" date="2021-09-19">
+      <action dev="grgrzybek" type="fix" issue="477">
+        Removed local system dependencies in jvm-agent's pom.xml that accidentally slipped in
+      </action>
+    </release>
     <release version="1.7.0" description="Release 1.7.0" date="2021-07-26">
       <action dev="grgrzybek" type="fix" issue="466">
         Reimplement self-signed certificate generation without using reflection

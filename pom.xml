@@ -590,8 +590,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <currentStableVersion>1.7.0</currentStableVersion>
-    <currentSnapshotVersion>1.7.1-SNAPSHOT</currentSnapshotVersion>
+    <currentStableVersion>1.7.1</currentStableVersion>
+    <currentSnapshotVersion>1.7.2-SNAPSHOT</currentSnapshotVersion>
     <github.global.server>github</github.global.server>
   </properties>
 
