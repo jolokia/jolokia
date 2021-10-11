@@ -66,6 +66,14 @@
             <td>Java Client Library</td>
             <td><a href="http://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-client-java/${currentStableVersion}/jolokia-client-java-${currentStableVersion}.jar">jolokia-client-java-${currentStableVersion}.jar</a></td>
           </tr>
+          <tr>
+            <td>Jolokia JMX Adapter</td>
+            <td><a href="http://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-jmx-adapter/${currentStableVersion}/jolokia-jmx-adapter-${currentStableVersion}-standalone.jar">jolokia-jmx-adapter-${currentStableVersion}-standalone.jar</a></td>
+          </tr>
+          <tr>
+            <td>Jolokia Kubernetes Adapter</td>
+            <td><a href="http://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-kubernetes/${currentStableVersion}/jolokia-kubernetes-${currentStableVersion}-standalone.jar">jolokia-kubernetes-${currentStableVersion}-standalone.jar</a></td>
+          </tr>
         </tbody>
       </table>
       <subsection name="Javascript Library">
