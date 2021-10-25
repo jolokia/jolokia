@@ -20,13 +20,11 @@
 		JConsole, Visual VM or Java Mission
 		Control to a JVM that provides a
 		Jolokia endpoint.
-		There is ongoing work
-		to provide plugins for Java Mission Control and
-		visualvm.
 		Java Mission
 		Control plugins can be tried out
 		<ulink
 			url="https://github.com/skarsaune/jmc-cloud-extensions/blob/master/README.md">here</ulink>
+		Java Visual VM plugin can be downloaded <ulink url="https://skarsaune.github.io/jolokia-jmc-update-site/visualvm/org-jolokia-jmx-plugin.nbm">here</ulink>	
 	</para>
 
 	<para>
