@@ -60,7 +60,7 @@
           </tr>
           <tr>
             <td>JVM-Agent</td>
-            <td><a href="http://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-jvm/${currentStableVersion}/jolokia-jvm-${currentStableVersion}-agent.jar">jolokia-jvm-${currentStableVersion}-agent.jar</a></td>
+            <td><a href="http://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-jvm/${currentStableVersion}/jolokia-jvm-${currentStableVersion}.jar">jolokia-jvm-${currentStableVersion}.jar</a></td>
           </tr>
           <tr>
             <td>Java Client Library</td>
