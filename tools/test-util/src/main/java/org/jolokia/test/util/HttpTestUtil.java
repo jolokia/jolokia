@@ -20,7 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.*;
 
-import javax.servlet.*;
+import jakarta.servlet.*;
 
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
@@ -56,6 +56,24 @@ public class HttpTestUtil {
         final ByteArrayInputStream bis =
                 new ByteArrayInputStream(pData.getBytes());
         return new ServletInputStream() {
+
+            @Override
+            public boolean isFinished() {
+                // TODO jakartaee
+                return false;
+            }
+
+            @Override
+            public boolean isReady() {
+                // TODO jakartaee
+                return false;
+            }
+
+            @Override
+            public void setReadListener(ReadListener readListener) {
+                // TODO jakartaee
+            }
+
             @Override
             public int read() throws IOException {
                 return bis.read();
@@ -81,9 +99,9 @@ public class HttpTestUtil {
             }
         }
 
-        final Vector paramNames = new Vector(configParams.keySet());
-        EasyMock.expect(config.getInitParameterNames()).andAnswer(new IAnswer<Enumeration>() {
-            public Enumeration answer() throws Throwable {
+        final Vector<String> paramNames = new Vector<String>(configParams.keySet());
+        EasyMock.expect(config.getInitParameterNames()).andAnswer(new IAnswer<Enumeration<String>>() {
+            public Enumeration<String> answer() {
                 return paramNames.elements();
             }
         }).anyTimes();
@@ -105,9 +123,9 @@ public class HttpTestUtil {
                 EasyMock.expect(pContext.getInitParameter(entry.getKey())).andReturn(entry.getValue()).anyTimes();
             }
         }
-        final Vector paramNames = new Vector(configParams.keySet());
-        EasyMock.expect(pContext.getInitParameterNames()).andAnswer(new IAnswer<Enumeration>() {
-            public Enumeration answer() throws Throwable {
+        final Vector<String> paramNames = new Vector<String>(configParams.keySet());
+        EasyMock.expect(pContext.getInitParameterNames()).andAnswer(new IAnswer<Enumeration<String>>() {
+            public Enumeration<String> answer() {
                 return paramNames.elements();
             }
         }).anyTimes();

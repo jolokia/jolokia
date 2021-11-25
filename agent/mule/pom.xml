@@ -33,9 +33,7 @@
 
   <properties>
     <jetty.mortbay.version>6.1.26</jetty.mortbay.version>
-    <jetty8.eclipse.version>8.1.16.v20140903</jetty8.eclipse.version>
-    <jetty9.eclipse.version>9.2.9.v20150224</jetty9.eclipse.version>
-    <jetty.eclipse.version>${jetty9.eclipse.version}</jetty.eclipse.version>
+    <jetty.eclipse.version>11.0.7</jetty.eclipse.version>
   </properties>
   <dependencies>
     <dependency>
@@ -61,18 +59,18 @@
       </exclusions>
     </dependency>
 
-    <dependency>
-      <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jetty</artifactId>
-      <version>${jetty.mortbay.version}</version>
-      <scope>provided</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>org.mortbay.jetty</groupId>
-          <artifactId>servlet-api</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
+<!--    <dependency>-->
+<!--      <groupId>org.mortbay.jetty</groupId>-->
+<!--      <artifactId>jetty</artifactId>-->
+<!--      <version>${jetty.mortbay.version}</version>-->
+<!--      <scope>provided</scope>-->
+<!--      <exclusions>-->
+<!--        <exclusion>-->
+<!--          <groupId>org.mortbay.jetty</groupId>-->
+<!--          <artifactId>servlet-api</artifactId>-->
+<!--        </exclusion>-->
+<!--      </exclusions>-->
+<!--    </dependency>-->
 
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
@@ -154,12 +152,4 @@
     </plugins>
   </reporting>
 
-  <profiles>
-    <profile>
-      <id>jetty8</id>
-      <properties>
-        <jetty.eclipse.version>${jetty8.eclipse.version}</jetty.eclipse.version>
-      </properties>
-    </profile>
-  </profiles>
 </project>

@@ -39,23 +39,23 @@
     <module>war</module>
     <module>war-unsecured</module>
     <module>jsr160</module>
-    <module>osgi</module>
-    <module>osgi-bundle</module>
+<!-- TODO: jakartaee: <module>osgi</module>-->
+<!-- TODO: jakartaee: <module>osgi-bundle</module>-->
     <module>jmx</module>
     <module>jvm</module>
     <module>jvm-spring</module>
   </modules>
 
-  <profiles>
-    <profile>
-      <id>mule</id>
-      <modules>
-        <!-- Mule only for Java 7+ (test won't compile on java 6 -->
-        <module>mule</module>
-      </modules>
-      <activation>
-        <jdk>[1.7,)</jdk>
-      </activation>
-    </profile>
-  </profiles>
+<!--  <profiles>-->
+<!-- TODO: jakartaee:   <profile>-->
+<!--      <id>mule</id>-->
+<!--      <modules>-->
+<!--        &lt;!&ndash; Mule only for Java 7+ (test won't compile on java 6 &ndash;&gt;-->
+<!--        <module>mule</module>-->
+<!--      </modules>-->
+<!--      <activation>-->
+<!--        <jdk>[1.7,)</jdk>-->
+<!--      </activation>-->
+<!--    </profile>-->
+<!--  </profiles>-->
 </project>
