@@ -1,5 +1,6 @@
 package org.jolokia.kubernetes.client;
 
+import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.BaseClient;
 import io.fabric8.kubernetes.client.Config;
@@ -118,15 +119,13 @@ public class KubernetesJmxConnector extends JolokiaJmxConnector {
     throw new MalformedURLException("Unable to connect to proxypath " + proxyPath);
   }
 
-  private StringBuilder buildProxyPath(Pod pod, String protocol, String port, String path) {
-    final StringBuilder url = new StringBuilder(pod.getMetadata().getSelfLink());
+  public static StringBuilder buildProxyPath(Pod pod, String protocol, String port, String path) {
+    final ObjectMeta metadata = pod.getMetadata();
+    final StringBuilder url = new StringBuilder("/api/").append(pod.getApiVersion()).append("/namespaces/").append(metadata.getNamespace()).append("/pods/");
     if (protocol != null && !protocol.equals("http:")) {
-      //if we need to specify protocol, inject in url
-      final int index = url.lastIndexOf(pod.getMetadata().getName());
-      if (index > -1) {
-        url.insert(index, protocol);
-      }
+      url.append(protocol);
     }
+    url.append(metadata.getName());
     if(port!=null){
       url.append(port);
     }
