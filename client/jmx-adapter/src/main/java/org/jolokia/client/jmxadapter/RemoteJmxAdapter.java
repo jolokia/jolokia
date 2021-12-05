@@ -439,7 +439,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
   public Object invoke(ObjectName name, String operationName, Object[] params, String[] signature)
       throws InstanceNotFoundException, MBeanException, IOException {
     //jvisualvm may send null for no parameters
-    if (params == null && signature.length == 0) {
+    if (params == null && (signature == null || signature.length == 0)) {
       params = new Object[0];
     }
     try {
@@ -457,11 +457,13 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
 
   private String makeSignature(String[] signature) {
     StringBuilder builder = new StringBuilder("(");
-    for (int i = 0; i < signature.length; i++) {
-      if (i > 0) {
-        builder.append(',');
+    if(signature != null) {
+      for (int i = 0; i < signature.length; i++) {
+        if (i > 0) {
+          builder.append(',');
+        }
+        builder.append(signature[i]);
       }
-      builder.append(signature[i]);
     }
     builder.append(')');
     return builder.toString();
