@@ -30,5 +30,6 @@
 
     <xi:include href='client/javascript.xml'/>
     <xi:include href='client/java.xml'/>
+    <xi:include href='client/mbeanserverconnection.xml'/>
 
 </chapter>
