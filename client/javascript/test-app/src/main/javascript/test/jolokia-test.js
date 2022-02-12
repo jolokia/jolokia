@@ -263,7 +263,101 @@ $(document).ready(function() {
             equals(resp.value,"Max\nMorlock");
         });
 
+        // ==============================================================================
+        //  quoteNonFiniteNumbers option tests
+        // ==============================================================================
+        test("GET Write test with Long.MAX using quoteNonFiniteNumbers option", function() {
+            //Given Long.Max value is set on MBean attribute
+            var value = "9223372036854775807";
+            var resp = j4p.request({ type: "WRITE", mbean: "jolokia.it:type=attribute", attribute: "VeryLong", value: value},{method: "GET", "quoteNonFiniteNumbers": true});
+            equals(resp.status,200);
+            //When parsing value greater than max Number using quoteNonFiniteNumbers option
+            resp = j4p.request({type: "READ", mbean: "jolokia.it:type=attribute", attribute: "VeryLong"}, {"quoteNonFiniteNumbers": true});
+            //Then expecting parsed value as String and to be equal to the value set
+            equals(resp.value,value);
+            equals(typeof  resp.value, "string");
+        });
+
+        test("GET Write test with negative Long.MAX using quoteNonFiniteNumbers option", function() {
+            //Given Long.Max value is set on MBean attribute
+            var value = "-9223372036854775807";
+            var resp = j4p.request({ type: "WRITE", mbean: "jolokia.it:type=attribute", attribute: "VeryLong", value: value},{method: "GET", "quoteNonFiniteNumbers": true});
+            equals(resp.status,200);
+            //When parsing value greater than max Number using quoteNonFiniteNumbers option
+            resp = j4p.request({type: "READ", mbean: "jolokia.it:type=attribute", attribute: "VeryLong"}, {"quoteNonFiniteNumbers": true});
+            //Then expecting parsed value as String and to be equal to the value set
+            equals(resp.value,value);
+            equals(typeof  resp.value, "string");
+        });
+
+        test("GET Write test with array of Number values using quoteNonFiniteNumbers option", function() {
+            //Given Long.Max value is set on MBean attribute
+            var maxLong = "9223372036854775807";
+            var value = `[${maxLong},${maxLong}]`;
+            var resp = j4p.request({ type: "WRITE", mbean: "jolokia.it:type=attribute", attribute: "List", value: value},{method: "GET", "quoteNonFiniteNumbers": true});
+            equals(resp.status,200);
+            //When parsing value greater than max Number using quoteNonFiniteNumbers option
+            resp = j4p.request({type: "READ", mbean: "jolokia.it:type=attribute", attribute: "List"}, {"quoteNonFiniteNumbers": true});
+            //Then expecting parsed Array values as String and to be equal to maxLong
+            equals(resp.value.length, 2);
+            for(var i in resp.value) {
+                equals(resp.value[i], maxLong);
+                equals(typeof resp.value[i], "string");
+            }
+        });
+
+        test("GET Write test with array of Number values without using quoteNonFiniteNumbers option", function() {
+            //Given Long.Max value is set on MBean attribute
+            var maxLong = "9223372036854775807";
+            var value = `[${maxLong},${maxLong}]`;
+            var resp = j4p.request({ type: "WRITE", mbean: "jolokia.it:type=attribute", attribute: "List", value: value},{method: "GET", "quoteNonFiniteNumbers": false});
+            equals(resp.status,200);
+            //When parsing value greater than max Number using quoteNonFiniteNumbers option
+            resp = j4p.request({type: "READ", mbean: "jolokia.it:type=attribute", attribute: "List"}, {"quoteNonFiniteNumbers": false});
+            //Then expecting parsed Array values as Number and not to be equal to maxLong
+            equals(resp.value.length, 2);
+            for(var i in resp.value) {
+                equals(resp.value[i], 9223372036854776000);
+                equals(typeof resp.value[i], "number");
+            }
+        });
+
+        test("GET Write test with Long.MAX not using quoteNonFiniteNumbers option", function() {
+            //Given Long.Max value is set on MBean attribute
+            var value = "9223372036854775807";
+            var resp = j4p.request({ type: "WRITE", mbean: "jolokia.it:type=attribute", attribute: "VeryLong", value: value},{method: "GET", "quoteNonFiniteNumbers": false});
+            equals(resp.status,200);
+            //When parsing value greater than max Number without quoteNonFiniteNumbers option
+            resp = j4p.request({type: "READ", mbean: "jolokia.it:type=attribute", attribute: "VeryLong"}, {"quoteNonFiniteNumbers": false});
+            //Then expecting parsed value as Number and lose precision
+            equals(resp.value,value);
+            equals(typeof resp.value, "number");
+        });
+
+        test("GET Write test with Integer using quoteNonFiniteNumbers option", function() {
+            //Given an Integer value is set on MBean attribute
+            var value = 92233;
+            var resp = j4p.request({ type: "WRITE", mbean: "jolokia.it:type=attribute", attribute: "VeryLong", value: value},{method: "GET", "quoteNonFiniteNumbers": true});
+            equals(resp.status,200);
+            //When parsing value greater lower than or equal to max Number using quoteNonFiniteNumbers option
+            resp = j4p.request({type: "READ", mbean: "jolokia.it:type=attribute", attribute: "VeryLong"}, {"quoteNonFiniteNumbers": true});
+            //Then expecting parsed value as Number and equals to value set
+            equals(resp.value,value);
+            equals(typeof resp.value, "number");
+        });
+
+        test("GET Write test with values that must not be changed when using quoteNonFiniteNumbers option", function() {
+            //Given a String with numeric value nested in String
+            var value = [{"{\"nestedLong\":9223372036854775807}":["9223372036854775807","{\"nestedLong\":9223372036854775807}", 1234, 8E-1,{"9223372036854775807":"9223372036854775807"}]}];
+            var resp = j4p.request({ type: "WRITE", mbean: "jolokia.it:type=attribute", attribute: "List", value: value},{method: "POST", "quoteNonFiniteNumbers": true});
+            equals(resp.status,200);
+            //When parsing value using quoteNonFiniteNumbers option
+            resp = j4p.request({type: "READ", mbean: "jolokia.it:type=attribute", attribute: "List"}, {"quoteNonFiniteNumbers": true});
+            //Then value should remain unchanged.
+            equals(JSON.stringify(resp.value), JSON.stringify(value));
+        });
     }
+
 
     // ==========================================================================================
 

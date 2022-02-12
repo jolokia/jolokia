@@ -159,6 +159,12 @@
              *     are ignored. Otherwise if a single deserialization fails, the whole request
              *     returns with an error. This works only for certain operations like pattern reads..
              *   </dd>
+             *   <dt>quoteNonFiniteNumbers</dt>
+             *   <dd>
+             *      If set to true, numeric values that are not finite will be quoted and represented as strings in
+             *      the JSON object, except for value using exponential representation that will remain unquoted.<br />
+             *      This option avoids loosing precision when converting numeric types such as Long.
+             *   </dd>
              * </dl>
              *
              * @param request the request to send
@@ -223,7 +229,10 @@
                 if (opts.success) {
                     var success_callback = constructCallbackDispatcher(opts.success);
                     var error_callback = constructCallbackDispatcher(opts.error);
-                    ajaxParams.success = function (data) {
+                    ajaxParams.success = function (data, status, xhr) {
+                        if (opts['quoteNonFiniteNumbers']) {
+                            data = quoteNonFiniteNumbers(xhr.responseText);
+                        }
                         var responses = $.isArray(data) ? data : [ data ];
                         for (var idx = 0; idx < responses.length; idx++) {
                             var resp = responses[idx];
@@ -246,6 +255,9 @@
                     ajaxParams.async = false;
                     var xhr = $.ajax(ajaxParams);
                     if (httpSuccess(xhr)) {
+                        if (opts['quoteNonFiniteNumbers']) {
+                            return quoteNonFiniteNumbers(xhr.responseText);
+                        }
                         return $.parseJSON(xhr.responseText);
                     } else {
                         return null;
@@ -406,6 +418,45 @@
 
         // ========================================================================
         // Private Methods:
+
+        // Utility function to transform numeric values found in JSON that are not
+        // "finite" (i.e. too large to preserve their precision as Number) to Strings.
+        // This function takes a raw JSON string as input, and returns a parsed JSON
+        // object.
+        // In case of exception, it will log a warning return use the original
+        // JSON String for parsing.
+        function quoteNonFiniteNumbers(jsonString) {
+            let quotedJsonString = "";
+            try {
+                // Sanitizing the json strong from escaped characters.
+                const sanitizedJsonString = jsonString.replaceAll(/(\\.)/g, "__");
+
+                //integer and float, excluding exponential notation
+                const numericValuePattern = /^(\s*[:\[,]\s*)(-?[0-9\.]{16,})\s*[,\]\}]+/
+                let isString = false;
+
+                for(let i=0; i< jsonString.length; i++) {
+                    let appended = false;
+                    let charAtI = sanitizedJsonString.charAt(i);
+                    if (!isString) {
+                        let matches = numericValuePattern.exec(sanitizedJsonString.substring(i));
+                        if (matches && !Number.isFinite(matches[2])) {
+                            quotedJsonString += `${matches[1]}"${matches[2]}"`;
+                            i += (matches[1].length + matches[2].length -1);
+                            appended = true;
+                        }
+                    }
+                    if (!appended) {
+                        quotedJsonString += jsonString.charAt(i);
+                    }
+                    isString = ('"' == charAtI) ? !isString : isString;
+                }
+                return JSON.parse(quotedJsonString);
+            } catch(ex) {
+                console.warn("Failed to quote numeric values, returning original object", ex, quotedJsonString);
+                return JSON.parse(jsonString);
+            }
+        }
 
         // Create a function called by a timer, which requests the registered requests
         // calling the stored callback on receipt. jolokia and jobs are put into the closure

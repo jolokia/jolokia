@@ -51,6 +51,7 @@ public class AttributeChecking implements AttributeCheckingMBean,MBeanRegistrati
     private String     domain;
     private Date date = new Date();
     private Chili chili = Chili.AJI;
+    private Long veryLong = Long.MAX_VALUE;
 
 
     public AttributeChecking(String pDomain) {
@@ -91,6 +92,14 @@ public class AttributeChecking implements AttributeCheckingMBean,MBeanRegistrati
         } catch (MalformedObjectNameException e) {
             throw new RuntimeException("Couldnot objectname",e);
         }
+    }
+
+    public Long getVeryLong() {
+        return veryLong;
+    }
+
+    public void setVeryLong(Long veryLong) {
+        this.veryLong = veryLong;
     }
 
     public boolean getState() {

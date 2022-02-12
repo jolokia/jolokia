@@ -28,6 +28,10 @@ import javax.management.ObjectName;
  */
 public interface AttributeCheckingMBean {
 
+    Long getVeryLong();
+
+    void setVeryLong(Long veryLong);
+
     void reset();
 
     boolean getState();
