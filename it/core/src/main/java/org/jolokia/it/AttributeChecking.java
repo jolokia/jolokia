@@ -3,6 +3,7 @@ package org.jolokia.it;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.*;
 
 import javax.management.*;
@@ -52,6 +53,7 @@ public class AttributeChecking implements AttributeCheckingMBean,MBeanRegistrati
     private Date date = new Date();
     private Chili chili = Chili.AJI;
     private Long veryLong = Long.MAX_VALUE;
+    private BigDecimal bigDecimal;
 
 
     public AttributeChecking(String pDomain) {
@@ -92,6 +94,16 @@ public class AttributeChecking implements AttributeCheckingMBean,MBeanRegistrati
         } catch (MalformedObjectNameException e) {
             throw new RuntimeException("Couldnot objectname",e);
         }
+    }
+
+    @Override
+    public BigDecimal getBigDecimal() {
+        return bigDecimal;
+    }
+
+    @Override
+    public void setBigDecimal(BigDecimal bigDecimal) {
+        this.bigDecimal = bigDecimal;
     }
 
     public Long getVeryLong() {

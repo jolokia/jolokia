@@ -1,6 +1,7 @@
 package org.jolokia.it;
 
 import java.io.File;
+import java.math.BigDecimal;
 import java.util.*;
 
 import javax.management.ObjectName;
@@ -27,6 +28,10 @@ import javax.management.ObjectName;
  * @since Aug 7, 2009
  */
 public interface AttributeCheckingMBean {
+
+    BigDecimal getBigDecimal();
+
+    void setBigDecimal(BigDecimal bigDecimal);
 
     Long getVeryLong();
 

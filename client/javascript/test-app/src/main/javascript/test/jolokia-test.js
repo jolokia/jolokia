@@ -290,6 +290,30 @@ $(document).ready(function() {
             equals(typeof  resp.value, "string");
         });
 
+        test("GET Write test with PIE using quoteNonFiniteNumbers option", function() {
+            //Given Double.PIE value is set on MBean attribute
+            var value = "3.14159265358979323846";
+            var resp = j4p.request({ type: "WRITE", mbean: "jolokia.it:type=attribute", attribute: "BigDecimal", value: value},{method: "GET", "quoteNonFiniteNumbers": true});
+            equals(resp.status,200);
+            //When parsing value greater than max Number using quoteNonFiniteNumbers option
+            resp = j4p.request({type: "READ", mbean: "jolokia.it:type=attribute", attribute: "BigDecimal"}, {"quoteNonFiniteNumbers": true});
+            //Then expecting parsed value as String and to be equal to the value set
+            equals(resp.value,value);
+            equals(typeof  resp.value, "string");
+        });
+
+        test("GET Write test with negative PIE using quoteNonFiniteNumbers option", function() {
+            //Given Double.PIE value is set on MBean attribute
+            var value = "-3.14159265358979323846";
+            var resp = j4p.request({ type: "WRITE", mbean: "jolokia.it:type=attribute", attribute: "BigDecimal", value: value},{method: "GET", "quoteNonFiniteNumbers": true});
+            equals(resp.status,200);
+            //When parsing value greater than max Number using quoteNonFiniteNumbers option
+            resp = j4p.request({type: "READ", mbean: "jolokia.it:type=attribute", attribute: "BigDecimal"}, {"quoteNonFiniteNumbers": true});
+            //Then expecting parsed value as String and to be equal to the value set
+            equals(resp.value,value);
+            equals(typeof  resp.value, "string");
+        });
+
         test("GET Write test with array of Number values using quoteNonFiniteNumbers option", function() {
             //Given Long.Max value is set on MBean attribute
             var maxLong = "9223372036854775807";
