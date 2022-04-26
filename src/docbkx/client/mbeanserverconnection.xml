@@ -40,10 +40,10 @@
   <itemizedlist>
   <listitem>
   Jolokia's <filename>remote-jmx-adapter-&lt;version&gt;-standalone.jar</filename>
-  must be on the classpath. See the <ulink url="../../download.html">Download page</ulink> for the latest versions of this adapater jar.
+  must be on the classpath. See the <ulink url="../../download.html">Download page</ulink> for the latest versions of this adapter jar.
   </listitem>
   <listitem>
-  Jolokia ha to be accessible running at
+  Jolokia has to be accessible running at
   <ulink url="http://localhost:8778/jolokia/">http://localhost:8778/jolokia/</ulink>. If user/password authentication is enabled for the agent, uncomment the line below and insert your credentials.
   </listitem>
   </itemizedlist>
@@ -80,13 +80,13 @@ public class ConnectWithJolokiaDemo {
   </para>
 
   <para>
-  Before compiling and running the example below, please check that the followin prerequesites are met:
+  Before compiling and running the example below, please check that the following prerequesites are met:
   </para>
 
   <itemizedlist>
   <listitem>
   Jolokia's <filename>remote-jmx-adapter-&lt;version&gt;-standalone.jar</filename>
-  must be on the classpath. See the <ulink url="../../download.html">Download page</ulink> for the latest versions of this adapater jar.
+  must be on the classpath. See the <ulink url="../../download.html">Download page</ulink> for the latest versions of this adapter jar.
   </listitem>
   <listitem>
   In addition, the Jolokia Kubernetes extension
@@ -129,7 +129,7 @@ public class ConnectInKubernetesDemo {
 
     <para>
   As an alternative to connecting programmatically to the Jolokia agent, you can also leverage <command>jconsole</command> to explore JMX on the remote JVM.
-  You need to add the jolokia connector client libraries when launching <command>jconsole</command> like in:
+  You need to add the Jolokia connector client libraries when launching <command>jconsole</command> like in:
 
       <programlisting language="sh"><![CDATA[
 java \
