@@ -201,6 +201,9 @@ public class ToOpenTypeConverter {
         return new CompositeType("complex", "complex", keys, keys, types);
       }
     }
+    if( rawValue == null ) {
+      return VOID;
+    }
     // should probably never happen, to signify type could not be found
     throw new InvalidOpenTypeException("Unable to figure out type for " + rawValue);
   }
@@ -325,10 +328,20 @@ public class ToOpenTypeConverter {
     }
     //may be null on Java 10
     cacheType(STRING, "jdk.management.jfr:type=FlightRecorder.EventTypes.item.description");
+    cacheType(STRING, "jdk.management.jfr:type=FlightRecorder.getRecordingOptions.destination");
     return TYPE_SPECIFICATIONS.get(name);
   }
 
-  static void cacheType(OpenType<?> type, String... names) {
+  /**
+   * Specify type to use for an attribute, operation or an attribute within the response.
+   * Syntax
+   * <pre>
+   *   cacheType(TYPE, "ObjectName.Operation/Attribute.item(if array).attribute.innerattribute")
+   * </pre>
+   * @param type type to apply for reverse engineering
+   * @param names One or more items to type according to syntax given above
+   */
+  public static void cacheType(OpenType<?> type, String... names) {
     for (String name : names) {
       TYPE_SPECIFICATIONS.put(name, type);
     }
@@ -343,7 +356,12 @@ public class ToOpenTypeConverter {
     return type;
   }
 
-  static OpenType<?> introspectComplexTypeFrom(Class<?> klass) throws OpenDataException {
+  /**
+   * @param klass The Java type
+   * @return OpenType deducted from Java type by reflection
+   * @throws OpenDataException
+   */
+  public static OpenType<?> introspectComplexTypeFrom(Class<?> klass) throws OpenDataException {
     if (CompositeData.class.equals(klass) || TabularData.class.equals(klass)) {
       //do not attempt to read from these classes, will have to be created from the "real" class runtime
       return null;
