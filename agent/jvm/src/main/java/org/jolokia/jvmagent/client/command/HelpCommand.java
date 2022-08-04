@@ -140,8 +140,8 @@ public class HelpCommand extends AbstractBaseCommand {
 "is printed\n" +
 "\n" +
 "There are several possible reasons, why attaching to a process can fail:\n" +
-"   * The UID of this launcher must be the very *same* as the process to attach too. It not sufficient to be root.\n" +
-"   * The JVM must have HotSpot enabled and be a JVM 1.6 or larger.\n" +
+"   * The UID of this launcher must be the very *same* as the process to attach to. It's not sufficient to be root.\n" +
+"   * The JVM must have HotSpot enabled and be a JVM 1.6 or later.\n" +
 "   * It must be a Java process ;-)\n" +
 "\n" +
 "For more documentation please visit www.jolokia.org"
