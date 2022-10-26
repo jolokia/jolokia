@@ -37,7 +37,12 @@
             <artifactId>testng</artifactId>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.awaitility</groupId>
+            <artifactId>awaitility</artifactId>
+            <version>4.0.0</version>
+            <scope>test</scope>
+        </dependency>
         <!-- note jolokia-jvm dependency must come before jolokia-core
         as it is shaded and the combination does not work
         hence unconventionally listing test deps first -->
