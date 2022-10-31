@@ -345,8 +345,8 @@
   </scm>
 
   <ciManagement>
-    <system>jenkins</system>
-    <url>https://travis-ci.org/rhuss/jolokia</url>
+    <system>github</system>
+    <url>https://github.com/rhuss/jolokia/actions</url>
   </ciManagement>
 
   <licenses>
