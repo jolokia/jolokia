@@ -1,8 +1,8 @@
 package org.jolokia.kubernetes.client;
 
-import io.fabric8.kubernetes.client.BaseClient;
+import io.fabric8.kubernetes.client.impl.BaseClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
-import io.fabric8.kubernetes.client.dsl.base.OperationSupport;
+import io.fabric8.kubernetes.client.dsl.internal.OperationSupport;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

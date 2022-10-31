@@ -1,10 +1,10 @@
 package org.jolokia.kubernetes.client;
 
 import io.fabric8.kubernetes.api.model.Pod;
-import io.fabric8.kubernetes.client.BaseClient;
+import io.fabric8.kubernetes.client.impl.BaseClient;
 import io.fabric8.kubernetes.client.Config;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -62,7 +62,7 @@ public class KubernetesJmxConnector extends JolokiaJmxConnector {
     KubernetesClient client = apiClients.get(key);
 
     if(client == null){
-      client=new DefaultKubernetesClient(Config.autoConfigure(context));
+      client=new KubernetesClientBuilder().withConfig(Config.autoConfigure(context)).build();
       apiClients.put(key, client);
     }
     return client;
