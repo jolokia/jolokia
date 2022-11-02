@@ -306,7 +306,7 @@ public class JmxBridgeTest {
   }
 
   @Test
-  public void testRecodringSettings()
+  public void testRecordingSettings()
       throws MalformedObjectNameException, IOException, MBeanException, InstanceNotFoundException {
     final ObjectName objectName = new ObjectName("jdk.management.jfr:type=FlightRecorder");
     try {
