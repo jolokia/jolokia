@@ -1,9 +1,7 @@
 package org.jolokia.client.jmxadapter;
 
-import static com.jayway.awaitility.Awaitility.await;
+import static org.awaitility.Awaitility.await;
 
-import com.jayway.awaitility.Awaitility;
-import com.jayway.awaitility.core.ThrowingRunnable;
 import java.io.IOException;
 import java.lang.management.ClassLoadingMXBean;
 import java.lang.management.CompilationMXBean;
@@ -23,6 +21,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
+
 import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.AttributeNotFoundException;
@@ -54,7 +54,6 @@ import javax.management.remote.JMXServiceURL;
 import org.jolokia.Version;
 import org.jolokia.client.J4pClient;
 import org.jolokia.client.J4pClientBuilder;
-import org.jolokia.client.exception.J4pException;
 import org.jolokia.client.request.J4pVersionRequest;
 import org.jolokia.jvmagent.JvmAgent;
 import org.jolokia.test.util.EnvTestUtil;
@@ -190,7 +189,8 @@ public class JmxBridgeTest {
               "HardwareModel"));
 
   // Safe values for testing setting attributes
-  private static final Map<String, Object> ATTRIBUTE_REPLACEMENTS =
+  @SuppressWarnings("serial")
+private static final Map<String, Object> ATTRIBUTE_REPLACEMENTS =
       new HashMap<String, Object>() {
         {
           put("jolokia:type=Config.Debug", true);
@@ -329,13 +329,14 @@ public class JmxBridgeTest {
     // wait for agent to be running
     await()
         .until(
-            Awaitility.matches(
-                new ThrowingRunnable() {
-                  @Override
-                  public void run() throws J4pException {
-                    connector.execute(new J4pVersionRequest());
-                  }
-                }));
+        		new Callable<Boolean>() {
+
+					@Override
+					public Boolean call() throws Exception {
+						//will throw exception if connection is not ready
+						connector.execute(new J4pVersionRequest());
+						return true;
+					}});
     this.adapter = new RemoteJmxAdapter(connector);
     //see javadoc above if this line fails while running tests
     JMXConnector rmiConnector = JMXConnectorFactory
@@ -478,8 +479,6 @@ public class JmxBridgeTest {
   @Test
   public void testThatWeAreAbleToInvokeOperationWithOverloadedSignature()
       throws IOException, InstanceNotFoundException, MBeanException {
-    final MBeanInfo mbean = this.adapter
-        .getMBeanInfo(RemoteJmxAdapter.getObjectName("java.lang:type=Threading"));
     // Invoke method that has both primitive and boxed Long as possible input
     this.adapter.invoke(
         RemoteJmxAdapter.getObjectName("java.lang:type=Threading"),
