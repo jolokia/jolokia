@@ -2,8 +2,8 @@
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.jolokia/jolokia-parent/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/org.jolokia/jolokia-parent/)
 [![Build Status](https://secure.travis-ci.org/rhuss/jolokia.png)](http://travis-ci.org/rhuss/jolokia)
-[![Coverage](https://sonarqube.com/api/badges/measure?key=org.jolokia:jolokia&metric=coverage)](https://sonarqube.com/dashboard?id=org.jolokia%3Ajolokia)
-[![Technical Debt](https://sonarqube.com/api/badges/measure?key=org.jolokia:jolokia&metric=sqale_debt_ratio)](https://sonarqube.com/dashboard?id=org.jolokia%3Ajolokia)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=org.jolokia%3Ajolokia&metric=coverage)](https://sonarcloud.io/summary/new_code?id=org.jolokia%3Ajolokia)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=org.jolokia%3Ajolokia&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=org.jolokia%3Ajolokia)
 [![Gitter](https://badges.gitter.im/Join+Chat.svg)](https://gitter.im/rhuss/jolokia?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 [![Code Quality: Java](https://img.shields.io/lgtm/grade/java/g/rhuss/jolokia.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/rhuss/jolokia/context:java)
 [![Total Alerts](https://img.shields.io/lgtm/alerts/g/rhuss/jolokia.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/rhuss/jolokia/alerts)
