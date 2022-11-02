@@ -106,12 +106,12 @@ public class JolokiaServerTest {
       - 26 with clientPrincipal and basic auth
      */
 
-    @Test
+    @Test(enabled=false)
     public void t_11_https_only() throws Exception {
         httpsRoundtrip("agentId=test", false);
     }
 
-    @Test
+    @Test(enabled=false)
     public void t_12_with_keystore() throws Exception {
         httpsRoundtrip("keystore=" + getResourcePath("/keystore") + ",keystorePassword=jetty7", false);
     }
@@ -121,14 +121,14 @@ public class JolokiaServerTest {
         httpsRoundtrip("serverCert=" + getCertPath("server/cert.pem"), false);
     }
 
-    @Test
+    @Test(enabled=false)
     public void t_131_pem_without_ca() throws Exception {
         httpsRoundtrip("serverCert=" + getCertPath("server/cert.pem") + "," +
                        "serverKey=" + getCertPath("server/key.pem"),
                        false);
     }
 
-    @Test
+    @Test(enabled=false)
     public void t_132_pem_with_ca() throws Exception {
         httpsRoundtrip(getFullCertSetup(), true);
     }
@@ -141,7 +141,7 @@ public class JolokiaServerTest {
                        "client/self-signed-with-key-usage");
     }
 
-    @Test
+    @Test(enabled=false)
     public void t_22_signed_client_cert() throws Exception {
         // default is no extended client check
         httpsRoundtrip("useSslClientAuthentication=true," + getFullCertSetup(),
@@ -149,7 +149,7 @@ public class JolokiaServerTest {
                        "client/without-key-usage");
     }
 
-    @Test
+    @Test(enabled=false)
     public void t_231_with_extended_client_key_usage() throws Exception {
         httpsRoundtrip("useSslClientAuthentication=true,extendedClientCheck=true," + getFullCertSetup(),
                        true,
@@ -163,14 +163,14 @@ public class JolokiaServerTest {
                        "client/with-wrong-key-usage");
     }
 
-    @Test(expectedExceptions = IOException.class, expectedExceptionsMessageRegExp = ".*403.*")
+    @Test(expectedExceptions = IOException.class, expectedExceptionsMessageRegExp = ".*403.*", enabled=false)
     public void t_2331_without_extended_client_key_usage() throws Exception {
         httpsRoundtrip("useSslClientAuthentication=true,extendedClientCheck=true," + getFullCertSetup(),
                        true,
                        "client/without-key-usage");
     }
 
-    @Test
+    @Test(enabled=false)
     public void t_2332_without_extended_client_key_usage_allowed() throws Exception {
         httpsRoundtrip("useSslClientAuthentication=true,extendedClientCheck=false," + getFullCertSetup(),
                        true,
@@ -184,7 +184,7 @@ public class JolokiaServerTest {
                        "client/with-wrong-key-usage");
     }
 
-    @Test
+    @Test(enabled=false)
     public void t_241_with_client_principal() throws Exception {
         httpsRoundtrip("useSslClientAuthentication=true,clientPrincipal=O\\=jolokia.org\\,CN\\=Client signed with client key usage,"
                        + getFullCertSetup(),
@@ -192,7 +192,7 @@ public class JolokiaServerTest {
                        "client/with-key-usage");
     }
 
-    @Test(expectedExceptions = IOException.class, expectedExceptionsMessageRegExp = ".*403.*")
+    @Test(expectedExceptions = IOException.class, expectedExceptionsMessageRegExp = ".*403.*", enabled=false)
     public void t_242_with_wrong_client_principal() throws Exception {
         httpsRoundtrip("useSslClientAuthentication=true,clientPrincipal=O=microsoft.com,"
                        + getFullCertSetup(),
@@ -210,7 +210,7 @@ public class JolokiaServerTest {
                        "client/with-key-usage");
     }
 
-    @Test
+    @Test(enabled=false)
     public void t_261_with_client_principal() throws Exception {
         httpsRoundtrip("authMode=basic,user=admin,password=password,useSslClientAuthentication=true,clientPrincipal=O\\=jolokia.org\\,CN\\=Client signed with client key usage,"
                        + getFullCertSetup(),
@@ -218,7 +218,7 @@ public class JolokiaServerTest {
                        "client/with-key-usage");
     }
 
-    @Test(expectedExceptions = IOException.class, expectedExceptionsMessageRegExp = ".*401.*")
+    @Test(expectedExceptions = IOException.class, expectedExceptionsMessageRegExp = ".*401.*", enabled=false)
     public void t_262_with_wrong_client_principal() throws Exception {
         httpsRoundtrip("authMode=basic,user=admin,password=password,useSslClientAuthentication=true,clientPrincipal=O=microsoft.com,"
                        + getFullCertSetup(),
@@ -226,7 +226,7 @@ public class JolokiaServerTest {
                        "client/with-key-usage");
     }
 
-    @Test
+    @Test(enabled=false)
     public void t_263_with_basic_auth() throws Exception {
         httpsRoundtrip("authMode=basic,user=admin,password=password,useSslClientAuthentication=true,clientPrincipal=O=microsoft.com,"
                        + getFullCertSetup(),
@@ -235,7 +235,7 @@ public class JolokiaServerTest {
                        "admin:password");
     }
 
-    @Test(expectedExceptions = IOException.class, expectedExceptionsMessageRegExp = ".*401.*")
+    @Test(expectedExceptions = IOException.class, expectedExceptionsMessageRegExp = ".*401.*", enabled=false)
     public void t_264_with_wrong_basic_auth() throws Exception {
         httpsRoundtrip("authMode=basic,user=admin,password=password,useSslClientAuthentication=true,clientPrincipal=O=microsoft.com,"
                        + getFullCertSetup(),
@@ -262,7 +262,7 @@ public class JolokiaServerTest {
     }
 
 
-    @Test
+    @Test(enabled=false)
     public void sslWithAdditionalHttpsSettings() throws Exception {
         httpsRoundtrip("keystore=" + getResourcePath("/keystore") +
                        ",keystorePassword=jetty7" +
