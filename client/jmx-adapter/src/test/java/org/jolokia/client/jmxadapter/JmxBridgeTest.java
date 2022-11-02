@@ -64,6 +64,7 @@ import org.jolokia.jvmagent.JvmAgent;
 import org.jolokia.test.util.EnvTestUtil;
 import org.jolokia.util.ClassUtil;
 import org.testng.Assert;
+import org.testng.SkipException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -312,8 +313,7 @@ public class JmxBridgeTest {
     try {
       final MBeanInfo mBeanInfo = this.adapter.getMBeanInfo(objectName);
     } catch (InstanceNotFoundException e) {
-      //skip test for older JVMs
-      return;
+    	throw new SkipException("Flight recorder bean is not available in this Java version");
     }
     final Object newRecording = this.adapter.invoke(objectName, "newRecording", new Object[0], new String[0]);
 
