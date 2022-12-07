@@ -36,6 +36,7 @@ import javax.management.MBeanInfo;
 import javax.management.MBeanOperationInfo;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
+import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.Notification;
 import javax.management.NotificationListener;
@@ -45,7 +46,10 @@ import javax.management.Query;
 import javax.management.QueryExp;
 import javax.management.ReflectionException;
 import javax.management.RuntimeMBeanException;
+import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.OpenDataException;
+import javax.management.openmbean.OpenType;
+import javax.management.openmbean.SimpleType;
 import javax.management.remote.JMXConnectionNotification;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
@@ -59,6 +63,7 @@ import org.jolokia.jvmagent.JvmAgent;
 import org.jolokia.test.util.EnvTestUtil;
 import org.jolokia.util.ClassUtil;
 import org.testng.Assert;
+import org.testng.SkipException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -299,6 +304,25 @@ private static final Map<String, Object> ATTRIBUTE_REPLACEMENTS =
             new Object[]{new long[]{1L}, true, true},
             new String[]{"[J", "boolean", "boolean"}}
     };
+  }
+
+  @Test
+  public void testRecordingSettings()
+      throws MalformedObjectNameException, IOException, MBeanException, InstanceNotFoundException {
+    final ObjectName objectName = new ObjectName("jdk.management.jfr:type=FlightRecorder");
+    try {
+      final MBeanInfo mBeanInfo = this.adapter.getMBeanInfo(objectName);
+    } catch (InstanceNotFoundException e) {
+    	throw new SkipException("Flight recorder bean is not available in this Java version");
+    }
+    final Object newRecording = this.adapter.invoke(objectName, "newRecording", new Object[0], new String[0]);
+
+    final Object recordingOptions = this.adapter
+        .invoke(objectName, "getRecordingOptions", new Object[]{newRecording},
+            new String[]{"long"});
+    Assert.assertTrue(recordingOptions instanceof CompositeDataSupport);
+    OpenType<?> descriptionType=((CompositeDataSupport)recordingOptions).getCompositeType().getType("destination");
+    Assert.assertEquals(descriptionType, SimpleType.STRING);
   }
 
   @DataProvider
