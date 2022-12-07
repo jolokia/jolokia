@@ -1202,7 +1202,7 @@ java -javaagent:jolokia.jar=\
           build in addition to our own <a
                 href="http://labs.consol.de/jenkins">CI Server</a>. (Did I
           mentioned already, that we have a quite I high <a
-                href="http://labs.consol.de/sonar/dashboard/index/org.jolokia:jolokia">Sonar
+                href="https://sonarcloud.io/project/overview?id=org.jolokia%3Ajolokia">Sonar
         </a> score
           ?).
         </p>
