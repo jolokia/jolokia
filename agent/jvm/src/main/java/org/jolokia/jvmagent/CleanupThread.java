@@ -98,7 +98,8 @@ class CleanupThread extends Thread {
     private boolean joinThreads(Thread pThreads[]) {
         for (int i=0;i< pThreads.length;i++) {
             final Thread t = pThreads[i];
-            if (t.isDaemon() ||
+            if (t == null ||
+                    t.isDaemon() ||
                     t.getThreadGroup() == null || // has died on us
                     t.getThreadGroup().equals(threadGroup) ||
                     checkExcludedNames(t.getName()))
