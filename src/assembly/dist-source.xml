@@ -41,7 +41,7 @@
         <exclude>.gitshots/**</exclude>
         <exclude>roo-repository.xml</exclude>
         <exclude>.idea/**</exclude>
-        <exclude>.travis.yml</exclude>
+        <exclude>.github/**</exclude>
       </excludes>
     </fileSet>
   </fileSets>

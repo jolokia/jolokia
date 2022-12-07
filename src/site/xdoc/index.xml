@@ -1197,15 +1197,14 @@ java -javaagent:jolokia.jar=\
         <p>
           Jolokia uses also a
           <a
-                  href="http://travis-ci.org/#!/rhuss/jolokia">Travis
+                  href="https://github.com/rhuss/jolokia/actions">GitHub workflow
           </a>
           build in addition to our own <a
                 href="http://labs.consol.de/jenkins">CI Server</a>. (Did I
           mentioned already, that we have a quite I high <a
                 href="https://sonarcloud.io/project/overview?id=org.jolokia%3Ajolokia">Sonar
         </a> score
-          ?). Travis is a quite nice supplement to Github, and brings CI
-          testing to a higher level.
+          ?).
         </p>
         <p>
           That's it for now. The next months of my open-source work
