@@ -321,8 +321,11 @@ private static final Map<String, Object> ATTRIBUTE_REPLACEMENTS =
         .invoke(objectName, "getRecordingOptions", new Object[]{newRecording},
             new String[]{"long"});
     Assert.assertTrue(recordingOptions instanceof CompositeDataSupport);
-    OpenType<?> descriptionType=((CompositeDataSupport)recordingOptions).getCompositeType().getType("destination");
-    Assert.assertEquals(descriptionType, SimpleType.STRING);
+    CompositeDataSupport recordingOptionsComposite = (CompositeDataSupport) recordingOptions;
+    if(recordingOptionsComposite.containsKey("destination")) {//The field is not present in all JVM
+      OpenType<?> descriptionType= recordingOptionsComposite.getCompositeType().getType("destination");
+      Assert.assertEquals(descriptionType, SimpleType.STRING);
+    }
   }
 
   @DataProvider
