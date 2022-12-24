@@ -23,6 +23,12 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
+    <release version="1.7.2" description="Release 1.7.2" >
+      <action dev="skarsaune" type="fix" issue="487">
+        Support calling invoke with null as arguments and signature for operations with no arguments over JMX connection.
+        Java Visual VM does this.
+      </action>
+    </release>
     <release version="1.7.1" description="Release 1.7.1" date="2021-09-19">
       <action dev="grgrzybek" type="fix" issue="477">
         Removed local system dependencies in jvm-agent's pom.xml that accidentally slipped in

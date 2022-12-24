@@ -259,13 +259,13 @@ private static final Map<String, Object> ATTRIBUTE_REPLACEMENTS =
         {
             RemoteJmxAdapter.getObjectName("java.lang:type=Threading"),
             "findDeadlockedThreads",
-            new Object[0]
+            null
         },
-        {RemoteJmxAdapter.getObjectName("java.lang:type=Memory"), "gc", new Object[0]},
+        {RemoteJmxAdapter.getObjectName("java.lang:type=Memory"), "gc", null},
         {
             RemoteJmxAdapter.getObjectName("com.sun.management:type=DiagnosticCommand"),
             "vmCommandLine",
-            new Object[0]
+            null
         },
         {
             RemoteJmxAdapter.getObjectName("com.sun.management:type=HotSpotDiagnostic"),
@@ -536,11 +536,8 @@ private static final Map<String, Object> ATTRIBUTE_REPLACEMENTS =
     try {
       for (MBeanOperationInfo operationInfo : this.adapter.getMBeanInfo(name).getOperations()) {
         if (operationInfo.getName().equals(operation)
-            && operationInfo.getSignature().length == arguments.length) {
-          String[] signature = new String[operationInfo.getSignature().length];
-          for (int i = 0; i < signature.length; i++) {
-            signature[i] = operationInfo.getSignature()[i].getType();
-          }
+            && argumentCountIsCompatible(arguments, operationInfo.getSignature().length)) {
+          String[] signature = createSignature(operationInfo);
           Assert.assertEquals(
               this.adapter.invoke(name, operation, arguments, signature),
               nativeServer.invoke(name, operation, arguments, signature));
@@ -552,6 +549,21 @@ private static final Map<String, Object> ATTRIBUTE_REPLACEMENTS =
               .getProperty("java.runtime.version") + " skipping");
     }
   }
+
+private String[] createSignature(MBeanOperationInfo operationInfo) {
+	if(operationInfo.getSignature().length == 0) {
+		return null;//simulate JVisualVM by returning null instead of an empty array
+	}
+	String[] signature = new String[operationInfo.getSignature().length];
+	  for (int i = 0; i < signature.length; i++) {
+	    signature[i] = operationInfo.getSignature()[i].getType();
+	  }
+	return signature;
+}
+
+private boolean argumentCountIsCompatible(Object[] arguments, int argumentCount) {
+	return (arguments == null && argumentCount == 0) || argumentCount == arguments.length;
+}
 
   @Test(dataProvider = "allNames")
   public void testInstances(ObjectName name) throws InstanceNotFoundException, IOException {
