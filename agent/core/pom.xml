@@ -78,7 +78,8 @@
           <systemPropertyVariables>
             <project.version>${project.version}</project.version>
           </systemPropertyVariables>
-          <parallel>false</parallel>
+          <parallel>classes</parallel>
+          <useUnlimitedThreads>true</useUnlimitedThreads>
         </configuration>
       </plugin>
     </plugins>
