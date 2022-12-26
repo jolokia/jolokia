@@ -20,7 +20,7 @@
 
   <groupId>org.jolokia</groupId>
   <artifactId>jolokia-osgi</artifactId>
-  <version>1.7.2</version>
+  <version>1.7.3-SNAPSHOT</version>
   <name>jolokia-osgi</name>
   <packaging>bundle</packaging>
   <description>osgi agent</description>
@@ -28,7 +28,7 @@
   <parent>
     <groupId>org.jolokia</groupId>
     <artifactId>jolokia-agent-parent</artifactId>
-    <version>1.7.2</version>
+    <version>1.7.3-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 

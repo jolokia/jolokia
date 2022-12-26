@@ -20,14 +20,14 @@
   <parent>
     <groupId>org.jolokia</groupId>
     <artifactId>jolokia</artifactId>
-    <version>1.7.2</version>
+    <version>1.7.3-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
     
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jolokia</groupId>
   <artifactId>jolokia-it-parent</artifactId>
-  <version>1.7.2</version>
+  <version>1.7.3-SNAPSHOT</version>
   <name>jolokia-it-parent</name>
   <description>jolokia integration tests parent pom</description>
 

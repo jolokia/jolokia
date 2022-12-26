@@ -21,7 +21,7 @@
 
   <groupId>org.jolokia</groupId>
   <artifactId>jolokia-jsr160</artifactId>
-  <version>1.7.2</version>
+  <version>1.7.3-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>jolokia-jsr160</name>
   <description>jar file containing JSR 160 based code for proxying</description>
@@ -29,7 +29,7 @@
   <parent>
     <groupId>org.jolokia</groupId>
     <artifactId>jolokia-agent-parent</artifactId>
-    <version>1.7.2</version>
+    <version>1.7.3-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
