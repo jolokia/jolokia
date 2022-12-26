@@ -23,10 +23,18 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
-    <release version="1.7.2" description="Release 1.7.2" >
+    <release version="1.7.2" description="Release 1.7.2" date="2022-12-26">
       <action dev="skarsaune" type="fix" issue="487">
-        Support calling invoke with null as arguments and signature for operations with no arguments over JMX connection.
-        Java Visual VM does this.
+        Support calling invoke with <code>null</code> as arguments and signature for operations with no arguments over JMX connection.
+      </action>
+      <action dev="apupier" type="update" issue="519">
+        Fix Sonar badges in README
+      </action>
+      <action dev="apupier" type="update" issue="522">
+        Replace Travis CI with GitHub workflow
+      </action>
+      <action dev="skarsaune" type="add" issue="480">
+        Added documentation for MBeanServerConnection
       </action>
     </release>
     <release version="1.7.1" description="Release 1.7.1" date="2021-09-19">
