@@ -19,13 +19,13 @@
   <parent>
     <artifactId>jolokia-agent-parent</artifactId>
     <groupId>org.jolokia</groupId>
-    <version>1.7.2-SNAPSHOT</version>
+    <version>1.7.2</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.jolokia</groupId>
   <artifactId>jolokia-jmx</artifactId>
-  <version>1.7.2-SNAPSHOT</version>
+  <version>1.7.2</version>
   <packaging>bundle</packaging>
   <name>jolokia-jmx</name>
 

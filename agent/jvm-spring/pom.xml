@@ -20,14 +20,14 @@
 
   <groupId>org.jolokia</groupId>
   <artifactId>jolokia-spring</artifactId>
-  <version>1.7.2-SNAPSHOT</version>
+  <version>1.7.2</version>
   <name>jolokia-spring</name>
   <description>JVM agent with Spring integration</description>
 
   <parent>
     <groupId>org.jolokia</groupId>
     <artifactId>jolokia-agent-parent</artifactId>
-    <version>1.7.2-SNAPSHOT</version>
+    <version>1.7.2</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 

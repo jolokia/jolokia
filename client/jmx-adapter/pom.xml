@@ -19,7 +19,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>jolokia-jmx-adapter</artifactId>
-    <version>1.7.2-SNAPSHOT</version>
+    <version>1.7.2</version>
     <name>jolokia-jmx-adapter</name>
     <packaging>bundle</packaging>
     <description>Adapter to allow jolokia connections to be uses MBeanServerConnection</description>
@@ -27,7 +27,7 @@
     <parent>
         <groupId>org.jolokia</groupId>
         <artifactId>jolokia-client-parent</artifactId>
-        <version>1.7.2-SNAPSHOT</version>
+        <version>1.7.2</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
