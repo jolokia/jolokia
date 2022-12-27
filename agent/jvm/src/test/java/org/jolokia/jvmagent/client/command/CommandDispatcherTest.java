@@ -73,7 +73,8 @@ public class CommandDispatcherTest {
         CommandDispatcher d = new CommandDispatcher(opts("--version"));
         assertEquals(d.dispatchCommand(null, null), 0);
         assertTrue(outStream.toString().contains(Version.getAgentVersion()));
-        assertFalse(outStream.toString().contains(Version.getProtocolVersion()));
+        // Following test doesn't work when Protocl version is part of the Jolokia version:
+        //assertFalse(outStream.toString().contains(Version.getProtocolVersion()));
     }
 
     @Test
