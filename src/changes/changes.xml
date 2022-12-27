@@ -34,7 +34,7 @@
     </release>
     <release version="1.7.2" description="Release 1.7.2" date="2022-12-26">
       <action dev="skarsaune" type="fix" issue="487">
-        Support calling invoke with <code>null</code> as arguments and signature for operations with no arguments over JMX connection.
+        Support calling invoke with null as arguments and signature for operations with no arguments over JMX connection.
       </action>
       <action dev="apupier" type="update" issue="519">
         Fix Sonar badges in README
@@ -738,7 +738,7 @@
         100% (plus 100% rules coverage, 0% duplications, 0% package
         tangle index ...). See
         http://labs.consol.de/sonar/dashboard/index/org.jolokia:jolokia
-        for more informations about Jolokia's code metrics.
+        for more information about Jolokia's code metrics.
       </action>
       <action dev="roland" type="fix" date="2011-9-14">
         Fixed problem with URL encoding for GET request with the Java
