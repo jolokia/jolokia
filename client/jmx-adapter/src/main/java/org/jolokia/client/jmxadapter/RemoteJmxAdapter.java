@@ -5,6 +5,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,6 +20,7 @@ import javax.management.InvalidAttributeValueException;
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanException;
 import javax.management.MBeanInfo;
+import javax.management.MBeanOperationInfo;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
@@ -294,7 +296,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
       throws AttributeNotFoundException, InstanceNotFoundException, IOException {
     try {
       final Object rawValue = unwrapExecute(new J4pReadRequest(name, attribute)).getValue();
-      return adaptJsonToOptimalResponseValue(name, attribute, rawValue);
+      return adaptJsonToOptimalResponseValue(name, attribute, rawValue, getAttributeTypeFromMBeanInfo(name, attribute));
     } catch (UncheckedJmxAdapterException e) {
       if (e.getCause() instanceof J4pRemoteException
           && "javax.management.AttributeNotFoundException"
@@ -310,7 +312,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
   }
 
   private Object adaptJsonToOptimalResponseValue(
-      ObjectName name, String attribute, Object rawValue)
+      ObjectName name, String attribute, Object rawValue, String typeFromMBeanInfo)
       throws IOException, InstanceNotFoundException {
     final String qualifiedName = name + "." + attribute;
 
@@ -340,7 +342,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
       return getObjectName("" + ((JSONObject) rawValue).get("objectName"));
     }
     try {
-      return ToOpenTypeConverter.returnOpenTypedValue(qualifiedName, rawValue);
+      return ToOpenTypeConverter.returnOpenTypedValue(qualifiedName, rawValue, typeFromMBeanInfo);
     } catch (OpenDataException e) {
       return rawValue;
     }
@@ -386,7 +388,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
         J4pReadResponse value = (J4pReadResponse) item;
         final String attribute = value.getRequest().getAttribute();
         result.add(new Attribute(attribute,
-            adaptJsonToOptimalResponseValue(name, attribute, value.getValue())));
+            adaptJsonToOptimalResponseValue(name, attribute, value.getValue(), getAttributeTypeFromMBeanInfo(name, attribute))));
       }
     }
     return result;
@@ -446,7 +448,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
       final J4pExecResponse response =
           unwrapExecute(
               new J4pExecRequest(name, operationName + makeSignature(signature), params));
-      return adaptJsonToOptimalResponseValue(name, operationName, response.getValue());
+      return adaptJsonToOptimalResponseValue(name, operationName, response.getValue(), getOperationTypeFromMBeanInfo(name, operationName, signature));
     } catch (UncheckedJmxAdapterException e) {
       if (e.getCause() instanceof J4pRemoteException) {
         throw new MBeanException((Exception) e.getCause());
@@ -455,6 +457,20 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
     }
   }
 
+  private String getOperationTypeFromMBeanInfo(ObjectName name, String operationName, String[] signature)
+      throws IOException, InstanceNotFoundException {
+    final MBeanInfo mBeanInfo = getMBeanInfo(name);
+    if (signature == null) {
+      signature = new String[0];
+    }
+    for (final MBeanOperationInfo operation : mBeanInfo.getOperations()) {
+      if (operationName.equals(operation.getName()) && Arrays
+          .equals(operation.getSignature(), signature)) {
+        return operation.getReturnType();
+      }
+    }
+    return null;
+  }
   private String makeSignature(String[] signature) {
     StringBuilder builder = new StringBuilder("(");
     if(signature != null) {
@@ -557,6 +573,17 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
       }
     }
     return result;
+  }
+
+  private String getAttributeTypeFromMBeanInfo(final ObjectName name, final String attributeName)
+      throws IOException, InstanceNotFoundException {
+    final MBeanInfo mBeanInfo = getMBeanInfo(name);
+    for (final MBeanAttributeInfo attribute : mBeanInfo.getAttributes()) {
+      if(attributeName.equals(attribute.getName())) {
+        return attribute.getType();
+      }
+    }
+    return null;
   }
 
   @Override

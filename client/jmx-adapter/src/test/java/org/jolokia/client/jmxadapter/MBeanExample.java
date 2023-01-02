@@ -2,6 +2,7 @@ package org.jolokia.client.jmxadapter;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public class MBeanExample implements MBeanExampleMXBean {
 
@@ -25,5 +26,15 @@ public class MBeanExample implements MBeanExampleMXBean {
     public FieldWithMoreElementsThanTheTypeImpl getField() {
         return new FieldWithMoreElementsThanTheTypeImpl("a value",
             "another value");
+    }
+
+    @Override
+    public Map<String,String> getMapAttribute() {
+        return Collections.singletonMap("foo", "bar");
+    }
+
+    @Override
+    public Map<String,String> doMapOperation() {
+        return getMapAttribute();
     }
 }
