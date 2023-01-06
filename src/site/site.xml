@@ -22,7 +22,7 @@
   <skin> 
     <groupId>org.jolokia</groupId> 
     <artifactId>jolokia-site-skin</artifactId>
-    <version>1.7.3-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
   </skin>  
   
   <bannerLeft>

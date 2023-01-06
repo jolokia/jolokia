@@ -20,7 +20,7 @@
 
   <groupId>org.jolokia</groupId>
   <artifactId>jolokia-jvm</artifactId>
-  <version>1.7.3-SNAPSHOT</version>
+  <version>2.0.0-SNAPSHOT</version>
   <name>jolokia-jvm</name>
   <packaging>jar</packaging>
   <description>JVM-agent</description>
@@ -28,7 +28,7 @@
   <parent>
     <groupId>org.jolokia</groupId>
     <artifactId>jolokia-agent-parent</artifactId>
-    <version>1.7.3-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -39,7 +39,7 @@
   <dependencies>
     <dependency>
       <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-core</artifactId>
+      <artifactId>jolokia-core-servlet4</artifactId>
       <version>${project.version}</version>
     </dependency>
 

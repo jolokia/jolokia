@@ -25,10 +25,10 @@
   <moduleSets>
     <moduleSet>
       <includes>
-        <include>org.jolokia:jolokia-war</include>
+        <include>org.jolokia:jolokia-war-servlet4</include>
       </includes>
       <binaries>
-        <outputFileNameMapping>jolokia.war</outputFileNameMapping>
+        <outputFileNameMapping>jolokia-servlet4.war</outputFileNameMapping>
         <outputDirectory>agents</outputDirectory>
         <unpack>false</unpack>
         <includeDependencies>false</includeDependencies>
@@ -37,10 +37,34 @@
     </moduleSet>
     <moduleSet>
       <includes>
-        <include>org.jolokia:jolokia-war-unsecured</include>
+        <include>org.jolokia:jolokia-war-servlet4-unsecured</include>
       </includes>
       <binaries>
-        <outputFileNameMapping>jolokia-unsecured.war</outputFileNameMapping>
+        <outputFileNameMapping>jolokia-servlet4-unsecured.war</outputFileNameMapping>
+        <outputDirectory>agents</outputDirectory>
+        <unpack>false</unpack>
+        <includeDependencies>false</includeDependencies>
+      </binaries>
+      <useAllReactorProjects>true</useAllReactorProjects>
+    </moduleSet>
+    <moduleSet>
+      <includes>
+        <include>org.jolokia:jolokia-war-jakarta</include>
+      </includes>
+      <binaries>
+        <outputFileNameMapping>jolokia-jakarta.war</outputFileNameMapping>
+        <outputDirectory>agents</outputDirectory>
+        <unpack>false</unpack>
+        <includeDependencies>false</includeDependencies>
+      </binaries>
+      <useAllReactorProjects>true</useAllReactorProjects>
+    </moduleSet>
+    <moduleSet>
+      <includes>
+        <include>org.jolokia:jolokia-war-jakarta-unsecured</include>
+      </includes>
+      <binaries>
+        <outputFileNameMapping>jolokia-jakarta-unsecured.war</outputFileNameMapping>
         <outputDirectory>agents</outputDirectory>
         <unpack>false</unpack>
         <includeDependencies>false</includeDependencies>

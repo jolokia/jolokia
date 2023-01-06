@@ -15,7 +15,8 @@ REST-stylish way.
 
 Multiple agents are provided for different environments:
 
-* **WAR Agent** for deployment as web application in a Java EE Server. 
+* **WAR Agent Servlet4** for deployment as web application in a Java EE Server. 
+* **WAR Agent Jakarta** for deployment as web application in a Jakarta EE Server. 
 * **OSGi Agent** for deployment in an [OSGi][2] container. This agent
   is packaged as a bundle and comes in two flavors (minimal,
   all-in-one).
