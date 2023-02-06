@@ -75,7 +75,7 @@
       Additionally you can configured a white list with patterns for all allowed JMX service URL in a Jolokia Request.
       This white list is a plain text file which contains <ulink
     url="https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html">Patterns</ulink> line by line. Lines starting with <literal>#</literal> are ignored.
-      This file can be configured in various ways:
+      Pattern matching is performed case insensitive. This file can be configured in various ways:
     </para>
     <itemizedlist>
       <listitem>
