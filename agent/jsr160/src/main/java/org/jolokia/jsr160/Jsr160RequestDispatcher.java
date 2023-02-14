@@ -60,6 +60,7 @@ public class Jsr160RequestDispatcher implements RequestDispatcher {
     public static final String ALLOWED_TARGETS_ENV = "JOLOKIA_JSR160_PROXY_ALLOWED_TARGETS";
 
     // White and blacklist for patterns to match the JMX Service URL against
+    // Pattern matching is done case insensitive
     private final Set<String> whiteList;
     private final Set<String> blackList;
 
@@ -195,7 +196,7 @@ public class Jsr160RequestDispatcher implements RequestDispatcher {
 
     private boolean checkPattern(Set<String> patterns, String urlS, boolean isPositive) {
         for (String pattern : patterns) {
-            if (Pattern.compile(pattern).matcher(urlS).matches()) {
+            if (Pattern.compile(pattern, Pattern.CASE_INSENSITIVE).matcher(urlS).matches()) {
                 return isPositive;
             }
         }
