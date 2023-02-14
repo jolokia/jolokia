@@ -150,6 +150,12 @@ service:jmx:rmi:///jndi/ldap:.*
           (e.g. JDK 1.5 and JBoss 5).
         </listitem>
         <listitem>
+          For MBeans that have arguments of type <literal>Map</literal> or <literal>List</literal> 
+          it is required that <literal>org.json.simple.JSONObject</literal> and <literal>org.json.simple.JSONArray</literal>
+          (contained in <literal>json-simple.jar</literal>) are available on the
+          classpath of the target JVM that receives the JSR-160 requests.
+        </listitem>
+        <listitem>
           The proxy mode can theoretically be exploited for local code execution if not secured properly.
           So its is highly recommended to not make the agent available without any authentication to any
           non trusted environment. Also the new whitelist feature prevents redirecting to arbitrary JMX Service URLs.
