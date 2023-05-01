@@ -2,16 +2,21 @@ package org.jolokia.client.jmxadapter;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @SuppressWarnings("unused")
-public interface MBeanExampleMXBean {
+public interface MBeanExampleMBean {
     void unsupportedOperation();
 
     void unexpectedFailureMethod();
 
     List<String> getEmptyList();
 
-    FieldWithMoreElementsThanTheTypeImpl getField();
+  Set<String> getSetAttribute();
+
+  Set<String> doEmptySetOperation();
+
+  FieldWithMoreElementsThanTheTypeImpl getField();
 
     Map<String,String> getMapAttribute();
 

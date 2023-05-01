@@ -1,10 +1,13 @@
 package org.jolokia.client.jmxadapter;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-public class MBeanExample implements MBeanExampleMXBean {
+public class MBeanExample implements MBeanExampleMBean {
 
     @Override
     @SuppressWarnings("unused")
@@ -22,6 +25,17 @@ public class MBeanExample implements MBeanExampleMXBean {
     public List<String> getEmptyList() {
         return Collections.emptyList();
     }
+
+    @Override
+    public Set<String> getSetAttribute() {
+        return new HashSet<String>(Arrays.asList("foo", "bar"));
+    }
+
+    @Override
+    public Set<String> doEmptySetOperation() {
+        return Collections.emptySet();
+    }
+
     @Override
     public FieldWithMoreElementsThanTheTypeImpl getField() {
         return new FieldWithMoreElementsThanTheTypeImpl("a value",

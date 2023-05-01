@@ -26,7 +26,9 @@ import java.lang.management.ThreadMXBean;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -79,7 +81,13 @@ public class ToOpenTypeConverter {
   public static Object returnOpenTypedValue(String name, Object rawValue,
       String typeFromMBeanInfo) throws OpenDataException {
     //special case, empty array with no type information, return object (empty list) itself
-    if (rawValue instanceof JSONArray && ((JSONArray) rawValue).isEmpty()) {
+    if ( "java.util.List".equals(typeFromMBeanInfo) && rawValue instanceof JSONArray) {
+      return rawValue;//JSONArray can act as a list
+    } else if ("java.util.Set".equals(typeFromMBeanInfo) && rawValue instanceof JSONArray ){
+      return new HashSet<Object>((Collection<?>)rawValue);
+    } else if( "java.util.Map".equals(typeFromMBeanInfo) && rawValue instanceof JSONObject) {
+      return rawValue;//JSONObject is a valid Map as it is
+    }else if (rawValue instanceof JSONArray && ((JSONArray) rawValue).isEmpty()) {
       final OpenType<?> type = cachedType(name);
       if (type != null) {
         return new Converters().getToOpenTypeConverter().convertToObject(type, rawValue);
@@ -87,6 +95,7 @@ public class ToOpenTypeConverter {
         return rawValue;
       }
     }
+
     final OpenType<?> type = recursivelyBuildOpenType(name, rawValue, typeFromMBeanInfo);
     if (type == null) {
       return rawValue;

@@ -281,8 +281,12 @@ private static final Map<String, Object> ATTRIBUTE_REPLACEMENTS =
             RemoteJmxAdapter.getObjectName("jolokia.test:name=MBeanExample"),
             "doMapOperation",
             null
+        },
+        {
+            RemoteJmxAdapter.getObjectName("jolokia.test:name=MBeanExample"),
+            "doEmptySetOperation",
+            null
         }
-
     };
   }
 
