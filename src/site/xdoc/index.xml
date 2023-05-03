@@ -231,6 +231,7 @@
           Also, you can now configure a whitelist with allowed patterns for the JMX service URL used as
           the target URL of the proxy.
           These patterns are supposed to be contained in a plain text file, line by line.
+          Pattern matching is performed case insensitive.
           This file then can be referenced by a system property, an env variable or directly configured in
           <code>web.xml</code>
           in the war file.
