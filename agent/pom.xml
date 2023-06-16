@@ -20,14 +20,14 @@
   <parent>
     <groupId>org.jolokia</groupId>
     <artifactId>jolokia</artifactId>
-    <version>1.7.3-SNAPSHOT</version>
+    <version>1.7.3.jakarta-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jolokia</groupId>
   <artifactId>jolokia-agent-parent</artifactId>
-  <version>1.7.3-SNAPSHOT</version>
+  <version>1.7.3.jakarta-SNAPSHOT</version>
   <name>jolokia-agent-parent</name>
   <description>jolokia agent parent pom</description>
   <url>http://www.jolokia.org/jolokia-agent-parent/</url>
@@ -36,14 +36,14 @@
 
   <modules>
     <module>core</module>
-    <module>war</module>
-    <module>war-unsecured</module>
-    <module>jsr160</module>
-    <module>osgi</module>
-    <module>osgi-bundle</module>
-    <module>jmx</module>
-    <module>jvm</module>
-    <module>jvm-spring</module>
+<!--    <module>war</module>-->
+<!--    <module>war-unsecured</module>-->
+<!--    <module>jsr160</module>-->
+<!--    <module>osgi</module>-->
+<!--    <module>osgi-bundle</module>-->
+<!--    <module>jmx</module>-->
+<!--    <module>jvm</module>-->
+<!--    <module>jvm-spring</module>-->
   </modules>
 
   <profiles>

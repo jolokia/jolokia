@@ -19,7 +19,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jolokia</groupId>
   <artifactId>jolokia</artifactId>
-  <version>1.7.3-SNAPSHOT</version>
+  <version>1.7.3.jakarta-SNAPSHOT</version>
   <name>jolokia-parent</name>
   <description>jolokia parent pom</description>
 
@@ -29,8 +29,8 @@
 
   <modules>
     <module>agent</module>
-    <module>it</module>
-    <module>client</module>
+<!--    <module>it</module>-->
+<!--    <module>client</module>-->
     <module>tools/test-util</module>
   </modules>
 
@@ -40,8 +40,8 @@
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
+          <source>1.7</source>
+          <target>1.7</target>
           <meminitial>128m</meminitial>
           <maxmem>512m</maxmem>
         </configuration>
@@ -532,9 +532,9 @@
     <dependencies>
 
       <dependency>
-        <groupId>javax.servlet</groupId>
-        <artifactId>servlet-api</artifactId>
-        <version>2.4</version>
+        <groupId>jakarta.servlet</groupId>
+        <artifactId>jakarta.servlet-api</artifactId>
+        <version>6.0.0</version>
         <scope>provided</scope>
       </dependency>
 
