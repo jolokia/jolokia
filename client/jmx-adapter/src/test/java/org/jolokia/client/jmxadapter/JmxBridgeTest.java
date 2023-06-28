@@ -276,6 +276,16 @@ private static final Map<String, Object> ATTRIBUTE_REPLACEMENTS =
             RemoteJmxAdapter.getObjectName("com.sun.management:type=HotSpotDiagnostic"),
             "setVMOption",
             new Object[]{"HeapDumpOnOutOfMemoryError", "true"}
+        },
+        {
+            RemoteJmxAdapter.getObjectName("jolokia.test:name=MBeanExample"),
+            "doMapOperation",
+            null
+        },
+        {
+            RemoteJmxAdapter.getObjectName("jolokia.test:name=MBeanExample"),
+            "doEmptySetOperation",
+            null
         }
     };
   }

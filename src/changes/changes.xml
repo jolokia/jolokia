@@ -23,6 +23,10 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
+    <release version="1.7-SNAPSHOT" description="Release 1.7.3">
+      <action dev="skarsaune" type="fix" issue="532">
+        Ensure that TabularData compatible data structures are deserialized better
+    </release>
     <release version="1.7.3-SNAPSHOT" description="Release 1.7.3-SNAPSHOT">
       <action dev="qtc-de" type="fix" issue="543">
         Improve proxy's denylist
