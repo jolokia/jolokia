@@ -45,7 +45,7 @@ public class DateExtractorTest {
         extractor = new DateExtractor();
 
         // Needed for subclassing final object
-        converter = new ObjectToJsonConverter(null, null);
+        converter = new ObjectToJsonConverter(null);
         converter.setupContext(new JsonConvertOptions.Builder().faultHandler(ValueFaultHandler.THROWING_VALUE_FAULT_HANDLER).build());
     }
 
