@@ -16,7 +16,7 @@
 
 package org.jolokia.jvmagent.security.asn1;
 
-import java.nio.charset.StandardCharsets;
+import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -43,7 +43,11 @@ public class DERUtcTime implements DERObject {
         byte[] result = new byte[15];
         result[0] = DER_UTCTIME_TAG;
         result[1] = 0xD;
-        System.arraycopy(utctime.getBytes(StandardCharsets.UTF_8), 0, result, 2, 13);
+        try {
+            System.arraycopy(utctime.getBytes("UTF-8"), 0, result, 2, 13);
+        } catch (UnsupportedEncodingException e) {
+            System.arraycopy(utctime.getBytes(), 0, result, 2, 13);
+        }
         return result;
     }
 

@@ -38,6 +38,7 @@ public class JaasAuthenticatorTest {
 
         replay(req);
 
+        // requires ~/.java.login.config file on JDK 6
         assertFalse(auth.doAuthenticate(req, info));
     }
 

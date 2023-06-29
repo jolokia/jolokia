@@ -38,13 +38,8 @@
 
     <plugins>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
-          <meminitial>128m</meminitial>
-          <maxmem>512m</maxmem>
-        </configuration>
       </plugin>
 
       <plugin>
@@ -156,6 +151,10 @@
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
           <version>3.8.1</version>
+          <configuration>
+            <meminitial>128m</meminitial>
+            <maxmem>512m</maxmem>
+          </configuration>
         </plugin>
 
         <plugin>
@@ -573,13 +572,6 @@
       </dependency>
 
       <dependency>
-        <groupId>org.easymock</groupId>
-        <artifactId>easymock</artifactId>
-        <version>4.3</version>
-        <scope>test</scope>
-      </dependency>
-
-      <dependency>
         <groupId>org.mortbay.jetty</groupId>
         <artifactId>jetty</artifactId>
         <version>6.1.26</version>
@@ -751,6 +743,73 @@
     </profile>
 
     <profile>
+      <id>java6</id>
+      <activation>
+        <jdk>1.6</jdk>
+      </activation>
+      <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <artifactId>maven-compiler-plugin</artifactId>
+              <version>3.6.2</version>
+            </plugin>
+            <plugin>
+              <artifactId>maven-war-plugin</artifactId>
+              <version>3.1.0</version>
+            </plugin>
+            <plugin>
+              <artifactId>maven-shade-plugin</artifactId>
+              <version>2.4</version>
+            </plugin>
+            <plugin>
+              <artifactId>maven-assembly-plugin</artifactId>
+              <version>3.0.0</version>
+            </plugin>
+            <plugin>
+              <artifactId>maven-surefire-plugin</artifactId>
+              <configuration>
+                <excludedGroups>java7</excludedGroups>
+              </configuration>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+      </build>
+    </profile>
+
+    <profile>
+      <id>java7</id>
+      <activation>
+        <jdk>[1.5,1.8)</jdk>
+      </activation>
+      <dependencyManagement>
+        <dependencies>
+          <dependency>
+            <groupId>org.easymock</groupId>
+            <artifactId>easymock</artifactId>
+            <version>3.4</version>
+          </dependency>
+        </dependencies>
+      </dependencyManagement>
+    </profile>
+
+    <profile>
+      <id>java8+</id>
+      <activation>
+        <jdk>[1.8,)</jdk>
+      </activation>
+      <dependencyManagement>
+        <dependencies>
+          <dependency>
+            <groupId>org.easymock</groupId>
+            <artifactId>easymock</artifactId>
+            <version>4.3</version>
+          </dependency>
+        </dependencies>
+      </dependencyManagement>
+    </profile>
+
+    <profile>
       <id>java9+</id>
       <activation>
         <jdk>[9,)</jdk>
@@ -771,6 +830,16 @@
                   --add-opens java.base/java.lang=ALL-UNNAMED
                   --add-opens java.management/javax.management.modelmbean=ALL-UNNAMED
                 </argLine>
+              </configuration>
+            </plugin>
+            <plugin>
+              <artifactId>maven-compiler-plugin</artifactId>
+              <configuration>
+                <!-- JDK 17 can't compile with source/target=1.6 anymore -->
+                <source>1.7</source>
+                <target>1.7</target>
+                <testSource>1.7</testSource>
+                <testTarget>1.7</testTarget>
               </configuration>
             </plugin>
           </plugins>

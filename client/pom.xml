@@ -21,12 +21,11 @@
     <module>java</module>
     <module>javascript</module>
     <module>jmx-adapter</module>
-    <module>kubernetes</module>
   </modules>
 
   <profiles>
     <profile>
-      <id>jdk5</id>
+      <id>java5</id>
       <activation>
         <jdk>1.5</jdk>
       </activation>
@@ -41,6 +40,15 @@
           </plugin>
         </plugins>
       </build>
+    </profile>
+    <profile>
+      <id>java7+</id>
+      <activation>
+        <jdk>[1.7,)</jdk>
+      </activation>
+      <modules>
+        <module>kubernetes</module>
+      </modules>
     </profile>
   </profiles>
 </project>

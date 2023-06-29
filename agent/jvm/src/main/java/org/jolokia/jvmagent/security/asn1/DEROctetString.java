@@ -16,7 +16,7 @@
 
 package org.jolokia.jvmagent.security.asn1;
 
-import java.nio.charset.StandardCharsets;
+import java.io.UnsupportedEncodingException;
 
 public class DEROctetString implements DERObject {
 
@@ -40,7 +40,12 @@ public class DEROctetString implements DERObject {
 
     @Override
     public byte[] getEncoded() {
-        byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
+        byte[] bytes;
+        try {
+            bytes = value.getBytes("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            bytes = value.getBytes();
+        }
         if (bytes.length < 128) {
             byte[] result = new byte[bytes.length + 2];
             result[0] = tag;

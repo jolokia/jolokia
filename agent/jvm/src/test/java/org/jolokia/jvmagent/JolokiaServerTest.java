@@ -270,7 +270,7 @@ public class JolokiaServerTest {
                        false);
     }
 
-    @Test
+    @Test(groups = "java7")
     public void sslWithSpecialHttpsSettings() throws Exception {
         JvmAgentConfig config = new JvmAgentConfig(
             prepareConfigString("host=localhost,port=" + EnvTestUtil.getFreePort() + ",protocol=https," +
