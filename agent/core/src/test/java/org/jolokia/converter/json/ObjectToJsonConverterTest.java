@@ -43,7 +43,7 @@ public class ObjectToJsonConverterTest {
 
     @BeforeMethod
     public void setup() {
-        converter = new ObjectToJsonConverter(new StringToObjectConverter(),null);
+        converter = new ObjectToJsonConverter(new StringToObjectConverter());
         converter.setupContext();
     }
 
@@ -154,9 +154,23 @@ public class ObjectToJsonConverterTest {
         bean.value = "value";
         bean.transientValue = "transient";
 
-        Map ret =  (Map)converter.convertToJson(bean, null, JsonConvertOptions.DEFAULT);
-        assertNull(ret.get("transientValue"));
-        assertEquals(ret.get("value"),"value");
+        String version = System.getProperty("java.specification.version");
+        if (version.contains(".")) {
+            version = version.substring(version.lastIndexOf('.') + 1);
+        }
+        int v = Integer.parseInt(version);
+        if (v > 6) {
+            Map ret =  (Map)converter.convertToJson(bean, null, JsonConvertOptions.DEFAULT);
+            assertNull(ret.get("transientValue"));
+            assertEquals(ret.get("value"),"value");
+        } else {
+            try {
+                converter.convertToJson(bean, null, JsonConvertOptions.DEFAULT);
+                fail("Should throw SecurityException(\"Prohibited package name: java.beans\")");
+            } catch (SecurityException e) {
+                assertEquals("Prohibited package name: java.beans", e.getMessage());
+            }
+        }
     }
 
     // ============================================================================

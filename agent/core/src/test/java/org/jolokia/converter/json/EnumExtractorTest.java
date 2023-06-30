@@ -22,7 +22,7 @@ public class EnumExtractorTest {
     @BeforeMethod
     public void setup() {
         enumExtractor = new EnumExtractor();
-        converter = new ObjectToJsonConverter(new StringToObjectConverter(), null);
+        converter = new ObjectToJsonConverter(new StringToObjectConverter());
         converter.setupContext();
     }
 

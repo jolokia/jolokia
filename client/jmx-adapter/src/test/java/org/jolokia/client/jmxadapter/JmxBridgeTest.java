@@ -224,7 +224,7 @@ private static final Map<String, Object> ATTRIBUTE_REPLACEMENTS =
    */
   @SuppressWarnings("unchecked")
   @DataProvider
-  public static Object[][] platformMBeans() {
+  public static Object[][] platformMBeans() throws MalformedObjectNameException {
     try {
       final Collection<Class<?>> list = (Collection<Class<?>>) ManagementFactory.class
           .getDeclaredMethod("getPlatformManagementInterfaces").invoke(null);
@@ -242,12 +242,12 @@ private static final Map<String, Object> ATTRIBUTE_REPLACEMENTS =
       return testData.toArray(new Object[0][0]);
     } catch (Exception ignore) {
       return new Object[][]{
-          {ManagementFactory.CLASS_LOADING_MXBEAN_NAME, ClassLoadingMXBean.class},
-          {ManagementFactory.COMPILATION_MXBEAN_NAME, CompilationMXBean.class},
-          {ManagementFactory.MEMORY_MXBEAN_NAME, MemoryMXBean.class},
-          {ManagementFactory.OPERATING_SYSTEM_MXBEAN_NAME, OperatingSystemMXBean.class},
-          {ManagementFactory.RUNTIME_MXBEAN_NAME, RuntimeMXBean.class},
-          {ManagementFactory.THREAD_MXBEAN_NAME, ThreadMXBean.class},
+          {new ObjectName(ManagementFactory.CLASS_LOADING_MXBEAN_NAME), ClassLoadingMXBean.class},
+          {new ObjectName(ManagementFactory.COMPILATION_MXBEAN_NAME), CompilationMXBean.class},
+          {new ObjectName(ManagementFactory.MEMORY_MXBEAN_NAME), MemoryMXBean.class},
+          {new ObjectName(ManagementFactory.OPERATING_SYSTEM_MXBEAN_NAME), OperatingSystemMXBean.class},
+          {new ObjectName(ManagementFactory.RUNTIME_MXBEAN_NAME), RuntimeMXBean.class},
+          {new ObjectName(ManagementFactory.THREAD_MXBEAN_NAME), ThreadMXBean.class},
       };
     }
   }
@@ -255,6 +255,31 @@ private static final Map<String, Object> ATTRIBUTE_REPLACEMENTS =
 
   @DataProvider
   public static Object[][] safeOperationsToCall() {
+    String version = System.getProperty("java.specification.version");
+    if (version.contains(".")) {
+      version = version.substring(version.lastIndexOf('.') + 1);
+    }
+    int v = Integer.parseInt(version);
+    if (v <= 6) {
+      return new Object[][]{
+          {
+              RemoteJmxAdapter.getObjectName("java.lang:type=Threading"),
+              "findDeadlockedThreads",
+              null
+          },
+          {RemoteJmxAdapter.getObjectName("java.lang:type=Memory"), "gc", null},
+          {
+              RemoteJmxAdapter.getObjectName("jolokia.test:name=MBeanExample"),
+              "doMapOperation",
+              null
+          },
+          {
+              RemoteJmxAdapter.getObjectName("jolokia.test:name=MBeanExample"),
+              "doEmptySetOperation",
+              null
+          }
+      };
+    }
     return new Object[][]{
         {
             RemoteJmxAdapter.getObjectName("java.lang:type=Threading"),

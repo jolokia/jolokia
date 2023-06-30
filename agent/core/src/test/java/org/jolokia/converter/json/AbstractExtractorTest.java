@@ -38,7 +38,7 @@ abstract public class AbstractExtractorTest {
     public void setup() {
         extractor = createExtractor();
         stringToObjectConverter = new StringToObjectConverter();
-        converter = new ObjectToJsonConverter(stringToObjectConverter,null);
+        converter = new ObjectToJsonConverter(stringToObjectConverter);
         converter.setupContext(new JsonConvertOptions.Builder().useAttributeFilter(true).build());
     }
 

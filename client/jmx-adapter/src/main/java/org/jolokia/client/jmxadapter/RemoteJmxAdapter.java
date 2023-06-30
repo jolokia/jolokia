@@ -374,7 +374,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
     for (String attribute : attributes) {
       requests.add(new J4pReadRequest(name, attribute));
     }
-    List<?> responses = Collections.emptyList();
+    List responses = Collections.emptyList();
     try {
       responses = this.connector.execute(requests, this.defaultProcessingOptions());
 

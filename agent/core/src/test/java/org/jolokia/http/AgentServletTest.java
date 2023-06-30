@@ -125,7 +125,7 @@ public class AgentServletTest {
         context = createMock(ServletContext.class);
 
         HttpTestUtil.prepareServletConfigMock(config, new String[]{ConfigKey.LOGHANDLER_CLASS.getKeyValue(), CustomLogHandler.class.getName()});
-        HttpTestUtil.prepareServletContextMock(context,null);
+        HttpTestUtil.prepareServletContextMock(context);
 
         expect(config.getServletContext()).andStubReturn(context);
         expect(config.getServletName()).andStubReturn("jolokia");
