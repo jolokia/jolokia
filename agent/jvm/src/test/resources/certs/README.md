@@ -57,16 +57,16 @@ openssl req -new -x509 -days 3650 -key key.pem -out cert.pem
 
 # Create a Server Key & signing request & sign it (with no password on the key) [ note: validity must be *shorter* than CA's ]
 cd server/
-openssl genrsa -out key.pem -aes128 2048 -days 3600
+openssl genrsa -out key.pem -aes128 2048
 openssl rsa -in key.pem -out key.pem
 openssl req -new -key key.pem -out server.csr -nodes
-openssl x509 -req  -extfile ../server.ext -days 2500 -in server.csr -CA ../ca/cert.pem -CAkey ../ca/key.pem -set_serial 01 -out cert.pem -text
+openssl x509 -req  -extfile ../server.ext -days 2500 -in server.csr -CA ../ca/cert.pem -CAkey ../ca/key.pem -set_serial 01 -out cert.pem
 
 # Create a Client Key & signing request & sign it
 cd client/<new-dir>/
 openssl genrsa -des3 -out key.pem 4096
 openssl req -new -key key.pem -out client.csr
-openssl x509 -extfile ../../client.ext -req -days 2500 -in client.csr -CA ../../ca/cert.pem -CAkey ../../ca/key.pem -set_serial 02 -out cert.pem -text
+openssl x509 -extfile ../../client.ext -req -days 2500 -in client.csr -CA ../../ca/cert.pem -CAkey ../../ca/key.pem -set_serial 02 -out cert.pem
 
 # Convert client key to PKCS
 openssl pkcs12 -export -clcerts -in cert.pem -inkey key.pem -out cert.p12
