@@ -24,8 +24,10 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.net.ssl.*;
 
 import com.sun.net.httpserver.HttpServer;
@@ -261,6 +263,12 @@ public class JolokiaServerTest {
                "caCert=" + getCertPath("ca/cert.pem");
     }
 
+    private String getFullCertSha256Setup() {
+        return "serverCert=" + getCertPath("server/cert2.pem") + "," +
+               "serverKey=" + getCertPath("server/key2.pem") + "," +
+               "caCert=" + getCertPath("ca/cert.pem");
+    }
+
 
     @Test(enabled=false)
     public void sslWithAdditionalHttpsSettings() throws Exception {
@@ -272,9 +280,17 @@ public class JolokiaServerTest {
 
     @Test(groups = "java7")
     public void sslWithSpecialHttpsSettings() throws Exception {
+        String certSetup = getFullCertSetup();
+        String disabledCertAlgorithms = Security.getProperty("jdk.certpath.disabledAlgorithms");
+        if (disabledCertAlgorithms != null) {
+            Set<String> set = new HashSet<String>(Arrays.asList(disabledCertAlgorithms.toUpperCase().split("\\s*,\\s*")));
+            if (set.contains("SHA1")) {
+                certSetup = getFullCertSha256Setup();
+            }
+        }
         JvmAgentConfig config = new JvmAgentConfig(
             prepareConfigString("host=localhost,port=" + EnvTestUtil.getFreePort() + ",protocol=https," +
-                getFullCertSetup() + ",config=" +  getResourcePath("/agent-test-specialHttpsSettings.properties")));
+                    certSetup + ",config=" +  getResourcePath("/agent-test-specialHttpsSettings.properties")));
         JolokiaServer server = new JolokiaServer(config, false);
         server.start();
 
