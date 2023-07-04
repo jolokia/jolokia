@@ -262,6 +262,31 @@
         </plugins>
       </build>
     </profile>
+    <profile>
+      <id>java9+</id>
+      <activation>
+        <jdk>[9,)</jdk>
+      </activation>
+      <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-compiler-plugin</artifactId>
+              <configuration>
+                <compilerArgs>
+                  <arg>--add-modules=jdk.attach</arg>
+                </compilerArgs>
+                <source>9</source>
+                <target>9</target>
+                <testSource>9</testSource>
+                <testTarget>9</testTarget>
+              </configuration>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+      </build>
+    </profile>
   </profiles>
 
 </project>
