@@ -1,6 +1,6 @@
 <html><head>
       <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-   <title>Chapter&nbsp;1.&nbsp;Introduction</title><link xmlns:xslthl="http://xslthl.sf.net" href="css/base.css" rel="stylesheet" type="text/css"><link xmlns:xslthl="http://xslthl.sf.net" href="css/style.css" rel="stylesheet" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.79.1"><link rel="home" href="index.html" title="Jolokia - Reference Documentation"><link rel="up" href="index.html" title="Jolokia - Reference Documentation"><link rel="prev" href="index.html" title="Jolokia - Reference Documentation"><link rel="next" href="architecture.html" title="Chapter&nbsp;2.&nbsp;Architecture"><script xmlns:xslthl="http://xslthl.sf.net" data-cfasync="false" type="text/javascript">
+   <title>Chapter&nbsp;1.&nbsp;Introduction</title><link xmlns:xslthl="http://xslthl.sf.net" href="css/base.css" rel="stylesheet" type="text/css"><link xmlns:xslthl="http://xslthl.sf.net" href="css/style.css" rel="stylesheet" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="Jolokia - Reference Documentation"><link rel="up" href="index.html" title="Jolokia - Reference Documentation"><link rel="prev" href="index.html" title="Jolokia - Reference Documentation"><link rel="next" href="architecture.html" title="Chapter&nbsp;2.&nbsp;Architecture"><script xmlns:xslthl="http://xslthl.sf.net" data-cfasync="false" type="text/javascript">
        var host = "jolokia.org";
        if ((host == window.location.host) && (window.location.protocol != "https:")) {
             window.location.protocol = "https";
@@ -16,15 +16,12 @@
     ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
     })();
-      </script></head><body><div class="chapter"><div class="titlepage"><div><div><h1 xmlns:xslthl="http://xslthl.sf.net"><a name="introduction"></a>Chapter&nbsp;1.&nbsp;Introduction</h1></div></div></div>
-  
-  <p>
+      </script></head><body><div class="navheader"><div><div class="navbar"><a xmlns:xslthl="http://xslthl.sf.net" href="index.html" title="Jolokia - Reference Documentation">Previous</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="index.html" title="Jolokia - Reference Documentation">Contents</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="architecture.html" title="Chapter&nbsp;2.&nbsp;Architecture">Next</a></div></div></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h1 xmlns:xslthl="http://xslthl.sf.net"><a name="introduction"></a>Chapter&nbsp;1.&nbsp;Introduction</h1></div></div></div><p>
     JMX (Java Management Extensions) is <span class="emphasis"><em>the</em></span>
     standard management solution in the Java world. Since JDK 1.5 it
     is available in every Java Virtual Machine and especially Java EE
     application servers use JMX for their management business.
-  </p>
-  <p>
+  </p><p>
     I love JMX. It is a well crafted specification, created in times
     where other concepts like EJBs failed spectacularly. Even more
     than ten years after its incubation it is still the one-and-only
@@ -32,12 +29,11 @@
     various levels of sophistications for implementing MBeans,
     starting with dead simple <span class="emphasis"><em>Standard MBeans</em></span> and
     ending in very flexible Open MBeans and MXBeans, are impressive.
-  </p>
-  <p>
+  </p><p>
     However, some of the advanced JMX concepts didn't really appeal to the
-    public and are now effectively obsolete. Add-on standards like <a class="ulink" href="http://jcp.org/en/jsr/detail?id=77" target="_top">JSR-77</a> didn't
+    public and are now effectively obsolete. Add-on standards like <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://jcp.org/en/jsr/detail?id=77" target="_top">JSR-77</a> didn't
     received the adoption level they deserved. And then there is
-    <a class="ulink" href="http://jcp.org/en/jsr/detail?id=160" target="_top">JSR-160</a>,
+    <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://jcp.org/en/jsr/detail?id=160" target="_top">JSR-160</a>,
     JMX remoting. This specificatiion is designed for ease of usage
     and has the ambition to transparently hide the technical details
     behind the remote communication so that is makes (nearly) no
@@ -45,8 +41,7 @@
     remotely. Unfortunately, the underlying transport protocol (RMI)
     and programing model is very Java centric and is not usable
     outside the Java world.
-  </p>
-  <p>
+  </p><p>
     This is where Jolokia steps in. It is an agent based approach,
     living side by side with JSR-160, but uses the much more open HTTP
     for its transport business where the data payload is serialized in
@@ -58,15 +53,13 @@
     can restrict the JMX access on specific JMX operations. Other
     features like the JSR-160 proxy mode or history tracking are
     specific to Jolokia, too.
-  </p>
-  <p>
+  </p><p>
     This reference manual explains the details of Jolokia. After an
-    overview of Jolokia's architecture in <a class="xref" href="architecture.html" title="Chapter&nbsp;2.&nbsp;Architecture">Chapter&nbsp;2, <i>Architecture</i></a>, installation and configuration of the
-    various Jolokia agents are described in <a class="xref" href="agents.html" title="Chapter&nbsp;3.&nbsp;Agents">Chapter&nbsp;3, <i>Agents</i></a>. Jolokia's security policy mechanism (<a class="xref" href="security.html" title="Chapter&nbsp;4.&nbsp;Security">Chapter&nbsp;4, <i>Security</i></a>) and proxy mode (<a class="xref" href="proxy.html" title="Chapter&nbsp;5.&nbsp;Proxy Mode">Chapter&nbsp;5, <i>Proxy Mode </i></a>) are
+    overview of Jolokia's architecture in <a href="architecture.html">Chapter&nbsp;2, <i xmlns:xlink="http://www.w3.org/1999/xlink">Architecture</i></a>, installation and configuration of the
+    various Jolokia agents are described in <a href="agents.html">Chapter&nbsp;3, <i xmlns:xlink="http://www.w3.org/1999/xlink">Agents</i></a>. Jolokia's security policy mechanism (<a href="security.html">Chapter&nbsp;4, <i xmlns:xlink="http://www.w3.org/1999/xlink">Security</i></a>) and proxy mode (<a href="proxy.html">Chapter&nbsp;5, <i xmlns:xlink="http://www.w3.org/1999/xlink">Proxy Mode </i></a>) are
     covered in the following chapters. For implementors of Jolokia
     client bindings the protocol definition is probably the most
-    interesting part (<a class="xref" href="protocol.html" title="Chapter&nbsp;6.&nbsp;Jolokia Protocol">Chapter&nbsp;6, <i>Jolokia Protocol</i></a>). Jolokia itself
-    comes with the preregistered MBeans listed in <a class="xref" href="mbeans.html" title="Chapter&nbsp;7.&nbsp;Jolokia MBeans">Chapter&nbsp;7, <i>Jolokia MBeans</i></a>. The available client bindings are described
-    in <a class="xref" href="clients.html" title="Chapter&nbsp;8.&nbsp;Clients">Chapter&nbsp;8, <i>Clients</i></a>.
-  </p>
-</div><div class="navfooter"><div><div class="navbar"><a xmlns:xslthl="http://xslthl.sf.net" href="index.html" title="Jolokia - Reference Documentation">Previous</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="" title="">Contents</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="architecture.html" title="Chapter&nbsp;2.&nbsp;Architecture">Next</a></div></div></div></body></html>
+    interesting part (<a href="protocol.html">Chapter&nbsp;6, <i xmlns:xlink="http://www.w3.org/1999/xlink">Jolokia Protocol</i></a>). Jolokia itself
+    comes with the preregistered MBeans listed in <a href="mbeans.html">Chapter&nbsp;7, <i xmlns:xlink="http://www.w3.org/1999/xlink">Jolokia MBeans</i></a>. The available client bindings are described
+    in <a href="clients.html">Chapter&nbsp;8, <i xmlns:xlink="http://www.w3.org/1999/xlink">Clients</i></a>.
+  </p></div><div class="navfooter"><div><div class="navbar"><a xmlns:xslthl="http://xslthl.sf.net" href="index.html" title="Jolokia - Reference Documentation">Previous</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="index.html" title="Jolokia - Reference Documentation">Contents</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="architecture.html" title="Chapter&nbsp;2.&nbsp;Architecture">Next</a></div></div></div></body></html>

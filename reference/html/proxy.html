@@ -1,6 +1,6 @@
 <html><head>
       <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-   <title>Chapter&nbsp;5.&nbsp;Proxy Mode</title><link xmlns:xslthl="http://xslthl.sf.net" href="css/base.css" rel="stylesheet" type="text/css"><link xmlns:xslthl="http://xslthl.sf.net" href="css/style.css" rel="stylesheet" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.79.1"><link rel="home" href="index.html" title="Jolokia - Reference Documentation"><link rel="up" href="index.html" title="Jolokia - Reference Documentation"><link rel="prev" href="security.html" title="Chapter&nbsp;4.&nbsp;Security"><link rel="next" href="protocol.html" title="Chapter&nbsp;6.&nbsp;Jolokia Protocol"><script xmlns:xslthl="http://xslthl.sf.net" data-cfasync="false" type="text/javascript">
+   <title>Chapter&nbsp;5.&nbsp;Proxy Mode</title><link xmlns:xslthl="http://xslthl.sf.net" href="css/base.css" rel="stylesheet" type="text/css"><link xmlns:xslthl="http://xslthl.sf.net" href="css/style.css" rel="stylesheet" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="Jolokia - Reference Documentation"><link rel="up" href="index.html" title="Jolokia - Reference Documentation"><link rel="prev" href="security.html" title="Chapter&nbsp;4.&nbsp;Security"><link rel="next" href="protocol.html" title="Chapter&nbsp;6.&nbsp;Jolokia Protocol"><script xmlns:xslthl="http://xslthl.sf.net" data-cfasync="false" type="text/javascript">
        var host = "jolokia.org";
        if ((host == window.location.host) && (window.location.protocol != "https:")) {
             window.location.protocol = "https";
@@ -16,18 +16,14 @@
     ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
     })();
-      </script></head><body><div class="chapter"><div class="titlepage"><div><div><h1 xmlns:xslthl="http://xslthl.sf.net"><a name="proxy"></a>Chapter&nbsp;5.&nbsp;Proxy Mode </h1></div></div></div>
-    
-
-    <p>
+      </script></head><body><div class="navheader"><div><div class="navbar"><a xmlns:xslthl="http://xslthl.sf.net" href="security.html" title="Chapter&nbsp;4.&nbsp;Security">Previous</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="index.html" title="Jolokia - Reference Documentation">Contents</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="protocol.html" title="Chapter&nbsp;6.&nbsp;Jolokia Protocol">Next</a></div></div></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h1 xmlns:xslthl="http://xslthl.sf.net"><a name="proxy"></a>Chapter&nbsp;5.&nbsp;Proxy Mode </h1></div></div></div><p>
       Using Jolokia in proxy mode enables for agentless operation
       on the target server. A dedicated agent deployment proxies by
       accepting Jolokia requests as input, translating them to JSR-160
-      requests for the target. This setup is described in <a class="xref" href="architecture.html" title="Chapter&nbsp;2.&nbsp;Architecture">Chapter&nbsp;2, <i>Architecture</i></a>. As noted there, the real target is
+      requests for the target. This setup is described in <a href="architecture.html">Chapter&nbsp;2, <i xmlns:xlink="http://www.w3.org/1999/xlink">Architecture</i></a>. As noted there, the real target is
       given within the original request, which must be sent as a POST
       request.
-    </p>
-    <p>
+    </p><p>
       Agents of all types support the proxy mode. However, since one
       has usually the free choice of platform for a dedicated Jolokia
       proxy, an environment optimized for HTTP communication should be
@@ -36,24 +32,18 @@
       in turn is typically based on an embedded servlet container like
       Tomcat or Jetty). The two other agents, the Mule and JVM agents
       are not that well suited for this job and do not contain the proxy.
-    </p>
-    <p>
+    </p><p>
       Please note that the proxy mode is <span class="emphasis"><em>not</em></span> switched on by default
       since version 1.5.0. You have to explicitly switch it on for the WAR or OSGI agent:
-    </p>
-    <div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+    </p><div class="itemizedlist"><ul><li>
         Repackaging the <code class="literal">jolokia.war</code> and adapt <code class="literal">web.xml</code> to
         include the init option <code class="literal">dispatcherClasses</code> with a value <code class="literal">org.jolokia.jsr160.Jsr160RequestDispatcher</code>.
-      </li><li class="listitem">
-        Set the system property <code class="literal">org.jolokia.jsr160ProxyEnabled</code> to <code class="literal">true</code>
-      </li><li class="listitem">
-        Set the environment variable <code class="literal">JOLOKIA_JSR160_PROXY_ENABLED</code> to <code class="literal">true</code>
-      </li></ul></div>
-    <p>
+      </li><li>
+        Set the system property <code class="literal">org.jolokia.jsr160ProxyEnabled</code> to <code class="literal">true</code></li><li>
+        Set the environment variable <code class="literal">JOLOKIA_JSR160_PROXY_ENABLED</code> to <code class="literal">true</code></li></ul></div><p>
       The first option requires you to repackage the <code class="literal">jolokia.war</code> and add the following section to
       the <code class="literal">web.xml</code> descriptor:
-    </p>
-    <pre class="programlisting">
+    </p><pre class="programlisting">
 &lt;init-param&gt;
   &lt;description&gt;
     Classnames (comma separated) of RequestDispatcher used in addition
@@ -62,52 +52,40 @@
   &lt;param-name&gt;dispatcherClasses&lt;/param-name&gt;
   &lt;param-value&gt;org.jolokia.jsr160.Jsr160RequestDispatcher&lt;/param-value&gt;
 &lt;/init-param&gt;
-</pre>
-    <p>
+</pre><p>
       The two other options by using a Java system property or an environment variable do not require a repackaging, so
       these are the recommended way.
-    </p>
-    <p>
+    </p><p>
       Additionally you can configured a white list with patterns for all allowed JMX service URL in a Jolokia Request.
-      This white list is a plain text file which contains <a class="ulink" href="https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html" target="_top">Patterns</a> line by line. Lines starting with <code class="literal">#</code> are ignored.
+      This white list is a plain text file which contains <a xmlns:xlink="http://www.w3.org/1999/xlink" href="https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html" target="_top">Patterns</a> line by line. Lines starting with <code class="literal">#</code> are ignored.
       This file can be configured in various ways:
-    </p>
-    <div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+    </p><div class="itemizedlist"><ul><li>
         Repackaging the <code class="literal">jolokia.war</code> and adapt <code class="literal">web.xml</code> to
         include the init option <code class="literal">jsr160ProxyAllowedTargets</code> with a file path to the white list. This should
         be an absolute path or a relative path if you know where your Java EE server sets the current directory.
-      </li><li class="listitem">
+      </li><li>
         Set the system property <code class="literal">org.jolokia.jsr160ProxyAllowedTargets</code> to the path of the whitelist
-      </li><li class="listitem">
+      </li><li>
         Set the environment variable <code class="literal">JOLOKIA_JSR160_PROXY_ALLOWED_TARGETS</code> to the path of the
         whitelist.
-      </li></ul></div>
-    <p>
+      </li></ul></div><p>
       By default the following patterns are disallowed, but you can re-enable them when providing them in the whitelist:
-    </p>
-    <pre class="programlisting">
+    </p><pre class="programlisting">
 # Disallow all JNDI lookups via LDAP
 service:jmx:rmi:///jndi/ldap:.*
-</pre>
-    <p>
+</pre><p>
       In any case it is highly recommended to use a dedicated Java EE servlet server for the JSR-160 proxy which
       is secured by configuring the server authentication properly for this servlet. An unprotected Jolokia proxy can be
       tricked to execute local code by a malicious attacker. As said previously, the Jolokia proxy should be avoided if
       possible in favor of direct access over the Jolokia protocol.
-    </p>
-    <p>
+    </p><p>
       All client libraries (jmx4perl, Java and Javascript) support the
       usage of proxy mode in its API.
-    </p>
-
-    <div class="section"><div class="titlepage"><div><div><h2 class="title"><a name="d5e1460"></a>5.1.&nbsp;Limitations of proxy mode</h2></div></div></div>
-      
-      <p>
+    </p><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="d0e3505"></a>5.1.&nbsp;Limitations of proxy mode</h2></div></div></div><p>
         The proxy mode has some limitations compared to the direct
         agent mode, so it is recommended to use a
         direct agent deployment if possible. The limitations are:
-      </p>
-      <div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+      </p><div class="itemizedlist"><ul><li>
           There is no automatic merging of JMX MBeanServers as in the case
           of the direct mode. Most application servers uses their own
           MBeanServer in addition to the
@@ -117,7 +95,7 @@ service:jmx:rmi:///jndi/ldap:.*
           given up front, usually as a part of the JMX Service URL. But even
           then (as it is the case for JBoss 5.1) you might run into problems
           when selecting the proper MBeanServer.
-        </li><li class="listitem">
+        </li><li>
           Proxying adds an additional remote layer which causes
           additional problems. I.e. the complex operations like
           <code class="constant">list</code> might fail in the proxy mode
@@ -126,19 +104,17 @@ service:jmx:rmi:///jndi/ldap:.*
           operation are not serializable. This is a bug of JBoss, but
           I expect similar limitations for other application servers
           as well.
-        </li><li class="listitem">
+        </li><li>
           Certain workarounds (like the JBoss "<span class="emphasis"><em>can not find
           MXBeans before MBeanInfo has been fetched</em></span>" bug)
           works only in agent mode.
-        </li><li class="listitem">
+        </li><li>
           It is astonishingly hard to set up an application server for
           JSR-160 export. And there are even cases (combinations of
           JDK and AppServer Version) which don't work at all properly
           (e.g. JDK 1.5 and JBoss 5).
-        </li><li class="listitem">
+        </li><li>
           The proxy mode can theoretically be exploited for local code execution if not secured properly.
           So its is highly recommended to not make the agent available without any authentication to any
           non trusted environment. Also the new whitelist feature prevents redirecting to arbitrary JMX Service URLs.
-        </li></ul></div>
-    </div>
-</div><div class="navfooter"><div><div class="navbar"><a xmlns:xslthl="http://xslthl.sf.net" href="security.html" title="Chapter&nbsp;4.&nbsp;Security">Previous</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="" title="">Contents</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="protocol.html" title="Chapter&nbsp;6.&nbsp;Jolokia Protocol">Next</a></div></div></div></body></html>
+        </li></ul></div></div></div><div class="navfooter"><div><div class="navbar"><a xmlns:xslthl="http://xslthl.sf.net" href="security.html" title="Chapter&nbsp;4.&nbsp;Security">Previous</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="index.html" title="Jolokia - Reference Documentation">Contents</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="protocol.html" title="Chapter&nbsp;6.&nbsp;Jolokia Protocol">Next</a></div></div></div></body></html>

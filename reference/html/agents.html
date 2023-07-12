@@ -1,6 +1,6 @@
 <html><head>
       <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-   <title>Chapter&nbsp;3.&nbsp;Agents</title><link xmlns:xslthl="http://xslthl.sf.net" href="css/base.css" rel="stylesheet" type="text/css"><link xmlns:xslthl="http://xslthl.sf.net" href="css/style.css" rel="stylesheet" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.79.1"><link rel="home" href="index.html" title="Jolokia - Reference Documentation"><link rel="up" href="index.html" title="Jolokia - Reference Documentation"><link rel="prev" href="architecture.html" title="Chapter&nbsp;2.&nbsp;Architecture"><link rel="next" href="security.html" title="Chapter&nbsp;4.&nbsp;Security"><script xmlns:xslthl="http://xslthl.sf.net" data-cfasync="false" type="text/javascript">
+   <title>Chapter&nbsp;3.&nbsp;Agents</title><link xmlns:xslthl="http://xslthl.sf.net" href="css/base.css" rel="stylesheet" type="text/css"><link xmlns:xslthl="http://xslthl.sf.net" href="css/style.css" rel="stylesheet" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="Jolokia - Reference Documentation"><link rel="up" href="index.html" title="Jolokia - Reference Documentation"><link rel="prev" href="architecture.html" title="Chapter&nbsp;2.&nbsp;Architecture"><link rel="next" href="security.html" title="Chapter&nbsp;4.&nbsp;Security"><script xmlns:xslthl="http://xslthl.sf.net" data-cfasync="false" type="text/javascript">
        var host = "jolokia.org";
        if ((host == window.location.host) && (window.location.protocol != "https:")) {
             window.location.protocol = "https";
@@ -16,41 +16,35 @@
     ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
     })();
-      </script></head><body><div class="chapter"><div class="titlepage"><div><div><h1 xmlns:xslthl="http://xslthl.sf.net"><a name="agents"></a>Chapter&nbsp;3.&nbsp;Agents</h1></div></div></div>
-  
-
-  <p>
+      </script></head><body><div class="navheader"><div><div class="navbar"><a xmlns:xslthl="http://xslthl.sf.net" href="architecture.html" title="Chapter&nbsp;2.&nbsp;Architecture">Previous</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="index.html" title="Jolokia - Reference Documentation">Contents</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="security.html" title="Chapter&nbsp;4.&nbsp;Security">Next</a></div></div></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h1 xmlns:xslthl="http://xslthl.sf.net"><a name="agents"></a>Chapter&nbsp;3.&nbsp;Agents</h1></div></div></div><p>
     Jolokia is an agent based approach to JMX, which requires that clients
     install an extra piece of software, the so-called
     <span class="emphasis"><em>agent</em></span>. This software either needs to be
     deployed on the target server which should be accessed via remote
-    JMX (<a class="xref" href="architecture.html#agent-mode" title="2.1.&nbsp;Agent mode">Section&nbsp;2.1, &#8220;Agent mode&#8221;</a>), or it can be installed on a
-    dedicated proxy server (<a class="xref" href="architecture.html#proxy-mode" title="2.2.&nbsp;Proxy Mode">Section&nbsp;2.2, &#8220;Proxy Mode&#8221;</a>). For both
+    JMX (<a href="architecture.html#agent-mode">Section&nbsp;2.1, &#8220;Agent mode&#8221;</a>), or it can be installed on a
+    dedicated proxy server (<a href="architecture.html#proxy-mode">Section&nbsp;2.2, &#8220;Proxy Mode&#8221;</a>). For both
     operational modes, there are four different kind of
-    agents<a href="#ftn.d5e78" class="footnote" name="d5e78"><sup class="footnote">[1]</sup></a>.
-  </p>
-  <div class="variablelist"><dl class="variablelist"><dt><span class="term"><span class="bold"><strong>Webarchive (War) agent</strong></span></span></dt><dd>
+    agents<sup>[<a name="d0e153" href="#ftn.d0e153">1</a>]</sup>.
+  </p><div class="variablelist"><dl><dt><span class="term"><span class="bold"><strong>Webarchive (War) agent</strong></span></span></dt><dd>
         This agent is packaged as a Java EE Webarchive (War). It is the
         standard installation artifact for Java webapplications and
         probably one of the best known deployment formats. Jolokia ships
         with a war-agent which can be deployed like any other web
         application. This agent has been tested on many Java EE
         servers, from well-known market leaders to rarer species.
-      </dd><dt><span class="term"><span class="bold"><strong>OSGi agent</strong></span></span></dt><dd>
-        <a class="ulink" href="http://www.osgi.org" target="_top">OSGi</a> is a middleware specification
+      </dd><dt><span class="term"><span class="bold"><strong>OSGi agent</strong></span></span></dt><dd><a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://www.osgi.org" target="_top">OSGi</a> is a middleware specification
         focusing on modularity and a well defined dynamic lifecycle
-        <a href="#ftn.d5e90" class="footnote" name="d5e90"><sup class="footnote">[2]</sup></a>.  The Jolokia OSGi agent bundles comes in two
+        <sup>[<a name="d0e172" href="#ftn.d0e172">2</a>]</sup>.  The Jolokia OSGi agent bundles comes in two
         flavors: a minimal one with a dependency on a running
-        <a class="ulink" href="http://www.osgi.org/javadoc/r4v42/org/osgi/service/http/HttpService.html" target="_top">OSGi
+        <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://www.osgi.org/javadoc/r4v42/org/osgi/service/http/HttpService.html" target="_top">OSGi
         HttpService</a>, and a all-in-one bundle including an
         embedded <span class="emphasis"><em>HttpService</em></span> implementation
         (which is exported, too). The former is the recommended,
         puristic solution, the later is provided for a quick startup
         for initial testing the OSGi agent (but should be replaced
         with the minimal bundle for production setups).
-      </dd><dt><span class="term"><span class="bold"><strong>Mule agent</strong></span></span></dt><dd>
-        <a class="ulink" href="http://www.mulesoft.org/" target="_top">Mule</a> is one of the leading Open Source
-        Enterprise Service Busses<a href="#ftn.d5e100" class="footnote" name="d5e100"><sup class="footnote">[3]</sup></a> (ESB). It provides a management API
+      </dd><dt><span class="term"><span class="bold"><strong>Mule agent</strong></span></span></dt><dd><a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://www.mulesoft.org/" target="_top">Mule</a> is one of the leading Open Source
+        Enterprise Service Busses<sup>[<a name="d0e193" href="#ftn.d0e193">3</a>]</sup> (ESB). It provides a management API
         into which a dedicated Jolokia agent plugs in nicely. This
         agent includes an embedded Jetty for providing JMX HTTP
         access.
@@ -62,42 +56,31 @@
         development tools requiring the instrumentation during the
         class loading phase), the JVM 6 Jolokia agent is the most
         generic one. It is able to instrument <span class="emphasis"><em>any</em></span>
-        Java application running on a Oracle JDK 6<a href="#ftn.d5e108" class="footnote" name="d5e108"><sup class="footnote">[4]</sup></a>.
+        Java application running on a Oracle JDK 6<sup>[<a name="d0e209" href="#ftn.d0e209">4</a>]</sup>.
         This Jolokia agent variant is fully featured, however tends to
         be a bit slow since the
         provided HTTP-Server is not optimized for performance. However
         it is useful for servers like Hadoop or Teracotta, which do
         not provide convenient hooks for an HTTP-exporting agent on
         their own.
-      </dd></dl></div>
-
-
-  <div class="section"><div class="titlepage"><div><div><h2 class="title"><a name="agents-war"></a>3.1.&nbsp;Java EE Agent (WAR)</h2></div></div></div>
-  
-
-  <div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="war-agent-installation"></a>3.1.1.&nbsp;Installation and Configuration</h3></div></div></div>
-    
-    <p>
+      </dd></dl></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="agents-war"></a>3.1.&nbsp;Java EE Agent (WAR)</h2></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="war-agent-installation"></a>3.1.1.&nbsp;Installation and Configuration</h3></div></div></div><p>
       The WAR agent is the most popular variant, and can be deployed
-      in a servlet container just like any other Java EE web application.</p><div class="sidebar"><div class="titlepage"><div><div><p class="title"><b>Tomcat example</b></p></div></div></div>
-      
+      in a servlet container just like any other Java EE web application.</p><div xmlns:xslthl="http://xslthl.sf.net" class="sidebar-border"><div class="sidebar"><p class="title"><b>Tomcat example</b></p>
       A simple example for deploying the agent on Tomcat can be found
-      in the Jolokia <a class="ulink" href="http://www.jolokia.org/tutorial.html" target="_top">quickstart</a>.
-    </div><p>
+      in the Jolokia <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://www.jolokia.org/tutorial.html" target="_top">quickstart</a>.
+    </div></div><p>
     Often, installation is simply a matter of copying the agent WAR to
     a deployment directory. On other platforms an administrative Web
     GUI or a command line tool need to be used for
     deployment. Providing detailed installation instructions for every servlet
     container is out of scope for this document.
-    </p>
-    <p>
+    </p><p>
       The servlet itself can be configured in two ways:
-    </p>
-  <div class="variablelist"><dl class="variablelist"><dt><span class="term"><span class="bold"><strong>Servlet Init Parameters</strong></span></span></dt><dd>
+    </p><div class="variablelist"><dl><dt><span class="term"><span class="bold"><strong>Servlet Init Parameters</strong></span></span></dt><dd>
         Jolokia can be configured with <code class="literal">init-param</code>
         declarations within the servlet definition in
         <code class="filename">WEB-INF/web.xml</code>. The known parameters are
-        described in <a class="xref" href="agents.html#agent-war-init-params" title="Table&nbsp;3.1.&nbsp;Servlet init parameters">Table&nbsp;3.1, &#8220;Servlet init parameters&#8221;</a>. The
+        described in <a href="agents.html#agent-war-init-params" title="Table&nbsp;3.1.&nbsp;Servlet init parameters">Table&nbsp;3.1, &#8220;Servlet init parameters&#8221;</a>. The
         stock agent needs to be repackaged, though, in order to modify
         the internal <code class="filename">web.xml</code>.
       </dd><dt><span class="term"><span class="bold"><strong>Servlet Context Parameters</strong></span></span></dt><dd>
@@ -105,30 +88,22 @@
         parameters, which can be configured outside the WAR
         archive. This is done differently for each servlet container
         but involves typically the editing of a configuration
-        file. E.g. for <a class="ulink" href="http://tomcat.apache.org/tomcat-7.0-doc/config/context.html" target="_top">Tomcat</a>,
+        file. E.g. for <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://tomcat.apache.org/tomcat-7.0-doc/config/context.html" target="_top">Tomcat</a>,
         the context for
         the Jolokia agent can be adapted by putting a file
         <code class="filename">jolokia.xml</code> below
         <code class="filename">$TC/conf/Catalina/localhost/</code> with a
         content like: <pre class="programlisting">&lt;Context&gt;
    &lt;Parameter name="maxDepth" value="1"/&gt;
-&lt;/Context&gt;</pre>
-      </dd></dl></div>
-  <p>
+&lt;/Context&gt;</pre></dd></dl></div><p>
     The configuration options <code class="literal">discoveryEnabled</code> and
     <code class="literal">discoveryAgentUrl</code> can be provided via environment
     variables or system properties, too. See the below for details.
-  </p>
-  <div class="table"><a name="agent-war-init-params"></a><table id="agent-war-init-params">
-    Servlet init parameters
-    <thead>
-        <tr>
+  </p><div xmlns:xslthl="http://xslthl.sf.net" class="table"><p class="title"><b>Table&nbsp;3.1.&nbsp;Servlet init parameters</b></p><div class="table-contents"><table id="agent-war-init-params"><thead xmlns:xi="http://www.w3.org/2001/XInclude"><tr>
           <td>Parameter</td>
           <td>Description</td>
           <td>Example</td>
-        </tr>
-      </thead>
-      <tr>
+        </tr></thead><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td><code class="constant">dispatcherClasses</code></td>
         <td>
           Classnames (comma separated) of <code class="constant">RequestDispatcher</code> used in addition
@@ -145,8 +120,7 @@
           <code class="literal">org.jolokia.jsr160.Jsr160RequestDispatcher</code>
           (this is the dispatcher for the JSR-160 proxy)
         </td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td><code class="constant">jsr160ProxyAllowedTargets</code></td>
         <td>
           Path to a white list of patterns which are matched against possible
@@ -155,8 +129,7 @@
         <td>
           <code class="literal">/opt/jolokia/jsr160-proxy-allowed-patterns.txt</code>
         </td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td><code class="constant">policyLocation</code></td>
         <td>
           Location of the policy file to use. This is either a URL
@@ -164,7 +137,7 @@
           <code class="literal">http:</code> URL) or with the special protocol
           <code class="literal">classpath:</code> which is used for looking up
           the policy file in the web application's classpath. See
-          <a class="xref" href="security.html#security-policy-location" title="4.1.7.&nbsp;Policy Location">Section&nbsp;4.1.7, &#8220;Policy Location&#8221;</a> for details about this
+          <a href="security.html#security-policy-location">Section&nbsp;4.1.7, &#8220;Policy Location&#8221;</a> for details about this
           parameter.
         </td>
         <td>
@@ -172,8 +145,7 @@
           for a file based access to the policy file. Default is
           <code class="filename">classpath:/jolokia-access.xml</code>
         </td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td><code class="constant">restrictorClass</code></td>
         <td>
           Full classname of an implementation of <code class="literal">org.jolokia.restrictor.Restrictor</code>
@@ -183,8 +155,7 @@
           <code class="literal">com.mycompany.jolokia.CustomRestrictor</code> (which must be included in the
           war file and must implement <code class="literal">org.jolokia.restrictor.Restrictor</code>)
         </td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td><code class="constant">allowDnsReverseLookup</code></td>
         <td>
           Access can be restricted based on the remote host accessing Jolokia. This host can be
@@ -195,8 +166,7 @@
         <td>
           Default: <code class="constant">true</code>
         </td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td><code class="constant">debug</code></td>
         <td>
           Debugging state after startup. Can be changed via
@@ -205,8 +175,7 @@
         <td>
           Default: <code class="constant">false</code>
         </td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td><code class="constant">logHandlerClass</code></td>
         <td>
           Loghandler to use for providing logging output. By default
@@ -214,22 +183,17 @@
           here a Java class implementing <code class="literal">org.jolokia.util.LogHandler</code>
           for an alternative log output. Two alternative implementations are included in
           this agent:
-          <div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
-              <p>
+          <div class="itemizedlist"><ul><li><p>
                 <code class="classname">org.jolokia.util.QuietLogHandler</code> which switches off
                 logging completely.
-              </p>
-            </li><li class="listitem">
-              <p>
+              </p></li><li><p>
                 <code class="classname">org.jolokia.util.JulLogHandler</code> which uses a <code class="literal">java.util.logging</code> Logger with name <code class="literal">org.jolokia</code>
-              </p>
-            </li></ul></div>
+              </p></li></ul></div>
         </td>
         <td>
           Example: <code class="constant">org.jolokia.util.LogHandler.Quiet</code>
         </td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td><code class="constant">historyMaxEntries</code></td>
         <td>
           Entries to keep in the history. Can be changed at
@@ -238,8 +202,7 @@
         <td>
           Default: <code class="constant">10</code>
         </td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td><code class="constant">debugMaxEntries</code></td>
         <td>
           Maximum number of entries to keep in the local
@@ -249,8 +212,7 @@
         <td>
           Default: <code class="constant">100</code>
         </td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td><code class="constant">maxDepth</code></td>
         <td>
           Maximum depth when traversing bean properties.
@@ -259,8 +221,7 @@
         <td>
           Default: <code class="constant">15</code>
         </td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td><code class="constant">maxCollectionSize</code></td>
         <td>
           Maximum size of collections returned when
@@ -270,8 +231,7 @@
         <td>
           Default: <code class="constant">1000</code>
         </td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td><code class="constant">maxObjects</code></td>
         <td>
           Maximum number of objects which are traversed
@@ -283,8 +243,7 @@
         <td>
           Default: <code class="constant">0</code>
         </td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td><code class="constant">mbeanQualifier</code></td>
         <td>
           Qualifier to add to the ObjectName of Jolokia's own
@@ -297,8 +256,7 @@
           <code class="constant">jolokia:type=ServerHandler,qualifier=own</code>
         </td>
         <td></td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td><code class="constant">mimeType</code></td>
         <td>
           MIME to use for the JSON responses. Only <code class="constant">application/json</code> and
@@ -308,8 +266,7 @@
         <td>
           Default: <code class="constant">text/plain</code>
         </td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td><code class="constant">canonicalNaming</code></td>
         <td>
           This option specifies in which order the key-value
@@ -325,8 +282,7 @@
         <td>
           Default: <code class="constant">true</code>
         </td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td><code class="constant">includeStackTrace</code></td>
         <td>
           Whether to include a stacktrace of an exception in case of
@@ -340,8 +296,7 @@
         <td>
           Default: <code class="constant">true</code>
         </td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td><code class="constant">serializeException</code></td>
         <td>
           When this parameter is set to <code class="constant">true</code>,
@@ -354,8 +309,7 @@
         <td>
           Default: <code class="constant">false</code>
         </td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td><code class="constant">allowErrorDetails</code></td>
         <td>
           If set to <code class="constant">true</code> then no error details like a stack trace
@@ -366,8 +320,7 @@
         <td>
           Default: <code class="constant">true</code>
         </td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td><code class="constant">detectorOptions</code></td>
         <td>
           Extra options passed to an detector after successful
@@ -376,8 +329,7 @@
         </td>
         <td>
         </td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td><code class="constant">discoveryEnabled</code></td>
         <td>
           Is set to <code class="literal">true</code> then this servlet will
@@ -393,8 +345,7 @@
         <td>
           Default: <code class="constant">false</code>
         </td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td><code class="constant">discoveryAgentUrl</code></td>
         <td>
           Sets the URL to respond for multicast discovery requests. If
@@ -410,18 +361,15 @@
         <td>
           <code class="constant">http://10.9.11.87:8080/jolokia</code>
         </td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td><code class="constant">multicastGroup</code></td>
         <td>The multicast group IPv4 address. This group IP can be also given as an environment variable <code class="literal">JOLOKIA_MULTICAST_GROUP</code> or a system property <code class="literal">jolokia.multicastGroup</code></td>
         <td><code class="constant">239.192.48.84</code></td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td>The multicast port. This port can be also given as an environment variable <code class="literal">JOLOKIA_MULTICAST_PORT</code> or a system property <code class="literal">jolokia.multicastPort</code></td>
         <td>The multicast port.</td>
         <td><code class="constant">24884</code></td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td><code class="constant">agentId</code></td>
         <td>
           A unique ID for this agent. By default a unique id is
@@ -434,8 +382,7 @@
         <td>
           <code class="constant">my-unique-agent-id</code>
         </td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td><code class="constant">agentDescription</code></td>
         <td>
           An optional description which can be used for clients to
@@ -444,9 +391,7 @@
         <td>
           <code class="constant">Monitoring agent</code>
         </td>
-      </tr>
-    </table></div>
-    <p>
+      </tr></table></div></div><p>
       Jolokia has various detectors which can detect the brand and
       version of an application server it is running in. This version
       is revealed with the <code class="constant">version</code> command. With
@@ -457,17 +402,11 @@
       configuration. This configuration is feed to a successful
       detector which can do some extra initialization on agent
       startup. Currently the following extra options are supported:
-    </p>
-   <div class="table"><a name="agent-war-detector-options"></a><table id="agent-war-detector-options">
-      Detector Options
-      <thead>
-        <tr>
+    </p><div xmlns:xslthl="http://xslthl.sf.net" class="table"><p class="title"><b>Table&nbsp;3.2.&nbsp;Detector Options</b></p><div class="table-contents"><table id="agent-war-detector-options"><thead xmlns:xi="http://www.w3.org/2001/XInclude"><tr>
           <td>Product</td>
           <td>Option</td>
           <td>Description</td>
-        </tr>
-      </thead>
-      <tr>
+        </tr></thead><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td>glassfish</td>
         <td>bootAmx</td>
         <td>If <code class="constant">false</code> and the agent is running on
@@ -475,32 +414,21 @@
         during startup. By default, AMX which contains all relevant
         MBeans for monitoring Glassfish is booted.
         </td>
-      </tr>
-   </table></div>
-  </div>
-  <div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="agent-war-security"></a>3.1.2.&nbsp;Security Setup</h3></div></div></div>
-    
-    <p>
+      </tr></table></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="agent-war-security"></a>3.1.2.&nbsp;Security Setup</h3></div></div></div><p>
       The WAR agent comes in two flavors:
-    </p>
-    <div class="variablelist"><dl class="variablelist"><dt><span class="term"><span class="bold"><strong>jolokia.war</strong></span></span></dt><dd>
+    </p><div class="variablelist"><dl><dt><span class="term"><span class="bold"><strong>jolokia.war</strong></span></span></dt><dd>
           The standard agent which is secured with the role "jolokia". You have to setup your servlet container
           to connect this role to the authentication.
         </dd><dt><span class="term"><span class="bold"><strong>jolokia-unsecured.war</strong></span></span></dt><dd>
           A demo agent, which is completely unsecured. Please use this agent only for evaluation purposes, but it is
-          highly recommended that use the security enabled agent <span class="emphasis"><em>jolokia.war</em></span>
-        </dd></dl></div>
-
-    <p>
+          highly recommended that use the security enabled agent <span class="emphasis"><em>jolokia.war</em></span></dd></dl></div><p>
       Java EE security is enabled by default by adding the required information within the
-      <code class="filename">web.xml</code>.</p><div class="sidebar"><div class="titlepage"><div><div><p class="title"><b>Using jmx4perl's <code class="literal">jolokia</code> tool</b></p></div></div></div>
-      
-      <a class="ulink" href="http://www.jmx4perl.org" target="_top">jmx4perl</a> comes
-      with a nice command line utility called <a class="ulink" href="http://search.cpan.org/~roland/jmx4perl/scripts/jolokia" target="_top">jolokia</a>
+      <code class="filename">web.xml</code>.</p><div xmlns:xslthl="http://xslthl.sf.net" class="sidebar-border"><div class="sidebar"><p class="title"><b>Using jmx4perl's <code class="literal">jolokia</code> tool</b></p><a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://www.jmx4perl.org" target="_top">jmx4perl</a> comes
+      with a nice command line utility called <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://search.cpan.org/~roland/jmx4perl/scripts/jolokia" target="_top">jolokia</a>
       which allows for an easy setup of security within a given
-      <code class="filename">jolokia.war</code>. See <a class="xref" href="tools.html#tools-jmx4perl" title="10.1.&nbsp;Jmx4Perl">Section&nbsp;10.1, &#8220;Jmx4Perl&#8221;</a> for
+      <code class="filename">jolokia.war</code>. See <a href="tools.html#tools-jmx4perl">Section&nbsp;10.1, &#8220;Jmx4Perl&#8221;</a> for
       more details.
-    </div><p>
+    </div></div><p>
     All
     current client libraries are able to use BASIC HTTP authentication
     with user and password. The
@@ -512,20 +440,14 @@
     role must be referenced outside the agent WAR within the servlet
     container, e.g. for Tomcat the role definition can be found in
     <code class="filename">$TOMCAT/config/tomcat-users.xml</code>.
-    </p>
-  </div>
-
-  <div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="agent-war-programmatic"></a>3.1.3.&nbsp;Programmatic usage of the Jolokia agent servlet</h3></div></div></div>
-    
-    <p>
+    </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="agent-war-programmatic"></a>3.1.3.&nbsp;Programmatic usage of the Jolokia agent servlet</h3></div></div></div><p>
       The Jolokia agent servlet can be integrated into one's own
       web-applications as well. Simply add a servlet with
       the servlet class
       <code class="classname">org.jolokia.http.AgentServlet</code> to your
       own <code class="filename">web.xml</code>. The following example maps
       the agent to the context <code class="literal">/jolokia</code>:
-    </p>
-    <pre class="programlisting">
+    </p><pre class="programlisting">
     &lt;servlet&gt;
       &lt;servlet-name&gt;jolokia-agent&lt;/servlet-name&gt;
       &lt;servlet-class&gt;org.jolokia.http.AgentServlet&lt;/servlet-class&gt;
@@ -536,18 +458,15 @@
       &lt;servlet-name&gt;jolokia-agent&lt;/servlet-name&gt;
       &lt;url-pattern&gt;/jolokia/*&lt;/url-pattern&gt;
     &lt;/servlet-mapping&gt;
-    </pre>
-    <p>
-      Of course, any init parameter as described in <a class="xref" href="agents.html#agent-war-init-params" title="Table&nbsp;3.1.&nbsp;Servlet init parameters">Table&nbsp;3.1, &#8220;Servlet init parameters&#8221;</a> can be used here as well.
-    </p>
-    <p>
+    </pre><p>
+      Of course, any init parameter as described in <a href="agents.html#agent-war-init-params" title="Table&nbsp;3.1.&nbsp;Servlet init parameters">Table&nbsp;3.1, &#8220;Servlet init parameters&#8221;</a> can be used here as well.
+    </p><p>
       In order for this servlet definition to find the referenced
       Java class, the JAR <code class="filename">jolokia-core.jar</code> must
-      be included. This jar can be found in <a class="ulink" href="http://repo1.maven.org/maven2/org/jolokia/jolokia-core" target="_top">Maven central
+      be included. This jar can be found in <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://repo1.maven.org/maven2/org/jolokia/jolokia-core" target="_top">Maven central
       </a>. Maven users will can declare a
       dependency on this jar artifact:
-    </p>
-    <pre class="programlisting">
+    </p><pre class="programlisting">
     &lt;project&gt;
       &lt;!-- ....  --&gt;
       &lt;dependencies&gt;
@@ -558,14 +477,12 @@
         &lt;/dependency&gt;
       &lt;/dependencies&gt;
       &lt;!-- .... --&gt;
-    &lt;/project&gt;</pre>
-    <p>
+    &lt;/project&gt;</pre><p>
       The <code class="classname">org.jolokia.http.Agent</code> can be
       subclassed, too in order to provide a custom restrictor or a
-      custom log handler. See <a class="xref" href="security.html#security-restrictor" title="4.2.&nbsp;Jolokia Restrictors">Section&nbsp;4.2, &#8220;Jolokia Restrictors&#8221;</a>
-      for details.<a href="#ftn.d5e406" class="footnote" name="d5e406"><sup class="footnote">[5]</sup></a>
-    </p>
-    <p>
+      custom log handler. See <a href="security.html#security-restrictor">Section&nbsp;4.2, &#8220;Jolokia Restrictors&#8221;</a>
+      for details.<sup>[<a name="d0e940" href="#ftn.d0e940">5</a>]</sup>
+    </p><p>
       Also, multiple Jolokia agents can be deployed in the same JVM
       without problem. However, since the agent deploys some
       Jolokia-specific MBeans on the single
@@ -576,18 +493,12 @@
       propery to those MBeans' names. This also needs to be done if
       multiple webapps containing Jolokia agents are deployed on
       the same Java EE server.
-    </p>
-  </div>
-</div>
-  <div class="section"><div class="titlepage"><div><div><h2 class="title"><a name="agents-osgi"></a>3.2.&nbsp;OSGi Agents</h2></div></div></div>
-  
-    <div class="sidebar"><div class="titlepage"><div><div><p class="title"><b></b></p></div></div></div>There are several free implementations available of OSGi
-    HttpService. This bundle has been tested with the <a class="ulink" href="http://wiki.ops4j.org/display/paxweb/Pax+Web" target="_top">Pax Web</a>
-    and <a class="ulink" href="http://felix.apache.org/site/apache-felix-http-service.html" target="_top">Apache
+    </p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="agents-osgi"></a>3.2.&nbsp;OSGi Agents</h2></div></div></div><div xmlns:xslthl="http://xslthl.sf.net" class="sidebar-border"><div class="sidebar"><p class="title"><b></b></p>There are several free implementations available of OSGi
+    HttpService. This bundle has been tested with the <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://wiki.ops4j.org/display/paxweb/Pax+Web" target="_top">Pax Web</a>
+    and <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://felix.apache.org/site/apache-felix-http-service.html" target="_top">Apache
     Felix</a> HttpService, both of which come with an embedded Jetty
-    as servlet container by default.</div>
-  <p>
-    Jolokia agents are also available as <a class="ulink" href="http://www.osgi.org" target="_top">OSGi</a> bundles. There are two
+    as servlet container by default.</div></div><p>
+    Jolokia agents are also available as <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://www.osgi.org" target="_top">OSGi</a> bundles. There are two
     flavors of this agent: A nearly bare agent
     <code class="filename">jolokia-osgi.jar</code> declaring all its package
     dependencies as imports in its Manifest and an all-in-one bundle
@@ -595,16 +506,12 @@
     dependencies. The pure bundle fits best with the OSGi philosophy and is
     hence the recommended bundle. The all-in-one monster is good for a
     quick start since normally no additional bundles are required.
-  </p>
-  <div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="agents-osgi-pure"></a>3.2.1.&nbsp;jolokia-osgi.jar</h3></div></div></div>
-    
-    <p>
-      This bundle depends mostly on a running <a class="ulink" href="http://www.osgi.org/javadoc/r4v42/org/osgi/service/http/HttpService.html" target="_top">OSGi
+  </p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="agents-osgi-pure"></a>3.2.1.&nbsp;jolokia-osgi.jar</h3></div></div></div><p>
+      This bundle depends mostly on a running <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://www.osgi.org/javadoc/r4v42/org/osgi/service/http/HttpService.html" target="_top">OSGi
       HttpService</a> which it uses for registering the agent
       servlet.
-    </p>
-    <p>
-      All package imports of this bundle are listed in <a class="xref" href="agents.html#table-agents-osgi-deps" title="Table&nbsp;3.3.&nbsp;Package Imports of jolokia-osgi.jar (SB: exported by system bundle)">Table&nbsp;3.3, &#8220;Package Imports of jolokia-osgi.jar (SB: exported by system bundle)&#8221;</a>. Note that the
+    </p><p>
+      All package imports of this bundle are listed in <a href="agents.html#table-agents-osgi-deps" title="Table&nbsp;3.3.&nbsp;Package Imports of jolokia-osgi.jar (SB: exported by system bundle)">Table&nbsp;3.3, &#8220;Package Imports of jolokia-osgi.jar (SB: exported by system bundle)&#8221;</a>. Note that the
       <code class="classname">org.osgi.framework.*</code> and
       <code class="classname">javax.*</code> packages are typically exported
       by the system bundle, so no extra installation effort is
@@ -612,16 +519,12 @@
       <code class="classname">org.osgi.service.*</code> interfaces are
       available depends on your OSGi container. If they are not
       provided, they can be easily fetched and installed from e.g.
-      <a class="ulink" href="http://repo1.maven.org/maven2/org/osgi/org.osgi.compendium/4.2.0/org.osgi.compendium-4.2.0.jar" target="_top">maven
+      <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://repo1.maven.org/maven2/org/osgi/org.osgi.compendium/4.2.0/org.osgi.compendium-4.2.0.jar" target="_top">maven
       central</a>. Often the LogService interface is exported
       out of the box, but not the HttpService. You will notice any
       missing package dependency during the resolve phase while
       installing <code class="filename">jolokia-osgi.jar</code>.
-    </p>
-    <div class="table"><a name="table-agents-osgi-deps"></a><table id="table-agents-osgi-deps">
-      Package Imports of jolokia-osgi.jar (SB: exported by system bundle)
-      <thead>
-        <tr>
+    </p><div xmlns:xslthl="http://xslthl.sf.net" class="table"><p class="title"><b>Table&nbsp;3.3.&nbsp;Package Imports of jolokia-osgi.jar (SB: exported by system bundle)</b></p><div class="table-contents"><table id="table-agents-osgi-deps"><thead xmlns:xi="http://www.w3.org/2001/XInclude"><tr>
           <td>Package</td>
           <td>SB</td>
           <td>Package</td>
@@ -630,9 +533,7 @@
           <td>SB</td>
           <td>Package</td>
           <td>SB</td>
-        </tr>
-      </thead>
-      <tr>
+        </tr></thead><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td>org.osgi.framework</td>
         <td>X</td>
         <td>javax.servlet</td>
@@ -641,8 +542,7 @@
         <td>X</td>
         <td>javax.management</td>
         <td>X</td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td>org.osgi.service.http</td>
         <td></td>
         <td>javax.servlet.http</td>
@@ -651,8 +551,7 @@
         <td>X</td>
         <td>javax.management.openmbean</td>
         <td>X</td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td>org.osgi.service.log</td>
         <td>?</td>
         <td>javax.naming</td>
@@ -661,8 +560,7 @@
         <td>X</td>
         <td>javax.management.remote</td>
         <td>X</td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td>org.osgi.util.tracker</td>
         <td>X</td>
         <td></td>
@@ -671,9 +569,7 @@
         <td></td>
         <td></td>
         <td></td>
-      </tr>
-    </table></div>
-    <p>
+      </tr></table></div></div><p>
       This agent bundle consumes two services by default: As stated
       above, an
       <code class="classname">org.osgi.service.http.HttpService</code> which
@@ -685,45 +581,35 @@
       the Jolokia bundle uses the standard
       <code class="methodname">HttpServlet.log()</code> method for its
       logging needs.
-    </p>
-    <p>
+    </p><p>
       The Jolokia OSGi bundle can be configured via the OSGi Configuration Admin
       service using the PID <code class="literal">org.jolokia.osgi</code>
       (e.g. if using Apache Karaf, place properties in
       <code class="literal">etc/org.jolokia.osgi.cfg</code>), or alternatively via global
       properties which typically can be configured in a configuration file of
       the OSGi container. All properties start with the prefix
-      <code class="literal">org.jolokia</code> and are listed in <a class="xref" href="agents.html#table-agents-osgi-properties" title="Table&nbsp;3.4.&nbsp;Jolokia Bundle Properties">Table&nbsp;3.4, &#8220;Jolokia Bundle Properties&#8221;</a>. They are mostly the
+      <code class="literal">org.jolokia</code> and are listed in <a href="agents.html#table-agents-osgi-properties" title="Table&nbsp;3.4.&nbsp;Jolokia Bundle Properties">Table&nbsp;3.4, &#8220;Jolokia Bundle Properties&#8221;</a>. They are mostly the
       same as the <code class="literal">init-param</code> options for
       a Jolokia servlet when used in a Java EE WAR artifact.
-    </p>
-    <div class="table"><a name="table-agents-osgi-properties"></a><table id="table-agents-osgi-properties">
-      Jolokia Bundle Properties
-      <thead>
-        <tr>
+    </p><div xmlns:xslthl="http://xslthl.sf.net" class="table"><p class="title"><b>Table&nbsp;3.4.&nbsp;Jolokia Bundle Properties</b></p><div class="table-contents"><table id="table-agents-osgi-properties"><thead xmlns:xi="http://www.w3.org/2001/XInclude"><tr>
           <td>Property</td>
           <td>Default</td>
           <td>Description</td>
-        </tr>
-      </thead>
-      <tr>
+        </tr></thead><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td>org.jolokia.user</td>
         <td></td>
         <td>User used for authentication with HTTP Basic
         Authentication. If not given, no authentication is used.</td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td>org.jolokia.password</td>
         <td></td>
         <td>Password used for authentication with HTTP Basic
         Authentication.</td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td>org.jolokia.agentContext</td>
         <td>/jolokia</td>
         <td>Context path of the agent servlet</td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td>org.jolokia.agentId</td>
         <td></td>
         <td>
@@ -734,16 +620,14 @@
           this value. Within the <code class="literal">agentId</code> specification you
           can use the same placeholders as in <code class="literal">discoveryAgentUrl</code>.
         </td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td>org.jolokia.agentDescription</td>
         <td></td>
         <td>
           An optional description which can be used for clients to
           present a humand readable label for this agent.
         </td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td>org.jolokia.dispatcherClasses</td>
         <td></td>
         <td>
@@ -758,8 +642,7 @@
           In that case you should be sure that you enable authentication for the web application to protect access
           to the proxy.
         </td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td>org.jolokia.debug</td>
         <td>false</td>
         <td>
@@ -767,8 +650,7 @@
           Config MBean (<code class="literal">jolokia:type=Config</code>) at
           runtime
         </td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td>org.jolokia.debugMaxEntries</td>
         <td>100</td>
         <td>
@@ -776,16 +658,14 @@
           if switched on. This can be changed via the config MBean at
           runtime.
         </td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td>org.jolokia.maxDepth</td>
         <td>0</td>
         <td>
           Maximum depth when traversing bean properties.
           If set to 0, depth checking is disabled
         </td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td>org.jolokia.maxCollectionSize</td>
         <td>0</td>
         <td>
@@ -793,8 +673,7 @@
           serializing to JSON. When set to 0,
           collections are not truncated.
         </td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td>org.jolokia.maxObjects</td>
         <td>0</td>
         <td>
@@ -804,16 +683,14 @@
           network traffic. Nevertheless, when set to 0
           no limit is imposed.
         </td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td>org.jolokia.historyMaxEntries</td>
         <td>10</td>
         <td>
           Number of entries to keep in the history. This can be changed at
           runtime via the Jolokia config MBean.
         </td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td>org.jolokia.listenForHttpService</td>
         <td>true</td>
         <td>
@@ -821,8 +698,7 @@
           <code class="literal">HttpService</code> and if available registers an
           agent servlet to it.
         </td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td>org.jolokia.httpServiceFilter</td>
         <td></td>
         <td>
@@ -830,12 +706,11 @@
            <code class="classname">org.osgi.service.http.HttpService</code>
            is used to expose the Jolokia servlet. The syntax is that
            used by the <code class="classname">org.osgi.framework.Filter</code>
-           which is in turn a <a class="ulink" href="http://www.ietf.org/rfc/rfc1960.txt" target="_top">
+           which is in turn a <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://www.ietf.org/rfc/rfc1960.txt" target="_top">
            RFC 1960 based filter</a>. The use of this property
-           is described in <a class="xref" href="agents.html#running-on-glassfish" title="3.2.2.&nbsp;Running on Glassfish v3 upwards">Section&nbsp;3.2.2, &#8220;Running on Glassfish v3 upwards&#8221;</a>
+           is described in <a href="agents.html#running-on-glassfish">Section&nbsp;3.2.2, &#8220;Running on Glassfish v3 upwards&#8221;</a>
         </td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td>org.jolokia.useRestrictorService</td>
         <td>false</td>
         <td>
@@ -843,10 +718,9 @@
           <code class="classname">org.jolokia.restrictor.Restrictor</code>
           service for applying access restrictions. If this option is
           <code class="literal">false</code> the standard method of looking up a
-          security policy file is used, as described in <a class="xref" href="security.html#security-policy" title="4.1.&nbsp;Policy based security">Section&nbsp;4.1, &#8220;Policy based security&#8221;</a>.
+          security policy file is used, as described in <a href="security.html#security-policy">Section&nbsp;4.1, &#8220;Policy based security&#8221;</a>.
         </td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td>org.jolokia.canonicalNaming</td>
         <td>true</td>
         <td>
@@ -860,8 +734,7 @@
           option can be overridden with a query parameter of the same
           name.
         </td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td>org.jolokia.includeStackTrace</td>
         <td>true</td>
         <td>
@@ -873,8 +746,7 @@
           only included for RuntimeExceptions. This global option can
           be overridden with a query parameter.
         </td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td>org.jolokia.serializeException</td>
         <td>false</td>
         <td>
@@ -885,18 +757,16 @@
           will be included, though. This global option can be
           overridden by a query parameter of the same name.
         </td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td>org.jolokia.detectorOptions</td>
         <td></td>
         <td>
           An optional JSON representation for application specific
           options used by detectors for post-initialization steps. See the description of
           <code class="literal">detectorOptions</code> in
-          <a class="xref" href="agents.html#agent-war-init-params" title="Table&nbsp;3.1.&nbsp;Servlet init parameters">Table&nbsp;3.1, &#8220;Servlet init parameters&#8221;</a> for details.
+          <a href="agents.html#agent-war-init-params" title="Table&nbsp;3.1.&nbsp;Servlet init parameters">Table&nbsp;3.1, &#8220;Servlet init parameters&#8221;</a> for details.
         </td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td>org.jolokia.discoveryEnabled</td>
         <td>false</td>
         <td>
@@ -911,8 +781,7 @@
           property <code class="literal">jolokia.discoveryEnabled</code> set to
           <code class="literal">true</code>.
         </td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td>org.jolokia.discoveryAgentUrl</td>
         <td></td>
         <td>
@@ -926,18 +795,15 @@
           by the autodetected local host name/address. Also with <code class="literal">${env:ENV_VAR}</code> and
           <code class="literal">${sys:property}</code> environment and system properties can be referenced, respectively.
         </td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td><code class="constant">org.jolokia.multicastGroup</code></td>
         <td><code class="constant">239.192.48.84</code></td>
         <td>The multicast group IPv4 address. This group IP can be also given as an environment variable <code class="literal">JOLOKIA_MULTICAST_GROUP</code> or a system property <code class="literal">jolokia.multicastGroup</code></td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td><code class="constant">org.jolokia.multicastPort</code></td>
         <td><code class="constant">24884</code></td>
         <td>The multicast port. This port can be also given as an environment variable <code class="literal">JOLOKIA_MULTICAST_PORT</code> or a system property <code class="literal">jolokia.multicastPort</code></td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td>org.jolokia.realm</td>
         <td>jolokia</td>
         <td>
@@ -946,8 +812,7 @@
           E.g. for Karaf 3 and later, this realm should be <code class="literal">karaf</code> since
           all JMX MBeans are guarded by this security domain.
         </td>
-      </tr>
-       <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
          <td>org.jolokia.authMode</td>
          <td>basic</td>
          <td>
@@ -961,9 +826,7 @@
            that all authenticators succeed, for <code class="literal">service-any</code> it is sufficient that one authenticator
            successfully authenticates. In any case if no such Authenticator service can be found, the request is rejected.
          </td>
-        </tr>
-    </table></div>
-    <p>
+        </tr></table></div></div><p>
       This bundle also exports the service
       <code class="classname">org.jolokia.osgi.servlet.JolokiaContext</code>
       which can be used to obtain context information of the
@@ -973,58 +836,44 @@
       is used for authentication. Note that this service is only
       available when the agent servlet is active (i.e. when an
       HttpService is registered).
-    </p>
-  </div>
-  <div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="running-on-glassfish"></a>3.2.2.&nbsp;Running on Glassfish v3 upwards</h3></div></div></div>
-     
-     <p>
+    </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="running-on-glassfish"></a>3.2.2.&nbsp;Running on Glassfish v3 upwards</h3></div></div></div><p>
         You have a couple of choices when running jolokia on
         Glassfish v3 and up, since Glassfish is a both a fully
         fledged Java EE container and an OSGi container. If you
-        choose to run the <a class="xref" href="agents.html#agents-war" title="3.1.&nbsp;Java EE Agent (WAR)">Section&nbsp;3.1, &#8220;Java EE Agent (WAR)&#8221;</a> then it
+        choose to run the <a href="agents.html#agents-war">Section&nbsp;3.1, &#8220;Java EE Agent (WAR)&#8221;</a> then it
         is completely straight forward just deploy the war
         in the normal way. If you choose to deploy
-        the <a class="xref" href="agents.html#agents-osgi" title="3.2.&nbsp;OSGi Agents">Section&nbsp;3.2, &#8220;OSGi Agents&#8221;</a> then you will need
+        the <a href="agents.html#agents-osgi">Section&nbsp;3.2, &#8220;OSGi Agents&#8221;</a> then you will need
         to configure the <code class="literal">org.jolokia.httpServiceFilter</code>
         option with a filter to select either the Admin
         <code class="classname">HttpService</code> (4848 by default) or the Default
         <code class="classname">HttpService</code> which is where WAR files are
         deployed to.
 
-     </p>
-     <p>
+     </p><p>
         In Glassfish 3.1.2 the OSGi bundle configuration is done in
         <code class="constant">glassfish/conf/osgi.properties</code> in version's
         prior to this the configuration is by default in
         <code class="constant">glassfish/osgi/felix/conf/config.properties</code>
         or if you are using Equinox
         <code class="constant">glassfish/osgi/equinox/configuration/config.ini</code>
-     </p>
-     <div class="informalexample">
-        <pre class="programlisting">
+     </p><div class="informalexample"><pre class="programlisting">
 # Restrict the jolokia http service selection to the admin host
 org.jolokia.httpServiceFilter=(VirtualServer=__asadmin)
 # Or alternatively to the normal http service use : (VirtualServer=server)
-</pre>
-     </div>
-     <p>
+</pre></div><p>
         Deploying the bundle can be either be done by coping the
         <code class="literal">jolokia-osgi.jar</code> into the domain
         <code class="constant">glassfish/domains/&lt;domain&gt;/autodeploy/bundles</code>
         directory or it can be added to all instances by copying the jar
         to <code class="constant">glassfish/modules/autostart</code>
-     </p>
-     <p>
+     </p><p>
         By default the agent will be available on <code class="constant">http://localhost:&lt;port&gt;/osgi/jolokia</code>
         rather than <code class="constant">http://localhost:&lt;port&gt;/jolokia</code> as with WAR deployment.
-     </p>
-  </div>
-  <div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="agents-osgi-bundle"></a>3.2.3.&nbsp;jolokia-osgi-bundle.jar</h3></div></div></div>
-    
-    <p>
+     </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="agents-osgi-bundle"></a>3.2.3.&nbsp;jolokia-osgi-bundle.jar</h3></div></div></div><p>
       The all-in-one bundle includes an implementation of
       <code class="classname">org.osgi.service.http.HttpService</code>,
-      i.e. the <a class="ulink" href="http://felix.apache.org/site/apache-felix-http-service.html" target="_top">Felix
+      i.e. the <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://felix.apache.org/site/apache-felix-http-service.html" target="_top">Felix
       implementation</a>. The HttpService will be registered as
       OSGi service during startup, so it is available for other
       bundles as well. The only package import requirement for this
@@ -1032,24 +881,19 @@ org.jolokia.httpServiceFilter=(VirtualServer=__asadmin)
       since the Felix Webservice requires this during startup. As
       mentioned above, normally the LogService interface gets exported
       by default in the standard containers, but if not, you need to
-      install it e.g. from the OSGi <a class="ulink" href="http://repo1.maven.org/maven2/org/osgi/org.osgi.compendium/4.2.0/org.osgi.compendium-4.2.0.jar" target="_top">compendium
+      install it e.g. from the OSGi <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://repo1.maven.org/maven2/org/osgi/org.osgi.compendium/4.2.0/org.osgi.compendium-4.2.0.jar" target="_top">compendium
       </a> definitions.
-    </p>
-    <p>
+    </p><p>
       This bundle can be configured the same way as the pure bundle as
-      described in <a class="xref" href="agents.html#agents-osgi-pure" title="3.2.1.&nbsp;jolokia-osgi.jar">Section&nbsp;3.2.1, &#8220;jolokia-osgi.jar&#8221;</a>. Additionally,
+      described in <a href="agents.html#agents-osgi-pure">Section&nbsp;3.2.1, &#8220;jolokia-osgi.jar&#8221;</a>. Additionally,
       the embedded Felix HttpService can be configured as described in
-      its <a class="ulink" href="http://felix.apache.org/site/apache-felix-http-service.html#ApacheFelixHTTPService-ConfigurationProperties" target="_top">documentation</a>.
+      its <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://felix.apache.org/site/apache-felix-http-service.html#ApacheFelixHTTPService-ConfigurationProperties" target="_top">documentation</a>.
       e.g. setting the port to 9090 instead of the default port 8080, a property
       <code class="literal">org.osgi.service.http.port=9090</code> needs to be
       set. This might be useful, if this bundle is used within
       containers which already occupy the default port (Glassfish,
       Eclipse Virgo) but don't expose an OSGi HttpService.
-    </p>
-  </div>
-  <div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="agents-osgi-servlet"></a>3.2.4.&nbsp;Programmatic servlet registration</h3></div></div></div>
-    
-    <p>
+    </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="agents-osgi-servlet"></a>3.2.4.&nbsp;Programmatic servlet registration</h3></div></div></div><p>
       It is also possible to register the Jolokia agent servlet
       manually instead of relying of the OSGi bundle activator which
       comes with the agents. For this use case
@@ -1060,17 +904,16 @@ org.jolokia.httpServiceFilter=(VirtualServer=__asadmin)
       class has three constructors: A default constructor without
       arguments, one with a single
       <code class="classname">BundleContext</code> argument and finally one
-      with an additional <code class="classname">Restrictor</code> (see <a class="xref" href="security.html#security-restrictor" title="4.2.&nbsp;Jolokia Restrictors">Section&nbsp;4.2, &#8220;Jolokia Restrictors&#8221;</a> for details how access
+      with an additional <code class="classname">Restrictor</code> (see <a href="security.html#security-restrictor">Section&nbsp;4.2, &#8220;Jolokia Restrictors&#8221;</a> for details how access
       restrictions can be applied). The constructor with a
       <code class="classname">BundleContext</code> as its argument has the
       advantage that it will use an OSGi
       <code class="classname">LogService</code> if available and adds various
       OSGi server detectors which adds server information like product
       name and version to the <code class="literal">version</code>
-      command. Refer to <a class="xref" href="protocol.html#version" title="6.2.6.&nbsp;Getting the agent version (version)">Section&nbsp;6.2.6, &#8220;Getting the agent version (version)&#8221;</a> for details about the
+      command. Refer to <a href="protocol.html#version">Section&nbsp;6.2.6, &#8220;Getting the agent version (version)&#8221;</a> for details about the
       server infos provided.
-    </p>
-    <p>
+    </p><p>
       Please note that for this use case the bundle
       <code class="classname">org.jolokia.osgi</code> should not be
       <span class="emphasis"><em>started</em></span> but left in the state
@@ -1081,12 +924,8 @@ org.jolokia.httpServiceFilter=(VirtualServer=__asadmin)
       <code class="literal">org.jolokia.listenForHttpService</code> can be set
       to <code class="literal">false</code> in which case there will be never an
       automatic servlet registration to an HttpService.
-    </p>
-  </div>
-  <div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="d5e713"></a>3.2.5.&nbsp;Restrictor service</h3></div></div></div>
-    
-    <p>
-      As described in <a class="xref" href="security.html#security-restrictor" title="4.2.&nbsp;Jolokia Restrictors">Section&nbsp;4.2, &#8220;Jolokia Restrictors&#8221;</a>, the
+    </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e1748"></a>3.2.5.&nbsp;Restrictor service</h3></div></div></div><p>
+      As described in <a href="security.html#security-restrictor">Section&nbsp;4.2, &#8220;Jolokia Restrictors&#8221;</a>, the
       Jolokia agent can use custom restrictors implementing the
       interface
       <code class="classname">org.jolokia.restrictor.Restrictor</code>. If the
@@ -1102,23 +941,15 @@ org.jolokia.httpServiceFilter=(VirtualServer=__asadmin)
       them individually grant access. A sample restrictor service as a
       maven project can be found in the Jolokia source at
       <code class="filename">agent/osgi/restrictor-sample</code>.
-    </p>
-  </div>
-</div>
-  <div class="section"><div class="titlepage"><div><div><h2 class="title"><a name="agents-mule"></a>3.3.&nbsp;Mule Agent</h2></div></div></div>
-  
-  <p>
-    Jolokia's <a class="ulink" href="http://www.mulesoft.org" target="_top">Mule</a> agent
+    </p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="agents-mule"></a>3.3.&nbsp;Mule Agent</h2></div></div></div><p>
+    Jolokia's <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://www.mulesoft.org" target="_top">Mule</a> agent
     uses Mule's own agent interface for plugging into the ESB running
     in standalone mode. 
-  </p>
-  <p>
+  </p><p>
     The agent needs to be included into the Mule configuration as
     shown in the following example, which is the way how to configure 
     the agent for Mule 3:
-  </p>
-  <div class="informalexample">
-    <pre class="programlisting">
+  </p><div class="informalexample"><pre class="programlisting">
 &lt;mule xmlns="http://www.mulesoft.org/schema/mule/core"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:management="http://www.mulesoft.org/schema/mule/management"
@@ -1137,27 +968,18 @@ org.jolokia.httpServiceFilter=(VirtualServer=__asadmin)
    &lt;/custom-agent&gt;
    &lt;management:jmx-server/&gt;
 &lt;/mule&gt;
-</pre>
-  </div>
-  <p>
+</pre></div><p>
     For Mule 2, the configuration is slightly different since the
     <code class="literal">&lt;custom-agent&gt;</code> is contained in the
     <code class="literal">management</code> namespace for Mule 2
     (<code class="literal">&lt;management:custom-agent&gt;</code>) 
-  </p>
-  <p>
+  </p><p>
     This agent knows about the following configuration parameters
-  </p>
-  <div class="table"><a name="agent-mule-config"></a><table id="agent-mule-config">
-    Mule agent configuration options
-    <thead>
-      <tr>
+  </p><div xmlns:xslthl="http://xslthl.sf.net" class="table"><p class="title"><b>Table&nbsp;3.5.&nbsp;Mule agent configuration options</b></p><div class="table-contents"><table id="agent-mule-config"><thead xmlns:xi="http://www.w3.org/2001/XInclude"><tr>
         <td>Parameter</td>
         <td>Description</td>
         <td>Example</td>
-      </tr>        
-    </thead>
-    <tr>
+      </tr></thead><tr xmlns:xi="http://www.w3.org/2001/XInclude">
       <td><code class="constant">host</code></td>
       <td>
         Hostaddress to which the HTTP server should bind to. 
@@ -1165,8 +987,7 @@ org.jolokia.httpServiceFilter=(VirtualServer=__asadmin)
       <td>
         <code class="constant">InetAddress.getLocalHost()</code>
       </td>
-    </tr>
-    <tr>
+    </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
       <td><code class="constant">port</code></td>
       <td>
         Port the HTTP server should listen to.
@@ -1174,8 +995,7 @@ org.jolokia.httpServiceFilter=(VirtualServer=__asadmin)
       <td>
         <code class="constant">8888</code>
       </td>
-    </tr>
-    <tr>
+    </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
       <td><code class="constant">user</code></td>
       <td>
         Use to authenticate against. This switches on security and
@@ -1183,47 +1003,42 @@ org.jolokia.httpServiceFilter=(VirtualServer=__asadmin)
       </td>        
       <td>
       </td>
-    </tr>
-    <tr>
+    </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
       <td><code class="constant">password</code></td>
       <td>
         Password to check against when security is switched on. 
       </td>        
       <td>
       </td>
-    </tr>
-    <tr>
+    </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
       <td><code class="constant">debug</code></td>
       <td>
-        Debugging state after startup. Can be changed via the <a class="xref" href="mbeans.html#mbean-config" title="7.1.&nbsp;Configuration MBean">Section&nbsp;7.1, &#8220;Configuration MBean&#8221;</a> during
+        Debugging state after startup. Can be changed via the <a href="mbeans.html#mbean-config">Section&nbsp;7.1, &#8220;Configuration MBean&#8221;</a> during
         runtime.
       </td>
       <td>
         <code class="constant">false</code>
       </td>
-    </tr>
-    <tr>
+    </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
       <td><code class="constant">historyMaxEntries</code></td>
       <td>
         Entries to keep in the history. Can be changed at
-        runtime via the <a class="xref" href="mbeans.html#mbean-config" title="7.1.&nbsp;Configuration MBean">Section&nbsp;7.1, &#8220;Configuration MBean&#8221;</a>.
+        runtime via the <a href="mbeans.html#mbean-config">Section&nbsp;7.1, &#8220;Configuration MBean&#8221;</a>.
       </td>
       <td>
         <code class="constant">10</code>
       </td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td><code class="constant">debugMaxEntries</code></td>
         <td>
           Maximum number of entries to keep in the local
           debug history (if enabled). Can be changed via
-          the <a class="xref" href="mbeans.html#mbean-config" title="7.1.&nbsp;Configuration MBean">Section&nbsp;7.1, &#8220;Configuration MBean&#8221;</a> at runtime.
+          the <a href="mbeans.html#mbean-config">Section&nbsp;7.1, &#8220;Configuration MBean&#8221;</a> at runtime.
         </td>
         <td>
           <code class="constant">100</code>
         </td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
       <td><code class="constant">maxDepth</code></td>
       <td>
         Maximum depth when traversing bean properties.
@@ -1232,8 +1047,7 @@ org.jolokia.httpServiceFilter=(VirtualServer=__asadmin)
         <td>
           <code class="constant">5</code>
         </td>
-    </tr>
-    <tr>
+    </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
       <td><code class="constant">maxCollectionSize</code></td>
         <td>
           Maximum size of collections returned when
@@ -1243,8 +1057,7 @@ org.jolokia.httpServiceFilter=(VirtualServer=__asadmin)
         <td>
           <code class="constant">0</code>
         </td>
-    </tr>
-    <tr>
+    </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
       <td><code class="constant">maxObjects</code></td>
       <td>
         Maximum number of objects which are traversed
@@ -1256,8 +1069,7 @@ org.jolokia.httpServiceFilter=(VirtualServer=__asadmin)
       <td>
         <code class="constant">10000</code>
       </td>
-    </tr>
-      <tr>
+    </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td><code class="constant">canonicalNaming</code></td>
         <td>
           This option specifies in which order the key-value
@@ -1273,8 +1085,7 @@ org.jolokia.httpServiceFilter=(VirtualServer=__asadmin)
         <td>
           <code class="constant">true</code>
         </td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td><code class="constant">includeStackTrace</code></td>
         <td>
           Whether to include a stacktrace of an exception in case of
@@ -1288,8 +1099,7 @@ org.jolokia.httpServiceFilter=(VirtualServer=__asadmin)
         <td>
           <code class="constant">true</code>
         </td>
-      </tr>
-      <tr>
+      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td><code class="constant">serializeException</code></td>
         <td>
           When this parameter is set to <code class="constant">true</code>,
@@ -1302,75 +1112,51 @@ org.jolokia.httpServiceFilter=(VirtualServer=__asadmin)
         <td>
           <code class="constant">false</code>
         </td>
-      </tr>
-  </table></div>      
-  <p>
+      </tr></table></div></div><p>
     The context under which the agent is reachable is fixed to
     <code class="literal">/jolokia</code>. As an alternative to this Mule agent,
-    the <a class="xref" href="agents.html#agents-jvm" title="3.4.&nbsp;JVM Agent">Section&nbsp;3.4, &#8220;JVM Agent&#8221;</a> can be used for
+    the <a href="agents.html#agents-jvm">Section&nbsp;3.4, &#8220;JVM Agent&#8221;</a> can be used for
     Mule, too. This agent also knows about SSL encryption and
     authentication.
-  </p>
-  
-</div>
-  <div class="section"><div class="titlepage"><div><div><h2 class="title"><a name="agents-jvm"></a>3.4.&nbsp;JVM Agent</h2></div></div></div>
-  
-
-  <p>
+  </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="agents-jvm"></a>3.4.&nbsp;JVM Agent</h2></div></div></div><p>
     The JVM agent is right agent when it comes to instrument an
     arbitrary Java application which is not covered by the other
     agents. This agent can be started by any Java program by
     providing certain startup options to the JVM. Or it can be
     dynamically attached (and detached) to an already running Java
-    process. This universal agent uses the <a class="ulink" href="http://download.oracle.com/javase/6/docs/technotes/guides/jvmti/index.html" target="_top">JVM
+    process. This universal agent uses the <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://download.oracle.com/javase/6/docs/technotes/guides/jvmti/index.html" target="_top">JVM
     agent API</a> and is available for every Sun/Oracle JVM 1.6
     and later.
-  </p>
-
-  <div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="jvm-agent"></a>3.4.1.&nbsp;Jolokia as JVM Agent</h3></div></div></div>
-    
-    <p>
-      The JVM agent uses the <a class="ulink" href="http://download.oracle.com/javase/6/docs/technotes/guides/jvmti/index.html" target="_top">JVM
+  </p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="jvm-agent"></a>3.4.1.&nbsp;Jolokia as JVM Agent</h3></div></div></div><p>
+      The JVM agent uses the <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://download.oracle.com/javase/6/docs/technotes/guides/jvmti/index.html" target="_top">JVM
       Agent interface</a> for linking into any JVM. Under the
       hood it uses an HTTP-Server, which is available on every
       Oracle/Sun JVM from version 1.6 upwards.
-    </p>
-    <div class="sidebar"><div class="titlepage"><div><div><p class="title"><b></b></p></div></div></div>
+    </p><div xmlns:xslthl="http://xslthl.sf.net" class="sidebar-border"><div class="sidebar"><p class="title"><b></b></p>
       The JDK embedded HTTP-Server is not the fastest one (it is used
       e.g. for the JAXWS reference implementation), but for our
       monitoring needs the performance is sufficient. There are
       several configuration options for tuning the HTTP server's
       performance. See below for details.
-    </div>
-    <div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="jvm-agent-installation"></a>3.4.1.1.&nbsp;Installation</h4></div></div></div>
-      
-      <p>
+    </div></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="jvm-agent-installation"></a>3.4.1.1.&nbsp;Installation</h4></div></div></div><p>
         This agent gets installed by providing a single startup option
         <code class="literal">-javaagent</code> when starting the Java process.
-      </p>
-      <pre class="programlisting">
-java -javaagent:agent.jar=port=7777,host=localhost</pre>
-      <p>
+      </p><pre class="programlisting">
+java -javaagent:agent.jar=port=7777,host=localhost</pre><p>
         <code class="filename">agent.jar</code> is the filename of the Jolokia
-        JVM agent. The agent can be downloaded like the others from the <a class="ulink" href="https://jolokia.org/download.html" target="_top">download page</a>.
+        JVM agent. The agent can be downloaded like the others from the <a xmlns:xlink="http://www.w3.org/1999/xlink" href="https://jolokia.org/download.html" target="_top">download page</a>.
         When downloading from a Maven repository you need to check for the classifier <code class="literal">agent</code> (i.e. the
         jar to download looks like <code class="filename">jolokia-jvm-1.3.1-agent.jar</code>, not <code class="filename">jolokia-jvm-1.1.5.jar</code>).
         Options can be appended as a comma separated
-        list. The available options are the same as described in <a class="xref" href="agents.html#agent-war-init-params" title="Table&nbsp;3.1.&nbsp;Servlet init parameters">Table&nbsp;3.1, &#8220;Servlet init parameters&#8221;</a> plus the one described in
-        table <a class="xref" href="agents.html#agent-jvm-config" title="Table&nbsp;3.6.&nbsp;JVM agent configuration options">Table&nbsp;3.6, &#8220;JVM agent configuration options&#8221;</a>. If an options
+        list. The available options are the same as described in <a href="agents.html#agent-war-init-params" title="Table&nbsp;3.1.&nbsp;Servlet init parameters">Table&nbsp;3.1, &#8220;Servlet init parameters&#8221;</a> plus the one described in
+        table <a href="agents.html#agent-jvm-config" title="Table&nbsp;3.6.&nbsp;JVM agent configuration options">Table&nbsp;3.6, &#8220;JVM agent configuration options&#8221;</a>. If an options
         contains a comma, an equal sign or a backslash, it must be
         escaped with a backslash.
-      </p>
-      <div class="table"><a name="agent-jvm-config"></a><table id="agent-jvm-config">
-        JVM agent configuration options
-        <thead>
-          <tr>
+      </p><div xmlns:xslthl="http://xslthl.sf.net" class="table"><p class="title"><b>Table&nbsp;3.6.&nbsp;JVM agent configuration options</b></p><div class="table-contents"><table id="agent-jvm-config"><thead xmlns:xi="http://www.w3.org/2001/XInclude"><tr>
             <td>Parameter</td>
             <td>Description</td>
             <td>Example</td>
-          </tr>
-        </thead>
-        <tr>
+          </tr></thead><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">agentContext</code></td>
           <td>
             Context under which the agent is deployed. The full URL
@@ -1380,8 +1166,7 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre>
           <td>
             <code class="constant">/j4p</code>
           </td>
-        </tr>
-        <tr>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">agentId</code></td>
           <td>
             A unique ID for this agent. By default a unique id is
@@ -1394,8 +1179,7 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre>
           <td>
             <code class="constant">my-unique-agent-id</code>
           </td>
-        </tr>
-        <tr>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">agentDescription</code></td>
           <td>
             An optional description which can be used for clients to
@@ -1404,8 +1188,7 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre>
           <td>
             <code class="constant">Intranet Timebooking Server</code>
           </td>
-        </tr>
-        <tr>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
         <td><code class="constant">host</code></td>
         <td>
           Hostaddress to which the HTTP server should bind to. If "*" or "0.0.0.0" is
@@ -1414,8 +1197,7 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre>
         <td>
           <code class="constant">localhost</code>
         </td>
-        </tr>
-        <tr>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">port</code></td>
           <td>
             Port the HTTP server should listen to. If set to 0, then an arbitrary free port
@@ -1424,24 +1206,21 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre>
           <td>
             <code class="constant">8778</code>
           </td>
-        </tr>
-        <tr>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">user</code></td>
           <td>
             User to be used for authentication (along with a <code class="constant">password</code>)
           </td>
           <td>
           </td>
-        </tr>
-        <tr>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">password</code></td>
           <td>
             Password used for authentication (<code class="constant">user</code> is then required, too)
           </td>
           <td>
           </td>
-        </tr>
-        <tr>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">realm</code></td>
           <td>
             Sets the security realm to use. If the <code class="constant">authMode</code> is set to
@@ -1452,8 +1231,7 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre>
           <td>
             jolokia
           </td>
-        </tr>
-        <tr>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">authMode</code></td>
           <td>
             Can be either <code class="constant">basic</code> (the default), <code class="constant">jaas</code> or <code class="constant">delegate</code>. If
@@ -1465,8 +1243,7 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre>
           <td>
             basic
           </td>
-        </tr>
-        <tr>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">authMatch</code></td>
           <td>
             If MultiAuthenticator is used, this config item explains how to combine multiple authenticators.
@@ -1476,8 +1253,7 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre>
           <td>
             any
           </td>
-        </tr>
-        <tr>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">authClass</code></td>
           <td>
             Fully qualified name of an authenticator class. Class must be on classpath and must extend
@@ -1489,8 +1265,7 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre>
           </td>
           <td>
           </td>
-        </tr>
-        <tr>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">authUrl</code></td>
           <td>
             URL of a service used for checking the authentication. This configuration option is only effective if
@@ -1500,30 +1275,24 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre>
           </td>
           <td>
           </td>
-        </tr>
-        <tr>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">authPrincipalSpec</code></td>
           <td>
             Expression used for extracting a principal name from the response of a delegate authentication service. This
             parameter is only in use when the <code class="constant">authMode</code> is set to <code class="constant">delegate</code>. The
             following expressions are supported:
-            <div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="literal">json:path</code></span></dt><dd>
-                  <p>
+            <div class="variablelist"><dl><dt><span class="term"><code class="literal">json:path</code></span></dt><dd><p>
                     a path into a JSON response which points to the principal.
                     E.g. a principal spec <code class="literal">jason:metadata/name</code> will select the "name" property within the JSON
                   object specified by the "metadata" property. For navigate into arrays, numeric indexes can be used.
-                  </p>
-                </dd><dt><span class="term"><code class="literal">empty:</code></span></dt><dd>
-                  <p>
+                  </p></dd><dt><span class="term"><code class="literal">empty:</code></span></dt><dd><p>
                     Always extracts an empty ("") principal.
-                  </p>
-                </dd></dl></div>
+                  </p></dd></dl></div>
             If this option is not specified, not principal is extracted.
           </td>
           <td>
           </td>
-        </tr>
-        <tr>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">authIgnoreCerts</code></td>
           <td>
             If given, the <code class="constant">authMode</code> is set to <code class="constant">delegate</code> and the delegate URL is
@@ -1533,8 +1302,7 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre>
           </td>
           <td>
           </td>
-        </tr>
-        <tr>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">protocol</code></td>
           <td>
             HTTP protocol to use. Should be either <code class="literal">http</code>
@@ -1544,8 +1312,7 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre>
           <td>
             <code class="constant">http</code>
           </td>
-        </tr>
-        <tr>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">backlog</code></td>
           <td>
             Size of request backlog before requests get discarded.
@@ -1553,33 +1320,25 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre>
           <td>
             <code class="constant">10</code>
           </td>
-        </tr>
-        <tr>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">executor</code></td>
           <td>
             Threading model of the HTTP server:
-            <div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="literal">fixed</code></span></dt><dd>
-                  <p>
+            <div class="variablelist"><dl><dt><span class="term"><code class="literal">fixed</code></span></dt><dd><p>
                     Thread pool with a fixed
                     number of threads (see also
                     <code class="constant">threadNr</code>)
-                  </p>
-                </dd><dt><span class="term"><code class="literal">cached</code></span></dt><dd>
-                  <p>
+                  </p></dd><dt><span class="term"><code class="literal">cached</code></span></dt><dd><p>
                     Cached thread pool which
                     creates threads on demand
-                  </p>
-                </dd><dt><span class="term"><code class="literal">single</code></span></dt><dd>
-                  <p>
+                  </p></dd><dt><span class="term"><code class="literal">single</code></span></dt><dd><p>
                     A single thread only
-                  </p>
-                </dd></dl></div>
+                  </p></dd></dl></div>
           </td>
           <td>
             <code class="constant">single</code>
           </td>
-        </tr>
-        <tr>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">threadNamePrefix</code></td>
           <td>
             Thread name prefix that executor will use while creating new thread(s).
@@ -1587,8 +1346,7 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre>
           <td>
             <code class="constant">jolokia-</code>
           </td>
-        </tr>
-        <tr>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">threadNr</code></td>
           <td>
             Number of threads to be used when the
@@ -1597,16 +1355,14 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre>
           <td>
             <code class="constant">5</code>
           </td>
-        </tr>
-        <tr>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">keystore</code></td>
           <td>
             Path to the SSL keystore to use (https only)
           </td>
           <td>
           </td>
-        </tr>
-        <tr>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">keystorePassword</code></td>
           <td>
             Keystore password (https only). If the password is given embedded in brackets <code class="constant">[[...]]</code>,
@@ -1615,8 +1371,7 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre>
           </td>
           <td>
           </td>
-        </tr>
-        <tr>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">useSslClientAuthentication</code></td>
           <td>
             Whether client certificates should be used for
@@ -1627,28 +1382,23 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre>
           <td>
             <code class="constant">false</code>
           </td>
-        </tr>
-        <tr>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">secureSocketProtocol</code></td>
           <td>Secure protocol that will be used for establishing HTTPS connection (https only)</td>
           <td><code class="constant">TLS</code></td>
-        </tr>
-        <tr>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">keyStoreType</code></td>
           <td>SSL keystore type to use (https only)</td>
           <td><code class="constant">JKS</code></td>
-        </tr>
-        <tr>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">keyManagerAlgorithm</code></td>
           <td>Key manager algorithm (https only)</td>
           <td><code class="constant">SunX509</code></td>
-        </tr>
-        <tr>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">trustManagerAlgorithm</code></td>
           <td>Trust manager algorithm (https only)</td>
           <td><code class="constant">SunX509</code></td>
-        </tr>
-        <tr>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">caCert</code></td>
           <td>
             If HTTPs is to be used and no <code class="constant">keystore</code> is given, then <code class="constant">caCert</code>
@@ -1656,29 +1406,25 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre>
             client certificates when <code class="constant">useSslClientAuthentication</code> is switched on (https only)
           </td>
           <td></td>
-        </tr>
-        <tr>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">serverCert</code></td>
           <td>
             For SSL (and when no <code class="constant">keyStore</code> is used) then this path must point to server
             certificate which is presented to clients (https only)
           </td>
           <td></td>
-        </tr>
-        <tr>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">serverKey</code></td>
           <td>Path to the PEM encoded key file for signing the server cert during TLS handshake. This is only
             used when no <code class="constant">keyStore</code> is used. For decrypting the key the password given with
             <code class="constant">keystorePassword</code> is used (https only).</td>
           <td></td>
-        </tr>
-        <tr>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">serverKeyAlgorithm</code></td>
           <td>Encryption algorithm to use for decrypting the key given with <code class="constant">serverKey</code>
             (https only)</td>
           <td><code class="constant">RSA</code></td>
-        </tr>
-        <tr>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">clientPrincipal</code></td>
           <td>
             The principal which must be given in a client certificate to allow access to the agent. This can be one or
@@ -1691,8 +1437,7 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre>
             (https and useSslAuthentication only)
           </td>
           <td></td>
-        </tr>
-        <tr>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">extraClientCheck</code></td>
           <td>
             If switched on the agent performs an extra check for client authentication that the presented client
@@ -1700,8 +1445,7 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre>
             (https and useSslAuthentication only)
           </td>
           <td></td>
-        </tr>
-        <tr>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">bootAmx</code></td>
           <td>
             If set to <code class="constant">true</code> and if the agent is
@@ -1713,8 +1457,7 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre>
           <td>
             <code class="constant">true</code>
           </td>
-        </tr>
-        <tr>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">config</code></td>
           <td>
             Path to a properties file from where the configuration
@@ -1724,8 +1467,7 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre>
             of course :)
           </td>
           <td></td>
-        </tr>
-        <tr>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">discoveryEnabled</code></td>
           <td>
             Is set to <code class="literal">false</code> then this agent will
@@ -1740,8 +1482,7 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre>
           <td>
             Default: <code class="constant">true</code>
           </td>
-        </tr>
-        <tr>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">discoveryAgentUrl</code></td>
           <td>
             Sets the URL to respond for multicast discovery requests. If
@@ -1757,18 +1498,15 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre>
           <td>
             <code class="constant">http://10.9.11.87:8778/jolokia</code>
           </td>
-        </tr>
-        <tr>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">multicastGroup</code></td>
           <td>The multicast group IPv4 address. This group IP can be also given as an environment variable <code class="literal">JOLOKIA_MULTICAST_GROUP</code> or a system property <code class="literal">jolokia.multicastGroup</code></td>
           <td><code class="constant">239.192.48.84</code></td>
-        </tr>
-        <tr>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">multicastPort</code></td>
           <td>The multicast port. This port can be also given as an environment variable <code class="literal">JOLOKIA_MULTICAST_PORT</code> or a system property <code class="literal">jolokia.multicastPort</code></td>
           <td><code class="constant">24884</code></td>
-        </tr>
-        <tr>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">sslProtocol</code></td>
           <td>
             The list of SSL / TLS protocols enabled. Valid options are available in the documentation
@@ -1779,51 +1517,40 @@ java -javaagent:agent.jar=port=7777,host=localhost</pre>
             <code class="code">sslProtocol.1</code>, <code class="code">sslProtocol.2</code>, ...
           </td>
           <td><code class="code">TLSv1.2</code></td>
-        </tr>
-        <tr>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">sslCipherSuite</code></td>
           <td>
             The list of SSL / TLS cipher suites to enable. The table of available cipher suites is
             available under the "Default Enabled Cipher Suites" at the SunJSSEProvider documentation
-            <a class="ulink" href="http://docs.oracle.com/javase/8/docs/technotes/guides/security/SunProviders.html#SunJSSEProvider" target="_top">here</a>.
+            <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://docs.oracle.com/javase/8/docs/technotes/guides/security/SunProviders.html#SunJSSEProvider" target="_top">here</a>.
             Multiple cipher suites can be configured by using additional options with consecutive index
             suffixes like in <code class="code">sslCipherSuite.1</code>, <code class="code">sslCipherSuite.2</code>, ...
           </td>
           <td></td>
-        </tr>
-        <tr>
+        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
           <td><code class="constant">policyLocation</code></td>
           <td>
             Path to the XML policy file
           </td>
           <td></td>
-        </tr>
-      </table></div>
-      <p>
+        </tr></table></div></div><p>
         Upon successful startup the agent will print out a success
         message with the full URL which can be used by clients for
         contacting the agent.
-      </p>
-    </div>
-  </div>
-  <div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="jvm-attach"></a>3.4.2.&nbsp;Attaching a Jolokia agent on the fly</h3></div></div></div>
-    
-    <p>
+      </p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="jvm-attach"></a>3.4.2.&nbsp;Attaching a Jolokia agent on the fly</h3></div></div></div><p>
       A Jolokia agent can be attached to any running Java process as
       long as the user has sufficient access privileges for
-      accessing the process.  This agent uses the <a class="ulink" href="http://download.oracle.com/javase/6/docs/jdk/api/attach/spec/com/sun/tools/attach/VirtualMachine.html" target="_top">Java
+      accessing the process.  This agent uses the <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://download.oracle.com/javase/6/docs/jdk/api/attach/spec/com/sun/tools/attach/VirtualMachine.html" target="_top">Java
       attach API</a> for dynamically attaching and detaching to
       and from the process. It works similar to JConsole connecting
       to a local process. The Jolokia advantage is, that after the
       start of the agent, it can be reached over the network.
-    </p>
-    <p>
+    </p><p>
       The JAR containing the JVM  agent also contains a client
       application which can be reached via the
       <code class="literal">-jar</code> option. Call it with
       <code class="literal">--help</code> to get a short usage information:
-    </p>
-    <pre class="programlisting">
+    </p><pre class="programlisting">
 $ java -jar jolokia-jvm-1.3.4-agent.jar --help
 
 Jolokia Agent Launcher
@@ -1922,21 +1649,17 @@ There are several possible reasons, why attaching to a process can fail:
    * It must be a Java process ;-)
 
 For more documentation please visit www.jolokia.org
-</pre>
-    <p>
-      Every option described in <a class="xref" href="agents.html#agent-jvm-config" title="Table&nbsp;3.6.&nbsp;JVM agent configuration options">Table&nbsp;3.6, &#8220;JVM agent configuration options&#8221;</a>
+</pre><p>
+      Every option described in <a href="agents.html#agent-jvm-config" title="Table&nbsp;3.6.&nbsp;JVM agent configuration options">Table&nbsp;3.6, &#8220;JVM agent configuration options&#8221;</a>
       is reflected by a command line option for the
       launcher. Additionally, the option <code class="literal">--quiet</code>
       can be used to keep the launcher silent and
       <code class="literal">--verbose</code> for adding some extra logging.
-    </p>
-    <p>
+    </p><p>
       The launcher knows various operational modes, which needs to
       be provided as a non-option argument and possibly require an
       extra argument.
-    </p>
-    <div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="literal">start</code></span></dt><dd>
-          <p>
+    </p><div class="variablelist"><dl><dt><span class="term"><code class="literal">start</code></span></dt><dd><p>
             Use this to attach an agent to an already running, local
             Java process. The additional argument is either the
             <span class="emphasis"><em>process id</em></span> of the Java process to
@@ -1949,18 +1672,14 @@ For more documentation please visit www.jolokia.org
             returns with 1. The URL of the Agent will be printed to
             standard out on an extra line except when the
             <code class="literal">--quiet</code> option is used.
-          </p>
-        </dd><dt><span class="term"><code class="literal">stop</code></span></dt><dd>
-          <p>
+          </p></dd><dt><span class="term"><code class="literal">stop</code></span></dt><dd><p>
               Command for stopping an running and dynamically attached
               agent. The required argument is the Java process id or
               an regular expression as described for the
               <code class="literal">start</code> command. If the agent could be
               stopped, the launcher exits with 0, it exits with 1 if
               there was no agent running.
-          </p>
-        </dd><dt><span class="term"><code class="literal">toggle</code></span></dt><dd>
-          <p>
+          </p></dd><dt><span class="term"><code class="literal">toggle</code></span></dt><dd><p>
             Starts or stops an dynamically attached agent,
             depending on its current state. The Java process ID is
             required as an additional argument. If an agent is
@@ -1972,41 +1691,32 @@ For more documentation please visit www.jolokia.org
             when only a numeric process id is given as argument or a
             regular expression which <span class="emphasis"><em>not</em></span> the same
             as a known command.
-          </p>
-        </dd><dt><span class="term"><code class="literal">status</code></span></dt><dd>
-          <p>
+          </p></dd><dt><span class="term"><code class="literal">status</code></span></dt><dd><p>
             Command for showing the current agent status for a given
             process. The process id or a regular expression is
             required. The launcher will return with 0 when the agent is
             running, otherwise with 1.
-          </p>
-        </dd><dt><span class="term"><code class="literal">list</code></span></dt><dd>
-          <p>
+          </p></dd><dt><span class="term"><code class="literal">list</code></span></dt><dd><p>
             List all local Java processes in a table with the
             process id and the description as columns. This is the
             default command if no non-option argument is given at
             all. <code class="literal">list</code> returns with 0 upon normal
             operation and with 1 otherwise.
-          </p>
-        </dd><dt><span class="term"><code class="literal">encrypt</code></span></dt><dd>
-          <p>
+          </p></dd><dt><span class="term"><code class="literal">encrypt</code></span></dt><dd><p>
             Encrypt the keystore password. You can add the password to encrypt
             as an additional argument or, if not given, it is read from standard input.
             The output of this command is the encrypted password in the format <code class="code">[[....]]</code>,
             which should be used literally (excluding the final newline) for the keystore password
             when using the option <code class="constant">keystorePassword</code> in the agent configuration.
-          </p>
-        </dd></dl></div>
-    <p>
+          </p></dd></dl></div><p>
       The launcher is especially suited for
       <span class="emphasis"><em>one-shot</em></span>, <span class="emphasis"><em>local</em></span>
       queries. For example, a simple shell script for printing out
       the memory usage of a local Java process, including
       (temporarily) attaching an Jolokia agent looks simply like in
-      the following example. With a complete client library like <a class="ulink" href="http://www.jmxp4perl.org" target="_top">Jmx4Perl</a> even more one
-      shot scripts are possible<a href="#ftn.rest-comment" class="footnote" name="rest-comment"><sup class="footnote">[6]</sup></a>.
-    </p>
-    <pre class="programlisting">
+      the following example. With a complete client library like <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://www.jmxp4perl.org" target="_top">Jmx4Perl</a> even more one
+      shot scripts are possible<sup>[<a name="rest-comment" href="#ftn.rest-comment">6</a>]</sup>.
+    </p><pre class="programlisting">
 #!/bin/sh
 
 url=`java -jar agent.jar start $1 | tail -1`
@@ -2017,41 +1727,25 @@ max=`wget -q -O - "${memory_url}/max" | sed 's/^.*"value":\([0-9]*\).*$/\1/'`
 usage=$((${used}*100/${max}))
 echo "Memory Usage: $usage %"
 
-java -jar agent.jar --quiet stop $1</pre>
-  </div>
-</div>
-
-<div class="footnotes"><br><hr width="100" align="left"><div id="ftn.d5e78" class="footnote">
-      <p><a href="#d5e78" class="para"><sup class="para">[1] </sup></a>
+java -jar agent.jar --quiet stop $1</pre></div></div><div class="footnotes"><br><hr width="100" align="left"><div class="footnote"><p><sup>[<a name="ftn.d0e153" href="#d0e153">1</a>] </sup>
         Although the proxy mode is available for all four agents, you
         are normally free to setup the proxy environment. The
         recommendation here is the war-agent for which very
         lightweight servlet container exists. Tomcat or Jetty are both
         a perfect choice for a Jolokia proxy server.
-      </p>
-    </div><div id="ftn.d5e90" class="footnote">
-          <p><a href="#d5e90" class="para"><sup class="para">[2] </sup></a>
+      </p></div><div class="footnote"><p><sup>[<a name="ftn.d0e172" href="#d0e172">2</a>] </sup>
             Of course, there is much more to OSGi, a platform and
             programing model which I <span class="emphasis"><em>really</em></span>
             like. This is my personal pet agent, so to speak ;-).
-          </p>
-        </div><div id="ftn.d5e100" class="footnote">
-          <p><a href="#d5e100" class="para"><sup class="para">[3] </sup></a>
-           <a class="ulink" href="http://answers.yahoo.com/question/index?qid=20071216082739AAfkxnm" target="_top">What is the proper plural form of "bus"?</a>
-          </p>
-        </div><div id="ftn.d5e108" class="footnote">
-        <p><a href="#d5e108" class="para"><sup class="para">[4] </sup></a>
+          </p></div><div class="footnote"><p><sup>[<a name="ftn.d0e193" href="#d0e193">3</a>] </sup>
+           <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://answers.yahoo.com/question/index?qid=20071216082739AAfkxnm" target="_top">What is the proper plural form of "bus"?</a>
+          </p></div><div class="footnote"><p><sup>[<a name="ftn.d0e209" href="#d0e209">4</a>] </sup>
           You could even instrument a Java EE application server this way,
           however this is not recommended.
-        </p>
-        </div><div id="ftn.d5e406" class="footnote">
-      <p><a href="#d5e406" class="para"><sup class="para">[5] </sup></a>
+        </p></div><div class="footnote"><p><sup>[<a name="ftn.d0e940" href="#d0e940">5</a>] </sup>
         Replace
         <code class="classname">org.jolokia.osgi.http.AgentServlet</code> with
         <code class="classname">org.jolokia.http.AgentServlet</code> to use
         the servlet in a non-OSGi environment.
-      </p>
-    </div><div id="ftn.rest-comment" class="footnote">
-      <p><a href="#rest-comment" class="para"><sup class="para">[6] </sup></a>And in fact, some support for launching this dynamic
-      agent is planned for a forthcoming release of jmx4perl.</p>
-      </div></div></div><div class="navfooter"><div><div class="navbar"><a xmlns:xslthl="http://xslthl.sf.net" href="architecture.html" title="Chapter&nbsp;2.&nbsp;Architecture">Previous</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="" title="">Contents</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="security.html" title="Chapter&nbsp;4.&nbsp;Security">Next</a></div></div></div></body></html>
+      </p></div><div class="footnote"><p><sup>[<a name="ftn.rest-comment" href="#rest-comment">6</a>] </sup>And in fact, some support for launching this dynamic
+      agent is planned for a forthcoming release of jmx4perl.</p></div></div></div><div class="navfooter"><div><div class="navbar"><a xmlns:xslthl="http://xslthl.sf.net" href="architecture.html" title="Chapter&nbsp;2.&nbsp;Architecture">Previous</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="index.html" title="Jolokia - Reference Documentation">Contents</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="security.html" title="Chapter&nbsp;4.&nbsp;Security">Next</a></div></div></div></body></html>
