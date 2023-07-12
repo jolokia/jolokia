@@ -1,6 +1,6 @@
 <html><head>
       <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-   <title>Chapter&nbsp;2.&nbsp;Architecture</title><link xmlns:xslthl="http://xslthl.sf.net" href="css/base.css" rel="stylesheet" type="text/css"><link xmlns:xslthl="http://xslthl.sf.net" href="css/style.css" rel="stylesheet" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="Jolokia - Reference Documentation"><link rel="up" href="index.html" title="Jolokia - Reference Documentation"><link rel="prev" href="introduction.html" title="Chapter&nbsp;1.&nbsp;Introduction"><link rel="next" href="agents.html" title="Chapter&nbsp;3.&nbsp;Agents"><script xmlns:xslthl="http://xslthl.sf.net" data-cfasync="false" type="text/javascript">
+   <title>Chapter&nbsp;2.&nbsp;Architecture</title><link xmlns:xslthl="http://xslthl.sf.net" href="css/base.css" rel="stylesheet" type="text/css"><link xmlns:xslthl="http://xslthl.sf.net" href="css/style.css" rel="stylesheet" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.79.1"><link rel="home" href="index.html" title="Jolokia - Reference Documentation"><link rel="up" href="index.html" title="Jolokia - Reference Documentation"><link rel="prev" href="introduction.html" title="Chapter&nbsp;1.&nbsp;Introduction"><link rel="next" href="agents.html" title="Chapter&nbsp;3.&nbsp;Agents"><script xmlns:xslthl="http://xslthl.sf.net" data-cfasync="false" type="text/javascript">
        var host = "jolokia.org";
        if ((host == window.location.host) && (window.location.protocol != "https:")) {
             window.location.protocol = "https";
@@ -16,11 +16,14 @@
     ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
     })();
-      </script></head><body><div class="navheader"><div><div class="navbar"><a xmlns:xslthl="http://xslthl.sf.net" href="introduction.html" title="Chapter&nbsp;1.&nbsp;Introduction">Previous</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="index.html" title="Jolokia - Reference Documentation">Contents</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="agents.html" title="Chapter&nbsp;3.&nbsp;Agents">Next</a></div></div></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h1 xmlns:xslthl="http://xslthl.sf.net"><a name="architecture"></a>Chapter&nbsp;2.&nbsp;Architecture</h1></div></div></div><p>
+      </script></head><body><div class="chapter"><div class="titlepage"><div><div><h1 xmlns:xslthl="http://xslthl.sf.net"><a name="architecture"></a>Chapter&nbsp;2.&nbsp;Architecture</h1></div></div></div>
+  
+  <p>
     The architecture of Jolokia is quite different to that of JSR-160
     connectors. One of the most striking difference is Jolokia's
     typeless approach.
-  </p><p>
+  </p>
+  <p>
     JSR-160, released in 2003, has a different design goal than
     Jolokia. It is a specification with which a client can transparently
     invoke MBean calls, regardless whether the MBean resides within a
@@ -37,7 +40,8 @@
     remote call. This is probably the main reason why RMI (the default
     protocol stack of JSR-160 connectors) lost market share to
     more explicit remote protocols.
-  </p><p>
+  </p>
+  <p>
     One problem with JSR-160 is it implicit reliance on RMI and its
     requirement for a complete (Java) object serialization mechanism
     for passing management information over the wire. This closes the
@@ -47,8 +51,12 @@
     a bit <span class="emphasis"><em>asymmetrically</em></span> in its capabilities). Of course
     this approach has some drawbacks, too, but also quite some
     advantages. At least it is unique in the JMX world ;-).
-  </p><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="agent-mode"></a>2.1.&nbsp;Agent mode</h2></div></div></div><p>
-      <a href="architecture.html#fig-architecture-overview" title="Figure&nbsp;2.1.&nbsp;Jolokia architecture">Figure&nbsp;2.1, &#8220;Jolokia architecture&#8221;</a> illustrates the
+  </p>
+
+  <div class="section"><div class="titlepage"><div><div><h2 class="title"><a name="agent-mode"></a>2.1.&nbsp;Agent mode</h2></div></div></div>
+    
+    <p>
+      <a class="xref" href="architecture.html#fig-architecture-overview" title="Figure&nbsp;2.1.&nbsp;Jolokia architecture">Figure&nbsp;2.1, &#8220;Jolokia architecture&#8221;</a> illustrates the
       environment in which Jolokia operates. The agent exports on the
       frontside a JSON based protocol over HTTP that gets bridged to
       invocation of local JMX MBeans. It lives outside the JSR-160
@@ -60,19 +68,32 @@
       deployment of the agent is well understood and should pose no
       entry barrier for any developer who has ever dealt with Java web
       applications.
-    </p><div class="figure"><a name="fig-architecture-overview"></a><p class="title"><b>Figure&nbsp;2.1.&nbsp;Jolokia architecture</b></p><div class="figure-contents"><div class="mediaobject"><img src="images/architecture.png" alt="Jolokia architecture"></div></div></div><br class="figure-break"><p>
+    </p>
+
+    <div class="figure"><a name="fig-architecture-overview"></a><p class="title"><b>Figure&nbsp;2.1.&nbsp;Jolokia architecture</b></p><div class="figure-contents">
+      
+      <div class="mediaobject"><img src="images/architecture.png" alt="Jolokia architecture"></div>
+    </div></div><br class="figure-break">
+
+    <p>
       But there are more options. Specialized agents are able to use an OSGi
       HttpService or come with an embedded Jetty-Server in case of the
       Mule agent. The JVM agent uses the HTTP-Server included
       with every Oracle JVM 6 and can be attached dynamically to any
-      running Java process. Agents are described in detail in <a href="agents.html">Chapter&nbsp;3, <i xmlns:xlink="http://www.w3.org/1999/xlink">Agents</i></a>.
-    </p><p>
+      running Java process. Agents are described in detail in <a class="xref" href="agents.html" title="Chapter&nbsp;3.&nbsp;Agents">Chapter&nbsp;3, <i>Agents</i></a>.
+    </p>
+    <p>
       Jolokia can be also integrated
       into one's own applications very easily. The <code class="literal">jolokia-core</code>
       library (which comes bundled as a jar), includes a servlet
-      which can be easily added to a custom application. <a href="agents.html#agent-war-programmatic">Section&nbsp;3.1.3, &#8220;Programmatic usage of the Jolokia agent servlet&#8221;</a> contains more information
+      which can be easily added to a custom application. <a class="xref" href="agents.html#agent-war-programmatic" title="3.1.3.&nbsp;Programmatic usage of the Jolokia agent servlet">Section&nbsp;3.1.3, &#8220;Programmatic usage of the Jolokia agent servlet&#8221;</a> contains more information
       about this.
-    </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="proxy-mode"></a>2.2.&nbsp;Proxy Mode</h2></div></div></div><p>
+    </p>
+  </div>
+
+  <div class="section"><div class="titlepage"><div><div><h2 class="title"><a name="proxy-mode"></a>2.2.&nbsp;Proxy Mode</h2></div></div></div>
+    
+    <p>
       Proxy mode is a solution for when it is impossible to deploy
       the Jolokia agent on the target platform. For this mode, the
       only prerequisite for accessing the target server is a JSR-160
@@ -82,26 +103,40 @@
       Another reason could be that the target server already
       exports JMX via JSR-160 and you want to avoid the extra step of
       deploying the agent.
-    </p><p>
+    </p>
+
+    <p>
       A dedicated proxy servlet server is needed for hosting
       <code class="literal">jolokia.war</code>, which by default supports both
       the <span class="emphasis"><em>agent mode</em></span> and the <span class="emphasis"><em>proxy
       mode</em></span>. A lightweight container like Tomcat or Jetty is
       a perfect choice for this kind of setup.
-    </p><p>
-      Figure <a href="architecture.html#fig-architecture-proxy" title="Figure&nbsp;2.2.&nbsp;Jolokia as JMX Proxy">Figure&nbsp;2.2, &#8220;Jolokia as JMX Proxy&#8221;</a> describes  a typical setup for the proxy mode. A
+    </p>
+    <p>
+      Figure <a class="xref" href="architecture.html#fig-architecture-proxy" title="Figure&nbsp;2.2.&nbsp;Jolokia as JMX Proxy">Figure&nbsp;2.2, &#8220;Jolokia as JMX Proxy&#8221;</a> describes  a typical setup for the proxy mode. A
       client sends a usual Jolokia request containing an extra section
       for specifying the target which should be queried. All routing
       information is contained in the request itself so that the proxy
       can act universally without the need of a specific
       configuration.
-    </p><div class="figure"><a name="fig-architecture-proxy"></a><p class="title"><b>Figure&nbsp;2.2.&nbsp;Jolokia as JMX Proxy</b></p><div class="figure-contents"><div class="mediaobject"><img src="images/proxy.png" alt="Jolokia as JMX Proxy"></div></div></div><br class="figure-break"><p>
+    </p>
+
+    <div class="figure"><a name="fig-architecture-proxy"></a><p class="title"><b>Figure&nbsp;2.2.&nbsp;Jolokia as JMX Proxy</b></p><div class="figure-contents">
+      
+      <div class="mediaobject"><img src="images/proxy.png" alt="Jolokia as JMX Proxy"></div>
+    </div></div><br class="figure-break">
+
+
+    <p>
       Having said all that, the proxy mode has some limitations which are
-      listed in <a href="proxy.html">Chapter&nbsp;5, <i xmlns:xlink="http://www.w3.org/1999/xlink">Proxy Mode </i></a>.
-    </p><p>
+      listed in <a class="xref" href="proxy.html" title="Chapter&nbsp;5.&nbsp;Proxy Mode">Chapter&nbsp;5, <i>Proxy Mode </i></a>.
+    </p>
+    <p>
       To summarize, the proxy mode should be used only when
       required. The agent servlet on its own is more powerful than the
       proxy mode since it eliminates an additional layer adding to the
       overall complexity and performance. Also, some features like
       merging of MBeanServers are not available in the proxy mode.
-    </p></div></div><div class="navfooter"><div><div class="navbar"><a xmlns:xslthl="http://xslthl.sf.net" href="introduction.html" title="Chapter&nbsp;1.&nbsp;Introduction">Previous</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="index.html" title="Jolokia - Reference Documentation">Contents</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="agents.html" title="Chapter&nbsp;3.&nbsp;Agents">Next</a></div></div></div></body></html>
+    </p>
+  </div>
+</div><div class="navfooter"><div><div class="navbar"><a xmlns:xslthl="http://xslthl.sf.net" href="introduction.html" title="Chapter&nbsp;1.&nbsp;Introduction">Previous</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="" title="">Contents</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="agents.html" title="Chapter&nbsp;3.&nbsp;Agents">Next</a></div></div></div></body></html>

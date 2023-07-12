@@ -1,6 +1,6 @@
 <html><head>
       <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-   <title>Chapter&nbsp;7.&nbsp;Jolokia MBeans</title><link xmlns:xslthl="http://xslthl.sf.net" href="css/base.css" rel="stylesheet" type="text/css"><link xmlns:xslthl="http://xslthl.sf.net" href="css/style.css" rel="stylesheet" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="Jolokia - Reference Documentation"><link rel="up" href="index.html" title="Jolokia - Reference Documentation"><link rel="prev" href="protocol.html" title="Chapter&nbsp;6.&nbsp;Jolokia Protocol"><link rel="next" href="clients.html" title="Chapter&nbsp;8.&nbsp;Clients"><script xmlns:xslthl="http://xslthl.sf.net" data-cfasync="false" type="text/javascript">
+   <title>Chapter&nbsp;7.&nbsp;Jolokia MBeans</title><link xmlns:xslthl="http://xslthl.sf.net" href="css/base.css" rel="stylesheet" type="text/css"><link xmlns:xslthl="http://xslthl.sf.net" href="css/style.css" rel="stylesheet" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.79.1"><link rel="home" href="index.html" title="Jolokia - Reference Documentation"><link rel="up" href="index.html" title="Jolokia - Reference Documentation"><link rel="prev" href="protocol.html" title="Chapter&nbsp;6.&nbsp;Jolokia Protocol"><link rel="next" href="clients.html" title="Chapter&nbsp;8.&nbsp;Clients"><script xmlns:xslthl="http://xslthl.sf.net" data-cfasync="false" type="text/javascript">
        var host = "jolokia.org";
        if ((host == window.location.host) && (window.location.protocol != "https:")) {
             window.location.protocol = "https";
@@ -16,17 +16,25 @@
     ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
     })();
-      </script></head><body><div class="navheader"><div><div class="navbar"><a xmlns:xslthl="http://xslthl.sf.net" href="protocol.html" title="Chapter&nbsp;6.&nbsp;Jolokia Protocol">Previous</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="index.html" title="Jolokia - Reference Documentation">Contents</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="clients.html" title="Chapter&nbsp;8.&nbsp;Clients">Next</a></div></div></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h1 xmlns:xslthl="http://xslthl.sf.net"><a name="mbeans"></a>Chapter&nbsp;7.&nbsp;Jolokia MBeans</h1></div></div></div><p>
+      </script></head><body><div class="chapter"><div class="titlepage"><div><div><h1 xmlns:xslthl="http://xslthl.sf.net"><a name="mbeans"></a>Chapter&nbsp;7.&nbsp;Jolokia MBeans</h1></div></div></div>
+  
+  <p>
     Besides bridging JMX to the HTTP/JSON world, the Jolokia agents
     also install their own MBeans which provide the extra services 
     described in this chapter.
-  </p><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="mbean-config"></a>7.1.&nbsp;Configuration MBean</h2></div></div></div><p>
+  </p>
+  <div class="section"><div class="titlepage"><div><div><h2 class="title"><a name="mbean-config"></a>7.1.&nbsp;Configuration MBean</h2></div></div></div>
+    
+    <p>
       This MBean, which is registered under the name <span class="bold"><strong>jolokia:type=Config</strong></span>, allows changing
       configuration parameters. Changes are non-persistent and get
       lost after a restart of the hosting application
       server. Debugging mode and the history store can be configured with
       this MBean.
-    </p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="mbean-debugging"></a>7.1.1.&nbsp;Debugging</h3></div></div></div><p>
+    </p>
+    <div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="mbean-debugging"></a>7.1.1.&nbsp;Debugging</h3></div></div></div>
+      
+      <p>
         Debugging can be switched on by setting the attribute
         <code class="literal">Debug</code>. When debugging is switched on, the
         Jolokia agent will store debug information in a ring buffer in
@@ -37,14 +45,19 @@
         turn contain their requests) sent to the client. Finally, the
         operation <code class="literal">resetDebugInfo</code> clears the debug
         history. 
-      </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="mbean-history"></a>7.1.2.&nbsp;History store</h3></div></div></div><p>
+      </p>
+    </div>
+    <div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="mbean-history"></a>7.1.2.&nbsp;History store</h3></div></div></div>
+      
+      <p>
         The <span class="emphasis"><em>history store</em></span> can be used to remember
         attribute and return values within the agent's memory. The
-        Nagios check <span><strong class="command">check_jmx4perl</strong></span>, for instance,
+        Nagios check <span class="command"><strong>check_jmx4perl</strong></span>, for instance,
         uses this feature for its delta check, which measures
         changes in attribute values. In order to
         switch on history tracking, two operations are provided:
-      </p><div class="variablelist"><dl><dt><span class="term"><span class="bold"><strong>setHistoryLimitForOperation</strong></span></span></dt><dd>              
+      </p>
+      <div class="variablelist"><dl class="variablelist"><dt><span class="term"><span class="bold"><strong>setHistoryLimitForOperation</strong></span></span></dt><dd>              
             JMX operation for switching on tracking of the execution of
             JMX operations. It takes five arguments: The MBean and
             operation name, an optional target URL when the agent
@@ -66,7 +79,8 @@
             history. As above, the target URL is only used for proxy
             requests. The path can be used to store only read requests
             with the given path.
-            </dd></dl></div><p>
+            </dd></dl></div>
+      <p>
        There are two kinds of limits which can be applied: Either by a
        maximum number of historical values to remember or a maximum
        duration for the values to keep. If both limits are given in a
@@ -74,33 +88,46 @@
        applied. In any case, there are never more values remembered
        than the global limit which can be set and retrieved with
        attribute <code class="constant">HistoryMaxEntries</code>. 
-      </p><p>
+      </p>
+      <p>
         The History store can be emptied with a call to the operation
         <code class="methodname">resetHistoryEntries</code>. This also
         switches off all history tracking. 
-      </p><p>
+      </p>
+      <p>
         If for a request history tracking is switched on, the JSON
         response will contain an extra field
         <code class="constant">history</code> which contains a list with
         historical values along with the timestamp when it was
-        recorded. This format is described in detail in <a href="protocol.html#history">Section&nbsp;6.5, &#8220;Tracking historical values&#8221;</a>.
-      </p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="mbean-serverhandler"></a>7.2.&nbsp;Server Handler</h2></div></div></div><p>
+        recorded. This format is described in detail in <a class="xref" href="protocol.html#history" title="6.5.&nbsp;Tracking historical values">Section&nbsp;6.5, &#8220;Tracking historical values&#8221;</a>.
+      </p>
+    </div>
+  </div>
+  <div class="section"><div class="titlepage"><div><div><h2 class="title"><a name="mbean-serverhandler"></a>7.2.&nbsp;Server Handler</h2></div></div></div>
+    
+    <p>
       The MBean <span class="bold"><strong>jolokia:type=ServerHandler</strong></span> has a single
       operation <code class="methodname">mBeanServersInfo</code> with no
       arguments. This operation can be used to dump out the name of
       all registered MBeans on all found MBeanServers. It is helpful to
       get a quick and condensed overview of the available JMX
       information. 
-    </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="mbean-discovery"></a>7.3.&nbsp;Discovery MBean</h2></div></div></div><p>
+    </p>
+  </div>
+  <div class="section"><div class="titlepage"><div><div><h2 class="title"><a name="mbean-discovery"></a>7.3.&nbsp;Discovery MBean</h2></div></div></div>
+    
+    <p>
       The MBean <span class="bold"><strong>jolokia:type=Discovery</strong></span> can be used to detect other MBeans by
       sending multicast discovery UDP requests. Every agent which has discovery enabled will respond with information
       about the agent itself and the access URL. The MBean itself ha two operations: <code class="methodname">lookupAgents</code>
       and <code class="methodname">lookupAgentsWithTimeout</code> which either use a default timeout of one second for waiting
       for response packet or with a user provided timeout given as argument to this operation. Both methods return an
       JSON array which contains JSON objects, one for each agent discovered.
-    </p><p>
+    </p>
+    <p>
       A return value of these operation could look like:
-    </p><pre class="programlisting">
+    </p>
+    <pre class="programlisting">
 [
   {
       "agent_id" : "10.9.11.25-58613-81b087d-servlet",
@@ -119,11 +146,17 @@
       "server_product" : "Felix",
       "server_version" : "4.2.1"
   }
-]</pre><div xmlns:xslthl="http://xslthl.sf.net" class="table"><p class="title"><b>Table&nbsp;7.1.&nbsp;Response properties</b></p><div class="table-contents"><table id="discovery-mbean-response"><thead xmlns:xi="http://www.w3.org/2001/XInclude"><tr>
+]</pre>
+     <div class="table"><a name="discovery-mbean-response"></a><table id="discovery-mbean-response">
+      Response properties
+      <thead>
+        <tr>
           <td>Property</td>
           <td>Description</td>
           <td>Example</td>
-        </tr></thead><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+        </tr>        
+      </thead>
+      <tr>
         <td><code class="constant">agent_id</code></td>
         <td>
           Each agent has a unique id which can be either provided
@@ -135,7 +168,8 @@
         <td>
           10.9.11.87-23455-9184ef-osgi
         </td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="constant">agent_description</code></td>
         <td>
           An optional description which can be used as a UI label if
@@ -144,7 +178,8 @@
         <td>
           ServiceMix ESB
         </td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="constant">url</code></td>
         <td>
           The URL how this agent can be contacted. This URL is
@@ -159,7 +194,8 @@
         <td>
           http://10.9.11.87:8080/jolokia
         </td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="constant">secured</code></td>
         <td>
           Whether the agent was configured for authentication or not. 
@@ -167,7 +203,8 @@
         <td>
           false
         </td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="constant">server_vendor</code></td>
         <td>
           The vendor of the container the agent is running in. This
@@ -176,7 +213,8 @@
         <td>
           Apache
         </td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="constant">server_product</code></td>
         <td>
           The container product if detected
@@ -184,7 +222,8 @@
         <td>
           tomcat
         </td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="constant">server_version</code></td>
         <td>
           The container's version (if detected)
@@ -192,4 +231,9 @@
         <td>
           7.0.50
         </td>
-      </tr></table></div></div></div></div><div class="navfooter"><div><div class="navbar"><a xmlns:xslthl="http://xslthl.sf.net" href="protocol.html" title="Chapter&nbsp;6.&nbsp;Jolokia Protocol">Previous</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="index.html" title="Jolokia - Reference Documentation">Contents</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="clients.html" title="Chapter&nbsp;8.&nbsp;Clients">Next</a></div></div></div></body></html>
+      </tr>
+
+      
+     </table></div>
+  </div>
+</div><div class="navfooter"><div><div class="navbar"><a xmlns:xslthl="http://xslthl.sf.net" href="protocol.html" title="Chapter&nbsp;6.&nbsp;Jolokia Protocol">Previous</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="" title="">Contents</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="clients.html" title="Chapter&nbsp;8.&nbsp;Clients">Next</a></div></div></div></body></html>

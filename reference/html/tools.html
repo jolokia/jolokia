@@ -1,6 +1,6 @@
 <html><head>
       <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-   <title>Chapter&nbsp;10.&nbsp;Tools</title><link xmlns:xslthl="http://xslthl.sf.net" href="css/base.css" rel="stylesheet" type="text/css"><link xmlns:xslthl="http://xslthl.sf.net" href="css/style.css" rel="stylesheet" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="Jolokia - Reference Documentation"><link rel="up" href="index.html" title="Jolokia - Reference Documentation"><link rel="prev" href="jmx.html" title="Chapter&nbsp;9.&nbsp;Jolokia JMX"><script xmlns:xslthl="http://xslthl.sf.net" data-cfasync="false" type="text/javascript">
+   <title>Chapter&nbsp;10.&nbsp;Tools</title><link xmlns:xslthl="http://xslthl.sf.net" href="css/base.css" rel="stylesheet" type="text/css"><link xmlns:xslthl="http://xslthl.sf.net" href="css/style.css" rel="stylesheet" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.79.1"><link rel="home" href="index.html" title="Jolokia - Reference Documentation"><link rel="up" href="index.html" title="Jolokia - Reference Documentation"><link rel="prev" href="jmx.html" title="Chapter&nbsp;9.&nbsp;Jolokia JMX"><script xmlns:xslthl="http://xslthl.sf.net" data-cfasync="false" type="text/javascript">
        var host = "jolokia.org";
        if ((host == window.location.host) && (window.location.protocol != "https:")) {
             window.location.protocol = "https";
@@ -16,45 +16,68 @@
     ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
     })();
-      </script></head><body><div class="navheader"><div><div class="navbar"><a xmlns:xslthl="http://xslthl.sf.net" href="jmx.html" title="Chapter&nbsp;9.&nbsp;Jolokia JMX">Previous</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="index.html" title="Jolokia - Reference Documentation">Contents</a></div></div></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h1 xmlns:xslthl="http://xslthl.sf.net"><a name="tools"></a>Chapter&nbsp;10.&nbsp;Tools</h1></div></div></div><p>
+      </script></head><body><div class="chapter"><div class="titlepage"><div><div><h1 xmlns:xslthl="http://xslthl.sf.net"><a name="tools"></a>Chapter&nbsp;10.&nbsp;Tools</h1></div></div></div>
+  
+  <p>
     Various tools complete the Jolokia portfolio. Some of the are
     available under the Jolokia umbrella, some of them are hosted
     elsewhere. This chapter gives an overview of this tool landscape.
-  </p><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="tools-jmx4perl"></a>10.1.&nbsp;Jmx4Perl</h2></div></div></div><p>
+  </p>
 
-    </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="tools-roo"></a>10.2.&nbsp;Jolokia Roo Addon</h2></div></div></div><p>
-    The Jolokia <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://www.springsource.org/roo" target="_top">Roo</a> addon allows for easy
+  <div class="section"><div class="titlepage"><div><div><h2 class="title"><a name="tools-jmx4perl"></a>10.1.&nbsp;Jmx4Perl</h2></div></div></div>
+    
+    <p>
+
+    </p>
+  </div>
+  <div class="section"><div class="titlepage"><div><div><h2 class="title"><a name="tools-roo"></a>10.2.&nbsp;Jolokia Roo Addon</h2></div></div></div>
+  
+  <p>
+    The Jolokia <a class="ulink" href="http://www.springsource.org/roo" target="_top">Roo</a> addon allows for easy
     integration of an agent servlet in an existing Roo web
     project. 
-  </p><div class="note"><h3 class="title"></h3><p>
+  </p>
+  <div class="note">
+    <p>
       This addon has been submitted to the Roobot, a central Roo addon
       registry. Until it is publicly available you can directly
       install the addon from our repository.
-    </p><pre class="programlisting">
+    </p>
+    <pre class="programlisting">
 roo&gt; osgi obr url add --url http://labs.consol.de/maven/repository/roo-repository.xml
-roo&gt; osgi obr start --bundleSymbolicName org.jolokia.roo</pre><p>
+roo&gt; osgi obr start --bundleSymbolicName org.jolokia.roo</pre>
+    <p>
       Alternatively, if there are problems with the approach above
       (which is currently the case because the hard coded public PGP
       keyserver which is used by Roo 1.1.1 is down) and you don't need
       PGP verification, you can install the addon bundle directly from
       our repository:
-    </p><pre class="programlisting">
-roo&gt; osgi start --url http://labs.consol.de/maven/repository/org/jolokia/jolokia-roo/0.83/jolokia-roo-0.83.jar</pre></div><p>
+    </p>
+    <pre class="programlisting">
+roo&gt; osgi start --url http://labs.consol.de/maven/repository/org/jolokia/jolokia-roo/0.83/jolokia-roo-0.83.jar</pre>
+  </div> 
+  <p>
     As soon as <code class="filename">src/main/webapp/WEB-INF/web.xml</code>
     is available in the roo project, Jolokia can be setup with the
-    command <span><strong class="command">jolokia setup</strong></span>. This will add the
+    command <span class="command"><strong>jolokia setup</strong></span>. This will add the
     proper dependency in the <code class="filename">pom.xml</code> and adapt
     <code class="filename">web.xml</code> so that an agent servlet gets
     registered under the subcontext <code class="literal">jolokia</code> (so,
     when you web application is deployed under the context
     <code class="literal">/mywebapp</code>, the agent is reachable under
     <code class="literal">/mywebapp/jolokia</code>. This command knows about
-    the options described in <a href="tools.html#table-roo-options" title="Table&nbsp;10.1.&nbsp;jolokia setup Options">Table&nbsp;10.1, &#8220;jolokia setup Options&#8221;</a>,
+    the options described in <a class="xref" href="tools.html#table-roo-options" title="Table&nbsp;10.1.&nbsp;jolokia setup Options">Table&nbsp;10.1, &#8220;jolokia setup Options&#8221;</a>,
     all of which are optional.
-  </p><div xmlns:xslthl="http://xslthl.sf.net" class="table"><p class="title"><b>Table&nbsp;10.1.&nbsp;jolokia setup Options</b></p><div class="table-contents"><table id="table-roo-options"><thead xmlns:xi="http://www.w3.org/2001/XInclude"><tr>
+  </p>
+  <div class="table"><a name="table-roo-options"></a><table id="table-roo-options">
+    jolokia setup Options
+    <thead>
+      <tr>
         <td>Option</td>
         <td>Description</td>
-      </tr></thead><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+    </thead>
+    <tr>
       <td><code class="literal">--addPolicy</code></td>
       <td>
         This adds an additional
@@ -64,20 +87,26 @@ roo&gt; osgi start --url http://labs.consol.de/maven/repository/org/jolokia/jolo
         however, doesn't come with any restriction but contains
         sample configurations commented out.
       </td>
-    </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+    </tr>
+    <tr>
       <td><code class="literal">--addJsr160Proxy</code></td>
       <td>
         Adapts the agent servlet's <code class="constant">init-param</code>
         to add an additional
         <code class="classname">org.jolokia.jsr160.Jsr160RequestDispatcher</code>
         request dispatcher which allows the installed servlet to act
-        as an JSR-160 proxy. See <a href="proxy.html">Chapter&nbsp;5, <i xmlns:xlink="http://www.w3.org/1999/xlink">Proxy Mode </i></a> for details
+        as an JSR-160 proxy. See <a class="xref" href="proxy.html" title="Chapter&nbsp;5.&nbsp;Proxy Mode">Chapter&nbsp;5, <i>Proxy Mode </i></a> for details
         about the JSR-160 proxy
       </td>
-    </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+    </tr>
+    <tr>
       <td><code class="literal">--addDefaultInitParams</code></td>
       <td>By default, the servlet gets registered without any init
       parameters. With this option, all available
       <code class="literal">init-param</code> are added to the servlet
       definition with their default values.</td>
-    </tr></table></div></div></div></div><div class="navfooter"><div><div class="navbar"><a xmlns:xslthl="http://xslthl.sf.net" href="jmx.html" title="Chapter&nbsp;9.&nbsp;Jolokia JMX">Previous</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="index.html" title="Jolokia - Reference Documentation">Contents</a></div></div></div></body></html>
+    </tr>      
+  </table></div>
+</div>
+
+</div><div class="navfooter"><div><div class="navbar"><a xmlns:xslthl="http://xslthl.sf.net" href="jmx.html" title="Chapter&nbsp;9.&nbsp;Jolokia JMX">Previous</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="" title="">Contents</a></div></div></div></body></html>

@@ -1,6 +1,6 @@
 <html><head>
       <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-   <title>Chapter&nbsp;6.&nbsp;Jolokia Protocol</title><link xmlns:xslthl="http://xslthl.sf.net" href="css/base.css" rel="stylesheet" type="text/css"><link xmlns:xslthl="http://xslthl.sf.net" href="css/style.css" rel="stylesheet" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="Jolokia - Reference Documentation"><link rel="up" href="index.html" title="Jolokia - Reference Documentation"><link rel="prev" href="proxy.html" title="Chapter&nbsp;5.&nbsp;Proxy Mode"><link rel="next" href="mbeans.html" title="Chapter&nbsp;7.&nbsp;Jolokia MBeans"><script xmlns:xslthl="http://xslthl.sf.net" data-cfasync="false" type="text/javascript">
+   <title>Chapter&nbsp;6.&nbsp;Jolokia Protocol</title><link xmlns:xslthl="http://xslthl.sf.net" href="css/base.css" rel="stylesheet" type="text/css"><link xmlns:xslthl="http://xslthl.sf.net" href="css/style.css" rel="stylesheet" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.79.1"><link rel="home" href="index.html" title="Jolokia - Reference Documentation"><link rel="up" href="index.html" title="Jolokia - Reference Documentation"><link rel="prev" href="proxy.html" title="Chapter&nbsp;5.&nbsp;Proxy Mode"><link rel="next" href="mbeans.html" title="Chapter&nbsp;7.&nbsp;Jolokia MBeans"><script xmlns:xslthl="http://xslthl.sf.net" data-cfasync="false" type="text/javascript">
        var host = "jolokia.org";
        if ((host == window.location.host) && (window.location.protocol != "https:")) {
             window.location.protocol = "https";
@@ -16,16 +16,21 @@
     ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
     })();
-      </script></head><body><div class="navheader"><div><div class="navbar"><a xmlns:xslthl="http://xslthl.sf.net" href="proxy.html" title="Chapter&nbsp;5.&nbsp;Proxy Mode">Previous</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="index.html" title="Jolokia - Reference Documentation">Contents</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="mbeans.html" title="Chapter&nbsp;7.&nbsp;Jolokia MBeans">Next</a></div></div></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h1 xmlns:xslthl="http://xslthl.sf.net"><a name="protocol"></a>Chapter&nbsp;6.&nbsp;Jolokia Protocol</h1></div></div></div><p>
+      </script></head><body><div class="chapter"><div class="titlepage"><div><div><h1 xmlns:xslthl="http://xslthl.sf.net"><a name="protocol"></a>Chapter&nbsp;6.&nbsp;Jolokia Protocol</h1></div></div></div>
+    
+    <p>
       Jolokia uses a JSON-over-HTTP protocol which is described in
       this chapter. The communication is based on a request-response
       paradigm, where each request results in a single response.
-    </p><div xmlns:xslthl="http://xslthl.sf.net" class="sidebar-border"><div class="sidebar"><p class="title"><b>GET URLs are chatty</b></p>
+    </p>
+  <div class="sidebar"><div class="titlepage"><div><div><p class="title"><b>GET URLs are chatty</b></p></div></div></div>
+    
     Keep in mind
     that many web servers log the requested path of every request, including
     parameters passed to a GET request, so sending messages over GET
     often bloats server logs.
-  </div></div><p>
+  </div>
+    <p>
       Jolokia requests can be sent in two ways: Either as a HTTP GET
       request, in which case the request parameters are encoded
       completely in the URL. Or as a POST request where the request is
@@ -36,15 +41,18 @@
       the request within the HTTP body. They are more appropriate for
       complex requests and provide some additional features (e.g. bulk
       requests are only possible with POST).
-    </p><p>
+    </p>
+    <p>
       The response returned by the agent uses always JSON for its data
       representation. It has the same format regardless whether GET or
       POST requests are used.
-    </p><p>
+    </p>
+    <p>
       The rest of this chapter is divided into two parts: First, the
       general structure of requests and responses are explained after
       which the representation of Jolokia supported operations defined.
-    </p><div class="note"><h3 class="title"></h3>
+    </p>
+    <div class="note">
       Unfortunately the term <span class="emphasis"><em>operation</em></span> is
       used in different contexts which should be
       distinguished from one another. <span class="emphasis"><em>Jolokia operations</em></span> denote
@@ -53,16 +61,22 @@
       MBean. Whenever the context requires it, this documents uses
       <span class="emphasis"><em>Jolokia</em></span> or <span class="emphasis"><em>JMX</em></span> as
       prefix.
-    </div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="request-response"></a>6.1.&nbsp;Requests and Responses</h2></div></div></div><p>
+    </div>
+    <div class="section"><div class="titlepage"><div><div><h2 class="title"><a name="request-response"></a>6.1.&nbsp;Requests and Responses</h2></div></div></div>
+      
+      <p>
         Jolokia knows about two different styles of handling
         requests, which are distinguished by the HTTP method used: GET
         or POST. Regardless of what method is used, the agent doesn't
         keep any state on the server side (except of course that
         MBeans are obviously stateful most of the time). So in this aspect, the
         communication can be considered
-       <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://en.wikipedia.org/wiki/Representational_State_Transfer" target="_top">REST</a>
-        like<sup>[<a name="rest-comment" href="#ftn.rest-comment">7</a>]</sup>.
-      </p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="get-request"></a>6.1.1.&nbsp;GET requests</h3></div></div></div><p>
+       <a class="ulink" href="http://en.wikipedia.org/wiki/Representational_State_Transfer" target="_top">REST</a>
+        like<a href="#ftn.rest-comment" class="footnote" name="rest-comment"><sup class="footnote">[7]</sup></a>.
+      </p>
+      <div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="get-request"></a>6.1.1.&nbsp;GET requests</h3></div></div></div>
+        
+        <p>
           The simplest way to access the Jolokia agent is by sending
           HTTP GET requests. These requests encode all their
           parameters within the access URL. Typically, Jolokia uses
@@ -82,17 +96,22 @@
           supported Jolokia operations (described in the next
           section), followed by one or more operation-specific
           parameters separated by slashes.
-        </p><p>
+        </p>
+        <p>
           For example, the following URL executes a
           <code class="constant">read</code> Jolokia operation on the MBean
           <code class="literal">java.lang:type=Memory</code> for reading the
-          attribute <code class="literal">HeapMemoryUsage</code> (see <a href="protocol.html#read">Section&nbsp;6.2.1, &#8220;Reading attributes (read)&#8221;</a>). It is assumed, that the agent is
+          attribute <code class="literal">HeapMemoryUsage</code> (see <a class="xref" href="protocol.html#read" title="6.2.1.&nbsp;Reading attributes (read)">Section&nbsp;6.2.1, &#8220;Reading attributes (read)&#8221;</a>). It is assumed, that the agent is
           reachable under the base URL
           <code class="uri">http://localhost:8080/jolokia</code>:
-          </p><div class="informalexample"><pre class="literallayout">http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage</pre></div><p>
-        </p><div xmlns:xslthl="http://xslthl.sf.net" class="sidebar-border"><div class="sidebar"><p class="title"><b>
+          </p><div class="informalexample">
+            <pre class="literallayout">http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage</pre>
+          </div><p>
+        </p>
+        <div class="sidebar"><div class="titlepage"><div><div><p class="title"><b>
             Why escaping ?
-          </b></p>
+          </b></p></div></div></div>
+          
           You might wonder why simple URI encoding isn't enough for
           escaping slashes. The reason is that JBoss/Tomcat has a
           strange behaviour when returning an HTTP response
@@ -103,73 +122,99 @@
           agent side before the agent-servlet gets the
           request. Other appservers might exhibit a similar
           behaviour, so Jolokia uses an own escaping mechanism.
-        </div></div><p>
+        </div>
+        <p>
           If one of the request parts contain a slash
           (<code class="literal">/</code>) (e.g. as part of you bean's name) it
           needs to be escaped. An exclamation mark
-          (<code class="literal">!</code>) is used as escape character<sup>[<a name="no-backslash" href="#ftn.no-backslash">8</a>]</sup>. An exclamation mark itself needs to be doubled
+          (<code class="literal">!</code>) is used as escape character<a href="#ftn.no-backslash" class="footnote" name="no-backslash"><sup class="footnote">[8]</sup></a>. An exclamation mark itself needs to be doubled
           for escaping. Any other characted preceded by an exclamation
-          mark is taken literally. Table <a href="protocol.html#escape-rules" title="Table&nbsp;6.1.&nbsp;Escaping rules">Table&nbsp;6.1, &#8220;Escaping rules&#8221;</a> illustrates the escape rules as
+          mark is taken literally. Table <a class="xref" href="protocol.html#escape-rules" title="Table&nbsp;6.1.&nbsp;Escaping rules">Table&nbsp;6.1, &#8220;Escaping rules&#8221;</a> illustrates the escape rules as
           used in GET requests. Also, if quotes are part of an GET
           request the need to be escaped  with
           <code class="constant">!"</code>.
-        </p><div xmlns:xslthl="http://xslthl.sf.net" class="table"><p class="title"><b>Table&nbsp;6.1.&nbsp;Escaping rules</b></p><div class="table-contents"><table id="escape-rules"><thead xmlns:xi="http://www.w3.org/2001/XInclude"><tr>
+        </p>
+        <div class="table"><a name="escape-rules"></a><table id="escape-rules">
+          Escaping rules
+          <thead>
+            <tr>
               <td>Escaped</td>
               <td>Unescaped</td>
-            </tr></thead><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+            </tr>
+          </thead>
+          <tr>
             <td><code class="constant">!/</code></td>
             <td><code class="constant">/</code></td>
-          </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+          </tr>
+          <tr>
             <td><code class="constant">!!</code></td>
             <td><code class="constant">!</code></td>
-          </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+          </tr>
+          <tr>
             <td><code class="constant">!"</code></td>
             <td><code class="constant">"</code></td>
-          </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+          </tr>
+          <tr>
             <td><code class="constant">!</code><span class="emphasis"><em>(anything else)</em></span></td>
             <td><span class="emphasis"><em>(anything else)</em></span></td>
-          </tr></table></div></div><p>
+          </tr>
+        </table></div>
+        <p>
           For example, to read the atrribute <code class="literal">State</code>
           on the MBean named
           <code class="literal">jboss.jmx:alias=jmx/rmi/RMIAdaptor</code>, an
           access URL like this has to be constructed:
-        </p><div class="informalexample"><pre class="literallayout">.../read/jboss.jmx:alias=jmx!/rmi!/RMIAdaptor/State</pre></div><p>
-          Client libraries like <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://search.cpan.org/~roland/jmx4perl" target="_top">JMX::Jmx4Perl</a>
+        </p>
+        <div class="informalexample">
+          <pre class="literallayout">.../read/jboss.jmx:alias=jmx!/rmi!/RMIAdaptor/State</pre>
+        </div>
+        <p>
+          Client libraries like <a class="ulink" href="http://search.cpan.org/~roland/jmx4perl" target="_top">JMX::Jmx4Perl</a>
           do this sort of escaping transparently.
-        </p><p>
+        </p>
+       <p>
           Escaping can be avoided alltogether if a slightly different
           variant for a request is used (which doesn't look that
           REST-stylish, though). Instead of providing the information
           as path-info, a query parameter <code class="literal">p</code> can be
           used instead. This should be URL encoded, though. For the
           example above, the alternative is
-          </p><div class="informalexample"><pre class="literallayout">http://localhost:8080/jolokia?p=/read/jboss.jmx:alias=jmx%2Frmi%2FRMIAdaptor/State</pre></div><p>
+          </p><div class="informalexample">
+            <pre class="literallayout">http://localhost:8080/jolokia?p=/read/jboss.jmx:alias=jmx%2Frmi%2FRMIAdaptor/State</pre>
+          </div><p>
           This format <span class="emphasis"><em>must</em></span> be used for GET
           requests containing backslashes (<code class="literal">\</code>) since
           backslashes can not be sent as part of an URL at all.
-        </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="post-request"></a>6.1.2.&nbsp;POST requests</h3></div></div></div><p>
+        </p>
+      </div>
+
+      <div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="post-request"></a>6.1.2.&nbsp;POST requests</h3></div></div></div>
+        
+        <p>
           POST requests are the most powerful way to communicate
           with the Jolokia agent. There are fewer escaping issues and it
           allows for features which are not available with GET
           requests. POST requests uses a fixed URL and put their payload
           within the HTTP request's body. This payload is represented
-          in <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://www.json.org" target="_top">JSON</a>, a
+          in <a class="ulink" href="http://www.json.org" target="_top">JSON</a>, a
           data serialization format originating from the JavaScript
           world.
-        </p><p>
+        </p>
+        <p>
           The JSON format for a single request is a JSON object, which
           is essentially a map with keys (or
           <span class="emphasis"><em>attributes</em></span>) and values. All requests
           have a common mandatory attribute,
           <code class="constant">type</code>, which specifies the kind of JMX
           operation to perform. The other attributes are either
-          operation specific as described in <a href="protocol.html#jolokia-operations">Section&nbsp;6.2, &#8220;Jolokia operations&#8221;</a> or are <span class="emphasis"><em>processing
+          operation specific as described in <a class="xref" href="protocol.html#jolokia-operations" title="6.2.&nbsp;Jolokia operations">Section&nbsp;6.2, &#8220;Jolokia operations&#8221;</a> or are <span class="emphasis"><em>processing
           parameters</em></span> which influence the overall behaviour
-          and can be mixed in to any request. See <a href="protocol.html#processing-parameters">Section&nbsp;6.3, &#8220;Processing parameters&#8221;</a> for details. Operation specific attributes
+          and can be mixed in to any request. See <a class="xref" href="protocol.html#processing-parameters" title="6.3.&nbsp;Processing parameters">Section&nbsp;6.3, &#8220;Processing parameters&#8221;</a> for details. Operation specific attributes
           can be either mandatory or optional and depend on the operation type.
           In the following, if not mentioned otherwise, attributes are mandatory.
           Processing parameters are always optional, though.
-        </p><p>
+        </p>
+        <p>
           A sample read request in JSON format looks like the
           following example. It has a <code class="constant">type</code>
           "read"
@@ -177,19 +222,25 @@
           <code class="constant">mbean</code>, <code class="constant">attribute</code>
           and <code class="constant">path</code> which are specific to a read
           request.
-        </p><div class="example"><a name="request-example"></a><p class="title"><b>Example&nbsp;6.1.&nbsp;JSON Request</b></p><div class="example-contents"><pre class="programlisting">
+        </p>
+        <div class="example"><a name="request-example"></a><p class="title"><b>Example&nbsp;6.1.&nbsp;JSON Request</b></p><div class="example-contents">
+          
+          <pre class="programlisting">
   {
     "type" : "read",
     "mbean" : "java.lang:type=Memory",
     "attribute" : "HeapMemoryUsage",
     "path" : "used",
-  }</pre></div></div><br class="example-break"><p>
+  }</pre>
+        </div></div><br class="example-break">
+        <p>
           Each request JSON object results in a single JSON response
           object contained in the HTTP answer's body. A <span class="emphasis"><em>bulk
           request</em></span> contains multiple Jolokia requests within
           a single HTTP request. This is done by putting individual
           Jolokia requests into a JSON array:
-        </p><pre class="programlisting">
+        </p>
+        <pre class="programlisting">
  [
   {
     "type" : "read",
@@ -201,11 +252,17 @@
     "type" : "search"
     "mbean" : "*:type=Memory,*",
   }
- ]</pre><p>
+ ]</pre>
+        <p>
           This request will result in a JSON array containing multiple
           JSON responses within the HTTP response. They are returned
           in same order as the requests in the initial bulk request.
-        </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="responses"></a>6.1.3.&nbsp;Responses</h3></div></div></div><p>
+        </p>
+      </div>
+
+      <div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="responses"></a>6.1.3.&nbsp;Responses</h3></div></div></div>
+        
+        <p>
           Responses are always encoded in UTF-8 JSON, regardless whether the
           requst was a GET or POST request.  In general, two kinds of
           responses can be classified: In the normal case, a HTTP
@@ -214,20 +271,25 @@
           error, a 4xx or 5xx code will be returned and the JSON
           payload contains details about the error
           occured (e.g. 404 means "not found"). (See
-          <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://en.wikipedia.org/wiki/List_of_HTTP_status_codes" target="_top">this page</a>
+          <a class="ulink" href="http://en.wikipedia.org/wiki/List_of_HTTP_status_codes" target="_top">this page</a>
           for more information about HTTP error codes..). If the processing option
           <code class="constant">ifModifiedSince</code> is given and the requested
           value as been not changed since then, a response code of 304 is returned.
           This option is currently only supported by the <code class="constant">LIST</code> request, for
           other request types the value is always fetched.
-        </p><p>
+        </p>
+        <p>
           In the non-error case a JSON response looks mostly the same
           for each request type except for the
           <code class="constant">value</code> attribute which is request type
           specific.
-        </p><p>
+        </p>
+        <p>
           The format of a single Jolokia response is
-        </p><div class="example"><a name="response-example"></a><p class="title"><b>Example&nbsp;6.2.&nbsp;JSON Response</b></p><div class="example-contents"><pre class="programlisting">
+        </p>
+        <div class="example"><a name="response-example"></a><p class="title"><b>Example&nbsp;6.2.&nbsp;JSON Response</b></p><div class="example-contents">
+          
+          <pre class="programlisting">
  {
    "value": .... ,
    "status" : 200,
@@ -241,15 +303,17 @@
                 "timestamp" : 1244839045
                }, ....
              ]
- }</pre></div></div><br class="example-break"><p>
+ }</pre>
+        </div></div><br class="example-break">
+        <p>
           For successful requests, the <code class="constant">status</code> is
           always <code class="literal">200</code> (the HTTP success code). The
           <code class="constant">timestamp</code> contains the epoch
-          time<sup>[<a name="epoch-time" href="#ftn.epoch-time">9</a>]</sup> when the
+          time<a href="#ftn.epoch-time" class="footnote" name="epoch-time"><sup class="footnote">[9]</sup></a> when the
           request has been handled. The request leading to this
           response can be found under the attribute
           <code class="constant">request</code>. Finally and optionally, if
-          history tracking is switched on (see <a href="protocol.html#history">Section&nbsp;6.5, &#8220;Tracking historical values&#8221;</a>), an entry with key
+          history tracking is switched on (see <a class="xref" href="protocol.html#history" title="6.5.&nbsp;Tracking historical values">Section&nbsp;6.5, &#8220;Tracking historical values&#8221;</a>), an entry with key
           <code class="constant">history</code> contains a list of historical
           values along with their timestamps. History tracking is only
           available for certain type of requests
@@ -257,11 +321,13 @@
           <code class="constant">exec</code>). The <code class="constant">value</code>
           is specific for the type of request, it can be a single
           scalar value or a monster JSON structure.
-        </p><p>
+        </p>
+        <p>
           If an error occurs, the <code class="constant">status</code> will be
           a number different from <code class="literal">200</code>. An error
           response looks like
-        </p><pre class="programlisting">
+        </p>
+        <pre class="programlisting">
   {
     "status":400,
     "error_type":"java.lang.IllegalArgumentException",
@@ -269,7 +335,8 @@
     "stacktrace":"java.lang.IllegalArgumentException: Invalid request type 'java.lang:type=Memory'\n
                   \tat org.cpan.jmx4perl.JmxRequest.extractType(Unknown Source)\n
                   \tat org.cpan.jmx4perl.JmxRequest.&lt;init&gt;(Unknown Source) ...."
-  }</pre><p>
+  }</pre>
+        <p>
             For status codes it is important to distinguish status
             codes as they appear in Jolokia JSON response objects
             and the HTTP status code of the (outer) HTTP
@@ -282,26 +349,35 @@
             exception). So it is not uncommon to have an HTTP status
             code of 200, but the contained JSON response(s) indicate
             some errors.
-        </p><p>
+        </p>
+        <p>
           I.e. the <code class="constant">status</code> has a code in the range
           <code class="literal">400 .. 499</code> or <code class="literal">500 .. 599</code>
-          <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://en.wikipedia.org/wiki/List_of_HTTP_status_codes" target="_top">as it is specified for HTTP return codes</a>.
+          <a class="ulink" href="http://en.wikipedia.org/wiki/List_of_HTTP_status_codes" target="_top">as it is specified for HTTP return codes</a>.
           The <code class="constant">error</code> member contains an error
           description. This is typically the message of an exception
-          occured on the agent side<sup>[<a name="mbeanexception-wrapping" href="#ftn.mbeanexception-wrapping">10</a>]</sup>. Finally, <code class="constant">error_type</code> contains the Java class name
+          occured on the agent side<a href="#ftn.mbeanexception-wrapping" class="footnote" name="mbeanexception-wrapping"><sup class="footnote">[10]</sup></a>. Finally, <code class="constant">error_type</code> contains the Java class name
           of the exception occured.
           The <code class="constant">stacktrace</code> contains a Java stacktrace
           occured on the server side (if any stacktrace is available).
-          </p><p>
+          </p>
+
+        <p>
           For each type of operation, the format of the
           <code class="constant">value</code> entry is explained in
-          <a href="protocol.html#jolokia-operations">Section&nbsp;6.2, &#8220;Jolokia operations&#8221;</a>
-        </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="paths"></a>6.1.4.&nbsp;Paths</h3></div></div></div><p>
+          <a class="xref" href="protocol.html#jolokia-operations" title="6.2.&nbsp;Jolokia operations">Section&nbsp;6.2, &#8220;Jolokia operations&#8221;</a>
+        </p>
+      </div>
+
+      <div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="paths"></a>6.1.4.&nbsp;Paths</h3></div></div></div>
+        
+        <p>
           An <span class="emphasis"><em>inner path</em></span> points to a certain
           substructure (plain value, array, hash) within a a complex
           JSON value. Think of it as something like "XPath lite". This
           is best explained by an example:
-        </p><p>
+        </p>
+        <p>
           The attribute <code class="literal">HeapMemoryUsage</code> of the MBean
           <code class="literal">java.lang:type=Memory</code> can be
           requested with the URL
@@ -319,60 +395,78 @@
   "request" : { .... },
   "timestamp" : ....
 }</pre><p>
-        </p><p>
+        </p>
+        <p>
           In order to get to the value for used heap memory you should
           specify an inner path <code class="literal">used</code>, so that the
           request
           <code class="literal">http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage/used</code>
           results in a response of <code class="literal">15348352</code>for the value:
-        </p><pre class="programlisting">
+        </p>
+        <pre class="programlisting">
 {
   "status" : 200,
   "value" :  15348352,
   "request" : { .... },
   "timestamp" : ....
-}</pre><p> If the attribute contains arrays at some level, use a numeric
+}</pre>
+        <p> If the attribute contains arrays at some level, use a numeric
           index (0 based) as part of the inner path if you want to
           traverse into this array.
-        </p><p>
+        </p>
+        <p>
           For both, GET and POST requests, paths must be escaped as
-          described in <a href="protocol.html#escape-rules" title="Table&nbsp;6.1.&nbsp;Escaping rules">Table&nbsp;6.1, &#8220;Escaping rules&#8221;</a> when they
+          described in <a class="xref" href="protocol.html#escape-rules" title="Table&nbsp;6.1.&nbsp;Escaping rules">Table&nbsp;6.1, &#8220;Escaping rules&#8221;</a> when they
           contain slashes (<code class="literal">/</code>) or exclamation marks
           (<code class="literal">!</code>).
-        </p><p>
+        </p>
+        <p>
           Paths support wildcards <code class="literal">*</code> in a simple form. If given as a path part exclusively, it
           matches any entry and path matching continues on the next level. This feature is especially
-          useful when using pattern read request together with paths. See <a href="protocol.html#read">Section&nbsp;6.2.1, &#8220;Reading attributes (read)&#8221;</a> for details. A
+          useful when using pattern read request together with paths. See <a class="xref" href="protocol.html#read" title="6.2.1.&nbsp;Reading attributes (read)">Section&nbsp;6.2.1, &#8220;Reading attributes (read)&#8221;</a> for details. A
           <code class="constant">*</code> mixed with other characters in a path part has no special meaning and is used literally.
-        </p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="jolokia-operations"></a>6.2.&nbsp;Jolokia operations</h2></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="read"></a>6.2.1.&nbsp;Reading attributes (read)</h3></div></div></div><p>
+        </p>
+      </div>
+    </div>
+
+    <div class="section"><div class="titlepage"><div><div><h2 class="title"><a name="jolokia-operations"></a>6.2.&nbsp;Jolokia operations</h2></div></div></div>
+      
+
+      <div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="read"></a>6.2.1.&nbsp;Reading attributes (read)</h3></div></div></div>
+  
+  <p>
     Reading MBean attributes is probably the most used JMX method,
     especially when it comes to monitoring. Concerning Jolokia, it is
     also the most powerful one with the richest semantics. Obviously
     the value of a single attribute can be fetched, but Jolokia
     supports also fetching of a list of given attributes on a single
     MBean or even on multiple MBeans matching a certain pattern.
-  </p><p>
+  </p>
+  <p>
     Reading attributes are supported by both kinds of requests,
     <code class="literal">GET</code> and <code class="literal">POST</code>. 
-  </p><div class="note"><h3 class="title"></h3>
+  </p>
+  <div class="note">
     Don't confuse fetching multiple attributes on possibly multiple
     MBeans with bulk requests. A single read request will always
     result in a single read response, even when multiple attribute
     values are fetched. Only the single response's structure of the
     <code class="literal">value</code> will differ depending on what kind of
     read request was performed.
-  </div><p>
+  </div>
+  <p>
     A read request for multiple attributes on the same MBean is
     initiated by giving a list of attributes to the request. For a
     POST request this is an JSON array, for a GET request it is a
     comma separated list of attribute names (where slashes and
-    exclamation marks must be escaped as described in <a href="protocol.html#escape-rules" title="Table&nbsp;6.1.&nbsp;Escaping rules">Table&nbsp;6.1, &#8220;Escaping rules&#8221;</a>). If no attribute is provided, then all
+    exclamation marks must be escaped as described in <a class="xref" href="protocol.html#escape-rules" title="Table&nbsp;6.1.&nbsp;Escaping rules">Table&nbsp;6.1, &#8220;Escaping rules&#8221;</a>). If no attribute is provided, then all
     attributes are fetched.  The MBean name can be given as a pattern
     in which case the attributes are read on all matching MBeans. If a
     MBean pattern and multiple attributes are requested, then only the
     value of attributes which matches both are returned, the others
     are ignored.
-  </p><p>
+  </p>
+  <p>
     Paths can be used with pattern and multiple attribute read as well. In order to
     skip the extra value levels introduced by a pattern read, the wildcard
     <code class="constant">*</code> can be used. For example, a read request for the MBean Pattern
@@ -384,7 +478,8 @@
     in order to skip the two extra levels for applying the path. The two levels are returned nevertheless, though.
     Note that in the following example the final value is <span class="emphasis"><em>not</em></span> the full GC-Info but only the
     value of its <code class="literal">used</code> entry:
-  </p><pre class="programlisting">
+  </p>
+  <pre class="programlisting">
 value: {
    "java.lang:name=PS MarkSweep,type=GarbageCollector": {
         LastGcInfo: null
@@ -392,34 +487,46 @@ value: {
    "java.lang:name=PS Scavenge,type=GarbageCollector": {
         LastGcInfo: 7
    }
-}</pre><p>
+}</pre>
+  <p>
     The following rule of thumb applies:
-  </p><div class="itemizedlist"><ul><li>
+  </p>
+  <div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
       If a wildcard is used, everything at that point in the path is
       matched. The next path parts are used to match from there
       on. All the values on this level are included.
-    </li><li>
+    </li><li class="listitem">
       Every other path part is literally compared against the values
       on that level. If there is a match, this value is
       <span class="emphasis"><em>removed</em></span> in the answer so that at the end
       you get back a structure with the values on the wildcard levels
       and the leaves of the matched parts. 
-    </li><li>
+    </li><li class="listitem">
       If used with wildcards, paths behave also like
       filters. E.g. you can use a path <code class="literal">*/*/used</code> on
       the MBean pattern <code class="literal">java.lang:*</code> and get back
       only that portions which contains "used" as key, all others are
       ignored. 
-    </li></ul></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="get-read"></a>6.2.1.1.&nbsp;GET read request</h4></div></div></div><p>
+    </li></ul></div>
+  <div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="get-read"></a>6.2.1.1.&nbsp;GET read request</h4></div></div></div>
+    
+    <p>
       The GET URL for a read request has the following format:
-    </p><pre class="synopsis">&lt;base-url&gt;/read/&lt;mbean name&gt;/&lt;attribute name&gt;/&lt;inner path&gt;</pre><div xmlns:xslthl="http://xslthl.sf.net" class="table"><p class="title"><b>Table&nbsp;6.2.&nbsp;GET Read Request</b></p><div class="table-contents"><table id="d0e4033"><thead xmlns:xi="http://www.w3.org/2001/XInclude"><tr>
+    </p>
+    <pre class="synopsis">&lt;base-url&gt;/read/&lt;mbean name&gt;/&lt;attribute name&gt;/&lt;inner path&gt;</pre>
+    <div class="table"><table>
+      GET Read Request
+      <thead>
+        <tr>
           <td>Part</td>
           <td>Description</td>
           <td>Example</td>
-        </tr></thead><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+        </tr>        
+      </thead>
+      <tr>
         <td><code class="literal">&lt;mbean name&gt;</code></td>
         <td>
-          The <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://download.oracle.com/javase/6/docs/api/javax/management/ObjectName.html" target="_top">ObjectName</a>
+          The <a class="ulink" href="http://download.oracle.com/javase/6/docs/api/javax/management/ObjectName.html" target="_top">ObjectName</a>
           of the MBean for which the attribute should be fetched. It
           contains two parts: A domain part and a list of properties
           which are separated by <code class="literal">:</code>. Properties
@@ -428,63 +535,93 @@ value: {
           multiple MBeans are queried for the attribute value.
         </td>
         <td><code class="literal">java.lang:type=Memory</code></td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="literal">&lt;attribute name&gt;</code></td>
         <td>Name of attribute to read. This can be a list of Attribute
         names separated by comma. Slashes and exclamations marks need
-        to be escaped as described in <a href="protocol.html#escape-rules" title="Table&nbsp;6.1.&nbsp;Escaping rules">Table&nbsp;6.1, &#8220;Escaping rules&#8221;</a>. If no attribute is given, all
+        to be escaped as described in <a class="xref" href="protocol.html#escape-rules" title="Table&nbsp;6.1.&nbsp;Escaping rules">Table&nbsp;6.1, &#8220;Escaping rules&#8221;</a>. If no attribute is given, all
         attributes are read.</td>
         <td><code class="literal">HeapMemoryUsage</code></td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="literal">&lt;inner path&gt;</code></td>
         <td>
           This optional part describes an <span class="emphasis"><em>inner
-          path</em></span> as described in <a href="protocol.html#paths">Section&nbsp;6.1.4, &#8220;Paths&#8221;</a>
+          path</em></span> as described in <a class="xref" href="protocol.html#paths" title="6.1.4.&nbsp;Paths">Section&nbsp;6.1.4, &#8220;Paths&#8221;</a>
         </td>
         <td><code class="literal">used</code></td>
-      </tr></table></div></div><p>
+      </tr>
+    </table></div>
+
+    <p>
       With this URL the used heap memory can be obtained:
-      </p><div class="informalexample"><pre class="literallayout">http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage/used</pre></div><p>           
-    </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="post-read"></a>6.2.1.2.&nbsp;POST read request</h4></div></div></div><p>
+      </p><div class="informalexample">
+        <pre class="literallayout">http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage/used</pre>
+      </div><p>           
+    </p>
+  </div>  
+  <div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="post-read"></a>6.2.1.2.&nbsp;POST read request</h4></div></div></div>
+    
+    <p>
       A the keys available for read POST requests are shown in the
       following table.
-    </p><div xmlns:xslthl="http://xslthl.sf.net" class="table"><p class="title"><b>Table&nbsp;6.3.&nbsp;POST Read Request</b></p><div class="table-contents"><table id="d0e4111"><thead xmlns:xi="http://www.w3.org/2001/XInclude"><tr>
+    </p>
+    <div class="table"><table>
+      POST Read Request
+      <thead>
+        <tr>
           <td>Key</td>
           <td>Description</td>
           <td>Example</td>
-        </tr></thead><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+        </tr>        
+      </thead>
+      <tr>
         <td><code class="constant">type</code></td>
         <td><span class="bold"><strong>read</strong></span></td>
         <td></td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="constant">mbean</code></td>
         <td>MBean's ObjectName which can be a pattern</td>
         <td><code class="literal">java.lang:type=Memory</code></td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="constant">attribute</code></td>
         <td>Attribute name to read or a JSON array containing a list
         of attributes to read. No attribute is given, then all attributes
         are read.</td>
         <td><code class="literal">HeapMemoryUsage</code>, <code class="literal">[
         "HeapMemoryUsage", "NonHeapMemoryUsage" ]</code></td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="constant">path</code></td>
         <td>Inner path for accessing the value of a complex value
-        (<a href="protocol.html#paths">Section&nbsp;6.1.4, &#8220;Paths&#8221;</a>)</td>
+        (<a class="xref" href="protocol.html#paths" title="6.1.4.&nbsp;Paths">Section&nbsp;6.1.4, &#8220;Paths&#8221;</a>)</td>
         <td><code class="constant">used</code></td>
-      </tr></table></div></div><p>
+      </tr>
+    </table></div>
+    <p>
       The following request fetches the number of active threads:      
-    </p><pre class="programlisting">
+    </p>
+    <pre class="programlisting">
 {
    "type":"read",
    "mbean":"java.lang:type=Threading",
    "attribute":"ThreadCount"
-}</pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="response-read"></a>6.2.1.3.&nbsp;Read response</h4></div></div></div><p>
-      The general format of the JSON response is described in <a href="protocol.html#responses">Section&nbsp;6.1.3, &#8220;Responses&#8221;</a> in detail.  A typical response for an
+}</pre>
+  </div>
+  <div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="response-read"></a>6.2.1.3.&nbsp;Read response</h4></div></div></div>
+    
+    <p>
+      The general format of the JSON response is described in <a class="xref" href="protocol.html#responses" title="6.1.3.&nbsp;Responses">Section&nbsp;6.1.3, &#8220;Responses&#8221;</a> in detail.  A typical response for an
       attribute read operation for an URL like
-      </p><div class="informalexample"><pre class="literallayout">http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage/</pre></div><p>
+      </p><div class="informalexample">
+        <pre class="literallayout">http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage/</pre>
+      </div><p>
       looks like 
-    </p><pre class="programlisting">
+    </p>
+    <pre class="programlisting">
  {
    "value":{
              "init":134217728,
@@ -508,17 +645,21 @@ value: {
                "timestamp":1244839045
              }, ....
              ]
- }</pre><p>
+ }</pre>
+    <p>
       The <code class="constant">value</code> contains the response's
       value. For simple data types it is a scalar value, more complex
-      types are serialized into a JSON object. See <a href="protocol.html#serialization">Section&nbsp;6.4, &#8220;Object serialization&#8221;</a> for detail on object serialization.
-    </p><p>
+      types are serialized into a JSON object. See <a class="xref" href="protocol.html#serialization" title="6.4.&nbsp;Object serialization">Section&nbsp;6.4, &#8220;Object serialization&#8221;</a> for detail on object serialization.
+    </p>
+    <p>
       For a read request to a single MBean with multiple attributes, the
       returned value is a JSON object with the attribute names as keys
       and their values as values. For example a request to
       <code class="literal">http://localhost:8080/jolokia/read/java.lang:type=Memory</code>
       leads to
-    </p><div class="informalexample"><pre class="programlisting">
+    </p>
+    <div class="informalexample">
+      <pre class="programlisting">
 {
  "timestamp": 1317151518,
  "status": 200,
@@ -529,14 +670,18 @@ value: {
    "NonHeapMemoryUsage": {"max":136314880,"committed":26771456,"init":24317952,"used":15211720},
    "HeapMemoryUsage": {"max":129957888,"committed":129957888,"init":0,"used":2880008}
  }
-}</pre></div><p>
+}</pre>
+    </div>
+    <p>
       A request to a MBean pattern returns as value a JSON object,
       with the MBean names as keys and as value another JSON object
       with the attribute name as keys and the attribute values as
       values. For example a request
       <code class="literal">http://localhost:8080/jolokia/read/java.lang:type=*/HeapMemoryUsage</code> 
       returns something like
-    </p><div class="informalexample"><pre class="programlisting">
+    </p>
+    <div class="informalexample">
+      <pre class="programlisting">
 {
  "timestamp": 1317151980,
  "status": 200,
@@ -547,85 +692,129 @@ value: {
     }
  }
 }
-</pre></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="write"></a>6.2.2.&nbsp;Writing attributes (write)</h3></div></div></div><p>
+</pre>
+    </div>
+  </div>  
+</div>
+      <div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="write"></a>6.2.2.&nbsp;Writing attributes (write)</h3></div></div></div>
+  
+  <p>
     Writing an attribute is quite similar to reading one, except that the request takes an
     additional <code class="constant">value</code> element.
-  </p><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="get-write"></a>6.2.2.1.&nbsp;GET write request</h4></div></div></div><p>
+  </p>
+  <div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="get-write"></a>6.2.2.1.&nbsp;GET write request</h4></div></div></div>
+    
+      <p>
         Writing an attribute wit an GET request, an URL with the following format has to be used:         
         </p><pre class="synopsis">&lt;base url&gt;/write/&lt;mbean name&gt;/&lt;attribute name&gt;/&lt;value&gt;/&lt;inner path&gt;</pre><p>    
-      </p><div xmlns:xslthl="http://xslthl.sf.net" class="table"><p class="title"><b>Table&nbsp;6.4.&nbsp;GET Write Request</b></p><div class="table-contents"><table id="d0e4239"><thead xmlns:xi="http://www.w3.org/2001/XInclude"><tr>
+      </p>
+      <div class="table"><table>
+        GET Write Request
+        <thead>
+          <tr>
             <td>Part</td>
             <td>Description</td>
             <td>Example</td>
-          </tr></thead><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+          </tr>        
+        </thead>
+        <tr>
           <td><code class="literal">&lt;mbean name&gt;</code></td>
           <td>MBean's ObjectName</td>
           <td><code class="literal">java.lang:type=ClassLoading</code></td>
-        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+        </tr>
+        <tr>
           <td><code class="literal">&lt;attribute name&gt;</code></td>
           <td>Name of attribute to set</td>
           <td><code class="literal">Verbose</code></td>
-        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+        </tr>
+        <tr>
           <td><code class="literal">&lt;value&gt;</code></td>
           <td>
             The attribute name to value. The value must be serializable as described in 
-            <a href="protocol.html#serialization-request">Section&nbsp;6.4.2, &#8220;Request parameter serialization&#8221;</a>.
+            <a class="xref" href="protocol.html#serialization-request" title="6.4.2.&nbsp;Request parameter serialization">Section&nbsp;6.4.2, &#8220;Request parameter serialization&#8221;</a>.
           </td>
           <td><code class="literal">true</code></td>
-        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+        </tr>
+        <tr>
           <td><code class="literal">&lt;path&gt;</code></td>
           <td>   
             Inner path for accessing the parent object on which to set the value.
-            (See also <a href="protocol.html#paths">Section&nbsp;6.1.4, &#8220;Paths&#8221;</a>). Note, that this is
+            (See also <a class="xref" href="protocol.html#paths" title="6.1.4.&nbsp;Paths">Section&nbsp;6.1.4, &#8220;Paths&#8221;</a>). Note, that this is
             <span class="emphasis"><em>not</em></span> the path to the attribute itself,
             but to the object carrying this attribute. With a given
             path it is possible to deeply set an value on a complex
             object. 
           </td>
           <td></td>
-        </tr></table></div></div><p>
+        </tr>
+      </table></div>
+      <p>
         For example, you can set the garbage collector to verbose mode by using
         something like
-        </p><div class="informalexample"><pre class="literallayout">http://localhost:8080/jolokia/write/java.lang:type=Memory/Verbose/true</pre></div><p>
-      </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="post-write"></a>6.2.2.2.&nbsp;POST write request</h4></div></div></div><p>
+        </p><div class="informalexample">
+          <pre class="literallayout">http://localhost:8080/jolokia/write/java.lang:type=Memory/Verbose/true</pre>
+        </div><p>
+      </p>
+    </div>
+
+    <div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="post-write"></a>6.2.2.2.&nbsp;POST write request</h4></div></div></div>
+      
+      <p>
         The keys which are evaluated for a POST write request are:
-      </p><div xmlns:xslthl="http://xslthl.sf.net" class="table"><p class="title"><b>Table&nbsp;6.5.&nbsp;POST Write Request</b></p><div class="table-contents"><table id="d0e4322"><thead xmlns:xi="http://www.w3.org/2001/XInclude"><tr>
+      </p>
+      <div class="table"><table>
+        POST Write Request
+        <thead>
+          <tr>
             <td>Key</td>
             <td>Description</td>
             <td>Example</td>
-          </tr></thead><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+          </tr>        
+        </thead>
+        <tr>
           <td><code class="constant">type</code></td>
           <td><span class="bold"><strong>write</strong></span></td>
           <td></td>
-        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+        </tr>
+        <tr>
           <td><code class="constant">mbean</code></td>
           <td>MBean's ObjectName</td>
           <td><code class="literal">java.lang:type=ClassLoading</code></td>
-        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+        </tr>
+        <tr>
           <td><code class="constant">attribute</code></td>
           <td>Name of attribute to set</td>
           <td><code class="literal">Verbose</code></td>
-        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+        </tr>
+        <tr>
           <td><code class="constant">value</code></td>
           <td>
             The attribute name to value. The value must be serializable as described in 
-            <a href="protocol.html#serialization-request">Section&nbsp;6.4.2, &#8220;Request parameter serialization&#8221;</a>.
+            <a class="xref" href="protocol.html#serialization-request" title="6.4.2.&nbsp;Request parameter serialization">Section&nbsp;6.4.2, &#8220;Request parameter serialization&#8221;</a>.
           </td>
           <td><code class="literal">true</code></td>
-        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+        </tr>
+        <tr>
           <td><code class="constant">path</code></td>
           <td>   
             An optional inner path for specifying an inner object on which to set the
-            value. See <a href="protocol.html#paths">Section&nbsp;6.1.4, &#8220;Paths&#8221;</a> for more on inner paths.
+            value. See <a class="xref" href="protocol.html#paths" title="6.1.4.&nbsp;Paths">Section&nbsp;6.1.4, &#8220;Paths&#8221;</a> for more on inner paths.
           </td>
           <td></td>
-        </tr></table></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="response-write"></a>6.2.2.3.&nbsp;Write response</h4></div></div></div><p>
+        </tr>
+      </table></div>
+    </div>
+    
+    <div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="response-write"></a>6.2.2.3.&nbsp;Write response</h4></div></div></div>
+      
+      <p>
         As response for a write operation the old attribute's value is
         returned. For a request
         </p><pre class="synopsis">http://localhost:8080/jolokia/write/java.lang:type=ClassLoading/Verbose/true</pre><p>
         you get the answer (supposed that verbose mode was switched
         off for class loading at the time this request was sent)
-      </p><pre class="programlisting">
+      </p>
+      <pre class="programlisting">
  { 
    "value":"false",
    "status":200,
@@ -635,29 +824,45 @@ value: {
                 "attribute":"Verbose",
                 "value":true
               }
- }</pre><p>
+ }</pre>
+      <p>
         The response is quite similar to the read operation except for
         the additional <code class="constant">value</code> element in the request
         (and of course, the different <code class="constant">type</code>).
-      </p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="exec"></a>6.2.3.&nbsp;Executing JMX operations (exec)</h3></div></div></div><p>
+      </p>
+    </div>
+</div>
+      <div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="exec"></a>6.2.3.&nbsp;Executing JMX operations (exec)</h3></div></div></div>
+  
+  <p>
     Beside attribute provides a way for the execution of exposed JMX
     operations with optional arguments. The same as for writing
     attributes, Jolokia must be able to serialize the arguments. See
-    <a href="protocol.html#serialization">Section&nbsp;6.4, &#8220;Object serialization&#8221;</a> for details. Execution of
+    <a class="xref" href="protocol.html#serialization" title="6.4.&nbsp;Object serialization">Section&nbsp;6.4, &#8220;Object serialization&#8221;</a> for details. Execution of
     overloaded methods is supported. The JMX specifications recommends
     to avoid overloaded methods when exposing them via JMX, though.
-  </p><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="get-exec"></a>6.2.3.1.&nbsp;GET exec request</h4></div></div></div><p>
+  </p>
+  <div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="get-exec"></a>6.2.3.1.&nbsp;GET exec request</h4></div></div></div>
+    
+    <p>
       The format of an GET exec request is
       </p><pre class="synopsis">&lt;base url&gt;/exec/&lt;mbean name&gt;/&lt;operation name&gt;/&lt;arg1&gt;/&lt;arg2&gt;/....</pre><p>
-    </p><div xmlns:xslthl="http://xslthl.sf.net" class="table"><p class="title"><b>Table&nbsp;6.6.&nbsp;GET Exec Request</b></p><div class="table-contents"><table id="d0e4437"><thead xmlns:xi="http://www.w3.org/2001/XInclude"><tr>
+    </p>
+    <div class="table"><table>
+      GET Exec Request
+      <thead>
+        <tr>
           <td>Part</td>
           <td>Description</td>
           <td>Example</td>
-        </tr></thead><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+        </tr>        
+      </thead>
+      <tr>
         <td><code class="literal">&lt;mbean name&gt;</code></td>
         <td>MBean's ObjectName</td>
         <td><code class="literal">java.lang:type=Threading</code></td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="literal">&lt;operation name&gt;</code></td>
         <td>  
           Name of the operation to execute. If this is an overloaded method,
@@ -670,53 +875,82 @@ value: {
         <td>
           <code class="literal">loadUsers(java.lang.String,int)</code>
         </td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="literal">&lt;arg1&gt;</code>, <code class="literal">&lt;arg2&gt;</code>, ...</td>
         <td>
           String representation for the arguments required to execute this
           operation. Only certain data types can be used here as
-          described in <a href="protocol.html#serialization-request">Section&nbsp;6.4.2, &#8220;Request parameter serialization&#8221;</a>.
+          described in <a class="xref" href="protocol.html#serialization-request" title="6.4.2.&nbsp;Request parameter serialization">Section&nbsp;6.4.2, &#8220;Request parameter serialization&#8221;</a>.
         </td>
         <td><code class="literal">"true","true"</code></td>
-      </tr></table></div></div><p>
+      </tr>
+    </table></div>
+
+    <p>
       The following request will trigger a garbage collection:
-      </p><div class="informalexample"><pre class="literallayout">http://localhost:8080/jolokia/exec/java.lang:type=Memory/gc</pre></div><p>
-    </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="post-exec"></a>6.2.3.2.&nbsp;POST exec request</h4></div></div></div><div xmlns:xslthl="http://xslthl.sf.net" class="table"><p class="title"><b>Table&nbsp;6.7.&nbsp;POST Exec Request</b></p><div class="table-contents"><table id="d0e4511"><thead xmlns:xi="http://www.w3.org/2001/XInclude"><tr>
+      </p><div class="informalexample">
+        <pre class="literallayout">http://localhost:8080/jolokia/exec/java.lang:type=Memory/gc</pre>
+      </div><p>
+    </p>
+  </div>
+  
+  <div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="post-exec"></a>6.2.3.2.&nbsp;POST exec request</h4></div></div></div>
+    
+
+      <div class="table"><table>
+        POST Exec Request
+        <thead>
+          <tr>
             <td>Key</td>
             <td>Description</td>
             <td>Example</td>
-          </tr></thead><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+          </tr>        
+        </thead>
+        <tr>
           <td><code class="constant">type</code></td>
           <td><span class="bold"><strong>exec</strong></span></td>
           <td></td>
-        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+        </tr>
+        <tr>
           <td><code class="constant">mbean</code></td>
           <td>MBean's ObjectName</td>
           <td><code class="literal">java.lang:type=Threading</code></td>
-        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+        </tr>
+        <tr>
           <td><code class="constant">operation</code></td>
           <td>The operation to execute, optionally with a signature as
           described above.
           </td>
           <td><code class="literal">dumpAllThreads</code></td>
-        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+        </tr>
+        <tr>
           <td><code class="constant">arguments</code></td>
           <td>
             An array of arguments for invoking this operation. The value must be serializable as described in 
-            <a href="protocol.html#serialization-request">Section&nbsp;6.4.2, &#8220;Request parameter serialization&#8221;</a>.
+            <a class="xref" href="protocol.html#serialization-request" title="6.4.2.&nbsp;Request parameter serialization">Section&nbsp;6.4.2, &#8220;Request parameter serialization&#8221;</a>.
           </td>
           <td><code class="literal">[true,true]</code></td>
-        </tr></table></div></div><p>
+        </tr>
+      </table></div>
+    <p>
       The following request dumps all threads (along with locked
       monitors and locked synchronizers, thats what the boolean
       arguments are for):
-    </p><pre class="programlisting">
+    </p>
+    <pre class="programlisting">
 {
    "type":"EXEC",
    "mbean":"java.lang:type=Threading",
    "operation":"dumpAllThreads",
    "arguments":[true,true]
-}</pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="response-exec"></a>6.2.3.3.&nbsp;Exec response</h4></div></div></div><p>
+}</pre>
+
+  </div>
+
+  <div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="response-exec"></a>6.2.3.3.&nbsp;Exec response</h4></div></div></div>
+    
+    <p>
       For an <code class="constant">exec</code> operation, the response
       contains the return value of the
       operation. <code class="constant">null</code> is returned if either the
@@ -724,7 +958,8 @@ value: {
       void. A typical response for an URL like
       </p><pre class="synopsis">http://localhost:8080/jolokia/exec/java.util.logging:type=Logging/setLoggerLevel/global/INFO</pre><p>
       looks like
-    </p><pre class="programlisting">
+    </p>
+    <pre class="programlisting">
  {
    "value":null,
    "status":200,
@@ -736,51 +971,86 @@ value: {
               }
 }
 
-</pre><p>
-      The return value get serialized as described in <a href="protocol.html#serialization">Section&nbsp;6.4, &#8220;Object serialization&#8221;</a>.
-    </p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="search"></a>6.2.4.&nbsp;Searching MBeans (search)</h3></div></div></div><p>
+</pre>
+    <p>
+      The return value get serialized as described in <a class="xref" href="protocol.html#serialization" title="6.4.&nbsp;Object serialization">Section&nbsp;6.4, &#8220;Object serialization&#8221;</a>.
+    </p>
+  </div>
+</div>
+      <div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="search"></a>6.2.4.&nbsp;Searching MBeans (search)</h3></div></div></div>
+  
+  <p>
     With the Jolokia search operation the agent can be queried for
     MBeans with a given pattern.  Searching will be performed on every
     <code class="classname">MBeanServer</code> found by the agent.
-  </p><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="get-search"></a>6.2.4.1.&nbsp;GET search request</h4></div></div></div><p>
+  </p>
+  <div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="get-search"></a>6.2.4.1.&nbsp;GET search request</h4></div></div></div>
+    
+    <p>
       The format of the search GET URL is:
-    </p><pre class="synopsis">&lt;base-url&gt;/search/&lt;pattern&gt;</pre><p>
+    </p>
+    <pre class="synopsis">&lt;base-url&gt;/search/&lt;pattern&gt;</pre>
+    <p>
       This mode is used to query for certain MBean. It takes a single
       argument <code class="literal">pattern</code> for
       specifying the search parameter like in 
       </p><pre class="synopsis">http://localhost:8080/jolokia/search/*:j2eeType=J2EEServer,*</pre><p>
-    </p><p>
-      You can use patterns as described <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://java.sun.com/j2se/1.5.0/docs/api/javax/management/ObjectName.html" target="_top">here</a>,
+    </p>
+    <p>
+      You can use patterns as described <a class="ulink" href="http://java.sun.com/j2se/1.5.0/docs/api/javax/management/ObjectName.html" target="_top">here</a>,
       i.e. it may contain wildcards like <code class="literal">*</code> and
       <code class="literal">?</code>. The Mbean names matching the query
       are returned as a list within the response.
-    </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="post-search"></a>6.2.4.2.&nbsp;POST search request</h4></div></div></div><p>
+    </p>
+  </div>
+  
+  <div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="post-search"></a>6.2.4.2.&nbsp;POST search request</h4></div></div></div>
+    
+    <p>
       A search POST request knows the following keys:
-    </p><div xmlns:xslthl="http://xslthl.sf.net" class="table"><p class="title"><b>Table&nbsp;6.8.&nbsp;POST Search Request</b></p><div class="table-contents"><table id="d0e4643"><thead xmlns:xi="http://www.w3.org/2001/XInclude"><tr>
+    </p>
+    <div class="table"><table>
+      POST Search Request
+      <thead>
+        <tr>
           <td>Key</td>
           <td>Description</td>
           <td>Example</td>
-          </tr></thead><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+          </tr>        
+      </thead>
+      <tr>
         <td><code class="constant">type</code></td>
         <td><span class="bold"><strong>search</strong></span></td>
         <td></td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="constant">mbean</code></td>
         <td>The MBean pattern to search for</td>
         <td><code class="literal">java.lang:*</code></td>
-      </tr></table></div></div><p>
+      </tr>
+    </table></div>
+    <p>
       The following request searches for all MBeans registered in the
       domain <code class="literal">java.lang</code>
-    </p><pre class="programlisting">
+    </p>
+    <pre class="programlisting">
 { 
    "type":"SEARCH",
    "mbean":"java.lang:*"
-}</pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="response-search"></a>6.2.4.3.&nbsp;Search response</h4></div></div></div><p>
+}</pre>
+  </div>
+
+  <div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="response-search"></a>6.2.4.3.&nbsp;Search response</h4></div></div></div>
+    
+    <p>
       The answer is a list of MBean names which matches the pattern or an empty 
       list if there was no match.
-    </p><p>
+    </p>
+    <p>
       For example, the request
-      </p><div class="informalexample"><pre class="literallayout">http://localhost:8888/jolokia/search/*:j2eeType=J2EEServer,*</pre></div><p>
+      </p><div class="informalexample">
+        <pre class="literallayout">http://localhost:8888/jolokia/search/*:j2eeType=J2EEServer,*</pre>
+      </div><p>
       results in
       </p><pre class="programlisting">
  {
@@ -793,50 +1063,82 @@ value: {
        "mbean":"*:j2eeType=J2EEServer,*","type":"search"
    }
  }</pre><p>
-    </p><p>
-      The returned MBean names are properly <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://download.oracle.com/javase/1.5.0/docs/api/javax/management/ObjectName.html" target="_top">quoted</a>
+    </p>
+    <p>
+      The returned MBean names are properly <a class="ulink" href="http://download.oracle.com/javase/1.5.0/docs/api/javax/management/ObjectName.html" target="_top">quoted</a>
       so that they can be directly used as 
       input for other requests.
-    </p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="list"></a>6.2.5.&nbsp;Listing MBeans (list)</h3></div></div></div><p>
+    </p>
+  </div>  
+</div>
+      <div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="list"></a>6.2.5.&nbsp;Listing MBeans (list)</h3></div></div></div>
+  
+  <p>
       The list operation collects information about accessible
       MBeans. This information includes the MBean names, their
       attributes, operations and notifications along with type
       information and description (as far as they are provided by the
       MBean author which doesn't seem to be often the case).
-  </p><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="get-list"></a>6.2.5.1.&nbsp;GET list request</h4></div></div></div><p>
+  </p>
+  <div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="get-list"></a>6.2.5.1.&nbsp;GET list request</h4></div></div></div>
+    
+    <p>
       The GET request format for a Jolokia list request is
-    </p><pre class="synopsis">&lt;base-url&gt;/list/&lt;inner path&gt;</pre><p>
-      The <code class="literal">&lt;inner path&gt;</code>, as described in <a href="protocol.html#paths">Section&nbsp;6.1.4, &#8220;Paths&#8221;</a> 
+    </p>
+    <pre class="synopsis">&lt;base-url&gt;/list/&lt;inner path&gt;</pre>
+    <p>
+      The <code class="literal">&lt;inner path&gt;</code>, as described in <a class="xref" href="protocol.html#paths" title="6.1.4.&nbsp;Paths">Section&nbsp;6.1.4, &#8220;Paths&#8221;</a> 
       specifies a subset of the complete response. You can
       use this to select a specific domain, MBean or
       attribute/operation. See the next section for the format of the
       complete response.      
-    </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="post-list"></a>6.2.5.2.&nbsp;POST list request</h4></div></div></div><p>
+    </p>
+  </div>
+
+  <div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="post-list"></a>6.2.5.2.&nbsp;POST list request</h4></div></div></div>
+    
+    <p>
       A list POST request has the following keys:
-    </p><div xmlns:xslthl="http://xslthl.sf.net" class="table"><p class="title"><b>Table&nbsp;6.9.&nbsp;POST list Request</b></p><div class="table-contents"><table id="d0e4734"><thead xmlns:xi="http://www.w3.org/2001/XInclude"><tr>
+    </p>
+    <div class="table"><table>
+      POST list Request
+      <thead>
+        <tr>
           <td>Key</td>
           <td>Description</td>
           <td>Example</td>
-        </tr></thead><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+        </tr>        
+      </thead>
+      <tr>
         <td><code class="constant">type</code></td>
         <td><span class="bold"><strong>list</strong></span></td>
         <td></td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="constant">path</code></td>
         <td>
           Inner path for accessing the value of a subset of the complete list
-          (<a href="protocol.html#paths">Section&nbsp;6.1.4, &#8220;Paths&#8221;</a>). 
+          (<a class="xref" href="protocol.html#paths" title="6.1.4.&nbsp;Paths">Section&nbsp;6.1.4, &#8220;Paths&#8221;</a>). 
         </td>
         <td><code class="literal">java.lang/type=Memory/attr</code></td>
-      </tr></table></div></div><p>
+      </tr>
+    </table></div>
+    <p>
       The following request fetches the information about the MBean <code class="literal">java.lang:type=Memory</code>
-    </p><pre class="programlisting">
+    </p>
+    <pre class="programlisting">
 { 
    "type":"LIST",
    "path":"java.lang/type=Memory"
-}</pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="response-list"></a>6.2.5.3.&nbsp;List response</h4></div></div></div><p>
+}</pre>
+  </div>
+
+  <div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="response-list"></a>6.2.5.3.&nbsp;List response</h4></div></div></div>
+    
+    <p>
       The <code class="constant">value</code> has the following format:
-    </p><pre class="programlisting">
+    </p>
+    <pre class="programlisting">
  { 
   &lt;domain&gt; : 
   {
@@ -879,7 +1181,8 @@ value: {
     ....
   },
   ....
- }</pre><p>
+ }</pre>
+    <p>
       The <code class="literal">domain name</code> and the <code class="literal">property
       list</code> together uniquely identify a single MBean. The
       property list is in the so called <span class="emphasis"><em>canonical
@@ -894,13 +1197,17 @@ value: {
       values, descriptive information and whether an attribute is
       writable (<code class="constant">rw</code> == <code class="constant">true</code>) or
       read-only.
-    </p><p>
+    </p>
+    <p>
       As for reading attributes you can fetch a subset of this information using an
       path. E.g a path of <code class="literal">domain/prop-list</code> would return the value for a single
       bean only. For example, a request 
-      </p><div class="informalexample"><pre class="literallayout">http://localhost:8080/jolokia/list/java.lang/type=Memory</pre></div><p>
+      </p><div class="informalexample">
+        <pre class="literallayout">http://localhost:8080/jolokia/list/java.lang/type=Memory</pre>
+      </div><p>
       results in an answer
-    </p><pre class="programlisting">
+    </p>
+    <pre class="programlisting">
  {
    "value":
    { 
@@ -948,7 +1255,12 @@ value: {
      "type":"list",
      "path":"java.lang\/type=Memory"
    }
- }</pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="d0e4830"></a>6.2.5.4.&nbsp;Restrict depth of the returned tree</h4></div></div></div><p>
+ }</pre>      
+  </div>
+
+  <div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="d5e2055"></a>6.2.5.4.&nbsp;Restrict depth of the returned tree</h4></div></div></div>
+    
+    <p>
       The optional parameter <code class="literal">maxDepth</code> can be used
       to restrict the depth of the return tree. Two value are
       possible: A <code class="literal">maxDepth</code> of 1 restricts the
@@ -957,22 +1269,42 @@ value: {
       the domain names (first level) and the MBean's properties
       (second level). The final values of the maps don't have any
       meaning and are dummy values.
-    </p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="version"></a>6.2.6.&nbsp;Getting the agent version (version)</h3></div></div></div><p>
+    </p>
+  </div>
+</div>
+      <div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="version"></a>6.2.6.&nbsp;Getting the agent version (version)</h3></div></div></div>
+  
+  <p>
     The Jolokia command <code class="constant">version</code> returns the version of
     the Jolokia agent along with the protocol version. 
-  </p><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="get-version"></a>6.2.6.1.&nbsp;GET version request</h4></div></div></div><p>
+  </p>
+
+  <div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="get-version"></a>6.2.6.1.&nbsp;GET version request</h4></div></div></div>
+    
+    <p>
       The GET URL for a version request has the following format:
-    </p><pre class="synopsis">&lt;base-url&gt;/version</pre><p>
+    </p>
+    <pre class="synopsis">&lt;base-url&gt;/version</pre>
+    <p>
       For GET request the <code class="literal">version</code> part can be
       omitted since this is the default command if no command is
       provided as path info.
-    </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="post-version"></a>6.2.6.2.&nbsp;POST version request</h4></div></div></div><p>
+    </p>
+  </div>
+  <div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="post-version"></a>6.2.6.2.&nbsp;POST version request</h4></div></div></div>
+    
+    <p>
       A version POST request has only a single key
       <code class="constant">type</code> which has to be set to 
       <span class="bold"><strong>version</strong></span>.
-    </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="response-version"></a>6.2.6.3.&nbsp;Version response</h4></div></div></div><p>
+    </p>
+  </div>
+  <div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="response-version"></a>6.2.6.3.&nbsp;Version response</h4></div></div></div>
+    
+    <p>
       The response value for a version request looks like:
-    </p><pre class="programlisting">
+    </p>
+    <pre class="programlisting">
  {
     "timestamp":1287143106,
     "status":200,
@@ -994,58 +1326,82 @@ value: {
                     "amxBooted": false
                  },
              }
- }</pre></div><p>
+ }</pre>
+  </div>
+  <p>
     <code class="literal">protocol</code> in the response value contains the
     protocol version used, <code class="literal">agent</code> is the version of
-    the Jolokia agent. See <a href="protocol.html#versions">Section&nbsp;6.8, &#8220;Jolokia protocol versions&#8221;</a> for the various
+    the Jolokia agent. See <a class="xref" href="protocol.html#versions" title="6.8.&nbsp;Jolokia protocol versions">Section&nbsp;6.8, &#8220;Jolokia protocol versions&#8221;</a> for the various
     protocol versions and the interoperability. If the agent is able
     to detect the server, additional meta information about this
     server is returned (i.e. the product name, the vendor and
     optionally some extra information added by the server detector).
-  </p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="processing-parameters"></a>6.3.&nbsp;Processing parameters</h2></div></div></div><p>
+  </p>  
+</div>
+
+    </div>
+
+    <div class="section"><div class="titlepage"><div><div><h2 class="title"><a name="processing-parameters"></a>6.3.&nbsp;Processing parameters</h2></div></div></div>
+      
+      <p>
         Jolokia operations can be influenced by so-called
         <span class="emphasis"><em>processing parameters</em></span>. These parameters
         are provided differently for POST and GET requests.
-      </p><p>
+      </p>
+      <p>
         For GET request, the processing parameter are given as normal
         query parameters:
         </p><pre class="synopsis">&lt;GET request URL&gt;?param1=value1&amp;param2=value2&amp;...</pre><p>
         For example the request
         </p><pre class="synopsis">http://localhost:8080/jolokia/list?maxObjects=100</pre><p>
         will limit the response to at max 100 values.
-      </p><p>
+      </p>
+      <p>
         POST request take the processing instructions within the
         JSON request below the key <code class="constant">config</code>:
-      </p><pre class="programlisting">
+      </p>
+        <pre class="programlisting">
   {
     "type" : "list"
     "config" : {
                  "maxObjects" : 100
                }
-  }</pre><p>
+  }</pre>
+      <p>
         If a POST request carries also query parameters in the URL, these processing parameters
         are merged with the ones given within the request. Configuration options given in the
         request take precedence over the ones given as query parameters.
-      </p><p>
+      </p>
+      <p>
         The list of known processing parameters is:
-      </p><div class="variablelist"><dl><dt><span class="term"><code class="literal">maxDepth</code></span></dt><dd><p>
+      </p>
+      <div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="literal">maxDepth</code></span></dt><dd>
+            <p>
               Maximum depth of the tree traversal into a bean's
               properties. The maximum value as configured in the
               agent's configuration is a hard limit
               and cannot be exceeded by a query parameter.
-            </p></dd><dt><span class="term"><code class="literal">maxCollectionSize</code></span></dt><dd><p>
+            </p>
+          </dd><dt><span class="term"><code class="literal">maxCollectionSize</code></span></dt><dd>
+            <p>
               For collections (lists, maps) this is the maximum
               size.
-            </p></dd><dt><span class="term"><code class="literal">maxObjects</code></span></dt><dd><p>
+            </p>
+          </dd><dt><span class="term"><code class="literal">maxObjects</code></span></dt><dd>
+            <p>
               Number of objects to visit in total. A hard limit
               can be configured in the agent's configuration.
-            </p></dd><dt><span class="term"><code class="literal">ignoreErrors</code></span></dt><dd><p>
+            </p>
+          </dd><dt><span class="term"><code class="literal">ignoreErrors</code></span></dt><dd>
+            <p>
               If set to "true", a Jolokia operation will not return an
               error if an JMX operation fails, but includes the
               exception message as value. This is useful for e.g. the
               read operation when requesting multiple attributes'
               values. Default: false
-            </p></dd><dt><span class="term"><code class="literal">mimeType</code></span></dt><dd><p>
+            </p>
+          </dd><dt><span class="term"><code class="literal">mimeType</code></span></dt><dd>
+            <p>
               The MIME type to return for the response. By default,
               this is <code class="constant">text/plain</code>, but it can be
               useful for some tools to change it to
@@ -1053,34 +1409,49 @@ value: {
               be used to change the default mime type.
               Only <code class="constant">text/plain</code> and <code class="constant">application/json</code> are allowed.
               For any other value Jolokia will fallback to <code class="constant">text/plain</code>.
-            </p></dd><dt><span class="term"><code class="literal">canonicalNaming</code></span></dt><dd><p>
+            </p>
+          </dd><dt><span class="term"><code class="literal">canonicalNaming</code></span></dt><dd>
+            <p>
               Defaults to <code class="constant">true</code> to return the canonical format of property lists.
               If set to <code class="constant">false</code> then the default unsorted property list is returned.
-            </p></dd><dt><span class="term"><code class="literal">includeStackTrace</code></span></dt><dd><p>
+            </p>
+          </dd><dt><span class="term"><code class="literal">includeStackTrace</code></span></dt><dd>
+            <p>
               If set to <code class="constant">true</code>, then in case of an error the stack trace is included.
               With <code class="constant">false</code> no stack trace will be returned, and when this parameter
               is set to <code class="constant">runtime</code> only for RuntimeExceptions a stack trace is put into
               the error response. Default is <code class="constant">true</code> if not set otherwise in the global
               agent configuration.
-            </p></dd><dt><span class="term"><code class="literal">serializeException</code></span></dt><dd><p>
+            </p>
+          </dd><dt><span class="term"><code class="literal">serializeException</code></span></dt><dd>
+            <p>
               If this parameter is set to <code class="constant">true</code> then a serialized version of the
               exception is included in an error response. This value
               is put under the key <code class="constant">error_value</code> in
               the response value. By default this is set to
               <code class="constant">false</code> except when the agent global
               configuration option is configured otherwise.
-            </p></dd><dt><span class="term"><code class="literal">ifModifiedSince</code></span></dt><dd><p>
+            </p>
+          </dd><dt><span class="term"><code class="literal">ifModifiedSince</code></span></dt><dd>
+            <p>
               If this parameter is given, its value is interpreted as epoch time (seconds since 1.1.1970) and
               if the requested value did not change since this time, an empty response (with no <code class="constant">value</code>)
               is returned and the response status code is set to 304 ("Not modified"). This
               option is currently only supported for <code class="literal">LIST</code> requests. The time value can be
               extracted from a previous' response <code class="constant">timestamp</code>.
-            </p></dd></dl></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="serialization"></a>6.4.&nbsp;Object serialization</h2></div></div></div><p>
+            </p>
+          </dd></dl></div>
+    </div>
+
+    <div class="section"><div class="titlepage"><div><div><h2 class="title"><a name="serialization"></a>6.4.&nbsp;Object serialization</h2></div></div></div>
+      
+      <p>
         Jolokia has some object serialization facilities in order to
         convert complex Java data types to JSON and vice
         versa. Serialization works in both ways in requests and
         responses, but the capabilities differ.
-      </p><p>
+      </p>
+      <p>
         Complex data types returned from the agent can be serialized
         completely into a JSON value object. It can detect cycles in
         the object graph and provides a way to limit the depth of
@@ -1088,70 +1459,88 @@ value: {
         <code class="classname">File</code> or
         <code class="classname">ObjectName</code>) it uses simplifier to not
         expose internal and redundant information.
-      </p><p>
+      </p>
+      <p>
         Object values used for values in
         <span class="emphasis"><em>write</em></span> operations and arguments in
         <span class="emphasis"><em>exec</em></span>, type support is limited to a
         handful of data types.
-      </p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="serialization-response"></a>6.4.1.&nbsp;Response value serialization</h3></div></div></div><p>
+      </p>
+      <div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="serialization-response"></a>6.4.1.&nbsp;Response value serialization</h3></div></div></div>
+        
+        <p>
           Jolokia can serialize any object into a JSON representation
           when generating the response. It uses some specific
           converters for certain well known data type with a generic
           bean converter as fallback.
-        </p><p>
+        </p>
+        <p>
           The following types are directly supported:
-          </p><div class="itemizedlist"><ul><li>
+          </p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
               Arrays and <code class="classname">java.util.List</code>
               are converted to JSON arrays
-            </li><li><code class="classname">java.util.Map</code> gets
+            </li><li class="listitem">
+              <code class="classname">java.util.Map</code> gets
               converted into a JSON object. Note, however, that JSON
               Object keys are <span class="emphasis"><em>always strings</em></span>.
-            </li><li>
-              Enums are converted to their canonical name.<sup>[<a name="enum-serial-jboss" href="#ftn.enum-serial-jboss">11</a>]</sup></li><li><code class="classname">javax.management.openmbean.CompositeData</code>
+            </li><li class="listitem">
+              Enums are converted to their canonical name.<a href="#ftn.enum-serial-jboss" class="footnote" name="enum-serial-jboss"><sup class="footnote">[11]</sup></a>
+            </li><li class="listitem">
+              <code class="classname">javax.management.openmbean.CompositeData</code>
               is converted in a JSON object, with the keys taken from
               the <code class="classname">CompositeData</code>'s key set and
               the value are its values.
-            </li><li><code class="classname">javax.management.openmbean.TabularData</code>
+            </li><li class="listitem">
+              <code class="classname">javax.management.openmbean.TabularData</code>
               is serialized differently depending on its internal
               structure. See below for a detailed explanation of this
               serialization mechanism including examples.
-            </li><li><code class="classname">java.lang.Class</code> is converted to
+            </li><li class="listitem">
+              <code class="classname">java.lang.Class</code> is converted to
               a JSON object with keys <code class="literal">name</code> (the class
               name) and <code class="literal">interfaces</code> (the implemented
               interfaces, if any)
-            </li><li><code class="classname">java.io.File</code> becomes a JSON
+            </li><li class="listitem">
+              <code class="classname">java.io.File</code> becomes a JSON
               object with keys <code class="literal">name</code> (file name),
               <code class="literal">modified</code> (date of last modification),
               <code class="literal">length</code> (file size in bytes),
               <code class="literal">directory</code> (whether the file is a directory),
               <code class="literal">canonicalPath</code> (the canonical path)
               and <code class="literal">exists</code>.
-            </li><li><code class="classname">javax.management.ObjectName</code> is
+            </li><li class="listitem">
+              <code class="classname">javax.management.ObjectName</code> is
               converted into a JSON object with the single key
               <code class="literal">objectName</code>.
-            </li><li><code class="classname">java.net.URL</code> becomes a JSON
+            </li><li class="listitem">
+              <code class="classname">java.net.URL</code> becomes a JSON
               object with the key <code class="literal">url</code> containing
               the URL as String.
-            </li><li><code class="classname">java.util.Date</code> is represented in
+            </li><li class="listitem">
+              <code class="classname">java.util.Date</code> is represented in
               an ISO-8601 format. When used with a path
               <code class="literal">time</code> the milliseconds since 1.1.1970
               00:00 UTC are returned.
-            </li><li><code class="classname">org.w3c.dom.Element</code> is translated
+            </li><li class="listitem">
+              <code class="classname">org.w3c.dom.Element</code> is translated
               into a JSON object with the properties
               <code class="literal">name</code>, <code class="literal">value</code> and
               <code class="literal">hasChildNodes</code>.
-            </li><li><code class="classname">java.math.BigInteger</code> becomes a JSON
+            </li><li class="listitem">
+              <code class="classname">java.math.BigInteger</code> becomes a JSON
               object with the key <code class="literal">bigint</code> containing
               the big integer value as String.
             </li></ul></div><p>
-        </p><p>
+        </p>
+        <p>
           Primitive and simple types (like String) are
           directly converted into their string presentation. All
           objects not covered by the list above are serialized in JSON
           objects, where the keys are the public bean properties of
           the object and the values are serialized (recursively) as
           described.
-        </p><p>
+        </p>
+        <p>
          <code class="classname">TabularData</code> serialization depends on
          the type of the index.  It is serialized into one or multiple
          nested JSON objects where the keys are derived from its
@@ -1165,8 +1554,8 @@ value: {
          first index's value, second level: second index's value and
          so on). For the serialization of
          <code class="classname">TabularData</code> resulting from a
-         <code class="classname"><a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://download.oracle.com/javase/6/docs/api/javax/management/MXBean.html" target="_top">MXBean</a></code>
-         translation for maps, see <a href="protocol.html#serialization-mxbean">Section&nbsp;6.4.3, &#8220;Jolokia and MXBeans&#8221;</a>.  If any of the declared
+         <code class="classname"><a class="ulink" href="http://download.oracle.com/javase/6/docs/api/javax/management/MXBean.html" target="_top">MXBean</a></code>
+         translation for maps, see <a class="xref" href="protocol.html#serialization-mxbean" title="6.4.3.&nbsp;Jolokia and MXBeans">Section&nbsp;6.4.3, &#8220;Jolokia and MXBeans&#8221;</a>.  If any of the declared
          index keys of a <code class="classname">TabularData</code> is a
          complex type (i.e. not a <code class="classname">SimpleType</code>),
          then this simple serialization into maps of maps is not
@@ -1178,22 +1567,26 @@ value: {
          <code class="constant">values</code> is the array containing the
          values as JSON object with the corresponding rows as values
          (including the indexes).
-        </p><p>
+        </p>
+        <p>
           For example if there is a single valued key
           <code class="constant">key</code>, then the returned JSON looks like
-        </p><pre class="programlisting">
+        </p>
+        <pre class="programlisting">
 {
   "mykey1" : { "key" : "mkey1", "item" : "value1", .... }
   "mykey2" : { "key" : "mkey2", "item" : "value2", .... }
   ....
-}</pre><p>
+}</pre>
+        <p>
           For multi valued keys of simple open types
           (i.e. <code class="methodname">TabularType.getIndexNames()</code>)
           is a list with more than one element but all of them are
           simple types), the returned JSON structure looks like (index
           names here are <code class="constant">key</code> and
           <code class="constant">innerkey</code>):
-        </p><pre class="programlisting">
+        </p>
+        <pre class="programlisting">
 {
   "mykey1" : {
     "myinner1" : { "key" : "mkey1", "innerkey" : "myinner1", "item" : "value1", .... }
@@ -1206,14 +1599,16 @@ value: {
     ....
   }
   ....
-}</pre><p>
+}</pre>
+        <p>
           If keys are used, which themselves are complex objects (like
           <code class="classname">CompositeData</code>), this hierarchical map structure can not be
           used. In this case an object with two keys is returned:
           "<code class="constant">indexNames</code>" holds the name of the key
           index and "<code class="constant">values</code>" is an array of all
           rows which are represented as JSON objects:
-        </p><pre class="programlisting">
+        </p>
+        <pre class="programlisting">
 {
   "indexNames" : [ "key", "innerkey" ],
   "values" : [
@@ -1221,71 +1616,96 @@ value: {
     { "key" : "mykey2", "innerkey" : { "name" : "b", "number" : 815 }, "item" : "value2", .... },
     ...
   ]
-}</pre><p>
+}</pre>
+        <p>
           Beside this special behaviour for
           <code class="classname">TabularData</code>, serialization can be
           influenced by certain processing parameters given with the
-          request (see <a href="protocol.html#processing-parameters">Section&nbsp;6.3, &#8220;Processing parameters&#8221;</a>). I.e. the recursive
+          request (see <a class="xref" href="protocol.html#processing-parameters" title="6.3.&nbsp;Processing parameters">Section&nbsp;6.3, &#8220;Processing parameters&#8221;</a>). I.e. the recursive
           process of JSON serialization can be stopped when the data
           set gets too large. Self and other circular references are
           detected, too. If this happen, special values indicate the
           truncation of the generated JSON object.
-        </p><div class="variablelist"><dl><dt><span class="term"><code class="constant">[this]</code></span></dt><dd><p>
+        </p>
+        <div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="constant">[this]</code></span></dt><dd>
+              <p>
                 This label is used when a property contains a self reference
-              </p></dd><dt><span class="term"><code class="constant">[Depth limit .... ]</code></span></dt><dd><p>
+              </p>
+            </dd><dt><span class="term"><code class="constant">[Depth limit .... ]</code></span></dt><dd>
+              <p>
                 When a depth limit is used or the hard depth limit
                 is exceeded, this label contains a string
                 representation of the next object one level deeper.
-                (see <a href="protocol.html#processing-parameters">Section&nbsp;6.3, &#8220;Processing parameters&#8221;</a>,
+                (see <a class="xref" href="protocol.html#processing-parameters" title="6.3.&nbsp;Processing parameters">Section&nbsp;6.3, &#8220;Processing parameters&#8221;</a>,
                 parameter <code class="literal">maxDepth</code>)
-              </p></dd><dt><span class="term"><code class="constant">[Reference .... ]</code></span></dt><dd><p>
+              </p>
+            </dd><dt><span class="term"><code class="constant">[Reference .... ]</code></span></dt><dd>
+              <p>
                 If during the traversal an object is visited a second time, this label is
                 used in order to break the cycle.
-              </p></dd><dt><span class="term"><code class="constant">[Object limit exceeded]</code></span></dt><dd><p>
+              </p>
+            </dd><dt><span class="term"><code class="constant">[Object limit exceeded]</code></span></dt><dd>
+              <p>
                 The total limit of object has been exceeded and hence
-                the object are not deserialized further.  (see <a href="protocol.html#processing-parameters">Section&nbsp;6.3, &#8220;Processing parameters&#8221;</a>, parameters
+                the object are not deserialized further.  (see <a class="xref" href="protocol.html#processing-parameters" title="6.3.&nbsp;Processing parameters">Section&nbsp;6.3, &#8220;Processing parameters&#8221;</a>, parameters
                 <code class="literal">maxCollectionSize</code> and
                 <code class="literal">maxObjects</code>)
-              </p></dd></dl></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="serialization-request"></a>6.4.2.&nbsp;Request parameter serialization</h3></div></div></div><p>
+              </p>
+            </dd></dl></div>
+      </div>
+
+      <div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="serialization-request"></a>6.4.2.&nbsp;Request parameter serialization</h3></div></div></div>
+        
+        <p>
           Serialization in the upstream direction (i.e. when sending
           values for <code class="constant">write</code> operations or arguments
           for <code class="constant">exec</code> operations) differs from
           from the object serializaton as used as response values
-          which is described in <a href="protocol.html#serialization-response">Section&nbsp;6.4.1, &#8220;Response value serialization&#8221;</a>. Not all types are
-          supported for upstream serialization <sup>[<a name="upstream-serialization-comment" href="#ftn.upstream-serialization-comment">12</a>]</sup>
+          which is described in <a class="xref" href="protocol.html#serialization-response" title="6.4.1.&nbsp;Response value serialization">Section&nbsp;6.4.1, &#8220;Response value serialization&#8221;</a>. Not all types are
+          supported for upstream serialization <a href="#ftn.upstream-serialization-comment" class="footnote" name="upstream-serialization-comment"><sup class="footnote">[12]</sup></a>
           and the capabilities differ also for POST and GET requests.
           <code class="literal">GET</code> upstream serialization is limited to
           basic types and simple arrays. POST requests on the other
           support a much large set of types, including the
           serialization of <code class="constant">Map</code>s,
-          <code class="constant">List</code>s and all <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://download.oracle.com/javase/6/docs/api/javax/management/openmbean/OpenType.html" target="_top">Open
+          <code class="constant">List</code>s and all <a class="ulink" href="http://download.oracle.com/javase/6/docs/api/javax/management/openmbean/OpenType.html" target="_top">Open
           Types</a>.
-        </p><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="d0e5320"></a>6.4.2.1.&nbsp;GET request values</h4></div></div></div><p>
+        </p>
+        <div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="d5e2285"></a>6.4.2.1.&nbsp;GET request values</h4></div></div></div>
+          
+          <p>
             Since parameters get encoded in the URL for GET request,
             only the following types can used for values and arguments
             in <code class="constant">write</code> and
             <code class="constant">exec</code> requests:
-            </p><div class="itemizedlist"><ul><li>String</li><li>Integer / int</li><li>Long / long</li><li>Byte / byte</li><li>Short / short</li><li>Float / float</li><li>Double / double</li><li>BigDecimal / BigInteger</li><li>char</li><li>Boolean / boolean</li><li>Date</li><li>URL</li><li>Enums (whose type is accessible to the agent,
-              see below)</li><li>Any type, that is accessible to the agent, and
+            </p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">String</li><li class="listitem">Integer / int</li><li class="listitem">Long / long</li><li class="listitem">Byte / byte</li><li class="listitem">Short / short</li><li class="listitem">Float / float</li><li class="listitem">Double / double</li><li class="listitem">BigDecimal / BigInteger</li><li class="listitem">char</li><li class="listitem">Boolean / boolean</li><li class="listitem">Date</li><li class="listitem">URL</li><li class="listitem">Enums (whose type is accessible to the agent,
+              see below)</li><li class="listitem">Any type, that is accessible to the agent, and
                 has a public constructor with one String parameter</li></ul></div><p>
-          </p><p>
+          </p>
+          <p>
             The serialized value is simply the string representation
             of those types. Dates can be set either by an long value
             (epoch milliseconds) or with a string value (ISO-8601
             format). Arrays of the given types are serialized as a
             comma separated list.
-          </p><div class="note"><h3 class="title"></h3>
+          </p>
+          <div class="note">
             The array support is somewhat limited since it makes a
             native split on commas. It does not yet take into account
             any quoting or escaping. For a much safer way to transport
             arrays to the agent, please consider using POST requests.
-          </div><p>
+          </div>
+          <p>
             Certain <span class="emphasis"><em>tag values</em></span> are used to mark special
             values.  A <code class="constant">null</code> value has to be
             serialized as <code class="literal">[null]</code>, an empty String
             as <code class="literal">""</code>. Tag values are not required for
             POST requests.
-          </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="d0e5379"></a>6.4.2.2.&nbsp;POST request values</h4></div></div></div><p>
+          </p>
+        </div>
+        <div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="d5e2312"></a>6.4.2.2.&nbsp;POST request values</h4></div></div></div>
+          
+          <p>
             POST request take advantage of the JSON type of the value
             transfered. These are basic types for numbers
             (<code class="literal">42</code> or <code class="literal">23.5</code>),
@@ -1299,7 +1719,8 @@ value: {
             takes a <code class="constant">Map</code> argument, the argument
             can be given as a JSON object. Be aware, however, that JSON
             maps (objects) only support strings as keys.
-          </p><p>
+          </p>
+          <p>
             The agent knows how to convert an JSON array to Java
             Arrays (of a basic type) or Lists, depending on the
             requirement as dictated by the MBeans operation or
@@ -1308,7 +1729,8 @@ value: {
             to the MBean's signature. In case of an overflow
             (e.g. when trying to treat a long with a too large value
             as int), an exception is raised.
-          </p><p>
+          </p>
+          <p>
             Enums can be converted from their canonical name. The
             prerequisite for this is, that the Jolokia agent has
             access to the Enum's class. This is true for all Enums
@@ -1317,25 +1739,31 @@ value: {
             used for upstream serialization by default since the
             Jolokia Agent is not able to contruct an instance of it
             because of missing type information.
-          </p><p>
-            Upstream serialization also supports <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://download.oracle.com/javase/6/docs/api/javax/management/openmbean/OpenType.html" target="_top">OpenType</a>s.
+          </p>
+          <p>
+            Upstream serialization also supports <a class="ulink" href="http://download.oracle.com/javase/6/docs/api/javax/management/openmbean/OpenType.html" target="_top">OpenType</a>s.
             If the signature of JMX exec operation or the value type
             of a JMX attribute is a <code class="classname">OpenType</code>,
             they are serialized as follows:
-          </p><div class="itemizedlist"><ul><li><code class="classname">SimpleType</code>s are extracted from
+          </p>
+          <div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+              <code class="classname">SimpleType</code>s are extracted from
               their corresponding JSON type.
-            </li><li><code class="classname">ArrayType</code> is extracted from a
+            </li><li class="listitem">
+              <code class="classname">ArrayType</code> is extracted from a
               <code class="classname">JSONArray</code> where the elements are
               serialized recursively with this algorithms. Only
               <code class="classname">ArrayType</code>s with element type
               <code class="classname">CompositeType</code> or
               <code class="classname">SimpleType</code> are supported.
-            </li><li><code class="classname">CompositeType</code> is extracted
+            </li><li class="listitem">
+              <code class="classname">CompositeType</code> is extracted
               recursively from a <code class="classname">JSONObject</code>
               where there the string keys must fit to the
               <code class="classname">CompositeType</code>'s item names and
               the values must be serializable as open types.
-            </li><li><p>
+            </li><li class="listitem">
+              <p>
                 <code class="classname">TabularType</code> is converted from
                 <code class="classname">JSONObject</code>. If it is single index
                 (i.e. has only one single index name), the
@@ -1350,7 +1778,8 @@ value: {
                 a <code class="classname">TabularType</code> with the two
                 index names <code class="literal">lastname</code> and
                 <code class="literal">firstname</code>, which are both of type <code class="classname">SimpleType.STRING</code>:
-              </p><pre class="programlisting">{
+              </p>
+        <pre class="programlisting">{
   "Mann": {
            "Thomas": {
                       "lastname": "Mann",
@@ -1363,12 +1792,14 @@ value: {
                         "birth": 1871
                        }
           }
-}</pre><p>
+}</pre>
+              <p>
                 <code class="classname">TabularType</code> used by the MXBean
                 framework for serialization of Maps are translated
                 directly from maps. More details are explained in the
-                next section <a href="protocol.html#serialization-mxbean">Section&nbsp;6.4.3, &#8220;Jolokia and MXBeans&#8221;</a>.
-              </p><p>
+                next section <a class="xref" href="protocol.html#serialization-mxbean" title="6.4.3.&nbsp;Jolokia and MXBeans">Section&nbsp;6.4.3, &#8220;Jolokia and MXBeans&#8221;</a>.
+              </p>
+              <p>
                 <code class="classname">TabularType</code>s with index values
                 which are <span class="emphasis"><em>not</em></span> of type
                 <code class="classname">SimpleType</code> can be used, too.
@@ -1388,29 +1819,40 @@ value: {
                 <code class="classname">User</code> with first- and lastname,
                 the JSON structure for setting the <code class="classname">TabularData</code> should
                 look like
-              </p><pre class="programlisting">{
+              </p>
+        <pre class="programlisting">{
   "indexNames": [ "user" ],
   "values" : [
      { "user" : { "lastname": "Mann", "firstname": "Thomas" }, "birth": 1875 },
      { "user" : { "lastname": "Mann", "firstname": "Heinrich" }, "birth": 1871 }
   ]
-}</pre></li></ul></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="serialization-mxbean"></a>6.4.3.&nbsp;Jolokia and MXBeans</h3></div></div></div><p>
-          The <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://download.oracle.com/javase/6/docs/api/javax/management/MXBean.html" target="_top">MXBean Framework</a> is availale in
+}</pre>
+            </li></ul></div>
+
+        </div>
+      </div>
+
+      <div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="serialization-mxbean"></a>6.4.3.&nbsp;Jolokia and MXBeans</h3></div></div></div>
+        
+        <p>
+          The <a class="ulink" href="http://download.oracle.com/javase/6/docs/api/javax/management/MXBean.html" target="_top">MXBean Framework</a> is availale in
           the JRE since version 6 and allows for easy creation and
           registration of own MBeans. MXBeans are some what the
           successor for standard MBeans and support an annotation driven
           as well as a naming convention driven programming model. The
           most important difference to standard MBeans it the
           restriction of MXBean to reference only open types.
-        </p><p>
+        </p>
+        <p>
           Although to the outside only open types are exposed by the
           MXBean framework, MXBean themselves can use more complex
           data types. The framework will translate forth and back
           between the custom and open types according to certain rules
-          as declared in the MXBean <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://download.oracle.com/javase/6/docs/api/javax/management/MXBean.html" target="_top">specification</a>.
+          as declared in the MXBean <a class="ulink" href="http://download.oracle.com/javase/6/docs/api/javax/management/MXBean.html" target="_top">specification</a>.
           Most of the translations to open types fits naturally to
           Jolokia's serialization, except for the translation of Map.
-        </p><p>
+        </p>
+        <p>
           When an MXBean references a map, the MXBean framework
           translates this map into a
           <code class="classname">TabularData</code> with a fixed internal
@@ -1422,7 +1864,8 @@ value: {
           <code class="literal">hotness</code> will be converted by the MXBean
           framework to a TabularData object which in turn would be
           translated by Jolokia to the following JSON struture
-        </p><pre class="programlisting">{
+        </p>
+      <pre class="programlisting">{
   "kind" : {
              "key": "kind",
              "value": "Habanero"
@@ -1431,48 +1874,65 @@ value: {
                 "key": "hotness",
                 "value": 10
               }
-}</pre><p>
+}</pre>
+      <p>
         Since this representation of a simple map is unnecessarily
         complicated, Jolokia treats <code class="classname">TabularData</code>
         of this kind (i.e. one index <code class="literal">key</code> and rows
         with properties <code class="literal">key</code> and
         <code class="literal">value</code>) specially in order to translate it
         back (and forth) to
-      </p><pre class="programlisting">{
+      </p>
+      <pre class="programlisting">{
   "kind" : "Habanero",
   "hotness" : 10
-}</pre></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="history"></a>6.5.&nbsp;Tracking historical values</h2></div></div></div><p>
+}</pre>
+      </div>
+
+    </div>
+
+    <div class="section"><div class="titlepage"><div><div><h2 class="title"><a name="history"></a>6.5.&nbsp;Tracking historical values</h2></div></div></div>
+      
+      <p>
         The Jolokia agents are able to keep requested values in memory
         along with a timestamp. If history tracking is switched on,
         then the agent will put the list of historical values specific
         for this request into the response. History tracking is
         toggled by an MBean operation on a Jolokia-owned MBean (see
-        <a href="mbeans.html">Chapter&nbsp;7, <i xmlns:xlink="http://www.w3.org/1999/xlink">Jolokia MBeans</i></a>). This has to be done individually for each
+        <a class="xref" href="mbeans.html" title="Chapter&nbsp;7.&nbsp;Jolokia MBeans">Chapter&nbsp;7, <i>Jolokia MBeans</i></a>). This has to be done individually for each
         attribute or JMX operation to be tracked.
-      </p><p>
+      </p>
+      <p>
         A <code class="constant">history</code> entry is contained in every
         response for which history tracking was switched on. A certain
         JMX operation on an Jolokia specific MBean has to be executed
         to turn history tracking on for a specific attribute or
-        operation. See <a href="mbeans.html">Chapter&nbsp;7, <i xmlns:xlink="http://www.w3.org/1999/xlink">Jolokia MBeans</i></a> for details.The
+        operation. See <a class="xref" href="mbeans.html" title="Chapter&nbsp;7.&nbsp;Jolokia MBeans">Chapter&nbsp;7, <i>Jolokia MBeans</i></a> for details.The
         <code class="constant">history</code> property of the JSON response
         contains an array of json objects which have two attributes:
         <code class="constant">value</code> containing the historical value
         (which can be as complex as any other value) and
         <code class="constant">timestamp</code> indicating the time when this
-        value was current (as measured by the server). <a href="protocol.html#response-example" title="Example&nbsp;6.2.&nbsp;JSON Response">Example&nbsp;6.2, &#8220;JSON Response&#8221;</a> has an example of a response
+        value was current (as measured by the server). <a class="xref" href="protocol.html#response-example" title="Example&nbsp;6.2.&nbsp;JSON Response">Example&nbsp;6.2, &#8220;JSON Response&#8221;</a> has an example of a response
         containing historical values.
-      </p><p>
+      </p>
+      <p>
         For multi attribute read requests, the history entry in the
         response is a JSON object instead of an array, where this
         object's attributes are the request's attribute names and the
         values are the history arrays as described above.
-      </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="protocol-proxy"></a>6.6.&nbsp;Proxy requests</h2></div></div></div><p>
+      </p>
+    </div>
+
+    <div class="section"><div class="titlepage"><div><div><h2 class="title"><a name="protocol-proxy"></a>6.6.&nbsp;Proxy requests</h2></div></div></div>
+      
+      <p>
         For proxy requests, POST must be used as HTTP method so that
         the given JSON request can contain an extra section for the
         target which should be finally reached via this proxy
         request. A typical proxy request looks like
-      </p><pre class="programlisting">
+      </p>
+      <pre class="programlisting">
   {
     "type" : "read",
     "mbean" : "java.lang:type=Memory",
@@ -1482,13 +1942,19 @@ value: {
          "user" : "jolokia",
          "password" : "s!cr!t"
     }
-  }</pre><p>
+  }</pre>
+      <p>
         <code class="literal">url</code> within the <code class="literal">target</code>
         section is a JSR-160 service URL for the target server
         reachable from within the proxy agent. <code class="literal">user</code>
         and <code class="literal">password</code> are optional credentials used
         for the JSR-160 communication.
-      </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="discovery"></a>6.7.&nbsp;Agent Discovery</h2></div></div></div><p>
+      </p>
+    </div>
+
+    <div class="section"><div class="titlepage"><div><div><h2 class="title"><a name="discovery"></a>6.7.&nbsp;Agent Discovery</h2></div></div></div>
+      
+      <p>
         Jolokia agents are able to respond to certain multicast
         requests in order to allow clients to detect automatically
         connection parameters. The agent URL to expose can be either
@@ -1502,18 +1968,20 @@ value: {
         might hide behind a proxy, too. So, if in doubt you should
         configure the agent URL from outside to allow external clients
         to be discovered. The configuration options for enabling
-        multicast requests are described in the <a href="agents.html#agent-jvm-config" title="Table&nbsp;3.6.&nbsp;JVM agent configuration options">Table&nbsp;3.6, &#8220;JVM agent configuration options&#8221;</a> and <a href="agents.html#agent-war-init-params" title="Table&nbsp;3.1.&nbsp;Servlet init parameters">Table&nbsp;3.1, &#8220;Servlet init parameters&#8221;</a> agent configuration
+        multicast requests are described in the <a class="xref" href="agents.html#agent-jvm-config" title="Table&nbsp;3.6.&nbsp;JVM agent configuration options">Table&nbsp;3.6, &#8220;JVM agent configuration options&#8221;</a> and <a class="xref" href="agents.html#agent-war-init-params" title="Table&nbsp;3.1.&nbsp;Servlet init parameters">Table&nbsp;3.1, &#8220;Servlet init parameters&#8221;</a> agent configuration
         sections.
-      </p><p>
+      </p>
+      <p>
         A agent which is enabled for multicast discovery will only
-        respond to a multicast request if the <a href="security.html#security-policy">Section&nbsp;4.1, &#8220;Policy based security&#8221;</a> allows
+        respond to a multicast request if the <a class="xref" href="security.html#security-policy" title="4.1.&nbsp;Policy based security">Section&nbsp;4.1, &#8220;Policy based security&#8221;</a> allows
         connections from the source IP. Otherwise a multicast request
         will be simply ignored. For example, if you have configured
         your agent to only allow request from a central monitoring
         host, only this host is able to detect these agents. Beside
         security aspects it wouldn't make sense to expose the URL as
         any other host is not able to connect anyways.
-      </p><p>
+      </p>
+      <p>
         Starting with version 1.2.0 the Jolokia JVM agent has this
         discovery feature enabled by default which can be switched off
         via <code class="literal">--discoveryEnabled=true</code> command line parameter or the
@@ -1526,17 +1994,21 @@ value: {
         with a <code class="literal">jolokia.</code> prefix
         (e.g. <code class="literal">jolokia.discoveryEnabled</code>). More on the configuration
         options can be found in the agent's configuration sections.
-      </p><p>
+      </p>
+      <p>
         For sending a multicast request discovery message, an UDP
         message should be send to the address <code class="literal">239.192.48.84</code>, port
         <code class="literal">24884</code> which contains a JSON message encoded in UTF-8 with
         the following format
-      </p><pre class="programlisting">
+      </p>
+      <pre class="programlisting">
   {
     "type": "query"
-  }</pre><p>
+  }</pre>
+      <p>
         Any agent enabled for discovery will respond to requester on the same socket with an answer which looks like
-      </p><pre class="programlisting">
+      </p>
+      <pre class="programlisting">
   {
     "type": "response",
     "agent_description" : "Atlantis Tomcat",
@@ -1545,7 +2017,8 @@ value: {
     "server_vendor" : "Apache",
     "server_product" : "Tomcat",
     "server_version" : "7.0.35"
-  }</pre><p>
+  }</pre>
+      <p>
         The response itself is a JSON object and is restricted to 8192
         bytes maximum. The request type is either
         <code class="constant">query</code> or <code class="constant">response</code>. A
@@ -1554,14 +2027,21 @@ value: {
         type <code class="constant">response</code>.  Query requests contain
         only the type as property. Responses are sent back to the
         address and port of the sender of the query request.
-      </p><p>
+      </p>
+      <p>
         Please note, that IPv6 is currently not supported yet but likely
         in the future.
-      </p><div xmlns:xslthl="http://xslthl.sf.net" class="table"><p class="title"><b>Table&nbsp;6.10.&nbsp;Response properties</b></p><div class="table-contents"><table id="discovery-response"><thead xmlns:xi="http://www.w3.org/2001/XInclude"><tr>
+      </p>
+      <div class="table"><a name="discovery-response"></a><table id="discovery-response">
+      Response properties
+      <thead>
+        <tr>
           <td>Property</td>
           <td>Description</td>
           <td>Example</td>
-        </tr></thead><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+        </tr>
+      </thead>
+      <tr>
         <td><code class="constant">type</code></td>
         <td>
           Request type, either <code class="constant">query</code> or
@@ -1570,7 +2050,8 @@ value: {
         <td>
           <code class="constant">query</code> or <code class="constant">response</code>
         </td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="constant">agent_id</code></td>
         <td>
           Each agent has a unique id which can be either provided
@@ -1582,7 +2063,8 @@ value: {
         <td>
           10.9.11.87-23455-9184ef-osgi
         </td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="constant">agent_description</code></td>
         <td>
           An optional description which can be used as a UI label if
@@ -1591,7 +2073,8 @@ value: {
         <td>
           ServiceMix ESB
         </td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="constant">url</code></td>
         <td>
           The URL how this agent can be contacted. This URL is
@@ -1606,7 +2089,8 @@ value: {
         <td>
           http://10.9.11.87:8080/jolokia
         </td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="constant">secured</code></td>
         <td>
           Whether the agent was configured for authentication or not.
@@ -1614,7 +2098,8 @@ value: {
         <td>
           false
         </td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="constant">server_vendor</code></td>
         <td>
           The vendor of the container the agent is running in. This
@@ -1623,7 +2108,8 @@ value: {
         <td>
           Apache
         </td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="constant">server_product</code></td>
         <td>
           The container product if detected
@@ -1631,7 +2117,8 @@ value: {
         <td>
           tomcat
         </td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="constant">server_version</code></td>
         <td>
           The container's version (if detected)
@@ -1639,23 +2126,36 @@ value: {
         <td>
           7.0.50
         </td>
-      </tr></table></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="versions"></a>6.8.&nbsp;Jolokia protocol versions</h2></div></div></div><p>
+      </tr>
+      </table></div>
+
+    </div>
+
+    <div class="section"><div class="titlepage"><div><div><h2 class="title"><a name="versions"></a>6.8.&nbsp;Jolokia protocol versions</h2></div></div></div>
+      
+      <p>
         The protocol definition is versioned. It contains of a major
         and minor version. Changes in the minor version are backward
         compatible to other protocol with the same major
         version. Major version changes incorporate possibly backwards
         incompatible changes. This document describes the Jolokia
         protocol version <span class="bold"><strong>7.2</strong></span>.
-      </p><div class="variablelist"><dl><dt><span class="term"><span class="bold"><strong>7.2</strong></span> (since 1.2.2)</span></dt><dd><p>
+      </p>
+      <div class="variablelist"><dl class="variablelist"><dt><span class="term"><span class="bold"><strong>7.2</strong></span> (since 1.2.2)</span></dt><dd>
+            <p>
               Pathes can now be used with wildcards
               (<code class="literal">*</code>) which match everything in the
               selected level. They are especially useful with pattern
               read requests.
-            </p></dd><dt><span class="term"><span class="bold"><strong>7.1</strong></span> (since 1.2.0)</span></dt><dd><p>
+            </p>
+          </dd><dt><span class="term"><span class="bold"><strong>7.1</strong></span> (since 1.2.0)</span></dt><dd>
+            <p>
               The <code class="literal">version</code> command returns now the configuration
               global information as well with the key <code class="code">config</code> in the
               returned value.
-            </p></dd><dt><span class="term"><span class="bold"><strong>7.0</strong></span> (since 1.1.0)</span></dt><dd><p>
+            </p>
+          </dd><dt><span class="term"><span class="bold"><strong>7.0</strong></span> (since 1.1.0)</span></dt><dd>
+            <p>
               The <span class="bold"><strong><code class="constant">maxDepth</code></strong></span>
               parameter (either as processing parameter or as
               configuration value) is now 1 based. I.e. 0 means always
@@ -1665,10 +2165,14 @@ value: {
               other limit values (maxCollectionSize and maxObjects) so
               this change is used in order to harmonize the overall
               behaviour with regard to limits.
-            </p><p>
+            </p>
+          
+            <p>
               Enums are now serialized downstream (full support)
               and upstream (for type accessible to the agent).
-            </p><p>
+            </p>
+          
+            <p>
               New query parameter options
               <code class="constant">serializeException</code> (for setting an
               <code class="constant">error_value</code> in case of an
@@ -1676,14 +2180,20 @@ value: {
               (influences how object names are returned) and
               <code class="constant">includeStackTrace</code> (for adding or
               omitting stacktraces in error responses).
-            </p></dd><dt><span class="term"><span class="bold"><strong>6.1</strong></span> (since 1.0.2)</span></dt><dd><p>
+            </p>
+          </dd><dt><span class="term"><span class="bold"><strong>6.1</strong></span> (since 1.0.2)</span></dt><dd>
+            <p>
               Error responses contain now the original request as
               well, for single and bulk requests.
-            </p></dd><dt><span class="term"><span class="bold"><strong>6.0</strong></span> (since 1.0.0)</span></dt><dd><p>
+            </p>
+          </dd><dt><span class="term"><span class="bold"><strong>6.0</strong></span> (since 1.0.0)</span></dt><dd>
+            <p>
               Escaping has been changed from <code class="literal">/-/</code> to
               <code class="literal">!/</code>. This affects GET Urls and
               <span class="emphasis"><em> inner paths</em></span>.
-            </p></dd><dt><span class="term"><span class="bold"><strong>5.0</strong></span> (since 0.95)</span></dt><dd><p>
+            </p>
+          </dd><dt><span class="term"><span class="bold"><strong>5.0</strong></span> (since 0.95)</span></dt><dd>
+            <p>
               <code class="classname">javax.management.openmbean.TabularData</code>
               is serialized differently when generating the
               response. In fact, the serialization as an array in
@@ -1699,17 +2209,23 @@ value: {
               <code class="literal">value</code> columns), the
               <code class="classname">TabularData</code> is transformed to an
               appropriate map..
-            </p><p>
+            </p>
+          
+            <p>
               Removed JSON property <code class="literal">modified</code> from
               the serialized JSON representation of a File return
               value since it duplicated the
               <code class="literal">lastModified</code> property on the same
               object.
-            </p></dd><dt><span class="term"><span class="bold"><strong>4.3</strong></span> (since 0.91)</span></dt><dd><p>
+            </p>
+          </dd><dt><span class="term"><span class="bold"><strong>4.3</strong></span> (since 0.91)</span></dt><dd>
+            <p>
               The <code class="literal">list</code> operation supports a
               <code class="literal">maxDepth</code> option for truncating the
               answer.
-            </p></dd><dt><span class="term"><span class="bold"><strong>4.2</strong></span> (since 0.90)</span></dt><dd><p>
+            </p>
+          </dd><dt><span class="term"><span class="bold"><strong>4.2</strong></span> (since 0.90)</span></dt><dd>
+            <p>
               Response values are returned in the native JSON
               datatype, not always as strings as in previous versions
               of this protocol. Parameter serialization for writing
@@ -1718,20 +2234,34 @@ value: {
               represented as native JSON types and not in a string
               representation as before. GET requests still use a
               simplified string representation.
-            </p></dd><dt><span class="term"><span class="bold"><strong>4.0</strong></span> (17.10.2010)</span></dt><dd><p>This is the initial version for Jolokia. Versions below 4 are
-            implemented by jmx4perl</p></dd></dl></div></div><div class="footnotes"><br><hr width="100" align="left"><div class="footnote"><p><sup>[<a name="ftn.rest-comment" href="#rest-comment">7</a>] </sup>This document will avoid the term REST as much as
+            </p>
+          </dd><dt><span class="term"><span class="bold"><strong>4.0</strong></span> (17.10.2010)</span></dt><dd>
+            <p>This is the initial version for Jolokia. Versions below 4 are
+            implemented by jmx4perl</p>
+          </dd></dl></div>
+    </div>
+<div class="footnotes"><br><hr width="100" align="left"><div id="ftn.rest-comment" class="footnote">
+          <p><a href="#rest-comment" class="para"><sup class="para">[7] </sup></a>This document will avoid the term REST as much as
           possible in order to avoid provoking any dogmatic
-          resentments.</p></div><div class="footnote"><p><sup>[<a name="ftn.no-backslash" href="#no-backslash">8</a>] </sup>
+          resentments.</p>
+        </div><div id="ftn.no-backslash" class="footnote">
+          <p><a href="#no-backslash" class="para"><sup class="para">[8] </sup></a>
             A backslash (<code class="literal">\</code>) can not be used, since
             most servlet container translate a backslash into a forward
             slash on the fly when given in an URL.
-          </p></div><div class="footnote"><p><sup>[<a name="ftn.epoch-time" href="#epoch-time">9</a>] </sup>
+          </p>
+          </div><div id="ftn.epoch-time" class="footnote">
+          <p><a href="#epoch-time" class="para"><sup class="para">[9] </sup></a>
             Seconds since 1.1.1970
-          </p></div><div class="footnote"><p><sup>[<a name="ftn.mbeanexception-wrapping" href="#mbeanexception-wrapping">10</a>] </sup>
+          </p>
+          </div><div id="ftn.mbeanexception-wrapping" class="footnote">
+          <p><a href="#mbeanexception-wrapping" class="para"><sup class="para">[10] </sup></a>
             If the server exception
             is a subtype of <code class="classname">MBeanException</code>, the wrapped
             exception's message is used.
-          </p></div><div class="footnote"><p><sup>[<a name="ftn.enum-serial-jboss" href="#enum-serial-jboss">11</a>] </sup>
+          </p>
+          </div><div id="ftn.enum-serial-jboss" class="footnote">
+              <p><a href="#enum-serial-jboss" class="para"><sup class="para">[11] </sup></a>
                 For JBoss older than version 7, there might be use cases
                 when custom enums need to be serialized. In this case,
                 the type information must be available to the agent,
@@ -1739,11 +2269,14 @@ value: {
                 serialization should work always, regardless whether
                 the customer enum type is accessible by the agent or
                 not.
-              </p></div><div class="footnote"><p><sup>[<a name="ftn.upstream-serialization-comment" href="#upstream-serialization-comment">12</a>] </sup>
+              </p>
+            </div><div id="ftn.upstream-serialization-comment" class="footnote">
+            <p><a href="#upstream-serialization-comment" class="para"><sup class="para">[12] </sup></a>
               Conversion from a typed system to an untyped
               representation is obviously much easier than vice
               versa. Please note, that Jolokia does not replace a full
               blown JSON object serialization framework like
               Jackson. Nor does it use one in order to keep the agent small
               and simple with a low dependency count.
-            </p></div></div></div><div class="navfooter"><div><div class="navbar"><a xmlns:xslthl="http://xslthl.sf.net" href="proxy.html" title="Chapter&nbsp;5.&nbsp;Proxy Mode">Previous</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="index.html" title="Jolokia - Reference Documentation">Contents</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="mbeans.html" title="Chapter&nbsp;7.&nbsp;Jolokia MBeans">Next</a></div></div></div></body></html>
+            </p>
+          </div></div></div><div class="navfooter"><div><div class="navbar"><a xmlns:xslthl="http://xslthl.sf.net" href="proxy.html" title="Chapter&nbsp;5.&nbsp;Proxy Mode">Previous</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="" title="">Contents</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="mbeans.html" title="Chapter&nbsp;7.&nbsp;Jolokia MBeans">Next</a></div></div></div></body></html>

@@ -1,6 +1,6 @@
 <html><head>
       <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-   <title>Chapter&nbsp;8.&nbsp;Clients</title><link xmlns:xslthl="http://xslthl.sf.net" href="css/base.css" rel="stylesheet" type="text/css"><link xmlns:xslthl="http://xslthl.sf.net" href="css/style.css" rel="stylesheet" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"><link rel="start" href="index.html" title="Jolokia - Reference Documentation"><link rel="up" href="index.html" title="Jolokia - Reference Documentation"><link rel="prev" href="mbeans.html" title="Chapter&nbsp;7.&nbsp;Jolokia MBeans"><link rel="next" href="jmx.html" title="Chapter&nbsp;9.&nbsp;Jolokia JMX"><script xmlns:xslthl="http://xslthl.sf.net" data-cfasync="false" type="text/javascript">
+   <title>Chapter&nbsp;8.&nbsp;Clients</title><link xmlns:xslthl="http://xslthl.sf.net" href="css/base.css" rel="stylesheet" type="text/css"><link xmlns:xslthl="http://xslthl.sf.net" href="css/style.css" rel="stylesheet" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.79.1"><link rel="home" href="index.html" title="Jolokia - Reference Documentation"><link rel="up" href="index.html" title="Jolokia - Reference Documentation"><link rel="prev" href="mbeans.html" title="Chapter&nbsp;7.&nbsp;Jolokia MBeans"><link rel="next" href="jmx.html" title="Chapter&nbsp;9.&nbsp;Jolokia JMX"><script xmlns:xslthl="http://xslthl.sf.net" data-cfasync="false" type="text/javascript">
        var host = "jolokia.org";
        if ((host == window.location.host) && (window.location.protocol != "https:")) {
             window.location.protocol = "https";
@@ -16,14 +16,21 @@
     ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
     })();
-      </script></head><body><div class="navheader"><div><div class="navbar"><a xmlns:xslthl="http://xslthl.sf.net" href="mbeans.html" title="Chapter&nbsp;7.&nbsp;Jolokia MBeans">Previous</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="index.html" title="Jolokia - Reference Documentation">Contents</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="jmx.html" title="Chapter&nbsp;9.&nbsp;Jolokia JMX">Next</a></div></div></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h1 xmlns:xslthl="http://xslthl.sf.net"><a name="clients"></a>Chapter&nbsp;8.&nbsp;Clients</h1></div></div></div><p>
+      </script></head><body><div class="chapter"><div class="titlepage"><div><div><h1 xmlns:xslthl="http://xslthl.sf.net"><a name="clients"></a>Chapter&nbsp;8.&nbsp;Clients</h1></div></div></div>
+    
+
+    <p>
       Three client implementations exists for Jolokia: Jmx4Perl, the
       Perl binding (the grandmother of all clients ;-), a Java library
       and a Javascript library. This reference describes the client
       bindings bundled with Jolokia. More JVM based client libraries
       are planned for inclusiong in Jolokia (e.g. Groovy, Scala or
-      JRuby). Information about Jmx4Perl can be found <a href="">???</a>.
-    </p><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="client-javascript"></a>8.1.&nbsp;Javascript Client Library</h2></div></div></div><p>
+      JRuby). Information about Jmx4Perl can be found <a class="xref" href="">???</a>.
+    </p>
+
+    <div class="section"><div class="titlepage"><div><div><h2 class="title"><a name="client-javascript"></a>8.1.&nbsp;Javascript Client Library</h2></div></div></div>
+  
+  <p>
     The Jolokia Javascript library provides a Javascript API to the 
     to the Jolokia agent. It comes with two layers, a
     basic one which allows for sending Jolokia requests to the agent
@@ -31,57 +38,76 @@
     which is less powerful but easier to use. This library supports
     bulk requests, HTTP GET and POST requests and JSONP for querying
     agents which are located on a different server.
-  </p><p>
+  </p>
+  <p>
     All methods of this library are available via the
     <code class="classname">Jolokia</code> client object, which needs to be
     instantiated up-front. In the following example a client object is
     created and the used heap memory is requested synchronously via
     the simple API. The agent is deployed within the same webarchive
     which also serves this script.
-  </p><pre class="programlisting">
+  </p>
+  <pre class="programlisting">
 var j4p = new Jolokia("/jolokia");
 var value = j4p.getAttribute("java.lang:type=Memory","HeapMemoryUsage","used");
 console.log("Heap Memory used: " + value);     
-</pre><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="js-installation"></a>8.1.1.&nbsp;Installation</h3></div></div></div><p> 
+</pre>
+  <div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="js-installation"></a>8.1.1.&nbsp;Installation</h3></div></div></div>
+    
+    <p> 
       The Jolokia Javascript library is distributed in two parts, in
       compressed and uncompressed forms:
-    </p><div class="variablelist"><dl><dt><span class="term"><code class="filename">jolokia.js</code> and
-        <code class="filename">jolokia-min.js</code></span></dt><dd><p>
+    </p>    
+    <div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="filename">jolokia.js</code> and
+        <code class="filename">jolokia-min.js</code></span></dt><dd>
+          <p>
             Base library containing the Jolokia object definition
             which carries the <code class="methodname">request()</code>
-          </p></dd><dt><span class="term"><code class="filename">jolokia-simple.js</code> and <code class="filename">jolokia-simple-min.js</code></span></dt><dd><p>
+          </p>
+        </dd><dt><span class="term"><code class="filename">jolokia-simple.js</code> and <code class="filename">jolokia-simple-min.js</code></span></dt><dd>
+          <p>
             Library containing the Jolokia simple API and which builds
             up on <code class="filename">jolokia.js</code> It must be included
             after <code class="filename">jolokia.js</code> since it adds methods
             to the <code class="classname">Jolokia</code> object definition.
-          </p></dd></dl></div><p>
-      All four files can be obtained from the <a xmlns:xlink="http://www.w3.org/1999/xlink" href="/download.html" target="_top">download
+          </p>
+        </dd></dl></div>
+    <p>
+      All four files can be obtained from the <a class="ulink" href="/download.html" target="_top">download
       page</a>. For production environments the compressed version
       is highly recommended since the extensive API documentation
       included in the original version is stripped off here. For Maven
       users there is an even better way to integrate them, described in
-      <a href="clients.html#js-maven">Section&nbsp;8.1.6, &#8220;Maven integration&#8221;</a>.
-    </p><p>
-      <code class="filename">jolokia.js</code> uses <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://www.jquery.com" target="_top">jQuery</a>, which must be
+      <a class="xref" href="clients.html#js-maven" title="8.1.6.&nbsp;Maven integration">Section&nbsp;8.1.6, &#8220;Maven integration&#8221;</a>.
+    </p>
+    <p>
+      <code class="filename">jolokia.js</code> uses <a class="ulink" href="http://www.jquery.com" target="_top">jQuery</a>, which must be
       included as well. If the target platform doesn't support native
-      JSON serialization, <a xmlns:xlink="http://www.w3.org/1999/xlink" href="https://github.com/douglascrockford/JSON-js" target="_top">json2.js</a>
+      JSON serialization, <a class="ulink" href="https://github.com/douglascrockford/JSON-js" target="_top">json2.js</a>
       needs to be included as well. As sample HTML head for including
       all necessary parts looks like:
-    </p><pre class="programlisting">
+    </p>
+    <pre class="programlisting">
 &lt;head&gt;
   &lt;script src="jquery-1.7.2.js"&gt;&lt;/script&gt;
   &lt;script src="json2.js"&gt;&lt;/script&gt;
   &lt;script src="jolokia-min.js"&gt;&lt;/script&gt;
   &lt;script src="jolokia-simple-min.js"&gt;&lt;/script&gt;
 &lt;/head&gt;
-</pre><p>
+</pre>
+    <p>
       A Jolokia client is always created as an instance of
       <code class="classname">Jolokia</code>. Requests to the agent are sent
       by calling methods on this object. The constructing function
       takes a plain object, which provides default parameters which
       are used in the <code class="methodname">request()</code> if no
       overriding are given there.
-    </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="js-request"></a>8.1.2.&nbsp;Usage</h3></div></div></div><p>
+    </p>
+  </div>
+  
+  <div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="js-request"></a>8.1.2.&nbsp;Usage</h3></div></div></div>    
+    
+    <p>
       All function of this library are available as methods of the
       <code class="classname">Jolokia</code> object. The options needs to be
       instantiated as usual and takes a set of default options, which
@@ -91,51 +117,70 @@ console.log("Heap Memory used: " + value);
       options object. For example, a synchronous request for obtaining
       the agent's version for a agent running on the same server which
       delivered the Javascript looks like:
-    </p><pre class="programlisting">
+    </p>
+    <pre class="programlisting">
 var j4p = new Jolokia({url: "/jolokia"});
 var response = j4p.request({type: "version"},{method: "post"});
-console.log("Agent Version: " + response.value.agent);</pre><p>
+console.log("Agent Version: " + response.value.agent);</pre>
+    <p>
       If the constructor is used with a single string argument, this
       value is considered to be the agent's access URL. I.e. in the
       example above the construction of the
       <code class="classname">Jolokia</code> could have been performed with a
       single string argument (<code class="code">new Jolokia("/jolokia")</code>).
-    </p><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="js-request-format"></a>8.1.2.1.&nbsp;Requests</h4></div></div></div><p>
+    </p>
+    <div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="js-request-format"></a>8.1.2.1.&nbsp;Requests</h4></div></div></div>
+      
+      <p>
         Jolokia requests and responses are represented as JSON
         objects. They have exactly the same format, which is expected
-        and returned by the agent as defined in <a href="protocol.html">Chapter&nbsp;6, <i xmlns:xlink="http://www.w3.org/1999/xlink">Jolokia Protocol</i></a> for POST requests. All request types are
+        and returned by the agent as defined in <a class="xref" href="protocol.html" title="Chapter&nbsp;6.&nbsp;Jolokia Protocol">Chapter&nbsp;6, <i>Jolokia Protocol</i></a> for POST requests. All request types are
         supported.
-      </p><p>
+      </p>
+      <p>
         The <code class="methodname">request()</code> expects as its first
         argument either a single request object or, for bulk requests,
         an array of request objects. Depending on this for synchronous
         operations either a single response JSON object is returned or
         an array of responses (in the order of the initial request
         array). For asynchronous request one or more callbacks are
-        called for each response separately. See <a href="clients.html#js-request-sync-async">Section&nbsp;8.1.2.3, &#8220;Operational modes&#8221;</a> for details.
-      </p><p>
+        called for each response separately. See <a class="xref" href="clients.html#js-request-sync-async" title="8.1.2.3.&nbsp;Operational modes">Section&nbsp;8.1.2.3, &#8220;Operational modes&#8221;</a> for details.
+      </p>
+      <p>
         The following example shows a single and bulk request call to
         the Jolokia agent:
-      </p><pre class="programlisting">
+      </p>
+      <pre class="programlisting">
 var j4p = new Jolokia({url: "/jolokia"});
 var req1 = { type: "read", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage" };
 var req2 = { type: "list" };
 var response = j4p.request(req1);
-var responses = j4p.request([ req1, req2 ]);</pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="js-request-options"></a>8.1.2.2.&nbsp;Request options</h4></div></div></div><p>
+var responses = j4p.request([ req1, req2 ]);</pre>
+    </div>
+    <div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="js-request-options"></a>8.1.2.2.&nbsp;Request options</h4></div></div></div>    
+      
+      <p>
         Each request can be influenced by a set of optional options
         provided either as default during construction of the
         <code class="classname">Jolokia</code> object or as optional last
         parameter for the request object. Also a request can carry a
         <code class="constant">config</code> attribute, which can be used for all
-        processing parameters (<a href="protocol.html#processing-parameters">Section&nbsp;6.3, &#8220;Processing parameters&#8221;</a>).
-        The known options are summarized in <a href="clients.html#js-request-options-table" title="Table&nbsp;8.1.&nbsp;Request options">Table&nbsp;8.1, &#8220;Request options&#8221;</a>
-      </p><div xmlns:xslthl="http://xslthl.sf.net" class="table"><p class="title"><b>Table&nbsp;8.1.&nbsp;Request options</b></p><div class="table-contents"><table id="js-request-options-table"><thead xmlns:xi="http://www.w3.org/2001/XInclude"><tr>
+        processing parameters (<a class="xref" href="protocol.html#processing-parameters" title="6.3.&nbsp;Processing parameters">Section&nbsp;6.3, &#8220;Processing parameters&#8221;</a>).
+        The known options are summarized in <a class="xref" href="clients.html#js-request-options-table" title="Table&nbsp;8.1.&nbsp;Request options">Table&nbsp;8.1, &#8220;Request options&#8221;</a>
+      </p>      
+      <div class="table"><a name="js-request-options-table"></a><table id="js-request-options-table">
+        Request options
+        <thead>
+          <tr>
             <td>Key</td>
             <td>Description</td>
-          </tr></thead><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+          </tr>        
+        </thead>
+        <tr>
           <td><code class="constant">url</code></td>
           <td>Agent URL (mandatory)</td>
-        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+        </tr>
+        <tr>
           <td><code class="constant">method</code></td>
           <td>
             Either "post" or "get" depending on the desired HTTP method
@@ -149,7 +194,8 @@ var responses = j4p.request([ req1, req2 ]);</pre></div><div class="section" lan
             dyamically. If a method is selected which doesn't fit to the
             request, an error is raised.
           </td>
-        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+        </tr>
+        <tr>
           <td><code class="constant">jsonp</code></td>
           <td>
             Whether the request should be sent via JSONP (a technique
@@ -157,7 +203,8 @@ var responses = j4p.request([ req1, req2 ]);</pre></div><div class="section" lan
             "same-origin-policy"). This can be used only with HTTP "get"
             requests.
           </td>
-        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+        </tr>
+        <tr>
           <td><code class="constant">success</code></td>
           <td>
             Callback function which is called for a successful
@@ -166,9 +213,10 @@ var responses = j4p.request([ req1, req2 ]);</pre></div><div class="section" lan
             the request is performed synchronously and gives back the
             response as return value. The value can be an array of
             functions which is used for bulk requests to dispatch
-            multiple responses to multiple callbacks. See <a href="clients.html#js-request-sync-async">Section&nbsp;8.1.2.3, &#8220;Operational modes&#8221;</a> for details.
+            multiple responses to multiple callbacks. See <a class="xref" href="clients.html#js-request-sync-async" title="8.1.2.3.&nbsp;Operational modes">Section&nbsp;8.1.2.3, &#8220;Operational modes&#8221;</a> for details.
           </td>
-        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+        </tr>
+        <tr>
           <td><code class="constant">error</code></td>
           <td>
             Callback in case a Jolokia error occurs. A Jolokia error is
@@ -181,7 +229,8 @@ var responses = j4p.request([ req1, req2 ]);</pre></div><div class="section" lan
             performed, the error response is printed to the Javascript
             console by default.
           </td>
-        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+        </tr>
+        <tr>
           <td><code class="constant">ajaxError</code></td>
           <td>
             Global error callback called when the Ajax request itself
@@ -191,33 +240,41 @@ var responses = j4p.request([ req1, req2 ]);</pre></div><div class="section" lan
             error thrown. Refer to the jQuery documentation for more
             information about this error handler.
           </td>
-        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+        </tr>
+        <tr>
           <td><code class="constant">username</code></td>
           <td>A username used for HTTP authentication</td>
-        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+        </tr>
+        <tr>
           <td><code class="constant">password</code></td>
           <td>A password used for HTTP authentication</td>
-        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+        </tr>
+        <tr>
           <td><code class="constant">timeout</code></td>
           <td>Timeout for the HTTP request</td>
-        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+        </tr>
+        <tr>
           <td><code class="constant">maxDepth</code></td>
           <td>Maximum traversal depth for serialization of complex return values</td>
-        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+        </tr>
+        <tr>
           <td><code class="constant">canonicalProperties</code></td>
           <td>Defaults to true for canonical (sorted) property lists on object names; if set to "false" then they are turned in their unsorted format.</td>
-        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+        </tr>
+        <tr>
           <td><code class="constant">maxCollectionSize</code></td>
           <td>
             Maximum size of collections returned during serialization.
             If larger, the collection is returned truncated.
           </td>
-        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+        </tr>
+        <tr>
           <td><code class="constant">maxObjects</code></td>
           <td>
             Maximum number of objects contained in the response.
           </td>
-        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+        </tr>
+        <tr>
           <td><code class="constant">ignoreErrors</code></td>
           <td>
             If set to true, errors during JMX operations and JSON
@@ -226,20 +283,23 @@ var responses = j4p.request([ req1, req2 ]);</pre></div><div class="section" lan
             error. This works only for certain operations like pattern
             reads.
           </td>
-        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+        </tr>
+        <tr>
           <td><code class="constant">serializeException</code></td>
           <td>
             If true then in case of an error, the exception itself is returned in 
             it JSON representation under the key <code class="constant">error_value</code> 
             in the response object.
           </td>
-        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+        </tr>
+        <tr>
           <td><code class="constant">includeStackTrace</code></td>
           <td>
             By default, a stacktrace is returned with every error (key: <code class="constant">stacktrace</code>)
             This can be ommitted by setting the value of this option to false.
           </td>
-        </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+        </tr>
+        <tr>
           <td><code class="constant">ifModifiedSince</code></td>
           <td>
             The <code class="constant">LIST</code> operations provides an
@@ -250,17 +310,23 @@ var responses = j4p.request([ req1, req2 ]);</pre></div><div class="section" lan
             (i.e. <code class="constant">value</code> is null) and a
             <code class="constant">status</code> code of 304 (Not Modified) if
             the MBeans haven't changed. If you use the request
-            scheduler (<a href="clients.html#js-request-options-table" title="Table&nbsp;8.1.&nbsp;Request options">Table&nbsp;8.1, &#8220;Request options&#8221;</a>)
+            scheduler (<a class="xref" href="clients.html#js-request-options-table" title="Table&nbsp;8.1.&nbsp;Request options">Table&nbsp;8.1, &#8220;Request options&#8221;</a>)
             then this feature can be used to get the callbacks called
             only if a value is returned. For the normal request, the
             error callback is called which must check the status itself.
           </td>
-        </tr></table></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="js-request-sync-async"></a>8.1.2.3.&nbsp;Operational modes</h4></div></div></div></div><p>
+        </tr>
+      </table></div>
+    </div>
+    <div class="section"><div class="titlepage"><div><div><h4 class="title"><a name="js-request-sync-async"></a>8.1.2.3.&nbsp;Operational modes</h4></div></div></div>
+      
+    </div>    
+    <p>
       Requests can be send either synchronously or asynchronously via
       Ajax. If a <code class="constant">success</code> callback is given in the
       request options, the request is performed asynchronously via an
       Ajax HTTP request. The callback gets these arguments: a Jolokia JSON
-      response object (see <a href="protocol.html#request-response">Section&nbsp;6.1, &#8220;Requests and Responses&#8221;</a>) and an
+      response object (see <a class="xref" href="protocol.html#request-response" title="6.1.&nbsp;Requests and Responses">Section&nbsp;6.1, &#8220;Requests and Responses&#8221;</a>) and an
       integer index indicating for which response this callback is being
       called. For bulk requests, this index corresponds to the array
       index of the request which lead to this response. The value of
@@ -273,11 +339,13 @@ var responses = j4p.request([ req1, req2 ]);</pre></div><div class="section" lan
       callback is given, the error is printed on the console by
       default. As for success callbacks, error callbacks reveive the
       Jolokia error response as a JSON object.
-    </p><p>
+    </p>
+    <p>
       The following example shows asynchronous requests for a single
       Jolokia request as well as for bulk request with multiple
       callbacks.
-    </p><pre class="programlisting">
+    </p>
+    <pre class="programlisting">
 var j4p = new Jolokia("/jolokia");
 
 // Single request with a single success callback
@@ -313,7 +381,8 @@ j4p.request(
        alert("Jolokia request failed: " + response.error);
     } 
   }
-);</pre><p>    
+);</pre>    
+    <p>    
       Both callbacks, <code class="constant">success</code> and
       <code class="constant">error</code>, are only called when the Ajax
       request succeeds. In case of an error on the HTTP level, the
@@ -322,17 +391,19 @@ j4p.request(
       <code class="constant">textStatus</code> and an optional exception
       object. It has the same signature as the underlying
       <code class="constant">error</code> callback of the
-      <code class="code">jQuery.ajax()</code> call. (See the <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://api.jquery.com/jQuery.ajax/" target="_top">jQuery documentation</a>
+      <code class="code">jQuery.ajax()</code> call. (See the <a class="ulink" href="http://api.jquery.com/jQuery.ajax/" target="_top">jQuery documentation</a>
       for details).
-    </p><p>
-      The Jolokia agent also supports <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://en.wikipedia.org/wiki/JSONP" target="_top">JSONP</a> requests
+    </p>
+    <p>
+      The Jolokia agent also supports <a class="ulink" href="http://en.wikipedia.org/wiki/JSONP" target="_top">JSONP</a> requests
       for cases where the Jolokia agent is served on a different server or port
       than the Javascript client. By default, such access is forbidden by the so called
       <span class="emphasis"><em>same-origin-policy</em></span>. To swith on JSONP, the
       option <code class="constant">jsonp</code> should be set to
       <code class="constant">"true"</code>. 
-    </p><p>
-      As explained in <a href="protocol.html#request-response">Section&nbsp;6.1, &#8220;Requests and Responses&#8221;</a> the Jolokia
+    </p>
+    <p>
+      As explained in <a class="xref" href="protocol.html#request-response" title="6.1.&nbsp;Requests and Responses">Section&nbsp;6.1, &#8220;Requests and Responses&#8221;</a> the Jolokia
       agent supports two HTTP methods, <code class="constant">GET</code> and
       <code class="constant">POST</code>. <code class="constant">POST</code> is more
       powerful since it supports more features. e.g. bulk requests and
@@ -342,35 +413,44 @@ j4p.request(
       for more sophisticated requests. The HTTP method can be
       overridden by setting the option <code class="constant">method</code> to
       <code class="constant">"get"</code> or <code class="constant">"post"</code>.
-    </p><p>
+    </p>
+    <p>
       There are some limitations in choosing the HTTP method depending
       on the request and other options given:
-    </p><div class="itemizedlist"><ul><li>
+    </p>
+    <div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
         Bulk requests (i.e. an array of multiple requests) can only be
         used with <code class="constant">POST</code>.
-      </li><li><code class="constant">READ</code> requests for multiple attributes
+      </li><li class="listitem">
+        <code class="constant">READ</code> requests for multiple attributes
         (i.e. the <code class="constant">attribute</code> request parameter is
         an array of string values) can only be used with
         <code class="constant">POST</code>. 
-      </li><li>
-        The JMX proxy mode (see <a href="proxy.html">Chapter&nbsp;5, <i xmlns:xlink="http://www.w3.org/1999/xlink">Proxy Mode </i></a>) can only be used
+      </li><li class="listitem">
+        The JMX proxy mode (see <a class="xref" href="proxy.html" title="Chapter&nbsp;5.&nbsp;Proxy Mode">Chapter&nbsp;5, <i>Proxy Mode </i></a>) can only be used
         with <code class="constant">POST</code>. 
-      </li><li>
+      </li><li class="listitem">
         JSONP can only be used with <code class="constant">GET</code> and only
         in asynchronous mode (i.e. a <code class="constant">success</code>
         callback must be given). This is a limitation of the JSONP
         technique itself.
-      </li></ul></div><p>
+      </li></ul></div>
+    <p>
       The restrictions above imply, that JSONP can only be used for
       single, simple requests and not for JMX proxy calls. 
-    </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="js-simple"></a>8.1.3.&nbsp;Simple API</h3></div></div></div><p>
+    </p>
+  </div>
+  
+  <div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="js-simple"></a>8.1.3.&nbsp;Simple API</h3></div></div></div>
+    
+    <p>
       Building upon the basic
       <code class="methodname">Jolokia.request()</code> method, a simplified
       access API is available. It is contained in
       <code class="filename">jolokia-simple.js</code> which must be included after
       <code class="filename">jolokia.js</code>. This API provides dedicated
       method for the various request types and supports all options as
-      described in <a href="clients.html#js-request-options-table" title="Table&nbsp;8.1.&nbsp;Request options">Table&nbsp;8.1, &#8220;Request options&#8221;</a>. There
+      described in <a class="xref" href="clients.html#js-request-options-table" title="Table&nbsp;8.1.&nbsp;Request options">Table&nbsp;8.1, &#8220;Request options&#8221;</a>. There
       is one notable difference for asynchronous callbacks and
       synchronous return values though: In case of a successful call,
       the callback is fed with the response's
@@ -380,81 +460,105 @@ j4p.request(
       either an <code class="constant">error</code> callback is called with the
       full response object or an <code class="classname">Error</code> is
       thrown for synchronous operations. 
-    </p><div class="variablelist"><dl><dt><span class="term">getAttribute(mbean,attribute,path,opts)</span></dt><dd><p>
+    </p>
+    <div class="variablelist"><dl class="variablelist"><dt><span class="term">getAttribute(mbean,attribute,path,opts)</span></dt><dd>
+          <p>
             This method returns the value of an JMX attribute
             <code class="code">attribute</code> of an MBean <code class="code">mbean</code>. A path
             can be optionally given, and the optional request options are
             given as last argument(s). The return value for synchronous
             operations are the attribute's value, for asynchronous
             operations (i.e. <code class="code">opts.success != null</code>) it is
-            <code class="constant">null</code>. See <a href="protocol.html#read">Section&nbsp;6.2.1, &#8220;Reading attributes (read)&#8221;</a> for
+            <code class="constant">null</code>. See <a class="xref" href="protocol.html#read" title="6.2.1.&nbsp;Reading attributes (read)">Section&nbsp;6.2.1, &#8220;Reading attributes (read)&#8221;</a> for
             details. 
-          </p><p>
+          </p>
+          <p>
             For example, the following method call can be used
             to synchronously fetch the current heap memory usage:
-          </p><pre class="programlisting">
+          </p>
+          <pre class="programlisting">
 var memoryUsed = j4p.getAttribute("java.lang:type=Memory","HeapMemoryUsage","used");
-</pre></dd><dt><span class="term">setAttribute(mbean,attribute,value,path,opts)</span></dt><dd><p>
+</pre>
+        </dd><dt><span class="term">setAttribute(mbean,attribute,value,path,opts)</span></dt><dd>
+          <p>
             For setting an JMX attribute, this method takes the MBean's
             name <code class="code">mbean</code>, the attribute
             <code class="code">attribute</code> and the value to set as
             <code class="code">value</code>. The optional <code class="code">path</code> is the
             <span class="emphasis"><em>inner path</em></span> of the attribute on which
-            to set the value (see <a href="protocol.html#write">Section&nbsp;6.2.2, &#8220;Writing attributes (write)&#8221;</a> for
+            to set the value (see <a class="xref" href="protocol.html#write" title="6.2.2.&nbsp;Writing attributes (write)">Section&nbsp;6.2.2, &#8220;Writing attributes (write)&#8221;</a> for
             details). The old value of the attribute is returned or
             given to a <code class="constant">success</code> callback.
-          </p><p>
+          </p>
+          <p>
             To enable verbose mode in the memory-handling beans, use
-          </p><pre class="programlisting">
+          </p>
+          <pre class="programlisting">
 var gsLoggingWasOn = j4p.setAttribute("java.lang:type=Memory","Verbose",true);
-</pre></dd><dt><span class="term">execute(mbean,operation,arg1,arg2,...,opts)</span></dt><dd><p>
+</pre>
+        </dd><dt><span class="term">execute(mbean,operation,arg1,arg2,...,opts)</span></dt><dd>
+          <p>
             With this method, a JMX operation can be executed on the
             MBean <code class="code">mbean</code>. Beside the operation's name
             <code class="code">operation</code>, one or more arguments can be given
             depending on the signature of the JMX operation. The
             return value is the return value of the operation. See
-            <a href="protocol.html#exec">Section&nbsp;6.2.3, &#8220;Executing JMX operations (exec)&#8221;</a> for details.
-          </p><p>
+            <a class="xref" href="protocol.html#exec" title="6.2.3.&nbsp;Executing JMX operations (exec)">Section&nbsp;6.2.3, &#8220;Executing JMX operations (exec)&#8221;</a> for details.
+          </p>
+          <p>
             The following exampled asynchronously fetches a thread dump
             as a JSON object and logs it into the console:
-          </p><pre class="programlisting">
+          </p>
+          <pre class="programlisting">
 j4p.execute("java.lang:type=Threading","dumpAllThreads",true,true,
               {
                  success: function(value) {
                      console.log(JSON.stringify(value));
                  }        
               });
-</pre></dd><dt><span class="term">search(mBeanPattern,opts)</span></dt><dd><p>
+</pre>
+        </dd><dt><span class="term">search(mBeanPattern,opts)</span></dt><dd>
+          <p>
             Searches for one or more MBeans whose object names fit the
             pattern <code class="code">mBeanPattern</code>. The return value is a list
             of strings with the matching MBean names or <code class="code">null</code>
-            if none is found. See <a href="protocol.html#search">Section&nbsp;6.2.4, &#8220;Searching MBeans (search)&#8221;</a> for details.            
-          </p><p>
+            if none is found. See <a class="xref" href="protocol.html#search" title="6.2.4.&nbsp;Searching MBeans (search)">Section&nbsp;6.2.4, &#8220;Searching MBeans (search)&#8221;</a> for details.            
+          </p>
+          <p>
             The following example looks up all application servers
             available in all domains: 
-          </p><pre class="programlisting">
+          </p>
+          <pre class="programlisting">
 var appServerNames = j4p.search("*:j2eeType=J2EEServer,*");
-</pre></dd><dt><span class="term">list(path,opts)</span></dt><dd><p>
+</pre>
+        </dd><dt><span class="term">list(path,opts)</span></dt><dd>
+          <p>
             For getting meta information about registered MBeans,
             the <code class="methodname">list</code> command can be used. The
             optional <code class="code">path</code> points into this meta
             information for retrieving partial information. The format
-            of the return value is described in detail in <a href="protocol.html#list">Section&nbsp;6.2.5, &#8220;Listing MBeans (list)&#8221;</a>.
-          </p><p>
+            of the return value is described in detail in <a class="xref" href="protocol.html#list" title="6.2.5.&nbsp;Listing MBeans (list)">Section&nbsp;6.2.5, &#8220;Listing MBeans (list)&#8221;</a>.
+          </p>
+          <p>
             This example fetches only the meta information for the
             attributes of the
             <code class="code">java.lang:type=OperatingSystem</code> MBean:
-          </p><pre class="programlisting">
+          </p>
+          <pre class="programlisting">
 var attributesMeta = j4p.list("java.lang/type=OperatingSystem/attr");
-</pre></dd><dt><span class="term">version(opts)</span></dt><dd><p>
+</pre>     
+        </dd><dt><span class="term">version(opts)</span></dt><dd>
+          <p>
             The <code class="methodname">version</code> method returns the
             agent's version, the protocol version, and possibly some
             additional server-specific information. See
-            <a href="protocol.html#version">Section&nbsp;6.2.6, &#8220;Getting the agent version (version)&#8221;</a> for more information about this
+            <a class="xref" href="protocol.html#version" title="6.2.6.&nbsp;Getting the agent version (version)">Section&nbsp;6.2.6, &#8220;Getting the agent version (version)&#8221;</a> for more information about this
             method.
-          </p><p>
+          </p>
+          <p>
             A sample return value for a Glassfish server looks like:
-          </p><pre class="programlisting">
+          </p>
+          <pre class="programlisting">
 {
   protocol: "4.0",
   agent: "0.82",
@@ -464,17 +568,25 @@ var attributesMeta = j4p.list("java.lang/type=OperatingSystem/attr");
      extraInfo: {
           amxBooted: false
      }
-}</pre></dd></dl></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="js-poller"></a>8.1.4.&nbsp;Request scheduler</h3></div></div></div><p>
+}</pre>
+        </dd></dl></div>
+  </div>
+
+  <div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="js-poller"></a>8.1.4.&nbsp;Request scheduler</h3></div></div></div>
+    
+    <p>
       A <code class="classname">Jolokia</code> object can be also used for
       periodically sending requests to the agent. Therefore requests
       can be registered to the client object, and a poller can be
       started and stopped. All registered requests are send at once
       with a single bulk request so this is a quite efficient method for
       periodically polling multiple values.
-    </p><p>
+    </p>
+    <p>
       Here is a simple example, which queries the heap memory usage
       every 10 seconds and prints out the used memory on the console:
-    </p><pre class="programlisting">
+    </p>
+          <pre class="programlisting">
 var j4p = new Jolokia("/jolokia")
 handle = j4p.register(function(resp) {
    console.log("HeapMemory used: " + resp.value);
@@ -482,17 +594,21 @@ handle = j4p.register(function(resp) {
  { type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage", path: "used"});
 
 j4p.start(10000);
-</pre><div class="variablelist"><dl><dt><span class="term">handle = j4p.register(callback,request,request,....)</span></dt><dd><p>
+</pre>
+    <div class="variablelist"><dl class="variablelist"><dt><span class="term">handle = j4p.register(callback,request,request,....)</span></dt><dd>
+          <p>
             This method registers one or more request for being
             periodically fetched. <code class="code">callback</code> can be either a
             function or an object.
-          </p><p>
+          </p>
+          <p>
             If a function is given or an object with an attribute
             <code class="code">callback</code> holding a function, then this
             function is called with all responses received as
             argument, regardless whether the individual response
             indicates a success or error state.
-          </p><p>
+          </p>
+          <p>
             If the first argument is an object with two callback
             attributes <code class="code">success</code> and <code class="code">error</code>,
             these functions are called for <span class="emphasis"><em>each</em></span> response
@@ -503,13 +619,15 @@ j4p.start(10000);
             order as the request are given.  As second argument, the
             handle which is returned by this method is given and as
             third argument the index within the list of requests.
-          </p><p>
+          </p>
+          <p>
             If the first argument is an object, an additional
             <code class="constant">config</code> attribute with processing
             parameters can be given which is used as default for the
             registered requests. Requests with a
             <code class="constant">config</code> section take precedence.
-          </p><p>
+          </p>            
+          <p>
             Furthermore, if a <code class="constant">onlyIfModified:
             true</code> exists in the callback object, then the
             <code class="constant">sucess</code> and <code class="constant">error</code>
@@ -525,14 +643,17 @@ j4p.start(10000);
             response with value (i.e. the server decided that there
             was no update for any request), then a call to the callback function is
             skipped competely.
-          </p><p>
+          </p>
+          <p>
             <code class="code">register()</code> returns a handle which can be used
             later for unregistering these requests.
-          </p><p>
+          </p>
+          <p>
             In the following example two requests are registered along
             with a single callback function, which takes two responses
             as arguments:
-          </p><pre class="programlisting">
+          </p>
+          <pre class="programlisting">
 handle = j4p.register(function(resp1,resp2) {
    console.log("HeapMemory used: " + resp1.value);
    console.log("ThreadCount: " + resp2.value);
@@ -540,12 +661,14 @@ handle = j4p.register(function(resp1,resp2) {
  { type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage", path: "used"},
  { type: "READ", mbean: "java.lang:type=Threading", attribute: "ThreadCount"});
 
-          </pre><p>
+          </pre>
+          <p>
             In the next example, a dedicated <code class="code">success</code>
             and <code class="code">error</code> callback are provided, which are
             called individually for each request (in the given
             order):
-          </p><pre class="programlisting">
+          </p>
+          <pre class="programlisting">
 j4p.register(
   {
     success: function(resp) {
@@ -564,14 +687,20 @@ j4p.register(
     attribute: "ThreadCount", config: { ignoreErrors: true }},
   { type: "READ", mbean: "bla.blu:type=foo", attribute: "blubber"});
 
-          </pre></dd><dt><span class="term">j4p.unregister(handle)</span></dt><dd><p>
+          </pre>
+        </dd><dt><span class="term">j4p.unregister(handle)</span></dt><dd>
+          <p>
             Unregister one or more requests registered with
             <code class="code">handle</code> so that they are no longer polled
             with the scheduler.
-          </p></dd><dt><span class="term">j4p.jobs()</span></dt><dd><p>
+          </p>
+        </dd><dt><span class="term">j4p.jobs()</span></dt><dd>
+          <p>
             Return an array of handles for all registered jobs. This array can be freely manipulated, its a copy of
             the handle list.
-          </p></dd><dt><span class="term">j4p.start(period)</span></dt><dd><p>
+          </p>
+        </dd><dt><span class="term">j4p.start(period)</span></dt><dd>
+          <p>
             Startup the scheduler for requeting the agent every
             <code class="code">period</code> milliseconds. If the scheduler is
             already running, it adapts its scheduling period according
@@ -579,64 +708,90 @@ j4p.register(
             the period provided during construction time (with the
             option <code class="code">fetchInterval</code>) is used. The default
             value is 30 seconds. 
-          </p></dd><dt><span class="term">j4p.stop()</span></dt><dd><p>
+          </p>
+        </dd><dt><span class="term">j4p.stop()</span></dt><dd>
+          <p>
             Stop the scheduler. If the scheduler is not running,
             nothing happens. The scheduler can be restarted after it
             has been stopped. 
-          </p></dd><dt><span class="term">j4p.isRunning()</span></dt><dd><p>
+          </p>
+        </dd><dt><span class="term">j4p.isRunning()</span></dt><dd>
+          <p>
             Checks whether the scheduler is running. Returns
             <code class="code">true</code> if this is the case, <code class="code">false</code>
             otherwise. 
-          </p></dd></dl></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="js-cubism"></a>8.1.5.&nbsp;Jolokia as a Cubism Source</h3></div></div></div><p>
-      <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://square.github.com/cubism/" target="_top">Cubism</a> is a Javascript library for
-      plotting time-series data and is based on <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://d3js.org/" target="_top">d3.js</a>. Jolokia comes with a plugin for Cubism and
+          </p>
+        </dd></dl></div>
+  </div>
+  
+  <div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="js-cubism"></a>8.1.5.&nbsp;Jolokia as a Cubism Source</h3></div></div></div>
+    
+    <p>
+      <a class="ulink" href="http://square.github.com/cubism/" target="_top">Cubism</a> is a Javascript library for
+      plotting time-series data and is based on <a class="ulink" href="http://d3js.org/" target="_top">d3.js</a>. Jolokia comes with a plugin for Cubism and
       can act as a data source. The usage is quite simple: After
       creating a Jolokia Cubism source, one or more JSON request can
       be registered, which are queried periodically. No matter how
       many requests are registered, only a single HTTP request is sent
       to the server after each period. Cubism is then responsible for
       plotting the data.
-    </p><p>
-      <a href="clients.html#fig-jolokia-cubism-example" title="Figure&nbsp;8.1.&nbsp;Horizon Chart for Heap-Memory Usage">Figure&nbsp;8.1, &#8220;Horizon Chart for Heap-Memory Usage&#8221;</a>  shows a sample for a memory plot. More examples can
-      be found on this <a xmlns:xlink="http://www.w3.org/1999/xlink" href="../../client/javascript-cubism.html" target="_top">page</a>.
-    </p><div class="figure"><a name="fig-jolokia-cubism-example"></a><p class="title"><b>Figure&nbsp;8.1.&nbsp;Horizon Chart for Heap-Memory Usage</b></p><div class="figure-contents"><div class="mediaobject"><img src="images/jolokia-cubism-memory-horizon.png" alt="Horizon Chart for Heap-Memory Usage"></div></div></div><br class="figure-break"><p>
+    </p>
+    <p>
+      <a class="xref" href="clients.html#fig-jolokia-cubism-example" title="Figure&nbsp;8.1.&nbsp;Horizon Chart for Heap-Memory Usage">Figure&nbsp;8.1, &#8220;Horizon Chart for Heap-Memory Usage&#8221;</a>  shows a sample for a memory plot. More examples can
+      be found on this <a class="ulink" href="../../client/javascript-cubism.html" target="_top">page</a>.
+    </p>
+    <div class="figure"><a name="fig-jolokia-cubism-example"></a><p class="title"><b>Figure&nbsp;8.1.&nbsp;Horizon Chart for Heap-Memory Usage</b></p><div class="figure-contents">
+      
+      <div class="mediaobject"><img src="images/jolokia-cubism-memory-horizon.png" alt="Horizon Chart for Heap-Memory Usage"></div>
+    </div></div><br class="figure-break">
+    <p>
       <code class="filename">jolokia-cubism.js</code> can be downloaded from
-      the <a xmlns:xlink="http://www.w3.org/1999/xlink" href="/download.html" target="_top">downlad page</a> and also
+      the <a class="ulink" href="/download.html" target="_top">downlad page</a> and also
       comes with a minified version. As dependencies it requires
-      <a xmlns:xlink="http://www.w3.org/1999/xlink" href="/download.html" target="_top">jolokia.js</a>, <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://www.jquery.com" target="_top">JQuery</a>, <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://square.github.com/cubism/" target="_top">Cubism</a> and <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://d3js.org/" target="_top">d3.js</a>. <code class="filename">jolokia-cubism.js</code>
-      registers itself as an <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://requirejs.org/docs/whyamd.html" target="_top">AMD</a> module
+      <a class="ulink" href="/download.html" target="_top">jolokia.js</a>, <a class="ulink" href="http://www.jquery.com" target="_top">JQuery</a>, <a class="ulink" href="http://square.github.com/cubism/" target="_top">Cubism</a> and <a class="ulink" href="http://d3js.org/" target="_top">d3.js</a>. <code class="filename">jolokia-cubism.js</code>
+      registers itself as an <a class="ulink" href="http://requirejs.org/docs/whyamd.html" target="_top">AMD</a> module
       if running within an AMD environment.
-    </p><p>
+    </p>
+    <p>
       In order to use Jolokia with Cubism, you first need to create a
-      Cubism <a xmlns:xlink="http://www.w3.org/1999/xlink" href="https://github.com/square/cubism/wiki/Context" target="_top">context</a>. Next use
+      Cubism <a class="ulink" href="https://github.com/square/cubism/wiki/Context" target="_top">context</a>. Next use
       <code class="code">context.jolokia()</code> for creating a connection to the
       Jolokia agent.
-    </p><pre class="programlisting">var context = cubism.context();
+    </p>
+    <pre class="programlisting">var context = cubism.context();
   
 // Create a source for Jolokia metrics pointing to the agent 
 // at 'http://jolokia.org/jolokia'
-var jolokia = context.jolokia("http://jolokia.org/jolokia");</pre><p>
+var jolokia = context.jolokia("http://jolokia.org/jolokia");</pre>
+    <p>
       The method <code class="methodname">context.jolokia()</code> can take various
       kind of arguments: 
-    </p><div class="itemizedlist"><ul><li><p>
+    </p>
+    <div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+        <p>
           A single string as in the example above is used as the
           agent's URL. Additionally, options as key-value pairs can be
           given as an additional argument. The possible keys are
-          described in <a href="clients.html#js-request-options-table" title="Table&nbsp;8.1.&nbsp;Request options">Table&nbsp;8.1, &#8220;Request options&#8221;</a>. If
+          described in <a class="xref" href="clients.html#js-request-options-table" title="Table&nbsp;8.1.&nbsp;Request options">Table&nbsp;8.1, &#8220;Request options&#8221;</a>. If
           the URL is omitted, but only an option object is provided,
           then this object must also contain a key <code class="code">url</code>
           for specifying the agent URL.
-        </p></li><li><p>
+        </p>  
+      </li><li class="listitem">
+        <p>
           Alternatively, an already instantiated Jolokia object can be
           provided as single argument, which then is used for all
           communications to the server. 
-        </p></li></ul></div><p>
-      From this source object, a <a xmlns:xlink="http://www.w3.org/1999/xlink" href="https://github.com/square/cubism/wiki/Metric" target="_top">metric</a>
+        </p>
+      </li></ul></div>
+    <p>
+      From this source object, a <a class="ulink" href="https://github.com/square/cubism/wiki/Metric" target="_top">metric</a>
       object can be easily created. This metric object embrasses one
       or more Jolokia requests which are send to the server
       periodically. The response(s) are then used for calculating a
       single numerical value which gets plotted. For example:
-    </p><pre class="programlisting">
+    </p>
+    <pre class="programlisting">
 // Read periodically the Heap-Memory use and take 'HeapMemory Usage' as name/label.
 var metricMem = jolokia.metric({
                       type: 'read', 
@@ -664,72 +819,101 @@ var metricReq = jolokia.metric(
         mbean: "Catalina:j2eeType=Servlet,*",
         attribute:"requestCount"
     }, 
-    { name: "All", delta: 101000});</pre><p>
+    { name: "All", delta: 101000});</pre>
+    <p>
       <code class="methodname">metric()</code> is a factory method which can be
       called in various ways.      
-    </p><div class="itemizedlist"><ul><li><p>
+    </p>
+    <div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+        <p>
           If the first argument is a Jolokia request object (i.e. not
           a function), this request is used for sending requests
           periodically.
-        </p></li><li><p>
+        </p>
+      </li><li class="listitem">
+        <p>
           If the first argument is a function, this function is used
           for calculating the numeric value to be plotted. The rest of
           the arguments can be one or more request objects, which are
           registered and their responses are put as arguments to the
           given callback function.
-        </p></li><li><p>
+        </p>
+      </li><li class="listitem">
+        <p>
           The last argument, if an object but not a Jolokia request
           (i.e. there is no <code class="code">type</code> key), is 
           taken as an option object which is described below.
-        </p></li><li><p>
+        </p>
+      </li><li class="listitem">
+        <p>
           Finally, if the last argument is a pure string, then this
           string is used as name for the chart.                      
-        </p></li></ul></div><p>
+        </p>
+      </li></ul></div>
+    <p>
       An object which can be given as last argument is used for fine
       tuning the metrics:
-    </p><div class="variablelist"><dl><dt><span class="term"><code class="constant">name</code></span></dt><dd><p>
+    </p>
+    <div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="constant">name</code></span></dt><dd>
+          <p>
             Name used in charts. The name can also be given
             alternatively as a string directly as last argument (but
             then without any other options)
-          </p></dd><dt><span class="term"><code class="constant">delta</code></span></dt><dd><p>
+          </p>
+        </dd><dt><span class="term"><code class="constant">delta</code></span></dt><dd>
+          <p>
             Delta value in milliseconds for creating delta (velocity)
             charts. This is done by taking the value measured
             that many milliseconds ago and substract them from each other..
-          </p></dd><dt><span class="term"><code class="constant">keepDelay</code></span></dt><dd><p>
+          </p>
+        </dd><dt><span class="term"><code class="constant">keepDelay</code></span></dt><dd>
+          <p>
             How many milliseconds before the oldest shown value should be
             kept in memory, which e.g. is necessary for delta
             charts. When <code class="constant">delta</code> is given, this
             value is implicetly set.
-          </p></dd></dl></div><p>
+          </p>
+        </dd></dl></div>    
+    <p>
       One or more metric objects can now be converted to charts and
       added to a website with <code class="filename">d3.js</code>. This is done
       in the usual cubism way as described here. In our example, in
       order to append charts to a <code class="constant">div</code> with id
       <code class="constant">chart</code> the following code can be used:
-    </p><pre class="programlisting">// Use d3 to attach the metrics with a specific graph type 
+    </p>
+    <pre class="programlisting">// Use d3 to attach the metrics with a specific graph type 
 // ('horizon' in this case) to the document
 d3.select("#charts").call(function(div) {
     div.append("div")
         .data([metricMem, metricReq])
         .call(context.horizon())
-});</pre><p>
-      For a complete API documentation please refer to the <a xmlns:xlink="http://www.w3.org/1999/xlink" href="https://github.com/square/cubism/wiki/API-Reference" target="_top">Cubism API</a>.
-    </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="js-maven"></a>8.1.6.&nbsp;Maven integration</h3></div></div></div><p>
+});</pre>
+    <p>
+      For a complete API documentation please refer to the <a class="ulink" href="https://github.com/square/cubism/wiki/API-Reference" target="_top">Cubism API</a>.
+    </p>
+  </div>
+  <div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="js-maven"></a>8.1.6.&nbsp;Maven integration</h3></div></div></div>
+    
+    <p>
       For maven users' convenience, the Jolokia Javascript package is
       also available as a JavaScript artifact. It can be easily
       included with help of the
       <code class="constant">javascript-maven-plugin</code>.
-    </p><div xmlns:xslthl="http://xslthl.sf.net" class="sidebar-border"><div class="sidebar"><p class="title"><b>Recommended plugin</b></p>
+    </p>
+    <div class="sidebar"><div class="titlepage"><div><div><p class="title"><b>Recommended plugin</b></p></div></div></div>
+      
       Unfortunately, the "offical" version of this plugin hosted on
       Codehaus has been stuck at version
         <code class="code">1.0-alpha-1-SNAPSHOT</code>. Although it is quite
         usable, in order to avoid a snapshot dependency, it is
-        recommended to use a fork of this plugin hosted on <a xmlns:xlink="http://www.w3.org/1999/xlink" href="https://github.com/harlanji/javascript-maven-tools" target="_top">GitHub</a> and deployed at the 
-        <a xmlns:xlink="http://www.w3.org/1999/xlink" href="https://oss.sonatype.org/content/groups/public" target="_top">Sonatype Maven repository</a>.
-      </div></div><p>
+        recommended to use a fork of this plugin hosted on <a class="ulink" href="https://github.com/harlanji/javascript-maven-tools" target="_top">GitHub</a> and deployed at the 
+        <a class="ulink" href="https://oss.sonatype.org/content/groups/public" target="_top">Sonatype Maven repository</a>.
+      </div>
+      <p>
         The following example shows a sample configuration which could
         be used within a <code class="filename">pom.xml</code>:
-      </p><pre class="programlisting">
+      </p>
+      <pre class="programlisting">
 &lt;project&gt;
 ...
   &lt;dependencies&gt;
@@ -772,20 +956,23 @@ d3.select("#charts").call(function(div) {
     &lt;/pluginRepository&gt;
   &lt;/pluginRepositories&gt;
 &lt;/project&gt;
-</pre><p>
+</pre>
+      <p>
         Then, in your webapp project, <code class="filename">jolokia.js</code>,
         <code class="filename">jolokia-simple.js</code> and
         <code class="filename">json2.js</code> can be found in the
         <code class="filename">scripts/lib</code> directory (relative to the
         top level of you WAR). In order to include it in your HTML
         files use something like this:
-      </p><pre class="programlisting">
+      </p>
+      <pre class="programlisting">
 &lt;head&gt;
   &lt;script src="jquery-1.7.2.js"&gt;&lt;/script&gt;
   &lt;script src="scripts/libk/json2.js"&gt;&lt;/script&gt;
   &lt;script src="scripts/lib/jolokia.js"&gt;&lt;/script&gt;
   &lt;script src="scripts/lib/jolokia-simple.js"&gt;&lt;/script&gt;
-&lt;/head&gt;</pre><p>
+&lt;/head&gt;</pre>
+      <p>
         <code class="filename">jQuery.js</code> has to be included on its own,
         though and is not included within the dependency. If the
         compressed version of <code class="filename">jolokia.js</code> should
@@ -793,33 +980,43 @@ d3.select("#charts").call(function(div) {
         <code class="code">classifier="compressed"</code> to the
         <code class="constant">jolokia-client-javascript</code> dependency, and
         include <code class="filename">scripts/lib/jolokia-min.js</code>
-      </p><p>
+      </p>
+      <p>
         A full working example can be found in the Jolokia src at 
         <code class="filename">client/javascript/test-app/pom.xml</code>.
-      </p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="client-java"></a>8.2.&nbsp;Java Client Library</h2></div></div></div><p>
+      </p>
+  </div>
+  
+</div>
+    <div class="section"><div class="titlepage"><div><div><h2 class="title"><a name="client-java"></a>8.2.&nbsp;Java Client Library</h2></div></div></div>
+  
+  <p>
     The Java client library provides an easy access to the Jolokia
     agent from within Java. Since JSR-160 connectors themselves
     provide Java based remote access to MBeans one might wonder about
     the benefits of  a Jolokia Java binding. There are several,
     though: 
-  </p><div class="itemizedlist"><ul><li>
+  </p>
+  <div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
       It provides a typeless access to remote MBeans. The big
       advantage is that for any non-OpenMBean access to custom typed
       objects is still possible without having the type information
       locally in the classpath.
-    </li><li>
+    </li><li class="listitem">
       Jolokia can be used in setups where JSR-160 connectors can not
       be used. I.e. in firewall secured environments it is much easier
       to get through to a Jolokia Agent than to an JSR-160 connector
       using RMI as transport protocol.
-    </li><li><span class="emphasis"><em>Remoteness</em></span> is explicit in this API instead
+    </li><li class="listitem">
+      <span class="emphasis"><em>Remoteness</em></span> is explicit in this API instead
       of JSR-160 connector's seeked <span class="emphasis"><em>transparent
       remoteness</em></span>. RMI has some arguable conceptually
       advantages, but hiding all remote aspects proved to have quite
       some disadvantages when it comes to the programming
       model. Explicite awareness of a 'heavy-weight' remote call is
       better than false transparency in order to know the price tag. 
-    </li></ul></div><p>
+    </li></ul></div>
+  <p>
     The Java client library follows a strict request-response
     paradigm, much like the underlying HTTP. It uses generics heavily
     and can be centered around three classes:
@@ -828,13 +1025,20 @@ d3.select("#charts").call(function(div) {
     sending requests. This method takes one or more
     <code class="classname">J4pRequest</code> objects as arguments and returns
     one or more <code class="classname">J4pResponse</code> objects as result.
-  </p><div xmlns:xslthl="http://xslthl.sf.net" class="sidebar-border"><div class="sidebar"><p class="title"><b>What the heck is this 'J4p' ?</b></p>
-    That's a reminiscence to Jolokia's roots which lies in <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://www.jmx4perl.org" target="_top">Jmx4Perl</a>. It is always good
+  </p>
+  <div class="sidebar"><div class="titlepage"><div><div><p class="title"><b>What the heck is this 'J4p' ?</b></p></div></div></div>
+    
+    That's a reminiscence to Jolokia's roots which lies in <a class="ulink" href="http://www.jmx4perl.org" target="_top">Jmx4Perl</a>. It is always good
     to remember where one comes from ;-)
-  </div></div><p>
+  </div>
+  <p>
     But before we got into the details, the next section gives a first
     tutorial to get a feeling how the API can be used.
-  </p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="client-java-tutorial"></a>8.2.1.&nbsp;Tutorial</h3></div></div></div><p>
+  </p>
+
+  <div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="client-java-tutorial"></a>8.2.1.&nbsp;Tutorial</h3></div></div></div>
+    
+    <p>
       As seen in the following example, the usage is quite easy. First
       a, client object <code class="varname">client</code> is created pointing
       to a Jolokia agent at <code class="uri">http://localhost:8080/jolokia</code>.
@@ -844,7 +1048,8 @@ d3.select("#charts").call(function(div) {
       response returned is of type
       <code class="classname">J4pReadResponse</code> and holds the result
       which finally is printed out to standard output.
-    </p><pre class="programlisting">   
+    </p>
+    <pre class="programlisting">   
 import org.jolokia.client.J4pClient;
 import org.jolokia.client.request.*;
 
@@ -858,25 +1063,34 @@ public class MemoryDemo {
        System.out.println("Memory used: " + response.getValue());
     }
 }
-</pre><p>
+</pre>
+    <p>
       In order to compile and run this sample, two support libraries
       are required in addition to
-      <code class="filename">jolokia-client-java.jar</code> (<a xmlns:xlink="http://www.w3.org/1999/xlink" href="../../download.html" target="_top">Download</a>): 
-    </p><div class="itemizedlist"><ul><li>
-        Apache <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://hc.apache.org/httpcomponents-client-ga/index.html" target="_top">HttpClient</a>, 
-        4.3.3 (<a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://hc.apache.org/downloads.cgi" target="_top">Download</a>)
-      </li><li><a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://code.google.com/p/json-simple/" target="_top">json-simple</a>, 
-        1.1 (<a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://code.google.com/p/json-simple/downloads/list" target="_top">Download</a>)
-      </li></ul></div><p>
+      <code class="filename">jolokia-client-java.jar</code> (<a class="ulink" href="../../download.html" target="_top">Download</a>): 
+    </p>
+    <div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+        Apache <a class="ulink" href="http://hc.apache.org/httpcomponents-client-ga/index.html" target="_top">HttpClient</a>, 
+        4.3.3 (<a class="ulink" href="http://hc.apache.org/downloads.cgi" target="_top">Download</a>)
+      </li><li class="listitem">
+        <a class="ulink" href="http://code.google.com/p/json-simple/" target="_top">json-simple</a>, 
+        1.1 (<a class="ulink" href="http://code.google.com/p/json-simple/downloads/list" target="_top">Download</a>)
+      </li></ul></div>
+    <p>
       For maven users, the following dependency is sufficient (it will include
       the other two as transitive dependencies):
-    </p><pre class="programlisting">
+    </p>
+    <pre class="programlisting">
  &lt;dependency&gt;
    &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
    &lt;artifactId&gt;jolokia-client-java&lt;/artifactId&gt;
    &lt;version&gt;1.2.2&lt;/version&gt;
  &lt;/dependency&gt;    
-</pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="client-client"></a>8.2.2.&nbsp;J4pClient</h3></div></div></div><p>
+</pre>
+  </div>
+  <div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="client-client"></a>8.2.2.&nbsp;J4pClient</h3></div></div></div>
+    
+    <p>
       <code class="classname">J4pClient</code> is the entry point for sending
       requests to a remote Jolokia agent. It can be created in multiple
       ways. For simple cases, public constructors are provided taking
@@ -885,36 +1099,47 @@ public class MemoryDemo {
       instance which is used for the HTTP business. The recommended style
       is to use the J4pClientBuilder, though. This way, all
       parameters for the HTTP communication can easily be set:
-    </p><pre class="programlisting">
+    </p>
+    <pre class="programlisting">
 J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
                          .user("roland")
                          .password("s!cr!t")
                          .authenticator(new BasicAuthenticator().preemptive())
                          .connectionTimeout(3000)
                          .build();
-</pre><p>
+</pre>
+    <p>
       The builder supports the following parameters with the given
       defaults: 
-    </p><div xmlns:xslthl="http://xslthl.sf.net" class="table"><p class="title"><b>Table&nbsp;8.2.&nbsp;J4pClient parameters</b></p><div class="table-contents"><table id="d0e7240"><thead xmlns:xi="http://www.w3.org/2001/XInclude"><tr>
+    </p>
+    <div class="table"><table>
+      J4pClient parameters
+      <thead>
+        <tr>
           <td>Parameter</td>
           <td>Description</td>
           <td>Default</td>
-        </tr></thead><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+        </tr>        
+      </thead>
+      <tr>
         <td><code class="constant">url</code></td>
         <td>The URL to the Jolokia agent. This is the only mandatory parameter.</td>
         <td></td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="constant">user</code></td>
         <td>User name when authentication is used. If not set, no
         authentication is used. If set, <code class="constant">password</code>
         must be set, too</td>
         <td></td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="constant">password</code></td>
         <td>Password used for authentication. Only used when
         <code class="constant">user</code> is set.</td>
         <td></td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="constant">authenticator</code></td>
         <td>Implementation of <code class="classname">J4pAuthenticator</code>. The Java client comes with
           one implementation <code class="classname">BasicAuthenticator</code> for using basic authentication.
@@ -922,32 +1147,37 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
           switch this on (see above for an example). Basic authentication is the default if no other
           authenticator is set.Only used when <code class="constant">user</code> is set, too.</td>
         <td></td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="constant">target</code></td>
         <td>A JMX JSR-160 ServiceURL which should be used by the agent
         as the <span class="emphasis"><em>real</em></span> target. This parameter should
-        be set if the client is used for accessing the agent in <a href="proxy.html">Chapter&nbsp;5, <i xmlns:xlink="http://www.w3.org/1999/xlink">Proxy Mode </i></a>.
+        be set if the client is used for accessing the agent in <a class="xref" href="proxy.html" title="Chapter&nbsp;5.&nbsp;Proxy Mode">Chapter&nbsp;5, <i>Proxy Mode </i></a>.
         </td> 
         <td></td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="constant">targetUser</code></td>
         <td>The JSR-160 user to use when using the proxy mode. If not
         given (and <code class="constant">target</code> is set), then no
         authentication is used for JSR-160 communication.
         </td> 
         <td></td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="constant">targetPassword</code></td>
         <td>JSR-160 Password to use for the proxy mode.</td> 
         <td></td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="constant">connectionTimeout</code></td>
         <td>The timeout in milliseconds until a connection is
         established. A timeout value of zero is interpreted as an
         infinite timeout. 
         </td>
         <td>20000</td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="constant">pooledConnection</code></td>
         <td>
           Specifies, that the underlying HttpClient should use pooled
@@ -962,7 +1192,8 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
           default.
         </td>
         <td></td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="constant">singleConnection</code></td>
         <td>
           Specifies that single connection should be used which
@@ -974,7 +1205,8 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
           connections are the default.
         </td>
         <td></td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="constant">maxTotalConnections</code></td>
         <td>
           Defines the number of total connections to be pooled. It
@@ -982,7 +1214,8 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
           used.
         </td>
         <td>20</td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="constant">defaultMaxConnectionsPerRoute</code></td>
         <td>
           Defines the number of total connections per route. It
@@ -990,7 +1223,8 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
           used.
         </td>
         <td>20</td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="constant">maxConnectionPoolTimeout</code></td>
         <td>
           Defines the timeout for waiting to obtain a connection
@@ -998,7 +1232,8 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
         <code class="constant">pooledConnections</code> are used.
         </td>
         <td>500</td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="constant">socketTimeout</code></td>
         <td>
           Defines the socket timeout (<code class="code">SO_TIMEOUT</code>) in milliseconds,
@@ -1007,14 +1242,16 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
           A timeout value of zero is interpreted as an infinite timeout.     
         </td>
         <td>0</td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="constant">contentCharset</code></td>
         <td>
           Defines the charset to be used per default for encoding
           content body.
         </td> 
         <td>ISO-8859-1</td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="constant">expectContinue</code></td>
         <td>
           Activates <code class="literal">Expect: 100-Continue</code> handshake
@@ -1029,7 +1266,8 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
           require the target server's authentication.
         </td>
         <td>true</td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="constant">tcpNoDelay</code></td>
         <td>
           Determines whether Nagle's algorithm is to be used. The
@@ -1042,7 +1280,8 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
           consumption.
         </td>
         <td>true</td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="constant">socketBufferSize</code></td>
         <td>
           Determines the size of the internal socket buffer in bytes
@@ -1050,7 +1289,8 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
           messages.
         </td>
         <td>8192</td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="constant">proxy</code></td>
         <td>
           Determines http proxy server. It can be defined as
@@ -1058,7 +1298,8 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
           <span class="emphasis"><em>password</em></span> are optional.
         </td>
         <td></td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="constant">useProxyFromEnvironment</code></td>
         <td>
           Set the proxy for this client based on <code class="constant">http_proxy</code> system environment variable.
@@ -1066,7 +1307,8 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
           Example: <code class="constant">http://tom:sEcReT@my.proxy.com:8080</code>
         </td>
         <td></td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="constant">responseExtractor</code></td>
         <td>
           A response extractor can be used for hooking into the JSON
@@ -1085,7 +1327,9 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
           execute method, too.
         </td>
         <td></td>
-      </tr></table></div></div><p>
+      </tr>
+    </table></div>
+    <p>
       The <code class="classname">J4pClient</code> provides various variants
       of a <code class="methodname">execute()</code> method, which takes
       either one single request or a list of requests. For a single
@@ -1094,32 +1338,42 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
       argument can be used type only for a homogeneous bulk request,
       i.e. for multiple requests of the same time. Otherwise an
       untyped list must be used. 
-    </p><p>
+    </p>
+    <p>
       Each request can be tuned by giving a map of processing options
       along with their values to the <code class="methodname">execute</code>
-      method. The possible options are shown in table <a href="clients.html#client-java-queryopts" title="Table&nbsp;8.3.&nbsp;J4pClient query parameters">Table&nbsp;8.3, &#8220;J4pClient query parameters&#8221;</a>.
-    </p><div xmlns:xslthl="http://xslthl.sf.net" class="table"><p class="title"><b>Table&nbsp;8.3.&nbsp;J4pClient query parameters</b></p><div class="table-contents"><table id="client-java-queryopts"><thead xmlns:xi="http://www.w3.org/2001/XInclude"><tr>
+      method. The possible options are shown in table <a class="xref" href="clients.html#client-java-queryopts" title="Table&nbsp;8.3.&nbsp;J4pClient query parameters">Table&nbsp;8.3, &#8220;J4pClient query parameters&#8221;</a>.
+    </p>
+    <div class="table"><a name="client-java-queryopts"></a><table id="client-java-queryopts">
+      J4pClient query parameters
+      <thead>
+        <tr>
           <td>J4pQueryParameter enum</td>
           <td>Description</td>
-        </tr></thead><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+        </tr>        
+      </thead>
+      <tr>
         <td><code class="constant">MAX_DEPTH</code></td>
         <td>
           Maximum traversal depth for serialization of complex
           objects. Use this with a "list" request to restrict the
           depth of the returned meta data tree.
         </td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="constant">MAX_COLLECTION_SIZE</code></td>
         <td>
            Maximum size of collections returned during serialization.
            If larger, a collection is truncated to this size.
         </td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="constant">MAX_OBJECTS</code></td>
         <td>
           Maximum number of objects returned in the response's value.
         </td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="constant">IGNORE_ERRORS</code></td>
         <td>
           Option for ignoring errors during JMX operations and JSON
@@ -1127,7 +1381,8 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
           pattern reads and should be either <code class="literal">true</code>
           or <code class="literal">false</code>. 
         </td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="constant">INCLUDE_STACKTRACE</code></td>
         <td>
           Whether to include a stack trace in the response when an
@@ -1138,7 +1393,8 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
           <code class="constant">RuntimeException</code>s should be
           included. Default is <code class="literal">true</code>.
         </td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="constant">SERIALIZE_EXCEPTION</code></td>
         <td>
           Whether to include a JSON serialized version of the
@@ -1146,7 +1402,8 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
           is added under the key <code class="constant">error_value</code> in
           the response. Default is <code class="literal">false</code>.
         </td>
-      </tr><tr xmlns:xi="http://www.w3.org/2001/XInclude">
+      </tr>
+      <tr>
         <td><code class="constant">CANONICAL_NAMING</code></td>
         <td>
           Whether property keys of <code class="classname">ObjectNames</code>
@@ -1157,7 +1414,13 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
           <code class="literal">false</code> for getting the keys as
           registered. Default is <code class="literal">true</code>
         </td>
-      </tr></table></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="client-java-requests"></a>8.2.3.&nbsp;Request types</h3></div></div></div><p>
+      </tr>
+    </table></div>
+  </div>
+
+  <div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="client-java-requests"></a>8.2.3.&nbsp;Request types</h3></div></div></div>
+    
+    <p>
       For each request type a dedicated request object is provided
       which all are subclasses from
       <code class="classname">J4pRequest</code>. For all requests it can be
@@ -1168,17 +1431,20 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
       Each request type has a corresponding response type which used
       for the return values of the
       <code class="methodname">J4pClient.execute()</code>.
-    </p><p>
+    </p>
+    <p>
       The constructor of each kind of request can take a
       <code class="classname">J4pTargetConfig</code> as argument for using a
-      request in <a href="proxy.html">Chapter&nbsp;5, <i xmlns:xlink="http://www.w3.org/1999/xlink">Proxy Mode </i></a>. This
+      request in <a class="xref" href="proxy.html" title="Chapter&nbsp;5.&nbsp;Proxy Mode">Chapter&nbsp;5, <i>Proxy Mode </i></a>. This
       configurational object holds the JMX service url and
       (optionally) credentials for JSR-160 authentication. When
       given, this proxy target specification overrides any default
       proxy configuration set during the initialization of the 
       <code class="classname">J4pClient</code>. 
-    </p><div class="variablelist"><dl><dt><span class="term"><code class="classname">J4pReadRequest</code> and
-        <code class="classname">J4pReadResponse</code></span></dt><dd><p>
+    </p>
+    <div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="classname">J4pReadRequest</code> and
+        <code class="classname">J4pReadResponse</code></span></dt><dd>
+          <p>
             <code class="classname">J4pReadRequest</code> is a read request to
             get one or more attributes from one or more MBeans within
             a single request. Various constructor variants can be used
@@ -1186,68 +1452,85 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
             ObjectName (which can be a pattern). A
             <code class="varname">path</code> can be set as property for
             specifying an <span class="emphasis"><em>inner path</em></span>, too.
-          </p><p>
+          </p>
+          <p>
             <code class="classname">J4pReadResponse</code> is the
             corresponding response type and allows typed acces to the
             fetched value for a single attribute fetch or to multiple
             values for a multi attribute read. In the latter case, the
             found object and attributes names can be retrieved as
             well. 
-          </p><p>
+          </p>
+          <p>
             For more information on fetching the value of multiple
             attributes and multiple MBeans at once, please refer to
-            <a href="protocol.html#read">Section&nbsp;6.2.1, &#8220;Reading attributes (read)&#8221;</a> or the Javadoc of
+            <a class="xref" href="protocol.html#read" title="6.2.1.&nbsp;Reading attributes (read)">Section&nbsp;6.2.1, &#8220;Reading attributes (read)&#8221;</a> or the Javadoc of
             <code class="classname">J4pReadResponse</code>. 
-          </p></dd><dt><span class="term"><code class="classname">J4pWriteRequest</code> and <code class="classname">J4pWriteResponse</code></span></dt><dd><p>
+          </p>
+        </dd><dt><span class="term"><code class="classname">J4pWriteRequest</code> and <code class="classname">J4pWriteResponse</code></span></dt><dd>
+          <p>
             A <code class="classname">J4pWriteRequest</code> is used to set
             the value of an MBean attribute. Beside the mandatory
             object and attribute name the value must be give in the
             constructor as well. Optionally a <code class="varname">path</code>
             can be provided, too. Only certain types for the given
             value can be serialized properly for calling the Jolokia
-            agent as described in <a href="protocol.html#serialization-request">Section&nbsp;6.4.2, &#8220;Request parameter serialization&#8221;</a>.
-          </p><p>
+            agent as described in <a class="xref" href="protocol.html#serialization-request" title="6.4.2.&nbsp;Request parameter serialization">Section&nbsp;6.4.2, &#8220;Request parameter serialization&#8221;</a>.
+          </p>
+          <p>
             The old value is returned as <code class="classname">J4pWriteResponse</code>'s value.
-          </p></dd><dt><span class="term"><code class="classname">J4pExecRequest</code> and
-        <code class="classname">J4pExecResponse</code></span></dt><dd><p>
+          </p>
+        </dd><dt><span class="term"><code class="classname">J4pExecRequest</code> and
+        <code class="classname">J4pExecResponse</code></span></dt><dd>
+          <p>
             <code class="classname">J4pExecRequest</code>s are used for
             executing operation on MBeans. The constructor takes as
             mandatory arguments the MBean's object name, the operation
             name and any arguments required by the operation. Only
             certain types for the given arguments can be serialized
             properly for calling the Jolokia agent as described in
-            <a href="protocol.html#serialization-request">Section&nbsp;6.4.2, &#8220;Request parameter serialization&#8221;</a>.
-          </p><p>
+            <a class="xref" href="protocol.html#serialization-request" title="6.4.2.&nbsp;Request parameter serialization">Section&nbsp;6.4.2, &#8220;Request parameter serialization&#8221;</a>.
+          </p>
+          <p>
             The returned <code class="classname">J4pExecResponse</code>
             contains the return value of the operation called. 
-          </p></dd><dt><span class="term"><code class="classname">J4pSearchRequest</code> and
-        <code class="classname">J4pSearchResponse</code></span></dt><dd><p>
+          </p>
+        </dd><dt><span class="term"><code class="classname">J4pSearchRequest</code> and
+        <code class="classname">J4pSearchResponse</code></span></dt><dd>
+          <p>
             A <code class="classname">J4pSearchRequest</code> contains a
             valid single MBean object name pattern which is used for
             searching MBeans.
-          </p><p>
+          </p>
+          <p>
             The <code class="classname">J4pSearchResponse</code> holds a
             list of found object names.
-          </p></dd><dt><span class="term"><code class="classname">J4pListRequest</code> and
-        <code class="classname">J4pListResponse</code></span></dt><dd><p>
+          </p>
+        </dd><dt><span class="term"><code class="classname">J4pListRequest</code> and
+        <code class="classname">J4pListResponse</code></span></dt><dd>
+          <p>
             For obtaining meta data on MBeans a
             <code class="classname">J4pListRequest</code> should be used. It
             can be used with a <span class="emphasis"><em>inner path</em></span> to
             obtain only a subtree of the response, otherwise the whole
-            tree as described in <a href="protocol.html#response-list">Section&nbsp;6.2.5.3, &#8220;List response&#8221;</a> is
+            tree as described in <a class="xref" href="protocol.html#response-list" title="6.2.5.3.&nbsp;List response">Section&nbsp;6.2.5.3, &#8220;List response&#8221;</a> is
             returned. With the query parameter
             <code class="constant">maxDepth</code> can be used to restrict the
             depth of returned tree. 
-          </p><p>
+          </p>
+          <p>
             The single value of a
             <code class="classname">J4pListResponse</code> is a tree (or
             subtree) as a JSON object, which has the format described
-            in <a href="protocol.html#response-list">Section&nbsp;6.2.5.3, &#8220;List response&#8221;</a>.
-          </p></dd><dt><span class="term"><code class="classname">J4pVersionRequest</code></span></dt><dd><p>
+            in <a class="xref" href="protocol.html#response-list" title="6.2.5.3.&nbsp;List response">Section&nbsp;6.2.5.3, &#8220;List response&#8221;</a>.
+          </p>
+        </dd><dt><span class="term"><code class="classname">J4pVersionRequest</code></span></dt><dd>
+          <p>
             A <code class="classname">J4pVersionRequest</code> request the
             Jolokia agent's version information and takes no
             argument. 
-          </p><p>
+          </p>
+          <p>
             The <code class="classname">J4pVersionResponse</code> returns the
             agent's version (<code class="varname">agentVersion</code>), the
             protocol version (<code class="varname">protocolVersion</code>), the
@@ -1256,25 +1539,39 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
             (<code class="varname">vendor</code>) and any extra info
             (<code class="varname">extraInfo</code>) specific to the platform
             the Jolokia is running on.
-          </p></dd></dl></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="client-java-execptions"></a>8.2.4.&nbsp;Exceptions</h3></div></div></div><p>
+          </p>
+        </dd></dl></div>
+  </div>
+
+  <div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="client-java-execptions"></a>8.2.4.&nbsp;Exceptions</h3></div></div></div>
+    
+    <p>
       In case of an error when executing a request a
       <code class="classname">J4pException</code> or one its subclass is
       thrown.
-    </p><div class="variablelist"><dl><dt><span class="term"><code class="classname">J4pConnectException</code></span></dt><dd><p>
+    </p>
+    <div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="classname">J4pConnectException</code></span></dt><dd>
+          <p>
             Exception thrown when the connection to the server
             fails. It contains the original
             <code class="classname">ConnectException</code> as nested value. 
-          </p></dd><dt><span class="term"><code class="classname">J4pTimeoutException</code></span></dt><dd><p>
+          </p>
+        </dd><dt><span class="term"><code class="classname">J4pTimeoutException</code></span></dt><dd>
+          <p>
             Exception thrown in case of an timeout. The nested
             exception is of type
             <code class="classname">ConnectTimeoutException</code>. 
-          </p></dd><dt><span class="term"><code class="classname">J4pRemoteException</code></span></dt><dd><p>
+          </p>
+        </dd><dt><span class="term"><code class="classname">J4pRemoteException</code></span></dt><dd>
+          <p>
             Generic exception thrown when an exception occurred on the
             remote side. This is the case when the JSON response
-            obtained is an error response as described in <a href="protocol.html#responses">Section&nbsp;6.1.3, &#8220;Responses&#8221;</a>. The error type, error value, the 
+            obtained is an error response as described in <a class="xref" href="protocol.html#responses" title="6.1.3.&nbsp;Responses">Section&nbsp;6.1.3, &#8220;Responses&#8221;</a>. The error type, error value, the 
 			status, the request leading to this error and the remote 
 			stacktrace as string) can be obtained from this exception. 
-          </p></dd><dt><span class="term"><code class="classname">J4pBulkRemoteException</code></span></dt><dd><p>
+          </p>
+        </dd><dt><span class="term"><code class="classname">J4pBulkRemoteException</code></span></dt><dd>
+          <p>
             Exception thrown when a bulk request fails on the remote
             side. This contains a mixed list which contains the
             <code class="classname">J4pRemoteException</code> occurred as well
@@ -1285,27 +1582,45 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
             <code class="methodname">execute</code>. All responses and remote
             exceptions can also be obtained separately in homogeneous
             lists. 
-          </p></dd><dt><span class="term"><code class="classname">J4pException</code></span></dt><dd><p>
+          </p>
+        </dd><dt><span class="term"><code class="classname">J4pException</code></span></dt><dd>
+          <p>
             Base exception thrown, when no other exception fits,
             i.e. when the exception happened on the client side. The
             original exception is contained as nested exception. 
-          </p></dd></dl></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="client-jmx-adapter"></a>8.3.&nbsp;MBeanServerConnection adapter</h2></div></div></div><p>
+          </p>
+        </dd></dl></div>
+  </div>
+</div>
+    <div class="section"><div class="titlepage"><div><div><h2 class="title"><a name="client-jmx-adapter"></a>8.3.&nbsp;MBeanServerConnection adapter</h2></div></div></div>
+  
+  <p>
   The JMX adapter library simulates a local or remote <code class="classname">MBeanServerConnection</code> by using the Jolokia protocol for connecting to a Jolokia agent.
     This allows you to use tools that leverage a JSR-160 <code class="classname">MBeanServerConnection</code> such as JConsole, Visual VM or Java Mission Control for connecting to a Jolokia endpoint.
-  </p><div xmlns:xslthl="http://xslthl.sf.net" class="sidebar-border"><div class="sidebar"><p class="title"><b>Recommended plugins</b></p>
+  </p>
+  <div class="sidebar"><div class="titlepage"><div><div><p class="title"><b>Recommended plugins</b></p></div></div></div>
+  
   For Java Mission Control, a set of plugins are provided at
-  <a xmlns:xlink="http://www.w3.org/1999/xlink" href="https://github.com/skarsaune/jmc-cloud-extensions/" target="_top">https://github.com/skarsaune/jmc-cloud-extensions</a> and for
-  Java Visual VM a Jolokia plugin can be downloaded from <a xmlns:xlink="http://www.w3.org/1999/xlink" href="https://skarsaune.github.io/jolokia-jmc-update-site/visualvm/org-jolokia-jmx-plugin.nbm" target="_top">https://skarsaune.github.io/jolokia-jmc-update-site/visualvm/org-jolokia-jmx-plugin.nbm</a></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="remote-jmx-example"></a>8.3.1.&nbsp;JSR-160 Connection to Jolokia</h3></div></div></div><p>
+  <a class="ulink" href="https://github.com/skarsaune/jmc-cloud-extensions/" target="_top">https://github.com/skarsaune/jmc-cloud-extensions</a> and for
+  Java Visual VM a Jolokia plugin can be downloaded from <a class="ulink" href="https://skarsaune.github.io/jolokia-jmc-update-site/visualvm/org-jolokia-jmx-plugin.nbm" target="_top">https://skarsaune.github.io/jolokia-jmc-update-site/visualvm/org-jolokia-jmx-plugin.nbm</a>
+  </div>
+
+  <div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="remote-jmx-example"></a>8.3.1.&nbsp;JSR-160 Connection to Jolokia</h3></div></div></div>
+  
+  <p>
   The example below shows how to connect programmatically via a JSR-160 <code class="classname">JMXConnector</code> to a Jolokia enabled Java process listening on <code class="literal">localhost:8778</code>.
-  </p><p>
+  </p>
+  <p>
   For this example to work you need the following prerequisites:
-  </p><div class="itemizedlist"><ul><li>
+  </p>
+  <div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
   Jolokia's <code class="filename">remote-jmx-adapter-&lt;version&gt;-standalone.jar</code>
-  must be on the classpath. See the <a xmlns:xlink="http://www.w3.org/1999/xlink" href="../../download.html" target="_top">Download page</a> for the latest versions of this adapater jar.
-  </li><li>
-  Jolokia ha to be accessible running at
-  <a xmlns:xlink="http://www.w3.org/1999/xlink" href="http://localhost:8778/jolokia/" target="_top">http://localhost:8778/jolokia/</a>. If user/password authentication is enabled for the agent, uncomment the line below and insert your credentials.
-  </li></ul></div><pre class="programlisting">
+  must be on the classpath. See the <a class="ulink" href="../../download.html" target="_top">Download page</a> for the latest versions of this adapter jar.
+  </li><li class="listitem">
+  Jolokia has to be accessible running at
+  <a class="ulink" href="http://localhost:8778/jolokia/" target="_top">http://localhost:8778/jolokia/</a>. If user/password authentication is enabled for the agent, uncomment the line below and insert your credentials.
+  </li></ul></div>
+  <pre class="programlisting">
 import javax.management.remote.*;
 import javax.management.ObjectName;
 import java.util.Arrays;
@@ -1329,23 +1644,32 @@ public class ConnectWithJolokiaDemo {
       ObjectName.getInstance("java.lang:type=Memory"),"HeapMemoryUsage"));
   }
 }
-</pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="kubernetes-jmx-example"></a>8.3.2.&nbsp;JSR-160 Connection to a JVM running in Kubernetes</h3></div></div></div><p>
+</pre>
+  </div>
+  <div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="kubernetes-jmx-example"></a>8.3.2.&nbsp;JSR-160 Connection to a JVM running in Kubernetes</h3></div></div></div>
+  
+  <p>
   If you are running a Jolokia-enabled JVM within a Kubernetes Pod, you can directly connect to this JVM from your local machine with the Jolokia JSR-160 connector. See the runnable example below for more details.
-  </p><p>
-  Before compiling and running the example below, please check that the followin prerequesites are met:
-  </p><div class="itemizedlist"><ul><li>
+  </p>
+
+  <p>
+  Before compiling and running the example below, please check that the following prerequesites are met:
+  </p>
+
+  <div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
   Jolokia's <code class="filename">remote-jmx-adapter-&lt;version&gt;-standalone.jar</code>
-  must be on the classpath. See the <a xmlns:xlink="http://www.w3.org/1999/xlink" href="../../download.html" target="_top">Download page</a> for the latest versions of this adapater jar.
-  </li><li>
+  must be on the classpath. See the <a class="ulink" href="../../download.html" target="_top">Download page</a> for the latest versions of this adapter jar.
+  </li><li class="listitem">
   In addition, the Jolokia Kubernetes extension
   <code class="filename">jolokia-kubernetes-&lt;version&gt;-standalone.jar</code>
   must be on the classpath. This can be also downloaded from the
-  <a xmlns:xlink="http://www.w3.org/1999/xlink" href="../../download.html" target="_top">Download page</a>.
-  </li><li>
-  Configuration and authentication for the Kubernetes context setup are as usual. I.e., you must be able to run <span><strong class="command">kubectl</strong></span> with the cluster to connect to. You can check this by <span><strong class="command">kubectl get namespace</strong></span>.
-  </li><li>
+  <a class="ulink" href="../../download.html" target="_top">Download page</a>.
+  </li><li class="listitem">
+  Configuration and authentication for the Kubernetes context setup are as usual. I.e., you must be able to run <span class="command"><strong>kubectl</strong></span> with the cluster to connect to. You can check this by <span class="command"><strong>kubectl get namespace</strong></span>.
+  </li><li class="listitem">
   For the example below, we assume a Java process running in a Pod <code class="literal">petclinic-6959c9b4cb-gk8np</code> in namespace <code class="literal">default</code> that has a Jolokia agent enabled. This agent is supposed to listen on port 8778.
-  </li></ul></div><pre class="programlisting">
+  </li></ul></div>
+  <pre class="programlisting">
 import javax.management.remote.*;
 import javax.management.ObjectName;
 import org.jolokia.kubernetes.client.KubernetesJmxConnector;
@@ -1369,9 +1693,11 @@ public class ConnectInKubernetesDemo {
       ObjectName.getInstance("java.lang:type=Memory"),"HeapMemoryUsage"));
   }
 }
-</pre><p>
-  As an alternative to connecting programmatically to the Jolokia agent, you can also leverage <span><strong class="command">jconsole</strong></span> to explore JMX on the remote JVM.
-  You need to add the jolokia connector client libraries when launching <span><strong class="command">jconsole</strong></span> like in:
+</pre>
+
+    <p>
+  As an alternative to connecting programmatically to the Jolokia agent, you can also leverage <span class="command"><strong>jconsole</strong></span> to explore JMX on the remote JVM.
+  You need to add the Jolokia connector client libraries when launching <span class="command"><strong>jconsole</strong></span> like in:
 
       </p><pre class="programlisting">
 java \
@@ -1383,4 +1709,8 @@ java \
   -Xms8m -Djconsole.showOutputViewer \
   sun.tools.jconsole.JConsole
 </pre><p>
-    </p></div></div></div><div class="navfooter"><div><div class="navbar"><a xmlns:xslthl="http://xslthl.sf.net" href="mbeans.html" title="Chapter&nbsp;7.&nbsp;Jolokia MBeans">Previous</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="index.html" title="Jolokia - Reference Documentation">Contents</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="jmx.html" title="Chapter&nbsp;9.&nbsp;Jolokia JMX">Next</a></div></div></div></body></html>
+    </p>
+  </div>
+</div>
+
+</div><div class="navfooter"><div><div class="navbar"><a xmlns:xslthl="http://xslthl.sf.net" href="mbeans.html" title="Chapter&nbsp;7.&nbsp;Jolokia MBeans">Previous</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="" title="">Contents</a><span>|</span><a xmlns:xslthl="http://xslthl.sf.net" href="jmx.html" title="Chapter&nbsp;9.&nbsp;Jolokia JMX">Next</a></div></div></div></body></html>
