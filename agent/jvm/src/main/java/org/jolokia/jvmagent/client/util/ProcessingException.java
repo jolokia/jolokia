@@ -34,7 +34,7 @@ public class ProcessingException extends RuntimeException {
      * @param pStoredExp the original exception
      * @param pOptions options from where to take the information how the error should be logged
      */
-    public ProcessingException(String pErrMsg, Exception pStoredExp, OptionsAndArgs pOptions) {
+    public ProcessingException(String pErrMsg, Throwable pStoredExp, OptionsAndArgs pOptions) {
         super(pErrMsg,pStoredExp);
         quiet = pOptions.isQuiet();
         verbose = pOptions.isVerbose();

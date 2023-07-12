@@ -1,9 +1,7 @@
 package org.jolokia.client.jmxadapter;
 
-import static com.jayway.awaitility.Awaitility.await;
+import static org.awaitility.Awaitility.await;
 
-import com.jayway.awaitility.Awaitility;
-import com.jayway.awaitility.core.ThrowingRunnable;
 import java.io.IOException;
 import java.lang.management.ClassLoadingMXBean;
 import java.lang.management.CompilationMXBean;
@@ -23,6 +21,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
+
 import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.AttributeNotFoundException;
@@ -36,6 +36,7 @@ import javax.management.MBeanInfo;
 import javax.management.MBeanOperationInfo;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
+import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.Notification;
 import javax.management.NotificationListener;
@@ -45,19 +46,24 @@ import javax.management.Query;
 import javax.management.QueryExp;
 import javax.management.ReflectionException;
 import javax.management.RuntimeMBeanException;
+import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.OpenDataException;
+import javax.management.openmbean.OpenType;
+import javax.management.openmbean.SimpleType;
 import javax.management.remote.JMXConnectionNotification;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
+
+import org.jolokia.Version;
 import org.jolokia.client.J4pClient;
 import org.jolokia.client.J4pClientBuilder;
-import org.jolokia.client.exception.J4pException;
 import org.jolokia.client.request.J4pVersionRequest;
 import org.jolokia.jvmagent.JvmAgent;
 import org.jolokia.test.util.EnvTestUtil;
 import org.jolokia.util.ClassUtil;
 import org.testng.Assert;
+import org.testng.SkipException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -188,7 +194,8 @@ public class JmxBridgeTest {
               "HardwareModel"));
 
   // Safe values for testing setting attributes
-  private static final Map<String, Object> ATTRIBUTE_REPLACEMENTS =
+  @SuppressWarnings("serial")
+private static final Map<String, Object> ATTRIBUTE_REPLACEMENTS =
       new HashMap<String, Object>() {
         {
           put("jolokia:type=Config.Debug", true);
@@ -217,7 +224,7 @@ public class JmxBridgeTest {
    */
   @SuppressWarnings("unchecked")
   @DataProvider
-  public static Object[][] platformMBeans() {
+  public static Object[][] platformMBeans() throws MalformedObjectNameException {
     try {
       final Collection<Class<?>> list = (Collection<Class<?>>) ManagementFactory.class
           .getDeclaredMethod("getPlatformManagementInterfaces").invoke(null);
@@ -235,12 +242,12 @@ public class JmxBridgeTest {
       return testData.toArray(new Object[0][0]);
     } catch (Exception ignore) {
       return new Object[][]{
-          {ManagementFactory.CLASS_LOADING_MXBEAN_NAME, ClassLoadingMXBean.class},
-          {ManagementFactory.COMPILATION_MXBEAN_NAME, CompilationMXBean.class},
-          {ManagementFactory.MEMORY_MXBEAN_NAME, MemoryMXBean.class},
-          {ManagementFactory.OPERATING_SYSTEM_MXBEAN_NAME, OperatingSystemMXBean.class},
-          {ManagementFactory.RUNTIME_MXBEAN_NAME, RuntimeMXBean.class},
-          {ManagementFactory.THREAD_MXBEAN_NAME, ThreadMXBean.class},
+          {new ObjectName(ManagementFactory.CLASS_LOADING_MXBEAN_NAME), ClassLoadingMXBean.class},
+          {new ObjectName(ManagementFactory.COMPILATION_MXBEAN_NAME), CompilationMXBean.class},
+          {new ObjectName(ManagementFactory.MEMORY_MXBEAN_NAME), MemoryMXBean.class},
+          {new ObjectName(ManagementFactory.OPERATING_SYSTEM_MXBEAN_NAME), OperatingSystemMXBean.class},
+          {new ObjectName(ManagementFactory.RUNTIME_MXBEAN_NAME), RuntimeMXBean.class},
+          {new ObjectName(ManagementFactory.THREAD_MXBEAN_NAME), ThreadMXBean.class},
       };
     }
   }
@@ -248,17 +255,42 @@ public class JmxBridgeTest {
 
   @DataProvider
   public static Object[][] safeOperationsToCall() {
+    String version = System.getProperty("java.specification.version");
+    if (version.contains(".")) {
+      version = version.substring(version.lastIndexOf('.') + 1);
+    }
+    int v = Integer.parseInt(version);
+    if (v <= 6) {
+      return new Object[][]{
+          {
+              RemoteJmxAdapter.getObjectName("java.lang:type=Threading"),
+              "findDeadlockedThreads",
+              null
+          },
+          {RemoteJmxAdapter.getObjectName("java.lang:type=Memory"), "gc", null},
+          {
+              RemoteJmxAdapter.getObjectName("jolokia.test:name=MBeanExample"),
+              "doMapOperation",
+              null
+          },
+          {
+              RemoteJmxAdapter.getObjectName("jolokia.test:name=MBeanExample"),
+              "doEmptySetOperation",
+              null
+          }
+      };
+    }
     return new Object[][]{
         {
             RemoteJmxAdapter.getObjectName("java.lang:type=Threading"),
             "findDeadlockedThreads",
-            new Object[0]
+            null
         },
-        {RemoteJmxAdapter.getObjectName("java.lang:type=Memory"), "gc", new Object[0]},
+        {RemoteJmxAdapter.getObjectName("java.lang:type=Memory"), "gc", null},
         {
             RemoteJmxAdapter.getObjectName("com.sun.management:type=DiagnosticCommand"),
             "vmCommandLine",
-            new Object[0]
+            null
         },
         {
             RemoteJmxAdapter.getObjectName("com.sun.management:type=HotSpotDiagnostic"),
@@ -269,6 +301,16 @@ public class JmxBridgeTest {
             RemoteJmxAdapter.getObjectName("com.sun.management:type=HotSpotDiagnostic"),
             "setVMOption",
             new Object[]{"HeapDumpOnOutOfMemoryError", "true"}
+        },
+        {
+            RemoteJmxAdapter.getObjectName("jolokia.test:name=MBeanExample"),
+            "doMapOperation",
+            null
+        },
+        {
+            RemoteJmxAdapter.getObjectName("jolokia.test:name=MBeanExample"),
+            "doEmptySetOperation",
+            null
         }
     };
   }
@@ -299,6 +341,28 @@ public class JmxBridgeTest {
     };
   }
 
+  @Test
+  public void testRecordingSettings()
+      throws MalformedObjectNameException, IOException, MBeanException, InstanceNotFoundException {
+    final ObjectName objectName = new ObjectName("jdk.management.jfr:type=FlightRecorder");
+    try {
+      final MBeanInfo mBeanInfo = this.adapter.getMBeanInfo(objectName);
+    } catch (InstanceNotFoundException e) {
+    	throw new SkipException("Flight recorder bean is not available in this Java version");
+    }
+    final Object newRecording = this.adapter.invoke(objectName, "newRecording", new Object[0], new String[0]);
+
+    final Object recordingOptions = this.adapter
+        .invoke(objectName, "getRecordingOptions", new Object[]{newRecording},
+            new String[]{"long"});
+    Assert.assertTrue(recordingOptions instanceof CompositeDataSupport);
+    CompositeDataSupport recordingOptionsComposite = (CompositeDataSupport) recordingOptions;
+    if(recordingOptionsComposite.containsKey("destination")) {//The field is not present in all JVM
+      OpenType<?> descriptionType= recordingOptionsComposite.getCompositeType().getType("destination");
+      Assert.assertEquals(descriptionType, SimpleType.STRING);
+    }
+  }
+
   @DataProvider
   public static Object[][] allNames() {
     final Set<ObjectName> names = ManagementFactory.getPlatformMBeanServer().queryNames(null, null);
@@ -322,19 +386,19 @@ public class JmxBridgeTest {
         MBeanExample.class.getName(),
         RemoteJmxAdapter.getObjectName("jolokia.test:name=MBeanExample"));
     JvmAgent.agentmain("port=" + (agentPort = EnvTestUtil.getFreePort()), null);
-
     final J4pClient connector =
         new J4pClientBuilder().url("http://localhost:" + this.agentPort + "/jolokia/").build();
     // wait for agent to be running
     await()
         .until(
-            Awaitility.matches(
-                new ThrowingRunnable() {
-                  @Override
-                  public void run() throws J4pException {
-                    connector.execute(new J4pVersionRequest());
-                  }
-                }));
+        		new Callable<Boolean>() {
+
+					@Override
+					public Boolean call() throws Exception {
+						//will throw exception if connection is not ready
+						connector.execute(new J4pVersionRequest());
+						return true;
+					}});
     this.adapter = new RemoteJmxAdapter(connector);
     //see javadoc above if this line fails while running tests
     JMXConnector rmiConnector = JMXConnectorFactory
@@ -477,8 +541,6 @@ public class JmxBridgeTest {
   @Test
   public void testThatWeAreAbleToInvokeOperationWithOverloadedSignature()
       throws IOException, InstanceNotFoundException, MBeanException {
-    final MBeanInfo mbean = this.adapter
-        .getMBeanInfo(RemoteJmxAdapter.getObjectName("java.lang:type=Threading"));
     // Invoke method that has both primitive and boxed Long as possible input
     this.adapter.invoke(
         RemoteJmxAdapter.getObjectName("java.lang:type=Threading"),
@@ -509,11 +571,8 @@ public class JmxBridgeTest {
     try {
       for (MBeanOperationInfo operationInfo : this.adapter.getMBeanInfo(name).getOperations()) {
         if (operationInfo.getName().equals(operation)
-            && operationInfo.getSignature().length == arguments.length) {
-          String[] signature = new String[operationInfo.getSignature().length];
-          for (int i = 0; i < signature.length; i++) {
-            signature[i] = operationInfo.getSignature()[i].getType();
-          }
+            && argumentCountIsCompatible(arguments, operationInfo.getSignature().length)) {
+          String[] signature = createSignature(operationInfo);
           Assert.assertEquals(
               this.adapter.invoke(name, operation, arguments, signature),
               nativeServer.invoke(name, operation, arguments, signature));
@@ -525,6 +584,21 @@ public class JmxBridgeTest {
               .getProperty("java.runtime.version") + " skipping");
     }
   }
+
+private String[] createSignature(MBeanOperationInfo operationInfo) {
+	if(operationInfo.getSignature().length == 0) {
+		return null;//simulate JVisualVM by returning null instead of an empty array
+	}
+	String[] signature = new String[operationInfo.getSignature().length];
+	  for (int i = 0; i < signature.length; i++) {
+	    signature[i] = operationInfo.getSignature()[i].getType();
+	  }
+	return signature;
+}
+
+private boolean argumentCountIsCompatible(Object[] arguments, int argumentCount) {
+	return (arguments == null && argumentCount == 0) || argumentCount == arguments.length;
+}
 
   @Test(dataProvider = "allNames")
   public void testInstances(ObjectName name) throws InstanceNotFoundException, IOException {
@@ -702,8 +776,8 @@ public class JmxBridgeTest {
     Assert.assertEquals(
         this.adapter.getDefaultDomain(), nativeServer.getDefaultDomain(), "Default domain");
 
-    Assert.assertEquals(this.adapter.agentVersion, "1.6.2");
-    Assert.assertEquals(this.adapter.protocolVersion, "7.2");
+    Assert.assertEquals(this.adapter.agentVersion, Version.getAgentVersion());
+    Assert.assertEquals(this.adapter.protocolVersion, Version.getProtocolVersion());
     Assert.assertTrue(this.adapter.getId().endsWith("-jvm"));
 
   }

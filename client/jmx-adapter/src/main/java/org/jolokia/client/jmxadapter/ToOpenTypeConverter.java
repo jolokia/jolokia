@@ -26,7 +26,10 @@ import java.lang.management.ThreadMXBean;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -75,9 +78,16 @@ public class ToOpenTypeConverter {
 
   private static Map<String, OpenType<?>> TYPE_SPECIFICATIONS;
 
-  public static Object returnOpenTypedValue(String name, Object rawValue) throws OpenDataException {
+  public static Object returnOpenTypedValue(String name, Object rawValue,
+      String typeFromMBeanInfo) throws OpenDataException {
     //special case, empty array with no type information, return object (empty list) itself
-    if (rawValue instanceof JSONArray && ((JSONArray) rawValue).isEmpty()) {
+    if ( "java.util.List".equals(typeFromMBeanInfo) && rawValue instanceof JSONArray) {
+      return rawValue;//JSONArray can act as a list
+    } else if ("java.util.Set".equals(typeFromMBeanInfo) && rawValue instanceof JSONArray ){
+      return new HashSet<Object>((Collection<?>)rawValue);
+    } else if( "java.util.Map".equals(typeFromMBeanInfo) && rawValue instanceof JSONObject) {
+      return rawValue;//JSONObject is a valid Map as it is
+    }else if (rawValue instanceof JSONArray && ((JSONArray) rawValue).isEmpty()) {
       final OpenType<?> type = cachedType(name);
       if (type != null) {
         return new Converters().getToOpenTypeConverter().convertToObject(type, rawValue);
@@ -85,7 +95,8 @@ public class ToOpenTypeConverter {
         return rawValue;
       }
     }
-    final OpenType<?> type = recursivelyBuildOpenType(name, rawValue);
+
+    final OpenType<?> type = recursivelyBuildOpenType(name, rawValue, typeFromMBeanInfo);
     if (type == null) {
       return rawValue;
     } else if (type.isArray() && ((ArrayType<?>) type).isPrimitiveArray()) {
@@ -150,7 +161,8 @@ public class ToOpenTypeConverter {
    * MBeanInfo 5. Dynamically build structured type from contents (will struggle with null values
    * for unknown entities) 6. Fail
    */
-  public static OpenType<?> recursivelyBuildOpenType(String name, Object rawValue)
+  public static OpenType<?> recursivelyBuildOpenType(String name, Object rawValue,
+      String typeFromMBeanInfo)
       throws OpenDataException {
     for (SimpleType<?> type : typeArray) {
       if (type.isValue(rawValue)
@@ -161,16 +173,17 @@ public class ToOpenTypeConverter {
     if (rawValue instanceof JSONArray) {
       final JSONArray array = (JSONArray) rawValue;
       if (array.size() > 0) {
-        final OpenType<?> elementType = recursivelyBuildOpenType(name + ".item", array.get(0));
+        final OpenType<?> elementType = recursivelyBuildOpenType(name + ".item", array.get(0),
+            typeFromMBeanInfo);
         if (elementType instanceof SimpleType && cachedType(name) != null) {
           return cachedType(name);
         } else {
           return ArrayType.getArrayType(elementType);
         }
       }
-    } else if (tabularContentType(name) != null) {
+    } else if (tabularContentType(name) != null ) {
       final String typeName =
-          "Map<java.lang.String," + tabularContentType(name).getClassName() + ">";
+          "java.util.Map<java.lang.String, " + tabularContentType(name).getClassName() + ">";
       return new TabularType(
           typeName,
           typeName,
@@ -186,6 +199,28 @@ public class ToOpenTypeConverter {
       return cachedType(name);
     } else if (rawValue instanceof JSONObject) {
       final JSONObject structure = (JSONObject) rawValue;
+      if("javax.management.openmbean.TabularData".equals(typeFromMBeanInfo)) {
+        //keys are typically String, if the structure is emtpy wrong type will problably not cause too much problem
+        OpenType<?> keyType=STRING, valueType= STRING;
+        final Iterator<Map.Entry<?,?>> iterator = structure.entrySet().iterator();
+        if(iterator.hasNext()){
+          final Map.Entry<?,?> sample = iterator.next();
+          keyType=recursivelyBuildOpenType(name+".key", sample.getKey(), null);
+          valueType=recursivelyBuildOpenType(name+".value", sample.getValue(), null);
+        }
+        final String typeName =
+            "java.util.Map<" + keyType.getClassName() +", "+ valueType.getClassName() + ">";
+        return new TabularType(
+            typeName,
+            typeName,
+            new CompositeType(
+                typeName,
+                typeName,
+                new String[]{"key", "value"},
+                new String[]{"key", "value"},
+                new OpenType<?>[]{keyType, valueType}),
+            new String[]{"key"});
+      }
       final String[] keys = new String[structure.size()];
       final OpenType<?>[] types = new OpenType[structure.size()];
       int index = 0;
@@ -193,13 +228,17 @@ public class ToOpenTypeConverter {
         @SuppressWarnings("unchecked")
         Map.Entry<String, Object> entry = (Entry<String, Object>) element;
         keys[index] = entry.getKey();
-        types[index++] = recursivelyBuildOpenType(name + "." + entry.getKey(), entry.getValue());
+        types[index++] = recursivelyBuildOpenType(name + "." + entry.getKey(), entry.getValue(),
+            typeFromMBeanInfo);
       }
       if (types.length == 0) {
         throw new InvalidOpenTypeException("No subtypes for " + name);
       } else {
         return new CompositeType("complex", "complex", keys, keys, types);
       }
+    }
+    if( rawValue == null ) {
+      return VOID;
     }
     // should probably never happen, to signify type could not be found
     throw new InvalidOpenTypeException("Unable to figure out type for " + rawValue);
@@ -325,10 +364,20 @@ public class ToOpenTypeConverter {
     }
     //may be null on Java 10
     cacheType(STRING, "jdk.management.jfr:type=FlightRecorder.EventTypes.item.description");
+    cacheType(STRING, "jdk.management.jfr:type=FlightRecorder.getRecordingOptions.destination");
     return TYPE_SPECIFICATIONS.get(name);
   }
 
-  static void cacheType(OpenType<?> type, String... names) {
+  /**
+   * Specify type to use for an attribute, operation or an attribute within the response.
+   * Syntax
+   * <pre>
+   *   cacheType(TYPE, "ObjectName.Operation/Attribute.item(if array).attribute.innerattribute")
+   * </pre>
+   * @param type type to apply for reverse engineering
+   * @param names One or more items to type according to syntax given above
+   */
+  public static void cacheType(OpenType<?> type, String... names) {
     for (String name : names) {
       TYPE_SPECIFICATIONS.put(name, type);
     }
@@ -343,7 +392,12 @@ public class ToOpenTypeConverter {
     return type;
   }
 
-  static OpenType<?> introspectComplexTypeFrom(Class<?> klass) throws OpenDataException {
+  /**
+   * @param klass The Java type
+   * @return OpenType deducted from Java type by reflection
+   * @throws OpenDataException
+   */
+  public static OpenType<?> introspectComplexTypeFrom(Class<?> klass) throws OpenDataException {
     if (CompositeData.class.equals(klass) || TabularData.class.equals(klass)) {
       //do not attempt to read from these classes, will have to be created from the "real" class runtime
       return null;
@@ -423,15 +477,6 @@ public class ToOpenTypeConverter {
   private static OpenType<?> tabularContentType(final String attribute) throws OpenDataException {
     if (TABULAR_CONTENT_TYPE == null) {
       TABULAR_CONTENT_TYPE = new HashMap<String, OpenType<?>>();
-      TABULAR_CONTENT_TYPE.put("java.lang:type=Runtime.SystemProperties", STRING);
-      TABULAR_CONTENT_TYPE
-          .put("jdk.management.jfr:type=FlightRecorder.Recordings.item.Settings", STRING);
-      TABULAR_CONTENT_TYPE
-          .put("jdk.jfr.management:type=FlightRecorder.Recordings.item.Settings", STRING);
-      TABULAR_CONTENT_TYPE
-          .put("jdk.management.jfr:type=FlightRecorder.Configurations.item.Settings", STRING);
-      TABULAR_CONTENT_TYPE
-          .put("jdk.jfr.management:type=FlightRecorder.Configurations.item.Settings", STRING);
       TABULAR_CONTENT_TYPE.put(
           "java.lang:name=PS Scavenge,type=GarbageCollector.LastGcInfo.memoryUsageAfterGc",
           introspectComplexTypeFrom(MemoryUsage.class));

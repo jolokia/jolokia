@@ -60,11 +60,19 @@
           </tr>
           <tr>
             <td>JVM-Agent</td>
-            <td><a href="http://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-jvm/${currentStableVersion}/jolokia-jvm-${currentStableVersion}-agent.jar">jolokia-jvm-${currentStableVersion}-agent.jar</a></td>
+            <td><a href="http://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-jvm/${currentStableVersion}/jolokia-jvm-${currentStableVersion}.jar">jolokia-jvm-${currentStableVersion}.jar</a></td>
           </tr>
           <tr>
             <td>Java Client Library</td>
             <td><a href="http://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-client-java/${currentStableVersion}/jolokia-client-java-${currentStableVersion}.jar">jolokia-client-java-${currentStableVersion}.jar</a></td>
+          </tr>
+          <tr>
+            <td>Jolokia JSR-160 JMX Adapter</td>
+            <td><a href="http://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-jmx-adapter/${currentStableVersion}/jolokia-jmx-adapter-${currentStableVersion}-standalone.jar">jolokia-jmx-adapter-${currentStableVersion}-standalone.jar</a></td>
+          </tr>
+          <tr>
+            <td>Jolokia JSR-160 JMX Adapter Kubernetes Extension</td>
+            <td><a href="http://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-kubernetes/${currentStableVersion}/jolokia-kubernetes-${currentStableVersion}-standalone.jar">jolokia-kubernetes-${currentStableVersion}-standalone.jar</a></td>
           </tr>
         </tbody>
       </table>

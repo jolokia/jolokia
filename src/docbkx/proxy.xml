@@ -75,7 +75,7 @@
       Additionally you can configured a white list with patterns for all allowed JMX service URL in a Jolokia Request.
       This white list is a plain text file which contains <ulink
     url="https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html">Patterns</ulink> line by line. Lines starting with <literal>#</literal> are ignored.
-      This file can be configured in various ways:
+      Pattern matching is performed case insensitive. This file can be configured in various ways:
     </para>
     <itemizedlist>
       <listitem>
@@ -148,6 +148,12 @@ service:jmx:rmi:///jndi/ldap:.*
           JSR-160 export. And there are even cases (combinations of
           JDK and AppServer Version) which don't work at all properly
           (e.g. JDK 1.5 and JBoss 5).
+        </listitem>
+        <listitem>
+          For MBeans that have arguments of type <literal>Map</literal> or <literal>List</literal> 
+          it is required that <literal>org.json.simple.JSONObject</literal> and <literal>org.json.simple.JSONArray</literal>
+          (contained in <literal>json-simple.jar</literal>) are available on the
+          classpath of the target JVM that receives the JSR-160 requests.
         </listitem>
         <listitem>
           The proxy mode can theoretically be exploited for local code execution if not secured properly.

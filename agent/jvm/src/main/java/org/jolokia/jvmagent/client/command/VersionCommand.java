@@ -20,7 +20,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.jolokia.server.core.Version;
 import org.jolokia.jvmagent.client.util.OptionsAndArgs;
-import org.jolokia.jvmagent.client.util.VirtualMachineHandler;
+import org.jolokia.jvmagent.client.util.VirtualMachineHandlerOperations;
 
 /**
  * Print out the version of the agent
@@ -36,7 +36,7 @@ public class VersionCommand extends AbstractBaseCommand {
 
     @Override
     @SuppressWarnings({"PMD.SystemPrintln"})
-    int execute(OptionsAndArgs pOpts, Object pVm, VirtualMachineHandler pHandler) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    int execute(OptionsAndArgs pOpts, Object pVm, VirtualMachineHandlerOperations pHandler) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         StringBuilder version = new StringBuilder("Jolokia JVM Agent ").append(Version.getAgentVersion());
         if (pOpts.isVerbose()) {
             version.append(" (Protocol: ").append(Version.getProtocolVersion()).append(")");

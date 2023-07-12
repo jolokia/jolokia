@@ -32,6 +32,7 @@ import java.util.regex.Pattern;
 import javax.management.*;
 import javax.management.remote.*;
 import javax.naming.Context;
+import javax.rmi.ssl.SslRMIClientSocketFactory;
 
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.request.*;
@@ -151,6 +152,10 @@ public class Jsr160RequestHandler extends AbstractRequestHandler {
             ret.put(Context.SECURITY_CREDENTIALS, password);
             ret.put("jmx.remote.credentials",new String[] { user, password });
         }
+        // Prevents error "java.rmi.ConnectIOException: non-JRMP server at remote endpoint"
+        if (System.getProperties().containsKey("javax.net.ssl.trustStore")) {
+            ret.put("com.sun.jndi.rmi.factory.socket", new SslRMIClientSocketFactory());
+        }
         return ret;
     }
 
@@ -195,7 +200,7 @@ public class Jsr160RequestHandler extends AbstractRequestHandler {
 
     private boolean checkPattern(Set<String> patterns, String urlS, boolean isPositive) {
         for (String pattern : patterns) {
-            if (Pattern.compile(pattern).matcher(urlS).matches()) {
+            if (Pattern.compile(pattern, Pattern.CASE_INSENSITIVE).matcher(urlS).matches()) {
                 return isPositive;
             }
         }

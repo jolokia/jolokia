@@ -35,12 +35,12 @@ import static org.testng.Assert.*;
 @Test(groups = "java6")
 public class VirtualMachineHandlerTest {
 
-    VirtualMachineHandler vmHandler;
+    VirtualMachineHandlerOperations vmHandler;
 
     @BeforeClass
     public void setup() {
-        OptionsAndArgs o = new OptionsAndArgs(CommandDispatcher.getAvailableCommands(),new String[0]);
-        vmHandler = new VirtualMachineHandler(o);
+        OptionsAndArgs o = new OptionsAndArgs(CommandDispatcher.getAvailableCommands());
+        vmHandler = PlatformUtils.createVMAccess(o);
     }
 
 
@@ -113,7 +113,7 @@ public class VirtualMachineHandlerTest {
 
     private boolean tryAttach(String pId,String ... expMsg) throws Exception {
         OptionsAndArgs o = new OptionsAndArgs(CommandDispatcher.getAvailableCommands(),"start", pId);
-        VirtualMachineHandler h = new VirtualMachineHandler(o);
+        VirtualMachineHandlerOperations h = PlatformUtils.createVMAccess(o);
         Object vm = null;
         try {
             vm = h.attachVirtualMachine();

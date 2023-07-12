@@ -1,7 +1,7 @@
 package org.jolokia.it.core;
 
 /*
- * Copyright 2009-2013 Roland Huss
+ * Copyright 2009-2021 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -149,7 +149,7 @@ public class OperationChecking implements OperationCheckingMBean,MBeanRegistrati
 
     public int sleep(int seconds) throws InterruptedException {
         synchronized(this) {
-            this.wait(seconds * 1000);
+            this.wait(seconds * 1000L);
         }
         return seconds;
     }

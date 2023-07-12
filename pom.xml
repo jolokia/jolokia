@@ -60,6 +60,7 @@
 
     <plugins>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
           <source>1.7</source>
@@ -82,7 +83,7 @@
         <artifactId>maven-release-plugin</artifactId>
         <configuration>
           <autoVersionSubmodules>true</autoVersionSubmodules>
-          <goals>deploy docbkx:generate-html docbkx:generate-pdf package assembly:assembly</goals>
+          <goals>deploy docbkx:generate-html docbkx:generate-pdf package</goals>
         </configuration>
       </plugin>
 
@@ -182,12 +183,16 @@
 
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.2</version>
+          <version>3.8.1</version>
+          <configuration>
+            <meminitial>128m</meminitial>
+            <maxmem>512m</maxmem>
+          </configuration>
         </plugin>
 
         <plugin>
           <artifactId>maven-assembly-plugin</artifactId>
-          <version>2.5.1</version>
+          <version>3.3.0</version>
         </plugin>
 
         <plugin>
@@ -237,7 +242,7 @@
 
         <plugin>
           <artifactId>maven-war-plugin</artifactId>
-          <version>2.5</version>
+          <version>3.3.1</version>
         </plugin>
 
         <plugin>
@@ -247,7 +252,12 @@
 
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>2.18.1</version>
+          <version>2.22.2</version>
+        </plugin>
+
+        <plugin>
+          <artifactId>maven-failsafe-plugin</artifactId>
+          <version>2.22.2</version>
         </plugin>
 
         <plugin>
@@ -366,8 +376,8 @@
   </scm>
 
   <ciManagement>
-    <system>jenkins</system>
-    <url>https://travis-ci.org/rhuss/jolokia</url>
+    <system>github</system>
+    <url>https://github.com/rhuss/jolokia/actions</url>
   </ciManagement>
 
   <licenses>
@@ -691,6 +701,10 @@
     <profile>
       <!-- Distribution to maven central. This is default deployment target -->
       <id>dist</id>
+      <modules>
+        <module>src/assembly</module>
+      </modules>
+
       <build>
         <plugins>
           <plugin>
@@ -790,6 +804,111 @@
         </plugins>
       </build>
     </profile>
+    <profile>
+      <id>java6</id>
+      <activation>
+        <jdk>1.6</jdk>
+      </activation>
+      <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <artifactId>maven-compiler-plugin</artifactId>
+              <version>3.6.2</version>
+            </plugin>
+            <plugin>
+              <artifactId>maven-war-plugin</artifactId>
+              <version>3.1.0</version>
+            </plugin>
+            <plugin>
+              <artifactId>maven-shade-plugin</artifactId>
+              <version>2.4</version>
+            </plugin>
+            <plugin>
+              <artifactId>maven-assembly-plugin</artifactId>
+              <version>3.0.0</version>
+            </plugin>
+            <plugin>
+              <artifactId>maven-surefire-plugin</artifactId>
+              <configuration>
+                <excludedGroups>java7</excludedGroups>
+              </configuration>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+      </build>
+    </profile>
+
+    <profile>
+      <id>java7</id>
+      <activation>
+        <jdk>[1.5,1.8)</jdk>
+      </activation>
+      <dependencyManagement>
+        <dependencies>
+          <dependency>
+            <groupId>org.easymock</groupId>
+            <artifactId>easymock</artifactId>
+            <version>3.4</version>
+          </dependency>
+        </dependencies>
+      </dependencyManagement>
+    </profile>
+
+    <profile>
+      <id>java8+</id>
+      <activation>
+        <jdk>[1.8,)</jdk>
+      </activation>
+      <dependencyManagement>
+        <dependencies>
+          <dependency>
+            <groupId>org.easymock</groupId>
+            <artifactId>easymock</artifactId>
+            <version>4.3</version>
+          </dependency>
+        </dependencies>
+      </dependencyManagement>
+    </profile>
+
+    <profile>
+      <id>java9+</id>
+      <activation>
+        <jdk>[9,)</jdk>
+      </activation>
+      <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <artifactId>maven-surefire-plugin</artifactId>
+              <configuration>
+                <argLine>
+                  <!--
+                    deny all reflective access except:
+                     - java.base/java.lang for Easymock (see https://github.com/easymock/easymock/issues/235)
+                     - java.management/javax.management.modelmbean for org.jolokia.jmx.JolokiaMBeanServerTest
+                  -->
+                  --illegal-access=deny
+                  --add-opens java.base/java.lang=ALL-UNNAMED
+                  --add-opens java.management/javax.management.modelmbean=ALL-UNNAMED
+                </argLine>
+              </configuration>
+            </plugin>
+            <plugin>
+              <artifactId>maven-compiler-plugin</artifactId>
+              <configuration>
+                <!-- JDK 17 can't compile with source/target=1.6 anymore -->
+                <source>1.7</source>
+                <target>1.7</target>
+                <testSource>1.7</testSource>
+                <testTarget>1.7</testTarget>
+              </configuration>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+      </build>
+    </profile>
+
     <profile>
       <id>disable-javadoc-lint</id>
       <activation>

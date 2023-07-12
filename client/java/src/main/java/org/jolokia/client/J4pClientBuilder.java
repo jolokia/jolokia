@@ -19,10 +19,12 @@ package org.jolokia.client;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
+import java.util.Collection;
 import java.util.Map;
 
 import javax.net.ssl.SSLContext;
 
+import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -97,6 +99,9 @@ public class J4pClientBuilder {
 
     // Extractor used creating responses
     private J4pResponseExtractor responseExtractor;
+
+    // Default http headers to use for each HTTP requests
+    private Collection<? extends Header> defaultHttpHeaders;
 
     /**
      * Package access constructor, use static method on J4pClient for creating
@@ -404,6 +409,16 @@ public class J4pClientBuilder {
         return this;
     }
 
+    /**
+     * Set the default HTTP Headers for each HTTP requests.
+     * @param pHttpHeaders
+     * @return
+     */
+    public final J4pClientBuilder setDefaultHttpHeaders(Collection<? extends Header> pHttpHeaders) {
+        this.defaultHttpHeaders = pHttpHeaders;
+        return this;
+    }
+
     // =====================================================================================
 
     /**
@@ -426,6 +441,10 @@ public class J4pClientBuilder {
                 .setDefaultCookieStore(cookieStore)
                 .setUserAgent("Jolokia JMX-Client (using Apache-HttpClient/" + getVersionInfo() + ")")
                 .setDefaultRequestConfig(createRequestConfig());
+
+        if (defaultHttpHeaders != null) {
+           builder.setDefaultHeaders(this.defaultHttpHeaders);
+        }
 
         if (user != null && authenticator != null) {
             authenticator.authenticate(builder, user, password);

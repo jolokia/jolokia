@@ -21,7 +21,6 @@ import java.util.Formatter;
 import java.util.List;
 
 import org.jolokia.jvmagent.client.util.*;
-import org.jolokia.jvmagent.client.util.VirtualMachineHandler;
 
 /**
  * List all available Java processes
@@ -40,7 +39,7 @@ public class ListCommand extends AbstractBaseCommand {
     /** {@inheritDoc} */
     @Override
     @SuppressWarnings("PMD.SystemPrintln")
-    int execute(OptionsAndArgs pOpts, Object pVm, VirtualMachineHandler pHandler) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    int execute(OptionsAndArgs pOpts, Object pVm, VirtualMachineHandlerOperations pHandler) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         List<ProcessDescription> vmDescriptors = pHandler.listProcesses();
         for (ProcessDescription descriptor : vmDescriptors) {
             Formatter formatter = new Formatter().format("%7.7s   %-100.100s",

@@ -2,6 +2,7 @@ package org.jolokia.service.serializer.json;
 
 import mockit.Mock;
 import mockit.MockUp;
+import org.jolokia.server.core.service.serializer.SerializeOptions;
 import org.jolokia.server.core.service.serializer.ValueFaultHandler;
 import org.jolokia.service.serializer.json.simplifier.BigIntegerSimplifier;
 import org.jolokia.service.serializer.json.simplifier.UrlSimplifier;
@@ -40,7 +41,7 @@ public class SimplifiersTest {
         };
         // Needed for subclassing final object
         converter = new ObjectToJsonConverter(null);
-        converter.setupContext();
+        converter.setupContext(new SerializeOptions.Builder().faultHandler(ValueFaultHandler.THROWING_VALUE_FAULT_HANDLER).build());
     }
 
     @Test

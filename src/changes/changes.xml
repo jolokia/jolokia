@@ -28,19 +28,87 @@
         Third milestone, rebased with latest 1.x branch
       </action>
     </release>
-
     <release version="2.0.0-M2" description="Release 2.0.0-M2" date="2016-07-07">
       <action dev="roland" type="add" date="2015-01-06">
         Second milestone, rebased with latest 1.x branch
       </action>
     </release>
+    <release version="2.0.0-M1" description="Release 2.0.0-M1" date="2016-01-06">
+      <action dev="roland" type="add" date="2015-01-06">
+        Initial milestone release with notification support.
+      </action>
+    </release>
 
-    <release version="1.6.3" description="Release 1.6.3" date="">
+    <release version="1.7-SNAPSHOT" description="Release 1.7.3">
+      <action dev="skarsaune" type="fix" issue="532">
+      Ensure that TabularData compatible data structures are deserialized better
+    </release>
+    <release version="1.7.3-SNAPSHOT" description="Release 1.7.3-SNAPSHOT">
+      <action dev="qtc-de" type="fix" issue="543">
+        Improve proxy's denylist
+      </action>
+    </release>
+    <release version="1.7.2" description="Release 1.7.2" date="2022-12-26">
+      <action dev="skarsaune" type="fix" issue="487">
+        Support calling invoke with <code>null</code> as arguments and signature for operations with no arguments over JMX connection.
+      </action>
+      <action dev="apupier" type="update" issue="519">
+        Fix Sonar badges in README
+      </action>
+      <action dev="apupier" type="update" issue="522">
+        Replace Travis CI with GitHub workflow
+      </action>
+      <action dev="skarsaune" type="add" issue="480">
+        Added documentation for MBeanServerConnection
+      </action>
+    </release>
+    <release version="1.7.1" description="Release 1.7.1" date="2021-09-19">
+      <action dev="grgrzybek" type="fix" issue="477">
+        Removed local system dependencies in jvm-agent's pom.xml that accidentally slipped in
+      </action>
+    </release>
+    <release version="1.7.0" description="Release 1.7.0" date="2021-07-26">
+      <action dev="grgrzybek" type="fix" issue="466">
+        Reimplement self-signed certificate generation without using reflection
+      </action>
+      <action dev="mmelko" type="fix" issue="465">
+        Handle UnsupportedOperationException to allow properly read Runtime MBean on jdk11
+      </action>
+      <action dev="grgrzybek" type="update" issue="464">
+        Provide non-reflective access to JVM Attach API on JDK9+
+      </action>
+      <action dev="ryandgoulding" type="fix" issue="460">
+        Fix possible integer overflow in OperationChecking.java
+      </action>
+      <action dev="sathieu" type="add" issue="445">
+        Debian package: Allow installation with openjdk-8-jre and with headless JREs
+      </action>
+      <action dev="TheWeatherCompany" type="fix" issue="436">
+        Fixes SSL failure to connect using proxy or .war
+      </action>
+      <action dev="skarsaune" type="add" issue="453">
+        Do not rely on whatever Kubernetes context is current at the client and allow specifying context when connecting with the Kubernetes connector.
+      </action>
+      <action dev="skarsaune" type="add" issue="434">
+        JSR-160 connector for connecting to a Pod in a Kubernetes cluster.
+      </action>
+      <action dev="skarsaune" type="add" issue="431">
+        JSR-160 connector using Jolokia
+      </action>
       <action dev="graben" type="add" issue="421">
         Make multicast discovery address and multicast port configurable with configuration, system property or environment variable.
       </action>
       <action dev="coheigea" type="fix" issue="427">
         Configure TLS settings per-connection and not globally
+      </action>
+      <action dev="JLLeitschuh" type="fix" issue="430">
+        Use HTTPS to resolve dependencies in Maven Build
+      </action>
+      <action dev="coheigea" type="fix" issue="414">
+        Don't require user to be set when JAAS authentication is configured for the OSGi connector.
+      </action>
+      <action dev="rhuss" type="fix" issue="388">
+        Fix the usage of JRE 1.8 classes that does not work with Java 6
       </action>
     </release>
     <release version="1.6.2" description="Release 1.6.2" date="2019-06-20">
@@ -170,13 +238,6 @@
         Removed Java 1.7 exception class, make the agent working with Java 1.6 again.
       </action>
     </release>
-
-    <release version="2.0.0-M1" description="Release 2.0.0-M1" date="2016-01-06">
-      <action dev="roland" type="add" date="2015-01-06">
-        Initial milestone release with notification support.
-      </action>
-    </release>
-
     <release version="1.3.3" description="Release 1.3.3" date="2016-02-16">
       <action dev="dejanb" type="add" date="2016-01-15" issue="239">
         Ignoring transient values during serialization when annotated

@@ -158,6 +158,17 @@
               org.jolokia.service.notif.sse.osgi,
               org.jolokia.service.jmx.api
             </Export-Package>
+            <Import-Package>
+              org.jolokia.osgi.servlet;version="${project.version}",
+              org.jolokia.restrictor;version="${project.version}",
+              org.jolokia.util;version="${project.version}",
+              org.osgi.framework;version="[1.0.0,2.0.0)",
+              org.osgi.service.http;version="[1.0.0,2.0.0)";resolution:=optional,
+              org.osgi.service.cm;version="[1.0.0,2.0.0)";resolution:=optional,
+              org.osgi.service.log;version="[1.0.0,2.0.0)",
+              org.osgi.util.tracker;version="[1.0.0,2.0.0)",
+              *
+            </Import-Package>
           </instructions>
         </configuration>
       </plugin>
@@ -178,7 +189,7 @@
   <pluginRepositories>
     <pluginRepository>
       <id>ops4j.releases</id>
-      <url>http://repository.ops4j.org/maven2</url>
+      <url>https://repository.ops4j.org/maven2</url>
       <snapshots>
         <enabled>false</enabled>
       </snapshots>

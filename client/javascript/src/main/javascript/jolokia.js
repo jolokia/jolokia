@@ -202,7 +202,7 @@
                     // Add appropriate field for CORS access
                     ajaxParams.xhrFields = {
                         // Please note that for CORS access with credentials, the request
-                        // must be asynchronous (see https://dvcs.w3.org/hg/xhr/raw-file/tip/Overvie.html#the-withcredentials-attribute)
+                        // must be asynchronous (see https://dvcs.w3.org/hg/xhr/raw-file/tip/Overview.html#the-withcredentials-attribute)
                         // It works synchronously in Chrome nevertheless, but fails in Firefox.
                         withCredentials: true
                     };

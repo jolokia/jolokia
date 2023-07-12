@@ -136,16 +136,14 @@ public class OsgiAgentActivator implements BundleActivator {
         if (jolokiaHttpContext == null) {
             final String user = getConfiguration(USER);
             final String authMode = getConfiguration(AUTH_MODE);
-            if (user == null) {
-                if (ServiceAuthenticationHttpContext.shouldBeUsed(authMode)) {
-                    jolokiaHttpContext = new ServiceAuthenticationHttpContext(bundleContext, authMode);
-                } else {
-                    jolokiaHttpContext = new DefaultHttpContext();
-                }
-            } else {
-                jolokiaHttpContext =
+            if (user != null || "jaas".equalsIgnoreCase(authMode)) {
+                 jolokiaHttpContext =
                     new BasicAuthenticationHttpContext(getConfiguration(REALM),
                                                        createAuthenticator(authMode));
+            } else if (ServiceAuthenticationHttpContext.shouldBeUsed(authMode)) {
+                jolokiaHttpContext = new ServiceAuthenticationHttpContext(bundleContext, authMode);
+            } else {
+                jolokiaHttpContext = new DefaultHttpContext();
             }
         }
         return jolokiaHttpContext;

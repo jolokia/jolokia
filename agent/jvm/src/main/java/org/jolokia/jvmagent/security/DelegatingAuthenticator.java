@@ -13,6 +13,7 @@ import javax.net.ssl.*;
 
 import com.sun.net.httpserver.Authenticator;
 import com.sun.net.httpserver.*;
+import org.jolokia.server.core.osgi.security.AuthorizationHeaderParser;
 import org.jolokia.server.core.util.EscapeUtil;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -50,8 +51,14 @@ public class DelegatingAuthenticator extends Authenticator {
     public Result authenticate(HttpExchange pHttpExchange) {
         try {
             URLConnection connection = delegateURL.openConnection();
+            String authorization = pHttpExchange.getRequestHeaders()
+                .getFirst("Authorization");
+            if(authorization == null){//In case middleware strips Authorization, allow alternate header
+                authorization = pHttpExchange.getRequestHeaders()
+                    .getFirst(AuthorizationHeaderParser.JOLOKIA_ALTERNATE_AUTHORIZATION_HEADER);
+            }
             connection.addRequestProperty("Authorization",
-                                          pHttpExchange.getRequestHeaders().getFirst("Authorization"));
+                authorization);
             connection.setConnectTimeout(2000);
             connection.connect();
             if (connection instanceof HttpURLConnection) {
@@ -112,17 +119,22 @@ public class DelegatingAuthenticator extends Authenticator {
 
         @Override
         public HttpPrincipal extract(URLConnection connection) throws IOException, ParseException {
-            Object payload = new JSONParser().parse(new InputStreamReader(connection.getInputStream()));
-            Stack<String> pathElements = EscapeUtil.extractElementsFromPath(path);
-            Object result = payload;
-            while (!pathElements.isEmpty()) {
-                if (result == null) {
-                    throw new IllegalArgumentException("No path '" + path + "' found in " + payload.toString());
+            final InputStreamReader isr = new InputStreamReader(connection.getInputStream());
+            try {
+                Object payload = new JSONParser().parse(isr);
+                Stack<String> pathElements = EscapeUtil.extractElementsFromPath(path);
+                Object result = payload;
+                while (!pathElements.isEmpty()) {
+                    if (result == null) {
+                        throw new IllegalArgumentException("No path '" + path + "' found in " + payload.toString());
+                    }
+                    String key = pathElements.pop();
+                    result = extractValue(result, key);
                 }
-                String key = pathElements.pop();
-                result = extractValue(result, key);
+                return new HttpPrincipal(result.toString(), realm);
+            } finally {
+                isr.close();
             }
-            return new HttpPrincipal(result.toString(),realm);
         }
 
         private Object extractValue(Object payload, String key) {

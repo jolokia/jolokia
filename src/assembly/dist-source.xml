@@ -22,21 +22,26 @@
   </formats>
   <fileSets>
     <fileSet>
-      <directory>${project.basedir}</directory>
+      <directory>${project.basedir}/../..</directory>
       <useDefaultExcludes>true</useDefaultExcludes>
       <excludes>
         <exclude>**/target/**</exclude>
         <exclude>**/*.xcf</exclude>
         <exclude>**/*.psd</exclude>
         <exclude>design.txt</exclude>
-        <exclude>HOWTO_RELEASE</exclude>
+        <exclude>src/HOWTO_RELEASE</exclude>
         <exclude>TODO</exclude>
         <exclude>**/*.ipr</exclude>
+        <exclude>**/*.iml</exclude>
+        <exclude>**/*.releaseBackup</exclude>
+        <exclude>**/release.properties</exclude>
         <exclude>**/*.iws</exclude>
         <exclude>*.pl</exclude>
         <exclude>.gitignore</exclude>
         <exclude>.gitshots/**</exclude>
         <exclude>roo-repository.xml</exclude>
+        <exclude>.idea/**</exclude>
+        <exclude>.github/**</exclude>
       </excludes>
     </fileSet>
   </fileSets>

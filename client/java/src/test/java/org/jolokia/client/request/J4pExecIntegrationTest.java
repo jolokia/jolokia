@@ -284,7 +284,7 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
                 assertEquals(res.get("vier"),true);
             }
 
-            request = new J4pExecRequest(itSetup.getOperationMBean(),"mapArgument",null);
+            request = new J4pExecRequest(itSetup.getOperationMBean(),"mapArgument",new Object[]{null});
             resp = j4pClient.execute(request,"POST");
             assertNull(resp.getValue());
         }

@@ -1,6 +1,7 @@
 package org.jolokia.server.core.osgi.security;
 
 import javax.servlet.http.HttpServletRequest;
+import org.jolokia.util.AuthorizationHeaderParser;
 
 /**
  * Interface used for performing the authentication.
@@ -17,6 +18,10 @@ public abstract class BaseAuthenticator implements Authenticator {
      */
     public boolean authenticate(HttpServletRequest pRequest) {
         String auth = pRequest.getHeader("Authorization");
+        if(auth==null){
+            //For cases where middleware may strip credentials
+            auth=pRequest.getHeader(AuthorizationHeaderParser.JOLOKIA_ALTERNATE_AUTHORIZATION_HEADER);
+        }
         if (auth == null) {
             return false;
         }

@@ -63,7 +63,14 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName>org.jolokia.it</Bundle-SymbolicName>
+            <Bundle-Version>${project.version}</Bundle-Version>
             <Bundle-Activator>org.jolokia.it.core.ItActivator</Bundle-Activator>
+            <Bundle-Name>Jolokia Integration Test Bundle</Bundle-Name>
+            <!-- Needed because we export an embedded package only -->
+            <Import-Package>
+              org.osgi.framework;version="[1.0.0,2.0.0)",
+              *
+            </Import-Package>
           </instructions>
         </configuration>
       </plugin>

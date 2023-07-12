@@ -155,9 +155,23 @@ public class ObjectToJsonConverterTest {
         bean.value = "value";
         bean.transientValue = "transient";
 
-        Map ret =  (Map)converter.serialize(bean, null, SerializeOptions.DEFAULT);
-        assertNull(ret.get("transientValue"));
-        assertEquals(ret.get("value"),"value");
+        String version = System.getProperty("java.specification.version");
+        if (version.contains(".")) {
+            version = version.substring(version.lastIndexOf('.') + 1);
+        }
+        int v = Integer.parseInt(version);
+        if (v > 6) {
+            Map ret =  (Map)converter.serialize(bean, null, SerializeOptions.DEFAULT);
+            assertNull(ret.get("transientValue"));
+            assertEquals(ret.get("value"),"value");
+        } else {
+            try {
+                converter.serialize(bean, null, SerializeOptions.DEFAULT);
+                fail("Should throw SecurityException(\"Prohibited package name: java.beans\")");
+            } catch (SecurityException e) {
+                assertEquals("Prohibited package name: java.beans", e.getMessage());
+            }
+        }
     }
 
     // ============================================================================

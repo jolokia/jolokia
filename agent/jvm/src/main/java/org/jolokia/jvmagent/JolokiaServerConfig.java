@@ -579,8 +579,8 @@ public class JolokiaServerConfig {
         if (!"single".equalsIgnoreCase(executor) &&
                 !"fixed".equalsIgnoreCase(executor) &&
                 !"cached".equalsIgnoreCase(executor)) {
-            throw new IllegalArgumentException("Executor model can be '" + executor +
-                                               "' but most be either 'single', 'fixed' or 'cached'");
+            throw new IllegalArgumentException("Invalid executor model: '" + executor +
+                                               "'. Must be either 'single', 'fixed' or 'cached'");
         }
     }
 

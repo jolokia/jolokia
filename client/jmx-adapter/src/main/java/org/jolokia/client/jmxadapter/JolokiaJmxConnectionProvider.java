@@ -13,7 +13,7 @@ import javax.management.remote.JMXServiceURL;
  * My Jar contains a service loader, so that Jolokia JMX protocol is supported
  * as long as my jar (jmx-adapter-version-standalone.jar) is on the classpath
  *
- * <code>
+ * <pre>
  *   Example:
  *   //NB: include trailing slash
  *   https will be used if port number fits the pattern *443 or connect env map contains "jmx.remote.x.check.stub"->"true"
@@ -23,7 +23,7 @@ import javax.management.remote.JMXServiceURL;
  *         connector.connect();
  *         connector.getMBeanServerConnection();
  *
- * </code>
+ * </pre>
  */
 public class JolokiaJmxConnectionProvider implements JMXConnectorProvider {
     @Override
