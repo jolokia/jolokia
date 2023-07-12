@@ -69,7 +69,7 @@
       <exclusions>
         <exclusion>
           <groupId>org.mortbay.jetty</groupId>
-          <artifactId>servlet-api</artifactId>
+          <artifactId>javax.servlet-api</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
