@@ -679,6 +679,15 @@ public class AgentServletTest {
             public void setBaos(ByteArrayOutputStream baos){
                 this.baos = baos;
             }
+
+            @Override
+            public boolean isReady() {
+                return true;
+            }
+
+            @Override
+            public void setWriteListener(WriteListener writeListener) {
+            }
         }
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         MyServletOutputStream sos = new MyServletOutputStream();

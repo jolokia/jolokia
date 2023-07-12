@@ -71,20 +71,4 @@ public class OpenTypeDeserializer {
         }
 	}
 
-    /**
-     * This converter is the parent converter can hence can convert
-     * all open types
-     * @param pType type (ignored)
-     * @return always true
-     */
-    @Override
-    boolean canConvert(OpenType pType) {
-        return true;
-    }
-
-
-    public StringToOpenTypeConverter makeForgiving() {
-        this.forgiving = true;
-        return this;
-    }
 }

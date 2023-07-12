@@ -93,11 +93,4 @@ abstract class OpenTypeConverter<T extends OpenType> {
         return dispatcher;
     }
 
-    /**
-     *
-     * @return whether I accept (and ignore) values that are not in the target type
-     */
-    protected boolean isForgiving() {
-        return this.forgiving || (this.dispatcher != null && this.dispatcher.isForgiving());
-    }
 }
