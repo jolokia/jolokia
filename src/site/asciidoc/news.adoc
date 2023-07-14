@@ -1,0 +1,49 @@
+////
+  Copyright 2009-2023 Roland Huss
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+== News
+
+=== Jolokia is back and 1.7.0 is out in the wild
+
+[.news-date]
+2021-07-26
+
+Jolokia took a big nap during the last two years. That's especially true for me, and I apologize to all of the
+excellent contributors who still keep Jolokia alive. The reason for the silence was really that my work
+interested has completely shifted. Jolokia is now older than ten years, and I think it aged quite well. But it
+gets harder and harder for me to justify working on Jolokia (and yes, I promised a 2.0 for ages, all the work
+is more or less done, but it would be irresponsible to move it out without being able to support it ;-(
+So, before we come to the fantastic new features if you are a Jolokia fan and willing to keep it alive, reach
+out to me. To be honest, if no one else steps up to take over the helm, Jolokia will very likely be sunset end
+of this year. It just feels not very good to constantly apologize for being so slow.
+
+Said that now to the amazing features that have been contributed over the last two years:
+
+Great news: Jolokia now has an actual JSR-160 connector that allows you to connect jconsole and another
+JSR-160 aware tooling to directly connect to Jolokia. Also, you can use the connector to connect into a
+Kubernetes cluster directly.
+Watch these videos for a short introduction:
+
+* https://www.youtube.com/watch?v=PDf2mqxOeMk[Jolokia from JMC,role=externalLink]
+* https://www.youtube.com/watch?v=ALkMdEPPg1U[Connect Visual VM to a JVM running in Kubernetes using Jolokia,role=externalLink]
+* https://www.youtube.com/watch?v=IkxDErc23lw[Connect Java Mission Control to a JVM in Kubernetes,role=externalLink]
+
+All kudos go to https://github.com/skarsaune[Martin Skarsaune,role=externalLink] for this great new feature!
+
+Thanks to the great work of https://github.com/grgrzybek[Grzegorz Grzybek,role=externalLink] Jolokia works now also
+for Java 11, and supports now the full range from Java 6 up to Java 11. All harmful reflection code has been
+replaced.
+
+There are many other little gems added by great people, please checkout the https://github.com/rhuss/jolokia/releases[release notes,role=externalLink] and/or the link:changes-report.html[changelog].
