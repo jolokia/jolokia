@@ -82,6 +82,44 @@
       <span style="clear: both;"></span>
     </subsection>
     <section name="News">
+      <subsection name="Jolokia has a new home!">
+        <div class="news-date">2023-07-13</div>
+        <p>
+          Yes, finally we moved Jolokia from my (rhuss) personal
+          account to a dedicated GitHub organisation: <a
+          href="https://github.com/jolokia">https://github.com/jolokia</a>.
+          I'm super happy that the story of Jolokia continues and you
+          will see quite some new faces very soon. Thanks Tadayoshi,
+          Grzegorz, Aurélien and all the other fine folks from Red Hat
+          who started to revive Jolokia. Also, Jolokia 2.0 becomes a realistic
+          option again. Stay tuned! 
+        </p>
+      </subsection>
+      <subsection name="Jolokia 1.7.1 and 1.7.2">
+        <div class="news-date">2022-12-26</div>
+        <p>
+          It has been silent times for Jolokia over the last 15
+          months. Still, there has been two minor releases with
+          bug fixes pushed out:
+        </p>
+        <p>
+          Jolokia 1.7.1:
+          <ul>
+            <li>Removed local system dependencies in jvm-agent's pom.xml that accidentally slipped in</li>
+          </ul>
+        </p>
+        <p>
+          Jolokia 1.7.2:
+          <ul>
+            <li>Support calling invoke with null as arguments and
+            signature for operations with no arguments over JMX
+            connection.</li>  
+            <li>Fix Sonar badges in README</li>
+            <li>Replace Travis CI with GitHub workflow</li>
+            <li>Added documentation for MBeanServerConnection</li>
+          </ul>
+        </p>
+      </subsection>
       <subsection name="Jolokia is back and 1.7.0 is out in the wild">
         <div class="news-date">2021-07-26</div>
         <p>
