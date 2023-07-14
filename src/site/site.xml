@@ -21,14 +21,14 @@
 
   <skin> 
     <groupId>org.jolokia</groupId> 
-    <artifactId>jolokia-site-skin</artifactId>
-    <version>1.7.3-SNAPSHOT</version>
+    <artifactId>jolokia-tools-siteskin</artifactId>
+    <version>2.0.0-SNAPSHOT</version>
   </skin>  
   
   <bannerLeft>
     <name>Jolokia</name>
     <src>images/header.png</src>
-    <href>http://www.jolokia.org</href>
+    <href>https://jolokia.org</href>
   </bannerLeft>
   
   <body>
@@ -39,7 +39,7 @@
       <item name="Documentation" href="documentation.html"/>
       <item name="Support" href="support.html"/>
       <item name="Blog" href="https://ro14nd.de"/>
-      <item name="About" href="http://www.jolokia.org/about.html"/>
+      <item name="About" href="https://jolokia.org/about.html"/>
     </links>
 
     <menu name="Jolokia" inherit="top">
