@@ -116,7 +116,7 @@ table.bodyTable th, table.bodyTable td {
   font-weight: bold;
   font-size: x-small;
 }
-.section {
+.section,.sect1,.sect2,.sect3,.sect4 {
   padding: 4px;
 }
 #footer {

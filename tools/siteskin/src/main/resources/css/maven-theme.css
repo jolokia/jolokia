@@ -279,14 +279,14 @@ ul {
     margin-left: 5px;
 }
 
-.section ul {
+.section ul, .ulist ul {
     margin-left: 25px;
     margin-right: 25px;
     text-align: justify;
     margin-bottom: 5px;
 }
 
-.section ul li {
+.section ul li, .ulist li {
     margin-bottom: 2px;
     margin-top: 3px;
 }
@@ -296,10 +296,18 @@ dd {
     text-align: justify;
 }
 
-p, .section > div {
+p, .section > div, .sectionbody > .sect2, .sect2 > .imageblock, .sect2 > .literalblock, .sect2 > .listingblock {
     margin: 10px 25px;
     text-align: justify;
     position: relative;
+}
+
+div.ulist {
+    margin: 0;
+}
+
+div.ulist p {
+    margin: 0;
 }
 
 code {
@@ -491,6 +499,10 @@ div.news-date {
     float: right;
     clear: both;
     margin-top: -40px;
+}
+div.news-date > p {
+    margin-top: 0;
+    margin-bottom: 0;
 }
 
 /* ========================== */
