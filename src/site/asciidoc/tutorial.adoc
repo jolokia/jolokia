@@ -130,7 +130,7 @@ interactive shell with context sensitive command
 completion on MBean names and attributes/operations. It
 is a perfect tool for interactively exploring MBeans and
 their values.
-* *check_jmx4perl* is a feature reach Nagios
+* *check_jmx4perl* is a feature-rich Nagios
 plugin for connecting the Jolokia agent with Nagios.
 * *jolokia* is a supporting script for easy
 download and configuration of the Jolokia agents.
