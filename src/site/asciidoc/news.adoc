@@ -17,6 +17,42 @@
 :source-highlighter: rouge
 Roland Huss <roland@jolokia.org>
 
+=== Jolokia has a new home!
+
+[.news-date]
+2023-07-13
+
+Yes, finally we moved Jolokia from my (rhuss) personal
+account to a dedicated GitHub organisation:
+https://github.com/jolokia[https://github.com/jolokia,role=externalLink].
+I'm super happy that the story of Jolokia continues and you
+will see quite some new faces very soon. Thanks Tadayoshi,
+Grzegorz, Aurélien and all the other fine folks from Red Hat
+who started to revive Jolokia. Also, Jolokia 2.0 becomes a realistic
+option again. Stay tuned!
+
+=== Jolokia 1.7.1 and 1.7.2
+
+[.news-date]
+2022-12-26
+
+It has been silent times for Jolokia over the last 15
+months. Still, there has been two minor releases with
+bug fixes pushed out:
+
+Jolokia 1.7.1:
+
+* Removed local system dependencies in ``jvm-agent``'s `pom.xml` that accidentally slipped in
+
+Jolokia 1.7.2:
+
+* Support calling invoke with null as arguments and
+signature for operations with no arguments over JMX
+connection.
+* Fix Sonar badges in README
+* Replace Travis CI with GitHub workflow
+* Added documentation for MBeanServerConnection
+
 === Jolokia is back and 1.7.0 is out in the wild
 
 [.news-date]

@@ -57,7 +57,6 @@
   </modules>
 
   <build>
-
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -419,19 +418,19 @@
   <!-- ===========================================================  -->
   <issueManagement>
     <system>GitHub</system>
-    <url>https://github.com/rhuss/jolokia/issues/</url>
+    <url>https://github.com/jolokia/jolokia/issues/</url>
   </issueManagement>
 
   <scm>
-    <connection>scm:git:git://github.com/rhuss/jolokia.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/rhuss/jolokia.git</developerConnection>
+    <connection>scm:git:git://github.com/jolokia/jolokia.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/jolokia/jolokia.git</developerConnection>
     <tag>HEAD</tag>
-    <url>git://github.com/rhuss/jolokia.git</url>
+    <url>git://github.com/jolokia/jolokia.git</url>
   </scm>
 
   <ciManagement>
     <system>github</system>
-    <url>https://github.com/rhuss/jolokia/actions</url>
+    <url>https://github.com/jolokia/jolokia/actions</url>
   </ciManagement>
 
   <licenses>
