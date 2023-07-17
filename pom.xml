@@ -147,6 +147,42 @@
       </plugin>
 
       <plugin>
+        <!--
+          Manual invocation which is faster than resources:copy-resources + asciidoctor-maven-plugin:process-asciidoc:
+          $ cd ${basedir}
+          $ mkdir -p target/generated-docs;
+          $ asciidoctor -a linkcss -a stylesdir=css -b html5 -D target/generated-docs src/asciidoc/index.adoc
+        -->
+        <groupId>org.asciidoctor</groupId>
+        <artifactId>asciidoctor-maven-plugin</artifactId>
+        <executions>
+          <execution>
+<!--            <phase>pre-site</phase>-->
+            <goals>
+              <goal>process-asciidoc</goal>
+            </goals>
+            <inherited>false</inherited>
+          </execution>
+        </executions>
+        <configuration>
+          <sourceDirectory>${basedir}/src/asciidoc</sourceDirectory>
+          <attributes>
+            <!--
+              default stylesheet:
+               - https://docs.asciidoctor.org/asciidoctor/latest/html-backend/default-stylesheet/
+               - https://raw.githubusercontent.com/asciidoctor/asciidoctor/v2.0.x/src/stylesheets/asciidoctor.css
+               - https://cdn.jsdelivr.net/gh/asciidoctor/asciidoctor@2.0/data/stylesheets/asciidoctor-default.css
+            -->
+            <copycss>../../src/site/resources/css/asciidoc-jolokia.css</copycss>
+            <linkcss>true</linkcss>
+            <stylesdir>css</stylesdir>
+            <stylesheet>asciidoc-jolokia.css</stylesheet>
+            <webfonts>Open+Sans:300,300italic,400,400italic,600,600italic|Noto+Serif:400,400italic,700,700italic|Ubuntu+Mono:400</webfonts>
+          </attributes>
+        </configuration>
+      </plugin>
+
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
         <executions>
