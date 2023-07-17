@@ -1,46 +1,53 @@
-            ---------------
-                License
-            ---------------
+////
+  Copyright 2009-2023 Roland Huss
 
-License
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
 
- Jolokia is released under the {{{http://www.apache.org/licenses/LICENSE-2.0}Apache License}}, Version 2.0. 
- The license is appended below.
+        http://www.apache.org/licenses/LICENSE-2.0
 
-* www.jolokia.org
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+
+== License
+
+Jolokia is released under the https://www.apache.org/licenses/LICENSE-2.0[Apache License], Version 2.0.
+The license is appended below.
+
+=== www.jolokia.org
  
- The content found on www.jolokia.org (i.e. icons, pictures and
- styling) is not (yet) Apache licensed, the licensing is still to be
- decided. Of course, you can use the icons for promotional purpose,
- but please don't reuse it for something different than Jolokia.
+The content found on https://www.jolokia.org (i.e. icons, pictures and
+styling) is not (yet) Apache licensed, the licensing is still to be
+decided. Of course, you can use the icons for promotional purpose,
+but please don't reuse it for something different than Jolokia.
 
-* Notice
+=== Notice
 
- Jolokia uses some 3rd party software, which is delivered as part of
- the agents. These are
+Jolokia uses some 3rd party software, which is delivered as part of
+the agents. These are
 
- * {{{http://code.google.com/p/json-simple/}json-simple}} released
-  under the Apache License 2.0 as well.
+* https://code.google.com/p/json-simple/[json-simple,role=externalLink] released
+under the Apache License 2.0 as well.
+* The OSGi bundle includes the
+https://github.com/apache/felix-dev/tree/master/http[Apache
+Felix HttpService Bundle,role=externalLink] which is licensed under the APL.
+* This web-site uses the https://960.gs/[960 Grid System,role=externalLink] for its
+layout. This is released under the GPL and MIT license.
+* The reference guide's stylesheets are adapted from
+https://www.gradle.org[Gradle,role=externalLink], which are released under the
+Apache License.
+* Syntax Highlighting is done with help of
+https://github.com/googlearchive/code-prettify[google-code-prettify,role=externalLink],
+Apache licensed, too.
 
- * The OSGi bundle includes the
-   {{{http://felix.apache.org/site/apache-felix-http-service.html}Apache
-   Felix HttpService Bundle}} which is licensed under the APL.
+=== Apache License
 
- * This web-site uses the {{{http://960.gs/}960 Grid System}} for its
-   layout. This is released under the GPL and MIT license.
-
- * The reference guide's stylesheets are adapted from
-   {{{http://www.gradle.org}Gradle}}, which are released under the
-   Apache License.
- 
- * Syntax Highlighting is done with help of
-   {{{http://code.google.com/p/google-code-prettify/}google-code-prettify}},
-   Apache licensed, too.
-
-* Apache License
-
---------------------
-
+----
                                  Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
@@ -242,5 +249,4 @@ License
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
---------------------
-
+----

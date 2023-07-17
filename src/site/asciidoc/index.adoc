@@ -22,7 +22,7 @@
 
 ++++
 <div class="teaser">
-<strong>Jolokia</strong> is remote JMX with JSON over HTTP.<br />
+    <strong>Jolokia</strong> is remote JMX with JSON over HTTP.<br />
     <div class="subtitle">
     It is fast, simple, polyglot and has unique features. It's JMX on <a class="externalLink" href="https://en.wikipedia.org/wiki/Capsaicin">Capsaicin</a>.
     </div>
@@ -31,6 +31,7 @@
 
 Jolokia is a JMX-HTTP bridge giving an alternative to JSR-160 connectors. It is an agent based approach with support for many platforms. In addition to basic JMX operations it enhances JMX remoting with unique features like bulk requests and fine grained security policies.
 
+// A warning about incorrect section nesting, but it's by design...
 === Starting points
 
 * Overview of link:features-nb.html[features] which make Jolokia unique for JMX remoting.

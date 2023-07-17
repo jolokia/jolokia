@@ -65,13 +65,7 @@
             }
 
             // Jolokia Javascript Client version
-<<<<<<< HEAD
-            this.CLIENT_VERSION = "1.1.3";
-||||||| merged common ancestors
-            this.CLIENT_VERSION = "1.1.1";
-=======
             this.CLIENT_VERSION = "1.2.2";
->>>>>>> master
 
             // Registered requests for fetching periodically
             var jobs = [];
@@ -716,7 +710,6 @@
         // The return value is an object with two properties: The 'parts' to glue together, where
         // each part gets escaped and a 'path' which is appended literally
         var GET_URL_EXTRACTORS = {
-<<<<<<< HEAD
             "read": function(request) {
                 if (request.attribute == null) {
                     // Path gets ignored for multiple attribute fetch
@@ -724,18 +717,6 @@
                 } else {
                     return { parts:[ request.mbean, request.attribute ], path:request.path };
                 }
-||||||| merged common ancestors
-            "read":function (request) {
-                if (request.attribute == null) {
-                    // Path gets ignored for multiple attribute fetch
-                    return { parts:[ request.mbean ] };
-                } else {
-                    return { parts:[ request.mbean, request.attribute ], path:request.path };
-                }
-=======
-            "read":function (request) {
-                return { parts:[ request.mbean, request.attribute ], path:request.path };
->>>>>>> master
             },
             "write": function(request) {
                 return { parts:[request.mbean, request.attribute, valueToString(request.value)], path:request.path};

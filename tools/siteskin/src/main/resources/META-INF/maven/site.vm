@@ -55,6 +55,7 @@
     <img class="imageLink"$imgSrc$imgAlt$imgBorder$imgWidth$imgHeight/>
   #end
 #end
+##
 #macro ( banner $banner $id )
   #if ( $banner )
     #if( $banner.href )
@@ -452,6 +453,9 @@
       @import url("$relativePath/css/maven-theme.css");
       @import url("$relativePath/css/site.css");
     </style>
+#if($alignedFileName.endsWith("-cubism.html"))
+    <link rel="stylesheet" type="text/css" href="$relativePath/css/style.css" />
+#end
     <script data-cfasync="false" type="text/javascript">
        var host = "jolokia.org";
        if ((host == window.location.host) && (window.location.protocol != "https:")) {
@@ -459,6 +463,14 @@
        }
     </script>
     <script type="text/javascript" src="$relativePath/js/prettify/prettify.js"></script>
+#if($alignedFileName.endsWith("-cubism.html"))
+    <script type="text/javascript" src="$relativePath/js/d3.v2.min.js"></script>
+    <script type="text/javascript" src="$relativePath/js/jquery-1.7.2-min.js"></script>
+    <script type="text/javascript" src="$relativePath/js/jolokia.js"></script>
+    <script type="text/javascript" src="$relativePath/js/cubism.v1.min.js"></script>
+    <script type="text/javascript" src="$relativePath/js/jolokia-cubism.js"></script>
+    <script type="text/javascript" src="$relativePath/js/javascript-cubism.js"></script>
+#end
     <link rel="stylesheet" href="$relativePath/css/print.css" type="text/css" media="print" />
     <link rel="icon" type="image/png" href="$relativePath/images/favicon.png" />
 #foreach( $author in $authors )

@@ -39,12 +39,12 @@
       <item name="Documentation" href="documentation.html"/>
       <item name="Support" href="support.html"/>
       <item name="Blog" href="https://ro14nd.de"/>
-      <item name="About" href="https://jolokia.org/about.html"/>
+      <item name="About" href="about.html"/>
     </links>
 
     <menu name="Jolokia" inherit="top">
       <item name="Download" href="download.html"/>
-      <item name="Features" href="features-nb.html"/>
+      <item name="Features" href="features.html"/>
       <item name="Support" href="support.html"/>
       <item name="Forum" href="forum.html"/>
       <item name="IRC" href="irc.html"/>

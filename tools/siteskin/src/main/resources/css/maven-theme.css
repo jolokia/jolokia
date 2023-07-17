@@ -296,7 +296,9 @@ dd {
     text-align: justify;
 }
 
-p, .section > div, .sectionbody > .sect2, .sect2 > .imageblock, .sect2 > .literalblock, .sect2 > .listingblock {
+p, .section > div, .sectionbody > .sect2, .sect2 > .imageblock, .sect2 > .literalblock, .sect2 > .listingblock,
+.sect1 > .imageblock, .sect1 > .literalblock, .sect1 > .listingblock,
+.sect1 > .sectionbody > .imageblock, .sect1 > .sectionbody > .literalblock, .sect1 > .sectionbody > .listingblock {
     margin: 10px 25px;
     text-align: justify;
     position: relative;
@@ -522,4 +524,17 @@ div#nabbleforum {
 
 .bvnmrte {
 
+}
+
+span.jolokiaLogo img {
+    float: right; margin: 0 0 10px 20px;
+}
+
+div.text-center div.content {
+    text-align: center;
+}
+
+span.image.right {
+    float: right;
+    margin-left: 20px;
 }

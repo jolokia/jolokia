@@ -1,24 +1,38 @@
-Webarchive (WAR) Agent
+////
+  Copyright 2009-2023 Roland Huss
 
-  This agent is most suitable for Java EE environments. It gets deployed
-  as a usual web archive. The specific deployment procedure depends on
-  the Java EE server in used. E.g. for Tomcat, copy the war agent into the <<<webapps/>>> directory.
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
 
-  The war agent comes in two flavors:
+        https://www.apache.org/licenses/LICENSE-2.0
 
-    * <<<jolokia.war>>> which is secured with a role "jolokia". So you need to setup your servlet container to connect
-      this role to your authentication setup (like the <<<tomcat-users.xml>>> for Tomcat)
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
 
-    * <<<jolokia-unsecured.war>>> is completely unsecured and might be useful for a quick evaluation. <<Please note that this unauthenticated
-      access should be ony used for development purposes. Check out {{{../reference/html/agents.html#agent-war-security}reference manual}} for details how to enable security.>>
+== Webarchive (WAR) Agent
 
-  As soon as it is deployed, the agents offers its services under the
-  URL of the deployed web application. For Tomcat running with its
-  standard configuration the agent is then reachable under
+This agent is most suitable for Java EE environments. It gets deployed
+as a usual web archive. The specific deployment procedure depends on
+the Java EE server in used. E.g. for Tomcat, copy the war agent into the `webapps/` directory.
 
-------
+The war agent comes in two flavors:
+
+* `jolokia.war` which is secured with a role "jolokia". So you need to setup your servlet container to connect
+this role to your authentication setup (like the `tomcat-users.xml` for Tomcat)
+* `jolokia-unsecured.war` is completely unsecured and might be useful for a quick evaluation. *Please note that this unauthenticated access should be ony used for development purposes. Check out link:../reference/html/agents.html#agent-war-security[reference manual] for details how to enable security.*
+
+As soon as it is deployed, the agents offers its services under the
+URL of the deployed web application. For Tomcat running with its
+standard configuration the agent is then reachable under
+
+----
 http://localhost:8080/jolokia
-------
+----
 
-   Setup and configuration of the WAR agent is explained detailed in
-   the {{{../reference/html/agents.html#agents-war} reference manual}}.
+Setup and configuration of the WAR agent is explained detailed in
+the link:../reference/html/agents.html#agents-war[reference manual].

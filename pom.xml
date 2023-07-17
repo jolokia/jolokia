@@ -148,6 +148,31 @@
       </plugin>
 
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-site-images</id>
+            <phase>pre-site</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/site</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>src/site/asciidoc</directory>
+                  <includes>
+                    <include>images/**/*</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
         <groupId>org.apache.rat</groupId>
         <artifactId>apache-rat-plugin</artifactId>
         <configuration>
@@ -286,6 +311,17 @@
           <version>3.12.1</version>
           <configuration>
             <validate>false</validate>
+            <!--
+              Don't worry about IDE warning (maven-site-plugin doesn't handle "asciidoc" property.
+              This is actually handled by asciidoctor-maven-plugin dependency
+            -->
+            <asciidoc>
+              <attributes>
+                <!-- Add required rouge styles in '/css/site.css' -->
+                <source-highlighter>rouge</source-highlighter>
+                <currentStableVersion>${currentStableVersion}</currentStableVersion>
+              </attributes>
+            </asciidoc>
           </configuration>
           <dependencies>
             <dependency>
