@@ -58,7 +58,7 @@
     </p><p>
       Additionally you can configured a white list with patterns for all allowed JMX service URL in a Jolokia Request.
       This white list is a plain text file which contains <a xmlns:xlink="http://www.w3.org/1999/xlink" href="https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html" target="_top">Patterns</a> line by line. Lines starting with <code class="literal">#</code> are ignored.
-      This file can be configured in various ways:
+      Pattern matching is performed case insensitive. This file can be configured in various ways:
     </p><div class="itemizedlist"><ul><li>
         Repackaging the <code class="literal">jolokia.war</code> and adapt <code class="literal">web.xml</code> to
         include the init option <code class="literal">jsr160ProxyAllowedTargets</code> with a file path to the white list. This should
@@ -113,6 +113,11 @@ service:jmx:rmi:///jndi/ldap:.*
           JSR-160 export. And there are even cases (combinations of
           JDK and AppServer Version) which don't work at all properly
           (e.g. JDK 1.5 and JBoss 5).
+        </li><li>
+          For MBeans that have arguments of type <code class="literal">Map</code> or <code class="literal">List</code> 
+          it is required that <code class="literal">org.json.simple.JSONObject</code> and <code class="literal">org.json.simple.JSONArray</code>
+          (contained in <code class="literal">json-simple.jar</code>) are available on the
+          classpath of the target JVM that receives the JSR-160 requests.
         </li><li>
           The proxy mode can theoretically be exploited for local code execution if not secured properly.
           So its is highly recommended to not make the agent available without any authentication to any
