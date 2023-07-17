@@ -83,9 +83,6 @@
        <action dev="graben" type="add" issue="421">
         Make multicast discovery address and multicast port configurable with configuration, system property or environment variable.
       </action>
-      <action dev="coheigea" type="fix" issue="427">
-        Configure TLS settings per-connection and not globally
-      </action>
       <action dev="JLLeitschuh" type="fix" issue="430">
         Use HTTPS to resolve dependencies in Maven Build
       </action>
