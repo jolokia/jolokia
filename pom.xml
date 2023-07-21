@@ -29,6 +29,8 @@
   <url>http://www.jolokia.org</url>
 
   <modules>
+    <module>bom</module>
+
     <module>server/core</module>
     <module>server/detector</module>
 
