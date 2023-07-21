@@ -409,7 +409,7 @@ public class OsgiAgentActivatorTest {
             expect(context.createFilter(filter.toString())).andReturn(filter);
             expect(context.getProperty("org.osgi.framework.version")).andReturn("4.5.0");
             context.addServiceListener(httpRememberListener(), eq(filter.toString()));
-            expect(context.getServiceReferences(null, filter.toString())).andReturn(null);
+            expect(context.getServiceReferences((String) null, filter.toString())).andReturn(null);
             registration = createMock(ServiceRegistration.class);
         }
 

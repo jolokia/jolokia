@@ -2,6 +2,7 @@ package org.jolokia.server.core.osgi.security;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.login.Configuration;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 import javax.servlet.http.HttpServletRequest;
@@ -48,7 +49,9 @@ public class JaasAuthenticatorTest {
         JaasAuthenticator auth = new JaasAuthenticator("jolokia") {
             @Override
             protected LoginContext createLoginContext(String realm, CallbackHandler handler) throws LoginException {
-                LoginContext mockLogin = mock(LoginContext.class);
+                // can't mock original LoginContext because sun.invoke.util.VerifyAccess.isTypeVisible()
+                // checks classloaders - we need AppClassLoader and LoginContext.class has null classloader
+                LoginContext mockLogin = mock(TestLoginContext.class);
                 mockLogin.login();
                 expect(mockLogin.getSubject()).andReturn(SUBJECT);
                 replay(mockLogin);
@@ -65,7 +68,9 @@ public class JaasAuthenticatorTest {
         JaasAuthenticator auth = new JaasAuthenticator("jolokia") {
             @Override
             protected LoginContext createLoginContext(String realm, CallbackHandler handler) throws LoginException {
-                LoginContext mockLogin = mock(LoginContext.class);
+                // can't mock original LoginContext because sun.invoke.util.VerifyAccess.isTypeVisible()
+                // checks classloaders - we need AppClassLoader and LoginContext.class has null classloader
+                LoginContext mockLogin = mock(TestLoginContext.class);
                 mockLogin.login();
                 EasyMock.expectLastCall().andThrow(new LoginException("Failed"));
                 replay(mockLogin);
@@ -84,5 +89,26 @@ public class JaasAuthenticatorTest {
         return req;
     }
 
+    public static class TestLoginContext extends LoginContext {
+        public TestLoginContext(String name) throws LoginException {
+            super(name);
+        }
+
+        public TestLoginContext(String name, Subject subject) throws LoginException {
+            super(name, subject);
+        }
+
+        public TestLoginContext(String name, CallbackHandler callbackHandler) throws LoginException {
+            super(name, callbackHandler);
+        }
+
+        public TestLoginContext(String name, Subject subject, CallbackHandler callbackHandler) throws LoginException {
+            super(name, subject, callbackHandler);
+        }
+
+        public TestLoginContext(String name, Subject subject, CallbackHandler callbackHandler, Configuration config) throws LoginException {
+            super(name, subject, callbackHandler, config);
+        }
+    }
 
 }
