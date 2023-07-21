@@ -35,7 +35,7 @@
     <links>
       <item name="Home" href="index.html"/>
       <item name="Download" href="download.html"/>
-      <item name="Features" href="features-nb.html"/>
+      <item name="Features" href="features.html"/>
       <item name="Documentation" href="documentation.html"/>
       <item name="Support" href="support.html"/>
       <item name="Blog" href="https://ro14nd.de"/>
@@ -44,6 +44,7 @@
 
     <menu name="Jolokia" inherit="top">
       <item name="Download" href="download.html"/>
+      <item name="Artifacts" href="artifacts.html"/>
       <item name="Features" href="features.html"/>
       <item name="Support" href="support.html"/>
       <item name="Forum" href="forum.html"/>
@@ -53,6 +54,7 @@
 
     <menu name="Documentation" inherit="top">
       <item name="Overview" href="documentation.html"/>
+      <item name="Concepts" href="concepts.html"/>
       <item name="Tutorial" href="tutorial.html"/>
       <item name="Reference Manual" href="reference/html/index.html"/>
       <item name="Talks and Screencasts" href="talks.html"/>
