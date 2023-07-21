@@ -37,22 +37,26 @@
     <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-server-core</artifactId>
-      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-server-core</artifactId>
+      <classifier>tests</classifier>
+      <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.core</artifactId>
+      <artifactId>osgi.core</artifactId>
       <scope>provided</scope>
     </dependency>
 
     <dependency>
-      <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-server-core</artifactId>
+      <groupId>org.easymock</groupId>
+      <artifactId>easymock</artifactId>
       <scope>test</scope>
-      <classifier>tests</classifier>
-      <version>${project.version}</version>
     </dependency>
+
   </dependencies>
 
   <build>
