@@ -16,13 +16,13 @@
   -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>jolokia-service-notif-sse</artifactId>
   <version>2.0.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
+  <name>jolokia-service-notif-sse</name>
   <description>Jolokia :: Service :: Notification :: SSE</description>
 
   <parent>
@@ -34,25 +34,27 @@
 
   <dependencies>
 
+    <!-- Jolokia own artifacts -->
+
     <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-server-core</artifactId>
-      <version>${project.version}</version>
     </dependency>
-
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.core</artifactId>
-      <scope>provided</scope>
-    </dependency>
-
     <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-server-core</artifactId>
       <scope>test</scope>
       <classifier>tests</classifier>
-      <version>${project.version}</version>
     </dependency>
+
+    <!-- OSGi dependencies -->
+
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>osgi.core</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
   </dependencies>
 
   <build>
@@ -64,24 +66,15 @@
 
         <configuration>
           <instructions>
-           <Bundle-Activator>org.jolokia.service.notif.sse.osgi.SseNotificationServiceActivator</Bundle-Activator>
+            <Bundle-Activator>org.jolokia.service.notif.sse.osgi.SseNotificationServiceActivator</Bundle-Activator>
             <Bundle-SymbolicName>org.jolokia.service.pullnotif</Bundle-SymbolicName>
             <Bundle-Description>Jolokia pull notification</Bundle-Description>
             <Export-Package />
           </instructions>
         </configuration>
       </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>7</source>
-          <target>7</target>
-        </configuration>
-      </plugin>
     </plugins>
   </build>
-
 
   <reporting>
     <plugins>

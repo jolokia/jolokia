@@ -33,7 +33,7 @@ import static org.testng.Assert.assertEquals;
  * @since 23.03.13
  */
 
-@Test(enabled = false)
+@Test
 public class SseNotificationBackendTest {
 
     private SseNotificationBackend backend;
@@ -55,7 +55,7 @@ public class SseNotificationBackendTest {
         context.destroy();
     }
 
-    @Test(enabled = false)
+    @Test
     public void testSubscription() throws Exception {
        String client = UUID.randomUUID().toString();
        String handle = "1";
@@ -66,7 +66,7 @@ public class SseNotificationBackendTest {
        cb.handleNotification(notification, handback);
    }
 
-    @Test(enabled = false)
+    @Test
     public void testUnsubscribe() throws Exception {
         String client = UUID.randomUUID().toString();
         String handle = "1";
@@ -82,7 +82,7 @@ public class SseNotificationBackendTest {
         backend.unsubscribe(client, handle);
     }
 
-    @Test(enabled = false)
+    @Test
     public void testUnregister() throws Exception {
         String client = UUID.randomUUID().toString();
         String handle = "1";
