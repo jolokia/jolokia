@@ -44,8 +44,8 @@
 
     <module>agent/war</module>
     <module>agent/war-unsecured</module>
-    <module>agent/osgi</module>
     <module>agent/jvm</module>
+    <module>agent/osgi</module>
 
     <module>it/core</module>
     <module>it/war</module>
@@ -708,8 +708,8 @@
       <dependency>
         <groupId>org.jolokia</groupId>
         <artifactId>jolokia-server-core</artifactId>
-        <version>${project.version}</version>
         <classifier>tests</classifier>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.jolokia</groupId>
@@ -756,14 +756,19 @@
       <dependency>
         <groupId>org.jolokia</groupId>
         <artifactId>jolokia-agent-war</artifactId>
-        <version>${project.version}</version>
         <type>war</type>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.jolokia</groupId>
         <artifactId>jolokia-agent-war-unsecured</artifactId>
-        <version>${project.version}</version>
         <type>war</type>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-agent-jvm</artifactId>
+        <version>${project.version}</version>
       </dependency>
 
       <!-- JSON -->
@@ -850,12 +855,6 @@
       <!-- Other dependencies -->
 
 <!--      <dependency>-->
-<!--        <groupId>org.mortbay.jetty</groupId>-->
-<!--        <artifactId>jetty</artifactId>-->
-<!--        <version>6.1.26</version>-->
-<!--      </dependency>-->
-
-<!--      <dependency>-->
 <!--        <groupId>com.google.code.findbugs</groupId>-->
 <!--        <artifactId>annotations</artifactId>-->
 <!--        <version>1.3.9</version>-->
@@ -871,6 +870,9 @@
     <currentSnapshotVersion>2.0.0-SNAPSHOT</currentSnapshotVersion>
     <sonar.projectKey>org.jolokia:jolokia-2.0</sonar.projectKey>
     <github.global.server>github</github.global.server>
+
+    <!-- Jetty 9.4.x is the last one supporting JDK8 -->
+    <version.jetty>9.4.51.v20230217</version.jetty>
   </properties>
 
   <repositories>
@@ -1035,41 +1037,31 @@
                 </argLine>
               </configuration>
             </plugin>
-            <plugin>
-              <artifactId>maven-compiler-plugin</artifactId>
-              <configuration>
-                <!-- JDK 17 can't compile with source/target=1.6 anymore -->
-                <source>1.7</source>
-                <target>1.7</target>
-                <testSource>1.7</testSource>
-                <testTarget>1.7</testTarget>
-              </configuration>
-            </plugin>
           </plugins>
         </pluginManagement>
       </build>
     </profile>
 
-    <profile>
-      <id>disable-javadoc-lint</id>
-      <activation>
-        <jdk>[1.8,2.0)</jdk>
-      </activation>
-      <build>
-        <pluginManagement>
-          <plugins>
-            <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-javadoc-plugin</artifactId>
-              <version>2.10.1</version>
-              <configuration>
-                <additionalparam>-Xdoclint:none</additionalparam>
-              </configuration>
-            </plugin>
-          </plugins>
-        </pluginManagement>
-      </build>
-    </profile>
+<!--    <profile>-->
+<!--      <id>disable-javadoc-lint</id>-->
+<!--      <activation>-->
+<!--        <jdk>[1.8,2.0)</jdk>-->
+<!--      </activation>-->
+<!--      <build>-->
+<!--        <pluginManagement>-->
+<!--          <plugins>-->
+<!--            <plugin>-->
+<!--              <groupId>org.apache.maven.plugins</groupId>-->
+<!--              <artifactId>maven-javadoc-plugin</artifactId>-->
+<!--              <version>2.10.1</version>-->
+<!--              <configuration>-->
+<!--                <additionalparam>-Xdoclint:none</additionalparam>-->
+<!--              </configuration>-->
+<!--            </plugin>-->
+<!--          </plugins>-->
+<!--        </pluginManagement>-->
+<!--      </build>-->
+<!--    </profile>-->
 
     <!-- Include Roo, which is not build by default -->
     <profile>

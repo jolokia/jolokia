@@ -1,4 +1,0 @@
-Jolokia JVM-Agent
-
-  JVM agent which uses the Java JVM agent API and the HTTP-Server
-  embedded in Sun JDK-6.

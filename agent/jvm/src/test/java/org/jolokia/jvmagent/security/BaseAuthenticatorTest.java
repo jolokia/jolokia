@@ -35,7 +35,7 @@ public class BaseAuthenticatorTest {
     }
 
     protected HttpExchange createHttpExchange(Headers respHeaders, Subject subject, String... reqHeaderValues) {
-        HttpExchange ex = createMock(HttpExchange.class);
+        HttpExchange ex = createMock(MockableHttpExchange.class);
         Headers reqHeaders = new Headers();
         for (int i = 0; i < reqHeaderValues.length; i+=2) {
             reqHeaders.put(reqHeaderValues[i], Arrays.asList(reqHeaderValues[i + 1]));
@@ -51,5 +51,7 @@ public class BaseAuthenticatorTest {
         return ex;
     }
 
+    public abstract static class MockableHttpExchange extends HttpExchange {
+    }
 
 }

@@ -279,7 +279,7 @@ public class JolokiaHttpHandlerTest {
     }
 
     static HttpExchange prepareExchange(String pUri,String ... pHeaders) throws URISyntaxException {
-        HttpExchange exchange = EasyMock.createMock(HttpExchange.class);
+        HttpExchange exchange = EasyMock.createMock(MockableHttpExchange.class);
         URI uri = new URI(pUri);
         expect(exchange.getRequestURI()).andReturn(uri);
         expect(exchange.getRemoteAddress()).andReturn(new InetSocketAddress(8080));
@@ -320,4 +320,8 @@ public class JolokiaHttpHandlerTest {
                 .services(Serializer.class,new TestSerializer())
                 .build();
     }
+
+    public abstract static class MockableHttpExchange extends HttpExchange {
+    }
+
 }

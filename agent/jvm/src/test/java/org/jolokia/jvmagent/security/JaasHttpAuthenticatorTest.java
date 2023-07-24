@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.login.Configuration;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
@@ -69,7 +70,7 @@ public class JaasHttpAuthenticatorTest extends BaseAuthenticatorTest {
         JaasHttpAuthenticator successAuth = new JaasHttpAuthenticator("jolokia") {
             @Override
             protected LoginContext createLoginContext(String realm, CallbackHandler handler) throws LoginException {
-                LoginContext mockLogin = EasyMock.mock(LoginContext.class);
+                LoginContext mockLogin = EasyMock.mock(MockableLoginContext.class);
                 mockLogin.login();
                 expect(mockLogin.getSubject()).andReturn(subject);
                 EasyMock.replay(mockLogin);
@@ -81,6 +82,28 @@ public class JaasHttpAuthenticatorTest extends BaseAuthenticatorTest {
         HttpPrincipal principal = ((Authenticator.Success) result).getPrincipal();
         assertEquals(principal.getRealm(),"jolokia");
         assertEquals(principal.getUsername(),"roland");
+    }
+
+    public static class MockableLoginContext extends LoginContext {
+        public MockableLoginContext(String name) throws LoginException {
+            super(name);
+        }
+
+        public MockableLoginContext(String name, Subject subject) throws LoginException {
+            super(name, subject);
+        }
+
+        public MockableLoginContext(String name, CallbackHandler callbackHandler) throws LoginException {
+            super(name, callbackHandler);
+        }
+
+        public MockableLoginContext(String name, Subject subject, CallbackHandler callbackHandler) throws LoginException {
+            super(name, subject, callbackHandler);
+        }
+
+        public MockableLoginContext(String name, Subject subject, CallbackHandler callbackHandler, Configuration config) throws LoginException {
+            super(name, subject, callbackHandler, config);
+        }
     }
 
 }

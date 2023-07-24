@@ -222,8 +222,8 @@
       <dependency>
         <groupId>org.jolokia</groupId>
         <artifactId>jolokia-server-core</artifactId>
-        <version>${project.version}</version>
         <classifier>tests</classifier>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.jolokia</groupId>
@@ -270,14 +270,19 @@
       <dependency>
         <groupId>org.jolokia</groupId>
         <artifactId>jolokia-agent-war</artifactId>
-        <version>${project.version}</version>
         <type>war</type>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.jolokia</groupId>
         <artifactId>jolokia-agent-war-unsecured</artifactId>
-        <version>${project.version}</version>
         <type>war</type>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-agent-jvm</artifactId>
+        <version>${project.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

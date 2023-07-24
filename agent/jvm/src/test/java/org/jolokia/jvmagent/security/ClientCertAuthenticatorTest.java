@@ -101,7 +101,7 @@ public class ClientCertAuthenticatorTest extends BaseAuthenticatorTest {
                                              boolean withCert,
                                              boolean withExtendedUsage, String... reqHeaderValues)
         throws SSLPeerUnverifiedException, CertificateParsingException {
-        HttpsExchange ex = createMock(HttpsExchange.class);
+        HttpsExchange ex = createMock(MockableHttpsExchange.class);
         Headers reqHeaders = new Headers();
         for (int i = 0; i < reqHeaderValues.length; i+=2) {
             reqHeaders.put(reqHeaderValues[i], Arrays.asList(reqHeaderValues[i + 1]));
@@ -133,4 +133,8 @@ public class ClientCertAuthenticatorTest extends BaseAuthenticatorTest {
         replay(ex, session);
         return ex;
     }
+
+    public abstract static class MockableHttpsExchange extends HttpsExchange {
+    }
+
 }

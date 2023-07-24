@@ -32,11 +32,6 @@
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
-  <properties>
-    <!-- Jetty 9.4.x is the last one supporting JDK8 -->
-    <version.jetty>9.4.51.v20230217</version.jetty>
-  </properties>
-
   <dependencies>
 
     <!-- Jolokia own artifacts -->

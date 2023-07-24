@@ -24,11 +24,11 @@ import javax.servlet.ServletException;
 import javax.servlet.http.*;
 
 import com.sun.net.httpserver.*;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
 import org.jolokia.server.core.osgi.security.AuthorizationHeaderParser;
 import org.jolokia.test.util.EnvTestUtil;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.servlet.Context;
-import org.mortbay.jetty.servlet.ServletHolder;
 import org.testng.annotations.*;
 
 import static org.testng.Assert.*;
@@ -51,7 +51,7 @@ public class DelegatingAuthenticatorTest extends BaseAuthenticatorTest {
     public void setup() throws Exception {
         int port = EnvTestUtil.getFreePort();
         jettyServer = new Server(port);
-        Context jettyContext = new Context(jettyServer, "/");
+        ServletContextHandler jettyContext = new ServletContextHandler(jettyServer, "/");
         ServletHolder holder = new ServletHolder(createServlet());
         jettyContext.addServlet(holder, "/test/*");
 
