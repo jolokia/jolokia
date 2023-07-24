@@ -39,5 +39,4 @@ public class TestMBeanRegisteringServlet extends HttpServlet {
         itSetup.stop();
     }
 
-
 }
