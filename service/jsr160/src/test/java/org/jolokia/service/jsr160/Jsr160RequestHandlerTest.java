@@ -21,8 +21,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.management.*;
+import javax.naming.CommunicationException;
+import javax.naming.NamingException;
 
+import org.jolokia.server.core.config.ConfigKey;
+import org.jolokia.server.core.config.Configuration;
+import org.jolokia.server.core.config.StaticConfiguration;
 import org.jolokia.server.core.request.*;
+import org.jolokia.server.core.restrictor.AllowAllRestrictor;
 import org.jolokia.server.core.util.TestJolokiaContext;
 import org.json.simple.JSONObject;
 import org.testng.annotations.*;
@@ -115,9 +121,13 @@ public class Jsr160RequestHandlerTest {
     // =========================================================================================================
 
     private JolokiaReadRequest preparePostReadRequest(String pUser, String... pAttribute) {
+        return preparePostReadRequestWithServiceUrl("service:jmx:test:///jndi/rmi://localhost:9999/jmxrmi", pUser, pAttribute);
+    }
+
+    private JolokiaReadRequest preparePostReadRequestWithServiceUrl(String pJmxServiceUrl, String pUser, String... pAttribute) {
         JSONObject params = new JSONObject();
         JSONObject target = new JSONObject();
-        target.put("url","service:jmx:test:///jndi/rmi://localhost:9999/jmxrmi");
+        target.put("url",pJmxServiceUrl);
         if (pUser != null) {
             target.put("user","roland");
             target.put("password","s!cr!et");
@@ -131,5 +141,113 @@ public class Jsr160RequestHandlerTest {
 
         return (JolokiaReadRequest) JolokiaRequestFactory.createPostRequest(params, new TestProcessingParameters());
     }
+
+    private Jsr160RequestHandler createDispatcherPointingToLocalMBeanServer(Configuration pConfig) {
+        TestJolokiaContext ctx = new TestJolokiaContext.Builder().config(pConfig).build();
+        Jsr160RequestHandler handler = new Jsr160RequestHandler(0) {
+            @Override
+            protected Map<String, Object> prepareEnv(Map<String, String> pTargetConfig) {
+                Map ret = super.prepareEnv(pTargetConfig);
+                if (ret == null) {
+                    ret = new HashMap();
+                }
+                ret.put("jmx.remote.protocol.provider.pkgs", "org.jolokia.service.jsr160");
+                return ret;
+            }
+        };
+        handler.init(ctx);
+
+        return handler;
+    }
+
+    // === ??? ===
+
+//    @Test
+//    public void useReturnValue() {
+//        assertTrue(dispatcher.useReturnValueWithPath(JmxRequestFactory.createGetRequest("/read/java.lang:type=Memory", procParams)));
+//    }
+
+    @Test
+    public void simpleWhiteListWithConfig() throws Exception {
+
+        String whiteListPath = getFilePathFor("/pattern-whitelist.txt");
+        Configuration config = new StaticConfiguration(
+                ConfigKey.JSR160_PROXY_ALLOWED_TARGETS, whiteListPath);
+        runWhiteListTest(config);
+    }
+
+    @Test
+    public void simpleWhiteListWithSysProp() throws Exception {
+        String whiteListPath = getFilePathFor("/pattern-whitelist.txt");
+        try {
+            System.setProperty(Jsr160RequestHandler.ALLOWED_TARGETS_SYSPROP, whiteListPath);
+            runWhiteListTest(null);
+        } finally {
+            System.getProperties().remove(Jsr160RequestHandler.ALLOWED_TARGETS_SYSPROP);
+        }
+    }
+
+    @Test
+    public void whiteListWithIllegalPath() throws Exception {
+        String invalidPath = "/very/unlikely/path";
+        Configuration config = new StaticConfiguration(
+                ConfigKey.JSR160_PROXY_ALLOWED_TARGETS, invalidPath);
+        try {
+            createDispatcherPointingToLocalMBeanServer(config);
+            fail();
+        } catch (IllegalArgumentException exp) {
+            assertTrue(exp.getMessage().contains(invalidPath));
+        }
+    }
+
+    @Test
+    public void defaultBlackList() throws Exception {
+        String blackListedUrl = "service:jmx:rmi:///jndi/ldap://localhost:9092/jmxrmi";
+        JolokiaRequest req = preparePostReadRequestWithServiceUrl(blackListedUrl, null);
+        try {
+            dispatcher.handleRequest(req,null);
+            fail("Exception should have been thrown for " + blackListedUrl);
+        } catch (SecurityException exp) {
+            assertTrue(exp.getMessage().contains(blackListedUrl));
+        }
+    }
+
+    private void runWhiteListTest(Configuration config) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException, EmptyResponseException {
+        Jsr160RequestHandler dispatcher = createDispatcherPointingToLocalMBeanServer(config);
+
+        Object[] testData = new Object[] {
+                "service:jmx:test:///jndi/rmi://devil.com:6666/jmxrmi", false,
+                "service:jmx:test:///jndi/rmi://localhost:9999/jmxrmi", true,
+                "service:jmx:test:///jndi/rmi://jolokia.org:8888/jmxrmi", true,
+                "service:jmx:rmi:///jndi/ldap://localhost:9999/jmxrmi", true,
+                "service:jmx:test:///jndi/ad://localhost:9999/jmxrmi", false,
+                "service:jmx:rmi:///jndi/ldap://localhost:9092/jmxrmi", true
+        };
+
+        for (int i = 0; i < testData.length; i +=2) {
+            JolokiaReadRequest req = preparePostReadRequestWithServiceUrl((String) testData[i], null);
+            try {
+                dispatcher.handleRequest(req,null);
+                if (!(Boolean) testData[i+1]) {
+                    fail("Exception should have been thrown for " + testData[i]);
+                }
+            } catch (SecurityException exp) {
+                if ((Boolean) testData[i+1]) {
+                    fail("Security exception for pattern " + testData[i]);
+                }
+            } catch (IOException exp) {
+                // That's fine if allowed to pass
+                assertTrue(exp.getCause() instanceof CommunicationException || exp.getCause() instanceof NamingException);
+                if (!(Boolean) testData[i+1]) {
+                    fail("Should not come that far " + testData[i]);
+                }
+            }
+        }
+    }
+
+    private String getFilePathFor(String resource) {
+        return this.getClass().getResource(resource).getFile();
+    }
+
 
 }
