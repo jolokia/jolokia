@@ -1,4 +1,4 @@
-package org.jolokia.detector;
+package org.jolokia.server.detector.jee;
 /*
  * 
  * Copyright 2016 Roland Huss
@@ -21,6 +21,7 @@ import java.util.HashSet;
 
 import javax.management.*;
 
+import org.jolokia.server.core.service.api.ServerHandle;
 import org.testng.annotations.Test;
 
 import static org.easymock.EasyMock.*;
@@ -47,7 +48,7 @@ public class TomcatDetectorTest extends BaseDetectorTest {
         expect(mockServer.getAttribute(oName,"serverInfo")).andStubReturn(property);
         replay(mockServer);
 
-        TomcatDetector detector = new TomcatDetector();
+        TomcatDetector detector = new TomcatDetector(1);
         ServerHandle handle = detector.detect(getMBeanServerManager(mockServer));
         assertNotNull(handle);
         assertEquals(handle.getVersion(),version);

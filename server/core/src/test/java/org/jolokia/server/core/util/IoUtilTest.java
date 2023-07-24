@@ -1,4 +1,4 @@
-package org.jolokia.util;
+package org.jolokia.server.core.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
