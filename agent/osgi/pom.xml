@@ -22,6 +22,7 @@
   <version>2.0.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
+  <name>jolokia-agent-osgi</name>
   <description>Jolokia :: Agent :: OSGi Bundle</description>
 
   <parent>
@@ -32,94 +33,87 @@
   </parent>
 
   <dependencies>
+
+    <!-- Jolokia own artifacts -->
+
     <dependency>
       <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-server-core</artifactId>
-      <version>${project.version}</version>
+      <artifactId>jolokia-tools-test</artifactId>
+      <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-server-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jolokia</groupId>
       <artifactId>jolokia-server-detector</artifactId>
-      <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-service-jmx</artifactId>
-      <version>${project.version}</version>
     </dependency>
-
     <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-service-serializer</artifactId>
-      <version>${project.version}</version>
     </dependency>
-
     <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-service-discovery</artifactId>
-      <version>${project.version}</version>
     </dependency>
-
     <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-service-history</artifactId>
-      <version>${project.version}</version>
     </dependency>
-
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-service-jsr160</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-service-notif-pull</artifactId>
-      <version>${project.version}</version>
     </dependency>
-
     <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-service-notif-sse</artifactId>
-      <version>${project.version}</version>
     </dependency>
+
+    <!-- JSON -->
 
     <dependency>
       <groupId>com.googlecode.json-simple</groupId>
       <artifactId>json-simple</artifactId>
     </dependency>
 
+    <!-- JakartaEE dependencies -->
+
     <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>javax.servlet-api</artifactId>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
+      <scope>provided</scope>
     </dependency>
+
+    <!-- OSGi dependencies -->
 
     <dependency>
       <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.core</artifactId>
+      <artifactId>osgi.core</artifactId>
       <scope>provided</scope>
     </dependency>
 
     <dependency>
       <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.compendium</artifactId>
+      <artifactId>org.osgi.service.http</artifactId>
       <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.testng</groupId>
-      <artifactId>testng</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-tools-test</artifactId>
-      <version>${project.version}</version>
-      <scope>test</scope>
     </dependency>
 
   </dependencies>
 
   <build>
     <plugins>
-
-       <plugin>
+      <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
         <extensions>true</extensions>
@@ -172,29 +166,8 @@
           </instructions>
         </configuration>
       </plugin>
-
-      <plugin>
-        <groupId>org.ops4j</groupId>
-        <artifactId>maven-pax-plugin</artifactId>
-        <version>1.4</version>
-        <configuration>
-          <noDependencies>false</noDependencies>
-          <profiles>log,web,compendium</profiles>
-        </configuration>
-      </plugin>
-
     </plugins>
   </build>
-
-  <pluginRepositories>
-    <pluginRepository>
-      <id>ops4j.releases</id>
-      <url>https://repository.ops4j.org/maven2</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </pluginRepository>
-  </pluginRepositories>
 
   <reporting>
     <plugins>
@@ -214,6 +187,7 @@
 
   <profiles>
     <profile>
+      <!-- TODO: check -->
       <!-- Distribution profile adaption for get also the embedded classes into the sources jar-->
       <id>dist</id>
       <build>

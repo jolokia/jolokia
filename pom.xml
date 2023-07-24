@@ -220,6 +220,7 @@
     <!-- plugin versions -->
     <pluginManagement>
       <plugins>
+
         <plugin>
           <groupId>org.apache.felix</groupId>
           <artifactId>maven-bundle-plugin</artifactId>
@@ -436,6 +437,7 @@
 
   <reporting>
     <plugins>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-project-info-reports-plugin</artifactId>
@@ -453,6 +455,13 @@
             </reports>
           </reportSet>
         </reportSets>
+        <dependencies>
+          <dependency>
+            <groupId>org.apache.bcel</groupId>
+            <artifactId>bcel</artifactId>
+            <version>6.7.0</version>
+          </dependency>
+        </dependencies>
       </plugin>
 
       <plugin>
@@ -467,8 +476,8 @@
           </reportSet>
         </reportSets>
       </plugin>
-    </plugins>
 
+    </plugins>
   </reporting>
 
   <!-- ===========================================================  -->
@@ -768,6 +777,11 @@
       <dependency>
         <groupId>org.jolokia</groupId>
         <artifactId>jolokia-agent-jvm</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-agent-osgi</artifactId>
         <version>${project.version}</version>
       </dependency>
 
