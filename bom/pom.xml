@@ -241,6 +241,11 @@
         <artifactId>jolokia-service-serializer</artifactId>
         <version>${project.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-service-discovery</artifactId>
+        <version>${project.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 

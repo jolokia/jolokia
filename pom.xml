@@ -36,6 +36,7 @@
 
     <module>service/jmx</module>
     <module>service/serializer</module>
+    <module>service/discovery</module>
 
     <module>agent/war</module>
     <module>agent/osgi</module>
@@ -43,7 +44,6 @@
 
     <module>service/notif/pull</module>
     <module>service/notif/sse</module>
-    <module>service/discovery</module>
     <module>service/jsr160</module>
     <module>service/history</module>
 

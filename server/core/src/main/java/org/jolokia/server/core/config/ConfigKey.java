@@ -202,7 +202,18 @@ public enum ConfigKey {
     DISCOVERY_AGENT_URL("discoveryAgentUrl",true,false),
 
     /**
-     * IPv4 Address for Jolokia's Multicast group.
+     * <p>IPv4 Address for Jolokia's Multicast group.</p>
+     *
+     * <p>To make UDP multicasting work on Linux, make sure firewall is properly configured. On Fedora
+     * with default <code>FedoraServer</code> zone, use:
+     * <pre>
+     *     $ firewall-cmd --zone=FedoraServer --add-rich-rule='inet firewalld destination 239.192.48.84 accept'
+     * </pre>
+     * or directly using {@code nft} (chain name may vary):
+     * <pre>
+     *     $ nft add rule inet firewalld filter_IN_FedoraServer_allow ip daddr 239.192.48.84 accept
+     * </pre>
+     * </p>
      */
     MULTICAST_GROUP("multicastGroup",true,false,"239.192.48.84"),
 
