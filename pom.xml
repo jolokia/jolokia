@@ -34,14 +34,15 @@
     <module>server/core</module>
     <module>server/detector</module>
 
+    <module>service/jmx</module>
+    <module>service/serializer</module>
+
     <module>agent/war</module>
     <module>agent/osgi</module>
     <module>agent/jvm</module>
 
-    <module>service/jmx</module>
     <module>service/notif/pull</module>
     <module>service/notif/sse</module>
-    <module>service/serializer</module>
     <module>service/discovery</module>
     <module>service/jsr160</module>
     <module>service/history</module>
@@ -719,6 +720,11 @@
       <dependency>
         <groupId>org.jolokia</groupId>
         <artifactId>jolokia-service-jmx</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-service-serializer</artifactId>
         <version>${project.version}</version>
       </dependency>
 

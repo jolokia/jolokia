@@ -1,7 +1,5 @@
 package org.jolokia.service.serializer.json;
 
-import mockit.Mock;
-import mockit.MockUp;
 import org.jolokia.server.core.service.serializer.SerializeOptions;
 import org.jolokia.server.core.service.serializer.ValueFaultHandler;
 import org.jolokia.service.serializer.json.simplifier.BigIntegerSimplifier;
@@ -33,12 +31,6 @@ public class SimplifiersTest {
         bigIntegerSimplifier = new BigIntegerSimplifier();
         urlSimplifier = new UrlSimplifier();
 
-        new MockUp<ObjectToJsonConverter>() {
-            @Mock
-            public ValueFaultHandler getValueFaultHandler() {
-                return new PathAttributeFilterValueFaultHandler(ValueFaultHandler.THROWING_VALUE_FAULT_HANDLER);
-            }
-        };
         // Needed for subclassing final object
         converter = new ObjectToJsonConverter(null);
         converter.setupContext(new SerializeOptions.Builder().faultHandler(ValueFaultHandler.THROWING_VALUE_FAULT_HANDLER).build());
