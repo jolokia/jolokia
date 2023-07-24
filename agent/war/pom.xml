@@ -22,6 +22,7 @@
   <version>2.0.0-SNAPSHOT</version>
   <packaging>war</packaging>
 
+  <name>jolokia-agent-war</name>
   <description>Jolokia :: Agent :: WAR</description>
 
   <parent>
@@ -31,69 +32,67 @@
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
+  <properties>
+    <!-- Jetty 9.4.x is the last one supporting JDK8 -->
+    <version.jetty>9.4.51.v20230217</version.jetty>
+  </properties>
+
   <dependencies>
+
+    <!-- Jolokia own artifacts -->
 
     <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-server-core</artifactId>
-      <version>${project.version}</version>
     </dependency>
-
     <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-server-detector</artifactId>
-      <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-service-jmx</artifactId>
-      <version>${project.version}</version>
     </dependency>
-
     <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-service-serializer</artifactId>
-      <version>${project.version}</version>
     </dependency>
-
-    <dependency>
-      <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-service-notif-pull</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-service-notif-sse</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
     <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-service-discovery</artifactId>
-      <version>${project.version}</version>
     </dependency>
-
     <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-service-history</artifactId>
-      <version>${project.version}</version>
     </dependency>
-
     <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-service-jsr160</artifactId>
-      <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-service-notif-pull</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-service-notif-sse</artifactId>
+    </dependency>
+
   </dependencies>
 
   <build>
     <plugins>
       <plugin>
-        <groupId>org.mortbay.jetty</groupId>
+        <!--
+          With `mvn jetty:run` we can test authenticated access. For example:
+          $ curl -u jolokia:jolokia -i http://localhost:8080/jolokia/
+          $ curl -u jolokia:jolokia -i http://localhost:8080/jolokia/read/JMImplementation:type=MBeanServerDelegate/SpecificationVersion
+          $ curl -s -u jolokia:jolokia http://localhost:8080/jolokia/read/java.lang:type=Runtime/BootClassPath | jq .value
+        -->
+        <groupId>org.eclipse.jetty</groupId>
         <artifactId>jetty-maven-plugin</artifactId>
-        <version>7.3.0.v20110203</version>
+        <version>${version.jetty}</version>
         <configuration>
           <scanIntervalSeconds>10</scanIntervalSeconds>
           <webAppConfig>
@@ -101,6 +100,7 @@
           </webAppConfig>
           <stopPort>9999</stopPort>
           <stopKey>foo</stopKey>
+          <jettyXml>${basedir}/etc/jetty.xml</jettyXml>
         </configuration>
       </plugin>
     </plugins>
@@ -119,7 +119,6 @@
           </reportSet>
         </reportSets>
       </plugin>
-
     </plugins>
   </reporting>
 

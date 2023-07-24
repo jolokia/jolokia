@@ -43,6 +43,7 @@
     <module>service/notif/sse</module>
 
     <module>agent/war</module>
+    <module>agent/war-unsecured</module>
     <module>agent/osgi</module>
     <module>agent/jvm</module>
 
@@ -750,6 +751,19 @@
         <groupId>org.jolokia</groupId>
         <artifactId>jolokia-service-notif-sse</artifactId>
         <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-agent-war</artifactId>
+        <version>${project.version}</version>
+        <type>war</type>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-agent-war-unsecured</artifactId>
+        <version>${project.version}</version>
+        <type>war</type>
       </dependency>
 
       <!-- JSON -->

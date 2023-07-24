@@ -18,39 +18,81 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.jolokia</groupId>
-  <artifactId>jolokia-war-unsecured</artifactId>
-  <version>1.7.3-SNAPSHOT</version>
-  <name>jolokia-war-unsecured</name>
+  <artifactId>jolokia-agent-war-unsecured</artifactId>
+  <version>2.0.0-SNAPSHOT</version>
   <packaging>war</packaging>
-  <description>agent as web application (unsecured)</description>
+
+  <name>jolokia-war-unsecured</name>
+  <description>Jolokia :: Agent :: WAR (unsecured)</description>
 
   <parent>
     <groupId>org.jolokia</groupId>
-    <artifactId>jolokia-agent-parent</artifactId>
-    <version>1.7.3-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
+    <artifactId>jolokia-parent</artifactId>
+    <version>2.0.0-SNAPSHOT</version>
+    <relativePath>../../pom.xml</relativePath>
   </parent>
 
+  <properties>
+    <!-- Jetty 9.4.x is the last one supporting JDK8 -->
+    <version.jetty>9.4.51.v20230217</version.jetty>
+  </properties>
+
   <dependencies>
+
+    <!-- Jolokia own artifacts -->
+
     <dependency>
       <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-core</artifactId>
-      <version>${project.version}</version>
+      <artifactId>jolokia-server-core</artifactId>
     </dependency>
     <dependency>
       <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-jsr160</artifactId>
-      <version>${project.version}</version>
+      <artifactId>jolokia-server-detector</artifactId>
     </dependency>
+
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-service-jmx</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-service-serializer</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-service-discovery</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-service-history</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-service-jsr160</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-service-notif-pull</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-service-notif-sse</artifactId>
+    </dependency>
+
   </dependencies>
 
   <build>
     <plugins>
       <plugin>
-        <groupId>org.mortbay.jetty</groupId>
+        <!--
+          With `mvn jetty:run` we can test unauthenticated access. For example:
+          $ curl -i http://localhost:8080/jolokia/
+          $ curl -i http://localhost:8080/jolokia/read/JMImplementation:type=MBeanServerDelegate/SpecificationVersion
+          $ curl -s http://localhost:8080/jolokia/read/java.lang:type=Runtime/BootClassPath | jq .value
+        -->
+        <groupId>org.eclipse.jetty</groupId>
         <artifactId>jetty-maven-plugin</artifactId>
-        <version>7.3.0.v20110203</version>
+        <version>${version.jetty}</version>
         <configuration>
           <scanIntervalSeconds>10</scanIntervalSeconds>
           <webAppConfig>
@@ -76,7 +118,6 @@
           </reportSet>
         </reportSets>
       </plugin>
-
     </plugins>
   </reporting>
 
