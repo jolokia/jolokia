@@ -225,10 +225,15 @@
         <version>${project.version}</version>
         <classifier>tests</classifier>
       </dependency>
-
       <dependency>
         <groupId>org.jolokia</groupId>
         <artifactId>jolokia-server-detector</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-service-jmx</artifactId>
         <version>${project.version}</version>
       </dependency>
     </dependencies>

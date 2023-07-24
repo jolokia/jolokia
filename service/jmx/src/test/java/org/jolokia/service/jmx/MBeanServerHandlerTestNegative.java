@@ -18,10 +18,13 @@ package org.jolokia.service.jmx;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.management.*;
 
+import org.jolokia.server.core.service.impl.ClasspathServerDetectorLookup;
 import org.jolokia.server.core.service.impl.MBeanRegistry;
 import org.jolokia.server.core.util.jmx.DefaultMBeanServerAccess;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
@@ -44,7 +47,14 @@ public class MBeanServerHandlerTestNegative {
         init();
         try {
             ObjectName oName = new ObjectName("Bla:type=blub");
-            MBeanServerAccess servers = new DefaultMBeanServerAccess();
+            final Set<MBeanServerConnection> connections = new HashSet<>();
+            new ClasspathServerDetectorLookup().lookup().forEach(d -> {
+                Set<MBeanServerConnection> servers = d.getMBeanServers();
+                if (servers != null) {
+                    connections.addAll(servers);
+                }
+            });
+            MBeanServerAccess servers = new DefaultMBeanServerAccess(connections);
             final List<Boolean> results = new ArrayList<Boolean>();
             servers.each(oName, new MBeanServerAccess.MBeanEachCallback() {
                 public void callback(MBeanServerConnection pConn, ObjectName pName)

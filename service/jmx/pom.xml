@@ -16,14 +16,15 @@
   -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>jolokia-service-jmx</artifactId>
   <version>2.0.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
+  <name>jolokia-service-jmx</name>
   <description>Jolokia :: Service :: JMX Request Handler</description>
+
   <parent>
     <groupId>org.jolokia</groupId>
     <artifactId>jolokia-parent</artifactId>
@@ -31,50 +32,41 @@
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
-  <properties>
-    <jetty.mortbay.version>6.1.26</jetty.mortbay.version>
-    <jetty.eclipse.version>8.1.13.v20130916</jetty.eclipse.version>
-  </properties>
   <dependencies>
 
-    <dependency>
-      <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-server-core</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.core</artifactId>
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-service-serializer</artifactId>
-      <version>${project.version}</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>com.google.code.findbugs</groupId>
-      <artifactId>annotations</artifactId>
-    </dependency>
+    <!-- Jolokia own artifacts -->
 
     <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-tools-test</artifactId>
-      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
 
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-server-core</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-server-core</artifactId>
       <scope>test</scope>
       <classifier>tests</classifier>
-      <version>${project.version}</version>
     </dependency>
+
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-service-serializer</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- OSGi dependencies -->
+
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>osgi.core</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
   </dependencies>
 
   <build>

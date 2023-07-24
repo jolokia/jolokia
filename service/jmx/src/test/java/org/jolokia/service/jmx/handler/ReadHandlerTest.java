@@ -17,6 +17,7 @@ package org.jolokia.service.jmx.handler;
  */
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.*;
 
 import javax.management.*;
@@ -27,7 +28,6 @@ import org.jolokia.server.core.request.JolokiaRequestBuilder;
 import org.jolokia.server.core.service.api.Restrictor;
 import org.jolokia.server.core.util.HttpMethod;
 import org.jolokia.server.core.util.TestJolokiaContext;
-import org.jolokia.service.jmx.handler.BaseHandlerTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -434,12 +434,12 @@ public class ReadHandlerTest extends BaseHandlerTest {
 
     private MBeanAttributeInfo[] prepareMBeanInfos(MBeanServerConnection pConnection, ObjectName pObjectName, String pAttrs[])
         throws InstanceNotFoundException, ReflectionException, IOException, IntrospectionException {
-        MBeanInfo mBeanInfo = createMock(MBeanInfo.class);
+        MBeanInfo mBeanInfo = createMock(MockableMBeanInfo.class);
         expect(pConnection.isRegistered(pObjectName)).andStubReturn(true);
         expect(pConnection.getMBeanInfo(pObjectName)).andReturn(mBeanInfo);
         MBeanAttributeInfo[] infos = new MBeanAttributeInfo[pAttrs.length];
         for (int i=0;i<pAttrs.length;i++) {
-            infos[i] = createMock(MBeanAttributeInfo.class);
+            infos[i] = createMock(MockableMBeanAttributeInfo.class);
             expect(infos[i].getName()).andReturn(pAttrs[i]);
             expect(infos[i].isReadable()).andReturn(true);
         }
@@ -452,5 +452,32 @@ public class ReadHandlerTest extends BaseHandlerTest {
         return infos;
     }
 
+    // to prevent
+    // java.lang.IllegalAccessException: no such field: javax.management.MBeanInfo$$$EasyMock$1.$callback/org.easymock.internal.ClassMockingData/putField
+    public static class MockableMBeanInfo extends MBeanInfo {
+        public MockableMBeanInfo(String className, String description, MBeanAttributeInfo[] attributes, MBeanConstructorInfo[] constructors, MBeanOperationInfo[] operations, MBeanNotificationInfo[] notifications) throws IllegalArgumentException {
+            super(className, description, attributes, constructors, operations, notifications);
+        }
+
+        public MockableMBeanInfo(String className, String description, MBeanAttributeInfo[] attributes, MBeanConstructorInfo[] constructors, MBeanOperationInfo[] operations, MBeanNotificationInfo[] notifications, Descriptor descriptor) throws IllegalArgumentException {
+            super(className, description, attributes, constructors, operations, notifications, descriptor);
+        }
+    }
+
+    // to prevent
+    // java.lang.IllegalAccessException: no such field: javax.management.MBeanAttributeInfo$$$EasyMock$2.$callback/org.easymock.internal.ClassMockingData/putField
+    public static class MockableMBeanAttributeInfo extends MBeanAttributeInfo {
+        public MockableMBeanAttributeInfo(String name, String type, String description, boolean isReadable, boolean isWritable, boolean isIs) {
+            super(name, type, description, isReadable, isWritable, isIs);
+        }
+
+        public MockableMBeanAttributeInfo(String name, String type, String description, boolean isReadable, boolean isWritable, boolean isIs, Descriptor descriptor) {
+            super(name, type, description, isReadable, isWritable, isIs, descriptor);
+        }
+
+        public MockableMBeanAttributeInfo(String name, String description, Method getter, Method setter) throws IntrospectionException {
+            super(name, description, getter, setter);
+        }
+    }
 
 }

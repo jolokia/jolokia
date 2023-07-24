@@ -22,6 +22,7 @@
   <version>2.0.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
+  <name>jolokia-server-core</name>
   <description>Jolokia :: Server :: Core</description>
 
   <parent>
@@ -33,10 +34,22 @@
 
   <dependencies>
 
+    <!-- Jolokia own artifacts -->
+
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-tools-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- JSON -->
+
     <dependency>
       <groupId>com.googlecode.json-simple</groupId>
       <artifactId>json-simple</artifactId>
     </dependency>
+
+    <!-- JakartaEE dependencies -->
 
     <dependency>
       <groupId>jakarta.servlet</groupId>
@@ -44,12 +57,13 @@
       <scope>provided</scope>
     </dependency>
 
+    <!-- OSGi dependencies -->
+
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>osgi.core</artifactId>
       <scope>provided</scope>
     </dependency>
-
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.service.cm</artifactId>
@@ -59,12 +73,6 @@
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.service.http</artifactId>
       <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-tools-test</artifactId>
-      <scope>test</scope>
     </dependency>
 
   </dependencies>
