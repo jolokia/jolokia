@@ -38,6 +38,7 @@
     <module>service/serializer</module>
     <module>service/discovery</module>
     <module>service/history</module>
+    <module>service/jsr160</module>
 
     <module>agent/war</module>
     <module>agent/osgi</module>
@@ -45,7 +46,6 @@
 
     <module>service/notif/pull</module>
     <module>service/notif/sse</module>
-    <module>service/jsr160</module>
 
     <module>it/core</module>
     <module>it/war</module>
@@ -735,6 +735,11 @@
       <dependency>
         <groupId>org.jolokia</groupId>
         <artifactId>jolokia-service-history</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-service-jsr160</artifactId>
         <version>${project.version}</version>
       </dependency>
 
