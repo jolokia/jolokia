@@ -154,7 +154,7 @@ class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
     }
 
     /** {@inheritDoc} */
-    @edu.umd.cs.findbugs.annotations.SuppressWarnings({"REC_CATCH_EXCEPTION","DE_MIGHT_IGNORE"})
+//    @edu.umd.cs.findbugs.annotations.SuppressWarnings({"REC_CATCH_EXCEPTION","DE_MIGHT_IGNORE"})
     public AttributeList setAttributes(AttributeList attributes) {
         final AttributeList ret = new AttributeList(attributes.size());
         for (Object o : attributes) {

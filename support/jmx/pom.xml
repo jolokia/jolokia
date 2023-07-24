@@ -18,24 +18,33 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
+  <artifactId>jolokia-support-jmx</artifactId>
   <version>2.0.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <artifactId>jolokia-support-jmx</artifactId>
+  <name>jolokia-support-jmx</name>
   <description>Jolokia :: Support :: JMX</description>
 
   <parent>
-    <artifactId>jolokia-parent</artifactId>
     <groupId>org.jolokia</groupId>
+    <artifactId>jolokia-parent</artifactId>
     <version>2.0.0-SNAPSHOT</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
   <dependencies>
+
+    <!-- Jolokia own artifacts -->
+
     <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-server-core</artifactId>
-      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-server-core</artifactId>
+      <classifier>tests</classifier>
+      <scope>test</scope>
     </dependency>
 
     <!-- This dependency is currently accorded. In principle, any
@@ -47,34 +56,24 @@
       <version>${project.version}</version>
     </dependency>
 
+    <!-- JSON -->
+
     <dependency>
       <groupId>com.googlecode.json-simple</groupId>
       <artifactId>json-simple</artifactId>
     </dependency>
 
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.core</artifactId>
-      <scope>provided</scope>
-    </dependency>
+    <!-- OSGi dependencies -->
 
     <dependency>
       <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.compendium</artifactId>
+      <artifactId>osgi.core</artifactId>
       <scope>provided</scope>
     </dependency>
-
     <dependency>
-      <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-server-core</artifactId>
-      <scope>test</scope>
-      <classifier>tests</classifier>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.google.code.findbugs</groupId>
-      <artifactId>annotations</artifactId>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.service.http</artifactId>
+      <scope>provided</scope>
     </dependency>
 
   </dependencies>
@@ -105,6 +104,5 @@
       </plugin>
     </plugins>
   </build>
-
 
 </project>
