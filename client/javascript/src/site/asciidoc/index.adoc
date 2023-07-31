@@ -1,0 +1,69 @@
+////
+  Copyright 2009-2023 Roland Huss
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+
+== Jolokia Javascript Client library
+
+The user manual for the Jolokia Javascript client library is
+contained in
+link:/reference/html/clients.html#client-javascript[Reference
+Manual]. This document concentrates on more technical
+aspects.
+
+=== Testing
+
+This library comes with a test webapplication for
+integration testing this library from within a browser. The
+submodule `test-app` creates a WAR artifact which
+can be deployed in a servlet container. The Jolokia agent is
+contained and reachable under the URL
+`/jolokia`. The unit tests can be found at
+
+[cols="1,1"]
+|===
+|`jolokia-test.html`
+|QUnit tests for the base library
+
+|`jolokia-simple-test.html`
+|QUnit tests for the simple API
+
+|`jolokia-all-test.html`
+|All the tests above combined
+|===
+
+This `test-app` is also configured for Jetty, so a
+
+----
+mvn jetty:run-exploded
+----
+
+will startup a Jetty and deploy this test application.
+
+In order to simplify development of unit-test a shell script
+`makeLinks.sh` is included which can be used in
+unix like OSs to create symbolic links to the Javascript
+files in the source directories. A typical workflow looks
+like:
+
+* Initalize:
++
+----
+mvn clean install
+sh makeLinks.sh
+mvn jetty:run-exploded
+----
+* Edit and save the Javascript files (e.g. `jolokia.js`
+or `jolokia-test.js`
+* Reload the test HTML files in the browser

@@ -423,6 +423,12 @@
           <version>0.11</version>
         </plugin>
 
+        <plugin>
+          <groupId>com.devspan.mojo.javascript</groupId>
+          <artifactId>javascript-maven-plugin</artifactId>
+          <version>0.9.3</version>
+        </plugin>
+
       </plugins>
     </pluginManagement>
 
@@ -788,6 +794,12 @@
       <dependency>
         <groupId>org.jolokia</groupId>
         <artifactId>jolokia-client-java</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-client-javascript</artifactId>
+        <classifier>compressed</classifier>
         <version>${project.version}</version>
       </dependency>
 
