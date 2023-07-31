@@ -17,15 +17,21 @@ package org.jolokia.client.request;
  */
 
 
+import org.eclipse.jetty.security.ConstraintMapping;
+import org.eclipse.jetty.security.ConstraintSecurityHandler;
+import org.eclipse.jetty.security.HashLoginService;
+import org.eclipse.jetty.security.SecurityHandler;
+import org.eclipse.jetty.security.UserStore;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.util.security.Constraint;
+import org.eclipse.jetty.util.security.Password;
 import org.jolokia.client.BasicAuthenticator;
 import org.jolokia.client.J4pClient;
 import org.jolokia.it.core.ItSetup;
 import org.jolokia.server.core.http.AgentServlet;
 import org.jolokia.test.util.EnvTestUtil;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.security.*;
-import org.mortbay.jetty.servlet.Context;
-import org.mortbay.jetty.servlet.ServletHolder;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 
@@ -53,13 +59,13 @@ abstract public class AbstractJ4pIntegrationTest {
 
             int port = EnvTestUtil.getFreePort();
             jettyServer = new Server(port);
-            Context jettyContext = new Context(jettyServer, "/");
+            ServletContextHandler jettyContext = new ServletContextHandler(jettyServer, "/");
             ServletHolder holder = new ServletHolder(new AgentServlet());
             holder.setInitParameter("dispatcherClasses", "org.jolokia.jsr160.Jsr160RequestDispatcher");
             jettyContext.addServlet(holder, "/j4p/*");
 
             SecurityHandler securityHandler = createSecurityHandler();
-            jettyContext.addHandler(securityHandler);
+            jettyContext.setSecurityHandler(securityHandler);
 
             jettyServer.start();
             j4pUrl = "http://localhost:" + port + "/j4p";
@@ -81,12 +87,17 @@ abstract public class AbstractJ4pIntegrationTest {
         cm.setConstraint(constraint);
         cm.setPathSpec("/*");
 
-        SecurityHandler securityHandler = new SecurityHandler();
-        HashUserRealm realm = new HashUserRealm("Jolokia");
-        realm.put("jolokia","jolokia");
-        realm.addUserToRole("jolokia", "jolokia");
-        securityHandler.setUserRealm(realm);
+        ConstraintSecurityHandler securityHandler = new ConstraintSecurityHandler();
+        UserStore userStore = new UserStore();
+        userStore.addUser("jolokia", new Password("jolokia"), new String[] { "jolokia" });
+        securityHandler.setRealmName("jolokia");
+        HashLoginService loginService = new HashLoginService("jolokia");
+        loginService.setUserStore(userStore);
+        securityHandler.setLoginService(loginService);
         securityHandler.setConstraintMappings(new ConstraintMapping[]{cm});
+
+        securityHandler.setAuthenticator(new org.eclipse.jetty.security.authentication.BasicAuthenticator());
+
         return securityHandler;
     }
 

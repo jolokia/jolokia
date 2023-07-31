@@ -93,6 +93,8 @@
       <artifactId>json-simple</artifactId>
     </dependency>
 
+    <!-- Other -->
+
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-server</artifactId>
@@ -102,6 +104,12 @@
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-servlet</artifactId>
+      <version>${version.jetty}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-security</artifactId>
       <version>${version.jetty}</version>
       <scope>test</scope>
     </dependency>

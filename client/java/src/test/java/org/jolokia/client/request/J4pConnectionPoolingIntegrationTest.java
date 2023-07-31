@@ -64,11 +64,11 @@ public class J4pConnectionPoolingIntegrationTest {
         final J4pClient j4pClient = createJ4pClient("http://localhost:" + wireMockServer.port() + "/test", 20, 20);
         searchParallel(j4pClient);
 
-        verify(20, getRequestedFor(urlPathMatching("/test/([a-z]*)")));
+        verify(20, getRequestedFor(urlPathMatching("/test/([a-z.:=*/]*)")));
     }
 
     private void searchParallel(J4pClient j4pClient) throws Exception {
-        stubFor(get(urlPathMatching("/test/([a-z]*)")).willReturn(aResponse().withFixedDelay(1000).withBody(getJsonResponse("test"))));
+        stubFor(get(urlPathMatching("/test/([a-z.:=*/]*)")).willReturn(aResponse().withFixedDelay(1000).withBody(getJsonResponse("test"))));
 
         final ExecutorService executorService = Executors.newFixedThreadPool(20);
         final J4pSearchRequest j4pSearchRequest = new J4pSearchRequest("java.lang:type=*");

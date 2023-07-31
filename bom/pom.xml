@@ -292,6 +292,12 @@
 
       <dependency>
         <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-client-java</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jolokia</groupId>
         <artifactId>jolokia-support-jmx</artifactId>
         <version>${project.version}</version>
       </dependency>
