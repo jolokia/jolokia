@@ -55,13 +55,13 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
-import org.jolokia.Version;
 import org.jolokia.client.J4pClient;
 import org.jolokia.client.J4pClientBuilder;
 import org.jolokia.client.request.J4pVersionRequest;
 import org.jolokia.jvmagent.JvmAgent;
+import org.jolokia.server.core.Version;
+import org.jolokia.server.core.util.ClassUtil;
 import org.jolokia.test.util.EnvTestUtil;
-import org.jolokia.util.ClassUtil;
 import org.testng.Assert;
 import org.testng.SkipException;
 import org.testng.annotations.AfterClass;
@@ -385,7 +385,7 @@ private static final Map<String, Object> ATTRIBUTE_REPLACEMENTS =
     localServer.createMBean(
         MBeanExample.class.getName(),
         RemoteJmxAdapter.getObjectName("jolokia.test:name=MBeanExample"));
-    JvmAgent.agentmain("port=" + (agentPort = EnvTestUtil.getFreePort()), null);
+    JvmAgent.agentmain("port=" + (agentPort = EnvTestUtil.getFreePort()) + ",agentId=local-jvm", null);
     final J4pClient connector =
         new J4pClientBuilder().url("http://localhost:" + this.agentPort + "/jolokia/").build();
     // wait for agent to be running
@@ -534,7 +534,7 @@ private static final Map<String, Object> ATTRIBUTE_REPLACEMENTS =
       throws IOException, AttributeNotFoundException, InstanceNotFoundException,
       InvalidAttributeValueException {
     this.adapter.setAttribute(
-        RemoteJmxAdapter.getObjectName("jolokia:type=Config"),
+        RemoteJmxAdapter.getObjectName("jolokia:type=Config,agent=local-jvm"),
         new Attribute("HistoryMaxEntries", null));
   }
 

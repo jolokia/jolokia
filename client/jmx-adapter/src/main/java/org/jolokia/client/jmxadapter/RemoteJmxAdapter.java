@@ -54,8 +54,8 @@ import org.jolokia.client.request.J4pSearchResponse;
 import org.jolokia.client.request.J4pVersionRequest;
 import org.jolokia.client.request.J4pVersionResponse;
 import org.jolokia.client.request.J4pWriteRequest;
-import org.jolokia.converter.Converters;
-import org.jolokia.util.ClassUtil;
+import org.jolokia.server.core.util.ClassUtil;
+import org.jolokia.service.serializer.JolokiaSerializer;
 import org.json.simple.JSONObject;
 
 /**
@@ -328,8 +328,8 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
       }
 
       if (rawValue instanceof Number && attributeType != null) {
-        return new Converters().getToOpenTypeConverter()
-            .convertToObject(attributeType, rawValue);
+        return new JolokiaSerializer()
+            .deserializeOpenType(attributeType, rawValue);
       } else {
         return rawValue;
       }

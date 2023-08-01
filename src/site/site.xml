@@ -45,6 +45,7 @@
     <menu name="Jolokia" inherit="top">
       <item name="Download" href="download.html"/>
       <item name="Artifacts" href="artifacts.html"/>
+      <item name="Migration to 2.0" href="migration.html"/>
       <item name="Features" href="features.html"/>
       <item name="Support" href="support.html"/>
       <item name="Forum" href="forum.html"/>

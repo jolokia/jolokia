@@ -52,6 +52,7 @@
 
     <module>client/java</module>
     <module>client/javascript</module>
+    <module>client/jmx-adapter</module>
 
     <module>support/jmx</module>
     <module>support/spring</module>
@@ -799,7 +800,17 @@
       <dependency>
         <groupId>org.jolokia</groupId>
         <artifactId>jolokia-client-javascript</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-client-javascript</artifactId>
         <classifier>compressed</classifier>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-client-jmx-adapter</artifactId>
         <version>${project.version}</version>
       </dependency>
 
@@ -938,6 +949,12 @@
             <artifactId>http2-server</artifactId>
           </exclusion>
         </exclusions>
+      </dependency>
+
+      <dependency>
+        <groupId>org.awaitility</groupId>
+        <artifactId>awaitility</artifactId>
+        <version>4.2.0</version>
       </dependency>
 
 <!--      <dependency>-->

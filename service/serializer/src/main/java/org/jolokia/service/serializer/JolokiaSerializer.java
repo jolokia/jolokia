@@ -82,4 +82,9 @@ public class JolokiaSerializer extends AbstractJolokiaService<Serializer> implem
     public Object deserializeOpenType(OpenType<?> pOpenType, Object pValue) {
         return toOpenTypeConverter.deserialize(pOpenType,pValue);
     }
+
+    public JolokiaSerializer makeForgiving() {
+        toOpenTypeConverter.makeForgiving();
+        return this;
+    }
 }

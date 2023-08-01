@@ -32,6 +32,8 @@ import javax.management.openmbean.OpenType;
  */
 public class OpenTypeDeserializer {
 
+    protected boolean forgiving = false;
+
     // List of converters used
     private List<OpenTypeConverter<? extends OpenType>> converters;
 
@@ -70,5 +72,13 @@ public class OpenTypeDeserializer {
                     "Cannot convert " + pValue + " to " + pOpenType + ": " + "No converter could be found");
         }
 	}
+
+    public void makeForgiving() {
+        this.forgiving = true;
+    }
+
+    public boolean isForgiving() {
+        return forgiving;
+    }
 
 }
