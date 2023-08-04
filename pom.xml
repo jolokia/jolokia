@@ -1220,12 +1220,5 @@
 <!--      </build>-->
 <!--    </profile>-->
 
-    <!-- Include Roo, which is not build by default -->
-    <profile>
-      <id>roo</id>
-      <modules>
-        <module>tools/roo</module>
-      </modules>
-    </profile>
   </profiles>
 </project>

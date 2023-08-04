@@ -21,3 +21,4 @@
 _draft_
 
 * `jolokia:type=Config` MBean is now registered with `agent=agentId` ObjectName property.
+* `roo-addon` is no longer available

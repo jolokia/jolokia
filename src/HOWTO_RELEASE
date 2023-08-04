@@ -25,8 +25,8 @@ Check in and push
 # Build release and deploy it on labs
 git clone git@github.com:rhuss/jolokia.git
 cd jolokia
-mvn -Dmaven.repo.local=/tmp/repo -DdevelopmentVersion=1.0.1-SNAPSHOT -DreleaseVersion=1.0.0 -Dtag=v1.0.0 -Pdist,roo release:prepare
-mvn -Dmaven.repo.local=/tmp/repo -DdevelopmentVersion=1.0.1-SNAPSHOT -DreleaseVersion=1.0.0 -Dtag=v1.0.0 -Pdist,roo release:perform
+mvn -Dmaven.repo.local=/tmp/repo -DdevelopmentVersion=1.0.1-SNAPSHOT -DreleaseVersion=1.0.0 -Dtag=v1.0.0 -Pdist release:prepare
+mvn -Dmaven.repo.local=/tmp/repo -DdevelopmentVersion=1.0.1-SNAPSHOT -DreleaseVersion=1.0.0 -Dtag=v1.0.0 -Pdist release:perform
 
 # Copy assembly to Github
 
@@ -40,7 +40,7 @@ mvn -Dmaven.repo.local=/tmp/repo -DdevelopmentVersion=1.0.1-SNAPSHOT -DreleaseVe
 
 # Deploy to Sonatype staging
 cd target/checkout
-mvn -Dmaven.repo.local=/tmp/repo -Pdist,roo deploy
+mvn -Dmaven.repo.local=/tmp/repo -Pdist deploy
 cd ../..
 
 # Release on central maven repo
@@ -81,11 +81,6 @@ cd tools/site-skin; mvn clean install;
 cd ../..
 mvn clean install
 mvn -N -Pdist site
-
-# Roo-Plugin:
-# Adapt uri and version number in root-repository.xml to use a httpgpg URL instead of a relative http
-# /home/maven-repository/www/htdocs/repository/roo-repository.xml
-# URL
 
 # =============================================================================
 # Snapshot release
