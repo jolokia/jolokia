@@ -22,7 +22,7 @@
   <version>2.0.0-SNAPSHOT</version>
   <packaging>war</packaging>
 
-  <name>jolokia-war-unsecured</name>
+  <name>jolokia-agent-war-unsecured</name>
   <description>Jolokia :: Agent :: WAR (unsecured)</description>
 
   <parent>
