@@ -3,10 +3,10 @@ package org.jolokia.support.spring;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 import org.jolokia.support.spring.log.CommonsLogHandler;
-import org.jolokia.support.spring.log.Log4jLogHandler;
 import org.jolokia.server.core.service.api.LogHandler;
+import org.jolokia.support.spring.log.Log4j2LogHandler;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.Test;
 
@@ -29,10 +29,10 @@ public class SpringJolokiaLogHandlerHolderTest {
     @Test
     public void logHandlerViaType() throws Exception {
         SpringJolokiaLogHandlerHolder holder = new SpringJolokiaLogHandlerHolder();
-        holder.setType("log4j");
+        holder.setType("log4j2");
         holder.setCategory("JOLOKIA");
         holder.afterPropertiesSet();
-        Log4jLogHandler logHandler = (Log4jLogHandler) holder.getLogHandler();
+        Log4j2LogHandler logHandler = (Log4j2LogHandler) holder.getLogHandler();
         Logger logger = (Logger) ReflectionTestUtils.getField(logHandler, "logger");
         assertEquals(logger.getName(),"JOLOKIA");
     }

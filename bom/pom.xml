@@ -322,6 +322,11 @@
         <artifactId>jolokia-support-jmx</artifactId>
         <version>${project.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-support-spring</artifactId>
+        <version>${project.version}</version>
+      </dependency>
 
       <dependency>
         <groupId>org.jolokia</groupId>

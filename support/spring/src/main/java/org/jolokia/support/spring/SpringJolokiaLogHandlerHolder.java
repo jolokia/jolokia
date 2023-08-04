@@ -63,7 +63,6 @@ public class SpringJolokiaLogHandlerHolder implements InitializingBean {
         STDOUT("stdout","org.jolokia.server.core.service.impl.StdoutLogHandler"),
         QUIET("stdout","org.jolokia.server.core.service.impl.QuietLogHandler"),
         JUL("jul","org.jolokia.server.core.service.impl.JulLogHandler"),
-        LOG4J("log4j","org.jolokia.support.spring.log.Log4jLogHandler"),
         LOG4J2("log4j2","org.jolokia.support.spring.log.Log4j2LogHandler"),
         SL4J("sl4j","org.jolokia.support.spring.log.Sl4jLogHandler"),
         COMMONS("commons","org.jolokia.support.spring.log.CommonsLogHandler");
