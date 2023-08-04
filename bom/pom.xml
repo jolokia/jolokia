@@ -311,6 +311,11 @@
         <artifactId>jolokia-client-jmx-adapter</artifactId>
         <version>${project.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-client-kubernetes</artifactId>
+        <version>${project.version}</version>
+      </dependency>
 
       <dependency>
         <groupId>org.jolokia</groupId>

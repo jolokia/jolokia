@@ -53,6 +53,7 @@
     <module>client/java</module>
     <module>client/javascript</module>
     <module>client/jmx-adapter</module>
+    <module>client/kubernetes</module>
 
     <module>support/jmx</module>
     <module>support/spring</module>
@@ -806,6 +807,11 @@
         <artifactId>jolokia-client-jmx-adapter</artifactId>
         <version>${project.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-client-kubernetes</artifactId>
+        <version>${project.version}</version>
+      </dependency>
 
       <dependency>
         <groupId>org.jolokia</groupId>
@@ -941,6 +947,10 @@
             <groupId>org.eclipse.jetty.http2</groupId>
             <artifactId>http2-server</artifactId>
           </exclusion>
+          <exclusion>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+          </exclusion>
         </exclusions>
       </dependency>
 
@@ -949,12 +959,6 @@
         <artifactId>awaitility</artifactId>
         <version>4.2.0</version>
       </dependency>
-
-<!--      <dependency>-->
-<!--        <groupId>org.jmockit</groupId>-->
-<!--        <artifactId>jmockit</artifactId>-->
-<!--        <version>1.49</version>-->
-<!--      </dependency>-->
 
       <!-- Other dependencies -->
 
@@ -973,6 +977,40 @@
         <groupId>org.apache.httpcomponents</groupId>
         <artifactId>httpclient</artifactId>
         <version>4.5.14</version>
+      </dependency>
+
+      <dependency>
+        <groupId>commons-codec</groupId>
+        <artifactId>commons-codec</artifactId>
+        <version>1.16.0</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.fabric8</groupId>
+        <artifactId>kubernetes-client</artifactId>
+        <version>6.8.0</version>
+      </dependency>
+      <dependency>
+        <groupId>io.fabric8</groupId>
+        <artifactId>kubernetes-httpclient-okhttp</artifactId>
+        <version>6.8.0</version>
+      </dependency>
+      <dependency>
+        <groupId>io.fabric8</groupId>
+        <artifactId>kubernetes-server-mock</artifactId>
+        <version>6.8.0</version>
+        <exclusions>
+          <exclusion>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-simple</artifactId>
+        <version>1.7.36</version>
       </dependency>
 
     </dependencies>

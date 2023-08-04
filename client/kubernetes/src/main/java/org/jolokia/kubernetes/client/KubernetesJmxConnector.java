@@ -2,10 +2,9 @@ package org.jolokia.kubernetes.client;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Pod;
-import io.fabric8.kubernetes.client.BaseClient;
 import io.fabric8.kubernetes.client.Config;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -16,6 +15,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXServiceURL;
+
 import okhttp3.Response;
 import org.jolokia.client.J4pClient;
 import org.jolokia.client.jmxadapter.JolokiaJmxConnector;
@@ -63,7 +63,7 @@ public class KubernetesJmxConnector extends JolokiaJmxConnector {
     KubernetesClient client = apiClients.get(key);
 
     if(client == null){
-      client=new DefaultKubernetesClient(Config.autoConfigure(context));
+      client=new KubernetesClientBuilder().withConfig(Config.autoConfigure(context)).build();
       apiClients.put(key, client);
     }
     return client;
@@ -157,14 +157,14 @@ public class KubernetesJmxConnector extends JolokiaJmxConnector {
     try {
       final String proxyPath = url.toString();
       Response response = MinimalHttpClientAdapter
-          .performRequest((BaseClient) client, proxyPath, "{\"type\":\"version\"}".getBytes(), null
+          .performRequest(client, proxyPath, "{\"type\":\"version\"}".getBytes(), null
               , headers);
       if (response.body() != null) {
         response.body().close();
       }
       if (response.isSuccessful()) {
         return new J4pClient(
-            proxyPath, new MinimalHttpClientAdapter((BaseClient) client, proxyPath, env));
+            proxyPath, new MinimalHttpClientAdapter(client, proxyPath, env));
       }
     } catch (IOException ignore) {
     }
