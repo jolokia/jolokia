@@ -1,12 +1,11 @@
 package org.jolokia.kubernetes.client;
 
-import io.fabric8.kubernetes.client.BaseClient;
+import io.fabric8.kubernetes.api.model.Status;
+import io.fabric8.kubernetes.api.model.StatusBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
-import io.fabric8.kubernetes.client.dsl.base.OperationSupport;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URL;
@@ -14,12 +13,19 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 import javax.management.remote.JMXConnector;
+
+import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.dsl.internal.OperationSupport;
+import io.fabric8.kubernetes.client.okhttp.OkHttpClientImpl;
+import io.fabric8.kubernetes.client.utils.KubernetesSerialization;
 import okhttp3.HttpUrl;
 import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
 import okhttp3.Protocol;
 import okhttp3.Request.Builder;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
@@ -41,8 +47,6 @@ import org.apache.http.protocol.HttpContext;
 import org.jolokia.util.AuthorizationHeaderParser;
 import org.jolokia.util.Base64Util;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 /**
  * This is a minimum implementation of the HttpClient interface based on what is used by J4PClient
@@ -50,13 +54,15 @@ import org.json.simple.parser.ParseException;
  */
 public class MinimalHttpClientAdapter implements HttpClient {
 
-  private final BaseClient client;
+  private final KubernetesClient client;
+  private final KubernetesSerialization serialization;
   private final String urlPath;
   private String user;
   private String password;
 
-  public MinimalHttpClientAdapter(BaseClient client, String urlPath, Map<String, Object> env) {
+  public MinimalHttpClientAdapter(KubernetesClient client, String urlPath, Map<String, Object> env) {
     this.client = client;
+    this.serialization = this.client.getKubernetesSerialization();
     this.urlPath = urlPath;
     String[] credentials = (String[]) env.get(JMXConnector.CREDENTIALS);
     if (credentials != null) {
@@ -112,7 +118,7 @@ public class MinimalHttpClientAdapter implements HttpClient {
   }
 
 
-  public static Response performRequest(BaseClient client, String path, byte[] body,
+  public static Response performRequest(KubernetesClient client, String path, byte[] body,
       String query, Map<String, String> headers) throws IOException {
     final Builder requestBuilder = new Builder()
         .post(RequestBody.create(MediaType.parse("application/json"), body)).url(
@@ -120,12 +126,14 @@ public class MinimalHttpClientAdapter implements HttpClient {
     for (Map.Entry<String, String> header : headers.entrySet()) {
       requestBuilder.addHeader(header.getKey(), header.getValue());
     }
-    return client.getHttpClient().newCall(
+    io.fabric8.kubernetes.client.http.HttpClient k8sHttpClient = client.getHttpClient();
+    OkHttpClient okHttpClient = ((OkHttpClientImpl) k8sHttpClient).getOkHttpClient();
+    return okHttpClient.newCall(
         requestBuilder.build()
     ).execute();
   }
 
-  private static URL buildHttpUri(BaseClient client, String resourcePath,
+  private static URL buildHttpUri(KubernetesClient client, String resourcePath,
       String query) {
     final URL masterUrl = client.getMasterUrl();
     final HttpUrl.Builder builder = new HttpUrl.Builder().scheme(masterUrl.getProtocol())
@@ -154,7 +162,7 @@ public class MinimalHttpClientAdapter implements HttpClient {
         Throwable syntethicException = new ClientProtocolException("Failure calling Jolokia in kubernetes");
         errorResponse.put("status", responseCode);
         try {//the payload would be a kubernetes error response
-          syntethicException=new KubernetesClientException(OperationSupport.createStatus(response));
+          syntethicException=new KubernetesClientException(convertResponseBody(response));
         } catch (Exception e) {
         }
         errorResponse.put("error_type", syntethicException.getClass().getName());
@@ -176,6 +184,28 @@ public class MinimalHttpClientAdapter implements HttpClient {
 
     }
     return convertedResponse;
+  }
+
+  private Status convertResponseBody(Response response) {
+    // see io.fabric8.kubernetes.client.dsl.internal.OperationSupport.createStatus()
+
+    String statusMessage = "";
+    ResponseBody body = response != null ? response.body() : null;
+    int statusCode = response != null ? response.code() : 0;
+    try {
+      if (body != null) {
+        statusMessage = body.string();
+      } else {
+        statusMessage = response.message();
+      }
+      Status status = serialization.unmarshal(statusMessage, Status.class);
+      if (status.getCode() == null) {
+        status = new StatusBuilder(status).withCode(statusCode).build();
+      }
+      return status;
+    } catch (IOException e) {
+      return OperationSupport.createStatus(statusCode, statusMessage);
+    }
   }
 
   protected byte[] extractBody(HttpRequest httpUriRequest) throws IOException {
