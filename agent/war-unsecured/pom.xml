@@ -47,11 +47,11 @@
 
     <dependency>
       <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-service-jmx</artifactId>
+      <artifactId>jolokia-service-serializer</artifactId>
     </dependency>
     <dependency>
       <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-service-serializer</artifactId>
+      <artifactId>jolokia-service-jmx</artifactId>
     </dependency>
     <dependency>
       <groupId>org.jolokia</groupId>

@@ -233,12 +233,12 @@
 
       <dependency>
         <groupId>org.jolokia</groupId>
-        <artifactId>jolokia-service-jmx</artifactId>
+        <artifactId>jolokia-service-serializer</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.jolokia</groupId>
-        <artifactId>jolokia-service-serializer</artifactId>
+        <artifactId>jolokia-service-jmx</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -292,6 +292,18 @@
 
       <dependency>
         <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-it-core</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-it-war</artifactId>
+        <type>war</type>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jolokia</groupId>
         <artifactId>jolokia-client-java</artifactId>
         <version>${project.version}</version>
       </dependency>
@@ -325,18 +337,6 @@
       <dependency>
         <groupId>org.jolokia</groupId>
         <artifactId>jolokia-support-spring</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.jolokia</groupId>
-        <artifactId>jolokia-it-core</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jolokia</groupId>
-        <artifactId>jolokia-it-war</artifactId>
-        <type>war</type>
         <version>${project.version}</version>
       </dependency>
     </dependencies>

@@ -33,6 +33,7 @@
 
   <properties>
     <version.spring>5.3.29</version.spring>
+    <version.log4j2>2.20.0</version.log4j2>
   </properties>
 
   <dependencies>
@@ -78,7 +79,7 @@
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-api</artifactId>
-      <version>2.20.0</version>
+      <version>${version.log4j2}</version>
       <scope>provided</scope>
       <optional>true</optional>
     </dependency>

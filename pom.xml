@@ -32,12 +32,13 @@
     <module>bom</module>
 
     <module>tools/siteskin</module>
+    <module>tools/test-util</module>
 
     <module>server/core</module>
     <module>server/detector</module>
 
-    <module>service/jmx</module>
     <module>service/serializer</module>
+    <module>service/jmx</module>
     <module>service/discovery</module>
     <module>service/history</module>
     <module>service/jsr160</module>
@@ -59,8 +60,6 @@
 
     <module>support/jmx</module>
     <module>support/spring</module>
-
-    <module>tools/test-util</module>
   </modules>
 
   <build>
@@ -692,12 +691,6 @@
       <artifactId>easymock</artifactId>
       <scope>test</scope>
     </dependency>
-
-<!--    <dependency>-->
-<!--      <groupId>org.jmockit</groupId>-->
-<!--      <artifactId>jmockit</artifactId>-->
-<!--      <scope>test</scope>-->
-<!--    </dependency>-->
   </dependencies>
 
   <!-- Overall version management for Jolokia itself. This POM should not be treated as Jolokia BOM -->
@@ -731,12 +724,12 @@
 
       <dependency>
         <groupId>org.jolokia</groupId>
-        <artifactId>jolokia-service-jmx</artifactId>
+        <artifactId>jolokia-service-serializer</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.jolokia</groupId>
-        <artifactId>jolokia-service-serializer</artifactId>
+        <artifactId>jolokia-service-jmx</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -790,6 +783,18 @@
 
       <dependency>
         <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-it-core</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-it-war</artifactId>
+        <type>war</type>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jolokia</groupId>
         <artifactId>jolokia-client-java</artifactId>
         <version>${project.version}</version>
       </dependency>
@@ -823,18 +828,6 @@
       <dependency>
         <groupId>org.jolokia</groupId>
         <artifactId>jolokia-support-spring</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.jolokia</groupId>
-        <artifactId>jolokia-it-core</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jolokia</groupId>
-        <artifactId>jolokia-it-war</artifactId>
-        <type>war</type>
         <version>${project.version}</version>
       </dependency>
 

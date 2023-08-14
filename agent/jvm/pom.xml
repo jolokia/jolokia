@@ -59,11 +59,11 @@
 
     <dependency>
       <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-service-jmx</artifactId>
+      <artifactId>jolokia-service-serializer</artifactId>
     </dependency>
     <dependency>
       <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-service-serializer</artifactId>
+      <artifactId>jolokia-service-jmx</artifactId>
     </dependency>
     <dependency>
       <groupId>org.jolokia</groupId>
@@ -149,8 +149,8 @@
                 <includes>
                   <include>org.jolokia:jolokia-server-core</include>
                   <include>org.jolokia:jolokia-server-detector</include>
-                  <include>org.jolokia:jolokia-service-jmx</include>
                   <include>org.jolokia:jolokia-service-serializer</include>
+                  <include>org.jolokia:jolokia-service-jmx</include>
                   <include>org.jolokia:jolokia-service-discovery</include>
                   <include>org.jolokia:jolokia-service-history</include>
                   <include>org.jolokia:jolokia-service-jsr160</include>
@@ -173,21 +173,33 @@
                   </excludes>
                 </filter>
                 <filter>
-                  <artifact>org.jolokia:jolokia-service-jmx</artifact>
-                  <excludes>
-                    <exclude>org/jolokia/service/jmx/osgi/**</exclude>
-                  </excludes>
-                </filter>
-                <filter>
                   <artifact>org.jolokia:jolokia-service-serializer</artifact>
                   <excludes>
                     <exclude>org/jolokia/service/serializer/osgi/**</exclude>
                   </excludes>
                 </filter>
                 <filter>
+                  <artifact>org.jolokia:jolokia-service-jmx</artifact>
+                  <excludes>
+                    <exclude>org/jolokia/service/jmx/osgi/**</exclude>
+                  </excludes>
+                </filter>
+                <filter>
+                  <artifact>org.jolokia:jolokia-service-discovery</artifact>
+                  <excludes>
+                    <exclude>org/jolokia/service/discovery/osgi/**</exclude>
+                  </excludes>
+                </filter>
+                <filter>
                   <artifact>org.jolokia:jolokia-service-history</artifact>
                   <excludes>
                     <exclude>org/jolokia/service/history/osgi/**</exclude>
+                  </excludes>
+                </filter>
+                <filter>
+                  <artifact>org.jolokia:jolokia-service-jsr160</artifact>
+                  <excludes>
+                    <exclude>org/jolokia/service/jsr160/osgi/**</exclude>
                   </excludes>
                 </filter>
                 <filter>
@@ -200,12 +212,6 @@
                   <artifact>org.jolokia:jolokia-service-notif-sse</artifact>
                   <excludes>
                     <exclude>org/jolokia/service/notif/sse/osgi/**</exclude>
-                  </excludes>
-                </filter>
-                <filter>
-                  <artifact>org.jolokia:jolokia-service-discovery</artifact>
-                  <excludes>
-                    <exclude>org/jolokia/service/discovery/osgi/**</exclude>
                   </excludes>
                 </filter>
               </filters>

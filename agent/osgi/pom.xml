@@ -53,11 +53,11 @@
 
     <dependency>
       <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-service-jmx</artifactId>
+      <artifactId>jolokia-service-serializer</artifactId>
     </dependency>
     <dependency>
       <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-service-serializer</artifactId>
+      <artifactId>jolokia-service-jmx</artifactId>
     </dependency>
     <dependency>
       <groupId>org.jolokia</groupId>
@@ -102,7 +102,6 @@
       <artifactId>osgi.core</artifactId>
       <scope>provided</scope>
     </dependency>
-
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.service.http</artifactId>
