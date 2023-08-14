@@ -1,9 +1,3 @@
-package org.jolokia.agent.osgi.restrictor;
-
-import javax.management.ObjectName;
-
-import org.jolokia.server.core.restrictor.AllowAllRestrictor;
-
 /*
  * Copyright 2009-2013 Roland Huss
  *
@@ -19,7 +13,11 @@ import org.jolokia.server.core.restrictor.AllowAllRestrictor;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.osgi.restrictor;
 
+import javax.management.ObjectName;
+
+import org.jolokia.server.core.restrictor.AllowAllRestrictor;
 
 /**
  * Sample restrictor, which grants read/write/exec access only

@@ -1,7 +1,3 @@
-package org.jolokia.agent.osgi.restrictor;
-
-import org.jolokia.server.core.service.api.Restrictor;
-
 /*
  * Copyright 2009-2013 Roland Huss
  *
@@ -17,9 +13,15 @@ import org.jolokia.server.core.service.api.Restrictor;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.osgi.restrictor;
+
+import org.jolokia.server.core.service.api.Restrictor;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 
 /**
- * Activator for registering a sample {@link  Restrictor} as an OSGi service
+ * Activator for registering a sample {@link Restrictor} as an OSGi service
  *
  * @author roland
  * @since 22.03.11

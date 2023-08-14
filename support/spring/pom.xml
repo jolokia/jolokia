@@ -31,11 +31,6 @@
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
-  <properties>
-    <version.spring>5.3.29</version.spring>
-    <version.log4j2>2.20.0</version.log4j2>
-  </properties>
-
   <dependencies>
 
     <!-- Jolokia own artifacts -->

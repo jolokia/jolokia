@@ -60,6 +60,10 @@
 
     <module>support/jmx</module>
     <module>support/spring</module>
+
+    <module>examples/osgi-restrictor</module>
+    <module>examples/client-javascript-test-app</module>
+    <module>examples/spring</module>
   </modules>
 
   <build>
@@ -1025,6 +1029,9 @@
 
     <!-- Jetty 9.4.x is the last one supporting JDK8 -->
     <version.jetty>9.4.51.v20230217</version.jetty>
+
+    <version.spring>5.3.29</version.spring>
+    <version.log4j2>2.20.0</version.log4j2>
   </properties>
 
   <repositories>
