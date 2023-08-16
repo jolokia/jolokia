@@ -82,6 +82,8 @@
     <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-client-javascript</artifactId>
+      <!-- This type is required by com.devspan.mojo.javascript:javascript-maven-plugin -->
+      <type>javascript</type>
     </dependency>
 
     <!-- JakartaEE dependencies -->
@@ -99,7 +101,6 @@
       <plugin>
         <groupId>com.devspan.mojo.javascript</groupId>
         <artifactId>javascript-maven-plugin</artifactId>
-        <version>0.9.3</version>
         <extensions>true</extensions>
         <configuration>
           <useArtifactId>false</useArtifactId>
@@ -114,11 +115,20 @@
         </executions>
       </plugin>
       <plugin>
-        <groupId>org.mortbay.jetty</groupId>
+        <!--
+          Use `mvn package jetty:run` and browse to http://localhost:8080/jolokia-all-test.html
+        -->
+        <groupId>org.eclipse.jetty</groupId>
         <artifactId>jetty-maven-plugin</artifactId>
-        <version>7.0.0.pre5</version>
+        <version>${version.jetty}</version>
         <configuration>
           <scanIntervalSeconds>10</scanIntervalSeconds>
+          <webAppConfig>
+            <contextPath>/</contextPath>
+          </webAppConfig>
+          <webAppSourceDirectory>${project.build.directory}/${project.artifactId}-${project.version}</webAppSourceDirectory>
+          <stopPort>9999</stopPort>
+          <stopKey>foo</stopKey>
           <systemProperties>
             <systemProperty>
               <name>org.mortbay.util.FileResource.checkAliases</name>
@@ -129,11 +139,6 @@
               <value>false</value>
             </systemProperty>
           </systemProperties>
-          <webAppConfig>
-            <contextPath>/</contextPath>
-          </webAppConfig>
-          <stopPort>9999</stopPort>
-          <stopKey>foo</stopKey>
         </configuration>
       </plugin>
     </plugins>

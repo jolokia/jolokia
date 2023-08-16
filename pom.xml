@@ -810,6 +810,13 @@
       <dependency>
         <groupId>org.jolokia</groupId>
         <artifactId>jolokia-client-javascript</artifactId>
+        <!-- This type is required by com.devspan.mojo.javascript:javascript-maven-plugin -->
+        <type>javascript</type>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-client-javascript</artifactId>
         <classifier>compressed</classifier>
         <version>${project.version}</version>
       </dependency>
