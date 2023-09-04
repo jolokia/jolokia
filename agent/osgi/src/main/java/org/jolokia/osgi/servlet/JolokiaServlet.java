@@ -16,7 +16,7 @@ package org.jolokia.osgi.servlet;
  * limitations under the License.
  */
 
-import javax.servlet.*;
+import jakarta.servlet.*;
 
 import org.jolokia.http.AgentServlet;
 import org.jolokia.restrictor.Restrictor;

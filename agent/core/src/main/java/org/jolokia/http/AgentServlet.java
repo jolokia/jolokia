@@ -8,8 +8,8 @@ import java.util.*;
 
 import javax.management.RuntimeMBeanException;
 import javax.security.auth.Subject;
-import javax.servlet.*;
-import javax.servlet.http.*;
+import jakarta.servlet.*;
+import jakarta.servlet.http.*;
 
 import org.jolokia.backend.BackendManager;
 import org.jolokia.config.*;

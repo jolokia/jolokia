@@ -2,7 +2,7 @@ package org.jolokia.osgi.security;
 
 import javax.security.auth.callback.*;
 import javax.security.auth.login.*;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.jolokia.config.ConfigKey;
 import org.jolokia.util.AuthorizationHeaderParser;

@@ -21,9 +21,9 @@ import java.net.SocketException;
 import java.util.*;
 
 import javax.management.JMException;
-import javax.servlet.*;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.*;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.jolokia.backend.TestDetector;
 import org.jolokia.config.ConfigKey;

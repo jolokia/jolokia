@@ -51,7 +51,7 @@
     </dependency>
 
     <dependency>
-      <groupId>javax.servlet</groupId>
+      <groupId>jakarta.servlet</groupId>
       <artifactId>servlet-api</artifactId>
       <scope>provided</scope>
     </dependency>
@@ -111,7 +111,7 @@
             </Embed-Dependency>
             <Export-Package>
               org.jolokia.osgi.security;version="${project.version}",
-              org.jolokia.osgi.servlet;uses:="org.osgi.service.http,org.osgi.framework,javax.servlet";version="${project.version}",
+              org.jolokia.osgi.servlet;uses:="org.osgi.service.http,org.osgi.framework,jakarta.servlet";version="${project.version}",
               org.jolokia.restrictor;uses:="javax.management,javax.xml.parsers,org.w3c.dom,org.xml.sax";version="${project.version}",
               org.jolokia.util;version="${project.version}",
               org.jolokia.converter;version="${project.version}",

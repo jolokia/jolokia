@@ -19,9 +19,9 @@ import java.io.IOException;
 import java.io.Writer;
 
 import javax.net.ssl.*;
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-import javax.servlet.http.*;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.*;
 
 import com.sun.net.httpserver.*;
 import org.jolokia.test.util.EnvTestUtil;

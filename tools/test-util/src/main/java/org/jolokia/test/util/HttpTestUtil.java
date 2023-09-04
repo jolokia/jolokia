@@ -20,7 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.*;
 
-import javax.servlet.*;
+import jakarta.servlet.*;
 
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;

@@ -39,7 +39,7 @@
       <version>${project.version}</version>
       <exclusions>
         <exclusion>
-          <groupId>javax.servlet</groupId>
+          <groupId>jakarta.servlet</groupId>
           <artifactId>servlet-api</artifactId>
         </exclusion>
         <exclusion>
@@ -75,7 +75,7 @@
       <version>2.2.0</version>
       <exclusions>
         <exclusion>
-          <groupId>javax.servlet</groupId>
+          <groupId>jakarta.servlet</groupId>
           <artifactId>servlet-api</artifactId>
         </exclusion>
       </exclusions>
@@ -108,18 +108,18 @@
               org.apache.felix.http.jetty;inline=true,
             </Embed-Dependency>
             <Export-Package>
-              org.jolokia.osgi.servlet;uses:="org.osgi.service.http,org.osgi.framework,javax.servlet";version="${project.version}",
+              org.jolokia.osgi.servlet;uses:="org.osgi.service.http,org.osgi.framework,jakarta.servlet";version="${project.version}",
               org.jolokia.restrictor;uses:="javax.management,javax.xml.parsers,org.w3c.dom,org.xml.sax";version="${project.version}",
               org.jolokia.converter;version="${project.version}",
               org.jolokia.converter.json;version="${project.version}",
               org.jolokia.converter.object;version="${project.version}",
               org.jolokia.util;version="${project.version}",
-              org.osgi.service.http;uses:="javax.servlet.http,javax.servlet";-split-package:="merge-last";version="1.2.1",
+              org.osgi.service.http;uses:="jakarta.servlet.http,jakarta.servlet";-split-package:="merge-last";version="1.2.1",
               org.osgi.service.log;version="1.3",
-              javax.servlet.resources;version="2.5",
-              javax.servlet;version="2.5",
-              javax.servlet.jsp.resources;version="2.5",
-              javax.servlet.http;uses:="javax.servlet";version="2.5"
+              jakarta.servlet.resources;version="2.5",
+              jakarta.servlet;version="2.5",
+              jakarta.servlet.jsp.resources;version="2.5",
+              jakarta.servlet.http;uses:="jakarta.servlet";version="2.5"
             </Export-Package>
             <Import-Package>
               !javax.microedition.io,
@@ -128,7 +128,7 @@
               org.jolokia.util;version="${project.version}",
               javax.net.ssl;resolution:=optional,
               javax.security.cert;resolution:=optional,
-              javax.servlet.*;resolution:=optional;version="2.5",
+              jakarta.servlet.*;resolution:=optional;version="2.5",
               javax.xml.parsers;resolution:=optional,
               org.osgi.framework;resolution:=optional;version="1.3",
               org.osgi.service.http;resolution:=optional;version="1.2",

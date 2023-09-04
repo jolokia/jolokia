@@ -20,7 +20,7 @@ import java.lang.instrument.Instrumentation;
 import java.util.Set;
 
 import javax.management.MBeanServerConnection;
-import javax.servlet.*;
+import jakarta.servlet.*;
 
 import org.easymock.EasyMock;
 import org.jolokia.backend.executor.MBeanServerExecutor;

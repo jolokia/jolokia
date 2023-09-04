@@ -6,7 +6,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletException;
 
 import org.jolokia.config.ConfigKey;
 import org.jolokia.osgi.security.*;

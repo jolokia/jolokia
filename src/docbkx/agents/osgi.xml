@@ -77,7 +77,7 @@
       <tr>
         <td>org.osgi.framework</td>
         <td>X</td>
-        <td>javax.servlet</td>
+        <td>jakarta.servlet</td>
         <td></td>
         <td>org.w3c.dom</td>
         <td>X</td>
@@ -87,7 +87,7 @@
       <tr>
         <td>org.osgi.service.http</td>
         <td></td>
-        <td>javax.servlet.http</td>
+        <td>jakarta.servlet.http</td>
         <td></td>
         <td>org.xml.sax</td>
         <td>X</td>
