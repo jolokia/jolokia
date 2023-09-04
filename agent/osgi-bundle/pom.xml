@@ -40,7 +40,7 @@
       <exclusions>
         <exclusion>
           <groupId>jakarta.servlet</groupId>
-          <artifactId>servlet-api</artifactId>
+          <artifactId>jakarta.servlet-api</artifactId>
         </exclusion>
         <exclusion>
           <groupId>org.jolokia</groupId>
@@ -76,7 +76,7 @@
       <exclusions>
         <exclusion>
           <groupId>jakarta.servlet</groupId>
-          <artifactId>servlet-api</artifactId>
+          <artifactId>jakarta.servlet-api</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -108,16 +108,16 @@
               org.apache.felix.http.jetty;inline=true,
             </Embed-Dependency>
             <Export-Package>
-              org.jolokia.osgi.servlet;uses:="org.osgi.service.http,org.osgi.framework,jakarta.servlet";version="${project.version}",
+              org.jolokia.osgi.servlet;uses:="org.osgi.service.http,org.osgi.framework,jakarta.servlet-api";version="${project.version}",
               org.jolokia.restrictor;uses:="javax.management,javax.xml.parsers,org.w3c.dom,org.xml.sax";version="${project.version}",
               org.jolokia.converter;version="${project.version}",
               org.jolokia.converter.json;version="${project.version}",
               org.jolokia.converter.object;version="${project.version}",
               org.jolokia.util;version="${project.version}",
-              org.osgi.service.http;uses:="jakarta.servlet.http,jakarta.servlet";-split-package:="merge-last";version="1.2.1",
+              org.osgi.service.http;uses:="jakarta.servlet-http,jakarta.servlet-api";-split-package:="merge-last";version="1.2.1",
               org.osgi.service.log;version="1.3",
               jakarta.servlet.resources;version="6.0.0",
-              jakarta.servlet;version="6.0.0",
+              jakarta.servlet-api;version="6.0.0",
               jakarta.servlet.jsp.resources;version="6.0.0",
               jakarta.servlet.http;uses:="jakarta.servlet";version="6.0.0"
             </Export-Package>
