@@ -60,6 +60,20 @@ public class HttpTestUtil {
             public int read() throws IOException {
                 return bis.read();
             }
+
+			@Override
+			public boolean isFinished() {
+				return false;
+			}
+
+			@Override
+			public boolean isReady() {
+				return true;
+			}
+
+			@Override
+			public void setReadListener(ReadListener readListener) {
+			}
         };
     }
 
