@@ -64,6 +64,10 @@ public class KeyStoreUtil {
             for (Certificate c : certificates) {
                 X509Certificate cert = (X509Certificate) c;
                 String alias = cert.getSubjectX500Principal().getName();
+                String sid = cert.getSerialNumber().toString();
+                if (sid != null) {
+                    alias += "|" + sid;
+                }
                 pTrustStore.setCertificateEntry(alias, cert);
             }
         } finally {
