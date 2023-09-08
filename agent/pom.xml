@@ -39,8 +39,6 @@
     <module>war</module>
     <module>war-unsecured</module>
     <module>jsr160</module>
-    <module>osgi</module>
-    <module>osgi-bundle</module>
     <module>jmx</module>
     <module>jvm</module>
     <module>jvm-spring</module>
