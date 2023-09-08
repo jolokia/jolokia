@@ -72,7 +72,7 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.http.jetty</artifactId>
-      <version>2.2.0</version>
+      <version>5.1.0</version>
       <exclusions>
         <exclusion>
           <groupId>jakarta.servlet</groupId>
@@ -114,8 +114,8 @@
               org.jolokia.converter.json;version="${project.version}",
               org.jolokia.converter.object;version="${project.version}",
               org.jolokia.util;version="${project.version}",
-              org.osgi.service.http;uses:="jakarta.servlet-http,jakarta.servlet-api";-split-package:="merge-last";version="1.2.1",
-              org.osgi.service.log;version="1.3",
+              org.osgi.service.servlet;uses:="jakarta.servlet-http,jakarta.servlet-api";-split-package:="merge-last";version="2.0.0",
+              org.osgi.service.log;version="1.5.0",
               jakarta.servlet.resources;version="6.0.0",
               jakarta.servlet-api;version="6.0.0",
               jakarta.servlet.jsp.resources;version="6.0.0",
@@ -130,12 +130,12 @@
               javax.security.cert;resolution:=optional,
               jakarta.servlet.*;resolution:=optional;version="6.0.0",
               javax.xml.parsers;resolution:=optional,
-              org.osgi.framework;resolution:=optional;version="1.3",
-              org.osgi.service.http;resolution:=optional;version="1.2",
-              org.osgi.service.cm;version="[1.0.0,2.0.0)";resolution:=optional,
-              org.osgi.service.log;resolution:=optional;version="1.3",
-              org.osgi.service.condpermadmin;resolution:=optional;version="1.1",
-              org.osgi.util.tracker;resolution:=optional;version="1.3",
+              org.osgi.framework;resolution:=optional;version="1.10.0",
+              org.osgi.service.servlet;resolution:=optional;version="2.0.0",
+              org.osgi.service.cm;version="[1.6.1]";resolution:=optional,
+              org.osgi.service.log;resolution:=optional;version="1.5.0",
+              org.osgi.service.condpermadmin;resolution:=optional;version="1.1.2",
+              org.osgi.util.tracker;resolution:=optional;version="1.5.4",
               org.slf4j;resolution:=optional,
               org.xml.sax;resolution:=optional,
               org.xml.sax.helpers;resolution:=optional,

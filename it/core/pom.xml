@@ -42,7 +42,7 @@
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
-      <version>4.2.0</version>
+      <version>6.0.0</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>
@@ -62,7 +62,7 @@
             <Bundle-Name>Jolokia Integration Test Bundle</Bundle-Name>
             <!-- Needed because we export an embedded package only -->
             <Import-Package>
-              org.osgi.framework;version="[1.0.0,2.0.0)",
+              org.osgi.framework;version="[6.0.0]",
               *
             </Import-Package>
           </instructions>

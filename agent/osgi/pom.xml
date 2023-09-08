@@ -111,7 +111,7 @@
             </Embed-Dependency>
             <Export-Package>
               org.jolokia.osgi.security;version="${project.version}",
-              org.jolokia.osgi.servlet;uses:="org.osgi.service.http,org.osgi.framework,jakarta.servlet";version="${project.version}",
+              org.jolokia.osgi.servlet;uses:="org.osgi.service.servlet,org.osgi.framework,jakarta.servlet";version="${project.version}",
               org.jolokia.restrictor;uses:="javax.management,javax.xml.parsers,org.w3c.dom,org.xml.sax";version="${project.version}",
               org.jolokia.util;version="${project.version}",
               org.jolokia.converter;version="${project.version}",
@@ -122,11 +122,11 @@
               org.jolokia.osgi.servlet;version="${project.version}",
               org.jolokia.restrictor;version="${project.version}",
               org.jolokia.util;version="${project.version}",
-              org.osgi.framework;version="[1.0.0,2.0.0)",
-              org.osgi.service.http;version="[1.0.0,2.0.0)";resolution:=optional,
-              org.osgi.service.cm;version="[1.0.0,2.0.0)";resolution:=optional,
-              org.osgi.service.log;version="[1.0.0,2.0.0)",
-              org.osgi.util.tracker;version="[1.0.0,2.0.0)",
+              org.osgi.framework;version="1.10.0]",
+              org.osgi.service.servlet;version="[2.0.0]";resolution:=optional,
+              org.osgi.service.cm;version=""[1.6.1]";resolution:=optional,
+              org.osgi.service.log;version="[1.5.0]",
+              org.osgi.util.tracker;version="[1.5.4]",
               *
             </Import-Package>
           </instructions>
