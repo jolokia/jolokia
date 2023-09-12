@@ -40,8 +40,7 @@ public interface JolokiaContext extends LogHandler, Restrictor {
     <T extends JolokiaService> T getService(Class<T> pType);
 
     /**
-     * Get a single, mandatory, service. If not present, then an exception is thrown. Also
-     * an exception is raised if more than one service exist
+     * Get a single, mandatory, service. If not present, then an exception is thrown.
      *
      * @param pType requested service type
      * @return the requested service

@@ -73,6 +73,8 @@ public class JolokiaServer {
     // HttpContext created when we start it up
     private HttpContext httpContext;
 
+    private LogHandler logHandler;
+
     /**
      * Create the Jolokia server which in turn creates an HttpServer for serving Jolokia requests. This
      * uses a loghandler which prints out to stdout.
@@ -147,7 +149,11 @@ public class JolokiaServer {
         serviceManager.stop();
 
         if (cleaner != null) {
-            cleaner.stopServer();
+            try {
+                cleaner.stopServer();
+            } catch (InterruptedException exp) {
+                logHandler.error("Could not stop Jolokia server properly: ", exp);
+            }
         }
     }
 
@@ -213,6 +219,7 @@ public class JolokiaServer {
     private void init(HttpServer pServer, JolokiaServerConfig pConfig, LogHandler pLogHandler)  {
         config = pConfig;
         httpServer = pServer;
+        this.logHandler = pLogHandler;
 
         Configuration jolokiaCfg = config.getJolokiaConfig();
         LogHandler log = pLogHandler != null ?
@@ -360,8 +367,9 @@ public class JolokiaServer {
     // HTTPS handling
     private HttpServer createHttpsServer(InetSocketAddress pSocketAddress, JolokiaServerConfig pConfig) {
         // initialise the HTTPS server
+        HttpsServer server = null;
         try {
-            HttpsServer server = HttpsServer.create(pSocketAddress, pConfig.getBacklog());
+            server = HttpsServer.create(pSocketAddress, pConfig.getBacklog());
             SSLContext sslContext = SSLContext.getInstance(pConfig.getSecureSocketProtocol());
 
             // initialise the keystore
@@ -384,9 +392,21 @@ public class JolokiaServer {
             server.setHttpsConfigurator(new JolokiaHttpsConfigurator(sslContext, pConfig));
             return server;
         } catch (GeneralSecurityException e) {
+            stopServer(server);
             throw new IllegalStateException("Cannot use keystore for https communication: " + e,e);
         } catch (IOException e) {
+            stopServer(server);
             throw new IllegalStateException("Cannot open keystore for https communication: " + e,e);
+        }
+        catch (IllegalArgumentException e) {
+            stopServer(server);
+            throw e;
+        }
+    }
+
+    private void stopServer(HttpsServer server) {
+        if (server != null) {
+            server.stop(0);
         }
     }
 

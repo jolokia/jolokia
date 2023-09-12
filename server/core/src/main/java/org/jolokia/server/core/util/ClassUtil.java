@@ -54,6 +54,10 @@ public final class ClassUtil {
      */
     public static <T> Class<T> classForName(String pClassName,boolean pInitialize,ClassLoader ... pClassLoaders) {
         Set<ClassLoader> tried = new HashSet<ClassLoader>();
+        Class<?> clazz = resolvePrimitiveClassByName(pClassName);
+        if (clazz != null) {
+            return (Class<T>) clazz;
+        }
         for (ClassLoader loader : findClassLoaders(pClassLoaders)) {
             // Go up the classloader stack to eventually find the server class. Sometimes the WebAppClassLoader
             // hide the server classes loaded by the parent class loader.
@@ -68,6 +72,27 @@ public final class ClassUtil {
             }
         }
         return null;
+    }
+
+    /**
+     * Map with primitive type name as key
+     */
+    private static final Map<String, Class<?>> primitiveTypeNameMap = new HashMap<String, Class<?>>(32);
+
+    static {
+        Set<Class<?>> primitiveTypes = new HashSet<Class<?>>();
+        primitiveTypes.addAll(Arrays.asList(
+                boolean.class, byte.class, char.class, double.class, float.class,
+                int.class, long.class, short.class,
+                boolean[].class, byte[].class, char[].class, double[].class,
+                float[].class, int[].class, long[].class, short[].class, void.class));
+        for (Class<?> primitiveType : primitiveTypes) {
+            primitiveTypeNameMap.put(primitiveType.getName(), primitiveType);
+        }
+    }
+
+    private static Class<?> resolvePrimitiveClassByName(String name) {
+        return primitiveTypeNameMap.get(name);
     }
 
     private static List<ClassLoader> findClassLoaders(ClassLoader... pClassLoaders) {
