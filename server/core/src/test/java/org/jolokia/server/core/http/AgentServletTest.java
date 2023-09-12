@@ -32,7 +32,7 @@ import org.jolokia.server.core.config.Configuration;
 import org.jolokia.server.core.restrictor.AbstractConstantRestrictor;
 import org.jolokia.server.core.restrictor.AllowAllRestrictor;
 import org.jolokia.server.core.service.api.*;
-import org.jolokia.test.util.HttpTestUtil;
+import org.jolokia.server.core.util.HttpTestUtil;
 import org.json.simple.JSONObject;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;

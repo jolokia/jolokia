@@ -16,10 +16,6 @@ package org.jolokia.server.core.osgi;
  *  limitations under the License.
  */
 
-import java.lang.instrument.Instrumentation;
-import java.util.Set;
-
-import javax.management.MBeanServerConnection;
 import javax.servlet.*;
 
 import org.easymock.EasyMock;
@@ -29,7 +25,7 @@ import org.jolokia.server.core.detector.ServerDetectorLookup;
 import org.jolokia.server.core.restrictor.AllowAllRestrictor;
 import org.jolokia.server.core.service.api.JolokiaService;
 import org.jolokia.server.core.service.api.LogHandler;
-import org.jolokia.test.util.HttpTestUtil;
+import org.jolokia.server.core.util.HttpTestUtil;
 import org.osgi.framework.*;
 import org.osgi.framework.Filter;
 import org.osgi.service.log.LogService;

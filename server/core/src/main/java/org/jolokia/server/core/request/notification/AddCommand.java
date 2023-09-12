@@ -41,7 +41,7 @@ public class AddCommand extends ClientCommand {
     private final String mode;
 
     // Extra configuration specific for the backend
-    private Map<String,?> config;
+    private Map<String, Object> config;
 
     // List of filter on notification types which are ORed together
     private List<String> filter;
@@ -105,11 +105,11 @@ public class AddCommand extends ClientCommand {
         objectName = new ObjectName((String) pMap.get("mbean"));
         Object f = pMap.get("filter");
         if (f != null) {
-            filter = f instanceof List ? (List<String>) f : Arrays.asList(f.toString());
+            filter = f instanceof List ? (List<String>) f : Collections.singletonList(f.toString());
         }
         Object c = pMap.get("config");
         if (c != null) {
-            config = c instanceof Map ? (Map<String,?>) c : parseConfig(c.toString());
+            config = c instanceof Map ? (Map<String, Object>) c : parseConfig(c.toString());
         }
         handback = pMap.get("handback");
     }
@@ -155,7 +155,7 @@ public class AddCommand extends ClientCommand {
      * Get the configuration for an add request
      * @return map holding extra configuration. This can be null or empty.
      */
-    public Map<String, ?> getConfig() {
+    public Map<String, Object> getConfig() {
         return config;
     }
 
@@ -179,9 +179,9 @@ public class AddCommand extends ClientCommand {
     // ==============================================================================================
 
     // Parse a string as configuration object
-    private Map<String, ?> parseConfig(String pElement) {
+    private Map<String, Object> parseConfig(String pElement) {
         try {
-            return (Map<String, ?>) new JSONParser().parse(pElement);
+            return (Map<String, Object>) new JSONParser().parse(pElement);
         } catch (ParseException e) {
             throw new IllegalArgumentException("Cannot parse config '" + pElement + "' as JSON Object",e);
         } catch (ClassCastException e) {

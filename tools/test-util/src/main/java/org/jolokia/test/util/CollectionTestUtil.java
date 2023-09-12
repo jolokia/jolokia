@@ -9,8 +9,8 @@ import java.util.Map;
  */
 public class CollectionTestUtil {
 
-    public static Map newMap(Object ... args) {
-        Map ret = new HashMap();
+    public static Map<String, Object> newMap(String ... args) {
+        Map<String, Object> ret = new HashMap<>();
         for (int i = 0; i < args.length; i +=2) {
             ret.put(args[i],args[i+1]);
         }

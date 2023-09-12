@@ -43,7 +43,7 @@ public class NotificationListenerDelegateTest {
         expect(cmd.getHandback()).andStubReturn(handback);
         expect(cmd.getMode()).andStubReturn("pull");
         if (configKeyAndValue.length > 0) {
-            Map config = CollectionTestUtil.newMap(configKeyAndValue);
+            Map<String, Object> config = CollectionTestUtil.newMap(configKeyAndValue);
             expect(cmd.getConfig()).andStubReturn(config);
         } else {
             expect(cmd.getConfig()).andStubReturn(null);

@@ -31,7 +31,7 @@ import org.jolokia.server.core.service.impl.StdoutLogHandler;
 import org.jolokia.server.core.service.request.RequestHandler;
 import org.jolokia.server.core.service.serializer.Serializer;
 import org.jolokia.server.core.util.*;
-import org.jolokia.test.util.HttpTestUtil;
+import org.jolokia.server.core.util.HttpTestUtil;
 import org.json.simple.*;
 import org.testng.annotations.Test;
 

@@ -32,22 +32,4 @@
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
-  <dependencies>
-
-    <!-- JakartaEE dependencies -->
-
-    <dependency>
-      <groupId>jakarta.servlet</groupId>
-      <artifactId>jakarta.servlet-api</artifactId>
-    </dependency>
-
-    <!-- Test dependencies -->
-
-    <dependency>
-      <groupId>org.easymock</groupId>
-      <artifactId>easymock</artifactId>
-    </dependency>
-
-  </dependencies>
-
 </project>
