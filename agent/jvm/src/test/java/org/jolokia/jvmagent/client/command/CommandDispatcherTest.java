@@ -22,6 +22,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 import com.sun.tools.attach.*;
+import com.sun.tools.attach.spi.AttachProvider;
 import org.easymock.EasyMock;
 import org.easymock.IArgumentMatcher;
 import org.jolokia.server.core.Version;
@@ -104,7 +105,7 @@ public class CommandDispatcherTest {
         CommandDispatcher d = new CommandDispatcher(opts("start","blub"));
 
         VirtualMachineHandlerOperations vmh = createMock(VirtualMachineHandlerOperations.class);
-        VirtualMachine vm = createMock(VirtualMachine.class);
+        MockableVirtualMachine vm = createMock(MockableVirtualMachine.class);
         expect(vmh.getSystemProperties(EasyMock.eq(vm))).andReturn(getProperties(false));
         expect(vmh.getSystemProperties(EasyMock.eq(vm))).andReturn(getProperties(true));
         // Agent should be loaded for successful switch
@@ -143,7 +144,7 @@ public class CommandDispatcherTest {
         CommandDispatcher d = new CommandDispatcher(opts("start", "42"));
 
         VirtualMachineHandlerOperations vmh = createMock(VirtualMachineHandlerOperations.class);
-        final VirtualMachine vm = createMock(VirtualMachine.class);
+        final MockableVirtualMachine vm = createMock(MockableVirtualMachine.class);
         expect(vm.getSystemProperties()).andThrow(new IOException());
         expect(vmh.getSystemProperties(EasyMock.eq(vm))).andThrow(new ProcessingException("", new IOException(),
                 new OptionsAndArgs(CommandDispatcher.getAvailableCommands())));
@@ -166,7 +167,7 @@ public class CommandDispatcherTest {
         CommandDispatcher d = new CommandDispatcher(opts(pCommand,p));
 
         VirtualMachineHandlerOperations vmh = createMock(VirtualMachineHandlerOperations.class);
-        VirtualMachine vm = createMock(VirtualMachine.class);
+        MockableVirtualMachine vm = createMock(MockableVirtualMachine.class);
         expect(vmh.getSystemProperties(EasyMock.eq(vm))).andReturn(getProperties(pActive)).times(pCommand.equals("toggle") ? 2 : 1);
         if (!pActive && !pCommand.equals("stop")) {
             expect(vmh.getSystemProperties(EasyMock.eq(vm))).andReturn(getProperties(true));
@@ -186,7 +187,7 @@ public class CommandDispatcherTest {
     private void testStatus(boolean pActive,int pRc) throws IOException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         CommandDispatcher d = new CommandDispatcher(opts("status", "18"));
 
-        VirtualMachine vm = createMock(VirtualMachine.class);
+        MockableVirtualMachine vm = createMock(MockableVirtualMachine.class);
         VirtualMachineHandlerOperations vmh = createMock(VirtualMachineHandlerOperations.class);
         expect(vmh.getSystemProperties(EasyMock.eq(vm))).andReturn(getProperties(pActive)).anyTimes();
         replay(vm, vmh);
@@ -236,6 +237,10 @@ public class CommandDispatcherTest {
         return new OptionsAndArgs(CommandDispatcher.getAvailableCommands(),args);
     }
 
-
+    public static abstract class MockableVirtualMachine extends VirtualMachine {
+        protected MockableVirtualMachine(AttachProvider provider, String id) {
+            super(provider, id);
+        }
+    }
 
 }

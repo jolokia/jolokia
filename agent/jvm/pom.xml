@@ -120,6 +120,16 @@
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <compilerArgs>
+            <arg>--add-modules=jdk.attach</arg>
+          </compilerArgs>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
         <executions>
           <execution>
@@ -265,21 +275,6 @@
 
   <profiles>
     <profile>
-      <id>default-tools-1.8.jar</id>
-      <activation>
-        <jdk>1.8</jdk>
-      </activation>
-      <dependencies>
-        <dependency>
-          <groupId>com.sun</groupId>
-          <artifactId>tools</artifactId>
-          <version>1.8</version>
-          <scope>system</scope>
-          <systemPath>${java.home}/../lib/tools.jar</systemPath>
-        </dependency>
-      </dependencies>
-    </profile>
-    <profile>
       <id>dist</id>
       <build>
         <plugins>
@@ -321,31 +316,6 @@
             </executions>
           </plugin>
         </plugins>
-      </build>
-    </profile>
-    <profile>
-      <id>java9+</id>
-      <activation>
-        <jdk>[9,)</jdk>
-      </activation>
-      <build>
-        <pluginManagement>
-          <plugins>
-            <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-compiler-plugin</artifactId>
-              <configuration>
-                <compilerArgs>
-                  <arg>--add-modules=jdk.attach</arg>
-                </compilerArgs>
-                <source>9</source>
-                <target>9</target>
-                <testSource>9</testSource>
-                <testTarget>9</testTarget>
-              </configuration>
-            </plugin>
-          </plugins>
-        </pluginManagement>
       </build>
     </profile>
   </profiles>

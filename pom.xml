@@ -249,10 +249,10 @@
           <artifactId>maven-compiler-plugin</artifactId>
           <version>3.11.0</version>
           <configuration>
-            <source>1.8</source>
-            <testSource>1.8</testSource>
-            <target>1.8</target>
-            <testTarget>1.8</testTarget>
+            <source>11</source>
+            <testSource>11</testSource>
+            <target>11</target>
+            <testTarget>11</testTarget>
             <meminitial>128m</meminitial>
             <maxmem>512m</maxmem>
           </configuration>
@@ -333,6 +333,18 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
           <version>3.1.2</version>
+          <configuration>
+            <argLine>
+              <!--
+                deny all reflective access except:
+                 - java.base/java.lang for Easymock (see https://github.com/easymock/easymock/issues/235 - should be fixed now)
+                 - java.management/javax.management.modelmbean for org.jolokia.jmx.JolokiaMBeanServerTest
+              -->
+              --illegal-access=deny
+<!--              &#45;&#45;add-opens java.base/java.lang=ALL-UNNAMED-->
+              --add-opens java.management/javax.management.modelmbean=ALL-UNNAMED
+            </argLine>
+          </configuration>
         </plugin>
 
         <plugin>
@@ -1179,55 +1191,6 @@
         </plugins>
       </build>
     </profile>
-
-    <profile>
-      <id>java9+</id>
-      <activation>
-        <jdk>[9,)</jdk>
-      </activation>
-      <build>
-        <pluginManagement>
-          <plugins>
-            <plugin>
-              <artifactId>maven-surefire-plugin</artifactId>
-              <configuration>
-                <argLine>
-                  <!--
-                    deny all reflective access except:
-                     - java.base/java.lang for Easymock (see https://github.com/easymock/easymock/issues/235)
-                     - java.management/javax.management.modelmbean for org.jolokia.jmx.JolokiaMBeanServerTest
-                  -->
-                  --illegal-access=deny
-                  --add-opens java.base/java.lang=ALL-UNNAMED
-                  --add-opens java.management/javax.management.modelmbean=ALL-UNNAMED
-                </argLine>
-              </configuration>
-            </plugin>
-          </plugins>
-        </pluginManagement>
-      </build>
-    </profile>
-
-<!--    <profile>-->
-<!--      <id>disable-javadoc-lint</id>-->
-<!--      <activation>-->
-<!--        <jdk>[1.8,2.0)</jdk>-->
-<!--      </activation>-->
-<!--      <build>-->
-<!--        <pluginManagement>-->
-<!--          <plugins>-->
-<!--            <plugin>-->
-<!--              <groupId>org.apache.maven.plugins</groupId>-->
-<!--              <artifactId>maven-javadoc-plugin</artifactId>-->
-<!--              <version>2.10.1</version>-->
-<!--              <configuration>-->
-<!--                <additionalparam>-Xdoclint:none</additionalparam>-->
-<!--              </configuration>-->
-<!--            </plugin>-->
-<!--          </plugins>-->
-<!--        </pluginManagement>-->
-<!--      </build>-->
-<!--    </profile>-->
 
   </profiles>
 </project>
