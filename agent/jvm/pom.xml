@@ -96,22 +96,13 @@
     <!-- Other -->
 
     <dependency>
-      <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-server</artifactId>
-      <version>${version.jetty}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-servlet</artifactId>
-      <version>${version.jetty}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-security</artifactId>
-      <version>${version.jetty}</version>
-      <scope>test</scope>
+      <!--
+        Undertow is the JDK11 container that can be easily used for tests which don't require Servlet API.
+        Tomcat 10+ depends on Servlet API and Jetty 12+ is JDK17 only.
+      -->
+      <groupId>io.undertow</groupId>
+      <artifactId>undertow-core</artifactId>
+      <version>${version.undertow}</version>
     </dependency>
 
   </dependencies>

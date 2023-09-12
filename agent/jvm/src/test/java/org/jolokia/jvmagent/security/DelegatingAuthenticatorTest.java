@@ -15,22 +15,27 @@ package org.jolokia.jvmagent.security;/*
  * limitations under the License.
  */
 
-import java.io.IOException;
-import java.io.Writer;
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStreamWriter;
+import java.nio.ByteBuffer;
 
 import javax.net.ssl.*;
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-import javax.servlet.http.*;
 
 import com.sun.net.httpserver.*;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import io.undertow.Handlers;
+import io.undertow.Undertow;
+import io.undertow.server.HttpHandler;
+import io.undertow.server.HttpServerExchange;
+import io.undertow.server.handlers.PathHandler;
+import io.undertow.util.HeaderMap;
+import io.undertow.util.HeaderValues;
+import io.undertow.util.StatusCodes;
 import org.jolokia.server.core.osgi.security.AuthorizationHeaderParser;
 import org.jolokia.test.util.EnvTestUtil;
 import org.testng.annotations.*;
+import org.xnio.channels.Channels;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.testng.Assert.*;
 
 /**
@@ -39,7 +44,7 @@ import static org.testng.Assert.*;
  */
 public class DelegatingAuthenticatorTest extends BaseAuthenticatorTest {
 
-    private Server jettyServer;
+    private Undertow undertowServer;
     private String url;
 
     @DataProvider
@@ -50,28 +55,46 @@ public class DelegatingAuthenticatorTest extends BaseAuthenticatorTest {
     @BeforeClass
     public void setup() throws Exception {
         int port = EnvTestUtil.getFreePort();
-        jettyServer = new Server(port);
-        ServletContextHandler jettyContext = new ServletContextHandler(jettyServer, "/");
-        ServletHolder holder = new ServletHolder(createServlet());
-        jettyContext.addServlet(holder, "/test/*");
 
-        jettyServer.start();
-        url = "http://localhost:" + port + "/test";
+        PathHandler path = Handlers.path();
+        undertowServer = Undertow.builder()
+                .addHttpListener(port, "127.0.0.1")
+                .setHandler(path)
+                .build();
+
+        path.addPrefixPath("/test", createHandler());
+
+        undertowServer.start();
+        url = "http://127.0.0.1:" + port + "/test";
     }
 
-    private Servlet createServlet() {
-        return new HttpServlet() {
-            protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-                String auth = req.getHeader("Authorization");
+    private HttpHandler createHandler() {
+        return new HttpHandler() {
+            @Override
+            public void handleRequest(HttpServerExchange ex) throws Exception {
+                HeaderMap headers = ex.getRequestHeaders();
+                HeaderValues values = headers.get(io.undertow.util.Headers.AUTHORIZATION);
+                String auth = values == null ? null : values.getFirst();
                 if (auth == null || !auth.equals("Bearer blub")) {
-                    resp.setStatus(401);
+                    ex.setStatusCode(StatusCodes.UNAUTHORIZED);
+                    ex.endExchange();
                 } else {
-                    resp.setContentType("text/json");
-                    Writer writer = resp.getWriter();
-                    if (req.getPathInfo() != null && req.getPathInfo().contains("invalid")) {
-                        writer.append("{\"Invalid JSON\"");
-                    } else {
-                        writer.append("{\"metadata\":{\"name\":\"roland\"},\"array\":[\"eins\",\"zwei\"]}");
+                    ex.getResponseHeaders().put(io.undertow.util.Headers.CONTENT_TYPE, "text/json");
+
+                    try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                         OutputStreamWriter writer = new OutputStreamWriter(outputStream, UTF_8)) {
+
+                        String requestUri = ex.getRequestURI();
+                        if (requestUri != null && requestUri.contains("invalid")) {
+                            writer.append("{\"Invalid JSON\"");
+                        } else {
+                            writer.append("{\"metadata\":{\"name\":\"roland\"},\"array\":[\"eins\",\"zwei\"]}");
+                        }
+                        writer.close();
+
+                        ByteBuffer output = ByteBuffer.wrap(outputStream.toByteArray());
+                        ex.getResponseHeaders().put(io.undertow.util.Headers.CONTENT_LENGTH, String.valueOf(output.limit()));
+                        Channels.writeBlocking(ex.getResponseChannel(), output);
                     }
                 }
             }
@@ -192,7 +215,7 @@ public class DelegatingAuthenticatorTest extends BaseAuthenticatorTest {
     }
 
     @AfterClass
-    public void tearDown() throws Exception {
-        jettyServer.stop();
+    public void tearDown() {
+        undertowServer.stop();
     }
 }
