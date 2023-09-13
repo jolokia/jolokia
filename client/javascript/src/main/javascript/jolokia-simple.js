@@ -51,7 +51,7 @@
             }
             var req = { type: "read", mbean: mbean, attribute: attribute };
             addPath(req,path);
-            return extractValue(this.request(req,prepareSucessCallback(opts)),opts);
+            return extractValue(this.request(req,prepareSuccessCallback(opts)),opts);
         }
 
         /**
@@ -72,7 +72,7 @@
             }
             var req = { type: "write", mbean: mbean, attribute: attribute, value: value };
             addPath(req,path);
-            return extractValue(this.request(req,prepareSucessCallback(opts)),opts);
+            return extractValue(this.request(req,prepareSuccessCallback(opts)),opts);
         }
 
         /**
@@ -100,7 +100,7 @@
                 }
                 req.arguments = args;
             }
-            return extractValue(this.request(req,prepareSucessCallback(opts)),opts);
+            return extractValue(this.request(req,prepareSuccessCallback(opts)),opts);
         }
 
         /**
@@ -119,7 +119,7 @@
          */
         function search(mbeanPattern,opts) {
             var req = { type: "search", mbean: mbeanPattern};
-            return extractValue(this.request(req,prepareSucessCallback(opts)),opts);
+            return extractValue(this.request(req,prepareSuccessCallback(opts)),opts);
         }
 
         /**
@@ -145,7 +145,7 @@
          * @param version and other meta information as object
          */
         function version(opts) {
-            return extractValue(this.request({type: "version"},prepareSucessCallback(opts)),opts);
+            return extractValue(this.request({type: "version"},prepareSuccessCallback(opts)),opts);
         }
 
 
@@ -213,7 +213,7 @@
             }
             var req = { type: "list" };
             addPath(req,path);
-            return extractValue(this.request(req,prepareSucessCallback(opts)),opts);
+            return extractValue(this.request(req,prepareSuccessCallback(opts)),opts);
         }
 
         // =======================================================================
@@ -246,7 +246,7 @@
         }
 
         // Prepare callback to receive directly the value (instead of the full blown response)
-        function prepareSucessCallback(opts) {
+        function prepareSuccessCallback(opts) {
             if (opts && opts.success) {
                 var parm = $.extend({},opts);
                 parm.success = function(resp) {

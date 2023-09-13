@@ -27,7 +27,7 @@
 
     var _jolokiaConstructorFunc = function ($) {
 
-        // Default paramerters for GET and POST requests
+        // Default parameters for GET and POST requests
         var DEFAULT_CLIENT_PARAMS = {
             type:"POST",
             jsonp:false
@@ -111,7 +111,7 @@
              *     that bulk request cannot be used with JSONP requests). Also, when using a
              *     <code>read</code> type request for multiple attributes, this also can
              *     only be sent as "post" requests. If not given, a HTTP method is determined
-             *     dyamically. If a method is selected which doesn't fit to the request, an error
+             *     dynamically. If a method is selected which doesn't fit to the request, an error
              *     is raised.
              *   </dd>
              *   <dt>jsonp</dt>
@@ -130,7 +130,7 @@
              *   <dt>error</dt>
              *   <dd>
              *     Callback in case a Jolokia error occurs. A Jolokia error is one, in which the HTTP request
-             *     suceeded with a status code of 200, but the response object contains a status other
+             *     succeeded with a status code of 200, but the response object contains a status other
              *     than OK (200) which happens if the request JMX operation fails. This callback receives
              *     the full Jolokia response object (with a key <code>error</code> set). If no error callback
              *     is given, but an asynchronous operation is performed, the error response is printed
@@ -139,7 +139,7 @@
              *   <dt>ajaxError</dt>
              *   <dd>
              *     Global error callback called when the Ajax request itself failed. It obtains the same arguments
-             *     as the error callback given for <code>jQuery.ajax()</code>, i.e. the <code>XmlHttpResonse</code>,
+             *     as the error callback given for <code>jQuery.ajax()</code>, i.e. the <code>XmlHttpResponse</code>,
              *     a text status and an error thrown. Refer to the jQuery documentation for more information about
              *     this error handler.
              *   </dd>
@@ -530,7 +530,7 @@
             }
 
             // ===== Notification handler state vars and functions ...
-            // Notification hanler definition for various notification modes
+            // Notification handler definition for various notification modes
             var NOTIFICATION_HANDLERS = {
                 // Pull mode for notifications
                 pull : {
@@ -756,7 +756,7 @@
         }
 
         // Extract the HTTP-Method to use and make some sanity checks if
-        // the method was provided as part of the options, but dont fit
+        // the method was provided as part of the options, but don't fit
         // to the request given
         function extractMethod(request, opts) {
             var methodGiven = opts && opts.method ? opts.method.toLowerCase() : null,

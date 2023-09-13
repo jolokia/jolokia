@@ -24,7 +24,7 @@ aspects.
 
 === Testing
 
-This library comes with a test webapplication for
+This library comes with a test web application for
 integration testing this library from within a browser. The
 submodule `test-app` creates a WAR artifact which
 can be deployed in a servlet container. The Jolokia agent is
@@ -57,7 +57,7 @@ unix like OSs to create symbolic links to the Javascript
 files in the source directories. A typical workflow looks
 like:
 
-* Initalize:
+* Initialize:
 +
 ----
 mvn clean install
