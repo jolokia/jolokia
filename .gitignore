@@ -4,7 +4,9 @@ target
 *.iws
 *~
 /classes/
+node_modules
 .idea
+.vscode
 wiki
 felix
 .settings
