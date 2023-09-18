@@ -1,0 +1,4 @@
+.*
+src/
+target/
+jest.config.js

@@ -18,12 +18,33 @@
  * Jolokia Javascript Client Library
  * =================================
  *
- * Requires jquery.js and json2.js
- * (if no native JSON.stringify() support is available,
- * look here where this is the case: http://caniuse.com/json)
+ * Requires jquery.js.
  */
+"use strict";
 
-(function() {
+// Uses Node, AMD or browser globals to create a module.
+(function (root, factory) {
+    if (typeof define === "function" && define.amd) {
+        // AMD. Register as an anonymous module.
+        define(["jquery"], factory);
+    } else if (typeof module === "object" && module.exports) {
+        // Node. Does not work with strict CommonJS, but
+        // only CommonJS-like environments that support module.exports,
+        // like Node.
+        var jquery = require("jquery");
+        // To get along with jest-environment-jsdom
+        if (typeof jquery.fn !== "undefined") {
+            module.exports = factory(jquery);
+        } else {
+            var {JSDOM} = require("jsdom");
+            var {window} = new JSDOM("");
+            module.exports = factory(jquery(window));
+        }
+    } else {
+        // Browser globals
+        root.Jolokia = factory(root.jQuery);
+    }
+}(typeof self !== "undefined" ? self : this, function (jQuery) {
 
     var _jolokiaConstructorFunc = function ($) {
 
@@ -61,7 +82,7 @@
         function Jolokia(param) {
             // If called without 'new', we are constructing an object
             // nevertheless
-            if (!(this instanceof arguments.callee)) {
+            if (typeof this === "undefined") {
                 return new Jolokia(param);
             }
 
@@ -974,19 +995,6 @@
         return Jolokia;
     };
 
-    // =====================================================================================================
-    // Register either as global or as AMD module
-
-    (function (root, factory) {
-        if (typeof define === 'function' && define.amd) {
-            // AMD. Register as a named module
-            define(["jquery"], factory);
-        } else {
-            // Browser globals
-            root.Jolokia = factory(root.jQuery);
-        }
-    }(this, function (jQuery) {
-        return _jolokiaConstructorFunc(jQuery);
-    }));
-}());
+    return _jolokiaConstructorFunc(jQuery);
+}));
 

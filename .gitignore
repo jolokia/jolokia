@@ -1,4 +1,5 @@
 target
+dist
 *.iml
 *.ipr
 *.iws
