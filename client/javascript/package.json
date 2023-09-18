@@ -1,0 +1,57 @@
+{
+  "name": "jolokia.js",
+  "version": "2.0.0-dev.3",
+  "description": "Jolokia JavaScript client",
+  "main": "dist/jolokia.js",
+  "exports": {
+    ".": "./dist/jolokia.js",
+    "./simple": "./dist/jolokia-simple.js",
+    "./cubism": "./dist/jolokia-cubism.js"
+  },
+  "author": "Roland Huss & Jolokia developers",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jolokia/jolokia.git"
+  },
+  "homepage": "https://github.com/jolokia/jolokia#readme",
+  "bugs": {
+    "url": "https://github.com/jolokia/jolokia/issues"
+  },
+  "keywords": [
+    "jolokia",
+    "jmx"
+  ],
+  "scripts": {
+    "clean": "rm -rf dist/",
+    "build": "npm run clean && mkdir dist && cp src/main/javascript/*.js dist/ && rm dist/*.test.js",
+    "test": "jest",
+    "prepack": "npm test && npm run build"
+  },
+  "dependencies": {
+    "jquery": "^3.7.1"
+  },
+  "peerDependencies": {
+    "cubism": "^1.6.0",
+    "jsdom": "^22.1.0"
+  },
+  "peerDependenciesMeta": {
+    "cubism": {
+      "optional": true
+    },
+    "jsdom": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "cubism": "^1.6.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0"
+  },
+  "engines": {
+    "node": ">=16"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

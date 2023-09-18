@@ -26,8 +26,36 @@
  *
  * @author roland
  */
+"use strict";
 
-(function() {
+// Uses Node, AMD or browser globals to create a module.
+(function (root, factory) {
+    if (typeof define === "function" && define.amd) {
+        // AMD. Register as an anonymous module.
+        define(["jquery", "./jolokia"], factory);
+    } else if (typeof module === "object" && module.exports) {
+        // Node. Does not work with strict CommonJS, but
+        // only CommonJS-like environments that support module.exports,
+        // like Node.
+        var jquery = require("jquery");
+        // To get along with jest-environment-jsdom
+        if (typeof jquery.fn !== "undefined") {
+            module.exports = factory(jquery, require("./jolokia"));
+        } else {
+            var {JSDOM} = require("jsdom");
+            var {window} = new JSDOM("");
+            module.exports = factory(jquery(window), require("./jolokia"));
+        }
+    } else {
+        // Browser globals
+        if (root.Jolokia) {
+            factory(root.jQuery, root.Jolokia);
+        } else {
+            console.error("No Jolokia definition found. Please include jolokia.js before jolokia-simple.js");
+        }
+    }
+}(typeof self !== "undefined" ? self : this, function (jQuery, Jolokia) {
+
     var builder = function($,Jolokia) {
         /**
          * Get one or more attributes
@@ -271,21 +299,5 @@
         return Jolokia;
     };
 
-    // =====================================================================================================
-    // Register either at the global Jolokia object global or as an AMD module
-    (function (root, factory) {
-        if (typeof define === 'function' && define.amd) {
-            // AMD. Register as a named module
-            define(["jquery","jolokia"], factory);
-        } else {
-            if (root.Jolokia) {
-                builder(jQuery,root.Jolokia);
-            } else {
-                console.error("No Jolokia definition found. Please include jolokia.js before jolokia-simple.js");
-            }
-        }
-    }(this, function (jQuery,Jolokia) {
-        return builder(jQuery,Jolokia);
-    }));
-})();
-
+    return builder(jQuery, Jolokia);
+}));
