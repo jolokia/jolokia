@@ -71,7 +71,7 @@ public class ExecHandler extends AbstractCommandHandler<JolokiaExecRequest> {
         OperationAndParamType types = extractOperationTypes(server,request);
         int nrParams = types.paramClasses.length;
         Object[] params = new Object[nrParams];
-        List<Object> args = request.getArguments();
+        List<Object> args = (List<Object>) request.getArguments();
         verifyArguments(request, types, nrParams, args);
         for (int i = 0;i < nrParams; i++) {
         	if (types.paramOpenTypes != null && types.paramOpenTypes[i] != null) {

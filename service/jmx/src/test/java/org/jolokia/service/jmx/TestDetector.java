@@ -24,6 +24,7 @@ import javax.management.*;
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
 import org.jolokia.server.core.detector.ServerDetector;
+import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.api.ServerHandle;
 import org.jolokia.server.core.service.request.RequestInterceptor;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
@@ -40,7 +41,7 @@ public class TestDetector implements ServerDetector {
 
     private static boolean fallThrough = false;
 
-    private static Exception exps[] = new Exception[] {
+    private static final Exception[] exps = new Exception[] {
             new RuntimeException(),
             new MBeanRegistrationException(new RuntimeException())
     };
@@ -59,6 +60,14 @@ public class TestDetector implements ServerDetector {
     }
 
     public void init(Map<String, Object> pConfig) {
+
+    }
+
+    public void init(JolokiaContext pJolokiaContext) {
+
+    }
+
+    public void destroy() {
 
     }
 
@@ -85,24 +94,24 @@ public class TestDetector implements ServerDetector {
         if (throwAddException) {
             MBeanServer server = createMock(MBeanServer.class);
             try {
-                expect(server.registerMBean(EasyMock.<Object>anyObject(), EasyMock.<ObjectName>anyObject()))
+                expect(server.registerMBean(EasyMock.anyObject(), EasyMock.anyObject()))
                         .andStubThrow(exps[nr % exps.length]);
-                expect(server.queryNames(EasyMock.<ObjectName>anyObject(), (QueryExp) isNull())).andStubAnswer(
+                expect(server.queryNames(EasyMock.anyObject(), isNull())).andStubAnswer(
                         new IAnswer<Set<ObjectName>>() {
-                            public Set<ObjectName> answer() throws Throwable {
+                            public Set<ObjectName> answer() {
                                 Object[] args = EasyMock.getCurrentArguments();
-                                return new HashSet<ObjectName>(Arrays.asList((ObjectName) args[0]));
+                                return new HashSet<>(Collections.singletonList((ObjectName) args[0]));
                             }
                         });
-                expect(server.isRegistered(EasyMock.<ObjectName>anyObject())).andStubReturn(true);
-                server.addNotificationListener((ObjectName) anyObject(), (NotificationListener) anyObject(),
-                                               (NotificationFilter) anyObject(), anyObject());
+                expect(server.isRegistered(EasyMock.anyObject())).andStubReturn(true);
+                server.addNotificationListener(anyObject(), (NotificationListener) anyObject(),
+                        anyObject(), anyObject());
                 expectLastCall().anyTimes();
-                server.removeNotificationListener((ObjectName) anyObject(), (NotificationListener) anyObject());
+                server.removeNotificationListener(anyObject(), (NotificationListener) anyObject());
                 expectLastCall().anyTimes();
                 replay(server);
-                return Collections.singleton((MBeanServerConnection) server);
-            } catch (JMException e) {
+                return Collections.singleton(server);
+            } catch (JMException ignored) {
             }
         }
         return null;
