@@ -16,16 +16,16 @@ package org.jolokia.server.core.util;
  *  limitations under the License.
  */
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.testng.annotations.Test;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.testng.Assert.assertEquals;
 
 import static org.jolokia.server.core.util.EscapeUtil.*;
-import static org.testng.Assert.assertEquals;
 
 /**
  * @author roland
@@ -35,8 +35,8 @@ public class EscapeUtilTest {
 
 
     Object[] PATH_SPLIT_TEST_DATA = new Object[] {
-            PATH_ESCAPE + PATH_ESCAPE + PATH_ESCAPE + PATH_ESCAPE,asList(PATH_ESCAPE + PATH_ESCAPE),true,
-            "hello" + PATH_ESCAPE + PATH_ESCAPE,asList("hello" + PATH_ESCAPE),true,
+            PATH_ESCAPE + PATH_ESCAPE + PATH_ESCAPE + PATH_ESCAPE,singletonList(PATH_ESCAPE + PATH_ESCAPE),true,
+            "hello" + PATH_ESCAPE + PATH_ESCAPE,singletonList("hello" + PATH_ESCAPE),true,
             "hello/world", asList("hello", "world"),true,
             "hello" + PATH_ESCAPE + "/world/yeah",asList("hello/world", "yeah"),true,
             "hello" + PATH_ESCAPE + PATH_ESCAPE + "/world/yeah",asList("hello" + PATH_ESCAPE,"world","yeah"),true,
@@ -56,14 +56,16 @@ public class EscapeUtilTest {
         assertEquals(EscapeUtil.escape("hello\\world,how are you?",CSV_ESCAPE,","),"hello\\\\world\\,how are you?");
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void pathSplitting() {
         for (int i = 0; i< PATH_SPLIT_TEST_DATA.length; i += 3) {
-            List got = EscapeUtil.parsePath((String) PATH_SPLIT_TEST_DATA[i]);
+            List<?> got = EscapeUtil.parsePath((String) PATH_SPLIT_TEST_DATA[i]);
             assertEquals(got, (List<String>) PATH_SPLIT_TEST_DATA[i+1]);
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void pathCombining() {
         for (int i = 0; i< PATH_SPLIT_TEST_DATA.length; i += 3) {
@@ -75,10 +77,11 @@ public class EscapeUtilTest {
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void commaSplitting() {
         for (int i = 0; i< COMMA_SPLIT_TEST_DATA.length; i +=2) {
-            List got = EscapeUtil.split((String) COMMA_SPLIT_TEST_DATA[i], CSV_ESCAPE, ",");
+            List<?> got = EscapeUtil.split((String) COMMA_SPLIT_TEST_DATA[i], CSV_ESCAPE, ",");
             assertEquals(got, (List<String>) COMMA_SPLIT_TEST_DATA[i+1]);
         }
     }
@@ -89,7 +92,7 @@ public class EscapeUtilTest {
         for (int i = 0; i < 15000; i++) {
             longString.append("!!");
         }
-        List<String> arguments = Arrays.asList(longString.toString());
+        List<String> arguments = Collections.singletonList(longString.toString());
 
         String path = EscapeUtil.combineToPath(arguments);
 

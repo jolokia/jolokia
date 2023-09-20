@@ -34,11 +34,11 @@ import org.json.simple.JSONObject;
 public class JolokiaExecRequest extends JolokiaObjectNameRequest {
 
     // Name of operation to execute
-    private String operation;
+    private final String operation;
 
     // List of arguments for the operation to execute. Can be either already of the
     // proper type or, if not, in a string representation.
-    private List arguments;
+    private final List<?> arguments;
 
     /**
      * Constructor for creating a JmxRequest resulting from an HTTP GET request
@@ -49,7 +49,7 @@ public class JolokiaExecRequest extends JolokiaObjectNameRequest {
      * @param pParams optional params used for processing the request.
      * @throws MalformedObjectNameException if the object name is not in proper format
      */
-    JolokiaExecRequest(String pObjectName, String pOperation, List pArguments,
+    JolokiaExecRequest(String pObjectName, String pOperation, List<?> pArguments,
                        ProcessingParameters pParams) throws MalformedObjectNameException {
         super(RequestType.EXEC, pObjectName, null /* path is not supported for exec requests */, pParams, true);
         operation = pOperation;
@@ -65,7 +65,7 @@ public class JolokiaExecRequest extends JolokiaObjectNameRequest {
      */
     JolokiaExecRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) throws MalformedObjectNameException {
         super(pRequestMap, pParams, true);
-        arguments = (List) pRequestMap.get("arguments");
+        arguments = (List<?>) pRequestMap.get("arguments");
         operation = (String) pRequestMap.get("operation");
     }
 
@@ -83,7 +83,7 @@ public class JolokiaExecRequest extends JolokiaObjectNameRequest {
      *
      * @return arguments
      */
-    public List getArguments() {
+    public List<?> getArguments() {
         return arguments;
     }
 
@@ -91,9 +91,10 @@ public class JolokiaExecRequest extends JolokiaObjectNameRequest {
      * Return this request in a proper JSON representation
      * @return this object in a JSON representation
      */
+    @SuppressWarnings("unchecked")
     public JSONObject toJSON() {
         JSONObject ret = super.toJSON();
-        if (arguments != null && arguments.size() > 0) {
+        if (arguments != null && !arguments.isEmpty()) {
             ret.put("arguments", arguments);
         }
         ret.put("operation", operation);
@@ -131,7 +132,7 @@ public class JolokiaExecRequest extends JolokiaObjectNameRequest {
         if (extraArgs == null) {
             return null;
         }
-        List<String> args = new ArrayList<String>();
+        List<String> args = new ArrayList<>();
         for (String arg : extraArgs) {
             args.add(EscapeUtil.convertSpecialStringTags(arg));
         }
@@ -143,7 +144,7 @@ public class JolokiaExecRequest extends JolokiaObjectNameRequest {
     public String toString() {
         StringBuffer ret = new StringBuffer("JmxExecRequest[");
         ret.append("operation=").append(getOperation());
-        if (arguments != null && arguments.size() > 0) {
+        if (arguments != null && !arguments.isEmpty()) {
             ret.append(", arguments=").append(getArguments());
         }
         String baseInfo = getInfo();

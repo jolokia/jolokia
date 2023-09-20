@@ -27,7 +27,7 @@ import java.util.*;
  */
 public class CascadingConfiguration implements Configuration {
 
-    private SortedSet<Configuration> configurations;
+    private final SortedSet<Configuration> configurations;
 
     /**
      * Constructor
@@ -50,7 +50,7 @@ public class CascadingConfiguration implements Configuration {
 
     /** {@inheritDoc} */
     public Set<ConfigKey> getConfigKeys() {
-        Set<ConfigKey> ret = new HashSet<ConfigKey>();
+        Set<ConfigKey> ret = new HashSet<>();
         for (Configuration config : getConfigurations()) {
             ret.addAll(config.getConfigKeys());
         }

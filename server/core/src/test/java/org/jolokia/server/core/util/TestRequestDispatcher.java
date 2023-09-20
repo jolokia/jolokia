@@ -16,9 +16,9 @@ import org.jolokia.server.core.request.JolokiaRequest;
  */
 public class TestRequestDispatcher implements RequestDispatcher {
 
-    private final Map stateMap;
+    private final Map<Object, Object> stateMap;
 
-    private TestRequestDispatcher(Map pStateMap) {
+    private TestRequestDispatcher(Map<Object, Object> pStateMap) {
         stateMap = pStateMap;
     }
 
@@ -36,7 +36,7 @@ public class TestRequestDispatcher implements RequestDispatcher {
     public static class Builder {
 
         JolokiaRequest req;
-        Map stateMap = new HashMap();
+        Map<Object, Object> stateMap = new HashMap<>();
 
         public Builder request(JolokiaRequest pReq) {
             req = pReq;
@@ -47,10 +47,10 @@ public class TestRequestDispatcher implements RequestDispatcher {
             if (req == null) {
                 throw new IllegalArgumentException("No request stored before");
             }
-            Map value = new HashMap();
+            Map<Object, Object> value = new HashMap<>();
             for (int i = 0; i < pArgs.length; i += 2) {
                 value.put(pArgs[i],pArgs[i+1]);
-            };
+            }
             stateMap.put(req.toString(),value);
             req = null;
             return this;

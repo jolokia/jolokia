@@ -80,7 +80,7 @@ public class JolokiaReadRequest extends JolokiaObjectNameRequest {
         }
         if (isMultiAttributeMode()) {
             throw new IllegalStateException("Request contains more than one attribute (attrs = " +
-                                            "" + attributeNames + "). Use getAttributeNames() instead.");
+                                            attributeNames + "). Use getAttributeNames() instead.");
         }
         return attributeNames.get(0);
     }
@@ -111,9 +111,10 @@ public class JolokiaReadRequest extends JolokiaObjectNameRequest {
     }
 
     /** {@inheritDoc} */
+    @SuppressWarnings("unchecked")
     public JSONObject toJSON() {
         JSONObject ret = super.toJSON();
-        if (attributeNames != null && attributeNames.size() > 0) {
+        if (attributeNames != null && !attributeNames.isEmpty()) {
             if (attributeNames.size() > 1) {
                 ret.put("attribute", attributeNames);
             } else {
@@ -185,12 +186,13 @@ public class JolokiaReadRequest extends JolokiaObjectNameRequest {
             attributeNames = EscapeUtil.split((String) pAttrval, EscapeUtil.CSV_ESCAPE, ",");
             multiAttributeMode = attributeNames.size() > 1;
         } else if (pAttrval instanceof Collection) {
+            @SuppressWarnings("unchecked")
             Collection<String> attributes = (Collection<String>) pAttrval;
             if (attributes.size() == 1 && attributes.iterator().next() == null) {
                 attributeNames = null;
                 multiAttributeMode = false;
             } else {
-                attributeNames = new ArrayList<String>(attributes);
+                attributeNames = new ArrayList<>(attributes);
                 multiAttributeMode = true;
             }
         } else if (pAttrval == null) {

@@ -3,6 +3,7 @@ package org.jolokia.server.core.util;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -14,10 +15,11 @@ import static org.testng.Assert.fail;
 
 
 public class IoUtilTest {
+    @SuppressWarnings("unchecked")
     @Test
     public void checkSmallWrite() throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        OutputStreamWriter writer = new OutputStreamWriter(out, "UTF-8");
+        OutputStreamWriter writer = new OutputStreamWriter(out, StandardCharsets.UTF_8);
 
         JSONObject resp = new JSONObject();
         resp.put("value", "hello");
@@ -29,10 +31,11 @@ public class IoUtilTest {
         assertWriterClosed(writer);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void checkBigWrite() throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        OutputStreamWriter writer = new OutputStreamWriter(out, "UTF-8");
+        OutputStreamWriter writer = new OutputStreamWriter(out, StandardCharsets.UTF_8);
 
         // Resp which should be bigger than 8192, the buffer size of OutputStreamWriter
         JSONArray resp = new JSONArray();
@@ -49,10 +52,11 @@ public class IoUtilTest {
         assertWriterClosed(writer);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void checkWriteWithCallback() throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        OutputStreamWriter writer = new OutputStreamWriter(out, "UTF-8");
+        OutputStreamWriter writer = new OutputStreamWriter(out, StandardCharsets.UTF_8);
 
         JSONObject resp = new JSONObject();
         resp.put("value", "hello");

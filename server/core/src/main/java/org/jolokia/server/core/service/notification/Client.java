@@ -29,10 +29,10 @@ public class Client {
     private long lastRefresh;
 
     // Used backend (content: Backend modes)
-    private Set<String> usedBackends;
+    private final Set<String> usedBackends;
 
     // Counter sequence
-    private AtomicLong handleSequence = new AtomicLong(0);
+    private final AtomicLong handleSequence = new AtomicLong(0);
 
     /**
      * Initialize
@@ -41,9 +41,9 @@ public class Client {
      */
     public Client(String pId) {
         id = pId;
-        listenerConfigMap = new HashMap<String, ListenerRegistration>();
-        backChannelMap = new HashMap<String, BackChannel>();
-        usedBackends = new HashSet<String>();
+        listenerConfigMap = new HashMap<>();
+        backChannelMap = new HashMap<>();
+        usedBackends = new HashSet<>();
         lastRefresh = System.currentTimeMillis();
     }
 
@@ -114,6 +114,7 @@ public class Client {
      *
      * @return JSON object for this configuration.
      */
+    @SuppressWarnings("unchecked")
     public JSONObject list() {
         JSONObject ret = new JSONObject();
         for (Map.Entry<String,ListenerRegistration> entry : listenerConfigMap.entrySet()) {

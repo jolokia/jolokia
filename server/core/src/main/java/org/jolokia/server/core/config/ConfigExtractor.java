@@ -30,7 +30,7 @@ public interface ConfigExtractor {
      * Get all configuration name
      * @return enumeration of config names
      */
-    Enumeration getNames();
+    Enumeration<String> getNames();
 
     /**
      * Get the parameter for a certain

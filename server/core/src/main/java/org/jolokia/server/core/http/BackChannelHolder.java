@@ -24,7 +24,7 @@ package org.jolokia.server.core.http;/*
  */
 public class BackChannelHolder {
 
-    private static final ThreadLocal<BackChannel> backChannelThreadLocal = new ThreadLocal<BackChannel>();
+    private static final ThreadLocal<BackChannel> backChannelThreadLocal = new ThreadLocal<>();
 
     /**
      * Get the currently set back channel

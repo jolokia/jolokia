@@ -33,10 +33,10 @@ import org.json.simple.JSONObject;
 public class JolokiaWriteRequest extends JolokiaObjectNameRequest {
 
     // The value to set
-    private Object value;
+    private final Object value;
 
     // The attribute name
-    private String attributeName;
+    private final String attributeName;
 
     /**
      * Constructor for creating a JmxRequest resulting from an HTTP GET request
@@ -110,6 +110,7 @@ public class JolokiaWriteRequest extends JolokiaObjectNameRequest {
         return ret.toString();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public JSONObject toJSON() {
         JSONObject ret = super.toJSON();

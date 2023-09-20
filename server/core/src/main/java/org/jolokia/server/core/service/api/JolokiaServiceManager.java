@@ -43,7 +43,7 @@ public interface JolokiaServiceManager  {
      *
      * @param pService service to add
      */
-    void addService(JolokiaService pService);
+    void addService(JolokiaService<?> pService);
 
     /**
      * Add a service factory for dynamically looking up services. This is

@@ -19,7 +19,7 @@ import org.json.simple.JSONObject;
 public class JolokiaNotificationRequest extends JolokiaRequest {
 
     // Command to execute
-    private NotificationCommand command;
+    private final NotificationCommand command;
 
     /**
      * Constructor for GET requests.
@@ -49,11 +49,13 @@ public class JolokiaNotificationRequest extends JolokiaRequest {
      *
      * @return notification command
      */
+    @SuppressWarnings("unchecked")
     public <T extends NotificationCommand> T getCommand() {
         return (T) command;
     }
 
     /** {@inheritDoc} */
+    @SuppressWarnings("unchecked")
     public JSONObject toJSON() {
         JSONObject ret = super.toJSON();
         JSONObject commandJson = command.toJSON();

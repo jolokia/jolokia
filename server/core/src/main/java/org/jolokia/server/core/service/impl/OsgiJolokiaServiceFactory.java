@@ -35,7 +35,7 @@ public class OsgiJolokiaServiceFactory implements JolokiaServiceLookup {
     private final BundleContext context;
 
     // Map holding all service trackers for the various services
-    private Map<Class<? extends JolokiaService>,ServiceTracker> serviceTrackerMap;
+    private final Map<Class<? extends JolokiaService<?>>,ServiceTracker<JolokiaService<?>, JolokiaService<?>>> serviceTrackerMap;
 
     // Jolokia context
     private JolokiaContext jolokiaContext;
@@ -47,16 +47,17 @@ public class OsgiJolokiaServiceFactory implements JolokiaServiceLookup {
      */
     public OsgiJolokiaServiceFactory(BundleContext pCtx) {
         context = pCtx;
-        serviceTrackerMap = new HashMap<Class<? extends JolokiaService>, ServiceTracker>();
+        serviceTrackerMap = new HashMap<>();
     }
 
     /** {@inheritDoc} */
-    public <T extends JolokiaService> Set<T> getServices(Class<T> pType) {
-        ServiceTracker tracker = getServiceTracker(pType);
+    @SuppressWarnings("unchecked")
+    public <T extends JolokiaService<?>> Set<T> getServices(Class<T> pType) {
+        ServiceTracker<?, ?> tracker = getServiceTracker(pType);
 
-        Object services[] = tracker.getServices();
+        Object[] services = tracker.getServices();
         if (services != null) {
-            Set<T> ret = new TreeSet<T>();
+            Set<T> ret = new TreeSet<>();
             for (Object service : services) {
                 ret.add((T) service);
             }
@@ -66,20 +67,20 @@ public class OsgiJolokiaServiceFactory implements JolokiaServiceLookup {
         }
     }
 
-    private <T extends JolokiaService> ServiceTracker getServiceTracker(Class<T> pType) {
-        ServiceTracker tracker = serviceTrackerMap.get(pType);
+    private <T extends JolokiaService<?>> ServiceTracker<JolokiaService<?>, JolokiaService<?>> getServiceTracker(Class<T> pType) {
+        ServiceTracker<JolokiaService<?>, JolokiaService<?>> tracker = serviceTrackerMap.get(pType);
         if (tracker == null) {
             tracker = initTracker(pType);
         }
         return tracker;
     }
 
-    private <T extends JolokiaService> ServiceTracker initTracker(Class<T> pType) {
-        ServiceTracker tracker;// Tracker are initialized lazily because the JolokiaServiceManager must be initialized
+    private <T extends JolokiaService<?>> ServiceTracker<JolokiaService<?>, JolokiaService<?>> initTracker(Class<T> pType) {
+        ServiceTracker<JolokiaService<?>, JolokiaService<?>> tracker;// Tracker are initialized lazily because the JolokiaServiceManager must be initialized
         // before a service is looked up via the tracker because of the customizer calling
         // service lifecycle methods. getServices() is guaranteed to be called
         // only after the JolokiaContext has been setup.
-        tracker = new ServiceTracker(context,pType.getName(), new JolokiaServiceTrackerCustomizer());
+        tracker = new ServiceTracker<>(context, pType.getName(), new JolokiaServiceTrackerCustomizer());
         serviceTrackerMap.put(pType,tracker);
         tracker.open();
         return tracker;
@@ -96,18 +97,18 @@ public class OsgiJolokiaServiceFactory implements JolokiaServiceLookup {
      * Close down the factory by closing all existing service trackers
      */
     public void destroy() {
-        for (ServiceTracker tracker : serviceTrackerMap.values()) {
+        for (ServiceTracker<?, ?> tracker : serviceTrackerMap.values()) {
             tracker.close();
         }
     }
 
     // ==========================================================================================================
     // Service initializer for calling init on all newly added services
-    private  class JolokiaServiceTrackerCustomizer implements ServiceTrackerCustomizer {
+    private class JolokiaServiceTrackerCustomizer implements ServiceTrackerCustomizer<JolokiaService<?>, JolokiaService<?>> {
 
         /** {@inheritDoc} */
-        public Object addingService(ServiceReference reference) {
-            JolokiaService jolokiaService = (JolokiaService) context.getService(reference);
+        public JolokiaService<?> addingService(ServiceReference<JolokiaService<?>> reference) {
+            JolokiaService<?> jolokiaService = context.getService(reference);
             if (jolokiaService != null) {
                 if (jolokiaContext != null) {
                     jolokiaService.init(jolokiaContext);
@@ -120,13 +121,14 @@ public class OsgiJolokiaServiceFactory implements JolokiaServiceLookup {
         }
 
         /** {@inheritDoc} */
-        public void modifiedService(ServiceReference reference, Object service) {
+        public void modifiedService(ServiceReference<JolokiaService<?>> reference, JolokiaService<?> service) {
         }
 
         /** {@inheritDoc} */
-        public void removedService(ServiceReference reference, Object service) {
+        public void removedService(ServiceReference<JolokiaService<?>> reference, JolokiaService<?> service) {
             try {
-                JolokiaService jolokiaService = (JolokiaService) service;
+                @SuppressWarnings("UnnecessaryLocalVariable")
+                JolokiaService<?> jolokiaService = service;
                 context.ungetService(reference);
                 jolokiaService.destroy();
             } catch (Exception e) {

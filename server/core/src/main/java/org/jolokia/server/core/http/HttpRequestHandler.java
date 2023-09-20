@@ -43,10 +43,10 @@ import org.json.simple.parser.ParseException;
 public class HttpRequestHandler {
 
     // handler for contacting the MBean server(s)
-    private BackendManager backendManager;
+    private final BackendManager backendManager;
 
     // Overall context
-    private JolokiaContext jolokiaCtx;
+    private final JolokiaContext jolokiaCtx;
 
     /**
      * Request handler for parsing HTTP request and dispatching to the appropriate
@@ -90,7 +90,7 @@ public class HttpRequestHandler {
      * @return the processing parameters
      */
     private ProcessingParameters getProcessingParameter(Map<String, String[]> pParameterMap) {
-        Map<ConfigKey,String> config = new HashMap<ConfigKey, String>();
+        Map<ConfigKey,String> config = new HashMap<>();
         if (pParameterMap != null) {
             extractRequestParameters(config, pParameterMap);
             extractDefaultRequestParameters(config);
@@ -111,6 +111,7 @@ public class HttpRequestHandler {
      *
      * @throws IOException if reading from the input stream fails
      */
+    @SuppressWarnings("unchecked")
     public JSONAware handlePostRequest(String pUri, InputStream pInputStream, String pEncoding, Map<String, String[]>  pParameterMap)
             throws IOException, EmptyResponseException {
         if (jolokiaCtx.isDebug()) {
@@ -119,7 +120,7 @@ public class HttpRequestHandler {
 
         Object jsonRequest = extractJsonRequest(pInputStream,pEncoding);
         if (jsonRequest instanceof JSONArray) {
-            List<JolokiaRequest> jolokiaRequests = JolokiaRequestFactory.createPostRequests((List) jsonRequest, getProcessingParameter(pParameterMap));
+            List<JolokiaRequest> jolokiaRequests = JolokiaRequestFactory.createPostRequests((List<?>) jsonRequest, getProcessingParameter(pParameterMap));
 
             JSONArray responseList = new JSONArray();
             for (JolokiaRequest jmxReq : jolokiaRequests) {
@@ -151,7 +152,7 @@ public class HttpRequestHandler {
      * @return headers to set
      */
     public Map<String, String> handleCorsPreflightRequest(String pOrigin, String pRequestHeaders) {
-        Map<String,String> ret = new HashMap<String, String>();
+        Map<String,String> ret = new HashMap<>();
         if (jolokiaCtx.isOriginAllowed(pOrigin,false)) {
             // CORS is allowed, we set exactly the origin in the header, so there are no problems with authentication
             ret.put("Access-Control-Allow-Origin",pOrigin == null || "null".equals(pOrigin) ? "*" : pOrigin);
@@ -194,19 +195,11 @@ public class HttpRequestHandler {
         // Call handler and retrieve return value
         try {
             return backendManager.handleRequest(pJmxReq);
-        } catch (ReflectionException e) {
-            return getErrorJSON(404,e, pJmxReq);
-        } catch (InstanceNotFoundException e) {
+        } catch (ReflectionException | InstanceNotFoundException | AttributeNotFoundException e) {
             return getErrorJSON(404,e, pJmxReq);
         } catch (MBeanException e) {
             return getErrorJSON(500,e.getTargetException(), pJmxReq);
-        } catch (AttributeNotFoundException e) {
-            return getErrorJSON(404,e, pJmxReq);
-        } catch (UnsupportedOperationException e) {
-            return getErrorJSON(500,e, pJmxReq);
-        } catch (JMException e) {
-            return getErrorJSON(500,e, pJmxReq);
-        } catch (IOException e) {
+        } catch (UnsupportedOperationException | JMException | IOException e) {
             return getErrorJSON(500,e, pJmxReq);
         } catch (IllegalArgumentException e) {
             return getErrorJSON(400,e, pJmxReq);
@@ -256,6 +249,7 @@ public class HttpRequestHandler {
      * @param pJmxReq request from where to get processing options
      * @return the json representation
      */
+    @SuppressWarnings("unchecked")
     public JSONObject getErrorJSON(int pErrorCode, Throwable pExp, JolokiaRequest pJmxReq) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("status",pErrorCode);
@@ -313,7 +307,7 @@ public class HttpRequestHandler {
     // Extract configuration parameters from the given HTTP request parameters
     private void extractRequestParameters(Map<ConfigKey, String> pConfig, Map<String, String[]> pParameterMap) {
         for (Map.Entry<String,String[]> entry : pParameterMap.entrySet()) {
-            String values[] = entry.getValue();
+            String[] values = entry.getValue();
             if (values != null && values.length > 0) {
                 ConfigKey cKey = ConfigKey.getRequestConfigKey(entry.getKey());
                 if (cKey != null) {
@@ -336,6 +330,7 @@ public class HttpRequestHandler {
     }
 
 
+    @SuppressWarnings("unchecked")
     private void addErrorInfo(JSONObject pErrorResp, Throwable pExp, JolokiaRequest pJmxReq) {
         if (Boolean.parseBoolean(jolokiaCtx.getConfig(ConfigKey.ALLOW_ERROR_DETAILS))) {
             String includeStackTrace = pJmxReq != null ?

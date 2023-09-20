@@ -7,11 +7,11 @@ import static org.testng.Assert.*;
 
 public class DefaultHttpContextTest {
 
-    private DefaultHttpContext ctx;
+    private DefaultServletContextHelper ctx;
 
     @BeforeMethod
     public void setUp() throws Exception {
-        ctx = new DefaultHttpContext();
+        ctx = new DefaultServletContextHelper();
     }
 
     @Test

@@ -13,7 +13,7 @@ public interface ServerDetectorLookup {
      * Lookup all server detector available and return a list
      * of all found detectors
      *
-     * @return list of server detectors
+     * @return set of server detectors
      */
     SortedSet<ServerDetector> lookup();
 }

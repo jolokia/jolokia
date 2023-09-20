@@ -17,10 +17,9 @@ package org.jolokia.server.core.util;
  */
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.util.*;
 
-import javax.servlet.*;
+import jakarta.servlet.*;
 
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
@@ -57,7 +56,7 @@ public class HttpTestUtil {
                 new ByteArrayInputStream(pData.getBytes());
         return new ServletInputStream() {
             @Override
-            public int read() throws IOException {
+            public int read() {
                 return bis.read();
             }
 
@@ -85,7 +84,7 @@ public class HttpTestUtil {
      */
     @SuppressWarnings("PMD.ReplaceVectorWithList")
     public static void prepareServletConfigMock(ServletConfig config,String ... pInitParams) {
-        Map<String,String> configParams = new HashMap<String, String>();
+        Map<String,String> configParams = new HashMap<>();
         if (pInitParams != null) {
             for (int i = 0; i < pInitParams.length; i += 2) {
                 configParams.put(pInitParams[i],pInitParams[i+1]);
@@ -95,9 +94,9 @@ public class HttpTestUtil {
             }
         }
 
-        final Vector paramNames = new Vector(configParams.keySet());
+        final Vector<String> paramNames = new Vector<>(configParams.keySet());
         EasyMock.expect(config.getInitParameterNames()).andAnswer(new IAnswer<Enumeration<String>>() {
-            public Enumeration answer() throws Throwable {
+            public Enumeration<String> answer() {
                 return paramNames.elements();
             }
         }).anyTimes();
@@ -110,7 +109,7 @@ public class HttpTestUtil {
      * @param pContextParams context parameters to return
      */
     public static void prepareServletContextMock(ServletContext pContext, String ... pContextParams) {
-        Map<String,String> configParams = new HashMap<String, String>();
+        Map<String,String> configParams = new HashMap<>();
         if (pContextParams != null) {
             for (int i = 0; i < pContextParams.length; i += 2) {
                 configParams.put(pContextParams[i],pContextParams[i+1]);
@@ -119,9 +118,9 @@ public class HttpTestUtil {
                 EasyMock.expect(pContext.getInitParameter(entry.getKey())).andReturn(entry.getValue()).anyTimes();
             }
         }
-        final Vector paramNames = new Vector(configParams.keySet());
+        final Vector<String> paramNames = new Vector<>(configParams.keySet());
         EasyMock.expect(pContext.getInitParameterNames()).andAnswer(new IAnswer<Enumeration<String>>() {
-            public Enumeration answer() throws Throwable {
+            public Enumeration<String> answer() {
                 return paramNames.elements();
             }
         }).anyTimes();

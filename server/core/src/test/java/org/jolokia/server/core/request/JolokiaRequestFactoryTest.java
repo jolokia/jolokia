@@ -85,14 +85,14 @@ public class JolokiaRequestFactoryTest {
 
     @Test
     public void simplePostWithMergedMaps() {
-        Map config = new HashMap();
+        Map<String, Object> config = new HashMap<>();
         config.put("maxDepth","10");
         Map<String,Object> reqMap = createMap(
                 "type","read",
                 "mbean","java.lang:type=Memory",
                 "attribute","HeapMemoryUsage",
                 "config",config);
-        Map param = new HashMap();;
+        Map<?, ?> param = new HashMap<>();
         JolokiaReadRequest req = JolokiaRequestFactory.createPostRequest(reqMap,
                                                                          TestProcessingParameters.create(ConfigKey.MAX_OBJECTS,"100"));
         assertEquals(req.getAttributeName(),"HeapMemoryUsage");
@@ -162,7 +162,7 @@ public class JolokiaRequestFactoryTest {
     @Test
     public void emptyRequest() {
         JolokiaVersionRequest req = JolokiaRequestFactory.createGetRequest("", procParams);
-        req = JolokiaRequestFactory.createGetRequest(null, procParams);
+        JolokiaRequestFactory.createGetRequest(null, procParams);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
@@ -172,7 +172,7 @@ public class JolokiaRequestFactoryTest {
 
     @Test
     public void simpleGetWithQueryPath() {
-        Map<String,String> params = new HashMap<String, String>();
+        Map<String,String> params = new HashMap<>();
         JolokiaListRequest req = JolokiaRequestFactory.createGetRequest(null,
                                                                         TestProcessingParameters.create(ConfigKey.PATH_QUERY_PARAM,"list/java.lang/type=Memory"));
         assert req.getHttpMethod() == HttpMethod.GET : "GET by default";

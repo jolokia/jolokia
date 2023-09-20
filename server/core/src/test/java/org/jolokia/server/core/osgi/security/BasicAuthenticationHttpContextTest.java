@@ -18,12 +18,11 @@ package org.jolokia.server.core.osgi.security;
 
 import java.io.IOException;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.easymock.EasyMock;
 import org.jolokia.server.core.config.ConfigKey;
-import org.osgi.service.http.HttpContext;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -52,8 +51,6 @@ public class BasicAuthenticationHttpContextTest {
     @Test
     public void correctAuth() throws IOException {
         expect(request.getHeader("Authorization")).andReturn("Basic cm9sYW5kOnMhY3IhdA==");
-        request.setAttribute(HttpContext.AUTHENTICATION_TYPE,HttpServletRequest.BASIC_AUTH);
-        request.setAttribute(HttpContext.REMOTE_USER, "roland");
         replay(request,response);
 
         assertTrue(context.handleSecurity(request,response));
@@ -63,8 +60,6 @@ public class BasicAuthenticationHttpContextTest {
     public void correctAlternateAuth() throws IOException {
         expect(request.getHeader("Authorization")).andReturn(null);
         expect(request.getHeader(AuthorizationHeaderParser.JOLOKIA_ALTERNATE_AUTHORIZATION_HEADER)).andReturn("Basic cm9sYW5kOnMhY3IhdA==");
-        request.setAttribute(HttpContext.AUTHENTICATION_TYPE,HttpServletRequest.BASIC_AUTH);
-        request.setAttribute(HttpContext.REMOTE_USER, "roland");
         replay(request,response);
 
         assertTrue(context.handleSecurity(request,response));
@@ -75,7 +70,7 @@ public class BasicAuthenticationHttpContextTest {
 
         expect(request.getHeader("Authorization")).andReturn(null);
         expect(request.getHeader(AuthorizationHeaderParser.JOLOKIA_ALTERNATE_AUTHORIZATION_HEADER)).andReturn(null);
-        response.setHeader(eq("WWW-Authenticate"), EasyMock.<String>anyObject());
+        response.setHeader(eq("WWW-Authenticate"), EasyMock.anyObject());
         response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
         replay(request, response);
 
@@ -87,7 +82,7 @@ public class BasicAuthenticationHttpContextTest {
 
         for (String val : new String[] { "cm9sYW5kOmJsdWI=", "Blub"}) {
             expect(request.getHeader("Authorization")).andReturn("Basic " + val);
-            response.setHeader(eq("WWW-Authenticate"), EasyMock.<String>anyObject());
+            response.setHeader(eq("WWW-Authenticate"), EasyMock.anyObject());
             response.sendError(401);
             replay(request, response);
 

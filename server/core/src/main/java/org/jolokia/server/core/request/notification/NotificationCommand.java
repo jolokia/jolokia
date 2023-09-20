@@ -27,7 +27,7 @@ import org.json.simple.JSONObject;
 public abstract class NotificationCommand {
 
     // Command action
-    private NotificationCommandType type;
+    private final NotificationCommandType type;
 
     /**
      * Constructor with type
@@ -48,6 +48,7 @@ public abstract class NotificationCommand {
     }
 
     /** {@inheritDoc} */
+    @SuppressWarnings("unchecked")
     public JSONObject toJSON() {
         JSONObject ret = new JSONObject();
         ret.put("command",type.getType());

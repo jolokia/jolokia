@@ -27,7 +27,7 @@ import java.util.*;
 public class StaticConfiguration implements Configuration {
 
     // The global configuration given during startup
-    private Map<ConfigKey, String> configMap;
+    private final Map<ConfigKey, String> configMap;
 
     /**
      * Convenience constructor for setting up base configuration with key values pairs. This constructor
@@ -37,7 +37,7 @@ public class StaticConfiguration implements Configuration {
      */
     public StaticConfiguration(Object... keyAndValues) {
         int idx = 0;
-        configMap = new HashMap<ConfigKey, String>();
+        configMap = new HashMap<>();
         for (int i = idx;i < keyAndValues.length; i+= 2) {
             configMap.put((ConfigKey) keyAndValues[i], (String) keyAndValues[i + 1]);
         }
@@ -50,7 +50,7 @@ public class StaticConfiguration implements Configuration {
      * @param pConfig config map from where to take the configuration
      */
     public StaticConfiguration(Map<String,String> pConfig) {
-        configMap = new HashMap<ConfigKey, String>();
+        configMap = new HashMap<>();
         for (ConfigKey c : ConfigKey.values()) {
             String value = pConfig.get(c.getKeyValue());
             if (value != null) {
@@ -65,9 +65,9 @@ public class StaticConfiguration implements Configuration {
      * @param pExtractor an extractor for retrieving the configuration from some external object
      */
     public void update(ConfigExtractor pExtractor) {
-        Enumeration e = pExtractor.getNames();
+        Enumeration<String> e = pExtractor.getNames();
         while (e.hasMoreElements()) {
-            String keyS = (String) e.nextElement();
+            String keyS = e.nextElement();
             ConfigKey key = ConfigKey.getGlobalConfigKey(keyS);
             if (key != null) {
                 configMap.put(key, pExtractor.getParameter(keyS));

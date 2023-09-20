@@ -1,6 +1,5 @@
 package org.jolokia.server.core.util;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +23,7 @@ public class TestSerializer extends AbstractJolokiaService<Serializer> implement
         super(Serializer.class, 0);
     }
 
+    @SuppressWarnings("unchecked")
     public Object serialize(Object pValue, List<String> pPathParts, SerializeOptions pOptions) throws AttributeNotFoundException {
         if (pValue instanceof Map) {
             return pValue;
@@ -39,10 +39,11 @@ public class TestSerializer extends AbstractJolokiaService<Serializer> implement
         return pValue;
     }
 
-    public Object setInnerValue(Object pOuterObject, Object pNewValue, List<String> pPathParts) throws AttributeNotFoundException, IllegalAccessException, InvocationTargetException {
+    public Object setInnerValue(Object pOuterObject, Object pNewValue, List<String> pPathParts) {
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     public Object deserializeOpenType(OpenType<?> pOpenType, Object pValue) {
         try {
             if (pOpenType instanceof CompositeType) {
@@ -50,9 +51,7 @@ public class TestSerializer extends AbstractJolokiaService<Serializer> implement
                 return new CompositeDataSupport((CompositeType) pOpenType, (Map<String, ?>) val);
             }
             return null;
-        } catch (ParseException e) {
-            throw new IllegalArgumentException(pOpenType + " " + pValue.toString());
-        } catch (OpenDataException e) {
+        } catch (ParseException | OpenDataException e) {
             throw new IllegalArgumentException(pOpenType + " " + pValue.toString());
         }
     }

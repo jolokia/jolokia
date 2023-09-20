@@ -45,10 +45,10 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
     private final ServerDetectorLookup detectorLookup;
 
     // Overall configuration
-    private Configuration configuration;
+    private final Configuration configuration;
 
     // Logger to use
-    private LogHandler logHandler;
+    private final LogHandler logHandler;
 
     // Restrictor to use
     private final Restrictor restrictor;
@@ -57,17 +57,17 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
     private boolean isInitialized;
 
     // Order in which services get initialized
-    private static final Class[] SERVICE_TYPE_ORDER =
+    private static final Class<?>[] SERVICE_TYPE_ORDER =
             new Class[] { ServerDetector.class, RequestHandler.class};
 
     // All service factories used
-    private List<JolokiaServiceLookup> serviceLookups;
+    private final List<JolokiaServiceLookup> serviceLookups;
 
     // Instantiated services, categorized by type and ordered;
-    private Map<Class<? extends JolokiaService>,SortedSet<? extends JolokiaService>> staticServices;
+    private final Map<Class<? extends JolokiaService<?>>,SortedSet<? extends JolokiaService<?>>> staticServices;
 
     // The lowest order service registered
-    private Map<Class<? extends JolokiaService>, JolokiaService> staticLowServices;
+    private final Map<Class<? extends JolokiaService<?>>, JolokiaService<?>> staticLowServices;
 
     // Jolokia context connecting to this manager
     private JolokiaContextImpl jolokiaContext;
@@ -96,9 +96,9 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
         logHandler = pLogHandler;
         restrictor = pRestrictor;
         isInitialized = false;
-        serviceLookups = new ArrayList<JolokiaServiceLookup>();
-        staticServices = new HashMap<Class<? extends JolokiaService>, SortedSet <? extends JolokiaService>>();
-        staticLowServices = new HashMap<Class<? extends JolokiaService>, JolokiaService>();
+        serviceLookups = new ArrayList<>();
+        staticServices = new HashMap<>();
+        staticLowServices = new HashMap<>();
         detectorLookup = pDetectorLookup != null ? pDetectorLookup : new ClasspathServerDetectorLookup();
         // The version request handler must be always present and always be first
         addService(new VersionRequestHandler());
@@ -133,15 +133,16 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
     }
 
     /** {@inheritDoc} */
-    public final synchronized void addService(JolokiaService pService) {
-        Class<? extends JolokiaService> type = pService.getType();
-        SortedSet<JolokiaService> servicesOfType = (SortedSet<JolokiaService>) staticServices.get(type);
+    public final synchronized void addService(JolokiaService<?> pService) {
+        Class<? extends JolokiaService<?>> type = pService.getType();
+        @SuppressWarnings("unchecked")
+        SortedSet<JolokiaService<?>> servicesOfType = (SortedSet<JolokiaService<?>>) staticServices.get(type);
         if (servicesOfType == null) {
-            servicesOfType = new TreeSet<JolokiaService>();
+            servicesOfType = new TreeSet<>();
             staticServices.put(type, servicesOfType);
         }
         servicesOfType.add(pService);
-        JolokiaService pLowService = staticLowServices.get(type);
+        JolokiaService<?> pLowService = staticLowServices.get(type);
         if (pLowService == null || pLowService.getOrder() > pService.getOrder()) {
             staticLowServices.put(type,pService);
         }
@@ -154,7 +155,7 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
 
     /** {@inheritDoc} */
     public void addServices(JolokiaServiceCreator pServiceCreator) {
-        for (JolokiaService service : pServiceCreator.getServices()) {
+        for (JolokiaService<?> service : pServiceCreator.getServices()) {
             addService(service);
         }
     }
@@ -175,12 +176,12 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
             mbeanRegistry = new MBeanRegistry();
 
             // Initialize all services in the proper order
-            List<Class<? extends JolokiaService>> serviceTypes = getServiceTypes();
-            for (Class<? extends JolokiaService> serviceType : serviceTypes) {
+            List<Class<? extends JolokiaService<?>>> serviceTypes = getServiceTypes();
+            for (Class<? extends JolokiaService<?>> serviceType : serviceTypes) {
                 // Initialize services
-                Set<? extends JolokiaService> services = staticServices.get(serviceType);
+                Set<? extends JolokiaService<?>> services = staticServices.get(serviceType);
                 if (services != null) {
-                    for (JolokiaService service : services) {
+                    for (JolokiaService<?> service : services) {
                         service.init(jolokiaContext);
                     }
                 }
@@ -208,10 +209,10 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
             for (JolokiaServiceLookup factory : serviceLookups) {
                 factory.destroy();
             }
-            for (Class<? extends JolokiaService> serviceType : getServiceTypes()) {
-                Set<? extends JolokiaService> services = staticServices.get(serviceType);
+            for (Class<? extends JolokiaService<?>> serviceType : getServiceTypes()) {
+                Set<? extends JolokiaService<?>> services = staticServices.get(serviceType);
                 if (services != null) {
-                    for (JolokiaService service : services) {
+                    for (JolokiaService<?> service : services) {
                         try {
                             service.destroy();
                         } catch (Exception e) {
@@ -231,11 +232,12 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
      * performed.
      *
      * @param pType service type to fetch
-     * @return list of services detected or an empty list
+     * @return set of services detected or an empty list
      */
-    public <T extends JolokiaService> SortedSet<T> getServices(Class<T> pType) {
+    public <T extends JolokiaService<?>> SortedSet<T> getServices(Class<T> pType) {
+        @SuppressWarnings("unchecked")
         SortedSet<T> services = (SortedSet<T>) staticServices.get(pType);
-        SortedSet<T> ret = services != null ? new TreeSet<T>(services) : new TreeSet<T>();
+        SortedSet<T> ret = services != null ? new TreeSet<>(services) : new TreeSet<>();
         for (JolokiaServiceLookup factory : serviceLookups) {
             ret.addAll(factory.getServices(pType));
         }
@@ -250,7 +252,8 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
      * @param pType requested service type
      * @return the requested service or null if none has been registered
      */
-    public <T extends JolokiaService> T getService(Class<T> pType) {
+    public <T extends JolokiaService<?>> T getService(Class<T> pType) {
+        @SuppressWarnings("unchecked")
         T ret = (T) staticLowServices.get(pType);
         int order = ret != null ? ret.getOrder() : Integer.MAX_VALUE;
         for (JolokiaServiceLookup factory : serviceLookups) {
@@ -273,6 +276,7 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
     // =============================================================================================================
 
 
+    @SuppressWarnings("unchecked")
     private ServerHandle detect(Map<String,Object> pConfig, SortedSet<ServerDetector> detectors, MBeanServerAccess pMBeanServerAccess) {
         for (ServerDetector detector : detectors) {
             try {
@@ -301,7 +305,7 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
     }
 
     private MBeanServerAccess createMBeanServerAccess(SortedSet<ServerDetector> pDetectors) {
-        Set<MBeanServerConnection> mbeanServers = new HashSet<MBeanServerConnection>();
+        Set<MBeanServerConnection> mbeanServers = new HashSet<>();
         for (ServerDetector detector : pDetectors) {
             Set<MBeanServerConnection> found = detector.getMBeanServers();
             if (found != null) {
@@ -323,6 +327,7 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
      *
      * @return the detector specific configuration
      */
+    @SuppressWarnings("unchecked")
     private Map<String,Object> getDetectorOptions() {
         String optionString = configuration.getConfig(ConfigKey.DETECTOR_OPTIONS);
         if (optionString != null) {
@@ -339,12 +344,13 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
 
 
     // Extract the order in which services should be initialized
-    private List<Class<? extends JolokiaService>> getServiceTypes() {
-        List<Class<? extends JolokiaService>> ret = new ArrayList<Class<? extends JolokiaService>>();
-        for (Class type : SERVICE_TYPE_ORDER) {
-            ret.add(type);
+    @SuppressWarnings("unchecked")
+    private List<Class<? extends JolokiaService<?>>> getServiceTypes() {
+        List<Class<? extends JolokiaService<?>>> ret = new ArrayList<>();
+        for (Class<?> type : SERVICE_TYPE_ORDER) {
+            ret.add((Class<? extends JolokiaService<?>>) type);
         }
-        for (Class<? extends JolokiaService> staticType : staticServices.keySet()) {
+        for (Class<? extends JolokiaService<?>> staticType : staticServices.keySet()) {
             if (!ret.contains(staticType)) {
                 ret.add(staticType);
             }

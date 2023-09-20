@@ -31,7 +31,7 @@ import org.osgi.framework.*;
  */
 public class DelegatingRestrictor implements Restrictor {
 
-    private BundleContext bundleContext;
+    private final BundleContext bundleContext;
 
     /**
      * Constructor remembering the bundle context
@@ -51,11 +51,11 @@ public class DelegatingRestrictor implements Restrictor {
      */
     private boolean checkRestrictorService(RestrictorCheck pCheck, Object ... args) {
         try {
-            ServiceReference[] serviceRefs = bundleContext.getServiceReferences(Restrictor.class.getName(),null);
+            ServiceReference<?>[] serviceRefs = bundleContext.getServiceReferences(Restrictor.class.getName(),null);
             if (serviceRefs != null) {
                 boolean ret = true;
                 boolean found = false;
-                for (ServiceReference serviceRef : serviceRefs) {
+                for (ServiceReference<?> serviceRef : serviceRefs) {
                     Restrictor restrictor = (Restrictor) bundleContext.getService(serviceRef);
                     if (restrictor != null) {
                         ret = ret && pCheck.check(restrictor,args);
@@ -157,7 +157,7 @@ public class DelegatingRestrictor implements Restrictor {
 
     /** {@inheritDoc} */
     public boolean isRemoteAccessAllowed(String... pHostOrAddress) {
-        return checkRestrictorService(REMOTE_CHECK,pHostOrAddress);
+        return checkRestrictorService(REMOTE_CHECK, (Object[]) pHostOrAddress);
     }
 
 

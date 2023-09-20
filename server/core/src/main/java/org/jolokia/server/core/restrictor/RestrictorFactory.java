@@ -81,33 +81,29 @@ public final class RestrictorFactory {
         if (restrictorClassName == null) {
             return null;
         }
-        Class restrictorClass = ClassUtil.classForName(restrictorClassName);
+        Class<?> restrictorClass = ClassUtil.classForName(restrictorClassName);
         if (restrictorClass == null) {
             throw new IllegalArgumentException("No custom restrictor class " + restrictorClassName + " found");
         }
         return lookupRestrictor(pConfig, restrictorClass);
     }
 
-    private static Restrictor lookupRestrictor(Configuration pConfig, Class restrictorClass) {
+    private static Restrictor lookupRestrictor(Configuration pConfig, Class<?> restrictorClass) {
         try {
             try {
                 // Prefer constructor that takes configuration
-                Constructor ctr = restrictorClass.getConstructor(Configuration.class);
+                Constructor<?> ctr = restrictorClass.getConstructor(Configuration.class);
                 return (Restrictor) ctr.newInstance(pConfig);
             } catch (NoSuchMethodException exp) {
                 // Fallback to default constructor
-                Constructor defaultConstructor = restrictorClass.getConstructor();
+                Constructor<?> defaultConstructor = restrictorClass.getConstructor();
                 return (Restrictor) defaultConstructor.newInstance();
             }
         } catch (NoSuchMethodException exp) {
             throw new IllegalArgumentException("Cannot create custom restrictor for class " + restrictorClass + " " +
                                                "because neither a constructor with 'Configuration' as only element " +
                                                "nor a default constructor is available");
-        } catch (IllegalAccessException e) {
-            throw new IllegalArgumentException("Cannot create an instance of custom restrictor class " + restrictorClass, e);
-        } catch (InstantiationException e) {
-            throw new IllegalArgumentException("Cannot create an instance of custom restrictor class " + restrictorClass, e);
-        } catch (InvocationTargetException e) {
+        } catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
             throw new IllegalArgumentException("Cannot create an instance of custom restrictor class " + restrictorClass, e);
         }
     }

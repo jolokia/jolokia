@@ -1,6 +1,6 @@
 package org.jolokia.server.core.osgi.util;
 
-import org.jolokia.server.core.osgi.security.ServiceAuthenticationHttpContext;
+import org.jolokia.server.core.osgi.security.Authenticator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
@@ -23,7 +23,7 @@ public class LogHelper {
      */
     public static void logError(String pMessage, Throwable pThrowable) {
         final BundleContext bundleContext = FrameworkUtil
-            .getBundle(ServiceAuthenticationHttpContext.class)
+            .getBundle(Authenticator.class)
             .getBundleContext();
         logError(bundleContext, pMessage, pThrowable);
     }
@@ -38,7 +38,7 @@ public class LogHelper {
      */
     public static void logError(BundleContext pBundleContext, String pMessage, Throwable pThrowable) {
 
-        final ServiceReference lRef = pBundleContext.getServiceReference(LogService.class.getName());
+        final ServiceReference<?> lRef = pBundleContext.getServiceReference(LogService.class.getName());
         if (lRef != null) {
             try {
                 final LogService logService = (LogService) pBundleContext.getService(lRef);

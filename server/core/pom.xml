@@ -71,7 +71,12 @@
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.service.http</artifactId>
+      <artifactId>org.osgi.service.log</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.service.servlet</artifactId>
       <scope>provided</scope>
     </dependency>
 
@@ -114,15 +119,21 @@
             <Bundle-Activator>org.jolokia.server.core.osgi.OsgiAgentActivator</Bundle-Activator>
 
             <Export-Package>
+              org.jolokia.server.core,
+              org.jolokia.server.core.backend,
               org.jolokia.server.core.config,
               org.jolokia.server.core.detector,
               org.jolokia.server.core.http,
+              org.jolokia.server.core.osgi,
+              org.jolokia.server.core.osgi.security,
+              org.jolokia.server.core.osgi.util,
               org.jolokia.server.core.request,
               org.jolokia.server.core.request.notification,
               org.jolokia.server.core.restrictor,
-              !org.jolokia.server.core.service.impl,org.jolokia.server.core.service.*,org.jolokia.server.core.service,
-              org.jolokia.server.core.util.*,
-              org.jolokia.server.core
+              org.jolokia.server.core.restrictor.policy,
+              !org.jolokia.server.core.service.*,
+              org.jolokia.server.core.util,
+              org.jolokia.server.core.util.jmx
             </Export-Package>
           </instructions>
         </configuration>

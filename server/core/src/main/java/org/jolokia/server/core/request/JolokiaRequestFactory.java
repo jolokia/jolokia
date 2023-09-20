@@ -81,6 +81,7 @@ public final class JolokiaRequestFactory {
      * @param pProcessingParameters processing parameters. Must not be null/
      * @return a newly created {@link JolokiaRequest}
      */
+    @SuppressWarnings("unchecked")
     public static <R extends JolokiaRequest> R createGetRequest(String pPathInfo, ProcessingParameters pProcessingParameters) {
         RequestType type = null;
         try {
@@ -90,7 +91,7 @@ public final class JolokiaRequestFactory {
             Stack<String> elements = EscapeUtil.extractElementsFromPath(pathInfo);
 
             // Use version by default if no type is given
-            type = elements.size() != 0 ? RequestType.getTypeByName(elements.pop()) : RequestType.VERSION;
+            type = !elements.isEmpty() ? RequestType.getTypeByName(elements.pop()) : RequestType.VERSION;
 
             // Parse request
             return (R) getCreator(type).create(elements, pProcessingParameters);
@@ -109,6 +110,7 @@ public final class JolokiaRequestFactory {
      * @param pProcessingParams additional map of operational parameters. Must not be null.
      * @return the created {@link JolokiaRequest}
      */
+    @SuppressWarnings("unchecked")
     public static <R extends JolokiaRequest> R createPostRequest(Map<String, ?> pRequestMap, ProcessingParameters pProcessingParams) {
         try {
             ProcessingParameters paramsMerged = pProcessingParams.mergedParams((Map<String,String>) pRequestMap.get("config"));
@@ -126,8 +128,9 @@ public final class JolokiaRequestFactory {
      * @param pProcessingParams processing options. Must not be null.
      * @return list with one or more {@link JolokiaRequest}
      */
-    public static List<JolokiaRequest> createPostRequests(List pJsonRequests, ProcessingParameters pProcessingParams) {
-        List<JolokiaRequest> ret = new ArrayList<JolokiaRequest>();
+    @SuppressWarnings("unchecked")
+    public static List<JolokiaRequest> createPostRequests(List<?> pJsonRequests, ProcessingParameters pProcessingParams) {
+        List<JolokiaRequest> ret = new ArrayList<>();
         for (Object o : pJsonRequests) {
             if (!(o instanceof Map)) {
                 throw new IllegalArgumentException("Not a request within the list of requests " + pJsonRequests +
@@ -148,7 +151,7 @@ public final class JolokiaRequestFactory {
         // This variant is helpful, if there are problems with the server mangling
         // up the pathinfo (e.g. for security concerns, often '/','\',';' and other are not
         // allowed in encoded form within the pathinfo)
-        if (pProcessingParams != null && (pPathInfo == null || pPathInfo.length() == 0 || pathInfo.matches("^/+$"))) {
+        if (pProcessingParams != null && (pPathInfo == null || pPathInfo.isEmpty() || pathInfo.matches("^/+$"))) {
             pathInfo = pProcessingParams.getPathInfo();
         }
         return normalizePathInfo(pathInfo);
@@ -158,7 +161,7 @@ public final class JolokiaRequestFactory {
 
     // Return always a non-null string and strip of leading slash
     private static String normalizePathInfo(String pPathInfo) {
-        if (pPathInfo != null && pPathInfo.length() > 0) {
+        if (pPathInfo != null && !pPathInfo.isEmpty()) {
             return pPathInfo.startsWith("/") ? pPathInfo.substring(1) : pPathInfo;
         } else {
             return "";
@@ -169,18 +172,18 @@ public final class JolokiaRequestFactory {
     // Dedicated creator for the various operations. They are installed as static processors.
 
     // Get the request creator for a specific type
-    private static RequestCreator getCreator(RequestType pType) {
-        RequestCreator creator = CREATOR_MAP.get(pType);
+    private static RequestCreator<?> getCreator(RequestType pType) {
+        RequestCreator<?> creator = CREATOR_MAP.get(pType);
         if (creator == null) {
             throw new UnsupportedOperationException("Type " + pType + " is not supported (yet)");
         }
         return creator;
     }
 
-    private static final Map<RequestType,RequestCreator> CREATOR_MAP;
+    private static final Map<RequestType,RequestCreator<?>> CREATOR_MAP;
 
     static {
-        CREATOR_MAP = new HashMap<RequestType, RequestCreator>();
+        CREATOR_MAP = new HashMap<>();
         CREATOR_MAP.put(RequestType.READ, JolokiaReadRequest.newCreator());
         CREATOR_MAP.put(RequestType.WRITE, JolokiaWriteRequest.newCreator());
         CREATOR_MAP.put(RequestType.EXEC, JolokiaExecRequest.newCreator());

@@ -18,10 +18,10 @@ package org.jolokia.server.core.http;/*
 import java.io.*;
 import java.util.Map;
 
-import javax.servlet.AsyncContext;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.AsyncContext;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * A back channel using the async request API as specified in the Servlet 3.0 spec.

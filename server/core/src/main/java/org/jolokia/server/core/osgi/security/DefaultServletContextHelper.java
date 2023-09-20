@@ -16,29 +16,27 @@ package org.jolokia.server.core.osgi.security;
  * limitations under the License.
  */
 
-import java.io.IOException;
 import java.net.URL;
+import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.osgi.service.http.HttpContext;
+import org.osgi.service.servlet.context.ServletContextHelper;
 
 /**
- * Basic JolokiaHttpContextContext, which does no authentication.
+ * Basic {@link ServletContextHelper}, which does no authentication.
  *
  * @author roland
  * @since Jan 7, 2010
  */
-public class DefaultHttpContext implements HttpContext {
+public class DefaultServletContextHelper extends ServletContextHelper {
 
     /**
-     * This method always returns true and does not handle security
+     * Always return null.
      *
      * {@inheritDoc}
      */
-    public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        return true;
+    @Override
+    public URL getResource(String name) {
+        return null;
     }
 
     /**
@@ -46,16 +44,9 @@ public class DefaultHttpContext implements HttpContext {
      *
      * {@inheritDoc}
      */
-    public URL getResource(String name) {
+    @Override
+    public Set<String> getResourcePaths(String path) {
         return null;
     }
 
-    /**
-     * Always return null
-     * {@inheritDoc}
-     *
-     */
-    public String getMimeType(String name) {
-        return null;
-    }
 }

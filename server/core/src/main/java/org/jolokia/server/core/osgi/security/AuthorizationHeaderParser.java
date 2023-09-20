@@ -18,8 +18,6 @@ package org.jolokia.server.core.osgi.security;
 
 import java.util.StringTokenizer;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.jolokia.server.core.util.Base64Util;
 
 public final class AuthorizationHeaderParser {
@@ -37,7 +35,7 @@ public final class AuthorizationHeaderParser {
     public static Result parse(String pAuthInfo) {
         StringTokenizer stok = new StringTokenizer(pAuthInfo);
         String method = stok.nextToken();
-        if (!HttpServletRequest.BASIC_AUTH.equalsIgnoreCase(method)) {
+        if (!"BASIC".equalsIgnoreCase(method)) {
             throw new IllegalArgumentException("Only BasicAuthentication is supported");
         }
 
@@ -73,6 +71,10 @@ public final class AuthorizationHeaderParser {
             user = pUser;
             password = pPassword;
             valid = pValid;
+        }
+
+        public String getMethod() {
+            return method;
         }
 
         public String getUser() {

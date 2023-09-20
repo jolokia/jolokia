@@ -32,10 +32,10 @@ public class AgentDetails {
     private Boolean secured;
 
     // Agent version
-    private String agentVersion;
+    private final String agentVersion;
 
     // Agent id
-    private String agentId;
+    private final String agentId;
 
     // Description for the agent
     private String agentDescription;
@@ -168,6 +168,7 @@ public class AgentDetails {
 
     // =======================================================================================
 
+    @SuppressWarnings("unchecked")
     private void add(JSONObject pResp, AgentDetailProperty pKey, Object pValue) {
         if (pValue != null) {
             pResp.put(pKey.toString().toLowerCase(),pValue);

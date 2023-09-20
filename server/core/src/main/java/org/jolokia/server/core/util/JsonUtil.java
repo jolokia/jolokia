@@ -35,6 +35,7 @@ public class JsonUtil {
      * @param pKey the key under which to add
      * @param pValue the map value to add to this map.
      */
+    @SuppressWarnings("unchecked")
     public static void addJSONObjectToJSONObject(JSONObject pMap, String pKey, JSONObject pValue) {
         Object ops = pMap.get(pKey);
         if (ops != null) {

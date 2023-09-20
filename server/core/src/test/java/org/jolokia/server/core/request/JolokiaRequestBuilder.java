@@ -36,14 +36,15 @@ import org.json.simple.JSONObject;
  */
 public class JolokiaRequestBuilder {
 
-    private JSONObject request = new JSONObject();
+    private final JSONObject request = new JSONObject();
 
-    private Map<ConfigKey,String> procConfig = new HashMap<ConfigKey,String>();
+    private final Map<ConfigKey,String> procConfig = new HashMap<>();
 
     public JolokiaRequestBuilder(RequestType pType) throws MalformedObjectNameException {
         this(pType,(String) null);
     }
 
+    @SuppressWarnings("unchecked")
     public JolokiaRequestBuilder(RequestType pType, String pObjectName) throws MalformedObjectNameException {
         request.put("type",pType.getName());
         if (pObjectName != null) {
@@ -55,6 +56,7 @@ public class JolokiaRequestBuilder {
         this(pType,pMBean.getCanonicalName());
     }
 
+    @SuppressWarnings("unchecked")
     public <R extends JolokiaRequest> R build() throws MalformedObjectNameException {
         RequestType type = RequestType.getTypeByName((String) request.get("type"));
         ProcessingParameters params = new TestProcessingParameters(procConfig);
@@ -71,76 +73,91 @@ public class JolokiaRequestBuilder {
         throw new IllegalArgumentException("Unknown type " + type);
     }
 
+    @SuppressWarnings("unchecked")
     public JolokiaRequestBuilder attribute(String pAttribute) {
         request.put("attribute",pAttribute);
         return this;
     }
 
+    @SuppressWarnings("unchecked")
     public JolokiaRequestBuilder attributes(List<String> pAttributeNames) {
         request.put("attribute", pAttributeNames);
         return this;
     }
 
+    @SuppressWarnings("unchecked")
     public JolokiaRequestBuilder attributes(String ... pAttributeNames) {
         request.put("attribute", Arrays.asList(pAttributeNames));
         return this;
     }
 
+    @SuppressWarnings("unchecked")
     public JolokiaRequestBuilder operation(String pOperation) {
         request.put("operation", pOperation);
         return this;
     }
 
+    @SuppressWarnings("unchecked")
     public JolokiaRequestBuilder value(Object pValue) {
         request.put("value", pValue);
         return this;
     }
 
+    @SuppressWarnings("unchecked")
     public JolokiaRequestBuilder pathParts(String... pExtraArgs) {
         request.put("path", EscapeUtil.combineToPath(Arrays.asList(pExtraArgs)));
         return this;
     }
 
+    @SuppressWarnings("unchecked")
     public JolokiaRequestBuilder path(String pPath) {
         request.put("path",pPath);
         return this;
     }
 
+    @SuppressWarnings("unchecked")
     public JolokiaRequestBuilder arguments(List<Object> pArguments) {
         request.put("arguments", pArguments);
         return this;
     }
 
+    @SuppressWarnings("unchecked")
     public JolokiaRequestBuilder arguments(Object ... pArguments) {
         request.put("arguments", Arrays.asList(pArguments));
         return this;
     }
 
+    @SuppressWarnings("unchecked")
     public JolokiaRequestBuilder command(NotificationCommandType pType) {
         request.put("command",pType.getType());
         return this;
     }
 
+    @SuppressWarnings("unchecked")
     public JolokiaRequestBuilder client(String client) {
         request.put("client",client);
         return this;
     }
 
+    @SuppressWarnings("unchecked")
     public JolokiaRequestBuilder handle(String handle) {
         request.put("handle",handle);
         return this;
     }
 
+    @SuppressWarnings("unchecked")
     public JolokiaRequestBuilder mode(String mode) {
         request.put("mode",mode);
         return this;
     }
 
+    @SuppressWarnings("unchecked")
     public JolokiaRequestBuilder handback(String handback) {
         request.put("handback",handback);
         return this;
     }
 
+    @SuppressWarnings("unchecked")
     public JolokiaRequestBuilder filter(String ...filter) {
         request.put("filter", Arrays.asList(filter));
         return this;
@@ -153,7 +170,7 @@ public class JolokiaRequestBuilder {
     }
 
     static Map<String,Object> createMap(Object ... args) {
-        Map<String,Object> ret = new HashMap<String, Object>();
+        Map<String,Object> ret = new HashMap<>();
         for (int i = 0; i<args.length; i+=2) {
             ret.put((String) args[i],args[i+1]);
         }

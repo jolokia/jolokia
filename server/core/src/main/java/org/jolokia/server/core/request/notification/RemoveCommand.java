@@ -29,7 +29,7 @@ import org.json.simple.JSONObject;
  */
 public class RemoveCommand extends ClientCommand {
 
-    private String handle;
+    private final String handle;
 
     /**
      * Remove a listener for GET requests. The handle must be given (after the client path part),
@@ -63,6 +63,7 @@ public class RemoveCommand extends ClientCommand {
         return handle;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public JSONObject toJSON() {
         JSONObject ret = super.toJSON();

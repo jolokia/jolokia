@@ -26,7 +26,7 @@ package org.jolokia.server.core.service.api;
  * @author roland
  * @since 28.03.13
  */
-public interface JolokiaService<T extends JolokiaService> extends Comparable<T> {
+public interface JolokiaService<T extends JolokiaService<?>> extends Comparable<T> {
 
     // Marker interface for services which only want to take part in the
     // service's lifecycle and are never looked up.

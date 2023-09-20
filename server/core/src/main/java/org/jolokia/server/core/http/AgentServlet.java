@@ -2,14 +2,15 @@ package org.jolokia.server.core.http;
 
 import java.io.*;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.*;
 
 import javax.management.RuntimeMBeanException;
 import javax.security.auth.Subject;
-import javax.servlet.*;
-import javax.servlet.http.*;
+import jakarta.servlet.*;
+import jakarta.servlet.http.*;
 
 import org.jolokia.server.core.config.*;
 import org.jolokia.server.core.detector.ServerDetectorLookup;
@@ -18,7 +19,6 @@ import org.jolokia.server.core.restrictor.RestrictorFactory;
 import org.jolokia.server.core.service.JolokiaServiceManagerFactory;
 import org.jolokia.server.core.service.api.*;
 import org.jolokia.server.core.service.impl.ClasspathServiceCreator;
-import org.jolokia.server.core.util.ChunkedWriter;
 import org.jolokia.server.core.util.ClassUtil;
 import org.jolokia.server.core.util.IoUtil;
 import org.jolokia.server.core.util.MimeTypeUtil;
@@ -68,7 +68,7 @@ public class AgentServlet extends HttpServlet {
     private HttpRequestHandler requestHandler;
 
     // Restrictor to use as given in the constructor
-    private Restrictor initRestrictor;
+    private final Restrictor initRestrictor;
 
     // If discovery multicast is enabled and URL should be initialized by request
     private boolean initAgentUrlFromRequest = false;
@@ -193,7 +193,7 @@ public class AgentServlet extends HttpServlet {
     }
 
     private Configuration configFromEnvironment() {
-        Map<String,String> envConfig = new HashMap<String, String>();
+        Map<String,String> envConfig = new HashMap<>();
         for (ConfigKey key : new ConfigKey[] {
                 // Todo: Might be even more generic as part of the key
                 ConfigKey.DISCOVERY_AGENT_URL,
@@ -284,14 +284,14 @@ public class AgentServlet extends HttpServlet {
     /** {@inheritDoc} */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-            throws ServletException, IOException {
+            throws IOException {
         handle(httpGetHandler, req, resp);
     }
 
     /** {@inheritDoc} */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
-            throws ServletException, IOException {
+            throws IOException {
         handle(httpPostHandler, req, resp);
     }
 
@@ -302,7 +302,7 @@ public class AgentServlet extends HttpServlet {
      * @param resp the response the answer are written to
      * */
     @Override
-    protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doOptions(HttpServletRequest req, HttpServletResponse resp) {
         Map<String,String> responseHeaders =
                 requestHandler.handleCorsPreflightRequest(
                         getOriginOrReferer(req),
@@ -341,6 +341,7 @@ public class AgentServlet extends HttpServlet {
                 json = requestHandler.handleThrowable(
                     exp instanceof RuntimeMBeanException ? ((RuntimeMBeanException) exp).getTargetException() : exp);
             } catch (Throwable exp2) {
+                //noinspection CallToPrintStackTrace
                 exp2.printStackTrace();
             }
         } finally {
@@ -369,7 +370,7 @@ public class AgentServlet extends HttpServlet {
         Subject subject = (Subject) pReq.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE);
         if (subject != null) {
             try {
-                return Subject.doAs(subject, new PrivilegedExceptionAction<JSONAware>() {
+                return Subject.doAs(subject, new PrivilegedExceptionAction<>() {
                     public JSONAware run() throws IOException, EmptyResponseException {
                         return pReqHandler.handleRequest(pReq, pResp);
                     }
@@ -531,10 +532,10 @@ public class AgentServlet extends HttpServlet {
         } catch (UnsupportedOperationException exp) {
             // Thrown by 'pseudo' 2.4 Servlet API implementations which fake a 2.4 API
             // As a service for the parameter map is build up explicitely
-            Map<String, String[]> ret = new HashMap<String, String[]>();
-            Enumeration params = pReq.getParameterNames();
+            Map<String, String[]> ret = new HashMap<>();
+            Enumeration<String> params = pReq.getParameterNames();
             while (params.hasMoreElements()) {
-                String param = (String) params.nextElement();
+                String param = params.nextElement();
                 ret.put(param, pReq.getParameterValues(param));
             }
             return ret;
@@ -570,7 +571,7 @@ public class AgentServlet extends HttpServlet {
         }
     }
     private void sendStreamingResponse(HttpServletResponse pResp, String pCallback, JSONStreamAware pJson) throws IOException {
-        Writer writer = new OutputStreamWriter(pResp.getOutputStream(), "UTF-8");
+        Writer writer = new OutputStreamWriter(pResp.getOutputStream(), StandardCharsets.UTF_8);
         IoUtil.streamResponseAndClose(writer, pJson, pCallback);
     }
 
@@ -579,7 +580,7 @@ public class AgentServlet extends HttpServlet {
         try {
             String json = pJson.toJSONString();
             String content = callback == null ? json : callback + "(" + json + ");";
-            byte[] response = content.getBytes("UTF8");
+            byte[] response = content.getBytes(StandardCharsets.UTF_8);
             pResp.setContentLength(response.length);
             out = pResp.getOutputStream();
             out.write(response);
@@ -641,7 +642,7 @@ public class AgentServlet extends HttpServlet {
         }
 
         /** {@inheritDoc} */
-        public Enumeration getNames() {
+        public Enumeration<String> getNames() {
             return config.getInitParameterNames();
         }
 
@@ -660,7 +661,7 @@ public class AgentServlet extends HttpServlet {
         }
 
         /** {@inheritDoc} */
-        public Enumeration getNames() {
+        public Enumeration<String> getNames() {
             return servletContext.getInitParameterNames();
         }
 

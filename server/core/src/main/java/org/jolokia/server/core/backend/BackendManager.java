@@ -82,6 +82,7 @@ public class BackendManager {
      * @throws JMException
      * @throws IOException
      */
+    @SuppressWarnings("unchecked")
     public JSONObject handleRequest(JolokiaRequest pJmxReq) throws JMException, IOException, EmptyResponseException {
         boolean debug = jolokiaCtx.isDebug();
 
@@ -161,6 +162,7 @@ public class BackendManager {
     }
 
     // call the an appropriate request dispatcher
+    @SuppressWarnings("unchecked")
     private JSONObject callRequestDispatcher(JolokiaRequest pJmxReq)
             throws JMException, IOException, NotChangedException, EmptyResponseException {
         Object result = requestDispatcher.dispatch(pJmxReq);

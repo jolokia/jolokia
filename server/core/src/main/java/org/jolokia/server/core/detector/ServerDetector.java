@@ -22,6 +22,7 @@ import java.util.Set;
 
 import javax.management.MBeanServerConnection;
 
+import org.jolokia.server.core.service.api.JolokiaService;
 import org.jolokia.server.core.service.api.ServerHandle;
 import org.jolokia.server.core.service.request.RequestInterceptor;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
@@ -38,7 +39,12 @@ import org.jolokia.server.core.util.jmx.MBeanServerAccess;
  * @author roland
  * @since 05.11.10
  */
-public interface ServerDetector extends Comparable<ServerDetector> {
+public interface ServerDetector extends JolokiaService<ServerDetector>, Comparable<ServerDetector> {
+
+    @Override
+    default Class<ServerDetector> getType() {
+        return ServerDetector.class;
+    }
 
     /**
      * Name of the detector which should reflect the server to be detected

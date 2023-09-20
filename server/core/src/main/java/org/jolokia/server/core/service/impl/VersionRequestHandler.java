@@ -56,6 +56,7 @@ public class VersionRequestHandler extends AbstractJolokiaService<RequestHandler
         context = pJolokiaContext;
     }
 
+    @SuppressWarnings("unchecked")
     public Object handleRequest(JolokiaRequest pJmxReq, Object pPreviousResult) throws JMException, IOException, NotChangedException {
         JSONObject ret = new JSONObject();
         ret.put("agent", Version.getAgentVersion());
@@ -90,6 +91,7 @@ public class VersionRequestHandler extends AbstractJolokiaService<RequestHandler
 
     // ========================================================================
 
+    @SuppressWarnings("unchecked")
     private JSONObject configToJSONObject() {
         JSONObject info = new JSONObject();
         Set<ConfigKey> keys = context.getConfigKeys();

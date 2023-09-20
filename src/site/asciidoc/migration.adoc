@@ -20,5 +20,8 @@
 
 _draft_
 
+* Switch from `javax.servlet` to `jakarta.servlet` (JavaEE/JakartaEE 8 → JakartaEE 9+)
 * `jolokia:type=Config` MBean is now registered with `agent=agentId` ObjectName property.
 * `roo-addon` is no longer available
+* OSGi code registers `org.jolokia.server.core.osgi.OsgiAgentServlet` using Whiteboard Specification instead of Http Service specification
+* `listenForHttpService` option is replaced (with deprecation) with `registerWhiteboardServlet` option

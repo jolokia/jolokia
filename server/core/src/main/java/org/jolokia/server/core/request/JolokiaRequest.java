@@ -33,7 +33,7 @@ import org.json.simple.JSONObject;
 public abstract class JolokiaRequest {
 
     // Type of request
-    private RequestType type;
+    private final RequestType type;
 
     // Processing configuration for tis request object
     private ProcessingParameters processingConfig;
@@ -43,10 +43,10 @@ public abstract class JolokiaRequest {
 
     // HTTP method which lead to this request. The method is selected dependent on the
     // constructor used.
-    private HttpMethod method;
+    private final HttpMethod method;
 
     // Path parts, which are used for selecting parts of the return value
-    private List<String> pathParts;
+    private final List<String> pathParts;
 
     // Free-form options
     private JSONObject options = null;
@@ -97,6 +97,7 @@ public abstract class JolokiaRequest {
     }
 
     // For backwards compatibility, examine "target" as well
+    @SuppressWarnings("unchecked")
     private void updateForLegacyProxyConfiguration(Map<String, ?> pMap) {
         JSONObject targetOptions = (JSONObject) pMap.get("target");
         if (targetOptions != null) {
@@ -172,6 +173,7 @@ public abstract class JolokiaRequest {
      * @param pKey get the option for this key
      * @return the specificied option or or null if no such option was set
      */
+    @SuppressWarnings("unchecked")
     public <T> T getOption(String pKey) {
         return options != null ? (T) options.get(pKey) : null;
     }
@@ -225,6 +227,7 @@ public abstract class JolokiaRequest {
      *
      * @return description of this base request
      */
+    @SuppressWarnings("unchecked")
     protected String getInfo() {
         StringBuilder ret = new StringBuilder();
         if (pathParts != null) {
@@ -232,7 +235,7 @@ public abstract class JolokiaRequest {
         }
         if (options != null) {
             ret.append(", options={");
-            for (Map.Entry entry : (Set<Map.Entry>) options.entrySet()) {
+            for (Map.Entry<?, ?> entry : (Set<Map.Entry<?, ?>>) options.entrySet()) {
                 ret.append(entry.getKey()).append("=").append(entry.getValue());
             }
             ret.append("}");
@@ -263,6 +266,7 @@ public abstract class JolokiaRequest {
      *
      * @return JSON object representing this base request object
      */
+    @SuppressWarnings("unchecked")
     public JSONObject toJSON() {
         JSONObject ret = new JSONObject();
         ret.put("type",type.getName());

@@ -31,7 +31,7 @@ import org.json.simple.JSONObject;
 public abstract class ClientCommand extends NotificationCommand {
 
     // Client which is typically a UUID
-    private String client;
+    private final String client;
 
     /**
      * Constructor used for GET requests. If no client id is given
@@ -68,6 +68,7 @@ public abstract class ClientCommand extends NotificationCommand {
         return client;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public JSONObject toJSON() {
         JSONObject ret = super.toJSON();

@@ -63,7 +63,7 @@ public class ClassUtilTest {
         ClassLoader cl = new MyCl(oldCl);
         Thread.currentThread().setContextClassLoader(cl);
 
-        Class clazz = ClassUtil.classForName("org.jolokia.server.core.util.RequestType");
+        Class<?> clazz = ClassUtil.classForName("org.jolokia.server.core.util.RequestType");
         assertEquals(clazz.getName(),"org.jolokia.server.core.util.RequestType");
         assertEquals(oldCl.loadClass("org.jolokia.server.core.util.RequestType"),clazz);
 
@@ -97,7 +97,7 @@ public class ClassUtilTest {
 
     @Test
     public void testGetResources() throws IOException {
-        Set<String> urls = ClassUtil.getResources("META-INF/jolokia/services-default");
+        Set<String> urls = ClassUtil.getResources("service/test-services");
         assertNotNull(urls);
         assertEquals(urls.size(),1);
     }
@@ -129,7 +129,7 @@ public class ClassUtilTest {
     public void testApplyWithPrimitive() {
         ClassUtilTest test = new ClassUtilTest("bla",1);
         assertEquals(test.intProp,1);
-        ClassUtil.applyMethod(test,"setIntProp",new Integer(2));
+        ClassUtil.applyMethod(test,"setIntProp",2);
         assertEquals(test.intProp,2);
     }
     @Test
@@ -142,7 +142,7 @@ public class ClassUtilTest {
     }
     @Test
     public void testApplyWithArgs() {
-        Map<String,String> map = new HashMap<String,String>();
+        Map<String,String> map = new HashMap<>();
         ClassUtil.applyMethod(map,"put","hello","world");
         assertEquals(map.get("hello"),"world");
     }
@@ -152,11 +152,11 @@ public class ClassUtilTest {
         ClassUtilTest test = new ClassUtilTest("set",0);
         assertEquals(test.stringProp,"set");
         ClassUtil.applyMethod(test,"setStringProp",new Object[] { null });
-        assertEquals(test.stringProp,null);
+        assertNull(test.stringProp);
     }
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*NoSuchMethod.*")
     public void testApplyWithArgsFail1() {
-        Map<String,String> map = new HashMap<String,String>();
+        Map<String,String> map = new HashMap<>();
         ClassUtil.applyMethod(map, "putBlubber", "hello", "world");
     }
 

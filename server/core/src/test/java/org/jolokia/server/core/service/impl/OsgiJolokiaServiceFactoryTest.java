@@ -31,19 +31,20 @@ public class OsgiJolokiaServiceFactoryTest {
         addServiceLookup(JolokiaService.class);
     }
 
-    private void addServiceLookup(Class pServiceClass) throws InvalidSyntaxException {
+    private void addServiceLookup(Class<?> pServiceClass) throws InvalidSyntaxException {
         expect(bundleContext.createFilter("(objectClass=" + pServiceClass.getName()+ ")"))
-                .andStubReturn((Filter) createMock(Filter.class));
-        bundleContext.addServiceListener(EasyMock.<ServiceListener>anyObject(), eq("(objectClass=" + pServiceClass.getName() + ")"));
+                .andStubReturn(createMock(Filter.class));
+        bundleContext.addServiceListener(EasyMock.anyObject(), eq("(objectClass=" + pServiceClass.getName() + ")"));
         expectLastCall().asStub();
         expect(bundleContext.getServiceReferences(pServiceClass.getName(), null)).andStubReturn(null);
-        bundleContext.removeServiceListener(EasyMock.<ServiceListener>anyObject());
+        bundleContext.removeServiceListener(EasyMock.anyObject());
         expectLastCall().asStub();
     }
 
     @Test
     public void simpleService() throws Exception {
-        ServiceReference serviceRef = createServiceReference();
+        @SuppressWarnings("unchecked")
+        ServiceReference<RequestHandler> serviceRef = (ServiceReference<RequestHandler>) createServiceReference();
         JolokiaContext jolokiaContext = createMock(JolokiaContext.class);
 
         RequestHandler requestHandler = createRequestHandler(serviceRef);
@@ -68,7 +69,8 @@ public class OsgiJolokiaServiceFactoryTest {
     public void notInitialized() throws Exception {
         JolokiaContext jolokiaContext = createMock(JolokiaContext.class);
 
-        ServiceReference serviceRef = createServiceReference();
+        @SuppressWarnings("unchecked")
+        ServiceReference<RequestHandler> serviceRef = (ServiceReference<RequestHandler>) createServiceReference();
         RequestHandler requestHandler = createRequestHandler(serviceRef);
 
         replay(bundleContext, serviceRef, requestHandler);
@@ -77,7 +79,8 @@ public class OsgiJolokiaServiceFactoryTest {
 
     @Test()
     public void exceptionOnDestroy() throws Exception {
-        ServiceReference serviceRef = createServiceReference();
+        @SuppressWarnings("unchecked")
+        ServiceReference<RequestHandler> serviceRef = (ServiceReference<RequestHandler>) createServiceReference();
         JolokiaContext jolokiaContext = createMock(JolokiaContext.class);
 
         RequestHandler requestHandler = createRequestHandler(serviceRef);
@@ -102,15 +105,16 @@ public class OsgiJolokiaServiceFactoryTest {
         verify(bundleContext, serviceRef, requestHandler, jolokiaContext);
     }
 
-    private RequestHandler createRequestHandler(ServiceReference pServiceRef) {
+    @SuppressWarnings("EqualsWithItself")
+    private RequestHandler createRequestHandler(ServiceReference<RequestHandler> pServiceRef) {
         RequestHandler requestHandler = createMock(RequestHandler.class);
         expect(requestHandler.compareTo(requestHandler)).andStubReturn(0);
         expect(bundleContext.getService(pServiceRef)).andReturn(requestHandler);
         return requestHandler;
     }
 
-    private ServiceReference createServiceReference() throws InvalidSyntaxException {
-        ServiceReference serviceRef = createMock(ServiceReference.class);
+    private ServiceReference<?> createServiceReference() throws InvalidSyntaxException {
+        ServiceReference<?> serviceRef = createMock(ServiceReference.class);
         expect(bundleContext.getServiceReferences(RequestHandler.class.getName(),null)).andReturn(new ServiceReference[]{
                 serviceRef
         });

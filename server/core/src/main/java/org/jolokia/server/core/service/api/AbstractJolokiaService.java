@@ -24,7 +24,7 @@ import javax.management.*;
  * @author roland
  * @since 22.04.13
  */
-public abstract class AbstractJolokiaService<T extends JolokiaService> implements JolokiaService<T> {
+public abstract class AbstractJolokiaService<T extends JolokiaService<?>> implements JolokiaService<T> {
 
     // service type of this Jolokia Service
     private Class<T> type;

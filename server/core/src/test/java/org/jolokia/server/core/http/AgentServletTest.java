@@ -21,9 +21,9 @@ import java.util.Arrays;
 import java.util.Vector;
 
 import javax.management.JMException;
-import javax.servlet.*;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.*;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.easymock.EasyMock;
 import org.jolokia.server.core.Version;
@@ -125,7 +125,7 @@ public class AgentServletTest {
         config = createMock(ServletConfig.class);
         context = createMock(ServletContext.class);
 
-        HttpTestUtil.prepareServletConfigMock(config, new String[]{ConfigKey.LOGHANDLER_CLASS.getKeyValue(), CustomLogHandler.class.getName()});
+        HttpTestUtil.prepareServletConfigMock(config, ConfigKey.LOGHANDLER_CLASS.getKeyValue(), CustomLogHandler.class.getName());
         HttpTestUtil.prepareServletContextMock(context);
 
         expect(config.getServletContext()).andStubReturn(context);
@@ -139,7 +139,7 @@ public class AgentServletTest {
     }
 
     @Test
-    public void initWithAgentDiscoveryAndGivenUrlAsSysProp() throws ServletException, IOException, InterruptedException, NoSuchFieldException, IllegalAccessException {
+    public void initWithAgentDiscoveryAndGivenUrlAsSysProp() throws ServletException, NoSuchFieldException, IllegalAccessException {
         String url = "http://localhost:8080/jolokia";
         System.setProperty(ConfigKey.DISCOVERY_AGENT_URL.asSystemProperty(),url);
         System.setProperty(ConfigKey.DISCOVERY_ENABLED.asSystemProperty(),"true");
@@ -157,7 +157,7 @@ public class AgentServletTest {
     }
 
     @Test(enabled = false)
-    public void initWithAgentDiscoveryAndUrlAsSysEnv() throws ServletException, IOException, NoSuchFieldException, IllegalAccessException {
+    public void initWithAgentDiscoveryAndUrlAsSysEnv() throws ServletException, NoSuchFieldException, IllegalAccessException {
         prepareStandardInitialisation();
         String url = "http://localhost:8080/jolokia";
         try {
@@ -344,7 +344,7 @@ public class AgentServletTest {
                         expect(request.getPathInfo()).andReturn(HttpTestUtil.VERSION_GET_REQUEST);
                         expect(request.getParameterMap()).andThrow(new UnsupportedOperationException(""));
                         expect(request.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE)).andReturn(null);
-                        Vector params = new Vector();
+                        Vector<String> params = new Vector<>();
                         params.add("debug");
                         expect(request.getParameterNames()).andReturn(params.elements());
                         expect(request.getParameterValues("debug")).andReturn(new String[] {"false"});
@@ -425,7 +425,7 @@ public class AgentServletTest {
         expect(request.getHeader("Origin")).andReturn(in);
         expect(request.getHeader("Access-Control-Request-Headers")).andReturn(null);
 
-        response.setHeader(eq("Access-Control-Max-Age"), (String) anyObject());
+        response.setHeader(eq("Access-Control-Max-Age"), anyObject());
         response.setHeader("Access-Control-Allow-Origin", out);
         response.setHeader("Access-Control-Allow-Credentials", "true");
 
@@ -629,9 +629,9 @@ public class AgentServletTest {
                 context.log(find(pLogRegexp));
             }
         }
-        context.log((String) anyObject());
+        context.log(anyObject());
         EasyMock.expectLastCall().asStub();
-        context.log((String) anyObject(),isA(JMException.class));
+        context.log(anyObject(),isA(JMException.class));
         expectLastCall().anyTimes();
     }
 
@@ -672,7 +672,7 @@ public class AgentServletTest {
 
         class MyServletOutputStream extends ServletOutputStream {
             ByteArrayOutputStream baos;
-            public void write(int b) throws IOException {
+            public void write(int b) {
                 baos.write(b);
             }
 

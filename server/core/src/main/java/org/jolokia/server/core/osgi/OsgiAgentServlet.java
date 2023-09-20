@@ -16,7 +16,7 @@ package org.jolokia.server.core.osgi;
  * limitations under the License.
  */
 
-import javax.servlet.*;
+import jakarta.servlet.*;
 
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.config.Configuration;
@@ -49,7 +49,7 @@ public class OsgiAgentServlet extends AgentServlet {
     private BundleContext bundleContextGiven;
 
     // Tracker to be used for the LogService
-    private ServiceTracker logTracker;
+    private ServiceTracker<LogService, LogService> logTracker;
 
     // A lookup which checks for OSGi detector services
     private ServerDetectorLookup osgiDetectorLookup;
@@ -117,7 +117,7 @@ public class OsgiAgentServlet extends AgentServlet {
         BundleContext ctx = getBundleContext(pServletConfig);
         if (ctx != null) {
             // Track logging service
-            logTracker = new ServiceTracker(ctx, LogService.class.getName(), null);
+            logTracker = new ServiceTracker<>(ctx, LogService.class.getName(), null);
             logTracker.open();
             return new ActivatorLogHandler(logTracker,Boolean.parseBoolean(pConfiguration.getConfig(ConfigKey.DEBUG)));
         } else {
@@ -169,10 +169,10 @@ public class OsgiAgentServlet extends AgentServlet {
     // it uses simply the servlets log facility
     private final class ActivatorLogHandler implements LogHandler {
 
-        private ServiceTracker logTracker;
-        private boolean debug;
+        private final ServiceTracker<LogService, LogService> logTracker;
+        private final boolean debug;
 
-        private ActivatorLogHandler(ServiceTracker pLogTracker, boolean pDebug) {
+        private ActivatorLogHandler(ServiceTracker<LogService, LogService> pLogTracker, boolean pDebug) {
             logTracker = pLogTracker;
             debug = pDebug;
         }
@@ -188,7 +188,7 @@ public class OsgiAgentServlet extends AgentServlet {
         }
 
         private void doLog(int level, String message) {
-            LogService logService = (LogService) logTracker.getService();
+            LogService logService = logTracker.getService();
             if (logService != null) {
                 logService.log(level,message);
             } else {
@@ -200,7 +200,7 @@ public class OsgiAgentServlet extends AgentServlet {
 
         /** {@inheritDoc} */
         public void error(String message, Throwable t) {
-            LogService logService = (LogService) logTracker.getService();
+            LogService logService = logTracker.getService();
             if (logService != null) {
                 logService.log(LogService.LOG_ERROR,message,t);
             } else {

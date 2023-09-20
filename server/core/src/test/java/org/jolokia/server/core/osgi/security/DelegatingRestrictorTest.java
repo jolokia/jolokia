@@ -45,13 +45,13 @@ public class DelegatingRestrictorTest {
     }
 
     private void setupRestrictor(Restrictor pRestrictor) throws InvalidSyntaxException {
-        ServiceReference[] refs;
+        ServiceReference<?>[] refs;
         if (pRestrictor != null) {
-            ServiceReference ref = createMock(ServiceReference.class);
+            ServiceReference<Restrictor> ref = createMock(ServiceReference.class);
             refs = new ServiceReference[] { ref };
             expect(context.getService(ref)).andStubReturn(pRestrictor);
             expect(context.ungetService(ref)).andStubReturn(true);
-            replay(refs);
+            replay((Object[]) refs);
         } else {
             refs = null;
         }

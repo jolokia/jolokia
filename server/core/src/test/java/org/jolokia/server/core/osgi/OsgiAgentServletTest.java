@@ -16,7 +16,7 @@ package org.jolokia.server.core.osgi;
  *  limitations under the License.
  */
 
-import javax.servlet.*;
+import jakarta.servlet.*;
 
 import org.easymock.EasyMock;
 import org.jolokia.server.core.config.ConfigKey;
@@ -106,7 +106,7 @@ public class OsgiAgentServletTest {
 
     private void destroyServlet() {
         reset(bundleContext);
-        bundleContext.removeServiceListener(EasyMock.<ServiceListener>anyObject());
+        bundleContext.removeServiceListener(EasyMock.anyObject());
         expectLastCall().asStub();
         replay(bundleContext);
         servlet.destroy();
@@ -121,16 +121,16 @@ public class OsgiAgentServletTest {
         addServiceLookup(ServerDetectorLookup.class);
     }
 
-    private void addServiceLookup(Class pLogServiceClass) throws InvalidSyntaxException {
+    private void addServiceLookup(Class<?> pLogServiceClass) throws InvalidSyntaxException {
         expect(bundleContext.createFilter("(objectClass=" + pLogServiceClass.getName()+ ")"))
-                .andStubReturn((Filter) createMock(Filter.class));
-        bundleContext.addServiceListener(EasyMock.<ServiceListener>anyObject(), eq("(objectClass=" + pLogServiceClass.getName() + ")"));
+                .andStubReturn(createMock(Filter.class));
+        bundleContext.addServiceListener(EasyMock.anyObject(), eq("(objectClass=" + pLogServiceClass.getName() + ")"));
         expectLastCall().asStub();
         expect(bundleContext.getServiceReferences(pLogServiceClass.getName(),null)).andStubReturn(null);
     }
 
     private void preparePlainLogging() {
-        servletContext.log(EasyMock.<String>anyObject());
+        servletContext.log(EasyMock.anyObject());
         servletContext.log("jolokia: Debug");
         servletContext.log("jolokia: Info");
         servletContext.log(eq("jolokia: Error"),isA(Exception.class));

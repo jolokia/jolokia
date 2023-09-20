@@ -23,6 +23,7 @@ import java.util.*;
 import javax.management.*;
 
 import org.jolokia.server.core.detector.ServerDetector;
+import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.request.RequestInterceptor;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 
@@ -60,6 +61,16 @@ public abstract class AbstractServerDetector implements ServerDetector {
     /** {@inheritDoc} */
     public void init (Map<String,Object> pConfig) {
         config = pConfig;
+    }
+
+    @Override
+    public void destroy() throws Exception {
+
+    }
+
+    @Override
+    public void init(JolokiaContext pJolokiaContext) {
+
     }
 
     protected Object getConfig(String pKey) {

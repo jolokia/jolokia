@@ -6,6 +6,7 @@ import java.util.Set;
 
 import javax.management.MBeanServerConnection;
 
+import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.api.ServerHandle;
 import org.jolokia.server.core.service.request.RequestInterceptor;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
@@ -25,6 +26,12 @@ class FallbackServerDetector implements ServerDetector {
 
     /** {@inheritDoc} */
     public void init(Map<String, Object> pConfig) { }
+
+    /** {@inheritDoc} */
+    public void init(JolokiaContext context) { }
+
+    /** {@inheritDoc} */
+    public void destroy() throws Exception { }
 
     /**
      * {@inheritDoc}

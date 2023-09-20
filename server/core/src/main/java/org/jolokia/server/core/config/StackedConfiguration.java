@@ -14,7 +14,7 @@ import java.util.*;
 public class StackedConfiguration implements Configuration {
 
     // List of delegated configuration objects
-    private List<Configuration> delegateConfigs;
+    private final List<Configuration> delegateConfigs;
 
     /**
      * Generated this configuration stack from the given configurations
@@ -37,7 +37,7 @@ public class StackedConfiguration implements Configuration {
 
     /** {@inheritDoc} */
     public Set<ConfigKey> getConfigKeys() {
-        Set<ConfigKey> keys = new HashSet<ConfigKey>();
+        Set<ConfigKey> keys = new HashSet<>();
         for (Configuration config : delegateConfigs) {
             keys.addAll(config.getConfigKeys());
         }

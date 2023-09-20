@@ -31,7 +31,6 @@ import org.jolokia.server.core.service.impl.StdoutLogHandler;
 import org.jolokia.server.core.service.request.RequestHandler;
 import org.jolokia.server.core.service.serializer.Serializer;
 import org.jolokia.server.core.util.*;
-import org.jolokia.server.core.util.HttpTestUtil;
 import org.json.simple.*;
 import org.testng.annotations.Test;
 
@@ -52,7 +51,7 @@ public class HttpRequestHandlerTest {
     public void accessAllowed() throws Exception {
         Restrictor restrictor = createMock(Restrictor.class);
         expect(restrictor.isRemoteAccessAllowed("localhost","127.0.0.1")).andReturn(true);
-        expect(restrictor.isOriginAllowed((String) isNull(), eq(true))).andReturn(true);
+        expect(restrictor.isOriginAllowed(isNull(), eq(true))).andReturn(true);
         replay(restrictor);
         init(restrictor);
         handler.checkAccess("localhost", "127.0.0.1", null);
@@ -173,12 +172,12 @@ public class HttpRequestHandlerTest {
             Exception e = (Exception) exceptions[i];
             LogHandler log = createMock(LogHandler.class);
             expect(log.isDebug()).andReturn(true).anyTimes();
-            log.error(find("" + exceptions[i + 1]), EasyMock.<Throwable>anyObject());
-            log.error(find("" + exceptions[i + 2]), EasyMock.<Throwable>anyObject());
-            log.debug((String) anyObject());
+            log.error(find("" + exceptions[i + 1]), EasyMock.anyObject());
+            log.error(find("" + exceptions[i + 2]), EasyMock.anyObject());
+            log.debug(anyObject());
             expectLastCall().asStub();
             init(log);
-            expect(requestHandler.handleRequest(EasyMock.<JolokiaRequest>anyObject(),EasyMock.anyObject())).andThrow(e);
+            expect(requestHandler.handleRequest(EasyMock.anyObject(),EasyMock.anyObject())).andThrow(e);
             replay(requestHandler,log);
             JSONObject resp = (JSONObject) handler.handleGetRequest("/jolokia",
                                                                     "/read/java.lang:type=Memory/HeapMemoryUsage",null);
@@ -209,13 +208,13 @@ public class HttpRequestHandlerTest {
         requestHandler = createMock(RequestHandler.class);
         requestHandler.destroy();
         expectLastCall().asStub();
-        expect(requestHandler.canHandle((JolokiaRequest) anyObject())).andStubReturn(true);
-        expect(requestHandler.compareTo((RequestHandler) anyObject())).andStubReturn(1);
+        expect(requestHandler.canHandle(anyObject())).andStubReturn(true);
+        expect(requestHandler.compareTo(anyObject())).andStubReturn(1);
         SortedSet<RequestHandler> services = createMock(SortedSet.class);
         expect(services.add(requestHandler)).andStubReturn(true);
         expect(services.iterator()).andStubAnswer(new IAnswer<Iterator<RequestHandler>>() {
-            public Iterator<RequestHandler> answer() throws Throwable {
-                return new SingletonIterator<RequestHandler> (requestHandler);
+            public Iterator<RequestHandler> answer() {
+                return new SingletonIterator<>(requestHandler);
             }
         });
         expect(services.comparator()).andStubReturn(null);
@@ -247,7 +246,7 @@ public class HttpRequestHandlerTest {
             expect(requestHandler.handleRequest((JolokiaRequest) pRequest,anyObject())).andReturn("hello").times(i);
         }
         else if (pRequest instanceof String[]) {
-            String a[] = (String[]) pRequest;
+            String[] a = (String[]) pRequest;
             expect(requestHandler.handleRequest(eqReadRequest(a[0], a[1]),anyObject())).andReturn("hello").times(i);
         } else {
             expect(requestHandler.handleRequest(isA(JolokiaRequest.class),anyObject())).andReturn("hello").times(i);
@@ -301,7 +300,7 @@ public class HttpRequestHandlerTest {
         return null;
     }
 
-    private class SingletonIterator<T> implements Iterator<T> {
+    private static class SingletonIterator<T> implements Iterator<T> {
         boolean first = true;
         T object;
 

@@ -4,22 +4,20 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.Hashtable;
 
-import javax.servlet.ServletException;
-
+import jakarta.servlet.http.HttpServlet;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.osgi.security.*;
-import org.jolokia.server.core.osgi.util.LogHelper;
 import org.jolokia.server.core.service.api.Restrictor;
 import org.jolokia.server.core.util.NetworkUtil;
 import org.osgi.framework.*;
-import org.osgi.framework.Constants;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.service.http.*;
+import org.osgi.service.servlet.context.ServletContextHelper;
+import org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants;
 import org.osgi.util.tracker.ServiceTracker;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 import static org.jolokia.server.core.config.ConfigKey.*;
 
@@ -41,25 +39,18 @@ import static org.jolokia.server.core.config.ConfigKey.*;
 
 
 /**
- * OSGi Activator for the Jolokia Agent
+ * OSGi Activator for the Jolokia Agent using Whiteboard Servlet specification
  *
  * @author roland
  * @since Dec 27, 2009
  */
 public class OsgiAgentActivator implements BundleActivator {
 
-    // Base filter to use for filtering out HttpServices
-    public static final String HTTP_SERVICE_FILTER_BASE =
-            "(" + Constants.OBJECTCLASS + "=" + HttpService.class.getName() + ")";
-
     // Context associated with this activator
     private BundleContext bundleContext;
 
-    // Tracker for HttpService
-    private ServiceTracker httpServiceTracker;
-
     // Tracker for ConfigAdmin Service
-    private ServiceTracker configAdminTracker;
+    private ServiceTracker<ConfigurationAdmin, ConfigurationAdmin> configAdminTracker;
 
     // Prefix used for configuration values
     private static final String CONFIG_PREFIX = "org.jolokia";
@@ -67,19 +58,24 @@ public class OsgiAgentActivator implements BundleActivator {
     // Prefix used for ConfigurationAdmin pid
     private static final String CONFIG_ADMIN_PID = "org.jolokia.osgi";
 
-    // HttpContext used for authorization
-    private HttpContext jolokiaHttpContext;
+    // ServletContextHelper (Whiteboard) used for authorization
+    // (it was an org.osgi.service.http.HttpContext when HttpService specification was used)
+    private ServletContextHelper jolokiaContextHelper;
 
     // Restrictor and associated service tracker when tracking restrictor
     // services
     private Restrictor restrictor = null;
 
+    private ServiceRegistration<ServletContextHelper> contextRegistration = null;
+    private ServiceRegistration<HttpServlet> servletRegistration = null;
+
     /** {@inheritDoc} */
+    @SuppressWarnings("deprecation")
     public void start(BundleContext pBundleContext) {
         bundleContext = pBundleContext;
 
         //Track ConfigurationAdmin service
-        configAdminTracker = new ServiceTracker(pBundleContext,
+        configAdminTracker = new ServiceTracker<>(pBundleContext,
                                                 "org.osgi.service.cm.ConfigurationAdmin",
                                                 null);
         configAdminTracker.open();
@@ -90,12 +86,9 @@ public class OsgiAgentActivator implements BundleActivator {
             restrictor = new DelegatingRestrictor(bundleContext);
         }
 
-        // Track HttpService
-        if (Boolean.parseBoolean(getConfiguration(LISTEN_FOR_HTTP_SERVICE))) {
-            httpServiceTracker = new ServiceTracker(pBundleContext,
-                                                    buildHttpServiceFilter(pBundleContext),
-                                                    new HttpServiceCustomizer(pBundleContext));
-            httpServiceTracker.open();
+        // Whiteboard servlet
+        if (Boolean.parseBoolean(getConfiguration(REGISTER_WHITEBOARD_SERVLET, LISTEN_FOR_HTTP_SERVICE))) {
+            registerWhiteboardServlet(pBundleContext);
         }
     }
 
@@ -103,11 +96,9 @@ public class OsgiAgentActivator implements BundleActivator {
     public void stop(BundleContext pBundleContext) {
         assert pBundleContext.equals(bundleContext);
 
-        if (httpServiceTracker != null) {
-            // Closing the tracker will also call {@link HttpServiceCustomizer#removedService()}
-            // for every active service which in turn unregisters the servlet
-            httpServiceTracker.close();
-            httpServiceTracker = null;
+        if (servletRegistration != null) {
+            servletRegistration.unregister();
+            contextRegistration.unregister();
         }
 
         //Shut this down last to make sure nobody calls for a property after this is shutdown
@@ -116,9 +107,9 @@ public class OsgiAgentActivator implements BundleActivator {
             configAdminTracker = null;
         }
 
-        if (jolokiaHttpContext instanceof ServiceAuthenticationHttpContext) {
-            final ServiceAuthenticationHttpContext context =
-                    (ServiceAuthenticationHttpContext) jolokiaHttpContext;
+        if (jolokiaContextHelper instanceof ServiceAuthenticationServletContextHelper) {
+            final ServiceAuthenticationServletContextHelper context =
+                    (ServiceAuthenticationServletContextHelper) jolokiaContextHelper;
             context.close();
         }
 
@@ -127,33 +118,33 @@ public class OsgiAgentActivator implements BundleActivator {
     }
 
     /**
-     * Get the security context for out servlet. Dependent on the configuration,
+     * Get the security context for our servlet. Dependent on the configuration,
      * this is either a no-op context or one which authenticates with a given user
      *
      * @return the HttpContext with which the agent servlet gets registered.
      */
-    public synchronized HttpContext getHttpContext() {
-        if (jolokiaHttpContext == null) {
+    public synchronized ServletContextHelper getServletContextHelper() {
+        if (jolokiaContextHelper == null) {
             final String user = getConfiguration(USER);
             final String authMode = getConfiguration(AUTH_MODE);
             if (user != null || "jaas".equalsIgnoreCase(authMode)) {
-                 jolokiaHttpContext =
+                 jolokiaContextHelper =
                     new BasicAuthenticationHttpContext(getConfiguration(REALM),
                                                        createAuthenticator(authMode));
-            } else if (ServiceAuthenticationHttpContext.shouldBeUsed(authMode)) {
-                jolokiaHttpContext = new ServiceAuthenticationHttpContext(bundleContext, authMode);
+            } else if (ServiceAuthenticationServletContextHelper.shouldBeUsed(authMode)) {
+                jolokiaContextHelper = new ServiceAuthenticationServletContextHelper(bundleContext, authMode);
             } else {
-                jolokiaHttpContext = new DefaultHttpContext();
+                jolokiaContextHelper = new DefaultServletContextHelper();
             }
         }
-        return jolokiaHttpContext;
+        return jolokiaContextHelper;
     }
 
     /**
-     * Get the servlet alias under which the agent servlet is registered
-     * @return get the servlet alias
+     * Get the servlet context path under which the agent servlet is registered
+     * @return get the servlet context path
      */
-    public String getServletAlias() {
+    public String getServletContextPath() {
         return getConfiguration(AGENT_CONTEXT);
     }
 
@@ -161,7 +152,7 @@ public class OsgiAgentActivator implements BundleActivator {
 
     // Customizer for registering servlet at a HttpService
     private Dictionary<String,String> getConfiguration() {
-        Dictionary<String,String> config = new Hashtable<String,String>();
+        Dictionary<String,String> config = new Hashtable<>();
         for (ConfigKey key : ConfigKey.values()) {
             String value = getConfiguration(key);
             if (value != null) {
@@ -177,7 +168,6 @@ public class OsgiAgentActivator implements BundleActivator {
         return config;
     }
 
-
     private String getConfiguration(ConfigKey pKey) {
         // TODO: Use fragments if available.
         String value = getConfigurationFromConfigAdmin(pKey);
@@ -190,8 +180,22 @@ public class OsgiAgentActivator implements BundleActivator {
         return value;
     }
 
+    private String getConfiguration(ConfigKey pKey, ConfigKey fallbackKey) {
+        String value = getConfigurationFromConfigAdmin(pKey);
+        if (value == null) {
+            value = bundleContext.getProperty(CONFIG_PREFIX + "." + pKey.getKeyValue());
+        }
+        if (value == null) {
+            value = getConfiguration(fallbackKey);
+        }
+        if (value == null) {
+            value = pKey.getDefaultValue();
+        }
+        return value;
+    }
+
     private String getConfigurationFromConfigAdmin(ConfigKey pkey) {
-        ConfigurationAdmin configAdmin = (ConfigurationAdmin) configAdminTracker.getService();
+        ConfigurationAdmin configAdmin = configAdminTracker.getService();
         if (configAdmin == null) {
             return null;
         }
@@ -207,18 +211,6 @@ public class OsgiAgentActivator implements BundleActivator {
             return (String) props.get(CONFIG_PREFIX + "." + pkey.getKeyValue());
         } catch (IOException e) {
             return null;
-        }
-    }
-
-    private Filter buildHttpServiceFilter(BundleContext pBundleContext) {
-        String customFilter = getConfiguration(ConfigKey.HTTP_SERVICE_FILTER);
-        String filter = customFilter != null && customFilter.trim().length() > 0 ?
-                "(&" + HTTP_SERVICE_FILTER_BASE + customFilter + ")" :
-                HTTP_SERVICE_FILTER_BASE;
-        try {
-            return pBundleContext.createFilter(filter);
-        } catch (InvalidSyntaxException e) {
-            throw new IllegalArgumentException("Unable to parse filter " + filter,e);
         }
     }
 
@@ -248,21 +240,20 @@ public class OsgiAgentActivator implements BundleActivator {
     }
 
     private Authenticator lookupAuthenticator(final Class<?> pAuthClass) {
-        Authenticator authenticator = null;
+        Authenticator authenticator;
         try {
             // prefer constructor that takes configuration
             try {
-                final Constructor<?> constructorThatTakesConfiguration = pAuthClass.getConstructor(Configuration.class);
+                // TODO: Something wrong here - Configuration vs. Dictionary constructor
+                final Constructor<?> constructorThatTakesConfiguration = pAuthClass.getConstructor(Dictionary.class);
                 authenticator = (Authenticator) constructorThatTakesConfiguration.newInstance(getConfiguration());
-            } catch (NoSuchMethodException ignore) {
+            } catch (NoSuchMethodException e) {
                 // Next try
-                authenticator = lookupAuthenticatorWithDefaultConstructor(pAuthClass, ignore);
+                authenticator = lookupAuthenticatorWithDefaultConstructor(pAuthClass, e);
             } catch (InvocationTargetException e) {
                 throw new IllegalArgumentException("Cannot create an instance of custom authenticator class with configuration", e);
             }
-        } catch (InstantiationException e) {
-            throw new IllegalArgumentException("Cannot create an instance of custom authenticator class", e);
-        } catch (IllegalAccessException e) {
+        } catch (InstantiationException | IllegalAccessException e) {
             throw new IllegalArgumentException("Cannot create an instance of custom authenticator class", e);
         }
         return authenticator;
@@ -294,40 +285,31 @@ public class OsgiAgentActivator implements BundleActivator {
         }
     }
 
-    // =============================================================================
+    private void registerWhiteboardServlet(BundleContext pBundleContext) {
+        // register org.osgi.service.servlet.context.ServletContextHelper
+        // in 1.x it was a org.osgi.service.http.HttpContext parameter to
+        // org.osgi.service.http.HttpService.registerServlet() method
+        ServletContextHelper contextHelper = getServletContextHelper();
+        String agentContext = getServletContextPath();
+        Dictionary<String, Object> properties = new Hashtable<>();
+        properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "jolokia");
+        properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, agentContext);
+        contextRegistration = pBundleContext.registerService(ServletContextHelper.class, contextHelper, properties);
 
-    private class HttpServiceCustomizer implements ServiceTrackerCustomizer {
-        private final BundleContext context;
-
-        HttpServiceCustomizer(BundleContext pContext) {
-            context = pContext;
+        // register servlet
+        HttpServlet servlet = new OsgiAgentServlet(pBundleContext, restrictor);
+        properties = new Hashtable<>();
+        properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, "jolokia");
+        properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED, Boolean.TRUE);
+        properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/*");
+        properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+                String.format("(%s=jolokia)", HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME));
+        Dictionary<String, String> config = getConfiguration();
+        for (Enumeration<String> e = config.keys(); e.hasMoreElements(); ) {
+            String key = e.nextElement();
+            properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_INIT_PARAM_PREFIX + key, config.get(key));
         }
-
-        /** {@inheritDoc} */
-        public Object addingService(ServiceReference reference) {
-            HttpService service = (HttpService) context.getService(reference);
-            try {
-                service.registerServlet(getServletAlias(),
-                                        new OsgiAgentServlet(context,restrictor),
-                                        getConfiguration(),
-                                        getHttpContext());
-            } catch (ServletException e) {
-                LogHelper.logError(bundleContext, "Servlet Exception: " + e, e);
-            } catch (NamespaceException e) {
-                LogHelper.logError(bundleContext, "Namespace Exception: " + e, e);
-            }
-            return service;
-        }
-
-        /** {@inheritDoc} */
-        public void modifiedService(ServiceReference reference, Object service) {
-        }
-
-        /** {@inheritDoc} */
-        public void removedService(ServiceReference reference, Object service) {
-            HttpService httpService = (HttpService) service;
-            httpService.unregister(getServletAlias());
-        }
+        servletRegistration = pBundleContext.registerService(HttpServlet.class, servlet, properties);
     }
 
 }

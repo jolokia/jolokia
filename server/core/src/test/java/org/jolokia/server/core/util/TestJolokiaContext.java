@@ -38,57 +38,58 @@ public class TestJolokiaContext implements JolokiaContext {
     // Switch on for more debuggin
     private static final boolean DEBUG = false;
 
-    Map<Class,SortedSet> services;
+    Map<Class<?>,SortedSet<?>> services;
     LogHandler logHandler;
     Restrictor restrictor;
     Configuration config;
     ServerHandle handle;
-    private AgentDetails agentDetails;
-    private Set<ObjectName> mbeans;
-    private MBeanServerAccess mBeanServerAccess;
+    private final AgentDetails agentDetails;
+    private final Set<ObjectName> mbeans;
+    private final MBeanServerAccess mBeanServerAccess;
 
     public TestJolokiaContext() {
         this(null,null,null,null,null);
-        services.put(Serializer.class,new TreeSet<Serializer>(Arrays.asList(new TestSerializer())));
+        services.put(Serializer.class,new TreeSet<Serializer>(Collections.singletonList(new TestSerializer())));
     }
 
     private TestJolokiaContext(Configuration pConfig,
                                Restrictor pRestrictor,
                                LogHandler pLogHandler,
-                               Map<Class, SortedSet> pServices,
+                               Map<Class<?>, SortedSet<?>> pServices,
                                AgentDetails pAgentDetails) {
         this.config = pConfig != null ? pConfig : new StaticConfiguration();
         this.logHandler = pLogHandler != null ? pLogHandler : new StdoutLogHandler(DEBUG);
         this.restrictor = pRestrictor != null ? pRestrictor : new AllowAllRestrictor();
-        this.services = pServices != null ? pServices : new HashMap();
+        this.services = pServices != null ? pServices : new HashMap<>();
         String agentId = pConfig != null ? pConfig.getConfig(ConfigKey.AGENT_ID) : null;
         this.agentDetails = pAgentDetails != null ? pAgentDetails : new AgentDetails(agentId != null ? agentId : UUID.randomUUID().toString());
-        mbeans = new HashSet<ObjectName>();
+        mbeans = new HashSet<>();
         mBeanServerAccess = new SingleMBeanServerAccess(ManagementFactory.getPlatformMBeanServer());
     }
 
     public void init() {
-        for (Class serviceClass : services.keySet()) {
+        for (Class<?> serviceClass : services.keySet()) {
             for (Object jolokiaService : services.get(serviceClass)) {
-                ((JolokiaService) jolokiaService).init(this);
+                ((JolokiaService<?>) jolokiaService).init(this);
             }
         }
     }
-    public <T extends JolokiaService> SortedSet<T> getServices(Class<T> pType) {
-        SortedSet<T> ret = services.get(pType);
-        return ret != null ? new TreeSet<T>(ret) : new TreeSet<T>();
+    public <T extends JolokiaService<?>> SortedSet<T> getServices(Class<T> pType) {
+        @SuppressWarnings("unchecked")
+        SortedSet<T> ret = (SortedSet<T>) services.get(pType);
+        return ret != null ? new TreeSet<>(ret) : new TreeSet<>();
     }
 
-    public <T extends JolokiaService> T getService(Class<T> pType) {
+    public <T extends JolokiaService<?>> T getService(Class<T> pType) {
         SortedSet<T> services = getServices(pType);
-        return services.size() > 0 ? services.first() : null;
+        return !services.isEmpty() ? services.first() : null;
     }
 
-    public <T extends JolokiaService> T getMandatoryService(Class<T> pType) {
+    public <T extends JolokiaService<?>> T getMandatoryService(Class<T> pType) {
         SortedSet<T> services = getServices(pType);
         if (services.size() > 1) {
             throw new IllegalStateException("More than one service of type " + pType + ": " + services);
-        } else if (services.size() == 0) {
+        } else if (services.isEmpty()) {
             throw new IllegalStateException("No service of type " + pType);
         }
         return services.first();
@@ -190,7 +191,7 @@ public class TestJolokiaContext implements JolokiaContext {
         private LogHandler logHandler;
         private Restrictor restrictor;
         private Configuration config;
-        private Map<Class,SortedSet> services = new HashMap<Class, SortedSet>();
+        private final Map<Class<?>,SortedSet<?>> services = new HashMap<>();
         private AgentDetails agentDetails;
 
         public Builder config(Configuration config) {
@@ -217,13 +218,15 @@ public class TestJolokiaContext implements JolokiaContext {
             agentDetails = pAgentDetails;
             return this;
         }
-        public <T extends JolokiaService> Builder services(Class<T> pType, T ... pServices) {
-            SortedSet<T> serviceSet = new TreeSet(Arrays.asList(pServices));
+
+        @SafeVarargs
+        public final <T extends JolokiaService<?>> Builder services(Class<T> pType, T... pServices) {
+            SortedSet<T> serviceSet = new TreeSet<>(Arrays.asList(pServices));
             services.put(pType, serviceSet);
             return this;
         }
 
-        public <T extends JolokiaService> Builder services(Class<T> pType, SortedSet<T> pServices) {
+        public <T extends JolokiaService<?>> Builder services(Class<T> pType, SortedSet<T> pServices) {
             services.put(pType, pServices);
             return this;
         }

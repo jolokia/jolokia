@@ -290,8 +290,18 @@ public enum ConfigKey {
      * By default, the OSGi Agent listens for an OSGi HttpService to which it will register
      * an agent servlet. Set this to false if you want to instantiate the
      * servlet on your own (either declaratively within another war or programmatically)
+     *
+     * @deprecated option is kept for compatibility reasons, because OSGi servlet is now registered
+     *             using Servlet Whiteboard pattern. Please use {@link #REGISTER_WHITEBOARD_SERVLET}
      */
-    LISTEN_FOR_HTTP_SERVICE("listenForHttpService", true, false, Constants.TRUE),
+    @Deprecated
+    LISTEN_FOR_HTTP_SERVICE("listenForHttpService", true, false),
+
+    /**
+     * By default, the OSGi Agent uses Whiteboard pattern to register an agent servlet.
+     * Set this to false if you want to instantiate and register the servlet on your own.
+     */
+    REGISTER_WHITEBOARD_SERVLET("registerWhiteboardServlet", true, false, Constants.TRUE),
 
     /**
      * By default, the OSGi Agent will bind to all HttpService implementations.
@@ -302,7 +312,11 @@ public enum ConfigKey {
      * </code></pre>
      * <p>Note this will be combined with the objectClass filter for HttpService with
      * the and (&amp;) operator.</p>
+     *
+     * @deprecated <a href="https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html">Whiteboard
+     *             specification</a> can no longer <em>point to</em> specific HttpService implementation.
      */
+    @Deprecated
     HTTP_SERVICE_FILTER("httpServiceFilter",true,false),
 
     /**
@@ -348,20 +362,20 @@ public enum ConfigKey {
      */
     public static final String JAAS_SUBJECT_REQUEST_ATTRIBUTE = "org.jolokia.jaasSubject";
 
-    private String  key;
-    private String  defaultValue;
-    private boolean globalConfig;
-    private boolean requestConfig;
+    private final String  key;
+    private final String  defaultValue;
+    private final boolean globalConfig;
+    private final boolean requestConfig;
 
-    private static Map<String, ConfigKey> keyByName;
-    private static Map<String, ConfigKey> globalKeyByName;
-    private static Map<String, ConfigKey> requestKeyByName;
+    private static final Map<String, ConfigKey> keyByName;
+    private static final Map<String, ConfigKey> globalKeyByName;
+    private static final Map<String, ConfigKey> requestKeyByName;
 
     // Build up internal reverse map
     static {
-        keyByName = new HashMap<String, ConfigKey>();
-        globalKeyByName = new HashMap<String, ConfigKey>();
-        requestKeyByName = new HashMap<String, ConfigKey>();
+        keyByName = new HashMap<>();
+        globalKeyByName = new HashMap<>();
+        requestKeyByName = new HashMap<>();
         for (ConfigKey ck : ConfigKey.values()) {
             keyByName.put(ck.getKeyValue(), ck);
             if (ck.isGlobalConfig()) {

@@ -1,6 +1,6 @@
 package org.jolokia.server.core.osgi.security;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Interface used for performing the authentication.

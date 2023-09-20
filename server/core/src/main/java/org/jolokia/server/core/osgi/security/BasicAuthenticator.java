@@ -1,8 +1,6 @@
 package org.jolokia.server.core.osgi.security;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.osgi.service.http.HttpContext;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
 * @author roland
@@ -26,8 +24,6 @@ public class BasicAuthenticator extends BaseAuthenticator {
         if (providedUser != null && providedUser.trim().equals(userToCheck) &&
                 providedPassword != null && providedPassword.trim().equals(passwordToCheck)) {
 
-            pRequest.setAttribute(HttpContext.AUTHENTICATION_TYPE,HttpServletRequest.BASIC_AUTH);
-            pRequest.setAttribute(HttpContext.REMOTE_USER, userToCheck);
             return true;
         } else {
             return false;

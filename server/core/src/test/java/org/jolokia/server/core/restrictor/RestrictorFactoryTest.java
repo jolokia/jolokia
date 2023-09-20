@@ -4,21 +4,13 @@ import org.jolokia.server.core.config.*;
 import org.jolokia.server.core.restrictor.policy.PolicyRestrictor;
 import org.jolokia.server.core.service.api.LogHandler;
 import org.jolokia.server.core.service.api.Restrictor;
-import org.jolokia.server.core.util.TestJolokiaContext;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
-
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
+import java.util.List;
 
 /**
  * Created by nevenr on 11/1/15.
@@ -29,7 +21,7 @@ public class RestrictorFactoryTest {
     private final LogHandler dummyLogHandler = createDummyLogHandler();
 
     @Test
-    public void testAllowAllRestrictor() throws Exception {
+    public void testAllowAllRestrictor() {
 
         Configuration config = getConfig();
         Restrictor restrictor = RestrictorFactory.createRestrictor(config, dummyLogHandler);
@@ -38,7 +30,7 @@ public class RestrictorFactoryTest {
     }
 
     @Test
-    public void testDenyAllRestrictor() throws Exception {
+    public void testDenyAllRestrictor() {
 
         Configuration config = getConfig(ConfigKey.POLICY_LOCATION, "file:///some_non_existing_file.xml");
         Restrictor restrictor = RestrictorFactory.createRestrictor(config, dummyLogHandler);
@@ -47,7 +39,7 @@ public class RestrictorFactoryTest {
     }
 
     @Test
-    public void testPolicyRestrictor() throws Exception {
+    public void testPolicyRestrictor() {
 
         Configuration config = getConfig(ConfigKey.POLICY_LOCATION, "classpath:/access-restrictor-factory-test.xml");
         Restrictor restrictor = RestrictorFactory.createRestrictor(config, dummyLogHandler);
@@ -56,7 +48,7 @@ public class RestrictorFactoryTest {
     }
 
     @Test
-    public void testCustomRestrictor() throws Exception {
+    public void testCustomRestrictor() {
 
         Configuration config = getConfig(ConfigKey.RESTRICTOR_CLASS, "org.jolokia.server.core.restrictor.TestRestrictor");
         Restrictor restrictor = RestrictorFactory.createRestrictor(config, dummyLogHandler);
@@ -65,7 +57,7 @@ public class RestrictorFactoryTest {
     }
 
     @Test
-    public void policyRestrictor() throws Exception {
+    public void policyRestrictor() {
         System.setProperty("jolokia.test1.policy.location","access-restrictor-factory-test.xml");
         System.setProperty("jolokia.test2.policy.location","access-restrictor-factory-test");
         for (String[] params : new String[][] {
@@ -85,7 +77,7 @@ public class RestrictorFactoryTest {
 
 
     private Configuration getConfig(Object... extra) {
-        ArrayList list = new ArrayList();
+        List<Object> list = new ArrayList<>();
         Collections.addAll(list, extra);
         return new StaticConfiguration(list.toArray());
     }

@@ -166,7 +166,7 @@ public class NotificationCommandTest {
 
     @Test
     public void addWithConfigMap() throws Exception {
-        Map args = prepareAddTestMap();
+        Map<String, Object> args = prepareAddTestMap();
         args.put("config",Collections.singletonMap("fcn","meister"));
         AddCommand command = (AddCommand) NotificationCommandFactory.createCommand(args);
         assertEquals(command.getConfig().size(),1);
@@ -175,20 +175,20 @@ public class NotificationCommandTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*\\{not parsable\\{.*")
     public void addWithConfigMapUnparsable() throws Exception {
-        Map args = prepareAddTestMap();
+        Map<String, Object> args = prepareAddTestMap();
         args.put("config","{not parsable{");
         NotificationCommandFactory.createCommand(args);
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*\\[\"array\"\\].*")
+    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*\\[\"array\"].*")
     public void addWithConfigMapWrongType() throws Exception {
-        Map args = prepareAddTestMap();
+        Map<String, Object> args = prepareAddTestMap();
         args.put("config","[\"array\"]");
         NotificationCommandFactory.createCommand(args);
     }
 
-    private Map prepareAddTestMap() {
-        Map args = new HashMap();
+    private Map<String, Object> prepareAddTestMap() {
+        Map<String, Object> args = new HashMap<>();
         args.put("client", UUID.randomUUID().toString());
         args.put("command","add");
         args.put("mode","pull");
@@ -198,7 +198,7 @@ public class NotificationCommandTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*MBean.*")
     public void addWithoutMBeanStack() throws Exception {
-        Stack<String> args = new Stack<String>();
+        Stack<String> args = new Stack<>();
         args.push("pull");
         args.push(UUID.randomUUID().toString());
         args.push("add");
@@ -207,7 +207,7 @@ public class NotificationCommandTest {
 
     @Test
     public void addWithEmptyFilterAndConfig() throws MalformedObjectNameException {
-        Stack<String> args = new Stack<String>();
+        Stack<String> args = new Stack<>();
         args.push("{}");
         args.push(" ");
         args.push("test:type=test");
@@ -216,13 +216,13 @@ public class NotificationCommandTest {
         args.push("add");
         AddCommand command = (AddCommand) NotificationCommandFactory.createCommand(args);
         assertNull(command.getFilter());
-        Map config = command.getConfig();
+        Map<?, ?> config = command.getConfig();
         assertEquals(config.size(),0);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*MBean.*")
     public void addWithoutMBeanMap() throws Exception {
-        Map<String,String> args = new HashMap();
+        Map<String,String> args = new HashMap<>();
         args.put("client",UUID.randomUUID().toString());
         args.put("command","add");
         args.put("mode","pull");
@@ -230,7 +230,7 @@ public class NotificationCommandTest {
     }
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*mode.*")
     public void addWithoutModeStack() throws Exception {
-        Stack<String> args = new Stack<String>();
+        Stack<String> args = new Stack<>();
         args.push(UUID.randomUUID().toString());
         args.push("add");
         NotificationCommandFactory.createCommand(args);
@@ -238,7 +238,7 @@ public class NotificationCommandTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*mode.*")
     public void addWithoutModeMap() throws Exception {
-        Map<String,String> args = new HashMap();
+        Map<String,String> args = new HashMap<>();
         args.put("client",UUID.randomUUID().toString());
         args.put("command","add");
         NotificationCommandFactory.createCommand(args);
@@ -265,7 +265,7 @@ public class NotificationCommandTest {
     }
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*handle.*")
     public void removeNoHandleStack() throws Exception {
-        Stack<String> args = new Stack<String>();
+        Stack<String> args = new Stack<>();
         args.push(UUID.randomUUID().toString());
         args.push("remove");
         NotificationCommandFactory.createCommand(args);
@@ -273,7 +273,7 @@ public class NotificationCommandTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*handle.*")
     public void removeNoHandleMap() throws Exception {
-        Map<String,String> args = new HashMap();
+        Map<String,String> args = new HashMap<>();
         args.put("client",UUID.randomUUID().toString());
         args.put("command","remove");
         NotificationCommandFactory.createCommand(args);
@@ -281,29 +281,30 @@ public class NotificationCommandTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*client.*")
     public void removeNoClientStack() throws Exception {
-        Stack<String> args = new Stack<String>();
+        Stack<String> args = new Stack<>();
         args.push("remove");
         NotificationCommandFactory.createCommand(args);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*client.*")
     public void removeNoClientMap() throws Exception {
-        Map<String,String> args = new HashMap();
+        Map<String,String> args = new HashMap<>();
         args.put("command","remove");
         NotificationCommandFactory.createCommand(args);
     }
 
     @Test(expectedExceptions = UnsupportedOperationException.class,expectedExceptionsMessageRegExp = ".*blub.*")
-    public void negativeLookup() throws Exception {
+    public void negativeLookup() {
         NotificationCommandType.getTypeByName("blub");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
-    public void nullLookup() throws Exception {
+    public void nullLookup() {
         NotificationCommandType.getTypeByName(null);
     }
 
 
+    @SuppressWarnings("unchecked")
     private JSONArray getFilterArrayList(String[] pFilter) {
         JSONArray ret = new JSONArray();
         for (String f : pFilter) {
@@ -314,19 +315,21 @@ public class NotificationCommandTest {
 
     // ========================================================================================================
 
+    @SuppressWarnings("unchecked")
     private <T extends NotificationCommand> void check(Object[] pArgs, Checkable<T> pCheckable) throws MalformedObjectNameException {
         pCheckable.check((T) NotificationCommandFactory.createCommand(getMap(pArgs)));
         pCheckable.check((T) NotificationCommandFactory.createCommand(getStack(pArgs)));
     }
 
     private Stack<String> getStack(Object[] pArgs) {
-        List<String> ret = new ArrayList<String>();
+        List<String> ret = new ArrayList<>();
         ret.add((String) pArgs[1]);
         if (pArgs.length > 3) {
             for (int j = 3; j < pArgs.length; j +=2) {
                 if (pArgs[j] instanceof String) {
                     ret.add((String) pArgs[j]);
                 } else if (pArgs[j] instanceof List) {
+                    @SuppressWarnings("unchecked")
                     List<String> argsList = (List<String>) pArgs[j];
                     StringBuffer s = new StringBuffer();
                     for (String a : argsList) {
@@ -340,7 +343,7 @@ public class NotificationCommandTest {
             }
         }
         Collections.reverse(ret);
-        Stack<String> st = new Stack<String>();
+        Stack<String> st = new Stack<>();
         st.addAll(ret);
         return st;
     }
@@ -350,9 +353,9 @@ public class NotificationCommandTest {
     }
 
     private Map<String, ?> getMap(Object[] pArgs) {
-        Map ret = new HashMap();
+        Map<String, Object> ret = new HashMap<>();
         for (int i = 0; i < pArgs.length; i+=2) {
-            ret.put(pArgs[i],pArgs[i+1]);
+            ret.put((String) pArgs[i],pArgs[i+1]);
         }
         return ret;
     }

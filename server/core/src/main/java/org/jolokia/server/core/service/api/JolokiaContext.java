@@ -27,7 +27,7 @@ public interface JolokiaContext extends LogHandler, Restrictor {
      * @param pType requested service type
      * @return sorted set of services or an empty set
      */
-    <T extends JolokiaService> SortedSet<T> getServices(Class<T> pType);
+    <T extends JolokiaService<?>> SortedSet<T> getServices(Class<T> pType);
 
     /**
      * Get a single service. If more than one service of the given type has been
@@ -37,7 +37,7 @@ public interface JolokiaContext extends LogHandler, Restrictor {
      * @param pType requested service type
      * @return the requested service or null if none has been registered
      */
-    <T extends JolokiaService> T getService(Class<T> pType);
+    <T extends JolokiaService<?>> T getService(Class<T> pType);
 
     /**
      * Get a single, mandatory, service. If not present, then an exception is thrown. Also
@@ -47,7 +47,7 @@ public interface JolokiaContext extends LogHandler, Restrictor {
      * @return the requested service
      * @throws IllegalStateException if no service is present
      */
-    <T extends JolokiaService> T getMandatoryService(Class<T> pType);
+    <T extends JolokiaService<?>> T getMandatoryService(Class<T> pType);
 
     /**
      * Get a configuration value if set as configuration or the default

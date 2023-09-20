@@ -93,6 +93,7 @@ public class AddCommand extends ClientCommand {
      * @param pMap request map
      * @throws MalformedObjectNameException if the given mbean name is not a valid {@link ObjectName}
      */
+    @SuppressWarnings("unchecked")
     AddCommand(Map<String,?> pMap) throws MalformedObjectNameException {
         super(NotificationCommandType.ADD, pMap);
         if (!pMap.containsKey("mode")) {
@@ -159,15 +160,16 @@ public class AddCommand extends ClientCommand {
         return config;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public JSONObject toJSON() {
         JSONObject ret = super.toJSON();
         ret.put("mbean",objectName.toString());
         ret.put("mode",mode);
-        if (filter != null && filter.size() > 0) {
+        if (filter != null && !filter.isEmpty()) {
             ret.put("filter",filter);
         }
-        if (config != null && config.size() > 0) {
+        if (config != null && !config.isEmpty()) {
             ret.put("config",config);
         }
         if (handback != null) {
@@ -179,12 +181,11 @@ public class AddCommand extends ClientCommand {
     // ==============================================================================================
 
     // Parse a string as configuration object
+    @SuppressWarnings("unchecked")
     private Map<String, Object> parseConfig(String pElement) {
         try {
             return (Map<String, Object>) new JSONParser().parse(pElement);
-        } catch (ParseException e) {
-            throw new IllegalArgumentException("Cannot parse config '" + pElement + "' as JSON Object",e);
-        } catch (ClassCastException e) {
+        } catch (ParseException | ClassCastException e) {
             throw new IllegalArgumentException("Cannot parse config '" + pElement + "' as JSON Object",e);
         }
     }

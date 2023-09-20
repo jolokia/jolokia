@@ -52,8 +52,9 @@ public final class ClassUtil {
      * @param pClassLoaders optional class loaders which are tried as well
      * @return the class class found or null if no class could be loaded
      */
+    @SuppressWarnings("unchecked")
     public static <T> Class<T> classForName(String pClassName,boolean pInitialize,ClassLoader ... pClassLoaders) {
-        Set<ClassLoader> tried = new HashSet<ClassLoader>();
+        Set<ClassLoader> tried = new HashSet<>();
         for (ClassLoader loader : findClassLoaders(pClassLoaders)) {
             // Go up the classloader stack to eventually find the server class. Sometimes the WebAppClassLoader
             // hide the server classes loaded by the parent class loader.
@@ -71,12 +72,12 @@ public final class ClassUtil {
     }
 
     private static List<ClassLoader> findClassLoaders(ClassLoader... pClassLoaders) {
-        List<ClassLoader> classLoadersToTry = new ArrayList<ClassLoader>(Arrays.asList(pClassLoaders));
+        List<ClassLoader> classLoadersToTry = new ArrayList<>(Arrays.asList(pClassLoaders));
         classLoadersToTry.add(Thread.currentThread().getContextClassLoader());
         classLoadersToTry.add(ClassUtil.class.getClassLoader());
 
-        List<ClassLoader> ret = new ArrayList<ClassLoader>();
-        Set<ClassLoader> visited = new HashSet<ClassLoader>();
+        List<ClassLoader> ret = new ArrayList<>();
+        Set<ClassLoader> visited = new HashSet<>();
         for (ClassLoader cll : classLoadersToTry) {
             if (cll != null && !visited.contains(cll)) {
                 ret.add(cll);
@@ -150,7 +151,7 @@ public final class ClassUtil {
         try {
             if (pClass != null) {
                 if (pArguments.length == 0) {
-                    return pClass.newInstance();
+                    return pClass.getConstructor().newInstance();
                 } else {
                     Constructor<T> ctr = lookupConstructor(pClass, pArguments);
                     return ctr.newInstance(pArguments);
@@ -158,13 +159,7 @@ public final class ClassUtil {
             } else {
                 throw new IllegalArgumentException("Given class must not be null");
             }
-        } catch (InstantiationException e) {
-            throw new IllegalArgumentException("Cannot instantiate " + pClass + ": " + e,e);
-        } catch (IllegalAccessException e) {
-            throw new IllegalArgumentException("Cannot instantiate " + pClass + ": " + e,e);
-        } catch (NoSuchMethodException e) {
-            throw new IllegalArgumentException("Cannot instantiate " + pClass + ": " + e,e);
-        } catch (InvocationTargetException e) {
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
             throw new IllegalArgumentException("Cannot instantiate " + pClass + ": " + e,e);
         }
     }
@@ -183,11 +178,7 @@ public final class ClassUtil {
         try {
             Method method = extractMethod(pMethod, clazz, pArgs);
             return method.invoke(pObject,pArgs);
-        } catch (NoSuchMethodException e) {
-            throw new IllegalArgumentException("Cannot call method " + pMethod + " on " + pObject + ": " + e,e);
-        } catch (InvocationTargetException e) {
-            throw new IllegalArgumentException("Cannot call method " + pMethod + " on " + pObject + ": " + e,e);
-        } catch (IllegalAccessException e) {
+        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
             throw new IllegalArgumentException("Cannot call method " + pMethod + " on " + pObject + ": " + e,e);
         }
     }
@@ -200,8 +191,8 @@ public final class ClassUtil {
      */
     public static Set<String> getResources(String pResource) throws IOException {
         List<ClassLoader> clls = findClassLoaders();
-        if (clls.size() != 0) {
-            Set<String> ret = new HashSet<String>();
+        if (!clls.isEmpty()) {
+            Set<String> ret = new HashSet<>();
             for (ClassLoader cll : clls) {
                 Enumeration<URL> urlEnum = cll.getResources(pResource);
                 ret.addAll(extractUrlAsStringsFromEnumeration(urlEnum));
@@ -213,7 +204,7 @@ public final class ClassUtil {
     }
 
     private static Set<String> extractUrlAsStringsFromEnumeration(Enumeration<URL> urlEnum) {
-        Set<String> ret = new HashSet<String>();
+        Set<String> ret = new HashSet<>();
         while (urlEnum.hasMoreElements()) {
             ret.add(urlEnum.nextElement().toExternalForm());
         }
@@ -222,7 +213,7 @@ public final class ClassUtil {
 
     // Lookup appropriate constructor
     private static <T> Constructor<T> lookupConstructor(Class<T> clazz, Object[] pArguments) throws NoSuchMethodException {
-        Class[] argTypes = extractArgumentTypes(pArguments);
+        Class<?>[] argTypes = extractArgumentTypes(pArguments);
         return clazz.getConstructor(argTypes);
     }
 
@@ -231,7 +222,7 @@ public final class ClassUtil {
             if (!method.getName().equals(pMethod)) {
                 continue;
             }
-            Class[] parameters = method.getParameterTypes();
+            Class<?>[] parameters = method.getParameterTypes();
             if (parametersMatch(parameters, pArgs)) {
                 return method;
             }
@@ -239,8 +230,8 @@ public final class ClassUtil {
         throw new NoSuchMethodException("No " + pMethod + " on " + clazz + " with " + pArgs.length + " arguments found ");
     }
 
-    private static Class[] extractArgumentTypes(Object[] pArguments) {
-        Class[] argTypes = new Class[pArguments.length];
+    private static Class<?>[] extractArgumentTypes(Object[] pArguments) {
+        Class<?>[] argTypes = new Class[pArguments.length];
         int i = 0;
         for (Object arg : pArguments) {
             argTypes[i++] = arg.getClass();
@@ -248,7 +239,7 @@ public final class ClassUtil {
         return argTypes;
     }
 
-    private static boolean parametersMatch(Class[] parameters, Object[] pArgs) {
+    private static boolean parametersMatch(Class<?>[] parameters, Object[] pArgs) {
         if (parameters.length != pArgs.length) {
             return false;
         }
@@ -256,8 +247,8 @@ public final class ClassUtil {
             if (pArgs[i] == null) {
                 continue;
             }
-            Class argClass = pArgs[i].getClass();
-            Class paramClass = parameters[i];
+            Class<?> argClass = pArgs[i].getClass();
+            Class<?> paramClass = parameters[i];
             if (!paramClass.isAssignableFrom(argClass)) {
                 if (checkForPrimitive(argClass, paramClass)) {
                     continue;
@@ -268,11 +259,11 @@ public final class ClassUtil {
         return true;
     }
 
-    private static boolean checkForPrimitive(Class argClass, Class paramClass) {
+    private static boolean checkForPrimitive(Class<?> argClass, Class<?> paramClass) {
         return paramClass.isPrimitive() && PRIMITIVE_TO_OBJECT_MAP.get(paramClass.getName()) != null;
     }
 
-    private static final Map<String,Class> PRIMITIVE_TO_OBJECT_MAP = new HashMap<String, Class>();
+    private static final Map<String,Class<?>> PRIMITIVE_TO_OBJECT_MAP = new HashMap<>();
 
     static {
         PRIMITIVE_TO_OBJECT_MAP.put("int", Integer.TYPE);

@@ -5,11 +5,10 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.Configuration;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.easymock.EasyMock;
 import org.jolokia.server.core.config.ConfigKey;
-import org.osgi.service.http.HttpContext;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -32,7 +31,7 @@ public class JaasAuthenticatorTest {
     }
 
     @Test
-    public void testAuthenticateNoLoginModule() throws Exception {
+    public void testAuthenticateNoLoginModule() {
         HttpServletRequest req = createMock(HttpServletRequest.class);
         JaasAuthenticator auth = new JaasAuthenticator("jolokia");
 
@@ -44,7 +43,7 @@ public class JaasAuthenticatorTest {
 
 
     @Test
-    public void testAuthenticationPositive() throws Exception {
+    public void testAuthenticationPositive() {
         HttpServletRequest req = prepareRequest();
         JaasAuthenticator auth = new JaasAuthenticator("jolokia") {
             @Override
@@ -62,7 +61,7 @@ public class JaasAuthenticatorTest {
     }
 
     @Test
-    public void testAuthenticationNegative() throws Exception {
+    public void testAuthenticationNegative() {
         HttpServletRequest req = prepareRequest();
 
         JaasAuthenticator auth = new JaasAuthenticator("jolokia") {
@@ -82,8 +81,6 @@ public class JaasAuthenticatorTest {
 
     private HttpServletRequest prepareRequest() {
         HttpServletRequest req = createMock(HttpServletRequest.class);
-        req.setAttribute(HttpContext.AUTHENTICATION_TYPE, HttpServletRequest.BASIC_AUTH);
-        req.setAttribute(HttpContext.REMOTE_USER, "roland");
         req.setAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE, SUBJECT);
         replay(req);
         return req;

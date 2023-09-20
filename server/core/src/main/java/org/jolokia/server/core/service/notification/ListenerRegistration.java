@@ -55,6 +55,7 @@ public class ListenerRegistration {
      * Return a JSON representation of this config (used for list)
      * @return JSON representation
      */
+    @SuppressWarnings("unchecked")
     public JSONObject toJson() {
         JSONObject ret = new JSONObject();
         ret.put("mbean", mbeanName.toString());
@@ -103,7 +104,7 @@ public class ListenerRegistration {
     // ====================================================================================
     // Filters are always on the notification type, but there can be multiple given, which are ORed together
     private NotificationFilterSupport createFilter(List<String> pFilters) {
-        if (pFilters != null && pFilters.size() > 0) {
+        if (pFilters != null && !pFilters.isEmpty()) {
             NotificationFilterSupport filterSupport = new NotificationFilterSupport();
             for (String f :  pFilters) {
                 filterSupport.enableType(f);
@@ -114,6 +115,7 @@ public class ListenerRegistration {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private JSONArray filterToJSON(NotificationFilterSupport pFilter) {
         JSONArray ret = new JSONArray();
         for (String f : pFilter.getEnabledTypes()) {

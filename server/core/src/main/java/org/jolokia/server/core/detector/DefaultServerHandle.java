@@ -31,13 +31,13 @@ import org.json.simple.JSONObject;
 public class DefaultServerHandle implements ServerHandle {
 
     // product name of server running
-    private String product;
+    private final String product;
 
     // version number
-    private String version;
+    private final String version;
 
     // vendor name
-    private String vendor;
+    private final String vendor;
 
     /**
      * Constructor
@@ -72,6 +72,7 @@ public class DefaultServerHandle implements ServerHandle {
         return ret;
     }
 
+    @SuppressWarnings("unchecked")
     private void addNullSafe(JSONObject pRet, String pKey, Object pValue) {
         if (pValue != null) {
             pRet.put(pKey,pValue);

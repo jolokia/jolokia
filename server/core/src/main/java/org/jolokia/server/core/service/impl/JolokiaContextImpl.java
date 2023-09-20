@@ -21,7 +21,7 @@ import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 public class JolokiaContextImpl implements JolokiaContext {
 
     // Service manager associated with the context
-    private JolokiaServiceManagerImpl serviceManager;
+    private final JolokiaServiceManagerImpl serviceManager;
 
     /**
      * New context associated with the given service manager
@@ -64,21 +64,21 @@ public class JolokiaContextImpl implements JolokiaContext {
     }
 
     /** {@inheritDoc} */
-    public <T extends JolokiaService> SortedSet<T> getServices(Class<T> pType) {
+    public <T extends JolokiaService<?>> SortedSet<T> getServices(Class<T> pType) {
         return serviceManager.getServices(pType);
     }
 
     /** {@inheritDoc} */
-    public <T extends JolokiaService> T getService(Class<T> pType) {
+    public <T extends JolokiaService<?>> T getService(Class<T> pType) {
         return serviceManager.getService(pType);
     }
 
     /** {@inheritDoc} */
-    public <T extends JolokiaService> T getMandatoryService(Class<T> pType) {
+    public <T extends JolokiaService<?>> T getMandatoryService(Class<T> pType) {
         SortedSet<T> services = serviceManager.getServices(pType);
         if (services.size() > 1) {
             throw new IllegalStateException("More than one service of type " + pType + " found: " + services);
-        } else if (services.size() == 0) {
+        } else if (services.isEmpty()) {
             throw new IllegalStateException("No service of type " + pType + " found");
         }
         return services.first();

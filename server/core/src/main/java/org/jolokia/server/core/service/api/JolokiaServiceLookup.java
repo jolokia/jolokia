@@ -32,9 +32,9 @@ public interface JolokiaServiceLookup {
      * Get the current list of available services for a certain type.
      *
      * @param pType type for which to get the services
-     * @return list of services for the required type or an empty set
+     * @return set of services for the required type or an empty set
      */
-    <T extends JolokiaService> Set<T> getServices(Class<T> pType);
+    <T extends JolokiaService<?>> Set<T> getServices(Class<T> pType);
 
     /**
      * Lifecycle method called when the service managed starts up

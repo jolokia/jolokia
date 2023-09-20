@@ -2,11 +2,10 @@ package org.jolokia.server.core.osgi.security;
 
 import javax.security.auth.callback.*;
 import javax.security.auth.login.*;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.util.UserPasswordCallbackHandler;
-import org.osgi.service.http.HttpContext;
 
 /**
  * @author roland
@@ -30,8 +29,6 @@ public class JaasAuthenticator extends BaseAuthenticator {
             LoginContext loginContext = createLoginContext(realm, handler);
             loginContext.login();
 
-            pRequest.setAttribute(HttpContext.AUTHENTICATION_TYPE,HttpServletRequest.BASIC_AUTH);
-            pRequest.setAttribute(HttpContext.REMOTE_USER, user);
             pRequest.setAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE, loginContext.getSubject());
 
             return true;

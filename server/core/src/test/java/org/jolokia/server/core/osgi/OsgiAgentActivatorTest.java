@@ -23,9 +23,10 @@ import java.lang.reflect.Proxy;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.easymock.EasyMock;
 import org.easymock.IArgumentMatcher;
@@ -34,16 +35,13 @@ import org.jolokia.server.core.osgi.security.Authenticator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
-import org.osgi.service.http.NamespaceException;
 import org.osgi.service.log.LogService;
+import org.osgi.service.servlet.context.ServletContextHelper;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -54,7 +52,6 @@ import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.find;
-import static org.easymock.EasyMock.isA;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.reportMatcher;
 import static org.easymock.EasyMock.reset;
@@ -68,7 +65,6 @@ import static org.testng.Assert.assertNotNull;
  */
 public class OsgiAgentActivatorTest {
 
-    private static final String HTTP_SERVICE_FILTER = "(objectClass=org.osgi.service.http.HttpService)";
     private static final String CONFIG_SERVICE_FILTER = "(objectClass=org.osgi.service.cm.ConfigurationAdmin)";
     private static final String AUTHENTICATOR_SERVICE_FILTER =
         "(objectClass=" + Authenticator.class.getName() + ")";
@@ -76,14 +72,9 @@ public class OsgiAgentActivatorTest {
     private BundleContext context;
     private OsgiAgentActivator activator;
 
-    // Listener registered by the ServiceTracker
-    private ServiceListener httpServiceListener;
-    private ServiceRegistration registration;
+    private ServiceRegistration<ServletContextHelper> contextRegistration;
+    private ServiceRegistration<HttpServlet> servletRegistration;
 
-    private HttpService httpService;
-    private ServiceReference httpServiceReference;
-
-    private ServiceReference configAdminRef;
     private ServiceListener configAdminServiceListener;
 
     private ServiceListener authenticationServiceListener;
@@ -95,159 +86,104 @@ public class OsgiAgentActivatorTest {
     }
 
     @Test
-    public void withHttpService() throws InvalidSyntaxException, NoSuchFieldException, IllegalAccessException, ServletException, NamespaceException, IOException {
-        startActivator(true, null, null);
+    public void withHttpService() throws InvalidSyntaxException, IOException {
         startupHttpService();
-        unregisterJolokiaServlet();
+        startActivator(true, null);
         stopActivator(true);
-        verify(httpService);
+        verify(context);
     }
 
     @Test
-    public void withHttpServiceAndExplicitServiceShutdown() throws InvalidSyntaxException, NoSuchFieldException, IllegalAccessException, ServletException, NamespaceException, IOException {
-        startActivator(true, null, null);
+    public void withHttpServiceAndExplicitServiceShutdown() throws InvalidSyntaxException, IOException {
         startupHttpService();
-
-        // Expect that servlet gets unregistered
-        unregisterJolokiaServlet();
-        shutdownHttpService();
+        startActivator(true, null);
 
         stopActivator(true);
         // Check, that unregister was called
-        verify(httpService);
-    }
-
-    @Test
-    public void withHttpServiceAndAdditionalFilter() throws InvalidSyntaxException, NoSuchFieldException, IllegalAccessException, ServletException, NamespaceException, IOException {
-        startActivator(true, "(Wibble=Wobble)", null);
-        startupHttpService();
-        unregisterJolokiaServlet();
-        stopActivator(true);
-        verify(httpService);
-    }
-
-    @Test
-    public void modifiedService() throws InvalidSyntaxException, ServletException, NamespaceException, IOException {
-        startActivator(true, null, null);
-        startupHttpService();
-
-        // Expect that servlet gets unregistered
-        modifiedHttpService();
-
-        // Check, that unregister was called
-        verify(httpService);
+        verify(context);
     }
 
     @Test
     public void withoutServices() throws InvalidSyntaxException, IOException {
-        startActivator(false, null, null);
+        startActivator(false, null);
         stopActivator(false);
     }
 
     @Test
-    public void exceptionDuringRegistration() throws InvalidSyntaxException, ServletException, NamespaceException, IOException {
-        startActivator(true, null, null);
-        ServletException exp = new ServletException();
-        prepareErrorLog(exp,"Servlet");
-        startupHttpService(exp);
-    }
-
-    @Test
-    public void exceptionDuringRegistration2() throws InvalidSyntaxException, ServletException, NamespaceException, IOException {
-        startActivator(true, null, null);
-        NamespaceException exp = new NamespaceException("Error");
-        prepareErrorLog(exp,"Namespace");
-        startupHttpService(exp);
-    }
-
-    @Test
-    public void exceptionWithoutLogService() throws InvalidSyntaxException, ServletException, NamespaceException, IOException {
-        startActivator(true, null, null);
-        expect(context.getServiceReference(LogService.class.getName())).andReturn(null);
-        startupHttpService(new ServletException());
-    }
-
-    @Test
-    public void authentication() throws InvalidSyntaxException, ServletException, NamespaceException, IOException {
-        startActivator(true, null, null);
+    public void authentication() throws InvalidSyntaxException, ServletException, IOException {
         startupHttpService("roland","s!cr!t");
-        unregisterJolokiaServlet();
+        startActivator(true, null);
         stopActivator(true);
-        verify(httpService);
+        verify(context);
     }
 
     @Test
-    public void authenticationSecure() throws InvalidSyntaxException, ServletException, NamespaceException, IOException {
-        startActivator(true, null, null);
+    public void authenticationSecure() throws InvalidSyntaxException, IOException {
         startupHttpService("roland","s!cr!t","jaas");
-        unregisterJolokiaServlet();
+        startActivator(true, null);
         stopActivator(true);
-        verify(httpService);
+        verify(context);
     }
 
     @Test
     public void testConfigAdminEmptyDictionary() throws Exception {
-        Dictionary dict = new Hashtable();
-        startActivator(false, null, dict);
+        Dictionary<String, Object> dict = new Hashtable<>();
+        startActivator(false, dict);
         stopActivator(false);
     }
 
     @Test
     public void testConfigAdminEmptyDictionaryNoHttpListener() throws Exception {
-        Dictionary dict = new Hashtable();
-        startActivator(false, null, dict);
+        Dictionary<String, Object> dict = new Hashtable<>();
+        startActivator(false, dict);
         stopActivator(false);
     }
 
     @Test
     public void testSomePropsFromConfigAdmin() throws Exception {
-        Dictionary<String, String> dict = new Hashtable<String, String>();
+        Dictionary<String, Object> dict = new Hashtable<>();
         dict.put("org.jolokia.user", "roland");
         dict.put("org.jolokia.password", "s!cr!t");
         dict.put("org.jolokia.authMode", "jaas");
-        startActivator(true, null, dict);
         startupHttpServiceWithConfigAdminProps();
-        unregisterJolokiaServlet();
+        startActivator(true, dict);
         stopActivator(true);
-        verify(httpService);
+        verify(context);
     }
 
     @Test
     public void testServiceAuthModeFromConfigAdmin() throws Exception {
-        final Dictionary<String, String> dict = new Hashtable<String, String>();
+        final Dictionary<String, Object> dict = new Hashtable<>();
         dict.put("org.jolokia.authMode", "service-all");
-        startActivator(true, AUTHENTICATOR_SERVICE_FILTER, dict);
         startupHttpServiceWithConfigAdminProps(true);
-        unregisterJolokiaServlet();
+        startActivator(true, dict);
         stopActivator(true);
-        verify(httpService);
+        verify(context);
     }
 
     @Test
     public void testNoServiceAvailable() throws Exception {
         final HttpServletRequest request = createMock(HttpServletRequest.class);
         final HttpServletResponse response = createNiceMock(HttpServletResponse.class);
-        final Dictionary<String, String> dict = new Hashtable<String, String>();
+        final Dictionary<String, Object> dict = new Hashtable<>();
         dict.put("org.jolokia.authMode", "service-all");
-        startActivator(true, AUTHENTICATOR_SERVICE_FILTER, dict);
         startupHttpServiceWithConfigAdminProps(true);
+        startActivator(true, dict);
 
         expect(request.getHeader("Authorization")).andReturn("Basic cm9sYW5kOnMhY3IhdA==");
-        request.setAttribute(HttpContext.AUTHENTICATION_TYPE, HttpServletRequest.BASIC_AUTH);
-        request.setAttribute(HttpContext.REMOTE_USER, "roland");
         replay(request, response);
 
         // w/o an Authenticator Service registered, requests should always be denied.
 
-        final HttpContext httpContext = activator.getHttpContext();
+        final ServletContextHelper httpContext = activator.getServletContextHelper();
         assertFalse(httpContext.handleSecurity(request, response));
 
-        unregisterJolokiaServlet();
         stopActivator(true);
     }
 
     // ========================================================================================================
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     private void prepareErrorLog(Exception exp,String msg) {
         ServiceReference logServiceReference = createMock(ServiceReference.class);
         LogService logService = createMock(LogService.class);
@@ -258,23 +194,8 @@ public class OsgiAgentActivatorTest {
         replay(logServiceReference, logService);
     }
 
-    private void shutdownHttpService() {
-        httpServiceListener.serviceChanged(new ServiceEvent(ServiceEvent.UNREGISTERING, httpServiceReference));
-    }
-
-    private void modifiedHttpService() {
-        httpServiceListener.serviceChanged(new ServiceEvent(ServiceEvent.MODIFIED, httpServiceReference));
-    }
-
-    private void unregisterJolokiaServlet() {
-        reset(httpService);
-        // Will be called when activator is stopped
-        httpService.unregister(ConfigKey.AGENT_CONTEXT.getDefaultValue());
-        replay(httpService);
-    }
-
-    private void startupHttpService(Object ... args) throws ServletException, NamespaceException {
-        String auth[] = new String[] { null, null,null };
+    private void startupHttpService(Object ... args) {
+        String[] auth = new String[] { null, null,null };
         Exception exp = null;
         int i = 0;
         for (Object arg : args) {
@@ -285,11 +206,6 @@ public class OsgiAgentActivatorTest {
             }
         }
 
-
-        httpServiceReference = createMock(ServiceReference.class);
-        httpService = createMock(HttpService.class);
-
-        expect(context.getService(httpServiceReference)).andReturn(httpService);
         i = 0;
         for (ConfigKey key : ConfigKey.values()) {
             if (auth[0] != null && key == ConfigKey.USER) {
@@ -304,32 +220,19 @@ public class OsgiAgentActivatorTest {
             }
         }
 
-        httpService.registerServlet(eq(ConfigKey.AGENT_CONTEXT.getDefaultValue()),
-                                    isA(OsgiAgentServlet.class),
-                                    EasyMock.<Dictionary>anyObject(),
-                                    EasyMock.<HttpContext>anyObject());
         if (exp != null) {
             expectLastCall().andThrow(exp);
         }
-        replay(context, httpServiceReference, httpService);
-
-        // Attach service
-        httpServiceListener.serviceChanged(new ServiceEvent(ServiceEvent.REGISTERED, httpServiceReference));
+//        replay(context);
     }
 
-    private void startupHttpServiceWithConfigAdminProps()
-            throws ServletException, NamespaceException, InvalidSyntaxException {
+    private void startupHttpServiceWithConfigAdminProps() throws InvalidSyntaxException {
 
         this.startupHttpServiceWithConfigAdminProps(false);
     }
 
-    private void startupHttpServiceWithConfigAdminProps(boolean serviceAuthentication)
-            throws ServletException, NamespaceException, InvalidSyntaxException {
+    private void startupHttpServiceWithConfigAdminProps(boolean serviceAuthentication) throws InvalidSyntaxException {
 
-        httpServiceReference = createMock(ServiceReference.class);
-        httpService = createMock(HttpService.class);
-
-        expect(context.getService(httpServiceReference)).andReturn(httpService);
         int i = 0;
         for (ConfigKey key : ConfigKey.values()) {
             if (!serviceAuthentication && (key == ConfigKey.USER || key == ConfigKey.PASSWORD || key == ConfigKey.AUTH_MODE)) {
@@ -347,78 +250,67 @@ public class OsgiAgentActivatorTest {
         expect(context.getServiceReferences(Authenticator.class.getName(), null)).andStubReturn(null);
         context.addServiceListener(authenticationServiceListener(), eq(filter.toString()));
 
-
-        httpService.registerServlet(eq(ConfigKey.AGENT_CONTEXT.getDefaultValue()),
-                isA(OsgiAgentServlet.class),
-                EasyMock.<Dictionary>anyObject(),
-                EasyMock.<HttpContext>anyObject());
-
-        replay(context, httpServiceReference, httpService);
-
-        // Attach service
-        httpServiceListener.serviceChanged(new ServiceEvent(ServiceEvent.REGISTERED, httpServiceReference));
+//        replay(context);
     }
 
     private void stopActivator(boolean withHttpListener) {
         reset(context);
         if (withHttpListener) {
-            reset(registration);
+            reset(contextRegistration);
+            reset(servletRegistration);
         }
         if (withHttpListener) {
-            context.removeServiceListener(httpServiceListener);
-            expect(context.getProperty("org.jolokia." + ConfigKey.AGENT_CONTEXT.getKeyValue()))
-                    .andReturn(ConfigKey.AGENT_CONTEXT.getDefaultValue());
-            registration.unregister();
+            contextRegistration.unregister();
+            servletRegistration.unregister();
         }
 
         expect(context.ungetService(anyObject(ServiceReference.class))).andReturn(true).anyTimes();
         context.removeServiceListener(configAdminServiceListener);
         context.removeServiceListener(authenticationServiceListener);
+        expectLastCall().anyTimes();
 
         replay(context);
         if (withHttpListener) {
-            replay(registration);
+            replay(contextRegistration);
+            replay(servletRegistration);
         }
         activator.stop(context);
     }
 
-    private void startActivator(boolean withHttpListener, String httpFilter, Dictionary configAdminProps) throws InvalidSyntaxException, IOException {
-        reset(context);
-        prepareStart(withHttpListener, true, httpFilter, configAdminProps);
+    private void startActivator(boolean doWhiteboardServlet, Dictionary<String, Object> configAdminProps) throws InvalidSyntaxException, IOException {
+//        reset(context);
+        prepareStart(doWhiteboardServlet, true, configAdminProps);
 
         replay(context);
-        if (withHttpListener) {
-            replay(registration);
+        if (doWhiteboardServlet) {
+            replay(contextRegistration);
+            replay(servletRegistration);
         }
 
         activator.start(context);
-        if (withHttpListener) {
-            assertNotNull(httpServiceListener);
-        }
         assertNotNull(configAdminServiceListener);
 
         reset(context);
     }
 
-    private void prepareStart(boolean doHttpService, boolean doRestrictor, String httpFilter, Dictionary configAdminProps) throws InvalidSyntaxException, IOException {
-        expect(context.getProperty("org.jolokia.listenForHttpService")).andReturn("" + doHttpService);
-        if (doHttpService) {
-            expect(context.getProperty("org.jolokia.httpServiceFilter")).andReturn(httpFilter);
-
-            Filter filter = createFilterMockWithToString(HTTP_SERVICE_FILTER, httpFilter);
-            expect(context.createFilter(filter.toString())).andReturn(filter);
+    private void prepareStart(boolean doWhiteboardServlet, boolean doRestrictor, Dictionary<String, Object> configAdminProps) throws InvalidSyntaxException, IOException {
+        expect(context.getProperty("org.jolokia.registerWhiteboardServlet")).andReturn("" + doWhiteboardServlet);
+        if (doWhiteboardServlet) {
+            contextRegistration = createMock(ServiceRegistration.class);
+            servletRegistration = createMock(ServiceRegistration.class);
+            expect(context.registerService(eq(ServletContextHelper.class), EasyMock.<ServletContextHelper>anyObject(), anyObject()))
+                    .andReturn(contextRegistration);
+            expect(context.registerService(eq(HttpServlet.class), EasyMock.<HttpServlet>anyObject(), anyObject()))
+                    .andReturn(servletRegistration);
             expect(context.getProperty("org.osgi.framework.version")).andReturn("4.5.0");
-            context.addServiceListener(httpRememberListener(), eq(filter.toString()));
-            expect(context.getServiceReferences((String) null, filter.toString())).andReturn(null);
-            registration = createMock(ServiceRegistration.class);
         }
 
         //Setup ConfigurationAdmin service
         Filter configFilter = createFilterMockWithToString(CONFIG_SERVICE_FILTER, null);
         expect(context.createFilter(configFilter.toString())).andReturn(configFilter);
         context.addServiceListener(configAdminRememberListener(), eq(configFilter.toString()));
-        configAdminRef = createMock(ServiceReference.class);
-        expect(context.getServiceReferences(ConfigurationAdmin.class.getCanonicalName(), null)).andReturn(new ServiceReference[]{configAdminRef}).anyTimes();
+        ServiceReference<ConfigurationAdmin> configAdminRef = createMock(ServiceReference.class);
+        expect(context.getServiceReferences(ConfigurationAdmin.class.getCanonicalName(), null)).andReturn(new ServiceReference[]{ configAdminRef }).anyTimes();
         ConfigurationAdmin configAdmin = createMock(ConfigurationAdmin.class);
         Configuration config = createMock(Configuration.class);
         expect(config.getProperties()).andReturn(configAdminProps).anyTimes();
@@ -435,9 +327,9 @@ public class OsgiAgentActivatorTest {
         return createFilterMockWithToString(this.getClass(), filter, additionalFilter);
     }
 
-    private static Filter createFilterMockWithToString(final Class clazz, final String filter, final String additionalFilter) {
+    private static Filter createFilterMockWithToString(final Class<?> clazz, final String filter, final String additionalFilter) {
         return (Filter) Proxy.newProxyInstance(clazz.getClassLoader(), new Class[]{Filter.class}, new InvocationHandler() {
-            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            public Object invoke(Object proxy, Method method, Object[] args) {
                 if (method.getName().equals("toString")) {
                     if (additionalFilter == null) {
                         return filter;
@@ -448,20 +340,6 @@ public class OsgiAgentActivatorTest {
                 throw new UnsupportedOperationException("Sorry this is a very limited proxy implementation of Filter");
             }
         });
-    }
-
-
-    private ServiceListener httpRememberListener() {
-        reportMatcher(new IArgumentMatcher() {
-            public boolean matches(Object argument) {
-                httpServiceListener = (ServiceListener) argument;
-                return true;
-            }
-
-            public void appendTo(StringBuffer buffer) {
-            }
-        });
-        return null;
     }
 
     private ServiceListener configAdminRememberListener() {

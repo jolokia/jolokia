@@ -20,6 +20,7 @@ import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -67,12 +68,12 @@ public final class LocalServiceFactory {
     public static <T> List<T> createServices(ClassLoader pClassLoader, String ... pDescriptorPaths) {
         try {
             ServiceEntry.initDefaultOrder();
-            HashMap<ServiceEntry,T> extractorMap = new HashMap<ServiceEntry,T>();
+            HashMap<ServiceEntry,T> extractorMap = new HashMap<>();
             for (String descriptor : pDescriptorPaths) {
                 readServiceDefinitions(pClassLoader, extractorMap, descriptor);
             }
-            List<T> ret = new ArrayList<T>();
-            List<ServiceEntry> entries = new ArrayList<ServiceEntry>(extractorMap.keySet());
+            List<T> ret = new ArrayList<>();
+            List<ServiceEntry> entries = new ArrayList<>(extractorMap.keySet());
             Collections.sort(entries);
             for (ServiceEntry entry : entries) {
                 ret.add(extractorMap.get(entry));
@@ -119,10 +120,10 @@ public final class LocalServiceFactory {
         Exception error = null;
         LineNumberReader reader = null;
         try {
-            reader = new LineNumberReader(new InputStreamReader(new URL(pUrl).openStream(),"UTF8"));
+            reader = new LineNumberReader(new InputStreamReader(new URL(pUrl).openStream(), StandardCharsets.UTF_8));
             while ( (line = reader.readLine()) != null) {
                 // Skip empty lines and comments
-                if (line.trim().length() > 0 && !line.matches("^\\s*#.*$")) {
+                if (!line.trim().isEmpty() && !line.matches("^\\s*#.*$")) {
                     createOrRemoveService(pClassLoader, pExtractorMap, line);
                 }
             }
@@ -138,14 +139,15 @@ public final class LocalServiceFactory {
     }
 
     private static <T> void createOrRemoveService(ClassLoader pClassLoader, Map<ServiceEntry, T> pExtractorMap, String pLine)
-            throws ClassNotFoundException, InstantiationException, IllegalAccessException {
-        if (pLine.length() > 0) {
+            throws ClassNotFoundException, InstantiationException, IllegalAccessException, InvocationTargetException,
+            NoSuchMethodException {
+        if (!pLine.isEmpty()) {
             ServiceEntry entry = new ServiceEntry(pLine);
             if (entry.isRemove()) {
                 // Removing is a bit complex since we need to find out
                 // the proper key since the order is part of equals/hash
                 // so we cant fetch/remove it directly
-                Set<ServiceEntry> toRemove = new HashSet<ServiceEntry>();
+                Set<ServiceEntry> toRemove = new HashSet<>();
                 for (ServiceEntry key : pExtractorMap.keySet()) {
                     if (key.getClassName().equals(entry.getClassName())) {
                         toRemove.add(key);
@@ -165,10 +167,10 @@ public final class LocalServiceFactory {
                 }
                 T ext;
                 try {
-                    Constructor ctr = clazz.getConstructor(int.class);
-                    pExtractorMap.put(entry, (T) ctr.newInstance(entry.getOrder()));
+                    Constructor<T> ctr = clazz.getConstructor(int.class);
+                    pExtractorMap.put(entry, ctr.newInstance(entry.getOrder()));
                 } catch (NoSuchMethodException e) {
-                    ext = clazz.newInstance();
+                    ext = clazz.getConstructor().newInstance();
                     pExtractorMap.put(entry,ext);
                 } catch (InvocationTargetException e) {
                     throw new IllegalArgumentException("Can not instantiate " + entry.getClassName() + ": " + e,e);
@@ -190,16 +192,16 @@ public final class LocalServiceFactory {
     // =============================================================================
 
     static class ServiceEntry implements Comparable<ServiceEntry> {
-        private String className;
-        private boolean remove;
+        private final String className;
+        private final boolean remove;
         private int order;
 
         // Thread holding the current default orders
-        private static ThreadLocal<Integer> defaultOrderHolder = new ThreadLocal<Integer>();
+        private static final ThreadLocal<Integer> defaultOrderHolder = new ThreadLocal<>();
 
         // Thread local holding an old order which gets restored on remove(). This is required
         // for nested service lookups
-        private static ThreadLocal<Stack<Integer>> defaultOrders = new ThreadLocal<Stack<Integer>>();
+        private static final ThreadLocal<Stack<Integer>> defaultOrders = new ThreadLocal<>();
 
         /**
          * Parse an entry in the service definition. This should be the full qualified classname
@@ -243,7 +245,7 @@ public final class LocalServiceFactory {
             Integer old = defaultOrderHolder.get();
             Stack<Integer> orderStack = defaultOrders.get();
             if (orderStack == null) {
-                orderStack = new Stack<Integer>();
+                orderStack = new Stack<>();
                 defaultOrders.set(orderStack);
             }
             if (old != null) {
@@ -257,7 +259,7 @@ public final class LocalServiceFactory {
             if (orderStack == null) {
                 throw new IllegalStateException("No initDefaultOrder() called before");
             }
-            if (orderStack.size() > 0) {
+            if (!orderStack.isEmpty()) {
                 defaultOrderHolder.set(orderStack.pop());
             } else {
                 defaultOrderHolder.remove();

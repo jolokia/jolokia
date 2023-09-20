@@ -872,10 +872,9 @@
       <!-- JakartaEE dependencies -->
 
       <dependency>
-        <!-- The main Jakarta Servlet API 4 dependency. Dedicated modules use version 6 -->
         <groupId>jakarta.servlet</groupId>
         <artifactId>jakarta.servlet-api</artifactId>
-        <version>4.0.4</version>
+        <version>${version.servlet-api}</version>
       </dependency>
 
       <!-- OSGi dependencies -->
@@ -883,7 +882,14 @@
       <dependency>
         <groupId>org.osgi</groupId>
         <artifactId>osgi.core</artifactId>
-        <version>8.0.0</version>
+        <!-- we support wide range of OSGI Core API, so please keep 6.0.0 -->
+        <version>6.0.0</version>
+      </dependency>
+      <dependency>
+        <groupId>org.osgi</groupId>
+        <artifactId>org.osgi.service.log</artifactId>
+        <!-- we support early log service too -->
+        <version>1.3.0</version>
       </dependency>
       <dependency>
         <groupId>org.osgi</groupId>
@@ -894,6 +900,11 @@
         <groupId>org.osgi</groupId>
         <artifactId>org.osgi.service.http</artifactId>
         <version>1.2.2</version>
+      </dependency>
+      <dependency>
+        <groupId>org.osgi</groupId>
+        <artifactId>org.osgi.service.servlet</artifactId>
+        <version>2.0.0</version>
       </dependency>
 
       <!-- Test dependencies -->
@@ -1045,6 +1056,8 @@
     <currentSnapshotVersion>2.0.0-SNAPSHOT</currentSnapshotVersion>
     <sonar.projectKey>org.jolokia:jolokia-2.0</sonar.projectKey>
     <github.global.server>github</github.global.server>
+
+    <version.servlet-api>5.0.0</version.servlet-api>
 
     <!-- Jetty 9.4.x is the last one supporting JDK8 -->
     <version.jetty>9.4.51.v20230217</version.jetty>

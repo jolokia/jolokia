@@ -25,12 +25,12 @@ public class DelegatingServerDetectorLookup implements ServerDetectorLookup, Ser
 
     /** {@inheritDoc} */
     public SortedSet<ServerDetector> lookup() {
-        SortedSet<ServerDetector> ret = new TreeSet<ServerDetector>();
+        SortedSet<ServerDetector> ret = new TreeSet<>();
         if (context != null) {
             try {
-                ServiceReference[] refs = context.getServiceReferences(ServerDetectorLookup.class.getName(), null);
+                ServiceReference<?>[] refs = context.getServiceReferences(ServerDetectorLookup.class.getName(), null);
                 if (refs != null) {
-                    for (ServiceReference  ref : refs) {
+                    for (ServiceReference<?>  ref : refs) {
                         ServerDetectorLookup detectorLookup = (ServerDetectorLookup) context.getService(ref);
                         try {
                             ret.addAll(detectorLookup.lookup());

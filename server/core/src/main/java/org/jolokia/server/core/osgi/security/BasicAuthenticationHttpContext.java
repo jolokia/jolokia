@@ -18,8 +18,8 @@ package org.jolokia.server.core.osgi.security;
 
 import java.io.IOException;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Authentication context which uses a simple user/password credential pair
@@ -27,7 +27,7 @@ import javax.servlet.http.HttpServletResponse;
  * @author roland
  * @since Jan 7, 2010
  */
-public class BasicAuthenticationHttpContext extends DefaultHttpContext {
+public class BasicAuthenticationHttpContext extends DefaultServletContextHelper {
 
     private final String realm;
     private final Authenticator authenticator;

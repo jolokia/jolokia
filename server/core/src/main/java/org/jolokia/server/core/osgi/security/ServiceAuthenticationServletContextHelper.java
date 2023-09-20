@@ -6,8 +6,8 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
@@ -29,28 +29,28 @@ import java.util.Set;
  */
 
 /**
- * Authentication context based on an Authenticator Service.
+ * Authentication context helper based on an Authenticator Service.
  */
-public class ServiceAuthenticationHttpContext extends DefaultHttpContext {
+public class ServiceAuthenticationServletContextHelper extends DefaultServletContextHelper {
 
     // Possible authentication mode when looking up a authenticator as service
     static final String AUTHMODE_SERVICE_ALL = "service-all";
     static final String AUTHMODE_SERVICE_ANY = "service-any";
 
-    private final Set<Authenticator> authenticators = new HashSet<Authenticator>();
+    private final Set<Authenticator> authenticators = new HashSet<>();
 
-    private ServiceTracker authenticatorServiceTracker;
+    private ServiceTracker<Authenticator, Authenticator> authenticatorServiceTracker;
 
     // whether a single authenticator is sufficient to succeed
     private final boolean checkModeAny;
 
-    public ServiceAuthenticationHttpContext(final BundleContext bundleContext, final String authMode) {
+    public ServiceAuthenticationServletContextHelper(final BundleContext bundleContext, final String authMode) {
         if (!shouldBeUsed(authMode)) {
             throw new IllegalArgumentException(String.format("Internal: Invalid authMode %s given", authMode));
         }
         checkModeAny = authMode.equalsIgnoreCase(AUTHMODE_SERVICE_ANY);
         authenticatorServiceTracker =
-            new ServiceTracker(bundleContext, Authenticator.class.getName(),
+            new ServiceTracker<>(bundleContext, Authenticator.class.getName(),
                                new AuthenticatorServiceCustomizer(bundleContext));
         authenticatorServiceTracker.open();
     }
@@ -107,7 +107,7 @@ public class ServiceAuthenticationHttpContext extends DefaultHttpContext {
 
     // =============================================================================
 
-    private class AuthenticatorServiceCustomizer implements ServiceTrackerCustomizer {
+    private class AuthenticatorServiceCustomizer implements ServiceTrackerCustomizer<Authenticator, Authenticator> {
 
         private final BundleContext bundleContext;
 
@@ -118,12 +118,13 @@ public class ServiceAuthenticationHttpContext extends DefaultHttpContext {
         /**
          * {@inheritDoc}
          */
-        public Object addingService(ServiceReference serviceReference) {
-            final Object service = bundleContext.getService(serviceReference);
+        public Authenticator addingService(ServiceReference<Authenticator> serviceReference) {
+            final Authenticator service = bundleContext.getService(serviceReference);
             try {
                 synchronized (authenticators) {
-                    authenticators.add((Authenticator) service);
-                    return authenticators;
+                    authenticators.add(service);
+                    // TODO: there was a mismatch between Authenticator and Set<Authenticator>
+                    return service;
                 }
             } catch (final ClassCastException e) {
                 LogHelper.logError("Unable to use provided Authenticator", e);
@@ -134,13 +135,13 @@ public class ServiceAuthenticationHttpContext extends DefaultHttpContext {
         /**
          * {@inheritDoc}
          */
-        public void modifiedService(final ServiceReference serviceReference, final Object service) {
+        public void modifiedService(final ServiceReference<Authenticator> serviceReference, final Authenticator service) {
         }
 
         /**
          * {@inheritDoc}
          */
-        public void removedService(final ServiceReference serviceReference, final Object service) {
+        public void removedService(final ServiceReference<Authenticator> serviceReference, final Authenticator service) {
             synchronized (authenticators) {
                 bundleContext.ungetService(serviceReference);
                 authenticators.remove(service);
