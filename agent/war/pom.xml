@@ -81,21 +81,25 @@
       <plugin>
         <!--
           With `mvn jetty:run` we can test authenticated access. For example:
-          $ curl -u jolokia:jolokia -i http://localhost:8080/jolokia/
-          $ curl -u jolokia:jolokia -i http://localhost:8080/jolokia/read/JMImplementation:type=MBeanServerDelegate/SpecificationVersion
-          $ curl -s -u jolokia:jolokia http://localhost:8080/jolokia/read/java.lang:type=Runtime/BootClassPath | jq .value
+          $ curl -i -u jolokia:jolokia http://localhost:8080/jolokia/
+          $ curl -i -u jolokia:jolokia http://localhost:8080/jolokia/read/JMImplementation:type=MBeanServerDelegate/SpecificationVersion
+          $ curl -s -u jolokia:jolokia http://localhost:8080/jolokia/read/java.lang:type=Runtime/Name | jq .value
+          $ curl -s -u jolokia:jolokia http://localhost:8080/jolokia/read/java.lang:type=OperatingSystem/Version | jq .value
         -->
         <groupId>org.eclipse.jetty</groupId>
         <artifactId>jetty-maven-plugin</artifactId>
         <version>${version.jetty}</version>
         <configuration>
-          <scanIntervalSeconds>10</scanIntervalSeconds>
-          <webAppConfig>
+          <scan>10</scan>
+          <webApp>
             <contextPath>/jolokia</contextPath>
-          </webAppConfig>
-          <stopPort>9999</stopPort>
-          <stopKey>foo</stopKey>
-          <jettyXml>${basedir}/etc/jetty.xml</jettyXml>
+          </webApp>
+          <loginServices>
+            <loginService implementation="org.eclipse.jetty.security.HashLoginService">
+              <name>jolokia</name>
+              <config>${project.basedir}/etc/realm.properties</config>
+            </loginService>
+          </loginServices>
         </configuration>
       </plugin>
     </plugins>

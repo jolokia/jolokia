@@ -83,18 +83,17 @@
           With `mvn jetty:run` we can test unauthenticated access. For example:
           $ curl -i http://localhost:8080/jolokia/
           $ curl -i http://localhost:8080/jolokia/read/JMImplementation:type=MBeanServerDelegate/SpecificationVersion
-          $ curl -s http://localhost:8080/jolokia/read/java.lang:type=Runtime/BootClassPath | jq .value
+          $ curl -s http://localhost:8080/jolokia/read/java.lang:type=Runtime/Name | jq .value
+          $ curl -s http://localhost:8080/jolokia/read/java.lang:type=OperatingSystem/Version | jq .value
         -->
         <groupId>org.eclipse.jetty</groupId>
         <artifactId>jetty-maven-plugin</artifactId>
         <version>${version.jetty}</version>
         <configuration>
-          <scanIntervalSeconds>10</scanIntervalSeconds>
-          <webAppConfig>
+          <scan>10</scan>
+          <webApp>
             <contextPath>/jolokia</contextPath>
-          </webAppConfig>
-          <stopPort>9999</stopPort>
-          <stopKey>foo</stopKey>
+          </webApp>
         </configuration>
       </plugin>
     </plugins>

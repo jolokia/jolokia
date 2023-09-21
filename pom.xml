@@ -1055,29 +1055,12 @@
 
     <version.servlet-api>5.0.0</version.servlet-api>
 
-    <!-- Jetty 9.4.x is the last one supporting JDK8 -->
-    <version.jetty>9.4.51.v20230217</version.jetty>
+    <version.jetty>11.0.6</version.jetty>
     <version.undertow>2.3.8.Final</version.undertow>
 
     <version.spring>5.3.29</version.spring>
     <version.log4j2>2.20.0</version.log4j2>
   </properties>
-
-  <repositories>
-    <repository>
-      <id>sonatype-nexus-snapshots</id>
-      <name>Sonatype Nexus Snapshots</name>
-      <url>
-        http://oss.sonatype.org/content/repositories/snapshots
-      </url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
 
   <distributionManagement>
     <snapshotRepository>
