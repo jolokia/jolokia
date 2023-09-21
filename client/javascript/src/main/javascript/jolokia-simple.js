@@ -179,7 +179,7 @@
 
         /**
          * Get all MBeans as registered at the specified server. A C<$path> can be
-         * specified in order to fetchy only a subset of the information. When no path is
+         * specified in order to fetch only a subset of the information. When no path is
          * given, the returned value has the following format
          *
          * <pre>
@@ -190,7 +190,7 @@
          *       {
          *           "attr" :
          *           {
-         *              &lt;atrribute name&gt; :
+         *              &lt;attribute name&gt; :
          *              {
          *                 desc : &lt;description of attribute&gt;
          *                 type : &lt;java type&gt;,
