@@ -14,7 +14,7 @@
     "type": "git",
     "url": "https://github.com/jolokia/jolokia.git"
   },
-  "homepage": "https://github.com/jolokia/jolokia#readme",
+  "homepage": "https://jolokia.org/",
   "bugs": {
     "url": "https://github.com/jolokia/jolokia/issues"
   },
