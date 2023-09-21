@@ -103,6 +103,7 @@
       <groupId>io.undertow</groupId>
       <artifactId>undertow-core</artifactId>
       <version>${version.undertow}</version>
+      <scope>test</scope>
     </dependency>
 
   </dependencies>

@@ -32,7 +32,6 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLParameters;
 import org.jolokia.jvmagent.security.*;
 import org.jolokia.server.core.config.*;
-import org.jolokia.server.core.osgi.security.JaasAuthenticator;
 import org.jolokia.server.core.util.JolokiaCipher;
 
 /**
