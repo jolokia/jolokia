@@ -104,7 +104,12 @@
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.service.http</artifactId>
+      <artifactId>org.osgi.service.log</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.service.servlet</artifactId>
       <scope>provided</scope>
     </dependency>
 
@@ -131,6 +136,8 @@
               jolokia-service-serializer;inline=true,
               jolokia-service-discovery;inline=true,
               jolokia-service-history;inline=true,
+              jolokia-service-history;inline=true,
+              jolokia-service-jsr160;inline=true,
               jolokia-service-notif-pull;inline=true,
               jolokia-service-notif-sse;inline=true,
               json-simple;inline=true
@@ -224,7 +231,7 @@
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>build-helper-maven-plugin</artifactId>
-            <version>1.9</version>
+            <version>3.4.0</version>
             <executions>
               <execution>
                 <id>add-source</id>
