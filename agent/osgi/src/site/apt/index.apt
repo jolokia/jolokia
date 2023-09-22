@@ -1,0 +1,3 @@
+Jolokia OSGi Bundle
+
+  Jolokia agent as a OSGi bundle depending on an OSGi HttpService.

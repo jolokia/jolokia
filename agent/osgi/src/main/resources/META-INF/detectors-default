@@ -1,0 +1,6 @@
+org.jolokia.osgi.detector.VirgoDetector,1000
+org.jolokia.detector.GlassfishDetector,1005
+org.jolokia.osgi.detector.FelixDetector,1010
+org.jolokia.osgi.detector.EquinoxDetector,1020
+org.jolokia.osgi.detector.KnopflerfishDetector,1050
+
