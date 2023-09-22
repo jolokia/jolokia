@@ -185,7 +185,7 @@
              *   <dd>
              *     If set to true, errors during JMX operations and JSON serialization
              *     are ignored. Otherwise if a single deserialization fails, the whole request
-             *     returns with an error. This works only for certain operations like pattern reads..
+             *     returns with an error. This works only for certain operations like pattern reads.
              *   </dd>
              * </dl>
              *
