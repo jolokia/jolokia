@@ -12,7 +12,7 @@ export default class Jolokia {
      *              an object with the default parameters as key-value pairs
      */
     constructor(url: string);
-    constructor(param: RequestOptions);
+    constructor(param: BaseRequestOptions);
 
     /**
      * Jolokia Javascript Client version
@@ -102,7 +102,7 @@ export default class Jolokia {
      * @return the response object if called synchronously or nothing if called for asynchronous operation.
      */
     request(request: Request, params?: RequestOptions): unknown | null;
-    request(request: Request[], params?: RequestOptions): unknown | null;
+    request(request: Request[], params?: BulkRequestOptions): unknown[] | null;
 
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // Scheduler related methods
@@ -195,8 +195,8 @@ export default class Jolokia {
      * @param opts options passed to Jolokia.request()
      * @return the value of the attribute, possibly a complex object
      */
-    getAttribute(mbean: string, attribute: string, path: string, opts?: RequestOptions): unknown | null;
-    getAttribute(mbean: string, attribute: string, opts?: RequestOptions): unknown | null;
+    getAttribute(mbean: string, attribute: string, path: string, opts?: AttributeRequestOptions): unknown | null;
+    getAttribute(mbean: string, attribute: string, opts?: AttributeRequestOptions): unknown | null;
 
     /**
      * Set an attribute on a MBean.
@@ -209,8 +209,8 @@ export default class Jolokia {
      * @param opts additional options passed to Jolokia.request()
      * @return the previous value
      */
-    setAttribute(mbean: string, attribute: string, value: unknown, path: string, opts?: RequestOptions): unknown | null;
-    setAttribute(mbean: string, attribute: string, value: unknown, opts?: RequestOptions): unknown | null;
+    setAttribute(mbean: string, attribute: string, value: unknown, path: string, opts?: AttributeRequestOptions): unknown | null;
+    setAttribute(mbean: string, attribute: string, value: unknown, opts?: AttributeRequestOptions): unknown | null;
 
     /**
      * Execute a JMX operation and return the result value
@@ -239,7 +239,7 @@ export default class Jolokia {
      * @param opts optional options for Jolokia.request()
      * @return an array with ObjectNames as string
      */
-    search(mbeanPattern: string, opts?: RequestOptions): string[] | null;
+    search(mbeanPattern: string, opts?: SearchRequestOptions): string[] | null;
 
     /**
      * This method return the version of the agent and the Jolokia protocol
@@ -263,7 +263,7 @@ export default class Jolokia {
      * @param opts optional options for Jolokia.request()
      * @param version and other meta information as object
      */
-    version(opts?: RequestOptions): VersionResponse | null;
+    version(opts?: VersionRequestOptions): VersionResponse | null;
 
     /**
      * Get all MBeans as registered at the specified server. A C<$path> can be
@@ -321,8 +321,8 @@ export default class Jolokia {
      * @param path optional path for diving into the list
      * @param opts optional opts passed to Jolokia.request()
      */
-    list(path: string | string[], opts?: RequestOptions): ListResponse | null;
-    list(opts?: RequestOptions): ListResponse | null;
+    list(path: string | string[], opts?: ListRequestOptions): ListResponse | null;
+    list(opts?: ListRequestOptions): ListResponse | null;
 }
 
 /**
@@ -392,11 +392,11 @@ export interface ProcessParameters {
 }
 
 /**
- * Request options that influence a Jolokia request.
+ * Base request options that influence a Jolokia request.
  *
  * @see {@link https://jolokia.org/reference/html/clients.html#js-request-options}
  */
-export interface RequestOptions extends ProcessParameters {
+export interface BaseRequestOptions extends ProcessParameters {
     /**
      * Agent URL, which is mandatory
      */
@@ -419,22 +419,6 @@ export interface RequestOptions extends ProcessParameters {
      */
     jsonp?: boolean;
     /**
-     * Callback function which is called for a successful request. The callback receives
-     * the response as single argument. If no <code>success</code> callback is given, then
-     * the request is performed synchronously and gives back the response as return
-     * value.
-     */
-    success?: (response: Response) => void | ((response: Response) => void)[];
-    /**
-     * Callback in case a Jolokia error occurs. A Jolokia error is one, in which the HTTP request
-     * succeeded with a status code of 200, but the response object contains a status other
-     * than OK (200) which happens if the request JMX operation fails. This callback receives
-     * the full Jolokia response object (with a key <code>error</code> set). If no error callback
-     * is given, but an asynchronous operation is performed, the error response is printed
-     * to the Javascript console by default.
-     */
-    error?: (error: ErrorResponse) => void | ((error: ErrorResponse) => void)[];
-    /**
      * Global error callback called when the Ajax request itself failed.It obtains the same arguments
      * as the error callback given for <code>jQuery.ajax()</code>, i.e. the <code>XmlHttpResponse</code>,
      * a text status and an error thrown.Refer to the jQuery documentation for more information about
@@ -453,6 +437,50 @@ export interface RequestOptions extends ProcessParameters {
      * Timeout for the HTTP request
      */
     timeout?: number;
+}
+
+/**
+ * Request options for a single Jolokia request.
+ */
+export interface RequestOptions extends BaseRequestOptions {
+    /**
+     * Callback function which is called for a successful request. The callback receives
+     * the response as single argument. If no <code>success</code> callback is given, then
+     * the request is performed synchronously and gives back the response as return
+     * value.
+     */
+    success?: (response: Response) => void;
+    /**
+     * Callback in case a Jolokia error occurs. A Jolokia error is one, in which the HTTP request
+     * succeeded with a status code of 200, but the response object contains a status other
+     * than OK (200) which happens if the request JMX operation fails. This callback receives
+     * the full Jolokia response object (with a key <code>error</code> set). If no error callback
+     * is given, but an asynchronous operation is performed, the error response is printed
+     * to the Javascript console by default.
+     */
+    error?: (error: ErrorResponse) => void;
+}
+
+/**
+ * Request options for a bulk Jolokia request.
+ */
+export interface BulkRequestOptions extends BaseRequestOptions {
+    /**
+     * Callback function which is called for a successful request. The callback receives
+     * the response as single argument. If no <code>success</code> callback is given, then
+     * the request is performed synchronously and gives back the response as return
+     * value.
+     */
+    success?: ((response: Response) => void)[];
+    /**
+     * Callback in case a Jolokia error occurs. A Jolokia error is one, in which the HTTP request
+     * succeeded with a status code of 200, but the response object contains a status other
+     * than OK (200) which happens if the request JMX operation fails. This callback receives
+     * the full Jolokia response object (with a key <code>error</code> set). If no error callback
+     * is given, but an asynchronous operation is performed, the error response is printed
+     * to the Javascript console by default.
+     */
+    error?: ((error: ErrorResponse) => void)[];
 }
 
 export type Request =
@@ -500,6 +528,30 @@ export interface NotificationOptions {
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Simple API (jolokia-simple.js)
 
+/**
+ * Request options for getting and setting an attribute.
+ */
+export interface AttributeRequestOptions extends BaseRequestOptions {
+    success?: (value: unknown) => void;
+    error?: (error: ErrorResponse) => void;
+}
+
+/**
+ * Request options for searching MBeans.
+ */
+export interface SearchRequestOptions extends BaseRequestOptions {
+    success?: (objectNames: string[]) => void;
+    error?: (error: ErrorResponse) => void;
+}
+
+/**
+ * Request options for version.
+ */
+export interface VersionRequestOptions extends BaseRequestOptions {
+    success?: (version: VersionResponse) => void;
+    error?: (error: ErrorResponse) => void;
+}
+
 export interface VersionResponse {
     protocol: string;
     agent: string;
@@ -516,7 +568,17 @@ export interface VersionInfo {
     extraInfo?: Record<string, unknown>;
 }
 
-export type ListResponse = Record<string, JmxDomain>;
+/**
+ * Request options for listing MBeans.
+ */
+export interface ListRequestOptions extends BaseRequestOptions {
+    success?: (list: ListResponse) => void;
+    error?: (error: ErrorResponse) => void;
+}
+
+export type ListResponse = JmxDomains | JmxDomain | MBeanInfo;
+
+export type JmxDomains = Record<string, JmxDomain>;
 
 export type JmxDomain = Record<string, MBeanInfo>;
 
