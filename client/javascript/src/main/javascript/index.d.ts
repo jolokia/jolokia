@@ -133,8 +133,8 @@ export default class Jolokia {
      * @param request, request, .... One or more requests to be registered for this single callback
      * @return handle which can be used for unregistering the request again or for correlation purposes in the callbacks
      */
-    register(callback: (...response: Response[]) => void, ...request: Request[]): number;
-    register(params: RequestOptions, ...request: Request[]): number;
+    register(callback: (...response: (Response | ErrorResponse)[]) => void, ...request: Request[]): number;
+    register(callback: RegisterCallback, ...request: Request[]): number;
 
     /**
      * Unregister one or more request which has been registered with {@link #register}. As parameter
@@ -484,21 +484,21 @@ export interface BulkRequestOptions extends BaseRequestOptions {
 }
 
 export type Request =
-    | { type: "read"; mbean: string; attribute?: string | string[]; path?: string; }
-    | { type: "write"; mbean: string; attribute: string; value: unknown; path?: string; }
-    | { type: "exec"; mbean: string; operation: string; arguments?: unknown[]; }
-    | { type: "search"; mbean: string; }
-    | { type: "list"; path?: string; }
-    | { type: "version"; }
+    | { type: "read"; mbean: string; attribute?: string | string[]; path?: string; config?: ProcessParameters; }
+    | { type: "write"; mbean: string; attribute: string; value: unknown; path?: string; config?: ProcessParameters; }
+    | { type: "exec"; mbean: string; operation: string; arguments?: unknown[]; config?: ProcessParameters; }
+    | { type: "search"; mbean: string; config?: ProcessParameters; }
+    | { type: "list"; path?: string; config?: ProcessParameters; }
+    | { type: "version"; config?: ProcessParameters; }
     | {
         type: "notification";
         command: "register" | "unregister" | "add" | "remove" | "ping" | "open" | "list";
         client?: string;
         mode?: NotificationMode;
         filter?: string[];
-        config?: Record<string, unknown>;
         handback?: unknown;
         handle?: string;
+        config?: ProcessParameters;
     };
 
 export interface Response {
@@ -513,6 +513,13 @@ export interface ErrorResponse extends Response {
     error_type: string;
     error: string;
     stacktrace: string;
+}
+
+export interface RegisterCallback {
+    success?: (response: Response) => void;
+    error?: (error: ErrorResponse) => void;
+    config?: ProcessParameters;
+    onlyIfModified?: boolean;
 }
 
 export type NotificationMode = "sse" | "pull";
