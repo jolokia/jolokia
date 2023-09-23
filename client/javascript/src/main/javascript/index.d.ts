@@ -325,7 +325,78 @@ export default class Jolokia {
     list(opts?: RequestOptions): ListResponse | null;
 }
 
-export interface RequestOptions {
+/**
+ * Processing parameters that influence Jolokia operations.
+ *
+ * @see {@link https://jolokia.org/reference/html/protocol.html#processing-parameters}
+ */
+export interface ProcessParameters {
+    /**
+     * Maximum traversal depth for serialization of complex return values
+     */
+    maxDepth?: number;
+    /**
+     * Maximum size of collections returned during serialization.
+     * If larger, the collection is returned truncated.
+     */
+    maxCollectionSize?: number;
+    /**
+     * Maximum number of objects contained in the response.
+     */
+    maxObjects?: number;
+    /**
+     * If set to true, errors during JMX operations and JSON serialization
+     * are ignored.Otherwise if a single deserialization fails, the whole request
+     * returns with an error. This works only for certain operations like pattern reads.
+     */
+    ignoreErrors?: boolean;
+    /**
+     * The MIME type to return for the response. By default, this is <code>text/plain</code>,
+     * but it can be useful for some tools to change it to <code>application/json</code>.
+     * Init parameters can be used to change the default mime type. Only <code>text/plain</code>
+     * and <code>application/json</code> are allowed. For any other value Jolokia
+     * will fallback to <code>text/plain</code>.
+     */
+    mimeType?: string;
+    /**
+     * Defaults to <code>true</code> to return the canonical format of property
+     * lists. If set to <code>false</code> then the default unsorted property list
+     * is returned.
+     */
+    canonicalNaming?: boolean;
+    /**
+     * If set to <code>true</code>, then in case of an error the stack trace is
+     * included. With <code>false</code> no stack trace will be returned, and when
+     * this parameter is set to <code>runtime</code> only for RuntimeExceptions
+     * a stack trace is put into the error response. Default is <code>true</code>
+     * if not set otherwise in the global agent configuration.
+     */
+    includeStackTrace?: "true" | "false" | "runtime";
+    /**
+     * If this parameter is set to <code>true</code> then a serialized version of
+     * the exception is included in an error response. This value is put under the
+     * key <code>error_value</code> in the response value. By default this is set
+     * to <code>false</code> except when the agent global configuration option is
+     * configured otherwise.
+     */
+    serializeException?: boolean;
+    /**
+     * If this parameter is given, its value is interpreted as epoch time (seconds
+     * since 1.1.1970) and if the requested value did not change since this time,
+     * an empty response (with no <code>value</code>) is returned and the response
+     * status code is set to 304 ("Not modified"). This option is currently only
+     * supported for <code>LIST</code> requests. The time value can be extracted
+     * from a previous' response <code>timestamp</code>.
+    */
+    ifModifiedSince?: number;
+}
+
+/**
+ * Request options that influence a Jolokia request.
+ *
+ * @see {@link https://jolokia.org/reference/html/clients.html#js-request-options}
+ */
+export interface RequestOptions extends ProcessParameters {
     /**
      * Agent URL, which is mandatory
      */
@@ -382,25 +453,6 @@ export interface RequestOptions {
      * Timeout for the HTTP request
      */
     timeout?: number;
-    /**
-     * Maximum traversal depth for serialization of complex return values
-     */
-    maxDepth?: number;
-    /**
-     * Maximum size of collections returned during serialization.
-     * If larger, the collection is returned truncated.
-     */
-    maxCollectionSize?: number;
-    /**
-     * Maximum number of objects contained in the response.
-     */
-    maxObjects?: number;
-    /**
-     * If set to true, errors during JMX operations and JSON serialization
-     * are ignored.Otherwise if a single deserialization fails, the whole request
-     * returns with an error. This works only for certain operations like pattern reads.
-     */
-    ignoreErrors?: boolean;
 }
 
 export type Request =
