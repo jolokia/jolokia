@@ -544,6 +544,14 @@ export interface AttributeRequestOptions extends BaseRequestOptions {
 }
 
 /**
+ * Request options for executing an operation.
+ */
+export interface ExecuteRequestOptions extends BaseRequestOptions {
+    success?: (value: unknown) => void;
+    error?: (error: ErrorResponse) => void;
+}
+
+/**
  * Request options for searching MBeans.
  */
 export interface SearchRequestOptions extends BaseRequestOptions {
