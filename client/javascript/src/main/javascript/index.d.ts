@@ -601,7 +601,7 @@ export interface MBeanInfo {
     desc: string;
     class?: string;
     attr?: Record<string, MBeanAttribute>;
-    op?: Record<string, MBeanOperation>;
+    op?: Record<string, MBeanOperation | MBeanOperation[]>;
     notif?: Record<string, MBeanNotification>;
 }
 
