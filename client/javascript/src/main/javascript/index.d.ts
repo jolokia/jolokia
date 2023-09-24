@@ -449,7 +449,7 @@ export interface RequestOptions extends BaseRequestOptions {
      * the request is performed synchronously and gives back the response as return
      * value.
      */
-    success?: (response: Response) => void;
+    success?: (response: Response, index: number) => void;
     /**
      * Callback in case a Jolokia error occurs. A Jolokia error is one, in which the HTTP request
      * succeeded with a status code of 200, but the response object contains a status other
@@ -458,7 +458,7 @@ export interface RequestOptions extends BaseRequestOptions {
      * is given, but an asynchronous operation is performed, the error response is printed
      * to the Javascript console by default.
      */
-    error?: (error: ErrorResponse) => void;
+    error?: (error: ErrorResponse, index: number) => void;
 }
 
 /**
@@ -471,7 +471,7 @@ export interface BulkRequestOptions extends BaseRequestOptions {
      * the request is performed synchronously and gives back the response as return
      * value.
      */
-    success?: ((response: Response) => void)[];
+    success?: (response: Response, index: number) => void | ((response: Response, index: number) => void)[];
     /**
      * Callback in case a Jolokia error occurs. A Jolokia error is one, in which the HTTP request
      * succeeded with a status code of 200, but the response object contains a status other
@@ -480,7 +480,7 @@ export interface BulkRequestOptions extends BaseRequestOptions {
      * is given, but an asynchronous operation is performed, the error response is printed
      * to the Javascript console by default.
      */
-    error?: ((error: ErrorResponse) => void)[];
+    error?: (error: ErrorResponse, index: number) => void | ((error: ErrorResponse, index: number) => void)[];
 }
 
 export type Request =
