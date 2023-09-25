@@ -1,8 +1,9 @@
 {
   "name": "jolokia.js",
-  "version": "2.0.0-dev.3",
+  "version": "2.0.0-dev.9",
   "description": "Jolokia JavaScript client",
   "main": "dist/jolokia.js",
+  "types": "dist/index.d.ts",
   "exports": {
     ".": "./dist/jolokia.js",
     "./simple": "./dist/jolokia-simple.js",
@@ -24,7 +25,7 @@
   ],
   "scripts": {
     "clean": "rm -rf dist/",
-    "build": "npm run clean && mkdir dist && cp src/main/javascript/*.js dist/ && rm dist/*.test.js",
+    "build": "npm run clean && mkdir dist && cp src/main/javascript/*.{js,d.ts} dist/ && rm dist/*.test.js",
     "test": "jest",
     "prepack": "npm test && npm run build"
   },

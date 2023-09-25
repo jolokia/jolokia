@@ -226,10 +226,9 @@
          * list&gt;/("attribute"|"operation")/&lt;index&gt;">
          * (e.g. <code>java.lang/name=Code Cache,type=MemoryPool/attribute/0</code>). A path can be
          * provided partially, in which case the remaining map/array is returned. The path given must
-         * be already properly escaped (i.e. slashes must be escaped like <code>!/</code> and exlamation
+         * be already properly escaped (i.e. slashes must be escaped like <code>!/</code> and exclamation
          * marks like <code>!!</code>.
          * See also the Jolokia Reference Manual for a more detailed discussion of inner paths and escaping.
-         *
          *
          * @param path optional path for diving into the list
          * @param opts optional opts passed to Jolokia.request()
