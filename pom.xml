@@ -1019,7 +1019,7 @@
     <version.jetty>11.0.16</version.jetty>
     <version.undertow>2.3.8.Final</version.undertow>
 
-    <version.spring>5.3.29</version.spring>
+    <version.spring>6.0.12</version.spring>
     <version.log4j2>2.20.0</version.log4j2>
   </properties>
 
