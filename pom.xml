@@ -937,51 +937,9 @@
       </dependency>
 
       <dependency>
-        <groupId>com.github.tomakehurst</groupId>
-        <artifactId>wiremock-jre8</artifactId>
-        <version>2.35.0</version>
-        <exclusions>
-          <exclusion>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-alpn-client</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-alpn-server</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-alpn-java-client</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-alpn-java-server</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-alpn-openjdk8-client</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-alpn-openjdk8-server</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.eclipse.jetty.http2</groupId>
-            <artifactId>http2-common</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.eclipse.jetty.http2</groupId>
-            <artifactId>http2-hpack</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.eclipse.jetty.http2</groupId>
-            <artifactId>http2-server</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>commons-fileupload</groupId>
-            <artifactId>commons-fileupload</artifactId>
-          </exclusion>
-        </exclusions>
+        <groupId>org.wiremock</groupId>
+        <artifactId>wiremock</artifactId>
+        <version>3.1.0</version>
       </dependency>
 
       <dependency>
@@ -1055,7 +1013,7 @@
 
     <version.servlet-api>5.0.0</version.servlet-api>
 
-    <version.jetty>11.0.6</version.jetty>
+    <version.jetty>11.0.16</version.jetty>
     <version.undertow>2.3.8.Final</version.undertow>
 
     <version.spring>5.3.29</version.spring>

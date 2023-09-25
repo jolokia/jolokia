@@ -37,28 +37,37 @@
 
       <!-- Other dependencies -->
 
-      <!-- Jetty is managed here, so 1) we have consistent versions, 2) we use different Jetty version for JakartaEE -->
-
       <dependency>
         <groupId>org.eclipse.jetty</groupId>
         <artifactId>jetty-server</artifactId>
         <version>${version.jetty}</version>
+        <exclusions>
+          <exclusion>
+            <artifactId>jetty-jakarta-servlet-api</artifactId>
+            <groupId>org.eclipse.jetty.toolchain</groupId>
+          </exclusion>
+        </exclusions>
       </dependency>
-<!--      <dependency>-->
-<!--        <groupId>org.eclipse.jetty</groupId>-->
-<!--        <artifactId>jetty-servlet</artifactId>-->
-<!--        <version>${version.jetty}</version>-->
-<!--      </dependency>-->
-<!--      <dependency>-->
-<!--        <groupId>org.eclipse.jetty</groupId>-->
-<!--        <artifactId>jetty-servlets</artifactId>-->
-<!--        <version>${version.jetty}</version>-->
-<!--      </dependency>-->
-<!--      <dependency>-->
-<!--        <groupId>org.eclipse.jetty</groupId>-->
-<!--        <artifactId>jetty-webapp</artifactId>-->
-<!--        <version>${version.jetty}</version>-->
-<!--      </dependency>-->
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-http</artifactId>
+        <version>${version.jetty}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-servlet</artifactId>
+        <version>${version.jetty}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-servlets</artifactId>
+        <version>${version.jetty}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-webapp</artifactId>
+        <version>${version.jetty}</version>
+      </dependency>
       <dependency>
         <groupId>org.eclipse.jetty</groupId>
         <artifactId>jetty-proxy</artifactId>
@@ -113,11 +122,19 @@
       <artifactId>json-simple</artifactId>
     </dependency>
 
+    <!-- JakartaEE dependencies -->
+
+    <dependency>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
+      <scope>test</scope>
+    </dependency>
+
     <!-- Test dependencies -->
 
     <dependency>
-      <groupId>com.github.tomakehurst</groupId>
-      <artifactId>wiremock-jre8</artifactId>
+      <groupId>org.wiremock</groupId>
+      <artifactId>wiremock</artifactId>
       <scope>test</scope>
     </dependency>
 
@@ -128,11 +145,11 @@
       <artifactId>jetty-server</artifactId>
       <scope>test</scope>
     </dependency>
-<!--    <dependency>-->
-<!--      <groupId>org.eclipse.jetty</groupId>-->
-<!--      <artifactId>jetty-servlet</artifactId>-->
-<!--      <scope>test</scope>-->
-<!--    </dependency>-->
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-servlet</artifactId>
+      <scope>test</scope>
+    </dependency>
 
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>

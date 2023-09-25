@@ -496,6 +496,7 @@ public class J4pClientBuilder {
     private RequestConfig createRequestConfig() {
         RequestConfig.Builder requestConfigB = RequestConfig.custom();
 
+        requestConfigB.setNormalizeUri(false);
         requestConfigB.setExpectContinueEnabled(expectContinue);
         if (socketTimeout > -1) {
             requestConfigB.setSocketTimeout(socketTimeout);

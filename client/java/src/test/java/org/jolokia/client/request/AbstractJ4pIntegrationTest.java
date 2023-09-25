@@ -17,11 +17,13 @@ package org.jolokia.client.request;
  */
 
 
+import org.eclipse.jetty.http.UriCompliance;
 import org.eclipse.jetty.security.ConstraintMapping;
 import org.eclipse.jetty.security.ConstraintSecurityHandler;
 import org.eclipse.jetty.security.HashLoginService;
 import org.eclipse.jetty.security.SecurityHandler;
 import org.eclipse.jetty.security.UserStore;
+import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -59,6 +61,9 @@ abstract public class AbstractJ4pIntegrationTest {
 
             int port = EnvTestUtil.getFreePort();
             jettyServer = new Server(port);
+            UriCompliance jolokiaCompliance = UriCompliance.DEFAULT.with("JOLOKIA", UriCompliance.Violation.AMBIGUOUS_EMPTY_SEGMENT);
+            ((HttpConnectionFactory) jettyServer.getConnectors()[0].getDefaultConnectionFactory())
+                    .getHttpConfiguration().setUriCompliance(jolokiaCompliance);
             ServletContextHandler jettyContext = new ServletContextHandler(jettyServer, "/");
             ServletHolder holder = new ServletHolder(new AgentServlet());
             holder.setInitParameter("dispatcherClasses", "org.jolokia.jsr160.Jsr160RequestDispatcher");
