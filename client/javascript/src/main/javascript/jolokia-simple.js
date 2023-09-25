@@ -42,9 +42,9 @@
         if (typeof jquery.fn !== "undefined") {
             module.exports = factory(jquery, require("./jolokia"));
         } else {
-            var {JSDOM} = require("jsdom");
-            var {window} = new JSDOM("");
-            module.exports = factory(jquery(window), require("./jolokia"));
+            var jsdom = require("jsdom");
+            var dom = new jsdom.JSDOM("");
+            module.exports = factory(jquery(dom.window), require("./jolokia"));
         }
     } else {
         // Browser globals
