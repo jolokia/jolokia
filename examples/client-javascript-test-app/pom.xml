@@ -116,29 +116,17 @@
       </plugin>
       <plugin>
         <!--
-          Use `mvn package jetty:run` and browse to http://localhost:8080/jolokia-all-test.html
+          Use `mvn clean package jetty:run` and browse to http://localhost:8080/jolokia-all-test.html
         -->
         <groupId>org.eclipse.jetty</groupId>
         <artifactId>jetty-maven-plugin</artifactId>
         <version>${version.jetty}</version>
         <configuration>
-          <scanIntervalSeconds>10</scanIntervalSeconds>
-          <webAppConfig>
+          <scan>10</scan>
+          <webApp>
             <contextPath>/</contextPath>
-          </webAppConfig>
+          </webApp>
           <webAppSourceDirectory>${project.build.directory}/${project.artifactId}-${project.version}</webAppSourceDirectory>
-          <stopPort>9999</stopPort>
-          <stopKey>foo</stopKey>
-          <systemProperties>
-            <systemProperty>
-              <name>org.mortbay.util.FileResource.checkAliases</name>
-              <value>false</value>
-            </systemProperty>
-            <systemProperty>
-              <name>org.eclipse.jetty.util.FileResource.checkAliases</name>
-              <value>false</value>
-            </systemProperty>
-          </systemProperties>
         </configuration>
       </plugin>
     </plugins>

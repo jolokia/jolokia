@@ -152,8 +152,11 @@
         <!--
           Manual invocation which is faster than resources:copy-resources + asciidoctor-maven-plugin:process-asciidoc:
           $ cd ${basedir}
-          $ mkdir -p target/generated-docs;
-          $ asciidoctor -a linkcss -a stylesdir=css -b html5 -D target/generated-docs src/asciidoc/index.adoc
+          $ mkdir -p target/generated-docs
+          $ asciidoctor -a linkcss -a copycss=../../src/site/resources/css/asciidoc-jolokia.css -a stylesdir=css -a stylesheet=asciidoc-jolokia.css -b html5 -D target/generated-docs src/asciidoc/index.adoc
+
+          Or run:
+          $ mvn org.asciidoctor:asciidoctor-maven-plugin:2.2.4:process-asciidoc@default-process-asciidoc -N
         -->
         <groupId>org.asciidoctor</groupId>
         <artifactId>asciidoctor-maven-plugin</artifactId>

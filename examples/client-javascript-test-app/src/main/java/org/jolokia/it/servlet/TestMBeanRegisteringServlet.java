@@ -17,9 +17,8 @@ package org.jolokia.it.servlet;
  * limitations under the License.
  */
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.http.HttpServlet;
 
 import org.jolokia.it.core.ItSetup;
 
@@ -28,7 +27,7 @@ public class TestMBeanRegisteringServlet extends HttpServlet {
     ItSetup itSetup;
 
     @Override
-    public void init(ServletConfig config) throws ServletException {
+    public void init(ServletConfig config) {
         itSetup = new ItSetup();
         itSetup.start();
     }
@@ -37,6 +36,5 @@ public class TestMBeanRegisteringServlet extends HttpServlet {
     public void destroy() {
         itSetup.stop();
     }
-
 
 }
