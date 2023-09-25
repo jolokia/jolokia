@@ -18,7 +18,7 @@
 <section id="client-javascript">
   <title>Javascript Client Library</title>
   <para>
-    The Jolokia Javascript library provides a Javascript API to the 
+    The Jolokia Javascript library provides a Javascript API to the
     to the Jolokia agent. It comes with two layers, a
     basic one which allows for sending Jolokia requests to the agent
     synchronously or asynchronously and one with a simplified API
@@ -37,14 +37,14 @@
   <programlisting language="javascript"><![CDATA[
 var j4p = new Jolokia("/jolokia");
 var value = j4p.getAttribute("java.lang:type=Memory","HeapMemoryUsage","used");
-console.log("Heap Memory used: " + value);     
+console.log("Heap Memory used: " + value);
 ]]></programlisting>
   <section id="js-installation">
     <title>Installation</title>
-    <para> 
+    <para>
       The Jolokia Javascript library is distributed in two parts, in
       compressed and uncompressed forms:
-    </para>    
+    </para>
     <variablelist>
       <varlistentry>
         <term><filename>jolokia.js</filename> and
@@ -103,8 +103,8 @@ console.log("Heap Memory used: " + value);
       overriding are given there.
     </para>
   </section>
-  
-  <section id="js-request">    
+
+  <section id="js-request">
     <title>Usage</title>
     <para>
       All function of this library are available as methods of the
@@ -158,7 +158,7 @@ var req2 = { type: "list" };
 var response = j4p.request(req1);
 var responses = j4p.request([ req1, req2 ]);]]></programlisting>
     </section>
-    <section id="js-request-options">    
+    <section id="js-request-options">
       <title>Request options</title>
       <para>
         Each request can be influenced by a set of optional options
@@ -168,14 +168,14 @@ var responses = j4p.request([ req1, req2 ]);]]></programlisting>
         <constant>config</constant> attribute, which can be used for all
         processing parameters (<xref linkend="processing-parameters"/>).
         The known options are summarized in <xref linkend="js-request-options-table"/>
-      </para>      
+      </para>
       <table id="js-request-options-table">
         <title>Request options</title>
         <thead>
           <tr>
             <td>Key</td>
             <td>Description</td>
-          </tr>        
+          </tr>
         </thead>
         <tr>
           <td><constant>url</constant></td>
@@ -222,7 +222,7 @@ var responses = j4p.request([ req1, req2 ]);]]></programlisting>
           <td><constant>error</constant></td>
           <td>
             Callback in case a Jolokia error occurs. A Jolokia error is
-            one, in which the HTTP request suceeded with a status code
+            one, in which the HTTP request succeeded with a status code
             of 200, but the response object contains a status other than
             OK (200) which happens if the request JMX operation
             fails. This callback receives the full Jolokia response
@@ -289,8 +289,8 @@ var responses = j4p.request([ req1, req2 ]);]]></programlisting>
         <tr>
           <td><constant>serializeException</constant></td>
           <td>
-            If true then in case of an error, the exception itself is returned in 
-            it JSON representation under the key <constant>error_value</constant> 
+            If true then in case of an error, the exception itself is returned in
+            it JSON representation under the key <constant>error_value</constant>
             in the response object.
           </td>
         </tr>
@@ -322,7 +322,7 @@ var responses = j4p.request([ req1, req2 ]);]]></programlisting>
     </section>
     <section id="js-request-sync-async">
       <title>Operational modes</title>
-    </section>    
+    </section>
     <para>
       Requests can be send either synchronously or asynchronously via
       Ajax. If a <constant>success</constant> callback is given in the
@@ -357,23 +357,23 @@ j4p.request(
        if (response.value.used / response.value.max > 0.9) {
           alert("90% of heap memory exceeded");
        }
-    }, 
+    },
     error: function(response) {
        alert("Jolokia request failed: " + response.error);
-    } 
+    }
   }
 );
 
 // Bulk request with multiple callbacks
 j4p.request(
-  [ 
+  [
     { type: "read", mbean: "java.lang:type=Threading", attribute: "ThreadCount"},
     { type: "read", mbean: "java.lang:type=Runtime", attribute: ["VmName", "VmVendor"]}
   ],
-  { success: [ 
+  { success: [
                function(response) {
                   console.log("Number of threads: " + response.value);
-               }, 
+               },
                function(response) {
                   console.log("JVM: " + response.value.VmName + " -- "
                                       + response.value.VmVendor);
@@ -381,10 +381,10 @@ j4p.request(
              ],
     error: function(response) {
        alert("Jolokia request failed: " + response.error);
-    } 
+    }
   }
-);]]></programlisting>    
-    <para>    
+);]]></programlisting>
+    <para>
       Both callbacks, <constant>success</constant> and
       <constant>error</constant>, are only called when the Ajax
       request succeeds. In case of an error on the HTTP level, the
@@ -404,7 +404,7 @@ j4p.request(
       than the Javascript client. By default, such access is forbidden by the so called
       <emphasis>same-origin-policy</emphasis>. To swith on JSONP, the
       option <constant>jsonp</constant> should be set to
-      <constant>"true"</constant>. 
+      <constant>"true"</constant>.
     </para>
     <para>
       As explained in <xref linkend="request-response"/> the Jolokia
@@ -431,11 +431,11 @@ j4p.request(
         <constant>READ</constant> requests for multiple attributes
         (i.e. the <constant>attribute</constant> request parameter is
         an array of string values) can only be used with
-        <constant>POST</constant>. 
+        <constant>POST</constant>.
       </listitem>
       <listitem>
         The JMX proxy mode (see <xref linkend="proxy"/>) can only be used
-        with <constant>POST</constant>. 
+        with <constant>POST</constant>.
       </listitem>
       <listitem>
         JSONP can only be used with <constant>GET</constant> and only
@@ -446,10 +446,10 @@ j4p.request(
     </itemizedlist>
     <para>
       The restrictions above imply, that JSONP can only be used for
-      single, simple requests and not for JMX proxy calls. 
+      single, simple requests and not for JMX proxy calls.
     </para>
   </section>
-  
+
   <section id="js-simple">
     <title>Simple API</title>
     <para>
@@ -468,7 +468,7 @@ j4p.request(
       operations the value itself is returned. In case of an error,
       either an <constant>error</constant> callback is called with the
       full response object or an <classname>Error</classname> is
-      thrown for synchronous operations. 
+      thrown for synchronous operations.
     </para>
     <variablelist>
       <varlistentry>
@@ -482,7 +482,7 @@ j4p.request(
             operations are the attribute's value, for asynchronous
             operations (i.e. <code>opts.success != null</code>) it is
             <constant>null</constant>. See <xref linkend="read"/> for
-            details. 
+            details.
           </para>
           <para>
             For example, the following method call can be used
@@ -534,7 +534,7 @@ j4p.execute("java.lang:type=Threading","dumpAllThreads",true,true,
               {
                  success: function(value) {
                      console.log(JSON.stringify(value));
-                 }        
+                 }
               });
 ]]></programlisting>
         </listitem>
@@ -546,11 +546,11 @@ j4p.execute("java.lang:type=Threading","dumpAllThreads",true,true,
             Searches for one or more MBeans whose object names fit the
             pattern <code>mBeanPattern</code>. The return value is a list
             of strings with the matching MBean names or <code>null</code>
-            if none is found. See <xref linkend="search"/> for details.            
+            if none is found. See <xref linkend="search"/> for details.
           </para>
           <para>
             The following example looks up all application servers
-            available in all domains: 
+            available in all domains:
           </para>
           <programlisting language="javascript"><![CDATA[
 var appServerNames = j4p.search("*:j2eeType=J2EEServer,*");
@@ -575,7 +575,7 @@ var appServerNames = j4p.search("*:j2eeType=J2EEServer,*");
           </para>
           <programlisting language="javascript"><![CDATA[
 var attributesMeta = j4p.list("java.lang/type=OperatingSystem/attr");
-]]></programlisting>     
+]]></programlisting>
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -664,11 +664,11 @@ j4p.start(10000);
             parameters can be given which is used as default for the
             registered requests. Requests with a
             <constant>config</constant> section take precedence.
-          </para>            
+          </para>
           <para>
             Furthermore, if a <constant>onlyIfModified:
             true</constant> exists in the callback object, then the
-            <constant>sucess</constant> and <constant>error</constant>
+            <constant>success</constant> and <constant>error</constant>
             callbacks are called only if the result changed on the
             server side. Currently, this is supported for the
             <constant>list</constant> operation only in which case the
@@ -721,7 +721,7 @@ j4p.register(
     onlyIfModified: true
   },
   { type: "LIST", config: { maxDepth: 2}},
-  { type: "READ", mbean: "java.lang:type=Threading", 
+  { type: "READ", mbean: "java.lang:type=Threading",
     attribute: "ThreadCount", config: { ignoreErrors: true }},
   { type: "READ", mbean: "bla.blu:type=foo", attribute: "blubber"});
 ]]>
@@ -757,7 +757,7 @@ j4p.register(
             to the given argument. If no <code>period</code> is given,
             the period provided during construction time (with the
             option <code>fetchInterval</code>) is used. The default
-            value is 30 seconds. 
+            value is 30 seconds.
           </para>
         </listitem>
       </varlistentry>
@@ -767,7 +767,7 @@ j4p.register(
           <para>
             Stop the scheduler. If the scheduler is not running,
             nothing happens. The scheduler can be restarted after it
-            has been stopped. 
+            has been stopped.
           </para>
         </listitem>
       </varlistentry>
@@ -777,13 +777,13 @@ j4p.register(
           <para>
             Checks whether the scheduler is running. Returns
             <code>true</code> if this is the case, <code>false</code>
-            otherwise. 
+            otherwise.
           </para>
         </listitem>
       </varlistentry>
     </variablelist>
   </section>
-  
+
   <section id="js-cubism">
     <title>Jolokia as a Cubism Source</title>
     <para>
@@ -828,13 +828,13 @@ j4p.register(
       Jolokia agent.
     </para>
     <programlisting language="javascript"><![CDATA[var context = cubism.context();
-  
-// Create a source for Jolokia metrics pointing to the agent 
+
+// Create a source for Jolokia metrics pointing to the agent
 // at 'http://jolokia.org/jolokia'
 var jolokia = context.jolokia("http://jolokia.org/jolokia");]]></programlisting>
     <para>
       The method <methodname>context.jolokia()</methodname> can take various
-      kind of arguments: 
+      kind of arguments:
     </para>
     <itemizedlist>
       <listitem>
@@ -846,13 +846,13 @@ var jolokia = context.jolokia("http://jolokia.org/jolokia");]]></programlisting>
           the URL is omitted, but only an option object is provided,
           then this object must also contain a key <code>url</code>
           for specifying the agent URL.
-        </para>  
+        </para>
       </listitem>
       <listitem>
         <para>
           Alternatively, an already instantiated Jolokia object can be
           provided as single argument, which then is used for all
-          communications to the server. 
+          communications to the server.
         </para>
       </listitem>
     </itemizedlist>
@@ -867,17 +867,17 @@ var jolokia = context.jolokia("http://jolokia.org/jolokia");]]></programlisting>
     <programlisting language="javascript"><![CDATA[
 // Read periodically the Heap-Memory use and take 'HeapMemory Usage' as name/label.
 var metricMem = jolokia.metric({
-                      type: 'read', 
+                      type: 'read',
                       mbean: 'java.lang:type=Memory',
                       attribute: 'HeapMemoryUsage',
                       path: 'used'
-                  },"HeapMemory Usage"); 
+                  },"HeapMemory Usage");
 
 // Example for a callback function for evaluating responses
 // dynamically. In this case, the first
 // argument is a function, which gets feed with all response objects
 // (one in this case). The requests objects are given next, and an
-// options object as last argument. 
+// options object as last argument.
 var metricReq = jolokia.metric(
     function (resp) {
         var attrs = resp.value;
@@ -887,15 +887,15 @@ var metricReq = jolokia.metric(
         }
         return sum;
     },
-    { 
+    {
         type: "read",
         mbean: "Catalina:j2eeType=Servlet,*",
         attribute:"requestCount"
-    }, 
+    },
     { name: "All", delta: 101000});]]></programlisting>
     <para>
       <methodname>metric()</methodname> is a factory method which can be
-      called in various ways.      
+      called in various ways.
     </para>
     <itemizedlist>
       <listitem>
@@ -917,14 +917,14 @@ var metricReq = jolokia.metric(
       <listitem>
         <para>
           The last argument, if an object but not a Jolokia request
-          (i.e. there is no <code>type</code> key), is 
+          (i.e. there is no <code>type</code> key), is
           taken as an option object which is described below.
         </para>
       </listitem>
       <listitem>
         <para>
           Finally, if the last argument is a pure string, then this
-          string is used as name for the chart.                      
+          string is used as name for the chart.
         </para>
       </listitem>
     </itemizedlist>
@@ -964,7 +964,7 @@ var metricReq = jolokia.metric(
           </para>
         </listitem>
       </varlistentry>
-    </variablelist>    
+    </variablelist>
     <para>
       One or more metric objects can now be converted to charts and
       added to a website with <filename>d3.js</filename>. This is done
@@ -972,7 +972,7 @@ var metricReq = jolokia.metric(
       order to append charts to a <constant>div</constant> with id
       <constant>chart</constant> the following code can be used:
     </para>
-    <programlisting language="xml"><![CDATA[// Use d3 to attach the metrics with a specific graph type 
+    <programlisting language="xml"><![CDATA[// Use d3 to attach the metrics with a specific graph type
 // ('horizon' in this case) to the document
 d3.select("#charts").call(function(div) {
     div.append("div")
@@ -999,7 +999,7 @@ d3.select("#charts").call(function(div) {
         <code>1.0-alpha-1-SNAPSHOT</code>. Although it is quite
         usable, in order to avoid a snapshot dependency, it is
         recommended to use a fork of this plugin hosted on <ulink
-        url="https://github.com/harlanji/javascript-maven-tools">GitHub</ulink> and deployed at the 
+        url="https://github.com/harlanji/javascript-maven-tools">GitHub</ulink> and deployed at the
         <ulink url="https://oss.sonatype.org/content/groups/public">Sonatype Maven repository</ulink>.
       </sidebar>
       <para>
@@ -1075,9 +1075,9 @@ d3.select("#charts").call(function(div) {
         include <filename>scripts/lib/jolokia-min.js</filename>
       </para>
       <para>
-        A full working example can be found in the Jolokia src at 
+        A full working example can be found in the Jolokia src at
         <filename>client/javascript/test-app/pom.xml</filename>.
       </para>
   </section>
-  
+
 </section>

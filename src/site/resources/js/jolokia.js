@@ -126,7 +126,7 @@
              *   <dt>error</dt>
              *   <dd>
              *     Callback in case a Jolokia error occurs. A Jolokia error is one, in which the HTTP request
-             *     suceeded with a status code of 200, but the response object contains a status other
+             *     succeeded with a status code of 200, but the response object contains a status other
              *     than OK (200) which happens if the request JMX operation fails. This callback receives
              *     the full Jolokia response object (with a key <code>error</code> set). If no error callback
              *     is given, but an asynchronous operation is performed, the error response is printed

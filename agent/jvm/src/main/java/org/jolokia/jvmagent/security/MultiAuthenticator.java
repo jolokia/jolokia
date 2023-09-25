@@ -29,7 +29,7 @@ import java.util.List;
  *
  * <ul>
  *     <li>Mode.ALL : All authenticators must succeed for this authenticator to succeed</li>
- *     <li>Mode.ANY : A single sucessful authenticator is sufficient for this authenticator to succeed</li>
+ *     <li>Mode.ANY : A single successful authenticator is sufficient for this authenticator to succeed</li>
  * </ul>
  *
  * @author roland

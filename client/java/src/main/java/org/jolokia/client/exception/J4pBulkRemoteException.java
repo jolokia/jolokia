@@ -29,7 +29,7 @@ import org.jolokia.client.request.J4pResponse;
 public class J4pBulkRemoteException extends J4pException {
 
     // List of results obtained from the remote side. This can be either exceptions for a single
-    // request or a suceeded request
+    // request or a succeeded request
     private List results;
 
     /**
