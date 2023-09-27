@@ -200,7 +200,7 @@
                 var ajaxParams = {};
 
                 // Copy over direct params for the jQuery ajax call
-                $.each(["username", "password", "timeout"], function (i, key) {
+                ["username", "password", "timeout"].forEach(function (key) {
                     if (opts[key]) {
                         ajaxParams[key] = opts[key];
                     }
@@ -816,7 +816,7 @@
         // to an URL as GET query parameters
         function addProcessingParameters(url, opts) {
             var sep = url.indexOf("?") > 0 ? "&" : "?";
-            $.each(PROCESSING_PARAMS, function (i, key) {
+            PROCESSING_PARAMS.forEach(function (key) {
                 if (opts[key] != null) {
                     url += sep + key + "=" + opts[key];
                     sep = "&";
@@ -838,7 +838,7 @@
             var result = extractor(request);
             var parts = result.parts || [];
             var url = type;
-            $.each(parts, function (i, v) {
+            parts.forEach(function (v) {
                 url += "/" + Jolokia.escape(v)
             });
             if (result.path) {
@@ -876,7 +876,7 @@
             "exec": function(request) {
                 var ret = [ request.mbean, request.operation ];
                 if (request.arguments && request.arguments.length > 0) {
-                    $.each(request.arguments, function (index, value) {
+                    request.arguments.forEach(function (value) {
                         ret.push(valueToString(value));
                     });
                 }
