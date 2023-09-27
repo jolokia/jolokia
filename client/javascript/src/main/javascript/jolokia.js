@@ -274,7 +274,7 @@
                     ajaxParams.async = false;
                     var xhr = $.ajax(ajaxParams);
                     if (httpSuccess(xhr)) {
-                        return $.parseJSON(xhr.responseText);
+                        return JSON.parse(xhr.responseText);
                     } else {
                         return null;
                     }
@@ -604,7 +604,7 @@
                             this.eventSource = new EventSource(agentOptions.url + "/notification/open/" + client.id + "/sse");
                             var dispatcher = this.dispatchMap;
                             this.eventSource.addEventListener("message", function (event) {
-                                var data = $.parseJSON(event.data);
+                                var data = JSON.parse(event.data);
                                 var callback = dispatcher[data.handle];
                                 if (callback != null) {
                                     callback(data);
