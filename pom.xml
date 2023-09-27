@@ -59,11 +59,9 @@
     <module>client/kubernetes</module>
 
     <module>support/jmx</module>
-    <module>support/spring</module>
 
     <module>examples/osgi-restrictor</module>
     <module>examples/client-javascript-test-app</module>
-    <module>examples/spring</module>
   </modules>
 
   <build>
@@ -1039,6 +1037,18 @@
   </distributionManagement>
 
   <profiles>
+
+    <profile>
+      <id>jdk17</id>
+      <activation>
+        <jdk>[17,)</jdk>
+      </activation>
+      <modules>
+        <module>support/spring</module>
+        <module>examples/spring</module>
+      </modules>
+    </profile>
+
     <profile>
       <!-- Distribution to maven central. This is default deployment target -->
       <id>dist</id>
