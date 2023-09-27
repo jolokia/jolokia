@@ -128,6 +128,13 @@ $(document).ready(function() {
                      }));
         });
         asyncTest("Invalid URL", function() {
+            // jQuery 3.x requires jsonp errors to be caught at window.onerror.
+            // https://github.com/jquery/jquery/issues/5034
+            if (extraParams.jsonp) {
+                window.onerror = function(e) {
+                    console.log('jsonp error:', e)
+                }
+            }
             Jolokia({url: "bla"}).request(
             { type: "version" },
             $.extend(extraParams,
