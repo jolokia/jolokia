@@ -69,10 +69,10 @@
          * @return the value of the attribute, possibly a complex object
          */
         function getAttribute(mbean,attribute,path,opts) {
-            if (arguments.length === 3 && $.isPlainObject(path)) {
+            if (arguments.length === 3 && isPlainObject(path)) {
                 opts = path;
                 path = null;
-            } else if (arguments.length == 2 && $.isPlainObject(attribute)) {
+            } else if (arguments.length == 2 && isPlainObject(attribute)) {
                 opts = attribute;
                 attribute = null;
                 path = null;
@@ -94,7 +94,7 @@
          * @return the previous value
          */
         function setAttribute(mbean,attribute,value,path,opts) {
-            if (arguments.length === 4 && $.isPlainObject(path)) {
+            if (arguments.length === 4 && isPlainObject(path)) {
                 opts = path;
                 path = null;
             }
@@ -117,7 +117,7 @@
         function execute(mbean,operation) {
             var req = { type: "exec", mbean: mbean, operation: operation };
             var opts, end = arguments.length;
-            if (arguments.length > 2 && $.isPlainObject(arguments[arguments.length-1])) {
+            if (arguments.length > 2 && isPlainObject(arguments[arguments.length-1])) {
                 opts = arguments[arguments.length-1];
                 end = arguments.length-1;
             }
@@ -234,7 +234,7 @@
          * @param opts optional opts passed to Jolokia.request()
          */
         function list(path,opts) {
-            if (arguments.length == 1 && !Array.isArray(path) && $.isPlainObject(path)) {
+            if (arguments.length == 1 && !Array.isArray(path) && isPlainObject(path)) {
                 opts = path;
                 path = null;
             }
@@ -283,6 +283,10 @@
             } else {
                 return opts;
             }
+        }
+
+        function isPlainObject(obj) {
+            return obj && Object.prototype.toString.call(obj) === "[object Object]";
         }
 
         // Extend the Jolokia prototype with new functionality (mixin)
