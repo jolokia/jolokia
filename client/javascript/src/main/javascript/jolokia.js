@@ -252,7 +252,7 @@
                     var success_callback = constructCallbackDispatcher(opts.success);
                     var error_callback = constructCallbackDispatcher(opts.error);
                     ajaxParams.success = function (data) {
-                        var responses = $.isArray(data) ? data : [ data ];
+                        var responses = Array.isArray(data) ? data : [ data ];
                         for (var idx = 0; idx < responses.length; idx++) {
                             var resp = responses[idx];
                             if (Jolokia.isError(resp)) {
@@ -770,7 +770,7 @@
                 return function () {
                 };
             }
-            var callbackArray = $.isArray(callback) ? callback : [ callback ];
+            var callbackArray = Array.isArray(callback) ? callback : [ callback ];
             return function (response, idx) {
                 callbackArray[idx % callbackArray.length](response, idx);
             }
@@ -784,10 +784,10 @@
                     method;
             if (methodGiven) {
                 if (methodGiven === "get") {
-                    if ($.isArray(request)) {
+                    if (Array.isArray(request)) {
                         throw new Error("Cannot use GET with bulk requests");
                     }
-                    if (request.type.toLowerCase() === "read" && $.isArray(request.attribute)) {
+                    if (request.type.toLowerCase() === "read" && Array.isArray(request.attribute)) {
                         throw new Error("Cannot use GET for read with multiple attributes");
                     }
                     if (request.target) {
@@ -800,9 +800,9 @@
                 method = methodGiven;
             } else {
                 // Determine method dynamically
-                method = $.isArray(request) ||
+                method = Array.isArray(request) ||
                          request.config ||
-                         (request.type.toLowerCase() === "read" && $.isArray(request.attribute)) ||
+                         (request.type.toLowerCase() === "read" && Array.isArray(request.attribute)) ||
                          request.target ?
                         "post" : "get";
             }
@@ -931,7 +931,7 @@
             if (value == null) {
                 return "[null]";
             }
-            if ($.isArray(value)) {
+            if (Array.isArray(value)) {
                 var ret = "";
                 for (var i = 0; i < value.length; i++) {
                     ret += value == null ? "[null]" : singleValueToString(value[i]);

@@ -234,7 +234,7 @@
          * @param opts optional opts passed to Jolokia.request()
          */
         function list(path,opts) {
-            if (arguments.length == 1 && !$.isArray(path) && $.isPlainObject(path)) {
+            if (arguments.length == 1 && !Array.isArray(path) && $.isPlainObject(path)) {
                 opts = path;
                 path = null;
             }
@@ -250,7 +250,7 @@
         // taken directly
         function addPath(req,path) {
             if (path != null) {
-                if ($.isArray(path)) {
+                if (Array.isArray(path)) {
                     req.path = $.map(path,Jolokia.escape).join("/");
                 } else {
                     req.path = path;
