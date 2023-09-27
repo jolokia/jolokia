@@ -251,8 +251,8 @@
         function addPath(req,path) {
             if (path != null) {
                 if (Array.isArray(path)) {
-                    req.path = $.map(path,Jolokia.escape).join("/");
-                } else {
+                    req.path = path.map(Jolokia.escape).join("/");
+                } else {1
                     req.path = path;
                 }
             }
