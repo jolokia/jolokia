@@ -38,7 +38,7 @@
           <td>Part</td>
           <td>Description</td>
           <td>Example</td>
-        </tr>        
+        </tr>
       </thead>
       <tr>
         <td><literal>&lt;mbean name&gt;</literal></td>
@@ -47,7 +47,7 @@
       </tr>
       <tr>
         <td><literal>&lt;operation name&gt;</literal></td>
-        <td>  
+        <td>
           Name of the operation to execute. If this is an overloaded method,
           it is mandatory to provide a method signature as
           well. A signature consist the fully qualified argument class
@@ -66,7 +66,7 @@
           operation. Only certain data types can be used here as
           described in <xref linkend="serialization-request"/>.
         </td>
-        <td><literal>"true","true"</literal></td>
+        <td><literal>/true/true/</literal></td>
       </tr>
     </table>
 
@@ -77,7 +77,7 @@
       </informalexample>
     </para>
   </section>
-  
+
   <section id="post-exec">
     <title>POST exec request</title>
 
@@ -88,7 +88,7 @@
             <td>Key</td>
             <td>Description</td>
             <td>Example</td>
-          </tr>        
+          </tr>
         </thead>
         <tr>
           <td><constant>type</constant></td>
@@ -110,7 +110,7 @@
         <tr>
           <td><constant>arguments</constant></td>
           <td>
-            An array of arguments for invoking this operation. The value must be serializable as described in 
+            An array of arguments for invoking this operation. The value must be serializable as described in
             <xref linkend="serialization-request"/>.
           </td>
           <td><literal>[true,true]</literal></td>
