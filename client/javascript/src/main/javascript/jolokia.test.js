@@ -127,4 +127,13 @@ describe("jolokia", () => {
         expect(success1).toHaveBeenCalled();
         expect(success2).toHaveBeenCalled();
     });
+
+    test("assignObject", () => {
+        expect(Jolokia.assignObject({}, {a: 1, b: 2, c: 3})).toEqual({a: 1, b: 2, c: 3});
+        expect(Jolokia.assignObject({a: 1, b: 2}, {b: 3, c: 5})).toEqual({a: 1, b: 3, c: 5});
+        expect(Jolokia.assignObject({a: 1}, {a: 2, b: 3}, {b: 4, c: 6})).toEqual({a: 2, b: 4, c: 6});
+        expect(Jolokia.assignObject({a: 1, b: 2, c: 3})).toEqual({a: 1, b: 2, c: 3});
+        expect(() => Jolokia.assignObject(undefined, {})).toThrow();
+        expect(() => Jolokia.assignObject(null, {})).toThrow();
+    });
 });
