@@ -42,9 +42,9 @@
         if (typeof jquery.fn !== "undefined") {
             module.exports = factory(jquery, require("./jolokia"));
         } else {
-            var {JSDOM} = require("jsdom");
-            var {window} = new JSDOM("");
-            module.exports = factory(jquery(window), require("./jolokia"));
+            var jsdom = require("jsdom");
+            var dom = new jsdom.JSDOM("");
+            module.exports = factory(jquery(dom.window), require("./jolokia"));
         }
     } else {
         // Browser globals
@@ -69,10 +69,10 @@
          * @return the value of the attribute, possibly a complex object
          */
         function getAttribute(mbean,attribute,path,opts) {
-            if (arguments.length === 3 && $.isPlainObject(path)) {
+            if (arguments.length === 3 && isPlainObject(path)) {
                 opts = path;
                 path = null;
-            } else if (arguments.length == 2 && $.isPlainObject(attribute)) {
+            } else if (arguments.length == 2 && isPlainObject(attribute)) {
                 opts = attribute;
                 attribute = null;
                 path = null;
@@ -94,7 +94,7 @@
          * @return the previous value
          */
         function setAttribute(mbean,attribute,value,path,opts) {
-            if (arguments.length === 4 && $.isPlainObject(path)) {
+            if (arguments.length === 4 && isPlainObject(path)) {
                 opts = path;
                 path = null;
             }
@@ -117,7 +117,7 @@
         function execute(mbean,operation) {
             var req = { type: "exec", mbean: mbean, operation: operation };
             var opts, end = arguments.length;
-            if (arguments.length > 2 && $.isPlainObject(arguments[arguments.length-1])) {
+            if (arguments.length > 2 && isPlainObject(arguments[arguments.length-1])) {
                 opts = arguments[arguments.length-1];
                 end = arguments.length-1;
             }
@@ -234,7 +234,7 @@
          * @param opts optional opts passed to Jolokia.request()
          */
         function list(path,opts) {
-            if (arguments.length == 1 && !$.isArray(path) && $.isPlainObject(path)) {
+            if (arguments.length == 1 && !Array.isArray(path) && isPlainObject(path)) {
                 opts = path;
                 path = null;
             }
@@ -250,9 +250,9 @@
         // taken directly
         function addPath(req,path) {
             if (path != null) {
-                if ($.isArray(path)) {
-                    req.path = $.map(path,Jolokia.escape).join("/");
-                } else {
+                if (Array.isArray(path)) {
+                    req.path = path.map(Jolokia.escape).join("/");
+                } else {1
                     req.path = path;
                 }
             }
@@ -283,6 +283,10 @@
             } else {
                 return opts;
             }
+        }
+
+        function isPlainObject(obj) {
+            return obj && Object.prototype.toString.call(obj) === "[object Object]";
         }
 
         // Extend the Jolokia prototype with new functionality (mixin)

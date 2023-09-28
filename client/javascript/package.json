@@ -26,8 +26,9 @@
   "scripts": {
     "clean": "rm -rf dist/",
     "build": "npm run clean && mkdir dist && cp src/main/javascript/*.{js,d.ts} dist/ && rm dist/*.test.js",
+    "check": "es-check es5 ./src/main/javascript/*.js --not=**/*.test.js,**/*.ts --verbose",
     "test": "jest",
-    "prepack": "npm test && npm run build"
+    "prepack": "npm run check && npm test && npm run build"
   },
   "dependencies": {
     "jquery": "^3.7.1"
@@ -46,6 +47,7 @@
   },
   "devDependencies": {
     "cubism": "^1.6.0",
+    "es-check": "^7.1.1",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0"
   },

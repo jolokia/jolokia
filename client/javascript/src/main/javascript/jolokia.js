@@ -36,9 +36,9 @@
         if (typeof jquery.fn !== "undefined") {
             module.exports = factory(jquery);
         } else {
-            var {JSDOM} = require("jsdom");
-            var {window} = new JSDOM("");
-            module.exports = factory(jquery(window));
+            var jsdom = require("jsdom");
+            var dom = new jsdom.JSDOM("");
+            module.exports = factory(jquery(dom.window));
         }
     } else {
         // Browser globals
@@ -200,7 +200,7 @@
                 var ajaxParams = {};
 
                 // Copy over direct params for the jQuery ajax call
-                $.each(["username", "password", "timeout"], function (i, key) {
+                ["username", "password", "timeout"].forEach(function (key) {
                     if (opts[key]) {
                         ajaxParams[key] = opts[key];
                     }
@@ -252,7 +252,7 @@
                     var success_callback = constructCallbackDispatcher(opts.success);
                     var error_callback = constructCallbackDispatcher(opts.error);
                     ajaxParams.success = function (data) {
-                        var responses = $.isArray(data) ? data : [ data ];
+                        var responses = Array.isArray(data) ? data : [ data ];
                         for (var idx = 0; idx < responses.length; idx++) {
                             var resp = responses[idx];
                             if (Jolokia.isError(resp)) {
@@ -274,7 +274,7 @@
                     ajaxParams.async = false;
                     var xhr = $.ajax(ajaxParams);
                     if (httpSuccess(xhr)) {
-                        return $.parseJSON(xhr.responseText);
+                        return JSON.parse(xhr.responseText);
                     } else {
                         return null;
                     }
@@ -604,7 +604,7 @@
                             this.eventSource = new EventSource(agentOptions.url + "/notification/open/" + client.id + "/sse");
                             var dispatcher = this.dispatchMap;
                             this.eventSource.addEventListener("message", function (event) {
-                                var data = $.parseJSON(event.data);
+                                var data = JSON.parse(event.data);
                                 var callback = dispatcher[data.handle];
                                 if (callback != null) {
                                     callback(data);
@@ -770,7 +770,7 @@
                 return function () {
                 };
             }
-            var callbackArray = $.isArray(callback) ? callback : [ callback ];
+            var callbackArray = Array.isArray(callback) ? callback : [ callback ];
             return function (response, idx) {
                 callbackArray[idx % callbackArray.length](response, idx);
             }
@@ -784,10 +784,10 @@
                     method;
             if (methodGiven) {
                 if (methodGiven === "get") {
-                    if ($.isArray(request)) {
+                    if (Array.isArray(request)) {
                         throw new Error("Cannot use GET with bulk requests");
                     }
-                    if (request.type.toLowerCase() === "read" && $.isArray(request.attribute)) {
+                    if (request.type.toLowerCase() === "read" && Array.isArray(request.attribute)) {
                         throw new Error("Cannot use GET for read with multiple attributes");
                     }
                     if (request.target) {
@@ -800,9 +800,9 @@
                 method = methodGiven;
             } else {
                 // Determine method dynamically
-                method = $.isArray(request) ||
+                method = Array.isArray(request) ||
                          request.config ||
-                         (request.type.toLowerCase() === "read" && $.isArray(request.attribute)) ||
+                         (request.type.toLowerCase() === "read" && Array.isArray(request.attribute)) ||
                          request.target ?
                         "post" : "get";
             }
@@ -816,7 +816,7 @@
         // to an URL as GET query parameters
         function addProcessingParameters(url, opts) {
             var sep = url.indexOf("?") > 0 ? "&" : "?";
-            $.each(PROCESSING_PARAMS, function (i, key) {
+            PROCESSING_PARAMS.forEach(function (key) {
                 if (opts[key] != null) {
                     url += sep + key + "=" + opts[key];
                     sep = "&";
@@ -838,7 +838,7 @@
             var result = extractor(request);
             var parts = result.parts || [];
             var url = type;
-            $.each(parts, function (i, v) {
+            parts.forEach(function (v) {
                 url += "/" + Jolokia.escape(v)
             });
             if (result.path) {
@@ -876,7 +876,7 @@
             "exec": function(request) {
                 var ret = [ request.mbean, request.operation ];
                 if (request.arguments && request.arguments.length > 0) {
-                    $.each(request.arguments, function (index, value) {
+                    request.arguments.forEach(function (value) {
                         ret.push(valueToString(value));
                     });
                 }
@@ -931,7 +931,7 @@
             if (value == null) {
                 return "[null]";
             }
-            if ($.isArray(value)) {
+            if (Array.isArray(value)) {
                 var ret = "";
                 for (var i = 0; i < value.length; i++) {
                     ret += value == null ? "[null]" : singleValueToString(value[i]);

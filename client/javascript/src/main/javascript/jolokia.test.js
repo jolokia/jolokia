@@ -10,12 +10,7 @@ describe("jolokia", () => {
         $.ajax = jest.fn(() => ({
             status: 200,
             responseText: JSON.stringify({
-                request: {
-                    type: "read",
-                    mbean: "java.lang:type=Memory",
-                    attribute: "HeapMemoryUsage",
-                    path: "used",
-                },
+                request: {type: "read", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage", path: "used"},
                 status: 200,
                 value: 12345,
                 timestamp: 1694682372,
@@ -23,12 +18,7 @@ describe("jolokia", () => {
         }));
 
         const jolokia = new Jolokia("/jolokia");
-        const response = jolokia.request({
-            type: "read",
-            mbean: "java.lang:type=Memory",
-            attribute: "HeapMemoryUsage",
-            path: "used",
-        });
+        const response = jolokia.request({type: "read", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage", path: "used"});
 
         expect(response.status).toEqual(200);
         expect(response.value).toEqual(12345);
@@ -38,11 +28,7 @@ describe("jolokia", () => {
         $.ajax = jest.fn(() => ({
             status: 200,
             responseText: JSON.stringify({
-                request: {
-                    type: "exec",
-                    mbean: "java.lang:type=Memory",
-                    operation: "gc()",
-                },
+                request: {type: "exec", mbean: "java.lang:type=Memory", operation: "gc()"},
                 status: 200,
                 value: null,
                 timestamp: 1694682372,
@@ -50,13 +36,95 @@ describe("jolokia", () => {
         }));
 
         const jolokia = new Jolokia("/jolokia");
-        const response = jolokia.request({
-            type: "exec",
-            mbean: "java.lang:type=Memory",
-            operation: "gc()",
-        });
+        const response = jolokia.request({type: "exec", mbean: "java.lang:type=Memory", operation: "gc()"});
 
         expect(response.status).toEqual(200);
         expect(response.value).toBeNull();
+    });
+
+    test("bulk request (sync)", () => {
+        $.ajax = jest.fn(() => ({
+            status: 200,
+            responseText: JSON.stringify([
+                {
+                    request: {type: "read", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage", path: "used"},
+                    status: 200,
+                    value: 12345,
+                    timestamp: 1694682372,
+                },
+                {
+                    request: {type: "exec", mbean: "java.lang:type=Memory", operation: "gc()"},
+                    status: 200,
+                    value: null,
+                    timestamp: 1694682372,
+                }
+            ])
+        }));
+
+        const jolokia = new Jolokia("/jolokia");
+        const responses = jolokia.request([
+            {type: "read", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage", path: "used"},
+            {type: "exec", mbean: "java.lang:type=Memory", operation: "gc()"},
+        ]);
+
+        expect(Array.isArray(responses)).toBe(true);
+        responses.forEach(response => {
+            expect(response.status).toEqual(200);
+            if (response.request.type === "read") {
+                expect(response.value).toEqual(12345);
+            } else {
+                expect(response.value).toBeNull();
+            }
+        });
+    });
+
+    test("bulk request (async)", () => {
+        $.ajax = jest.fn(ajaxParams => {
+            ajaxParams.success([
+                {
+                    request: {type: "read", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage", path: "used"},
+                    status: 200,
+                    value: 12345,
+                    timestamp: 1694682372,
+                },
+                {
+                    request: {type: "exec", mbean: "java.lang:type=Memory", operation: "gc()"},
+                    status: 200,
+                    value: null,
+                    timestamp: 1694682372,
+                }
+            ]);
+        });
+
+        const success1 = jest.fn();
+        const success2 = jest.fn();
+
+        const jolokia = new Jolokia("/jolokia");
+        const response = jolokia.request(
+            [
+                {type: "read", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage", path: "used"},
+                {type: "exec", mbean: "java.lang:type=Memory", operation: "gc()"},
+            ],
+            {
+                success: [
+                    response => {
+                        expect(response.status).toEqual(200);
+                        expect(response.request.type).toEqual("read");
+                        expect(response.value).toEqual(12345);
+                        success1();
+                    },
+                    response => {
+                        expect(response.status).toEqual(200);
+                        expect(response.request.type).toEqual("exec");
+                        expect(response.value).toBeNull();
+                        success2();
+                    },
+                ]
+            }
+        );
+
+        expect(response).toBeNull();
+        expect(success1).toHaveBeenCalled();
+        expect(success2).toHaveBeenCalled();
     });
 });
