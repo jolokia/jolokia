@@ -2,3 +2,4 @@
 src/
 target/
 jest.config.js
+pom.xml
