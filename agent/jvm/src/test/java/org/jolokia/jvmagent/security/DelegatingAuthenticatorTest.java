@@ -15,27 +15,23 @@ package org.jolokia.jvmagent.security;/*
  * limitations under the License.
  */
 
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStreamWriter;
-import java.nio.ByteBuffer;
+import java.io.IOException;
+import java.io.Writer;
 
 import javax.net.ssl.*;
 
 import com.sun.net.httpserver.*;
-import io.undertow.Handlers;
-import io.undertow.Undertow;
-import io.undertow.server.HttpHandler;
-import io.undertow.server.HttpServerExchange;
-import io.undertow.server.handlers.PathHandler;
-import io.undertow.util.HeaderMap;
-import io.undertow.util.HeaderValues;
-import io.undertow.util.StatusCodes;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
 import org.jolokia.server.core.osgi.security.AuthorizationHeaderParser;
 import org.jolokia.test.util.EnvTestUtil;
 import org.testng.annotations.*;
-import org.xnio.channels.Channels;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.testng.Assert.*;
 
 /**
@@ -44,7 +40,7 @@ import static org.testng.Assert.*;
  */
 public class DelegatingAuthenticatorTest extends BaseAuthenticatorTest {
 
-    private Undertow undertowServer;
+    private Server jettyServer;
     private String url;
 
     @DataProvider
@@ -55,46 +51,28 @@ public class DelegatingAuthenticatorTest extends BaseAuthenticatorTest {
     @BeforeClass
     public void setup() throws Exception {
         int port = EnvTestUtil.getFreePort();
+        jettyServer = new Server(port);
+        ServletContextHandler jettyContext = new ServletContextHandler(jettyServer, "/");
+        ServletHolder holder = new ServletHolder(createServlet());
+        jettyContext.addServlet(holder, "/test/*");
 
-        PathHandler path = Handlers.path();
-        undertowServer = Undertow.builder()
-                .addHttpListener(port, "127.0.0.1")
-                .setHandler(path)
-                .build();
-
-        path.addPrefixPath("/test", createHandler());
-
-        undertowServer.start();
+        jettyServer.start();
         url = "http://127.0.0.1:" + port + "/test";
     }
 
-    private HttpHandler createHandler() {
-        return new HttpHandler() {
-            @Override
-            public void handleRequest(HttpServerExchange ex) throws Exception {
-                HeaderMap headers = ex.getRequestHeaders();
-                HeaderValues values = headers.get(io.undertow.util.Headers.AUTHORIZATION);
-                String auth = values == null ? null : values.getFirst();
+    private Servlet createServlet() {
+        return new HttpServlet() {
+            protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+                String auth = req.getHeader("Authorization");
                 if (auth == null || !auth.equals("Bearer blub")) {
-                    ex.setStatusCode(StatusCodes.UNAUTHORIZED);
-                    ex.endExchange();
+                    resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 } else {
-                    ex.getResponseHeaders().put(io.undertow.util.Headers.CONTENT_TYPE, "text/json");
-
-                    try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                         OutputStreamWriter writer = new OutputStreamWriter(outputStream, UTF_8)) {
-
-                        String requestUri = ex.getRequestURI();
-                        if (requestUri != null && requestUri.contains("invalid")) {
-                            writer.append("{\"Invalid JSON\"");
-                        } else {
-                            writer.append("{\"metadata\":{\"name\":\"roland\"},\"array\":[\"eins\",\"zwei\"]}");
-                        }
-                        writer.close();
-
-                        ByteBuffer output = ByteBuffer.wrap(outputStream.toByteArray());
-                        ex.getResponseHeaders().put(io.undertow.util.Headers.CONTENT_LENGTH, String.valueOf(output.limit()));
-                        Channels.writeBlocking(ex.getResponseChannel(), output);
+                    resp.setContentType("text/json");
+                    Writer writer = resp.getWriter();
+                    if (req.getPathInfo() != null && req.getPathInfo().contains("invalid")) {
+                        writer.append("{\"Invalid JSON\"");
+                    } else {
+                        writer.append("{\"metadata\":{\"name\":\"roland\"},\"array\":[\"eins\",\"zwei\"]}");
                     }
                 }
             }
@@ -177,7 +155,7 @@ public class DelegatingAuthenticatorTest extends BaseAuthenticatorTest {
 
     @Test
     public void invalidPath() {
-        String  data[] = new String[] { "json:never/find/me", "never",
+        String[] data = new String[] { "json:never/find/me", "never",
                                         "json:metadata/name/yet/deeper", "deeper" };
         for (int i = 0; i < data.length; i +=2) {
             DelegatingAuthenticator authenticator = new DelegatingAuthenticator("jolokia", url, data[i], false);
@@ -215,7 +193,7 @@ public class DelegatingAuthenticatorTest extends BaseAuthenticatorTest {
     }
 
     @AfterClass
-    public void tearDown() {
-        undertowServer.stop();
+    public void tearDown() throws Exception {
+        jettyServer.stop();
     }
 }
