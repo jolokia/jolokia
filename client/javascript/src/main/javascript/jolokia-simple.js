@@ -32,31 +32,23 @@
 (function (root, factory) {
     if (typeof define === "function" && define.amd) {
         // AMD. Register as an anonymous module.
-        define(["jquery", "./jolokia"], factory);
+        define(["./jolokia"], factory);
     } else if (typeof module === "object" && module.exports) {
         // Node. Does not work with strict CommonJS, but
         // only CommonJS-like environments that support module.exports,
         // like Node.
-        var jquery = require("jquery");
-        // To get along with jest-environment-jsdom
-        if (typeof jquery.fn !== "undefined") {
-            module.exports = factory(jquery, require("./jolokia"));
-        } else {
-            var jsdom = require("jsdom");
-            var dom = new jsdom.JSDOM("");
-            module.exports = factory(jquery(dom.window), require("./jolokia"));
-        }
+        module.exports = factory(require("./jolokia"));
     } else {
         // Browser globals
         if (root.Jolokia) {
-            factory(root.jQuery, root.Jolokia);
+            factory(root.Jolokia);
         } else {
             console.error("No Jolokia definition found. Please include jolokia.js before jolokia-simple.js");
         }
     }
-}(typeof self !== "undefined" ? self : this, function (jQuery, Jolokia) {
+}(typeof self !== "undefined" ? self : this, function (Jolokia) {
 
-    var builder = function($,Jolokia) {
+    var builder = function(Jolokia) {
         /**
          * Get one or more attributes
          *
@@ -275,7 +267,7 @@
         // Prepare callback to receive directly the value (instead of the full blown response)
         function prepareSuccessCallback(opts) {
             if (opts && opts.success) {
-                var parm = $.extend({},opts);
+                var parm = Jolokia.assignObject({}, opts);
                 parm.success = function(resp) {
                     opts.success(resp.value);
                 };
@@ -290,7 +282,7 @@
         }
 
         // Extend the Jolokia prototype with new functionality (mixin)
-        $.extend(Jolokia.prototype,
+        Jolokia.assignObject(Jolokia.prototype,
                 {
                     "getAttribute" : getAttribute,
                     "setAttribute" : setAttribute,
@@ -302,5 +294,5 @@
         return Jolokia;
     };
 
-    return builder(jQuery, Jolokia);
+    return builder(Jolokia);
 }));

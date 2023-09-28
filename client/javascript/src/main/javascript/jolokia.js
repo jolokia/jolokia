@@ -109,7 +109,7 @@
             if (typeof param === "string") {
                 param = {url:param};
             }
-            $.extend(agentOptions, DEFAULT_CLIENT_PARAMS, param);
+            Jolokia.assignObject(agentOptions, DEFAULT_CLIENT_PARAMS, param);
 
             // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             // Public methods
@@ -230,11 +230,11 @@
                 }
 
                 if (extractMethod(request, opts) === "post") {
-                    $.extend(ajaxParams, POST_AJAX_PARAMS);
+                    Jolokia.assignObject(ajaxParams, POST_AJAX_PARAMS);
                     ajaxParams.data = JSON.stringify(request);
                     ajaxParams.url = ensureTrailingSlash(opts.url);
                 } else {
-                    $.extend(ajaxParams, GET_AJAX_PARAMS);
+                    Jolokia.assignObject(ajaxParams, GET_AJAX_PARAMS);
                     ajaxParams.dataType = opts.jsonp ? "jsonp" : "json";
                     ajaxParams.url = opts.url + "/" + constructGetUrlPath(request);
                 }
@@ -331,7 +331,7 @@
                         throw "Either 'callback' or ('success' and 'error') callback must be provided " +
                               "when registering a Jolokia job";
                     }
-                    job = $.extend(job,{
+                    job = Jolokia.assignObject(job,{
                         config: callback.config,
                         onlyIfModified: callback.onlyIfModified
                     });
@@ -490,7 +490,7 @@
 
             // Merge a set of parameters with the defaults values
             function mergeInDefaults(params) {
-                return $.extend({}, agentOptions, params);
+                return Jolokia.assignObject({}, agentOptions, params);
             }
 
             // Add a job to the job queue
@@ -696,7 +696,7 @@
                 // Add the proper ifModifiedSince parameter if already called at least once
                 extra = job.onlyIfModified && job.lastModified ? { ifModifiedSince: job.lastModified } : {};
 
-            request.config = $.extend({}, config, request.config, extra);
+            request.config = Jolokia.assignObject({}, config, request.config, extra);
             return request;
         }
 
@@ -990,6 +990,35 @@
         Jolokia.prototype.isError = Jolokia.isError = function(resp) {
             return resp.status == null || resp.status != 200;
         };
+
+        /**
+         * Polyfill method for $.extend and Object.assign.
+         */
+        Jolokia.prototype.assignObject = Jolokia.assignObject = function() {
+            /*
+            if (typeof Object.assign === "function") {
+                return Object.assign.apply(Object, arguments);
+            }
+            */
+            var target = arguments[0]
+            var sources = Array.prototype.slice.call(arguments, 1);
+            if (target === undefined || target === null) {
+                throw new Error("Cannot assign object to undefined or null");
+            }
+
+            sources.forEach(function (source) {
+                if (source === undefined || source === null) {
+                    return;
+                }
+                Object.keys(source).forEach(function (key) {
+                    if (Object.prototype.hasOwnProperty.call(source, key)) {
+                        target[key] = source[key];
+                    }
+                });
+            })
+
+            return target;
+        }
 
         // Return back exported function/constructor
         return Jolokia;
