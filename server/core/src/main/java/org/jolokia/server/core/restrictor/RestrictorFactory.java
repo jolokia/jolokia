@@ -116,7 +116,7 @@ public final class RestrictorFactory {
      * @return the restrictor created or <code>null</code> if none could be found.
      * @throws IOException if reading of the policy stream failed
      */
-    private static PolicyRestrictor lookupPolicyRestrictor(String pLocation) throws IOException {
+    public static PolicyRestrictor lookupPolicyRestrictor(String pLocation) throws IOException {
         InputStream is;
         if (pLocation.startsWith("classpath:")) {
             String path = pLocation.substring("classpath:".length());
