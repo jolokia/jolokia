@@ -287,7 +287,7 @@
       <extension>
         <groupId>org.apache.maven.wagon</groupId>
         <artifactId>wagon-ssh-external</artifactId>
-        <version>2.7</version>
+        <version>3.5.3</version>
       </extension>
     </extensions>
   </build>
