@@ -638,6 +638,7 @@ public class AgentServletTest {
         HttpTestUtil.prepareServletContextMock(context, pContextParams);
 
 
+        expect(config.getInitParameter("jakarta.servlet.http.legacyDoHead")).andStubReturn("false");
         expect(config.getServletContext()).andStubReturn(context);
         expect(config.getServletName()).andStubReturn("jolokia");
         if (pExceptionClass != null) {

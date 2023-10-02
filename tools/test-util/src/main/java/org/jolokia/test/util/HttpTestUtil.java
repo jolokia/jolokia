@@ -1,5 +1,7 @@
 package org.jolokia.test.util;
 
+import static org.easymock.EasyMock.expect;
+
 /*
  * Copyright 2009-2011 Roland Huss
  *
@@ -86,6 +88,8 @@ public class HttpTestUtil {
     @SuppressWarnings("PMD.ReplaceVectorWithList")
     public static void prepareServletConfigMock(ServletConfig config,String ... pInitParams) {
         Map<String,String> configParams = new HashMap<String, String>();
+        EasyMock.expect(config.getInitParameter("jakarta.servlet.http.legacyDoHead")).andStubReturn("false");
+
         if (pInitParams != null) {
             for (int i = 0; i < pInitParams.length; i += 2) {
                 configParams.put(pInitParams[i],pInitParams[i+1]);
