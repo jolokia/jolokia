@@ -1,0 +1,193 @@
+////
+  Copyright 2009-2023 Roland Huss
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+
+[#list]
+=== Listing MBeans (list)
+
+The list operation collects information about accessible
+MBeans. This information includes the MBean names, their
+attributes, operations and notifications along with type
+information and description (as far as they are provided by the
+MBean author which doesn't seem to be often the case).
+
+[#get-list]
+==== GET list request
+
+The GET request format for a Jolokia list request is
+
+----
+<base-url>/list/<inner path>
+----
+
+The `<inner path>`, as described in <<paths>>
+specifies a subset of the complete response. You can
+use this to select a specific domain, MBean or
+attribute/operation. See the next section for the format of the
+complete response.      
+
+[#post-list]
+==== POST list request
+
+A list POST request has the following keys:
+
+.POST list Request
+|===
+|Key|Description|Example
+
+|`type`
+|*`list`*
+|
+
+|`path`
+|Inner path for accessing the value of a subset of the complete list
+<<paths>>).
+
+|`java.lang/type=Memory/attr`
+|===
+
+The following request fetches the information about the MBean `java.lang:type=Memory`
+
+[,json]
+----
+{
+  "type": "LIST",
+  "path": "java.lang/type=Memory"
+}
+----
+
+[#response-list]
+==== List response
+
+The `value` has the following format:
+
+[,json]
+----
+{
+  "<domain>": {
+    "<prop list>": {
+      "attr": {
+        "<attr name>": {
+          "type": "<attribute type>",
+          "desc": "<textual description of attribute>",
+          "rw": "true|false"
+        },
+        ....
+      },
+      "op": {
+        "<operation name>": {
+          "args": [
+            {
+              "type": "<argument type>",
+              "name": "<argument name>",
+              "desc": "<textual description of argument>"
+            },
+            .....
+          ],
+          "ret": "<return type>",
+          "desc": "<textual description of operation>"
+        },
+        .....
+      },
+      "not": {
+        "name": "<name>",
+        "desc": "<desc>",
+        "types": [ "<type1>", "<type2>" ]
+      }
+    },
+    ....
+  },
+  ....
+}
+----
+
+The `domain name` and the `property
+list` together uniquely identify a single MBean. The
+property list is in the so called _canonical
+order_, i.e. in the form
+`"<key1>=<val1>,<key2>=<val2>,.."`
+where the keys are ordered alphabetically. Each MBean has zero
+or more attributes and operations which can be reached in an
+MBeans JSON object with the keys `attr` and
+`op` respectively. Within these groups the
+contained information is explained above in the schema and
+consist of Java types for attributes, arguments and return
+values, descriptive information and whether an attribute is
+writable (`rw` == `true`) or
+read-only.
+
+As for reading attributes you can fetch a subset of this information using an
+path. E.g a path of `domain/prop-list` would return the value for a single
+bean only. For example, a request 
+
+----
+http://localhost:8080/jolokia/list/java.lang/type=Memory
+----
+
+results in an answer
+
+[,json]
+----
+{
+  "value": {
+    "op": {
+      "gc": {
+        "args": [],
+        "ret": "void",
+        "desc": "gc"
+      }
+    },
+    "class": "sun.management.MemoryImpl",
+    "attr": {
+      "NonHeapMemoryUsage": {
+        "type": "javax.management.openmbean.CompositeData",
+        "rw": false,
+        "desc": "NonHeapMemoryUsage"
+      },
+      "Verbose": {
+        "type": "boolean",
+        "rw": true,
+        "desc": "Verbose"
+      },
+      "HeapMemoryUsage": {
+        "type": "javax.management.openmbean.CompositeData",
+        "rw": false,
+        "desc": "HeapMemoryUsage"
+      },
+      "ObjectPendingFinalizationCount": {
+        "type": "int",
+        "rw": false,
+        "desc": "ObjectPendingFinalizationCount"
+      }
+    }
+  },
+  "status": 200,
+  "request": {
+    "type": "list",
+    "path": "java.lang/type=Memory"
+  }
+}
+----
+
+==== Restrict depth of the returned tree
+
+The optional parameter `maxDepth` can be used
+to restrict the depth of the return tree. Two value are
+possible: A `maxDepth` of `1` restricts the
+return value to a map with the JMX domains as keys, a
+`maxDepth` of `2` truncates the map returned to
+the domain names (first level) and the MBean's properties
+(second level). The final values of the maps don't have any
+meaning and are dummy values.

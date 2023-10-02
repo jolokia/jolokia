@@ -15,3 +15,4 @@ felix
 .project
 .gitshots
 test-output
+src/documentation/build/site/

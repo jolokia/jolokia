@@ -16,4 +16,6 @@
 
 name: manual
 version: ~
-title: Jolokia Reference Documentation
+title: Jolokia Manual
+nav:
+  - modules/ROOT/nav.adoc

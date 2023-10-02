@@ -1,0 +1,126 @@
+////
+  Copyright 2009-2023 Roland Huss
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+[#proxy]
+= Proxy Mode
+
+Using Jolokia in proxy mode enables for agentless operation
+on the target server. A dedicated agent deployment proxies by
+accepting Jolokia requests as input, translating them to JSR-160
+requests for the target. This setup is described in
+xref:architecture.adoc[]. As noted there, the real target is
+given within the original request, which must be sent as a POST
+request.
+
+Agents of all types support the proxy mode. However, since one
+has usually the free choice of platform for a dedicated Jolokia
+proxy, an environment optimized for HTTP communication should be
+used. These are either servlet container or Java EE server hosting
+the WAR agent or an OSGi runtime with an OSGi HttpService (which
+in turn is typically based on an embedded servlet container like
+Tomcat or Jetty). The two other agents, the Mule and JVM agents
+are not that well suited for this job and do not contain the proxy.
+
+Please note that the proxy mode is _not_ switched on by default
+since version 1.5.0. You have to explicitly switch it on for the WAR or OSGI agent:
+
+* Repackaging the `jolokia.war` and adapt `web.xml` to
+include the init option `dispatcherClasses` with a value `org.jolokia.jsr160.Jsr160RequestDispatcher`.
+* Set the system property `org.jolokia.jsr160ProxyEnabled` to `true`
+* Set the environment variable `JOLOKIA_JSR160_PROXY_ENABLED` to `true`
+
+The first option requires you to repackage the `jolokia.war` and add the following section to
+the `web.xml` descriptor:
+
+[,xml]
+----
+<init-param>
+  <description>
+    Classnames (comma separated) of RequestDispatcher used in addition
+    to the LocalRequestDispatcher
+  </description>
+  <param-name>dispatcherClasses</param-name>
+  <param-value>org.jolokia.jsr160.Jsr160RequestDispatcher</param-value>
+</init-param>
+----
+
+The two other options by using a Java system property or an environment variable do not require a repackaging, so
+these are the recommended way.
+
+Additionally you can configured a white list with patterns for all allowed JMX service URL in a Jolokia Request.
+This white list is a plain text file which contains <ulink
+https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html[Patterns] line by line. Lines starting with `#` are ignored.
+Pattern matching is performed case insensitive. This file can be configured in various ways:
+
+* Repackaging the `jolokia.war` and adapt `web.xml` to
+include the init option `jsr160ProxyAllowedTargets` with a file path to the white list. This should
+be an absolute path or a relative path if you know where your Java EE server sets the current directory.
+* Set the system property `org.jolokia.jsr160ProxyAllowedTargets` to the path of the whitelist
+* Set the environment variable `JOLOKIA_JSR160_PROXY_ALLOWED_TARGETS` to the path of the
+whitelist.
+
+By default the following patterns are disallowed, but you can re-enable them when providing them in the whitelist:
+
+----
+# Disallow all JNDI lookups via LDAP
+service:jmx:rmi:///jndi/ldap:.*
+----
+
+In any case it is highly recommended to use a dedicated Java EE servlet server for the JSR-160 proxy which
+is secured by configuring the server authentication properly for this servlet. An unprotected Jolokia proxy can be
+tricked to execute local code by a malicious attacker. As said previously, the Jolokia proxy should be avoided if
+possible in favor of direct access over the Jolokia protocol.
+
+All client libraries (jmx4perl, Java and Javascript) support the
+usage of proxy mode in its API.
+
+[#proxy-limitations
+== Limitations of proxy mode
+
+The proxy mode has some limitations compared to the direct
+agent mode, so it is recommended to use a
+direct agent deployment if possible. The limitations are:
+
+* There is no automatic merging of JMX MBeanServers as in the case
+of the direct mode. Most application servers uses their own
+MBeanServer in addition to the
+`PlatformMBeanServer` (which is always
+present). Each MBean is registered only in one MBeanServer. The
+choice of which `MBeanServer` to use has to be
+given up front, usually as a part of the JMX Service URL. But even
+then (as it is the case for JBoss 5.1) you might run into problems
+when selecting the proper MBeanServer.
+* Proxying adds an additional remote layer which causes
+additional problems. I.e. the complex operations like
+`list` might fail in the proxy mode
+because of serialization issues. E.g. for JBoss it happens
+that certain MBeanInfo objects requested for the list
+operation are not serializable. This is a bug of JBoss, but
+I expect similar limitations for other application servers
+as well.
+* Certain workarounds (like the JBoss "_can not find
+MXBeans before MBeanInfo has been fetched_" bug)
+works only in agent mode.
+* It is astonishingly hard to set up an application server for
+JSR-160 export. And there are even cases (combinations of
+JDK and AppServer Version) which don't work at all properly
+(e.g. JDK 1.5 and JBoss 5).
+* For MBeans that have arguments of type `Map` or `List`
+it is required that `org.json.simple.JSONObject` and `org.json.simple.JSONArray`
+(contained in `json-simple.jar`) are available on the
+classpath of the target JVM that receives the JSR-160 requests.
+* The proxy mode can theoretically be exploited for local code execution if not secured properly.
+So its is highly recommended to not make the agent available without any authentication to any
+non trusted environment. Also the new whitelist feature prevents redirecting to arbitrary JMX Service URLs.

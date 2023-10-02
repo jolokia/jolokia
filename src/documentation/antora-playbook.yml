@@ -17,17 +17,19 @@
 site:
   title: Jolokia
   url: https://jolokia.org
-  start_page: manual::index.adoc
+  start_page: manual:ROOT:index.adoc
 
 content:
   sources:
-    - url: .
-      start_path: manual
-      branches: "2.0"
+    - url: ../..
+      start_path: src/documentation/manual
+      branches: HEAD
 
 asciidoc:
   attributes:
     page-pagination: ''
+    xrefstyle: 'full'
+    sectnums: false
 
 ui:
   bundle:

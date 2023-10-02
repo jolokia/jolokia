@@ -1,0 +1,149 @@
+////
+  Copyright 2009-2023 Roland Huss
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+[#agents-mule]
+== Mule Agent
+
+Jolokia's https://www.mulesoft.org[Mule] agent
+uses Mule's own agent interface for plugging into the ESB running
+in standalone mode.
+
+The agent needs to be included into the Mule configuration as
+shown in the following example, which is the way how to configure
+the agent for Mule 3:
+
+[,xml]
+----
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:management="http://www.mulesoft.org/schema/mule/management"
+      xmlns:spring="http://www.springframework.org/schema/beans"
+      xsi:schemaLocation="
+          http://www.mulesoft.org/schema/mule/core
+          https://www.mulesoft.org/schema/mule/core/3.1/mule.xsd
+          http://www.springframework.org/schema/beans
+          https://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+          http://www.mulesoft.org/schema/mule/management
+          https://www.mulesoft.org/schema/mule/management/3.1/mule-management.xsd">
+
+  <!-- .... -->
+  <custom-agent name="jolokia-agent" class="org.jolokia.mule.JolokiaMuleAgent">
+    <spring:property name="port" value="8899"/>
+  </custom-agent>
+  <management:jmx-server/>
+</mule>
+----
+
+For Mule 2, the configuration is slightly different since the
+`<custom-agent>` is contained in the
+`management` namespace for Mule 2
+(`<management:custom-agent>`)
+
+This agent knows about the following configuration parameters
+
+[#agent-mule-config]
+.Mule agent configuration options
+|===
+|Parameter|Description|Example
+
+|`host`
+|Hostaddress to which the HTTP server should bind to.
+|`InetAddress.getLocalHost()`
+|`port`
+|Port the HTTP server should listen to.
+|`8888`
+
+|`user`
+|Use to authenticate against. This switches on security and
+requires a client to provide a user and password.
+|
+
+|`password`
+|Password to check against when security is switched on.
+|
+
+|`debug`
+|Debugging state after startup. Can be changed via the <xref
+linkend="mbean-config">configuration MBean</xref> during
+runtime.
+|`false`
+
+|`historyMaxEntries`
+|Entries to keep in the history. Can be changed at
+runtime via the <xref linkend="mbean-config">configuration MBean</xref>.
+|`10`
+
+|`debugMaxEntries`
+|Maximum number of entries to keep in the local
+debug history (if enabled). Can be changed via
+the <xref linkend="mbean-config">configuration MBean</xref> at runtime.
+|`100`
+
+|`maxDepth`
+|Maximum depth when traversing bean properties.
+If set to 0, depth checking is disabled
+|`5`
+
+|`maxCollectionSize`
+|Maximum size of collections returned when
+serializing to JSON. When set to 0,
+collections are never truncated.
+|`0`
+
+|`maxObjects`
+|Maximum number of objects which are traversed
+when serializing a single response. Use this
+as an airbag to avoid boosting your memory and
+network traffic. Nevertheless, when set to 0
+no limit is imposed.
+|`10000`
+
+|`canonicalNaming`
+|This option specifies in which order the key-value
+properties within ObjectNames as returned by
+`list` or `search` are
+returned. By default this is the so called 'canonical order'
+in which the keys are sorted alphabetically. If this option
+is set to `false`, then the natural order
+is used, i.e. the object name as it was registered. This
+option can be overridden with a query parameter of the same
+name.
+|`true`
+
+|`includeStackTrace`
+|Whether to include a stacktrace of an exception in case of
+an error. By default it it set to `true`
+in which case the stacktrace is always included. If set to
+`false`, no stacktrace is included. If
+the value is `runtime` a stacktrace is
+only included for RuntimeExceptions. This global option can
+be overridden with a query parameter.
+|`true`
+
+|`serializeException`
+|When this parameter is set to `true`,
+then an exception thrown will be serialized as JSON and
+included in the response under the key
+`error_value`. No stactrace infornmation
+will be included, though. This global option can be
+overridden by a query parameter of the same name.
+|`false`
+|===
+
+The context under which the agent is reachable is fixed to
+`/jolokia`. As an alternative to this Mule agent,
+the <<agents-jvm>> can be used for
+Mule, too. This agent also knows about SSL encryption and
+authentication.
