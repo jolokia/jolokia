@@ -21,10 +21,10 @@ import org.jolokia.client.BasicAuthenticator;
 import org.jolokia.http.AgentServlet;
 import org.jolokia.it.ItSetup;
 import org.jolokia.test.util.EnvTestUtil;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.security.*;
-import org.mortbay.jetty.servlet.Context;
-import org.mortbay.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.security.*;
+import org.eclipse.jetty.servlet.Context;
+import org.eclipse.jetty.servlet.ServletHolder;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 

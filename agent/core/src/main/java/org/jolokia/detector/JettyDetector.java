@@ -33,11 +33,7 @@ public class JettyDetector extends AbstractServerDetector {
     /** {@inheritDoc}
      * @param pMBeanServerExecutor*/
     public ServerHandle detect(MBeanServerExecutor pMBeanServerExecutor) {
-        Class serverClass = ClassUtil.classForName("org.mortbay.jetty.Server",false);
-        if (serverClass != null) {
-            return new ServerHandle("Mortbay", "jetty", getVersion(serverClass), null);
-        }
-        serverClass = ClassUtil.classForName("org.eclipse.jetty.server.Server",false);
+        Class serverClass = ClassUtil.classForName("org.eclipse.jetty.server.Server",false);
         if (serverClass != null) {
             return new ServerHandle("Eclipse", "jetty", getVersion(serverClass), null);
         }

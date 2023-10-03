@@ -40,9 +40,7 @@ public final class MuleAgentHttpServerFactory {
 	 * @return internal HTTP server
 	 */
 	public static MuleAgentHttpServer create(Agent pParent, MuleAgentConfig pConfig) {
-        if (ClassUtil.checkForClass("org.mortbay.jetty.Server")) {
-            return new MortbayMuleAgentHttpServer(pParent, pConfig);
-        } else if (ClassUtil.checkForClass("org.eclipse.jetty.server.ServerConnector")) {
+        if (ClassUtil.checkForClass("org.eclipse.jetty.server.ServerConnector")) {
             return new Jetty9MuleAgentHttpServer(pParent, pConfig);
         } else if (ClassUtil.checkForClass("org.eclipse.jetty.server.Server")) {
             return new Jetty7And8MuleAgentHttpServer(pParent, pConfig);

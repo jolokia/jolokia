@@ -22,9 +22,10 @@ import java.util.Map;
 import org.eclipse.jetty.security.*;
 import org.eclipse.jetty.security.authentication.BasicAuthenticator;
 import org.eclipse.jetty.server.*;
+import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.jetty.util.security.Constraint;
+import org.eclipse.jetty.security.Constraint;
 import org.eclipse.jetty.util.security.Credential;
 import org.jolokia.http.AgentServlet;
 import org.jolokia.util.ClassUtil;
@@ -59,7 +60,9 @@ abstract public class EclipseMuleAgentHttpServer implements MuleAgentHttpServer 
 
         // Initialize server
         server = getServer(pConfig);
-        ServletContextHandler root = getContext(server, pConfig);
+        ServletContextHandler root = getContext(pConfig);
+        ContextHandlerCollection collection = new ContextHandlerCollection(root);
+        server.setHandler(collection);
         ServletHolder servletHolder = getServletHolder(pConfig);
         root.addServlet(servletHolder,  "/*");
     }
@@ -128,7 +131,7 @@ abstract public class EclipseMuleAgentHttpServer implements MuleAgentHttpServer 
         return holder;
     }
 
-    private ServletContextHandler getContext(HandlerContainer pContainer, MuleAgentConfig pConfig) {
+    private ServletContextHandler getContext(MuleAgentConfig pConfig) {
 		ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
 		context.setContextPath("/jolokia");
 		server.setHandler(context);

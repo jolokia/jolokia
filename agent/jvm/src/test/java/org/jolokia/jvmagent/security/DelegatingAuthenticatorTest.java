@@ -26,9 +26,9 @@ import jakarta.servlet.http.*;
 import com.sun.net.httpserver.*;
 import org.jolokia.test.util.EnvTestUtil;
 import org.jolokia.util.AuthorizationHeaderParser;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.servlet.Context;
-import org.mortbay.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.Context;
+import org.eclipse.jetty.servlet.ServletHolder;
 import org.testng.annotations.*;
 
 import static org.testng.Assert.*;
