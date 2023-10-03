@@ -29,7 +29,9 @@ asciidoc:
   attributes:
     page-pagination: ''
     xrefstyle: 'full'
-    sectnums: false
+#    sectnums: true
+#    partnums: true
+#    leveloffset: '+1'
 
 ui:
   bundle:
