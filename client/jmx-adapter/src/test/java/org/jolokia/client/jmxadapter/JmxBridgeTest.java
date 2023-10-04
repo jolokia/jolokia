@@ -38,10 +38,10 @@ import javax.management.Query;
 import javax.management.QueryExp;
 import javax.management.ReflectionException;
 import javax.management.RuntimeMBeanException;
-import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
+import javax.management.openmbean.TabularDataSupport;
 import javax.management.remote.JMXConnectionNotification;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
@@ -341,10 +341,10 @@ public class JmxBridgeTest {
         final Object recordingOptions = this.adapter
             .invoke(objectName, "getRecordingOptions", new Object[]{newRecording},
                 new String[]{"long"});
-        Assert.assertTrue(recordingOptions instanceof CompositeDataSupport);
-        CompositeDataSupport recordingOptionsComposite = (CompositeDataSupport) recordingOptions;
-        if (recordingOptionsComposite.containsKey("destination")) {//The field is not present in all JVM
-            OpenType<?> descriptionType = recordingOptionsComposite.getCompositeType().getType("destination");
+        Assert.assertTrue(recordingOptions instanceof TabularDataSupport);
+        TabularDataSupport recordingOptionsTabularData = (TabularDataSupport) recordingOptions;
+        if (recordingOptionsTabularData.containsKey(new String[] { "destination" })) {//The field is not present in all JVM
+            OpenType<?> descriptionType = recordingOptionsTabularData.get(new String[] { "destination" }).getCompositeType().getType("value");
             Assert.assertEquals(descriptionType, SimpleType.STRING);
         }
     }

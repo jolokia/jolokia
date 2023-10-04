@@ -461,11 +461,8 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
         }
         for (final MBeanOperationInfo operation : mBeanInfo.getOperations()) {
             if (operationName.equals(operation.getName()) &&
-                // TODO: IDE inspection suggests there is a bug here
                 Arrays.equals(
-                    // Should be:
-                    // Arrays.stream(operation.getSignature()).map(MBeanParameterInfo::getType).toArray(),
-                    operation.getSignature(),
+                    Arrays.stream(operation.getSignature()).map(MBeanParameterInfo::getType).toArray(String[]::new),
                     signature)) {
                 return operation.getReturnType();
             }
