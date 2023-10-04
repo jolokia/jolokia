@@ -19,6 +19,7 @@ import org.testng.Assert;
 import org.testng.annotations.*;
 
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 import static org.testng.AssertJUnit.assertEquals;
@@ -78,7 +79,7 @@ public class StringToObjectConverterTest {
         obj = converter.convertFromString(Float.class.getCanonicalName(),"10.5");
         assertEquals("Float conversion",10.5f,obj);
         obj = converter.convertFromString(float.class.getCanonicalName(),"21.3");
-        assertEquals("float conversion",new Float(21.3f),obj);
+        assertEquals("float conversion", 21.3f, obj);
         obj = converter.convertFromString(Double.class.getCanonicalName(),"10.5");
         assertEquals("Double conversion",10.5d,obj);
         obj = converter.convertFromString(double.class.getCanonicalName(),"21.3");
@@ -101,6 +102,7 @@ public class StringToObjectConverterTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void jsonConversion() {
         JSONObject json = new JSONObject();
         json.put("name","roland");
@@ -119,22 +121,22 @@ public class StringToObjectConverterTest {
         try {
             converter.convertFromString(JSONObject.class.getName(),"{bla:blub{");
             fail();
-        } catch (IllegalArgumentException exp) {
-
+        } catch (IllegalArgumentException ignored) {
         }
     }
 
     @Test
     public void urlConversion(){
-     	URL url = null;
-    	try {
-    		url = new URL("http://google.com");
-    	} catch (MalformedURLException e) {}     	
-        Object object = converter.convertFromString(URL.class.getCanonicalName(),"http://google.com");
+        URL url = null;
+        try {
+            url = new URL("http://google.com");
+        } catch (MalformedURLException ignored) {
+        }
+        Object object = converter.convertFromString(URL.class.getCanonicalName(), "http://google.com");
         assertEquals("URL conversion", url, object);
     }
-    
-    
+
+
     @Test
     public void enumConversion() {
         ConfigKey key = (ConfigKey) converter.deserialize(ConfigKey.class.getName(), "MAX_DEPTH");
@@ -173,18 +175,18 @@ public class StringToObjectConverterTest {
 
     @Test
     public void arrayConversions() {
-        Object obj = converter.convertFromString(new int[0].getClass().getName(),"10,20,30");
-        int expected[] = new int[] { 10,20,30};
+        Object obj = converter.convertFromString(int[].class.getName(), "10,20,30");
+        int[] expected = new int[] { 10,20,30};
         for (int i = 0;i < expected.length;i++) {
             assertEquals(expected[i],((int[]) obj)[i]);
         }
-        obj = converter.convertFromString(new Integer[0].getClass().getName(),"10,20,30");
+        obj = converter.convertFromString(Integer[].class.getName(), "10,20,30");
         for (int i = 0;i < expected.length;i++) {
             assertEquals(expected[i],(int) ((Integer[]) obj)[i]);
         }
 
         // Escaped arrays
-        String[] strings = (String[]) converter.convertFromString(new String[0].getClass().getName(),"hallo!,hans!!,wu!!rs!t");
+        String[] strings = (String[]) converter.convertFromString(String[].class.getName(), "hallo!,hans!!,wu!!rs!t");
         assertEquals(strings.length,2);
         assertEquals("hallo,hans!",strings[0]);
         assertEquals("wu!rst",strings[1]);
@@ -192,18 +194,18 @@ public class StringToObjectConverterTest {
         try {
             obj = converter.convertFromString("[Lbla;","10,20,30");
             fail("Unknown object type");
-        } catch (IllegalArgumentException exp) {}
+        } catch (IllegalArgumentException ignored) {}
 
 
         try {
             obj = converter.convertFromString("[X","10,20,30");
             fail("Unknown object type");
-        } catch (IllegalArgumentException exp) {}
+        } catch (IllegalArgumentException ignored) {}
     }
 
     @Test
     public void checkNull() {
-        Object obj = converter.convertFromString(new int[0].getClass().getName(),"[null]");
+        Object obj = converter.convertFromString(int[].class.getName(), "[null]");
         assertNull("Null check",obj);
     }
 
@@ -214,7 +216,7 @@ public class StringToObjectConverterTest {
         try {
             obj = converter.convertFromString("java.lang.Integer","\"\"");
             fail("Empty string conversion only for string");
-        } catch (IllegalArgumentException exp) {}
+        } catch (IllegalArgumentException ignored) {}
     }
 
     @Test
@@ -222,7 +224,7 @@ public class StringToObjectConverterTest {
         try {
             Object obj = converter.convertFromString(this.getClass().getName(),"bla");
             fail("Unknown extractor");
-        } catch (IllegalArgumentException exp) {};
+        } catch (IllegalArgumentException ignored) {}
     }
 
     @Test
@@ -230,9 +232,9 @@ public class StringToObjectConverterTest {
         assertNull(converter.deserialize("java.lang.String", null));
         assertEquals(converter.deserialize("java.lang.Long", 10L), 10L);
         assertEquals(converter.deserialize("java.lang.Long", "10"), 10L);
-        Map<String,String> map = new HashMap<String, String>();
+        Map<String,String> map = new HashMap<>();
         map.put("euro","fcn");
-        assertTrue(converter.deserialize("java.util.Map", map) == map);
+        assertSame(converter.deserialize("java.util.Map", map), map);
     }
 
     @Test(expectedExceptions = { IllegalArgumentException.class })
@@ -241,7 +243,7 @@ public class StringToObjectConverterTest {
     }
     @Test
     public void prepareValueListConversion1() {
-        List<Boolean> list = new ArrayList<Boolean>();
+        List<Boolean> list = new ArrayList<>();
         list.add(true);
         list.add(false);
         boolean[] res = (boolean[]) converter.deserialize("[Z", list);
@@ -252,7 +254,7 @@ public class StringToObjectConverterTest {
 
     @Test
     public void prepareValueListConversion2() {
-        List<Boolean> list = new ArrayList<Boolean>();
+        List<Boolean> list = new ArrayList<>();
         list.add(true);
         list.add(false);
         list.add(null);
@@ -265,86 +267,108 @@ public class StringToObjectConverterTest {
 
     @Test(expectedExceptions = { IllegalArgumentException.class })
     public void prepareValueWithException() {
-        List<Integer> list = new ArrayList<Integer>();
+        List<Integer> list = new ArrayList<>();
         list.add(10);
         list.add(null);
         converter.deserialize("[I", list);
     }
-    
+
     public static class Example {
-    	private String value;
-    	private List<String> list;
-    	
-    	public Example(String value) { this.value = value; }
-    	public Example(List<String> list) { this.list = list; }
-    	
-    	public String getValue() { return value; }
-    	public List<String> getList() { return list; }
+        private String value;
+        private List<String> list;
+
+        public Example(String value) {
+            this.value = value;
+        }
+
+        public Example(List<String> list) {
+            this.list = list;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public List<String> getList() {
+            return list;
+        }
     }
-    
+
     public static class PrivateExample {
-    	private String value;
-    	private PrivateExample(String value) { this.value = value; }
-    	public String getValue() { return value; }
+        private final String value;
+
+        private PrivateExample(String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
     }
-    
+
     public static class MultipleConstructorExample {
-    	private String value;
-    	private List<String> list;
-    	
-    	public MultipleConstructorExample(String value, List<String> list) { 
-    		this.value = value;
-    		this.list = list;
-    	}
-    	
-    	public String getValue() { return value; }
-    	public List<String> getList() { return list; }
+        private final String value;
+        private final List<String> list;
+
+        public MultipleConstructorExample(String value, List<String> list) {
+            this.value = value;
+            this.list = list;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public List<String> getList() {
+            return list;
+        }
     }
-    
+
     @Test
     public void prepareValueWithConstructor() {
-    	Object o = converter.deserialize(this.getClass().getCanonicalName() + "$Example", "test");
-    	assertTrue(o instanceof Example);
-    	assertEquals("test", ((Example)o).getValue());
+        Object o = converter.deserialize(this.getClass().getCanonicalName() + "$Example", "test");
+        assertTrue(o instanceof Example);
+        assertEquals("test", ((Example) o).getValue());
     }
-    
+
     @Test
     public void prepareValueWithConstructorList() {
-    	Object o = converter.deserialize(this.getClass().getCanonicalName() + "$Example", Arrays.asList("test"));
-    	assertTrue(o instanceof Example);
-    	assertNull(((Example)o).getList());
-    	assertEquals("[test]", ((Example)o).getValue());
-    }
-    
-    @Test(expectedExceptions = IllegalArgumentException.class, 
-    	  expectedExceptionsMessageRegExp = ".*Cannot convert.*")
-    public void prepareValueWithPrivateExample() {
-    	converter.deserialize(this.getClass().getCanonicalName() + "$PrivateExample", "test");
+        Object o = converter.deserialize(this.getClass().getCanonicalName() + "$Example", List.of("test"));
+        assertTrue(o instanceof Example);
+        assertNull(((Example) o).getList());
+        assertEquals("[test]", ((Example) o).getValue());
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,
-    	  expectedExceptionsMessageRegExp = ".*Cannot convert.*")
-    public void prepareValueWithMultipleConstructors() {
-    	converter.deserialize(this.getClass().getCanonicalName() + "$MultipleConstructorExample", "test");
+        expectedExceptionsMessageRegExp = ".*Cannot convert.*")
+    public void prepareValueWithPrivateExample() {
+        converter.deserialize(this.getClass().getCanonicalName() + "$PrivateExample", "test");
     }
-    
+
+    @Test(expectedExceptions = IllegalArgumentException.class,
+        expectedExceptionsMessageRegExp = ".*Cannot convert.*")
+    public void prepareValueWithMultipleConstructors() {
+        converter.deserialize(this.getClass().getCanonicalName() + "$MultipleConstructorExample", "test");
+    }
+
     @Test
     public void dateConversionNotByConstructor() throws ParseException {
-    	final String dateStr = "2015-11-20T00:00:00+00:00";
-    	
-    	try {
-    		new Date(dateStr);
-    		fail("Should have throw IllegalArgumentException");
-    	} catch (IllegalArgumentException ignore) {}
-    	
-    	// new Date(dateStr) will throw IllegalArgumentException but our convert does not. 
-    	// so it does not use Constructor to convert date
-    	Object obj = converter.convertFromString(Date.class.getCanonicalName(), dateStr);
-    	assertNotNull(obj);
-    	assertTrue(obj instanceof Date);
+        final String dateStr = "2015-11-20T00:00:00+00:00";
+
+        try {
+            new Date(dateStr);
+            fail("Should have throw IllegalArgumentException");
+        } catch (IllegalArgumentException ignore) {
+        }
+
+        // new Date(dateStr) will throw IllegalArgumentException but our convert does not.
+        // so it does not use Constructor to convert date
+        Object obj = converter.convertFromString(Date.class.getCanonicalName(), dateStr);
+        assertNotNull(obj);
+        assertTrue(obj instanceof Date);
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
-    	Date expectedDate = sdf.parse(dateStr.replaceFirst("\\+(0\\d)\\:(\\d{2})$", "+$1$2"));
-    	assertEquals(expectedDate, obj);
+        Date expectedDate = sdf.parse(dateStr.replaceFirst("\\+(0\\d):(\\d{2})$", "+$1$2"));
+        assertEquals(expectedDate, obj);
     }
 }

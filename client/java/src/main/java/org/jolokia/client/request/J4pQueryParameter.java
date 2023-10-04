@@ -83,7 +83,7 @@ public enum J4pQueryParameter {
     // =======================================================================
 
     // Query parameter
-    private String param;
+    private final String param;
 
     J4pQueryParameter(String pParam) {
         param = pParam;

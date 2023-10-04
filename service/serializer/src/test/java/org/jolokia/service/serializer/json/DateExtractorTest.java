@@ -66,7 +66,7 @@ public class DateExtractorTest {
     @Test
     public void directExtract() throws AttributeNotFoundException {
         Date date = new Date();
-        Stack stack = new Stack();
+        Stack<String> stack = new Stack<>();
         Object result = extractor.extractObject(null,date,stack,false);
         assertEquals(result,date);
         stack.add("time");
@@ -77,7 +77,7 @@ public class DateExtractorTest {
     @Test
     public void simpleJsonExtract() throws AttributeNotFoundException {
         Date date = new Date();
-        Stack stack = new Stack();
+        Stack<String> stack = new Stack<>();
         Object result = extractor.extractObject(null,date,stack,true);
         assertEquals(result, DateUtil.toISO8601(date));
         stack.add("time");
@@ -89,7 +89,7 @@ public class DateExtractorTest {
     @Test(enabled = false, expectedExceptions = AttributeNotFoundException.class)
     public void simpleJsonExtractWithWrongPath() throws AttributeNotFoundException {
         Date date = new Date();
-        Stack stack = new Stack();
+        Stack<String> stack = new Stack<>();
         stack.add("blablub");
 
         extractor.extractObject(converter, date, stack, true);

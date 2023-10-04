@@ -83,22 +83,17 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
         start();
 
         final CyclicBarrier barrier = new CyclicBarrier(10);
-        final Queue errors = new ConcurrentLinkedQueue();
-        Runnable run = new Runnable() {
-            public void run() {
-                try {
-                    j4pClient.execute(req);
-                } catch (Exception e) {
-                    errors.add(1);
-                    System.err.println(e);
-                }
-                try {
-                    barrier.await();
-                } catch (InterruptedException ex) {
-                    return;
-                } catch (BrokenBarrierException ex) {
-                    return;
-                }
+        final Queue<Integer> errors = new ConcurrentLinkedQueue<>();
+        Runnable run = () -> {
+            try {
+                j4pClient.execute(req);
+            } catch (Exception e) {
+                errors.add(1);
+                e.printStackTrace();
+            }
+            try {
+                barrier.await();
+            } catch (InterruptedException | BrokenBarrierException ignored) {
             }
         };
 
@@ -107,7 +102,7 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
         }
         if (barrier.await() == 0) {
             //System.err.println("Finished");
-            assertEquals(0, errors.size(),"Concurrent calls should work");
+            assertEquals(0, errors.size(), "Concurrent calls should work");
         }
     }
 
@@ -133,12 +128,12 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
             J4pReadResponse resp = j4pClient.execute(req);
             assertFalse(req.hasSingleAttribute());
             assertEquals(2,req.getAttributes().size());
-            Map respVal = resp.getValue();
+            Map<?, ?> respVal = resp.getValue();
             assertTrue(respVal.containsKey("LongSeconds"));
             assertTrue(respVal.containsKey("SmallMinutes"));
 
             Collection<String> attrs = resp.getAttributes(new ObjectName(itSetup.getAttributeMBean()));
-            Set<String> attrSet = new HashSet<String>(attrs);
+            Set<String> attrSet = new HashSet<>(attrs);
             assertTrue(attrSet.contains("LongSeconds"));
             assertTrue(attrSet.contains("SmallMinutes"));
 
@@ -149,7 +144,7 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
                 assertTrue(exp.getMessage().contains(itSetup.getAttributeMBean()));
             }
 
-            Set<String> allAttrs = new HashSet<String>(resp.getAttributes());
+            Set<String> allAttrs = new HashSet<>(resp.getAttributes());
             assertEquals(2,allAttrs.size());
             assertTrue(allAttrs.contains("LongSeconds"));
             assertTrue(allAttrs.contains("SmallMinutes"));
@@ -197,13 +192,13 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
             assertFalse(req.hasSingleAttribute());
             assertTrue(req.hasAllAttributes());
             assertEquals(0,req.getAttributes().size());
-            Map respVal = resp.getValue();
+            Map<?, ?> respVal = resp.getValue();
             assertTrue(respVal.containsKey("LongSeconds"));
             assertTrue(respVal.containsKey("SmallMinutes"));
             assertTrue(respVal.size() > 20);
 
             Collection<String> attrs = resp.getAttributes(new ObjectName(itSetup.getAttributeMBean()));
-            Set<String> attrSet = new HashSet<String>(attrs);
+            Set<String> attrSet = new HashSet<>(attrs);
             assertTrue(attrSet.contains("LongSeconds"));
             assertTrue(attrSet.contains("SmallMinutes"));
 
@@ -214,7 +209,7 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
                 assertTrue(exp.getMessage().contains(itSetup.getAttributeMBean()));
             }
 
-            Set<String> allAttrs = new HashSet<String>(resp.getAttributes());
+            Set<String> allAttrs = new HashSet<>(resp.getAttributes());
             assertTrue(allAttrs.size() > 20);
             assertTrue(allAttrs.contains("Name"));
             assertTrue(allAttrs.contains("Bytes"));
@@ -246,13 +241,13 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
         for (J4pReadRequest req : readRequests("*:type=attribute","LongSeconds")) {
             J4pReadResponse resp = j4pClient.execute(req);
             assertEquals(1,resp.getObjectNames().size());
-            Map respVal = resp.getValue();
+            Map<?, ?> respVal = resp.getValue();
             assertTrue(respVal.containsKey(itSetup.getAttributeMBean()));
-            Map attrs = (Map) respVal.get(itSetup.getAttributeMBean());
+            Map<?, ?> attrs = (Map<?, ?>) respVal.get(itSetup.getAttributeMBean());
             assertEquals(1,attrs.size());
             assertTrue(attrs.containsKey("LongSeconds"));
 
-            Set<String> attrSet = new HashSet<String>(resp.getAttributes(new ObjectName(itSetup.getAttributeMBean())));
+            Set<String> attrSet = new HashSet<>(resp.getAttributes(new ObjectName(itSetup.getAttributeMBean())));
             assertEquals(1,attrSet.size());
             assertTrue(attrSet.contains("LongSeconds"));
 
@@ -285,8 +280,8 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
             assertNull(req.getPath());
             J4pReadResponse resp = j4pClient.execute(req);
             assertEquals(1,resp.getObjectNames().size());
-            Map respVal = resp.getValue();
-            Map attrs = (Map) respVal.get(itSetup.getAttributeMBean());
+            Map<?, ?> respVal = resp.getValue();
+            Map<?, ?> attrs = (Map<?, ?>) respVal.get(itSetup.getAttributeMBean());
             assertEquals(2,attrs.size());
             assertTrue(attrs.containsKey("LongSeconds"));
             assertTrue(attrs.containsKey("List"));
@@ -311,30 +306,31 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
             assertEquals(value.get("number"),1968L);
             assertEquals(value.get("string"),"late");
 
-            List set = (List) value.get("set");
+            List<?> set = (List<?>) value.get("set");
             assertEquals(set.size(),2);
             assertTrue(set.contains(12L));
             assertTrue(set.contains(14L));
 
-            Map map = (Map) value.get("map");
+            Map<?, ?> map = (Map<?, ?>) value.get("map");
             assertEquals(map.size(),2);
             assertEquals(map.get("kill"), true);
             assertEquals(map.get("bill"), false);
 
-            List array = (List) value.get("stringArray");
+            List<?> array = (List<?>) value.get("stringArray");
             assertEquals(array.size(),2);
             assertTrue(array.contains("toy"));
             assertTrue(array.contains("story"));
 
+            //noinspection unchecked
             List<Boolean> list = (List<Boolean>) value.get("list");
             assertEquals(list.size(),3);
             assertTrue(list.get(0));
             assertFalse(list.get(1));
             assertTrue(list.get(2));
 
-            Map complex = (Map) value.get("complex");
-            List innerList = (List) complex.get("hidden");
-            Map innerInnerMap = (Map) innerList.get(0);
+            Map<?, ?> complex = (Map<?, ?>) value.get("complex");
+            List<?> innerList = (List<?>) complex.get("hidden");
+            Map<?, ?> innerInnerMap = (Map<?, ?>) innerList.get(0);
             assertEquals(innerInnerMap.get("deep"), "inside");
         }
     }
@@ -342,7 +338,7 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
     @Test
     public void processingOptionsTest() throws J4pException, MalformedObjectNameException {
         for (J4pReadRequest request : readRequests("jolokia.it:type=mxbean","ComplexTestData")) {
-            Map<J4pQueryParameter,String> params = new HashMap<J4pQueryParameter, String>();
+            Map<J4pQueryParameter,String> params = new HashMap<>();
             params.put(J4pQueryParameter.MAX_DEPTH,"1");
             params.put(J4pQueryParameter.IGNORE_ERRORS,"true");
             for (String method : new String[] { "GET", "POST" }) {
@@ -358,20 +354,21 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
         }
     }
 
+    @SafeVarargs
     private void checkNames(String pMethod, List<String> ... pNames) throws MalformedObjectNameException, J4pException {
-        for (int i = 0;i<pNames.length;i++) {
-            for (String name : pNames[i]) {
+        for (List<String> pName : pNames) {
+            for (String name : pName) {
                 System.out.println(name);
-                ObjectName oName =  new ObjectName(name);
-                J4pReadRequest req = new J4pReadRequest(oName,"Ok");
+                ObjectName oName = new ObjectName(name);
+                J4pReadRequest req = new J4pReadRequest(oName, "Ok");
                 req.setPreferredHttpMethod(pMethod);
                 J4pReadResponse resp = j4pClient.execute(req);
-                Collection names = resp.getObjectNames();
-                assertEquals(1,names.size());
-                assertEquals(oName,names.iterator().next());
-                assertEquals("OK",resp.getValue());
+                Collection<ObjectName> names = resp.getObjectNames();
+                assertEquals(1, names.size());
+                assertEquals(oName, names.iterator().next());
+                assertEquals("OK", resp.getValue());
                 Collection<String> attrs = resp.getAttributes();
-                assertEquals(1,attrs.size());
+                assertEquals(1, attrs.size());
 
                 assertNotNull(resp.getValue("Ok"));
                 try {

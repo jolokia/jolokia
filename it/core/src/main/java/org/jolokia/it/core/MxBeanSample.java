@@ -27,10 +27,11 @@ public class MxBeanSample implements MxBeanSampleMXBean {
     int[] numbers = new int[] { 47, 11} ;
     private ComplexTestData complex;
     private Map<String, Long> map;
+    @SuppressWarnings("FieldCanBeLocal")
     private Map<ComplexMapKey,String> mapWithComplexKey;
     private PojoBean bean;
     public MxBeanSample() {
-        map = new HashMap<String, Long>();
+        map = new HashMap<>();
         map.put("magic",42L);
         complex = new ComplexTestData();
         bean = new PojoBean("fcn","42");
@@ -61,7 +62,7 @@ public class MxBeanSample implements MxBeanSampleMXBean {
     }
 
     public Map<ComplexMapKey,String> getMapWithComplexKey() {
-        Map<ComplexMapKey,String> map = new TreeMap<ComplexMapKey,String>();
+        Map<ComplexMapKey,String> map = new TreeMap<>();
         map.put(new ComplexMapKey("foo", 1), "foo1");
         map.put(new ComplexMapKey("bar", 2), "foo2");
         return map;

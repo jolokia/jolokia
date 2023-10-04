@@ -28,19 +28,19 @@ import org.json.simple.JSONObject;
 public class J4pRemoteException extends J4pException {
 
     // Status code of the error
-    private int status;
+    private final int status;
 
     // Stacktrace of a remote exception (optional)
-    private String remoteStacktrace;
+    private final String remoteStacktrace;
 
     // Request leading to this error
-    private J4pRequest request;
+    private final J4pRequest request;
 
     // Java class of remote error
-    private String errorType;
-    
+    private final String errorType;
+
     // JSONObject containing value of the remote error
-    private JSONObject errorValue;
+    private final JSONObject errorValue;
 
     // String containing the entire response
     private JSONObject response;
@@ -76,11 +76,11 @@ public class J4pRemoteException extends J4pException {
 
     private static String generateErrorMessage(J4pRequest pJ4pRequest, JSONObject pJsonRespObject) {
 	if( pJsonRespObject.get("error") != null ) {
-		return "Error: " + (String) pJsonRespObject.get("error");
+		return "Error: " + pJsonRespObject.get("error");
 	}
 	Object o = pJsonRespObject.get("status");
 	if( o != null && !(o instanceof Long)) {
-		return "Invalid status of type " + o.getClass().getName() + "('" + o.toString() + "') received";
+		return "Invalid status of type " + o.getClass().getName() + "('" + o + "') received";
 	}
 	return "Invalid response received";
     }
@@ -125,7 +125,7 @@ public class J4pRemoteException extends J4pException {
 
     /**
      * Get value of the remote error.
-     * 
+     *
      * @return value of the remote error as JSON
      */
     public JSONObject getErrorValue() {

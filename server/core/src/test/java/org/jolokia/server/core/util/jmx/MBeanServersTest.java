@@ -1,13 +1,22 @@
 package org.jolokia.server.core.util.jmx;
 
-import java.lang.instrument.Instrumentation;
 import java.lang.management.ManagementFactory;
-import java.util.*;
+import java.util.Collections;
+import java.util.Set;
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
+import javax.management.ListenerNotFoundException;
+import javax.management.MBeanRegistrationException;
+import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
+import javax.management.MBeanServerDelegate;
+import javax.management.MBeanServerFactory;
+import javax.management.MalformedObjectNameException;
+import javax.management.NotCompliantMBeanException;
+import javax.management.Notification;
+import javax.management.NotificationListener;
+import javax.management.ObjectName;
 
-import javax.management.*;
-
-import org.jolokia.server.core.detector.ServerDetector;
-import org.jolokia.server.core.service.api.ServerHandle;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -31,7 +40,7 @@ public class MBeanServersTest implements NotificationListener {
 
     @Test
     public void simple() throws ListenerNotFoundException, InstanceNotFoundException {
-        MBeanServers servers = new MBeanServers(Collections.<MBeanServerConnection>singleton(ownServer), this);
+        MBeanServers servers = new MBeanServers(Collections.singleton(ownServer), this);
         checkForServers(servers.getMBeanServers(), ManagementFactory.getPlatformMBeanServer(), ownServer);
         Assert.assertFalse(notificationCalled);
 
@@ -39,8 +48,7 @@ public class MBeanServersTest implements NotificationListener {
         try {
             ManagementFactory.getPlatformMBeanServer().removeNotificationListener(MBeanServerDelegate.DELEGATE_NAME,servers);
             Assert.fail("Exception should be thrown");
-        } catch (ListenerNotFoundException exp) {
-
+        } catch (ListenerNotFoundException ignored) {
         }
     }
 
@@ -48,7 +56,7 @@ public class MBeanServersTest implements NotificationListener {
     @Test
     public void withJolokiaMBeanServerFromStart() throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanRegistrationException, InstanceNotFoundException {
         registerJolokiaMBeanServer();
-        MBeanServers servers = new MBeanServers(Collections.<MBeanServerConnection>singleton(ownServer), this);
+        MBeanServers servers = new MBeanServers(Collections.singleton(ownServer), this);
         checkForServers(servers.getMBeanServers(),ManagementFactory.getPlatformMBeanServer(), ownServer,lookup.getJolokiaMBeanServer());
         Assert.assertFalse(notificationCalled);
         Assert.assertEquals(lookup.getJolokiaMBeanServer(), servers.getJolokiaMBeanServer());
@@ -59,7 +67,7 @@ public class MBeanServersTest implements NotificationListener {
 
     @Test
     public void withJolokiaMBeanServerFromKickingInLater() throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanRegistrationException, InstanceNotFoundException {
-        MBeanServers servers = new MBeanServers(Collections.<MBeanServerConnection>singleton(ownServer), this);
+        MBeanServers servers = new MBeanServers(Collections.singleton(ownServer), this);
         registerJolokiaMBeanServer();
 
         MBeanServer jolokiaMBeanServer = lookup.getJolokiaMBeanServer();
@@ -76,7 +84,7 @@ public class MBeanServersTest implements NotificationListener {
 
     @Test
     public void dump() {
-        MBeanServers servers = new MBeanServers(Collections.<MBeanServerConnection>singleton(ownServer), this);
+        MBeanServers servers = new MBeanServers(Collections.singleton(ownServer), this);
         String dump = servers.dump();
         Assert.assertTrue(dump.contains("java.lang"));
         Assert.assertTrue(dump.contains("type=Memory"));
@@ -117,11 +125,11 @@ public class MBeanServersTest implements NotificationListener {
         }
     }
 
-    public static interface TestLookupMBean {
+    public interface TestLookupMBean {
         MBeanServer getJolokiaMBeanServer();
     }
 
     public static class Dummy implements DummyMBean {}
-    public static interface DummyMBean {}
+    public interface DummyMBean {}
 
 }

@@ -30,13 +30,13 @@ import org.json.simple.JSONObject;
 public abstract class J4pResponse<T extends J4pRequest> {
 
     // JSON representation of the returned response
-    private JSONObject jsonResponse;
+    private final JSONObject jsonResponse;
 
     // request which lead to this response
-    private T request;
+    private final T request;
 
     // timestamp of this response
-    private Date requestDate;
+    private final Date requestDate;
 
     protected J4pResponse(T pRequest, JSONObject pJsonResponse) {
         request = pRequest;
@@ -77,6 +77,7 @@ public abstract class J4pResponse<T extends J4pRequest> {
      * @return json representation of answer
      */
     public <V> V getValue() {
+        //noinspection unchecked
         return (V) jsonResponse.get("value");
     }
 

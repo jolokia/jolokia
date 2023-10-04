@@ -36,7 +36,7 @@ public class SpringReadHandler extends SpringCommandHandler<JolokiaReadRequest> 
         ApplicationContext ctx = getApplicationContext();
         try {
             Object bean = ctx.getBean(beanName);
-            Class clazz = bean.getClass();
+            Class<?> clazz = bean.getClass();
             String attribute = pJmxReq.getAttributeName();
             if (attribute == null) {
                 throw new UnsupportedOperationException("Multi attribute read not implemented yet");

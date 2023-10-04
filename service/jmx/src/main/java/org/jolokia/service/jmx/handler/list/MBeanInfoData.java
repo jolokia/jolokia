@@ -83,22 +83,23 @@ import org.json.simple.JSONObject;
  * @author roland
  * @since 13.09.11
  */
+@SuppressWarnings("rawtypes")
 public class MBeanInfoData {
 
     // max depth for map to return
-    private int maxDepth;
+    private final int maxDepth;
 
     // stack for an inner path
-    private Stack<String> pathStack;
+    private final Stack<String> pathStack;
 
     // Map holding information
-    private Map infoMap;
+    private final Map infoMap = new JSONObject();
 
     // Initialise updaters
-    private static final Map<String,DataUpdater> UPDATERS = new HashMap<String, DataUpdater>();
+    private static final Map<String,DataUpdater> UPDATERS = new HashMap<>();
 
     // How to order keys in Object Names
-    private boolean useCanonicalName;
+    private final boolean useCanonicalName;
 
     static {
         for (DataUpdater updater : new DataUpdater[] {
@@ -113,7 +114,7 @@ public class MBeanInfoData {
     }
 
     // Provider to prepend (if not null)
-    private String pProvider;
+    private final String pProvider;
 
     /**
      * Constructor taking a max depth. The <em>max depth</em> specifies how deep the info tree should be build
@@ -128,8 +129,8 @@ public class MBeanInfoData {
     public MBeanInfoData(int pMaxDepth, Stack<String> pPathStack, boolean pUseCanonicalName, String pProvider) {
         maxDepth = pMaxDepth;
         useCanonicalName = pUseCanonicalName;
-        pathStack = pPathStack != null ? (Stack<String>) pPathStack.clone() : new Stack<String>();
-        infoMap = new JSONObject();
+        //noinspection unchecked
+        pathStack = pPathStack != null ? (Stack<String>) pPathStack.clone() : new Stack<>();
         this.pProvider = pProvider;
     }
 
@@ -146,14 +147,16 @@ public class MBeanInfoData {
      * @return true if the object name has been added.
      */
     public boolean handleFirstOrSecondLevel(ObjectName pName) {
-        if (maxDepth == 1 && pathStack.size() == 0) {
+        if (maxDepth == 1 && pathStack.isEmpty()) {
             // Only add domain names with a dummy value if max depth is restricted to 1
             // But only when used without path
+            //noinspection unchecked
             infoMap.put(addProviderIfNeeded(pName.getDomain()), 1);
             return true;
-        } else if (maxDepth == 2 && pathStack.size() == 0) {
+        } else if (maxDepth == 2 && pathStack.isEmpty()) {
             // Add domain an object name into the map, final value is a dummy value
             Map mBeansMap = getOrCreateJSONObject(infoMap, addProviderIfNeeded(pName.getDomain()));
+            //noinspection unchecked
             mBeansMap.put(getKeyPropertyString(pName),1);
             return true;
         }
@@ -173,7 +176,7 @@ public class MBeanInfoData {
      * @param pName the object name of the MBean
      */
     public void addMBeanInfo(MBeanInfo mBeanInfo, ObjectName pName)
-            throws InstanceNotFoundException, IntrospectionException, ReflectionException, IOException {
+            throws InstanceNotFoundException, IntrospectionException, IOException {
 
         Map mBeansMap = getOrCreateJSONObject(infoMap, addProviderIfNeeded(pName.getDomain()));
         Map mBeanMap = getOrCreateJSONObject(mBeansMap, getKeyPropertyString(pName));
@@ -185,9 +188,9 @@ public class MBeanInfoData {
             addPartialMBeanInfo(mBeanMap, mBeanInfo,stack);
         }
         // Trim if required
-        if (mBeanMap.size() == 0) {
+        if (mBeanMap.isEmpty()) {
             mBeansMap.remove(getKeyPropertyString(pName));
-            if (mBeansMap.size() == 0) {
+            if (mBeansMap.isEmpty()) {
                 infoMap.remove(addProviderIfNeeded(pName.getDomain()));
             }
         }
@@ -208,7 +211,7 @@ public class MBeanInfoData {
     public void handleException(ObjectName pName, IOException pExp) throws IOException {
         // In case of a remote call, IOException can occur e.g. for
         // NonSerializableExceptions
-        if (pathStack.size() == 0) {
+        if (pathStack.isEmpty()) {
             addException(pName, pExp);
         } else {
             // Happens for a deeper request, i.e with a path pointing directly into an MBean,
@@ -228,7 +231,7 @@ public class MBeanInfoData {
      */
     public void handleException(ObjectName pName, IllegalStateException pExp) {
         // This happen happens for JBoss 7.1 in some cases.
-        if (pathStack.size() == 0) {
+        if (pathStack.isEmpty()) {
             addException(pName, pExp);
         } else {
             throw new IllegalStateException("IllegalStateException for MBean " + pName + " (" + pExp.getMessage() + ")",pExp);
@@ -245,7 +248,7 @@ public class MBeanInfoData {
      */
     public void handleException(ObjectName pName, InstanceNotFoundException pExp) throws InstanceNotFoundException {
         // This happen happens for JBoss 7.1 in some cases (i.e. ResourceAdapterModule)
-        if (pathStack.size() == 0) {
+        if (pathStack.isEmpty()) {
            addException(pName, pExp);
         } else {
            throw new InstanceNotFoundException("InstanceNotFoundException for MBean " + pName + " (" + pExp.getMessage() + ")");
@@ -256,6 +259,7 @@ public class MBeanInfoData {
     private void addException(ObjectName pName, Exception pExp) {
         Map mBeansMap = getOrCreateJSONObject(infoMap, addProviderIfNeeded(pName.getDomain()));
         Map mBeanMap = getOrCreateJSONObject(mBeansMap, getKeyPropertyString(pName));
+        //noinspection unchecked
         mBeanMap.put(DataKeys.ERROR.getKey(), pExp.toString());
     }
 
@@ -302,6 +306,7 @@ public class MBeanInfoData {
         Map nMap = (Map) pMap.get(pKey);
         if (nMap == null) {
             nMap = new JSONObject();
+            //noinspection unchecked
             pMap.put(pKey, nMap);
         }
         return nMap;
@@ -312,13 +317,16 @@ public class MBeanInfoData {
             return 1;
         }
         JSONObject ret = new JSONObject();
+        @SuppressWarnings("unchecked")
         Set<Map.Entry> entries = pValue.entrySet();
         for (Map.Entry entry : entries) {
             Object value = entry.getValue();
             Object key = entry.getKey();
             if (value instanceof JSONObject) {
+                //noinspection unchecked
                 ret.put(key, truncateJSONObject((JSONObject) value, pMaxDepth - 1));
             } else {
+                //noinspection unchecked
                 ret.put(key,value);
             }
         }
@@ -328,10 +336,11 @@ public class MBeanInfoData {
     // Trim down the stack by some value or return an empty stack
     private Stack<String> truncatePathStack(int pLevel) {
         if (pathStack.size() < pLevel) {
-            return new Stack<String>();
+            return new Stack<>();
         } else {
             // Trim of domain and MBean properties
             // pathStack gets cloned here since the processing will eat it up
+            @SuppressWarnings("unchecked")
             Stack<String> ret = (Stack<String>) pathStack.clone();
             for (int i = 0;i < pLevel;i++) {
                 ret.pop();
@@ -347,7 +356,7 @@ public class MBeanInfoData {
 
         while (size > 0) {
             Collection vals = innerMap.values();
-            if (vals.size() == 0) {
+            if (vals.isEmpty()) {
                 return innerMap;
             } else if (vals.size() != 1) {
                 throw new IllegalStateException("Internal: More than one key found when extracting with path: " + vals);

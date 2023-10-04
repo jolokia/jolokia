@@ -58,7 +58,7 @@ public class JBossDetectorTest extends BaseDetectorTest {
                 "jboss.as:*",
                 "jboss.modules:*"
         }) {
-            expect(server.queryNames(new ObjectName(name), null)).andReturn(Collections.<ObjectName>emptySet()).anyTimes();
+            expect(server.queryNames(new ObjectName(name), null)).andReturn(Collections.emptySet()).anyTimes();
         }
         replay(server);
         assertNull(detector.detect(servers));
@@ -66,9 +66,9 @@ public class JBossDetectorTest extends BaseDetectorTest {
     }
 
     @Test
-    public void simpleFound() throws MalformedObjectNameException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException, IntrospectionException {
+    public void simpleFound() throws MalformedObjectNameException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException {
 
-        expect(server.queryNames(new ObjectName("jboss.as:management-root=server"),null)).andReturn(Collections.EMPTY_SET);
+        expect(server.queryNames(new ObjectName("jboss.as:management-root=server"),null)).andReturn(Collections.emptySet());
         ObjectName oName = prepareQuery("jboss.system:type=Server");
         expect(server.isRegistered(oName)).andStubReturn(true);
         expect(server.getAttribute(oName, "Version")).andReturn("5.1.0");
@@ -88,9 +88,9 @@ public class JBossDetectorTest extends BaseDetectorTest {
     }
 
     @Test
-    public void version71() throws MalformedObjectNameException, IntrospectionException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException {
+    public void version71() throws MalformedObjectNameException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException {
 
-        expect(server.queryNames(new ObjectName("jboss.system:type=Server"),null)).andReturn(Collections.<ObjectName>emptySet());
+        expect(server.queryNames(new ObjectName("jboss.system:type=Server"),null)).andReturn(Collections.emptySet());
         prepareQuery("jboss.as:*");
         ObjectName oName = new ObjectName("jboss.as:management-root=server");
         expect(server.getAttribute(oName,"productVersion")).andReturn(null);
@@ -106,9 +106,9 @@ public class JBossDetectorTest extends BaseDetectorTest {
     }
 
     @Test
-    public void version101() throws MalformedObjectNameException, IntrospectionException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException {
+    public void version101() throws MalformedObjectNameException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException {
 
-        expect(server.queryNames(new ObjectName("jboss.system:type=Server"),null)).andReturn(Collections.<ObjectName>emptySet());
+        expect(server.queryNames(new ObjectName("jboss.system:type=Server"),null)).andReturn(Collections.emptySet());
         prepareQuery("jboss.as:*");
         ObjectName oName = new ObjectName("jboss.as:management-root=server");
         expect(server.getAttribute(oName,"productVersion")).andReturn("10.1.0.Final");
@@ -132,10 +132,10 @@ public class JBossDetectorTest extends BaseDetectorTest {
     }
 
     @Test
-    public void version7() throws MalformedObjectNameException, IntrospectionException, InstanceNotFoundException, ReflectionException {
+    public void version7() throws MalformedObjectNameException {
 
-        expect(server.queryNames(new ObjectName("jboss.system:type=Server"),null)).andReturn(Collections.<ObjectName>emptySet());
-        expect(server.queryNames(new ObjectName("jboss.as:*"),null)).andReturn(Collections.<ObjectName>emptySet());
+        expect(server.queryNames(new ObjectName("jboss.system:type=Server"),null)).andReturn(Collections.emptySet());
+        expect(server.queryNames(new ObjectName("jboss.as:*"),null)).andReturn(Collections.emptySet());
         prepareQuery("jboss.modules:*");
         replay(server);
         ServerHandle handle = detector.detect(servers);
@@ -149,7 +149,7 @@ public class JBossDetectorTest extends BaseDetectorTest {
 
     private ObjectName prepareQuery(String pName) throws MalformedObjectNameException {
         ObjectName oName = new ObjectName(pName);
-        Set<ObjectName> oNames = new HashSet<ObjectName>(Arrays.asList(oName));
+        Set<ObjectName> oNames = new HashSet<>(List.of(oName));
         expect(server.queryNames(oName,null)).andReturn(oNames);
         return oName;
     }

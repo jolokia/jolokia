@@ -46,7 +46,7 @@ public class VirtualMachineHandlerTest {
 
     @Test
     public void simple() throws ClassNotFoundException {
-        Class clazz = ToolsClassFinder.lookupClass("com.sun.tools.attach.VirtualMachine");
+        Class<?> clazz = ToolsClassFinder.lookupClass("com.sun.tools.attach.VirtualMachine");
         assertEquals(clazz.getName(),"com.sun.tools.attach.VirtualMachine");
     }
 
@@ -56,9 +56,9 @@ public class VirtualMachineHandlerTest {
     }
 
     @Test
-    public void listAndAttach() throws Exception, NoSuchMethodException, IllegalAccessException {
+    public void listAndAttach() {
         List<ProcessDescription> procs = vmHandler.listProcesses();
-        assertTrue(procs.size() > 0);
+        assertFalse(procs.isEmpty());
         boolean foundAtLeastOne = false;
         for (ProcessDescription p : procs) {
             try {
@@ -72,11 +72,11 @@ public class VirtualMachineHandlerTest {
 
 
     @Test
-    public void findProcess() throws Exception, NoSuchMethodException, IllegalAccessException {
+    public void findProcess() {
         List<ProcessDescription> procs = filterOwnProcess(vmHandler.listProcesses());
         for (ProcessDescription desc : procs) {
             try {
-                if (desc.getDisplay() != null && desc.getDisplay().length() > 0) {
+                if (desc.getDisplay() != null && !desc.getDisplay().isEmpty()) {
                     Pattern singleHitPattern = Pattern.compile("^" + Pattern.quote(desc.getDisplay()) + "$");
                     assertTrue(tryAttach(singleHitPattern.pattern()));
                     break;
@@ -95,7 +95,7 @@ public class VirtualMachineHandlerTest {
     }
 
     private List<ProcessDescription> filterOwnProcess(List<ProcessDescription> pProcessDescs) {
-        List<ProcessDescription> ret = new ArrayList<ProcessDescription>();
+        List<ProcessDescription> ret = new ArrayList<>();
         String ownId = getOwnProcessId();
         for (ProcessDescription desc : pProcessDescs) {
             if (!desc.getId().equals(ownId)) {
@@ -111,7 +111,7 @@ public class VirtualMachineHandlerTest {
         return endIdx != -1 ? name.substring(0,endIdx) : name;
     }
 
-    private boolean tryAttach(String pId,String ... expMsg) throws Exception {
+    private boolean tryAttach(String pId,String ... expMsg) {
         OptionsAndArgs o = new OptionsAndArgs(CommandDispatcher.getAvailableCommands(),"start", pId);
         VirtualMachineHandlerOperations h = PlatformUtils.createVMAccess(o);
         Object vm = null;

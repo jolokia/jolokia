@@ -41,7 +41,7 @@ public class EnumExtractorTest {
 
     @Test
     public void jsonExtract() throws AttributeNotFoundException {
-        Stack stack = new Stack();
+        Stack<String> stack = new Stack<>();
         assertEquals(enumExtractor.extractObject(converter, TestEnum.EINS,stack,true),"EINS");
         stack.add("EINS");
         assertEquals(enumExtractor.extractObject(converter, TestEnum.EINS,stack,true),"EINS");
@@ -49,14 +49,14 @@ public class EnumExtractorTest {
 
     @Test(expectedExceptions = AttributeNotFoundException.class)
     public void jsonExtractWithWrongPath() throws AttributeNotFoundException {
-        Stack stack = new Stack();
+        Stack<String> stack = new Stack<>();
         stack.add("ZWEI");
         enumExtractor.extractObject(converter,TestEnum.EINS,stack,true);
     }
 
     @Test
     public void plainExtract() throws AttributeNotFoundException {
-        Stack stack = new Stack();
+        Stack<String> stack = new Stack<>();
         Object result = enumExtractor.extractObject(converter, TestEnum.EINS,stack,false);
         assertEquals(result,TestEnum.EINS);
     }
@@ -66,8 +66,8 @@ public class EnumExtractorTest {
         enumExtractor.setObjectValue(null,null,null,null);
     }
 
-    private static enum TestEnum {
+    private enum TestEnum {
         EINS,
-        ZWEI;
+        ZWEI
     }
 }

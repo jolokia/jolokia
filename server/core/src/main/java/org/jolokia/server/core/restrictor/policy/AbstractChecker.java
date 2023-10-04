@@ -49,7 +49,7 @@ public abstract class AbstractChecker<T> {
             }
         }
         throw new SecurityException(
-                "Expected element " + buffer.toString() + " but got " + pNode.getNodeName());
+                "Expected element " + buffer + " but got " + pNode.getNodeName());
     }
 
     /**

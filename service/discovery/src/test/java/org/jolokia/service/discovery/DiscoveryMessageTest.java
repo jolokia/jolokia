@@ -55,6 +55,7 @@ public class DiscoveryMessageTest {
     @Test(expectedExceptions = IOException.class,expectedExceptionsMessageRegExp = ".*not.*parse.*")
     public void incomingWithLargerBuf() throws IOException {
         JSONObject data = new JSONObject();
+        //noinspection unchecked
         data.put("type", AbstractDiscoveryMessage.MessageType.QUERY.toString());
         String json = data.toJSONString();
         byte[] largeBuf = Arrays.copyOf(json.getBytes(),json.length() + 512);
@@ -65,6 +66,7 @@ public class DiscoveryMessageTest {
     public DatagramPacket createDatagramPacket(Object ... vals) {
         JSONObject data = new JSONObject();
         for (int i = 0; i < vals.length; i+=2) {
+            //noinspection unchecked
             data.put(vals[i],vals[i+1]);
         }
         String json = data.toJSONString();
@@ -74,11 +76,8 @@ public class DiscoveryMessageTest {
 
     private AgentDetails getAgentDetailsLargerThan(int size) {
         AgentDetails details = new AgentDetails("test-id");
-        StringBuffer large = new StringBuffer();
-        for (int i = 0; i < size; i++) {
-            large.append("Y");
-        }
-        details.setUrl(large.toString());
+        String large = "Y".repeat(Math.max(0, size));
+        details.setUrl(large);
         details.setSecured(true);
         return details;
     }

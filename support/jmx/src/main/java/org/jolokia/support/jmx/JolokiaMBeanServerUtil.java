@@ -99,15 +99,9 @@ public final class JolokiaMBeanServerUtil {
     // as a service is used.
     private static Serializer lookupSerializer() {
         try {
-            Class clazz = Class.forName("org.jolokia.service.serializer.JolokiaSerializer");
+            Class<?> clazz = Class.forName("org.jolokia.service.serializer.JolokiaSerializer");
             return (Serializer) clazz.newInstance();
-        } catch (ClassNotFoundException e) {
-            // No serializer available
-            return null;
-        } catch (InstantiationException e) {
-            // No serializer available
-            return null;
-        } catch (IllegalAccessException e) {
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
             // No serializer available
             return null;
         }

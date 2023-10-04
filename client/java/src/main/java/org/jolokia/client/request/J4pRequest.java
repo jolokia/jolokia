@@ -33,13 +33,13 @@ public abstract class J4pRequest {
 
 
     // request type
-    private J4pType type;
+    private final J4pType type;
 
     // "GET" or "POST"
     private String preferredHttpMethod;
 
     // target configuration for this request when used as a JSR-160 proxy
-    private J4pTargetConfig targetConfig;
+    private final J4pTargetConfig targetConfig;
 
     /**
      * Constructor for subclasses
@@ -108,9 +108,11 @@ public abstract class J4pRequest {
     // Get a JSON representation of this request
     JSONObject toJson() {
         JSONObject ret = new JSONObject();
-        ret.put("type",type.name());
+        //noinspection unchecked
+        ret.put("type", type.name());
         if (targetConfig != null) {
-            ret.put("target",targetConfig.toJson());
+            //noinspection unchecked
+            ret.put("target", targetConfig.toJson());
         }
         return ret;
     }
@@ -150,7 +152,7 @@ public abstract class J4pRequest {
             if (pArg.getClass().isArray()) {
                 return getArrayForArgument((Object[]) pArg);
             } else if (List.class.isAssignableFrom(pArg.getClass())) {
-                List list = (List) pArg;
+                List<?> list = (List<?>) pArg;
                 Object[] args = new Object[list.size()];
                 int i = 0;
                 for (Object e : list) {
@@ -205,9 +207,9 @@ public abstract class J4pRequest {
         } else if (pArg.getClass().isArray()) {
             return serializeArray(pArg);
         } else if (pArg instanceof Map) {
-            return serializeMap((Map) pArg);
+            return serializeMap((Map<?, ?>) pArg);
         } else if (pArg instanceof Collection) {
-            return serializeCollection((Collection) pArg);
+            return serializeCollection((Collection<?>) pArg);
         } else {
             return pArg instanceof Number || pArg instanceof Boolean ? pArg : pArg.toString();
         }
@@ -225,7 +227,7 @@ public abstract class J4pRequest {
      * @return split element or null if the argument was null.
      */
     protected List<String> splitPath(String pArg) {
-        List<String> ret = new ArrayList<String>();
+        List<String> ret = new ArrayList<>();
         if (pArg != null) {
             Matcher m = SLASH_ESCAPE_PATTERN.matcher(pArg);
             while (m.find() && m.start(1) != pArg.length()) {
@@ -237,18 +239,20 @@ public abstract class J4pRequest {
 
     // =====================================================================================================
 
-    private Object serializeCollection(Collection pArg) {
+    private Object serializeCollection(Collection<?> pArg) {
         JSONArray array = new JSONArray();
-        for (Object value : ((Collection) pArg)) {
+        for (Object value : pArg) {
+            //noinspection unchecked
             array.add(serializeArgumentToJson(value));
         }
         return array;
     }
 
-    private Object serializeMap(Map pArg) {
-        JSONObject map  = new JSONObject();
-        for (Map.Entry<Object,Object> entry : ((Map<Object,Object>) pArg).entrySet()) {
-            map.put(entry.getKey(),serializeArgumentToJson(entry.getValue()));
+    private Object serializeMap(Map<?, ?> pArg) {
+        JSONObject map = new JSONObject();
+        for (Map.Entry<?, ?> entry : pArg.entrySet()) {
+            //noinspection unchecked
+            map.put(entry.getKey(), serializeArgumentToJson(entry.getValue()));
         }
         return map;
     }
@@ -256,6 +260,7 @@ public abstract class J4pRequest {
     private Object serializeArray(Object pArg) {
         JSONArray innerArray = new JSONArray();
         for (int i = 0; i < Array.getLength(pArg); i++ ) {
+            //noinspection unchecked
             innerArray.add(serializeArgumentToJson(Array.get(pArg, i)));
         }
         return innerArray;
@@ -276,7 +281,7 @@ public abstract class J4pRequest {
     private String nullEscape(Object pArg) {
         if (pArg == null) {
             return "[null]";
-        } else if (pArg instanceof String && ((String) pArg).length() == 0) {
+        } else if (pArg instanceof String && ((String) pArg).isEmpty()) {
             return "\"\"";
         } else if (pArg instanceof JSONAware) {
             return ((JSONAware) pArg).toJSONString();

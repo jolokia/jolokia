@@ -31,8 +31,8 @@ import org.jolokia.jvmagent.client.util.VirtualMachineHandlerOperations;
 public class ToggleCommand extends AbstractBaseCommand {
 
     // commands to delegate to
-    private StartCommand startCommand = new StartCommand();
-    private StopCommand stopCommand = new StopCommand();
+    private final StartCommand startCommand = new StartCommand();
+    private final StopCommand stopCommand = new StopCommand();
 
     /** {@inheritDoc} */
     @Override

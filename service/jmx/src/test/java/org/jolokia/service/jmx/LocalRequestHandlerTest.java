@@ -27,6 +27,7 @@ public class LocalRequestHandlerTest {
 
     private JolokiaRequest request;
     private LocalRequestHandler requestHandler;
+    @SuppressWarnings("rawtypes")
     private CommandHandler commandHandler;
     @BeforeMethod
     public void setup() throws JMException, NoSuchFieldException, IllegalAccessException {
@@ -38,10 +39,11 @@ public class LocalRequestHandlerTest {
         request = new JolokiaRequestBuilder(RequestType.READ,"java.lang:type=Memory").attribute("HeapMemoryUsage").build();
     }
 
-    private CommandHandler injectCommandHandler(LocalRequestHandler pRequestHandler) throws JMException, NoSuchFieldException, IllegalAccessException {
+    private CommandHandler<?> injectCommandHandler(LocalRequestHandler pRequestHandler) throws JMException, NoSuchFieldException, IllegalAccessException {
         commandHandler = createMock(CommandHandler.class);
         CommandHandlerManager commandHandlerManager = createMock(CommandHandlerManager.class);
-        expect(commandHandlerManager.getCommandHandler((RequestType) anyObject())).andStubReturn(commandHandler);
+        //noinspection unchecked
+        expect(commandHandlerManager.getCommandHandler(anyObject())).andStubReturn(commandHandler);
         commandHandlerManager.destroy();
         expectLastCall().asStub();
         replay(commandHandlerManager);
@@ -60,40 +62,43 @@ public class LocalRequestHandlerTest {
     }
 
 
+    @SuppressWarnings("unchecked")
     @Test
-    public void dispatchRequest() throws MalformedObjectNameException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException, IOException, NotChangedException, EmptyResponseException {
+    public void dispatchRequest() throws InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException, IOException, NotChangedException, EmptyResponseException {
         Object result = new Object();
 
         expect(commandHandler.handleAllServersAtOnce(request)).andReturn(false);
-        expect(commandHandler.handleSingleServerRequest(EasyMock.<MBeanServerConnection>anyObject(), eq(request))).andReturn(result);
+        expect(commandHandler.handleSingleServerRequest(EasyMock.anyObject(), eq(request))).andReturn(result);
         replay(commandHandler);
         assertEquals(requestHandler.handleRequest(request,null),result);
     }
 
 
     @Test(expectedExceptions = InstanceNotFoundException.class)
-    public void dispatchRequestInstanceNotFound() throws MalformedObjectNameException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException, IOException, NotChangedException, EmptyResponseException {
+    public void dispatchRequestInstanceNotFound() throws InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException, IOException, NotChangedException, EmptyResponseException {
         dispatchWithException(new InstanceNotFoundException());
     }
 
 
     @Test(expectedExceptions = AttributeNotFoundException.class)
-    public void dispatchRequestAttributeNotFound() throws MalformedObjectNameException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException, IOException, NotChangedException, EmptyResponseException {
+    public void dispatchRequestAttributeNotFound() throws InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException, IOException, NotChangedException, EmptyResponseException {
         dispatchWithException(new AttributeNotFoundException());
     }
 
     @Test(expectedExceptions = IllegalStateException.class)
-    public void dispatchRequestIOException() throws MalformedObjectNameException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException, IOException, NotChangedException, EmptyResponseException {
+    public void dispatchRequestIOException() throws InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException, IOException, NotChangedException, EmptyResponseException {
         dispatchWithException(new IOException());
     }
 
+    @SuppressWarnings("unchecked")
     private void dispatchWithException(Exception e) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException, EmptyResponseException {
         expect(commandHandler.handleAllServersAtOnce(request)).andReturn(false);
-        expect(commandHandler.handleSingleServerRequest(EasyMock.<MBeanServerConnection>anyObject(), eq(request))).andThrow(e).anyTimes();
+        expect(commandHandler.handleSingleServerRequest(EasyMock.anyObject(), eq(request))).andThrow(e).anyTimes();
         replay(commandHandler);
         requestHandler.handleRequest(request,null);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void dispatchAtOnce() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException, EmptyResponseException {
         Object result = new Object();
@@ -104,6 +109,7 @@ public class LocalRequestHandlerTest {
         assertEquals(requestHandler.handleRequest(request,null),result);
     }
 
+    @SuppressWarnings("unchecked")
     @Test(expectedExceptions = IllegalStateException.class,expectedExceptionsMessageRegExp = ".*Internal.*")
     public void dispatchAtWithException() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException, EmptyResponseException {
         expect(commandHandler.handleAllServersAtOnce(request)).andReturn(true);

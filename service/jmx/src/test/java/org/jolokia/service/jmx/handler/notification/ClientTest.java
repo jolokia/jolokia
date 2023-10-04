@@ -12,14 +12,14 @@ import static org.testng.Assert.assertEquals;
 public class ClientTest {
 
     @Test
-    public void testId() throws Exception {
+    public void testId() {
         String id = "12";
         Client client = new Client(id);
         assertEquals(client.getId(),id);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*not_there.*")
-    public void testInvalidHandle() throws Exception {
+    public void testInvalidHandle() {
         String id = "12";
         Client client = new Client(id);
 

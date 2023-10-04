@@ -40,7 +40,7 @@ public class J4pConnectionPoolingIntegrationTest {
     private WireMockServer wireMockServer;
 
     @BeforeMethod
-    public void setUp() throws Exception {
+    public void setUp() {
         wireMockServer = new WireMockServer(Options.DYNAMIC_PORT);
         wireMockServer.start();
     }
@@ -73,7 +73,7 @@ public class J4pConnectionPoolingIntegrationTest {
         final ExecutorService executorService = Executors.newFixedThreadPool(20);
         final J4pSearchRequest j4pSearchRequest = new J4pSearchRequest("java.lang:type=*");
 
-        final List<Future<Void>> requestsList = new ArrayList<Future<Void>>();
+        final List<Future<Void>> requestsList = new ArrayList<>();
 
         for (int i = 0; i < 20; i++) {
             requestsList.add(executorService.submit(new AsyncRequest(j4pClient, j4pSearchRequest)));
@@ -88,7 +88,7 @@ public class J4pConnectionPoolingIntegrationTest {
 
 
     @AfterMethod
-    public void tearDown() throws Exception {
+    public void tearDown() {
         wireMockServer.stop();
     }
 

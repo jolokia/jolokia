@@ -37,7 +37,7 @@ class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
     public static final String STRING_TYPE = String.class.getName();
 
     // Set containing all types which are directly supported and are not converted
-    private static final Set<String> DIRECT_TYPES = new HashSet<String>();
+    private static final Set<String> DIRECT_TYPES = new HashSet<>();
 
     // Serializer to use
     private final Serializer serializer;
@@ -74,8 +74,8 @@ class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
         serializer = pSerializer;
         objectName = pObjectName;
         serializeOptions = pConvertOptions != null ? pConvertOptions : SerializeOptions.DEFAULT;
-        attributeInfoMap = new HashMap<String, MBeanAttributeInfo>();
-        operationInfoMap = new HashMap<String, List<OperationMapInfo>>();
+        attributeInfoMap = new HashMap<>();
+        operationInfoMap = new HashMap<>();
         wrappedMBeanInfo = getWrappedInfo(pInfo);
     }
 
@@ -199,12 +199,12 @@ class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
     private Object mapAndInvoke(String pOperation, Object[] pParams, String[] pSignature, OperationMapInfo pOpMapInfo)
             throws InstanceNotFoundException, MBeanException, ReflectionException {
         // Map parameters
-        Object realParams[] = new Object[pSignature.length];
-        String realSignature[] = new String[pSignature.length];
+        Object[] realParams = new Object[pSignature.length];
+        String[] realSignature = new String[pSignature.length];
         for (int i = 0; i < pSignature.length; i++) {
             if (pOpMapInfo.isParamMapped(i)) {
                 String origType = pOpMapInfo.getOriginalType(i);
-                OpenType openType = pOpMapInfo.getOpenMBeanType(i);
+                OpenType<?> openType = pOpMapInfo.getOpenMBeanType(i);
                 if (openType != null) {
                     realParams[i] = fromJson(openType, (String) pParams[i]);
                 } else {
@@ -255,8 +255,8 @@ class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
     }
 
     private MBeanAttributeInfo[] getWrappedAttributeInfo(MBeanInfo pMBeanInfo) {
-        MBeanAttributeInfo origAttrInfo[] = pMBeanInfo.getAttributes();
-        MBeanAttributeInfo attrInfo[] = new MBeanAttributeInfo[origAttrInfo.length];
+        MBeanAttributeInfo[] origAttrInfo = pMBeanInfo.getAttributes();
+        MBeanAttributeInfo[] attrInfo = new MBeanAttributeInfo[origAttrInfo.length];
         for (int i = 0; i < origAttrInfo.length; i++) {
             MBeanAttributeInfo aInfo = origAttrInfo[i];
             String clazz = aInfo.getType();
@@ -283,8 +283,8 @@ class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
     }
 
     private MBeanOperationInfo[] getWrappedOperationInfo(MBeanInfo pMBeanInfo) {
-        MBeanOperationInfo origOpInfo[] = pMBeanInfo.getOperations();
-        MBeanOperationInfo opInfo[] = new MBeanOperationInfo[origOpInfo.length];
+        MBeanOperationInfo[] origOpInfo = pMBeanInfo.getOperations();
+        MBeanOperationInfo[] opInfo = new MBeanOperationInfo[origOpInfo.length];
 
         for (int i = 0; i < origOpInfo.length; i++) {
             MBeanOperationInfo oInfo = origOpInfo[i];
@@ -303,11 +303,7 @@ class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
             // Remember that we mapped this operation info
             if (opMapInfo.containsMapping()) {
                 String name = oInfo.getName();
-                List<OperationMapInfo> infos = operationInfoMap.get(name);
-                if (infos == null) {
-                    infos = new ArrayList<OperationMapInfo>();
-                    operationInfoMap.put(name, infos);
-                }
+                List<OperationMapInfo> infos = operationInfoMap.computeIfAbsent(name, k -> new ArrayList<>());
                 infos.add(opMapInfo);
             }
 
@@ -325,8 +321,8 @@ class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
     }
 
     private MBeanParameterInfo[] getWrappedParameterInfo(MBeanOperationInfo pOInfo, OperationMapInfo pMapInfo) {
-        MBeanParameterInfo origParamInfo[] = pOInfo.getSignature();
-        MBeanParameterInfo paramInfo[] = new MBeanParameterInfo[origParamInfo.length];
+        MBeanParameterInfo[] origParamInfo = pOInfo.getSignature();
+        MBeanParameterInfo[] paramInfo = new MBeanParameterInfo[origParamInfo.length];
 
         for (int j = 0; j < origParamInfo.length; j++) {
             MBeanParameterInfo pInfo = origParamInfo[j];
@@ -381,10 +377,10 @@ class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
 
     private static final class OperationMapInfo {
 
-        private boolean    retTypeMapped;
-        private String[]   signature;
-        private String[]   origTypes;
-        private OpenType[] openMBeanTypes;
+        private final boolean    retTypeMapped;
+        private final String[]   signature;
+        private final String[]   origTypes;
+        private final OpenType<?>[] openMBeanTypes;
         private int        idx;
         private boolean    paramMapped;
 
@@ -397,7 +393,7 @@ class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
             paramMapped = false;
         }
 
-        private void pushParamTypes(String pNewType, String pOrigType, OpenType pOpenType) {
+        private void pushParamTypes(String pNewType, String pOrigType, OpenType<?> pOpenType) {
             signature[idx] = pNewType;
             origTypes[idx] = pOrigType;
             openMBeanTypes[idx] = pOpenType;
@@ -415,7 +411,7 @@ class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
             return origTypes[pIdx];
         }
 
-        private OpenType getOpenMBeanType(int pIdx) {
+        private OpenType<?> getOpenMBeanType(int pIdx) {
             return openMBeanTypes[pIdx];
         }
 
@@ -427,7 +423,7 @@ class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
             return retTypeMapped || paramMapped;
         }
 
-        private boolean matchSignature(String pSignature[]) {
+        private boolean matchSignature(String[] pSignature) {
             return Arrays.equals(signature, pSignature);
         }
     }

@@ -57,11 +57,10 @@ public enum NotificationCommandType {
     LIST("list");
 
     // type as given in the request
-    private String type;
+    private final String type;
 
     // lookup for name-to-type
-    private static final Map<String, NotificationCommandType> COMMANDS_BY_NAME =
-            new HashMap<String, NotificationCommandType>();
+    private static final Map<String, NotificationCommandType> COMMANDS_BY_NAME = new HashMap<>();
 
     // Initialise lookup map
     static {
@@ -70,7 +69,7 @@ public enum NotificationCommandType {
         }
     }
 
-    private NotificationCommandType(String pPType) {
+    NotificationCommandType(String pPType) {
         type = pPType;
     }
 

@@ -40,11 +40,9 @@ public class ListHandlerMockTest extends BaseHandlerTest {
 
     private ListHandler handler;
 
-    private TestJolokiaContext ctx;
-
     @BeforeMethod
-    public void createHandler() throws MalformedObjectNameException {
-        ctx = new TestJolokiaContext();
+    public void createHandler() {
+        TestJolokiaContext ctx = new TestJolokiaContext();
         handler = new ListHandler();
         handler.init(ctx, null);
     }
@@ -67,7 +65,7 @@ public class ListHandlerMockTest extends BaseHandlerTest {
         JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST).build();
 
         MBeanServerConnection connection = createMock(MBeanServerConnection.class);
-        Set<ObjectName> nameSet = new HashSet<ObjectName>();
+        Set<ObjectName> nameSet = new HashSet<>();
         for (String name : new String[] { "java.lang:type=Memory", "java.lang:type=Runtime" }) {
             ObjectName oName = new ObjectName(name);
             nameSet.add(oName);
@@ -77,17 +75,20 @@ public class ListHandlerMockTest extends BaseHandlerTest {
         expect(connection.queryNames(null,null)).andReturn(nameSet);
         replay(connection);
 
-        Map res = (Map) handler.handleAllServerRequest(getMBeanServerManager(connection), request, null);
+        @SuppressWarnings("unchecked")
+        Map<String, ?> res = (Map<String, ?>) handler.handleAllServerRequest(getMBeanServerManager(connection), request, null);
         assertTrue(res.containsKey("java.lang"));
-        Map inner = (Map) res.get("java.lang");
+        @SuppressWarnings("unchecked")
+        Map<String, ?> inner = (Map<String, ?>) res.get("java.lang");
         assertTrue(inner.containsKey("type=Memory"));
         assertTrue(inner.containsKey("type=Runtime"));
         assertEquals(inner.size(), 2);
-        inner = (Map) inner.get("type=Memory");
-        for (String k : new String[] {DataKeys.DESCRIPTION.getKey(), DataKeys.OPERATIONS.getKey(), DataKeys.ATTRIBUTES.getKey(), DataKeys.CLASSNAME.getKey()}) {
+        //noinspection unchecked
+        inner = (Map<String, ?>) inner.get("type=Memory");
+        for (String k : new String[] {DataKeys.DESCRIPTION.getKey(), DataKeys.OPERATIONS.getKey(), DataKeys.ATTRIBUTES.getKey(), DataKeys.CLASSNAME.getKey(), DataKeys.NOTIFICATIONS.getKey()}) {
             assertTrue(inner.containsKey(k));
         }
-        assertEquals(inner.size(), 4);
+        assertEquals(inner.size(), 5);
         verify(connection);
     }
 
@@ -100,12 +101,15 @@ public class ListHandlerMockTest extends BaseHandlerTest {
         MBeanServerConnection connection = prepareForIOException(false);
 
 
-        Map res = (Map) handler.handleAllServerRequest(getMBeanServerManager(connection), request, null);
+        @SuppressWarnings("unchecked")
+        Map<String, ?> res = (Map<String, ?>) handler.handleAllServerRequest(getMBeanServerManager(connection), request, null);
         verify(connection);
         assertEquals(res.size(),1);
-        Map jl = (Map) res.get("java.lang");
+        @SuppressWarnings("unchecked")
+        Map<String, ?> jl = (Map<String, ?>) res.get("java.lang");
         assertEquals(jl.size(),2);
-        Map rt = (Map) jl.get("type=Runtime");
+        @SuppressWarnings("unchecked")
+        Map<String, ?> rt = (Map<String, ?>) jl.get("type=Runtime");
         assertNotNull(rt.get("error"));
         assertEquals(rt.size(),1);
     }
@@ -120,7 +124,7 @@ public class ListHandlerMockTest extends BaseHandlerTest {
 
     private MBeanServerConnection prepareForIOException(boolean registerCheck) throws MalformedObjectNameException, InstanceNotFoundException, IntrospectionException, ReflectionException, IOException {
         MBeanServerConnection server = createMock(MBeanServerConnection.class);
-        Set<ObjectName> nameSet = new HashSet<ObjectName>();
+        Set<ObjectName> nameSet = new HashSet<>();
         ObjectName oName = new ObjectName("java.lang:type=Memory");
         nameSet.add(oName);
         expect(server.getMBeanInfo(oName)).andReturn(getRealMBeanInfo(oName));
@@ -135,7 +139,7 @@ public class ListHandlerMockTest extends BaseHandlerTest {
         return server;
     }
 
-    private MBeanInfo getRealMBeanInfo(ObjectName oName) throws MalformedObjectNameException, IntrospectionException, InstanceNotFoundException, IOException, ReflectionException {
+    private MBeanInfo getRealMBeanInfo(ObjectName oName) throws IntrospectionException, InstanceNotFoundException, IOException, ReflectionException {
         MBeanServerConnection conn = ManagementFactory.getPlatformMBeanServer();
         return conn.getMBeanInfo(oName);
     }

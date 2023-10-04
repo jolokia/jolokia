@@ -63,14 +63,14 @@ class FallbackServerDetector implements ServerDetector {
         return getOrder() - pDetector.getOrder();
     }
 
-    @Override
     /** {@inheritDoc} */
+    @Override
     public boolean equals(Object obj) {
         return this == obj;
     }
 
-    @Override
     /** {@inheritDoc} */
+    @Override
     public int hashCode() {
         return 42;
     }

@@ -36,17 +36,17 @@ class JolokiaMBeanServerHandler implements InvocationHandler {
 
     private final MBeanServer mBeanServer;
     // MBeanServer to delegate to for JsonMBeans
-    private MBeanServer     delegateServer;
-    private Set<ObjectName> delegatedMBeans;
+    private final MBeanServer     delegateServer;
+    private final Set<ObjectName> delegatedMBeans;
 
-    private Serializer serializer;
+    private final Serializer serializer;
 
     /**
      * Create a private MBean server
      */
     public JolokiaMBeanServerHandler(Serializer pSerializer) {
         mBeanServer = MBeanServerFactory.newMBeanServer();
-        delegatedMBeans = new HashSet<ObjectName>();
+        delegatedMBeans = new HashSet<>();
         delegateServer = ManagementFactory.getPlatformMBeanServer();
         serializer = pSerializer;
     }
@@ -90,11 +90,7 @@ class JolokiaMBeanServerHandler implements InvocationHandler {
                 // Register MBean on delegate MBeanServer
                 delegatedMBeans.add(realName);
                 delegateServer.registerMBean(mbean,realName);
-            } catch (InstanceNotFoundException e) {
-                throw new MBeanRegistrationException(e,"Cannot obtain MBeanInfo from Jolokia-Server for " + realName);
-            } catch (IntrospectionException e) {
-                throw new MBeanRegistrationException(e,"Cannot obtain MBeanInfo from Jolokia-Server for " + realName);
-            } catch (ReflectionException e) {
+            } catch (InstanceNotFoundException | IntrospectionException | ReflectionException e) {
                 throw new MBeanRegistrationException(e,"Cannot obtain MBeanInfo from Jolokia-Server for " + realName);
             }
         }
@@ -156,7 +152,7 @@ class JolokiaMBeanServerHandler implements InvocationHandler {
 
     // Find a field in an inheritance hierarchy
     private Field findField(Class<?> pClazz, String pField) {
-        Class c = pClazz;
+        Class<?> c = pClazz;
         do {
             try {
                 return c.getDeclaredField(pField);

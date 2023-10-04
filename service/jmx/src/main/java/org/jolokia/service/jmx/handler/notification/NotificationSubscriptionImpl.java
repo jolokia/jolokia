@@ -18,25 +18,25 @@ import org.jolokia.server.core.request.notification.AddCommand;
 class NotificationSubscriptionImpl implements NotificationSubscription {
 
     // MBean on which the notification is registered
-    private ObjectName mBean;
+    private final ObjectName mBean;
 
     // Filter used
-    private List<String> filter;
+    private final List<String> filter;
 
     // A handback object
-    private Object handback;
+    private final Object handback;
 
     // Extra configuration used for the registration
-    private Map<String, ?> config;
+    private final Map<String, ?> config;
 
     // Used for updating freshness
-    private NotificationListenerDelegate delegate;
+    private final NotificationListenerDelegate delegate;
 
     // Client id
-    private Client client;
+    private final Client client;
 
     // Registration handle
-    private String handle;
+    private final String handle;
 
     /**
      * Registration used when registering at a notification backend

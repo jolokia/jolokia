@@ -20,14 +20,14 @@ public class DiscoveryMulticastResponder extends AbstractJolokiaService<JolokiaS
 
     // Listener threads responsible for creating the response as soon as a discovery request
     // arrives.
-    private List<MulticastSocketListenerThread> listenerThreads;
+    private final List<MulticastSocketListenerThread> listenerThreads;
 
     /**
      * Create the responder which can be started and stopped
      */
     public DiscoveryMulticastResponder() {
         super(Init.class, 0 /* no order required */);
-        listenerThreads = new ArrayList<MulticastSocketListenerThread>();
+        listenerThreads = new ArrayList<>();
     }
 
     /**
@@ -35,9 +35,9 @@ public class DiscoveryMulticastResponder extends AbstractJolokiaService<JolokiaS
      */
     @Override
     public void init(JolokiaContext pContext) {
-        if (discoveryEnabled(pContext) && listenerThreads.size() == 0) {
+        if (discoveryEnabled(pContext) && listenerThreads.isEmpty()) {
             List<InetAddress> addresses = NetworkUtil.getMulticastAddresses();
-            if (addresses.size() == 0) {
+            if (addresses.isEmpty()) {
                 pContext.info("No suitable address found for listening on multicast discovery requests");
                 return;
             }
@@ -52,7 +52,7 @@ public class DiscoveryMulticastResponder extends AbstractJolokiaService<JolokiaS
                     pContext.error("Cannot start multicast discovery listener thread on " + addr + ": " + e, e);
                 }
             }
-            if (listenerThreads.size() == 0) {
+            if (listenerThreads.isEmpty()) {
                 pContext.info("Cannot start a single multicast discovery listener");
             }
         }
@@ -63,7 +63,7 @@ public class DiscoveryMulticastResponder extends AbstractJolokiaService<JolokiaS
      */
     @Override
     public synchronized void destroy() {
-        if (listenerThreads.size() > 0) {
+        if (!listenerThreads.isEmpty()) {
             for (MulticastSocketListenerThread thread : listenerThreads) {
                 thread.shutdown();
             }

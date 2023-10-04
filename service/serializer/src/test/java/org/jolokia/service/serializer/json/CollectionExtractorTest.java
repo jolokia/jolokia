@@ -51,8 +51,8 @@ public class CollectionExtractorTest {
     @Test
     public void json() throws AttributeNotFoundException {
         assertFalse(extractor.canSetValue());
-        Set set = new HashSet(Arrays.asList("jolokia","habanero"));
-        List ret = (List) extractor.extractObject(converter,set,new Stack<String>(),true);
+        Set<String> set = new HashSet<>(Arrays.asList("jolokia","habanero"));
+        List<?> ret = (List<?>) extractor.extractObject(converter, set, new Stack<>(), true);
         assertEquals(ret.size(),2);
         assertTrue(ret.contains("jolokia"));
         assertTrue(ret.contains("habanero"));
@@ -61,9 +61,9 @@ public class CollectionExtractorTest {
 
     @Test
     public void jsonAndPath() throws AttributeNotFoundException {
-        Collection collection = Arrays.asList("jolokia","habanero");
+        Collection<String> collection = Arrays.asList("jolokia","habanero");
 
-        Stack paths = new Stack();
+        Stack<String> paths = new Stack<>();
         paths.add("1");
 
         String val = (String) extractor.extractObject(converter,collection,paths,true);
@@ -71,18 +71,17 @@ public class CollectionExtractorTest {
     }
 
     @Test
-    public void jsonAndInvalidPaths() throws AttributeNotFoundException {
-        Collection collection = Arrays.asList("jolokia","habanero");
+    public void jsonAndInvalidPaths() {
+        Collection<String> collection = Arrays.asList("jolokia","habanero");
 
 
         for (String path : new String[] { "bla", "2"}) {
-            Stack<String> paths = new Stack();
+            Stack<String> paths = new Stack<>();
             paths.add(path);
             try {
                 extractor.extractObject(converter, collection, paths, true);
                 fail();
-            } catch (AttributeNotFoundException exp) {
-
+            } catch (AttributeNotFoundException ignored) {
             }
         }
     }
@@ -90,8 +89,8 @@ public class CollectionExtractorTest {
 
     @Test
     public void noJson() throws AttributeNotFoundException {
-        Set set = new HashSet(Arrays.asList("jolokia","habanero"));
-        Set ret = (Set) extractor.extractObject(converter,set,new Stack<String>(),false);
+        Set<String> set = Set.of("jolokia","habanero");
+        Set<?> ret = (Set<?>) extractor.extractObject(converter, set, new Stack<>(), false);
         assertEquals(ret,set);
     }
 

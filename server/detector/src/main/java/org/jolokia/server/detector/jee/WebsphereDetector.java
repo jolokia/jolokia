@@ -44,9 +44,9 @@ public class WebsphereDetector extends AbstractServerDetector {
     public static final  String  INTERNAL_ERROR_MSG = "Internal: Found AdminServiceFactory but can not call methods on it (wrong WAS version ?)";
 
     // Whether running under Websphere
-    private boolean isWebsphere = ClassUtil.checkForClass("com.ibm.websphere.management.AdminServiceFactory");
-    private boolean isWebsphere7 = ClassUtil.checkForClass("com.ibm.websphere.management.AdminContext");
-    private boolean isWebsphere6 = isWebsphere && !isWebsphere7;
+    private final boolean isWebsphere = ClassUtil.checkForClass("com.ibm.websphere.management.AdminServiceFactory");
+    private final boolean isWebsphere7 = ClassUtil.checkForClass("com.ibm.websphere.management.AdminContext");
+    private final boolean isWebsphere6 = isWebsphere && !isWebsphere7;
 
     /**
      * Create a server detector
@@ -69,9 +69,11 @@ public class WebsphereDetector extends AbstractServerDetector {
                 String date = matcher.group(2);
                 JSONObject extraInfo = new JSONObject();
                 if (date != null) {
+                    //noinspection unchecked
                     extraInfo.put("buildDate",date);
                 }
-                return new WebsphereServerHandle(version,extraInfo.size() > 0 ? extraInfo : null);
+                //noinspection unchecked
+                return new WebsphereServerHandle(version, !extraInfo.isEmpty() ? extraInfo : null);
             }
             return null;
         } else if (isWebsphere) {
@@ -80,19 +82,19 @@ public class WebsphereDetector extends AbstractServerDetector {
         return null;
     }
 
-    @Override
     /** {@inheritDoc} */
+    @Override
     public Set<MBeanServerConnection> getMBeanServers() {
         try {
             /*
-			 * this.mbeanServer = AdminServiceFactory.getMBeanFactory().getMBeanServer();
-			 */
-            Class adminServiceClass = ClassUtil.classForName("com.ibm.websphere.management.AdminServiceFactory",getClass().getClassLoader());
+             * this.mbeanServer = AdminServiceFactory.getMBeanFactory().getMBeanServer();
+             */
+            Class<?> adminServiceClass = ClassUtil.classForName("com.ibm.websphere.management.AdminServiceFactory", getClass().getClassLoader());
             if (adminServiceClass != null) {
-                Method getMBeanFactoryMethod = adminServiceClass.getMethod("getMBeanFactory", new Class[0]);
+                Method getMBeanFactoryMethod = adminServiceClass.getMethod("getMBeanFactory");
                 Object mbeanFactory = getMBeanFactoryMethod.invoke(null);
                 if (mbeanFactory != null) {
-                    Method getMBeanServerMethod = mbeanFactory.getClass().getMethod("getMBeanServer", new Class[0]);
+                    Method getMBeanServerMethod = mbeanFactory.getClass().getMethod("getMBeanServer");
                     return Collections.singleton((MBeanServerConnection) getMBeanServerMethod.invoke(mbeanFactory));
                 }
             }
@@ -100,9 +102,7 @@ public class WebsphereDetector extends AbstractServerDetector {
         catch (InvocationTargetException ex) {
             // CNFE should be earlier
             throw new IllegalArgumentException(INTERNAL_ERROR_MSG,ex);
-        } catch (IllegalAccessException ex) {
-            throw new IllegalArgumentException(INTERNAL_ERROR_MSG,ex);
-        } catch (NoSuchMethodException ex) {
+        } catch (IllegalAccessException | NoSuchMethodException ex) {
             throw new IllegalArgumentException(INTERNAL_ERROR_MSG,ex);
         }
         return null;
@@ -115,7 +115,7 @@ public class WebsphereDetector extends AbstractServerDetector {
      */
     static class WebsphereServerHandle extends DefaultServerHandle {
 
-        private Map<String,String> extraInfo;
+        private final Map<String,String> extraInfo;
 
         /** {@inheritDoc} */
         public WebsphereServerHandle(String pVersion, Map<String, String> pExtrainfo) {

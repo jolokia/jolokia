@@ -23,6 +23,7 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.text.DateFormat;
@@ -36,23 +37,22 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.management.MalformedObjectNameException;
 import javax.management.RuntimeMBeanException;
 import javax.security.auth.Subject;
+
+import com.sun.net.httpserver.Headers;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
 import org.jolokia.jvmagent.ParsedUri;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.http.BackChannelHolder;
 import org.jolokia.server.core.http.HttpRequestHandler;
 import org.jolokia.server.core.request.EmptyResponseException;
 import org.jolokia.server.core.service.api.JolokiaContext;
-import org.jolokia.server.core.util.ChunkedWriter;
 import org.jolokia.server.core.util.IoUtil;
 import org.jolokia.server.core.util.MimeTypeUtil;
 import org.json.simple.JSONAware;
 import org.json.simple.JSONStreamAware;
-import com.sun.net.httpserver.Headers;
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
 
 /**
  * HttpHandler for handling a Jolokia request
@@ -63,19 +63,19 @@ import com.sun.net.httpserver.HttpHandler;
 public class JolokiaHttpHandler implements HttpHandler {
 
     // The HttpRequestHandler
-    private HttpRequestHandler requestHandler;
+    private final HttpRequestHandler requestHandler;
 
     // Context of this request
     private String contextPath;
 
     // Content type matching
-    private Pattern contentTypePattern = Pattern.compile(".*;\\s*charset=([^;,]+)\\s*.*");
+    private final Pattern contentTypePattern = Pattern.compile(".*;\\s*charset=([^;,]+)\\s*.*");
 
     // Global context
-    private JolokiaContext jolokiaContext;
+    private final JolokiaContext jolokiaContext;
 
     // Backchannel Thread Pool (TODO: Optimize that for backchannel handling)
-    private Executor backChannelThreadPool = Executors.newCachedThreadPool();
+    private final Executor backChannelThreadPool = Executors.newCachedThreadPool();
     /**
      * Create a new HttpHandler for processing HTTP request
      *
@@ -116,11 +116,9 @@ public class JolokiaHttpHandler implements HttpHandler {
     // run as priviledged action
     private void doHandleAs(Subject subject, final HttpExchange pHttpExchange) {
         try {
-            Subject.doAs(subject, new PrivilegedExceptionAction<Void>() {
-            public Void run() throws IOException {
+            Subject.doAs(subject, (PrivilegedExceptionAction<Void>) () -> {
                 doHandle(pHttpExchange);
                 return null;
-            }
             });
         } catch (PrivilegedActionException e) {
             throw new SecurityException("Security exception: " + e.getCause(),e.getCause());
@@ -180,7 +178,7 @@ public class JolokiaHttpHandler implements HttpHandler {
                 jolokiaContext.debug("Response: " + json);
             }
         } catch (EmptyResponseException exp) {
-            // No response needed, will answer later ..
+            // No response needed, will answer later ...
             return;
         } catch (Throwable exp) {
             json = requestHandler.handleThrowable(
@@ -229,7 +227,7 @@ public class JolokiaHttpHandler implements HttpHandler {
         return requestHandler.handleGetRequest(parsedUri.getUri().toString(),parsedUri.getPathInfo(), parsedUri.getParameterMap());
     }
 
-    private JSONAware executePostRequest(HttpExchange pExchange, ParsedUri pUri) throws MalformedObjectNameException, IOException, EmptyResponseException {
+    private JSONAware executePostRequest(HttpExchange pExchange, ParsedUri pUri) throws IOException, EmptyResponseException {
         String encoding = null;
         Headers headers = pExchange.getRequestHeaders();
         String cType =  headers.getFirst("Content-Type");
@@ -307,7 +305,7 @@ public class JolokiaHttpHandler implements HttpHandler {
         if (pJson != null) {
             headers.set("Content-Type", getMimeType(pParsedUri) + "; charset=utf-8");
             pExchange.sendResponseHeaders(200, 0);
-            Writer writer = new OutputStreamWriter(pExchange.getResponseBody(), "UTF-8");
+            Writer writer = new OutputStreamWriter(pExchange.getResponseBody(), StandardCharsets.UTF_8);
 
             String callback = pParsedUri.getParameter(ConfigKey.CALLBACK.getKeyValue());
             IoUtil.streamResponseAndClose(writer, pJson, callback != null && MimeTypeUtil.isValidCallback(callback) ? callback : null);
@@ -326,7 +324,7 @@ public class JolokiaHttpHandler implements HttpHandler {
                 String json = pJson.toJSONString();
                 String callback = pParsedUri.getParameter(ConfigKey.CALLBACK.getKeyValue());
                 String content = callback != null && MimeTypeUtil.isValidCallback(callback) ? callback + "(" + json + ");" : json;
-                byte[] response = content.getBytes("UTF8");
+                byte[] response = content.getBytes(StandardCharsets.UTF_8);
                 pExchange.sendResponseHeaders(200,response.length);
                 out = pExchange.getResponseBody();
                 out.write(response);
@@ -337,7 +335,7 @@ public class JolokiaHttpHandler implements HttpHandler {
         } finally {
             if (out != null) {
                 // Always close in order to finish the request.
-                // Otherwise the thread blocks.
+                // Otherwise, the thread blocks.
                 out.close();
             }
         }

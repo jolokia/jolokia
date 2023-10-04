@@ -35,7 +35,7 @@ import org.json.simple.JSONObject;
 public class TabularDataExtractor implements Extractor {
 
     /** {@inheritDoc} */
-    public Class getType() {
+    public Class<?> getType() {
         return TabularData.class;
     }
 
@@ -180,7 +180,9 @@ public class TabularDataExtractor implements Extractor {
         List<String> indexNames = type.getIndexNames();
 
         boolean found = false;
+        //noinspection unchecked
         for (CompositeData cd : (Collection<CompositeData>) pTd.values()) {
+            @SuppressWarnings("unchecked")
             Stack<String> path = (Stack<String>) pExtraArgs.clone();
             try {
                 JSONObject targetJSONObject = ret;
@@ -193,6 +195,7 @@ public class TabularDataExtractor implements Extractor {
                 Object row = pConverter.extractObject(cd, path, true);
                 String finalIndex = indexNames.get(indexNames.size() - 1);
                 Object finalIndexValue = pConverter.extractObject(cd.get(finalIndex), null, true);
+                //noinspection unchecked
                 targetJSONObject.put(finalIndexValue, row);
                 found = true;
             } catch (ValueFaultHandler.AttributeFilteredException exp) {
@@ -206,6 +209,7 @@ public class TabularDataExtractor implements Extractor {
     }
 
     // Convert to a direct representation of the tabular data
+    @SuppressWarnings("unchecked")
     private Object convertTabularDataDirectly(TabularData pTd, Stack<String> pExtraArgs, ObjectToJsonConverter pConverter)
             throws AttributeNotFoundException {
         if (!pExtraArgs.empty()) {
@@ -215,9 +219,7 @@ public class TabularDataExtractor implements Extractor {
         JSONObject ret = new JSONObject();
         JSONArray indexNames = new JSONArray();
         TabularType type = pTd.getTabularType();
-        for (String index : type.getIndexNames()) {
-            indexNames.add(index);
-        }
+        indexNames.addAll(type.getIndexNames());
         ret.put("indexNames",indexNames);
 
         JSONArray values = new JSONArray();
@@ -234,6 +236,7 @@ public class TabularDataExtractor implements Extractor {
         JSONObject ret = (JSONObject) pJsonObject.get(pKey);
         if (ret == null) {
             ret = new JSONObject();
+            //noinspection unchecked
             pJsonObject.put(pKey, ret);
         }
         return ret;
@@ -246,9 +249,9 @@ public class TabularDataExtractor implements Extractor {
         List<String> indexNames = type.getIndexNames();
         checkPathFitsIndexNames(pPathStack, indexNames);
 
-        Object keys[] = new Object[indexNames.size()];
+        Object[] keys = new Object[indexNames.size()];
         CompositeType rowType = type.getRowType();
-        List<String> pathPartsUsed = new ArrayList<String>();
+        List<String> pathPartsUsed = new ArrayList<>();
         for (int i = 0; i < indexNames.size(); i++) {
             String path = pPathStack.pop();
             pathPartsUsed.add(path);
@@ -271,7 +274,7 @@ public class TabularDataExtractor implements Extractor {
                 }
             }
             throw new AttributeNotFoundException("No enough keys on path stack provided for accessing tabular data with index names "
-                                                 + buf.toString());
+                                                 + buf);
         }
     }
 
@@ -282,7 +285,7 @@ public class TabularDataExtractor implements Extractor {
     // from the ground up, so I can live with the solution here.
     // See also #97 for details.
     private Object getKey(CompositeType rowType, String key, String value)  {
-        OpenType keyType = rowType.getType(key);
+        OpenType<?> keyType = rowType.getType(key);
         if (SimpleType.STRING == keyType) {
             return value;
         } else if (SimpleType.INTEGER == keyType) {
@@ -311,11 +314,13 @@ public class TabularDataExtractor implements Extractor {
         JSONObject ret = new JSONObject();
         for (Object rowObject : pTd.values()) {
             CompositeData row = (CompositeData) rowObject;
+            @SuppressWarnings("unchecked")
             Stack<String> path = (Stack<String>) pExtraArgs.clone();
             Object keyObject = row.get("key");
             if (keyObject != null) {
                 try {
                     Object value = pConverter.extractObject(row.get("value"), path, true);
+                    //noinspection unchecked
                     ret.put(keyObject.toString(), value);
                 } catch (ValueFaultHandler.AttributeFilteredException exp) {
                     // Skip to next object since attribute was filtered

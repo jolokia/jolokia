@@ -37,13 +37,13 @@ public enum DataKeys {
     TYPE("type"),
     READ_WRITE("rw");
 
-    private String key;
+    private final String key;
 
     /**
      * Create the constant with the given key
      * @param pKey string representation of the key
      */
-    private DataKeys(String pKey) {
+    DataKeys(String pKey) {
         key = pKey;
     }
 

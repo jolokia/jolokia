@@ -28,7 +28,7 @@ import org.jolokia.server.core.restrictor.AllowAllRestrictor;
  */
 public class SampleRestrictor extends AllowAllRestrictor {
 
-    private String allowedDomain;
+    private final String allowedDomain;
 
     public SampleRestrictor(String pAllowedDomain) {
         allowedDomain = pAllowedDomain;

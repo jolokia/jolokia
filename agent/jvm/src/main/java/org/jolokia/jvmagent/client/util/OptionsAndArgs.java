@@ -36,12 +36,12 @@ public final class OptionsAndArgs {
     // ===================================================================================
     // Available options
 
-    private static final Map<String,String> SHORT_OPTS = new HashMap<String, String>();
-    private static final Set<String> OPTIONS = new HashSet<String>(Arrays.asList(
+    private static final Map<String,String> SHORT_OPTS = new HashMap<>();
+    private static final Set<String> OPTIONS = new HashSet<>(Arrays.asList(
             // JVM Agent options:
             "host", "port", "agentContext", "user", "password",
             "quiet!", "verbose!", "version!", "executor", "threadNamePrefix", "threadNr",
-            "backlog", "hide!", "protocol","authMode","authClass",
+            "backlog", "hide!", "protocol", "authMode", "authClass",
             "authUrl", "authPrincipalSpec", "authIgnoreCerts!",
             //https options:
             "keystore", "keystorePassword", "useSslClientAuthentication!",
@@ -57,11 +57,11 @@ public final class OptionsAndArgs {
             // Others:
             "config", "help!"));
 
-    private static final Set<String> LIST_OPTIONS = new HashSet<String>(Arrays.asList(
+    private static final Set<String> LIST_OPTIONS = new HashSet<>(Arrays.asList(
             "clientPrincipal", "sslProtocol", "sslCipherSuite"));
 
     static {
-        String shortOptsDef[] = {
+        String[] shortOptsDef = {
             "h", "help",
             "u", "user",
             "p", "password",
@@ -77,7 +77,7 @@ public final class OptionsAndArgs {
 
     // Command which require a PID as argument
     private static final Set<String> COMMANDS_REQUIRING_PID =
-            new HashSet<String>(Arrays.asList("start","stop","toggle","status"));
+            new HashSet<>(Arrays.asList("start", "stop", "toggle", "status"));
 
     // Launcher command
     private String command;
@@ -85,7 +85,7 @@ public final class OptionsAndArgs {
     // Extra arguments
     private List<String> extraArgs;
 
-    private Map<String,String> options;
+    private final Map<String,String> options;
 
     private boolean quiet;
     private boolean verbose;
@@ -98,7 +98,7 @@ public final class OptionsAndArgs {
      * defined in {@see OPTIONS} and {@see SHORT_OPTS}. For options with arguments, the argument can
      * bei either provided in the form '--option=value' or '--option value'. Everything which is
      * not an option is considered to be an argument. Two arguments are allowed: The command
-     * (first) and the PID (second). Any non numeric PID is considered to be a pattern. Either {@link #getPid()} or
+     * (first) and the PID (second). Any non-numeric PID is considered to be a pattern. Either {@link #getPid()} or
      * {@link #getProcessPattern()} is set.
      * <p/>
      * If no PID/pattern and no command is given the "list" command is implied. If as first argument a pure numeric value
@@ -110,10 +110,10 @@ public final class OptionsAndArgs {
      * @throws IllegalArgumentException if parsing fails
      */
     public OptionsAndArgs(Set<String> pCommands, String ... pArgs) {
-        options = new HashMap<String, String>();
+        options = new HashMap<>();
 
         // Parse options
-        List<String> arguments = new ArrayList<String>();
+        List<String> arguments = new ArrayList<>();
         for (int i = 0; i < pArgs.length; i++) {
             String arg = pArgs[i];
             if (arg.startsWith("-")) {
@@ -129,8 +129,8 @@ public final class OptionsAndArgs {
                 arguments.add(arg);
             }
         }
-        command = arguments.size() > 0 ? arguments.remove(0) : null;
-        String[] args = arguments.size() > 0 ? arguments.toArray(new String[0]) : new String[0];
+        command = !arguments.isEmpty() ? arguments.remove(0) : null;
+        String[] args = !arguments.isEmpty() ? arguments.toArray(new String[0]) : new String[0];
 
         init(pCommands, args);
     }
@@ -158,7 +158,7 @@ public final class OptionsAndArgs {
      * @return process id or null
      */
     public String getPid() {
-        String arg = extraArgs.size() > 0 ? extraArgs.get(0) : null;
+        String arg = !extraArgs.isEmpty() ? extraArgs.get(0) : null;
         return arg != null && arg.matches("^\\d+$") ? arg : null;
     }
 
@@ -169,7 +169,7 @@ public final class OptionsAndArgs {
      * @return pattern to match a process name or null
      */
     public Pattern getProcessPattern() {
-        String arg = extraArgs.size() > 0 ? extraArgs.get(0) : null;
+        String arg = !extraArgs.isEmpty() ? extraArgs.get(0) : null;
         try {
             return arg != null && getPid() == null ?
                     Pattern.compile(arg, Pattern.CASE_INSENSITIVE)
@@ -222,7 +222,7 @@ public final class OptionsAndArgs {
     }
 
     /**
-     * Return <code>true</code> if this command required a attached VM or <code>false</code> otherwise
+     * Return <code>true</code> if this command required an attached VM or <code>false</code> otherwise
      *
      * @return true if the command requires an attached VM
      */
@@ -340,13 +340,13 @@ public final class OptionsAndArgs {
     }
 
     private void verifyCommandAndArgs(String pCommand, List<String> pArgs) {
-        if (COMMANDS_REQUIRING_PID.contains(pCommand) && pArgs.size() == 0) {
+        if (COMMANDS_REQUIRING_PID.contains(pCommand) && pArgs.isEmpty()) {
             throw new IllegalArgumentException("No process id (PID) or pattern given");
-        };
+        }
     }
 
     private List<String> checkCommandAndArgs(Set<String> pCommands, String ... pArgs) {
-        List<String> ret = new ArrayList<String>(Arrays.asList(pArgs));
+        List<String> ret = new ArrayList<>(Arrays.asList(pArgs));
         if (options.containsKey("help")) {
             command = "help";
         } else if (options.containsKey("version")) {
@@ -363,9 +363,9 @@ public final class OptionsAndArgs {
 
     // A parsed argument
     private static final class ArgParsed {
-        private boolean skipNext;
-        private String  option;
-        private String  value;
+        private final boolean skipNext;
+        private final String  option;
+        private final String  value;
 
         private ArgParsed(String pOption, String pValue, boolean pSkipNext) {
             skipNext = pSkipNext;

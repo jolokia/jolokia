@@ -60,9 +60,9 @@ public class GlassfishDetectorTest extends BaseDetectorTest {
         GlassfishDetector detector = createDetector();
         MBeanServer mockServer = createMock(MBeanServer.class);
         expect(mockServer.queryNames(new ObjectName("com.sun.appserv:j2eeType=J2EEServer,*"), null)).
-                andReturn(Collections.<ObjectName>emptySet()).anyTimes();
+                andReturn(Collections.emptySet()).anyTimes();
         expect(mockServer.queryNames(new ObjectName("amx:type=domain-root,*"),null)).
-                andReturn(Collections.<ObjectName>emptySet()).anyTimes();
+                andReturn(Collections.emptySet()).anyTimes();
         replay(mockServer);
         if (property != null) {
             System.setProperty("glassfish.version",property);
@@ -79,8 +79,7 @@ public class GlassfishDetectorTest extends BaseDetectorTest {
     }
 
     private GlassfishDetector createDetector() {
-        GlassfishDetector detector = new GlassfishDetector(0);
-        return detector;
+        return new GlassfishDetector(0);
     }
 
     @Test
@@ -89,12 +88,12 @@ public class GlassfishDetectorTest extends BaseDetectorTest {
         MBeanServer mockServer = createMock(MBeanServer.class);
 
         expect(mockServer.queryNames(new ObjectName("com.sun.appserv:j2eeType=J2EEServer,*"),null)).
-                andReturn(new HashSet<ObjectName>(Arrays.asList(serverMbean))).anyTimes();
+                andReturn(new HashSet<>(List.of(serverMbean))).anyTimes();
         expect(mockServer.isRegistered(serverMbean)).andStubReturn(true);
         expect(mockServer.getAttribute(serverMbean, "serverVersion")).andReturn("GlassFish 3x");
         expect(mockServer.queryNames(new ObjectName("com.sun.appserver:type=Host,*"),null)).
-                andReturn(new HashSet<ObjectName>(Arrays.asList(serverMbean))).anyTimes();
-        expect(mockServer.queryNames(new ObjectName("amx:type=domain-root,*"),null)).andReturn(Collections.<ObjectName>emptySet());
+                andReturn(new HashSet<>(List.of(serverMbean))).anyTimes();
+        expect(mockServer.queryNames(new ObjectName("amx:type=domain-root,*"),null)).andReturn(Collections.emptySet());
 
         replay(mockServer);
 
@@ -117,11 +116,11 @@ public class GlassfishDetectorTest extends BaseDetectorTest {
         MBeanServer mockServer = createMock(MBeanServer.class);
 
         expect(mockServer.queryNames(new ObjectName("com.sun.appserv:j2eeType=J2EEServer,*"),null)).
-                andReturn(new HashSet<ObjectName>(Arrays.asList(serverMbean))).anyTimes();
+                andReturn(new HashSet<>(List.of(serverMbean))).anyTimes();
         expect(mockServer.isRegistered(serverMbean)).andStubReturn(true);
         expect(mockServer.getAttribute(serverMbean, "serverVersion")).andReturn("GlassFish v3");
         if (booted) {
-            expect(mockServer.queryNames(new ObjectName("amx:type=domain-root,*"),null)).andReturn(new HashSet<ObjectName>(Arrays.asList(serverMbean)));
+            expect(mockServer.queryNames(new ObjectName("amx:type=domain-root,*"),null)).andReturn(new HashSet<>(List.of(serverMbean)));
             expect(mockServer.getAttribute(serverMbean,"ApplicationServerFullVersion")).andReturn(" GlassFish v3.1 ");
             replay(mockServer);
             MBeanServerAccess mbeanServers = getMBeanServerManager(mockServer);
@@ -130,8 +129,8 @@ public class GlassfishDetectorTest extends BaseDetectorTest {
             assertEquals(info.getProduct(),"glassfish");
             return detector.getRequestInterceptor(mbeanServers);
         } else {
-            expect(mockServer.queryNames(new ObjectName("amx:type=domain-root,*"),null)).andReturn(new HashSet<ObjectName>()).anyTimes();
-            expect(mockServer.queryNames(new ObjectName("amx:type=domain-root,*"),null)).andReturn(Collections.<ObjectName>emptySet()).anyTimes();
+            expect(mockServer.queryNames(new ObjectName("amx:type=domain-root,*"),null)).andReturn(new HashSet<>()).anyTimes();
+            expect(mockServer.queryNames(new ObjectName("amx:type=domain-root,*"),null)).andReturn(Collections.emptySet()).anyTimes();
             replay(mockServer);
             MBeanServerAccess mbeanServers = getMBeanServerManager(mockServer);
             ServerHandle info = detector.detect(mbeanServers);
@@ -152,13 +151,13 @@ public class GlassfishDetectorTest extends BaseDetectorTest {
 
     @Test
     public void postDetectWithNegativConfig() throws MalformedObjectNameException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException {
-        doPlainDetect(false, Collections.<String,Object>singletonMap("bootAmx",Boolean.FALSE));
+        doPlainDetect(false, Collections.singletonMap("bootAmx", Boolean.FALSE));
     }
 
     private void postDetectPositive(String opts) throws MalformedObjectNameException, MBeanException, AttributeNotFoundException, InstanceNotFoundException, ReflectionException {
         RequestInterceptor interceptor = doPlainDetect(false,null);
         MBeanServer mockServer = createMock(MBeanServer.class);
-        expect(mockServer.queryNames(new ObjectName("amx:type=domain-root,*"),null)).andReturn(Collections.<ObjectName>emptySet()).anyTimes();
+        expect(mockServer.queryNames(new ObjectName("amx:type=domain-root,*"),null)).andReturn(Collections.emptySet()).anyTimes();
         ObjectName bootAmxName = new ObjectName("amx-support:type=boot-amx");
         expect(mockServer.isRegistered(bootAmxName)).andStubReturn(true);
         expect(mockServer.invoke(bootAmxName,"bootAMX",null,null)).andReturn(null);
@@ -181,7 +180,7 @@ public class GlassfishDetectorTest extends BaseDetectorTest {
     private void detectExceptionDuringPostProcess(String regexp,Exception exp) throws MalformedObjectNameException, MBeanException, AttributeNotFoundException, InstanceNotFoundException, ReflectionException {
         RequestInterceptor interceptor = doPlainDetect(false,null);
         MBeanServer mockServer = createMock(MBeanServer.class);
-        expect(mockServer.queryNames(new ObjectName("amx:type=domain-root,*"),null)).andReturn(Collections.<ObjectName>emptySet()).anyTimes();
+        expect(mockServer.queryNames(new ObjectName("amx:type=domain-root,*"),null)).andReturn(Collections.emptySet()).anyTimes();
         ObjectName bootAmxName = new ObjectName("amx-support:type=boot-amx");
         expect(mockServer.isRegistered(bootAmxName)).andStubReturn(true);
         expect(mockServer.invoke(bootAmxName, "bootAMX", null, null)).andThrow(exp);
@@ -194,6 +193,6 @@ public class GlassfishDetectorTest extends BaseDetectorTest {
     }
 
 
-    private static String SERVER_MBEAN = "com.sun.appserv:j2eeType=J2EEServer,type=bla";
+    private static final String SERVER_MBEAN = "com.sun.appserv:j2eeType=J2EEServer,type=bla";
 
 }

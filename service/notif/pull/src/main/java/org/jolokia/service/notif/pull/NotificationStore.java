@@ -17,10 +17,10 @@ import org.jolokia.server.core.service.notification.NotificationSubscription;
 public class NotificationStore {
 
     // maximum number of entries to hold
-    private int maxEntries;
+    private final int maxEntries;
 
     // the set of notification, sorted by sequence number
-    private SortedSet<Notification> entries;
+    private final SortedSet<Notification> entries;
 
     // number of dropped notifications because the max limit has been reached
     private int dropped;
@@ -38,7 +38,7 @@ public class NotificationStore {
      */
     public NotificationStore(NotificationSubscription pSubscription, int pMaxEntries) {
         subscription = pSubscription;
-        entries = Collections.synchronizedSortedSet(new TreeSet<Notification>(getComparator()));
+        entries = Collections.synchronizedSortedSet(new TreeSet<>(getComparator()));
         maxEntries = pMaxEntries;
         dropped = 0;
     }
@@ -62,7 +62,7 @@ public class NotificationStore {
      * @return list of notifications, ordered by sequence number
      */
     NotificationResult fetchAndClear() {
-        ArrayList<Notification> notifs = new ArrayList<Notification>(entries);
+        ArrayList<Notification> notifs = new ArrayList<>(entries);
         NotificationResult ret = new  NotificationResult(subscription.getHandle(),notifs, subscription.getHandback(),dropped);
         entries.clear();
         subscription.ping();
@@ -83,7 +83,7 @@ public class NotificationStore {
 
     // Comparator based on sequence number
     private Comparator<? super Notification> getComparator() {
-        return new Comparator<Notification>() {
+        return new Comparator<>() {
             /** {@inheritDoc} */
             public int compare(Notification o1, Notification o2) {
                 return (int) (o1.getSequenceNumber() - o2.getSequenceNumber());

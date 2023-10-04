@@ -79,8 +79,6 @@ public class BackendManager {
      *
      * @param pJmxReq request to perform
      * @return the already converted answer.
-     * @throws JMException
-     * @throws IOException
      */
     @SuppressWarnings("unchecked")
     public JSONObject handleRequest(JolokiaRequest pJmxReq) throws JMException, IOException, EmptyResponseException {

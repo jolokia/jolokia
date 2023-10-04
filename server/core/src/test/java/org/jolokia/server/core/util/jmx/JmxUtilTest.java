@@ -87,5 +87,5 @@ public class JmxUtilTest implements NotificationListener {
     }
 
     public static class Bla implements BlaMBean {}
-    public static interface BlaMBean {}
+    public interface BlaMBean {}
 }

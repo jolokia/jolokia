@@ -30,7 +30,7 @@ import org.jolokia.server.core.config.ConfigKey;
 public class ProcessingParameters {
 
     // Request specific parameters
-    private Map<ConfigKey,String> params;
+    private final Map<ConfigKey,String> params;
 
     /**
      * Constructor which is already filtered and splitted
@@ -68,7 +68,7 @@ public class ProcessingParameters {
         if (pConfig == null) {
             return this;
         } else {
-            Map<ConfigKey,String> newParams = new HashMap<ConfigKey, String>();
+            Map<ConfigKey,String> newParams = new HashMap<>();
             newParams.putAll(params);
             newParams.putAll(convertToConfigMap(pConfig));
             return new ProcessingParameters(newParams);
@@ -88,7 +88,7 @@ public class ProcessingParameters {
     // Convert a string-string map to one with ConfigKeys. All parameters which doesn't
     // map to a ConfigKey are filtered out
     private Map<ConfigKey, String> convertToConfigMap(Map<String, String> pParams) {
-        Map<ConfigKey,String> config = new HashMap<ConfigKey, String>();
+        Map<ConfigKey,String> config = new HashMap<>();
         if (pParams != null) {
             for (Map.Entry<String,?> entry : pParams.entrySet()) {
                 ConfigKey cKey = ConfigKey.getRequestConfigKey(entry.getKey());

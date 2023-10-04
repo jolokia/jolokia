@@ -52,7 +52,7 @@ public class VirgoDetector extends AbstractOsgiServerDetector {
             } else if (getBundleVersion("org.eclipse.jetty.osgi.boot") != null) {
                 type = "jetty";
             }
-            Map<String,String> extraInfo = new HashMap<String,String>();
+            Map<String,String> extraInfo = new HashMap<>();
             extraInfo.put("type",type);
             return new VirgoServerHandle(version,extraInfo);
         } else {

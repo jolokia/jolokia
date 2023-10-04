@@ -38,16 +38,13 @@ import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
 
-
-/**
- */
 public class RawObjectNameTest {
 
     private BackendManager backendManager;
 
 
     @BeforeMethod
-    public void setUp() throws Exception {
+    public void setUp() {
 
         LocalRequestHandler requestHandler = new LocalRequestHandler(0);
         TestJolokiaContext ctx = new TestJolokiaContext.Builder()
@@ -108,9 +105,10 @@ public class RawObjectNameTest {
         JSONObject json = backendManager.handleRequest(req);
         JSONAware value = (JSONAware) json.get("value");
         String memoryKey = null;
-        Set keys = value instanceof JSONObject ?
+        @SuppressWarnings({"unchecked", "rawtypes"})
+        Set<?> keys = value instanceof JSONObject ?
                 ((JSONObject) value).keySet() :
-                new HashSet((JSONArray) value);
+                new HashSet<>((JSONArray) value);
         for (Object key : keys) {
             String keyText = key.toString();
             if (keyText.contains("MemoryPool")) {
@@ -118,7 +116,7 @@ public class RawObjectNameTest {
             }
         }
 
-        assertNotNull("Should have found a JMX key matching java.lang:type=MemoryPool", memoryKey);
+        assertNotNull(memoryKey, "Should have found a JMX key matching java.lang:type=MemoryPool");
 
         // canonical order will have name first; raw format should start with type=MemoryPool
         String prefix = "^(java\\.lang:)?type=MemoryPool";

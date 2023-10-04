@@ -87,11 +87,11 @@ public class JvmAgentConfig extends JolokiaServerConfig {
 
     // Split arguments into a map
     private static Map<String, String> split(String pAgentArgs) {
-        Map<String,String> ret = new HashMap<String, String>();
-        if (pAgentArgs != null && pAgentArgs.length() > 0) {
+        Map<String,String> ret = new HashMap<>();
+        if (pAgentArgs != null && !pAgentArgs.isEmpty()) {
             for (String arg : EscapeUtil.splitAsArray(pAgentArgs, EscapeUtil.CSV_ESCAPE, ",")) {
                 String[] prop = arg.split("=",2);
-                if (prop == null || prop.length != 2) {
+                if (prop.length != 2) {
                     throw new IllegalArgumentException("jolokia: Invalid option '" + arg + "'");
                 } else {
                     ret.put(prop[0],prop[1]);

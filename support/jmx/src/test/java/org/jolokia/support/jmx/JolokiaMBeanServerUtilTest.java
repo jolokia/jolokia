@@ -45,7 +45,7 @@ public class JolokiaMBeanServerUtilTest {
     }
 
     @Test
-    public void checkNotRegistered() throws MalformedObjectNameException {
+    public void checkNotRegistered() {
         MBeanServer jolokiaServer = JolokiaMBeanServerUtil.getJolokiaMBeanServer();
         Assert.assertNotEquals(ManagementFactory.getPlatformMBeanServer(), jolokiaServer);
         for (MBeanServer server : MBeanServerFactory.findMBeanServer(null)) {
@@ -70,6 +70,6 @@ public class JolokiaMBeanServerUtilTest {
     public interface DummyMBean {
 
     }
-    private class Dummy implements DummyMBean {
+    private static class Dummy implements DummyMBean {
     }
 }

@@ -16,12 +16,10 @@
 
 package org.jolokia.it.core.notification;
 
-import javax.management.MalformedObjectNameException;
-
 /**
  * @author roland
  * @since 23.03.13
  */
 public interface ChatMBean {
-    public void message(String who,String message);
+    void message(String who, String message);
 }

@@ -17,7 +17,7 @@ import static org.testng.Assert.assertEquals;
  */
 public class EncryptCommandTest {
 
-    class JCPPTest implements JolokiaCipher.KeyHolder {
+    static class JCPPTest implements JolokiaCipher.KeyHolder {
         @Override
         public String getKey() {
             return "changeit";

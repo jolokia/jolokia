@@ -16,16 +16,23 @@ package org.jolokia.server.detector.jee;
  * limitations under the License.
  */
 
-import java.util.Arrays;
 import java.util.HashSet;
-
-import javax.management.*;
+import java.util.List;
+import javax.management.AttributeNotFoundException;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanException;
+import javax.management.MBeanServer;
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import javax.management.ReflectionException;
 
 import org.jolokia.server.core.detector.ServerDetector;
 import org.jolokia.server.core.service.api.ServerHandle;
 import org.testng.annotations.Test;
 
-import static org.easymock.EasyMock.*;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -40,7 +47,7 @@ public class WebSphereDetectorTest extends BaseDetectorTest {
         ObjectName serverMbean = new ObjectName(SERVER_MBEAN);
         MBeanServer mockServer = createMock(MBeanServer.class);
         expect(mockServer.queryNames(new ObjectName("*:j2eeType=J2EEServer,type=Server,*"),null)).
-                andStubReturn(new HashSet<ObjectName>(Arrays.asList(serverMbean)));
+                andStubReturn(new HashSet<>(List.of(serverMbean)));
         expect(mockServer.isRegistered(serverMbean)).andStubReturn(true);
         expect(mockServer.getAttribute(serverMbean,"platformName")).andReturn("IBM WebSphere Application Server");
         expect(mockServer.getAttribute(serverMbean,"serverVersion")).andReturn(SERVER_VERSION_V6);
@@ -53,12 +60,12 @@ public class WebSphereDetectorTest extends BaseDetectorTest {
 
 
 
-    private static String SERVER_MBEAN = "WebSphere:cell=bhutNode02Cell,j2eeType=J2EEServer," +
-                                         "mbeanIdentifier=cells/bhutNode02Cell/nodes/bhutNode02/servers/server1/server.xml#Server_1245012281417," +
-                                         "name=server1,node=bhutNode02,platform=proxy,process=server1,processType=UnManagedProcess," +
-                                         "spec=1.0,type=Server,version=6.1.0.33";
+    private static final String SERVER_MBEAN = "WebSphere:cell=bhutNode02Cell,j2eeType=J2EEServer," +
+                                               "mbeanIdentifier=cells/bhutNode02Cell/nodes/bhutNode02/servers/server1/server.xml#Server_1245012281417," +
+                                               "name=server1,node=bhutNode02,platform=proxy,process=server1,processType=UnManagedProcess," +
+                                               "spec=1.0,type=Server,version=6.1.0.33";
 
-    private static String SERVER_VERSION_V6 =
+    private static final String SERVER_VERSION_V6 =
             "--------------------------------------------------------------------------------\n" +
             "IBM WebSphere Application Server Product Installation Status Report\n" +
             "--------------------------------------------------------------------------------\n" +

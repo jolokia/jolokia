@@ -37,7 +37,7 @@ public class ReadHandler extends AbstractCommandHandler<JolokiaReadRequest> {
 
     // MBean Handler used for extracting MBean Meta data
     private static final MBeanServerAccess.MBeanAction<MBeanInfo> MBEAN_INFO_HANDLER =
-            new MBeanServerAccess.MBeanAction<MBeanInfo>() {
+            new MBeanServerAccess.MBeanAction<>() {
                 /** {@inheritDoc} */
                 public MBeanInfo execute(MBeanServerConnection pConn, ObjectName pName, Object... extraArgs)
                         throws ReflectionException, InstanceNotFoundException, IOException {
@@ -51,7 +51,7 @@ public class ReadHandler extends AbstractCommandHandler<JolokiaReadRequest> {
 
     // MBean Handler for getting an attribute
     private static final MBeanServerAccess.MBeanAction<Object> MBEAN_ATTRIBUTE_READ_HANDLER =
-            new MBeanServerAccess.MBeanAction<Object>() {
+            new MBeanServerAccess.MBeanAction<>() {
                 /** {@inheritDoc} */
                 public Object execute(MBeanServerConnection pConn, ObjectName pName, Object... extraArgs)
                         throws ReflectionException, InstanceNotFoundException, IOException, MBeanException, AttributeNotFoundException {
@@ -96,8 +96,8 @@ public class ReadHandler extends AbstractCommandHandler<JolokiaReadRequest> {
         return pServer.getAttribute(pRequest.getObjectName(), pRequest.getAttributeName());
     }
 
-    @Override
     /** {@inheritDoc} */
+    @Override
     public Object doHandleAllServerRequest(MBeanServerAccess pServerManager, JolokiaReadRequest pRequest, Object pPreviousResult)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
         // Read command is still exclusive yet (no merging of bulk read requests). If a non-exclusive usage
@@ -117,18 +117,18 @@ public class ReadHandler extends AbstractCommandHandler<JolokiaReadRequest> {
         ObjectName objectName = pRequest.getObjectName();
         ValueFaultHandler faultHandler = pRequest.getValueFaultHandler();
         Set<ObjectName> names = searchMBeans(pServerManager, objectName);
-        Map<String,Object> ret = new HashMap<String, Object>();
+        Map<String,Object> ret = new HashMap<>();
         List<String> attributeNames = pRequest.getAttributeNames();
         for (ObjectName name : names) {
             try {
                 if (!pRequest.hasAttribute()) {
-                    Map values = (Map) fetchAttributes(pServerManager,name, null, faultHandler);
-                    if (values != null && values.size() > 0) {
+                    Map<?, ?> values = (Map<?, ?>) fetchAttributes(pServerManager,name, null, faultHandler);
+                    if (!values.isEmpty()) {
                         ret.put(pRequest.getOrderedObjectName(name),values);
                     }
                 } else {
                     List<String> filteredAttributeNames = filterAttributeNames(pServerManager, name, attributeNames);
-                    if (filteredAttributeNames.size() == 0) {
+                    if (filteredAttributeNames.isEmpty()) {
                         continue;
                     }
                     ret.put(pRequest.getOrderedObjectName(name),
@@ -140,7 +140,7 @@ public class ReadHandler extends AbstractCommandHandler<JolokiaReadRequest> {
                 // here and go on ....
             }
         }
-        if (ret.size() == 0) {
+        if (ret.isEmpty()) {
             throw new IllegalArgumentException("No matching attributes " +
                     pRequest.getAttributeNames() + " found on MBeans " + names);
         }
@@ -149,7 +149,7 @@ public class ReadHandler extends AbstractCommandHandler<JolokiaReadRequest> {
 
     private Set<ObjectName> searchMBeans(MBeanServerAccess pServerManager, ObjectName pObjectName) throws IOException, InstanceNotFoundException {
         Set<ObjectName> names = pServerManager.queryNames(pObjectName);
-        if (names.size() == 0) {
+        if (names.isEmpty()) {
             throw new InstanceNotFoundException("No MBean with pattern " + pObjectName +
                     " found for reading attributes");
         }
@@ -159,8 +159,8 @@ public class ReadHandler extends AbstractCommandHandler<JolokiaReadRequest> {
     // Return only those attributes of an mbean which has one of the given names
     private List<String> filterAttributeNames(MBeanServerAccess pSeverManager,ObjectName pName, List<String> pNames)
             throws IOException, ReflectionException, MBeanException, AttributeNotFoundException, InstanceNotFoundException {
-        Set<String> attrs = new HashSet<String>(getAllAttributesNames(pSeverManager,pName));
-        List<String> ret = new ArrayList<String>();
+        Set<String> attrs = new HashSet<>(getAllAttributesNames(pSeverManager, pName));
+        List<String> ret = new ArrayList<>();
         for (String name : pNames) {
             if (attrs.contains(name)) {
                 ret.add(name);
@@ -169,12 +169,13 @@ public class ReadHandler extends AbstractCommandHandler<JolokiaReadRequest> {
         return ret;
     }
 
+    @SuppressWarnings("TryWithIdenticalCatches")
     private Object fetchAttributes(MBeanServerAccess pServerManager, ObjectName pMBeanName, List<String> pAttributeNames,
                                    ValueFaultHandler pFaultHandler)
             throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
 
         List<String> attributes = resolveAttributes(pServerManager, pMBeanName, pAttributeNames);
-        Map<String,Object> ret = new HashMap<String, Object>();
+        Map<String,Object> ret = new HashMap<>();
 
         for (String attribute : attributes) {
             try {
@@ -217,7 +218,7 @@ public class ReadHandler extends AbstractCommandHandler<JolokiaReadRequest> {
     }
 
     private boolean shouldAllAttributesBeFetched(List<String> pAttributeNames) {
-        return pAttributeNames == null || pAttributeNames.size() == 0 || pAttributeNames.size() == 1 && pAttributeNames.get(0) == null;
+        return pAttributeNames == null || pAttributeNames.isEmpty() || pAttributeNames.size() == 1 && pAttributeNames.get(0) == null;
     }
 
     // Get the MBeanInfo from one of the provided MBeanServers
@@ -236,7 +237,7 @@ public class ReadHandler extends AbstractCommandHandler<JolokiaReadRequest> {
     private List<String> getAllAttributesNames(MBeanServerAccess pServerManager, ObjectName pObjectName)
             throws IOException, ReflectionException, MBeanException, AttributeNotFoundException, InstanceNotFoundException {
         MBeanInfo mBeanInfo = getMBeanInfo(pServerManager, pObjectName);
-        List<String> ret = new ArrayList<String>();
+        List<String> ret = new ArrayList<>();
         for (MBeanAttributeInfo attrInfo : mBeanInfo.getAttributes()) {
             if (attrInfo.isReadable()) {
                 ret.add(attrInfo.getName());

@@ -47,9 +47,9 @@ public final class IpChecker {
             convertToIntTuple(pToCheck);
             return pExpected.equals(pToCheck);
         } else if (parts.length == 2) {
-            int ipToCheck[] = convertToIntTuple(pToCheck);
-            int ipPattern[] = convertToIntTuple(parts[0]);
-            int netmask[];
+            int[] ipToCheck = convertToIntTuple(pToCheck);
+            int[] ipPattern = convertToIntTuple(parts[0]);
+            int[] netmask;
             if (parts[1].length() <= 2) {
                 netmask = transformCidrToNetmask(parts[1]);
             } else {
@@ -72,13 +72,9 @@ public final class IpChecker {
             if (pCidr < 0 || pCidr > 32) {
                 throw new IllegalArgumentException("Invalid netmask specification " + pCidr);
             }
-            StringBuffer buf = new StringBuffer();
-            for (int i=0;i<pCidr;i++) {
-                buf.append("1");
-            }
-            for (int i=pCidr;i<32;i++) {
-                buf.append("0");
-            }
+            StringBuilder buf = new StringBuilder();
+            buf.append("1".repeat(pCidr));
+            buf.append("0".repeat(32 - pCidr));
             int[] ret = new int[4];
             int start = 0,end = 8;
 
@@ -98,7 +94,7 @@ public final class IpChecker {
         if (parts.length != 4) {
             throw new IllegalArgumentException("Invalid IP-Adresse " + pAddress);
         }
-        int ret[] = new int[4];
+        int[] ret = new int[4];
         for (int i = 0; i < 4; i++) {
             try {
                 ret[i] = Integer.parseInt(parts[i]);

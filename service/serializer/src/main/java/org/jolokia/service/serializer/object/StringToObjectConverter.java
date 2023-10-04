@@ -2,16 +2,19 @@ package org.jolokia.service.serializer.object;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
-
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.management.ObjectName;
 
-import org.jolokia.server.core.util.*;
+import org.jolokia.server.core.util.ClassUtil;
+import org.jolokia.server.core.util.DateUtil;
+import org.jolokia.server.core.util.EscapeUtil;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
@@ -42,8 +45,9 @@ import org.json.simple.parser.ParseException;
 public class StringToObjectConverter {
 
 
-    private static final Map<String,Parser> PARSER_MAP = new HashMap<String,Parser>();
-    private static final Map<String,Class> TYPE_SIGNATURE_MAP = new HashMap<String, Class>();
+    private static final Map<String,Parser> PARSER_MAP = new HashMap<>();
+    @SuppressWarnings("rawtypes")
+    private static final Map<String,Class> TYPE_SIGNATURE_MAP = new HashMap<>();
 
     static {
         PARSER_MAP.put(Byte.class.getName(),new ByteParser());
@@ -60,7 +64,7 @@ public class StringToObjectConverter {
         PARSER_MAP.put("float",new FloatParser());
         PARSER_MAP.put(BigDecimal.class.getName(),new BigDecimalParser());
         PARSER_MAP.put(BigInteger.class.getName(),new BigIntegerParser());
-        
+
 
         PARSER_MAP.put(Boolean.class.getName(),new BooleanParser());
         PARSER_MAP.put("boolean",new BooleanParser());
@@ -72,7 +76,7 @@ public class StringToObjectConverter {
         PARSER_MAP.put(URL.class.getName(),new URLParser());
 
         JSONParser jsonExtractor = new JSONParser();
-        for (Class type : new Class[] { Map.class, List.class,
+        for (Class<?> type : new Class[] { Map.class, List.class,
                                         JSONObject.class, JSONArray.class }) {
             PARSER_MAP.put(type.getName(),jsonExtractor);
         }
@@ -99,7 +103,7 @@ public class StringToObjectConverter {
         if (pValue == null) {
             return null;
         } else {
-            Class expectedClass = ClassUtil.classForName(pExpectedClassName);
+            Class<?> expectedClass = ClassUtil.classForName(pExpectedClassName);
             Object param = null;
             if (expectedClass != null) {
                 param = prepareValue(expectedClass,pValue);
@@ -122,11 +126,13 @@ public class StringToObjectConverter {
     // Extract a type version of the method above. This might be useful later
     // on, e.g. when setting enums should be supported for certain
     // use cases
+    @SuppressWarnings("rawtypes")
     Object prepareValue(Class expectedClass, Object pValue) {
         if (pValue == null) {
             return null;
         }
         if (Enum.class.isAssignableFrom(expectedClass)) {
+            //noinspection unchecked
             return Enum.valueOf(expectedClass,pValue.toString());
         } else {
             return prepareForDirectUsage(expectedClass, pValue);
@@ -135,19 +141,19 @@ public class StringToObjectConverter {
 
     // ======================================================================================================
 
-    // Check whether an argument can be used directly 
+    // Check whether an argument can be used directly
     // or the argument could be used in a public constructor
     // or whether it needs some sort of conversion,
     // Returns null if a string conversion should happen
-    private Object prepareForDirectUsage(Class expectedClass, Object pArgument) {
-        Class givenClass = pArgument.getClass();
+    private Object prepareForDirectUsage(Class<?> expectedClass, Object pArgument) {
+        Class<?> givenClass = pArgument.getClass();
         if (expectedClass.isArray() && List.class.isAssignableFrom(givenClass)) {
-            return convertListToArray(expectedClass, (List) pArgument);
+            return convertListToArray(expectedClass, (List<?>) pArgument);
         } else {
         	return expectedClass.isAssignableFrom(givenClass) ? pArgument : null;
         }
     }
-    
+
     private Object convertByConstructor(String pType, String pValue) {
         Class<?> expectedClass = ClassUtil.classForName(pType);
         if (expectedClass != null) {
@@ -161,7 +167,7 @@ public class StringToObjectConverter {
                 }
             }
         }
-        
+
         return null;
     }
 
@@ -186,12 +192,12 @@ public class StringToObjectConverter {
         if (parser != null) {
             return parser.extract(value);
         }
-        
+
         Object cValue = convertByConstructor(pType, pValue);
         if (cValue != null) {
         	return cValue;
         }
-        
+
         throw new IllegalArgumentException(
                 "Cannot convert string " + value + " to type " +
                         pType + " because no converter could be found");
@@ -201,7 +207,7 @@ public class StringToObjectConverter {
     private Object convertToArray(String pType, String pValue) {
         // It's an array
         String t = pType.substring(1,2);
-        Class valueType;
+        Class<?> valueType;
         if (t.equals("L")) {
             // It's an object-type
             String oType = pType.substring(2,pType.length()-1).replace('/','.');
@@ -225,8 +231,8 @@ public class StringToObjectConverter {
     }
 
     // Convert a list to an array of the given type
-    private Object convertListToArray(Class pType, List pList) {
-        Class valueType = pType.getComponentType();
+    private Object convertListToArray(Class<?> pType, List<?> pList) {
+        Class<?> valueType = pType.getComponentType();
         Object ret = Array.newInstance(valueType, pList.size());
         int i = 0;
         for (Object value : pList) {

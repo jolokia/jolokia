@@ -1,5 +1,5 @@
 package org.jolokia.server.core.util;/*
- * 
+ *
  * Copyright 2014 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +15,6 @@ package org.jolokia.server.core.util;/*
  * limitations under the License.
  */
 
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;

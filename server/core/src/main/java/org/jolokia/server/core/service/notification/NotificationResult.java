@@ -33,13 +33,13 @@ public class NotificationResult {
     private final String handle;
 
     // List of notifications
-    private List<Notification> notifications;
+    private final List<Notification> notifications;
 
     // Handback object given during subscription
-    private Object handback;
+    private final Object handback;
 
     // Number of notifications dropped since the last pull
-    private int dropped;
+    private final int dropped;
 
     public NotificationResult(String pHandle, List<Notification> pNotifications, Object pHandback, int pDropped) {
         notifications = pNotifications;

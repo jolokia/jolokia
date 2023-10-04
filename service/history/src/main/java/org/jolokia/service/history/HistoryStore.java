@@ -48,7 +48,7 @@ public class HistoryStore {
     private static final String KEY_VALUE = "value";
     private static final String KEY_TIMESTAMP = "timestamp";
 
-    private Map<RequestType,HistoryUpdater> historyUpdaters = new HashMap<RequestType, HistoryUpdater>();
+    private final Map<RequestType, HistoryUpdater<?>> historyUpdaters = new HashMap<>();
 
     /**
      * Constructor for a history store
@@ -58,8 +58,8 @@ public class HistoryStore {
      */
     public HistoryStore(int pTotalMaxEntries) {
         globalMaxEntries = pTotalMaxEntries;
-        historyStore = new HashMap<HistoryKey, HistoryEntry>();
-        patterns = new HashMap<HistoryKey, HistoryLimit>();
+        historyStore = new HashMap<>();
+        patterns = new HashMap<>();
         initHistoryUpdaters();
     }
 
@@ -125,8 +125,8 @@ public class HistoryStore {
      * Reset the complete store.
      */
     public synchronized void reset() {
-        historyStore = new HashMap<HistoryKey, HistoryEntry>();
-        patterns = new HashMap<HistoryKey, HistoryLimit>();
+        historyStore = new HashMap<>();
+        patterns = new HashMap<>();
     }
 
     /**
@@ -138,10 +138,12 @@ public class HistoryStore {
      */
     public synchronized void updateAndAdd(JolokiaRequest pJmxReq, JSONObject pJson) {
         long timestamp = System.currentTimeMillis() / 1000;
+        //noinspection unchecked
         pJson.put(KEY_TIMESTAMP,timestamp);
 
         RequestType type  = pJmxReq.getType();
-        HistoryUpdater updater = historyUpdaters.get(type);
+        @SuppressWarnings("unchecked")
+        HistoryUpdater<JolokiaRequest> updater = (HistoryUpdater<JolokiaRequest>) historyUpdaters.get(type);
         if (updater != null) {
             updater.updateHistory(pJson,pJmxReq,timestamp);
         }
@@ -193,6 +195,7 @@ public class HistoryStore {
                                     HistoryEntry entry = historyStore.get(new HistoryKey(request));
                                     if (entry != null) {
                                         synchronized(entry) {
+                                            //noinspection unchecked
                                             pJson.put(KEY_HISTORY,entry.jsonifyValues());
                                             entry.add(pJson.get(KEY_VALUE),pTimestamp);
                                         }
@@ -206,6 +209,7 @@ public class HistoryStore {
                                     HistoryEntry entry = historyStore.get(new HistoryKey(request));
                                     if (entry != null) {
                                         synchronized(entry) {
+                                            //noinspection unchecked
                                             pJson.put(KEY_HISTORY,entry.jsonifyValues());
                                             entry.add(request.getValue(),pTimestamp);
                                         }
@@ -227,7 +231,7 @@ public class HistoryStore {
     private void removeEntries(HistoryKey pKey) {
         if (pKey.isMBeanPattern()) {
             patterns.remove(pKey);
-            List<HistoryKey> toRemove = new ArrayList<HistoryKey>();
+            List<HistoryKey> toRemove = new ArrayList<>();
             for (HistoryKey key : historyStore.keySet()) {
                 if (pKey.matches(key)) {
                     toRemove.add(key);
@@ -252,11 +256,13 @@ public class HistoryStore {
         if (name.isPattern()) {
             // We have a pattern and hence a value structure
             // of bean -> attribute_key -> attribute_value
+            @SuppressWarnings("unchecked")
             Map<String,Object> values = (Map<String, Object>) pJson.get(KEY_VALUE);
             // Can be null if used with path and no single match occurred
             if (values != null) {
                 JSONObject history = updateHistoryForPatternRead(pJmxReq, pTimestamp, values);
-                if (history.size() > 0) {
+                if (!history.isEmpty()) {
+                    //noinspection unchecked
                     pJson.put(KEY_HISTORY,history);
                 }
             }
@@ -264,12 +270,14 @@ public class HistoryStore {
             // Multiple attributes, but a single bean.
             // Value has the following structure:
             // attribute_key -> attribute_value
+            @SuppressWarnings("unchecked")
             JSONObject history = addMultipleAttributeValues(
                     pJmxReq,
                     ((Map<String, Object>) pJson.get(KEY_VALUE)),
                     pJmxReq.getObjectNameAsString(),
                     pTimestamp);
-            if (history.size() > 0) {
+            if (!history.isEmpty()) {
+                //noinspection unchecked
                 pJson.put(KEY_HISTORY,history);
             }
         } else {
@@ -296,6 +304,7 @@ public class HistoryStore {
                 beanHistory = addPathFilteredAttributeValue(pJmxReq, pTimestamp, beanName, value);
             }
             if (value instanceof Map) {
+                //noinspection unchecked
                 beanHistory =
                         addMultipleAttributeValues(
                                 pJmxReq,
@@ -303,7 +312,8 @@ public class HistoryStore {
                                 beanName,
                                 pTimestamp);
             }
-            if (beanHistory != null && beanHistory.size() > 0) {
+            if (beanHistory != null && !beanHistory.isEmpty()) {
+                //noinspection unchecked
                 history.put(beanName, beanHistory);
             }
         }
@@ -326,7 +336,8 @@ public class HistoryStore {
                 pValues,
                 beanName,
                 pTimestamp);
-        if (beanHistory.size() > 0) {
+        if (!beanHistory.isEmpty()) {
+            //noinspection unchecked
             ret.put(beanName, beanHistory);
         }
         return ret;
@@ -382,8 +393,9 @@ public class HistoryStore {
     private JSONObject addToHistoryEntryAndGetCurrentHistory(JSONObject pHistMap, HistoryEntry pEntry, String pAttrName,
                                                              Object pValue, long pTimestamp) {
         synchronized (pEntry) {
-                pHistMap.put(pAttrName, pEntry.jsonifyValues());
-                pEntry.add(pValue, pTimestamp);
+            //noinspection unchecked
+            pHistMap.put(pAttrName, pEntry.jsonifyValues());
+            pEntry.add(pValue, pTimestamp);
         }
         return pHistMap;
     }

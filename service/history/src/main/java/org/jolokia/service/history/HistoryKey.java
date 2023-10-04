@@ -1,6 +1,7 @@
 package org.jolokia.service.history;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
@@ -36,10 +37,10 @@ public class HistoryKey implements Serializable {
 
     private static final long serialVersionUID = 42L;
 
-    private String type;
+    private final String type;
     private ObjectName mBean;
     private String secondary;
-    private String path;
+    private final String path;
     private String target;
 
     /**
@@ -177,13 +178,10 @@ public class HistoryKey implements Serializable {
         HistoryKey that = (HistoryKey) o;
 
         if (!mBean.equals(that.mBean)) return false;
-        if (path != null ? !path.equals(that.path) : that.path != null) return false;
+        if (!Objects.equals(path, that.path)) return false;
         if (!secondary.equals(that.secondary)) return false;
-        if (target != null ? !target.equals(that.target) : that.target != null)
-            return false;
-        if (!type.equals(that.type)) return false;
-
-        return true;
+        if (!Objects.equals(target, that.target)) return false;
+        return type.equals(that.type);
     }
     // CHECKSTYLE:ON
 

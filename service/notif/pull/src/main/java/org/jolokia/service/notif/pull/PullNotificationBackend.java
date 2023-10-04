@@ -25,7 +25,7 @@ public class PullNotificationBackend extends AbstractJolokiaService<Notification
     private PullNotificationStore store;
 
     // maximal number of entries *per* notification subscription
-    private int maxEntries = 100;
+    private final int maxEntries = 100;
 
     // name as the MBean has been registered
     private ObjectName objectName;
@@ -90,6 +90,7 @@ public class PullNotificationBackend extends AbstractJolokiaService<Notification
     }
 
     /** {@inheritDoc} */
+    @SuppressWarnings("unchecked")
     public Map<String, ?> getConfig() {
         JSONObject ret = new JSONObject();
         ret.put("store",objectName.toString());

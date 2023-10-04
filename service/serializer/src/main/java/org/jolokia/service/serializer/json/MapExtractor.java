@@ -37,7 +37,7 @@ public class MapExtractor implements Extractor {
     private static final int MAX_STRING_LENGTH = 400;
 
     /** {@inheritDoc} */
-    public Class getType() {
+    public Class<?> getType() {
         return Map.class;
     }
 
@@ -57,6 +57,7 @@ public class MapExtractor implements Extractor {
      */
     public Object extractObject(ObjectToJsonConverter pConverter, Object pValue,
                                 Stack<String> pPathParts,boolean jsonify) throws AttributeNotFoundException {
+        @SuppressWarnings("unchecked")
         Map<Object,Object> map = (Map<Object,Object>) pValue;
         int length = pConverter.getCollectionLength(map.size());
         String pathParth = pPathParts.isEmpty() ? null : pPathParts.pop();
@@ -70,9 +71,11 @@ public class MapExtractor implements Extractor {
     private JSONObject extractMapValues(ObjectToJsonConverter pConverter, Stack<String> pPathParts, boolean jsonify, Map<Object, Object> pMap, int pLength) throws AttributeNotFoundException {
         JSONObject ret = new JSONObject();
         int i = 0;
-        for(Map.Entry entry : pMap.entrySet()) {
+        for(Map.Entry<?, ?> entry : pMap.entrySet()) {
+            @SuppressWarnings("unchecked")
             Stack<String> paths = (Stack<String>) pPathParts.clone();
             try {
+                //noinspection unchecked
                 ret.put(entry.getKey(),
                         pConverter.extractObject(entry.getValue(), paths, jsonify));
                 if (++i > pLength) {
@@ -90,7 +93,7 @@ public class MapExtractor implements Extractor {
     }
 
     private Object extractMapValueWithPath(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pPathParts, boolean jsonify, Map<Object, Object> pMap, String pPathParth) throws AttributeNotFoundException {
-        for (Map.Entry entry : pMap.entrySet()) {
+        for (Map.Entry<?, ?> entry : pMap.entrySet()) {
             // We dont access the map via a lookup since the key
             // are potentially object but we have to deal with string
             // representations
@@ -118,10 +121,11 @@ public class MapExtractor implements Extractor {
      */
     public Object setObjectValue(StringToObjectConverter pConverter, Object pMap, String pKey, Object pValue)
             throws IllegalAccessException, InvocationTargetException {
+        @SuppressWarnings("unchecked")
         Map<Object,Object> map = (Map<Object,Object>) pMap;
         Object oldValue = null;
         Object oldKey = pKey;
-        for (Map.Entry entry : map.entrySet()) {
+        for (Map.Entry<?, ?> entry : map.entrySet()) {
             // We dont access the map via a lookup since the key
             // are potentially object but we have to deal with string
             // representations

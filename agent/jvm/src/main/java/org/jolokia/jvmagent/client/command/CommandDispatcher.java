@@ -24,16 +24,16 @@ import org.jolokia.jvmagent.client.util.VirtualMachineHandlerOperations;
 
 /**
  * Dispatch for various attach commands
- * 
+ *
  * @author roland
  * @since 12.08.11
  */
 @SuppressWarnings({"PMD.SystemPrintln"})
 public class CommandDispatcher {
 
-    private OptionsAndArgs options;
+    private final OptionsAndArgs options;
 
-    private static final Map<String,AbstractBaseCommand> COMMANDS = new HashMap<String, AbstractBaseCommand>();
+    private static final Map<String,AbstractBaseCommand> COMMANDS = new HashMap<>();
 
     // Initialize command objects
     static {

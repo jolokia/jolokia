@@ -41,7 +41,7 @@ public class NotificationHandlerTest extends BaseHandlerTest {
     TestJolokiaContext ctx;
 
     @BeforeMethod
-    public void setUp() throws Exception {
+    public void setUp() {
         ctx = new TestJolokiaContext.Builder().config(ConfigKey.AGENT_ID,"test")
                                               .build();
 

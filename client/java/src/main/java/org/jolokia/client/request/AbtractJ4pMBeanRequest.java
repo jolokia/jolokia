@@ -31,7 +31,7 @@ import org.json.simple.*;
 public abstract class AbtractJ4pMBeanRequest extends J4pRequest {
 
     // name of MBean to execute a request on
-    private ObjectName objectName;
+    private final ObjectName objectName;
 
     protected AbtractJ4pMBeanRequest(J4pType pType,ObjectName pMBeanName,J4pTargetConfig pTargetConfig) {
         super(pType,pTargetConfig);
@@ -50,7 +50,7 @@ public abstract class AbtractJ4pMBeanRequest extends J4pRequest {
 
     @Override
     List<String> getRequestParts() {
-        List<String> ret = new ArrayList<String>();
+        List<String> ret = new ArrayList<>();
         ret.add(objectName.getCanonicalName());
         return ret;
     }
@@ -58,7 +58,8 @@ public abstract class AbtractJ4pMBeanRequest extends J4pRequest {
     @Override
     JSONObject toJson() {
         JSONObject ret =  super.toJson();
-        ret.put("mbean",objectName.getCanonicalName());
+        //noinspection unchecked
+        ret.put("mbean", objectName.getCanonicalName());
         return ret;
     }
 

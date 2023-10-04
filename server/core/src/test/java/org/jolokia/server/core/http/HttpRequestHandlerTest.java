@@ -212,11 +212,7 @@ public class HttpRequestHandlerTest {
         expect(requestHandler.compareTo(anyObject())).andStubReturn(1);
         SortedSet<RequestHandler> services = createMock(SortedSet.class);
         expect(services.add(requestHandler)).andStubReturn(true);
-        expect(services.iterator()).andStubAnswer(new IAnswer<Iterator<RequestHandler>>() {
-            public Iterator<RequestHandler> answer() {
-                return new SingletonIterator<>(requestHandler);
-            }
-        });
+        expect(services.iterator()).andStubAnswer(() -> new SingletonIterator<>(requestHandler));
         expect(services.comparator()).andStubReturn(null);
         expect(services.size()).andStubReturn(1);
         replay(services);

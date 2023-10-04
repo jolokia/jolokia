@@ -1,12 +1,7 @@
 package org.jolokia.support.spring;
 
-import java.io.IOException;
-
-import javax.management.JMException;
-
-import org.jolokia.server.core.request.NotChangedException;
-import org.jolokia.server.core.service.request.AbstractRequestHandler;
 import org.jolokia.server.core.request.JolokiaRequest;
+import org.jolokia.server.core.service.request.AbstractRequestHandler;
 
 /**
  * @author roland
@@ -18,7 +13,7 @@ public class DummyRequestHandler extends AbstractRequestHandler {
         super("dummy",0);
     }
 
-    public Object handleRequest(JolokiaRequest pJmxReq, Object pPreviousResult) throws JMException, IOException, NotChangedException {
+    public Object handleRequest(JolokiaRequest pJmxReq, Object pPreviousResult) {
         return null;
     }
 

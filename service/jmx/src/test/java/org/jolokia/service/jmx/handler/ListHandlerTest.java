@@ -47,11 +47,9 @@ public class ListHandlerTest extends BaseHandlerTest {
 
     private MBeanServerAccess executor;
 
-    private TestJolokiaContext ctx;
-
     @BeforeMethod
-    public void createHandler() throws MalformedObjectNameException {
-        ctx = new TestJolokiaContext();
+    public void createHandler() {
+        TestJolokiaContext ctx = new TestJolokiaContext();
         handler = new ListHandler();
         handler.init(ctx, null);
         handlerWithRealm = new ListHandler();
@@ -65,7 +63,7 @@ public class ListHandlerTest extends BaseHandlerTest {
         for (String p : new String[]{null, "", "/"}) {
             JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST).path(p).build();
 
-            Map res = execute(handler,request);
+            Map<String, ?> res = execute(handler,request);
             assertTrue(res.containsKey("java.lang"));
             assertTrue(res.get("java.lang") instanceof Map);
 
@@ -73,15 +71,15 @@ public class ListHandlerTest extends BaseHandlerTest {
             assertTrue(res.containsKey("proxy@java.lang"));
             assertTrue(res.get("proxy@java.lang") instanceof Map);
 
-            Map baseMap = createMap("first","second");
+            Map<String, String> baseMap = createMap("first", "second");
             res = execute(handler,request,baseMap);
             assertTrue(res.containsKey("java.lang"));
             assertEquals(res.get("first"), "second");
         }
     }
 
-    private Map createMap(String... args) {
-        Map map = new HashMap();
+    private Map<String, String> createMap(String... args) {
+        Map<String, String> map = new HashMap<>();
         for (int i = 0; i < args.length; i+=2) {
             map.put(args[i], args[i + 1]);
         }
@@ -91,7 +89,7 @@ public class ListHandlerTest extends BaseHandlerTest {
     @Test
     public void domainPath() throws Exception {
         JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST).pathParts("java.lang").build();
-        Map res = execute(handler, request);
+        Map<String, ?> res = execute(handler, request);
         assertTrue(res.containsKey("type=Memory"));
         assertTrue(res.get("type=Memory") instanceof Map);
 
@@ -106,14 +104,14 @@ public class ListHandlerTest extends BaseHandlerTest {
     @Test
     public void propertiesPath() throws Exception {
         JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST).pathParts("java.lang", "type=Memory").build();
-        Map res = execute(handler, request);
-        checkKeys(res, DESCRIPTION, OPERATIONS, ATTRIBUTES, CLASSNAME);
+        Map<String, ?> res = execute(handler, request);
+        checkKeys(res, DESCRIPTION, OPERATIONS, ATTRIBUTES, CLASSNAME, NOTIFICATIONS);
 
         res = execute(handlerWithRealm,request);
         checkKeys(res);
     }
 
-    private void checkKeys(Map pRes, DataKeys ... pKeys) {
+    private void checkKeys(Map<?, ?> pRes, DataKeys ... pKeys) {
         for (DataKeys k : pKeys) {
             assertTrue(pRes.containsKey(k.getKey()));
         }
@@ -125,7 +123,7 @@ public class ListHandlerTest extends BaseHandlerTest {
         JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST).pathParts("java.lang","type=Memory",
                                                                                            ATTRIBUTES.getKey()).build();
 
-        Map res = execute(handler, request);
+        Map<String, ?> res = execute(handler, request);
         assertTrue(res.containsKey("HeapMemoryUsage"));
 
         res = execute(handlerWithRealm, request);
@@ -159,14 +157,14 @@ public class ListHandlerTest extends BaseHandlerTest {
     public void opPath() throws Exception {
         JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST).pathParts("java.lang","type=Memory",
                                                                                            OPERATIONS.getKey()).build();
-        Map res = execute(handler, request);
+        Map<String, ?> res = execute(handler, request);
         assertTrue(res.containsKey("gc"));
     }
 
     @Test
     public void maxDepth1() throws Exception {
         JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST).option(ConfigKey.MAX_DEPTH,"1").build();
-        Map res = execute(handler, request);
+        Map<String, ?> res = execute(handler, request);
         assertTrue(res.containsKey("java.lang"));
         assertFalse(res.get("java.lang") instanceof Map);
     }
@@ -174,9 +172,9 @@ public class ListHandlerTest extends BaseHandlerTest {
     @Test
     public void maxDepth2() throws Exception {
         JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST).option(ConfigKey.MAX_DEPTH,"2").build();
-        Map res = execute(handler, request);
+        Map<String, ?> res = execute(handler, request);
         assertTrue(res.containsKey("java.lang"));
-        Map inner = (Map) res.get("java.lang");
+        Map<?, ?> inner = (Map<?, ?>) res.get("java.lang");
         assertTrue(inner.containsKey("type=Memory"));
         assertFalse(inner.get("type=Memory") instanceof Map);
     }
@@ -186,12 +184,14 @@ public class ListHandlerTest extends BaseHandlerTest {
     public void maxDepthAndPath() throws Exception {
         JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST).pathParts("java.lang","type=Memory")
                 .option(ConfigKey.MAX_DEPTH, "3").build();
-        Map res =  execute(handler, request);
-        assertEquals(res.size(), 4);
-        Map ops = (Map) res.get(OPERATIONS.getKey());
+        Map<String, ?> res =  execute(handler, request);
+        assertEquals(res.size(), 5);
+        @SuppressWarnings("unchecked")
+        Map<String, ?> ops = (Map<String, ?>) res.get(OPERATIONS.getKey());
         assertTrue(ops.containsKey("gc"));
         assertTrue(ops.get("gc") instanceof Map);
-        Map attrs = (Map) res.get(ATTRIBUTES.getKey());
+        @SuppressWarnings("unchecked")
+        Map<String, ?> attrs = (Map<String, ?>) res.get(ATTRIBUTES.getKey());
         // Java 7 introduces a new attribute 'ObjectName' here
         assertEquals(attrs.size(),attrs.containsKey("ObjectName") ? 5 : 4);
         assertTrue(attrs.get("HeapMemoryUsage") instanceof Map);
@@ -215,11 +215,12 @@ public class ListHandlerTest extends BaseHandlerTest {
     @Test
     public void keyOrder() throws Exception {
         JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST).option(ConfigKey.CANONICAL_NAMING,"true").build();
-        Map res = execute(handler, request);
+        Map<String, ?> res = execute(handler, request);
+        @SuppressWarnings("unchecked")
         Map<String,?> mbeans = (Map<String,?>) res.get("java.lang");
         for (String key : mbeans.keySet()) {
-            String parts[] = key.split(",");
-            String partsSorted[] = parts.clone();
+            String[] parts = key.split(",");
+            String[] partsSorted = parts.clone();
             Arrays.sort(partsSorted);
             assertEquals(parts,partsSorted);
         }
@@ -228,7 +229,7 @@ public class ListHandlerTest extends BaseHandlerTest {
     @Test
     public void truncatedList() throws Exception {
         JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST).pathParts("java.lang", "type=Runtime").build();
-        Map res = execute(handler, request);
+        Map<String, ?> res = execute(handler, request);
         assertFalse(res.containsKey(OPERATIONS.getKey()));
         assertEquals(res.size(),3);
     }
@@ -290,8 +291,9 @@ public class ListHandlerTest extends BaseHandlerTest {
         execute(handler, request);
     }
 
-    private Map execute(ListHandler pHandler, JolokiaListRequest pRequest, Map ... pPreviousResult) throws ReflectionException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, IOException, NotChangedException, EmptyResponseException {
-        return (Map) pHandler.handleAllServerRequest(executor, pRequest,
+    @SuppressWarnings("unchecked")
+    private Map<String, ?> execute(ListHandler pHandler, JolokiaListRequest pRequest, Map<?, ?> ... pPreviousResult) throws ReflectionException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, IOException, NotChangedException, EmptyResponseException {
+        return (Map<String, ?>) pHandler.handleAllServerRequest(executor, pRequest,
                                                      pPreviousResult != null && pPreviousResult.length > 0 ? pPreviousResult[0] : null);
     }
 
@@ -301,13 +303,15 @@ public class ListHandlerTest extends BaseHandlerTest {
         JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST)
                 .pathParts("java.lang", "type=Runtime", OPERATIONS.getKey())
                 .build();
-        Map res = (Map) handler.handleAllServerRequest(executor, request, null);
+        @SuppressWarnings("unchecked")
+        Map<String, ?> res = (Map<String, ?>) handler.handleAllServerRequest(executor, request, null);
         assertEquals(res.size(),0);
 
         request = new JolokiaRequestBuilder(RequestType.LIST)
                 .pathParts("java.lang", "type=Runtime", NOTIFICATIONS.getKey())
                 .build();
-        res = (Map) handler.handleAllServerRequest(executor, request, null);
+        //noinspection unchecked
+        res = (Map<String, ?>) handler.handleAllServerRequest(executor, request, null);
         assertEquals(res.size(),0);
     }
 
@@ -317,14 +321,16 @@ public class ListHandlerTest extends BaseHandlerTest {
                 .pathParts("java.lang", "type=Memory", ATTRIBUTES.getKey())
                 .build();
         MBeanServerConnection dummyConn = EasyMock.createMock(MBeanServerConnection.class);
-        Set<MBeanServerConnection> conns = new LinkedHashSet<MBeanServerConnection>();
+        Set<MBeanServerConnection> conns = new LinkedHashSet<>();
         conns.add(dummyConn);
         conns.add(ManagementFactory.getPlatformMBeanServer());
 
         expect(dummyConn.getMBeanInfo(new ObjectName("java.lang:type=Memory"))).andThrow(new InstanceNotFoundException());
         replay(dummyConn);
-        Map res = (Map) handler.handleAllServerRequest(executor, request, null);
-        assertEquals(((Map) res.get("Verbose")).get(TYPE.getKey()),"boolean");
+        @SuppressWarnings("unchecked")
+        Map<String, ?> res = (Map<String, ?>) handler.handleAllServerRequest(executor, request, null);
+        //noinspection unchecked
+        assertEquals(((Map<String, ?>) res.get("Verbose")).get(TYPE.getKey()),"boolean");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = ".*No MBean.*")
@@ -334,7 +340,7 @@ public class ListHandlerTest extends BaseHandlerTest {
                 .build();
         MBeanServer dummyConn = EasyMock.createMock(MBeanServer.class);
 
-        MBeanServerAccess servers = new DefaultMBeanServerAccess(new HashSet<MBeanServerConnection>(Arrays.asList(dummyConn)));
+        MBeanServerAccess servers = new DefaultMBeanServerAccess(new HashSet<>(Collections.singletonList(dummyConn)));
 
         ObjectName name = new ObjectName("bullerbue:country=sweden");
         expect(dummyConn.getMBeanInfo(name)).andThrow(new InstanceNotFoundException());

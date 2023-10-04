@@ -52,7 +52,7 @@ public class TestSerializer extends AbstractJolokiaService<Serializer> implement
             }
             return null;
         } catch (ParseException | OpenDataException e) {
-            throw new IllegalArgumentException(pOpenType + " " + pValue.toString());
+            throw new IllegalArgumentException(pOpenType + " " + pValue);
         }
     }
 }

@@ -36,13 +36,11 @@ public class OpenExecHandlerTest {
 
     private ObjectName oName;
 
-    private TestJolokiaContext ctx;
-
     @BeforeMethod
-    public void createHandler() throws MalformedObjectNameException {
-        ctx = new TestJolokiaContext.Builder().services(Serializer.class,new JolokiaSerializer()).build();
+    public void createHandler() {
+        TestJolokiaContext ctx = new TestJolokiaContext.Builder().services(Serializer.class, new JolokiaSerializer()).build();
         handler = new ExecHandler();
-        handler.init(ctx,null);
+        handler.init(ctx, null);
     }
 
     @BeforeClass
@@ -50,7 +48,7 @@ public class OpenExecHandlerTest {
         oName = new ObjectName("jolokia:test=openExec");
 
         MBeanServerConnection conn = getMBeanServer();
-        conn.createMBean(OpenExecData.class.getName(),oName);        
+        conn.createMBean(OpenExecData.class.getName(),oName);
     }
 
     @AfterClass
@@ -76,7 +74,7 @@ public class OpenExecHandlerTest {
     }
 
     /**
-     * set a non-existing field 
+     * set a non-existing field
      */
     @Test(expectedExceptions={IllegalArgumentException.class})
     public void invalidField() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException, EmptyResponseException {
@@ -86,10 +84,10 @@ public class OpenExecHandlerTest {
                 arguments("{ \"nonExistentField\":\"aString\" }").
                 build();
         handler.handleSingleServerRequest(getMBeanServer(), request);
-    }    
-    
+    }
+
     /**
-     * Give an invalid value (wrong type) for the field 
+     * Give an invalid value (wrong type) for the field
      */
     @Test(expectedExceptions={ NumberFormatException.class })
     public void invalidValueForField() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException, EmptyResponseException {
@@ -123,7 +121,7 @@ public class OpenExecHandlerTest {
                 build();
         handler.handleSingleServerRequest(getMBeanServer(), request);
     }
-    
+
     /**
      * The operation argument is a Set
      */
@@ -135,7 +133,7 @@ public class OpenExecHandlerTest {
                 build();
         handler.handleSingleServerRequest(getMBeanServer(), request);
     }
-    
+
     /**
      * The operation argument is a Map
      */
@@ -147,7 +145,7 @@ public class OpenExecHandlerTest {
                 build();
         handler.handleSingleServerRequest(getMBeanServer(), request);
     }
-    
+
     /**
      * Set a nested field inside the composite argument
      */
@@ -159,7 +157,7 @@ public class OpenExecHandlerTest {
 				build();
         handler.handleSingleServerRequest(getMBeanServer(), request);
     }
-    
+
     /**
      * Set an array field inside the composite argument
      */
@@ -171,7 +169,7 @@ public class OpenExecHandlerTest {
         		build();
         handler.handleSingleServerRequest(getMBeanServer(), request);
     }
-    
+
     /**
      * Set a List field inside the composite argument with values that can't be converted to
      * the list element type
@@ -195,8 +193,8 @@ public class OpenExecHandlerTest {
         		arguments("{ \"list\":[\"1\", \"2\"] }").
         		build();
         handler.handleSingleServerRequest(getMBeanServer(), request);
-    }    
-    
+    }
+
     /**
      * Set a Map field inside the composite argument
      */
@@ -210,7 +208,7 @@ public class OpenExecHandlerTest {
     }
 
     /**
-     * Set a Set field inside the composite argument 
+     * Set a Set field inside the composite argument
      */
     @Test
     public void compositeWithSetField() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException, EmptyResponseException {
@@ -220,8 +218,8 @@ public class OpenExecHandlerTest {
         		build();
         handler.handleSingleServerRequest(getMBeanServer(), request);
     }
-    
-    
+
+
     @Test
     public void overloaded() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException, EmptyResponseException {
         JolokiaExecRequest request = new JolokiaRequestBuilder(EXEC, oName).
@@ -230,7 +228,7 @@ public class OpenExecHandlerTest {
 				build();
         handler.handleSingleServerRequest(getMBeanServer(), request);
     }
-        
+
 
     private MBeanServerConnection getMBeanServer() {
         return ManagementFactory.getPlatformMBeanServer();

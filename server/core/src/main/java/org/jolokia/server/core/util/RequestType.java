@@ -32,9 +32,9 @@ public enum RequestType {
     SEARCH("search"),
     NOTIFICATION("notification");
 
-    private String name;
+    private final String name;
 
-    private static Map<String, RequestType> typesByNameMap = new HashMap<String, RequestType>();
+    private static final Map<String, RequestType> typesByNameMap = new HashMap<>();
 
     static {
         for (RequestType t : RequestType.values()) {

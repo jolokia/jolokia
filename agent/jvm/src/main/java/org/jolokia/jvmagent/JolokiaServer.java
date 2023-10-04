@@ -193,12 +193,12 @@ public class JolokiaServer {
     }
 
     /**
-     * Allow to add service from within a sub class. This method should be called before
+     * Allow to add service from within a subclass. This method should be called before
      * this server is started vie {@link #start(boolean)}
      *
      * @param pService service to add
      */
-    protected void addService(JolokiaService pService) {
+    protected void addService(JolokiaService<?> pService) {
         serviceManager.addService(pService);
     }
 
@@ -275,12 +275,7 @@ public class JolokiaServer {
         ThreadGroup threadGroup = new ThreadGroup("jolokia");
         threadGroup.setDaemon(false);
 
-        Thread starterThread = new Thread(threadGroup,new Runnable() {
-            @Override
-            public void run() {
-                httpServer.start();
-            }
-        });
+        Thread starterThread = new Thread(threadGroup, () -> httpServer.start());
         starterThread.start();
         cleaner = new CleanupThread(httpServer,threadGroup);
         cleaner.start();
@@ -367,15 +362,15 @@ public class JolokiaServer {
             // initialise the keystore
             KeyStore ks = getKeyStore(pConfig);
 
-            // setup the key manager factory
+            // set up the key manager factory
             KeyManagerFactory kmf = getKeyManagerFactory(pConfig);
             kmf.init(ks, pConfig.getKeystorePassword());
 
-            // setup the trust manager factory
+            // set up the trust manager factory
             TrustManagerFactory tmf = getTrustManagerFactory(pConfig);
             tmf.init(ks);
 
-            // setup the HTTPS context and parameters
+            // set up the HTTPS context and parameters
             sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
 
             // Update the config to filter out bad protocols or ciphers
@@ -425,8 +420,7 @@ public class JolokiaServer {
     }
 
     private void updateKeyStoreFromPEM(KeyStore keystore, JolokiaServerConfig pConfig)
-            throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException,
-                   InvalidKeySpecException, InvalidKeyException, NoSuchProviderException, SignatureException {
+            throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, InvalidKeySpecException {
 
         if (pConfig.getCaCert() != null) {
             File caCert = getAndValidateFile(pConfig.getCaCert(),"CA cert");
@@ -460,15 +454,9 @@ public class JolokiaServer {
     }
 
     private void loadKeyStoreFromFile(KeyStore pKeyStore, String pFile, char[] pPassword)
-            throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
-        FileInputStream fis = null;
-        try {
-            fis = new FileInputStream(getAndValidateFile(pFile, "keystore"));
+            throws IOException, NoSuchAlgorithmException, CertificateException {
+        try (FileInputStream fis = new FileInputStream(getAndValidateFile(pFile, "keystore"))) {
             pKeyStore.load(fis, pPassword);
-        } finally {
-            if (fis != null) {
-                fis.close();
-            }
         }
     }
 
@@ -477,7 +465,7 @@ public class JolokiaServer {
     private class LazyInitializedJolokiaHttpHandler implements HttpHandler {
 
         // Initialize used for late initialization
-        // ("volatile: because we use double-checked locking later on
+        // ("volatile": because we use double-checked locking later on
         // --> http://www.cs.umd.edu/~pugh/java/memoryModel/DoubleCheckedLocking.html)
         private volatile HttpHandler realHandler;
 

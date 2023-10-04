@@ -24,7 +24,7 @@ import org.json.simple.JSONObject;
 
 /**
  * MBean for exporting various configuration tuning opportunities
- * to the outside world. 
+ * to the outside world.
  *
  * @author roland
  * @since Jun 12, 2009
@@ -32,7 +32,7 @@ import org.json.simple.JSONObject;
 public class History implements HistoryMBean {
 
     // Stores for various information
-    private HistoryStore store;
+    private final HistoryStore store;
 
     /**
      * Constructor with the configurable objects as parameters.

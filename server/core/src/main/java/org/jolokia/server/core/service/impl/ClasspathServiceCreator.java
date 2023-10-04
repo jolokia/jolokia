@@ -16,7 +16,7 @@ import org.jolokia.server.core.util.LocalServiceFactory;
  */
 public class ClasspathServiceCreator implements JolokiaServiceCreator {
 
-    private String base;
+    private final String base;
 
     /**
      * Create a creator with the given base name
@@ -28,9 +28,9 @@ public class ClasspathServiceCreator implements JolokiaServiceCreator {
     }
 
     /** {@inheritDoc} */
-    public Set<JolokiaService> getServices() {
-        return new TreeSet<JolokiaService>(
-                LocalServiceFactory.<JolokiaService>createServices("META-INF/jolokia/" + base + "-default",
-                                                                   "META-INF/jolokia/" + base));
+    public Set<JolokiaService<?>> getServices() {
+        return new TreeSet<>(
+                LocalServiceFactory.createServices("META-INF/jolokia/" + base + "-default",
+                                                   "META-INF/jolokia/" + base));
     }
 }

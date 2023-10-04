@@ -33,7 +33,7 @@ public class DefaultMBeanServerAccess implements MBeanServerAccess, Notification
     private long lastMBeanRegistrationChange;
 
     // Wrapped MBeanServers
-    private MBeanServers mbeanServers;
+    private final MBeanServers mbeanServers;
 
 
     /**
@@ -78,7 +78,7 @@ public class DefaultMBeanServerAccess implements MBeanServerAccess, Notification
     /** {@inheritDoc} */
     public void each(ObjectName pObjectName, MBeanEachCallback pCallback) throws IOException, ReflectionException, MBeanException {
         try {
-            Set<ObjectName> visited = new HashSet<ObjectName>();
+            Set<ObjectName> visited = new HashSet<>();
             for (MBeanServerConnection server : getMBeanServers()) {
                 // Query for a full name is the same as a direct lookup
                 for (ObjectName nameObject : server.queryNames(pObjectName, null)) {
@@ -119,7 +119,7 @@ public class DefaultMBeanServerAccess implements MBeanServerAccess, Notification
         }
 
         // Must be != null, otherwise we would not have left the loop
-        throw objNotFoundException;
+        throw Objects.requireNonNull(objNotFoundException);
 
         // When we reach this, no MBeanServer know about the requested MBean.
         // Hence, we throw our own InstanceNotFoundException here
@@ -131,7 +131,7 @@ public class DefaultMBeanServerAccess implements MBeanServerAccess, Notification
 
     /** {@inheritDoc} */
     public Set<ObjectName> queryNames(ObjectName pObjectName) throws IOException {
-        Set<ObjectName> names = new LinkedHashSet<ObjectName>();
+        Set<ObjectName> names = new LinkedHashSet<>();
         for (MBeanServerConnection server : getMBeanServers()) {
             names.addAll(server.queryNames(pObjectName,null));
         }

@@ -93,7 +93,7 @@ public class ArrayExtractorTest extends AbstractExtractorTest {
 
     @Test
     public void setValue() throws InvocationTargetException, IllegalAccessException {
-        Boolean inner[] = new Boolean[] { true, false, true };
+        Boolean[] inner = new Boolean[] { true, false, true };
         setObject(inner,"1",true);
         for (Boolean b : inner) {
             assertTrue(b);

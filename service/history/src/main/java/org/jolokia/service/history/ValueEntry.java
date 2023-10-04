@@ -27,8 +27,8 @@ class ValueEntry implements Serializable {
 
     private static final long serialVersionUID = 42L;
 
-    private Object value;
-    private long timestamp;
+    private final Object value;
+    private final long timestamp;
 
     ValueEntry(Object pValue, long pTimestamp) {
         value = pValue;

@@ -37,7 +37,8 @@ class SseHeartBeat implements Runnable {
     private final BackChannel backChannel;
 
     // Heartbeat in seconds
-    private int heartBeatPeriod = 10;
+    @SuppressWarnings("FieldCanBeLocal")
+    private final int heartBeatPeriod = 10;
 
     // hearbeat hand
     private Future<?> heartBeat;

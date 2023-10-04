@@ -17,10 +17,10 @@ import org.springframework.context.ApplicationContext;
 public abstract class SpringCommandHandler<T extends JolokiaRequest> {
 
     // Spring application context
-    private ApplicationContext applicationContext;
+    private final ApplicationContext applicationContext;
 
     // The jolokia context used
-    private JolokiaContext context;
+    private final JolokiaContext context;
 
     protected SpringCommandHandler(ApplicationContext pAppContext, JolokiaContext pContext, RequestType pType) {
         this.context = pContext;
@@ -29,7 +29,7 @@ public abstract class SpringCommandHandler<T extends JolokiaRequest> {
     }
 
     // Request type of this command
-    private RequestType type;
+    private final RequestType type;
 
     public RequestType getType() {
         return type;

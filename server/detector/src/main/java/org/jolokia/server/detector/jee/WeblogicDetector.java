@@ -16,9 +16,8 @@ package org.jolokia.server.detector.jee;
  * limitations under the License.
  */
 
-import java.util.*;
-
-import javax.management.MBeanServer;
+import java.util.Collections;
+import java.util.Set;
 import javax.management.MBeanServerConnection;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -78,7 +77,8 @@ public class WeblogicDetector extends AbstractServerDetector {
     // Workaround for old JBosses.
     private boolean isJBoss() {
         try {
-            return Class.forName("org.jboss.mx.util.MBeanServerLocator") != null;
+            Class.forName("org.jboss.mx.util.MBeanServerLocator");
+            return true;
         } catch (ClassNotFoundException e) {
             return false;
         }

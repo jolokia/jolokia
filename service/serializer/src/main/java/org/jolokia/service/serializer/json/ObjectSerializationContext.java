@@ -31,17 +31,18 @@ class ObjectSerializationContext {
 
     // =============================================================================
     // Context used for detecting call loops and the like
-    private static final Set<Class> SIMPLE_TYPES = new HashSet<Class>(Arrays.asList(
+    @SuppressWarnings("rawtypes")
+    private static final Set<Class> SIMPLE_TYPES = new HashSet<>(Arrays.asList(
             String.class,
             Number.class,
             Long.class,
             Integer.class,
             Boolean.class,
             Date.class
-                                                                                   ));
+    ));
 
-    private Set   objectsInCallStack = new HashSet();
-    private Stack callStack          = new Stack();
+    private final Set<Object>   objectsInCallStack = new HashSet<>();
+    private final Stack<Object> callStack          = new Stack<>();
     private final SerializeOptions options;
 
     private int objectCount = 0;

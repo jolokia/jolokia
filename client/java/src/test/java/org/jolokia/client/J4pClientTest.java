@@ -18,26 +18,31 @@ package org.jolokia.client;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.*;
-
+import java.util.HashMap;
+import java.util.Map;
 import javax.management.MalformedObjectNameException;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.message.BasicHeader;
-import org.apache.http.util.EntityUtils;
 import org.easymock.EasyMock;
-import org.jolokia.client.exception.*;
-import org.jolokia.client.request.*;
+import org.jolokia.client.exception.J4pException;
+import org.jolokia.client.exception.J4pRemoteException;
+import org.jolokia.client.exception.J4pTimeoutException;
+import org.jolokia.client.request.J4pQueryParameter;
+import org.jolokia.client.request.J4pReadRequest;
+import org.jolokia.client.request.J4pReadResponse;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.testng.collections.Maps;
 
-import static org.easymock.EasyMock.*;
-import static org.testng.Assert.*;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
 
 /**
  * @author roland
@@ -45,14 +50,14 @@ import static org.testng.Assert.*;
  */
 public class J4pClientTest {
 
-    private static String MEMORY_RESPONSE =
+    private static final String MEMORY_RESPONSE =
             "{\"timestamp\":1316801201,\"status\":200," +
             "\"request\":{\"mbean\":\"java.lang:type=Memory\",\"attribute\":\"HeapMemoryUsage\",\"type\":\"read\"}," +
             "\"value\":{\"max\":530186240,\"committed\":85000192,\"init\":0,\"used\":17962568}}";
 
-    private static String EMPTY_RESPONSE = "{}";
+    private static final String EMPTY_RESPONSE = "{}";
 
-    private static String ARRAY_RESPONSE = "[ " + MEMORY_RESPONSE + "]";
+    private static final String ARRAY_RESPONSE = "[ " + MEMORY_RESPONSE + "]";
     public static final String TEST_URL = "http://localhost:8080/jolokia";
 
 	private static final String ERROR_VALUE_RESPONSE = "{" +
@@ -76,26 +81,26 @@ public class J4pClientTest {
 
         J4pClient j4p = new J4pClient(TEST_URL,client);
         J4pReadResponse resp = j4p.execute(TEST_REQUEST);
-        assertEquals(((Map) resp.getValue()).get("max"), 530186240L);
+        assertEquals(((Map<?, ?>) resp.getValue()).get("max"), 530186240L);
     }
 
     @Test(expectedExceptions = J4pException.class,expectedExceptionsMessageRegExp = ".*JSONArray.*")
-    public void invalidArrayResponse() throws MalformedObjectNameException, J4pException, IOException {
+    public void invalidArrayResponse() throws J4pException, IOException {
         HttpClient client = prepareMocks(null,ARRAY_RESPONSE);
 
         J4pClient j4p = new J4pClient(TEST_URL,client);
-        Map<J4pQueryParameter,String> opts = new HashMap<J4pQueryParameter, String>();;
+        Map<J4pQueryParameter,String> opts = new HashMap<>();
         opts.put(J4pQueryParameter.IGNORE_ERRORS,"true");
         j4p.execute(TEST_REQUEST, opts);
     }
 
     @Test(expectedExceptions = J4pTimeoutException.class,expectedExceptionsMessageRegExp = ".*timeout.*")
-    public void timeout() throws IOException, MalformedObjectNameException, J4pException {
+    public void timeout() throws IOException, J4pException {
         throwException(false, new ConnectTimeoutException());
     }
 
     @Test(expectedExceptions = J4pException.class,expectedExceptionsMessageRegExp = ".*IO-Error.*")
-    public void ioException() throws IOException, MalformedObjectNameException, J4pException {
+    public void ioException() throws IOException, J4pException {
         throwException(false,new IOException());
     }
 
@@ -114,7 +119,7 @@ public class J4pClientTest {
         HttpClient client = createMock(HttpClient.class);
         HttpResponse response  = createMock(HttpResponse.class);
         HttpEntity entity = createMock(HttpEntity.class);
-        expect(client.execute(EasyMock.<HttpUriRequest>anyObject())).andReturn(response);
+        expect(client.execute(EasyMock.anyObject())).andReturn(response);
         expect(response.getEntity()).andReturn(entity);
         expect(entity.getContentEncoding()).andReturn(null);
         expect(entity.isStreaming()).andReturn(false);
@@ -162,7 +167,7 @@ public class J4pClientTest {
 
     private void throwException(boolean bulk,Exception exp) throws IOException, J4pException {
         HttpClient client = createMock(HttpClient.class);
-        expect(client.execute(EasyMock.<HttpUriRequest>anyObject())).andThrow(exp);
+        expect(client.execute(EasyMock.anyObject())).andThrow(exp);
         replay(client);
 
         J4pClient j4p = new J4pClient(TEST_URL,client);
@@ -177,7 +182,7 @@ public class J4pClientTest {
         HttpClient client = createMock(HttpClient.class);
         HttpResponse response  = createMock(HttpResponse.class);
         HttpEntity entity = createMock(HttpEntity.class);
-        expect(client.execute(EasyMock.<HttpUriRequest>anyObject())).andReturn(response);
+        expect(client.execute(EasyMock.anyObject())).andReturn(response);
         expect(response.getEntity()).andReturn(entity);
         expect(entity.isStreaming()).andReturn(false);
         expect(entity.getContentEncoding()).andReturn(encoding != null ? new BasicHeader("Content-Encoding",encoding) : null);

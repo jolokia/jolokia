@@ -29,12 +29,12 @@ import com.sun.net.httpserver.HttpServer;
  */
 class CleanupThread extends Thread {
 
-    private HttpServer server;
-    private ThreadGroup threadGroup;
+    private final HttpServer server;
+    private final ThreadGroup threadGroup;
     private boolean active = true;
 
     /**
-     * Constructor associating the clean up thread with an HTTP-Server
+     * Constructor associating the cleanup thread with an HTTP-Server
      *
      * @param pServer HTTP server to observe
      * @param pThreadGroup thread group needed for proper cleanup
@@ -56,7 +56,7 @@ class CleanupThread extends Thread {
                 // and when all finished, finish as well. This is in order to avoid
                 // hanging endless because the HTTP Server thread cant be set into
                 // daemon mode
-                Thread threads[] = enumerateThreads();
+                Thread[] threads = enumerateThreads();
                 retry = joinThreads(threads);
             }
         } finally {
@@ -89,15 +89,14 @@ class CleanupThread extends Thread {
             }
         }
         // Trim array
-        Thread ret[] = new Thread[nrThreads];
+        Thread[] ret = new Thread[nrThreads];
         System.arraycopy(threads,0,ret,0,nrThreads);
         return ret;
     }
 
     // Join threads, return false if only our own threads are left.
-    private boolean joinThreads(Thread pThreads[]) {
-        for (int i=0;i< pThreads.length;i++) {
-            final Thread t = pThreads[i];
+    private boolean joinThreads(Thread[] pThreads) {
+        for (final Thread t : pThreads) {
             if (isDaemonLikeThread(t)) {
                 continue;
             }
@@ -105,10 +104,9 @@ class CleanupThread extends Thread {
                 t.join();
             } catch (Exception ex) {
                 // Ignore that one.
-            } finally {
-                // We just joined a 'foreign' thread, so we redo the loop
-                return true;
             }
+            // We just joined a 'foreign' thread, so we redo the loop
+            return true;
         }
         // All 'foreign' threads has finished, hence we are prepared to stop
         return false;

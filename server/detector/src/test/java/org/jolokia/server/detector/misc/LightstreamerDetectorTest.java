@@ -1,8 +1,8 @@
 package org.jolokia.server.detector.misc;
 
 import java.lang.instrument.Instrumentation;
-import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
@@ -10,6 +10,11 @@ import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
+
+import org.jolokia.server.core.service.api.ServerHandle;
+import org.jolokia.server.detector.jee.BaseDetectorTest;
+import org.testng.annotations.Test;
+
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
@@ -17,10 +22,6 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
-
-import org.jolokia.server.core.service.api.ServerHandle;
-import org.jolokia.server.detector.jee.BaseDetectorTest;
-import org.testng.annotations.Test;
 
 public class LightstreamerDetectorTest extends BaseDetectorTest {
 
@@ -32,7 +33,7 @@ public class LightstreamerDetectorTest extends BaseDetectorTest {
         MBeanServer mockServer = createMock(MBeanServer.class);
         ObjectName oName = new ObjectName("com.lightstreamer:type=Server");
         expect(mockServer.queryNames(new ObjectName("com.lightstreamer:type=Server"), null)).
-                andReturn(new HashSet<ObjectName>(Arrays.asList(oName))).anyTimes();
+                andReturn(new HashSet<>(List.of(oName))).anyTimes();
         expect(mockServer.isRegistered(oName)).andStubReturn(true);
         expect(mockServer.getAttribute(oName,"LSVersion")).andStubReturn(version);
         replay(mockServer);

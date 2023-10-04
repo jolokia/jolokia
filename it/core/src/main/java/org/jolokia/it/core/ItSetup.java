@@ -34,7 +34,7 @@ public class ItSetup {
     public static final  String JOLOKIA_IT_DOMAIN_HIDDEN    = "jolokia.it.hidden";
     private static final String JOLOKIA_IT_JSONMBEAN_DOMAIN = "jolokia.it.jsonmbean";
 
-    private String[]     strangeNamesShort = {
+    private final String[]     strangeNamesShort = {
             "\\/",
             "simple",
             "/slash-simple/",
@@ -47,14 +47,14 @@ public class ItSetup {
             "n!a!m!e with !/!",
 //            "äöüßÄÖÜ"
     };
-    private List<String> strangeNames      = new ArrayList<String>();
+    private final List<String> strangeNames      = new ArrayList<>();
 
-    private String[] fullNames = {
+    private final String[] fullNames = {
             "jolokia/it:id=3786439,pid=[ServiceRegistryProvider#(null)],type=ParticipantMonitor",
             "jolokia.jboss.as.expr:access=authorization,applies-to=\"/subsystem=undertow/server=\\*/ajp-listener=\\*\",classification=socket-binding-ref,constraint=sensitivity-classification,core-service=management,type=core"
     };
 
-    private String[]     escapedNamesShort = {
+    private final String[]     escapedNamesShort = {
 //            "name*with?strange=\"chars"
             "name*withstrange=chars",
             "name?withstrange=chars",
@@ -69,7 +69,7 @@ public class ItSetup {
             "???",
             "!!!"
     };
-    private List<String> escapedNames      = new ArrayList<String>();
+    private final List<String> escapedNames      = new ArrayList<>();
 
 
     private List<ObjectName> registeredMBeans;
@@ -103,7 +103,7 @@ public class ItSetup {
     // ===================================================================================================
 
     private List<ObjectName> registerMBeans(MBeanServer pServer, String pDomain) {
-        List<ObjectName> ret = new ArrayList<ObjectName>();
+        List<ObjectName> ret = new ArrayList<>();
         try {
             // Register my test mbeans
             for (String name : strangeNamesShort) {
@@ -135,8 +135,6 @@ public class ItSetup {
 
             // Chat MBean used for notifications
             ret.add(registerMBean(pServer, new Chat(), pDomain + ":type=Chat"));
-        } catch (RuntimeException e) {
-            throw new RuntimeException("Error",e);
         } catch (Exception exp) {
             throw new RuntimeException("Error",exp);
         }
@@ -144,7 +142,7 @@ public class ItSetup {
     }
 
     private List<ObjectName> registerJsonMBeans(MBeanServer pServer, String pDomain) {
-        List<ObjectName> ret = new ArrayList<ObjectName>();
+        List<ObjectName> ret = new ArrayList<>();
         try {
             ret.add(registerMBean(pServer,new JsonChecking(),pDomain + ":type=plain"));
             ret.add(registerMXBean(pServer, new JsonChecking2(), JsonChecking2MXBean.class, pDomain + ":type=mx"));
@@ -198,8 +196,10 @@ public class ItSetup {
     // Needed, because the JBoss MBeanServer cannot parse MXBean interfaces
     // Hence we wrap it with a StandardMBean
     // See https://community.jboss.org/thread/167796 for details
+    @SuppressWarnings("rawtypes")
     private ObjectName registerMXBean(MBeanServer pServer, Object pObject, Class pManagementInterface, String pName) throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanRegistrationException {
         ObjectName objectName = new ObjectName(pName);
+        @SuppressWarnings("unchecked")
         final StandardMBean mxBean = new StandardMBean(pObject, pManagementInterface, true /* MXBean */);
         pServer.registerMBean(mxBean, objectName);
         System.out.println("Registered MXBean " + objectName);
@@ -218,7 +218,7 @@ public class ItSetup {
         return getClass(pClassName) != null;
     }
 
-    private Class getClass(String pClassName) {
+    private Class<?> getClass(String pClassName) {
         try {
             ClassLoader loader = getClassLoader();
             return Class.forName(pClassName,false, loader);
@@ -233,14 +233,15 @@ public class ItSetup {
 
     public MBeanServer getJolokiaMBeanServer() {
         try {
-            if (this.getClass("org.jolokia.support.jmx.JolokiaMBeanServerUtil") != null || Class.forName("org.jolokia.support.jmx.JolokiaMBeanServerUtil") != null) {
-                return JolokiaMBeanServerUtil.getJolokiaMBeanServer();
+            if (this.getClass("org.jolokia.support.jmx.JolokiaMBeanServerUtil") == null) {
+                Class.forName("org.jolokia.support.jmx.JolokiaMBeanServerUtil");
             }
+            return JolokiaMBeanServerUtil.getJolokiaMBeanServer();
         } catch (RuntimeException e) {
             System.out.println("No JolokiaServer found: " + e);
             e.printStackTrace();
             return null;
-        } catch (ClassNotFoundException e) {
+        } catch (ClassNotFoundException ignored) {
         }
         System.out.println("No JolokiaServer found, ignoring certain tests ...");
         return null;

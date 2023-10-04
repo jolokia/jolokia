@@ -74,11 +74,11 @@ public class RequestDispatcherImplTest {
 
     private static class TestRequestHandler extends AbstractRequestHandler {
 
-        private boolean canHandle;
+        private final boolean canHandle;
 
         private boolean handleRequestCalled = false;
 
-        private Object returnValue = new Object();
+        private final Object returnValue = new Object();
 
         // For comparing
         private static int MAX_ID = 0;
@@ -90,7 +90,7 @@ public class RequestDispatcherImplTest {
             id = MAX_ID++;
         }
 
-        public Object handleRequest(JolokiaRequest pJmxReq, Object pPrevious) throws JMException, IOException, NotChangedException {
+        public Object handleRequest(JolokiaRequest pJmxReq, Object pPrevious) {
             handleRequestCalled = true;
             return returnValue;
         }
@@ -103,7 +103,7 @@ public class RequestDispatcherImplTest {
             return null;
         }
 
-        public void destroy() throws Exception {
+        public void destroy() {
         }
 
         public void init(JolokiaContext pJolokiaContext) {

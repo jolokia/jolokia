@@ -41,7 +41,7 @@ public enum SystemPropertyMode {
     // Mode as it can be provided in the configuration
     private final String mode;
 
-    private SystemPropertyMode(String pMode) {
+    SystemPropertyMode(String pMode) {
         mode = pMode;
     }
 

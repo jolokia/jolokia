@@ -37,9 +37,11 @@ class ClassNameDataUpdater extends DataUpdater {
      * {@inheritDoc}
      * */
      @Override
-    void update(Map pMap, MBeanInfo pMBeanInfo, Stack<String> pPathStack) {
-        verifyThatPathIsEmpty(pPathStack);
-        pMap.put(getKey(), pMBeanInfo.getClassName());
-    }
+     @SuppressWarnings("rawtypes")
+     void update(Map pMap, MBeanInfo pMBeanInfo, Stack<String> pPathStack) {
+         verifyThatPathIsEmpty(pPathStack);
+         //noinspection unchecked
+         pMap.put(getKey(), pMBeanInfo.getClassName());
+     }
 
 }

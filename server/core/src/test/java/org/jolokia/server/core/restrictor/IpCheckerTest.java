@@ -40,11 +40,11 @@ public class IpCheckerTest {
                 { "10.0.15.16", "10.0.0.1/255.255.0.0", "true"},
                 { "10.0.15.16", "10.0.0.1/255.255.1.0", "false"},
         };
-        for (int i = 0; i < fixture.length; i ++) {
-            String result = IpChecker.matches(fixture[i][1],fixture[i][0]) ?
+        for (String[] strings : fixture) {
+            String result = IpChecker.matches(strings[1], strings[0]) ?
                     "true" : "false";
-            assertEquals("Expected mask: " + fixture[i][1] + ", IP to check: " + fixture[i][0],
-                         fixture[i][2],result);
+            assertEquals("Expected mask: " + strings[1] + ", IP to check: " + strings[0],
+                         strings[2], result);
         }
     }
 
@@ -53,40 +53,40 @@ public class IpCheckerTest {
         try {
             IpChecker.matches("10.0.16.27.8","10.0.16.8");
             fail("Invalid IP");
-        } catch (IllegalArgumentException exp) {}
+        } catch (IllegalArgumentException ignored) {}
         try {
             IpChecker.matches("10.0.16.27","10.0.16.8.b");
             fail("Invalid IP");
-        } catch (IllegalArgumentException exp) {}
+        } catch (IllegalArgumentException ignored) {}
         try {
             IpChecker.matches("10.0.16.27/43434","10.0.16.8");
             fail("Invalid IP");
-        } catch (IllegalArgumentException exp) {}
+        } catch (IllegalArgumentException ignored) {}
         try {
             IpChecker.matches("10.0.16.27.13/24","10.0.16.8");
             fail("Invalid IP");
-        } catch (IllegalArgumentException exp) {}
+        } catch (IllegalArgumentException ignored) {}
         try {
             IpChecker.matches("A.0.16.27/24", "10.0.16.8");
             fail("Invalid IP");
-        } catch (IllegalArgumentException exp) {}
+        } catch (IllegalArgumentException ignored) {}
 
         try {
             IpChecker.matches("10.0.16.27/24","A.0.16.8");
             fail("Invalid IP");
-        } catch (IllegalArgumentException exp) {}
+        } catch (IllegalArgumentException ignored) {}
         try {
             IpChecker.matches("10.0.16.27/255.255.255.255.255","10.0.16.8");
             fail("Invalid IP");
-        } catch (IllegalArgumentException exp) {}
+        } catch (IllegalArgumentException ignored) {}
         try {
             IpChecker.matches("10.0.16.27/35","10.0.16.8");
             fail("Invalid IP");
-        } catch (IllegalArgumentException exp) {}
+        } catch (IllegalArgumentException ignored) {}
         try {
             IpChecker.matches("10.0.16.27/500.255.255.255","10.0.16.8");
             fail("Invalid IP");
-        } catch (IllegalArgumentException exp) {}
+        } catch (IllegalArgumentException ignored) {}
 
     }
 

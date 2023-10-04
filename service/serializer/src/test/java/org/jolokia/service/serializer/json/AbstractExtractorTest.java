@@ -61,7 +61,7 @@ abstract public class AbstractExtractorTest {
     }
 
     private Object extract(Object pValue, String[] extraArgs, boolean pJsonify) throws AttributeNotFoundException {
-        Stack<String> args = new Stack<String>();
+        Stack<String> args = new Stack<>();
         args.addAll(Arrays.asList(extraArgs));
         Collections.reverse(args);
 

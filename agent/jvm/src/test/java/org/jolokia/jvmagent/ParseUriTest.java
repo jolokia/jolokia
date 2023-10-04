@@ -19,10 +19,11 @@ package org.jolokia.jvmagent;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import org.jolokia.jvmagent.ParsedUri;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author roland

@@ -38,7 +38,7 @@ public class EncryptCommand extends AbstractBaseCommand {
             throws InvocationTargetException {
         try {
             List<String> args = pOpts.getExtraArgs();
-            String password = args.size() == 0 ?
+            String password = args.isEmpty() ?
                     getPasswordFromConsoleOrStdin(pOpts) :
                     args.get(0);
             JolokiaCipher jolokiaCipher = keyHolder != null ?

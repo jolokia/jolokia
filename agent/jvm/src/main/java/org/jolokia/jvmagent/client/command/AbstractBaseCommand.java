@@ -65,9 +65,9 @@ public abstract class AbstractBaseCommand {
     protected void loadAgent(Object pVm, VirtualMachineHandlerOperations pHandler, OptionsAndArgs pOpts, String ... pAdditionalOpts) {
         String args = pOpts.toAgentArg();
         if (pAdditionalOpts.length > 0) {
-            args = args.length() != 0 ? args + "," + pAdditionalOpts[0] : pAdditionalOpts[0];
+            args = !args.isEmpty() ? args + "," + pAdditionalOpts[0] : pAdditionalOpts[0];
         }
-        pHandler.loadAgent(pVm, pOpts.getJarFilePath(), args.length() > 0 ? args : null);
+        pHandler.loadAgent(pVm, pOpts.getJarFilePath(), !args.isEmpty() ? args : null);
     }
 
     /**
@@ -77,7 +77,7 @@ public abstract class AbstractBaseCommand {
      *
      * @param pVm the {@link com.sun.tools.attach.VirtualMachine}, but typeless
      * @param pHandler platform-specific way to invoke operations on VM
-     * @return the agent URL if it is was set by a previous 'start' command.
+     * @return the agent URL if it was set by a previous 'start' command.
      */
     protected String checkAgentUrl(Object pVm, VirtualMachineHandlerOperations pHandler) {
         return checkAgentUrl(pVm, pHandler, 0);
@@ -91,7 +91,7 @@ public abstract class AbstractBaseCommand {
      * @param pVm the {@link com.sun.tools.attach.VirtualMachine}, but typeless
      * @param pHandler platform-specific way to invoke operations on VM
      * @param delayInMs wait that many ms before fetching the properties
-     ** @return the agent URL if it is was set by a previous 'start' command.
+     ** @return the agent URL if it was set by a previous 'start' command.
      */
     protected String checkAgentUrl(Object pVm, VirtualMachineHandlerOperations pHandler, int delayInMs) {
         if (delayInMs != 0) {
@@ -127,7 +127,7 @@ public abstract class AbstractBaseCommand {
         if (pOpts.getPid() != null) {
             return "PID " + pOpts.getPid();
         } else if (pOpts.getProcessPattern() != null) {
-            StringBuffer desc = new StringBuffer("process matching \"")
+            StringBuilder desc = new StringBuilder("process matching \"")
                     .append(pOpts.getProcessPattern().pattern())
                     .append("\"");
             desc.append(" (PID: ")

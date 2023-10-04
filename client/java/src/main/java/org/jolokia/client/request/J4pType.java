@@ -35,7 +35,7 @@ public enum J4pType {
     REMNOTIF("remnotif"),
     CONFIG("config");
 
-    private String value;
+    private final String value;
 
     J4pType(String pValue) {
         value = pValue;

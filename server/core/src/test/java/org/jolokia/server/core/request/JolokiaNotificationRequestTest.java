@@ -36,7 +36,7 @@ public class JolokiaNotificationRequestTest {
     @Test
     public void testSimpleStack() throws Exception {
         RequestCreator<JolokiaNotificationRequest> creator = JolokiaNotificationRequest.newCreator();
-        Stack<String> args = new Stack<String>();
+        Stack<String> args = new Stack<>();
         args.push("register");
         JolokiaNotificationRequest request = creator.create(args,getParams());
 
@@ -49,7 +49,7 @@ public class JolokiaNotificationRequestTest {
     @Test
     public void testSimpleMap() throws Exception {
         RequestCreator<JolokiaNotificationRequest> creator = JolokiaNotificationRequest.newCreator();
-        Map<String,String> map = new HashMap<String, String>();
+        Map<String,String> map = new HashMap<>();
         map.put("type","notification");
         map.put("command","ping");
         map.put("client","dummy");
@@ -65,22 +65,22 @@ public class JolokiaNotificationRequestTest {
     @Test
     public void testToJson() throws Exception {
         RequestCreator<JolokiaNotificationRequest> creator = JolokiaNotificationRequest.newCreator();
-        Map<String,Object> map = new HashMap<String, Object>();
+        Map<String,Object> map = new HashMap<>();
         map.put("type","notification");
         map.put("command","add");
         map.put("client","dummy");
         map.put("mode","pull");
         map.put("mbean","test:type=test");
         map.put("filter",Arrays.asList("filter1","filter2"));
-        map.put("config", new HashMap());
+        map.put("config", new HashMap<>());
         JolokiaNotificationRequest request = creator.create(map,getParams());
         JSONObject ret = request.toJSON();
         assertEquals(ret.size(), 6);
         assertEquals(ret.get("mbean"),"test:type=test");
-        List filters = (List) ret.get("filter");
+        List<?> filters = (List<?>) ret.get("filter");
         assertEquals(filters.size(),2);
         assertTrue(filters.contains("filter1"));
-        assertTrue(!ret.containsKey("config"));
+        assertFalse(ret.containsKey("config"));
     }
 
     private ProcessingParameters getParams() {

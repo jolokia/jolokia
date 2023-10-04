@@ -63,10 +63,10 @@ abstract class RequestCreator<R extends JolokiaRequest> {
      * @return the remaining elements as list (but never null).
      */
     protected List<String> prepareExtraArgs(Stack<String> pElements) {
-        if (pElements == null || pElements.size() == 0) {
+        if (pElements == null || pElements.isEmpty()) {
             return null;
         }
-        List<String> ret = new ArrayList<String>();
+        List<String> ret = new ArrayList<>();
         while (!pElements.isEmpty()) {
             String element = pElements.pop();
             ret.add("*".equals(element) ? null : element);

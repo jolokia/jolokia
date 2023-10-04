@@ -37,7 +37,7 @@ public interface NotificationBackend extends JolokiaService<NotificationBackend>
      * Callback method called when a channel has been created and opened. This can be used to start
      * channel specific code like starting a heartbeat for SSE event.
      *
-     * @param client
+     * @param client the client
      * @param channel created channel
      */
     void channelInit(Client client, BackChannel channel);

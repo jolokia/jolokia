@@ -42,7 +42,8 @@ import org.json.simple.JSONObject;
  */
 public class BeanExtractor implements Extractor {
 
-    private static final Set<Class> FINAL_CLASSES = new HashSet<Class>(Arrays.asList(
+    @SuppressWarnings("rawtypes")
+    private static final Set<Class> FINAL_CLASSES = new HashSet<>(Arrays.asList(
             String.class,
             Number.class,
             Byte.class,
@@ -54,13 +55,14 @@ public class BeanExtractor implements Extractor {
             Boolean.class
     ));
 
-    private static final Set<String> IGNORE_METHODS = new HashSet<String>(Arrays.asList(
+    private static final Set<String> IGNORE_METHODS = new HashSet<>(Arrays.asList(
             "getClass",
             // Ommit internal stuff
             "getStackTrace",
             "getClassLoader"
     ));
 
+    @SuppressWarnings("rawtypes")
     private static final Class[] IGNORED_RETURN_TYPES = new Class[]{
             OutputStream.class,
             Writer.class
@@ -69,7 +71,7 @@ public class BeanExtractor implements Extractor {
     private static final String[] GETTER_PREFIX = new String[]{"get", "is", "has"};
 
     /** {@inheritDoc} */
-    public Class getType() {
+    public Class<?> getType() {
         return Object.class;
     }
 
@@ -106,7 +108,7 @@ public class BeanExtractor implements Extractor {
         String setter = new StringBuffer("set").append(rest).toString();
         String getter = new StringBuffer("get").append(rest).toString();
 
-        Class clazz = pInner.getClass();
+        Class<?> clazz = pInner.getClass();
         Method found = null;
         for (Method method : clazz.getMethods()) {
             if (method.getName().equals(setter)) {
@@ -118,7 +120,7 @@ public class BeanExtractor implements Extractor {
             throw new IllegalArgumentException(
                     "No Method " + setter + " known for object of type " + clazz.getName());
         }
-        Class params[] = found.getParameterTypes();
+        Class<?>[] params = found.getParameterTypes();
         if (params.length != 1) {
             throw new IllegalArgumentException(
                     "Invalid parameter signature for " + setter + " known for object of type "
@@ -153,7 +155,7 @@ public class BeanExtractor implements Extractor {
         } else {
             // For the rest we build up a JSON map with the attributes as keys and the value are
             List<String> attributes = extractBeanAttributes(pValue);
-            if (attributes.size() > 0) {
+            if (!attributes.isEmpty()) {
                 return extractBeanValues(pConverter, pValue, pPathParts, attributes);
             } else {
                 // No further attributes, return string representation
@@ -163,16 +165,18 @@ public class BeanExtractor implements Extractor {
     }
 
     private Object extractBeanValues(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pPathParts, List<String> pAttributes) throws AttributeNotFoundException {
-        Map ret = new JSONObject();
+        @SuppressWarnings("unchecked")
+        Map<String, Object> ret = new JSONObject();
         for (String attribute : pAttributes) {
-            Stack path = (Stack) pPathParts.clone();
+            @SuppressWarnings("unchecked")
+            Stack<String> path = (Stack<String>) pPathParts.clone();
             try {
                 ret.put(attribute, extractJsonifiedPropertyValue(pConverter, pValue, attribute, path));
             } catch (ValueFaultHandler.AttributeFilteredException exp) {
                 // Skip it since we are doing a path with wildcards, filtering out non-matchin attrs.
            }
         }
-        if (ret.isEmpty() && pAttributes.size() > 0) {
+        if (ret.isEmpty() && !pAttributes.isEmpty()) {
             // Ok, everything was filtered. Bubbling upwards ...
             throw new ValueFaultHandler.AttributeFilteredException();
         }
@@ -205,7 +209,7 @@ public class BeanExtractor implements Extractor {
 
     // Extract all attributes from a given bean
     private List<String> extractBeanAttributes(Object pValue) {
-        List<String> attrs = new ArrayList<String>();
+        List<String> attrs = new ArrayList<>();
         for (Method method : pValue.getClass().getMethods()) {
             if (!Modifier.isStatic(method.getModifiers()) &&
                 !IGNORE_METHODS.contains(method.getName()) &&
@@ -248,7 +252,7 @@ public class BeanExtractor implements Extractor {
 
     private Object extractBeanPropertyValue(Object pValue, String pAttribute, ValueFaultHandler pFaultHandler)
             throws AttributeNotFoundException {
-        Class clazz = pValue.getClass();
+        Class<?> clazz = pValue.getClass();
 
         Method method = null;
 
@@ -280,10 +284,7 @@ public class BeanExtractor implements Extractor {
         try {
             method.setAccessible(true);
             return method.invoke(pValue);
-        } catch (IllegalAccessException e) {
-            return pFaultHandler.handleException(new IllegalStateException("Error while extracting " + pAttribute
-                    + " from " + pValue,e));
-        } catch (InvocationTargetException e) {
+        } catch (IllegalAccessException | InvocationTargetException e) {
             return pFaultHandler.handleException(new IllegalStateException("Error while extracting " + pAttribute
                     + " from " + pValue,e));
         }

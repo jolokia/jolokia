@@ -39,17 +39,17 @@ public final class SerializeOptions {
     public static final SerializeOptions DEFAULT = new Builder().build();
 
     // Maximum depth used for serialization
-    private int maxDepth;
+    private final int maxDepth;
 
     // Maximal size of collections returned
-    private int maxCollectionSize;
+    private final int maxCollectionSize;
 
     // Maximum number of objects to return
-    private int maxObjects;
+    private final int maxObjects;
 
     // Handler which determines what should be done when
     // extracting of an value fails
-    private ValueFaultHandler faultHandler;
+    private final ValueFaultHandler faultHandler;
 
     // Use a builder to construct this object
     private SerializeOptions(int pMaxDepth, int pMaxCollectionSize, int pMaxObjects,
@@ -107,9 +107,9 @@ public final class SerializeOptions {
      */
     public static class Builder {
 
-        private int hardMaxDepth;
-        private int hardMaxCollectionSize;
-        private int hardMaxObjects;
+        private final int hardMaxDepth;
+        private final int hardMaxCollectionSize;
+        private final int hardMaxObjects;
 
         private int maxDepth;
         private int maxCollectionSize;

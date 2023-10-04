@@ -39,11 +39,11 @@ public final class EscapeUtil {
      * regexp. E.g. a backslash (\ or "\\") must be doubled (\\ or "\\\\")
      */
     public static final String CSV_ESCAPE = "\\\\";
-    
+
     // Compile patterns in advance and cache them
-    static final Map<String,Pattern[]> SPLIT_PATTERNS = new HashMap<String, Pattern[]>();
+    static final Map<String,Pattern[]> SPLIT_PATTERNS = new HashMap<>();
     static {
-        for (String param[] : new String[][] {
+        for (String[] param : new String[][] {
                 { PATH_ESCAPE, "/"} ,
                 { CSV_ESCAPE, ","},
                 { CSV_ESCAPE, "="}
@@ -63,7 +63,7 @@ public final class EscapeUtil {
      * @return the combined path
      */
     public static String combineToPath(List<String> pParts) {
-        if (pParts != null && pParts.size() > 0) {
+        if (pParts != null && !pParts.isEmpty()) {
             StringBuilder buf = new StringBuilder();
             Iterator<String> it = pParts.iterator();
             while (it.hasNext()) {
@@ -87,7 +87,7 @@ public final class EscapeUtil {
      */
     public static List<String> parsePath(String pPath) {
         // Special cases which simply implies 'no path'
-        if (pPath == null || pPath.equals("") || pPath.equals("/")) {
+        if (pPath == null || pPath.isEmpty() || pPath.equals("/")) {
             return null;
         }
         return replaceWildcardsWithNull(split(pPath, PATH_ESCAPE, "/"));
@@ -111,7 +111,7 @@ public final class EscapeUtil {
      * @return reversed path or an empty stack if no path parts are given. Never return null.
      */
     public static Stack<String> reversePath(List<String> pathParts) {
-        Stack<String> pathStack = new Stack<String>();
+        Stack<String> pathStack = new Stack<>();
         if (pathParts != null) {
             // Needs first extra argument at top of the stack
             for (int i = pathParts.size() - 1;i >=0;i--) {
@@ -144,7 +144,7 @@ public final class EscapeUtil {
      */
     public static List<String> split(String pArg,String pEscape, String pDelimiter) {
         if (pArg != null) {
-            ArrayList<String> ret = new ArrayList<String>();
+            ArrayList<String> ret = new ArrayList<>();
             Pattern[] pattern = SPLIT_PATTERNS.get(pEscape + pDelimiter);
             if (pattern == null) {
                 pattern = createSplitPatterns(pEscape, pDelimiter);
@@ -174,7 +174,7 @@ public final class EscapeUtil {
     public static String[] splitAsArray(String pArg, String pEscape, String pDelimiter) {
         if (pArg != null) {
             List<String> elements = split(pArg, pEscape, pDelimiter);
-            return elements.toArray(new String[elements.size()]);
+            return elements.toArray(new String[0]);
         } else {
             return new String[0];
         }
@@ -256,7 +256,7 @@ public final class EscapeUtil {
         if (pParts  == null) {
             return null;
         }
-        List<String> ret = new ArrayList<String>(pParts.size());
+        List<String> ret = new ArrayList<>(pParts.size());
         for (String part : pParts) {
             ret.add("*".equals(part) ? null : part);
         }

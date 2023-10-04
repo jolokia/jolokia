@@ -14,7 +14,7 @@ import javax.management.*;
  */
 public class SingleMBeanServerAccess implements MBeanServerAccess {
 
-    private MBeanServerConnection connection;
+    private final MBeanServerConnection connection;
 
     /**
      * Constructor for wrapping a remote connection

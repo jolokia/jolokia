@@ -52,6 +52,7 @@ public class J4pVersionRequest extends J4pRequest {
 
     /** {@inheritDoc} */
     @Override
+    @SuppressWarnings("unchecked")
     J4pVersionResponse createResponse(JSONObject pResponse) {
         return new J4pVersionResponse(this,pResponse);
     }

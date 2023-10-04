@@ -16,7 +16,6 @@ package org.jolokia.support.spring;
  * limitations under the License.
  */
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,7 +23,9 @@ import org.jolokia.jvmagent.JolokiaServerConfig;
 import org.springframework.context.ApplicationContext;
 import org.testng.annotations.Test;
 
-import static org.easymock.EasyMock.*;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -85,7 +86,7 @@ public class SpringJolokiaServerTest extends BaseServerTest {
         server.setConfig(getConfig(true,100));
 
         ApplicationContext ctx = createMock(ApplicationContext.class);
-        Map<String,SpringJolokiaConfigHolder> configs = new HashMap<String, SpringJolokiaConfigHolder>();
+        Map<String,SpringJolokiaConfigHolder> configs = new HashMap<>();
         configs.put("B",getConfig(false,10,"executor","single","agentContext","/j4p/"));
         configs.put("A", getConfig(true, 20, "executor", "fixed", "threadNr", "2"));
         expect(ctx.getBeansOfType(SpringJolokiaConfigHolder.class)).andReturn(configs);
@@ -99,10 +100,10 @@ public class SpringJolokiaServerTest extends BaseServerTest {
         checkServerAndStop(server);
     }
 
-    private SpringJolokiaConfigHolder getConfig(boolean autoStart, int order, String ... extraArgs) throws IOException {
+    private SpringJolokiaConfigHolder getConfig(boolean autoStart, int order, String ... extraArgs) {
         SpringJolokiaConfigHolder cfg = new SpringJolokiaConfigHolder();
         cfg.setOrder(order);
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, String> map = new HashMap<>();
         map.put("autoStart","" + autoStart);
         map.put("port", "0");
         map.put("host","127.0.0.1");

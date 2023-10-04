@@ -29,6 +29,7 @@ import org.json.simple.JSONAware;
  * @author roland
  * @since 28.09.11
  */
+@SuppressWarnings("rawtypes")
 class ArrayTypeConverter extends OpenTypeConverter<ArrayType> {
 
     /**

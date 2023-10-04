@@ -3,6 +3,7 @@ package org.jolokia.service.discovery;
 import java.io.*;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import org.jolokia.server.core.service.api.AgentDetails;
@@ -16,8 +17,8 @@ import org.json.simple.parser.ParseException;
  */
 public class DiscoveryIncomingMessage extends AbstractDiscoveryMessage {
 
-    private InetAddress sourceAddress;
-    private int sourcePort;
+    private final InetAddress sourceAddress;
+    private final int sourcePort;
 
     /**
      * Parse a message from a datagram packet.
@@ -64,9 +65,10 @@ public class DiscoveryIncomingMessage extends AbstractDiscoveryMessage {
                "source = " + getSourceAddress() + ":" + getSourcePort() + ": " + super.toString() + "}";
     }
 
-    private Map<AgentDetails.AgentDetailProperty,Object> extractDetails(JSONObject pData) throws IOException {
-        Map<AgentDetails.AgentDetailProperty, Object> data = new HashMap<AgentDetails.AgentDetailProperty, Object>();
-        for (Map.Entry entry : (Set<Map.Entry>) pData.entrySet()) {
+    private Map<AgentDetails.AgentDetailProperty,Object> extractDetails(JSONObject pData) {
+        Map<AgentDetails.AgentDetailProperty, Object> data = new HashMap<>();
+        //noinspection unchecked
+        for (Map.Entry<?, ?> entry : (Set<Map.Entry<?, ?>>) pData.entrySet()) {
             try {
                 data.put(AgentDetails.AgentDetailProperty.fromKey(entry.getKey().toString()), entry.getValue());
             } catch (IllegalArgumentException exp) {
@@ -80,7 +82,7 @@ public class DiscoveryIncomingMessage extends AbstractDiscoveryMessage {
         JSONParser parser = new JSONParser();
         ByteArrayInputStream is = new ByteArrayInputStream(pData,0,pLength);
         try {
-            return (JSONObject) parser.parse(new InputStreamReader(is, "UTF-8"));
+            return (JSONObject) parser.parse(new InputStreamReader(is, StandardCharsets.UTF_8));
         } catch (ParseException e) {
             throw new IOException("Cannot parse discovery message as JSON",e);
         }

@@ -52,7 +52,7 @@ public class JolokiaListRequest extends JolokiaRequest {
 
     @Override
     public String toString() {
-        StringBuffer ret = new StringBuffer("JmxListRequest[");
+        StringBuilder ret = new StringBuilder("JmxListRequest[");
         String baseInfo = getInfo();
         if (baseInfo != null) {
             ret.append(baseInfo);
@@ -81,18 +81,17 @@ public class JolokiaListRequest extends JolokiaRequest {
      * @return creator
      */
     static RequestCreator<JolokiaListRequest> newCreator() {
-        return new RequestCreator<JolokiaListRequest>() {
+        return new RequestCreator<>() {
             /** {@inheritDoc} */
-            public JolokiaListRequest create(Stack<String> pStack, ProcessingParameters pParams) throws MalformedObjectNameException {
+            public JolokiaListRequest create(Stack<String> pStack, ProcessingParameters pParams) {
                 return new JolokiaListRequest(
                         prepareExtraArgs(pStack), // path
                         pParams);
             }
 
             /** {@inheritDoc} */
-            public JolokiaListRequest create(Map<String, ?> requestMap, ProcessingParameters pParams)
-                    throws MalformedObjectNameException {
-                return new JolokiaListRequest(requestMap,pParams);
+            public JolokiaListRequest create(Map<String, ?> requestMap, ProcessingParameters pParams) {
+                return new JolokiaListRequest(requestMap, pParams);
             }
         };
     }

@@ -19,10 +19,9 @@ package org.jolokia.jvmagent.handler;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
-
-import javax.management.JMException;
 import javax.management.MalformedObjectNameException;
 
 import com.sun.net.httpserver.Headers;
@@ -41,8 +40,15 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.testng.annotations.*;
 
-import static org.easymock.EasyMock.*;
-import static org.testng.Assert.*;
+import static org.easymock.EasyMock.anyInt;
+import static org.easymock.EasyMock.anyLong;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author roland
@@ -51,13 +57,12 @@ import static org.testng.Assert.*;
 public class JolokiaHttpHandlerTest {
 
     private JolokiaHttpHandler handler;
-    private TestJolokiaContext ctx;
     private RequestDispatcher requestDispatcher;
 
 
     @BeforeMethod
     public void setup() throws MalformedObjectNameException, NoSuchFieldException, IllegalAccessException {
-        ctx = getContext();
+        TestJolokiaContext ctx = getContext();
         requestDispatcher = new TestRequestDispatcher.Builder()
                 .request(new JolokiaRequestBuilder(RequestType.READ, "java.lang:type=Memory").attribute("HeapMemoryUsage").build())
                 .andReturnMapValue("used",4711L).build();
@@ -81,7 +86,7 @@ public class JolokiaHttpHandlerTest {
     }
 
     @AfterMethod
-    public void tearDown() throws JMException {
+    public void tearDown() {
         if (handler != null) {
             handler = null;
         }
@@ -100,7 +105,7 @@ public class JolokiaHttpHandlerTest {
         handler.handle(exchange);
 
         assertEquals(header.getFirst("content-type"),"text/javascript; charset=utf-8");
-        String result = out.toString("utf-8");
+        String result = out.toString(StandardCharsets.UTF_8);
         assertTrue(result.endsWith("});"));
         assertTrue(result.startsWith("data({"));
     }
@@ -156,7 +161,7 @@ public class JolokiaHttpHandlerTest {
         handler.handle(exchange);
 
         assertEquals(header.getFirst("content-type"),"text/plain; charset=utf-8");
-        String result = out.toString("utf-8");
+        String result = out.toString(StandardCharsets.UTF_8);
         JSONObject resp = (JSONObject) new JSONParser().parse(result);
         assertTrue(resp.containsKey("error"));
         assertEquals(resp.get("error_type"), IllegalArgumentException.class.getName());
@@ -179,7 +184,7 @@ public class JolokiaHttpHandlerTest {
         handler.handle(exchange);
 
         assertEquals(header.getFirst("content-type"),"text/javascript; charset=utf-8");
-        String result = out.toString("utf-8");
+        String result = out.toString(StandardCharsets.UTF_8);
         assertTrue(result.endsWith("});"));
         assertTrue(result.startsWith("data({"));
         assertTrue(result.contains("\"used\""));
@@ -232,10 +237,10 @@ public class JolokiaHttpHandlerTest {
         assertEquals(header.getFirst("Access-Control-Allow-Origin"),"http://localhost:8080/");
     }
 
-    private void prepareMemoryPostReadRequest(HttpExchange pExchange) throws UnsupportedEncodingException {
+    private void prepareMemoryPostReadRequest(HttpExchange pExchange) {
         expect(pExchange.getRequestMethod()).andReturn("POST");
         String response = "{\"mbean\":\"java.lang:type=Memory\",\"attribute\":\"HeapMemoryUsage\",\"type\":\"read\"}";
-        byte[] buf = response.getBytes("utf-8");
+        byte[] buf = response.getBytes(StandardCharsets.UTF_8);
         InputStream is = new ByteArrayInputStream(buf);
         expect(pExchange.getRequestBody()).andReturn(is);
     }
@@ -256,7 +261,7 @@ public class JolokiaHttpHandlerTest {
     }
 
     @Test
-    public void usingStreamingJSON() throws IOException, URISyntaxException, ParseException, NoSuchFieldException, IllegalAccessException, MalformedObjectNameException {
+    public void usingStreamingJSON() throws IOException, URISyntaxException, ParseException, NoSuchFieldException, IllegalAccessException {
         handler = new JolokiaHttpHandler(getContext(ConfigKey.STREAMING, "true"));
         injectRequestDispatcher(handler,requestDispatcher);
 
@@ -267,7 +272,7 @@ public class JolokiaHttpHandlerTest {
         ByteArrayOutputStream out = prepareResponse(exchange, header);
         handler.doHandle(exchange);
 
-        String result = out.toString("utf-8");
+        String result = out.toString(StandardCharsets.UTF_8);
 
         assertNull(header.getFirst("Content-Length"));
         JSONObject resp = (JSONObject) new JSONParser().parse(result);
@@ -304,16 +309,14 @@ public class JolokiaHttpHandlerTest {
 
     private static boolean debugToggle = false;
     public TestJolokiaContext getContext(Object... extra) {
-        ArrayList list = new ArrayList();
+        List<Object> list = new ArrayList<>();
         list.add(ConfigKey.AGENT_CONTEXT);
         list.add("/jolokia");
         list.add(ConfigKey.DEBUG);
         list.add(debugToggle ? "true" : "false");
         list.add(ConfigKey.AGENT_ID);
         list.add(UUID.randomUUID().toString());
-        for (Object e : extra) {
-            list.add(e);
-        }
+        Collections.addAll(list, extra);
         debugToggle = !debugToggle;
         return new TestJolokiaContext.Builder()
                 .config(list.toArray())

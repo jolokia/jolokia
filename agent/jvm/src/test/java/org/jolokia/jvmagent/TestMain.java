@@ -22,14 +22,14 @@ package org.jolokia.jvmagent;
  */
 public class TestMain {
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) {
         for (int i = 1;i< 10;i++) {
             Thread thread = new Thread("Bla " + i) {
                 @Override
                 public void run() {
                     try {
                         sleep((long) (Math.random() * 20000));
-                    } catch (InterruptedException e) {
+                    } catch (InterruptedException ignored) {
                     }
                 }
             };

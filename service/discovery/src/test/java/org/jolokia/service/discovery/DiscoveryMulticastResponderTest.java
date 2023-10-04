@@ -50,9 +50,10 @@ public class DiscoveryMulticastResponderTest {
                         .build();
         JolokiaDiscovery discovery = new JolokiaDiscovery();
         discovery.init(ctx);
+        @SuppressWarnings("unchecked")
         List<JSONObject> msgs = discovery.lookupAgents();
         if (enabled) {
-            Assert.assertTrue(msgs.size() > 0);
+            Assert.assertFalse(msgs.isEmpty());
         } else {
             for (JSONObject resp : msgs) {
                 Assert.assertNotEquals(resp.get("agent_id"),id);

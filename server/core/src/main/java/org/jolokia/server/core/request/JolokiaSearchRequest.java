@@ -56,7 +56,7 @@ public class JolokiaSearchRequest extends JolokiaObjectNameRequest {
 
     @Override
     public String toString() {
-        StringBuffer ret = new StringBuffer("JmxSearchRequest[");
+        StringBuilder ret = new StringBuilder("JmxSearchRequest[");
         String baseInfo = getInfo();
         if (baseInfo != null) {
             ret.append(baseInfo);

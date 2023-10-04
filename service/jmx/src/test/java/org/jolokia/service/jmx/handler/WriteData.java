@@ -22,6 +22,7 @@ import java.util.Map;
  * @author roland
  * @since 21.04.11
  */
+@SuppressWarnings("rawtypes")
 public class WriteData implements WriteDataMBean {
     private int val;
     private Boolean bool;
@@ -51,5 +52,5 @@ public class WriteData implements WriteDataMBean {
         bool = b;
     }
 
-    public String getReadOnly() { return "winter"; };
+    public String getReadOnly() { return "winter"; }
 }

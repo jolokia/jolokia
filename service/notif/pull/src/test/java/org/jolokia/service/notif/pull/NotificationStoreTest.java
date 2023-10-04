@@ -30,7 +30,7 @@ import static org.testng.Assert.assertEquals;
  */
 public class NotificationStoreTest {
     @Test
-    public void testSimple() throws Exception {
+    public void testSimple() {
         Object handback = new Object();
         NotificationSubscription subcr = createNotificationSubscription(handback);
         NotificationStore store = new NotificationStore(subcr,1);

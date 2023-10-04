@@ -28,7 +28,6 @@ import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.config.Configuration;
 import org.jolokia.server.core.config.StaticConfiguration;
 import org.jolokia.server.core.request.*;
-import org.jolokia.server.core.restrictor.AllowAllRestrictor;
 import org.jolokia.server.core.util.TestJolokiaContext;
 import org.json.simple.JSONObject;
 import org.testng.annotations.*;
@@ -43,18 +42,17 @@ import static org.testng.Assert.*;
 public class Jsr160RequestHandlerTest {
 
     private Jsr160RequestHandler dispatcher;
-    //private ProcessingParameters procParams;
-    private TestJolokiaContext ctx;
 
     @BeforeMethod
     private void setup() {
-        ctx = new TestJolokiaContext.Builder().build();
+        //private ProcessingParameters procParams;
+        TestJolokiaContext ctx = new TestJolokiaContext.Builder().build();
         dispatcher = new Jsr160RequestHandler(0) {
             @Override
             protected Map<String, Object> prepareEnv(Map<String, String> pTargetConfig) {
-                Map ret = super.prepareEnv(pTargetConfig);
+                Map<String, Object> ret = super.prepareEnv(pTargetConfig);
                 if (ret == null) {
-                    ret = new HashMap();
+                    ret = new HashMap<>();
                 }
                 ret.put("jmx.remote.protocol.provider.pkgs", "org.jolokia.service.jsr160");
                 return ret;
@@ -95,7 +93,8 @@ public class Jsr160RequestHandlerTest {
     @Test
     public void simpleDispatch() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException, EmptyResponseException {
         JolokiaReadRequest req =  preparePostReadRequest(null);
-        Map result = (Map) dispatcher.handleRequest(req,null);
+        @SuppressWarnings("unchecked")
+        Map<String, ?> result = (Map<String, ?>) dispatcher.handleRequest(req, null);
         assertTrue(result.containsKey("HeapMemoryUsage"));
     }
 
@@ -110,7 +109,8 @@ public class Jsr160RequestHandlerTest {
         System.setProperty("TEST_WITH_USER","roland");
         try {
             JolokiaRequest req = preparePostReadRequest("roland");
-            Map result = (Map) dispatcher.handleRequest(req,null);
+            @SuppressWarnings("unchecked")
+            Map<String, ?> result = (Map<String, ?>) dispatcher.handleRequest(req, null);
             assertTrue(result.containsKey("HeapMemoryUsage"));
         } finally {
             System.clearProperty("TEST_WITH_USER");
@@ -124,6 +124,7 @@ public class Jsr160RequestHandlerTest {
         return preparePostReadRequestWithServiceUrl("service:jmx:test:///jndi/rmi://localhost:9999/jmxrmi", pUser, pAttribute);
     }
 
+    @SuppressWarnings("unchecked")
     private JolokiaReadRequest preparePostReadRequestWithServiceUrl(String pJmxServiceUrl, String pUser, String... pAttribute) {
         JSONObject params = new JSONObject();
         JSONObject target = new JSONObject();
@@ -147,9 +148,9 @@ public class Jsr160RequestHandlerTest {
         Jsr160RequestHandler handler = new Jsr160RequestHandler(0) {
             @Override
             protected Map<String, Object> prepareEnv(Map<String, String> pTargetConfig) {
-                Map ret = super.prepareEnv(pTargetConfig);
+                Map<String, Object> ret = super.prepareEnv(pTargetConfig);
                 if (ret == null) {
-                    ret = new HashMap();
+                    ret = new HashMap<>();
                 }
                 ret.put("jmx.remote.protocol.provider.pkgs", "org.jolokia.service.jsr160");
                 return ret;
@@ -188,7 +189,7 @@ public class Jsr160RequestHandlerTest {
     }
 
     @Test
-    public void whiteListWithIllegalPath() throws Exception {
+    public void whiteListWithIllegalPath() {
         String invalidPath = "/very/unlikely/path";
         Configuration config = new StaticConfiguration(
                 ConfigKey.JSR160_PROXY_ALLOWED_TARGETS, invalidPath);
@@ -212,7 +213,7 @@ public class Jsr160RequestHandlerTest {
         }
     }
 
-    private void runWhiteListTest(Configuration config) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException, EmptyResponseException {
+    private void runWhiteListTest(Configuration config) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, NotChangedException, EmptyResponseException {
         Jsr160RequestHandler dispatcher = createDispatcherPointingToLocalMBeanServer(config);
 
         Object[] testData = new Object[] {

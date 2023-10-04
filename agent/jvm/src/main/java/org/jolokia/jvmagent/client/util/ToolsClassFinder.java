@@ -47,7 +47,7 @@ public final class ToolsClassFinder {
      * @return the found class
      * @throws ClassNotFoundException if no class could be found
      */
-    public static Class lookupClass(String pClassName) throws ClassNotFoundException {
+    public static Class<?> lookupClass(String pClassName) throws ClassNotFoundException {
         try {
             return Class.forName(pClassName);
         } catch (ClassNotFoundException exp) {
@@ -57,7 +57,7 @@ public final class ToolsClassFinder {
 
     /**
      * Searches for <code>tools.jar</code> in various locations and uses an {@link URLClassLoader} for
-     * loading a class from this files. If the class could not be found in any, then a {@link ClassNotFoundException}
+     * loading a class from these files. If the class could not be found in any, then a {@link ClassNotFoundException}
      * is thrown. The locations used for lookup are (in this order)
      *
      * <ul>
@@ -71,7 +71,7 @@ public final class ToolsClassFinder {
      * @return the found class
      * @throws ClassNotFoundException if no class could be found
      */
-    public static Class lookupInToolsJar(String pClassName) throws ClassNotFoundException {
+    public static Class<?> lookupInToolsJar(String pClassName) throws ClassNotFoundException {
         // Try to look up tools.jar within $java.home, otherwise give up
         String extraInfo;
         if (JAVA_HOME != null) {
@@ -84,7 +84,7 @@ public final class ToolsClassFinder {
                     }
                 } catch (MalformedURLException e) {
                     // Cannot happen because the URL comes from a File.
-                    // And if, we throws an class not found exception.
+                    // And if, we throw a class not found exception.
                     extraInfo = "Cannot create URL from " + toolsJar;
                 }
             }
@@ -97,11 +97,11 @@ public final class ToolsClassFinder {
 
     // Create a classloader and respect a security manager if installed
     private static ClassLoader createClassLoader(File toolsJar) throws MalformedURLException {
-        final URL urls[] = new URL[] {toolsJar.toURI().toURL() };
+        final URL[] urls = new URL[] {toolsJar.toURI().toURL() };
         if (System.getSecurityManager() == null) {
             return new URLClassLoader(urls, getParentClassLoader());
         } else {
-            return AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
+            return AccessController.doPrivileged(new PrivilegedAction<>() {
                 /** {@inheritDoc} */
                 public ClassLoader run() {
                     return new URLClassLoader(urls, getParentClassLoader());

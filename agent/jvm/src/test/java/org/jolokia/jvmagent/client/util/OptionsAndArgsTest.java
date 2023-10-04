@@ -56,7 +56,7 @@ public class OptionsAndArgsTest {
         assertTrue(args.matches(".*host=localhost.*"));
         assertTrue(args.matches(".*user=roland.*"));
         assertTrue(args.matches(".*password=bla.*"));
-        Map<String,String> opts = new HashMap<String, String>();
+        Map<String,String> opts = new HashMap<>();
         for (String s : args.split(",")) {
             String[] p = s.split("=");
             assertEquals(p.length,2);
@@ -121,7 +121,8 @@ public class OptionsAndArgsTest {
         OptionsAndArgs o = opts("bla");
         assertNull(o.getPid());
         Pattern pat = o.getProcessPattern();
-        assertEquals(pat.pattern(),"bla");
+        assertNotNull(pat);
+        assertEquals(pat.pattern(), "bla");
         assertEquals(o.getCommand(), "toggle");
     }
 
@@ -135,7 +136,7 @@ public class OptionsAndArgsTest {
     public void encrypt() {
         OptionsAndArgs o = opts("encrypt", "passwd");
         assertEquals(o.getCommand(), "encrypt");
-        assertEquals(o.getExtraArgs(), Arrays.asList("passwd"));
+        assertEquals(o.getExtraArgs(), List.of("passwd"));
 
     }
 }

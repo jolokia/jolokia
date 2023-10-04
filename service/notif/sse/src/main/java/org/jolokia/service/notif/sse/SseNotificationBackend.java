@@ -28,7 +28,7 @@ public class SseNotificationBackend extends AbstractJolokiaService<NotificationB
     private static final byte[] DATA_FIELD = "data: ".getBytes(StandardCharsets.UTF_8);
 
     // Map with heart beat threads
-    private HashMap<String,SseHeartBeat> heartBeatMap = new HashMap<String,SseHeartBeat>();
+    private final HashMap<String,SseHeartBeat> heartBeatMap = new HashMap<>();
 
     /**
      * Create a server side event notification backend which will return notifications
@@ -71,7 +71,7 @@ public class SseNotificationBackend extends AbstractJolokiaService<NotificationB
                         JolokiaContext ctx = getJolokiaContext();
                         Serializer serializer = ctx.getMandatoryService(Serializer.class);
                         NotificationResult result =
-                                new NotificationResult(pSubscription.getHandle(), Arrays.asList(notification),
+                                new NotificationResult(pSubscription.getHandle(), Collections.singletonList(notification),
                                                        handback, 0);
                     try {
                         long id = notification.getSequenceNumber();
@@ -120,6 +120,7 @@ public class SseNotificationBackend extends AbstractJolokiaService<NotificationB
     }
 
     /** {@inheritDoc} */
+    @SuppressWarnings("unchecked")
     public Map<String, ?> getConfig() {
         JSONObject ret = new JSONObject();
         ret.put(BackChannel.CONTENT_TYPE, "text/event-stream");

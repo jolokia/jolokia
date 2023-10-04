@@ -16,7 +16,7 @@ import org.w3c.dom.Element;
  */
 public class LogBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
-    protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
+    protected AbstractBeanDefinition parseInternal(Element element, @SuppressWarnings("NullableProblems") ParserContext parserContext) {
         BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(SpringJolokiaLogHandlerHolder.class);
         String logRef = element.getAttribute("log-ref");
         if (StringUtils.hasLength(logRef)) {

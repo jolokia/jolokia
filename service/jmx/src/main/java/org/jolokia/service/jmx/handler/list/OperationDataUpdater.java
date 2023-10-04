@@ -39,6 +39,7 @@ class OperationDataUpdater extends DataUpdater {
 
     /** {@inheritDoc} */
     @Override
+    @SuppressWarnings("unchecked")
     protected JSONObject extractData(MBeanInfo pMBeanInfo, String pOperation) {
         JSONObject opMap = new JSONObject();
 

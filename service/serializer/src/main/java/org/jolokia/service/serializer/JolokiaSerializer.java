@@ -38,11 +38,11 @@ import org.jolokia.server.core.service.api.AbstractJolokiaService;
 public class JolokiaSerializer extends AbstractJolokiaService<Serializer> implements Serializer {
 
     // From object to json:
-    private ObjectToJsonConverter toJsonConverter;
+    private final ObjectToJsonConverter toJsonConverter;
 
     // From string/json to object:
-    private StringToObjectConverter toObjectConverter;
-    private OpenTypeDeserializer toOpenTypeConverter;
+    private final StringToObjectConverter toObjectConverter;
+    private final OpenTypeDeserializer toOpenTypeConverter;
 
     /**
      * Default constructor

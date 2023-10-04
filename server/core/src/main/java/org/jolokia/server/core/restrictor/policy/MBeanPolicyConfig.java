@@ -24,7 +24,7 @@ import org.jolokia.server.core.util.RequestType;
 
 /**
  * Class combining various maps for attributes, operations and name patterns. It is used
- * internally by {@libk MBeanAccessChecker} to store the policy configuration.
+ * internally by {@link MBeanAccessChecker} to store the policy configuration.
  *
  * @author roland
  * @since 03.09.11
@@ -32,10 +32,10 @@ import org.jolokia.server.core.util.RequestType;
 
 class MBeanPolicyConfig {
 
-    private Set<ObjectName>             patterns = new HashSet<ObjectName>();
-    private Map<ObjectName,Set<String>> readAttributes = new HashMap<ObjectName, Set<String>>();
-    private Map<ObjectName,Set<String>> writeAttributes = new HashMap<ObjectName, Set<String>>();
-    private Map<ObjectName,Set<String>> operations = new HashMap<ObjectName, Set<String>>();
+    private final Set<ObjectName>             patterns = new HashSet<>();
+    private final Map<ObjectName,Set<String>> readAttributes = new HashMap<>();
+    private final Map<ObjectName,Set<String>> writeAttributes = new HashMap<>();
+    private final Map<ObjectName,Set<String>> operations = new HashMap<>();
 
     /**
      * Add a object name pattern

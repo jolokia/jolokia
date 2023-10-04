@@ -46,6 +46,7 @@ abstract class DataUpdater {
      * @param pMBeanInfo info to extract from
      * @param pPathStack stack for further constraining the result
      */
+    @SuppressWarnings("rawtypes")
     void update(Map pMap, MBeanInfo pMBeanInfo, Stack<String> pPathStack) {
 
         boolean isPathEmpty = pPathStack == null || pPathStack.empty();
@@ -54,7 +55,8 @@ abstract class DataUpdater {
 
         JSONObject attrMap = extractData(pMBeanInfo,filter);
 
-        if (attrMap.size() > 0) {
+        if (!attrMap.isEmpty()) {
+            //noinspection unchecked
             pMap.put(getKey(), attrMap);
         } else if (!isPathEmpty) {
             throw new IllegalArgumentException("Path given but extracted value is empty");
@@ -81,7 +83,7 @@ abstract class DataUpdater {
      * @param pPathStack path to check
      */
     protected void verifyThatPathIsEmpty(Stack<String> pPathStack) {
-        if (pPathStack != null && pPathStack.size() > 0) {
+        if (pPathStack != null && !pPathStack.isEmpty()) {
             throw new IllegalArgumentException("Path contains extra elements not usable for a list request: " + pPathStack);
         }
     }

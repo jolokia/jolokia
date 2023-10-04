@@ -19,11 +19,7 @@ public class JolokiaCipherTest {
 
     @BeforeMethod
     public void setUp() throws GeneralSecurityException {
-        cipher = new JolokiaCipher(new JolokiaCipher.KeyHolder() {
-            public String getKey() {
-                return "testtest";
-            }
-        });
+        cipher = new JolokiaCipher(() -> "testtest");
     }
 
     @Test

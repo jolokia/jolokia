@@ -39,33 +39,33 @@ public class SimplifiersTest {
     @Test
     public void bigIntegerSimplifier() throws AttributeNotFoundException {
         BigInteger bigInt = new BigInteger("12345678901234567890");
-        Object result = bigIntegerSimplifier.extractObject(converter, bigInt, new Stack<String>(), false);
+        Object result = bigIntegerSimplifier.extractObject(converter, bigInt, new Stack<>(), false);
         assertEquals(result, bigInt);
     }
 
     @Test
     public void bigIntegerSimplifierJson() throws AttributeNotFoundException {
         BigInteger bigInt = new BigInteger("12345678901234567890");
-        Object result = bigIntegerSimplifier.extractObject(converter, bigInt, new Stack<String>(), true);
+        Object result = bigIntegerSimplifier.extractObject(converter, bigInt, new Stack<>(), true);
         assertEquals(result.toString(), "{\"bigint\":\"12345678901234567890\"}");
     }
 
     @Test
     public void urlSimplifier() throws AttributeNotFoundException, MalformedURLException {
         URL url = new URL("https://www.jolokia.org");
-        Object result = urlSimplifier.extractObject(converter, url, new Stack<String>(), false);
+        Object result = urlSimplifier.extractObject(converter, url, new Stack<>(), false);
         assertEquals(result, url);
     }
 
     @Test
     public void urlSimplifierJson() throws AttributeNotFoundException, MalformedURLException {
         URL url = new URL("https://www.jolokia.org");
-        Object result = urlSimplifier.extractObject(converter, url, new Stack<String>(), true);
+        Object result = urlSimplifier.extractObject(converter, url, new Stack<>(), true);
         assertEquals(result.toString(), "{\"url\":\"https:\\/\\/www.jolokia.org\"}");
     }
 
 
-    private class PathAttributeFilterValueFaultHandler implements ValueFaultHandler {
+    private static class PathAttributeFilterValueFaultHandler implements ValueFaultHandler {
         private final ValueFaultHandler origHandler;
 
         PathAttributeFilterValueFaultHandler(ValueFaultHandler pOrigHandler) {

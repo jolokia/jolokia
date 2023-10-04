@@ -27,15 +27,16 @@ import javax.management.openmbean.TabularData;
  * @author roland
  * @since Jun 30, 2009
  */
+@SuppressWarnings("rawtypes")
 public interface OperationCheckingMBean {
 
     void reset();
 
     int fetchNumber(String arg);
 
-    public void throwCheckedException() throws Exception;
+    void throwCheckedException() throws Exception;
 
-    public void throwRuntimeException();
+    void throwRuntimeException();
 
     int overloadedMethod();
 
@@ -49,7 +50,7 @@ public interface OperationCheckingMBean {
 
     boolean emptyStringArgumentCheck(String arg1);
 
-    String arrayArguments(String args[], String extra);
+    String arrayArguments(String[] args, String extra);
 
     Object objectArrayArg(Object[] args);
 
@@ -63,9 +64,9 @@ public interface OperationCheckingMBean {
 
     double doubleArguments(double arg1, Double arg2);
 
-    public int sleep(int seconds) throws InterruptedException;
+    int sleep(int seconds) throws InterruptedException;
 
-    public String echo(String pEcho);
+    String echo(String pEcho);
 
     TimeUnit findTimeUnit(TimeUnit unit);
 

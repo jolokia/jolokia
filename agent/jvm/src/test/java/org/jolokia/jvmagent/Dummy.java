@@ -9,7 +9,7 @@ import org.jolokia.server.core.config.Configuration;
  */
 public class Dummy extends Authenticator {
 
-    private Configuration config;
+    private final Configuration config;
 
     public Dummy() {
         throw new UnsupportedOperationException("I expect to get some config parameters, use another constructor");

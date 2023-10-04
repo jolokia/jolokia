@@ -42,7 +42,7 @@ public final class DiscoveryOutgoingMessage extends AbstractDiscoveryMessage {
     public static class Builder {
 
         private AgentDetails agentDetails;
-        private MessageType type;
+        private final MessageType type;
         private InetAddress targetAddress;
         private int targetPort;
         private String agentId;

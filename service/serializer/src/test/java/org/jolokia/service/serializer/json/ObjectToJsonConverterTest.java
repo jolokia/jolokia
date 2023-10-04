@@ -55,36 +55,43 @@ public class ObjectToJsonConverterTest {
 
     @Test
     public void basics() throws AttributeNotFoundException {
-        Map result = (Map) converter.extractObject(new SelfRefBean1(), new Stack<String>(), true);
+        @SuppressWarnings("unchecked")
+        Map<String, ?> result = (Map<String, ?>) converter.extractObject(new SelfRefBean1(), new Stack<>(), true);
         assertNotNull("Bean2 is set",result.get("bean2"));
         assertNotNull("Binary attribute is set",result.get("strong"));
     }
 
     @Test
     public void checkDeadLockDetection() throws AttributeNotFoundException {
-        Map result = (Map) converter.extractObject(new SelfRefBean1(), new Stack<String>(), true);
+        @SuppressWarnings("unchecked")
+        Map<String, ?> result = (Map<String, ?>) converter.extractObject(new SelfRefBean1(), new Stack<>(), true);
         assertNotNull("Bean 2 is set",result.get("bean2"));
-        assertNotNull("Bean2:Bean1 is set",((Map)result.get("bean2")).get("bean1"));
-        assertEquals("Reference breackage",((Map)result.get("bean2")).get("bean1").getClass(),String.class);
+        //noinspection unchecked
+        assertNotNull("Bean2:Bean1 is set",((Map<String, ?>)result.get("bean2")).get("bean1"));
+        //noinspection unchecked
+        assertEquals("Reference breackage",((Map<String, ?>)result.get("bean2")).get("bean1").getClass(),String.class);
         assertTrue("Bean 3 should be resolved",result.get("bean3") instanceof Map);
     }
 
     @Test
     public void maxDepth() throws AttributeNotFoundException, NoSuchFieldException, IllegalAccessException {
         setOptionsViaReflection("maxDepth",2);
-        Map result = (Map) converter.extractObject(new SelfRefBean1(), new Stack<String>(), true);
-        String c = (String) ((Map) result.get("bean2")).get("bean1");
+        @SuppressWarnings("unchecked")
+        Map<String, ?> result = (Map<String, ?>) converter.extractObject(new SelfRefBean1(), new Stack<>(), true);
+        @SuppressWarnings("unchecked")
+        String c = (String) ((Map<String, ?>) result.get("bean2")).get("bean1");
         assertTrue("Recurence detected",c.contains("bean1: toString"));
     }
 
     @Test
     public void maxObjects() throws NoSuchFieldException, IllegalAccessException, AttributeNotFoundException {
         setOptionsViaReflection("maxObjects",1);
-        Map<String,Object> result = (Map) converter.extractObject(new InnerValueTestBean("foo", "bar", "baz"), new Stack<String>(), true);
+        @SuppressWarnings("unchecked")
+        Map<String, Object> result = (Map<String, Object>) converter.extractObject(new InnerValueTestBean("foo", "bar", "baz"), new Stack<>(), true);
         boolean found = false;
         for (Object val : result.values()) {
             if (val instanceof String) {
-                found = ((String) val).matches("^\\[.*(limit).*\\]$");
+                found = ((String) val).matches("^\\[.*(limit).*]$");
             }
         }
         assertTrue(found);
@@ -104,46 +111,50 @@ public class ObjectToJsonConverterTest {
     @Test
     public void customSimplifier() throws AttributeNotFoundException {
         Date date = new Date();
-        Map result = (Map) converter.extractObject(date, new Stack<String>(), true);
+        @SuppressWarnings("unchecked")
+        Map<String, ?> result = (Map<String, ?>) converter.extractObject(date, new Stack<>(), true);
         assertEquals(date.getTime(),result.get("millis"));
     }
 
     @Test
     public void fileSimplifier() throws AttributeNotFoundException {
-        Map result = (Map) converter.extractObject(new File("/tmp"), new Stack<String>(), true);
+        @SuppressWarnings("unchecked")
+        Map<String, ?> result = (Map<String, ?>) converter.extractObject(new File("/tmp"), new Stack<>(), true);
         assertNull(result.get("parent"));
     }
 
     @Test
     public void customNegativeSimpifier() throws MalformedObjectNameException, AttributeNotFoundException {
         ObjectName name = new ObjectName("java.lang:type=Memory");
-        Map result = (Map) converter.extractObject(name, new Stack<String>(), true);
+        @SuppressWarnings("unchecked")
+        Map<String, ?> result = (Map<String, ?>) converter.extractObject(name, new Stack<>(), true);
         // Since we removed the objectname simplifier from the list of simplifiers-default
         // explicitely, the converter should return the full blown object;
         assertEquals("type=Memory",result.get("canonicalKeyPropertyListString"));
     }
 
     @Test
-    public void convertToJsonTest() throws MalformedObjectNameException, AttributeNotFoundException {
+    public void convertToJsonTest() throws AttributeNotFoundException {
         File file = new File("myFile");
 
-        Map ret = (Map) converter.serialize(file, null, SerializeOptions.DEFAULT);
+        @SuppressWarnings("unchecked")
+        Map<String, ?> ret = (Map<String, ?>) converter.serialize(file, null, SerializeOptions.DEFAULT);
         assertEquals(ret.get("name"),"myFile");
-        String name = (String) converter.serialize(file, Arrays.asList("name"), SerializeOptions.DEFAULT);
+        String name = (String) converter.serialize(file, List.of("name"), SerializeOptions.DEFAULT);
         assertEquals(name,"myFile");
     }
 
     @Test
     public void setInnerValueTest() throws IllegalAccessException, AttributeNotFoundException, InvocationTargetException {
-        InnerValueTestBean bean = new InnerValueTestBean("foo","bar","baz");
+        InnerValueTestBean bean = new InnerValueTestBean("foo", "bar", "baz");
 
-        Object oldValue = converter.setInnerValue(bean,"blub",new ArrayList<String>(Arrays.asList("map","foo","1")));
+        Object oldValue = converter.setInnerValue(bean, "blub", new ArrayList<>(Arrays.asList("map", "foo", "1")));
 
         assertEquals(oldValue,"baz");
         assertEquals(bean.getMap().get("foo").get(0),"bar");
         assertEquals(bean.getMap().get("foo").get(1),"blub");
 
-        oldValue = converter.setInnerValue(bean,"fcn",new ArrayList<String>(Arrays.asList("array","0")));
+        oldValue = converter.setInnerValue(bean, "fcn", new ArrayList<>(Arrays.asList("array", "0")));
 
         assertEquals(oldValue,"bar");
         assertEquals(bean.getArray()[0],"fcn");
@@ -161,7 +172,8 @@ public class ObjectToJsonConverterTest {
         }
         int v = Integer.parseInt(version);
         if (v > 6) {
-            Map ret =  (Map)converter.serialize(bean, null, SerializeOptions.DEFAULT);
+            @SuppressWarnings("unchecked")
+            Map<String, ?> ret =  (Map<String, ?>)converter.serialize(bean, null, SerializeOptions.DEFAULT);
             assertNull(ret.get("transientValue"));
             assertEquals(ret.get("value"),"value");
         } else {
@@ -238,13 +250,13 @@ public class ObjectToJsonConverterTest {
         }
     }
 
-    class InnerValueTestBean {
-        private Map<String, List<String>> map;
+    static class InnerValueTestBean {
+        private final Map<String, List<String>> map;
 
-        private String[] array;
+        private final String[] array;
 
         InnerValueTestBean(String key, String value1, String value2) {
-            map = new HashMap<String, List<String>>();
+            map = new HashMap<>();
             map.put(key,Arrays.asList(value1, value2));
 
             array = new String[] { value1, value2 };
@@ -259,7 +271,7 @@ public class ObjectToJsonConverterTest {
         }
     }
 
-    class TransientValueBean {
+    static class TransientValueBean {
 
         String value;
 

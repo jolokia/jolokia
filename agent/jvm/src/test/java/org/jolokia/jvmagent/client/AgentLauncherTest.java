@@ -31,8 +31,7 @@ public class AgentLauncherTest {
         forbidSystemExitCall();
         try {
             AgentLauncher.main();
-        } catch (ExitTrappedException exp) {
-
+        } catch (ExitTrappedException ignored) {
         } finally {
             enableSystemExitCall();
         }

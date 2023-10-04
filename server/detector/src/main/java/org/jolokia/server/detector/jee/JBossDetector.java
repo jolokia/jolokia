@@ -4,9 +4,7 @@ import java.lang.instrument.Instrumentation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collections;
-import java.util.Map;
 import java.util.Set;
-
 import javax.management.MBeanServerConnection;
 
 import org.jolokia.server.core.detector.DefaultServerHandle;
@@ -163,7 +161,7 @@ public class JBossDetector extends AbstractServerDetector {
     private ServerHandle checkForManagementRootServerViaJMX(MBeanServerAccess pMBeanServerAccess) {
         // Bug (or not ?) in Wildfly 8.0: Search for jboss.as:management-root=server return null but accessing this
         // MBean works. So we are looking, whether the JMX domain jboss.as exists and fetch the version directly.
-        if (searchMBeans(pMBeanServerAccess,"jboss.as:*").size() != 0) {
+        if (!searchMBeans(pMBeanServerAccess, "jboss.as:*").isEmpty()) {
             String version = getAttributeValue(pMBeanServerAccess, JBOSS_AS_MANAGEMENT_ROOT_SERVER, "productVersion");
             if (version == null) {
                 version = getAttributeValue(pMBeanServerAccess, JBOSS_AS_MANAGEMENT_ROOT_SERVER, "releaseVersion");
@@ -187,12 +185,12 @@ public class JBossDetector extends AbstractServerDetector {
     @Override
     public Set<MBeanServerConnection> getMBeanServers() {
         try {
-            Class locatorClass = Class.forName("org.jboss.mx.util.MBeanServerLocator");
+            Class<?> locatorClass = Class.forName("org.jboss.mx.util.MBeanServerLocator");
             Method method = locatorClass.getMethod("locateJBoss");
             return Collections.singleton((MBeanServerConnection) method.invoke(null));
-        } catch (ClassNotFoundException e) { /* Ok, its *not* JBoss 4,5 or 6, continue with search ... */ } catch (NoSuchMethodException e) {
-        } catch (IllegalAccessException e) {
-        } catch (InvocationTargetException e) {
+        } catch (ClassNotFoundException e) {
+            /* Ok, its *not* JBoss 4,5 or 6, continue with search ... */
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) {
         }
         return null;
     }

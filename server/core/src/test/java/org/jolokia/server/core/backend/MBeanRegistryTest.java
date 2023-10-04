@@ -38,7 +38,7 @@ public class MBeanRegistryTest {
 
     }
 
-    class Testy implements TestyMBean,MBeanRegistration {
+    static class Testy implements TestyMBean,MBeanRegistration {
 
         ObjectName oName;
 
@@ -46,7 +46,7 @@ public class MBeanRegistryTest {
             this.oName = name;
         }
 
-        public ObjectName preRegister(MBeanServer mBeanServer, ObjectName ignored) throws Exception {
+        public ObjectName preRegister(MBeanServer mBeanServer, ObjectName ignored) {
             return oName;
         }
 
@@ -54,7 +54,7 @@ public class MBeanRegistryTest {
 
         }
 
-        public void preDeregister() throws Exception {
+        public void preDeregister() {
 
         }
 

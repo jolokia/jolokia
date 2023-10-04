@@ -18,25 +18,28 @@ public interface JolokiaDiscoveryMBean {
      * @param pTimeout timeout for the lookup in milliseconds
      * @param pMulticastGroup multicast IPv4 address
      * @param pMulticastPort multicast port
-     * @return an array with JSON objects containing the agent details discovered
+     * @return a list with JSON objects containing the agent details discovered
      * @throws java.io.IOException
      */
+    @SuppressWarnings("rawtypes")
     List lookupAgentsWithTimeoutAndMulticastAddress(int pTimeout, String pMulticastGroup, int pMulticastPort) throws IOException;
 
     /**
      * Lookup agents.
      *
      * @param pTimeout timeout for the lookup in milliseconds
-     * @return an array with JSON objects containing the agent details discovered
+     * @return a list with JSON objects containing the agent details discovered
      * @throws java.io.IOException
      */
+    @SuppressWarnings("rawtypes")
     List lookupAgentsWithTimeout(int pTimeout) throws IOException;
 
     /**
      * Lookup agents with a timeout of 1 second
      *
-     * @return an array with JSON objects containing the agent details discovered
+     * @return a list with JSON objects containing the agent details discovered
      * @throws java.io.IOException
      */
+    @SuppressWarnings("rawtypes")
     List lookupAgents() throws IOException;
 }

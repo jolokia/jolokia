@@ -46,6 +46,7 @@ public class BeanExtractorTest extends AbstractExtractorTest {
     private BeanExtractorTest self;
     private BeanExtractorTest hiddenSelf;
 
+    @SuppressWarnings("FieldCanBeLocal")
     private Inner hiddenInner;
 
     @BeforeMethod
@@ -72,7 +73,7 @@ public class BeanExtractorTest extends AbstractExtractorTest {
         assertFalse((Boolean) res.get("flag"));
         assertEquals( ((JSONObject) res.get("inner")).get("innerText"),"innerValue");
         assertNull(res.get("nulli"));
-        assertTrue(!res.containsKey("forbiddenStream"));
+        assertFalse(res.containsKey("forbiddenStream"));
         assertTrue(res.containsKey("nulli"));
         assertEquals(res.get("nacked"),"nacked object");
         assertEquals(res.get("self"),"[this]");
@@ -129,7 +130,7 @@ public class BeanExtractorTest extends AbstractExtractorTest {
     }
 
     // =================================================================================
-    
+
     @Override
     Extractor createExtractor() {
         return new BeanExtractor();
@@ -188,9 +189,9 @@ public class BeanExtractorTest extends AbstractExtractorTest {
 
     }
 
-    private class Inner {
+    public static class Inner {
         private String innerText;
-        private Date innerDate = new Date();
+        private final Date innerDate = new Date();
 
         public Inner(String pInnerValue) {
             innerText = pInnerValue;
@@ -209,7 +210,7 @@ public class BeanExtractorTest extends AbstractExtractorTest {
         }
     }
 
-    private class Nacked {
+    public static class Nacked {
         @Override
         public String toString() {
             return "nacked object";

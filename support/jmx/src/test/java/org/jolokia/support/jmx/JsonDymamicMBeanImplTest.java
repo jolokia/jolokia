@@ -18,18 +18,36 @@ package org.jolokia.support.jmx;
 
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Proxy;
-import java.util.*;
-
-import javax.management.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import javax.management.Attribute;
+import javax.management.AttributeList;
+import javax.management.AttributeNotFoundException;
+import javax.management.InstanceNotFoundException;
+import javax.management.InvalidAttributeValueException;
+import javax.management.MBeanAttributeInfo;
+import javax.management.MBeanException;
+import javax.management.MBeanInfo;
+import javax.management.MBeanOperationInfo;
+import javax.management.MBeanParameterInfo;
+import javax.management.MBeanServer;
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import javax.management.ReflectionException;
+import javax.management.RuntimeMBeanException;
 
 import org.jolokia.service.serializer.JolokiaSerializer;
-import org.jolokia.support.jmx.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.testng.Assert;
-import org.testng.annotations.*;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
 
@@ -77,8 +95,8 @@ public class JsonDymamicMBeanImplTest {
     @Test
     public void checkMBeanInfo() throws Exception {
         MBeanInfo info = platformServer.getMBeanInfo(testName);
-        MBeanAttributeInfo aInfo[] = info.getAttributes();
-        Map<String,MBeanAttributeInfo> attributes = new HashMap<String, MBeanAttributeInfo>();
+        MBeanAttributeInfo[] aInfo = info.getAttributes();
+        Map<String,MBeanAttributeInfo> attributes = new HashMap<>();
         for (MBeanAttributeInfo a : aInfo) {
             attributes.put(a.getName(),a);
         }
@@ -87,8 +105,8 @@ public class JsonDymamicMBeanImplTest {
         assertEquals(attributes.get("Numbers").getType(), String.class.getName());
         assertEquals(attributes.get("User").getType(), String.class.getName());
 
-        MBeanOperationInfo oInfo[] = info.getOperations();
-        Map<String,MBeanOperationInfo> ops = new HashMap<String, MBeanOperationInfo>();
+        MBeanOperationInfo[] oInfo = info.getOperations();
+        Map<String,MBeanOperationInfo> ops = new HashMap<>();
         for (MBeanOperationInfo o : oInfo) {
             ops.put(o.getName(), o);
         }
@@ -97,7 +115,7 @@ public class JsonDymamicMBeanImplTest {
         assertEquals(ops.get("epoch").getReturnType(), "long");
         assertEquals(ops.get("charTest").getReturnType(), "char");
 
-        MBeanParameterInfo p[] = ops.get("lookup").getSignature();
+        MBeanParameterInfo[] p = ops.get("lookup").getSignature();
         assertEquals(p[0].getType(), String.class.getName());
         assertEquals(p[1].getType(), String.class.getName());
 
@@ -159,7 +177,7 @@ public class JsonDymamicMBeanImplTest {
         assertEquals(numsJ.get(2), 68L);
         assertEquals(numsJ.size(), 3);
 
-        Assert.assertTrue(platformServer.getAttributes(testName, new String[0]).size() == 0);
+        assertEquals(platformServer.getAttributes(testName, new String[0]).size(), 0);
 
     }
 
@@ -218,14 +236,14 @@ public class JsonDymamicMBeanImplTest {
     // Test MBean
 
     public interface UserTestManagerMXBean {
-        public void setUser(User user);
+        void setUser(User user);
 
-        public User getUser();
+        User getUser();
 
-        public User lookup(String name, User[] parents);
+        User lookup(String name, User[] parents);
     }
 
-    public class UserTestManager implements UserTestManagerMXBean {
+    public static class UserTestManager implements UserTestManagerMXBean {
         User user = new User("Hans", "Kalb");
 
         public void setUser(User user) {
@@ -242,18 +260,18 @@ public class JsonDymamicMBeanImplTest {
     }
 
     public interface TestingMBean {
-        public String getChili();
+        String getChili();
 
-        public void setChili(String name);
+        void setChili(String name);
 
-        public int[] getNumbers();
-        public void setNumbers(int[] numbers);
-        public User getUser();
+        int[] getNumbers();
+        void setNumbers(int[] numbers);
+        User getUser();
 
-        public User lookup(String name, String[] parents);
-        public long epoch(Date date);
+        User lookup(String name, String[] parents);
+        long epoch(Date date);
 
-        public char charTest(Character c);
+        char charTest(Character c);
     }
 
     public static class User {

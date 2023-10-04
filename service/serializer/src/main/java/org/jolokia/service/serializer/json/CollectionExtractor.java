@@ -37,7 +37,7 @@ import org.json.simple.JSONArray;
 public class CollectionExtractor implements Extractor {
 
     /** {@inheritDoc} */
-    public Class getType() {
+    public Class<?> getType() {
         return Collection.class;
     }
 
@@ -53,7 +53,7 @@ public class CollectionExtractor implements Extractor {
      * @return the extracted object
      */
     public Object extractObject(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pPathParts, boolean jsonify) throws AttributeNotFoundException {
-        Collection collection = (Collection) pValue;
+        Collection<?> collection = (Collection<?>) pValue;
         String pathPart = pPathParts.isEmpty() ? null : pPathParts.pop();
         int length = pConverter.getCollectionLength(collection.size());
         if (pathPart != null) {
@@ -63,7 +63,7 @@ public class CollectionExtractor implements Extractor {
         }
     }
 
-    private Object extractWithPath(ObjectToJsonConverter pConverter, Collection pCollection, Stack<String> pPathParts, boolean pJsonify, String pPathPart,int pLength) throws AttributeNotFoundException {
+    private Object extractWithPath(ObjectToJsonConverter pConverter, Collection<?> pCollection, Stack<String> pPathParts, boolean pJsonify, String pPathPart,int pLength) throws AttributeNotFoundException {
         try {
             int idx = Integer.parseInt(pPathPart);
             return pConverter.extractObject(getElement(pCollection,idx,pLength), pPathParts, pJsonify);
@@ -78,9 +78,9 @@ public class CollectionExtractor implements Extractor {
         }
     }
 
-    private Object getElement(Collection pCollection, int pIdx, int pLength) {
+    private Object getElement(Collection<?> pCollection, int pIdx, int pLength) {
         int i = 0;
-        Iterator it = pCollection.iterator();
+        Iterator<?> it = pCollection.iterator();
         while (it.hasNext() && i < pLength) {
             Object val = it.next();
             if (i == pIdx) {
@@ -91,11 +91,13 @@ public class CollectionExtractor implements Extractor {
         throw new IndexOutOfBoundsException("Collection index " + pIdx + " larger than size " + pLength);
     }
 
-    private Object extractListAsJson(ObjectToJsonConverter pConverter, Collection pCollection, Stack<String> pPathParts, int pLength) throws AttributeNotFoundException {
-        List ret = new JSONArray();
-        Iterator it = pCollection.iterator();
+    private Object extractListAsJson(ObjectToJsonConverter pConverter, Collection<?> pCollection, Stack<String> pPathParts, int pLength) throws AttributeNotFoundException {
+        @SuppressWarnings("unchecked")
+        List<Object> ret = new JSONArray();
+        Iterator<?> it = pCollection.iterator();
         for (int i = 0;i < pLength; i++) {
             Object val = it.next();
+            @SuppressWarnings("unchecked")
             Stack<String> path = (Stack<String>) pPathParts.clone();
             ret.add(pConverter.extractObject(val, path, true));
         }

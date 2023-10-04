@@ -72,9 +72,9 @@ public class HistoryKeyTest {
         HistoryKey key2 = new HistoryKey("test:type=blub","bla","blub","targetUrl");
         assertTrue(key2.toString().contains("targetUrl"));
 
-        assertFalse(key.equals(key2));
+        assertNotEquals(key2, key);
         HistoryKey key3 = new HistoryKey("test:type=blub","bla","blub",null);
-        assertTrue(key.equals(key3));
+        assertEquals(key3, key);
         assertEquals(key.hashCode(),key3.hashCode());
     }
 
@@ -100,7 +100,7 @@ public class HistoryKeyTest {
         assertTrue(key.toString().contains("bla"));
         assertTrue(key.toString().contains("test:type=blub"));
     }
-    
+
     @Test
     public void execRequest() throws MalformedObjectNameException {
         JolokiaExecRequest req = new JolokiaRequestBuilder(EXEC,"test:type=blub")
@@ -116,12 +116,12 @@ public class HistoryKeyTest {
         key = new HistoryKey("test:type=blub","exec","targetUrl");
         assertTrue(key.toString().contains("targetUrl"));
     }
-    
+
     @Test
     public void matches() throws MalformedObjectNameException {
         HistoryKey key = new HistoryKey("test:type=*","bla",null,null);
         assertTrue(key.isMBeanPattern());
-        
+
         JolokiaReadRequest req2 = new JolokiaRequestBuilder(READ,"test:type=hello")
                 .attribute("bla")
                 .build();

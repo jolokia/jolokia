@@ -7,21 +7,27 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.management.AttributeNotFoundException;
-import javax.management.InstanceNotFoundException;
-
 import org.jolokia.server.core.request.JolokiaListRequest;
 import org.jolokia.server.core.service.api.JolokiaContext;
-import org.jolokia.server.core.util.*;
+import org.jolokia.server.core.util.ClassUtil;
+import org.jolokia.server.core.util.JsonUtil;
+import org.jolokia.server.core.util.RequestType;
 import org.jolokia.service.jmx.handler.list.DataKeys;
-import org.json.simple.*;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 
-import static org.jolokia.service.jmx.handler.list.DataKeys.*;
+import static org.jolokia.service.jmx.handler.list.DataKeys.ARGS;
+import static org.jolokia.service.jmx.handler.list.DataKeys.ATTRIBUTES;
+import static org.jolokia.service.jmx.handler.list.DataKeys.DESCRIPTION;
+import static org.jolokia.service.jmx.handler.list.DataKeys.OPERATIONS;
+import static org.jolokia.service.jmx.handler.list.DataKeys.READ_WRITE;
+import static org.jolokia.service.jmx.handler.list.DataKeys.RETURN_TYPE;
+import static org.jolokia.service.jmx.handler.list.DataKeys.TYPE;
 
 /**
  * A handler for dealing with "list" requests. Currently only one application context
@@ -41,10 +47,9 @@ public class SpringListHandler extends SpringCommandHandler<JolokiaListRequest> 
     }
 
     @Override
-    public Object handleRequest(JolokiaListRequest pJmxReq, Object pPreviousResult)
-            throws InstanceNotFoundException, AttributeNotFoundException {
+    public Object handleRequest(JolokiaListRequest pJmxReq, Object pPreviousResult) {
         String domain = getApplicationContext().getApplicationName();
-        if (domain == null || domain.length() == 0) {
+        if (domain.isEmpty()) {
             domain = "default";
         }
         String providerAndDomain = SpringRequestHandler.PROVIDER + "@" + domain;
@@ -167,7 +172,7 @@ public class SpringListHandler extends SpringCommandHandler<JolokiaListRequest> 
 
     // Class mapping for primitive values
     static {
-        WRAPPER_TO_PRIMITIVE = new HashMap<Class<?>, String>();
+        WRAPPER_TO_PRIMITIVE = new HashMap<>();
         Object[] p = {
                 Boolean.TYPE, "boolean",
                 Character.TYPE, "character",

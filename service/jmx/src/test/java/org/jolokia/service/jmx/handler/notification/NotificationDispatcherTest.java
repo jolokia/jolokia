@@ -28,7 +28,7 @@ import static org.testng.Assert.*;
  */
 public class NotificationDispatcherTest {
 
-    private static ObjectName TEST_NAME;
+    private static final ObjectName TEST_NAME;
 
     static {
         try {
@@ -43,14 +43,13 @@ public class NotificationDispatcherTest {
     private MBeanServerAccess executor;
 
     private TestJolokiaContext ctx;
-    private NotificationBackend pullBackend;
 
     @BeforeMethod
     public void setup() {
-        pullBackend = new TestNotificationBackend();
+        NotificationBackend pullBackend = new TestNotificationBackend();
         ctx = new TestJolokiaContext.Builder()
                 .config(ConfigKey.AGENT_ID,"test")
-                .services(NotificationBackend.class,pullBackend)
+                .services(NotificationBackend.class, pullBackend)
                 .build();
         dispatcher = new NotificationDispatcher(ctx);
         connection = createMock(MBeanServerConnection.class);
@@ -86,8 +85,7 @@ public class NotificationDispatcherTest {
         try {
             dispatch(pingCmd);
             fail("Client with id " + id + " should be unregistered");
-        } catch (IllegalArgumentException exp) {
-
+        } catch (IllegalArgumentException ignored) {
         }
     }
 
@@ -119,8 +117,8 @@ public class NotificationDispatcherTest {
 
     private void setupConnectionForAdd() throws IOException, InstanceNotFoundException, NoSuchFieldException, IllegalAccessException, ListenerNotFoundException {
         expect(connection.queryNames(TEST_NAME, null)).andStubReturn(Collections.singleton(TEST_NAME));
-        connection.addNotificationListener(EasyMock.eq(TEST_NAME), EasyMock.eq(getNotificationListener()), (NotificationFilter) EasyMock.isNull(), EasyMock.isA(ListenerRegistration.class));
-        connection.removeNotificationListener(EasyMock.eq(TEST_NAME), EasyMock.eq(getNotificationListener()), (NotificationFilter) EasyMock.isNull(), EasyMock.isA(ListenerRegistration.class));
+        connection.addNotificationListener(EasyMock.eq(TEST_NAME), EasyMock.eq(getNotificationListener()), EasyMock.isNull(), EasyMock.isA(ListenerRegistration.class));
+        connection.removeNotificationListener(EasyMock.eq(TEST_NAME), EasyMock.eq(getNotificationListener()), EasyMock.isNull(), EasyMock.isA(ListenerRegistration.class));
         replay(connection);
     }
 
@@ -140,16 +138,18 @@ public class NotificationDispatcherTest {
     }
 
     private NotificationListener getNotificationListener() throws NoSuchFieldException, IllegalAccessException {
-        return (NotificationListener) getField(dispatcher,"listenerDelegate");
+        return getField(dispatcher, "listenerDelegate");
     }
 
     private <T> T getField(Object pObject, String pField) throws NoSuchFieldException, IllegalAccessException {
         Field field = pObject.getClass().getDeclaredField(pField);
         field.setAccessible(true);
+        //noinspection unchecked
         return (T) field.get(pObject);
     }
 
     private <T> T dispatch(NotificationCommand cmd) throws MBeanException, IOException, ReflectionException, EmptyResponseException {
+        //noinspection unchecked
         return (T) dispatcher.dispatch(executor,cmd);
     }
     private <T extends NotificationCommand> T createCommand(Class<T> pClass, Object ... keyValues) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
@@ -161,15 +161,15 @@ public class NotificationDispatcherTest {
         } else {
             constructor = pClass.getDeclaredConstructor(Map.class);
             constructor.setAccessible(true);
-            Map args = new HashMap();
+            Map<Object, Object> args = new HashMap<>();
             for (int i = 0; i < keyValues.length; i+=2) {
-                args.put(keyValues[i],keyValues[i+1]);
+                args.put(keyValues[i], keyValues[i+1]);
             }
             return constructor.newInstance(args);
         }
     }
 
-    private class TestNotificationBackend extends AbstractJolokiaService<NotificationBackend> implements NotificationBackend {
+    private static class TestNotificationBackend extends AbstractJolokiaService<NotificationBackend> implements NotificationBackend {
 
         protected TestNotificationBackend() {
             super(NotificationBackend.class, 0);
@@ -196,7 +196,7 @@ public class NotificationDispatcherTest {
         }
 
         public Map<String, ?> getConfig() {
-            return new HashMap<String, Object>();
+            return new HashMap<>();
         }
     }
 }

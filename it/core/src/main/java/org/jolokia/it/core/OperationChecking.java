@@ -28,10 +28,11 @@ import javax.management.openmbean.TabularData;
  * @author roland
  * @since Jun 30, 2009
  */
+@SuppressWarnings("rawtypes")
 public class OperationChecking implements OperationCheckingMBean,MBeanRegistration {
 
     private int counter = 0;
-    private String domain;
+    private final String domain;
 
     public OperationChecking(String pDomain) {
         domain = pDomain;
@@ -62,10 +63,10 @@ public class OperationChecking implements OperationCheckingMBean,MBeanRegistrati
     }
 
     public boolean emptyStringArgumentCheck(String arg1) {
-        return arg1 != null && arg1.length() == 0;
+        return arg1 != null && arg1.isEmpty();
     }
 
-    public String arrayArguments(String args[], String extra) {
+    public String arrayArguments(String[] args, String extra) {
         return args[0];
     }
 
@@ -141,7 +142,7 @@ public class OperationChecking implements OperationCheckingMBean,MBeanRegistrati
     public void postRegister(Boolean registrationDone) {
     }
 
-    public void preDeregister() throws Exception {
+    public void preDeregister() {
     }
 
     public void postDeregister() {

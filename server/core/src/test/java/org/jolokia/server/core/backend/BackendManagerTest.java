@@ -40,9 +40,7 @@ import static org.testng.Assert.*;
  */
 public class BackendManagerTest {
 
-    private TestJolokiaContext ctx;
-
-    private LogHandler log = new StdoutLogHandler(false);
+    private final LogHandler log = new StdoutLogHandler(false);
 
     private TestJolokiaContext createContext(Object ... configKeysAndValues) {
         TestJolokiaContext.Builder builder = new TestJolokiaContext.Builder().services(Serializer.class,new TestSerializer());
@@ -51,8 +49,7 @@ public class BackendManagerTest {
         }
         builder.config(ConfigKey.AGENT_ID,"test");
         builder.logHandler(log);
-        ctx = builder.build();
-        return ctx;
+        return builder.build();
     }
 
     @Test
@@ -64,7 +61,7 @@ public class BackendManagerTest {
         BackendManager backendManager = createBackendManager(new Object[]{ConfigKey.DEBUG, "true"},
                                                              createDispatcher(req,"used",123456L));
         JSONObject ret = backendManager.handleRequest(req);
-        assertTrue((Long) ((Map) ret.get("value")).get("used") > 0);
+        assertTrue((Long) ((Map<?, ?>) ret.get("value")).get("used") > 0);
     }
 
     private TestRequestDispatcher createDispatcher(Object ... pReq) {
@@ -89,7 +86,7 @@ public class BackendManagerTest {
         BackendManager backendManager = createBackendManager(new Object[0], createDispatcher(req, "used", 123456L));
 
         JSONObject ret = backendManager.handleRequest(req);
-        assertTrue((Long) ((Map) ret.get("value")).get("used") > 0);
+        assertTrue((Long) ((Map<?, ?>) ret.get("value")).get("used") > 0);
     }
 
    @Test
@@ -126,7 +123,7 @@ public class BackendManagerTest {
             super("test", 1);
         }
 
-        public <R extends JolokiaRequest> Object handleRequest(R pJmxReq,Object pPrevious) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+        public <R extends JolokiaRequest> Object handleRequest(R pJmxReq,Object pPrevious) {
             called = true;
             if (pJmxReq.getType() == RequestType.READ) {
                 return new JSONObject();
@@ -155,7 +152,7 @@ public class BackendManagerTest {
 
         // No special constructor --> fail
 
-        public Object handleRequest(JolokiaRequest pJmxReq, Object pPrevious) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+        public Object handleRequest(JolokiaRequest pJmxReq, Object pPrevious) {
             return null;
         }
 

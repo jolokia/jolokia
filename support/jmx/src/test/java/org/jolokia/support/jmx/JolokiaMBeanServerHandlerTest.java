@@ -20,20 +20,35 @@ import java.lang.management.ManagementFactory;
 import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.management.*;
-import javax.management.modelmbean.*;
+import javax.management.AttributeNotFoundException;
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
+import javax.management.IntrospectionException;
+import javax.management.MBeanException;
+import javax.management.MBeanServer;
+import javax.management.MalformedObjectNameException;
+import javax.management.NotCompliantMBeanException;
+import javax.management.ObjectName;
+import javax.management.ReflectionException;
+import javax.management.modelmbean.InvalidTargetObjectTypeException;
+import javax.management.modelmbean.ModelMBeanAttributeInfo;
+import javax.management.modelmbean.ModelMBeanConstructorInfo;
+import javax.management.modelmbean.ModelMBeanInfo;
+import javax.management.modelmbean.ModelMBeanInfoSupport;
+import javax.management.modelmbean.ModelMBeanNotificationInfo;
+import javax.management.modelmbean.ModelMBeanOperationInfo;
+import javax.management.modelmbean.RequiredModelMBean;
 import javax.management.openmbean.CompositeData;
 
 import org.jolokia.service.serializer.JolokiaSerializer;
-import org.jolokia.support.jmx.*;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author roland
@@ -65,7 +80,7 @@ public class JolokiaMBeanServerHandlerTest {
     }
 
     @Test
-    public void withConstraint() throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanException, AttributeNotFoundException, ReflectionException, InstanceNotFoundException, ParseException, InvalidTargetObjectTypeException, NoSuchMethodException, IntrospectionException {
+    public void withConstraint() throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanException, AttributeNotFoundException, ReflectionException, InstanceNotFoundException, ParseException {
         MBeanServer server = createJolokiaMBeanServer();
 
         ObjectName oName = new ObjectName("test:type=jsonMBean");
@@ -151,15 +166,16 @@ public class JolokiaMBeanServerHandlerTest {
     }
 
     public static class DeepDive {
-        private Chili chili;
-        private Map map;
+        @SuppressWarnings("FieldCanBeLocal")
+        private final Chili chili;
+        private final Map<String, Chili> map;
         public DeepDive() {
             chili = new Chili("Aji",700000);
-            map = new HashMap();
+            map = new HashMap<>();
             map.put("hot",chili);
         }
 
-        public Map getMap() {
+        public Map<String, Chili> getMap() {
             return map;
         }
     }

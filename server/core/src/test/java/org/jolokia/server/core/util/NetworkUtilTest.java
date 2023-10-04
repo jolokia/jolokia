@@ -14,7 +14,7 @@ import static org.testng.Assert.*;
 public class NetworkUtilTest {
 
     @Test
-    public void dump() throws SocketException, UnknownHostException {
+    public void dump() {
         try {
             System.out.println(NetworkUtil.dumpLocalNetworkInfo());
         } catch (Exception exp) {
@@ -34,7 +34,7 @@ public class NetworkUtilTest {
         }
         InetAddress addr = NetworkUtil.findLocalAddressViaNetworkInterface();
         System.out.println("Address found via NIF: " + addr);
-        assertTrue(found ? addr != null : addr == null);
+        assertEquals(addr != null, found);
         if (addr != null) {
             assertTrue(addr instanceof Inet4Address);
         }

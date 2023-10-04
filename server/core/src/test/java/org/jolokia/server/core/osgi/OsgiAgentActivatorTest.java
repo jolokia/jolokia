@@ -17,8 +17,6 @@ package org.jolokia.server.core.osgi;
  */
 
 import java.io.IOException;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -237,12 +235,14 @@ public class OsgiAgentActivatorTest {
         for (ConfigKey key : ConfigKey.values()) {
             if (!serviceAuthentication && (key == ConfigKey.USER || key == ConfigKey.PASSWORD || key == ConfigKey.AUTH_MODE)) {
                 //ignore these, they will be provided from config admin service
-            } else if (serviceAuthentication && (key == ConfigKey.AUTH_MODE)) {
-                //ignore these, they will be provided from config admin service
-            } else {
-                expect(context.getProperty("org.jolokia." + key.getKeyValue())).andStubReturn(
-                        i++ % 2 == 0 ? key.getDefaultValue() : null);
+                continue;
             }
+            if (serviceAuthentication && (key == ConfigKey.AUTH_MODE)) {
+                //ignore these, they will be provided from config admin service
+                continue;
+            }
+            expect(context.getProperty("org.jolokia." + key.getKeyValue())).andStubReturn(
+                    i++ % 2 == 0 ? key.getDefaultValue() : null);
         }
 
         final Filter filter = createFilterMockWithToString(AUTHENTICATOR_SERVICE_FILTER, null);
@@ -328,17 +328,15 @@ public class OsgiAgentActivatorTest {
     }
 
     private static Filter createFilterMockWithToString(final Class<?> clazz, final String filter, final String additionalFilter) {
-        return (Filter) Proxy.newProxyInstance(clazz.getClassLoader(), new Class[]{Filter.class}, new InvocationHandler() {
-            public Object invoke(Object proxy, Method method, Object[] args) {
-                if (method.getName().equals("toString")) {
-                    if (additionalFilter == null) {
-                        return filter;
-                    } else {
-                        return "(&" + filter + additionalFilter +")" ;
-                    }
+        return (Filter) Proxy.newProxyInstance(clazz.getClassLoader(), new Class[]{Filter.class}, (proxy, method, args) -> {
+            if (method.getName().equals("toString")) {
+                if (additionalFilter == null) {
+                    return filter;
+                } else {
+                    return "(&" + filter + additionalFilter +")" ;
                 }
-                throw new UnsupportedOperationException("Sorry this is a very limited proxy implementation of Filter");
             }
+            throw new UnsupportedOperationException("Sorry this is a very limited proxy implementation of Filter");
         });
     }
 

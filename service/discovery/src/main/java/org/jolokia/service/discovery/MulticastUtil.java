@@ -79,12 +79,12 @@ public final class MulticastUtil {
                                                                                       int pTimeout,
                                                                                       String pMulticastGroup,
                                                                                       int pMulticastPort,
-                                                                                      LogHandler pLogHandler) throws SocketException, UnknownHostException {
+                                                                                      LogHandler pLogHandler) throws UnknownHostException {
         // Note for Ipv6 support: If there are two local addresses, one with IpV6 and one with IpV4 then two discovery request
         // should be sent, on each interface respectively. Currently, only IpV4 is supported.
         List<InetAddress> addresses = getMulticastAddresses();
         ExecutorService executor = Executors.newFixedThreadPool(addresses.size());
-        final List<Future<List<DiscoveryIncomingMessage>>> futures = new ArrayList<Future<List<DiscoveryIncomingMessage>>>(addresses.size());
+        final List<Future<List<DiscoveryIncomingMessage>>> futures = new ArrayList<>(addresses.size());
         for (InetAddress address : addresses) {
             // Discover UDP packet send to multicast address
             DatagramPacket out = pOutMsg.createDatagramPacket(InetAddress.getByName(pMulticastGroup), pMulticastPort);
@@ -96,9 +96,9 @@ public final class MulticastUtil {
     }
 
     // All addresses which can be used for sending multicast addresses
-    private static List<InetAddress> getMulticastAddresses() throws SocketException, UnknownHostException {
+    private static List<InetAddress> getMulticastAddresses() throws UnknownHostException {
         List<InetAddress> addresses = NetworkUtil.getMulticastAddresses();
-        if (addresses.size() == 0) {
+        if (addresses.isEmpty()) {
             throw new UnknownHostException("Cannot find address of local host which can be used for sending discovery request");
         }
         return addresses;
@@ -106,8 +106,8 @@ public final class MulticastUtil {
 
     // Collect the incoming messages and filter out duplicates
     private static List<DiscoveryIncomingMessage> collectIncomingMessages(int pTimeout, List<Future<List<DiscoveryIncomingMessage>>> pFutures, LogHandler pLogHandler) throws UnknownHostException {
-        List<DiscoveryIncomingMessage> ret = new ArrayList<DiscoveryIncomingMessage>();
-        Set<String> seen = new HashSet<String>();
+        List<DiscoveryIncomingMessage> ret = new ArrayList<>();
+        Set<String> seen = new HashSet<>();
         int nrCouldntSend = 0;
         for (Future<List<DiscoveryIncomingMessage>> future : pFutures) {
             try {
@@ -163,7 +163,7 @@ public final class MulticastUtil {
         return interfacesJoined;
     }
 
-    private static void setOutgoingInterfaceForMulticastRequest(InetAddress pAddress, MulticastSocket pSocket) throws SocketException, UnknownHostException {
+    private static void setOutgoingInterfaceForMulticastRequest(InetAddress pAddress, MulticastSocket pSocket) throws SocketException {
         NetworkInterface nif = NetworkInterface.getByInetAddress(pAddress);
         if (nif != null) {
             pSocket.setNetworkInterface(nif);
@@ -187,20 +187,18 @@ public final class MulticastUtil {
         public List<DiscoveryIncomingMessage> call() throws IOException {
             final DatagramSocket socket = new DatagramSocket(0, address);
 
-            List<DiscoveryIncomingMessage> ret = new ArrayList<DiscoveryIncomingMessage>();
-
-            try {
-                socket.setSoTimeout(timeout);
-                logHandler.debug(address + "--> Sending");
-                socket.send(outPacket);
-            } catch (IOException exp) {
-                throw new CouldntSendDiscoveryPacketException(
-                    address,
-                    "Can't send discovery UDP packet from " + address + ": " + exp.getMessage(),
-                    exp);
-            }
-
-            try {
+            try (socket) {
+                List<DiscoveryIncomingMessage> ret = new ArrayList<>();
+                try {
+                    socket.setSoTimeout(timeout);
+                    logHandler.debug(address + "--> Sending");
+                    socket.send(outPacket);
+                } catch (IOException exp) {
+                    throw new CouldntSendDiscoveryPacketException(
+                            address,
+                            "Can't send discovery UDP packet from " + address + ": " + exp.getMessage(),
+                            exp);
+                }
 
                 try {
                     do {
@@ -214,11 +212,9 @@ public final class MulticastUtil {
                     logHandler.debug(address + "--> Timeout");
                     // Expected until no responses are returned anymore
                 } catch (IOException exp) {
-                    throw new IOException("Cannot receive broadcast answer on " + address + ": " + exp.getMessage(),exp);
+                    throw new IOException("Cannot receive broadcast answer on " + address + ": " + exp.getMessage(), exp);
                 }
                 return ret;
-            } finally {
-                socket.close();
             }
         }
 

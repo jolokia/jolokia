@@ -69,18 +69,18 @@ public class JolokiaNotificationRequest extends JolokiaRequest {
      * @return the creator implementation
      */
     static RequestCreator<JolokiaNotificationRequest> newCreator() {
-        return new RequestCreator<JolokiaNotificationRequest>() {
+        return new RequestCreator<>() {
             /** {@inheritDoc} */
             public JolokiaNotificationRequest create(Stack<String> pStack, ProcessingParameters pParams) throws MalformedObjectNameException {
                 NotificationCommand notifCommand = NotificationCommandFactory.createCommand(pStack);
-                return new JolokiaNotificationRequest(notifCommand,pParams);
+                return new JolokiaNotificationRequest(notifCommand, pParams);
             }
 
             /** {@inheritDoc} */
             public JolokiaNotificationRequest create(Map<String, ?> requestMap, ProcessingParameters pParams)
                     throws MalformedObjectNameException {
                 NotificationCommand notifCommand = NotificationCommandFactory.createCommand(requestMap);
-                return new JolokiaNotificationRequest(notifCommand,requestMap,pParams);
+                return new JolokiaNotificationRequest(notifCommand, requestMap, pParams);
             }
         };
     }

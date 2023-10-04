@@ -33,10 +33,10 @@ import org.json.simple.JSONObject;
 public class J4pExecRequest extends AbtractJ4pMBeanRequest {
 
     // Operation to execute
-    private String operation;
+    private final String operation;
 
     // Operation arguments
-    private List<Object> arguments;
+    private final List<Object> arguments;
 
     /**
      * New client request for executing a JMX operation
@@ -63,7 +63,7 @@ public class J4pExecRequest extends AbtractJ4pMBeanRequest {
         if (pArgs == null) {
             // That's the case when a single, null argument is given (which is the only
             // case that pArgs can be null)
-            arguments = new ArrayList<Object>();
+            arguments = new ArrayList<>();
             arguments.add(null);
         } else {
             arguments = Arrays.asList(pArgs);
@@ -119,6 +119,7 @@ public class J4pExecRequest extends AbtractJ4pMBeanRequest {
 
     /** {@inheritDoc} */
     @Override
+    @SuppressWarnings("unchecked")
     J4pExecResponse createResponse(JSONObject pResponse) {
         return new J4pExecResponse(this,pResponse);
     }
@@ -128,9 +129,9 @@ public class J4pExecRequest extends AbtractJ4pMBeanRequest {
     List<String> getRequestParts() {
         List<String> ret = super.getRequestParts();
         ret.add(operation);
-        if (arguments.size() > 0) {
-            for (int i = 0; i < arguments.size(); i++) {
-                ret.add(serializeArgumentToRequestPart(arguments.get(i)));
+        if (!arguments.isEmpty()) {
+            for (Object argument : arguments) {
+                ret.add(serializeArgumentToRequestPart(argument));
             }
         }
         return ret;
@@ -140,12 +141,15 @@ public class J4pExecRequest extends AbtractJ4pMBeanRequest {
     @Override
     JSONObject toJson() {
         JSONObject ret = super.toJson();
+        //noinspection unchecked
         ret.put("operation",operation);
-        if (arguments.size() > 0) {
+        if (!arguments.isEmpty()) {
             JSONArray args = new JSONArray();
             for (Object arg : arguments) {
+                //noinspection unchecked
                 args.add(serializeArgumentToJson(arg));
             }
+            //noinspection unchecked
             ret.put("arguments",args);
         }
         return ret;

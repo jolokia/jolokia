@@ -41,7 +41,7 @@ public class VersionCommand extends AbstractBaseCommand {
         if (pOpts.isVerbose()) {
             version.append(" (Protocol: ").append(Version.getProtocolVersion()).append(")");
         }
-        System.out.println(version.toString());
+        System.out.println(version);
         return 0;
     }
 }

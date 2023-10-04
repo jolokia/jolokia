@@ -99,7 +99,7 @@ public class JolokiaWriteRequest extends JolokiaObjectNameRequest {
 
     @Override
     public String toString() {
-        StringBuffer ret = new StringBuffer("JmxWriteRequest[");
+        StringBuilder ret = new StringBuilder("JmxWriteRequest[");
         ret.append("attribute=").append(getAttributeName())
                     .append(", value=").append(getValue());
         String baseInfo = getInfo();
@@ -131,7 +131,7 @@ public class JolokiaWriteRequest extends JolokiaObjectNameRequest {
      * @return the creator implementation
      */
     static RequestCreator<JolokiaWriteRequest> newCreator() {
-        return new RequestCreator<JolokiaWriteRequest>() {
+        return new RequestCreator<>() {
             /** {@inheritDoc} */
             public JolokiaWriteRequest create(Stack<String> pStack, ProcessingParameters pParams) throws MalformedObjectNameException {
                 return new JolokiaWriteRequest(
@@ -145,7 +145,7 @@ public class JolokiaWriteRequest extends JolokiaObjectNameRequest {
             /** {@inheritDoc} */
             public JolokiaWriteRequest create(Map<String, ?> requestMap, ProcessingParameters pParams)
                     throws MalformedObjectNameException {
-                return new JolokiaWriteRequest(requestMap,pParams);
+                return new JolokiaWriteRequest(requestMap, pParams);
             }
         };
     }

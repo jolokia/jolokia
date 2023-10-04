@@ -257,13 +257,11 @@ public class AgentServletTest {
 
         initRequestResponseMocks(
             getStandardRequestSetup(),
-            new Runnable() {
-                public void run() {
-                    response.setCharacterEncoding("utf-8");
-                    // The default content type
-                    response.setContentType(expected);
-                    response.setStatus(200);
-                }
+            () -> {
+                response.setCharacterEncoding("utf-8");
+                // The default content type
+                response.setContentType(expected);
+                response.setStatus(200);
             });
         expect(request.getPathInfo()).andReturn(HttpTestUtil.VERSION_GET_REQUEST);
         expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn(given);
@@ -333,25 +331,23 @@ public class AgentServletTest {
     public void simpleGetWithUnsupportedGetParameterMapCall() throws ServletException, IOException {
         prepareStandardInitialisation();
         ByteArrayOutputStream sw = initRequestResponseMocks(
-                new Runnable() {
-                    public void run() {
-                        expect(request.getHeader("Origin")).andStubReturn(null);
-                        expect(request.getHeader("Referer")).andStubReturn(null);
-                        expect(request.getRemoteHost()).andReturn("localhost");
-                        expect(request.getRemoteAddr()).andReturn("127.0.0.1");
-                        expect(request.getRequestURI()).andReturn("/jolokia/");
-                        setupAgentDetailsInitExpectations();
-                        expect(request.getPathInfo()).andReturn(HttpTestUtil.VERSION_GET_REQUEST);
-                        expect(request.getParameterMap()).andThrow(new UnsupportedOperationException(""));
-                        expect(request.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE)).andReturn(null);
-                        Vector<String> params = new Vector<>();
-                        params.add("debug");
-                        expect(request.getParameterNames()).andReturn(params.elements());
-                        expect(request.getParameterValues("debug")).andReturn(new String[] {"false"});
-                        expect(request.getAttribute("subject")).andReturn(null);
-                        expect(request.getParameter(ConfigKey.STREAMING.getKeyValue())).andReturn(null);
+                () -> {
+                    expect(request.getHeader("Origin")).andStubReturn(null);
+                    expect(request.getHeader("Referer")).andStubReturn(null);
+                    expect(request.getRemoteHost()).andReturn("localhost");
+                    expect(request.getRemoteAddr()).andReturn("127.0.0.1");
+                    expect(request.getRequestURI()).andReturn("/jolokia/");
+                    setupAgentDetailsInitExpectations();
+                    expect(request.getPathInfo()).andReturn(HttpTestUtil.VERSION_GET_REQUEST);
+                    expect(request.getParameterMap()).andThrow(new UnsupportedOperationException(""));
+                    expect(request.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE)).andReturn(null);
+                    Vector<String> params = new Vector<>();
+                    params.add("debug");
+                    expect(request.getParameterNames()).andReturn(params.elements());
+                    expect(request.getParameterValues("debug")).andReturn(new String[] {"false"});
+                    expect(request.getAttribute("subject")).andReturn(null);
+                    expect(request.getParameter(ConfigKey.STREAMING.getKeyValue())).andReturn(null);
 
-                    }
                 },
                 getStandardResponseSetup());
         expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn(null);
@@ -387,13 +383,11 @@ public class AgentServletTest {
 
         ByteArrayOutputStream sw = initRequestResponseMocks(
                 getStandardRequestSetup(),
-                new Runnable() {
-                    public void run() {
-                        response.setCharacterEncoding("utf-8");
-                        expectLastCall().andThrow(new NoSuchMethodError());
-                        response.setContentType("text/plain; charset=utf-8");
-                        response.setStatus(200);
-                    }
+                () -> {
+                    response.setCharacterEncoding("utf-8");
+                    expectLastCall().andThrow(new NoSuchMethodError());
+                    response.setContentType("text/plain; charset=utf-8");
+                    response.setStatus(200);
                 });
         expect(request.getPathInfo()).andReturn(HttpTestUtil.VERSION_GET_REQUEST);
         expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn(null);
@@ -408,16 +402,16 @@ public class AgentServletTest {
     }
 
     @Test
-    public void corsPreflightCheck() throws ServletException, IOException {
+    public void corsPreflightCheck() throws ServletException {
         checkCorsOriginPreflight("http://bla.com", "http://bla.com");
     }
 
     @Test
-    public void corsPreflightCheckWithNullOrigin() throws ServletException, IOException {
+    public void corsPreflightCheckWithNullOrigin() throws ServletException {
         checkCorsOriginPreflight("null", "*");
     }
 
-    private void checkCorsOriginPreflight(String in, String out) throws ServletException, IOException {
+    private void checkCorsOriginPreflight(String in, String out) throws ServletException {
         prepareStandardInitialisation();
         request = createMock(HttpServletRequest.class);
         response = createMock(HttpServletResponse.class);
@@ -450,29 +444,25 @@ public class AgentServletTest {
         prepareStandardInitialisation();
 
         ByteArrayOutputStream sw = initRequestResponseMocks(
-                new Runnable() {
-                    public void run() {
-                        expect(request.getParameter(ConfigKey.STREAMING.getKeyValue())).andReturn(null);
-                        expect(request.getHeader("Origin")).andStubReturn(in);
-                        expect(request.getRemoteHost()).andReturn("localhost");
-                        expect(request.getRemoteAddr()).andReturn("127.0.0.1");
-                        expect(request.getRequestURI()).andReturn("/jolokia/").times(2);
-                        expect(request.getRequestURL()).andReturn(new StringBuffer("http://localhost/jolokia"));
-                        expect(request.getContextPath()).andReturn("/jolokia");
-                        expect(request.getAuthType()).andReturn(null);
-                        expect(request.getParameterMap()).andReturn(null);
-                        expect(request.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE)).andReturn(null);
-                        expect(request.getAttribute("subject")).andReturn(null);
-                    }
+                () -> {
+                    expect(request.getParameter(ConfigKey.STREAMING.getKeyValue())).andReturn(null);
+                    expect(request.getHeader("Origin")).andStubReturn(in);
+                    expect(request.getRemoteHost()).andReturn("localhost");
+                    expect(request.getRemoteAddr()).andReturn("127.0.0.1");
+                    expect(request.getRequestURI()).andReturn("/jolokia/").times(2);
+                    expect(request.getRequestURL()).andReturn(new StringBuffer("http://localhost/jolokia"));
+                    expect(request.getContextPath()).andReturn("/jolokia");
+                    expect(request.getAuthType()).andReturn(null);
+                    expect(request.getParameterMap()).andReturn(null);
+                    expect(request.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE)).andReturn(null);
+                    expect(request.getAttribute("subject")).andReturn(null);
                 },
-                new Runnable() {
-                    public void run() {
-                        response.setHeader("Access-Control-Allow-Origin", out);
-                        response.setHeader("Access-Control-Allow-Credentials","true");
-                        response.setCharacterEncoding("utf-8");
-                        response.setContentType("text/plain");
-                        response.setStatus(200);
-                    }
+                () -> {
+                    response.setHeader("Access-Control-Allow-Origin", out);
+                    response.setHeader("Access-Control-Allow-Credentials","true");
+                    response.setCharacterEncoding("utf-8");
+                    response.setContentType("text/plain");
+                    response.setStatus(200);
                 }
 
         );
@@ -499,12 +489,10 @@ public class AgentServletTest {
         ByteArrayOutputStream sw = initRequestResponseMocks(
                 "myCallback",
                 getStandardRequestSetup(),
-                new Runnable() {
-                    public void run() {
-                        response.setCharacterEncoding("utf-8");
-                        response.setContentType("text/javascript");
-                        response.setStatus(200);
-                    }
+                () -> {
+                    response.setCharacterEncoding("utf-8");
+                    response.setContentType("text/javascript");
+                    response.setStatus(200);
                 });
         expect(request.getPathInfo()).andReturn(HttpTestUtil.VERSION_GET_REQUEST);
         expect(request.getAttribute("subject")).andReturn(null);
@@ -550,11 +538,9 @@ public class AgentServletTest {
         replay(config, context);
         servlet.init(config);
         ByteArrayOutputStream sw = initRequestResponseMocks(
-                new Runnable() {
-                    public void run() {
-                        expect(request.getHeader("Origin")).andReturn(null);
-                        expect(request.getRemoteHost()).andThrow(new IllegalStateException());
-                    }
+                () -> {
+                    expect(request.getHeader("Origin")).andReturn(null);
+                    expect(request.getRemoteHost()).andThrow(new IllegalStateException());
                 },
                 getStandardResponseSetup());
         expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
@@ -714,30 +700,26 @@ public class AgentServletTest {
     }
 
     private Runnable getStandardResponseSetup() {
-        return new Runnable() {
-            public void run() {
-                response.setCharacterEncoding("utf-8");
-                // The default content type
-                response.setContentType("text/plain");
-                response.setStatus(200);
-            }
+        return () -> {
+            response.setCharacterEncoding("utf-8");
+            // The default content type
+            response.setContentType("text/plain");
+            response.setStatus(200);
         };
     }
 
     private Runnable getStandardRequestSetup() {
-        return new Runnable() {
-            public void run() {
-                expect(request.getHeader("Origin")).andStubReturn(null);
-                expect(request.getHeader("Referer")).andStubReturn(null);
-                expect(request.getRemoteHost()).andStubReturn("localhost");
-                expect(request.getRemoteAddr()).andStubReturn("127.0.0.1");
-                expect(request.getRequestURI()).andReturn("/jolokia/");
-                setupAgentDetailsInitExpectations();
-                expect(request.getParameterMap()).andReturn(null);
-                expect(request.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE)).andReturn(null);
-                expect(request.getParameter(ConfigKey.STREAMING.getKeyValue())).andReturn(null);
+        return () -> {
+            expect(request.getHeader("Origin")).andStubReturn(null);
+            expect(request.getHeader("Referer")).andStubReturn(null);
+            expect(request.getRemoteHost()).andStubReturn("localhost");
+            expect(request.getRemoteAddr()).andStubReturn("127.0.0.1");
+            expect(request.getRequestURI()).andReturn("/jolokia/");
+            setupAgentDetailsInitExpectations();
+            expect(request.getParameterMap()).andReturn(null);
+            expect(request.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE)).andReturn(null);
+            expect(request.getParameter(ConfigKey.STREAMING.getKeyValue())).andReturn(null);
 
-            }
         };
     }
 
@@ -749,28 +731,26 @@ public class AgentServletTest {
     }
 
     private Runnable getDiscoveryRequestSetup(final String url) {
-        return new Runnable() {
-            public void run() {
-                expect(request.getHeader("Origin")).andStubReturn(null);
-                expect(request.getHeader("Referer")).andStubReturn(null);
-                expect(request.getRemoteHost()).andReturn("localhost");
-                expect(request.getRemoteAddr()).andReturn("127.0.0.1");
-                expect(request.getRequestURI()).andReturn("/jolokia/");
-                expect(request.getParameterMap()).andReturn(null);
-                expect(request.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE)).andReturn(null);
+        return () -> {
+            expect(request.getHeader("Origin")).andStubReturn(null);
+            expect(request.getHeader("Referer")).andStubReturn(null);
+            expect(request.getRemoteHost()).andReturn("localhost");
+            expect(request.getRemoteAddr()).andReturn("127.0.0.1");
+            expect(request.getRequestURI()).andReturn("/jolokia/");
+            expect(request.getParameterMap()).andReturn(null);
+            expect(request.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE)).andReturn(null);
 
-                expect(request.getPathInfo()).andReturn(HttpTestUtil.VERSION_GET_REQUEST);
-                expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain").anyTimes();
-                StringBuffer buf = new StringBuffer();
-                buf.append(url).append(HttpTestUtil.VERSION_GET_REQUEST);
-                expect(request.getRequestURL()).andReturn(buf);
-                expect(request.getRequestURI()).andReturn("/jolokia" + HttpTestUtil.VERSION_GET_REQUEST);
-                expect(request.getContextPath()).andReturn("/jolokia");
-                expect(request.getAuthType()).andReturn("BASIC");
-                expect(request.getAttribute("subject")).andReturn(null);
-                expect(request.getParameter(ConfigKey.STREAMING.getKeyValue())).andReturn(null);
+            expect(request.getPathInfo()).andReturn(HttpTestUtil.VERSION_GET_REQUEST);
+            expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain").anyTimes();
+            StringBuffer buf = new StringBuffer();
+            buf.append(url).append(HttpTestUtil.VERSION_GET_REQUEST);
+            expect(request.getRequestURL()).andReturn(buf);
+            expect(request.getRequestURI()).andReturn("/jolokia" + HttpTestUtil.VERSION_GET_REQUEST);
+            expect(request.getContextPath()).andReturn("/jolokia");
+            expect(request.getAuthType()).andReturn("BASIC");
+            expect(request.getAttribute("subject")).andReturn(null);
+            expect(request.getParameter(ConfigKey.STREAMING.getKeyValue())).andReturn(null);
 
-            }
         };
     }
 

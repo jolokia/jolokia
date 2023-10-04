@@ -45,6 +45,7 @@ class TabularDataConverter extends OpenTypeConverter<TabularType> {
 
     /** {@inheritDoc} */
     @Override
+    @SuppressWarnings("rawtypes")
     boolean canConvert(OpenType pType) {
         return pType instanceof TabularType;
     }
@@ -140,7 +141,7 @@ class TabularDataConverter extends OpenTypeConverter<TabularType> {
         @SuppressWarnings("unchecked")
         Map<String, String> jsonObj = (Map<String,String>) pValue;
         for(Map.Entry<String, String> entry : jsonObj.entrySet()) {
-            Map<String, Object> map = new HashMap<String, Object>();
+            Map<String, Object> map = new HashMap<>();
             map.put("key", getDispatcher().deserialize(rowType.getType("key"), entry.getKey()));
             map.put("value", getDispatcher().deserialize(rowType.getType("value"), entry.getValue()));
 

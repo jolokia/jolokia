@@ -105,7 +105,7 @@ public class JolokiaServerConfig {
      * @param pDefaultConfig default config used as background
      */
     protected final void init(Map<String, String> pConfig,Map<String,String> pDefaultConfig) {
-        Map<String, String> finalCfg = new HashMap<String, String>(pDefaultConfig);
+        Map<String, String> finalCfg = new HashMap<>(pDefaultConfig);
         finalCfg.putAll(pConfig);
 
         prepareDetectorOptions(finalCfg);
@@ -119,14 +119,13 @@ public class JolokiaServerConfig {
     private void addJolokiaId(Map<String, String> pFinalCfg) {
         if (!pFinalCfg.containsKey(ConfigKey.AGENT_ID.getKeyValue())) {
             String id = Integer.toHexString(hashCode()) + "-jvm";
-            pFinalCfg.putAll(Collections.singletonMap(ConfigKey.AGENT_ID.getKeyValue(),
-                                                      id));
+            pFinalCfg.put(ConfigKey.AGENT_ID.getKeyValue(), id);
         }
     }
 
     /**
      * Read in the default configuration from a properties resource
-     * @return
+     * @return the default configuration
      */
     protected final Map<String, String> getDefaultConfig() {
         InputStream is = getClass().getResourceAsStream("/default-jolokia-agent.properties");
@@ -301,14 +300,14 @@ public class JolokiaServerConfig {
     /**
      * The list of enabled SSL / TLS protocols to serve with
      *
-     * @return the list of enabled protocols
+     * @return the array of enabled protocols
      */
     public String[] getSSLProtocols() { return sslProtocols; }
 
     /**
      * The list of enabled SSL / TLS cipher suites
      *
-     * @return the list of cipher suites
+     * @return the array of cipher suites
      */
     public String[] getSSLCipherSuites() {
         return sslCipherSuites;
@@ -327,7 +326,7 @@ public class JolokiaServerConfig {
             sslProtocols = parameters.getProtocols();
         } else {
             List<String> supportedProtocols = Arrays.asList(parameters.getProtocols());
-            List<String> sslProtocolsList = new ArrayList<String>(Arrays.asList(sslProtocols));
+            List<String> sslProtocolsList = new ArrayList<>(Arrays.asList(sslProtocols));
 
             Iterator<String> pit = sslProtocolsList.iterator();
             while (pit.hasNext()) {
@@ -345,7 +344,7 @@ public class JolokiaServerConfig {
             sslCipherSuites = parameters.getCipherSuites();
         } else {
             List<String> supportedCipherSuites = Arrays.asList(parameters.getCipherSuites());
-            List<String> sslCipherSuitesList = new ArrayList<String>(Arrays.asList(sslCipherSuites));
+            List<String> sslCipherSuitesList = new ArrayList<>(Arrays.asList(sslCipherSuites));
 
             Iterator<String> cit = sslCipherSuitesList.iterator();
             while (cit.hasNext()) {
@@ -384,7 +383,7 @@ public class JolokiaServerConfig {
         String authenticatorClass = jolokiaConfig.getConfig(ConfigKey.AUTH_CLASS);
 
         if (authenticatorClass != null) {
-            Class authClass = getAuthenticatorClass(authenticatorClass);
+            Class<?> authClass = getAuthenticatorClass(authenticatorClass);
 
             try {
                 // prefer constructor that takes configuration
@@ -396,9 +395,9 @@ public class JolokiaServerConfig {
         }
     }
 
-    private Authenticator createFromConstructorWithConfigArg(Class pAuthClass) throws NoSuchMethodException {
+    private Authenticator createFromConstructorWithConfigArg(Class<?> pAuthClass) throws NoSuchMethodException {
         try {
-            Constructor constructorThatTakesConfiguration = pAuthClass.getConstructor(Configuration.class);
+            Constructor<?> constructorThatTakesConfiguration = pAuthClass.getConstructor(Configuration.class);
             return (Authenticator) constructorThatTakesConfiguration.newInstance(this.jolokiaConfig);
         }
         catch (InvocationTargetException e) {
@@ -411,9 +410,9 @@ public class JolokiaServerConfig {
         }
     }
 
-    private Authenticator createFromDefaultConstructor(Class pAuthClass) {
+    private Authenticator createFromDefaultConstructor(Class<?> pAuthClass) {
         try {
-            Constructor defaultConstructor = pAuthClass.getConstructor();
+            Constructor<?> defaultConstructor = pAuthClass.getConstructor();
             return (Authenticator) defaultConstructor.newInstance();
         } catch (NoSuchMethodException e) {
             throw new IllegalArgumentException("Cannot create an instance of custom authenticator class, " +
@@ -428,9 +427,9 @@ public class JolokiaServerConfig {
         }
     }
 
-    private Class getAuthenticatorClass(String pAuthenticatorClass) {
+    private Class<?> getAuthenticatorClass(String pAuthenticatorClass) {
         try {
-            Class authClass = Class.forName(pAuthenticatorClass);
+            Class<?> authClass = Class.forName(pAuthenticatorClass);
             if (!Authenticator.class.isAssignableFrom(authClass)) {
                 throw new IllegalArgumentException("Provided authenticator class [" + pAuthenticatorClass +
                                                    "] is not a subclass of Authenticator");
@@ -448,7 +447,7 @@ public class JolokiaServerConfig {
         String authMode = jolokiaConfig.getConfig(ConfigKey.AUTH_MODE);
         String realm = jolokiaConfig.getConfig(ConfigKey.REALM);
 
-        ArrayList<Authenticator> authenticators = new ArrayList<Authenticator>();
+        ArrayList<Authenticator> authenticators = new ArrayList<>();
 
         if (useHttps() && useSslClientAuthentication()) {
             authenticators.add(new ClientCertAuthenticator(this));
@@ -486,7 +485,7 @@ public class JolokiaServerConfig {
     }
 
     private void initProtocol(Map<String, String> agentConfig) {
-        protocol = agentConfig.containsKey("protocol") ? agentConfig.get("protocol") : "http";
+        protocol = agentConfig.getOrDefault("protocol", "http");
         if (!protocol.equals("http") && !protocol.equals("https")) {
             throw new IllegalArgumentException("Invalid protocol '" + protocol + "'. Must be either 'http' or 'https'");
         }
@@ -515,7 +514,7 @@ public class JolokiaServerConfig {
         trustManagerAlgorithm = agentConfig.get("trustManagerAlgorithm");
 
         String auth = agentConfig.get("useSslClientAuthentication");
-        useSslClientAuthentication = auth != null && Boolean.valueOf(auth);
+        useSslClientAuthentication = Boolean.parseBoolean(auth);
 
         String password = agentConfig.get("keystorePassword");
         keystorePassword =  password != null ? decipherPasswordIfNecessary(password) : new char[0];
@@ -523,7 +522,7 @@ public class JolokiaServerConfig {
         serverKeyAlgorithm = agentConfig.get("serverKeyAlgorithm");
         clientPrincipals = extractList(agentConfig, "clientPrincipal");
         String xCheck = agentConfig.get("extendedClientCheck");
-        extendedClientCheck = xCheck != null && Boolean.valueOf(xCheck);
+        extendedClientCheck = Boolean.parseBoolean(xCheck);
 
         List<String> sslProtocolsList = extractList(agentConfig, "sslProtocol");
         if (sslProtocolsList != null) {
@@ -554,7 +553,7 @@ public class JolokiaServerConfig {
     // The first element is one without extensions
     // More elements can be given with ".1", ".2", ... added.
     private List<String> extractList(Map<String, String> pAgentConfig, String pKey) {
-        List<String> ret = new ArrayList<String>();
+        List<String> ret = new ArrayList<>();
         if (pAgentConfig.containsKey(pKey)) {
             ret.add(pAgentConfig.get(pKey));
         }
@@ -564,7 +563,7 @@ public class JolokiaServerConfig {
             ret.add(pAgentConfig.get(keyIdx));
             keyIdx = pKey + "." + ++idx;
         }
-        return ret.size() > 0 ? ret : null;
+        return !ret.isEmpty() ? ret : null;
     }
 
     private void initThreadNr(Map<String, String> pAgentConfig) {
@@ -574,7 +573,7 @@ public class JolokiaServerConfig {
     }
 
     private void initExecutor(Map<String, String> agentConfig) {
-        executor = agentConfig.containsKey("executor") ? agentConfig.get("executor") : "single";
+        executor = agentConfig.getOrDefault("executor", "single");
         if (!"single".equalsIgnoreCase(executor) &&
                 !"fixed".equalsIgnoreCase(executor) &&
                 !"cached".equalsIgnoreCase(executor)) {
@@ -606,23 +605,23 @@ public class JolokiaServerConfig {
     }
 
     protected final Map<String, String> readPropertiesFromInputStream(InputStream pIs, String pLabel) {
-        Map ret = new HashMap<String, String>();
+        Map<String, String> ret = new HashMap<>();
         if (pIs == null) {
             return ret;
         }
         Properties props = new Properties();
         try {
             props.load(pIs);
-            ret.putAll(props);
+            props.forEach((key, value) -> ret.put((String) key, (String) value));
         } catch (IOException e) {
-            throw new IllegalArgumentException("jolokia: Cannot load properties " + pLabel + " : " + e,e);
+            throw new IllegalArgumentException("jolokia: Cannot load properties " + pLabel + " : " + e, e);
         }
         return ret;
     }
 
     // Add detector specific options if given on the command line
     private void prepareDetectorOptions(Map<String, String> pConfig) {
-        StringBuffer detectorOpts = new StringBuffer("{");
+        StringBuilder detectorOpts = new StringBuilder("{");
         if (pConfig.containsKey("bootAmx") && Boolean.parseBoolean(pConfig.get("bootAmx"))) {
             detectorOpts.append("\"glassfish\" : { \"bootAmx\" : true }");
         }

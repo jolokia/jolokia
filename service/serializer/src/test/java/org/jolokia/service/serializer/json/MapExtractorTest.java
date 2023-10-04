@@ -14,11 +14,11 @@ import static org.testng.Assert.*;
 
 public class MapExtractorTest extends AbstractExtractorTest {
 
-    Map map;
+    Map<String, Object> map;
 
     @BeforeMethod
     public void setUp() throws Exception {
-        map = new HashMap();
+        map = new HashMap<>();
         map.put("eins","one");
         map.put("zwei","second");
         map.put("drei",new ObjectName("test:type=blub"));

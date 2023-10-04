@@ -55,9 +55,8 @@ public class KeyStoreUtil {
      * @param pCaCert     CA cert as PEM used for the trust store
      */
     public static void updateWithCaPem(KeyStore pTrustStore, File pCaCert)
-            throws IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException {
-        InputStream is = new FileInputStream(pCaCert);
-        try {
+            throws IOException, CertificateException, KeyStoreException {
+        try (InputStream is = new FileInputStream(pCaCert)) {
             CertificateFactory certFactory = CertificateFactory.getInstance("X509");
             Collection<? extends Certificate> certificates = certFactory.generateCertificates(is);
 
@@ -70,8 +69,6 @@ public class KeyStoreUtil {
                 }
                 pTrustStore.setCertificateEntry(alias, cert);
             }
-        } finally {
-            is.close();
         }
     }
 
@@ -87,8 +84,7 @@ public class KeyStoreUtil {
      */
     public static void updateWithServerPems(KeyStore pKeyStore, File pServerCert, File pServerKey, String pKeyAlgo, char[] pPassword)
             throws IOException, CertificateException, NoSuchAlgorithmException, InvalidKeySpecException, KeyStoreException {
-        InputStream is = new FileInputStream(pServerCert);
-        try {
+        try (InputStream is = new FileInputStream(pServerCert)) {
             CertificateFactory certFactory = CertificateFactory.getInstance("X509");
             X509Certificate cert = (X509Certificate) certFactory.generateCertificate(is);
 
@@ -107,13 +103,11 @@ public class KeyStoreUtil {
 
             String alias = cert.getSubjectX500Principal().getName();
             pKeyStore.setKeyEntry(alias, privateKey, pPassword, new Certificate[]{cert});
-        } finally {
-            is.close();
         }
     }
 
     /**
-     * Update the given keystore with a self signed server certificate. This can be used if no
+     * Update the given keystore with a self-signed server certificate. This can be used if no
      * server certificate is provided from the outside and no SSL verification is used by the client.
      *
      * @param pKeyStore keystore to update
@@ -256,13 +250,7 @@ public class KeyStoreUtil {
 
             CertificateFactory cf = CertificateFactory.getInstance("X509");
             return (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(certificate.getEncoded()));
-        } catch (final InvalidKeyException e) {
-            throw new IllegalStateException("The getSelfCertificate-method threw an error.", e);
-        } catch (final NoSuchAlgorithmException e) {
-            throw new IllegalStateException("The getSelfCertificate-method threw an error.", e);
-        } catch (final SignatureException e) {
-            throw new IllegalStateException("The getSelfCertificate-method threw an error.", e);
-        } catch (final CertificateException e) {
+        } catch (final InvalidKeyException | NoSuchAlgorithmException | SignatureException | CertificateException e) {
             throw new IllegalStateException("The getSelfCertificate-method threw an error.", e);
         }
     }
@@ -271,8 +259,7 @@ public class KeyStoreUtil {
     // http://oauth.googlecode.com/svn/code/java/
     // All credits to belong to them.
     private static byte[] decodePem(File pemFile) throws IOException {
-        BufferedReader reader = new BufferedReader(new FileReader(pemFile));
-        try {
+        try (BufferedReader reader = new BufferedReader(new FileReader(pemFile))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 if (line.contains("-----BEGIN ")) {
@@ -280,17 +267,15 @@ public class KeyStoreUtil {
                 }
             }
             throw new IOException("PEM " + pemFile + " is invalid: no begin marker");
-        } finally {
-            reader.close();
         }
     }
 
     private static byte[] readBytes(File pemFile, BufferedReader reader, String endMarker) throws IOException {
         String line;
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
 
         while ((line = reader.readLine()) != null) {
-            if (line.indexOf(endMarker) != -1) {
+            if (line.contains(endMarker)) {
                 return Base64Util.decode(buf.toString());
             }
             buf.append(line.trim());

@@ -51,7 +51,7 @@ public class CorsChecker extends AbstractChecker<String> {
     public CorsChecker(Document pDoc) {
         NodeList corsNodes = pDoc.getElementsByTagName("cors");
         if (corsNodes.getLength() > 0) {
-            patterns = new ArrayList<Pattern>();
+            patterns = new ArrayList<>();
             for (int i = 0; i < corsNodes.getLength(); i++) {
                 Node corsNode = corsNodes.item(i);
                 NodeList nodes = corsNode.getChildNodes();
@@ -92,7 +92,7 @@ public class CorsChecker extends AbstractChecker<String> {
             return false;
         }
 
-        if (patterns == null || patterns.size() == 0 || pOrigin == null) {
+        if (patterns == null || patterns.isEmpty() || pOrigin == null) {
             return true;
         }
 

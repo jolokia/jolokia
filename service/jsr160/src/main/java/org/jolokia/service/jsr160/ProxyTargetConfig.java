@@ -30,7 +30,7 @@ import org.json.simple.JSONObject;
 public class ProxyTargetConfig {
 
     // The target URl
-    private String url;
+    private final String url;
 
     // Environment used for lookup
     private Map<String,String> env;
@@ -51,7 +51,7 @@ public class ProxyTargetConfig {
         url = pMap.get("url");
         String user = pMap.get("user");
         if (user != null) {
-            env = new HashMap<String, String>();
+            env = new HashMap<>();
             env.put("user",user);
             String pwd = pMap.get("password");
             if (pwd != null) {
@@ -83,6 +83,7 @@ public class ProxyTargetConfig {
      *
      * @return JSON object representing this proxy configuration
      */
+    @SuppressWarnings("unchecked")
     public JSONObject toJSON() {
         JSONObject ret = new JSONObject();
         ret.put("url", url);

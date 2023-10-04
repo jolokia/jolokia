@@ -29,7 +29,7 @@ import org.w3c.dom.Element;
 public class MBeanServerBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
     @Override
-    protected Class<?> getBeanClass(Element element) {
+    protected Class<?> getBeanClass(@SuppressWarnings("NullableProblems") Element element) {
         return SpringJolokiaMBeanServerFactory.class;
     }
 

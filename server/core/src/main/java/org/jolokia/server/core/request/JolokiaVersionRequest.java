@@ -63,16 +63,15 @@ public class JolokiaVersionRequest extends JolokiaRequest {
      * @return the creator implementation
      */
     static RequestCreator<JolokiaVersionRequest> newCreator() {
-        return new RequestCreator<JolokiaVersionRequest>() {
+        return new RequestCreator<>() {
             /** {@inheritDoc} */
-            public JolokiaVersionRequest create(Stack<String> pStack, ProcessingParameters pParams) throws MalformedObjectNameException {
+            public JolokiaVersionRequest create(Stack<String> pStack, ProcessingParameters pParams) {
                 return new JolokiaVersionRequest(pParams);
             }
 
             /** {@inheritDoc} */
-            public JolokiaVersionRequest create(Map<String, ?> requestMap, ProcessingParameters pParams)
-                    throws MalformedObjectNameException {
-                return new JolokiaVersionRequest(requestMap,pParams);
+            public JolokiaVersionRequest create(Map<String, ?> requestMap, ProcessingParameters pParams) {
+                return new JolokiaVersionRequest(requestMap, pParams);
             }
         };
     }

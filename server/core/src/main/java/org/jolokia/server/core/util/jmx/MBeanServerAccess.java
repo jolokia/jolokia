@@ -98,7 +98,7 @@ public interface MBeanServerAccess {
     /**
      * Get all MBeanServers which are handled by this manager
      *
-     * @return list of MBeanServers to handle (in the proper merge order)
+     * @return set of MBeanServers to handle (in the proper merge order)
      */
     Set<MBeanServerConnection> getMBeanServers();
 

@@ -370,11 +370,7 @@ public class AgentServlet extends HttpServlet {
         Subject subject = (Subject) pReq.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE);
         if (subject != null) {
             try {
-                return Subject.doAs(subject, new PrivilegedExceptionAction<>() {
-                    public JSONAware run() throws IOException, EmptyResponseException {
-                        return pReqHandler.handleRequest(pReq, pResp);
-                    }
-                });
+                return Subject.doAs(subject, (PrivilegedExceptionAction<JSONAware>) () -> pReqHandler.handleRequest(pReq, pResp));
             } catch (PrivilegedActionException exp) {
                 // Unwrap an empty response exception
                 Throwable innerExp = exp.getCause();
