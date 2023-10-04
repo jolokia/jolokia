@@ -38,7 +38,7 @@ import org.json.simple.JSONArray;
 public class ArrayExtractor implements Extractor {
 
     /** {@inheritDoc} */
-    public Class getType() {
+    public Class<?> getType() {
         // Special handler, no specific Type
         return null;
     }
@@ -83,7 +83,7 @@ public class ArrayExtractor implements Extractor {
      */
     public Object setObjectValue(StringToObjectConverter pConverter, Object pInner, String pIndex, Object  pValue)
             throws IllegalAccessException, InvocationTargetException {
-        Class clazz = pInner.getClass();
+        Class<?> clazz = pInner.getClass();
         if (!clazz.isArray()) {
             throw new IllegalArgumentException("Not an array to set a value, but " + clazz +
                     ". (index = " + pIndex + ", value = " +  pValue + ")");
@@ -95,7 +95,7 @@ public class ArrayExtractor implements Extractor {
             throw new IllegalArgumentException("Non-numeric index for accessing array " + pInner +
                     ". (index = " + pIndex + ", value to set = " +  pValue + ")",exp);
         }
-        Class type = clazz.getComponentType();
+        Class<?> type = clazz.getComponentType();
         Object value = pConverter.deserialize(type.getName(), pValue);
         Object oldValue = Array.get(pInner, idx);
         Array.set(pInner, idx, value);
@@ -107,6 +107,7 @@ public class ArrayExtractor implements Extractor {
         return true;
     }
 
+    @SuppressWarnings("unchecked")
     private List<Object> extractArray(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pPath, boolean jsonify, int pLength) throws AttributeNotFoundException {
         List<Object> ret = new JSONArray();
         for (int i = 0; i < pLength; i++) {

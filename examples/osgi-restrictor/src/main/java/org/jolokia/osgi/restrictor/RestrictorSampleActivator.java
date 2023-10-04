@@ -28,14 +28,14 @@ import org.osgi.framework.ServiceRegistration;
  */
 public class RestrictorSampleActivator implements BundleActivator {
 
-    private ServiceRegistration registration;
+    private ServiceRegistration<?> registration;
 
-    public void start(BundleContext context) throws Exception {
+    public void start(BundleContext context) {
         registration = context.registerService(Restrictor.class.getName(),new SampleRestrictor("java.lang"),null);
         System.out.println("Register sample restrictor service");
     }
 
-    public void stop(BundleContext context) throws Exception {
+    public void stop(BundleContext context) {
         registration.unregister();
         System.out.println("Unregistered sample restrictor service");
     }

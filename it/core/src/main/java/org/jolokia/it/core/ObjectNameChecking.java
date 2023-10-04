@@ -30,7 +30,7 @@ import javax.management.*;
  */
 public class ObjectNameChecking implements ObjectNameCheckingMBean,MBeanRegistration {
 
-    private String name;
+    private final String name;
 
     public ObjectNameChecking(String pStrangeName) {
         name = pStrangeName;
@@ -47,7 +47,7 @@ public class ObjectNameChecking implements ObjectNameCheckingMBean,MBeanRegistra
     public void postRegister(Boolean registrationDone) {
     }
 
-    public void preDeregister() throws Exception {
+    public void preDeregister() {
     }
 
     public void postDeregister() {

@@ -52,7 +52,7 @@ class VirtualMachineHandler implements VirtualMachineHandlerOperations {
      *
      * If lookup fails, a message is printed out (except when '--quiet' is provided)
      *
-     * @return the create virtual machine of <code>null</code> if none could be created
+     * @return the virtual machine of <code>null</code> if none could be created
      */
     @Override
     public Object attachVirtualMachine() throws ProcessingException {
@@ -97,11 +97,7 @@ class VirtualMachineHandler implements VirtualMachineHandlerOperations {
                 method.setAccessible(true); // on J9 you get IllegalAccessException otherwise.
                 method.invoke(pVm);
             }
-        } catch (InvocationTargetException e) {
-            throw new ProcessingException("Error while detaching",e, options);
-        } catch (NoSuchMethodException e) {
-            throw new ProcessingException("Error while detaching",e, options);
-        } catch (IllegalAccessException e) {
+        } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
             throw new ProcessingException("Error while detaching",e, options);
         }
     }
@@ -113,7 +109,7 @@ class VirtualMachineHandler implements VirtualMachineHandlerOperations {
      */
     @Override
     public List<ProcessDescription> listProcesses() {
-        List<ProcessDescription> ret = new ArrayList<ProcessDescription>();
+        List<ProcessDescription> ret = new ArrayList<>();
         Class<?> vmClass = lookupVirtualMachineClass();
         try {
             Method method = vmClass.getMethod("list");
@@ -126,11 +122,7 @@ class VirtualMachineHandler implements VirtualMachineHandlerOperations {
                 ret.add(new ProcessDescription(id, display));
             }
             return ret;
-        } catch (NoSuchMethodException e) {
-            throw new ProcessingException("Error while listing JVM processes", e, options);
-        } catch (InvocationTargetException e) {
-            throw new ProcessingException("Error while listing JVM processes", e, options);
-        } catch (IllegalAccessException e) {
+        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
             throw new ProcessingException("Error while listing JVM processes", e, options);
         }
     }
@@ -155,11 +147,7 @@ class VirtualMachineHandler implements VirtualMachineHandlerOperations {
         try {
             Method method = clazz.getMethod("loadAgent",String.class, String.class);
             method.invoke(pVm, jarFilePath, args);
-        } catch (NoSuchMethodException e) {
-            throw new ProcessingException("Error while loading Jolokia agent to a JVM process", e, options);
-        } catch (InvocationTargetException e) {
-            throw new ProcessingException("Error while loading Jolokia agent to a JVM process", e, options);
-        } catch (IllegalAccessException e) {
+        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
             throw new ProcessingException("Error while loading Jolokia agent to a JVM process", e, options);
         }
     }
@@ -170,11 +158,7 @@ class VirtualMachineHandler implements VirtualMachineHandlerOperations {
         try {
             Method method = clazz.getMethod("getSystemProperties");
             return (Properties) method.invoke(pVm);
-        } catch (NoSuchMethodException e) {
-            throw new ProcessingException("Error while getting system properties from a JVM process", e, options);
-        } catch (InvocationTargetException e) {
-            throw new ProcessingException("Error while getting system properties from a JVM process", e, options);
-        } catch (IllegalAccessException e) {
+        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
             throw new ProcessingException("Error while getting system properties from a JVM process", e, options);
         }
     }

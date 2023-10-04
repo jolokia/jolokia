@@ -27,10 +27,10 @@ import javax.management.*;
 public abstract class AbstractJolokiaService<T extends JolokiaService<?>> implements JolokiaService<T> {
 
     // service type of this Jolokia Service
-    private Class<T> type;
+    private final Class<T> type;
 
     // order number for this service
-    private int order;
+    private final int order;
 
     // context, valid after init
     private JolokiaContext jolokiaContext;

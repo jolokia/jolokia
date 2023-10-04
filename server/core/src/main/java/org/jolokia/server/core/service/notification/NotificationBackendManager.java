@@ -50,7 +50,7 @@ public class NotificationBackendManager {
      *         is probably also a map)
      */
     public Map<String, ?> getBackendConfig() {
-        Map<String, Map<String, ?>> configMap = new HashMap<String, Map<String, ?>>();
+        Map<String, Map<String, ?>> configMap = new HashMap<>();
 
         for (NotificationBackend backend : context.getServices(NotificationBackend.class)) {
             configMap.put(backend.getNotifType(),backend.getConfig());

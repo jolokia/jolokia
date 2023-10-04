@@ -58,7 +58,7 @@ public final class DateUtil {
         } else {
             try {
                 // Try on our own, works for most cases
-                String date = pDateString.replaceFirst("([+-])(0\\d)\\:(\\d{2})$", "$1$2$3");
+                String date = pDateString.replaceFirst("([+-])(0\\d):(\\d{2})$", "$1$2$3");
                 date = date.replaceFirst("Z$","+0000");
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
                 return dateFormat.parse(date);

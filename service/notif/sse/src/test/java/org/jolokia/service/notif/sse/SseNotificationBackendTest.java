@@ -40,7 +40,7 @@ public class SseNotificationBackendTest {
     private TestJolokiaContext context;
 
     @BeforeMethod
-    public void setUp() throws Exception {
+    public void setUp() {
         context = new TestJolokiaContext.Builder()
                 .config(ConfigKey.AGENT_ID,"test")
                 .build();
@@ -56,7 +56,7 @@ public class SseNotificationBackendTest {
     }
 
     @Test
-    public void testSubscription() throws Exception {
+    public void testSubscription() {
        String client = UUID.randomUUID().toString();
        String handle = "1";
 
@@ -67,7 +67,7 @@ public class SseNotificationBackendTest {
    }
 
     @Test
-    public void testUnsubscribe() throws Exception {
+    public void testUnsubscribe() {
         String client = UUID.randomUUID().toString();
         String handle = "1";
         TestNotificationSubscription sbc =
@@ -83,7 +83,7 @@ public class SseNotificationBackendTest {
     }
 
     @Test
-    public void testUnregister() throws Exception {
+    public void testUnregister() {
         String client = UUID.randomUUID().toString();
         String handle = "1";
         TestNotificationSubscription sbc =

@@ -16,8 +16,13 @@ package org.jolokia.it.core;
  *  limitations under the License.
  */
 
-import java.io.StringWriter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Test data for MXBeans
@@ -36,17 +41,17 @@ public class ComplexTestData {
     public ComplexTestData() {
         number = 1968;
         string = "late";
-        map = new HashMap<String, Boolean>();
+        map = new HashMap<>();
         map.put("kill",true);
         map.put("bill",false);
-        set = new HashSet<Integer>();
+        set = new HashSet<>();
         set.add(12);
         set.add(14);
         stringArray = new String[] { "toy", "story" };
-        list = new ArrayList<Boolean>(Arrays.asList(true,false,true));
-        complex = new HashMap<String, List<Map<String, String>>>();
-        List<Map<String,String>> innerList = new ArrayList<Map<String, String>>();
-        Map<String,String> veryInner = new HashMap<String, String>();
+        list = new ArrayList<>(Arrays.asList(true, false, true));
+        complex = new HashMap<>();
+        List<Map<String,String>> innerList = new ArrayList<>();
+        Map<String,String> veryInner = new HashMap<>();
         veryInner.put("deep", "inside");
         innerList.add(veryInner);
         complex.put("hidden",innerList);

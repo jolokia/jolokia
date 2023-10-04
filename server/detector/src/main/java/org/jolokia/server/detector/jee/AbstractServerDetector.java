@@ -36,13 +36,13 @@ import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 public abstract class AbstractServerDetector implements ServerDetector {
 
     // order number for this service
-    private int order;
+    private final int order;
 
     // detector configuration
     private Map<String,Object> config;
 
     // Detector name
-    private String name;
+    private final String name;
 
     /**
      * The order of this detector
@@ -64,7 +64,7 @@ public abstract class AbstractServerDetector implements ServerDetector {
     }
 
     @Override
-    public void destroy() throws Exception {
+    public void destroy() {
 
     }
 
@@ -92,10 +92,8 @@ public abstract class AbstractServerDetector implements ServerDetector {
         try {
             ObjectName oName = new ObjectName(pMbeanPattern);
             return pMBeanServerAccess.queryNames(oName);
-        } catch (MalformedObjectNameException e) {
-            return new HashSet<ObjectName>();
-        } catch (IOException e) {
-            return new HashSet<ObjectName>();
+        } catch (MalformedObjectNameException | IOException e) {
+            return new HashSet<>();
         }
     }
 
@@ -108,7 +106,7 @@ public abstract class AbstractServerDetector implements ServerDetector {
      * @return true if at least one MBean of the given name (or pattern) exists
      */
     protected boolean mBeanExists(MBeanServerAccess pMBeanServerManger,String pObjectName) {
-        return searchMBeans(pMBeanServerManger,pObjectName).size() > 0;
+        return !searchMBeans(pMBeanServerManger, pObjectName).isEmpty();
     }
 
     /**
@@ -139,17 +137,13 @@ public abstract class AbstractServerDetector implements ServerDetector {
     protected String getAttributeValue(MBeanServerAccess pMBeanServerAccess, final ObjectName pMBean, final String pAttribute) {
         try {
             return pMBeanServerAccess.call(pMBean, GET_ATTRIBUTE_HANDLER, pAttribute);
-        } catch (IOException e) {
-            return null;
-        } catch (ReflectionException e) {
-            return null;
-        } catch (JMException e) {
+        } catch (IOException | JMException e) {
             return null;
         }
     }
 
     // Handler for fetching an attribute
-    private static final MBeanServerAccess.MBeanAction<String> GET_ATTRIBUTE_HANDLER = new MBeanServerAccess.MBeanAction<String>() {
+    private static final MBeanServerAccess.MBeanAction<String> GET_ATTRIBUTE_HANDLER = new MBeanServerAccess.MBeanAction<>() {
         /** {@inheritDoc} */
         public String execute(MBeanServerConnection pConn, ObjectName pName, Object... extraArgs) throws ReflectionException, InstanceNotFoundException, IOException, MBeanException, AttributeNotFoundException {
             Object attr = pConn.getAttribute(pName, (String) extraArgs[0]);
@@ -168,17 +162,17 @@ public abstract class AbstractServerDetector implements ServerDetector {
      */
     protected String getSingleStringAttribute(MBeanServerAccess pMBeanServerAccess, String pMBeanName, String pAttribute) {
         Set<ObjectName> serverMBeanNames = searchMBeans(pMBeanServerAccess, pMBeanName);
-        if (serverMBeanNames.size() == 0) {
+        if (serverMBeanNames.isEmpty()) {
             return null;
         }
-        Set<String> attributeValues = new HashSet<String>();
+        Set<String> attributeValues = new HashSet<>();
         for (ObjectName oName : serverMBeanNames) {
             String val = getAttributeValue(pMBeanServerAccess, oName, pAttribute);
             if (val != null) {
                 attributeValues.add(val);
             }
         }
-        if (attributeValues.size() == 0 || attributeValues.size() > 1) {
+        if (attributeValues.size() != 1) {
             return null;
         }
         return attributeValues.iterator().next();
@@ -193,7 +187,7 @@ public abstract class AbstractServerDetector implements ServerDetector {
     protected String getVersionFromJsr77(MBeanServerAccess pMbeanServers) {
         Set<ObjectName> names = searchMBeans(pMbeanServers, "*:j2eeType=J2EEServer,*");
         // Take the first one
-        if (names.size() > 0) {
+        if (!names.isEmpty()) {
             return getAttributeValue(pMbeanServers, names.iterator().next(), "serverVersion");
         }
         return null;

@@ -72,11 +72,9 @@ public class PolicyRestrictor implements Restrictor {
             networkChecker = new NetworkChecker(doc);
             mbeanAccessChecker = new MBeanAccessChecker(doc);
             corsChecker = new CorsChecker(doc);
+        } catch (SAXException | IOException | ParserConfigurationException | MalformedObjectNameException e) {
+            exp = e;
         }
-        catch (SAXException e) { exp = e; }
-        catch (IOException e) { exp = e; }
-        catch (ParserConfigurationException e) { exp = e; }
-        catch (MalformedObjectNameException e) { exp = e; }
 
         if (exp != null) {
             throw new SecurityException("Cannot parse policy file: " + exp,exp);

@@ -19,7 +19,7 @@ import org.jolokia.server.core.util.UserPasswordCallbackHandler;
 public class JaasHttpAuthenticator extends BasicAuthenticator {
 
     // Used for communicating back the subject obtained.
-    private ThreadLocal<Subject> subjectThreadLocal = new ThreadLocal<Subject>();
+    private final ThreadLocal<Subject> subjectThreadLocal = new ThreadLocal<>();
 
     public JaasHttpAuthenticator(String pRealm) {
         super(pRealm);

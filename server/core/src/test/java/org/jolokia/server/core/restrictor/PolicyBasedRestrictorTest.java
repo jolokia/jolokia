@@ -54,7 +54,7 @@ public class PolicyBasedRestrictorTest {
         InputStream is = getClass().getResourceAsStream("/access-sample1.xml");
         PolicyRestrictor restrictor = new PolicyRestrictor(is);
 
-        String ips[][] = {
+        String[][] ips = {
                 { "11.0.18.32", "true" },
                 { "planck", "true" },
                 { "heisenberg", "false" },
@@ -66,7 +66,7 @@ public class PolicyBasedRestrictorTest {
                 { "192.168.16.3", "false" }
         };
 
-        for (String check[] : ips) {
+        for (String[] check : ips) {
             String res = restrictor.isRemoteAccessAllowed(check[0]) ? "true" : "false";
             assertEquals("Ip " + check[0] + " is " +
                          (check[1].equals("false") ? "not " : "") +

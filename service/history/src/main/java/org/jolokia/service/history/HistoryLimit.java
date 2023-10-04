@@ -32,7 +32,7 @@ public class HistoryLimit implements Serializable {
     private int maxEntries;
 
     // maximum duration to keep
-    private long maxDuration;
+    private final long maxDuration;
 
     /**
      * Create a limit with either or both maxEntries and maxDuration set

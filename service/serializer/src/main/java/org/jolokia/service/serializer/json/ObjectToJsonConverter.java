@@ -43,15 +43,15 @@ import org.jolokia.server.core.util.EscapeUtil;
 public final class ObjectToJsonConverter {
 
     // List of dedicated handlers used for delegation in serialization/deserializatin
-    private List<Extractor> handlers;
+    private final List<Extractor> handlers;
 
-    private ArrayExtractor arrayExtractor;
+    private final ArrayExtractor arrayExtractor;
 
     // Thread-Local set in order to prevent infinite recursions
-    private ThreadLocal<ObjectSerializationContext> stackContextLocal = new ThreadLocal<ObjectSerializationContext>();
+    private final ThreadLocal<ObjectSerializationContext> stackContextLocal = new ThreadLocal<>();
 
     // Used for converting string to objects when setting attributes
-    private StringToObjectConverter stringToObjectConverter;
+    private final StringToObjectConverter stringToObjectConverter;
 
     // Definition of simplifiers
     private static final String SIMPLIFIERS_DEFAULT_DEF = "META-INF/jolokia/simplifiers-default";
@@ -61,11 +61,10 @@ public final class ObjectToJsonConverter {
      * New object-to-json converter
      *
      * @param pStringToObjectConverter used when setting values
-     * @param pSimplifyHandlers a bunch of simplifiers-default used for mangling the conversion result
      */
     public ObjectToJsonConverter(StringToObjectConverter pStringToObjectConverter) {
 
-        handlers = new ArrayList<Extractor>();
+        handlers = new ArrayList<>();
 
         // TabularDataExtractor must be before MapExtractor
         // since TabularDataSupport isa Map
@@ -106,7 +105,7 @@ public final class ObjectToJsonConverter {
      */
     public Object serialize(Object pValue, List<String> pPathParts, SerializeOptions pOptions)
             throws AttributeNotFoundException {
-        Stack<String> extraStack = pPathParts != null ? EscapeUtil.reversePath(pPathParts) : new Stack<String>();
+        Stack<String> extraStack = pPathParts != null ? EscapeUtil.reversePath(pPathParts) : new Stack<>();
         return extractObjectWithContext(pValue, extraStack, pOptions, true);
     }
 
@@ -157,7 +156,7 @@ public final class ObjectToJsonConverter {
             throws AttributeNotFoundException {
         ObjectSerializationContext stackContext = stackContextLocal.get();
         String limitReached = checkForLimits(pValue, stackContext);
-        Stack<String> pathStack = pPathParts != null ? pPathParts : new Stack<String>();
+        Stack<String> pathStack = pPathParts != null ? pPathParts : new Stack<>();
         if (limitReached != null) {
             return limitReached;
         }
@@ -227,7 +226,7 @@ public final class ObjectToJsonConverter {
 
         // Call various handlers depending on the type of the inner object, as is extract Object
 
-        Class clazz = pInner.getClass();
+        Class<?> clazz = pInner.getClass();
         if (clazz.isArray()) {
             return arrayExtractor.setObjectValue(stringToObjectConverter,pInner,pAttribute,pValue);
         }
@@ -294,7 +293,7 @@ public final class ObjectToJsonConverter {
     // =================================================================================
 
     // Get the extractor for a certain class
-    private Extractor getExtractor(Class pClazz) {
+    private Extractor getExtractor(Class<?> pClazz) {
         for (Extractor handler : handlers) {
             if (handler.canSetValue() && handler.getType() != null && handler.getType().isAssignableFrom(pClazz)) {
                 return handler;
@@ -323,7 +322,7 @@ public final class ObjectToJsonConverter {
 
     private Object callHandler(Object pValue, Stack<String> pPathParts, boolean pJsonify)
             throws AttributeNotFoundException {
-        Class pClazz = pValue.getClass();
+        Class<?> pClazz = pValue.getClass();
         for (Extractor handler : handlers) {
             if (handler.getType() != null && handler.getType().isAssignableFrom(pClazz)) {
                 return handler.extractObject(this,pValue,pPathParts,pJsonify);
@@ -343,7 +342,7 @@ public final class ObjectToJsonConverter {
     // Simplifiers are added either explicitely or by reflection from a subpackage
     private void addSimplifiers(List<Extractor> pHandlers) {
         // Add all
-        pHandlers.addAll(LocalServiceFactory.<Extractor>createServices(this.getClass().getClassLoader(),
-                                                                       SIMPLIFIERS_DEFAULT_DEF, SIMPLIFIERS_DEF));
+        pHandlers.addAll(LocalServiceFactory.createServices(this.getClass().getClassLoader(),
+                                                            SIMPLIFIERS_DEFAULT_DEF, SIMPLIFIERS_DEF));
     }
 }

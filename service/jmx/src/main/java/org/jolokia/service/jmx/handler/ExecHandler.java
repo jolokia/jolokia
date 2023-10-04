@@ -32,7 +32,7 @@ import org.jolokia.server.core.util.RequestType;
 
 /**
  * Handler for dealing with execute requests.
- * 
+ *
  * @author roland
  * @since Jun 12, 2009
  */
@@ -67,16 +67,17 @@ public class ExecHandler extends AbstractCommandHandler<JolokiaExecRequest> {
      */
     @Override
     public Object doHandleSingleServerRequest(MBeanServerConnection server, JolokiaExecRequest request)
-            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+            throws InstanceNotFoundException, ReflectionException, MBeanException, IOException {
         OperationAndParamType types = extractOperationTypes(server,request);
         int nrParams = types.paramClasses.length;
         Object[] params = new Object[nrParams];
+        @SuppressWarnings("unchecked")
         List<Object> args = (List<Object>) request.getArguments();
         verifyArguments(request, types, nrParams, args);
         for (int i = 0;i < nrParams; i++) {
-        	if (types.paramOpenTypes != null && types.paramOpenTypes[i] != null) {
+        	if (types.paramOpenTypes[i] != null) {
         		params[i] = context.getMandatoryService(Serializer.class).deserializeOpenType(types.paramOpenTypes[i], args.get(i));
-        	} else { 
+        	} else {
         		params[i] = context.getMandatoryService(Serializer.class).deserialize(types.paramClasses[i], args.get(i));
         	}
         }
@@ -152,13 +153,13 @@ public class ExecHandler extends AbstractCommandHandler<JolokiaExecRequest> {
             throws InstanceNotFoundException, ReflectionException, IOException {
         try {
             MBeanInfo mBeanInfo = pServer.getMBeanInfo(pRequest.getObjectName());
-            List<MBeanParameterInfo[]> paramInfos = new ArrayList<MBeanParameterInfo[]>();
+            List<MBeanParameterInfo[]> paramInfos = new ArrayList<>();
             for (MBeanOperationInfo opInfo : mBeanInfo.getOperations()) {
                 if (opInfo.getName().equals(pOperation)) {
                     paramInfos.add(opInfo.getSignature());
                 }
             }
-            if (paramInfos.size() == 0) {
+            if (paramInfos.isEmpty()) {
                 throw new IllegalArgumentException("No operation " + pOperation +
                         " found on MBean " + pRequest.getObjectNameAsString());
             }
@@ -179,13 +180,13 @@ public class ExecHandler extends AbstractCommandHandler<JolokiaExecRequest> {
     private MBeanParameterInfo[] getMatchingSignature(List<String> pTypes, List<MBeanParameterInfo[]> pParamInfos) {
         OUTER:
         for (MBeanParameterInfo[]  infos : pParamInfos) {
-            if (infos.length == 0 && pTypes.size() == 0) {
+            if (infos.length == 0 && pTypes.isEmpty()) {
                 // No-arg argument
                 return infos;
             }
             if (pTypes.size() != infos.length) {
                 // Number of arguments dont match
-                continue OUTER;
+                continue;
             }
             for (int i=0;i<infos.length;i++) {
                 String type = infos[i].getType();
@@ -202,12 +203,12 @@ public class ExecHandler extends AbstractCommandHandler<JolokiaExecRequest> {
 
     // Extract operation and optional type parameters
     private List<String> splitOperation(String pOperation) {
-        List<String> ret = new ArrayList<String>();
+        List<String> ret = new ArrayList<>();
         Pattern p = Pattern.compile("^(.*)\\((.*)\\)$");
         Matcher m = p.matcher(pOperation);
         if (m.matches()) {
             ret.add(m.group(1));
-            if (m.group(2).length() > 0) {
+            if (!m.group(2).isEmpty()) {
                 // No escaping required since the parts a Java types which does not
                 // allow for commas
                 String[] args = m.group(2).split("\\s*,\\s*");
@@ -223,7 +224,7 @@ public class ExecHandler extends AbstractCommandHandler<JolokiaExecRequest> {
     }
 
     private String getErrorMessageForMissingSignature(JolokiaExecRequest pRequest, String pOperation, List<MBeanParameterInfo[]> pParamInfos) {
-        StringBuffer msg = new StringBuffer("Operation ");
+        StringBuilder msg = new StringBuilder("Operation ");
         msg.append(pOperation).
                 append(" on MBean ").
                 append(pRequest.getObjectNameAsString()).
@@ -234,7 +235,7 @@ public class ExecHandler extends AbstractCommandHandler<JolokiaExecRequest> {
     }
 
     private String signatureToString(List<MBeanParameterInfo[]> pParamInfos) {
-        StringBuffer ret = new StringBuffer();
+        StringBuilder ret = new StringBuilder();
         for (MBeanParameterInfo[] ii : pParamInfos) {
             ret.append("(");
             for (MBeanParameterInfo i : ii) {
@@ -264,8 +265,8 @@ public class ExecHandler extends AbstractCommandHandler<JolokiaExecRequest> {
             }
         }
 
-        private String operationName;
-        private String paramClasses[];
-        private OpenType<?> paramOpenTypes[];
+        private final String operationName;
+        private final String[] paramClasses;
+        private final OpenType<?>[] paramOpenTypes;
     }
 }

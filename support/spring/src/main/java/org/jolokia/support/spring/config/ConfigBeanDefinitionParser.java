@@ -36,7 +36,7 @@ import org.w3c.dom.*;
 class ConfigBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
     // Properties to ignore for setting the configuration
-    private static final String SKIP_ATTRIBUTES[] = {
+    private static final String[] SKIP_ATTRIBUTES = {
             "order",
             "xmlns",
             "xmlns:xsi",
@@ -44,15 +44,15 @@ class ConfigBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
             "id"
     };
 
-    private Set<String>         skipMap;
+    private final Set<String>         skipMap;
 
     ConfigBeanDefinitionParser() {
-        skipMap = new HashSet<String>(Arrays.asList(SKIP_ATTRIBUTES));
+        skipMap = new HashSet<>(Arrays.asList(SKIP_ATTRIBUTES));
     }
 
     @Override
-    protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
-        Map<String, Object> config = new HashMap<String, Object>();
+    protected void doParse(Element element, @SuppressWarnings("NullableProblems") ParserContext parserContext, BeanDefinitionBuilder builder) {
+        Map<String, Object> config = new HashMap<>();
         builder.addPropertyValue("config",createConfigMap(element.getAttributes()));
         String order = element.getAttribute("order");
         if (StringUtils.hasText(order)) {
@@ -61,7 +61,7 @@ class ConfigBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
     }
 
     private Map<Object, Object> createConfigMap(NamedNodeMap attributes) {
-        ManagedMap<Object, Object> map = new ManagedMap<Object, Object>(attributes.getLength());
+        ManagedMap<Object, Object> map = new ManagedMap<>(attributes.getLength());
 		map.setKeyTypeName("java.lang.String");
 		map.setValueTypeName("java.lang.String");
 
@@ -79,7 +79,7 @@ class ConfigBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
     }
 
     @Override
-    protected Class<?> getBeanClass(Element element) {
+    protected Class<?> getBeanClass(@SuppressWarnings("NullableProblems") Element element) {
         return SpringJolokiaConfigHolder.class;
     }
 

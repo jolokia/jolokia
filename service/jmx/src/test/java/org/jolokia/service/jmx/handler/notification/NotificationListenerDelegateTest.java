@@ -56,19 +56,19 @@ public class NotificationListenerDelegateTest {
     @Test
     public void testCleanup() throws Exception {
         NotificationBackendManager backendManager = createMock(NotificationBackendManager.class);
-        expect(backendManager.getBackend((String) anyObject())).andStubReturn(backend);
+        expect(backendManager.getBackend(anyObject())).andStubReturn(backend);
 
         NotificationListenerDelegate delegate = new NotificationListenerDelegate(backendManager);
 
         expect(connection.queryNames(TEST_NAME, null)).andStubReturn(Collections.singleton(TEST_NAME));
         connection.addNotificationListener(eq(TEST_NAME), eq(delegate), eqNotificationFilter("type.jmx"), isA(ListenerRegistration.class));
         connection.removeNotificationListener(eq(TEST_NAME), eq(delegate), eqNotificationFilter("type.jmx"), isA(ListenerRegistration.class));
-        expect(backend.subscribe((NotificationSubscription) anyObject())).andStubReturn(null);
+        expect(backend.subscribe(anyObject())).andStubReturn(null);
         replay(connection,backend);
         String id = delegate.register();
 
-        backendManager.unsubscribe((String) anyObject(),eq(id),(String) anyObject());
-        backendManager.unregister((Client) anyObject());
+        backendManager.unsubscribe(anyObject(), eq(id), anyObject());
+        backendManager.unregister(anyObject());
         Object handback = new Object();
         AddCommand command = getAddCommand(id, handback);
         replay(command,backendManager);
@@ -79,14 +79,13 @@ public class NotificationListenerDelegateTest {
         try {
             delegate.refresh(id);
             fail("Client should not be registered");
-        } catch (IllegalArgumentException exp) {
-
+        } catch (IllegalArgumentException ignored) {
         }
     }
 
     private NotificationListenerDelegate getNotificationListenerDelegate() {
         NotificationBackendManager backendManager = createMock(NotificationBackendManager.class);
-        expect(backendManager.getBackend((String) anyObject())).andStubReturn(backend);
+        expect(backendManager.getBackend(anyObject())).andStubReturn(backend);
         replay(backendManager);
         return new NotificationListenerDelegate(backendManager);
     }
@@ -103,15 +102,14 @@ public class NotificationListenerDelegateTest {
         String id = delegate.register();
         AddCommand command = getAddCommand(id, handback);
         NotificationBackend backend = createMock(NotificationBackend.class);
-        expect(backend.subscribe((NotificationSubscription) anyObject())).andStubReturn(null);
+        expect(backend.subscribe(anyObject())).andStubReturn(null);
         replay(command, backend);
 
         assertEquals(delegate.list(id).size(),0);
         try {
             delegate.addListener(executor,command);
             fail();
-        } catch (IllegalArgumentException exp) {
-
+        } catch (IllegalArgumentException ignored) {
         }
         assertEquals(delegate.list(id).size(),0);
     }
@@ -120,7 +118,7 @@ public class NotificationListenerDelegateTest {
         AddCommand command = createMock(AddCommand.class);
         expect(command.getClient()).andStubReturn(pId);
         expect(command.getObjectName()).andStubReturn(TEST_NAME);
-        expect(command.getFilter()).andStubReturn(Arrays.asList("type.jmx"));
+        expect(command.getFilter()).andStubReturn(List.of("type.jmx"));
         expect(command.getHandback()).andStubReturn(pHandback);
         expect(command.getConfig()).andStubReturn(null);
         expect(command.getMode()).andStubReturn("pull");
@@ -130,13 +128,13 @@ public class NotificationListenerDelegateTest {
     @Test
     public void testToJson() throws Exception {
         Object handback = new Object();
-        ListenerRegistration reg = createRegistration(TEST_NAME.toString(), Arrays.asList("type.jmx"), handback, null, "eins", "zwei");
+        ListenerRegistration reg = createRegistration(TEST_NAME.toString(), List.of("type.jmx"), handback, null, "eins", "zwei");
         JSONObject ret = reg.toJson();
         assertEquals(ret.get("mbean"),TEST_NAME.toString());
         assertEquals(ret.get("handback"),handback);
-        assertEquals(((List) ret.get("filter")).get(0),"type.jmx");
-        assertEquals(((List) ret.get("filter")).size(),1);
-        Map config = (Map) ret.get("config");
+        assertEquals(((List<?>) ret.get("filter")).get(0), "type.jmx");
+        assertEquals(((List<?>) ret.get("filter")).size(), 1);
+        Map<?, ?> config = (Map<?, ?>) ret.get("config");
         assertEquals(config.get("eins"),"zwei");
     }
 
@@ -145,13 +143,11 @@ public class NotificationListenerDelegateTest {
         NotificationListenerDelegate delegate = getNotificationListenerDelegate();
 
         final Object handback = new Object();
-        ListenerRegistration reg = createRegistration(TEST_NAME.toString(), Arrays.asList("type.jmx"), handback, new BackendCallback() {
-            public void handleNotification(Notification notification, Object pHandback) {
-                assertEquals(notification.getType(), "type.jmx");
-                assertEquals(notification.getSource(), NotificationListenerDelegateTest.this);
-                assertEquals(notification.getSequenceNumber(), 1L);
-                assertEquals(pHandback, handback);
-            }
+        ListenerRegistration reg = createRegistration(TEST_NAME.toString(), List.of("type.jmx"), handback, (notification, pHandback) -> {
+            assertEquals(notification.getType(), "type.jmx");
+            assertEquals(notification.getSource(), NotificationListenerDelegateTest.this);
+            assertEquals(notification.getSequenceNumber(), 1L);
+            assertEquals(pHandback, handback);
         });
 
         Notification notif = new Notification("type.jmx", this, 1L);

@@ -31,7 +31,7 @@ import java.util.LinkedList;
 public class DebugStore {
 
     @SuppressWarnings("PMD.LooseCoupling")
-    private LinkedList<Entry> debugEntries = new LinkedList<Entry>();
+    private final LinkedList<Entry> debugEntries = new LinkedList<>();
     private int maxDebugEntries;
     private boolean isDebug;
 
@@ -75,17 +75,17 @@ public class DebugStore {
      * @return debug string
      */
     public String debugInfo() {
-        if (!isDebug || debugEntries.size() == 0) {
+        if (!isDebug || debugEntries.isEmpty()) {
             return "";
         }
-        StringBuffer ret = new StringBuffer();
+        StringBuilder ret = new StringBuilder();
         for (int i = debugEntries.size() - 1;i >= 0;i--) {
             Entry entry = debugEntries.get(i);
             ret.append(entry.timestamp).append(": ").append(entry.message).append("\n");
             if (entry.throwable != null) {
                 StringWriter writer = new StringWriter();
                 entry.throwable.printStackTrace(new PrintWriter(writer));
-                ret.append(writer.toString());
+                ret.append(writer);
             }
         }
         return ret.toString();
@@ -160,8 +160,8 @@ public class DebugStore {
 
     // a singel entry in the debug store
     private static final class Entry {
-        private long timestamp;
-        private String message;
+        private final long timestamp;
+        private final String message;
         private Throwable throwable;
 
         private Entry(long pTimestamp, String pMessage, Throwable pThrowable) {

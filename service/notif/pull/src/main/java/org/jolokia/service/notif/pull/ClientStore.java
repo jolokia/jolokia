@@ -17,10 +17,10 @@ import org.jolokia.server.core.service.notification.NotificationSubscription;
 public class ClientStore  {
 
     // association client to notifications
-    private Map<String,NotificationStore> store;
+    private final Map<String,NotificationStore> store;
 
     // Max notification entries to hold
-    private int maxEntries;
+    private final int maxEntries;
 
     /**
      * Init with a maimal entry limit
@@ -29,7 +29,7 @@ public class ClientStore  {
      */
     ClientStore(int pMaxEntries) {
         maxEntries = pMaxEntries;
-        store = new HashMap<String, NotificationStore>();
+        store = new HashMap<>();
     }
 
     /**

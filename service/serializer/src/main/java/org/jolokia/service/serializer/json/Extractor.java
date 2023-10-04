@@ -37,7 +37,7 @@ public interface Extractor {
      *
      * @return type which can be handled
      */
-    Class getType();
+    Class<?> getType();
 
     /**
      * Extract an object from pValue. In the simplest case, this is the value itself.

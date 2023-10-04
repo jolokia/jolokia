@@ -29,7 +29,7 @@ public class JolokiaMBeanServerHolderTest {
     }
 
     @Test(expectedExceptions = IllegalStateException.class)
-    void registerMBeanFailed() throws NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanException, MalformedObjectNameException, AttributeNotFoundException, ReflectionException, InstanceNotFoundException {
+    void registerMBeanFailed() throws NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanException, MalformedObjectNameException {
         MBeanServer server = EasyMock.createMock(MBeanServer.class);
         ObjectName oName = new ObjectName(JolokiaMBeanServerHolderMBean.OBJECT_NAME);
         EasyMock.expect(server.registerMBean(anyObject(), eq(oName))).andThrow(new MBeanRegistrationException(new Exception()));

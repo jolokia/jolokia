@@ -19,10 +19,9 @@ import java.nio.charset.*;
  */
 public class ChunkedWriter extends Writer {
 
-    private OutputStream out;
-    private Charset cs;
-    private CharsetEncoder encoder;
-    private ByteBuffer bb;
+    private final OutputStream out;
+    private final CharsetEncoder encoder;
+    private final ByteBuffer bb;
     // Leftover first char in a surrogate pair
     private boolean haveLeftoverChar = false;
     private char leftoverChar;
@@ -34,7 +33,7 @@ public class ChunkedWriter extends Writer {
         super(stream);
         this.out = stream;
         if (Charset.isSupported(charset)) {
-            this.cs = Charset.forName(charset);
+            Charset cs = Charset.forName(charset);
             this.encoder = cs.newEncoder().onMalformedInput(CodingErrorAction.REPLACE)
                     .onUnmappableCharacter(CodingErrorAction.REPLACE);
         } else {
@@ -69,7 +68,7 @@ public class ChunkedWriter extends Writer {
     }
 
     public void write(int c) throws IOException {
-        char cbuf[] = new char[1];
+        char[] cbuf = new char[1];
         cbuf[0] = (char) c;
         write(cbuf, 0, 1);
     }
@@ -78,7 +77,7 @@ public class ChunkedWriter extends Writer {
         /* Check the len before creating a char buffer */
         if (len < 0)
             throw new IndexOutOfBoundsException();
-        char cbuf[] = new char[len];
+        char[] cbuf = new char[len];
         str.getChars(off, off + len, cbuf, 0);
         write(cbuf, 0, len);
     }
@@ -133,7 +132,7 @@ public class ChunkedWriter extends Writer {
         }
     }
 
-    void implWrite(char cbuf[], int off, int len) throws IOException {
+    void implWrite(char[] cbuf, int off, int len) throws IOException {
         CharBuffer cb = CharBuffer.wrap(cbuf, off, len);
 
         if(haveLeftoverChar)
@@ -207,7 +206,7 @@ public class ChunkedWriter extends Writer {
         int pos = bb.position();
         assert (pos <= lim);
 
-        int rem = (pos <= lim ? lim - pos : 0);
+        int rem = lim - pos;
 
         if (rem > 0) {
             out.write(bb.array(), bb.arrayOffset() + pos, rem);

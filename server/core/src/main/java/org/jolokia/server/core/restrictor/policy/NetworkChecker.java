@@ -45,7 +45,7 @@ import org.w3c.dom.*;
  */
 public class NetworkChecker extends AbstractChecker<String[]> {
 
-    private Set<String> allowedHostsSet;
+    private final Set<String> allowedHostsSet;
     private Set<String> allowedSubnetsSet;
 
     // Simple patterns, could be mor specific
@@ -65,7 +65,7 @@ public class NetworkChecker extends AbstractChecker<String[]> {
             return;
         }
 
-        allowedHostsSet = new HashSet<String>();
+        allowedHostsSet = new HashSet<>();
         for (int i = 0;i<nodes.getLength();i++) {
             Node node = nodes.item(i);
             NodeList childs = node.getChildNodes();
@@ -78,7 +78,7 @@ public class NetworkChecker extends AbstractChecker<String[]> {
                 String host = hostNode.getTextContent().trim().toLowerCase();
                 if (SUBNET_PATTERN.matcher(host).matches()) {
                     if (allowedSubnetsSet == null) {
-                        allowedSubnetsSet = new HashSet<String>();
+                        allowedSubnetsSet = new HashSet<>();
                     }
                     allowedSubnetsSet.add(host);
                 } else {

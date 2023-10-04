@@ -34,7 +34,7 @@ class MBeanServers implements NotificationListener {
      * @param pListener listener to register to the Jolokia MBeanServer when this server
      */
     MBeanServers(Set<MBeanServerConnection> pExtraServers, NotificationListener pListener) {
-        detectedMBeanServers = new LinkedHashSet<MBeanServerConnection>();
+        detectedMBeanServers = new LinkedHashSet<>();
         jolokiaMBeanServerListener = pListener;
 
         // Create and add our own JolokiaMBeanServer first and
@@ -48,14 +48,12 @@ class MBeanServers implements NotificationListener {
 
         // All MBean Server known by the MBeanServerFactory
         List<MBeanServer> beanServers = MBeanServerFactory.findMBeanServer(null);
-        if (beanServers != null) {
-            detectedMBeanServers.addAll(beanServers);
-        }
+        detectedMBeanServers.addAll(beanServers);
 
         // Last entry is always the platform MBeanServer
         detectedMBeanServers.add(ManagementFactory.getPlatformMBeanServer());
 
-        allMBeanServers = new LinkedHashSet<MBeanServerConnection>();
+        allMBeanServers = new LinkedHashSet<>();
         if (jolokiaMBeanServer != null) {
             allMBeanServers.add(jolokiaMBeanServer);
         }
@@ -90,7 +88,7 @@ class MBeanServers implements NotificationListener {
 
     /**
      * Get the list of the current set of MBeanServers which are active
-     * @return the list of current MBeanServers
+     * @return the set of current MBeanServers
      */
     public Set<MBeanServerConnection> getMBeanServers() {
         return allMBeanServers;

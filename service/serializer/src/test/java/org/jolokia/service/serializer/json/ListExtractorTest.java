@@ -57,7 +57,7 @@ public class ListExtractorTest extends AbstractExtractorTest {
 
     @Test
     public void testWildCardPath() throws Exception {
-        List mixed = createMixedList();
+        List<Object> mixed = createMixedList();
         JSONArray result = (JSONArray) extractJson(mixed,null,"domain");
         assertEquals(result.size(),2);
         assertEquals(result.get(0),"java.lang");
@@ -66,11 +66,11 @@ public class ListExtractorTest extends AbstractExtractorTest {
 
     @Test(expectedExceptions = ValueFaultHandler.AttributeFilteredException.class)
     public void testWildCardPathAndInvalidEnd() throws Exception {
-        List mixed = createMixedList();
+        List<Object> mixed = createMixedList();
         extractJson(mixed, null, "NoNoNo!");
     }
 
-    private List createMixedList() throws MalformedObjectNameException {
+    private List<Object> createMixedList() throws MalformedObjectNameException {
         return Arrays.asList(new ObjectName("java.lang:type=Memory"),
                              "blub",
                              null,
@@ -80,20 +80,20 @@ public class ListExtractorTest extends AbstractExtractorTest {
     @Test
     public void testSetValue() throws Exception {
         assertTrue(extractor.canSetValue());
-        List list = Arrays.asList("null", "bla");
+        List<String> list = Arrays.asList("null", "bla");
         extractor.setObjectValue(stringToObjectConverter, list, "1", "blub");
         assertEquals(list.get(1),"blub");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testSetValueInvalidIndex() throws Exception {
-        List list = Arrays.asList("null", "bla");
+        List<String> list = Arrays.asList("null", "bla");
         extractor.setObjectValue(stringToObjectConverter, list, "NaN", "blub");
     }
 
     @Test(expectedExceptions = IndexOutOfBoundsException.class)
     public void testSetValueIndexOutOfBounds() throws Exception {
-        List list = Arrays.asList("null", "bla");
+        List<String> list = Arrays.asList("null", "bla");
         extractor.setObjectValue(stringToObjectConverter, list, "3", "blub");
     }
 

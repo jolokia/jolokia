@@ -75,6 +75,7 @@ public class ListHandler extends AbstractCommandHandler<JolokiaListRequest> {
 
         ObjectName oName = null;
         try {
+            @SuppressWarnings("unchecked")
             Stack<String> pathStack = (Stack<String>) originalPathStack.clone();
             oName = objectNameFromPath(pathStack);
 
@@ -87,7 +88,7 @@ public class ListHandler extends AbstractCommandHandler<JolokiaListRequest> {
             }
 
             ListMBeanEachAction action = new ListMBeanEachAction(maxDepth, pathStack, useCanonicalName, pProvider);
-            return executeListAction(pServerManager, (Map) pPreviousResult, oName, action);
+            return executeListAction(pServerManager, (Map<?, ?>) pPreviousResult, oName, action);
         } catch (MalformedObjectNameException e) {
             throw new IllegalArgumentException("Invalid path within the MBean part given. (Path: " + pRequest.getPath() + ")",e);
         } catch (InstanceNotFoundException e) {
@@ -97,20 +98,19 @@ public class ListHandler extends AbstractCommandHandler<JolokiaListRequest> {
         }
     }
 
-    private Object executeListAction(MBeanServerAccess pServerManager, Map pPreviousResult, ObjectName pName, ListMBeanEachAction pAction)
+    private Object executeListAction(MBeanServerAccess pServerManager, Map<?, ?> pPreviousResult, ObjectName pName, ListMBeanEachAction pAction)
             throws IOException, ReflectionException, MBeanException, AttributeNotFoundException, InstanceNotFoundException {
         if (pName == null || pName.isPattern()) {
             pServerManager.each(pName, pAction);
         } else {
             pServerManager.call(pName, pAction);
         }
-        return pAction.getResult((Map) pPreviousResult);
+        return pAction.getResult(pPreviousResult);
     }
 
     /** {@inheritDoc} */
     @Override
-    public Object doHandleSingleServerRequest(MBeanServerConnection server, JolokiaListRequest request)
-            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException {
+    public Object doHandleSingleServerRequest(MBeanServerConnection server, JolokiaListRequest request) {
         throw new UnsupportedOperationException("Internal: Method must not be called when all MBeanServers are handled at once");
     }
 
@@ -125,6 +125,7 @@ public class ListHandler extends AbstractCommandHandler<JolokiaListRequest> {
         if (pPathStack.empty()) {
             return null;
         }
+        @SuppressWarnings("unchecked")
         Stack<String> path = (Stack<String>) pPathStack.clone();
         String domain = path.pop();
         if (path.empty()) {
@@ -166,7 +167,7 @@ public class ListHandler extends AbstractCommandHandler<JolokiaListRequest> {
          * @throws IOException
          */
         public void callback(MBeanServerConnection pConn, ObjectName pName)
-                throws ReflectionException, InstanceNotFoundException, IOException, MBeanException {
+                throws ReflectionException, InstanceNotFoundException, IOException {
             lookupMBeanInfo(pConn, pName);
         }
 
@@ -180,11 +181,9 @@ public class ListHandler extends AbstractCommandHandler<JolokiaListRequest> {
          * @throws ReflectionException
          * @throws InstanceNotFoundException
          * @throws IOException
-         * @throws MBeanException
-         * @throws AttributeNotFoundException
          */
         public Void execute(MBeanServerConnection pConn, ObjectName pName, Object... extraArgs)
-                throws ReflectionException, InstanceNotFoundException, IOException, MBeanException, AttributeNotFoundException {
+                throws ReflectionException, InstanceNotFoundException, IOException {
             lookupMBeanInfo(pConn, pName);
             return null;
         }
@@ -215,6 +214,7 @@ public class ListHandler extends AbstractCommandHandler<JolokiaListRequest> {
          * @return the meta data suitable for JSON serialization
          * @param pBaseMap the base map to merge in the result
          */
+        @SuppressWarnings({"rawtypes", "unchecked"})
         public Object getResult(Map pBaseMap) {
 
             Object result = infoData.applyPath();

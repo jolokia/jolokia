@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Sl4jLogHandler implements LogHandler {
 
-    private Logger logger;
+    private final Logger logger;
 
     /**
      * Constructor for a {@link LogHandler} using commons SL4J

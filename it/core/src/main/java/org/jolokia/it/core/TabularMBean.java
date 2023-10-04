@@ -21,6 +21,7 @@ public class TabularMBean implements DynamicMBean
   private final TabularType _table1Type;
   private final TabularType _table2Type;
 
+  @SuppressWarnings("FieldCanBeLocal")
   private final TabularType _updateType;
 
   public TabularMBean() throws
@@ -29,6 +30,7 @@ public class TabularMBean implements DynamicMBean
       MBeanAttributeInfo[] attributes = new MBeanAttributeInfo[2];
 
       String[] columnDescriptions = {"column one", "column two", "column three"};
+      @SuppressWarnings("rawtypes")
       OpenType[] columnTypes = {SimpleType.STRING, SimpleType.STRING, SimpleType.STRING};
       CompositeType compositeType = new CompositeType("SensorMetric", "Sensor metric data",
                                                       COLUMN_NAMES, columnDescriptions, columnTypes);
@@ -134,7 +136,7 @@ public class TabularMBean implements DynamicMBean
 
   public AttributeList setAttributes(AttributeList attributes)
   {
-    Iterator iterator = attributes.iterator();
+    Iterator<Object> iterator = attributes.iterator();
     AttributeList newValues = new AttributeList(attributes.size());
 
     while (iterator.hasNext())

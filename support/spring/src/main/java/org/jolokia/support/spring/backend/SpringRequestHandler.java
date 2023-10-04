@@ -1,16 +1,13 @@
 package org.jolokia.support.spring.backend;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.management.JMException;
 
-import org.jolokia.server.core.request.NotChangedException;
-import org.jolokia.server.core.service.request.AbstractRequestHandler;
-import org.jolokia.server.core.service.request.RequestHandler;
 import org.jolokia.server.core.request.JolokiaRequest;
 import org.jolokia.server.core.service.api.JolokiaContext;
+import org.jolokia.server.core.service.request.AbstractRequestHandler;
+import org.jolokia.server.core.service.request.RequestHandler;
 import org.jolokia.server.core.util.RequestType;
 import org.springframework.context.ApplicationContext;
 
@@ -27,10 +24,10 @@ public class SpringRequestHandler extends AbstractRequestHandler
     public static final String PROVIDER = "spring";
 
     // Application context for looking up beans
-    private ApplicationContext appContext;
+    private final ApplicationContext appContext;
 
     // Map for getting to the proper command handler
-    private Map<RequestType,SpringCommandHandler> commandHandlerMap = new HashMap<RequestType, SpringCommandHandler>();
+    private final Map<RequestType,SpringCommandHandler<?>> commandHandlerMap = new HashMap<>();
 
     /**
      * Construction of a spring request handler
@@ -44,8 +41,9 @@ public class SpringRequestHandler extends AbstractRequestHandler
     }
 
     /** {@inheritDoc} */
-    public <R extends JolokiaRequest> Object handleRequest(R pJmxReq, Object pPreviousResult) throws JMException, IOException, NotChangedException {
-        SpringCommandHandler handler = commandHandlerMap.get(pJmxReq.getType());
+    public <R extends JolokiaRequest> Object handleRequest(R pJmxReq, Object pPreviousResult) throws JMException {
+        @SuppressWarnings("unchecked")
+        SpringCommandHandler<R> handler = (SpringCommandHandler<R>) commandHandlerMap.get(pJmxReq.getType());
         if (handler == null) {
             throw new UnsupportedOperationException("No spring command handler for type " + pJmxReq.getType() + " registered");
         }
@@ -54,7 +52,7 @@ public class SpringRequestHandler extends AbstractRequestHandler
 
     @Override
     public void init(JolokiaContext pJolokiaContext) {
-        for (SpringCommandHandler handler : new SpringCommandHandler[] {
+        for (SpringCommandHandler<?> handler : new SpringCommandHandler<?>[] {
                 new SpringReadHandler(appContext, pJolokiaContext),
                 new SpringListHandler(appContext, pJolokiaContext)
         }) {

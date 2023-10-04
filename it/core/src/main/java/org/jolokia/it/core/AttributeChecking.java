@@ -28,13 +28,14 @@ import javax.management.*;
  * @author roland
  * @since Aug 7, 2009
  */
+@SuppressWarnings("rawtypes")
 public class AttributeChecking implements AttributeCheckingMBean,MBeanRegistration {
 
 
     private boolean state     = false;
     private int     idx       = 0;
     private String  name      = null;
-    private String  strings[] = {
+    private String[] strings = {
             "Started",
             "Stopped"
     };
@@ -48,7 +49,7 @@ public class AttributeChecking implements AttributeCheckingMBean,MBeanRegistrati
     private Map        map;
     private Set        set;
     private Object     bean;
-    private String     domain;
+    private final String domain;
     private Date date = new Date();
     private Chili chili = Chili.AJI;
 
@@ -58,6 +59,7 @@ public class AttributeChecking implements AttributeCheckingMBean,MBeanRegistrati
         reset();
     }
 
+    @SuppressWarnings("unchecked")
     final public void reset() {
         try {
             state = false;
@@ -75,7 +77,7 @@ public class AttributeChecking implements AttributeCheckingMBean,MBeanRegistrati
             complexMap = new HashMap();
             List inner = new ArrayList();
             Map anotherInner = new HashMap();
-            int innerInner[] = new int[]{42, 23};
+            int[] innerInner = new int[]{42, 23};
             anotherInner.put("numbers", innerInner);
             inner.add("Bla");
             inner.add(anotherInner);
@@ -153,9 +155,9 @@ public class AttributeChecking implements AttributeCheckingMBean,MBeanRegistrati
     }
 
     public List<List<PojoBean>> createLargeList(int nr) {
-        List<List<PojoBean>> ret = new ArrayList<List<PojoBean>>(nr);
+        List<List<PojoBean>> ret = new ArrayList<>(nr);
         for (int i = 0; i < nr; i++) {
-            List<PojoBean> inner = new ArrayList<PojoBean>(i / 10);
+            List<PojoBean> inner = new ArrayList<>(i / 10);
             for (int j = 0; j < i / 10; j++) {
                 inner.add(new PojoBean("" + j, i + "."));
             }
@@ -272,7 +274,7 @@ public class AttributeChecking implements AttributeCheckingMBean,MBeanRegistrati
     public void postRegister(Boolean registrationDone) {
     }
 
-    public void preDeregister() throws Exception {
+    public void preDeregister() {
     }
 
     public void postDeregister() {

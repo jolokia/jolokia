@@ -35,7 +35,7 @@ public class JolokiaBundleActivator implements BundleActivator {
                 );
     }
 
-    public void start(BundleContext pContext) throws Exception {
+    public void start(BundleContext pContext) {
         for (BundleActivator activator : activators) {
             try {
                 activator.start(pContext);
@@ -45,7 +45,7 @@ public class JolokiaBundleActivator implements BundleActivator {
         }
     }
 
-    public void stop(BundleContext pContext) throws Exception {
+    public void stop(BundleContext pContext) {
         for (BundleActivator activator : activators) {
            try {
                activator.stop(pContext);
@@ -56,7 +56,7 @@ public class JolokiaBundleActivator implements BundleActivator {
     }
 
     private void logError(BundleContext ctx, String pTxt,Exception pExp) {
-        ServiceReference ref = ctx.getServiceReference(LogService.class.getName());
+        ServiceReference<?> ref = ctx.getServiceReference(LogService.class.getName());
         if (ref != null) {
             try {
                 LogService service = (LogService) ctx.getService(ref);

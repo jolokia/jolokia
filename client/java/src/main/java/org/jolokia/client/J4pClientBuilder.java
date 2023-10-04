@@ -21,7 +21,7 @@ import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.Map;
-
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 
 import org.apache.http.Header;
@@ -32,19 +32,33 @@ import org.apache.http.client.CookieStore;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.config.*;
-import org.apache.http.conn.*;
+import org.apache.http.config.ConnectionConfig;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.config.SocketConfig;
+import org.apache.http.conn.HttpClientConnectionManager;
+import org.apache.http.conn.HttpConnectionFactory;
+import org.apache.http.conn.ManagedHttpClientConnection;
 import org.apache.http.conn.routing.HttpRoute;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
-import org.apache.http.conn.ssl.*;
-import org.apache.http.impl.client.*;
-import org.apache.http.impl.conn.*;
+import org.apache.http.conn.ssl.DefaultHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.impl.client.BasicCookieStore;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
+import org.apache.http.impl.conn.ManagedHttpClientConnectionFactory;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.impl.io.DefaultHttpRequestWriterFactory;
 import org.apache.http.impl.io.DefaultHttpResponseParserFactory;
 import org.apache.http.protocol.HTTP;
+import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.VersionInfo;
-import org.jolokia.client.request.*;
+import org.jolokia.client.request.J4pResponseExtractor;
+import org.jolokia.client.request.J4pTargetConfig;
+import org.jolokia.client.request.ValidatingResponseExtractor;
 
 /**
  * A builder for a {@link org.jolokia.client.J4pClient}.
@@ -411,8 +425,8 @@ public class J4pClientBuilder {
 
     /**
      * Set the default HTTP Headers for each HTTP requests.
-     * @param pHttpHeaders
-     * @return
+     * @param pHttpHeaders http headers to set
+     * @return this builder object
      */
     public final J4pClientBuilder setDefaultHttpHeaders(Collection<? extends Header> pHttpHeaders) {
         this.defaultHttpHeaders = pHttpHeaders;
@@ -463,7 +477,7 @@ public class J4pClientBuilder {
     static Proxy parseProxySettings(String spec) {
 
         try {
-            if (spec == null || spec.length() == 0) {
+            if (spec == null || spec.isEmpty()) {
                 return null;
             }
             return new Proxy(spec);
@@ -534,7 +548,7 @@ public class J4pClientBuilder {
 
     private SSLConnectionSocketFactory createDefaultSSLConnectionSocketFactory() {
         SSLContext sslcontext = SSLContexts.createSystemDefault();
-        X509HostnameVerifier hostnameVerifier = new BrowserCompatHostnameVerifier();
+        HostnameVerifier hostnameVerifier = new DefaultHostnameVerifier();
         return new SSLConnectionSocketFactory(sslcontext, hostnameVerifier);
     }
 
@@ -573,8 +587,8 @@ public class J4pClientBuilder {
      * Internal representation of proxy server. Package protected so that it can be accessed by tests.
      */
     static class Proxy {
-        private String host;
-        private int port;
+        private final String host;
+        private final int port;
         private String user;
         private String pass;
 

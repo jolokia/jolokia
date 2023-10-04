@@ -41,7 +41,7 @@ public class PullNotificationBackendTest {
     private TestJolokiaContext context;
 
     @BeforeMethod
-    public void setUp() throws Exception {
+    public void setUp() {
         context = new TestJolokiaContext.Builder()
                 .config(ConfigKey.AGENT_ID,"test")
                 .build();
@@ -57,7 +57,7 @@ public class PullNotificationBackendTest {
     }
 
     @Test
-    public void testConfig() throws Exception {
+    public void testConfig() {
         JSONObject cfg = (JSONObject) backend.getConfig();
         Assert.assertEquals(cfg.get("store"), "jolokia:type=NotificationStore,agent=test");
         Assert.assertTrue(cfg.containsKey("maxEntries"));
@@ -119,7 +119,7 @@ public class PullNotificationBackendTest {
 
     private NotificationResult jmxPull(String pClient, String pHandle) throws MalformedObjectNameException, InstanceNotFoundException, MBeanException, ReflectionException {
         MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-        Map cfg = backend.getConfig();
+        Map<String, ?> cfg = backend.getConfig();
         ObjectName name = new ObjectName((String) cfg.get("store"));
         return (NotificationResult) server.invoke(name,"pull",new Object[] {pClient, pHandle}, new String[] { String.class.getName(), String.class.getName()});
     }

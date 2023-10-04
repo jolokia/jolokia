@@ -43,13 +43,13 @@ public final class J4pListResponse extends J4pResponse<J4pListRequest> {
 
   public List<ObjectInstance> getObjectInstances(ObjectName name)
       throws MalformedObjectNameException {
-    List<ObjectInstance> result = new LinkedList<ObjectInstance>();
+    List<ObjectInstance> result = new LinkedList<>();
     Map<String, Map<String, Map<String, String>>> value = this.getValue();
     //class, at top level means single result
     if (value.containsKey("class")) {
       return Collections.singletonList(new ObjectInstance(name, getClassName()));
     }
-    List<ObjectInstance> instances = new ArrayList<ObjectInstance>(value.size());
+    List<ObjectInstance> instances = new ArrayList<>(value.size());
     for (Entry<String, Map<String, Map<String, String>>> domain : value.entrySet()) {
       for (Entry<String, Map<String, String>> qualifier : domain.getValue().entrySet()) {
         result.add(new ObjectInstance(new ObjectName(domain.getKey() + ":" + qualifier.getKey()),
@@ -81,7 +81,7 @@ public final class J4pListResponse extends J4pResponse<J4pListRequest> {
       if(operations == null) {
           return new MBeanOperationInfo[0];
       }
-    final List<MBeanOperationInfo> result = new ArrayList<MBeanOperationInfo>(operations.size());
+    final List<MBeanOperationInfo> result = new ArrayList<>(operations.size());
 
     for (Map.Entry<String, Map<String, Object>> operation : operations.entrySet()) {
         //if more operations with same name (overloaded), the value part is an array
@@ -123,7 +123,7 @@ public final class J4pListResponse extends J4pResponse<J4pListRequest> {
           return new MBeanAttributeInfo[0];
       }
       //sort alphabetically to match native MBeanServer
-      attributes=new TreeMap<String, Map<String, Object>>(attributes);
+      attributes= new TreeMap<>(attributes);
 
       final MBeanAttributeInfo[] result = new MBeanAttributeInfo[attributes.size()];
     int index = 0;

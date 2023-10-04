@@ -16,10 +16,10 @@ import org.jolokia.server.core.service.notification.NotificationSubscription;
 public class PullNotificationStore implements PullNotificationStoreMBean {
 
     // store holding the notifications
-    private Map<String,ClientStore> store;
+    private final Map<String,ClientStore> store;
 
     // maximum entries per subscription
-    private int maxEntries;
+    private final int maxEntries;
 
     /**
      * Initialize the store
@@ -27,7 +27,7 @@ public class PullNotificationStore implements PullNotificationStoreMBean {
      * @param pMaxEntries maximum entries per subscriptions
      */
     PullNotificationStore(int pMaxEntries) {
-        store = new HashMap<String, ClientStore>();
+        store = new HashMap<>();
         maxEntries = pMaxEntries;
     }
 

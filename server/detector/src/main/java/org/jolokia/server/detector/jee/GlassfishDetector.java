@@ -162,11 +162,11 @@ public class GlassfishDetector extends AbstractServerDetector {
             super(vendorName, serverName, version);
         }
 
-        @Override
         /** {@inheritDoc} */
+        @Override
         public Map<String, String> getExtraInfo(MBeanServerAccess pExecutor) {
-            Map<String,String> extra = new HashMap<String, String>();
-            if (extra != null && getVersion().startsWith("3")) {
+            Map<String,String> extra = new HashMap<>();
+            if (getVersion().startsWith("3")) {
                 extra.put("amxBooted",Boolean.toString(isAmxBooted(pExecutor)));
             }
             return extra;
@@ -175,7 +175,7 @@ public class GlassfishDetector extends AbstractServerDetector {
 
     private static final class AmxBootInterceptor extends AbstractJolokiaService<RequestInterceptor> implements RequestInterceptor {
 
-        private MBeanServerAccess serverAccess;
+        private final MBeanServerAccess serverAccess;
         private boolean isBooted;
         private JolokiaContext jolokiaContext;
 

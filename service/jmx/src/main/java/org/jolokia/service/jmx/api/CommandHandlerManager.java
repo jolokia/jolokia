@@ -37,7 +37,7 @@ import org.jolokia.server.core.util.RequestType;
 public class CommandHandlerManager {
 
     // Map with all json request handlers
-    private final Map<RequestType, CommandHandler> requestHandlerMap = new HashMap<RequestType, CommandHandler>();
+    private final Map<RequestType, CommandHandler<?>> requestHandlerMap = new HashMap<>();
 
     /**
      * Manager and dispatcher for incoming requests
@@ -58,9 +58,9 @@ public class CommandHandlerManager {
      *               data with the proper provider prefixed.
      */
     public CommandHandlerManager(JolokiaContext pCtx, String pProvider) {
-        List<CommandHandler> handlers =
+        List<CommandHandler<?>> handlers =
                 LocalServiceFactory.createServices (this.getClass().getClassLoader(),"META-INF/jolokia/command-handlers");
-        for (CommandHandler handler : handlers) {
+        for (CommandHandler<?> handler : handlers) {
             handler.init(pCtx,pProvider);
             requestHandlerMap.put(handler.getType(),handler);
         }
@@ -73,18 +73,19 @@ public class CommandHandlerManager {
      * @return handler which can handle requests of the given type
      */
     public <R extends JolokiaRequest> CommandHandler<R> getCommandHandler(RequestType pType) {
-        CommandHandler handler = requestHandlerMap.get(pType);
+        CommandHandler<?> handler = requestHandlerMap.get(pType);
         if (handler == null) {
             throw new UnsupportedOperationException("Unsupported operation '" + pType + "'");
         }
-        return handler;
+        //noinspection unchecked
+        return (CommandHandler<R>) handler;
     }
 
     /**
      * Lifecycle method called when agent goes down
      */
     public void destroy() throws JMException {
-        for (CommandHandler handler : requestHandlerMap.values()) {
+        for (CommandHandler<?> handler : requestHandlerMap.values()) {
             handler.destroy();
         }
     }

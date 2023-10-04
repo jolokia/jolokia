@@ -25,9 +25,10 @@ import javax.management.openmbean.SimpleType;
  * @author roland
  * @since 28.09.11
  */
+@SuppressWarnings("rawtypes")
 class SimpleTypeConverter extends OpenTypeConverter<SimpleType> {
 
-    private StringToObjectConverter stringToObjectConverter;
+    private final StringToObjectConverter stringToObjectConverter;
 
     /**
      * Constructor

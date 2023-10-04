@@ -37,15 +37,17 @@ class DescriptionDataUpdater extends DataUpdater {
         return DESCRIPTION.getKey();
     }
 
-    /** 
+    /**
      * The update method is overridden here directly since the usual extraction method
      * is not needed
      *
      * {@inheritDoc}
-     * */
-     @Override
+     */
+    @Override
+     @SuppressWarnings("rawtypes")
     void update(Map pMap, MBeanInfo pMBeanInfo, Stack<String> pPathStack) {
         verifyThatPathIsEmpty(pPathStack);
+        //noinspection unchecked
         pMap.put(getKey(), pMBeanInfo.getDescription());
     }
 }

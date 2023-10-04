@@ -125,9 +125,9 @@ public class MBeanAccessChecker extends AbstractChecker<MBeanAccessChecker.Arg> 
     private void extractMBeanPolicy(MBeanPolicyConfig pConfig, Node pMBeanNode) throws MalformedObjectNameException {
             NodeList params = pMBeanNode.getChildNodes();
         String name = null;
-        Set<String> readAttributes = new HashSet<String>();
-        Set<String> writeAttributes = new HashSet<String>();
-        Set<String> operations = new HashSet<String>();
+        Set<String> readAttributes = new HashSet<>();
+        Set<String> writeAttributes = new HashSet<>();
+        Set<String> operations = new HashSet<>();
         for (int k = 0; k < params.getLength(); k++) {
             Node param = params.item(k);
             if (param.getNodeType() != Node.ELEMENT_NODE) {
@@ -135,17 +135,21 @@ public class MBeanAccessChecker extends AbstractChecker<MBeanAccessChecker.Arg> 
             }
             assertNodeName(param,"name","attribute","operation");
             String tag = param.getNodeName();
-            if (tag.equals("name")) {
+            switch (tag) {
+            case "name":
                 if (name != null) {
                     throw new SecurityException("<name> given twice as MBean name");
                 } else {
                     name = param.getTextContent().trim();
                 }
-            } else if (tag.equals("attribute")) {
+                break;
+            case "attribute":
                 extractAttribute(readAttributes, writeAttributes, param);
-            } else if (tag.equals("operation")) {
+                break;
+            case "operation":
                 operations.add(param.getTextContent().trim());
-            } else {
+                break;
+            default:
                 throw new SecurityException("Tag <" + tag + "> invalid");
             }
         }
@@ -193,10 +197,10 @@ public class MBeanAccessChecker extends AbstractChecker<MBeanAccessChecker.Arg> 
      * Class encapsulation the arguments for the check command
      */
     public static class Arg {
-        private boolean isTypeAllowed;
-        private RequestType type;
-        private ObjectName name;
-        private String value;
+        private final boolean isTypeAllowed;
+        private final RequestType type;
+        private final ObjectName name;
+        private final String value;
 
         /**
          * Constructor for this immutable object
@@ -215,8 +219,8 @@ public class MBeanAccessChecker extends AbstractChecker<MBeanAccessChecker.Arg> 
         }
 
         /**
-         * Whethe the command type is allowed generally. 
-         * @return
+         * Whether the command type is allowed generally.
+         * @return true if it is allowed
          */
         public boolean isTypeAllowed() {
             return isTypeAllowed;

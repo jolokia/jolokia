@@ -72,8 +72,8 @@ public final class ProviderUtil {
      * Helper class holding the provider (can be null) and an object name belonging to this provider)
      */
     public static final class ProviderObjectNamePair {
-        private String provider;
-        private ObjectName objectName;
+        private final String provider;
+        private final ObjectName objectName;
 
         private ProviderObjectNamePair(String pProvider, String pObjectName) throws MalformedObjectNameException {
             provider = pProvider;

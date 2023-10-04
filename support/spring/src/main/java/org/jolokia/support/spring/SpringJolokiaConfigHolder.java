@@ -41,7 +41,7 @@ import org.springframework.core.Ordered;
 public class SpringJolokiaConfigHolder implements Ordered {
 
     // configuration
-    private Map<String, String> config = new HashMap<String, String>();
+    private Map<String, String> config = new HashMap<>();
 
     // order for multiple configurations available
     private int order;

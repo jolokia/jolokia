@@ -98,7 +98,7 @@ class MulticastSocketListenerThread extends Thread {
     }
 
     private DiscoveryIncomingMessage receiveMessage() {
-        byte buf[] = new byte[AbstractDiscoveryMessage.MAX_MSG_SIZE];
+        byte[] buf = new byte[AbstractDiscoveryMessage.MAX_MSG_SIZE];
         DatagramPacket packet = new DatagramPacket(buf, buf.length);
         try {
             packet.setLength(buf.length);

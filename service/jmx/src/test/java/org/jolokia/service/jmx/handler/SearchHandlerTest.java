@@ -42,11 +42,9 @@ public class SearchHandlerTest extends BaseHandlerTest {
 
     private MBeanServer server;
 
-    private TestJolokiaContext ctx;
-
     @BeforeMethod
-    public void createHandler() throws MalformedObjectNameException {
-        ctx = new TestJolokiaContext();
+    public void createHandler() {
+        TestJolokiaContext ctx = new TestJolokiaContext();
         handler = new SearchHandler();
         handler.init(ctx, null);
         handlerWithProvider = new SearchHandler();
@@ -57,19 +55,19 @@ public class SearchHandlerTest extends BaseHandlerTest {
     @Test(expectedExceptions = UnsupportedOperationException.class)
     public void unsupported() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, MalformedObjectNameException, NotChangedException, EmptyResponseException {
         handler.handleSingleServerRequest(null,
-                                          new JolokiaRequestBuilder(RequestType.SEARCH, "java.lang:*").<JolokiaSearchRequest>build());
+                                          new JolokiaRequestBuilder(RequestType.SEARCH, "java.lang:*").build());
     }
 
     @Test
     public void handleAllServersAtOnce() throws MalformedObjectNameException {
-        assertTrue(handler.handleAllServersAtOnce(new JolokiaRequestBuilder(RequestType.SEARCH, "java.lang:*").<JolokiaSearchRequest>build()));
+        assertTrue(handler.handleAllServersAtOnce(new JolokiaRequestBuilder(RequestType.SEARCH, "java.lang:*").build()));
     }
 
     @Test
     public void simple() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException, EmptyResponseException {
-        String names[] = { "java.lang:type=Memory", "java.lang:type=Runtime" };
+        String[] names = { "java.lang:type=Memory", "java.lang:type=Runtime" };
         List<String> res = doSearch(handler, "java.lang:*", null, null, names);
-        verifyResult(res, Collections.EMPTY_LIST, null, names);
+        verifyResult(res, Collections.emptyList(), null, names);
         verify(server);
     }
 
@@ -83,8 +81,8 @@ public class SearchHandlerTest extends BaseHandlerTest {
 
     private void checkAllHandlers(String pSearch, Boolean pCanonical, String[] pNames) throws MalformedObjectNameException, NotChangedException, ReflectionException, IOException, InstanceNotFoundException, AttributeNotFoundException, MBeanException, EmptyResponseException {
         for (SearchHandler h : new SearchHandler[] {handler, handlerWithProvider}) {
-            List<String> previousResults = new ArrayList<String>(Arrays.asList("jolokia:type=dummy", "bla:name=blub"));
-            List<String> res = doSearch(h, pSearch, pCanonical, new ArrayList(previousResults), pNames);
+            List<String> previousResults = new ArrayList<>(Arrays.asList("jolokia:type=dummy", "bla:name=blub"));
+            List<String> res = doSearch(h, pSearch, pCanonical, new ArrayList<>(previousResults), pNames);
             verifyResult(res, previousResults, h == handlerWithProvider ? "proxy" : null, pNames);
         }
     }
@@ -101,16 +99,16 @@ public class SearchHandlerTest extends BaseHandlerTest {
 
     @Test
     public void canonical() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException, EmptyResponseException {
-        String namesIn[] = { "java.lang:type=Memory,name=bla", "java.lang:type=Runtime,mode=run" };
-        String namesOut[] = { "java.lang:name=bla,type=Memory", "java.lang:mode=run,type=Runtime" };
+        String[] namesIn = { "java.lang:type=Memory,name=bla", "java.lang:type=Runtime,mode=run" };
+        String[] namesOut = { "java.lang:name=bla,type=Memory", "java.lang:mode=run,type=Runtime" };
         List<String> res = doSearch(handler, "java.lang:*", Boolean.TRUE, null, namesIn);
-        verifyResult(res, Collections.EMPTY_LIST, null, namesOut);
+        verifyResult(res, Collections.emptyList(), null, namesOut);
         verify(server);
     }
 
     @Test
     public void constructionTime() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException, EmptyResponseException {
-        String names[] = { "java.lang:type=Memory,name=bla", "java.lang:type=Runtime,mode=run" };
+        String[] names = { "java.lang:type=Memory,name=bla", "java.lang:type=Runtime,mode=run" };
         checkAllHandlers("java.lang:*",Boolean.FALSE,names);
         verify(server);
     }
@@ -124,12 +122,13 @@ public class SearchHandlerTest extends BaseHandlerTest {
         JolokiaSearchRequest request = builder.build();
 
         server = createMock(MBeanServer.class);
-        Set<ObjectName> names = new HashSet<ObjectName>();
+        Set<ObjectName> names = new HashSet<>();
         for (String name : pFoundNames) {
             names.add(new ObjectName(name));
         }
         expect(server.queryNames(oName,null)).andReturn(names);
         replay(server);
+        //noinspection unchecked
         return (List<String>) pHandler.handleAllServerRequest(getMBeanServerManager(server), request, previousResult);
     }
 }

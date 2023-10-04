@@ -39,6 +39,7 @@ import static org.testng.Assert.assertTrue;
  */
 public class MBeanServerHandlerTest {
 
+    @SuppressWarnings("FieldCanBeLocal")
     private JolokiaRequest request;
 
     private MBeanRegistry handler;
@@ -70,20 +71,17 @@ public class MBeanServerHandlerTest {
     }
 
     @Test(enabled = false)
-    public void mbeanRegistration() throws JMException, IOException {
+    public void mbeanRegistration() {
         //checkMBeans(new ObjectName(handler.getObjectName()));
     }
 
     private void checkMBeans(ObjectName oName) throws MBeanException, IOException, ReflectionException {
         MBeanServerAccess servers = new DefaultMBeanServerAccess();
-        final List<Boolean> result = new ArrayList<Boolean>();
-        servers.each(oName, new MBeanServerAccess.MBeanEachCallback() {
-            public void callback(MBeanServerConnection pConn, ObjectName pName)
-                    throws ReflectionException, InstanceNotFoundException, IOException, MBeanException {
-                // Throws an InstanceNotFoundException
-                pConn.getObjectInstance(pName);
-                result.add(pConn.isRegistered(pName));
-            }
+        final List<Boolean> result = new ArrayList<>();
+        servers.each(oName, (pConn, pName) -> {
+            // Throws an InstanceNotFoundException
+            pConn.getObjectInstance(pName);
+            result.add(pConn.isRegistered(pName));
         });
         assertTrue(result.contains(Boolean.TRUE), "MBean not registered");
     }
@@ -98,7 +96,7 @@ public class MBeanServerHandlerTest {
     @Test(expectedExceptions = JMException.class,expectedExceptionsMessageRegExp = ".*(dummy[12].*){2}.*")
     public void mbeanUnregistrationFailed2() throws JMException {
         handler.registerMBean(new Dummy(false, "test:type=dummy1"));
-        handler.registerMBean(new Dummy(false,"test:type=dummy2"));
+        handler.registerMBean(new Dummy(false, "test:type=dummy2"));
         ManagementFactory.getPlatformMBeanServer().unregisterMBean(new ObjectName("test:type=dummy1"));
         ManagementFactory.getPlatformMBeanServer().unregisterMBean(new ObjectName("test:type=dummy2"));
         handler.destroy();
@@ -116,10 +114,10 @@ public class MBeanServerHandlerTest {
     public interface DummyMBean {
 
     }
-    private class Dummy implements DummyMBean,MBeanRegistration {
+    private static class Dummy implements DummyMBean,MBeanRegistration {
 
-        private boolean throwException;
-        private String name;
+        private final boolean throwException;
+        private final String name;
 
         public Dummy(boolean b,String pName) {
             throwException = b;
@@ -136,7 +134,7 @@ public class MBeanServerHandlerTest {
         public void postRegister(Boolean registrationDone) {
         }
 
-        public void preDeregister() throws Exception {
+        public void preDeregister() {
         }
 
         public void postDeregister() {

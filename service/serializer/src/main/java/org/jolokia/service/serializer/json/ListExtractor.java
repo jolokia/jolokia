@@ -37,7 +37,7 @@ import org.json.simple.JSONArray;
 public class ListExtractor implements Extractor {
 
     /** {@inheritDoc} */
-    public Class getType() {
+    public Class<?> getType() {
         return List.class;
     }
 
@@ -58,7 +58,7 @@ public class ListExtractor implements Extractor {
      */
     public Object extractObject(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pPathParts,boolean jsonify)
             throws AttributeNotFoundException {
-        List list = (List) pValue;
+        List<?> list = (List<?>) pValue;
         int length = pConverter.getCollectionLength(list.size());
         String pathPart = pPathParts.isEmpty() ? null : pPathParts.pop();
         if (pathPart != null) {
@@ -83,7 +83,8 @@ public class ListExtractor implements Extractor {
      */
     public Object setObjectValue(StringToObjectConverter pConverter, Object pInner, String pIndex, Object  pValue)
             throws IllegalAccessException, InvocationTargetException {
-        List list = (List) pInner;
+        @SuppressWarnings("unchecked")
+        List<Object> list = (List<Object>) pInner;
         int idx;
         try {
             idx = Integer.parseInt(pIndex);
@@ -108,7 +109,7 @@ public class ListExtractor implements Extractor {
         return true;
     }
 
-    private Object extractWithPath(ObjectToJsonConverter pConverter, List pList, Stack<String> pStack, boolean jsonify, String pPathPart) throws AttributeNotFoundException {
+    private Object extractWithPath(ObjectToJsonConverter pConverter, List<?> pList, Stack<String> pStack, boolean jsonify, String pPathPart) throws AttributeNotFoundException {
         try {
             int idx = Integer.parseInt(pPathPart);
             return pConverter.extractObject(pList.get(idx), pStack, jsonify);
@@ -123,9 +124,11 @@ public class ListExtractor implements Extractor {
         }
     }
 
-    private Object extractListAsJson(ObjectToJsonConverter pConverter, List pList, Stack<String> pPath, int pLength) throws AttributeNotFoundException {
-        List ret = new JSONArray();
+    private Object extractListAsJson(ObjectToJsonConverter pConverter, List<?> pList, Stack<String> pPath, int pLength) throws AttributeNotFoundException {
+        @SuppressWarnings("unchecked")
+        List<Object> ret = new JSONArray();
         for (int i = 0;i < pLength; i++) {
+            @SuppressWarnings("unchecked")
             Stack<String> path = (Stack<String>) pPath.clone();
             try {
                 ret.add(pConverter.extractObject(pList.get(i), path, true));

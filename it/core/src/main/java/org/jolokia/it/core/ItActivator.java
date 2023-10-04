@@ -20,12 +20,12 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
 /**
- * 
+ *
  * @author roland
  * @since Mar 27, 2010
  */
 public class ItActivator implements BundleActivator {
-    private ItSetup itSetup;
+    private final ItSetup itSetup;
 
     public ItActivator() {
         itSetup = new ItSetup();

@@ -72,7 +72,7 @@ public class MultiAuthenticator extends Authenticator {
         if (authenticators.isEmpty()) {
             throw new IllegalArgumentException("Authenticators cannot be empty");
         }
-        this.authenticators = new ArrayList<Authenticator>(authenticators);
+        this.authenticators = new ArrayList<>(authenticators);
         this.mode = mode;
     }
 

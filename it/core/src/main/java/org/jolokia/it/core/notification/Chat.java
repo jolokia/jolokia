@@ -28,15 +28,13 @@ import javax.management.*;
 public class Chat extends NotificationBroadcasterSupport implements ChatMBean  {
 
     // Sequence number uniquely identifying a notification
-    private AtomicInteger seqNumber = new AtomicInteger();
+    private final AtomicInteger seqNumber = new AtomicInteger();
 
     /**
      * Constructor preparing the meta data for the base class
      * {@link NotificationBroadcasterSupport}.
-     *
-     * @throws MalformedObjectNameException
      */
-    public Chat() throws MalformedObjectNameException {
+    public Chat() {
         super(new MBeanNotificationInfo(
                 new String[] {"jolokia.chat"},
                 Notification.class.getName(),
@@ -57,7 +55,7 @@ public class Chat extends NotificationBroadcasterSupport implements ChatMBean  {
                 new Notification("jolokia.chat", this, seqNumber.getAndIncrement());
 
         // Prepare and set payload for listeners
-        Map<String,String> data = new HashMap<String, String>();
+        Map<String,String> data = new HashMap<>();
         data.put("user",who);
         data.put("message",message);
         notification.setUserData(data);

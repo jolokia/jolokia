@@ -1,5 +1,5 @@
 package org.jolokia.server.core.service.api;/*
- * 
+ *
  * Copyright 2015 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,8 +19,9 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Map;
 
-import org.jolokia.server.core.backend.BackendManager;
-import org.jolokia.server.core.config.*;
+import org.jolokia.server.core.config.ConfigKey;
+import org.jolokia.server.core.config.Configuration;
+import org.jolokia.server.core.config.StaticConfiguration;
 import org.jolokia.server.core.detector.DefaultServerHandle;
 import org.jolokia.server.core.util.NetworkUtil;
 import org.testng.annotations.Test;

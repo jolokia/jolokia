@@ -14,7 +14,7 @@ import org.jolokia.server.core.service.api.LogHandler;
  */
 public class JulLogHandler implements LogHandler {
 
-    private Logger logger;
+    private final Logger logger;
 
     /**
      * Constructor for a {@link LogHandler} using java util logging

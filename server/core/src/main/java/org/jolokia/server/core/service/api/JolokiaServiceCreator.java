@@ -33,5 +33,5 @@ public interface JolokiaServiceCreator {
      *
      * @return created services
      */
-    Set<JolokiaService> getServices();
+    Set<JolokiaService<?>> getServices();
 }

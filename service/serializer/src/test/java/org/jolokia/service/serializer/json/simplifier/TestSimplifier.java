@@ -30,14 +30,7 @@ public class TestSimplifier extends SimplifierExtractor<Date> {
     public TestSimplifier() {
         super(Date.class);
 
-        Object[][] pAttrs = {
-                { "millis", new AttributeExtractor<Date>() {
-                    public Object extract(Date value) throws SkipAttributeException {
-                        return value.getTime();
-                    }
-                }
-                },
-        };
+        Object[][] pAttrs = {{"millis", (AttributeExtractor<Date>) Date::getTime}};
         addExtractors(pAttrs);
     }
 }

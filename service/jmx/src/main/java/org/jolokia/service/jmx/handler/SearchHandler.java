@@ -50,11 +50,12 @@ public class SearchHandler extends AbstractCommandHandler<JolokiaSearchRequest> 
     @Override
     @SuppressWarnings("PMD.ReplaceHashtableWithMap")
     public Object doHandleAllServerRequest(MBeanServerAccess serverManager, JolokiaSearchRequest request, Object pPreviousResult)
-            throws MBeanException, IOException, NotChangedException {
+            throws IOException, NotChangedException {
         checkForModifiedSince(serverManager,request);
         Set<ObjectName> names = serverManager.queryNames(request.getObjectName());
 
-        Collection ret = pPreviousResult != null ? (Collection) pPreviousResult : new ArrayList<String>();
+        @SuppressWarnings("unchecked")
+        Collection<String> ret = pPreviousResult != null ? (Collection<String>) pPreviousResult : new ArrayList<>();
         for (ObjectName name : names) {
             String oName = request.getOrderedObjectName(name);
             ret.add(pProvider != null ? pProvider + "@" + oName : oName);
@@ -70,7 +71,7 @@ public class SearchHandler extends AbstractCommandHandler<JolokiaSearchRequest> 
 
     /** {@inheritDoc} */
     @Override
-    protected Object doHandleSingleServerRequest(MBeanServerConnection server, JolokiaSearchRequest request) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+    protected Object doHandleSingleServerRequest(MBeanServerConnection server, JolokiaSearchRequest request) {
         throw new UnsupportedOperationException("Internal: Method must not be called when all MBeanServers are handled at once");
     }
 }

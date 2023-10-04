@@ -54,19 +54,13 @@ public class EnvTestUtil {
     @SuppressWarnings({"PMD.SystemPrintln"})
     public static boolean trySocket(int port) throws IOException {
         InetAddress address = Inet4Address.getByName("localhost");
-        ServerSocket s = null;
-        try {
-            s = new ServerSocket();
-            s.bind(new InetSocketAddress(address,port));
+        try (ServerSocket s = new ServerSocket()) {
+            s.bind(new InetSocketAddress(address, port));
             return true;
         } catch (IOException exp) {
             System.err.println("Port " + port + " already in use, trying next ...");
             // exp.printStackTrace();
             // next try ....
-        } finally {
-            if (s != null) {
-                s.close();
-            }
         }
         return false;
     }
@@ -80,12 +74,12 @@ public class EnvTestUtil {
      */
     public static String readToString(InputStream is) throws IOException {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
-        byte buffer[] = new byte[8192];
+        byte[] buffer = new byte[8192];
         int read = -1;
         while ((read = is.read(buffer)) != -1) {
             os.write(buffer, 0, read);
             os.flush();
         }
-        return new String(os.toByteArray());
+        return os.toString();
     }
 }

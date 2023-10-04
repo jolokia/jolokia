@@ -1,6 +1,6 @@
 package org.jolokia.server.detector.jee;
 /*
- * 
+ *
  * Copyright 2016 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,16 +16,24 @@ package org.jolokia.server.detector.jee;
  * limitations under the License.
  */
 
-import java.util.Arrays;
 import java.util.HashSet;
-
-import javax.management.*;
+import java.util.List;
+import javax.management.AttributeNotFoundException;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanException;
+import javax.management.MBeanServer;
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import javax.management.ReflectionException;
 
 import org.jolokia.server.core.service.api.ServerHandle;
 import org.testng.annotations.Test;
 
-import static org.easymock.EasyMock.*;
-import static org.testng.Assert.*;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 /**
  * @author roland
@@ -43,7 +51,7 @@ public class TomcatDetectorTest extends BaseDetectorTest {
         MBeanServer mockServer = createMock(MBeanServer.class);
         ObjectName oName = new ObjectName("catalina:type=Server");
         expect(mockServer.queryNames(new ObjectName("*:type=Server"), null)).
-                andReturn(new HashSet<ObjectName>(Arrays.asList(oName))).anyTimes();
+                andReturn(new HashSet<>(List.of(oName))).anyTimes();
         expect(mockServer.isRegistered(oName)).andStubReturn(true);
         expect(mockServer.getAttribute(oName,"serverInfo")).andStubReturn(property);
         replay(mockServer);

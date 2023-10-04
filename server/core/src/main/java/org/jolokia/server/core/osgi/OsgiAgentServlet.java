@@ -95,7 +95,7 @@ public class OsgiAgentServlet extends AgentServlet {
 
     /**
      * Get an OSGi based lookup mechanism for finding all detectors available during
-     * @return
+     * @return lookup instance
      */
     @Override
     protected ServerDetectorLookup getServerDetectorLookup() {

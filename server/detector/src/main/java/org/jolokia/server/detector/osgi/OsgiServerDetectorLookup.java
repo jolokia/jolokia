@@ -15,7 +15,7 @@ import org.osgi.framework.BundleContext;
  */
 public class OsgiServerDetectorLookup implements ServerDetectorLookup {
 
-    private BundleContext context;
+    private final BundleContext context;
 
     OsgiServerDetectorLookup(BundleContext pContext) {
         context = pContext;
@@ -23,7 +23,7 @@ public class OsgiServerDetectorLookup implements ServerDetectorLookup {
 
     /** {@inheritDoc} */
     public SortedSet<ServerDetector> lookup() {
-        SortedSet<ServerDetector> detectors = new TreeSet<ServerDetector>();
+        SortedSet<ServerDetector> detectors = new TreeSet<>();
 
         detectors.addAll(classpathDetectors());
         detectors.addAll(osgiDetectors());
@@ -33,7 +33,7 @@ public class OsgiServerDetectorLookup implements ServerDetectorLookup {
     }
 
     private List<ServerDetector> osgiDetectors() {
-        return Arrays.<ServerDetector>asList(
+        return Arrays.asList(
                 new VirgoDetector(context),
                 new FelixDetector(context),
                 new EquinoxDetector(context),

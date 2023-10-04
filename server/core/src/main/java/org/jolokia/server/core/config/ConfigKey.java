@@ -399,8 +399,8 @@ public enum ConfigKey {
         requestConfig = pIsRequestConfig;
     }
 
-    @Override
     /** {@inheritDoc} */
+    @Override
     public String toString() {
         return key;
     }
@@ -479,7 +479,7 @@ public enum ConfigKey {
      */
     public String asEnvVariable() {
         String kevValue = getKeyValue();
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         boolean notFirst = false;
         for (char c : kevValue.toCharArray()) {
             if (Character.isUpperCase(c) && notFirst) {
@@ -489,7 +489,7 @@ public enum ConfigKey {
             }
             notFirst = true;
         }
-        return "JOLOKIA_" + buf.toString();
+        return "JOLOKIA_" + buf;
     }
 
 

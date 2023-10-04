@@ -64,7 +64,7 @@ public class ProcessingExceptionTest {
         try {
             System.setErr(new PrintStream(bos));
             pExp.printErrorMessage();
-            if (pArg.length() > 0) {
+            if (!pArg.isEmpty()) {
                 assertTrue(bos.toString().contains(pArg));
             } else {
                 assertEquals(bos.toString().length(), 0);

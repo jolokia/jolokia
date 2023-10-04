@@ -40,8 +40,7 @@ class BaseServerTest {
             server.destroy();
             try {
                 Thread.sleep(10);
-            } catch (InterruptedException e) {
-
+            } catch (InterruptedException ignored) {
             }
         }
     }

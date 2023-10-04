@@ -52,16 +52,19 @@ public class JolokiaDiscovery extends AbstractJolokiaService<JolokiaService.Init
     }
 
     /** {@inheritDoc} */
+    @SuppressWarnings("rawtypes")
     public List lookupAgents() throws IOException {
         return lookupAgentsWithTimeout(1000);
     }
 
     /** {@inheritDoc} */
+    @SuppressWarnings("rawtypes")
     public List lookupAgentsWithTimeout(int pTimeout) throws IOException {
         return lookupAgentsWithTimeoutAndMulticastAddress(1000, ConfigKey.MULTICAST_GROUP.getDefaultValue(), Integer.parseInt(ConfigKey.MULTICAST_PORT.getDefaultValue()));
     }
 
     /** {@inheritDoc} */
+    @SuppressWarnings("rawtypes")
     public List lookupAgentsWithTimeoutAndMulticastAddress(int pTimeout, String pMulticastGroup, int pMulticastPort) throws IOException {
         JolokiaContext ctx = getJolokiaContext();
         DiscoveryOutgoingMessage out =
@@ -71,6 +74,7 @@ public class JolokiaDiscovery extends AbstractJolokiaService<JolokiaService.Init
         List<DiscoveryIncomingMessage> discovered = MulticastUtil.sendQueryAndCollectAnswers(out, pTimeout, pMulticastGroup, pMulticastPort, ctx);
         JSONArray ret = new JSONArray();
         for (DiscoveryIncomingMessage in : discovered) {
+            //noinspection unchecked
             ret.add(in.getAgentDetails().toJSONObject());
         }
         return ret;

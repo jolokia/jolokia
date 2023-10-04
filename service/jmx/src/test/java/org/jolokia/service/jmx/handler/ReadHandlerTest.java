@@ -79,15 +79,16 @@ public class ReadHandlerTest extends BaseHandlerTest {
 
 
         MBeanServer server = createMBeanServer();
-        String attrs[] = new String[] {"attr0","atrr1","attr2"};
-        String vals[]  = new String[] {"val0", "val1", "val2"};
+        String[] attrs = new String[] {"attr0","atrr1","attr2"};
+        String[] vals = new String[] {"val0", "val1", "val2"};
         prepareMBeanInfos(server, testBeanName, attrs);
         for (int i=0;i<attrs.length;i++) {
             expect(server.getAttribute(testBeanName,attrs[i])).andReturn(vals[i]);
         }
         replay(server);
 
-        Map res = (Map) handler.handleAllServerRequest(getMBeanServerManager(server), request, null);
+        @SuppressWarnings("unchecked")
+        Map<String, ?> res = (Map<String, ?>) handler.handleAllServerRequest(getMBeanServerManager(server), request, null);
         verify(server);
         for (int i=0;i<attrs.length;i++) {
             assertEquals(vals[i],res.get(attrs[i]));
@@ -108,7 +109,8 @@ public class ReadHandlerTest extends BaseHandlerTest {
         expect(server.getAttribute(testBeanName,"attr1")).andReturn("val1");
         replay(server);
 
-        Map res = (Map) handler.handleAllServerRequest(getMBeanServerManager(server), request, null);
+        @SuppressWarnings("unchecked")
+        Map<String, ?> res = (Map<String, ?>) handler.handleAllServerRequest(getMBeanServerManager(server), request, null);
         verify(server);
         assertEquals("val0", res.get("attr0"));
         assertEquals("val1",res.get("attr1"));
@@ -127,7 +129,8 @@ public class ReadHandlerTest extends BaseHandlerTest {
         expect(server.getAttribute(testBeanName,"attr1")).andThrow(new AttributeNotFoundException("Couldn't find attr1"));
         replay(server);
 
-        Map res = (Map) handler.handleAllServerRequest(getMBeanServerManager(server),request,null);
+        @SuppressWarnings("unchecked")
+        Map<String, ?> res = (Map<String, ?>) handler.handleAllServerRequest(getMBeanServerManager(server),request,null);
     }
 
     @Test
@@ -143,8 +146,8 @@ public class ReadHandlerTest extends BaseHandlerTest {
         expect(server.getAttribute(testBeanName,"attr1")).andThrow(new AttributeNotFoundException("Couldn't find attr1"));
         replay(server);
 
-
-        Map res = (Map) handler.handleAllServerRequest(getMBeanServerManager(server),request,null);
+        @SuppressWarnings("unchecked")
+        Map<String, ?> res = (Map<String, ?>) handler.handleAllServerRequest(getMBeanServerManager(server),request,null);
         verify(server);
         assertEquals("val0",res.get("attr0"));
         String err = (String) res.get("attr1");
@@ -160,12 +163,12 @@ public class ReadHandlerTest extends BaseHandlerTest {
                 attribute("mem1").
                 build();
         MBeanServer server = createMBeanServer();
-        expect(server.queryNames(patternMBean,null)).andReturn(new HashSet());
+        expect(server.queryNames(patternMBean,null)).andReturn(new HashSet<>());
         replay(server);
         try {
             handler.handleAllServerRequest(getMBeanServerManager(server), request, null);
             fail("Exception should be thrown");
-        } catch (InstanceNotFoundException exp) {}
+        } catch (InstanceNotFoundException ignored) {}
     }
 
     @Test
@@ -175,7 +178,7 @@ public class ReadHandlerTest extends BaseHandlerTest {
                 attribute("mem1").
                 build();
 
-        ObjectName beans[] =  {
+        ObjectName[] beans =  {
                 new ObjectName("java.lang:type=Memory"),
                 new ObjectName("java.lang:type=GarbageCollection")
         };
@@ -183,13 +186,16 @@ public class ReadHandlerTest extends BaseHandlerTest {
         expect(server.getAttribute(beans[0],"mem1")).andReturn("memval1");
 
         replay(server);
-        Map res = (Map) handler.handleAllServerRequest(getMBeanServerManager(server), request, null);
+        @SuppressWarnings("unchecked")
+        Map<String, ?> res = (Map<String, ?>) handler.handleAllServerRequest(getMBeanServerManager(server), request, null);
         verify(server);
         assertEquals(1,res.size());
-        assertEquals("memval1",((Map) res.get("java.lang:type=Memory")).get("mem1"));
+        //noinspection unchecked
+        assertEquals("memval1",((Map<String, ?>) res.get("java.lang:type=Memory")).get("mem1"));
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void searchPatternNoAttribute() throws Exception {
         ObjectName patternMBean = new ObjectName("java.lang:type=*");
         JolokiaReadRequest[] requests = new JolokiaReadRequest[2];
@@ -200,11 +206,11 @@ public class ReadHandlerTest extends BaseHandlerTest {
         requests[1] =
                 new JolokiaRequestBuilder(READ, patternMBean).
                         // A single null element is enough to denote "all"
-                        attributes(Arrays.asList((String) null)).
+                        attributes(Collections.singletonList(null)).
                         build();
 
         for (JolokiaReadRequest request : requests) {
-            ObjectName beans[] =  {
+            ObjectName[] beans =  {
                     new ObjectName("java.lang:type=Memory"),
                     new ObjectName("java.lang:type=GarbageCollection")
             };
@@ -218,15 +224,15 @@ public class ReadHandlerTest extends BaseHandlerTest {
             expect(server.getAttribute(beans[1],"common")).andReturn("commonVal1");
             replay(server);
 
-            Map res = (Map) handler.handleAllServerRequest(getMBeanServerManager(server), request, null);
+            Map<String, ?> res = (Map<String, ?>) handler.handleAllServerRequest(getMBeanServerManager(server), request, null);
 
-            assertEquals("memval0",((Map) res.get("java.lang:type=Memory")).get("mem0"));
-            assertEquals("memval1",((Map) res.get("java.lang:type=Memory")).get("mem1"));
-            assertEquals("commonVal0",((Map) res.get("java.lang:type=Memory")).get("common"));
-            assertEquals("gcval0",((Map) res.get("java.lang:type=GarbageCollection")).get("gc0"));
-            assertEquals("gcval1",((Map) res.get("java.lang:type=GarbageCollection")).get("gc1"));
-            assertEquals("gcval3",((Map) res.get("java.lang:type=GarbageCollection")).get("gc3"));
-            assertEquals("commonVal1",((Map) res.get("java.lang:type=GarbageCollection")).get("common"));
+            assertEquals("memval0",((Map<String, ?>) res.get("java.lang:type=Memory")).get("mem0"));
+            assertEquals("memval1",((Map<String, ?>) res.get("java.lang:type=Memory")).get("mem1"));
+            assertEquals("commonVal0",((Map<String, ?>) res.get("java.lang:type=Memory")).get("common"));
+            assertEquals("gcval0",((Map<String, ?>) res.get("java.lang:type=GarbageCollection")).get("gc0"));
+            assertEquals("gcval1",((Map<String, ?>) res.get("java.lang:type=GarbageCollection")).get("gc1"));
+            assertEquals("gcval3",((Map<String, ?>) res.get("java.lang:type=GarbageCollection")).get("gc3"));
+            assertEquals("commonVal1",((Map<String, ?>) res.get("java.lang:type=GarbageCollection")).get("common"));
 
             verify(server);
         }
@@ -238,18 +244,19 @@ public class ReadHandlerTest extends BaseHandlerTest {
         JolokiaReadRequest request = new JolokiaRequestBuilder(READ, patternMBean).
                 attribute(null).
                 build();
-        ObjectName beans[] =  {
+        ObjectName[] beans =  {
                 new ObjectName("java.lang:type=Memory"),
                 new ObjectName("java.lang:type=GarbageCollection")
         };
         MBeanServer server = createMBeanServer();
-        expect(server.queryNames(patternMBean,null)).andReturn(new HashSet(Arrays.asList(beans)));
+        expect(server.queryNames(patternMBean,null)).andReturn(new HashSet<>(Arrays.asList(beans)));
         prepareMBeanInfos(server,beans[0],new String[0]);
         prepareMBeanInfos(server,beans[1],new String[] { "gc0" });
         expect(server.getAttribute(beans[1],"gc0")).andReturn("gcval0");
         replay(server);
 
-        Map res = (Map) handler.handleAllServerRequest(getMBeanServerManager(server), request, null);
+        @SuppressWarnings("unchecked")
+        Map<String, ?> res = (Map<String, ?>) handler.handleAllServerRequest(getMBeanServerManager(server), request, null);
 
         // Only a single entry fetched
         assertEquals(res.size(),1);
@@ -265,7 +272,7 @@ public class ReadHandlerTest extends BaseHandlerTest {
                 attribute("blub").
                 build();
 
-        ObjectName beans[] =  {
+        ObjectName[] beans =  {
                 new ObjectName("java.lang:type=Memory"),
                 new ObjectName("java.lang:type=GarbageCollection")
         };
@@ -286,7 +293,7 @@ public class ReadHandlerTest extends BaseHandlerTest {
                 attributes(Arrays.asList("mem0","gc3")).
                 build();
 
-        ObjectName beans[] =  {
+        ObjectName[] beans =  {
                 new ObjectName("java.lang:type=Memory"),
                 new ObjectName("java.lang:type=GarbageCollection")
         };
@@ -295,11 +302,14 @@ public class ReadHandlerTest extends BaseHandlerTest {
         expect(server.getAttribute(beans[1],"gc3")).andReturn("gcval3");
 
         replay(server);
-        Map res = (Map) handler.handleAllServerRequest(getMBeanServerManager(server), request, null);
+        @SuppressWarnings("unchecked")
+        Map<String, ?> res = (Map<String, ?>) handler.handleAllServerRequest(getMBeanServerManager(server), request, null);
         verify(server);
         assertEquals(2,res.size());
-        assertEquals("memval0",((Map) res.get("java.lang:type=Memory")).get("mem0"));
-        assertEquals("gcval3",((Map) res.get("java.lang:type=GarbageCollection")).get("gc3"));
+        //noinspection unchecked
+        assertEquals("memval0",((Map<String, ?>) res.get("java.lang:type=Memory")).get("mem0"));
+        //noinspection unchecked
+        assertEquals("gcval3",((Map<String, ?>) res.get("java.lang:type=GarbageCollection")).get("gc3"));
     }
 
 
@@ -307,10 +317,10 @@ public class ReadHandlerTest extends BaseHandlerTest {
     public void searchPatternMultiAttributes3() throws Exception {
         ObjectName patternMBean = new ObjectName("java.lang:type=*");
         JolokiaReadRequest request = new JolokiaRequestBuilder(READ, patternMBean).
-                attributes(Arrays.asList("bla")).
+                attributes(List.of("bla")).
                 build();
 
-        ObjectName beans[] =  {
+        ObjectName[] beans =  {
                 new ObjectName("java.lang:type=Memory"),
                 new ObjectName("java.lang:type=GarbageCollection")
         };
@@ -318,21 +328,23 @@ public class ReadHandlerTest extends BaseHandlerTest {
         replay(server);
 
         try {
-            Map res = (Map) handler.handleAllServerRequest(getMBeanServerManager(server), request, null);
+            @SuppressWarnings("unchecked")
+            Map<String, ?> res = (Map<String, ?>) handler.handleAllServerRequest(getMBeanServerManager(server), request, null);
             fail("Request should fail since attribute name doesn't match any MBean's attribute");
         } catch (IllegalArgumentException exp) {
             // Expect this since no MBean matches the given attribute
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void searchPatternMultiAttributes4() throws Exception {
         ObjectName patternMBean = new ObjectName("java.lang:type=*");
         JolokiaReadRequest request = new JolokiaRequestBuilder(READ, patternMBean).
-                attributes(Arrays.asList("common")).
+                attributes(List.of("common")).
                 build();
 
-        ObjectName beans[] =  {
+        ObjectName[] beans =  {
                 new ObjectName("java.lang:type=Memory"),
                 new ObjectName("java.lang:type=GarbageCollection")
         };
@@ -341,21 +353,21 @@ public class ReadHandlerTest extends BaseHandlerTest {
         expect(server.getAttribute(beans[1],"common")).andReturn("com2");
 
         replay(server);
-        Map res = (Map) handler.handleAllServerRequest(getMBeanServerManager(server), request, null);
+        Map<String, ?> res = (Map<String, ?>) handler.handleAllServerRequest(getMBeanServerManager(server), request, null);
         verify(server);
         assertEquals(2,res.size());
-        assertEquals("com1",((Map) res.get("java.lang:type=Memory")).get("common"));
-        assertEquals("com2",((Map) res.get("java.lang:type=GarbageCollection")).get("common"));
+        assertEquals("com1",((Map<String, ?>) res.get("java.lang:type=Memory")).get("common"));
+        assertEquals("com2",((Map<String, ?>) res.get("java.lang:type=GarbageCollection")).get("common"));
     }
 
     private MBeanServer prepareMultiAttributeTest(ObjectName pPatternMBean, ObjectName[] pBeans)
-            throws IOException, MBeanException, AttributeNotFoundException, InstanceNotFoundException, ReflectionException, IntrospectionException {
+            throws IOException, InstanceNotFoundException, ReflectionException, IntrospectionException {
         MBeanServer server = createMBeanServer();
-        String params[][] = {
+        String[][] params = {
                 new String[] {"mem0","mem1","common" },
                 new String[] {"gc0","gc1","gc3","common"},
         };
-        expect(server.queryNames(pPatternMBean,null)).andReturn(new HashSet(Arrays.asList(pBeans)));
+        expect(server.queryNames(pPatternMBean,null)).andReturn(new HashSet<>(Arrays.asList(pBeans)));
         for (int i=0;i< pBeans.length;i++) {
             prepareMBeanInfos(server, pBeans[i],params[i]);
         }
@@ -374,7 +386,7 @@ public class ReadHandlerTest extends BaseHandlerTest {
                 build();
         assertTrue(handler.handleAllServersAtOnce(request));
         request = new JolokiaRequestBuilder(READ, testBeanName).
-                attributes((List) null).
+                attributes((List<String>) null).
                 build();
         assertTrue(handler.handleAllServersAtOnce(request));
         request = new JolokiaRequestBuilder(READ, "java.lang:*").
@@ -402,7 +414,7 @@ public class ReadHandlerTest extends BaseHandlerTest {
         try {
             handler.handleAllServerRequest(getMBeanServerManager(server), request, null);
             fail("Restrictor should forbid access");
-        } catch (SecurityException exp) {}
+        } catch (SecurityException ignored) {}
         verify(restrictor,server);
     }
 
@@ -421,18 +433,17 @@ public class ReadHandlerTest extends BaseHandlerTest {
         try {
             handler.handleAllServerRequest(getMBeanServerManager(server),request, null);
             fail("Restrictor should forbid HTTP Method Access");
-        } catch (SecurityException exp) {}
+        } catch (SecurityException ignored) {}
         verify(restrictor,server);
     }
 
-    private MBeanServer createMBeanServer() throws InstanceNotFoundException {
-        MBeanServer server = createMock(MBeanServer.class);
-        return server;
+    private MBeanServer createMBeanServer() {
+        return createMock(MBeanServer.class);
     }
 
     // ==============================================================================================================
 
-    private MBeanAttributeInfo[] prepareMBeanInfos(MBeanServerConnection pConnection, ObjectName pObjectName, String pAttrs[])
+    private MBeanAttributeInfo[] prepareMBeanInfos(MBeanServerConnection pConnection, ObjectName pObjectName, String[] pAttrs)
         throws InstanceNotFoundException, ReflectionException, IOException, IntrospectionException {
         MBeanInfo mBeanInfo = createMock(MockableMBeanInfo.class);
         expect(pConnection.isRegistered(pObjectName)).andStubReturn(true);

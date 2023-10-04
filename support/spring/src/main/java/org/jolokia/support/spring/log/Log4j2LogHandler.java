@@ -13,7 +13,7 @@ import org.jolokia.server.core.service.api.LogHandler;
  */
 public class Log4j2LogHandler implements LogHandler {
 
-    private Logger logger;
+    private final Logger logger;
 
     /**
      * Constructor for a {@link LogHandler} using Log4J, version 2

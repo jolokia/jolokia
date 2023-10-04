@@ -38,13 +38,13 @@ import org.json.simple.parser.ParseException;
 public class J4pClient extends J4pClientBuilderFactory {
 
     // Http client used for connecting the j4p Agent
-    private HttpClient httpClient;
+    private final HttpClient httpClient;
 
     // Creating and parsing HTTP-Requests and Responses
-    private J4pRequestHandler requestHandler;
+    private final J4pRequestHandler requestHandler;
 
     // Extractor used for creating J4pResponses
-    private J4pResponseExtractor responseExtractor;
+    private final J4pResponseExtractor responseExtractor;
 
     /**
      * Construct a new client for a given server url
@@ -109,12 +109,13 @@ public class J4pClient extends J4pClientBuilderFactory {
      * @param <RESP> response type
      * @param <REQ> request type
      * @return the response as returned by the server
+     * @throws J4pException if something's wrong (e.g. connection failed or read timeout)
      */
     public <RESP extends J4pResponse<REQ>, REQ extends J4pRequest> RESP execute(REQ pRequest)
             throws J4pException {
         // type spec is required to keep OpenJDK 1.6 happy (other JVM dont have a problem
         // with infering the type is missing here)
-        return this.<RESP, REQ>execute(pRequest,null,null);
+        return this.execute(pRequest,null,null);
     }
 
     /**
@@ -126,13 +127,12 @@ public class J4pClient extends J4pClientBuilderFactory {
      * @param <RESP> response type
      * @param <REQ> request type
      * @return the response as returned by the server
-     * @throws java.io.IOException when the execution fails
-     * @throws org.json.simple.parser.ParseException if parsing of the JSON answer fails
+     * @throws J4pException if something's wrong (e.g. connection failed or read timeout)
      */
     public <RESP extends J4pResponse<REQ>, REQ extends J4pRequest> RESP execute(REQ pRequest,
                                                                      Map<J4pQueryParameter,String> pProcessingOptions)
             throws J4pException {
-        return this.<RESP, REQ>execute(pRequest,null,pProcessingOptions);
+        return this.execute(pRequest,null,pProcessingOptions);
     }
 
     /**
@@ -147,7 +147,7 @@ public class J4pClient extends J4pClientBuilderFactory {
      * @throws J4pException if something's wrong (e.g. connection failed or read timeout)
      */
     public <RESP extends J4pResponse<REQ>, REQ extends J4pRequest> RESP execute(REQ pRequest,String pMethod) throws J4pException {
-        return this.<RESP, REQ>execute(pRequest, pMethod, null);
+        return this.execute(pRequest, pMethod, null);
     }
 
     /**
@@ -165,7 +165,7 @@ public class J4pClient extends J4pClientBuilderFactory {
     public <RESP extends J4pResponse<REQ>, REQ extends J4pRequest> RESP execute(REQ pRequest,String pMethod,
                                                                      Map<J4pQueryParameter,String> pProcessingOptions)
             throws J4pException {
-        return this.<RESP, REQ>execute(pRequest,pMethod,pProcessingOptions,responseExtractor);
+        return this.execute(pRequest,pMethod,pProcessingOptions,responseExtractor);
     }
 
     /**
@@ -194,9 +194,7 @@ public class J4pClient extends J4pClientBuilderFactory {
             }
             return pExtractor.extract(pRequest, (JSONObject) jsonResponse);
         }
-        catch (IOException e) {
-            throw mapException(e);
-        } catch (URISyntaxException e) {
+        catch (IOException | URISyntaxException e) {
             throw mapException(e);
         }
     }
@@ -213,7 +211,7 @@ public class J4pClient extends J4pClientBuilderFactory {
      */
     public <RESP extends J4pResponse<REQ>, REQ extends J4pRequest> List<RESP> execute(List<REQ> pRequests)
             throws J4pException {
-        return this.<RESP, REQ>execute(pRequests, null);
+        return this.execute(pRequests, null);
     }
 
     /**
@@ -254,10 +252,8 @@ public class J4pClient extends J4pClientBuilderFactory {
 
             verifyBulkJsonResponse(jsonResponse);
 
-            return this.<RESP, REQ>extractResponses(jsonResponse, pRequests, pResponseExtractor);
-        } catch (IOException e) {
-            throw mapException(e);
-        } catch (URISyntaxException e) {
+            return this.extractResponses(jsonResponse, pRequests, pResponseExtractor);
+        } catch (IOException | URISyntaxException e) {
             throw mapException(e);
         }
     }
@@ -286,8 +282,8 @@ public class J4pClient extends J4pClientBuilderFactory {
                                                                                       List<T> pRequests,
                                                                                       J4pResponseExtractor pResponseExtractor) throws J4pException {
         JSONArray responseArray = (JSONArray) pJsonResponse;
-        List<R> ret = new ArrayList<R>(responseArray.size());
-        J4pRemoteException remoteExceptions[] = new J4pRemoteException[responseArray.size()];
+        List<R> ret = new ArrayList<>(responseArray.size());
+        J4pRemoteException[] remoteExceptions = new J4pRemoteException[responseArray.size()];
         boolean exceptionFound = false;
         for (int i = 0; i < pRequests.size(); i++) {
             T request = pRequests.get(i);
@@ -296,7 +292,7 @@ public class J4pClient extends J4pClientBuilderFactory {
                 throw new J4pException("Response for request Nr. " + i + " is invalid (expected a map but got " + jsonResp.getClass() + ")");
             }
             try {
-                ret.add(i,pResponseExtractor.<R,T>extract(request, (JSONObject) jsonResp));
+                ret.add(i,pResponseExtractor.extract(request, (JSONObject) jsonResp));
             } catch (J4pRemoteException exp) {
                 remoteExceptions[i] = exp;
                 exceptionFound = true;
@@ -304,7 +300,7 @@ public class J4pClient extends J4pClientBuilderFactory {
             }
         }
         if (exceptionFound) {
-            List partialResults = new ArrayList();
+            List<Object> partialResults = new ArrayList<>();
             // Merge partial results and exceptions in a single list
             for (int i = 0;i<pRequests.size();i++) {
                 J4pRemoteException exp = remoteExceptions[i];
@@ -320,7 +316,7 @@ public class J4pClient extends J4pClientBuilderFactory {
     }
 
     // Map IO-Exceptions accordingly
-    private J4pException mapException(Exception pException) throws J4pException {
+    private J4pException mapException(Exception pException) {
         if (pException instanceof ConnectException) {
             return new J4pConnectException(
                     "Cannot connect to " + requestHandler.getJ4pServerUrl() + ": " + pException.getMessage(),
@@ -364,8 +360,9 @@ public class J4pClient extends J4pClientBuilderFactory {
      * @return list of responses, one response for each request
      * @throws J4pException when an communication error occurs
      */
-    public <R extends J4pResponse<T>,T extends J4pRequest> List<R> execute(T ... pRequests) throws J4pException {
-        return this.<R,T>execute(Arrays.asList(pRequests));
+    @SafeVarargs
+    public final <R extends J4pResponse<T>,T extends J4pRequest> List<R> execute(T... pRequests) throws J4pException {
+        return this.execute(Arrays.asList(pRequests));
     }
 
     /**

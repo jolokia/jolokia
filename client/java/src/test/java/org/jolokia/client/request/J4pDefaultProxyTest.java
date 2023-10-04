@@ -39,7 +39,7 @@ public class J4pDefaultProxyTest extends AbstractJ4pIntegrationTest {
     public void baseTest() throws MalformedObjectNameException, J4pException {
         J4pReadResponse resp = j4pClient.execute(new J4pReadRequest("java.lang:type=Memory","HeapMemoryUsage"));
         assertFalse(resp.getRequest().toJson().containsKey("target"));
-        assertTrue(resp.getValue() != null);
+        assertNotNull(resp.getValue());
     }
 
     @Test
@@ -51,9 +51,9 @@ public class J4pDefaultProxyTest extends AbstractJ4pIntegrationTest {
             fail();
         } catch (J4pBulkRemoteException exp) {
             List<J4pReadResponse> resps = exp.getResponses();
-            assertTrue(resps.get(0).getValue() != null);
+            assertNotNull(resps.get(0).getValue());
             J4pRemoteException jExp = exp.getRemoteExceptions().get(0);
-            jExp.getRemoteStackTrace().contains("RMI");
+            assertTrue(jExp.getRemoteStackTrace().contains("RMI"));
         }
     }
 

@@ -15,6 +15,8 @@ package org.jolokia.server.core.util;/*
  * limitations under the License.
  */
 
+import java.nio.charset.StandardCharsets;
+
 /**
  * Base64 routine taken from http://iharder.sourceforge.net/current/java/base64/ (public domain)
  * It has be tailored to suite our needs, so some things likes compression and
@@ -37,12 +39,7 @@ public class Base64Util {
         }
 
         byte[] inBytes;
-        try {
-            inBytes = s.getBytes("US-ASCII");
-        }
-        catch( java.io.UnsupportedEncodingException uee ) {
-            inBytes = s.getBytes();
-        }
+        inBytes = s.getBytes(StandardCharsets.US_ASCII);
 
         if( inBytes.length == 0 ) {
             return new byte[0];
@@ -66,20 +63,13 @@ public class Base64Util {
     public static String encode(byte[] source) {
         byte[] encoded = encodeBytesToBytes( source, source.length);
 
-        try {
-            return new String(encoded, "US-ASCII");
-        }
-        catch (java.io.UnsupportedEncodingException uue) {
-            return new String( encoded );
-        }
+        return new String(encoded, StandardCharsets.US_ASCII);
     }
 
     // ==========================================================================================================
     // Do the conversion to bytes
 
     private static byte[] decodeBytes(byte[] pInBytes) {
-        byte[] decodabet = DECODABET;
-
         int    len34   = pInBytes.length * 3 / 4;       // Estimate on array size
         byte[] outBuff = new byte[ len34 ]; // Upper limit on size of output
         int    outBuffPosn = 0;             // Keep track of where we're writing
@@ -90,10 +80,10 @@ public class Base64Util {
         byte   sbiCrop   = 0;               // Low seven bits (ASCII) of input
         byte   sbiDecode = 0;               // Special value from DECODABET
 
-        for( i = 0; i < 0 + pInBytes.length; i++ ) {  // Loop through source
+        for (i = 0; i < pInBytes.length; i++) {  // Loop through source
 
             sbiCrop = (byte)(pInBytes[i] & 0x7f); // Only the low seven bits
-            sbiDecode = decodabet[ sbiCrop ];   // Special value
+            sbiDecode = DECODABET[ sbiCrop ];   // Special value
 
             // White space, Equals sign, or legit Base64 character
             // Note the values such as -5 and -9 in the

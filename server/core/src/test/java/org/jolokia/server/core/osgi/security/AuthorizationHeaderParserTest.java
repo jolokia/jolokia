@@ -14,7 +14,7 @@ import org.testng.annotations.Test;
 public class AuthorizationHeaderParserTest {
 
     @Test
-    public void testParseAuthorizationPositive() throws Exception {
+    public void testParseAuthorizationPositive() {
         AuthorizationHeaderParser.Result result =
                 AuthorizationHeaderParser.parse("Basic cm9sYW5kOnMhY3IhdA==");
         assertEquals(result.getUser(),"roland");
@@ -23,12 +23,12 @@ public class AuthorizationHeaderParserTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = ".*BasicAuthentication.*")
-    public void testParseAuthorizationWrongMethod() throws Exception {
+    public void testParseAuthorizationWrongMethod() {
         AuthorizationHeaderParser.parse("Digest cm9sYW5kOnMhY3IhdA==");
     }
 
     @Test
-    public void testParseAuthorizationInvalidFormat() throws Exception {
+    public void testParseAuthorizationInvalidFormat() {
         AuthorizationHeaderParser.Result result =
                 AuthorizationHeaderParser.parse("Basic cm9sYAZ5kOnMhA=");
         assertFalse(result.isValid());

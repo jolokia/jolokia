@@ -31,7 +31,7 @@ import org.json.simple.JSONObject;
  */
 public class J4pListRequest extends J4pRequest {
 
-    private List<String> pathElements;
+    private final List<String> pathElements;
 
     /**
      * Default constructor to be used when all meta information should
@@ -74,7 +74,7 @@ public class J4pListRequest extends J4pRequest {
      */
     public J4pListRequest(J4pTargetConfig pConfig, String pPath) {
         super(J4pType.LIST,pConfig);
-        pathElements = splitPath(pPath);                
+        pathElements = splitPath(pPath);
     }
 
     /**
@@ -115,12 +115,13 @@ public class J4pListRequest extends J4pRequest {
      */
     public J4pListRequest(J4pTargetConfig pConfig, ObjectName pObjectName) {
         super(J4pType.LIST,pConfig);
-        pathElements = new ArrayList<String>();
+        pathElements = new ArrayList<>();
         pathElements.add(pObjectName.getDomain());
         pathElements.add(pObjectName.getCanonicalKeyPropertyListString());
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     J4pListResponse createResponse(JSONObject pResponse) {
         return new J4pListResponse(this,pResponse);
     }
@@ -141,6 +142,7 @@ public class J4pListRequest extends J4pRequest {
                     path.append("/");
                 }
             }
+            //noinspection unchecked
             ret.put("path",path.toString());
         }
         return ret;

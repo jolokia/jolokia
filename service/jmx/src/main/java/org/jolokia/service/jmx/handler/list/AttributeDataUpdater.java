@@ -38,6 +38,7 @@ class AttributeDataUpdater extends DataUpdater {
 
     /** {@inheritDoc} */
     @Override
+    @SuppressWarnings("unchecked")
     protected JSONObject extractData(MBeanInfo pMBeanInfo, String attribute) {
         JSONObject attrMap = new JSONObject();
 
@@ -46,7 +47,7 @@ class AttributeDataUpdater extends DataUpdater {
                 JSONObject map = new JSONObject();
                 map.put(TYPE.getKey(), attrInfo.getType());
                 map.put(DESCRIPTION.getKey(), attrInfo.getDescription());
-                map.put(READ_WRITE.getKey(), Boolean.valueOf(attrInfo.isWritable() && attrInfo.isReadable()));
+                map.put(READ_WRITE.getKey(), attrInfo.isWritable() && attrInfo.isReadable());
                 attrMap.put(attrInfo.getName(), map);
             }
         }

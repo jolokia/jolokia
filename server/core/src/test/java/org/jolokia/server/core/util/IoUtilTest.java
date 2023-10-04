@@ -27,7 +27,7 @@ public class IoUtilTest {
 
         IoUtil.streamResponseAndClose(writer,resp,null);
         assertEquals(out.size(), respString.length());
-        assertEquals(out.toString("UTF-8"), respString);
+        assertEquals(out.toString(StandardCharsets.UTF_8), respString);
         assertWriterClosed(writer);
     }
 
@@ -48,7 +48,7 @@ public class IoUtilTest {
 
         IoUtil.streamResponseAndClose(writer,resp,null);
         assertEquals(out.size(), respString.length());
-        assertEquals(out.toString("UTF-8"), respString);
+        assertEquals(out.toString(StandardCharsets.UTF_8), respString);
         assertWriterClosed(writer);
     }
 
@@ -64,7 +64,7 @@ public class IoUtilTest {
 
         IoUtil.streamResponseAndClose(writer,resp,"callbackFunc");
         assertEquals(out.size(), respString.length());
-        assertEquals(out.toString("UTF-8"), respString);
+        assertEquals(out.toString(StandardCharsets.UTF_8), respString);
         assertWriterClosed(writer);
     }
 

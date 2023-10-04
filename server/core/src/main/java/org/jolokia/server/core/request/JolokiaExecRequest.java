@@ -109,7 +109,7 @@ public class JolokiaExecRequest extends JolokiaObjectNameRequest {
      * @return the creator implementation
      */
     static RequestCreator<JolokiaExecRequest> newCreator() {
-        return new RequestCreator<JolokiaExecRequest>() {
+        return new RequestCreator<>() {
             /** {@inheritDoc} */
             public JolokiaExecRequest create(Stack<String> pStack, ProcessingParameters pParams) throws MalformedObjectNameException {
                 return new JolokiaExecRequest(
@@ -122,7 +122,7 @@ public class JolokiaExecRequest extends JolokiaObjectNameRequest {
             /** {@inheritDoc} */
             public JolokiaExecRequest create(Map<String, ?> requestMap, ProcessingParameters pParams)
                     throws MalformedObjectNameException {
-                return new JolokiaExecRequest(requestMap,pParams);
+                return new JolokiaExecRequest(requestMap, pParams);
             }
         };
     }
@@ -142,7 +142,7 @@ public class JolokiaExecRequest extends JolokiaObjectNameRequest {
 
     @Override
     public String toString() {
-        StringBuffer ret = new StringBuffer("JmxExecRequest[");
+        StringBuilder ret = new StringBuilder("JmxExecRequest[");
         ret.append("operation=").append(getOperation());
         if (arguments != null && !arguments.isEmpty()) {
             ret.append(", arguments=").append(getArguments());

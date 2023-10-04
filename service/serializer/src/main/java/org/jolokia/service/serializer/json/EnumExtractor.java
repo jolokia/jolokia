@@ -16,14 +16,14 @@ import org.jolokia.service.serializer.object.StringToObjectConverter;
 public class EnumExtractor implements Extractor {
 
     /** {@inheritDoc} */
-    public Class getType() {
+    public Class<?> getType() {
         return Enum.class;
     }
 
     /** {@inheritDoc} */
     public Object extractObject(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pPathPart, boolean jsonify) throws AttributeNotFoundException {
         String pathPart = pPathPart.isEmpty() ? null : pPathPart.pop();
-        Enum en = (Enum) pValue;
+        Enum<?> en = (Enum<?>) pValue;
         String name = en.name();
         if (pathPart != null) {
             if (name.equals(pathPart)) {

@@ -31,7 +31,7 @@ public class ConfigKeyTest {
 
     @Test
     public void extractKey() {
-        Map<String,String> map = new HashMap<String, String>();
+        Map<String,String> map = new HashMap<>();
         map.put(ConfigKey.MAX_OBJECTS.getKeyValue(),"4711");
         map.put(ConfigKey.CANONICAL_NAMING.getKeyValue(),"true");
         map.put("blub","bla");

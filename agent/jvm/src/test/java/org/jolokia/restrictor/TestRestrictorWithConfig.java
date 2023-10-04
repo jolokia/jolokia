@@ -16,7 +16,7 @@ public class TestRestrictorWithConfig implements Restrictor {
     boolean res;
 
     public TestRestrictorWithConfig(Configuration configuration) {
-        res = Boolean.valueOf(configuration.getConfig(ConfigKey.POLICY_LOCATION));
+        res = Boolean.parseBoolean(configuration.getConfig(ConfigKey.POLICY_LOCATION));
     }
 
     @Override

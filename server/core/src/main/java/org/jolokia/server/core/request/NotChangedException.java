@@ -8,7 +8,7 @@ package org.jolokia.server.core.request;
  */
 public class NotChangedException extends Exception {
 
-    private JolokiaRequest request;
+    private final JolokiaRequest request;
 
     /**
      * Constructor

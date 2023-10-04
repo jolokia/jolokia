@@ -43,7 +43,7 @@ public class DefaultServerHandleTest {
 
     @BeforeMethod
     public void setup() throws MalformedURLException {
-        extraInfo = new HashMap<String, String>();
+        extraInfo = new HashMap<>();
         extraInfo.put("extra1", "value1");
         vendor = "acim";
         product = "dukeNukem";
@@ -57,7 +57,7 @@ public class DefaultServerHandleTest {
     }
 
     @Test
-    public void basics() throws MalformedURLException {
+    public void basics() {
         assertEquals(serverHandle.getProduct(),product);
         assertEquals(serverHandle.getVendor(),vendor);
         assertEquals(serverHandle.getExtraInfo(null).get("extra1"),"value1");

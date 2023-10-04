@@ -1,13 +1,13 @@
 package org.jolokia.service.discovery;
 
 import java.io.IOException;
-import java.net.SocketException;
 import java.util.List;
 import java.util.UUID;
 
 import org.jolokia.server.core.Version;
 import org.jolokia.server.core.config.ConfigKey;
-import org.jolokia.server.core.service.api.*;
+import org.jolokia.server.core.service.api.AgentDetails;
+import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.impl.StdoutLogHandler;
 import org.jolokia.server.core.util.NetworkUtil;
 import org.jolokia.server.core.util.TestJolokiaContext;
@@ -83,7 +83,7 @@ public class MulticastSocketListenerThreadTest {
         }
     }
 
-    private void checkForMulticastSupport() throws SocketException {
+    private void checkForMulticastSupport() {
         if (!NetworkUtil.isMulticastSupported()) {
             throw new SkipException("No multicast supported");
         }

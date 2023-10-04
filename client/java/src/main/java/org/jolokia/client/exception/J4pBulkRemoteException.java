@@ -30,14 +30,14 @@ public class J4pBulkRemoteException extends J4pException {
 
     // List of results obtained from the remote side. This can be either exceptions for a single
     // request or a succeeded request
-    private List results;
+    private final List<Object> results;
 
     /**
      * Constructor
      *
      * @param pResults list of results which should be of type {@link J4pResponse}
      */
-    public J4pBulkRemoteException(List pResults) {
+    public J4pBulkRemoteException(List<Object> pResults) {
         super("Bulk request failed remotely");
         results = pResults;
     }
@@ -48,7 +48,7 @@ public class J4pBulkRemoteException extends J4pException {
      *
      * @return a list of results
      */
-    public List getResults() {
+    public List<Object> getResults() {
         return results;
     }
 
@@ -58,10 +58,11 @@ public class J4pBulkRemoteException extends J4pException {
      * @param <T> response type
      * @return list of successful responses.
      */
-    public <T extends J4pResponse> List<T> getResponses() {
-        List<T> ret = new ArrayList<T>();
+    public <T extends J4pResponse<?>> List<T> getResponses() {
+        List<T> ret = new ArrayList<>();
         for (Object entry : results) {
             if (entry instanceof J4pResponse) {
+                //noinspection unchecked
                 ret.add((T) entry);
             }
         }
@@ -74,7 +75,7 @@ public class J4pBulkRemoteException extends J4pException {
      * @return list of remote exceptions
      */
     public List<J4pRemoteException> getRemoteExceptions() {
-        List<J4pRemoteException> ret = new ArrayList<J4pRemoteException>();
+        List<J4pRemoteException> ret = new ArrayList<>();
         for (Object entry : results) {
             if (entry instanceof J4pRemoteException) {
                 ret.add((J4pRemoteException) entry);

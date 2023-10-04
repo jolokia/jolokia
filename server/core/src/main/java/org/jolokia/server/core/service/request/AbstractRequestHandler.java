@@ -15,7 +15,7 @@ public abstract class AbstractRequestHandler extends AbstractJolokiaService<Requ
         implements RequestHandler {
 
     // Provider of this request handler
-    private String provider;
+    private final String provider;
 
     /** {@inheritDoc} */
     protected AbstractRequestHandler(String pProvider,int pOrderId) {

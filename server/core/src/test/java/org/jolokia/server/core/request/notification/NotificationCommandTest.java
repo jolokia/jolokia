@@ -16,13 +16,17 @@
 
 package org.jolokia.server.core.request.notification;
 
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Stack;
+import java.util.UUID;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import org.json.simple.JSONArray;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
@@ -41,11 +45,7 @@ public class NotificationCommandTest {
                 new String[]{
                         "command", "register"
                 },
-                new Checkable<RegisterCommand>() {
-                    public void check(RegisterCommand cmd) {
-                        Assert.assertEquals(cmd.getType(), NotificationCommandType.REGISTER);
-                    }
-                });
+                (Checkable<RegisterCommand>) cmd -> assertEquals(cmd.getType(), NotificationCommandType.REGISTER));
     }
 
     @Test
@@ -56,14 +56,12 @@ public class NotificationCommandTest {
                         "command", "unregister",
                         "client", uuid
                 },
-                new Checkable<UnregisterCommand>() {
-                    public void check(UnregisterCommand cmd) {
-                        assertEquals(cmd.getType(), NotificationCommandType.UNREGISTER);
-                        assertEquals(cmd.getClient(), uuid);
-                    }
+                (Checkable<UnregisterCommand>) cmd -> {
+                    assertEquals(cmd.getType(), NotificationCommandType.UNREGISTER);
+                    assertEquals(cmd.getClient(), uuid);
                 }
 
-             );
+        );
     }
 
     @Test
@@ -74,14 +72,12 @@ public class NotificationCommandTest {
                         "command", "ping",
                         "client", uuid
                 },
-                new Checkable<PingCommand>() {
-                    public void check(PingCommand cmd) {
-                        assertEquals(cmd.getType(), NotificationCommandType.PING);
-                        assertEquals(cmd.getClient(), uuid);
-                    }
+                (Checkable<PingCommand>) cmd -> {
+                    assertEquals(cmd.getType(), NotificationCommandType.PING);
+                    assertEquals(cmd.getClient(), uuid);
                 }
 
-             );
+        );
     }
 
     @Test
@@ -92,14 +88,12 @@ public class NotificationCommandTest {
                         "command", "list",
                         "client", uuid
                 },
-                new Checkable<ListCommand>() {
-                    public void check(ListCommand cmd) {
-                        assertEquals(cmd.getType(), NotificationCommandType.LIST);
-                        assertEquals(cmd.getClient(), uuid);
-                    }
+                (Checkable<ListCommand>) cmd -> {
+                    assertEquals(cmd.getType(), NotificationCommandType.LIST);
+                    assertEquals(cmd.getClient(), uuid);
                 }
 
-             );
+        );
     }
 
     @Test
@@ -123,23 +117,21 @@ public class NotificationCommandTest {
                             "config", "{ \"extra\": \"club\" }",
                             "handback", handback
                     },
-                    new Checkable<AddCommand>() {
-                        public void check(AddCommand cmd) {
-                            assertEquals(cmd.getType(), NotificationCommandType.ADD);
-                            assertEquals(cmd.getMode(),"pull");
-                            assertEquals(cmd.getClient(),uuid);
-                            assertEquals(cmd.getObjectName(),mbean);
-                            Map<String,?> config = cmd.getConfig();
-                            assertEquals(config.size(),1);
-                            assertEquals(config.get("extra"),"club");
-                            assertEquals(cmd.getFilter().size(),filter.length);
-                            assertEquals(cmd.getHandback(),handback);
-                            for (int i = 0; i < filter.length; i++) {
-                                assertEquals(cmd.getFilter().get(i),filter[i]);
-                            }
+                    (Checkable<AddCommand>) cmd -> {
+                        assertEquals(cmd.getType(), NotificationCommandType.ADD);
+                        assertEquals(cmd.getMode(),"pull");
+                        assertEquals(cmd.getClient(),uuid);
+                        assertEquals(cmd.getObjectName(),mbean);
+                        Map<String,?> config = cmd.getConfig();
+                        assertEquals(config.size(),1);
+                        assertEquals(config.get("extra"),"club");
+                        assertEquals(cmd.getFilter().size(),filter.length);
+                        assertEquals(cmd.getHandback(),handback);
+                        for (int i = 0; i < filter.length; i++) {
+                            assertEquals(cmd.getFilter().get(i),filter[i]);
                         }
                     }
-                 );
+            );
         }
     }
 
@@ -154,13 +146,11 @@ public class NotificationCommandTest {
                         "mode", "pull",
                         "mbean", mbean.toString(),
                 },
-                new Checkable<AddCommand>() {
-                    public void check(AddCommand cmd) {
-                        assertEquals(cmd.getType(), NotificationCommandType.ADD);
-                        assertEquals(cmd.getMode(),"pull");
-                        assertEquals(cmd.getClient(), uuid);
-                        assertEquals(cmd.getObjectName(), mbean);
-                    }
+                (Checkable<AddCommand>) cmd -> {
+                    assertEquals(cmd.getType(), NotificationCommandType.ADD);
+                    assertEquals(cmd.getMode(),"pull");
+                    assertEquals(cmd.getClient(), uuid);
+                    assertEquals(cmd.getObjectName(), mbean);
                 });
     }
 
@@ -254,14 +244,12 @@ public class NotificationCommandTest {
                         "client", uuid,
                         "handle", handle
                 },
-                new Checkable<RemoveCommand>() {
-                    public void check(RemoveCommand cmd) {
-                        assertEquals(cmd.getType(), NotificationCommandType.REMOVE);
-                        assertEquals(cmd.getClient(),uuid);
-                        assertEquals(cmd.getHandle(),handle);
-                    }
+                (Checkable<RemoveCommand>) cmd -> {
+                    assertEquals(cmd.getType(), NotificationCommandType.REMOVE);
+                    assertEquals(cmd.getClient(),uuid);
+                    assertEquals(cmd.getHandle(),handle);
                 }
-             );
+        );
     }
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*handle.*")
     public void removeNoHandleStack() throws Exception {
@@ -307,9 +295,7 @@ public class NotificationCommandTest {
     @SuppressWarnings("unchecked")
     private JSONArray getFilterArrayList(String[] pFilter) {
         JSONArray ret = new JSONArray();
-        for (String f : pFilter) {
-            ret.add(f);
-        }
+        Collections.addAll(ret, pFilter);
         return ret;
     }
 
@@ -331,7 +317,7 @@ public class NotificationCommandTest {
                 } else if (pArgs[j] instanceof List) {
                     @SuppressWarnings("unchecked")
                     List<String> argsList = (List<String>) pArgs[j];
-                    StringBuffer s = new StringBuffer();
+                    StringBuilder s = new StringBuilder();
                     for (String a : argsList) {
                         s.append(a);
                         s.append(",");

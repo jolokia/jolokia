@@ -89,9 +89,7 @@ public class EscapeUtilTest {
     @Test
     public void stackOverflowError() {
         StringBuilder longString = new StringBuilder();
-        for (int i = 0; i < 15000; i++) {
-            longString.append("!!");
-        }
+        longString.append("!!".repeat(15000));
         List<String> arguments = Collections.singletonList(longString.toString());
 
         String path = EscapeUtil.combineToPath(arguments);

@@ -4,16 +4,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-import javax.management.JMException;
-import javax.management.MalformedObjectNameException;
-
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
-import org.jolokia.jvmagent.handler.JolokiaHttpHandler;
-import org.jolokia.jvmagent.handler.JolokiaHttpHandlerTest;
-import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.restrictor.DenyAllRestrictor;
-import org.jolokia.server.core.restrictor.RestrictorFactory;
 import org.jolokia.server.core.util.TestJolokiaContext;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -30,13 +23,13 @@ import static org.testng.Assert.assertTrue;
 public class JolokiaHttpHandlerRestrictorTest {
 
     @Test
-    void denyAllRestrictor() throws JMException, IOException, ParseException, URISyntaxException {
+    void denyAllRestrictor() throws IOException, ParseException, URISyntaxException {
         TestJolokiaContext testContext = new TestJolokiaContext.Builder()
                 .restrictor(new DenyAllRestrictor()).build();
         checkRestrictor("No access", testContext);
     }
 
-    private void checkRestrictor(String pParam, TestJolokiaContext pTestContext) throws URISyntaxException, IOException, ParseException, JMException {
+    private void checkRestrictor(String pParam, TestJolokiaContext pTestContext) throws URISyntaxException, IOException, ParseException {
         JolokiaHttpHandler newHandler = new JolokiaHttpHandler(pTestContext);
         HttpExchange exchange = JolokiaHttpHandlerTest.prepareExchange("http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage");
         // Simple GET method

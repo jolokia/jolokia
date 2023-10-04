@@ -52,7 +52,7 @@ public class OpenTypeDeserializerTest {
     }
 
     @Test
-    public void nullValue() throws OpenDataException {
+    public void nullValue() {
         assertNull(converter.deserialize(SimpleType.STRING, null));
     }
 

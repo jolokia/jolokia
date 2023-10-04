@@ -18,7 +18,6 @@ package org.jolokia.jvmagent;
 
 import java.io.IOException;
 
-import org.jolokia.jvmagent.JvmAgent;
 import org.jolokia.test.util.EnvTestUtil;
 import org.testng.annotations.Test;
 

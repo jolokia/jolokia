@@ -46,7 +46,7 @@ public interface ValueFaultHandler {
          * @param exception exception to ignore
          * @return a descriptive string of the exception
          */
-        public <T extends Throwable> Object handleException(T exception) throws T {
+        public <T extends Throwable> Object handleException(T exception) {
             return "ERROR: " + exception.getMessage() + " (" + exception.getClass() + ")";
         }
     };

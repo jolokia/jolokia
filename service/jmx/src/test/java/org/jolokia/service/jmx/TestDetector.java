@@ -17,19 +17,30 @@ package org.jolokia.service.jmx;
  */
 
 import java.lang.instrument.Instrumentation;
-import java.util.*;
-
-import javax.management.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import javax.management.JMException;
+import javax.management.MBeanRegistrationException;
+import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
+import javax.management.NotificationListener;
+import javax.management.ObjectName;
 
 import org.easymock.EasyMock;
-import org.easymock.IAnswer;
 import org.jolokia.server.core.detector.ServerDetector;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.api.ServerHandle;
 import org.jolokia.server.core.service.request.RequestInterceptor;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 
-import static org.easymock.EasyMock.*;
+import static org.easymock.EasyMock.anyObject;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.expectLastCall;
+import static org.easymock.EasyMock.isNull;
+import static org.easymock.EasyMock.replay;
 
 /**
  * @author roland
@@ -97,11 +108,9 @@ public class TestDetector implements ServerDetector {
                 expect(server.registerMBean(EasyMock.anyObject(), EasyMock.anyObject()))
                         .andStubThrow(exps[nr % exps.length]);
                 expect(server.queryNames(EasyMock.anyObject(), isNull())).andStubAnswer(
-                        new IAnswer<Set<ObjectName>>() {
-                            public Set<ObjectName> answer() {
-                                Object[] args = EasyMock.getCurrentArguments();
-                                return new HashSet<>(Collections.singletonList((ObjectName) args[0]));
-                            }
+                        () -> {
+                            Object[] args = EasyMock.getCurrentArguments();
+                            return new HashSet<>(Collections.singletonList((ObjectName) args[0]));
                         });
                 expect(server.isRegistered(EasyMock.anyObject())).andStubReturn(true);
                 server.addNotificationListener(anyObject(), (NotificationListener) anyObject(),

@@ -61,7 +61,7 @@ public class SpringConfigTest {
     }
 
     @Test
-    public void simpleServer() throws ParserConfigurationException, IOException, SAXException {
+    public void simpleServer() {
 
         reader.loadBeanDefinitions(new ClassPathResource("/simple-server.xml"));
 
@@ -71,7 +71,7 @@ public class SpringConfigTest {
         assertEquals(props.size(),3);
         assertEquals(props.getPropertyValue("lookupConfig").getValue(), false);
         assertEquals(props.getPropertyValue("lookupServices").getValue(), false);
-        BeanDefinition cBd = (BeanDefinition) props.getPropertyValue("config").getValue();;
+        BeanDefinition cBd = (BeanDefinition) props.getPropertyValue("config").getValue();
         assertEquals(cBd.getBeanClassName(),SpringJolokiaConfigHolder.class.getName());
         MutablePropertyValues cProps = cBd.getPropertyValues();
         assertEquals(cProps.size(), 1);
@@ -79,7 +79,7 @@ public class SpringConfigTest {
     }
 
     @Test
-    public void simpleConfig() throws Exception {
+    public void simpleConfig() {
         reader.loadBeanDefinitions(new ClassPathResource("/simple-config.xml"));
 
         BeanDefinition bd = beanFactory.getBeanDefinition("config");
@@ -115,7 +115,7 @@ public class SpringConfigTest {
     }
 
     private void verifyConfig(MutablePropertyValues pCProps) {
-        Map vals = (Map) pCProps.getPropertyValue("config").getValue();
+        Map<?, ?> vals = (Map<?, ?>) pCProps.getPropertyValue("config").getValue();
         assertEquals(vals.size(),3);
         for (String k : new String[] { "host", "port", "autoStart" }) {
             assertTrue(vals.containsKey(new TypedStringValue(k,String.class)));

@@ -20,12 +20,12 @@ public class DefaultHttpContextTest {
     }
 
     @Test
-    public void testGetResource() throws Exception {
+    public void testGetResource() {
         assertNull(ctx.getMimeType(null));
     }
 
     @Test
-    public void testGetMimeType() throws Exception {
+    public void testGetMimeType() {
         assertNull(ctx.getResource(null));
     }
 }

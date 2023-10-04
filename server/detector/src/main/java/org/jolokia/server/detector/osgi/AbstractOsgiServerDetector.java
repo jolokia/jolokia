@@ -45,14 +45,14 @@ public abstract class AbstractOsgiServerDetector extends AbstractServerDetector 
     }
 
     protected String getSystemBundleVersion() {
-        Dictionary headers = getSystemBundleHeaders();
+        Dictionary<?, ?> headers = getSystemBundleHeaders();
         return (String) headers.get("Bundle-Version");
     }
 
     protected String getBundleVersion(String pSymbolicName) {
         for (Bundle bundle: context.getBundles()) {
             if (pSymbolicName.equalsIgnoreCase(bundle.getSymbolicName())) {
-                Dictionary headers = bundle.getHeaders();
+                Dictionary<?, ?> headers = bundle.getHeaders();
                 return (String) headers.get("Bundle-Version");
             }
         }
@@ -60,7 +60,7 @@ public abstract class AbstractOsgiServerDetector extends AbstractServerDetector 
     }
 
     protected boolean checkSystemBundleForSymbolicName(String pSymbolicName) {
-        Dictionary headers = getSystemBundleHeaders();
+        Dictionary<?, ?> headers = getSystemBundleHeaders();
         if (headers != null) {
             String name = (String) headers.get("Bundle-SymbolicName");
             return name.startsWith(pSymbolicName);
@@ -70,7 +70,7 @@ public abstract class AbstractOsgiServerDetector extends AbstractServerDetector 
         }
     }
 
-    private Dictionary getSystemBundleHeaders() {
+    private Dictionary<?, ?> getSystemBundleHeaders() {
         Bundle systemBundle = context.getBundle(0);
         return systemBundle.getHeaders();
     }

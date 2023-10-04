@@ -23,9 +23,9 @@ package org.jolokia.jvmagent.client.util;
  * @since 12.08.11
  */
 public class ProcessingException extends RuntimeException {
-    private boolean quiet;
-    private boolean verbose;
-    private String command;
+    private final boolean quiet;
+    private final boolean verbose;
+    private final String command;
 
     /**
      * Constructor
@@ -43,7 +43,7 @@ public class ProcessingException extends RuntimeException {
 
     /**
      * Print this exception to standard error, but only if no <code>--quiet</code> is given. If
-     * <code>--verbose</code> is given, then an stacktrace is printed as well.
+     * <code>--verbose</code> is given, then a stacktrace is printed as well.
      */
     @SuppressWarnings({"PMD.SystemPrintln"})
     public void printErrorMessage() {

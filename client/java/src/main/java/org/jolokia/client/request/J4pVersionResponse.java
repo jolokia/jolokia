@@ -33,15 +33,15 @@ public final class J4pVersionResponse extends J4pResponse<J4pVersionRequest> {
 
     private JSONObject info;
 
-    private String agentVersion;
+    private final String agentVersion;
 
-    private String protocolVersion;
+    private final String protocolVersion;
 
     private JSONObject details;
 
     J4pVersionResponse(J4pVersionRequest pRequest, JSONObject pResponse) {
         super(pRequest,pResponse);
-        JSONObject value = (JSONObject) getValue();
+        JSONObject value = getValue();
         agentVersion = (String) value.get("agent");
         protocolVersion = (String) value.get("protocol");
         details = (JSONObject) value.get("details");
@@ -109,6 +109,7 @@ public final class J4pVersionResponse extends J4pResponse<J4pVersionRequest> {
      * @return set of supported providers
      */
     public Set<String> getProviders() {
+        //noinspection unchecked
         return info.keySet();
     }
 
@@ -118,8 +119,8 @@ public final class J4pVersionResponse extends J4pResponse<J4pVersionRequest> {
      * @param pProvider provider for which information is requested
      * @return extra information for the provider, which might be null
      */
-    public Map getExtraInfo(String pProvider) {
-        return (Map) info.get(pProvider);
+    public Map<?, ?> getExtraInfo(String pProvider) {
+        return (Map<?, ?>) info.get(pProvider);
     }
 }
 

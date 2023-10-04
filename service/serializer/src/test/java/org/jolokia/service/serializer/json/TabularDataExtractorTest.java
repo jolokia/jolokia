@@ -128,10 +128,10 @@ public class TabularDataExtractorTest {
         assertEquals(result.size(), 2);
         assertTrue(result.containsKey("indexNames"));
         assertTrue(result.containsKey("values"));
-        List indexNames = (List) result.get("indexNames");
+        List<?> indexNames = (List<?>) result.get("indexNames");
         assertEquals(indexNames.size(), 1);
         assertTrue(indexNames.contains("key"));
-        List values = (List) result.get("values");
+        List<?> values = (List<?>) result.get("values");
         assertEquals(values.size(),1);
         JSONObject value = (JSONObject) values.get(0);
         JSONObject key = (JSONObject) value.get("key");
@@ -325,7 +325,7 @@ public class TabularDataExtractorTest {
     }
 
     @Test
-    void emptyTabularData() throws MalformedObjectNameException, OpenDataException, AttributeNotFoundException {
+    void emptyTabularData() throws OpenDataException, AttributeNotFoundException {
         CompositeType type = new CompositeType(
                 "testType",
                 "Type for testing",
@@ -363,7 +363,7 @@ public class TabularDataExtractorTest {
     }
 
 
-    private TabularData getMapTabularData(OpenType keyType, Object ... keyAndValues) throws OpenDataException {
+    private TabularData getMapTabularData(OpenType<?> keyType, Object ... keyAndValues) throws OpenDataException {
         CompositeTypeAndJson ctj = new CompositeTypeAndJson(
                 keyType,"key",null,
                 STRING,"value",null
@@ -382,11 +382,9 @@ public class TabularDataExtractorTest {
 
 
     private Object extract(boolean pJson,Object pValue,String ... pPathElements) throws AttributeNotFoundException {
-        Stack<String> extra = new Stack<String>();
-        if (pPathElements.length > 0) {
-            for (String p : pPathElements) {
-                extra.push(p);
-            }
+        Stack<String> extra = new Stack<>();
+        for (String p : pPathElements) {
+            extra.push(p);
         }
         Collections.reverse(extra);
         return extractor.extractObject(converter,pValue,extra,pJson);

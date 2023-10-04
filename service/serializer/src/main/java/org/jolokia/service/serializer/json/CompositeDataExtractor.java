@@ -1,9 +1,7 @@
 package org.jolokia.service.serializer.json;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Set;
 import java.util.Stack;
-
 import javax.management.AttributeNotFoundException;
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.InvalidKeyException;
@@ -38,7 +36,7 @@ import org.json.simple.JSONObject;
 public class CompositeDataExtractor implements Extractor {
 
     /** {@inheritDoc} */
-    public Class getType() {
+    public Class<?> getType() {
         return CompositeData.class;
     }
 
@@ -62,9 +60,11 @@ public class CompositeDataExtractor implements Extractor {
 
     private Object extractCompleteCdAsJson(ObjectToJsonConverter pConverter, CompositeData pData, Stack<String> pPath) throws AttributeNotFoundException {
         JSONObject ret = new JSONObject();
-        for (String key : (Set<String>) pData.getCompositeType().keySet()) {
+        for (String key : pData.getCompositeType().keySet()) {
+            @SuppressWarnings("unchecked")
             Stack<String> path = (Stack<String>) pPath.clone();
             try {
+                //noinspection unchecked
                 ret.put(key, pConverter.extractObject(pData.get(key), path, true));
             } catch (ValueFaultHandler.AttributeFilteredException exp) {
                 // Ignore this key;

@@ -35,7 +35,7 @@ public interface VirtualMachineHandlerOperations {
     /**
      * Lookup and create a {@code com.sun.tools.attach.VirtualMachine}
      *
-     * @return the create virtual machine of <code>null</code> if none could be created
+     * @return the virtual machine of <code>null</code> if none could be created
      * @throws ProcessingException for any problem related to VM attaching. Specific to particular implementation.
      */
     Object attachVirtualMachine() throws ProcessingException;

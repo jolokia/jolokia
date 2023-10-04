@@ -63,7 +63,7 @@ public class SpringJolokiaAgent extends JolokiaServer implements ApplicationCont
      * Callback used for initializing and optionally starting up the server
      */
     public void afterPropertiesSet() throws IOException {
-        Map<String, String> config = new HashMap<String, String>();
+        Map<String, String> config = new HashMap<>();
         if (systemPropertyMode == SystemPropertyMode.FALLBACK) {
             config.putAll(lookupSystemProperties());
         }
@@ -99,18 +99,19 @@ public class SpringJolokiaAgent extends JolokiaServer implements ApplicationCont
     }
 
     private void lookupServices() {
+        @SuppressWarnings("rawtypes")
         Map<String,JolokiaService> services = context.getBeansOfType(JolokiaService.class);
-        for (JolokiaService service : services.values()) {
+        for (JolokiaService<?> service : services.values()) {
             addService(service);
         }
     }
 
     private Map<String,String> lookupConfigurationFromContext() {
         // Merge all configs in the context in the reverse order
-        Map<String,String> config = new HashMap<String, String>();
+        Map<String,String> config = new HashMap<>();
         Map<String, SpringJolokiaConfigHolder> configsMap = context.getBeansOfType(SpringJolokiaConfigHolder.class);
-        List<SpringJolokiaConfigHolder> configs = new ArrayList<SpringJolokiaConfigHolder>(configsMap.values());
-        Collections.sort(configs, new OrderComparator());
+        List<SpringJolokiaConfigHolder> configs = new ArrayList<>(configsMap.values());
+        configs.sort(new OrderComparator());
         for (SpringJolokiaConfigHolder c : configs) {
             if (c != this.configHolder) {
                 config.putAll(c.getConfig());
@@ -121,8 +122,8 @@ public class SpringJolokiaAgent extends JolokiaServer implements ApplicationCont
 
     // Lookup system properties for all configurations possible
     private Map<String, String> lookupSystemProperties() {
-        Map<String,String> ret = new HashMap<String, String>();
-        Enumeration propEnum = System.getProperties().propertyNames();
+        Map<String,String> ret = new HashMap<>();
+        Enumeration<?> propEnum = System.getProperties().propertyNames();
         while (propEnum.hasMoreElements()) {
             String prop = (String) propEnum.nextElement();
             if (prop.startsWith("jolokia.")) {
@@ -195,7 +196,7 @@ public class SpringJolokiaAgent extends JolokiaServer implements ApplicationCont
      *
      * @param pContext spring context containing the bean definition
      */
-    public void setApplicationContext(ApplicationContext pContext)  {
+    public void setApplicationContext(@SuppressWarnings("NullableProblems") ApplicationContext pContext)  {
         context = pContext;
     }
 

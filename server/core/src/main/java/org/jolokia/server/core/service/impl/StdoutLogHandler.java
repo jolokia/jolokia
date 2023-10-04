@@ -22,7 +22,7 @@ import org.jolokia.server.core.service.api.LogHandler;
  * Loghandler for printing to stdout
  */
 public class StdoutLogHandler implements LogHandler {
-    private boolean doDebug;
+    private final boolean doDebug;
 
     public StdoutLogHandler(boolean pDoDebug) {
         doDebug = pDoDebug;

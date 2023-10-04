@@ -17,12 +17,16 @@ package org.jolokia.server.core.util;
  */
 
 import java.io.ByteArrayInputStream;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Vector;
 
-import jakarta.servlet.*;
+import jakarta.servlet.ReadListener;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletInputStream;
 
 import org.easymock.EasyMock;
-import org.easymock.IAnswer;
 
 /**
  * Test utility methods for HTTP related tests
@@ -95,11 +99,7 @@ public class HttpTestUtil {
         }
 
         final Vector<String> paramNames = new Vector<>(configParams.keySet());
-        EasyMock.expect(config.getInitParameterNames()).andAnswer(new IAnswer<Enumeration<String>>() {
-            public Enumeration<String> answer() {
-                return paramNames.elements();
-            }
-        }).anyTimes();
+        EasyMock.expect(config.getInitParameterNames()).andAnswer(paramNames::elements).anyTimes();
     }
 
     /**
@@ -119,10 +119,6 @@ public class HttpTestUtil {
             }
         }
         final Vector<String> paramNames = new Vector<>(configParams.keySet());
-        EasyMock.expect(pContext.getInitParameterNames()).andAnswer(new IAnswer<Enumeration<String>>() {
-            public Enumeration<String> answer() {
-                return paramNames.elements();
-            }
-        }).anyTimes();
+        EasyMock.expect(pContext.getInitParameterNames()).andAnswer(paramNames::elements).anyTimes();
     }
 }

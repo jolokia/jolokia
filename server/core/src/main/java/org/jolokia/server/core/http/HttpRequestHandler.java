@@ -2,6 +2,7 @@ package org.jolokia.server.core.http;
 
 import java.io.*;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -378,11 +379,7 @@ public class HttpRequestHandler {
             if (matcher.find()) {
                 String prefix = matcher.group();
                 String pathInfoEncoded = pUri.replaceFirst("^.*?" + prefix, prefix);
-                try {
-                    return URLDecoder.decode(pathInfoEncoded, "UTF-8");
-                } catch (UnsupportedEncodingException e) {
-                    // Should not happen at all ... so we silently fall through
-                }
+                return URLDecoder.decode(pathInfoEncoded, StandardCharsets.UTF_8);
             }
         }
         return pPathInfo;

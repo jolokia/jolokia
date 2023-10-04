@@ -36,7 +36,7 @@ import org.jolokia.server.core.util.DateUtil;
 public class DateExtractor implements Extractor {
 
     /** {@inheritDoc} */
-    public Class getType() {
+    public Class<?> getType() {
         return Date.class;
     }
 

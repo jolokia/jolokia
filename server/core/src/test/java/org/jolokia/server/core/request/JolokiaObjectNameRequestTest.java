@@ -16,6 +16,7 @@
 
 package org.jolokia.server.core.request;
 
+import java.util.Objects;
 import javax.management.MalformedObjectNameException;
 
 import org.jolokia.server.core.util.RequestType;
@@ -46,7 +47,7 @@ public class JolokiaObjectNameRequestTest {
             assertEquals(request.getObjectName().getDomain(),testData[i+2]);
             assertEquals(request.getObjectName().getKeyPropertyListString(),testData[i+3]);
             if (testData[i+1] != null) {
-                assertTrue(request.toString().contains(testData[i+1]));
+                assertTrue(request.toString().contains(Objects.requireNonNull(testData[i + 1])));
             }
         }
     }

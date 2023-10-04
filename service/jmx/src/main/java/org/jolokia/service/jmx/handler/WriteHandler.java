@@ -63,10 +63,7 @@ public class WriteHandler extends AbstractCommandHandler<JolokiaWriteRequest> {
         } catch (InvalidAttributeValueException e) {
             throw new IllegalArgumentException("Invalid value " + request.getValue() + " for attribute " +
                     request.getAttributeName() + ", MBean " + request.getObjectNameAsString(),e);
-        } catch (IllegalAccessException e) {
-            throw new IllegalArgumentException("Cannot set value " + request.getValue() + " for attribute " +
-                    request.getAttributeName() + ", MBean " + request.getObjectNameAsString(),e);
-        } catch (InvocationTargetException e) {
+        } catch (IllegalAccessException | InvocationTargetException e) {
             throw new IllegalArgumentException("Cannot set value " + request.getValue() + " for attribute " +
                     request.getAttributeName() + ", MBean " + request.getObjectNameAsString(),e);
         }
@@ -80,14 +77,14 @@ public class WriteHandler extends AbstractCommandHandler<JolokiaWriteRequest> {
 
         MBeanInfo mInfo = server.getMBeanInfo(request.getObjectName());
         MBeanAttributeInfo aInfo = null;
-        
+
         for (MBeanAttributeInfo i : mInfo.getAttributes()) {
             if (i.getName().equals(request.getAttributeName())) {
                 aInfo = i;
                 break;
             }
         }
-        Object values[];
+        Object[] values;
         if (aInfo instanceof OpenMBeanAttributeInfo) {
             OpenMBeanAttributeInfo info = (OpenMBeanAttributeInfo) aInfo;
             values = getValues(info.getOpenType(), oldValue, request);
@@ -124,7 +121,7 @@ public class WriteHandler extends AbstractCommandHandler<JolokiaWriteRequest> {
         List<String> pathParts = pRequest.getPathParts();
         Object newValue = pRequest.getValue();
 
-        if (pathParts != null && pathParts.size() > 0) {
+        if (pathParts != null && !pathParts.isEmpty()) {
             if (pCurrentValue == null ) {
                 throw new IllegalArgumentException(
                         "Cannot set value with path when parent object is not set");
@@ -151,7 +148,7 @@ public class WriteHandler extends AbstractCommandHandler<JolokiaWriteRequest> {
         // a new CompositeData with old values and the new value.
         // However, since this is probably out of scope, we will simply throw an exception if the path is not empty.
         List<String> pathParts = pRequest.getPathParts();
-        if (pathParts != null && pathParts.size() > 0) {
+        if (pathParts != null && !pathParts.isEmpty()) {
             throw new IllegalArgumentException("Cannot set value for OpenType " + pOpenType + " with inner path " +
                                                pRequest.getPath() + " since OpenTypes are immutable");
         }

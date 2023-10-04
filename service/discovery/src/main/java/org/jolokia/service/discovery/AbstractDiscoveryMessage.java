@@ -1,7 +1,7 @@
 package org.jolokia.service.discovery;
 
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 import org.jolokia.server.core.service.api.AgentDetails;
 import org.json.simple.JSONObject;
@@ -45,8 +45,10 @@ abstract class AbstractDiscoveryMessage {
 
     public byte[] getData() {
         JSONObject respond = new JSONObject();
+        //noinspection unchecked
         respond.put(MESSAGE_TYPE, type.toString().toLowerCase());
         if (agentDetails != null) {
+            //noinspection unchecked
             respond.putAll(agentDetails.toJSONObject());
         }
         byte[] ret = getBytes(respond.toJSONString());
@@ -61,17 +63,13 @@ abstract class AbstractDiscoveryMessage {
     }
 
     protected byte[] getBytes(String pRespond) {
-        try {
-            return pRespond.getBytes("UTF8");
-        } catch (UnsupportedEncodingException e) {
-            return pRespond.getBytes();
-        }
+        return pRespond.getBytes(StandardCharsets.UTF_8);
     }
 
     /**
      * Type of message. The constant names are used as type value for the payload
      */
-    enum MessageType {
+    public enum MessageType {
         // Discovery query
         QUERY,
         // Response to a discovery query

@@ -33,10 +33,10 @@ import org.json.simple.JSONObject;
 public class J4pWriteRequest extends AbtractJ4pMBeanRequest {
 
     // Name of attribute to set
-    private String attribute;
+    private final String attribute;
 
     // Value of the attribute to set
-    private Object value;
+    private final Object value;
 
     // Inner path (optional)
     private String path;
@@ -99,6 +99,7 @@ public class J4pWriteRequest extends AbtractJ4pMBeanRequest {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     J4pWriteResponse createResponse(JSONObject pResponse) {
         return new J4pWriteResponse(this,pResponse);
     }
@@ -115,10 +116,13 @@ public class J4pWriteRequest extends AbtractJ4pMBeanRequest {
     @Override
     JSONObject toJson() {
         JSONObject ret = super.toJson();
-        ret.put("attribute",attribute);
-        ret.put("value",serializeArgumentToJson(value));
+        //noinspection unchecked
+        ret.put("attribute", attribute);
+        //noinspection unchecked
+        ret.put("value", serializeArgumentToJson(value));
         if (path != null) {
-            ret.put("path",path);
+            //noinspection unchecked
+            ret.put("path", path);
         }
         return ret;
     }

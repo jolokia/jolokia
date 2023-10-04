@@ -31,7 +31,7 @@ import org.jolokia.server.core.service.serializer.Serializer;
 public class JolokiaMBeanServerHolder implements JolokiaMBeanServerHolderMBean {
 
     // The privat Jolokia MBeanServer
-    private MBeanServer jolokiaMBeanServer;
+    private final MBeanServer jolokiaMBeanServer;
 
     //
     public static final ObjectName MBEAN_SERVER_HOLDER_OBJECTNAME;

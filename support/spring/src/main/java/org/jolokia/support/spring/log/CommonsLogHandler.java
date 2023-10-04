@@ -12,7 +12,7 @@ import org.jolokia.server.core.service.api.LogHandler;
  */
 public class CommonsLogHandler implements LogHandler {
 
-    private Log log;
+    private final Log log;
 
     /**
      * Constructor for a {@link LogHandler} using commons logging

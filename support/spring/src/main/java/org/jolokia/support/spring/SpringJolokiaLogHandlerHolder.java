@@ -87,18 +87,12 @@ public class SpringJolokiaLogHandlerHolder implements InitializingBean {
 
         LogHandler createLogHandler(String category) {
             try {
+                @SuppressWarnings("unchecked")
                 Class<LogHandler> clazz = (Class<LogHandler>) this.getClass().getClassLoader().loadClass(className);
                 Constructor<LogHandler> ctr = clazz.getConstructor(String.class);
                 return ctr.newInstance(category);
-            } catch (NoSuchMethodException e) {
-                throw new IllegalStateException(e);
-            } catch (InstantiationException e) {
-                throw new IllegalStateException(e);
-            } catch (IllegalAccessException e) {
-                throw new IllegalStateException(e);
-            } catch (InvocationTargetException e) {
-                throw new IllegalStateException(e);
-            } catch (ClassNotFoundException e) {
+            } catch (NoSuchMethodException | InstantiationException | IllegalAccessException |
+                     InvocationTargetException | ClassNotFoundException e) {
                 throw new IllegalStateException(e);
             }
         }

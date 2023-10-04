@@ -1,5 +1,5 @@
 package org.jolokia.client.request;/*
- * 
+ *
  * Copyright 2014 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,7 +43,7 @@ public class ValidatingResponseExtractor implements J4pResponseExtractor {
     Set<Integer> allowedCodes;
 
     public ValidatingResponseExtractor(int... pCodesAllowed) {
-        allowedCodes = new HashSet<Integer>();
+        allowedCodes = new HashSet<>();
         // 200 is always contained
         allowedCodes.add(200);
         for (int code : pCodesAllowed) {
@@ -52,20 +52,20 @@ public class ValidatingResponseExtractor implements J4pResponseExtractor {
     }
 
     public <RESP extends J4pResponse<REQ>, REQ extends J4pRequest> RESP extract(REQ pRequest,
-                                                                      JSONObject pJsonResp)
+                                                                                JSONObject pJsonResp)
             throws J4pRemoteException {
-	
-	int status = 0;
-	if( pJsonResp.containsKey("status")) {
-		Object o = pJsonResp.get("status");
-		if( o instanceof Long ) {
-			status = ((Long)o).intValue();
-		} 
-	}
+
+        int status = 0;
+        if (pJsonResp.containsKey("status")) {
+            Object o = pJsonResp.get("status");
+            if (o instanceof Long) {
+                status = ((Long) o).intValue();
+            }
+        }
 
         if (!allowedCodes.contains(status)) {
             throw new J4pRemoteException(pRequest, pJsonResp);
         }
-        return status == 200 ? pRequest.<RESP>createResponse(pJsonResp) : null;
+        return status == 200 ? pRequest.createResponse(pJsonResp) : null;
     }
 }

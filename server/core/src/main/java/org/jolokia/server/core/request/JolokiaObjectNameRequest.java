@@ -88,7 +88,7 @@ public abstract class JolokiaObjectNameRequest extends JolokiaRequest {
 
     @Override
     protected String getInfo() {
-        StringBuffer ret = new StringBuffer("objectName = ").append(objectName.getCanonicalName());
+        StringBuilder ret = new StringBuilder("objectName = ").append(objectName.getCanonicalName());
         if (provider != null) {
             ret.append(", provider = ").append(provider);
         }

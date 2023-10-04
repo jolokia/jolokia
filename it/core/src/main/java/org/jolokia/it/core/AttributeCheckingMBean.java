@@ -26,6 +26,7 @@ import javax.management.ObjectName;
  * @author roland
  * @since Aug 7, 2009
  */
+@SuppressWarnings("rawtypes")
 public interface AttributeCheckingMBean {
 
     void reset();
@@ -45,7 +46,7 @@ public interface AttributeCheckingMBean {
     long getMemoryUsed();
 
     long getMemoryMax();
-    
+
     float getLongSeconds();
 
     double getSmallMinutes();

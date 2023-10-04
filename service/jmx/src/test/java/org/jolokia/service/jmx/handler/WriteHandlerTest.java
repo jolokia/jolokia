@@ -44,8 +44,6 @@ public class WriteHandlerTest {
 
     private ObjectName oName;
 
-    private TestJolokiaContext ctx;
-
     @BeforeClass
     public void setup() throws MalformedObjectNameException, MBeanException, InstanceAlreadyExistsException, IOException, NotCompliantMBeanException, ReflectionException {
         oName = new ObjectName("jolokia:test=write");
@@ -55,9 +53,9 @@ public class WriteHandlerTest {
 
     @BeforeMethod
     public void createHandler() {
-        ctx = new TestJolokiaContext.Builder().services(Serializer.class,new JolokiaSerializer()).build();
+        TestJolokiaContext ctx = new TestJolokiaContext.Builder().services(Serializer.class, new JolokiaSerializer()).build();
         handler = new WriteHandler();
-        handler.init(ctx,null);
+        handler.init(ctx, null);
     }
 
     @AfterTest
@@ -77,20 +75,21 @@ public class WriteHandlerTest {
         handler.doHandleSingleServerRequest(getMBeanServer(), req);
         req = new JolokiaRequestBuilder(WRITE,oName).attribute("Simple").value("20").build();
         Integer ret = (Integer) handler.doHandleSingleServerRequest(getMBeanServer(), req);
-        assertEquals(ret,new Integer(10));
+        assertEquals(ret, Integer.valueOf(10));
         assertEquals(handler.getType(),WRITE);
     }
 
     @Test
     public void map() throws Exception {
-        Map map = new HashMap<String,Integer>();
+        Map<String, Integer> map = new HashMap<>();
         map.put("answer",42);
         JolokiaWriteRequest req = new JolokiaRequestBuilder(WRITE,oName).attribute("Map").value(map).build();
         handler.doHandleSingleServerRequest(getMBeanServer(), req);
         req = new JolokiaRequestBuilder(WRITE,oName).attribute("Map").value(null).build();
-        Map ret = (Map) handler.doHandleSingleServerRequest(getMBeanServer(), req);
+        @SuppressWarnings("unchecked")
+        Map<String, ?> ret = (Map<String, ?>) handler.doHandleSingleServerRequest(getMBeanServer(), req);
         assertTrue(ret instanceof Map);
-        assertEquals(((Map) ret).get("answer"),42);
+        assertEquals(ret.get("answer"), 42);
 
     }
 

@@ -27,16 +27,16 @@ import org.json.simple.JSONObject;
 public class CompositeTypeAndJson {
     JSONObject    json;
     CompositeType type;
-    String keys[];
+    String[] keys;
 
 
     public CompositeTypeAndJson(Object... elements) throws OpenDataException {
-        OpenType types[] = new OpenType[elements.length / 3];
+        OpenType<?>[] types = new OpenType[elements.length / 3];
         keys = new String[elements.length / 3];
-        Object values[] = new Object[elements.length / 3];
+        Object[] values = new Object[elements.length / 3];
         int j = 0;
         for (int i = 0; i < elements.length; i+=3) {
-            types[j] = (OpenType) elements[i];
+            types[j] = (OpenType<?>) elements[i];
             keys[j] = (String) elements[i+1];
             values[j] = elements[i+2];
             j++;
@@ -51,6 +51,7 @@ public class CompositeTypeAndJson {
         json = new JSONObject();
         for (int i=0; i<keys.length;i++) {
             if (values[i] != null) {
+                //noinspection unchecked
                 json.put(keys[i],values[i]);
             }
         }
@@ -73,6 +74,7 @@ public class CompositeTypeAndJson {
     }
 
     public CompositeData getCompositeData() throws OpenDataException {
+        //noinspection unchecked
         return new CompositeDataSupport(type,json);
     }
 }

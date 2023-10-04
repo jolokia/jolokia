@@ -24,6 +24,7 @@ package org.jolokia.service.serializer.json.simplifier;
  * @author roland
  * @since Jul 27, 2009
  */
+@SuppressWarnings("rawtypes")
 public class ClassSimplifier extends SimplifierExtractor<Class> {
 
     /**

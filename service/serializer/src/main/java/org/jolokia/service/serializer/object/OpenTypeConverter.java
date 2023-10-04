@@ -28,11 +28,12 @@ import org.json.simple.parser.ParseException;
  * @author roland
  * @since 28.09.11
  */
+@SuppressWarnings("rawtypes")
 abstract class OpenTypeConverter<T extends OpenType> {
 
     protected boolean forgiving=false;
     // parent converter
-    private OpenTypeDeserializer dispatcher;
+    private final OpenTypeDeserializer dispatcher;
 
     /**
      * Constructor which need the parent converter. This parent converter
@@ -79,7 +80,7 @@ abstract class OpenTypeConverter<T extends OpenType> {
             } catch (ParseException e) {
                 throw new IllegalArgumentException("Cannot parse JSON " + pValue + ": " + e,e);
             } catch (ClassCastException exp) {
-                throw new IllegalArgumentException("Given value " + pValue.toString() +
+                throw new IllegalArgumentException("Given value " + pValue +
                                                    " cannot be parsed to JSONAware object: " + exp,exp);
             }
         }

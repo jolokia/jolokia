@@ -36,7 +36,7 @@ public class JolokiaJmxConnector implements JMXConnector {
 
   @Override
   public void connect() throws IOException {
-    connect(Collections.<String, Object>emptyMap());
+    connect(Collections.emptyMap());
   }
 
   private String prefixWithSlashIfNone(String urlPath) {
@@ -83,7 +83,7 @@ public class JolokiaJmxConnector implements JMXConnector {
   }
 
   protected Map<String, Object> mergedEnvironment(Map<String, ?> env) {
-    Map<String, Object> mergedEnv = new HashMap<String, Object>();
+    Map<String, Object> mergedEnv = new HashMap<>();
     if (this.environment != null) {
       mergedEnv.putAll(this.environment);
     }

@@ -52,7 +52,7 @@ public class RequestTypeChecker extends AbstractChecker<RequestType> {
         NodeList nodes = pDoc.getElementsByTagName("commands");
         if (nodes.getLength() > 0) {
             // Leave typeSet null if no commands has been given...
-            typeSet = new HashSet<RequestType>();
+            typeSet = new HashSet<>();
         }
         for (int i = 0;i<nodes.getLength();i++) {
             Node node = nodes.item(i);

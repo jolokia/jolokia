@@ -22,8 +22,9 @@ import java.util.Map;
  * @author roland
  * @since 21.04.11
  */
+@SuppressWarnings("rawtypes")
 public interface WriteDataMBean {
-    
+
     int getSimple();
 
     void setSimple(int i);

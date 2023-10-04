@@ -44,7 +44,7 @@ public abstract class SimplifierExtractor<T> implements Extractor {
 
     private final Map<String, AttributeExtractor<T>> extractorMap;
 
-    private Class<T> type;
+    private final Class<T> type;
 
     /**
      * Super constructor taking the value type as argument
@@ -52,14 +52,14 @@ public abstract class SimplifierExtractor<T> implements Extractor {
      * @param pType type for which this extractor is responsible
      */
     protected SimplifierExtractor(Class<T> pType) {
-        extractorMap = new HashMap<String, AttributeExtractor<T>>();
+        extractorMap = new HashMap<>();
         type = pType;
         // Old method, here only for backwards compatibility. Please initialize in the constructor instead
         init(extractorMap);
     }
 
     /** {@inheritDoc} */
-    public Class getType() {
+    public Class<?> getType() {
         return type;
     }
 
@@ -71,6 +71,7 @@ public abstract class SimplifierExtractor<T> implements Extractor {
         if (path != null) {
             return extractWithPath(pConverter, pValue, pPathParts, jsonify, path, faultHandler);
         } else {
+            //noinspection unchecked
             return jsonify ? extractAll(pConverter, (T) pValue, pPathParts, jsonify) : pValue;
         }
     }
@@ -78,16 +79,14 @@ public abstract class SimplifierExtractor<T> implements Extractor {
     private Object extractAll(ObjectToJsonConverter pConverter, T pValue, Stack<String> pPathParts, boolean jsonify) throws AttributeNotFoundException {
         JSONObject ret = new JSONObject();
         for (Map.Entry<String, AttributeExtractor<T>> entry : extractorMap.entrySet()) {
+            @SuppressWarnings("unchecked")
             Stack<String> paths = (Stack<String>) pPathParts.clone();
             try {
                 Object value = entry.getValue().extract(pValue);
+                //noinspection unchecked
                 ret.put(entry.getKey(),pConverter.extractObject(value, paths, jsonify));
-            } catch (AttributeExtractor.SkipAttributeException e) {
-                // Skip this one ...
-                continue;
-            } catch (ValueFaultHandler.AttributeFilteredException e) {
-                // ... and this, too
-                continue;
+            } catch (AttributeExtractor.SkipAttributeException | ValueFaultHandler.AttributeFilteredException e) {
+                // Skip this one
             }
         }
         if (ret.isEmpty()) {
@@ -104,6 +103,7 @@ public abstract class SimplifierExtractor<T> implements Extractor {
         }
 
         try {
+            @SuppressWarnings("unchecked")
             Object attributeValue = extractor.extract((T) pValue);
             return pConverter.extractObject(attributeValue, pPathParts, jsonify);
         } catch (AttributeExtractor.SkipAttributeException e) {

@@ -18,7 +18,7 @@ package org.jolokia.server.core.service.api;
 
 
 /**
- * Simple log handler for dispatching logging to e.g. a {@link javax.servlet.http.HttpServlet}
+ * Simple log handler for dispatching logging to e.g. a {@link jakarta.servlet.http.HttpServlet}
  * @author roland
  * @since Nov 11, 2009
  */

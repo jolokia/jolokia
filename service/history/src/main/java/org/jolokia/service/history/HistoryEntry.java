@@ -38,7 +38,7 @@ class HistoryEntry implements Serializable {
 
 
     @SuppressWarnings("PMD.LooseCoupling")
-    private LinkedList<ValueEntry> values;
+    private final LinkedList<ValueEntry> values;
     private HistoryLimit limit;
 
     /**
@@ -48,14 +48,15 @@ class HistoryEntry implements Serializable {
      */
     HistoryEntry(HistoryLimit pLimit) {
         limit = pLimit;
-        values = new LinkedList<ValueEntry>();
+        values = new LinkedList<>();
     }
 
     /**
      * Get an JSON array with values (along with their timestamps)
      *
-     * @return array of values
+     * @return JSON array of values
      */
+    @SuppressWarnings("unchecked")
     public JSONArray jsonifyValues() {
         JSONArray jValues = new JSONArray();
         for (ValueEntry vEntry : values) {

@@ -145,7 +145,7 @@ public class JolokiaReadRequest extends JolokiaObjectNameRequest {
      * @return the creator implementation
      */
     static RequestCreator<JolokiaReadRequest> newCreator() {
-        return new RequestCreator<JolokiaReadRequest>() {
+        return new RequestCreator<>() {
             /** {@inheritDoc} */
             public JolokiaReadRequest create(Stack<String> pStack, ProcessingParameters pParams) throws MalformedObjectNameException {
                 return new JolokiaReadRequest(
@@ -158,7 +158,7 @@ public class JolokiaReadRequest extends JolokiaObjectNameRequest {
             /** {@inheritDoc} */
             public JolokiaReadRequest create(Map<String, ?> requestMap, ProcessingParameters pParams)
                     throws MalformedObjectNameException {
-                return new JolokiaReadRequest(requestMap,pParams);
+                return new JolokiaReadRequest(requestMap, pParams);
             }
         };
     }

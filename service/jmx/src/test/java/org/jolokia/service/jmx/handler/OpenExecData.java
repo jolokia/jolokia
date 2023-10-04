@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Set;
 
 
+@SuppressWarnings("rawtypes")
 public class OpenExecData implements OpenExecDataMXBean {
 
 	public OpenWriteData compositeData(OpenWriteData data) {
@@ -44,7 +45,7 @@ public class OpenExecData implements OpenExecDataMXBean {
 	public Set opSetData(Set<OpenWriteData> data) {
         return data;
     }
-	
+
 	public OpenWriteData overloaded(OpenWriteData data) {
 
         return data;
@@ -53,6 +54,6 @@ public class OpenExecData implements OpenExecDataMXBean {
 	public String overloaded(String data) {
         return data;
     }
-	
+
 
 }

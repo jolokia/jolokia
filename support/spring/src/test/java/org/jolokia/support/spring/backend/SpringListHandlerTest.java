@@ -1,8 +1,5 @@
 package org.jolokia.support.spring.backend;
 
-import org.testng.annotations.Test;
-
-import static org.testng.Assert.*;
 /*
  *
  * Copyright 2015 Roland Huss
@@ -20,6 +17,8 @@ import static org.testng.Assert.*;
  * limitations under the License.
  */
 
+import org.testng.annotations.Test;
+
 /**
  * @author roland
  * @since 14/01/16
@@ -28,10 +27,6 @@ public class SpringListHandlerTest {
 
     @Test
     public void simple() {
-
-
-
     }
-
 
 }

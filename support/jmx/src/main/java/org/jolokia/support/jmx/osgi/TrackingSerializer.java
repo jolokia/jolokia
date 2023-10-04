@@ -22,7 +22,7 @@ import org.osgi.util.tracker.ServiceTracker;
 public class TrackingSerializer extends AbstractJolokiaService<Serializer> implements Serializer {
 
     // tracks the service
-    private final ServiceTracker tracker;
+    private final ServiceTracker<?, ?> tracker;
 
     /**
      * Proxy using the given context for tracking serializer
@@ -31,7 +31,7 @@ public class TrackingSerializer extends AbstractJolokiaService<Serializer> imple
      */
     TrackingSerializer(BundleContext pContext) {
         super(Serializer.class,0);
-        tracker = new ServiceTracker(pContext,Serializer.class.getName(),null);
+        tracker = new ServiceTracker<>(pContext,Serializer.class.getName(),null);
     }
 
     // Get the delegated service via the tracker

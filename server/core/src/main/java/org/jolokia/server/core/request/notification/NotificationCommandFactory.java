@@ -34,8 +34,7 @@ public final class NotificationCommandFactory {
     // Only static methods
     private NotificationCommandFactory() {}
 
-    private static final Map<NotificationCommandType, Creator> CREATORS =
-            new HashMap<NotificationCommandType, Creator>();
+    private static final Map<NotificationCommandType, Creator> CREATORS = new HashMap<>();
 
     /**
      * Create a command out of the request path. The command type must be on top
@@ -81,47 +80,13 @@ public final class NotificationCommandFactory {
 
     // Build up the lookup map
     static {
-        CREATORS.put(NotificationCommandType.REGISTER,new Creator() {
-            /** {@inheritDoc} */
-            public NotificationCommand create(Stack<String> pStack,Map<String,?> pMap) {
-                return new RegisterCommand();
-            }
-        });
-        CREATORS.put(NotificationCommandType.UNREGISTER,new Creator() {
-            /** {@inheritDoc} */
-            public NotificationCommand create(Stack<String> pStack,Map<String, ?> pMap) {
-                return pStack != null ? new UnregisterCommand(pStack) : new UnregisterCommand(pMap);
-            }
-        });
-        CREATORS.put(NotificationCommandType.ADD,new Creator() {
-            /** {@inheritDoc} */
-            public NotificationCommand create(Stack<String> pStack, Map<String, ?> pMap) throws MalformedObjectNameException {
-                return pStack != null ? new AddCommand(pStack) : new AddCommand(pMap);
-            }
-        });
-        CREATORS.put(NotificationCommandType.REMOVE,new Creator() {
-            /** {@inheritDoc} */
-            public NotificationCommand create(Stack<String> pStack, Map<String, ?> pMap) throws MalformedObjectNameException {
-                return pStack != null ? new RemoveCommand(pStack) : new RemoveCommand(pMap);
-            }
-        });
-        CREATORS.put(NotificationCommandType.PING,new Creator() {
-            /** {@inheritDoc} */
-            public NotificationCommand create(Stack<String> pStack, Map<String, ?> pMap) throws MalformedObjectNameException {
-                return pStack != null ? new PingCommand(pStack) : new PingCommand(pMap);
-            }
-        });
-        CREATORS.put(NotificationCommandType.OPEN, new Creator() {
-            public NotificationCommand create(Stack<String> pStack, Map<String, ?> pMap) throws MalformedObjectNameException {
-                return pStack != null ? new OpenCommand(pStack) : new OpenCommand(pMap);
-            }
-        });
-        CREATORS.put(NotificationCommandType.LIST,new Creator() {
-            /** {@inheritDoc} */
-            public NotificationCommand create(Stack<String> pStack, Map<String, ?> pMap) throws MalformedObjectNameException {
-                return pStack != null ? new ListCommand(pStack) : new ListCommand(pMap);
-            }
-        });
+        CREATORS.put(NotificationCommandType.REGISTER, (pStack, pMap) -> new RegisterCommand());
+        CREATORS.put(NotificationCommandType.UNREGISTER, (pStack, pMap) -> pStack != null ? new UnregisterCommand(pStack) : new UnregisterCommand(pMap));
+        CREATORS.put(NotificationCommandType.ADD, (pStack, pMap) -> pStack != null ? new AddCommand(pStack) : new AddCommand(pMap));
+        CREATORS.put(NotificationCommandType.REMOVE, (pStack, pMap) -> pStack != null ? new RemoveCommand(pStack) : new RemoveCommand(pMap));
+        CREATORS.put(NotificationCommandType.PING, (pStack, pMap) -> pStack != null ? new PingCommand(pStack) : new PingCommand(pMap));
+        CREATORS.put(NotificationCommandType.OPEN, (pStack, pMap) -> pStack != null ? new OpenCommand(pStack) : new OpenCommand(pMap));
+        CREATORS.put(NotificationCommandType.LIST, (pStack, pMap) -> pStack != null ? new ListCommand(pStack) : new ListCommand(pMap));
 
 
     }

@@ -17,18 +17,6 @@
 
 package org.jolokia.jvmagent.security;
 
-import com.sun.net.httpserver.Authenticator;
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpPrincipal;
-import com.sun.net.httpserver.HttpsExchange;
-import org.jolokia.jvmagent.JolokiaServerConfig;
-import org.jolokia.server.core.service.api.JolokiaContext;
-
-import javax.naming.InvalidNameException;
-import javax.naming.ldap.LdapName;
-import javax.naming.ldap.Rdn;
-import javax.net.ssl.SSLPeerUnverifiedException;
-import javax.security.auth.x500.X500Principal;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
@@ -36,6 +24,17 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import javax.naming.InvalidNameException;
+import javax.naming.ldap.LdapName;
+import javax.naming.ldap.Rdn;
+import javax.net.ssl.SSLPeerUnverifiedException;
+import javax.security.auth.x500.X500Principal;
+
+import com.sun.net.httpserver.Authenticator;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpPrincipal;
+import com.sun.net.httpserver.HttpsExchange;
+import org.jolokia.jvmagent.JolokiaServerConfig;
 
 public class ClientCertAuthenticator extends Authenticator {
 
@@ -43,6 +42,7 @@ public class ClientCertAuthenticator extends Authenticator {
     static final String CLIENTAUTH_OID = "1.3.6.1.5.5.7.3.2";
 
     // whether to use client cert authentication
+    // TODO: not used
     private final boolean useSslClientAuthentication;
     private final List<LdapName> allowedPrincipals;
     private final boolean extendedClientCheck;
@@ -51,7 +51,6 @@ public class ClientCertAuthenticator extends Authenticator {
      * Constructor
      *
      * @param pConfig full server config (in contrast to the jolokia config use by the http-handler)
-     * @param pContext the Jolokia context to use
      */
     public ClientCertAuthenticator(JolokiaServerConfig pConfig) {
         useSslClientAuthentication = pConfig.useSslClientAuthentication();
@@ -141,7 +140,7 @@ public class ClientCertAuthenticator extends Authenticator {
     private Set<Rdn> getPrincipalRdns(X500Principal principal) {
         try {
             LdapName certAsLdapName =new LdapName(principal.getName());
-            return new HashSet<Rdn>(certAsLdapName.getRdns());
+            return new HashSet<>(certAsLdapName.getRdns());
         } catch (InvalidNameException e) {
             throw new SecurityException("Cannot parse '" + principal + "' as LDAP name");
         }
@@ -150,7 +149,7 @@ public class ClientCertAuthenticator extends Authenticator {
     private List<LdapName> parseAllowedPrincipals(JolokiaServerConfig pConfig) {
         List<String> principals = pConfig.getClientPrincipals();
         if (principals != null) {
-            List<LdapName> ret = new ArrayList<LdapName>();
+            List<LdapName> ret = new ArrayList<>();
             for (String principal : principals) {
                 try {
                     ret.add(new LdapName(principal));

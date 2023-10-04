@@ -48,7 +48,7 @@ import org.json.simple.JSONObject;
 class NotificationListenerDelegate implements NotificationListener {
 
     // Managed clients
-    private Map<String, Client> clients;
+    private final Map<String, Client> clients;
 
     // Backendmanager holding the backends
     private final NotificationBackendManager backendManager;
@@ -59,7 +59,7 @@ class NotificationListenerDelegate implements NotificationListener {
      */
     NotificationListenerDelegate(NotificationBackendManager pBackendManager) {
         backendManager = pBackendManager;
-        clients = new HashMap<String, Client>();
+        clients = new HashMap<>();
     }
 
     /**
@@ -148,7 +148,7 @@ class NotificationListenerDelegate implements NotificationListener {
                 pExecutor.each(listenerRegistration.getMBeanName(),new MBeanServerAccess.MBeanEachCallback() {
                     /** {@inheritDoc} */
                     public void callback(MBeanServerConnection pConn, ObjectName pName)
-                            throws ReflectionException, InstanceNotFoundException, IOException, MBeanException {
+                            throws InstanceNotFoundException, IOException {
                         pConn.addNotificationListener(pName,NotificationListenerDelegate.this,
                                                       listenerRegistration.getFilter(),listenerRegistration);
                         added[0] = true;
@@ -181,8 +181,7 @@ class NotificationListenerDelegate implements NotificationListener {
         final ListenerRegistration registration = client.get(pHandle);
         pExecutor.each(registration.getMBeanName(), new MBeanServerAccess.MBeanEachCallback() {
             /** {@inheritDoc} */
-            public void callback(MBeanServerConnection pConn, ObjectName pName)
-                    throws ReflectionException, InstanceNotFoundException, IOException, MBeanException {
+            public void callback(MBeanServerConnection pConn, ObjectName pName) throws InstanceNotFoundException, IOException {
                 try {
                     pConn.removeNotificationListener(pName, NotificationListenerDelegate.this, registration.getFilter(), registration);
                 } catch (ListenerNotFoundException e) {

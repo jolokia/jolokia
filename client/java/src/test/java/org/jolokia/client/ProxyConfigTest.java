@@ -1,5 +1,5 @@
 package org.jolokia.client;/*
- * 
+ *
  * Copyright 2014 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,7 +29,7 @@ public class ProxyConfigTest {
 
 
     @Test
-    public void testInvalidArguments() throws Exception {
+    public void testInvalidArguments() {
         for (String spec : new String[] {
                 "",
                 "host",
@@ -51,7 +51,7 @@ public class ProxyConfigTest {
 
     @Test
     public void testParseProxySettings_schemaHostColonPost() throws Exception {
-        String testData[][] = {
+        String[][] testData = {
                 { "http://host:8080", "host", "8080", null, null },
                 { "http://user@host:8080", "host", "8080", "user", null },
                 { "http://user:pass@host:8080", "host", "8080", "user", "pass" },

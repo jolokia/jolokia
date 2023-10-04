@@ -18,7 +18,7 @@ import static org.testng.Assert.*;
  */
 public class SpringJolokiaLogHandlerHolderTest {
     @Test
-    public void logHandlerProp() throws Exception {
+    public void logHandlerProp() {
         SpringJolokiaLogHandlerHolder holder = new SpringJolokiaLogHandlerHolder();
         LogHandler handler = new CommonsLogHandler(null);
         holder.setLogHandler(handler);
@@ -27,7 +27,7 @@ public class SpringJolokiaLogHandlerHolderTest {
     }
 
     @Test
-    public void logHandlerViaType() throws Exception {
+    public void logHandlerViaType() {
         SpringJolokiaLogHandlerHolder holder = new SpringJolokiaLogHandlerHolder();
         holder.setType("log4j2");
         holder.setCategory("JOLOKIA");
@@ -38,8 +38,8 @@ public class SpringJolokiaLogHandlerHolderTest {
     }
 
     @Test
-    public void checkAllTypes() throws Exception {
-        List<String> types = new ArrayList<String>();
+    public void checkAllTypes() {
+        List<String> types = new ArrayList<>();
         for (SpringJolokiaLogHandlerHolder.LogHandlerType t :
                 SpringJolokiaLogHandlerHolder.LogHandlerType.values()) {
             types.add((String) ReflectionTestUtils.getField(t, "type"));
@@ -59,14 +59,14 @@ public class SpringJolokiaLogHandlerHolderTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class,
           expectedExceptionsMessageRegExp = ".*((log-ref|type).*){2}.*")
-    public void noTypeGiven() throws Exception {
+    public void noTypeGiven() {
         SpringJolokiaLogHandlerHolder holder = new SpringJolokiaLogHandlerHolder();
         holder.afterPropertiesSet();
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,
     expectedExceptionsMessageRegExp = ".*bla.*")
-    public void invalidType() throws Exception {
+    public void invalidType() {
         SpringJolokiaLogHandlerHolder holder = new SpringJolokiaLogHandlerHolder();
         holder.setType("bla");
         holder.afterPropertiesSet();

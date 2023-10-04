@@ -116,8 +116,8 @@ public final class NetworkUtil {
      *
      * @return true if at least one network interface supports multicast
      */
-    public static boolean isMulticastSupported() throws SocketException {
-        return getMulticastAddresses().size() != 0;
+    public static boolean isMulticastSupported() {
+        return !getMulticastAddresses().isEmpty();
     }
 
     /**
@@ -150,7 +150,7 @@ public final class NetworkUtil {
         Enumeration<NetworkInterface> nifs;
         try {
             nifs = NetworkInterface.getNetworkInterfaces();
-            List<InetAddress> ret = new ArrayList<InetAddress>();
+            List<InetAddress> ret = new ArrayList<>();
             while (nifs.hasMoreElements()) {
                 NetworkInterface nif = nifs.nextElement();
                 if (checkMethod(nif, supportsMulticast) && checkMethod(nif,isUp)) {
@@ -227,9 +227,7 @@ public final class NetworkUtil {
         if (toCheck != null) {
             try {
                 return (Boolean) toCheck.invoke(iface, (Object[]) null);
-            } catch (IllegalAccessException e) {
-                return false;
-            } catch (InvocationTargetException e) {
+            } catch (IllegalAccessException | InvocationTargetException e) {
                 return false;
             }
         }
@@ -277,23 +275,13 @@ public final class NetworkUtil {
 
     // Check a port by connecting to it. Try only 200ms.
     private static boolean isPortOpen(InetAddress pAddress, int pPort) {
-        Socket socket = null;
-        try {
-            socket = new Socket();
+        try (Socket socket = new Socket()) {
             socket.setReuseAddress(true);
             SocketAddress sa = new InetSocketAddress(pAddress, pPort);
             socket.connect(sa, 200);
             return socket.isConnected();
         } catch (IOException e) {
             return false;
-        } finally {
-            if (socket != null) {
-                try {
-                    socket.close();
-                } catch (IOException e) {
-                    // Best effort. Hate that close throws an IOException, btw. Never saw a real use case for that.
-                }
-            }
         }
     }
 
@@ -313,18 +301,18 @@ public final class NetworkUtil {
      * @throws SocketException
      */
     public static String dumpLocalNetworkInfo() throws UnknownHostException, SocketException {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         InetAddress addr = InetAddress.getLocalHost();
-        buffer.append("Localhost: " + getAddrInfo(addr) + "\n");
+        buffer.append("Localhost: ").append(getAddrInfo(addr)).append("\n");
         Enumeration<NetworkInterface> nifs = NetworkInterface.getNetworkInterfaces();
         buffer.append("Network interfaces:\n");
         while (nifs.hasMoreElements()) {
             NetworkInterface nif = nifs.nextElement();
-            buffer.append("  - " + getNetworkInterfaceInfo(nif) + "\n");
+            buffer.append("  - ").append(getNetworkInterfaceInfo(nif)).append("\n");
             Enumeration<InetAddress> addresses = nif.getInetAddresses();
             while (addresses.hasMoreElements()) {
                 addr = addresses.nextElement();
-                buffer.append("    " + getAddrInfo(addr) + "\n");
+                buffer.append("    ").append(getAddrInfo(addr)).append("\n");
             }
         }
         return buffer.toString();
@@ -346,7 +334,7 @@ public final class NetworkUtil {
             return null;
         }
         Matcher matcher = EXPRESSION_EXTRACTOR.matcher(pValue);
-        StringBuffer ret = new StringBuffer();
+        StringBuilder ret = new StringBuilder();
         try {
             while (matcher.find()) {
                 String var = matcher.group(1);
@@ -380,7 +368,7 @@ public final class NetworkUtil {
     private static String extractKey(String pVar, String pPrefix) {
         if (pVar.toLowerCase().startsWith(pPrefix + ":")) {
             String ret = pVar.substring(pPrefix.length() + 1);
-            if (ret.length() == 0) {
+            if (ret.isEmpty()) {
                 throw new IllegalArgumentException("Expression with " + pPrefix + ": must not contain spaces");
             }
             return ret;

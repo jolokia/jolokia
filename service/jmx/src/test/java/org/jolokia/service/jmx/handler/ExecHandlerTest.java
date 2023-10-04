@@ -39,13 +39,11 @@ public class ExecHandlerTest {
 
     private ObjectName oName;
 
-    private TestJolokiaContext ctx;
-
     @BeforeMethod
-    public void createHandler() throws MalformedObjectNameException {
-        ctx = new TestJolokiaContext();
+    public void createHandler() {
+        TestJolokiaContext ctx = new TestJolokiaContext();
         handler = new ExecHandler();
-        handler.init(ctx,null);
+        handler.init(ctx, null);
     }
 
     @BeforeClass
@@ -96,17 +94,18 @@ public class ExecHandlerTest {
 
     @Test
     public void execWithArgumentsAndReturn() throws Exception {
-        List list = new ArrayList();
+        List<String> list = new ArrayList<>();
         list.add("wollscheid");
 
         JolokiaExecRequest request = new JolokiaRequestBuilder(EXEC,oName).
                 operation("withArgs").
                 arguments(10L,list,Boolean.TRUE)
                 .build();
-        Map result = (Map) handler.handleSingleServerRequest(getMBeanServer(), request);
+        @SuppressWarnings("unchecked")
+        Map<String, ?> result = (Map<String, ?>) handler.handleSingleServerRequest(getMBeanServer(), request);
         assertEquals(result.get("long"),10L);
         assertTrue(result.get("list") instanceof List);
-        assertEquals(((List) result.get("list")).get(0), "wollscheid");
+        assertEquals(((List<?>) result.get("list")).get(0), "wollscheid");
         assertTrue((Boolean) result.get("boolean"));
     }
 

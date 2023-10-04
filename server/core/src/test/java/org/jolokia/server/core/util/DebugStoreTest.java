@@ -59,7 +59,7 @@ public class DebugStoreTest {
         store.log("Test2");
         store.log("Test3");
         // Test1 should be removed
-        assertTrue(!store.debugInfo().contains("Test1"));
+        assertFalse(store.debugInfo().contains("Test1"));
         assertTrue(store.debugInfo().contains("Test2"));
         assertTrue(store.debugInfo().contains("Test3"));
 
@@ -67,8 +67,8 @@ public class DebugStoreTest {
         assertEquals(store.getMaxDebugEntries(),2);
         store.setMaxDebugEntries(1);
         assertEquals(store.getMaxDebugEntries(),1);
-        assertTrue(!store.debugInfo().contains("Test1"));
-        assertTrue(!store.debugInfo().contains("Test2"));
+        assertFalse(store.debugInfo().contains("Test1"));
+        assertFalse(store.debugInfo().contains("Test2"));
         assertTrue(store.debugInfo().contains("Test3"));
     }
 

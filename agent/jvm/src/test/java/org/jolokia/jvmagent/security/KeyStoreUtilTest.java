@@ -38,6 +38,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.jolokia.server.core.Version;
 import org.testng.annotations.Test;
@@ -143,7 +144,7 @@ public class KeyStoreUtilTest {
     }
 
     @Test
-    public void testInvalid() throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, InvalidKeySpecException {
+    public void testInvalid() throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException {
 
         for (String file : new String[]{"invalid/base64.pem", "invalid/begin.pem", "invalid/end.pem"}) {
             File invalidPem = getTempFile(file);
@@ -152,12 +153,12 @@ public class KeyStoreUtilTest {
             try {
                 KeyStoreUtil.updateWithCaPem(keystore, invalidPem);
                 fail();
-            } catch (Exception exp) {
+            } catch (Exception ignored) {
             }
             try {
                 KeyStoreUtil.updateWithServerPems(keystore, getTempFile("server/cert.pem"), invalidPem, "RSA", new char[0]);
                 fail();
-            } catch (Exception exp) {
+            } catch (Exception ignored) {
             }
         }
     }
@@ -167,10 +168,10 @@ public class KeyStoreUtilTest {
         KeyStore keystore = createKeyStore();
         long millis = System.currentTimeMillis();
         updateKeyStoreWithSelfSignedCert(keystore);
-        System.out.println(String.format("SelfSigned Cert: Duration = %d ms", System.currentTimeMillis() - millis));
+        System.out.printf("SelfSigned Cert: Duration = %d ms%n", System.currentTimeMillis() - millis);
     }
 
-    private void updateKeyStoreWithSelfSignedCert(KeyStore keystore) throws NoSuchProviderException, NoSuchAlgorithmException, IOException, InvalidKeyException, CertificateException, SignatureException, KeyStoreException {
+    private void updateKeyStoreWithSelfSignedCert(KeyStore keystore) throws NoSuchAlgorithmException, KeyStoreException {
         KeyStoreUtil.updateWithSelfSignedServerCertificate(keystore);
         X509Certificate cert = (X509Certificate) keystore.getCertificate("jolokia-agent");
         assertNotNull(cert);
@@ -189,22 +190,17 @@ public class KeyStoreUtilTest {
     private File getTempFile(String path) throws IOException {
         InputStream is = this.getClass().getResourceAsStream("/certs/" + path);
         File dest = File.createTempFile("cert-", "pem");
-        LineNumberReader reader = new LineNumberReader(new InputStreamReader(is));
-        FileWriter writer = new FileWriter(dest);
-        try {
+        try (LineNumberReader reader = new LineNumberReader(new InputStreamReader(Objects.requireNonNull(is))); FileWriter writer = new FileWriter(dest)) {
             String line;
             while ((line = reader.readLine()) != null) {
                 writer.write(line + "\n");
             }
             return dest;
-        } finally {
-            writer.close();
-            reader.close();
         }
     }
 
     private List<String> asList(Enumeration<String> enumeration) {
-        List<String> ret = new ArrayList<String>();
+        List<String> ret = new ArrayList<>();
         while (enumeration.hasMoreElements()) {
             ret.add(enumeration.nextElement());
         }

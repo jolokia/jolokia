@@ -31,7 +31,7 @@ import static org.testng.Assert.*;
 public class JSR160HiddenTest extends AbstractJ4pIntegrationTest {
 
     @Test
-    public void hiddenMBeanNotAvailableForJSR160() throws MalformedObjectNameException, J4pException {
+    public void hiddenMBeanNotAvailableForJSR160() throws MalformedObjectNameException {
         try {
             J4pReadRequest request = new J4pReadRequest(getTargetProxyConfig(),
                                                         ItSetup.JOLOKIA_IT_DOMAIN_HIDDEN + ":type=attribute","LongSeconds");

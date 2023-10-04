@@ -31,6 +31,7 @@ import org.w3c.dom.Element;
 public class AgentBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
     @Override
+    @SuppressWarnings("NullableProblems")
     protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
         Element config = DomUtils.getChildElementByTagName(element,"config");
         if (config != null) {
@@ -58,6 +59,7 @@ public class AgentBeanDefinitionParser extends AbstractSingleBeanDefinitionParse
     }
 
     @Override
+    @SuppressWarnings("NullableProblems")
     protected Class<?> getBeanClass(Element element) {
         return SpringJolokiaAgent.class;
     }

@@ -20,18 +20,18 @@ import org.json.simple.JSONObject;
 
 /**
  * Configuration for a JSR-160 proxy request for specifying the target server.
- * 
+ *
  * @author roland
  * @since 27.12.11
  */
 public class J4pTargetConfig {
 
     // Service URL for the final target
-    private String url;
+    private final String url;
 
     // Optional user and password
-    private String user;
-    private String password;
+    private final String user;
+    private final String password;
 
     /**
      * Constructor
@@ -59,14 +59,17 @@ public class J4pTargetConfig {
 
     /**
      * Get a JSON representation of this target configuration
-     * 
+     *
      * @return JSON representation of the target configuration
      */
     public JSONObject toJson() {
         JSONObject ret = new JSONObject();
+        //noinspection unchecked
         ret.put("url",url);
         if (user != null) {
+            //noinspection unchecked
             ret.put("user",user);
+            //noinspection unchecked
             ret.put("password",password);
         }
         return ret;

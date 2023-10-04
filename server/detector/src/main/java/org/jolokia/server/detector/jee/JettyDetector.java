@@ -44,7 +44,7 @@ public class JettyDetector extends AbstractServerDetector {
     /** {@inheritDoc}
      * @param pMBeanServerAccess*/
     public ServerHandle detect(MBeanServerAccess pMBeanServerAccess) {
-        Class serverClass = ClassUtil.classForName("org.mortbay.jetty.Server",false);
+        Class<?> serverClass = ClassUtil.classForName("org.mortbay.jetty.Server", false);
         if (serverClass != null) {
             return new DefaultServerHandle("Mortbay", getName(), getVersion(serverClass));
         }
@@ -55,20 +55,18 @@ public class JettyDetector extends AbstractServerDetector {
         return null;
     }
 
-    private String getVersion(Class serverClass) {
+    private String getVersion(Class<?> serverClass) {
         try {
             Method method = serverClass.getMethod("getVersion");
             if (Modifier.isStatic(method.getModifiers())) {
                 return (String) method.invoke(null);
             } else {
-                Constructor ctr = serverClass.getConstructor();
+                Constructor<?> ctr = serverClass.getConstructor();
                 Object server = ctr.newInstance();
                 return (String) method.invoke(server);
             }
-        } catch (NoSuchMethodException e) {
-        } catch (InvocationTargetException e) {
-        } catch (IllegalAccessException e) {
-        } catch (InstantiationException e) {
+        } catch (NoSuchMethodException | InvocationTargetException | InstantiationException |
+                 IllegalAccessException ignored) {
         }
         return null;
     }

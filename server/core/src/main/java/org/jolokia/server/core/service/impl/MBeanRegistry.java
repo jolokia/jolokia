@@ -33,7 +33,7 @@ import javax.management.*;
 public class MBeanRegistry {
 
     // Handles remembered for unregistering
-    private final List<MBeanHandle> mBeanHandles = new ArrayList<MBeanHandle>();
+    private final List<MBeanHandle> mBeanHandles = new ArrayList<>();
 
     /**
      * Register a MBean under a certain name to the platform MBeanServer
@@ -71,7 +71,7 @@ public class MBeanRegistry {
      * @return the object name of the registered MBean
      * @throws MBeanRegistrationException when registration failed
      * @throws InstanceAlreadyExistsException when there is already MBean with this name
-     * @throws NotCompliantMBeanException
+     * @throws NotCompliantMBeanException when the object is not a JMX compliant MBean
      * @throws MalformedObjectNameException if the name is not valid
      */
     private ObjectName registerMBeanAtServer(MBeanServer pServer, Object pMBean, String pName)
@@ -118,15 +118,13 @@ public class MBeanRegistry {
      */
     public final void destroy() throws JMException {
         synchronized (mBeanHandles) {
-            List<JMException> exceptions = new ArrayList<JMException>();
-            List<MBeanHandle> unregistered = new ArrayList<MBeanHandle>();
+            List<JMException> exceptions = new ArrayList<>();
+            List<MBeanHandle> unregistered = new ArrayList<>();
             for (MBeanHandle handle : mBeanHandles) {
                 try {
                     unregistered.add(handle);
                     handle.server.unregisterMBean(handle.objectName);
-                } catch (InstanceNotFoundException e) {
-                    exceptions.add(e);
-                } catch (MBeanRegistrationException e) {
+                } catch (InstanceNotFoundException | MBeanRegistrationException e) {
                     exceptions.add(e);
                 }
             }
@@ -150,8 +148,8 @@ public class MBeanRegistry {
     // Handle for remembering registered MBeans
 
     private static final class MBeanHandle {
-        private ObjectName objectName;
-        private MBeanServer server;
+        private final ObjectName objectName;
+        private final MBeanServer server;
 
         private MBeanHandle(MBeanServer pServer, ObjectName pRegisteredName) {
             server = pServer;

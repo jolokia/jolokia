@@ -1,6 +1,7 @@
 package org.jolokia.it.core;
 
 import java.beans.ConstructorProperties;
+import java.util.Objects;
 
 /*
  * Copyright 2009-2011 Roland Huss
@@ -24,8 +25,8 @@ import java.beans.ConstructorProperties;
  * @since 07.08.11
  */
 public class ComplexMapKey implements Comparable<ComplexMapKey> {
-    private int number;
-    private String string;
+    private final int number;
+    private final String string;
 
     @ConstructorProperties({"string", "number"})
     public ComplexMapKey(String string, int number) {
@@ -54,9 +55,7 @@ public class ComplexMapKey implements Comparable<ComplexMapKey> {
         ComplexMapKey that = (ComplexMapKey) o;
 
         if (number != that.number) return false;
-        if (string != null ? !string.equals(that.string) : that.string != null) return false;
-
-        return true;
+        return Objects.equals(string, that.string);
     }
 
     @Override

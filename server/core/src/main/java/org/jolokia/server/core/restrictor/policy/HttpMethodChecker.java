@@ -49,7 +49,7 @@ public class HttpMethodChecker extends AbstractChecker<HttpMethod> {
         NodeList nodes = pPolicy.getElementsByTagName("http");
         if (nodes.getLength() > 0) {
             // Leave typeSet null if no commands has been given...
-            httpMethodsSet = new HashSet<String>();
+            httpMethodsSet = new HashSet<>();
         }
         for (int i = 0;i<nodes.getLength();i++) {
             Node node = nodes.item(i);

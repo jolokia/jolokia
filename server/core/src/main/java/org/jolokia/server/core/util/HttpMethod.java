@@ -33,7 +33,7 @@ public enum HttpMethod {
      */
     GET("get");
 
-    private String method;
+    private final String method;
 
     HttpMethod(String pMethod) {
         method = pMethod;

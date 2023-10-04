@@ -15,11 +15,9 @@ public class ClasspathServerDetectorLookup implements ServerDetectorLookup {
 
     /** {@inheritDoc} */
     public SortedSet<ServerDetector> lookup() {
-        SortedSet<ServerDetector> detectors = new TreeSet<ServerDetector>();
-        detectors.addAll(
-                LocalServiceFactory.<ServerDetector>createServices("META-INF/jolokia/detectors-default",
-                                                                   "META-INF/jolokia/detectors")
-                        );
+        SortedSet<ServerDetector> detectors = new TreeSet<>(
+                LocalServiceFactory.createServices("META-INF/jolokia/detectors-default",
+                                                   "META-INF/jolokia/detectors"));
         detectors.add(ServerDetector.FALLBACK);
         return detectors;
     }

@@ -35,7 +35,8 @@ public class OpenTypeDeserializer {
     protected boolean forgiving = false;
 
     // List of converters used
-    private List<OpenTypeConverter<? extends OpenType>> converters;
+    @SuppressWarnings("rawtypes")
+    private final List<OpenTypeConverter<? extends OpenType>> converters;
 
     /**
      * Constructor
@@ -58,7 +59,7 @@ public class OpenTypeDeserializer {
      * @param pValue value to convert from
      * @return the converted value
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public Object deserialize(OpenType pOpenType, Object pValue) {
         if (pValue == null) {
             return null;

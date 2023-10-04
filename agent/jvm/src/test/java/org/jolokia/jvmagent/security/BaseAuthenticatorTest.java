@@ -1,5 +1,5 @@
 package org.jolokia.jvmagent.security;/*
- * 
+ *
  * Copyright 2014 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,6 +16,7 @@ package org.jolokia.jvmagent.security;/*
  */
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import javax.security.auth.Subject;
 
@@ -38,7 +39,7 @@ public class BaseAuthenticatorTest {
         HttpExchange ex = createMock(MockableHttpExchange.class);
         Headers reqHeaders = new Headers();
         for (int i = 0; i < reqHeaderValues.length; i+=2) {
-            reqHeaders.put(reqHeaderValues[i], Arrays.asList(reqHeaderValues[i + 1]));
+            reqHeaders.put(reqHeaderValues[i], Collections.singletonList(reqHeaderValues[i + 1]));
         }
         expect(ex.getResponseHeaders()).andStubReturn(respHeaders);
         expect(ex.getRequestHeaders()).andStubReturn(reqHeaders);

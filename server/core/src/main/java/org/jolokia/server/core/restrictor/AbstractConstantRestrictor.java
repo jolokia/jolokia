@@ -31,7 +31,7 @@ import org.jolokia.server.core.util.RequestType;
  */
 public abstract class AbstractConstantRestrictor implements Restrictor {
 
-    private boolean isAllowed;
+    private final boolean isAllowed;
 
     /**
      * Create restrictor which always returns the given value on every check

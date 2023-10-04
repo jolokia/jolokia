@@ -21,12 +21,7 @@ public class BasicAuthenticator extends BaseAuthenticator {
     protected boolean doAuthenticate(HttpServletRequest pRequest, AuthorizationHeaderParser.Result pAuthInfo) {
         String providedUser = pAuthInfo.getUser();
         String providedPassword = pAuthInfo.getPassword();
-        if (providedUser != null && providedUser.trim().equals(userToCheck) &&
-                providedPassword != null && providedPassword.trim().equals(passwordToCheck)) {
-
-            return true;
-        } else {
-            return false;
-        }
+        return providedUser != null && providedUser.trim().equals(userToCheck) &&
+                providedPassword != null && providedPassword.trim().equals(passwordToCheck);
     }
 }

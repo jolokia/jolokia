@@ -27,7 +27,7 @@ public class JaasHttpAuthenticatorTest extends BaseAuthenticatorTest {
     private JaasHttpAuthenticator auth;
 
     @BeforeMethod
-    public void setUp() throws Exception {
+    public void setUp() {
         auth = new JaasHttpAuthenticator("jolokia");
     }
 
@@ -35,13 +35,14 @@ public class JaasHttpAuthenticatorTest extends BaseAuthenticatorTest {
     public void checkThatThreadLocalIsRemoved() throws NoSuchFieldException, IllegalAccessException {
         Field field = auth.getClass().getDeclaredField("subjectThreadLocal");
         field.setAccessible(true);
+        @SuppressWarnings("unchecked")
         ThreadLocal<Subject> tl = (ThreadLocal<Subject>) field.get(auth);
         assertNull(tl.get());
         field.setAccessible(false);
     }
 
     @Test
-    public void testAuthenticateNoAuthorizationHeader() throws Exception {
+    public void testAuthenticateNoAuthorizationHeader() {
         Headers respHeader = new Headers();
         HttpExchange ex = createHttpExchange(respHeader);
 
@@ -53,7 +54,7 @@ public class JaasHttpAuthenticatorTest extends BaseAuthenticatorTest {
     }
 
     @Test
-    public void testAuthenticateNoLoginModules() throws Exception {
+    public void testAuthenticateNoLoginModules() {
             Headers respHeader = new Headers();
             HttpExchange ex = createHttpExchange(respHeader, "Authorization", "Basic cm9sYW5kOnMhY3IhdA==");
 
@@ -62,7 +63,7 @@ public class JaasHttpAuthenticatorTest extends BaseAuthenticatorTest {
     }
 
     @Test
-    public void testAuthenticateSuccess() throws Exception {
+    public void testAuthenticateSuccess() {
         Headers respHeader = new Headers();
         final Subject subject = new Subject();
         HttpExchange ex = createHttpExchange(respHeader, subject, "Authorization", "Basic cm9sYW5kOnMhY3IhdA==");

@@ -116,7 +116,7 @@ public class Jsr160RequestHandler extends AbstractRequestHandler {
 
     // TODO: Add connector to a pool and release it on demand. For now, simply close it.
     private JMXConnector createConnector(JolokiaRequest pJmxReq) throws IOException {
-        ProxyTargetConfig targetConfig = new ProxyTargetConfig((Map<String, String>) pJmxReq.getOption("target"));
+        ProxyTargetConfig targetConfig = new ProxyTargetConfig(pJmxReq.getOption("target"));
         String urlS = targetConfig.getUrl();
         if (!acceptTargetUrl(urlS)) {
             throw new SecurityException(String.format("Target URL %s is not allowed by configuration", urlS));
@@ -141,10 +141,10 @@ public class Jsr160RequestHandler extends AbstractRequestHandler {
      * @return the prepared environment
      */
     protected Map<String,Object> prepareEnv(Map<String, String> pTargetConfig) {
-        if (pTargetConfig == null || pTargetConfig.size() == 0) {
+        if (pTargetConfig == null || pTargetConfig.isEmpty()) {
             return null;
         }
-        Map<String,Object> ret = new HashMap<String, Object>(pTargetConfig);
+        Map<String,Object> ret = new HashMap<>(pTargetConfig);
         String user = (String) ret.remove("user");
         String password  = (String) ret.remove("password");
         if (user != null && password != null) {
@@ -171,10 +171,6 @@ public class Jsr160RequestHandler extends AbstractRequestHandler {
 
     public String getProvider() {
         return "proxy";
-    }
-
-    public Object getRuntimeInfo() {
-        return null;
     }
 
     /** {@inheritDoc} */
@@ -214,21 +210,19 @@ public class Jsr160RequestHandler extends AbstractRequestHandler {
     }
 
     private Set<String> extractFrom(String ... paths) {
-        Set<String> ret = new HashSet<String>();
+        Set<String> ret = new HashSet<>();
         for (String path : paths) {
             if (path != null) {
                 ret.addAll(readPatterns(path));
             }
         }
-        return ret.size() > 0 ? ret : null;
+        return !ret.isEmpty() ? ret : null;
     }
 
     private List<? extends String> readPatterns(String pPath) {
-        BufferedReader reader = null;
-        List<String> ret = new ArrayList<String>();
+        List<String> ret = new ArrayList<>();
         Pattern commentPattern = Pattern.compile("^\\s*#.*$");
-        try {
-            reader = new BufferedReader(new FileReader(pPath));
+        try (BufferedReader reader = new BufferedReader(new FileReader(pPath))) {
             String line = reader.readLine();
             while (line != null) {
                 if (!commentPattern.matcher(line).matches()) {
@@ -238,17 +232,9 @@ public class Jsr160RequestHandler extends AbstractRequestHandler {
             }
             return ret;
         } catch (FileNotFoundException e) {
-            throw new IllegalArgumentException(String.format("No such pattern file %s", pPath ));
+            throw new IllegalArgumentException(String.format("No such pattern file %s", pPath));
         } catch (IOException e) {
-            throw new IllegalStateException(String.format("Error while reading pattern file %s: %s", pPath, e.getMessage() ));
-        } finally {
-            try {
-                if (reader != null) {
-                    reader.close();
-                }
-            } catch (IOException e) {
-                // we tried
-            }
+            throw new IllegalStateException(String.format("Error while reading pattern file %s: %s", pPath, e.getMessage()));
         }
     }
 

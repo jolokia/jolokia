@@ -42,7 +42,7 @@ public class DERObjectIdentifier implements DERObject {
         int p = 0;
         for (String v : vt) {
             try {
-                if ("".equals(v.trim())) {
+                if (v.trim().isEmpty()) {
                     throw new IllegalArgumentException("Bad syntax for OID \"" + value + "\"");
                 }
                 values[p] = Integer.parseInt(v);
@@ -88,7 +88,7 @@ public class DERObjectIdentifier implements DERObject {
         for (int i = 4; i >= 0; i--) {
             maxResult[i] = (byte) (v & 0x7F);
             if (i < 4) {
-                maxResult[i] |= 0x80;
+                maxResult[i] |= (byte) 0x80;
             }
             v >>>= 7;
         }

@@ -12,8 +12,8 @@ import org.jolokia.server.core.osgi.security.AuthorizationHeaderParser;
  * @since 07.06.13
 */
 public class UserPasswordHttpAuthenticator extends BasicAuthenticator {
-    private String user;
-    private String password;
+    private final String user;
+    private final String password;
 
     /**
      * Authenticator which checks against a given user and password

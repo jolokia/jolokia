@@ -29,7 +29,7 @@ import static org.testng.Assert.*;
  */
 public class ClientStoreTest {
     @Test
-    public void testAddAndPull() throws Exception {
+    public void testAddAndPull() {
         ClientStore clientStore = new ClientStore(5);
         Notification notif = new Notification("test.test", this, 1);
         clientStore.add(new TestNotificationSubscription("handle"),notif);
@@ -44,7 +44,7 @@ public class ClientStoreTest {
     }
 
     @Test
-    public void testRemoveSubscription() throws Exception {
+    public void testRemoveSubscription() {
         ClientStore clientStore = new ClientStore(5);
         Notification notif = new Notification("test.test", this, 1);
         clientStore.add(new TestNotificationSubscription("handle"),notif);

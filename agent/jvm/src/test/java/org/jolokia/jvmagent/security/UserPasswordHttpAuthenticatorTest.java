@@ -8,7 +8,7 @@ import static org.testng.Assert.assertTrue;
 public class UserPasswordHttpAuthenticatorTest {
 
     @Test
-    public void testCheckCredentials() throws Exception {
+    public void testCheckCredentials() {
         UserPasswordHttpAuthenticator auth = new UserPasswordHttpAuthenticator("jolokia","roland","s!cr!t");
         assertTrue(auth.checkCredentials("roland","s!cr!t"));
         assertFalse(auth.checkCredentials("roland", "bla"));

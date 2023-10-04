@@ -30,6 +30,7 @@ import org.json.simple.JSONObject;
  * @author roland
  * @since 28.09.11
  */
+@SuppressWarnings("rawtypes")
 class CompositeTypeConverter extends OpenTypeConverter<CompositeType> {
 
     /**
@@ -57,8 +58,9 @@ class CompositeTypeConverter extends OpenTypeConverter<CompositeType> {
                     pType + " failed because provided JSON type " + value.getClass() + " is not a JSONObject");
         }
 
+        @SuppressWarnings("unchecked")
         Map<String, Object> givenValues = (JSONObject) value;
-        Map<String, Object> compositeValues = new HashMap<String, Object>();
+        Map<String, Object> compositeValues = new HashMap<>();
 
         fillCompositeWithGivenValues(pType, compositeValues, givenValues);
         completeCompositeValuesWithDefaults(pType, compositeValues);
@@ -112,7 +114,7 @@ class CompositeTypeConverter extends OpenTypeConverter<CompositeType> {
     }
 
     // List of default values to use
-    private static final Map<String, Object> DEFAULT_PRIMITIVE_VALUES = new HashMap<String, Object>();;
+    private static final Map<String, Object> DEFAULT_PRIMITIVE_VALUES = new HashMap<>();
 
     static {
         DEFAULT_PRIMITIVE_VALUES.put(Boolean.class.getName(), false);

@@ -144,7 +144,7 @@ public class AgentDetails {
     /**
      * Get the details as JSON Object
      *
-     * @return
+     * @return the details JSON object
      */
     public JSONObject toJSONObject() {
         JSONObject resp = new JSONObject();

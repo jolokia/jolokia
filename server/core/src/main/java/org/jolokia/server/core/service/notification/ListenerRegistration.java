@@ -118,9 +118,7 @@ public class ListenerRegistration {
     @SuppressWarnings("unchecked")
     private JSONArray filterToJSON(NotificationFilterSupport pFilter) {
         JSONArray ret = new JSONArray();
-        for (String f : pFilter.getEnabledTypes()) {
-            ret.add(f);
-        }
+        ret.addAll(pFilter.getEnabledTypes());
         return ret;
     }
 }

@@ -49,32 +49,29 @@ public class NotificationHandler extends AbstractCommandHandler<JolokiaNotificat
         return RequestType.NOTIFICATION;
     }
 
-    @Override
     /** {@inheritDoc} */
+    @Override
     public boolean handleAllServersAtOnce(JolokiaNotificationRequest pRequest) {
         // We always handler requests on all MBeanServers
         return true;
     }
 
-    @Override
     /** {@inheritDoc} */
+    @Override
     protected void checkForRestriction(JolokiaNotificationRequest pRequest) {
         // Not used currently ...
     }
 
-    @Override
     /** {@inheritDoc} */
-    protected Object doHandleSingleServerRequest(MBeanServerConnection server, JolokiaNotificationRequest request)
-            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException,
-                   MBeanException, IOException, NotChangedException {
+    @Override
+    protected Object doHandleSingleServerRequest(MBeanServerConnection server, JolokiaNotificationRequest request) {
         throw new UnsupportedOperationException("Internal: Notification handler works an all MBeanServers, not on single one");
     }
 
-    @Override
     /** {@inheritDoc} */
+    @Override
     public Object doHandleAllServerRequest(MBeanServerAccess serverManager, JolokiaNotificationRequest request, Object pPreviousResult)
-            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException,
-                   MBeanException, IOException, NotChangedException, EmptyResponseException {
+            throws ReflectionException, MBeanException, IOException, EmptyResponseException {
         return dispatcher.dispatch(serverManager,request.getCommand());
     }
 

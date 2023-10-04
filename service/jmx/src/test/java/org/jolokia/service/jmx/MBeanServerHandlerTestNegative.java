@@ -36,6 +36,7 @@ import static org.testng.Assert.assertTrue;
  * @author roland
  * @since 02.09.11
  */
+@SuppressWarnings("NewClassNamingConvention")
 public class MBeanServerHandlerTestNegative {
 
     private MBeanRegistry handler;
@@ -55,13 +56,8 @@ public class MBeanServerHandlerTestNegative {
                 }
             });
             MBeanServerAccess servers = new DefaultMBeanServerAccess(connections);
-            final List<Boolean> results = new ArrayList<Boolean>();
-            servers.each(oName, new MBeanServerAccess.MBeanEachCallback() {
-                public void callback(MBeanServerConnection pConn, ObjectName pName)
-                        throws ReflectionException, InstanceNotFoundException, IOException, MBeanException {
-                    results.add(pConn.isRegistered(pName));
-                }
-            });
+            final List<Boolean> results = new ArrayList<>();
+            servers.each(oName, (pConn, pName) -> results.add(pConn.isRegistered(pName)));
             assertTrue(results.contains(Boolean.TRUE),"MBean not registered");
         } finally {
             TestDetector.setThrowAddException(false);
@@ -71,7 +67,7 @@ public class MBeanServerHandlerTestNegative {
 
     // ===================================================================================================
 
-    private void init() throws MalformedObjectNameException {
+    private void init() {
         TestDetector.reset();
         handler = new MBeanRegistry();
     }
