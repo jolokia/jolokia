@@ -67,22 +67,15 @@
     </dependency>
 
     <dependency>
-      <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-server</artifactId>
+      <groupId>org.eclipse.jetty.ee10</groupId>
+      <artifactId>jetty-ee10-webapp</artifactId>
       <version>${jetty.eclipse.version}</version>
       <scope>provided</scope>
     </dependency>
 
     <dependency>
-      <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-servlet</artifactId>
-      <version>11.0.16</version>
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-security</artifactId>
+      <groupId>org.eclipse.jetty.ee10</groupId>
+      <artifactId>jetty-ee10-servlet</artifactId>
       <version>${jetty.eclipse.version}</version>
       <scope>provided</scope>
     </dependency>
@@ -148,9 +141,9 @@
 
   <profiles>
     <profile>
-      <id>jetty8</id>
+      <id>jetty12</id>
       <properties>
-        <jetty.eclipse.version>${jetty8.eclipse.version}</jetty.eclipse.version>
+        <jetty.eclipse.version>${jetty.eclipse.version}</jetty.eclipse.version>
       </properties>
     </profile>
   </profiles>
