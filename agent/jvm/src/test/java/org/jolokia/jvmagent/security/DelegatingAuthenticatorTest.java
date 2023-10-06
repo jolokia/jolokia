@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.Writer;
 
 import javax.net.ssl.*;
-import jakarta.servlet.Servlet;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.*;
 
@@ -27,8 +26,10 @@ import com.sun.net.httpserver.*;
 import org.jolokia.test.util.EnvTestUtil;
 import org.jolokia.util.AuthorizationHeaderParser;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.Context;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
+import org.eclipse.jetty.server.Connector;
 import org.testng.annotations.*;
 
 import static org.testng.Assert.*;
@@ -50,34 +51,36 @@ public class DelegatingAuthenticatorTest extends BaseAuthenticatorTest {
     @BeforeClass
     public void setup() throws Exception {
         int port = EnvTestUtil.getFreePort();
+        // -- from the jetty documentation (https://eclipse.dev/jetty/documentation/jetty-12/programming-guide/index.html#pg-server-http)
         jettyServer = new Server(port);
-        Context jettyContext = new Context(jettyServer, "/");
-        ServletHolder holder = new ServletHolder(createServlet());
-        jettyContext.addServlet(holder, "/test/*");
-
+        Connector connector = new ServerConnector(jettyServer);
+        jettyServer.addConnector(connector);
+        ServletContextHandler context = new ServletContextHandler();
+        context.setContextPath("/test");
+        jettyServer.setHandler(context);
+        ServletHolder servletHolder = context.addServlet(TestServlet.class, "/*");
         jettyServer.start();
         url = "http://localhost:" + port + "/test";
     }
 
-    private Servlet createServlet() {
-        return new HttpServlet() {
-            protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-                String auth = req.getHeader("Authorization");
-                if (auth == null || !auth.equals("Bearer blub")) {
-                    resp.setStatus(401);
-                } else {
-                    resp.setContentType("text/json");
-                    Writer writer = resp.getWriter();
-                    if (req.getPathInfo() != null && req.getPathInfo().contains("invalid")) {
-                        writer.append("{\"Invalid JSON\"");
-                    } else {
-                        writer.append("{\"metadata\":{\"name\":\"roland\"},\"array\":[\"eins\",\"zwei\"]}");
-                    }
-                }
-            }
-        };
-    }
+	public static final class TestServlet extends HttpServlet {
+		private static final long serialVersionUID = -2728712850618912773L;
 
+		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+			String auth = req.getHeader("Authorization");
+			if (auth == null || !auth.equals("Bearer blub")) {
+				resp.setStatus(401);
+			} else {
+				resp.setContentType("text/json");
+				Writer writer = resp.getWriter();
+				if (req.getPathInfo() != null && req.getPathInfo().contains("invalid")) {
+					writer.append("{\"Invalid JSON\"");
+				} else {
+					writer.append("{\"metadata\":{\"name\":\"roland\"},\"array\":[\"eins\",\"zwei\"]}");
+				}
+			}
+		}
+	}
 
     @Test
     public void noAuth() {
