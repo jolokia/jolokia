@@ -63,14 +63,14 @@ if ($memory->{"used"} / $memory->{"max"} > 0.9) {
 }
 ----
 
-=== Javascript
+=== JavaScript
 
 The JSON based Jolokia protocol fits perfectly in the
-Javascript world. Jolokia provides a
-link:../client/javascript.html[Javascript client
+JavaScript world. Jolokia provides a
+link:../client/javascript.html[JavaScript client
 library] which makes it a piece of cake to access JMX
 information directly from within the browser. A variant of
-the memory example above looks in Javascript like this:
+the memory example above looks in JavaScript like this:
 
 [source,javascript]
 ----
@@ -134,7 +134,7 @@ evolution of Jolokia is to provide more client
 libraries. Top on the list are Groovy and Scala. If you like
 to add a client library in your favourite language, go
 ahead, we would be happy to include it. Currently, the
-tendency is to keep JVM based languages (+ Javascript) under
+tendency is to keep JVM based languages (+ JavaScript) under
 the Jolokia umbrella, but support for others (like
 https://www.jmx4perl.org[jmx4perl]) hosted
 elsewhere is in our focus as well. But well, let's see ;-).

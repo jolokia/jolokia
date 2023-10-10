@@ -66,9 +66,9 @@ from our maven repository, too:
 |https://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-kubernetes/{currentStableVersion}/jolokia-kubernetes-{currentStableVersion}.war[jolokia-kubernetes-{currentStableVersion}.war,role=externalLink]
 |===
 
-=== Javascript Library
+=== JavaScript Library
 
-The Jolokia Javascript client library comes in two variants:
+The Jolokia JavaScript client library comes in two variants:
 `jolokia.js` contains the basics and can be used
 with its `request()` for sending JSON
 requests. `jolokia-simple.js` adds on this code
@@ -130,7 +130,7 @@ and
 ----
 
 // TODO: check what is javascript-maven-plugin
-The Javascript library can easily be used as Maven
+The JavaScript library can easily be used as Maven
 dependency by use of `javascript-maven-plugin`:
 
 [source,xml]

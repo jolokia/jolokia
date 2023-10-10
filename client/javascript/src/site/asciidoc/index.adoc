@@ -14,9 +14,9 @@
   limitations under the License.
 ////
 
-== Jolokia Javascript Client library
+== Jolokia JavaScript Client library
 
-The user manual for the Jolokia Javascript client library is
+The user manual for the Jolokia JavaScript client library is
 contained in
 link:/reference/html/clients.html#client-javascript[Reference
 Manual]. This document concentrates on more technical
@@ -53,7 +53,7 @@ will startup a Jetty and deploy this test application.
 
 In order to simplify development of unit-test a shell script
 `makeLinks.sh` is included which can be used in
-unix like OSs to create symbolic links to the Javascript
+unix like OSs to create symbolic links to the JavaScript
 files in the source directories. A typical workflow looks
 like:
 
@@ -64,6 +64,6 @@ mvn clean install
 sh makeLinks.sh
 mvn jetty:run-exploded
 ----
-* Edit and save the Javascript files (e.g. `jolokia.js`
+* Edit and save the JavaScript files (e.g. `jolokia.js`
 or `jolokia-test.js`
 * Reload the test HTML files in the browser

@@ -7,8 +7,8 @@ These are:
 * Apache Felix HttpService, all-in-one bundle (http://felix.apache.org/site/apache-felix-http-service.html)
 * 960 Grid System (Website, GPL or MIT, http://960.gs/)
 * google-code-prettify (Website, Apache License 2.0, http://code.google.com/p/google-code-prettify/)
-* jQuery and QUnit (Jolokia Javascript testuite) 
-* json2.js (Jolokia Javascript binding)
+* jQuery and QUnit (Jolokia JavaScript testuite) 
+* json2.js (Jolokia JavaScript binding)
 
 The content found on www.jolokia.org (i.e. icons, pictures and
 styling) is not (yet) Apache licensed, the licensing is still to be

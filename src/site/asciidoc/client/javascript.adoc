@@ -14,14 +14,14 @@
   limitations under the License.
 ////
 
-== Javascript Client Library
+== JavaScript Client Library
 
-Jolokia's Javascript client library allows for easy access to
-the Jolokia agent from within Javascript scripts. It
+Jolokia's JavaScript client library allows for easy access to
+the Jolokia agent from within JavaScript scripts. It
 encapsulates the JSON/HTTP access within a simple object
 layer.
 
-The Javascript client binding provides the following features:
+The JavaScript client binding provides the following features:
 
 * Synchronous and asynchronous operations
 * Support for JSONP for accessing servers other than the one
@@ -32,14 +32,14 @@ proxy calls
 `exec` in addition to a generic
 `request` method.
 
-Documentation for the Javascript library can be found in the
+Documentation for the JavaScript library can be found in the
 reference manual in the chapter
-link:../reference/html/clients.html#client-javascript[Javascript
+link:../reference/html/clients.html#client-javascript[JavaScript
 Client Library].
 
 === Installation
 
-The Jolokia Javascript library can be downloaded from the
+The Jolokia JavaScript library can be downloaded from the
 link:../download.html[download page]. It is divided
 into two scripts: `jolokia.js` contains the basic
 `Jolokia` object definition which provides the
@@ -141,7 +141,7 @@ will startup a Jetty and deploy this test application.
 
 In order to simplify development of unit-test a shell script
 `makeLinks.sh` is included which can be used in
-unix like OSs to create symbolic links to the Javascript
+unix like OSs to create symbolic links to the JavaScript
 files in the source directories. A typical workflow looks
 like:
 
@@ -153,6 +153,6 @@ mvn clean install
 sh makeLinks.sh
 mvn jetty:run-exploded
 ----
-* Edit and save the Javascript files (e.g. `jolokia.js`
+* Edit and save the JavaScript files (e.g. `jolokia.js`
 or `jolokia-test.js`)
 * Reload the test HTML files in the browser

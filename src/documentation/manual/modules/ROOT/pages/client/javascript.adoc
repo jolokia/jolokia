@@ -14,9 +14,9 @@
   limitations under the License.
 ////
 [#client-javascript]
-== Javascript Client Library
+== JavaScript Client Library
 
-The Jolokia Javascript library provides a Javascript API to the
+The Jolokia JavaScript library provides a JavaScript API to the
 to the Jolokia agent. It comes with two layers, a
 basic one which allows for sending Jolokia requests to the agent
 synchronously or asynchronously and one with a simplified API
@@ -41,7 +41,7 @@ console.log("Heap Memory used: " + value);
 [#js-installation]
 === Installation
 
-The Jolokia Javascript library is distributed in two parts, in
+The Jolokia JavaScript library is distributed in two parts, in
 compressed and uncompressed forms:
 
 `jolokia.js` and `jolokia-min.js`:: Base library containing the Jolokia object definition
@@ -95,7 +95,7 @@ layer is a single `request()` method,
 which takes two arguments: A request object and an optional
 options object. For example, a synchronous request for obtaining
 the agent's version for a agent running on the same server which
-delivered the Javascript looks like:
+delivered the JavaScript looks like:
 
 [,javascript]
 ----
@@ -195,7 +195,7 @@ OK (200) which happens if the request JMX operation
 fails. This callback receives the full Jolokia response
 object (with a key `error` set). If no error
 callback is given, but an asynchronous operation is
-performed, the error response is printed to the Javascript
+performed, the error response is printed to the JavaScript
 console by default.
 
 |`ajaxError`
@@ -353,7 +353,7 @@ for details).
 The Jolokia agent also supports
 https://en.wikipedia.org/wiki/JSONP[JSONP] requests
 for cases where the Jolokia agent is served on a different server or port
-than the Javascript client. By default, such access is forbidden by the so called
+than the JavaScript client. By default, such access is forbidden by the so called
 _same-origin-policy_. To swith on JSONP, the
 option `jsonp` should be set to
 `"true"`.
@@ -363,7 +363,7 @@ agent supports two HTTP methods, `GET` and
 `POST`. `POST` is more
 powerful since it supports more features. e.g. bulk requests and
 JMX proxy requests are only possible with POST. By default, the
-Jolokia Javascript library selects an HTTP method automatically,
+Jolokia JavaScript library selects an HTTP method automatically,
 which is `GET` for simple cases and `POST`
 for more sophisticated requests. The HTTP method can be
 overridden by setting the option `method` to
@@ -677,7 +677,7 @@ otherwise.
 [#js-cubism]
 === Jolokia as a Cubism Source
 
-https://square.github.com/cubism/[Cubism] is a Javascript library for
+https://square.github.com/cubism/[Cubism] is a JavaScript library for
 plotting time-series data and is based on <ulink
 https://d3js.org/[d3.js]. Jolokia comes with a plugin for Cubism and
 can act as a data source. The usage is quite simple: After
@@ -830,7 +830,7 @@ https://github.com/square/cubism/wiki/API-Reference[Cubism API].
 [#js-maven]
 === Maven integration
 
-For Maven users' convenience, the Jolokia Javascript package is
+For Maven users' convenience, the Jolokia JavaScript package is
 also available as a JavaScript artifact. It can be easily
 included with help of the
 `javascript-maven-plugin`.
