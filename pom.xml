@@ -80,13 +80,14 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-release-plugin</artifactId>
-        <configuration>
-          <autoVersionSubmodules>true</autoVersionSubmodules>
-          <goals>deploy docbkx:generate-html docbkx:generate-pdf</goals>
-        </configuration>
+<!--        <configuration>-->
+<!--          <autoVersionSubmodules>true</autoVersionSubmodules>-->
+<!--          <goals>deploy docbkx:generate-html docbkx:generate-pdf package</goals>-->
+<!--        </configuration>-->
       </plugin>
 
       <plugin>
+        <!-- 2.0: not enabled by default after moving to asciidoc -->
         <groupId>com.agilejava.docbkx</groupId>
         <artifactId>docbkx-maven-plugin</artifactId>
         <executions>
@@ -147,31 +148,9 @@
       </plugin>
 
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-resources-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>copy-site-images</id>
-            <phase>pre-site</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${project.build.directory}/site</outputDirectory>
-              <resources>
-                <resource>
-                  <directory>src/site/asciidoc</directory>
-                  <includes>
-                    <include>images/**/*</include>
-                  </includes>
-                </resource>
-              </resources>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
+        <!--
+          Antora is invoked using npm/npx
+        -->
         <groupId>com.github.eirslett</groupId>
         <artifactId>frontend-maven-plugin</artifactId>
         <inherited>false</inherited>
@@ -190,7 +169,7 @@
             <goals>
               <goal>install-node-and-npm</goal>
             </goals>
-            <phase>generate-resources</phase>
+            <phase>pre-site</phase>
             <configuration>
               <nodeVersion>v18.17.1</nodeVersion>
             </configuration>
@@ -200,10 +179,64 @@
             <goals>
               <goal>npm</goal>
             </goals>
-            <phase>generate-resources</phase>
+            <phase>pre-site</phase>
             <configuration>
               <arguments>install</arguments>
               <workingDirectory>src/documentation</workingDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>antora-documentation</id>
+            <goals>
+              <goal>npx</goal>
+            </goals>
+            <phase>pre-site</phase>
+            <configuration>
+              <arguments>antora generate antora-playbook.yml</arguments>
+              <workingDirectory>src/documentation</workingDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-antora-documentation</id>
+            <phase>pre-site</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/site/reference/html</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${project.basedir}/src/documentation/build/site</directory>
+                  <includes>
+                    <include>**/*</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>copy-site-images</id>
+            <phase>pre-site</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/site</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>src/site/asciidoc</directory>
+                  <includes>
+                    <include>images/**/*</include>
+                  </includes>
+                </resource>
+              </resources>
             </configuration>
           </execution>
         </executions>

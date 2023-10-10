@@ -16,5 +16,5 @@ felix
 .project
 .gitshots
 test-output
-src/documentation/build/site/
+src/documentation/build/
 .node/

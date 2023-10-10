@@ -27,7 +27,7 @@ It'll generate a Maven project with several files:
 @import url("$relativePath/css/site.css");
 ----
 
-So the `css/site.css` is a place where further customization may be placed.
+So the `css/site.css` is a place where further customization may be added.
 
 `META-INF/maven/site.vm` template may use some Velocity context parameters specified by https://github.com/apache/maven-doxia-sitetools/blob/doxia-sitetools-1.11.1/doxia-site-renderer/src/main/java/org/apache/maven/doxia/siterenderer/DefaultSiteRenderer.java#L542-L620[Doxia site renderer]. Probably the most important is `$relativePath`.
 
