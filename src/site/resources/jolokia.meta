@@ -130,11 +130,6 @@
          "jolokia-osgi-%v.jar",
          "jolokia.jar"
       ],
-      "mule" : [
-         "jolokia-mule",
-         "jolokia-mule-%v.jar",
-         "jolokia-mule.jar"
-      ],
       "osgi-bundle" : [
          "jolokia-osgi-bundle",
          "jolokia-osgi-bundle-%v.jar",

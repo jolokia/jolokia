@@ -49,19 +49,6 @@
     </moduleSet>
     <moduleSet>
       <includes>
-        <include>org.jolokia:jolokia-mule</include>
-      </includes>
-      <binaries>
-        <attachmentClassifier>agent</attachmentClassifier>
-        <outputFileNameMapping>jolokia-mule.jar</outputFileNameMapping>
-        <outputDirectory>agents</outputDirectory>
-        <unpack>false</unpack>
-        <includeDependencies>false</includeDependencies>
-      </binaries>
-      <useAllReactorProjects>true</useAllReactorProjects>
-    </moduleSet>
-    <moduleSet>
-      <includes>
         <include>org.jolokia:jolokia-osgi</include>
       </includes>
       <binaries>

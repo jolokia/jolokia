@@ -53,9 +53,6 @@ from our maven repository, too:
 |Osgi-Agent (full bundle)
 |https://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-osgi-bundle/{currentStableVersion}/jolokia-osgi-bundle-{currentStableVersion}.war[jolokia-osgi-bundle-{currentStableVersion}.war,role=externalLink]
 
-|Mule-Agent
-|https://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-mule/{currentStableVersion}/jolokia-mule-{currentStableVersion}.war[jolokia-mule-{currentStableVersion}.war,role=externalLink]
-
 |JVM-Agent
 |https://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-jvm/{currentStableVersion}/jolokia-jvm-{currentStableVersion}.war[jolokia-jvm-{currentStableVersion}.war,role=externalLink]
 

@@ -37,7 +37,6 @@ Each kind of Jolokia supported _agent_ uses the same set of link:#support-classe
 
 ==== Jolokia agents
 
-// TODO: Mule?
 There are 3 kinds of agents supported by Jolokia:
 
 JVM agent:: An agent installed using https://docs.oracle.com/en/java/javase/11/docs/api/jdk.attach/com/sun/tools/attach/VirtualMachine.html[JVM Attach API,role=externalLink] or https://docs.oracle.com/en/java/javase/11/docs/api/java.instrument/java/lang/instrument/package-summary.html[Java Instrument API,role=externalLink].

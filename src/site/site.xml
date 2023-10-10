@@ -69,7 +69,6 @@
       <item name="Web Archive (war)" href="agent/war.html"/>
       <item name="Osgi" href="agent/osgi.html"/>
       <item name="JVM" href="agent/jvm.html"/>
-      <item name="Mule" href="agent/mule.html"/>
     </menu>
 
     <menu name="Clients" inherit="top">
