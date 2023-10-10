@@ -52,13 +52,6 @@ puristic solution, the later is provided for a quick startup
 for initial testing the OSGi agent (but should be replaced
 with the minimal bundle for production setups).
 
-_Mule agent_::
-https://www.mulesoft.org/[Mule] is one of the leading Open Source
-Enterprise Service Bussesfootnote:[https://answers.yahoo.com/question/index?qid=20071216082739AAfkxnm[What is the proper plural form of "bus"?]] (ESB). It provides a management API
-into which a dedicated Jolokia agent plugs in nicely. This
-agent includes an embedded Jetty for providing JMX HTTP
-access.
-
 _JVM agent_::
 Starting with Java 6 the JDK provided by Oracle contains a
 lightweight HTTP-Server which is used e.g. for the reference
@@ -79,5 +72,4 @@ their own.
 
 include::agents/war.adoc[]
 include::agents/osgi.adoc[]
-include::agents/mule.adoc[]
 include::agents/jvm.adoc[]

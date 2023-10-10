@@ -343,7 +343,7 @@ public enum ConfigKey {
     AGENT_ID("agentId", true, false),
 
     /**
-     * The agent type holds the information which kind of agent (war,jvm,osgi,mule)
+     * The agent type holds the information which kind of agent (war,jvm,osgi)
      * is in use. This configuration cannot be set from the outside but is
      * written by the agent itself
      */

@@ -17,7 +17,6 @@ Multiple agents are provided for different environments:
 * **OSGi Agent** for deployment in an [OSGi][2] container. This agent
   is packaged as a bundle and comes in two flavors (minimal,
   all-in-one).
-* **Mule Agent** for usage within a [Mule][3] ESB
 * **JVM JDK6 Agent** which can be used with any Oracle/Sun JVM,
   Version 6 or later and which is able to attach to a running Java process 
   dynamically. 
@@ -36,14 +35,14 @@ The agent approach as several advantages:
 * **Polyglot**
 
   No Java installation is required on the client
-  side. E.g. [Jmx4Perl][4] provides a rich Perl client library and
+  side. E.g. [Jmx4Perl][3] provides a rich Perl client library and
   Perl based tools for accessing the agents.
 
 * **Simple Setup**
 
   The Setup is done by a simple agent deployment. In contrast,
   exporting JMX via JSR-160 can be remarkable complicated (see these
-  blog posts for setting up [Weblogic][6] and [JBoss][7] for native
+  blog posts for setting up [Weblogic][4] and [JBoss][5] for native
   remote JMX exposure setup)
 
 Additionally, the agents provide extra features not available with
@@ -56,7 +55,7 @@ JSR-160 connectors:
   those requests in its JSON payload which gets dispatched on the
   agent side. These bulk requests can increase performance drastically,
   especially for monitoring solutions. The Nagios plugin
-  [check_jmx4perl][8] uses bulk requests for its multi-check feature.
+  [check_jmx4perl][6] uses bulk requests for its multi-check feature.
   
 * **Fine grained security**
 
@@ -78,16 +77,16 @@ JSR-160 connectors:
 
 ## Resources
 
-* The [Jolokia Forum][9] can be used for questions about Jolokia 
+* The [Jolokia Forum][7] can be used for questions about Jolokia 
   (and Jmx4perl).
 
-* For bug reports, please use the [Github Issue tracker][10].
+* For bug reports, please use the [Github Issue tracker][8].
 
-* Most of the time, I'm hanging around at [Freenode][11] in 
+* Most of the time, I'm hanging around at [Freenode][9] in 
   `#jolokia`, too.
 
-Even more information on Jolokia can be found at [www.jolokia.org][5], including
-a complete [reference manual][12].
+Even more information on Jolokia can be found at [www.jolokia.org][10], including
+a complete [reference manual][11].
 
 ## Contributions
 
@@ -152,13 +151,12 @@ if you forgot it the first time.
 
  [1]: https://jolokia.org/images/jolokia_logo.png "Jolokia"
  [2]: http://www.osgi.org
- [3]: http://www.mulesoft.org
- [4]: http://www.jmx4perl.org
- [5]: https://www.jolokia.org
- [6]: http://labs.consol.de/blog/jmx4perl/configuring-remote-jmx-access-for-weblogic   
- [7]: http://labs.consol.de/blog/jmx4perl/jboss-remote-jmx
- [8]: http://search.cpan.org/~roland/jmx4perl/scripts/check_jmx4perl
- [9]: https://jolokia.org/forum.html
- [10]: https://github.com/rhuss/jolokia/issues
- [11]: http://webchat.freenode.net/?channels=jolokia
- [12]: https://www.jolokia.org/reference/html/index.html
+ [3]: http://www.jmx4perl.org
+ [4]: http://labs.consol.de/blog/jmx4perl/configuring-remote-jmx-access-for-weblogic   
+ [5]: http://labs.consol.de/blog/jmx4perl/jboss-remote-jmx
+ [6]: http://search.cpan.org/~roland/jmx4perl/scripts/check_jmx4perl
+ [7]: https://jolokia.org/forum.html
+ [8]: https://github.com/rhuss/jolokia/issues
+ [9]: http://webchat.freenode.net/?channels=jolokia
+ [10]: https://www.jolokia.org
+ [11]: https://www.jolokia.org/reference/html/index.html

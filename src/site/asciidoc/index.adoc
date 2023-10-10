@@ -36,7 +36,7 @@ Jolokia is a JMX-HTTP bridge giving an alternative to JSR-160 connectors. It is 
 
 * Overview of link:features.html[features] which make Jolokia unique for JMX remoting.
 * The link:documentation.html[documentation] includes a link:tutorial.html[tutorial] and a https://jolokia.org/reference/html/index.html[reference manual].
-* link:agent.html[Agents] exist for many platforms (Java EE, OSGi, Mule, JVM).
+* link:agent.html[Agents] exist for many platforms (Java EE, OSGi, JVM).
 * link:support.html[Support] is available through various channels.
 * link:support.html#Source[Contributions] are highly appreciated, too.
 

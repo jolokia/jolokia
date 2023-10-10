@@ -35,8 +35,6 @@ deployed in the OSGi container, but there is also a
 all-in-one bundle which embedds all dependencies in a single
 bundle. The pure bundle is the prefered agent, though, since
 it fits the OSGi philosophy better.
-* The link:../agent/mule.html[Mule Agent] is a Mule JMX-Agent, whose
-installation is described in detail in the Mule documentation.
 * The link:../agent/jvm.html[JVM JDK 6 Agent] requires for its setup
 some extra command line parameter for the JVM, but this
 shouldn't be a big deal either.
