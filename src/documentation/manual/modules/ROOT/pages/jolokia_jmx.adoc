@@ -154,7 +154,7 @@ MXBeans, JSON strings for JsonMBean). However, there are also
 differences:
 
 * MXBeans are a standard mechanism which are available on every
-JVM since 1.5.footnote:jbos-mxbean[
+JVM since 1.5.footnote:jboss-mxbean[
 For JBoss prior to version 7 there are some slight issues
 since JBoss used to replace the standard MBeanServer with an
 own variant. See this
@@ -166,7 +166,7 @@ references. MXBeans will cause an error in this case.
 * JsonMBeans must be added to the Jolokia MBeanServer to
 work. MXBeans work with the PlatformMBeanServer, too.
 * JsonMBean work also with JMX support libraries which use
-``ModelMBean``'s unde the hood. E.g.
+``ModelMBean``'s under the hood. E.g.
 https://static.springsource.org/spring/docs/3.0.x/reference/jmx.html[Spring
 JMX] uses a ModelMBean for
 `@ManagedResource` annotated
@@ -373,7 +373,7 @@ except when annotated with `@JsonMBean`.
 There is an even simpler way to startup a Jolokia JVM agent
 with a default setup if you use a variant of the
 `jolokia-spring` module with the classifier
-`plugin`. This artefact contains a
+`plugin`. This artifact contains a
 predefined Spring configuration for starting up Jolokia with
 default values automatically:
 
@@ -418,6 +418,6 @@ Spring application context. An `order`
 attribute can be used if multiple config declarations are
 present: the higher the order, the higher the priority. But
 then again, instead of using the plugin with an external
-configuration it is probably better to us an explicite
+configuration it is probably better to us an explicit
 `<jolokia:agent>` declaration, since
 you have to add to a Spring configuration file anyway.

@@ -158,7 +158,7 @@ can use the same placeholders as in `discoveryAgentUrl`.
 |`org.jolokia.agentDescription`
 |
 |An optional description which can be used for clients to
-present a humand readable label for this agent.
+present a human readable label for this agent.
 
 |`org.jolokia.dispatcherClasses`
 |
@@ -260,7 +260,7 @@ be overridden with a query parameter.
 |When this parameter is set to `true`,
 then an exception thrown will be serialized as JSON and
 included in the response under the key
-`error_value`. No stactrace infornmation
+`error_value`. No stacktrace information
 will be included, though. This global option can be
 overridden by a query parameter of the same name.
 
@@ -275,7 +275,7 @@ options used by detectors for post-initialization steps. See the description of
 |`false`
 |Is set to `true` then this servlet will
 listen for multicast request (multicast-group `239.192.48.84`,
-port `24884` by default, but can be configued).
+port `24884` by default, but can be configured).
 By default this option is disabled in order to
 avoid conflicts with an Java EE standards (though this should't
 harm anyways). This option can also be switched on with an
@@ -288,7 +288,7 @@ property `jolokia.discoveryEnabled` set to
 |
 |Sets the URL to respond for multicast discovery requests. If
 given, `discoveryEnabled` is set
-implicetly to true. This URL can also be provided by an
+implicitly to true. This URL can also be provided by an
 environment variable
 `JOLOKIA_DISCOVERY_AGENT_URL` or the system
 property `jolokia.discoveryUrl`. Within the value you can use the
@@ -335,10 +335,10 @@ available when the agent servlet is active (i.e. when an
 `HttpService` is registered).
 
 [#running-on-glassfish]
-=== Running on Glassfish v3 upwards
+=== Running on GlassFish v3 upwards
 
 You have a couple of choices when running Jolokia on
-Glassfish v3 and up, since Glassfish is a both a fully
+GlassFish v3 and up, since GlassFish is a both a fully
 fledged Java EE container and an OSGi container. If you
 choose to run the xref:agents/war.adoc[Java EE Agent (WAR)] then it
 is completely straight forward just deploy the war
@@ -350,7 +350,7 @@ option with a filter to select either the Admin
 `HttpService` which is where WAR files are
 deployed to.
 
-In Glassfish 3.1.2 the OSGi bundle configuration is done in
+In GlassFish 3.1.2 the OSGi bundle configuration is done in
 `glassfish/conf/osgi.properties` in version's
 prior to this the configuration is by default in
 `glassfish/osgi/felix/conf/config.properties`
@@ -398,7 +398,7 @@ https://felix.apache.org/site/apache-felix-http-service.html#ApacheFelixHTTPServ
 e.g. setting the port to 9090 instead of the default port 8080, a property
 `org.osgi.service.http.port=9090` needs to be
 set. This might be useful, if this bundle is used within
-containers which already occupy the default port (Glassfish,
+containers which already occupy the default port (GlassFish,
 Eclipse Virgo) but don't expose an OSGi HttpService.
 
 [#agents-osgi-servlet]
@@ -450,7 +450,7 @@ will use one or more OSGi service which register under the name
 such service is available, access to the agent is always
 denied. If one such restrictor service is available, the access
 decision is delegated to this service. When more than one
-restrictor service is available, access is ony granted if all of
+restrictor service is available, access is only granted if all of
 them individually grant access. A sample restrictor service as a
 maven project can be found in the Jolokia source at
 `agent/osgi/restrictor-sample`.

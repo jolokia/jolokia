@@ -239,7 +239,7 @@ property `jolokia.discoveryEnabled` set to
 |`discoveryAgentUrl`
 |Sets the URL to respond for multicast discovery requests. If
 given, `discoveryEnabled` is set
-implicetly to true. This URL can also be provied by an
+implicitly to true. This URL can also be provided by an
 environment variable
 `JOLOKIA_DISCOVERY_AGENT_URL` or the system
 property `jolokia.discoveryUrl`. Within the value you can use the
@@ -290,9 +290,9 @@ startup. Currently the following extra options are supported:
 |glassfish
 |bootAmx
 |If `false` and the agent is running on
-Glassfish, this will cause the AMX subsystem not to be booted
+GlassFish, this will cause the AMX subsystem not to be booted
 during startup. By default, AMX which contains all relevant
-MBeans for monitoring Glassfish is booted.
+MBeans for monitoring GlassFish is booted.
 |===
 
 [#agent-war-security]
@@ -397,6 +397,6 @@ Jolokia-specific MBeans on the single
 deployments it is important to use the
 `mbeanQualifier` init parameter to
 distinguish multiple Jolokia MBeans by adding an extra
-propery to those MBeans' names. This also needs to be done if
+property to those MBeans' names. This also needs to be done if
 multiple webapps containing Jolokia agents are deployed on
 the same Java EE server.
