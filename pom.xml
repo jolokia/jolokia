@@ -98,7 +98,7 @@
             <configuration>
               <imgSrcPath>file:///${project.basedir}/src/docbkx/images/</imgSrcPath>
             </configuration>
-            <phase>pre-site</phase>
+<!--            <phase>pre-site</phase>-->
           </execution>
         </executions>
         <dependencies>
@@ -147,45 +147,6 @@
       </plugin>
 
       <plugin>
-        <!--
-          Manual invocation which is faster than resources:copy-resources + asciidoctor-maven-plugin:process-asciidoc:
-          $ cd ${basedir}
-          $ mkdir -p target/generated-docs
-          $ asciidoctor -a linkcss -a copycss=../../src/site/resources/css/asciidoc-jolokia.css -a stylesdir=css -a stylesheet=asciidoc-jolokia.css -b html5 -D target/generated-docs src/asciidoc/index.adoc
-
-          Or run:
-          $ mvn org.asciidoctor:asciidoctor-maven-plugin:2.2.4:process-asciidoc@default-process-asciidoc -N
-        -->
-        <groupId>org.asciidoctor</groupId>
-        <artifactId>asciidoctor-maven-plugin</artifactId>
-        <executions>
-          <execution>
-<!--            <phase>pre-site</phase>-->
-            <goals>
-              <goal>process-asciidoc</goal>
-            </goals>
-            <inherited>false</inherited>
-          </execution>
-        </executions>
-        <configuration>
-          <sourceDirectory>${basedir}/src/asciidoc</sourceDirectory>
-          <attributes>
-            <!--
-              default stylesheet:
-               - https://docs.asciidoctor.org/asciidoctor/latest/html-backend/default-stylesheet/
-               - https://raw.githubusercontent.com/asciidoctor/asciidoctor/v2.0.x/src/stylesheets/asciidoctor.css
-               - https://cdn.jsdelivr.net/gh/asciidoctor/asciidoctor@2.0/data/stylesheets/asciidoctor-default.css
-            -->
-            <copycss>../../src/site/resources/css/asciidoc-jolokia.css</copycss>
-            <linkcss>true</linkcss>
-            <stylesdir>css</stylesdir>
-            <stylesheet>asciidoc-jolokia.css</stylesheet>
-            <webfonts>Open+Sans:300,300italic,400,400italic,600,600italic|Noto+Serif:400,400italic,700,700italic|Ubuntu+Mono:400</webfonts>
-          </attributes>
-        </configuration>
-      </plugin>
-
-      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
         <executions>
@@ -205,6 +166,44 @@
                   </includes>
                 </resource>
               </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>com.github.eirslett</groupId>
+        <artifactId>frontend-maven-plugin</artifactId>
+        <inherited>false</inherited>
+        <configuration>
+          <installDirectory>.node</installDirectory>
+        </configuration>
+        <executions>
+          <!--
+            Mind that "generate-resources" is default phase for "install-node-and-npm" and "npm-install goals"
+            Execution id can be used to provide configuration for cli invocation, like:
+            $ mvn -N com.github.eirslett:frontend-maven-plugin:install-node-and-npm@install-node-and-npm
+            $ mvn -N com.github.eirslett:frontend-maven-plugin:npm@npm-install
+          -->
+          <execution>
+            <id>install-node-and-npm</id>
+            <goals>
+              <goal>install-node-and-npm</goal>
+            </goals>
+            <phase>generate-resources</phase>
+            <configuration>
+              <nodeVersion>v18.17.1</nodeVersion>
+            </configuration>
+          </execution>
+          <execution>
+            <id>npm-install</id>
+            <goals>
+              <goal>npm</goal>
+            </goals>
+            <phase>generate-resources</phase>
+            <configuration>
+              <arguments>install</arguments>
+              <workingDirectory>src/documentation</workingDirectory>
             </configuration>
           </execution>
         </executions>
@@ -374,6 +373,8 @@
           <version>3.12.1</version>
           <configuration>
             <validate>false</validate>
+            <!-- comma separated list - available as $locale Velocity variable -->
+            <locales>en</locales>
             <!--
               Don't worry about IDE warning (maven-site-plugin doesn't handle "asciidoc" property).
               This is actually handled by asciidoctor-maven-plugin dependency in

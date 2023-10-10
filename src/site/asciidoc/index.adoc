@@ -13,12 +13,12 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 ////
-:doctype: book
-:reproducible:
-:noheader:
-:nofooter:
-:description: Jolokia is an alternative to JSR-160 connectors for remote JMX access. It provides REST-like access to JMX with JSON over HTTP.
-:source-highlighter: rouge
+// :doctype: book
+// :reproducible:
+// :noheader:
+// :nofooter:
+// :description: Jolokia is an alternative to JSR-160 connectors for remote JMX access. It provides REST-like access to JMX with JSON over HTTP.
+// :source-highlighter: rouge
 
 ++++
 <div class="teaser">

@@ -46,7 +46,7 @@ link:irc.html[web chat]
 for a quick contact.
 
 Bug Reports and Feature Requests::
-Jolokia uses GitHub for <a
+Jolokia uses GitHub for
 https://github.com/rhuss/jolokia/issues[bug tracking,role=externalLink]
 and release management. Please fill in any
 issue you find or feature requests you have.

@@ -14,8 +14,6 @@
   limitations under the License.
 ////
 == News
-:source-highlighter: rouge
-Roland Huss <roland@jolokia.org>
 
 === Jolokia has a new home!
 

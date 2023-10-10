@@ -15,7 +15,10 @@
   ~ limitations under the License.
   -->
 
-<project name="Jolokia">
+<project name="Jolokia" xmlns="http://maven.apache.org/DECORATION/1.8.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://maven.apache.org/DECORATION/1.8.0 https://maven.apache.org/xsd/decoration-1.8.0.xsd">
+
   <publishDate position="bottom"/>
   <version position="bottom"/>
 
@@ -24,7 +27,7 @@
     <artifactId>jolokia-tools-siteskin</artifactId>
     <version>2.0.0-SNAPSHOT</version>
   </skin>  
-  
+
   <bannerLeft>
     <name>Jolokia</name>
     <src>images/header.png</src>
@@ -74,6 +77,13 @@
       <item name="Javascript" href="client/javascript.html"/>
       <item name="Perl" href="client/perl.html"/>
     </menu>
+    <!--
+      https://maven.apache.org/plugins/maven-site-plugin/examples/sitedescriptor.html#including-generated-content
+      The currently available preset menus are:
+       - reports - a menu with links to all the generated reports for your project
+       - parent - a menu with a link to the parent project's site
+       - modules - a menu containing the links to the sites of the submodules of this project
+    -->
     <menu ref="reports" inherit="bottom"/>
   </body>  
 </project>

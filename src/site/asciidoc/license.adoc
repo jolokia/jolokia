@@ -47,6 +47,7 @@ Apache licensed, too.
 
 === Apache License
 
+[#apache-license]
 ----
                                  Apache License
                            Version 2.0, January 2004

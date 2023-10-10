@@ -5,9 +5,9 @@ dist
 *.iws
 *~
 /classes/
-node_modules
-.idea
-.vscode
+node_modules/
+.idea/
+.vscode/
 wiki
 felix
 .settings
@@ -16,3 +16,4 @@ felix
 .gitshots
 test-output
 src/documentation/build/site/
+.node/

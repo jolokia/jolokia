@@ -1,9 +1,7 @@
+/* https://github.com/apache/maven-archetypes/blob/master/maven-archetype-site-skin/src/main/resources/archetype-resources/src/main/resources/css/maven-base.css */
 body {
   margin: 0px;
   padding: 0px;
-}
-img {
-  border:none;
 }
 table {
   padding:0px;
@@ -11,7 +9,6 @@ table {
   margin-left: -2px;
   margin-right: -2px;
 }
-
 acronym {
   cursor: help;
   border-bottom: 1px dotted #feb;
@@ -19,6 +16,13 @@ acronym {
 table.bodyTable th, table.bodyTable td {
   padding: 2px 4px 2px 4px;
   vertical-align: top;
+}
+div.clear{
+  clear:both;
+  visibility: hidden;
+}
+div.clear hr{
+  display: none;
 }
 #bannerLeft, #bannerRight {
   font-size: xx-large;
@@ -35,9 +39,6 @@ table.bodyTable th, table.bodyTable td {
 }
 #banner {
   padding: 0px;
-}
-#banner img {
-  border: none;
 }
 #breadcrumbs {
   padding: 3px 10px 3px 10px;
@@ -83,6 +84,10 @@ table.bodyTable th, table.bodyTable td {
 #navcolumn li.collapsed {
   background-image: url(../images/collapsed.gif);
 }
+#navcolumn li.none {
+  text-indent: -1em;
+  margin-left: 1em;
+}
 #poweredBy {
   text-align: center;
 }
@@ -116,7 +121,7 @@ table.bodyTable th, table.bodyTable td {
   font-weight: bold;
   font-size: x-small;
 }
-.section,.sect1,.sect2,.sect3,.sect4 {
+.section {
   padding: 4px;
 }
 #footer {

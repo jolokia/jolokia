@@ -27,10 +27,10 @@ https://github.com/rhuss/jolokia[GitHub,role=externalLink].
 
 * *jolokia-{currentStableVersion}-bin* (
 https://github.com/rhuss/jolokia/releases/download/v{currentStableVersion}/jolokia-{currentStableVersion}-bin.tar.gz[tar.gz,role=externalLink] |
-https://github.com/rhuss/jolokia/releases/download/v{currentStableVersion}/jolokia-{currentStableVersion}-bin.zip[zip])
+https://github.com/rhuss/jolokia/releases/download/v{currentStableVersion}/jolokia-{currentStableVersion}-bin.zip[zip,role=externalLink])
 * *jolokia-{currentStableVersion}-source* (
-https://github.com/rhuss/jolokia/releases/download/v{currentStableVersion}/jolokia-{currentStableVersion}-source.tar.gz[tar.gz] |
-https://github.com/rhuss/jolokia/releases/download/v{currentStableVersion}/jolokia-{currentStableVersion}-source.zip[zip])
+https://github.com/rhuss/jolokia/releases/download/v{currentStableVersion}/jolokia-{currentStableVersion}-source.tar.gz[tar.gz,role=externalLink] |
+https://github.com/rhuss/jolokia/releases/download/v{currentStableVersion}/jolokia-{currentStableVersion}-source.zip[zip,role=externalLink])
 
 The agents and the client library can be downloaded directly
 from our maven repository, too:
@@ -77,7 +77,7 @@ with its `request()` for sending JSON
 requests. `jolokia-simple.js` adds on this code
 and provides a simplified API for Jolokia request, but is
 slightly less powerful. Finally,
-`jolokia-cubism.js` contains the Jolokia <a
+`jolokia-cubism.js` contains the Jolokia
 https://square.github.com/cubism/[Cubism,role=externalLink] integration which adds Jolokia as a data
 source. The `-min` versions are
 compressed with all documentation stripped off and

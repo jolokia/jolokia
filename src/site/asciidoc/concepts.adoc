@@ -16,6 +16,8 @@
 
 == Concepts
 
+While link:reference/html/index.html[reference manual] contains all the details about Jolokia protocol, configuration, agents, etc., this page contains information about some high level concepts and core classes which are required to understand Jolokia goals.
+
 === Main feature
 
 The most important feature of Jolokia is to provide a _protocol adaptor_ for accessing MBeanServer instances and managed beans available in single or multiple JVMs.
@@ -29,7 +31,7 @@ NOTE: JMX _connectors_ were originally defined in details in https://jcp.org/en/
 
 === Jolokia architecture
 
-Jolokia exposes a _protocol adaptor_ using an _agent_ which effectively translates HTTP protocol into operations invoked on an instance of `javax.management.MBeanServer` (or `javax.management.MBeanServerConnection` in link:features/proxy.adoc[Proxy mode]).
+Jolokia exposes a _protocol adaptor_ using an _agent_ which effectively translates HTTP protocol messages into operations invoked on an instance of `javax.management.MBeanServer` (or `javax.management.MBeanServerConnection` in link:features/proxy.html[Proxy mode]) and their results.
 
 Each kind of Jolokia supported _agent_ uses the same set of link:#support-classes[support classes].
 
@@ -52,10 +54,10 @@ JVM Agent uses JDK's https://docs.oracle.com/en/java/javase/11/docs/api/jdk.http
 [#support-classes]
 ==== Jolokia support classes
 
-For all the agents, Jolokia uses the same of classes for two kinds of processing:
+For all the agents, Jolokia uses the same set of classes for two kinds of processing:
 
-* _initialization stage_, where Jolokia is configured
-* _request processing stage_, where Jolokia handles incoming HTTP requests, communicates with `javax.management.MBeanServer` and returns HTTP responses after translating the results
+* _initialization stage_, when Jolokia is configured
+* _request processing stage_, when Jolokia handles incoming HTTP requests, communicates with `javax.management.MBeanServer` and returns HTTP responses after translating the results
 
 ===== Initialization stage
 
@@ -81,5 +83,5 @@ Jolokia provides several implementations of `org.jolokia.server.core.service.req
 
 * `org.jolokia.service.jmx.LocalRequestHandler` which directly calls `javax.management.MBeanServer` (actually a merged view of available MBeanServer instances)
 * `org.jolokia.service.jsr160.Jsr160RequestHandler` which calls remote `MBeanServer` through JSR-160 connector (`javax.management.remote.JMXConnector`)
-* `org.jolokia.support.spring.backend.SpringRequestHandler` which operates on beans obtained from Spring's `org.springframework.context.ApplicationContext` based `name` key from target `javax.management.ObjectName`.
+* `org.jolokia.support.spring.backend.SpringRequestHandler` which operates on beans obtained from Spring's `org.springframework.context.ApplicationContext` using `name` key from target `javax.management.ObjectName`.
 * `org.jolokia.server.core.service.impl.VersionRequestHandler` which doesn't really call any MBean, but simply returns version information of Jolokia agent.

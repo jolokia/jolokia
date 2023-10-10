@@ -64,11 +64,11 @@ pre.rouge .kc {
     font-weight: bold;
 }
 pre.rouge .kd {
-    color: #000000;
+    color: #800000;
     font-weight: bold;
 }
 pre.rouge .kn {
-    color: #000000;
+    color: #800000;
     font-weight: bold;
 }
 pre.rouge .kp {
@@ -80,11 +80,11 @@ pre.rouge .kr {
     font-weight: bold;
 }
 pre.rouge .kt {
-    color: #445588;
+    color: #800000;
     font-weight: bold;
 }
 pre.rouge .k, pre.rouge .kv {
-    color: #000000;
+    color: #800000;
     font-weight: bold;
 }
 pre.rouge .mf {
@@ -97,7 +97,7 @@ pre.rouge .il {
     color: #009999;
 }
 pre.rouge .mi {
-    color: #009999;
+    color: #003CA0;
 }
 pre.rouge .mo {
     color: #009999;
@@ -119,10 +119,10 @@ pre.rouge .sd {
     color: #d14;
 }
 pre.rouge .s2 {
-    color: #d14;
+    color: #008000;
 }
 pre.rouge .se {
-    color: #d14;
+    color: #003ac0;
 }
 pre.rouge .sh {
     color: #d14;
@@ -137,26 +137,25 @@ pre.rouge .sr {
     color: #009926;
 }
 pre.rouge .s1 {
-    color: #d14;
+    color: #008000;
 }
 pre.rouge .ss {
     color: #990073;
 }
 pre.rouge .s, pre.rouge .dl {
-    color: #d14;
+    color: #008000;
 }
 pre.rouge .na {
-    color: #008080;
+    color: #333333;
 }
 pre.rouge .bp {
     color: #999999;
 }
 pre.rouge .nb {
-    color: #0086B3;
+    color: #32508c;
 }
 pre.rouge .nc {
-    color: #445588;
-    font-weight: bold;
+    color: #333333;
 }
 pre.rouge .no {
     color: #008080;
@@ -167,6 +166,9 @@ pre.rouge .nd {
 }
 pre.rouge .ni {
     color: #800080;
+}
+pre.rouge .n {
+    color: #32508c;
 }
 pre.rouge .ne {
     color: #990000;
@@ -181,30 +183,30 @@ pre.rouge .nl {
     font-weight: bold;
 }
 pre.rouge .nn {
-    color: #555555;
+    color: #333333;
 }
 pre.rouge .nt {
     color: #000080;
 }
 pre.rouge .vc {
-    color: #008080;
+    color: #32508c;
 }
 pre.rouge .vg {
-    color: #008080;
+    color: #32508c;
 }
 pre.rouge .vi {
-    color: #008080;
+    color: #32508c;
 }
 pre.rouge .nv, pre.rouge .vm {
-    color: #008080;
+    color: #32508c;
+    font-weight: bold;
 }
 pre.rouge .ow {
     color: #000000;
     font-weight: bold;
 }
 pre.rouge .o {
-    color: #000000;
-    font-weight: bold;
+    color: #003ac0;
 }
 pre.rouge .w {
     color: #bbbbbb;
