@@ -55,7 +55,7 @@ last update on
 https://jcp.org/en/jsr/detail?id=262[JSR-262,role=externalLink] was in
 May 2008 and it is marked as "inactive". And frankly, I don't
 want to use WebServices for monitoring, either (although
-https://dmtf.org/standards/wsman[WS-Mangament,role=externalLink] is an
+https://dmtf.org/standards/wsman[WS-Management,role=externalLink] is an
 interesting approach).
 
 That was the birth of https://www.jmx4perl.org[jmx4perl,role=externalLink] in May
