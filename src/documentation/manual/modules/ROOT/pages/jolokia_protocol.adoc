@@ -65,7 +65,7 @@ keep any state on the server side (except of course that
 MBeans are obviously stateful most of the time). So in this aspect, the
 communication can be considered
 https://en.wikipedia.org/wiki/Representational_State_Transfer[REST]
-likefootnote:rest-comment[
+like footnote:rest-comment[
 This document will avoid the term REST as much as
 possible in order to avoid provoking any dogmatic
 resentments.].
@@ -125,12 +125,12 @@ behaviour, so Jolokia uses an own escaping mechanism.
 If one of the request parts contain a slash
 (`/`) (e.g. as part of you bean's name) it
 needs to be escaped. An exclamation mark
-(`!`) is used as escape characterfootnote:no-backslash[
+(`!`) is used as escape character footnote:no-backslash[
 A backslash (`\`) can not be used, since
 most servlet container translate a backslash into a forward
 slash on the fly when given in an URL.].
 An exclamation mark itself needs to be doubled
-for escaping. Any other characted preceded by an exclamation
+for escaping. Any other character preceded by an exclamation
 mark is taken literally. Table
 <<escape-rules>> illustrates the escape rules as
 used in GET requests. Also, if quotes are part of an GET
@@ -155,7 +155,7 @@ request the need to be escaped  with
 |_(anything else)_
 |===
 
-For example, to read the atrribute `State`
+For example, to read the attribute `State`
 on the MBean named
 `jboss.jmx:alias=jmx/rmi/RMIAdaptor`, an
 access URL like this has to be constructed:
@@ -168,7 +168,7 @@ Client libraries like
 https://search.cpan.org/~roland/jmx4perl[JMX::Jmx4Perl]
 do this sort of escaping transparently.
 
-Escaping can be avoided alltogether if a slightly different
+Escaping can be avoided altogether if a slightly different
 variant for a request is used (which doesn't look that
 REST-stylish, though). Instead of providing the information
 as path-info, a query parameter `p` can be
@@ -259,13 +259,13 @@ in same order as the requests in the initial bulk request.
 === Responses
 
 Responses are always encoded in UTF-8 JSON, regardless whether the
-requst was a GET or POST request.  In general, two kinds of
+request was a GET or POST request.  In general, two kinds of
 responses can be classified: In the normal case, a HTTP
 Response with response code 200 is returned, containing the
 result of the operation as a JSON payload. In case of an
 error, a 4xx or 5xx code will be returned and the JSON
 payload contains details about the error
-occured (e.g. 404 means "not found"). (See
+occurred (e.g. 404 means "not found"). (See
 https://en.wikipedia.org/wiki/List_of_HTTP_status_codes[this page]
 for more information about HTTP error codes..). If the processing option
 `ifModifiedSince` is given and the requested
@@ -304,7 +304,7 @@ The format of a single Jolokia response is
 For successful requests, the `status` is
 always `200` (the HTTP success code). The
 `timestamp` contains the epoch
-timefootnote:epoch-time[Seconds since 1.1.1970]
+time footnote:epoch-time[Seconds since 1.1.1970]
 when the
 request has been handled. The request leading to this
 response can be found under the attribute
@@ -353,14 +353,14 @@ I.e. the `status` has a code in the range
 https://en.wikipedia.org/wiki/List_of_HTTP_status_codes[as it is specified for HTTP return codes].
 The `error` member contains an error
 description. This is typically the message of an exception
-occured on the agent sidefootnote:mbeanexception-wrapping[
+occurred on the agent sidefootnote:mbeanexception-wrapping[
 If the server exception
 is a subtype of `MBeanException`, the wrapped
 exception's message is used.
 ]. Finally, `error_type` contains the Java class name
-of the exception occured.
+of the exception occurred.
 The `stacktrace` contains a Java stacktrace
-occured on the server side (if any stacktrace is available).
+occurred on the server side (if any stacktrace is available).
 
 For each type of operation, the format of the
 `value` entry is explained in
@@ -555,7 +555,7 @@ The following types are directly supported:
 * `java.util.Map` gets
 converted into a JSON object. Note, however, that JSON
 Object keys are _always strings_.
-* Enums are converted to their canonical namefootnote:enum-serial-jboss[
+* Enums are converted to their canonical name footnote:enum-serial-jboss[
 For JBoss older than version 7, there might be use cases
 when custom enums need to be serialized. In this case,
 the type information must be available to the agent,
@@ -725,7 +725,7 @@ for `exec` operations) differs from
 from the object serializaton as used as response values
 which is described in
 <<serialization-response>>. Not all types are
-supported for upstream serializationfootnote:upstream-serialization-comment[
+supported for upstream serialization footnote:upstream-serialization-comment[
 Conversion from a typed system to an untyped
 representation is obviously much easier than vice
 versa. Please note, that Jolokia does not replace a full
@@ -812,7 +812,7 @@ access to the Enum's class. This is true for all Enums
 shipped with the JDK (like
 `TimeUnit`). Custom enums can not be
 used for upstream serialization by default since the
-Jolokia Agent is not able to contruct an instance of it
+Jolokia Agent is not able to construct an instance of it
 because of missing type information.
 
 Upstream serialization also supports
@@ -905,7 +905,7 @@ look like
 [#serialization-mxbean]
 === Jolokia and MXBeans
 
-The https://download.oracle.com/javase/6/docs/api/javax/management/MXBean.html[MXBean Framework] is availale in
+The https://download.oracle.com/javase/6/docs/api/javax/management/MXBean.html[MXBean Framework] is available in
 the JRE since version 6 and allows for easy creation and
 registration of own MBeans. MXBeans are some what the
 successor for standard MBeans and support an annotation driven
@@ -932,7 +932,7 @@ representation which is quite artificial. E.g a map with
 two keys `kind` and
 `hotness` will be converted by the MXBean
 framework to a TabularData object which in turn would be
-translated by Jolokia to the following JSON struture
+translated by Jolokia to the following JSON structure
 
 [,json]
 ----
@@ -1117,7 +1117,7 @@ in the future.
 |`agent_id`
 |Each agent has a unique id which can be either provided
 during startup of the agent in form of a configuration
-parameter or being autodetected. If autodected, the id has
+parameter or being autodetected. If autodetected, the id has
 several parts: The IP, the process id, hashcode of the agent
 and its type. This field will be always provided.
 |`10.9.11.87-23455-9184ef-osgi`

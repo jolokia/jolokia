@@ -35,7 +35,7 @@ of JSR-160 connector's seeked _transparent
 remoteness_. RMI has some arguable conceptually
 advantages, but hiding all remote aspects proved to have quite
 some disadvantages when it comes to the programming
-model. Explicite awareness of a 'heavy-weight' remote call is
+model. Explicit awareness of a 'heavy-weight' remote call is
 better than false transparency in order to know the price tag.
 
 The Java client library follows a strict request-response
@@ -392,7 +392,7 @@ ObjectName (which can be a pattern). A
 specifying an _inner path_, too.
 +
 `J4pReadResponse` is the
-corresponding response type and allows typed acces to the
+corresponding response type and allows typed access to the
 fetched value for a single attribute fetch or to multiple
 values for a multi attribute read. In the latter case, the
 found object and attributes names can be retrieved as
@@ -459,7 +459,7 @@ application server product name
 (`extraInfo`) specific to the platform
 the Jolokia is running on.
 
-[#client-java-execptions]
+[#client-java-exceptions]
 === Exceptions
 
 In case of an error when executing a request a

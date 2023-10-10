@@ -34,7 +34,7 @@ public and are now effectively obsolete. Add-on standards like
 https://jcp.org/en/jsr/detail?id=77[JSR-77] didn't
 received the adoption level they deserved. And then there is
 https://jcp.org/en/jsr/detail?id=160[JSR-160],
-JMX remoting. This specificatiion is designed for ease of usage
+JMX remoting. This specification is designed for ease of usage
 and has the ambition to transparently hide the technical details
 behind the remote communication so that is makes (nearly) no
 difference, whether MBeans are invoked locally or
