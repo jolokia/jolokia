@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Architecture :: Jolokia</title>
+    <link rel="canonical" href="https://jolokia.org/manual/architecture.html">
+    <link rel="prev" href="index.html">
+    <link rel="next" href="agents.html">
+    <meta name="generator" content="Antora 3.1.4">
+    <link rel="stylesheet" href="../_/css/site.css">
+    <link rel="stylesheet" href="../_/css/jolokia.css">
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://jolokia.org">Jolokia</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="manual" data-version="">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="index.html">Jolokia Manual</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="index.html">Introduction</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="1">
+    <a class="nav-link" href="architecture.html">Architecture</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="agents.html">Agents</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="security.html">Security</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="proxy_mode.html">Proxy Mode</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="jolokia_protocol.html">Jolokia Protocol</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="jolokia_mbeans.html">Jolokia MBeans</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="clients.html">Clients</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="jolokia_jmx.html">Jolokia JMX</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="tools.html">Tools</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Jolokia Manual</span>
+    <span class="version">default</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="index.html">Jolokia Manual</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="index.html">default</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="index.html">Jolokia Manual</a></li>
+    <li><a href="architecture.html">Architecture</a></li>
+  </ul>
+</nav>
+<div class="edit-this-page"><a href="file:///data/sources/github.com/jolokia/jolokia/src/documentation/manual/modules/ROOT/pages/architecture.adoc">Edit this Page</a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Architecture</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>The architecture of Jolokia is quite different to that of JSR-160
+connectors. One of the most striking difference is Jolokia&#8217;s
+typeless approach.</p>
+</div>
+<div class="paragraph">
+<p>JSR-160, released in 2003, has a different design goal than
+Jolokia. It is a specification with which a client can transparently
+invoke MBean calls, regardless whether the MBean resides within a
+local or remote MBeanServer. This provides a good deal of
+comfort for Java clients of this API, but it is also dangerous
+<em>because</em> it hides the remoteness of JMX
+calls. There are several subtle issues, performance
+being one of them. It <em>does</em> matter whether a
+call is invoked locally or remotely. A caller should at least be
+aware what happens and what the consequences are. On the other
+side, there are message passing models which include remoting
+explicitly, so that the caller <em>knows</em> from
+the programming model that she is calling a potentially expensive
+remote call. This is probably the main reason why RMI (the default
+protocol stack of JSR-160 connectors) lost market share to
+more explicit remote protocols.</p>
+</div>
+<div class="paragraph">
+<p>One problem with JSR-160 is it implicit reliance on RMI and its
+requirement for a complete (Java) object serialization mechanism
+for passing management information over the wire. This closes the
+door for all environments which are not Java (or more precisely, JVM)
+aware. Jolokia uses a typeless approach, where some sort of
+lightweight serialization to JSON is used (in both directions, but
+a bit <em>asymmetrically</em> in its capabilities). Of course
+this approach has some drawbacks, too, but also quite some
+advantages. At least it is unique in the JMX world ;-).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="agent-mode"><a class="anchor" href="#agent-mode"></a>Agent mode</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><a href="#fig-architecture-overview">Figure 1, &#8220;Jolokia architecture&#8221;</a> illustrates the
+environment in which Jolokia operates. The agent exports on the
+frontside a JSON based protocol over HTTP that gets bridged to
+invocation of local JMX MBeans. It lives outside the JSR-160
+space and hence requires a different setup. Various techniques
+are available for exporting its protocol via HTTP. The most
+prominent being to put the agent into a servlet container. This
+can be a lightweight one like Tomcat or Jetty or a full-blown
+Java EE Server. Since it acts like a usual web application the
+deployment of the agent is well understood and should pose no
+entry barrier for any developer who has ever dealt with Java web
+applications.</p>
+</div>
+<div id="fig-architecture-overview" class="imageblock">
+<div class="content">
+<img src="_images/architecture.png" alt="architecture">
+</div>
+<div class="title">Figure 1. Jolokia architecture</div>
+</div>
+<div class="paragraph">
+<p>But there are more options. Specialized agents are able to use an OSGi
+HttpService or come with an embedded Jetty-Server in case of the
+Mule agent. The JVM agent uses the HTTP-Server included
+with every Oracle JVM 6 and can be attached dynamically to any
+running Java process. Agents are described in detail in
+<a href="agents.html" class="xref page">Agents</a>.</p>
+</div>
+<div class="paragraph">
+<p>Jolokia can be also integrated
+into one&#8217;s own applications very easily. The <code>jolokia-core</code>
+library (which comes bundled as a jar), includes a servlet
+which can be easily added to a custom application.
+<a href="agents.html#agent-war-programmatic" class="xref page">Programmatic usage of the Jolokia agent servlet</a> contains more information
+about this.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="proxy-mode"><a class="anchor" href="#proxy-mode"></a>Proxy Mode</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Proxy mode is a solution for when it is impossible to deploy
+the Jolokia agent on the target platform. For this mode, the
+only prerequisite for accessing the target server is a JSR-160
+connection. Most of the time this happens for political reasons,
+where it is simply not allowed to deploy an extra piece of
+software or where doing so requires a lengthy approval process.
+Another reason could be that the target server already
+exports JMX via JSR-160 and you want to avoid the extra step of
+deploying the agent.</p>
+</div>
+<div class="paragraph">
+<p>A dedicated proxy servlet server is needed for hosting
+<code>jolokia.war</code>, which by default supports both
+the <em>agent mode</em> and the <em>proxy
+mode</em>. A lightweight container like Tomcat or Jetty is
+a perfect choice for this kind of setup.</p>
+</div>
+<div class="paragraph">
+<p>Figure <a href="#fig-architecture-proxy">Figure 2, &#8220;Jolokia as JMX Proxy&#8221;</a> describes a typical setup for the proxy mode. A
+client sends a usual Jolokia request containing an extra section
+for specifying the target which should be queried. All routing
+information is contained in the request itself so that the proxy
+can act universally without the need of a specific
+configuration.</p>
+</div>
+<div id="fig-architecture-proxy" class="imageblock">
+<div class="content">
+<img src="_images/proxy.png" alt="proxy">
+</div>
+<div class="title">Figure 2. Jolokia as JMX Proxy</div>
+</div>
+<div class="paragraph">
+<p>Having said all that, the proxy mode has some limitations which are
+listed in <a href="proxy_mode.html" class="xref page">Proxy Mode</a>.</p>
+</div>
+<div class="paragraph">
+<p>To summarize, the proxy mode should be used only when
+required. The agent servlet on its own is more powerful than the
+proxy mode since it eliminates an additional layer adding to the
+overall complexity and performance. Also, some features like
+merging of MBeanServers are not available in the proxy mode.</p>
+</div>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="index.html">Introduction</a></span>
+  <span class="next"><a href="agents.html">Agents</a></span>
+</nav>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <p>This page was built using the Antora default UI.</p>
+  <p>The source code for this UI is licensed under the terms of the MPL-2.0 license.</p>
+</footer>
+<script id="site-script" src="../_/js/site.js" data-ui-root-path="../_"></script>
+<script async src="../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

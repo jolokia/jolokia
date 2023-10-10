@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Security :: Jolokia</title>
+    <link rel="canonical" href="https://jolokia.org/manual/security.html">
+    <link rel="prev" href="agents.html">
+    <link rel="next" href="proxy_mode.html">
+    <meta name="generator" content="Antora 3.1.4">
+    <link rel="stylesheet" href="../_/css/site.css">
+    <link rel="stylesheet" href="../_/css/jolokia.css">
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://jolokia.org">Jolokia</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="manual" data-version="">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="index.html">Jolokia Manual</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="index.html">Introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="architecture.html">Architecture</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="agents.html">Agents</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="1">
+    <a class="nav-link" href="security.html">Security</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="proxy_mode.html">Proxy Mode</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="jolokia_protocol.html">Jolokia Protocol</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="jolokia_mbeans.html">Jolokia MBeans</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="clients.html">Clients</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="jolokia_jmx.html">Jolokia JMX</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="tools.html">Tools</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Jolokia Manual</span>
+    <span class="version">default</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="index.html">Jolokia Manual</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="index.html">default</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="index.html">Jolokia Manual</a></li>
+    <li><a href="security.html">Security</a></li>
+  </ul>
+</nav>
+<div class="edit-this-page"><a href="file:///data/sources/github.com/jolokia/jolokia/src/documentation/manual/modules/ROOT/pages/security.adoc">Edit this Page</a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Security</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Security in JSR-160 remoting is an all-or-nothing option. Either
+all or none of your MBeans are accessible (except when your application server
+uses a SecurityManager, but that is not often the case). Jolokia, on
+the other hand, allows for fine grained security defined in an
+XML security policy file. It allows for access restrictions on
+MBean names (or patterns), attributes, operations, source IP
+address (or a subnet) and type of Jolokia operation.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="security-policy"><a class="anchor" href="#security-policy"></a>Policy based security</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Access to MBean and to the Jolokia agents in general can be
+restricted with an XML policy file. This policy can be configured
+for various parameters and is divided into several sections.</p>
+</div>
+<div class="sect2">
+<h3 id="_ip_based_restrictions"><a class="anchor" href="#_ip_based_restrictions"></a>IP based restrictions</h3>
+<div class="paragraph">
+<p>Overall access can be granted based on the IP address of an
+HTTP client. These restrictions are
+specified within a <code>&lt;remote&gt;</code> section,
+which contains one or more <code>&lt;host&gt;</code>
+elements. The source can be given either as an IP address,
+a host name, or a netmask given in
+<a href="https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing">CIDR format</a>
+(e.g. <code>10.0.0.0/16</code> for all clients coming from the 10.0
+network). The following allows access from localhost and all
+clients whose IP addresses start with "10.0". For all other
+IP addresses access is denied.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;remote&gt;
+  &lt;host&gt;localhost&lt;/host&gt;
+  &lt;host&gt;10.0.0.0/16&lt;/host&gt;
+&lt;/remote&gt;</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_commands"><a class="anchor" href="#_commands"></a>Commands</h3>
+<div class="paragraph">
+<p>This section specifies the Jolokia commands for which access
+is generally granted. For each command in the list, access can
+be further restricted within the
+<code>&lt;deny&gt;</code> part and each command
+missing in the list, which is forbidden globally, can be
+selectively enabled for certain MBeans in the
+<code>&lt;allow&gt;</code> section. If the
+<code>&lt;commands&gt;</code> section is missing
+completely, access to all commands is allowed.</p>
+</div>
+<div class="paragraph">
+<p>All Jolokia commands described in
+<a href="jolokia_protocol.html" class="xref page">Jolokia Protocol</a> can be used in this section:</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">read</dt>
+<dd>
+<p>Reading of MBean attributes</p>
+</dd>
+<dt class="hdlist1">write</dt>
+<dd>
+<p>Setting of MBean attributes</p>
+</dd>
+<dt class="hdlist1">exec</dt>
+<dd>
+<p>Execution of JMX operations</p>
+</dd>
+<dt class="hdlist1">list</dt>
+<dd>
+<p>List the available MBeans along with their supported</p>
+</dd>
+<dt class="hdlist1">search</dt>
+<dd>
+<p>Searching for MBeans</p>
+</dd>
+<dt class="hdlist1">version</dt>
+<dd>
+<p>Getting version and server information</p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>In the following example, access is granted to the
+<code>read</code>, <code>list</code>,
+<code>search</code> and <code>version</code> command, but
+not to <code>write</code> and <code>exec</code>
+operations.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;commands&gt;
+  &lt;command&gt;read&lt;/command&gt;
+  &lt;command&gt;list&lt;/command&gt;
+  &lt;command&gt;version&lt;/command&gt;
+  &lt;command&gt;search&lt;/command&gt;
+&lt;/commands&gt;</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_allow_and_deny_access_to_certain_mbeanstitle"><a class="anchor" href="#_allow_and_deny_access_to_certain_mbeanstitle"></a>Allow and deny access to certain MBeans&lt;/title&gt;</h3>
+<div class="paragraph">
+<p>Within an <code>&lt;allow&gt;</code> section, access
+to MBeans can be granted regardless of the
+operations specified in the
+<code>&lt;commands&gt;</code> section. The reverse is
+true for the <code>&lt;deny&gt;</code> section: It
+rejects access to the MBeans specified here. Both sections
+contain one or more <code>&lt;mbean&gt;</code>
+elements which have a format like:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;mbean&gt;
+  &lt;name&gt;java.lang:type=Memory&lt;/name&gt;
+  &lt;attribute&gt;*Memory*&lt;/attribute&gt;
+  &lt;attribute mode="read"&gt;Verbose&lt;/attribute&gt;
+  &lt;operation&gt;gc&lt;/operation&gt;
+&lt;/mbean&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Within the <code>&lt;name&gt;</code> section the name
+of the MBean is specified. This can bei either a complete
+ObjectName or a MBean pattern containing wildcards. The
+value given here must conform to the JMX specification for a
+valid <code>ObjectName</code>. On this MBean (or
+<em>MBeans</em> if <code>name</code> is a pattern),
+attributes are specified within one or more
+<code>&lt;attribute&gt;</code> elements and operations
+within one or more <code>&lt;operation&gt;</code>
+elements. The content can also be a pattern, which uses a wildcard
+<code>*</code>. e.g. <code>&lt;attribute&gt;*&lt;/attribute&gt;</code>
+specifies all attributes on the given MBean. If for an
+<code>&lt;attribute&gt;</code> element the XML
+attribute <code>mode="read"</code> is given, then this
+attribute can be accessed only read-only.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_http_method_restrictions"><a class="anchor" href="#_http_method_restrictions"></a>HTTP method restrictions</h3>
+<div class="paragraph">
+<p>Finally, access can be restricted based on the HTTP method
+with which an Jolokia request was received with the
+<code>&lt;http&gt;</code> element. Method allowed
+(<code>post</code> or <code>get</code>) are
+specified with an <code>&lt;method&gt;</code> inner
+element. The following example restricts the access to POST
+requests only:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;http&gt;
+  &lt;method&gt;post&lt;/method&gt;
+&lt;/http&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It the <code>&lt;http&gt;</code> section is missing
+completely, any HTTP method can be used.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_cross_origin_resource_sharing_cors_restrictions"><a class="anchor" href="#_cross_origin_resource_sharing_cors_restrictions"></a>Cross-Origin Resource Sharing (CORS) restrictions</h3>
+<div class="paragraph">
+<p>Jolokia (since version 1.0.3) supports the W3C specification
+for <a href="https://www.w3.org/TR/cors/">Cross-Origin
+Resource Sharing</a> (also known as "CORS") which allows
+browser to access resources which are located on a different
+server than the calling script is loaded from. This
+specification provides a controlled way to come around the
+<em>same origin policy</em>. Most
+<a href="https://caniuse.com/#search=CORS">contemporary
+browsers</a> support CORS.</p>
+</div>
+<div class="paragraph">
+<p>By default Jolokia allows cross origin access from any
+host. This can be limited to certain hosts by using
+<code>&lt;allow-origin&gt;</code> sections within a
+<code>&lt;cors&gt;</code> sections. This tags can
+contain the origin URL provided by browsers with the
+<code>Origin:</code> header literally or a
+wildcard specification with <code>*</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;cors&gt;
+  &lt;!-- Allow cross origin access from www.jolokia.org ... --&gt;
+  &lt;allow-origin&gt;https://www.jolokia.org&lt;/allow-origin&gt;
+
+  &lt;!-- ... and all servers from jmx4perl.org with any protocol --&gt;
+  &lt;allow-origin&gt;*://*.jmx4perl.org&lt;/allow-origin&gt;
+
+  &lt;!-- Check for the proper origin on the server side, too --&gt;
+  &lt;strict-checking/&gt;
+&lt;/cors&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If the option <code>&lt;strict-checking/&gt;</code> is given in this section, too, then the given patterns
+are not only used for CORS checking but also every request is checked on the server side whether the
+<code>Origin:</code> or <code>Referer:</code> header matches one of the given patterns.
+If neither <code>Origin:</code> nor <code>Referer:</code> is given and strict checking is enabled, then the access is denied. This useful for protecting against Cross-Site Request Forgery.</p>
+</div>
+<div class="paragraph">
+<p>Please note that <code>&lt;strict-checking/&gt;</code> might not be good enough because of potential
+browser bugs which could allow to forge the origin header. Examples of these issues are
+<a href="https://blog.bentkowski.info/2018/06/setting-arbitrary-request-headers-in.html">arbitrary header injection</a>
+or <a href="https://www.brokenbrowser.com/referer-spoofing-defeating-xss-filter/">referer and origin
+spoofing</a>. User facing application which uses Jolokia has backend should consider to implement
+additional measures like using the
+<a href="https://tools.ietf.org/html/draft-west-first-party-cookies-07">same-site</a> flag
+on the session cookie.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_example_for_a_security_policy"><a class="anchor" href="#_example_for_a_security_policy"></a>Example for a security policy</h3>
+<div class="paragraph">
+<p>The following complete example applies various access
+restrictions:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Access is only allowed for clients coming from localhost</p>
+</li>
+<li>
+<p>Only HTTP Post requests are allowed</p>
+</li>
+<li>
+<p>By default, only <code>read</code> and <code>list</code> requests are allowed.</p>
+</li>
+<li>
+<p>A single <code>exec</code> request is allowed for triggering garbage collection.</p>
+</li>
+<li>
+<p>Read access to the C3P0 connection pool is restricted to
+forbid fetching the pool&#8217;s properties, which in fact
+contains the DB password as clear text.</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;restrict&gt;
+
+  &lt;remote&gt;
+    &lt;host&gt;127.0.0.1&lt;/host&gt;
+  &lt;/remote&gt;
+
+  &lt;http&gt;
+    &lt;method&gt;post&lt;/method&gt;
+  &lt;/http&gt;
+
+  &lt;commands&gt;
+    &lt;command&gt;read&lt;/command&gt;
+    &lt;command&gt;list&lt;/command&gt;
+  &lt;/commands&gt;
+
+  &lt;allow&gt;
+    &lt;mbean&gt;
+      &lt;name&gt;java.lang:type=Memory&lt;/name&gt;
+      &lt;operation&gt;gc&lt;/operation&gt;
+    &lt;/mbean&gt;
+  &lt;/allow&gt;
+
+  &lt;deny&gt;
+    &lt;mbean&gt;
+      &lt;name&gt;com.mchange.v2.c3p0:type=PooledDataSource,*&lt;/name&gt;
+      &lt;attribute&gt;properties&lt;/attribute&gt;
+    &lt;/mbean&gt;
+  &lt;/deny&gt;
+
+&lt;/restrict&gt;</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="security-policy-location"><a class="anchor" href="#security-policy-location"></a>Policy Location</h3>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph">
+<p>A great tool which helps in repackaging an agent for
+inclusion of a <code>jolokia-access.xml</code>
+policy file
+is the command line tool
+<a href="https://search.cpan.org/~roland/jmx4perl/scripts/jolokia">jolokia</a>,
+which comes with the
+<a href="https://www.jmx4perl.org">jmx4perl</a> distribution. See
+<a href="tools.html" class="xref page">Tools</a> for an introduction.</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>But how do the agents lookup the policy file ? By default,
+the agents will lookup for a policy file top-level in the
+classpath under the name
+<code>jolokia-access.xml</code>. Hence for the war
+agent, the policy file must be packaged within the war at
+<code>WEB-INF/classes/jolokia-access.xml</code>, for
+all other agents at
+<code>/jolokia-access.xml</code>. The location can
+be overwritten with the configuration parameter
+<code>policyLocation</code>, which has to be set
+differently depending on the agent type. Please refer to
+<a href="agents.html" class="xref page">Agents</a> for more details. The value of this
+init parameter can be any URL which can loaded by the JVM. A
+special case is an URL with the scheme
+<code>classpath:</code> which results in a lookup of
+the policy file within the classpath. As stated above, the
+default value of this parameter is
+<code>classpath:/jolokia-access.xml</code>. If a
+non-classpath URL is provided with this parameter, and the
+target policy file could not be found then access is
+completely denied. If a classpath lookup fails then access
+is globally granted and a warning is given on standard
+output.</p>
+</div>
+<div class="paragraph">
+<p>The parameter specified with <code>policyLocation</code> can contain placeholders:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>$ip</code>: IP - Address</p>
+</li>
+<li>
+<p><code>$host</code>: Host - Address</p>
+</li>
+<li>
+<p><code>$\{prop:foo}</code>: System property <em>foo</em></p>
+</li>
+<li>
+<p><code>$\{env:FOO}</code>: Environment variable <em>FOO</em></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="security-restrictor"><a class="anchor" href="#security-restrictor"></a>Jolokia Restrictors</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In order to provide fine grained security, Jolokia using the
+abstract concept of an <em>Restrictor</em>. It is
+represented by the Java interface
+<code>org.jolokia.core.service.Restrictor</code> and
+comes with several implementations. The most prominent one is
+the <code>PolicyRestrictor</code> which is described
+in <a href="#security-policy">Policy based security</a>. This is also the
+restrictor which is active by default. For special needs, it is
+possible to provide a custom implementation of this
+interface for the WAR and OSGi agents. It is recommended to
+subclass either
+<code>org.jolokia.core.restrictor.AllowAllRestrictor</code>
+or
+<code>org.jolokia.core.restrictor.DenyAllRestrictor</code>.</p>
+</div>
+<div class="paragraph">
+<p>For the WAR agent (<a href="agents.html#agents-war" class="xref page">Java EE Agent (WAR)</a>), a subclass
+of <code>org.jolokia.core.http.AgentServlet</code> should
+be created which overrides the
+<code>createRestrictor()</code></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public class RestrictedAgentServlet extends AgentServlet {
+
+  @Override
+  protected Restrictor createRestrictor(String policyLocation) {
+    return new MyOwnRestrictor();
+  }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>policyLocation</code> is a URL pointing to the
+policy file, which is either the default value
+<code>classpath:/jolokia-access.xml</code> or the
+value specified with the init parameter
+<code>policyLocation</code>. This servlet can then be
+easily configured in a custom <code>web.xml</code>
+the same way as the Jolokia agent.</p>
+</div>
+<div class="paragraph">
+<p>For programmatic usage there is an even simpler way:
+<code>AgentServlet</code> provides an constructor
+which takes an restrictor as argument, so no sublcassing is
+required in this case.</p>
+</div>
+<div class="paragraph">
+<p>For an OSGi agent (<a href="agents.html#agents-osgi" class="xref page">OSGi Agents</a>),
+<code>org.jolokia.server.core.osgi.servlet.JolokiaServlet</code>
+is the proper extension point. It can be subclassed the same
+way as shown above and allows a restrictor implementation as
+constructor parameter, too. In contrast to
+<code>AgentServlet</code> this class is also OSGi
+exported and can be referenced from other
+bundles. Additionally, the OSGi agent can also pick up a
+restrictor as an OSGi service. See
+<a href="agents.html#agents-osgi" class="xref page">OSGi Agents</a> for details.</p>
+</div>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="agents.html">Agents</a></span>
+  <span class="next"><a href="proxy_mode.html">Proxy Mode</a></span>
+</nav>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <p>This page was built using the Antora default UI.</p>
+  <p>The source code for this UI is licensed under the terms of the MPL-2.0 license.</p>
+</footer>
+<script id="site-script" src="../_/js/site.js" data-ui-root-path="../_"></script>
+<script async src="../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Untitled :: Jolokia</title>
+    <link rel="canonical" href="https://jolokia.org/manual/protocol/write.html">
+    <meta name="generator" content="Antora 3.1.4">
+    <link rel="stylesheet" href="../../_/css/site.css">
+    <link rel="stylesheet" href="../../_/css/jolokia.css">
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://jolokia.org">Jolokia</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="manual" data-version="">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Jolokia Manual</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../architecture.html">Architecture</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../agents.html">Agents</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../security.html">Security</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../proxy_mode.html">Proxy Mode</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../jolokia_protocol.html">Jolokia Protocol</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../jolokia_mbeans.html">Jolokia MBeans</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../clients.html">Clients</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../jolokia_jmx.html">Jolokia JMX</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../tools.html">Tools</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Jolokia Manual</span>
+    <span class="version">default</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">Jolokia Manual</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">default</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+</nav>
+<div class="edit-this-page"><a href="file:///data/sources/github.com/jolokia/jolokia/src/documentation/manual/modules/ROOT/pages/protocol/write.adoc">Edit this Page</a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<div class="sect2">
+<h3 id="write"><a class="anchor" href="#write"></a>Writing attributes (write)</h3>
+<div class="paragraph">
+<p>Writing an attribute is quite similar to reading one, except that the request takes an
+additional <code>value</code> element.</p>
+</div>
+<div class="sect3">
+<h4 id="get-write"><a class="anchor" href="#get-write"></a>GET write request</h4>
+<div class="paragraph">
+<p>Writing an attribute wit an GET request, an URL with the following format has to be used:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;base url&gt;/write/&lt;mbean name&gt;/&lt;attribute name&gt;/&lt;value&gt;/&lt;inner path&gt;</pre>
+</div>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. GET Write Request</caption>
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Part</th>
+<th class="tableblock halign-left valign-top">Description</th>
+<th class="tableblock halign-left valign-top">Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;mbean name&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">MBean&#8217;s ObjectName</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>java.lang:type=ClassLoading</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;attribute name&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Name of attribute to set</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Verbose</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;value&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The attribute name to value. The value must be serializable as described in
+<a href="#serialization-request">[serialization-request]</a>.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>true</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;path&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Inner path for accessing the parent object on which to set the value.
+(See also <a href="#paths">[paths]</a>). Note, that this is
+<em>not</em> the path to the attribute itself,
+but to the object carrying this attribute. With a given
+path it is possible to deeply set an value on a complex
+object.</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>For example, you can set the garbage collector to verbose mode by using
+something like</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>http://localhost:8080/jolokia/write/java.lang:type=Memory/Verbose/true</pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="post-write"><a class="anchor" href="#post-write"></a>POST write request</h4>
+<div class="paragraph">
+<p>The keys which are evaluated for a POST write request are:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 2. POST Write Request</caption>
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Key</th>
+<th class="tableblock halign-left valign-top">Description</th>
+<th class="tableblock halign-left valign-top">Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>type</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong><code>write</code></strong></p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>mbean</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">MBean&#8217;s ObjectName</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>java.lang:type=ClassLoading</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>attribute</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Name of attribute to set</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Verbose</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>value</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The attribute name to value. The value must be serializable as described in
+<a href="#serialization-request">[serialization-request]</a>.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>true</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>path</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">An optional inner path for specifying an inner object on which to set the
+value. See <a href="#paths">[paths]</a> for more on inner paths.</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>[#response-write
+==== Write response</p>
+</div>
+<div class="paragraph">
+<p>As response for a write operation the old attribute&#8217;s value is
+returned. For a request</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>http://localhost:8080/jolokia/write/java.lang:type=ClassLoading/Verbose/true</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>you get the answer (supposed that verbose mode was switched
+off for class loading at the time this request was sent)</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "value": "false",
+  "status": 200,
+  "request": {
+    "mbean": "java.lang:type=ClassLoading",
+    "type": "write",
+    "attribute": "Verbose",
+    "value": "true"
+  }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The response is quite similar to the read operation except for
+the additional <code>value</code> element in the request
+(and of course, the different <code>type</code>).</p>
+</div>
+</div>
+</div>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <p>This page was built using the Antora default UI.</p>
+  <p>The source code for this UI is licensed under the terms of the MPL-2.0 license.</p>
+</footer>
+<script id="site-script" src="../../_/js/site.js" data-ui-root-path="../../_"></script>
+<script async src="../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Untitled :: Jolokia</title>
+    <link rel="canonical" href="https://jolokia.org/manual/agents/jvm.html">
+    <meta name="generator" content="Antora 3.1.4">
+    <link rel="stylesheet" href="../../_/css/site.css">
+    <link rel="stylesheet" href="../../_/css/jolokia.css">
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://jolokia.org">Jolokia</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="manual" data-version="">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Jolokia Manual</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../architecture.html">Architecture</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../agents.html">Agents</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../security.html">Security</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../proxy_mode.html">Proxy Mode</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../jolokia_protocol.html">Jolokia Protocol</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../jolokia_mbeans.html">Jolokia MBeans</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../clients.html">Clients</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../jolokia_jmx.html">Jolokia JMX</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../tools.html">Tools</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Jolokia Manual</span>
+    <span class="version">default</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">Jolokia Manual</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">default</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+</nav>
+<div class="edit-this-page"><a href="file:///data/sources/github.com/jolokia/jolokia/src/documentation/manual/modules/ROOT/pages/agents/jvm.adoc">Edit this Page</a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<div class="sect1">
+<h2 id="agents-jvm"><a class="anchor" href="#agents-jvm"></a>JVM Agent</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The JVM agent is right agent when it comes to instrument an
+arbitrary Java application which is not covered by the other
+agents. This agent can be started by any Java program by
+providing certain startup options to the JVM. Or it can be
+dynamically attached (and detached) to an already running Java
+process. This universal agent uses the
+<a href="https://download.oracle.com/javase/6/docs/technotes/guides/jvmti/index.html">JVM
+agent API</a> and is available for every Sun/Oracle JVM 1.6
+and later.</p>
+</div>
+<div class="sect2">
+<h3 id="jvm-agent"><a class="anchor" href="#jvm-agent"></a>Jolokia as JVM Agent</h3>
+<div class="paragraph">
+<p>The JVM agent uses the
+<a href="https://download.oracle.com/javase/6/docs/technotes/guides/jvmti/index.html">JVM
+Agent interface</a> for linking into any JVM. Under the
+hood it uses an HTTP-Server, which is available on every
+Oracle/Sun JVM from version 1.6 upwards.</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph">
+<p>The JDK embedded HTTP-Server is not the fastest one (it is used
+e.g. for the JAXWS reference implementation), but for our
+monitoring needs the performance is sufficient. There are
+several configuration options for tuning the HTTP server&#8217;s
+performance. See below for details.</p>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="jvm-agent-installation"><a class="anchor" href="#jvm-agent-installation"></a>Installation</h4>
+<div class="paragraph">
+<p>This agent gets installed by providing a single startup option
+<code>-javaagent</code> when starting the Java process.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>java -javaagent:agent.jar=port=7777,host=localhost</pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>agent.jar</code> is the filename of the Jolokia
+JVM agent. The agent can be downloaded like the others from the <a href="https://jolokia.org/download.html">download page</a>.
+When downloading from a Maven repository you need to check for the classifier <code>agent</code> (i.e. the
+jar to download looks like <code>jolokia-jvm-1.3.1-agent.jar</code>, not <code>jolokia-jvm-1.1.5.jar</code>).
+Options can be appended as a comma separated
+list. The available options are the same as described in
+<a href="#agent-war-init-params">[agent-war-init-params]</a> plus the one described in
+table <a href="#agent-jvm-config">Table 1, &#8220;JVM agent configuration options&#8221;</a>. If an options
+contains a comma, an equal sign or a backslash, it must be
+escaped with a backslash.</p>
+</div>
+<table id="agent-jvm-config" class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. JVM agent configuration options</caption>
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Description</th>
+<th class="tableblock halign-left valign-top">Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>agentContext</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Context under which the agent is deployed. The full URL
+will be <code>protocol://host:port/agentContext</code>. The default context is
+<code>/jolokia</code>.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>/j4p</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>agentId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A unique ID for this agent. By default a unique id is
+calculated. If provided it should be ensured that this id is
+unique among all agent reachable via multicast requests used
+by the discovery mechanism. It is recommended not to set
+this value. Within the <code>agentId</code> specification you
+can use the same placeholders as in <code>discoveryAgentUrl</code>.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>my-unique-agent-id</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>agentDescription</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">An optional description which can be used for clients to
+present a human readable label for this agent.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Intranet Timebooking Server</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>host</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Hostaddress to which the HTTP server should bind to. If "*" or "0.0.0.0" is
+given, the servers binds to every network interface.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>localhost</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>port</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Port the HTTP server should listen to. If set to 0, then an arbitrary free port
+will be selected.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>8778</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>user</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">User to be used for authentication (along with a <code>password</code>)</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>password</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Password used for authentication (<code>user</code> is then required, too)</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>realm</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Sets the security realm to use. If the <code>authMode</code> is set to
+<code>jaas</code> this is also used as value for the security domain.
+E.g. for Karaf 3 and later, this realm should be <code>karaf</code> since
+all JMX MBeans are guarded by this security domain.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>jolokia</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>authMode</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Can be either <code>basic</code> (the default), <code>jaas</code> or <code>delegate</code>. If
+<code>jaas</code> is used, the user and password given in the <code>Authorization:</code>
+header are used for login in via JAAS and, if successful, the return subject is used for all Jolokia operation.
+This has only an effect, if user is set. For authentication mode <code>delegate</code>, the authentication
+decision is delegated to a service specified by <code>authUrl</code> (see below for details).</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>basic</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>authMatch</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">If MultiAuthenticator is used, this config item explains how to combine multiple authenticators.
+Supported values: <code>any</code> at least one authenticator must match, <code>all</code>
+all authenticators must match.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>any</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>authClass</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Fully qualified name of an authenticator class. Class must be on classpath and must extend
+<code>com.sun.net.httpserver.Authenticator</code>. Class can declare a constructor
+that takes one argument of a type <code>org.jolokia.core.config.Configuration</code> in which case
+Jolokia runtime configuration will be passed (useful in cases where authenticator requires additional
+configuration). If no such constructor is found, default (no-arg) constructor will be use to create an
+instance.</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>authUrl</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">URL of a service used for checking the authentication. This configuration option is only effective if
+<code>authMode</code> is set to <code>delegate</code>. This URL can have a HTTP or HTTPS scheme.
+The initially provided <code>Authorization:</code> header is copied over to the request against this
+URL.</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>authPrincipalSpec</code></p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>Expression used for extracting a principal name from the response of a delegate authentication service. This
+parameter is only in use when the <code>authMode</code> is set to <code>delegate</code>. The
+following expressions are supported:</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>json:path</code></dt>
+<dd>
+<p>a path into a JSON response which points to the principal.
+E.g. a principal spec <code>jason:metadata/name</code> will select the "name" property within the JSON
+object specified by the "metadata" property. For navigate into arrays, numeric indexes can be used.</p>
+</dd>
+<dt class="hdlist1"><code>empty:</code></dt>
+<dd>
+<p>Always extracts an empty (<code>""</code>) principal.
+If this option is not specified, not principal is extracted.</p>
+</dd>
+</dl>
+</div></div></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>authIgnoreCerts</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">If given, the <code>authMode</code> is set to <code>delegate</code> and the delegate URL is
+as HTTPS-URL then the server certificate as well as the server&#8217;s DNS name will not be verified. This useful
+in order to avoid (or introduce) complex keymanagement issues, but is of course less secure. By default
+certs a verified with the local keystore.</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>protocol</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">HTTP protocol to use. Should be either <code>http</code>
+or <code>https</code>. For the SSL stack there are various
+additional configuration options.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>http</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>backlog</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Size of request backlog before requests get discarded.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>10</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>executor</code></p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>Threading model of the HTTP server:</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>fixed</code></dt>
+<dd>
+<p>Thread pool with a fixed number of threads (see also <code>threadNr</code>)</p>
+</dd>
+<dt class="hdlist1"><code>cached</code></dt>
+<dd>
+<p>Cached thread pool which creates threads on demand</p>
+</dd>
+<dt class="hdlist1"><code>single</code></dt>
+<dd>
+<p>A single thread only</p>
+</dd>
+</dl>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>single</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>threadNamePrefix</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Thread name prefix that executor will use while creating new thread(s).</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>jolokia-</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>threadNr</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number of threads to be used when the
+<code>fixed</code> execution model is chosen.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>5</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>keystore</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Path to the SSL keystore to use (https only)</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>keystorePassword</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Keystore password (https only). If the password is given embedded in brackets <code>[[...]]</code>,
+then it is treated as an encrypted password which was encrypted with <code>java -jar jvm-agent.jar
+encrypt</code>. See below for details.</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>useSslClientAuthentication</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether client certificates should be used for
+authentication. The presented certificate is validated that it is signed by
+a known CA which must be in the keystore (https only). (<code>true</code> or
+<code>false</code>).</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>false</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>secureSocketProtocol</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Secure protocol that will be used for establishing HTTPS connection (https only)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>TLS</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>keyStoreType</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SSL keystore type to use (https only)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>JKS</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>keyManagerAlgorithm</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Key manager algorithm (https only)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>SunX509</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>trustManagerAlgorithm</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Trust manager algorithm (https only)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>SunX509</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>caCert</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">If HTTPs is to be used and no <code>keystore</code> is given, then <code>caCert</code>
+can be used to point to a PEM encoded CA certification file. This is use to verify
+client certificates when <code>useSslClientAuthentication</code> is switched on (https only)</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>serverCert</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">For SSL (and when no <code>keyStore</code> is used) then this path must point to server
+certificate which is presented to clients (https only)</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>serverKey</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Path to the PEM encoded key file for signing the server cert during TLS handshake. This is only
+used when no <code>keyStore</code> is used. For decrypting the key the password given with
+<code>keystorePassword</code> is used (https only).</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>serverKeyAlgorithm</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Encryption algorithm to use for decrypting the key given with <code>serverKey</code>
+(https only)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>RSA</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>clientPrincipal</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The principal which must be given in a client certificate to allow access to the agent. This can be one or
+or more relative distinguished names (RDN), separated by commas. The subject of a given client certificate
+must match on all configured RDNs. For example, when the configuration is <code>O=jolokia.org,OU=Dev</code> then a
+client certificate&#8217;s subject must contain <code>O=jolokia.org</code> and <code>OU=Dev</code> to allow the request. Multiple alternative
+principals can be configured by using additional options with consecutive index suffix like in
+<code>clientPrincipal.1</code>, <code>clientPrincipal.2</code>, &#8230;&#8203; Please remember that a <code>,</code>
+separating RDNs must be escaped with a backslash (<code>\,</code>) when used on the commandline as agent arguments.
+(https and useSslAuthentication only)</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>extraClientCheck</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">If switched on the agent performs an extra check for client authentication that the presented client
+cert contains a client flag in the extended key usage section which must be present.
+(https and useSslAuthentication only)</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>bootAmx</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">If set to <code>true</code> and if the agent is
+attached to a Glassfish server, then during startup the
+AMX subsystem is booted so that Glassfish specific MBeans
+are available. Otherwise, if set to
+<code>false</code> the AMX system is not booted.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>true</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>config</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Path to a properties file from where the configuration
+options should be read. Such a property file can contain
+the configuration options as described here as key value
+pairs (except for the <code>config</code> property
+of course :)</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>discoveryEnabled</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Is set to <code>false</code> then this agent will
+not listen for multicast request (multicast-group 239.192.48.84,
+port 24884 by default, but can configured individually).
+By default this option is enabled. This option can also be switched on with an
+environment variable
+<code>JOLOKIA_DISCOVERY</code> or the system
+property <code>jolokia.discoveryEnabled</code> set to
+<code>true</code>.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>true</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>discoveryAgentUrl</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Sets the URL to respond for multicast discovery requests. If
+given, <code>discoveryEnabled</code> is set
+implicitly to true. This URL can also be provided by an
+environment variable
+<code>JOLOKIA_DISCOVERY_AGENT_URL</code> or the system
+property <code>jolokia.discoveryUrl</code>. Within the value you can use the
+placeholders <code>${host}</code> and <code>${ip}</code> which gets replaced
+by the autodetected local host name/address. Also with <code>$\{env:ENV_VAR}</code> and
+<code>$\{sys:property}</code> environment and system properties can be referenced, respectively.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code><a href="http://10.9.11.87:8778/jolokia" class="bare">http://10.9.11.87:8778/jolokia</a></code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>multicastGroup</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The multicast group IPv4 address. This group IP can be also given as an environment variable <code>JOLOKIA_MULTICAST_GROUP</code> or a system property <code>jolokia.multicastGroup</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>239.192.48.84</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>multicastPort</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The multicast port. This port can be also given as an environment variable <code>JOLOKIA_MULTICAST_PORT</code> or a system property <code>jolokia.multicastPort</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>24884</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>sslProtocol</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The list of SSL / TLS protocols enabled. Valid options are available in the documentation
+on SunJSSEProvider for your JDK version. Using only <code>TLSv1.1</code> and
+<code>TLSv1.2</code> is recommended in Java 1.7 and Java 1.8. Using only
+<code>TLSv1</code> is recommended in Java 1.6. Multiple protocols can be configured
+by using additional options with consecutive index suffixes like in
+<code>sslProtocol.1</code>, <code>sslProtocol.2</code>, &#8230;&#8203;</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>TLSv1.2</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>sslCipherSuite</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The list of SSL / TLS cipher suites to enable. The table of available cipher suites is
+available under the "Default Enabled Cipher Suites" at the SunJSSEProvider documentation
+<a href="https://docs.oracle.com/javase/8/docs/technotes/guides/security/SunProviders.html#SunJSSEProvider">here</a>.
+Multiple cipher suites can be configured by using additional options with consecutive index
+suffixes like in <code>sslCipherSuite.1</code>, <code>sslCipherSuite.2</code>, &#8230;&#8203;</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>policyLocation</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Path to the XML policy file</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>Upon successful startup the agent will print out a success
+message with the full URL which can be used by clients for
+contacting the agent.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="jvm-attach"><a class="anchor" href="#jvm-attach"></a>Attaching a Jolokia agent on the fly</h3>
+<div class="paragraph">
+<p>A Jolokia agent can be attached to any running Java process as
+long as the user has sufficient access privileges for
+accessing the process. This agent uses the
+<a href="https://download.oracle.com/javase/6/docs/jdk/api/attach/spec/com/sun/tools/attach/VirtualMachine.html">Java
+attach API</a> for dynamically attaching and detaching to
+and from the process. It works similar to JConsole connecting
+to a local process. The Jolokia advantage is, that after the
+start of the agent, it can be reached over the network.</p>
+</div>
+<div class="paragraph">
+<p>The JAR containing the JVM  agent also contains a client
+application which can be reached via the
+<code>-jar</code> option. Call it with
+<code>--help</code> to get a short usage information:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ java -jar jolokia-jvm-1.3.4-agent.jar --help
+
+Jolokia Agent Launcher
+======================
+
+Usage: java -jar jolokia-jvm-1.3.4-agent.jar [options] &lt;command&gt; &lt;pid/regexp&gt;
+
+where &lt;command&gt; is one of
+start     -- Start a Jolokia agent for the process specified
+stop      -- Stop a Jolokia agent for the process specified
+status    -- Show status of an (potentially) attached agent
+toggle    -- Toggle between start/stop (default when no command is given)
+list      -- List all attachable Java processes (default when no argument is given at all)
+encrypt   -- Encrypt a password which is given as argument or read from standard input
+
+[options] are used for providing runtime information for attaching the agent:
+
+--host &lt;host&gt;                   Hostname or IP address to which to bind on
+(default: InetAddress.getLocalHost())
+--port &lt;port&gt;                   Port to listen on (default: 8778)
+--agentContext &lt;context&gt;        HTTP Context under which the agent is reachable (default: /jolokia)
+--agentId &lt;agent-id&gt;            VM unique identifier used by this agent (default: autogenerated)
+--agentDescription &lt;desc&gt;       Agent description
+--authMode &lt;mode&gt;               Authentication mode: 'basic' (default), 'jaas' or 'delegate'
+--authClass &lt;class&gt;             Classname of an custom Authenticator which must be loadable from
+the classpath
+--authUrl &lt;url&gt;                 URL used for a dispatcher authentication (authMode == delegate)
+--authPrincipalSpec &lt;spec&gt;      Extractor specification for getting the principal
+(authMode == delegate)
+--authIgnoreCerts               Whether to ignore CERTS when doing a dispatching authentication
+(authMode == delegate)
+--user &lt;user&gt;                   User used for Basic-Authentication
+--password &lt;password&gt;           Password used for Basic-Authentication
+--quiet                         No output. "status" will exit with code 0 if the agent is running,
+1 otherwise
+--verbose                       Verbose output
+--executor &lt;executor&gt;           Executor policy for HTTP Threads to use (default: single)
+"fixed"  -- Thread pool with a fixed number of threads (default: 5)
+"cached" -- Cached Thread Pool, creates threads on demand
+"single" -- Single Thread
+--threadNr &lt;nr threads&gt;         Number of fixed threads if "fixed" is used as executor
+--backlog &lt;backlog&gt;             How many request to keep in the backlog (default: 10)
+--protocol &lt;http|https&gt;         Protocol which must be either "http" or "https" (default: http)
+--keystore &lt;keystore&gt;           Path to keystore (https only)
+--keystorePassword &lt;pwd&gt;        Password to the keystore (https only)
+--useSslClientAuthentication    Use client certificate authentication (https only)
+--secureSocketProtocol &lt;name&gt;   Secure protocol (https only, default: TLS)
+--keyStoreType &lt;name&gt;           Keystore type (https only, default: JKS)
+--keyManagerAlgorithm &lt;name&gt;    Key manager algorithm (https only, default: SunX509)
+--trustManagerAlgorithm &lt;name&gt;  Trust manager algorithm (https only, default: SunX509)
+--caCert &lt;path&gt;                 Path to a PEM encoded CA cert file (https &amp; sslClientAuth only)
+--serverCert &lt;path&gt;             Path to a PEM encoded server cert file (https only)
+--serverKey &lt;path&gt;              Path to a PEM encoded server key file (https only)
+--serverKeyAlgorithm &lt;algo&gt;     Algorithm to use for decrypting the server key (https only, default: RSA)
+--clientPrincipal &lt;principal&gt;   Allow only this principal in the client cert (https &amp; sslClientAuth only)
+If supplied multiple times, any one of the clientPrincipals must match
+--extendedClientCheck &lt;t|f&gt;     Additional validation of client certs for the proper key usage
+(https &amp; sslClientAuth only)
+--discoveryEnabled &lt;t|f&gt;        Enable/Disable discovery multicast responses (default: true)
+--discoveryAgentUrl &lt;url&gt;       The URL to use for answering discovery requests. Will be autodetected
+if not given.
+--sslProtocol &lt;protocol&gt;        SSL / TLS protocol to enable, can be provided multiple times
+--sslCipherSuite &lt;suite&gt;        SSL / TLS cipher suite to enable, can be provided multiple times
+--debug                         Switch on agent debugging
+--debugMaxEntries &lt;nr&gt;          Number of debug entries to keep in memory which can be fetched from the
+Jolokia MBean
+--maxDepth &lt;depth&gt;              Maximum number of levels for serialization of beans
+--maxCollectionSize &lt;size&gt;      Maximum number of element in collections to keep when serializing the
+response
+--maxObjects &lt;nr&gt;               Maximum number of objects to consider for serialization
+--restrictorClass &lt;class&gt;       Classname of an custom restrictor which must be loadable from the classpath
+--policyLocation &lt;url&gt;          Location of a Jolokia policy file
+--mbeanQualifier &lt;qualifier&gt;    Qualifier to use when registering Jolokia internal MBeans
+--canonicalNaming &lt;t|f&gt;         whether to use canonicalName for ObjectNames in 'list' or 'search'
+(default: true)
+--includeStackTrace &lt;t|f&gt;       whether to include StackTraces for error messages (default: true)
+--serializeException &lt;t|f&gt;      whether to add a serialized version of the exception in the Jolokia
+response (default: false)
+--config &lt;configfile&gt;           Path to a property file from where to read the configuration
+--help                          This help documentation
+--version                       Version of this agent (it's 1.3.4 btw :)
+
+&lt;pid/regexp&gt; can be either a numeric process id or a regular expression. A regular expression is matched
+against the processes' names (ignoring case) and must be specific enough to select exactly one process.
+
+If no &lt;command&gt; is given but only a &lt;pid&gt; the state of the Agent will be toggled
+between "start" and "stop"
+
+If neither &lt;command&gt; nor &lt;pid&gt; is given, a list of Java processes along with their IDs
+is printed
+
+There are several possible reasons, why attaching to a process can fail:
+* The UID of this launcher must be the very *same* as the process to attach to. It's not sufficient
+to be root.
+* The JVM must have HotSpot enabled and be a JVM 1.6 or later.
+* It must be a Java process ;-)
+
+For more documentation please visit www.jolokia.org</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Every option described in <a href="#agent-jvm-config">Table 1, &#8220;JVM agent configuration options&#8221;</a>
+is reflected by a command line option for the
+launcher. Additionally, the option <code>--quiet</code>
+can be used to keep the launcher silent and
+<code>--verbose</code> for adding some extra logging.</p>
+</div>
+<div class="paragraph">
+<p>The launcher knows various operational modes, which needs to
+be provided as a non-option argument and possibly require an
+extra argument.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>start</code></dt>
+<dd>
+<p>Use this to attach an agent to an already running, local
+Java process. The additional argument is either the
+<em>process id</em> of the Java process to
+attach to or a <em>regular expression</em>
+which is matched against the Java processes names. In the
+later case, exactly one process must match, otherwise an
+exception is raised. The command will return with an
+return code of 0 if an agent has been started. If the
+agent is already running, nothing happens and the launcher
+returns with 1. The URL of the Agent will be printed to
+standard out on an extra line except when the
+<code>--quiet</code> option is used.</p>
+</dd>
+<dt class="hdlist1"><code>stop</code></dt>
+<dd>
+<p>Command for stopping an running and dynamically attached
+agent. The required argument is the Java process id or
+an regular expression as described for the
+<code>start</code> command. If the agent could be
+stopped, the launcher exits with 0, it exits with 1 if
+there was no agent running.</p>
+</dd>
+<dt class="hdlist1"><code>toggle</code></dt>
+<dd>
+<p>Starts or stops an dynamically attached agent,
+depending on its current state. The Java process ID is
+required as an additional argument. If an agent is
+running, <code>toggle</code> will stop it (and
+vice versa). The launcher returns with an exit code of 0
+except when the operation fails. When the agent is
+started, the full agent&#8217;s URL is printed to standard
+out. <code>toggle</code> is the default command
+when only a numeric process id is given as argument or a
+regular expression which <em>not</em> the same
+as a known command.</p>
+</dd>
+<dt class="hdlist1"><code>status</code></dt>
+<dd>
+<p>Command for showing the current agent status for a given
+process. The process id or a regular expression is
+required. The launcher will return with 0 when the agent is
+running, otherwise with 1.</p>
+</dd>
+<dt class="hdlist1"><code>list</code></dt>
+<dd>
+<p>List all local Java processes in a table with the
+process id and the description as columns. This is the
+default command if no non-option argument is given at
+all. <code>list</code> returns with 0 upon normal
+operation and with 1 otherwise.</p>
+</dd>
+<dt class="hdlist1"><code>encrypt</code></dt>
+<dd>
+<p>Encrypt the keystore password. You can add the password to encrypt
+as an additional argument or, if not given, it is read from standard input.
+The output of this command is the encrypted password in the format <code>[[&#8230;&#8203;.]]</code>,
+which should be used literally (excluding the final newline) for the keystore password
+when using the option <code>keystorePassword</code> in the agent configuration.</p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>The launcher is especially suited for
+<em>one-shot</em>, <em>local</em>
+queries. For example, a simple shell script for printing out
+the memory usage of a local Java process, including
+(temporarily) attaching an Jolokia agent looks simply like in
+the following example. With a complete client library like &lt;ulink
+<a href="https://www.jmxp4perl.org">Jmx4Perl</a> even more one
+shot scripts are possible<sup class="footnote" id="_footnote_rest-comment">[<a id="_footnoteref_1" class="footnote" href="#_footnotedef_1" title="View footnote.">1</a>]</sup>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>#!/bin/sh
+
+url=`java -jar agent.jar start $1 | tail -1`
+
+memory_url="${url}read/java.lang:type=Memory/HeapMemoryUsage"
+used=`wget -q -O - "${memory_url}/used" | sed 's/^.*"value":\([0-9]*\).*$/\1/'`
+max=`wget -q -O - "${memory_url}/max" | sed 's/^.*"value":\([0-9]*\).*$/\1/'`
+usage=$((${used}*100/${max}))
+echo "Memory Usage: $usage %"
+
+java -jar agent.jar --quiet stop $1</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footnotes">
+<hr>
+<div class="footnote" id="_footnotedef_1">
+<a href="#_footnoteref_1">1</a>. And in fact, some support for launching this dynamic agent is planned for a forthcoming release of jmx4perl.
+</div>
+</div>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <p>This page was built using the Antora default UI.</p>
+  <p>The source code for this UI is licensed under the terms of the MPL-2.0 license.</p>
+</footer>
+<script id="site-script" src="../../_/js/site.js" data-ui-root-path="../../_"></script>
+<script async src="../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

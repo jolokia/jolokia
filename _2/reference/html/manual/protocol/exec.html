@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Untitled :: Jolokia</title>
+    <link rel="canonical" href="https://jolokia.org/manual/protocol/exec.html">
+    <meta name="generator" content="Antora 3.1.4">
+    <link rel="stylesheet" href="../../_/css/site.css">
+    <link rel="stylesheet" href="../../_/css/jolokia.css">
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://jolokia.org">Jolokia</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="manual" data-version="">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Jolokia Manual</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../architecture.html">Architecture</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../agents.html">Agents</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../security.html">Security</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../proxy_mode.html">Proxy Mode</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../jolokia_protocol.html">Jolokia Protocol</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../jolokia_mbeans.html">Jolokia MBeans</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../clients.html">Clients</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../jolokia_jmx.html">Jolokia JMX</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../tools.html">Tools</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Jolokia Manual</span>
+    <span class="version">default</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">Jolokia Manual</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">default</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+</nav>
+<div class="edit-this-page"><a href="file:///data/sources/github.com/jolokia/jolokia/src/documentation/manual/modules/ROOT/pages/protocol/exec.adoc">Edit this Page</a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<div class="sect2">
+<h3 id="exec"><a class="anchor" href="#exec"></a>Executing JMX operations (exec)</h3>
+<div class="paragraph">
+<p>Beside attribute provides a way for the execution of exposed JMX
+operations with optional arguments. The same as for writing
+attributes, Jolokia must be able to serialize the arguments. See
+<a href="#serialization">[serialization]</a> for details. Execution of
+overloaded methods is supported. The JMX specifications recommends
+to avoid overloaded methods when exposing them via JMX, though.</p>
+</div>
+<div class="sect3">
+<h4 id="get-exec"><a class="anchor" href="#get-exec"></a>GET exec request</h4>
+<div class="paragraph">
+<p>The format of an GET exec request is</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;base url&gt;/exec/&lt;mbean name&gt;/&lt;operation name&gt;/&lt;arg1&gt;/&lt;arg2&gt;/....</pre>
+</div>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. GET Exec Request</caption>
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Part</th>
+<th class="tableblock halign-left valign-top">Description</th>
+<th class="tableblock halign-left valign-top">Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;mbean name&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">MBean&#8217;s ObjectName</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>java.lang:type=Threading</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;operation name&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Name of the operation to execute. If this is an overloaded method,
+it is mandatory to provide a method signature as
+well. A signature consist the fully qualified argument class
+names or native types, separated by commas and enclosed with
+parentheses. For calling a non-argument overloaded method use <code>()</code>
+as signature.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>loadUsers(java.lang.String, int)</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;arg1&gt;</code>, <code>&lt;arg2&gt;</code>, <code>&#8230;&#8203;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String representation for the arguments required to execute this
+operation. Only certain data types can be used here as
+described in &lt;serialization-request&gt;&gt;.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>/true/true/</code></p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>The following request will trigger a garbage collection:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>http://localhost:8080/jolokia/exec/java.lang:type=Memory/gc</pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="post-exec"><a class="anchor" href="#post-exec"></a>POST exec request</h4>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 2. POST Exec Request</caption>
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Key</th>
+<th class="tableblock halign-left valign-top">Description</th>
+<th class="tableblock halign-left valign-top">Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>type</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong><code>exec</code></strong></p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>mbean</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">MBean&#8217;s ObjectName</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>java.lang:type=Threading</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>operation</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The operation to execute, optionally with a signature as
+described above.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>dumpAllThreads</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>arguments</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">An array of arguments for invoking this operation. The value must be serializable as described in
+<a href="#serialization-request">[serialization-request]</a>.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>[true, true]</code></p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>The following request dumps all threads (along with locked
+monitors and locked synchronizers, thats what the boolean
+arguments are for):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "type": "EXEC",
+  "mbean": "java.lang:type=Threading",
+  "operation": "dumpAllThreads",
+  "arguments": [ true, true ]
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>[#response-exec
+==== Exec response</p>
+</div>
+<div class="paragraph">
+<p>For an <code>exec</code> operation, the response
+contains the return value of the
+operation. <code>null</code> is returned if either the
+operation returns a null value or the operation is declared as
+void. A typical response for an URL like</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>http://localhost:8080/jolokia/exec/java.util.logging:type=Logging/setLoggerLevel/global/INFO</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>looks like</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "value": null,
+  "status": 200,
+  "request": {
+    "type": "exec",
+    "mbean": "java.util.logging:type=Logging",
+    "operation": "setLoggerLevel",
+    "arguments": [ "global", "INFO" ]
+  }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The return value get serialized as described in <a href="#serialization">[serialization]</a>.</p>
+</div>
+</div>
+</div>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <p>This page was built using the Antora default UI.</p>
+  <p>The source code for this UI is licensed under the terms of the MPL-2.0 license.</p>
+</footer>
+<script id="site-script" src="../../_/js/site.js" data-ui-root-path="../../_"></script>
+<script async src="../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Untitled :: Jolokia</title>
+    <link rel="canonical" href="https://jolokia.org/manual/client/java.html">
+    <meta name="generator" content="Antora 3.1.4">
+    <link rel="stylesheet" href="../../_/css/site.css">
+    <link rel="stylesheet" href="../../_/css/jolokia.css">
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://jolokia.org">Jolokia</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="manual" data-version="">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Jolokia Manual</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../architecture.html">Architecture</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../agents.html">Agents</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../security.html">Security</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../proxy_mode.html">Proxy Mode</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../jolokia_protocol.html">Jolokia Protocol</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../jolokia_mbeans.html">Jolokia MBeans</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../clients.html">Clients</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../jolokia_jmx.html">Jolokia JMX</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../tools.html">Tools</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Jolokia Manual</span>
+    <span class="version">default</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">Jolokia Manual</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">default</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+</nav>
+<div class="edit-this-page"><a href="file:///data/sources/github.com/jolokia/jolokia/src/documentation/manual/modules/ROOT/pages/client/java.adoc">Edit this Page</a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<div class="sect1">
+<h2 id="client-java"><a class="anchor" href="#client-java"></a>Java Client Library</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The Java client library provides an easy access to the Jolokia
+agent from within Java. Since JSR-160 connectors themselves
+provide Java based remote access to MBeans one might wonder about
+the benefits of  a Jolokia Java binding. There are several,
+though:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>It provides a typeless access to remote MBeans. The big
+advantage is that for any non-OpenMBean access to custom typed
+objects is still possible without having the type information
+locally in the classpath.</p>
+</li>
+<li>
+<p>Jolokia can be used in setups where JSR-160 connectors can not
+be used. I.e. in firewall secured environments it is much easier
+to get through to a Jolokia Agent than to an JSR-160 connector
+using RMI as transport protocol.</p>
+</li>
+<li>
+<p><em>Remoteness</em> is explicit in this API instead
+of JSR-160 connector&#8217;s seeked <em>transparent
+remoteness</em>. RMI has some arguable conceptually
+advantages, but hiding all remote aspects proved to have quite
+some disadvantages when it comes to the programming
+model. Explicite awareness of a 'heavy-weight' remote call is
+better than false transparency in order to know the price tag.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The Java client library follows a strict request-response
+paradigm, much like the underlying HTTP. It uses generics heavily
+and can be centered around three classes:
+<code>J4pClient</code> is the client side agent, which
+has various variants of a <code>execute()</code> for
+sending requests. This method takes one or more
+<code>J4pRequest</code> objects as arguments and returns
+one or more <code>J4pResponse</code> objects as result.</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">What the heck is this "J4p"?</div>
+<div class="paragraph">
+<p>That&#8217;s a reminiscence to Jolokia&#8217;s roots which lies in
+<a href="https://www.jmx4perl.org">Jmx4Perl</a>. It is always good
+to remember where one comes from ;-)</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>But before we got into the details, the next section gives a first
+tutorial to get a feeling how the API can be used.</p>
+</div>
+<div class="sect2">
+<h3 id="client-java-tutorial"><a class="anchor" href="#client-java-tutorial"></a>Tutorial</h3>
+<div class="paragraph">
+<p>As seen in the following example, the usage is quite easy. First
+a, client object <code>client</code> is created pointing
+to a Jolokia agent at <code>http://localhost:8080/jolokia</code>.
+A read request for querying the heap memory usage from the
+<code>MemoryMXBean</code> is created and then send via
+the <code>execute()</code> to the agent. The
+response returned is of type
+<code>J4pReadResponse</code> and holds the result
+which finally is printed out to standard output.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import org.jolokia.client.J4pClient;
+import org.jolokia.client.request.*;
+
+public class MemoryDemo {
+  public static void main(String[] args) {
+    J4pClient client = new J4pClient("http://localhost:8080/jolokia");
+    J4pReadRequest request =
+        new J4pReadRequest("java.lang:type=Memory", "HeapMemoryUsage");
+    request.setPath("used");
+    J4pReadResponse response = client.execute(request);
+    System.out.println("Memory used: " + response.getValue());
+  }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In order to compile and run this sample, two support libraries
+are required in addition to
+<code>jolokia-client-java.jar</code> (<a href="../../download.html">Download</a>):</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Apache
+<a href="https://hc.apache.org/httpcomponents-client-ga/index.html">HttpClient</a>,
+4.3.3 (<a href="https://hc.apache.org/downloads.cgi">Download</a>)</p>
+</li>
+<li>
+<p><a href="https://code.google.com/p/json-simple/">json-simple</a>,
+1.1 (<a href="https://code.google.com/p/json-simple/downloads/list">Download</a>)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>For Maven users, the following dependency is sufficient (it will include
+the other two as transitive dependencies):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
+  &lt;artifactId&gt;jolokia-client-java&lt;/artifactId&gt;
+  &lt;version&gt;1.2.2&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="client-client"><a class="anchor" href="#client-client"></a>J4pClient</h3>
+<div class="paragraph">
+<p><code>J4pClient</code> is the entry point for sending
+requests to a remote Jolokia agent. It can be created in multiple
+ways. For simple cases, public constructors are provided taking
+the mandatory Jolokia agent URL and optionally a
+<code>org.apache.http.client.HttpClient</code>
+instance which is used for the HTTP business. The recommended style
+is to use the <code>J4pClientBuilder</code>, though. This way, all
+parameters for the HTTP communication can easily be set:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
+  .user("roland")
+  .password("s!cr!t")
+  .authenticator(new BasicAuthenticator().preemptive())
+  .connectionTimeout(3000)
+  .build();</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The builder supports the following parameters with the given
+defaults:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. J4pClient parameters</caption>
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Description</th>
+<th class="tableblock halign-left valign-top">Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>url</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The URL to the Jolokia agent. This is the only mandatory parameter.</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>user</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">User name when authentication is used. If not set, no
+authentication is used. If set, <code>password</code>
+must be set, too</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>password</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Password used for authentication. Only used when
+<code>user</code> is set.</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>authenticator</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Implementation of <code>J4pAuthenticator</code>. The Java client comes with
+one implementation <code>BasicAuthenticator</code> for using basic authentication.
+This class supports also <em>preemptive</em> authentication. Call <code>preemptive()</code> to
+switch this on (see above for an example). Basic authentication is the default if no other
+authenticator is set.Only used when <code>user</code> is set, too.</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>target</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A JMX JSR-160 ServiceURL which should be used by the agent
+as the <em>real</em> target. This parameter should
+be set if the client is used for accessing the agent in
+<a href="#proxy">proxy mode</a>.</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>targetUser</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The JSR-160 user to use when using the proxy mode. If not
+given (and <code>target</code> is set), then no
+authentication is used for JSR-160 communication.</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>targetPassword</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">JSR-160 Password to use for the proxy mode.</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>connectionTimeout</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The timeout in milliseconds until a connection is
+established. A timeout value of zero is interpreted as an
+infinite timeout.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>20000</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>pooledConnection</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Specifies, that the underlying HttpClient should use pooled
+connection manager, which is thread safe and can service
+connection requests from multiples threads
+simultaneously. This is important if the
+<code>J4pClient</code> is to be used in a multi
+threaded context. The size of the pool is restricted by the
+parameter <code>maxTotalConnection</code>.
+<code>ThreadSafeClientConnManager</code> is the
+underlying connection manager. Pooled connections are the
+default.</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>singleConnection</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Specifies that single connection should be used which
+maintains only one active connection at a time.  Even though
+<code>J4pClient</code> is still thread-safe it
+ought to be used by one execution thread only. The
+underlying connection manager is
+<code>SingleClientConnManager</code> Pooled
+connections are the default.</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>maxTotalConnections</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Defines the number of total connections to be pooled. It
+is only used when <code>pooledConnection</code> is
+used.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>20</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>defaultMaxConnectionsPerRoute</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Defines the number of total connections per route. It
+is only used when <code>pooledConnection</code> is
+used.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>20</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>maxConnectionPoolTimeout</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Defines the timeout for waiting to obtain a connection
+from the pool. This parameter is only used when
+<code>pooledConnections</code> are used.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>500</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>socketTimeout</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Defines the socket timeout (<code>SO_TIMEOUT</code>) in milliseconds,
+which is the timeout for waiting for data  or, put differently,
+a maximum period inactivity between two consecutive data packets.
+A timeout value of zero is interpreted as an infinite timeout.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>0</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>contentCharset</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Defines the charset to be used per default for encoding
+content body.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>ISO-8859-1</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>expectContinue</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Activates <code>Expect: 100-Continue</code> handshake
+for the entity enclosing methods.  The purpose of the
+<code>Expect: 100-Continue</code> handshake to allow a
+client that is sending a request message with a request body
+to determine if the origin server is willing to accept the
+request (based on the request headers) before the client
+sends the request body.  The use of the <code>Expect:
+100-continue</code> handshake can result in noticeable
+performance improvement for entity enclosing requests that
+require the target server&#8217;s authentication.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>true</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>tcpNoDelay</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Determines whether Nagle&#8217;s algorithm is to be used. The
+Nagle&#8217;s algorithm tries to conserve bandwidth by minimizing
+the number of segments that are sent. When applications wish
+to decrease network latency and increase performance, they
+can disable Nagle&#8217;s algorithm (that is enable
+<code>TCP_NODELAY</code>). Data will be sent
+earlier, at the cost of an increase in bandwidth
+consumption.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>socketBufferSize</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Determines the size of the internal socket buffer in bytes
+used to buffer data while receiving and transmitting HTTP
+messages.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>8192</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>proxy</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Determines http proxy server. It can be defined as
+<code><a href="http://user:password@host:port" class="bare">http://user:password@host:port</a></code>. <em>user</em> and
+<em>password</em> are optional.</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>useProxyFromEnvironment</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Set the proxy for this client based on <code>http_proxy</code> system environment variable.
+Expect formats are <code><a href="http://user:pass@host:port" class="bare">http://user:pass@host:port</a></code> or <code><a href="http://host:port" class="bare">http://host:port</a></code>
+Example: <code><a href="http://tom:sEcReT@my.proxy.com:8080" class="bare">http://tom:sEcReT@my.proxy.com:8080</a></code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>responseExtractor</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A response extractor can be used for hooking into the JSON
+deserialization process when a JSON response is converted
+into a <code>J4pResponse</code> object. By
+default, the received JSON object is examined for a status
+code of 200 and only then creates a response
+object. Otherwise an exception is thrown. An extractor is
+specified by the interface
+<code>J4pResponseExtractor</code>. Beside the
+default extractor, an alternate extractor
+<code>ValidatingResponseExtractor</code> can be
+used, which instead of throwing an exception returns a
+<code>null</code> object when the response has a status of
+404. An extractor can be specified as extra argument to the
+execute method, too.</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>The <code>J4pClient</code> provides various variants
+of a <code>execute()</code> method, which takes
+either one single request or a list of requests. For a single
+request, the preferred HTTP method (GET or POST) can be
+specified optionally. The <code>List&lt;R&gt;</code>
+argument can be used type only for a homogeneous bulk request,
+i.e. for multiple requests of the same time. Otherwise an
+untyped list must be used.</p>
+</div>
+<div class="paragraph">
+<p>Each request can be tuned by giving a map of processing options
+along with their values to the <code>execute</code>
+method. The possible options are shown in table
+<a href="#client-java-queryopts">Table 2, &#8220;J4pClient query parameters&#8221;</a>.</p>
+</div>
+<table id="client-java-queryopts" class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 2. J4pClient query parameters</caption>
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">J4pQueryParameter enum</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>MAX_DEPTH</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Maximum traversal depth for serialization of complex
+objects. Use this with a "list" request to restrict the
+depth of the returned meta data tree.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>MAX_COLLECTION_SIZE</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Maximum size of collections returned during serialization.
+If larger, a collection is truncated to this size.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>MAX_OBJECTS</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Maximum number of objects returned in the response&#8217;s value.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>IGNORE_ERRORS</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Option for ignoring errors during JMX operations and JSON
+serialization.  This works only for certain operations like
+pattern reads and should be either <code>true</code>
+or <code>false</code>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>INCLUDE_STACKTRACE</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether to include a stack trace in the response when an
+error occurs.  The allowed values are
+<code>true</code> for inclusion,
+<code>false</code> if no stacktrace should be
+included or <code>runtime</code> if only
+<code>RuntimeException`s should be
+included. Default is `true</code>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>SERIALIZE_EXCEPTION</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether to include a JSON serialized version of the
+exception. If set to <code>true</code>, the exception
+is added under the key <code>error_value</code> in
+the response. Default is <code>false</code>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>CANONICAL_NAMING</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether property keys of <code>ObjectNames</code>
+should be ordered in the canonical way or in the way that
+they are created. The allowed values are either
+<code>true</code> in which case the canonical key
+order (== alphabetical sorted) is used or
+<code>false</code> for getting the keys as
+registered. Default is <code>true</code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="client-java-requests"><a class="anchor" href="#client-java-requests"></a>Request types</h3>
+<div class="paragraph">
+<p>For each request type a dedicated request object is provided
+which all are subclasses from
+<code>J4pRequest</code>. For all requests it can be
+specified which HTTP method is to be used by setting the
+property <code>preferredHttpMethod</code> to either
+<code>GET</code> or <code>POST</code>.</p>
+</div>
+<div class="paragraph">
+<p>Each request type has a corresponding response type which used
+for the return values of the
+<code>J4pClient.execute()</code>.</p>
+</div>
+<div class="paragraph">
+<p>The constructor of each kind of request can take a
+<code>J4pTargetConfig</code> as argument for using a
+request in <a href="#proxy">proxy mode</a>. This
+configurational object holds the JMX service url and
+(optionally) credentials for JSR-160 authentication. When
+given, this proxy target specification overrides any default
+proxy configuration set during the initialization of the
+<code>J4pClient</code>.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>J4pReadRequest</code> and <code>J4pReadResponse</code></dt>
+<dd>
+<p><code>J4pReadRequest</code> is a read request to
+get one or more attributes from one or more MBeans within
+a single request. Various constructor variants can be used
+to specify one or more attributes along with the
+ObjectName (which can be a pattern). A
+<code>path</code> can be set as property for
+specifying an <em>inner path</em>, too.</p>
+<div class="paragraph">
+<p><code>J4pReadResponse</code> is the
+corresponding response type and allows typed acces to the
+fetched value for a single attribute fetch or to multiple
+values for a multi attribute read. In the latter case, the
+found object and attributes names can be retrieved as
+well.</p>
+</div>
+<div class="paragraph">
+<p>For more information on fetching the value of multiple
+attributes and multiple MBeans at once, please refer to
+<a href="#read">[read]</a> or the Javadoc of
+<code>J4pReadResponse</code>.</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>J4pWriteRequest</code> and <code>J4pWriteResponse</code></dt>
+<dd>
+<p>A <code>J4pWriteRequest</code> is used to set
+the value of an MBean attribute. Beside the mandatory
+object and attribute name the value must be give in the
+constructor as well. Optionally a <code>path</code>
+can be provided, too. Only certain types for the given
+value can be serialized properly for calling the Jolokia
+agent as described in
+<a href="#serialization-request">[serialization-request]</a>.</p>
+<div class="paragraph">
+<p>The old value is returned as `J4pWriteResponse&#8217;s value.</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>J4pExecRequest</code> and <code>J4pExecResponse</code></dt>
+<dd>
+<p><code>J4pExecRequest</code>'s are used for
+executing operation on MBeans. The constructor takes as
+mandatory arguments the MBean&#8217;s object name, the operation
+name and any arguments required by the operation. Only
+certain types for the given arguments can be serialized
+properly for calling the Jolokia agent as described in
+<a href="#serialization-request">[serialization-request]</a>.</p>
+<div class="paragraph">
+<p>The returned <code>J4pExecResponse</code>
+contains the return value of the operation called.</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>J4pSearchRequest</code> and <code>J4pSearchResponse</code></dt>
+<dd>
+<p>A <code>J4pSearchRequest</code> contains a
+valid single MBean object name pattern which is used for
+searching MBeans.</p>
+<div class="paragraph">
+<p>The <code>J4pSearchResponse</code> holds a
+list of found object names.</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>J4pListRequest</code> and <code>J4pListResponse</code></dt>
+<dd>
+<p>For obtaining meta data on MBeans a
+<code>J4pListRequest</code> should be used. It
+can be used with a <em>inner path</em> to
+obtain only a subtree of the response, otherwise the whole
+tree as described in <a href="#response-list">[response-list]</a> is
+returned. With the query parameter
+<code>maxDepth</code> can be used to restrict the
+depth of returned tree.</p>
+<div class="paragraph">
+<p>The single value of a
+<code>J4pListResponse</code> is a tree (or
+subtree) as a JSON object, which has the format described
+in <a href="#response-list">[response-list]</a>.</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>J4pVersionRequest</code> and <code>J4pVersionResponse</code></dt>
+<dd>
+<p>A <code>J4pVersionRequest</code> request the
+Jolokia agent&#8217;s version information and takes no
+argument.</p>
+<div class="paragraph">
+<p>The <code>J4pVersionResponse</code> returns the
+agent&#8217;s version (<code>agentVersion</code>), the
+protocol version (<code>protocolVersion</code>), the
+application server product name
+(<code>product</code>), the vendor name
+(<code>vendor</code>) and any extra info
+(<code>extraInfo</code>) specific to the platform
+the Jolokia is running on.</p>
+</div>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="client-java-execptions"><a class="anchor" href="#client-java-execptions"></a>Exceptions</h3>
+<div class="paragraph">
+<p>In case of an error when executing a request a
+<code>J4pException</code> or one its subclass is
+thrown.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>J4pConnectException</code></dt>
+<dd>
+<p>Exception thrown when the connection to the server
+fails. It contains the original
+<code>ConnectException</code> as nested value.</p>
+</dd>
+<dt class="hdlist1"><code>J4pTimeoutException</code></dt>
+<dd>
+<p>Exception thrown in case of an timeout. The nested
+exception is of type
+<code>ConnectTimeoutException</code>.</p>
+</dd>
+<dt class="hdlist1"><code>J4pRemoteException</code></dt>
+<dd>
+<p>Generic exception thrown when an exception occurred on the
+remote side. This is the case when the JSON response
+obtained is an error response as described in
+<a href="#responses">[responses]</a>. The error type, error value, the
+status, the request leading to this error and the remote
+stacktrace as string) can be obtained from this exception.</p>
+</dd>
+<dt class="hdlist1"><code>J4pBulkRemoteException</code></dt>
+<dd>
+<p>Exception thrown when a bulk request fails on the remote
+side. This contains a mixed list which contains the
+<code>J4pRemoteException</code> occurred as well
+as the <code>J4pResponse</code> objects for the
+requests, which succeeded. The list obtained by
+<code>getResults()</code> contains these
+objects in the same order as the list of requests given to
+<code>execute</code>. All responses and remote
+exceptions can also be obtained separately in homogeneous
+lists.</p>
+</dd>
+<dt class="hdlist1"><code>J4pException</code></dt>
+<dd>
+<p>Base exception thrown, when no other exception fits,
+i.e. when the exception happened on the client side. The
+original exception is contained as nested exception.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+</div>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <p>This page was built using the Antora default UI.</p>
+  <p>The source code for this UI is licensed under the terms of the MPL-2.0 license.</p>
+</footer>
+<script id="site-script" src="../../_/js/site.js" data-ui-root-path="../../_"></script>
+<script async src="../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

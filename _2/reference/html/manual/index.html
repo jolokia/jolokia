@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Introduction :: Jolokia</title>
+    <link rel="canonical" href="https://jolokia.org/manual/index.html">
+    <link rel="next" href="architecture.html">
+    <meta name="generator" content="Antora 3.1.4">
+    <link rel="stylesheet" href="../_/css/site.css">
+    <link rel="stylesheet" href="../_/css/jolokia.css">
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://jolokia.org">Jolokia</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="manual" data-version="">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="index.html">Jolokia Manual</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item is-current-page" data-depth="1">
+    <a class="nav-link" href="index.html">Introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="architecture.html">Architecture</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="agents.html">Agents</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="security.html">Security</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="proxy_mode.html">Proxy Mode</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="jolokia_protocol.html">Jolokia Protocol</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="jolokia_mbeans.html">Jolokia MBeans</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="clients.html">Clients</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="jolokia_jmx.html">Jolokia JMX</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="tools.html">Tools</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Jolokia Manual</span>
+    <span class="version">default</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="index.html">Jolokia Manual</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="index.html">default</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="index.html" class="home-link is-current"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="index.html">Jolokia Manual</a></li>
+    <li><a href="index.html">Introduction</a></li>
+  </ul>
+</nav>
+<div class="edit-this-page"><a href="file:///data/sources/github.com/jolokia/jolokia/src/documentation/manual/modules/ROOT/pages/index.adoc">Edit this Page</a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Introduction</h1>
+<div class="paragraph">
+<p>JMX (Java Management Extensions) is <em>the</em>
+standard management solution in the Java world. Since JDK 1.5 it
+is available in every Java Virtual Machine and especially Java EE
+application servers use JMX for their management business.</p>
+</div>
+<div class="paragraph">
+<p>I love JMX. It is a well crafted specification, created in times
+where other concepts like EJBs failed spectacularly. Even more
+than ten years after its incubation it is still the one-and-only
+when it comes to management in the Java world.  Especially the
+various levels of sophistications for implementing MBeans,
+starting with dead simple <em>Standard MBeans</em> and
+ending in very flexible <em>Open MBeans</em> and <em>MXBeans</em>, are impressive.</p>
+</div>
+<div class="paragraph">
+<p>However, some of the advanced JMX concepts didn&#8217;t really appeal to the
+public and are now effectively obsolete. Add-on standards like
+<a href="https://jcp.org/en/jsr/detail?id=77">JSR-77</a> didn&#8217;t
+received the adoption level they deserved. And then there is
+<a href="https://jcp.org/en/jsr/detail?id=160">JSR-160</a>,
+JMX remoting. This specificatiion is designed for ease of usage
+and has the ambition to transparently hide the technical details
+behind the remote communication so that is makes (nearly) no
+difference, whether MBeans are invoked locally or
+remotely. Unfortunately, the underlying transport protocol (RMI)
+and programing model is very Java centric and is not usable
+outside the Java world.</p>
+</div>
+<div class="paragraph">
+<p>This is where Jolokia steps in. It is an agent based approach,
+living side by side with JSR-160, but uses the much more open HTTP
+for its transport business where the data payload is serialized in
+JSON. This opens a whole new world for different, non-Java
+clients. Beside this protocol switch, Jolokia provides new
+features for JMX remoting, which are not available in JSR-160
+connectors: Bulk requests allow for multiple JMX operations with a
+single remote server roundtrip. A fine grained security mechanism
+can restrict the JMX access on specific JMX operations. Other
+features like the JSR-160 proxy mode or history tracking are
+specific to Jolokia, too.</p>
+</div>
+<div class="paragraph">
+<p>This reference manual explains the details of Jolokia. After an
+overview of Jolokia&#8217;s architecture in <a href="architecture.html" class="xref page">Architecture</a>,
+installation and configuration of the
+various Jolokia agents are described in <a href="agents.html" class="xref page">Agents</a>.
+Jolokia&#8217;s security policy mechanism
+(<a href="security.html" class="xref page">Security</a>) and proxy mode (<a href="proxy_mode.html" class="xref page">Proxy Mode</a>) are
+covered in the following chapters. For implementors of Jolokia
+client bindings the protocol definition is probably the most
+interesting part (<a href="jolokia_protocol.html" class="xref page">Jolokia Protocol</a>). Jolokia itself
+comes with the preregistered MBeans listed in
+<a href="jolokia_mbeans.html" class="xref page">Jolokia MBeans</a>. The available client bindings are described
+in <a href="clients.html" class="xref page">Clients</a>.</p>
+</div>
+<nav class="pagination">
+  <span class="next"><a href="architecture.html">Architecture</a></span>
+</nav>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <p>This page was built using the Antora default UI.</p>
+  <p>The source code for this UI is licensed under the terms of the MPL-2.0 license.</p>
+</footer>
+<script id="site-script" src="../_/js/site.js" data-ui-root-path="../_"></script>
+<script async src="../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

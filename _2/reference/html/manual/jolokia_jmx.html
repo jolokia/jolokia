@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Jolokia JMX :: Jolokia</title>
+    <link rel="canonical" href="https://jolokia.org/manual/jolokia_jmx.html">
+    <link rel="prev" href="clients.html">
+    <link rel="next" href="tools.html">
+    <meta name="generator" content="Antora 3.1.4">
+    <link rel="stylesheet" href="../_/css/site.css">
+    <link rel="stylesheet" href="../_/css/jolokia.css">
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://jolokia.org">Jolokia</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="manual" data-version="">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="index.html">Jolokia Manual</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="index.html">Introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="architecture.html">Architecture</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="agents.html">Agents</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="security.html">Security</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="proxy_mode.html">Proxy Mode</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="jolokia_protocol.html">Jolokia Protocol</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="jolokia_mbeans.html">Jolokia MBeans</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="clients.html">Clients</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="1">
+    <a class="nav-link" href="jolokia_jmx.html">Jolokia JMX</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="tools.html">Tools</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Jolokia Manual</span>
+    <span class="version">default</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="index.html">Jolokia Manual</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="index.html">default</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="index.html">Jolokia Manual</a></li>
+    <li><a href="jolokia_jmx.html">Jolokia JMX</a></li>
+  </ul>
+</nav>
+<div class="edit-this-page"><a href="file:///data/sources/github.com/jolokia/jolokia/src/documentation/manual/modules/ROOT/pages/jolokia_jmx.adoc">Edit this Page</a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Jolokia JMX</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>The main focus of Jolokia is to allow easy access to JMX MBeans
+from everywhere. MBeans can be provided by the JVM itself, by an
+application server or an application itself, where each MBean is
+registered at a specific MBeanServer.  Multiple MBeanServers can
+co-exist in a single JVM. The so called
+<em>PlatformMBeanServer</em> is always present and is
+created by the JVM during startup. Especially application servers
+often create additional MBeanServers for various purposes. When
+accessing an MBean remotely via JSR-160, the MBeanServer holding
+the requested MBean must be known before. Jolokia instead
+<em>merges</em> all MBeanServers it can find to give a
+single view on all MBeans. The merging algorithm is described in
+<a href="#mbeanserver-merging">MBeanServer merging</a>.</p>
+</div>
+<div class="paragraph">
+<p>For application specific MBeans, Jolokia provides an own, so
+called <em>Jolokia MBeanServer</em> which is treated
+specially by the Jolokia agent. The Jolokia MBeanServer and its
+features are explained in <a href="#jolokia-mbeanserver">Jolokia MBeanServer</a>.</p>
+</div>
+<div class="paragraph">
+<p>Developing application specific MBeans is easy, especially if
+sttp://docs.oracle.com/javase/tutorial/jmx/mbeans/standard.html[Standard
+MBeans] are used. However, for Spring users there is even a
+easier, more
+<a href="https://static.springsource.org/spring/docs/3.2.1.RELEASE/spring-framework-reference/html/jmx.html">declarative
+way</a> for turning POJOs into MBeans. On top of this Jolokia
+provides an easy, declarative way for firing up a Jolokia JVM
+agent merely by including some Jolokia specific Spring
+configuration. This is described in <a href="#jvm-spring">Spring Support</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="jolokia-mbeanserver"><a class="anchor" href="#jolokia-mbeanserver"></a>Jolokia MBeanServer</h2>
+<div class="sectionbody">
+<div class="sidebarblock">
+<div class="content">
+<div class="title">JBoss 7 Gotcha</div>
+<div class="paragraph">
+<p>For JBoss 7 there is a slight issue when creating a new <code>MBeanServer</code>. For this to work,
+a <code>jboss-deployment-structure</code> with a dependency on
+<code>org.jboss.as.jmx</code> must be added. For an example see the
+<a href="https://github.com/rhuss/jolokia/blob/master/it/war/src/main/webapp/WEB-INF/jboss-deployment-structure.xml">integration test war</a>, the location
+to where to put this file is explained in the <a href="https://docs.jboss.org/author/display/AS7/Developer+Guide#DeveloperGuide-JBossDeploymentStructureFile">JBoss documentation</a>.</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The Jolokia MBeanServer can be easily created and used with a locator:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">MBeanServer jolokiaServer = JolokiaMBeanServerUtil.getJolokiaMBeanServer();</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This server is treated specially by a Jolokia Agent:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Every MBean registered at the Jolokia MBeanServer will never
+show up remotely via JSR-160. The Jolokia MBeanServer is never
+exposed over JSR-160.</p>
+</li>
+<li>
+<p>Each Jolokia MBeanServer registered MBean will shadow any
+MBean with the same ObjectName in any other MBeanServer
+present. See below for more details.</p>
+</li>
+<li>
+<p>The Jolokia MBeanServer is also responsible for managing so
+called <em>JSON MBeans</em>. These are MBeans
+annotated with <code>@JsonMBean</code> on the class
+level. JSON MBean are explained in
+<a href="#json-mbean">@JsonMBean</a></p>
+</li>
+</ul>
+</div>
+<div class="sect2">
+<h3 id="mbeanserver-merging"><a class="anchor" href="#mbeanserver-merging"></a>MBeanServer merging</h3>
+<div class="paragraph">
+<p>Jolokia tries hard to detect as many MBeanServer as available
+in a JVM. Beside the always present
+<code>PlatformMBeanServer</code> many
+application servers create own MBeanServer which not always
+can be found with standard mechanisms. Therefore Jolokia comes
+with so called <code>ServerDetector</code>'s for many
+known brands of applications server. These server detectors
+know how to find MBeanServer by application server specific
+means.</p>
+</div>
+<div class="paragraph">
+<p>The set of available of MBeanServers is detected during
+startup and kept, except for the Jolokia MBeanServer which can
+kick in and out at any time. For Jolokia operations, all these
+MBeanServers are tried according the order given below.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Jolokia <code>MBeanServer</code></strong> is queried first,
+if available.</p>
+</li>
+<li>
+<p>Next every <code>MBeanServer</code> as detected by the <em>server
+detectors</em> a queried in turn.</p>
+</li>
+<li>
+<p>All MBeanServers returned by
+<code>MBeanServerFactory.findMBeanServer(null)</code> are
+called if not already tried previously.</p>
+</li>
+<li>
+<p>Finally, the
+<code>ManagementFactory.getPlatformMBeanServer()</code> is
+used (also, if not found in a former step).</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>All MBeans contained in all detected MBeanServers are merged
+to give a single view on the set of available MBeans.
+For MBeans registered with the same name at different
+MBeanServers, MBeans registered in later MBeanServers are not
+visible. These hidden MBeans will never be called on
+<code>READ</code>, <code>WRITE</code> or
+<code>EXEC</code> operations. Also, for
+<code>LIST</code> operations only the meta data of the
+visible MBeans is returned.</p>
+</div>
+<div class="paragraph">
+<p>This hiding mechanism is used by
+<code>@JsonMBean</code> to provide a different view of
+an MBean for JSR-160 connectors (see below).</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="json-mbean"><a class="anchor" href="#json-mbean"></a>@JsonMBean</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>JMX 1.4 introduced &lt;ulink
+<a href="https://docs.oracle.com/javase/6/docs/api/javax/management/MXBean.html">MXBeans</a>
+which allows for nearly arbitrary data to be translated into so
+called OpenData which are accessible via JMX. For example,
+arbitrary Java Beans are translated into a
+<a href="https://docs.oracle.com/javase/6/docs/api/javax/management/openmbean/CompositeData.html"><code>CompositeData</code></a>
+structure with property names as keys and their values in
+OpenData values.</p>
+</div>
+<div class="paragraph">
+<p>Jolokia provides an annotation <code>@JsonMBean</code>
+for marking an MBean as a JSON MBean. Such an MBean, if
+registered at the <em>Jolokia MBeanServer</em>
+creates a proxy on the <em>PlatformMBeanServer</em>
+where every complex value gets translated into plain strings in
+JSON format. This is true for attributes, operation return
+values and arguments. That way, a JSR-160 based console (like
+<code>jconsole</code>) can easily access complex data
+type exposed by custom MBeans. Json MBeans work for Java 6 and
+newer.</p>
+</div>
+<div id="fig-jconsole-json-mbean" class="imageblock">
+<div class="content">
+<img src="_images/jconsole-json-mbean.png" alt="jconsole json mbean">
+</div>
+<div class="title">Figure 1. A JsonMBean in jconsole</div>
+</div>
+<div class="paragraph">
+<p>JsonMBean and MXBean are quite similar as both do a translation
+from complex data types to a standard format (OpenType for
+MXBeans, JSON strings for JsonMBean). However, there are also
+differences:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>MXBeans are a standard mechanism which are available on every
+JVM since 1.5.<sup class="footnote" id="_footnote_jbos-mxbean">[<a id="_footnoteref_1" class="footnote" href="#_footnotedef_1" title="View footnote.">1</a>]</sup></p>
+</li>
+<li>
+<p>Serialization of complex Java Beans is more powerful with
+JsonMBeans, e.g. Jolokia can detect self (or cyclic) object
+references. MXBeans will cause an error in this case.</p>
+</li>
+<li>
+<p>JsonMBeans must be added to the Jolokia MBeanServer to
+work. MXBeans work with the PlatformMBeanServer, too.</p>
+</li>
+<li>
+<p>JsonMBean work also with JMX support libraries which use
+<code>ModelMBean</code>'s unde the hood. E.g.
+<a href="https://static.springsource.org/spring/docs/3.0.x/reference/jmx.html">Spring
+JMX</a> uses a ModelMBean for
+<code>@ManagedResource</code> annotated
+MBeans. <code>@JsonMBean</code> can be easily added,
+whereas <code>@MXBean</code> wouldn&#8217;t work here.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The Jolokia MBeanServer and the
+<code>@JsonMBean</code> annotation are contained in the
+Maven module <code>jolokia-jmx</code>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="jvm-spring"><a class="anchor" href="#jvm-spring"></a>Spring Support</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>A Jolokia agent can be easily integrated into a Spring application
+context. A dedicated artifact
+<code>jolokia-spring</code> can be used, which
+comes with a custom Spring configuration syntax.</p>
+</div>
+<div class="paragraph">
+<p>For Maven based projects, a simple dependency declaration is
+sufficient:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
+  &lt;artifactId&gt;jolokia-spring&lt;/artifactId&gt;
+  &lt;version&gt;1.1.0&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+</div>
+</div>
+<div class="sect2">
+<h3 id="jvm-spring-agent"><a class="anchor" href="#jvm-spring-agent"></a>JVM agent</h3>
+<div class="paragraph">
+<p>With this in place, the following configuration can be used to
+fire up a Jolokia JVM based agent using the HTTP server which
+comes with OpenJDK/Oracle JVMs (Version 6 or later).</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jolokia="http://www.jolokia.org/jolokia-spring/schema/config"
+       xsi:schemaLocation="
+           http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.jolokia.org/jolokia-spring/schema/config
+           http://www.jolokia.org/jolokia-spring/schema/config/jolokia-config.xsd"&gt;
+
+  &lt;jolokia:agent lookupConfig="false" systemPropertiesMode="never"&gt;
+    &lt;jolokia:config autoStart="true" host="0.0.0.0" port="8778" .... /&gt;
+  &lt;/jolokia:agent&gt;
+&lt;/beans&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>There are two directives available:
+<code>&lt;jolokia:agent&gt;</code> declares a Jolokia
+server with a configuration as defined in an embedded
+<code>&lt;jolokia:config&gt;</code> configuration
+section.</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">IDE support</div>
+<div class="paragraph">
+<p>With a decent IDE like IntelliJ IDEA you get completion support
+on the configuration attributes so it can be easily determined
+which configuration options are available. Even better, there is also
+some documentation for each attribute (e.g. by using "Quick
+documentation" with ^Q in IDEA with).</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>&lt;jolokia:agent&gt;</code> has an attribute
+<code>lookupConfig</code>. If set to
+<code>true</code>, externally defined
+<code>&lt;jolokia:config&gt;</code> sections will be
+looked up, too and merged with the embedded configuration. A
+<code>&lt;jolokia:config&gt;</code> has an
+<code>order</code> attribute, which determines the
+config merge order: The higher order configs will be merged
+later and hence will override conflicting parameters. By
+default, external config lookup is disabled.</p>
+</div>
+<div class="paragraph">
+<p>The attribute <code>systemPropertiesMode</code>
+determines, how system properties with a  prefix
+<code>jolokia.</code> can be used as configuration
+values. There are three modes available:</p>
+</div>
+<table id="jvm-spring-system-properties" class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. System properties modes</caption>
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Mode</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Description</p>
+<p class="tableblock">&lt;tr&gt;</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>never</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">No lookup is done on system properties as all. This is the
+default mode.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>fallback</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">System properties with a prefix
+<code>jolokia.</code> are used as fallback
+configuration values if not specified locally in the
+Spring application
+context. E.g. <code>jolokia.port=8888</code> will
+change the port on which the agent is listening to 8888 if
+the port is not explicitly specified in the
+configuration.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>override</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">System properties with a prefix
+<code>jolokia.</code> are used as configuration
+values even if they are specified locally in the Spring
+application
+context. E.g. <code>jolokia.port=8888</code> will
+change the port on which the agent is listening to 8888 in
+any case.</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p><code>&lt;jolokia:config&gt;</code> takes as attributes all
+the configuration parameters for the JVM agent as described in
+<a href="#agent-jvm-config">[agent-jvm-config]</a>. In addition, the is an extra
+attribute <code>autoStart</code> which allows for
+automatically starting the HTTP server during the initialization
+of the application context. By default this is set to
+<code>true</code>, so the server starts up automatically
+by default.</p>
+</div>
+<div class="paragraph">
+<p>Just in case you don&#8217;t want to use the Jolokia Spring namespace you can also
+use plain beans to configure a JVM agent. The following examples shows the example above with
+only base Spring bean configurations (including an Spring EL expression):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="
+           http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context.xsd
+           http://www.springframework.org/schema/util
+           http://www.springframework.org/schema/util/spring-util.xsd"&gt;
+
+  &lt;bean name="server" id="jolokia" class="org.jolokia.jvmagent.spring.SpringJolokiaAgent"&gt;
+    &lt;property name="lookupConfig" value="false"/&gt;
+    &lt;property name="systemPropertiesMode" value="never"/&gt;
+    &lt;property name="config"&gt;
+      &lt;bean class="org.jolokia.jvmagent.spring.SpringJolokiaConfigHolder"&gt;
+        &lt;property name="config"&gt;
+          &lt;util:map&gt;
+            &lt;entry key="autoStart" value="true"/&gt;
+            &lt;entry key="host" value="0.0.0.0"/&gt;
+            &lt;entry key="port" value="#{configuration['jmx.jolokiaPort']}"/&gt;
+            ...
+          &lt;/util:map&gt;
+        &lt;/property&gt;
+      &lt;/bean&gt;
+    &lt;/property&gt;
+  &lt;/bean&gt;
+
+&lt;/beans&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This style however is only recommended if there are some issues with the Jolokia spring configuration setup
+(like using Spring EL expressions in Jolokia versions earlier than 1.2.4). Otherwise, the Jolokia configuration
+namespace is much easier to read.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="jvm-spring-mbean-server"><a class="anchor" href="#jvm-spring-mbean-server"></a>Jolokia MBeanServer</h3>
+<div class="paragraph">
+<p>With <code>&lt;jolokia:mbean-server&gt;</code> the Jolokia
+MBeanServer can be specified. This is especially useful for
+adding it to <code>&lt;context:mbean-export&gt;</code>
+so that this MBeanServer is used for registering
+<code>@ManagedResource</code> and
+<code>@JsonMBean</code>. Remember, MBean registered at
+the Jolokia MBeanServer never will show up in an JSR-160 client
+except when annotated with <code>@JsonMBean</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:jolokia="http://www.jolokia.org/jolokia-spring/schema/config"
+       xsi:schemaLocation="
+           http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.jolokia.org/jolokia-spring/schema/config
+           http://www.jolokia.org/jolokia-spring/schema/config/jolokia-config.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context.xsd"&gt;
+
+  &lt;context:mbean-export server="jolokiaServer"/&gt;
+  &lt;jolokia:mbean-server id="jolokiaServer"/&gt;
+
+&lt;/beans&gt;</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="jvm-spring-plugin"><a class="anchor" href="#jvm-spring-plugin"></a>Jolokia Spring plugin</h3>
+<div class="paragraph">
+<p>There is an even simpler way to startup a Jolokia JVM agent
+with a default setup if you use a variant of the
+<code>jolokia-spring</code> module with the classifier
+<code>plugin</code>. This artefact contains a
+predefined Spring configuration for starting up Jolokia with
+default values automatically:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
+  &lt;artifactId&gt;jolokia-spring&lt;/artifactId&gt;
+  &lt;classifier&gt;plugin&lt;/classifier&gt;
+  &lt;version&gt;1.1.0&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Beside putting this jar into the classpath (along with its
+dependencies) the only requirement is, that the Spring
+application context needs to pickup
+<code>classpath:META-INF/spring/jolokia.xml</code>. Luckily,
+many Spring based containers like the
+<a href="https://camel.apache.org/camel-maven-plugin.html">Camel
+Maven Plugin</a> do this automatically for you, nothing
+has to be configured here. Otherwise this
+application context path has to be added manually, but in this case it is
+probably easier to use the non-plugin version (without
+classifier) and declare the Jolokia server explicitly in an
+existing Spring configuration file as described above.</p>
+</div>
+<div class="paragraph">
+<p>By default, the Jolokia agent starts on port 8778 on every
+IP-Address of the host <em>without</em>
+security.</p>
+</div>
+<div class="paragraph">
+<p>The configuration can be tweaked via system properties as
+described in
+<a href="#jvm-spring-system-properties">Table 1, &#8220;System properties modes&#8221;</a>. I.e. the plugin
+doesn&#8217;t specify any configuration on its own and uses a
+<code>systemPropertiesMode</code> of
+<code>fallback</code>.</p>
+</div>
+<div class="paragraph">
+<p>As an alternative, the default settings can be customized by
+providing a standalone
+<code>&lt;jolokia:config&gt;</code> somewhere in the
+Spring application context. An <code>order</code>
+attribute can be used if multiple config declarations are
+present: the higher the order, the higher the priority. But
+then again, instead of using the plugin with an external
+configuration it is probably better to us an explicite
+<code>&lt;jolokia:agent&gt;</code> declaration, since
+you have to add to a Spring configuration file anyway.</p>
+</div>
+</div>
+</div>
+</div>
+<div id="footnotes">
+<hr>
+<div class="footnote" id="_footnotedef_1">
+<a href="#_footnoteref_1">1</a>. For JBoss prior to version 7 there are some slight issues since JBoss used to replace the standard MBeanServer with an own variant. See this <a href="https://community.jboss.org/thread/167796">discussion</a> for details.
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="clients.html">Clients</a></span>
+  <span class="next"><a href="tools.html">Tools</a></span>
+</nav>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <p>This page was built using the Antora default UI.</p>
+  <p>The source code for this UI is licensed under the terms of the MPL-2.0 license.</p>
+</footer>
+<script id="site-script" src="../_/js/site.js" data-ui-root-path="../_"></script>
+<script async src="../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

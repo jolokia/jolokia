@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Proxy Mode :: Jolokia</title>
+    <link rel="canonical" href="https://jolokia.org/manual/proxy_mode.html">
+    <link rel="prev" href="security.html">
+    <link rel="next" href="jolokia_protocol.html">
+    <meta name="generator" content="Antora 3.1.4">
+    <link rel="stylesheet" href="../_/css/site.css">
+    <link rel="stylesheet" href="../_/css/jolokia.css">
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://jolokia.org">Jolokia</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="manual" data-version="">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="index.html">Jolokia Manual</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="index.html">Introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="architecture.html">Architecture</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="agents.html">Agents</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="security.html">Security</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="1">
+    <a class="nav-link" href="proxy_mode.html">Proxy Mode</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="jolokia_protocol.html">Jolokia Protocol</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="jolokia_mbeans.html">Jolokia MBeans</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="clients.html">Clients</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="jolokia_jmx.html">Jolokia JMX</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="tools.html">Tools</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Jolokia Manual</span>
+    <span class="version">default</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="index.html">Jolokia Manual</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="index.html">default</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="index.html">Jolokia Manual</a></li>
+    <li><a href="proxy_mode.html">Proxy Mode</a></li>
+  </ul>
+</nav>
+<div class="edit-this-page"><a href="file:///data/sources/github.com/jolokia/jolokia/src/documentation/manual/modules/ROOT/pages/proxy_mode.adoc">Edit this Page</a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Proxy Mode</h1>
+<div class="paragraph">
+<p>Using Jolokia in proxy mode enables for agentless operation
+on the target server. A dedicated agent deployment proxies by
+accepting Jolokia requests as input, translating them to JSR-160
+requests for the target. This setup is described in
+<a href="architecture.html" class="xref page">Architecture</a>. As noted there, the real target is
+given within the original request, which must be sent as a POST
+request.</p>
+</div>
+<div class="paragraph">
+<p>Agents of all types support the proxy mode. However, since one
+has usually the free choice of platform for a dedicated Jolokia
+proxy, an environment optimized for HTTP communication should be
+used. These are either servlet container or Java EE server hosting
+the WAR agent or an OSGi runtime with an OSGi HttpService (which
+in turn is typically based on an embedded servlet container like
+Tomcat or Jetty). The two other agents, the Mule and JVM agents
+are not that well suited for this job and do not contain the proxy.</p>
+</div>
+<div class="paragraph">
+<p>Please note that the proxy mode is <em>not</em> switched on by default
+since version 1.5.0. You have to explicitly switch it on for the WAR or OSGI agent:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Repackaging the <code>jolokia.war</code> and adapt <code>web.xml</code> to
+include the init option <code>dispatcherClasses</code> with a value <code>org.jolokia.jsr160.Jsr160RequestDispatcher</code>.</p>
+</li>
+<li>
+<p>Set the system property <code>org.jolokia.jsr160ProxyEnabled</code> to <code>true</code></p>
+</li>
+<li>
+<p>Set the environment variable <code>JOLOKIA_JSR160_PROXY_ENABLED</code> to <code>true</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The first option requires you to repackage the <code>jolokia.war</code> and add the following section to
+the <code>web.xml</code> descriptor:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;init-param&gt;
+  &lt;description&gt;
+    Classnames (comma separated) of RequestDispatcher used in addition
+    to the LocalRequestDispatcher
+  &lt;/description&gt;
+  &lt;param-name&gt;dispatcherClasses&lt;/param-name&gt;
+  &lt;param-value&gt;org.jolokia.jsr160.Jsr160RequestDispatcher&lt;/param-value&gt;
+&lt;/init-param&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The two other options by using a Java system property or an environment variable do not require a repackaging, so
+these are the recommended way.</p>
+</div>
+<div class="paragraph">
+<p>Additionally you can configured a white list with patterns for all allowed JMX service URL in a Jolokia Request.
+This white list is a plain text file which contains &lt;ulink
+<a href="https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html">Patterns</a> line by line. Lines starting with <code>#</code> are ignored.
+Pattern matching is performed case insensitive. This file can be configured in various ways:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Repackaging the <code>jolokia.war</code> and adapt <code>web.xml</code> to
+include the init option <code>jsr160ProxyAllowedTargets</code> with a file path to the white list. This should
+be an absolute path or a relative path if you know where your Java EE server sets the current directory.</p>
+</li>
+<li>
+<p>Set the system property <code>org.jolokia.jsr160ProxyAllowedTargets</code> to the path of the whitelist</p>
+</li>
+<li>
+<p>Set the environment variable <code>JOLOKIA_JSR160_PROXY_ALLOWED_TARGETS</code> to the path of the
+whitelist.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>By default the following patterns are disallowed, but you can re-enable them when providing them in the whitelist:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># Disallow all JNDI lookups via LDAP
+service:jmx:rmi:///jndi/ldap:.*</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In any case it is highly recommended to use a dedicated Java EE servlet server for the JSR-160 proxy which
+is secured by configuring the server authentication properly for this servlet. An unprotected Jolokia proxy can be
+tricked to execute local code by a malicious attacker. As said previously, the Jolokia proxy should be avoided if
+possible in favor of direct access over the Jolokia protocol.</p>
+</div>
+<div class="paragraph">
+<p>All client libraries (jmx4perl, Java and Javascript) support the
+usage of proxy mode in its API.</p>
+</div>
+<div class="paragraph">
+<p>[#proxy-limitations
+== Limitations of proxy mode</p>
+</div>
+<div class="paragraph">
+<p>The proxy mode has some limitations compared to the direct
+agent mode, so it is recommended to use a
+direct agent deployment if possible. The limitations are:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>There is no automatic merging of JMX MBeanServers as in the case
+of the direct mode. Most application servers uses their own
+MBeanServer in addition to the
+<code>PlatformMBeanServer</code> (which is always
+present). Each MBean is registered only in one MBeanServer. The
+choice of which <code>MBeanServer</code> to use has to be
+given up front, usually as a part of the JMX Service URL. But even
+then (as it is the case for JBoss 5.1) you might run into problems
+when selecting the proper MBeanServer.</p>
+</li>
+<li>
+<p>Proxying adds an additional remote layer which causes
+additional problems. I.e. the complex operations like
+<code>list</code> might fail in the proxy mode
+because of serialization issues. E.g. for JBoss it happens
+that certain MBeanInfo objects requested for the list
+operation are not serializable. This is a bug of JBoss, but
+I expect similar limitations for other application servers
+as well.</p>
+</li>
+<li>
+<p>Certain workarounds (like the JBoss "<em>can not find
+MXBeans before MBeanInfo has been fetched</em>" bug)
+works only in agent mode.</p>
+</li>
+<li>
+<p>It is astonishingly hard to set up an application server for
+JSR-160 export. And there are even cases (combinations of
+JDK and AppServer Version) which don&#8217;t work at all properly
+(e.g. JDK 1.5 and JBoss 5).</p>
+</li>
+<li>
+<p>For MBeans that have arguments of type <code>Map</code> or <code>List</code>
+it is required that <code>org.json.simple.JSONObject</code> and <code>org.json.simple.JSONArray</code>
+(contained in <code>json-simple.jar</code>) are available on the
+classpath of the target JVM that receives the JSR-160 requests.</p>
+</li>
+<li>
+<p>The proxy mode can theoretically be exploited for local code execution if not secured properly.
+So its is highly recommended to not make the agent available without any authentication to any
+non trusted environment. Also the new whitelist feature prevents redirecting to arbitrary JMX Service URLs.</p>
+</li>
+</ul>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="security.html">Security</a></span>
+  <span class="next"><a href="jolokia_protocol.html">Jolokia Protocol</a></span>
+</nav>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <p>This page was built using the Antora default UI.</p>
+  <p>The source code for this UI is licensed under the terms of the MPL-2.0 license.</p>
+</footer>
+<script id="site-script" src="../_/js/site.js" data-ui-root-path="../_"></script>
+<script async src="../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

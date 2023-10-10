@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Jolokia MBeans :: Jolokia</title>
+    <link rel="canonical" href="https://jolokia.org/manual/jolokia_mbeans.html">
+    <link rel="prev" href="jolokia_protocol.html">
+    <link rel="next" href="clients.html">
+    <meta name="generator" content="Antora 3.1.4">
+    <link rel="stylesheet" href="../_/css/site.css">
+    <link rel="stylesheet" href="../_/css/jolokia.css">
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://jolokia.org">Jolokia</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="manual" data-version="">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="index.html">Jolokia Manual</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="index.html">Introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="architecture.html">Architecture</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="agents.html">Agents</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="security.html">Security</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="proxy_mode.html">Proxy Mode</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="jolokia_protocol.html">Jolokia Protocol</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="1">
+    <a class="nav-link" href="jolokia_mbeans.html">Jolokia MBeans</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="clients.html">Clients</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="jolokia_jmx.html">Jolokia JMX</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="tools.html">Tools</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Jolokia Manual</span>
+    <span class="version">default</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="index.html">Jolokia Manual</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="index.html">default</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="index.html">Jolokia Manual</a></li>
+    <li><a href="jolokia_mbeans.html">Jolokia MBeans</a></li>
+  </ul>
+</nav>
+<div class="edit-this-page"><a href="file:///data/sources/github.com/jolokia/jolokia/src/documentation/manual/modules/ROOT/pages/jolokia_mbeans.adoc">Edit this Page</a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Jolokia MBeans</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Besides bridging JMX to the HTTP/JSON world, the Jolokia agents
+also install their own MBeans which provide the extra services
+described in this chapter.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="mbean-config"><a class="anchor" href="#mbean-config"></a>Configuration MBean</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This MBean, which is registered under the name
+<code>jolokia:type=Config</code>, allows changing
+configuration parameters. Changes are non-persistent and get
+lost after a restart of the hosting application
+server. Debugging mode and the history store can be configured with
+this MBean.</p>
+</div>
+<div class="sect2">
+<h3 id="mbean-debugging"><a class="anchor" href="#mbean-debugging"></a>Debugging</h3>
+<div class="paragraph">
+<p>Debugging can be switched on by setting the attribute
+<code>Debug</code>. When debugging is switched on, the
+Jolokia agent will store debug information in a ring buffer in
+memory, whose size can be tuned with the attribute
+<code>MaxDebugEntries</code>. The debug information can
+be fetched by the operation <code>debugInfo</code>. This
+debugging output will contain the JSON responses (which in
+turn contain their requests) sent to the client. Finally, the
+operation <code>resetDebugInfo</code> clears the debug
+history.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="mbean-history"><a class="anchor" href="#mbean-history"></a>History store</h3>
+<div class="paragraph">
+<p>The <em>history store</em> can be used to remember
+attribute and return values within the agent&#8217;s memory. The
+Nagios check <code>check_jmx4perl</code>, for instance,
+uses this feature for its delta check, which measures
+changes in attribute values. In order to
+switch on history tracking, two operations are provided:</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><strong><code>setHistoryLimitForOperation</code></strong></dt>
+<dd>
+<p>JMX operation for switching on tracking of the execution of
+JMX operations. It takes five arguments: The MBean and
+operation name, an optional target URL when the agent
+is used in proxy mode and as limit the number of maximal
+entries to track and a duration in seconds.
+If the target URL is given, then
+request for this specific target are tracked,
+otherwise, if the URL is null, requests to this
+operation on the local agent are tracked.  The return
+value of calling this operations is stored in a
+buffer with the specified length, where the oldest
+elements will be shifted out in case of an overflow.</p>
+</dd>
+<dt class="hdlist1"><strong><code>setHistoryLimitForAttribute</code></strong></dt>
+<dd>
+<p>JMX operation for switching on tracking of an JMX
+attribute&#8217;s value. It takes six arguments: The MBean and
+attribute name, an optional path and target URL and as
+limit the maximal number of entries to remember and/or an
+maximum duration for the elements to keep in the
+history. As above, the target URL is only used for proxy
+requests. The path can be used to store only read requests
+with the given path.</p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>There are two kinds of limits which can be applied: Either by a
+maximum number of historical values to remember or a maximum
+duration for the values to keep. If both limits are given in a
+configuration call on the MBean above, both limits are
+applied. In any case, there are never more values remembered
+than the global limit which can be set and retrieved with
+attribute <code>HistoryMaxEntries</code>.</p>
+</div>
+<div class="paragraph">
+<p>The History store can be emptied with a call to the operation
+<code>resetHistoryEntries</code>. This also
+switches off all history tracking.</p>
+</div>
+<div class="paragraph">
+<p>If for a request history tracking is switched on, the JSON
+response will contain an extra field
+<code>history</code> which contains a list with
+historical values along with the timestamp when it was
+recorded. This format is described in detail in
+<a href="#history">[history]</a>.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="mbean-serverhandler"><a class="anchor" href="#mbean-serverhandler"></a>Server Handler</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The MBean
+<code>jolokia:type=ServerHandler</code> has a single
+operation <code>mBeanServersInfo</code> with no
+arguments. This operation can be used to dump out the name of
+all registered MBeans on all found MBeanServers. It is helpful to
+get a quick and condensed overview of the available JMX
+information.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="mbean-discovery"><a class="anchor" href="#mbean-discovery"></a>Discovery MBean</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><code>jolokia:type=Discovery</code> can be used to detect other MBeans by
+sending multicast discovery UDP requests. Every agent which has discovery enabled will respond with information
+about the agent itself and the access URL. The MBean itself ha two operations: <code>lookupAgents</code>
+and <code>lookupAgentsWithTimeout</code> which either use a default timeout of one second for waiting
+for response packet or with a user provided timeout given as argument to this operation. Both methods return an
+JSON array which contains JSON objects, one for each agent discovered.</p>
+</div>
+<div class="paragraph">
+<p>A return value of these operation could look like:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">[
+  {
+    "agent_id" : "10.9.11.25-58613-81b087d-servlet",
+    "url": "http://10.9.11.25:8778/jolokia",
+    "secured": false,
+    "server_vendor" : "Apache",
+    "server_product" : "Tomcat",
+    "server_version" : "7.0.35"
+  },
+  {
+    "agent_id" : "10.9.11.87-23455-9184ef-osgi",
+    "agent_description": "My OSGi container",
+    "url": "http://10.9.11.87:8080/jolokia",
+    "secured": true,
+    "server_vendor" : "Apache",
+    "server_product" : "Felix",
+    "server_version" : "4.2.1"
+  }
+]</code></pre>
+</div>
+</div>
+<table id="discovery-mbean-response" class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. Response properties</caption>
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Property</th>
+<th class="tableblock halign-left valign-top">Description</th>
+<th class="tableblock halign-left valign-top">Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>agent_id</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Each agent has a unique id which can be either provided
+during startup of the agent in form of a configuration
+parameter or being autodetected. If autodected, the id has
+several parts: The IP, the process id, hashcode of the agent
+and its type. This field will be always provided.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>10.9.11.87-23455-9184ef-osgi</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>agent_description</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">An optional description which can be used as a UI label if
+given.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>ServiceMix ESB</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>url</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The URL how this agent can be contacted. This URL is
+typically autodetected. For the JVM agent it should be
+highly accurate. For the servlet based agents, it
+depends. If configured via an initialisation parameter this
+URL is used. If autodetected it is taken from the first HTTP
+request processed by the servlet. Hence no URL is available
+until this first request was processed. This property might
+be empty.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code><a href="http://10.9.11.87:8080/jolokia" class="bare">http://10.9.11.87:8080/jolokia</a></code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>secured</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether the agent was configured for authentication or not.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>false</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>server_vendor</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The vendor of the container the agent is running in. This
+field is included if it could be automatically detected.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Apache</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>server_product</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The container product if detected</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>tomcat</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>server_version</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The container&#8217;s version (if detected)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>7.0.50</code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="jolokia_protocol.html">Jolokia Protocol</a></span>
+  <span class="next"><a href="clients.html">Clients</a></span>
+</nav>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <p>This page was built using the Antora default UI.</p>
+  <p>The source code for this UI is licensed under the terms of the MPL-2.0 license.</p>
+</footer>
+<script id="site-script" src="../_/js/site.js" data-ui-root-path="../_"></script>
+<script async src="../_/js/vendor/highlight.js"></script>
+  </body>
+</html>

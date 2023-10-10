@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Untitled :: Jolokia</title>
+    <link rel="canonical" href="https://jolokia.org/manual/protocol/list.html">
+    <meta name="generator" content="Antora 3.1.4">
+    <link rel="stylesheet" href="../../_/css/site.css">
+    <link rel="stylesheet" href="../../_/css/jolokia.css">
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://jolokia.org">Jolokia</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="manual" data-version="">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Jolokia Manual</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../architecture.html">Architecture</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../agents.html">Agents</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../security.html">Security</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../proxy_mode.html">Proxy Mode</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../jolokia_protocol.html">Jolokia Protocol</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../jolokia_mbeans.html">Jolokia MBeans</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../clients.html">Clients</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../jolokia_jmx.html">Jolokia JMX</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../tools.html">Tools</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Jolokia Manual</span>
+    <span class="version">default</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">Jolokia Manual</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">default</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+</nav>
+<div class="edit-this-page"><a href="file:///data/sources/github.com/jolokia/jolokia/src/documentation/manual/modules/ROOT/pages/protocol/list.adoc">Edit this Page</a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<div class="sect2">
+<h3 id="list"><a class="anchor" href="#list"></a>Listing MBeans (list)</h3>
+<div class="paragraph">
+<p>The list operation collects information about accessible
+MBeans. This information includes the MBean names, their
+attributes, operations and notifications along with type
+information and description (as far as they are provided by the
+MBean author which doesn&#8217;t seem to be often the case).</p>
+</div>
+<div class="sect3">
+<h4 id="get-list"><a class="anchor" href="#get-list"></a>GET list request</h4>
+<div class="paragraph">
+<p>The GET request format for a Jolokia list request is</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;base-url&gt;/list/&lt;inner path&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>&lt;inner path&gt;</code>, as described in <a href="#paths">[paths]</a>
+specifies a subset of the complete response. You can
+use this to select a specific domain, MBean or
+attribute/operation. See the next section for the format of the
+complete response.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="post-list"><a class="anchor" href="#post-list"></a>POST list request</h4>
+<div class="paragraph">
+<p>A list POST request has the following keys:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. POST list Request</caption>
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Key</th>
+<th class="tableblock halign-left valign-top">Description</th>
+<th class="tableblock halign-left valign-top">Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>type</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong><code>list</code></strong></p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>path</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Inner path for accessing the value of a subset of the complete list
+<a href="#paths">[paths]</a>).</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>java.lang/type=Memory/attr</code></p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>The following request fetches the information about the MBean <code>java.lang:type=Memory</code></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "type": "LIST",
+  "path": "java.lang/type=Memory"
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="response-list"><a class="anchor" href="#response-list"></a>List response</h4>
+<div class="paragraph">
+<p>The <code>value</code> has the following format:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "&lt;domain&gt;": {
+    "&lt;prop list&gt;": {
+      "attr": {
+        "&lt;attr name&gt;": {
+          "type": "&lt;attribute type&gt;",
+          "desc": "&lt;textual description of attribute&gt;",
+          "rw": "true|false"
+        },
+        ....
+      },
+      "op": {
+        "&lt;operation name&gt;": {
+          "args": [
+            {
+              "type": "&lt;argument type&gt;",
+              "name": "&lt;argument name&gt;",
+              "desc": "&lt;textual description of argument&gt;"
+            },
+            .....
+          ],
+          "ret": "&lt;return type&gt;",
+          "desc": "&lt;textual description of operation&gt;"
+        },
+        .....
+      },
+      "not": {
+        "name": "&lt;name&gt;",
+        "desc": "&lt;desc&gt;",
+        "types": [ "&lt;type1&gt;", "&lt;type2&gt;" ]
+      }
+    },
+    ....
+  },
+  ....
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>domain name</code> and the <code>property
+list</code> together uniquely identify a single MBean. The
+property list is in the so called <em>canonical
+order</em>, i.e. in the form
+<code>"&lt;key1&gt;=&lt;val1&gt;,&lt;key2&gt;=&lt;val2&gt;,.."</code>
+where the keys are ordered alphabetically. Each MBean has zero
+or more attributes and operations which can be reached in an
+MBeans JSON object with the keys <code>attr</code> and
+<code>op</code> respectively. Within these groups the
+contained information is explained above in the schema and
+consist of Java types for attributes, arguments and return
+values, descriptive information and whether an attribute is
+writable (<code>rw</code> == <code>true</code>) or
+read-only.</p>
+</div>
+<div class="paragraph">
+<p>As for reading attributes you can fetch a subset of this information using an
+path. E.g a path of <code>domain/prop-list</code> would return the value for a single
+bean only. For example, a request</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>http://localhost:8080/jolokia/list/java.lang/type=Memory</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>results in an answer</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "value": {
+    "op": {
+      "gc": {
+        "args": [],
+        "ret": "void",
+        "desc": "gc"
+      }
+    },
+    "class": "sun.management.MemoryImpl",
+    "attr": {
+      "NonHeapMemoryUsage": {
+        "type": "javax.management.openmbean.CompositeData",
+        "rw": false,
+        "desc": "NonHeapMemoryUsage"
+      },
+      "Verbose": {
+        "type": "boolean",
+        "rw": true,
+        "desc": "Verbose"
+      },
+      "HeapMemoryUsage": {
+        "type": "javax.management.openmbean.CompositeData",
+        "rw": false,
+        "desc": "HeapMemoryUsage"
+      },
+      "ObjectPendingFinalizationCount": {
+        "type": "int",
+        "rw": false,
+        "desc": "ObjectPendingFinalizationCount"
+      }
+    }
+  },
+  "status": 200,
+  "request": {
+    "type": "list",
+    "path": "java.lang/type=Memory"
+  }
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_restrict_depth_of_the_returned_tree"><a class="anchor" href="#_restrict_depth_of_the_returned_tree"></a>Restrict depth of the returned tree</h4>
+<div class="paragraph">
+<p>The optional parameter <code>maxDepth</code> can be used
+to restrict the depth of the return tree. Two value are
+possible: A <code>maxDepth</code> of <code>1</code> restricts the
+return value to a map with the JMX domains as keys, a
+<code>maxDepth</code> of <code>2</code> truncates the map returned to
+the domain names (first level) and the MBean&#8217;s properties
+(second level). The final values of the maps don&#8217;t have any
+meaning and are dummy values.</p>
+</div>
+</div>
+</div>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <p>This page was built using the Antora default UI.</p>
+  <p>The source code for this UI is licensed under the terms of the MPL-2.0 license.</p>
+</footer>
+<script id="site-script" src="../../_/js/site.js" data-ui-root-path="../../_"></script>
+<script async src="../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>
