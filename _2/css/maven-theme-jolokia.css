@@ -357,254 +357,35 @@ dd {
 span.right {
   float: right;
 }
+span.image.right {
+  margin: 0 0 15px 15px;
+}
 
-/*div.feature {*/
-/*    padding-left: 10px;*/
-/*}*/
+/* special main section for features page */
 
-/*div.feature_box {*/
-/*    background: url(../images/feature_box_bottom.png) no-repeat bottom right;*/
-/*    width: 271px;*/
-/*    margin: 0px 30px 30px 0px;*/
-/*    padding-left: 1px;*/
-/*    min-height: 200px;*/
-/*}*/
-
-/*div.feature_box div.section {*/
-/*    padding: 1px;*/
-/*}*/
-
-/*div.feature_icon {*/
-/*    float: right;*/
-/*    margin: 10px;*/
-/*}*/
-
-/*div.feature_icon_large {*/
-/*    float: right; */
-/*    margin: 0px 20px 20px 30px;*/
-/*}*/
-
-
-/*.feature_box h2 {*/
-/*    background: url(../images/feature_box_head.png) #fff no-repeat top right;*/
-/*    text-align: center;*/
-/*    color: #fff;*/
-/*    width: 100%;*/
-/*    height: 24px;*/
-/*    padding: 2px 0 0 1px;*/
-/*    margin: -1px 0 0 0;*/
-/*    font-size: 15px;*/
-/*}*/
-
-/*.feature_box p {*/
-/*    margin: 10px;*/
-/*    text-align: left;*/
-/*}*/
-
-/*!* ========================================================================================================  *!*/
-/*!* Common text attributes *!*/
-
-/*!*ul {*!*/
-/*!*    list-style: square;*!*/
-/*!*    margin-left: 5px;*!*/
-/*!*}*!*/
-
-
-/*p, .section > div, .sectionbody > .sect2, .sect2 > .imageblock, .sect2 > .literalblock, .sect2 > .listingblock,*/
-/*.sect1 > .imageblock, .sect1 > .literalblock, .sect1 > .listingblock,*/
-/*.sect1 > .sectionbody > .imageblock, .sect1 > .sectionbody > .literalblock, .sect1 > .sectionbody > .listingblock {*/
-/*    margin: 10px 25px;*/
-/*    text-align: justify;*/
-/*    position: relative;*/
-/*}*/
-
-/*code {*/
-/*  font-size: 12px;*/
-/*}*/
-
-/*#legend li.externalLink {*/
-/*  background: url(../images/external.png) left top no-repeat;*/
-/*  padding-left: 18px;*/
-/*}*/
-
-/*a.externalLink, a.externalLink:link, a.externalLink:visited, a.externalLink:active, a.externalLink:hover {*/
-/*  background: url(../images/external.png) right center no-repeat;*/
-/*  padding-right: 15px;*/
-/*}*/
-
-/*a.externalLink:hover {*/
-/*  background: #E9E9E9 url(../images/external.png) right center no-repeat;*/
-/*}*/
-
-/*#legend li.newWindow {*/
-/*  background: url(../images/newwindow.png) left top no-repeat;*/
-/*  padding-left: 18px;*/
-/*}*/
-
-/*a.newWindow, a.newWindow:link, a.newWindow:visited, a.newWindow:active, a.newWindow:hover {*/
-/*  background: url(../images/newwindow.png) right center no-repeat;*/
-/*  padding-right: 18px;*/
-/*}*/
-
-/*h3 {*/
-/*  padding: 4px 4px 4px 4px;*/
-/*  color: #555;*/
-/*  font-weight: normal;*/
-/*  font-size: 17px;*/
-/*  display: block;*/
-/*  border-bottom: #555 1px solid;*/
-/*}*/
-
-/*h4 {*/
-/*  padding: 4px 4px 4px 4px;*/
-/*  color: #c20000;*/
-/*  font-weight: normal;*/
-/*  font-size: 17px;*/
-/*}*/
-
-/*!*h5 {*!*/
-/*!*  padding: 4px 4px 4px 4px;*!*/
-/*!*  font-size: 15px;*!*/
-/*!*  color: #555;*!*/
-/*!*}*!*/
-
-/*#breadcrumbs {*/
-/*  height: 6px;*/
-/*  padding: 5px 10px 14px 205px;*/
-/*}*/
-
-/** html #breadcrumbs {*/
-/*  padding-bottom: 8px;*/
-/*}*/
-
-/*pre {*/
-/*  border: 1px solid #999;*/
-/*  background: #f5f5f5;*/
-/*  margin: 1.5em 0px;*/
-/*  padding: 8px;*/
-/*  overflow: auto*/
-/*}*/
-
-/*div.source pre {*/
-/*  border: 0;*/
-/*}*/
-
-/*div.source {*/
-/*  border: 1px solid #999;*/
-/*  margin: 1.5em 0px;*/
-/*  background: #f5f5f5;*/
-/*}*/
-
-/*.subsectionTitle {*/
-/*  font-size: 13px;*/
-/*  font-weight: bold;*/
-/*  color: #666;*/
-
-/*}*/
-
-/*.xright a:link, .xright a:visited, .xright a:active {*/
-/*  color: #666;*/
-/*}*/
-/*.xright a:hover {*/
-/*  color: #003300;*/
-/*}*/
-/*#breadcrumbs .xleft a:link, #breadcrumbs .xleft a:visited, #breadcrumbs .xleft a:active, #breadcrumbs .xleft a:hover {*/
-/*  color: #FF9622;*/
-/*  font-weight: bold;*/
-/*}*/
-/*#banner {*/
-/*  height: 235px;*/
-/*}*/
-
-/*.subsection {*/
-/*  margin-left: 3px;*/
-/*  color: #333333;*/
-/*}*/
-/*.subsection p {*/
-/*  font-size: 12px;*/
-/*}*/
-/*.errormark, .warningmark, .donemark, .infomark {*/
-/*  background: url(../images/icon_error_sml.gif) no-repeat;*/
-/*}*/
-
-/*.warningmark {*/
-/*  background-image: url(../images/icon_warning_sml.gif);*/
-/*}*/
-
-/*.donemark {*/
-/*  background-image: url(../images/icon_success_sml.gif);*/
-/*}*/
-
-/*.infomark {*/
-/*  background-image: url(../images/icon_info_sml.gif);*/
-/*}*/
-
-/*table.bodyTable { */
-/*  font-size: 100%;*/
-/*  margin: 10px 25px;*/
-/*  width: 620px;*/
-/*}*/
-
-/*li table.bodyTable {*/
-/*  width: 500px;*/
-/*}*/
-
-/*.bodyTable td, .bodyTable th {*/
-/*  max-width: 470px;*/
-/*}*/
-
-/*.bodyTable th {*/
-/*  text-align: left;*/
-/*}*/
-
-/*!* ========================== *!*/
-
-/*.str { */
-/*    color: #061;*/
-/*}*/
-
-/*!* news date *!*/
-
-/*div.news-date {*/
-/*    color: #C7C7C7;*/
-/*    font-size: 10px;*/
-/*    float: right;*/
-/*    clear: both;*/
-/*    margin-top: -40px;*/
-/*}*/
-/*div.news-date > p {*/
-/*    margin-top: 0;*/
-/*    margin-bottom: 0;*/
-/*}*/
-
-/*!* ========================== *!*/
-/*!* Nabble *!*/
-
-/*div#nabbleforum {*/
-/*    margin-top: -30px;*/
-/*}*/
-
-/*!* ========================== *!*/
-/*!* Idea.Informer *!*/
-
-/*.tegdiw_pot h2 {*/
-/*  width: auto;*/
-/*  background: none;*/
-/*}*/
-
-/*.bvnmrte {*/
-
-/*}*/
-
-/*span.jolokiaLogo img {*/
-/*    float: right; margin: 0 0 10px 20px;*/
-/*}*/
-
-/*div.text-center div.content {*/
-/*    text-align: center;*/
-/*}*/
-
-/*span.image.right {*/
-/*    float: right;*/
-/*    margin-left: 20px;*/
-/*}*/
+div.main.features {
+  display: flex;
+  flex-flow: row wrap;
+  border-radius: 0;
+  border: 0;
+  background-color: transparent;
+}
+div.main.features div.sect1 {
+  width: 50%;
+  box-sizing: border-box;
+  padding: 0 20px 30px 20px;
+}
+div.main.features div.sect1>h2 {
+  background: linear-gradient(to bottom, #ff5525 0%, #e3311e 50%, #be1518 100%);
+  border: 2px solid white;
+  border-bottom-width: 0;
+  margin: 0;
+  border-radius: 3px 3px 0 0;
+  color: white;
+  font-size: 15px;
+  text-align: center;
+}
+div.main.features div.sect1>.sectionbody {
+  border: 1px solid white;
+  background-color: white;
+}
