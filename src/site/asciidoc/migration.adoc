@@ -27,9 +27,9 @@ _draft_
 * `listenForHttpService` option is replaced (with deprecation) with `registerWhiteboardServlet` option
 * list artifact IDs and their usage
 
-=== Javascript Client
+=== JavaScript Client
 
-* The minimum supported Javascript version is now ES5. For environments with ES3 and older Javascript versions, keep using old versions of the Javascript client provided with Jolokia 1.x.
+* The minimum supported JavaScript version is now ES5. For environments with ES3 and older JavaScript versions, keep using old versions of the JavaScript client provided with Jolokia 1.x.
 * Since it is based on ES5, `JSON2.js` is no longer required.
 * Now it also supports installation with NPM or Yarn. You can install it with `npm i jolokia.js` or `yarn add jolokia.js`.
 * You can also use it with a TypeScript project, as the client provides its type definitions with the package.

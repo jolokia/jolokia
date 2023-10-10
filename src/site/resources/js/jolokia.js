@@ -15,7 +15,7 @@
  */
 
 /* =================================
- * Jolokia Javascript Client Library
+ * Jolokia JavaScript Client Library
  * =================================
  *
  * Requires jquery.js and json2.js
@@ -64,7 +64,7 @@
                 return new Jolokia(param);
             }
 
-            // Jolokia Javascript Client version
+            // Jolokia JavaScript Client version
             this.CLIENT_VERSION = "1.2.2";
 
             // Registered requests for fetching periodically
@@ -130,7 +130,7 @@
              *     than OK (200) which happens if the request JMX operation fails. This callback receives
              *     the full Jolokia response object (with a key <code>error</code> set). If no error callback
              *     is given, but an asynchronous operation is performed, the error response is printed
-             *     to the Javascript console by default.
+             *     to the JavaScript console by default.
              *   </dd>
              *   <dt>ajaxError</dt>
              *   <dd>

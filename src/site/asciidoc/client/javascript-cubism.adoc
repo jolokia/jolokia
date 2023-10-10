@@ -17,7 +17,7 @@
 == Jolokia-Cubism Integration
 
 https://square.github.com/cubism/[Cubism,role=externalLink] is a
-fine Javascript library for plotting timeseries data based on
+fine JavaScript library for plotting timeseries data based on
 https://d3js.org/[d3.js]. It provides support for
 various backend sources like
 https://graphite.wikidot.com/[Graphite,role=externalLink] or
@@ -28,13 +28,13 @@ https://vis.berkeley.edu/papers/horizon/[horizon,role=externalLink]
 chart. The Jolokia integration polls the Jolokia agent
 periodically and remembers the values locally. It uses the
 link:../reference/html/clients.html#js-poller[scheduling
-facility] of the Jolokia Javascript library by sending a
+facility] of the Jolokia JavaScript library by sending a
 single bulk request for fetching the data for all charts and is
 hence very efficient.
 
 The following sections show some simple real time demos of
 this integration. After that, some concepts are explained. The
-full Javascript source can be downloaded
+full JavaScript source can be downloaded
 link:../js/javascript-cubism.js[here].
 
 === HeapMemory

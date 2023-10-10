@@ -73,7 +73,7 @@
 
     <menu name="Clients" inherit="top">
       <item name="Java" href="client/java.html"/>
-      <item name="Javascript" href="client/javascript.html"/>
+      <item name="JavaScript" href="client/javascript.html"/>
       <item name="Perl" href="client/perl.html"/>
     </menu>
     <!--

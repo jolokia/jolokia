@@ -109,7 +109,7 @@ Jolokia is able to effortlessly bridge the Java centric
 technology JMX to non-Java platforms.
 link:client/java.adoc[Java],
 link:client/perl.adoc[Perl] and
-link:client/javascript.adoc[Javascript] client
+link:client/javascript.adoc[JavaScript] client
 libraries are already available, other language bindings
 are in the pipeline (e.g. Scala).
 link:features/polyglot.html[More ...]

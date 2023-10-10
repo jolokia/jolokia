@@ -83,7 +83,7 @@ is secured by configuring the server authentication properly for this servlet. A
 tricked to execute local code by a malicious attacker. As said previously, the Jolokia proxy should be avoided if
 possible in favor of direct access over the Jolokia protocol.
 
-All client libraries (jmx4perl, Java and Javascript) support the
+All client libraries (jmx4perl, Java and JavaScript) support the
 usage of proxy mode in its API.
 
 [#proxy-limitations

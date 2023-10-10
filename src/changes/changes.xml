@@ -600,7 +600,7 @@
     </release>
     <release version="1.0.6" description="Release 1.0.6" date="2012-11-26">
       <action dev="roland" type="fix" date="2012-08-14">
-        Jolokia's Javascript poller fixes an register/unregister issue, where the returned
+        Jolokia's JavaScript poller fixes an register/unregister issue, where the returned
         handle from register() remains stable.
       </action>
       <action dev="roland" type="fix" date="2012-07-27">
@@ -935,7 +935,7 @@
         otherwise 200 is returned (even when an Jolokia response object contains an error).
       </action>
       <action dev="roland" type="add" date="2011-01-16">
-        Added a Javascript client library including about 120 unit
+        Added a JavaScript client library including about 120 unit
         tests and a new section in the reference manual.
       </action>
     </release>

@@ -15,7 +15,7 @@ export default class Jolokia {
     constructor(param: BaseRequestOptions);
 
     /**
-     * Jolokia Javascript Client version
+     * Jolokia JavaScript Client version
      */
     CLIENT_VERSION: string;
 
@@ -63,7 +63,7 @@ export default class Jolokia {
      *     than OK (200) which happens if the request JMX operation fails. This callback receives
      *     the full Jolokia response object (with a key <code>error</code> set). If no error callback
      *     is given, but an asynchronous operation is performed, the error response is printed
-     *     to the Javascript console by default.
+     *     to the JavaScript console by default.
      *   </dd>
      *   <dt>ajaxError</dt>
      *   <dd>
@@ -456,7 +456,7 @@ export interface RequestOptions extends BaseRequestOptions {
      * than OK (200) which happens if the request JMX operation fails. This callback receives
      * the full Jolokia response object (with a key <code>error</code> set). If no error callback
      * is given, but an asynchronous operation is performed, the error response is printed
-     * to the Javascript console by default.
+     * to the JavaScript console by default.
      */
     error?: (error: ErrorResponse, index: number) => void;
 }
@@ -478,7 +478,7 @@ export interface BulkRequestOptions extends BaseRequestOptions {
      * than OK (200) which happens if the request JMX operation fails. This callback receives
      * the full Jolokia response object (with a key <code>error</code> set). If no error callback
      * is given, but an asynchronous operation is performed, the error response is printed
-     * to the Javascript console by default.
+     * to the JavaScript console by default.
      */
     error?: (error: ErrorResponse, index: number) => void | ((error: ErrorResponse, index: number) => void)[];
 }
