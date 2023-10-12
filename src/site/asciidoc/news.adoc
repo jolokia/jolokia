@@ -876,11 +876,11 @@ That's it for now, all changes are summarized as always in the link:changes-repo
 Some other, more organizational stuff for now:
 
 * Bugtracking and feature requests switch over completely to
-https://github.com/jolokia/jolokia/issues[Github].
+https://github.com/jolokia/jolokia/issues[GitHub].
 Since I'm currently collecting features for 2.0, it's a good time for feature requests ;-). All ideas
 entered
 https://jolokia.idea.informer.com/[jolokia.idea.informer.com] has been transformed into
-Github issues.
+GitHub issues.
 * If you are close to Germany it might be of interest to you, that I'm giving a training on Jolokia and
 Jmx4Perl,
 with focus on Java Monitoring with Nagios. This will happen at 16./17.04.2013 in Munich, details can be

@@ -80,7 +80,7 @@ JSR-160 connectors:
 * The [Jolokia Forum][7] can be used for questions about Jolokia 
   (and Jmx4perl).
 
-* For bug reports, please use the [Github Issue tracker][8].
+* For bug reports, please use the [GitHub Issue tracker][8].
 
 * Most of the time, I'm hanging around at [Freenode][9] in 
   `#jolokia`, too.

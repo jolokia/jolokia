@@ -28,7 +28,7 @@ cd jolokia
 mvn -Dmaven.repo.local=/tmp/repo -DdevelopmentVersion=1.0.1-SNAPSHOT -DreleaseVersion=1.0.0 -Dtag=v1.0.0 -Pdist release:prepare
 mvn -Dmaven.repo.local=/tmp/repo -DdevelopmentVersion=1.0.1-SNAPSHOT -DreleaseVersion=1.0.0 -Dtag=v1.0.0 -Pdist release:perform
 
-# Copy assembly to Github
+# Copy assembly to GitHub
 
 * Create a new release ("Draft a release" - Button)
 * Upload tar.gz and zip files from target/checkout/src/assembly/target
