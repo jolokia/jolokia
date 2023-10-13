@@ -21,13 +21,13 @@
 
 There a multiple channels from where support for Jolokia can be
 obtained. Bugs are tracked via
-https://github.com/rhuss/jolokia/issues[GitHub,role=externalLink],
+https://github.com/jolokia/jolokia/issues[GitHub,role=externalLink],
 questions should be preferably posed in the Jolokia
 link:forum.html[Forum].
 
 On the other hand, the are ways for supporting the development
 of Jolokia, too. You can contribute code and bug-fixes via
-https://github.com/rhuss/jolokia[GitHub,role=externalLink] (prefered)
+https://github.com/jolokia/jolokia[GitHub,role=externalLink] (prefered)
 or with financial support (donations via Pledgie or flattring
 Jolokia).
 
@@ -47,7 +47,7 @@ for a quick contact.
 
 Bug Reports and Feature Requests::
 Jolokia uses GitHub for
-https://github.com/rhuss/jolokia/issues[bug tracking,role=externalLink]
+https://github.com/jolokia/jolokia/issues[bug tracking,role=externalLink]
 and release management. Please fill in any
 issue you find or feature requests you have.
 
@@ -55,10 +55,10 @@ issue you find or feature requests you have.
 === Source
 
 Jolokia uses
-https://github.com/rhuss/jolokia[GitHub,role=externalLink] as source
+https://github.com/jolokia/jolokia[GitHub,role=externalLink] as source
 repository and employs a
 https://help.github.com/pull-requests/[Fork + Pull Model,role=externalLink]
-for development. The git clone URL is `git@github.com:rhuss/jolokia.git`.
+for development. The git clone URL is `git@github.com:jolokia/jolokia.git`.
 
 We are always looking for volunteers to enhance Jolokia. If
 you would like start to participate, we suggest the
@@ -66,9 +66,9 @@ following way:
 
 * Check for an open feature request
 you like or open bug at
-https://github.com/rhuss/jolokia/issues[GitHub,role=externalLink].
+https://github.com/jolokia/jolokia/issues[GitHub,role=externalLink].
 * Fork Jolokia by visiting the
-https://github.com/rhuss/jolokia[project page,role=externalLink]
+https://github.com/jolokia/jolokia[project page,role=externalLink]
 (use "Fork" from the menu).
 * Your contribution must be donated under the https://www.apache.org/licenses/LICENSE-2.0.html[Apache Public License,role=externalLink] and you
 should sign-off your commits that you conform to the https://developercertificate.org/[Developer Certificate of Origin,role=externalLink]
