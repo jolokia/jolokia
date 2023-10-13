@@ -100,7 +100,7 @@ public final class OptionsAndArgs {
      * not an option is considered to be an argument. Two arguments are allowed: The command
      * (first) and the PID (second). Any non-numeric PID is considered to be a pattern. Either {@link #getPid()} or
      * {@link #getProcessPattern()} is set.
-     * <p/>
+     * <p>
      * If no PID/pattern and no command is given the "list" command is implied. If as first argument a pure numeric value
      * or a pattern (which must not be equal to a valid command) is given, then "toggle" is infered with the given
      * PID/pattern.

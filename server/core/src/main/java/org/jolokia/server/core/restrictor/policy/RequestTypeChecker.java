@@ -26,9 +26,9 @@ import org.w3c.dom.*;
  * Checks for a certain requst type which are specified within a <code>&lt;commands&gt;</code>
  * section. If no such section is present, then all commands are allowed, otherwise only
  * the given type is allowed by this checker.
- * <p/>
+ * <p>
  * Allowed types are the names as defined in {@link RequestType}.
- * <p/
+ * <p>
  * Example:
  * <pre>
  * &lt;commands&gt;

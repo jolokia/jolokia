@@ -183,7 +183,7 @@ public final class NetworkUtil {
     /**
      * Examine the given URL and replace the host with a non-loopback host if possible. It is checked,
      * whether the port is open as well.
-     * <p/>
+     * <p>
      * A replaced host uses the  IP address instead of a (possibly non resolvable) name.
      *
      * @param pRequestURL url to examine and to update

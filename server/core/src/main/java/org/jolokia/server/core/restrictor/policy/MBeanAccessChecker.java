@@ -28,11 +28,11 @@ import org.w3c.dom.*;
 /**
  * Checker, which checks for specific MBean attributes or operations which can be either
  * defined in an <code>&lt;allow&gt;</code> or <code>&lt;deny&gt;</code> seciton.
- * <p/>
+ * <p>
  * MBean names can be specified either a full names or as patterns in which case the rule
  * applies to all MBeans matching this pattern. For attribute and operations names, the wildcard
  * <code>*</code> is allowed, too.
- * <p/>
+ * <p>
  * Example:
  * <pre>
  * &lt;allow&gt;

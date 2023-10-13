@@ -28,7 +28,7 @@ import org.w3c.dom.*;
  * Check whether a host is allowed to access the agent. The restriction
  * can be specified in the policy file with the <code>&lt;remote&gt;</code>
  * tag. Either plain host or subnet (in the CIDR notation) can be specified
- * <br/>
+ * <br>
  * Example:
  * <pre>
  * &lt;remote&gt;
