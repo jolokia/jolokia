@@ -46,16 +46,24 @@ Check in and push the changes.
 ### Build release and deploy it on labs
 
 ```console
-git clone git@github.com:jolokia/jolokia.git
+git clone git@github.com:jolokia/jolokia.git -b 2.0
 cd jolokia
-mvn -Dmaven.repo.local=/tmp/repo -DdevelopmentVersion=2.0.1-SNAPSHOT -DreleaseVersion=2.0.0 -Dtag=v2.0.0 -Pdist release:prepare
-mvn -Dmaven.repo.local=/tmp/repo -DdevelopmentVersion=2.0.1-SNAPSHOT -DreleaseVersion=2.0.0 -Dtag=v2.0.0 -Pdist release:perform
+mvn -Dmaven.repo.local=/tmp/repo \
+    -DdevelopmentVersion=2.0.1-SNAPSHOT \
+    -DreleaseVersion=2.0.0 \
+    -Dtag=v2.0.0 \
+    -Pdist release:prepare
+mvn -Dmaven.repo.local=/tmp/repo \
+    -DdevelopmentVersion=2.0.1-SNAPSHOT \
+    -DreleaseVersion=2.0.0 \
+    -Dtag=v2.0.0 \
+    -Pdist release:perform
 ```
 
 ### Copy assembly to GitHub
 
 * Create a new release ("Draft a release" - Button)
-* Upload tar.gz and zip files from `target/checkout/src/assembly/target`
+* Upload `tar.gz` and `zip` files from `target/checkout/src/assembly/target`
 * Upload all JavaScript files in `target/checkout/client/javascript/target`:
     * `compressed/jolokia-*.js`
     * `scripts/jolokia*.js`
@@ -72,7 +80,7 @@ cd ../..
 
 ### Release on central maven repo
 
-* See: <https://docs.sonatype.org/display/Repository/Sonatype+OSS+Maven+Repository+Usage+Guide>
+* See: <https://central.sonatype.org/publish/publish-guide/>
 * Staging Nexus: <https://oss.sonatype.org/>
 * Steps:
     1. Login into <https://oss.sonatype.org/>
@@ -100,7 +108,7 @@ md5 -q src/site/resources/jolokia.meta > src/site/resources/jolokia.meta.md5
 
 ## Recreate website (`~/jolokia`)
 
-### Update version number in site.xml to next dev version
+### Update version number in `site.xml` to next dev version
 
 ```console
 vi ./src/site/site.xml
