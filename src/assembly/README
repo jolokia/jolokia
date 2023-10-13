@@ -23,7 +23,7 @@ Multiple agents are provided for different environments:
     Version 11+
 
 All agents can be found in the agents/ subdirectory. For installation
-instructions, please refer to http://www.jolokia.org/agent.html
+instructions, please refer to https://www.jolokia.org/agent.html
 
 JMX Support Libraries
 ---------------------
@@ -52,4 +52,4 @@ Resources
 ---------
 
 Much more information on jolokia can be found at
-http://www.jolokia.org.
+https://www.jolokia.org.
