@@ -17,8 +17,8 @@ Multiple agents are provided for different environments:
 * **OSGi Agent** for deployment in an [OSGi][2] container. This agent
   is packaged as a bundle and comes in two flavors (minimal,
   all-in-one).
-* **JVM JDK6 Agent** which can be used with any Oracle/Sun JVM,
-  Version 6 or later and which is able to attach to a running Java process 
+* **JVM JDK11+ Agent** which can be used with any Oracle/Sun JVM,
+  Version 11 or later and which is able to attach to a running Java process 
   dynamically. 
 
 

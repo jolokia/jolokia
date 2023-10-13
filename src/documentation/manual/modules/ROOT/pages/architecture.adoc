@@ -68,7 +68,7 @@ image::architecture.png[]
 
 But there are more options. Specialized agents are able to use an OSGi
 HttpService. The JVM agent uses the HTTP-Server included
-with every Oracle JVM 6 and can be attached dynamically to any
+with every Oracle JVM 11+ and can be attached dynamically to any
 running Java process. Agents are described in detail in
 xref:agents.adoc[].
 

@@ -24,7 +24,7 @@ services in different environments:
 agent is packaged as a bundle and comes in two flavors (minimal,
 all-in-one).
 * *JVM Agent* which can be used with any Oracle/Sun based JVM,
-Version 6 or later.
+Version 11 or later.
 
 === WAR Agent
 

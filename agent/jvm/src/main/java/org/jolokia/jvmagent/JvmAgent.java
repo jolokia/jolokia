@@ -26,7 +26,7 @@ import org.jolokia.server.core.service.impl.ClasspathServerDetectorLookup;
 
 
 /**
- * A JVM level agent using the JDK6 HTTP Server {@link com.sun.net.httpserver.HttpServer} or
+ * A JVM level agent using the JDK11+ HTTP Server {@link com.sun.net.httpserver.HttpServer} or
  * its SSL variant {@link com.sun.net.httpserver.HttpsServer}.
  *
  * Beside the configuration defined in {@link ConfigKey}, this agent honors the following
