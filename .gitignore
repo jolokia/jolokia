@@ -3,6 +3,7 @@ dist
 *.iml
 *.ipr
 *.iws
+*.class
 *~
 /classes/
 node_modules/
