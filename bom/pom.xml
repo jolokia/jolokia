@@ -26,6 +26,12 @@
   <description>Jolokia :: BOM</description>
   <packaging>pom</packaging>
 
+  <parent>
+    <groupId>org.jolokia</groupId>
+    <artifactId>jolokia-parent</artifactId>
+    <version>2.0.0-M4</version>
+  </parent>
+
   <url>https://jolokia.org/</url>
 
   <licenses>
