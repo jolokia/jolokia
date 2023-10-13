@@ -23,6 +23,16 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
+    <release version="2.0.0-SNAPSHOT" description="Release 2.0.0">
+      <action dev="tadayosi" type="add" issue="555">
+        The new Jolokia 2.0 release with support for Jakarta EE 9+ and Spring Boot 3
+      </action>
+    </release>
+    <release version="2.0.0-M4" description="Release 2.0.0-M4" date="2023-10-13">
+      <action dev="tadayosi" type="add" date="2023-10-13">
+        Fourth milestone, preparatory release before 2.0.0-RC1
+      </action>
+    </release>
     <release version="1.7-SNAPSHOT" description="Release 1.7.3">
       <action dev="skarsaune" type="fix" issue="532">
         Ensure that TabularData compatible data structures are deserialized better

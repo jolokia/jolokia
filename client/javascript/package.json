@@ -1,6 +1,6 @@
 {
   "name": "jolokia.js",
-  "version": "2.0.0-dev.10",
+  "version": "2.0.0-m4.0",
   "description": "Jolokia JavaScript client",
   "main": "dist/jolokia.js",
   "types": "dist/index.d.ts",
