@@ -211,9 +211,9 @@ comes with OpenJDK/Oracle JVMs (Version 11 or later).
        xmlns:jolokia="http://www.jolokia.org/jolokia-spring/schema/config"
        xsi:schemaLocation="
            http://www.springframework.org/schema/beans
-           http://www.springframework.org/schema/beans/spring-beans.xsd
+           https://www.springframework.org/schema/beans/spring-beans.xsd
            http://www.jolokia.org/jolokia-spring/schema/config
-           http://www.jolokia.org/jolokia-spring/schema/config/jolokia-config.xsd">
+           https://www.jolokia.org/jolokia-spring/schema/config/jolokia-config.xsd">
 
   <jolokia:agent lookupConfig="false" systemPropertiesMode="never">
     <jolokia:config autoStart="true" host="0.0.0.0" port="8778" .... />
@@ -305,11 +305,11 @@ only base Spring bean configurations (including an Spring EL expression):
        xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="
            http://www.springframework.org/schema/beans
-           http://www.springframework.org/schema/beans/spring-beans.xsd
+           https://www.springframework.org/schema/beans/spring-beans.xsd
            http://www.springframework.org/schema/context
-           http://www.springframework.org/schema/context/spring-context.xsd
+           https://www.springframework.org/schema/context/spring-context.xsd
            http://www.springframework.org/schema/util
-           http://www.springframework.org/schema/util/spring-util.xsd">
+           https://www.springframework.org/schema/util/spring-util.xsd">
 
   <bean name="server" id="jolokia" class="org.jolokia.jvmagent.spring.SpringJolokiaAgent">
     <property name="lookupConfig" value="false"/>
@@ -355,11 +355,11 @@ except when annotated with `@JsonMBean`.
        xmlns:jolokia="http://www.jolokia.org/jolokia-spring/schema/config"
        xsi:schemaLocation="
            http://www.springframework.org/schema/beans
-           http://www.springframework.org/schema/beans/spring-beans.xsd
+           https://www.springframework.org/schema/beans/spring-beans.xsd
            http://www.jolokia.org/jolokia-spring/schema/config
-           http://www.jolokia.org/jolokia-spring/schema/config/jolokia-config.xsd
+           https://www.jolokia.org/jolokia-spring/schema/config/jolokia-config.xsd
            http://www.springframework.org/schema/context
-           http://www.springframework.org/schema/context/spring-context.xsd">
+           https://www.springframework.org/schema/context/spring-context.xsd">
 
   <context:mbean-export server="jolokiaServer"/>
   <jolokia:mbean-server id="jolokiaServer"/>

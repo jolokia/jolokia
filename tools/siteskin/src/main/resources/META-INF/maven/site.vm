@@ -374,7 +374,7 @@
         #set ( $href = $PathTool.calculateLink( $item.href, $relativePath ) )
         #set ( $href = $href.replaceAll( "\\", "/" ) )
       #else
-        #set ( $href="http://maven.apache.org/" )
+        #set ( $href="https://maven.apache.org/" )
       #end
 ##
       #if( $item.name )
@@ -423,12 +423,12 @@
       </a>
     #end
     #if( $poweredBy.isEmpty() )
-      <a href="http://maven.apache.org/" title="$i18n.getString( "site-renderer", $locale, "template.builtby" ) Maven" class="poweredBy">
+      <a href="https://maven.apache.org/" title="$i18n.getString( "site-renderer", $locale, "template.builtby" ) Maven" class="poweredBy">
         <img class="poweredBy" alt="$i18n.getString( "site-renderer", $locale, "template.builtby" ) Maven" src="$relativePath/images/logos/maven-feather.png" />
       </a>
     #end
   #else
-    <a href="http://maven.apache.org/" title="$i18n.getString( "site-renderer", $locale, "template.builtby" ) Maven" class="poweredBy">
+    <a href="https://maven.apache.org/" title="$i18n.getString( "site-renderer", $locale, "template.builtby" ) Maven" class="poweredBy">
       <img class="poweredBy" alt="$i18n.getString( "site-renderer", $locale, "template.builtby" ) Maven" src="$relativePath/images/logos/maven-feather.png" />
     </a>
   #end

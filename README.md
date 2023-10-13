@@ -90,7 +90,7 @@ doing a pull request. The sign-off is a simple line at the end of the patch desc
 which certifies that you wrote it or otherwise have the right to
 pass it on as an open-source patch.  The rules are very simple: if you
 can certify the below (from
-[developercertificate.org](http://developercertificate.org/)):
+[developercertificate.org](https://developercertificate.org/)):
 
 ```
 Developer Certificate of Origin
@@ -140,15 +140,15 @@ If you set your `user.name` and `user.email` git configs, you can sign your
 commit automatically with `git commit -s`.
 
 If you fix some documentation (typos, formatting, ...) you are not required to sign-off. 
-It is possible to sign your commits in retrospective, [too](http://stackoverflow.com/questions/13043357/git-sign-off-previous-commits) 
+It is possible to sign your commits in retrospective, [too](https://stackoverflow.com/questions/13043357/git-sign-off-previous-commits) 
 if you forgot it the first time. 
 
  [1]: https://jolokia.org/images/jolokia_logo.png "Jolokia"
- [2]: http://www.osgi.org
- [3]: http://www.jmx4perl.org
- [4]: http://labs.consol.de/blog/jmx4perl/configuring-remote-jmx-access-for-weblogic   
- [5]: http://labs.consol.de/blog/jmx4perl/jboss-remote-jmx
- [6]: http://search.cpan.org/~roland/jmx4perl/scripts/check_jmx4perl
+ [2]: https://www.osgi.org
+ [3]: https://www.jmx4perl.org
+ [4]: https://labs.consol.de/blog/jmx4perl/configuring-remote-jmx-access-for-weblogic   
+ [5]: https://labs.consol.de/blog/jmx4perl/jboss-remote-jmx
+ [6]: https://search.cpan.org/~roland/jmx4perl/scripts/check_jmx4perl
  [7]: https://github.com/jolokia/jolokia/issues
  [8]: https://github.com/jolokia/jolokia/discussions
  [9]: https://www.jolokia.org
