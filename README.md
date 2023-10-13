@@ -77,16 +77,11 @@ JSR-160 connectors:
 
 ## Resources
 
-* The [Jolokia Forum][7] can be used for questions about Jolokia 
-  (and Jmx4perl).
+* For bug reports, please use the [GitHub Issue tracker][7].
+* For questions and discussions, please use [GitHub discussions][8].
 
-* For bug reports, please use the [GitHub Issue tracker][8].
-
-* Most of the time, I'm hanging around at [Freenode][9] in 
-  `#jolokia`, too.
-
-Even more information on Jolokia can be found at [www.jolokia.org][10], including
-a complete [reference manual][11].
+Even more information on Jolokia can be found at [www.jolokia.org][9], including
+a complete [reference manual][10].
 
 ## Contributions
 
@@ -155,8 +150,7 @@ if you forgot it the first time.
  [4]: http://labs.consol.de/blog/jmx4perl/configuring-remote-jmx-access-for-weblogic   
  [5]: http://labs.consol.de/blog/jmx4perl/jboss-remote-jmx
  [6]: http://search.cpan.org/~roland/jmx4perl/scripts/check_jmx4perl
- [7]: https://jolokia.org/forum.html
- [8]: https://github.com/rhuss/jolokia/issues
- [9]: http://webchat.freenode.net/?channels=jolokia
- [10]: https://www.jolokia.org
- [11]: https://www.jolokia.org/reference/html/index.html
+ [7]: https://github.com/rhuss/jolokia/issues
+ [8]: https://github.com/jolokia/jolokia/discussions
+ [9]: https://www.jolokia.org
+ [10]: https://www.jolokia.org/reference/html/index.html
