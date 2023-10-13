@@ -88,6 +88,16 @@ cd ../..
     5. Check the artifacts in the "closed" repository
     6. If ok --> click "Release" in menu
 
+### Release JavaScript client NPM package
+
+Before performing the following commands, make sure you've logged in to the [NPM registry](https://www.npmjs.com/) with an account that has publish privilege to [jolokia.js](https://www.npmjs.com/package/jolokia.js) NPM package. 
+
+```console
+cd client/javascript
+npm install
+npm publish
+```
+
 ## Adapt metadata
 
 ### Add new release to `jolokia.meta`
