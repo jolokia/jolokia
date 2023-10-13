@@ -53,7 +53,7 @@ configuration. This is described in <<jvm-spring>>.
 For JBoss 7 there is a slight issue when creating a new `MBeanServer`. For this to work,
 a `jboss-deployment-structure` with a dependency on
 `org.jboss.as.jmx` must be added. For an example see the
-https://github.com/rhuss/jolokia/blob/master/it/war/src/main/webapp/WEB-INF/jboss-deployment-structure.xml[integration test war], the location
+https://github.com/jolokia/jolokia/blob/main/it/war/src/main/webapp/WEB-INF/jboss-deployment-structure.xml[integration test war], the location
 to where to put this file is explained in the https://docs.jboss.org/author/display/AS7/Developer+Guide#DeveloperGuide-JBossDeploymentStructureFile[JBoss documentation].
 ****
 
