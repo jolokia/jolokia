@@ -150,7 +150,7 @@ if you forgot it the first time.
  [4]: http://labs.consol.de/blog/jmx4perl/configuring-remote-jmx-access-for-weblogic   
  [5]: http://labs.consol.de/blog/jmx4perl/jboss-remote-jmx
  [6]: http://search.cpan.org/~roland/jmx4perl/scripts/check_jmx4perl
- [7]: https://github.com/rhuss/jolokia/issues
+ [7]: https://github.com/jolokia/jolokia/issues
  [8]: https://github.com/jolokia/jolokia/discussions
  [9]: https://www.jolokia.org
  [10]: https://www.jolokia.org/reference/html/index.html
