@@ -195,7 +195,7 @@
     <profile>
       <!-- TODO: check -->
       <!-- Distribution profile adaption for get also the embedded classes into the sources jar-->
-      <id>ignore</id>
+      <id>dist</id>
       <build>
         <plugins>
           <!-- Unpack dependencies in target/sources -->
