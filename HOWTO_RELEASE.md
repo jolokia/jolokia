@@ -52,11 +52,13 @@ mvn -Dmaven.repo.local=/tmp/repo \
     -DdevelopmentVersion=2.0.1-SNAPSHOT \
     -DreleaseVersion=2.0.0 \
     -Dtag=v2.0.0 \
+    -Dgpg.keyname=roland@jolokia.org \
     -Pdist release:prepare
 mvn -Dmaven.repo.local=/tmp/repo \
     -DdevelopmentVersion=2.0.1-SNAPSHOT \
     -DreleaseVersion=2.0.0 \
     -Dtag=v2.0.0 \
+    -Dgpg.keyname=roland@jolokia.org \
     -Pdist release:perform
 ```
 
