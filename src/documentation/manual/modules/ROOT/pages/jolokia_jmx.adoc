@@ -202,7 +202,7 @@ sufficient:
 
 With this in place, the following configuration can be used to
 fire up a Jolokia JVM based agent using the HTTP server which
-comes with OpenJDK/Oracle JVMs (Version 6 or later).
+comes with OpenJDK/Oracle JVMs (Version 11 or later).
 
 [,xml]
 ----

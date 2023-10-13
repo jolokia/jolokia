@@ -58,9 +58,9 @@ lightweight HTTP-Server which is used e.g. for the reference
 WebService stack implementation included in Java 6. Using
 the Java-agent API (normally used by profilers and other
 development tools requiring the instrumentation during the
-class loading phase), the JVM 6 Jolokia agent is the most
+class loading phase), the JVM 11+ Jolokia agent is the most
 generic one. It is able to instrument _any_
-Java application running on a Oracle JDK 6footnote:[
+Java application running on a Oracle JDK 11+footnote:[
 You could even instrument a Java EE application server this way,
 however this is not recommended.].
 This Jolokia agent variant is fully featured, however tends to

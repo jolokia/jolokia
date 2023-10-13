@@ -35,7 +35,7 @@ deployed in the OSGi container, but there is also a
 all-in-one bundle which embedds all dependencies in a single
 bundle. The pure bundle is the prefered agent, though, since
 it fits the OSGi philosophy better.
-* The link:../agent/jvm.html[JVM JDK 6 Agent] requires for its setup
+* The link:../agent/jvm.html[JVM JDK 11 Agent] requires for its setup
 some extra command line parameter for the JVM, but this
 shouldn't be a big deal either.
 

@@ -36,7 +36,7 @@ import org.json.simple.parser.ParseException;
 
 /**
  * Request handler with no dependency on the servlet API so that it can be used in
- * several different environments (like for the Sun JDK 6 {@link com.sun.net.httpserver.HttpServer}.
+ * several different environments (like for the Sun JDK 11+ {@link com.sun.net.httpserver.HttpServer}.
  *
  * @author roland
  * @since Mar 3, 2010

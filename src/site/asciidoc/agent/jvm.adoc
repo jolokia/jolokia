@@ -17,10 +17,10 @@
 == JVM Agent
 
 Another variant is Jolokia's JVM agent which does not need any special container
-environment. The only dependency is on Oracle's JDK 6 or later as runtime,
+environment. The only dependency is on Oracle's JDK 11 or later as runtime,
 since it contains a lightweight HTTP Server used for
 exporting the Jolokia protocol. This agent is the most generic one which can
-instrument <any> Java application using a JDK6. It is suitable for
+instrument <any> Java application using a JDK11+. It is suitable for
 situations where the other agents don't fit. Also, it can be used for dynamically
 attaching an agent to a running Java process.
 
