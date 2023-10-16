@@ -19,13 +19,18 @@ package org.jolokia.mule;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.jetty.security.*;
-import org.eclipse.jetty.security.authentication.BasicAuthenticator;
-import org.eclipse.jetty.server.*;
-import org.eclipse.jetty.server.handler.ContextHandlerCollection;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.servlet.security.ConstraintMapping;
+import org.eclipse.jetty.ee10.servlet.security.ConstraintSecurityHandler;
 import org.eclipse.jetty.security.Constraint;
+import org.eclipse.jetty.security.HashLoginService;
+import org.eclipse.jetty.security.SecurityHandler;
+import org.eclipse.jetty.security.UserStore;
+import org.eclipse.jetty.security.authentication.BasicAuthenticator;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.util.security.Credential;
 import org.jolokia.http.AgentServlet;
 import org.jolokia.util.ClassUtil;
@@ -155,16 +160,14 @@ abstract public class EclipseMuleAgentHttpServer implements MuleAgentHttpServer 
     private HashLoginService getLoginService(String pUser, String pPassword, String pRole) {
     	Credential credential = Credential.getCredential(pPassword);
     	HashLoginService loginService = new HashLoginService("jolokia Realm");
-    	loginService.putUser(pUser, credential, new String[] {pRole});
+    	UserStore userStore=new UserStore();
+    	userStore.addUser(pUser, credential, new String[] {pRole});
+		loginService.setUserStore(userStore);
     	return loginService;
     }
 
     private ConstraintMapping[] getConstraintMappings(String ... pRoles) {
-        Constraint constraint = new Constraint();
-        constraint.setName(Constraint.__BASIC_AUTH);
-        constraint.setRoles(pRoles);
-        constraint.setAuthenticate(true);
-
+    	Constraint constraint = new Constraint.Builder().name(Constraint.KNOWN_ROLE.getName()).roles(pRoles).build();
         ConstraintMapping cm = new ConstraintMapping();
         cm.setConstraint(constraint);
         cm.setPathSpec("/*");
