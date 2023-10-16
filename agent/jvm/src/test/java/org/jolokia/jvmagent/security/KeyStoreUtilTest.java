@@ -45,7 +45,7 @@ public class KeyStoreUtilTest {
     public static final String CA_CERT_SUBJECT_DN_CN = "CN=ca.test.jolokia.org";
     public static final String SERVER_CERT_SUBJECT_DN = "CN=Server Cert signed and with extended key usage server, C=DE, ST=Franconia, L=Pegnitz, OU=Test, O=jolokia.org";
 
-    public static final String CA_ALIAS = "cn=ca.test.jolokia.org,c=de,st=bavaria,l=pegnitz,1.2.840.113549.1.9.1=#1612726f6c616e64406a6f6c6f6b69612e6f7267,ou=dev,o=jolokia";
+    public static final String CA_ALIAS = "cn=ca.test.jolokia.org,c=de,st=bavaria,l=pegnitz,1.2.840.113549.1.9.1=#1612726f6c616e64406a6f6c6f6b69612e6f7267,ou=dev,o=jolokia|9531696871831421790";
     public static final String SERVER_ALIAS = "cn=server cert signed and with extended key usage server,c=de,st=franconia,l=pegnitz,ou=test,o=jolokia.org";
 
     @Test
@@ -73,16 +73,16 @@ public class KeyStoreUtilTest {
         KeyStoreUtil.updateWithCaPem(keystore, caPem);
 
         List<String> aliases = asList(keystore.aliases());
-        assertEquals(aliases.size(), 2);
+        assertEquals(aliases.size(), 3);
         Map<String, String> expectedAliases = new HashMap<String, String>();
-        expectedAliases.put("ca.test.jolokia.org",CA_CERT_SUBJECT_DN_CN);
-        expectedAliases.put("another.test.jolokia.org","CN=another.test.jolokia.org");
+        expectedAliases.put("cn=ca.test.jolokia.org,c=de,st=bavaria,l=pegnitz,1.2.840.113549.1.9.1=#1612726f6c616e64406a6f6c6f6b69612e6f7267,ou=dev,o=jolokia|9531696871831421790", "ca.test.jolokia.org");
+        expectedAliases.put("cn=another.test.jolokia.org,ou=jolokia,o=jolokia,l=pegnitz,st=bavaria,c=us|167767600", "another.test.jolokia.org");
+        expectedAliases.put("cn=another.test.jolokia.org,ou=jolokia,o=jolokia,l=pegnitz,st=bavaria,c=us|42", "another.test.jolokia.org");
 
         for (String alias : aliases) {
 
-            String key = findMatchingKeyAsSubstring(expectedAliases, alias);
-            assertNotNull(key);
-            String expectedSubjectDN = expectedAliases.remove(key);
+            assertNotNull(alias);
+            String expectedSubjectDN = expectedAliases.remove(alias);
             assertNotNull(expectedSubjectDN);
 
             X509Certificate cert = (X509Certificate) keystore.getCertificate(alias);
