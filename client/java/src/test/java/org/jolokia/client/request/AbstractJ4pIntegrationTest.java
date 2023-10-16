@@ -21,10 +21,15 @@ import org.jolokia.client.BasicAuthenticator;
 import org.jolokia.http.AgentServlet;
 import org.jolokia.it.ItSetup;
 import org.jolokia.test.util.EnvTestUtil;
+import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.util.security.Credential;
 import org.eclipse.jetty.security.*;
-import org.eclipse.jetty.servlet.Context;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.servlet.security.ConstraintMapping;
+import org.eclipse.jetty.ee10.servlet.security.ConstraintSecurityHandler;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 
@@ -52,13 +57,14 @@ abstract public class AbstractJ4pIntegrationTest {
 
             int port = EnvTestUtil.getFreePort();
             jettyServer = new Server(port);
-            Context jettyContext = new Context(jettyServer, "/");
-            ServletHolder holder = new ServletHolder(new AgentServlet());
+            Connector connector = new ServerConnector(jettyServer);
+            jettyServer.addConnector(connector);
+            ServletContextHandler context = new ServletContextHandler();
+            context.setContextPath("/");
+            jettyServer.setHandler(context);
+            ServletHolder holder = context.addServlet(AgentServlet.class, "/j4p/*");
             holder.setInitParameter("dispatcherClasses", "org.jolokia.jsr160.Jsr160RequestDispatcher");
-            jettyContext.addServlet(holder, "/j4p/*");
-
-            SecurityHandler securityHandler = createSecurityHandler();
-            jettyContext.addHandler(securityHandler);
+            context.setSecurityHandler(getSecurityHandler("jolokia", "jolokia","jolokia"));
 
             jettyServer.start();
             j4pUrl = "http://localhost:" + port + "/j4p";
@@ -69,26 +75,34 @@ abstract public class AbstractJ4pIntegrationTest {
         }
         j4pClient = createJ4pClient(j4pUrl);
 	}
-
-    private SecurityHandler createSecurityHandler() {
-        Constraint constraint = new Constraint();
-        constraint.setName(Constraint.__BASIC_AUTH);
-        constraint.setRoles(new String[]{"jolokia"});
-        constraint.setAuthenticate(true);
-
-        ConstraintMapping cm = new ConstraintMapping();
-        cm.setConstraint(constraint);
-        cm.setPathSpec("/*");
-
-        SecurityHandler securityHandler = new SecurityHandler();
-        HashUserRealm realm = new HashUserRealm("Jolokia");
-        realm.put("jolokia","jolokia");
-        realm.addUserToRole("jolokia", "jolokia");
-        securityHandler.setUserRealm(realm);
-        securityHandler.setConstraintMappings(new ConstraintMapping[]{cm});
+    
+    private SecurityHandler getSecurityHandler(String pUser, String pPassword, String pRole) {
+    	HashLoginService loginService = getLoginService(pUser, pPassword, pRole);
+    	jettyServer.addBean(loginService);	 	   	
+    	ConstraintSecurityHandler securityHandler = new ConstraintSecurityHandler();
+    	securityHandler.setConstraintMappings(getConstraintMappings(pRole));
+    	securityHandler.setAuthenticator(new org.eclipse.jetty.security.authentication.BasicAuthenticator());
+    	securityHandler.addBean(loginService);
         return securityHandler;
     }
 
+    private HashLoginService getLoginService(String pUser, String pPassword, String pRole) {
+    	Credential credential = Credential.getCredential(pPassword);
+    	HashLoginService loginService = new HashLoginService("Jolokia");
+    	UserStore userStore=new UserStore();
+    	userStore.addUser(pUser, credential, new String[] {pRole});
+		loginService.setUserStore(userStore);
+    	return loginService;
+    }
+
+    private ConstraintMapping[] getConstraintMappings(String ... pRoles) {
+    	Constraint constraint = new Constraint.Builder().name(Constraint.KNOWN_ROLE.getName()).roles(pRoles).build();
+        ConstraintMapping cm = new ConstraintMapping();
+        cm.setConstraint(constraint);
+        cm.setPathSpec("/*");
+        return new ConstraintMapping[] { cm };
+    }
+    
     protected J4pClient createJ4pClient(String url) {
         return J4pClient.url(url)
                 .user("jolokia")
