@@ -16,7 +16,10 @@
 
 == Support
 
-The best place to get Jolokia support is the https://github.com/jolokia/jolokia/issues[GitHub,role=externalLink] page where Jolokia is being developed. You can ask questions and report issues directly and simply as GitHub issues and you'll find developers from different time zones ready to answer your questions.
+The best place to get Jolokia support is the https://github.com/jolokia/jolokia/discussions[GitHub discussions page,role=externalLink] or https://github.com/jolokia/jolokia/issues[GitHub issues page,role=externalLink].
+You'll find Jolokia own issues and get a glance at current development status.
+
+You can ask questions, report issues and you'll find developers from different time zones ready to answer your questions.
 
 [#Source]
 === Source
