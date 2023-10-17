@@ -241,9 +241,11 @@ table.tableblock, table.bodyTable {
   padding: 2px 5px;
 }
 .tableblock td, .bodyTable td {
-  line-height: 1.7em;
-  padding: 1px 5px 1px 5px;
+  padding: 3px 5px 1px 5px;
   vertical-align: top;
+}
+.tableblock td, .bodyTable td figure {
+  margin-bottom: -6px;
 }
 .bodyTable tr:nth-of-type(2n+1) {
   background-color: #f8f8f8;
