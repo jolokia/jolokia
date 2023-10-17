@@ -14,42 +14,9 @@
   limitations under the License.
 ////
 
-// TODO: this script was added, but it refers to nonexisting http://api.flattr.com/js/0.5.0/load.js
-// <script type="text/javascript" src="js/flattr.js"></script>
-
 == Support
 
-There a multiple channels from where support for Jolokia can be
-obtained. Bugs are tracked via
-https://github.com/jolokia/jolokia/issues[GitHub,role=externalLink],
-questions should be preferably posed in the Jolokia
-link:forum.html[Forum].
-
-On the other hand, the are ways for supporting the development
-of Jolokia, too. You can contribute code and bug-fixes via
-https://github.com/jolokia/jolokia[GitHub,role=externalLink] (prefered)
-or with financial support (donations via Pledgie or flattring
-Jolokia).
-
-=== Communication channels
-
-Forum::
-There's a link:forum.html[forum] for Jolokia
-related discussions. Don't hesitate to fill it up with
-your questions and suggestions.
-
-IRC::
-Feel free to join us on
-https://freenode.net[Freenode,role=externalLink], and discuss on
-**`#jolokia`** about JMX and the
-link:irc.html[web chat]
-for a quick contact.
-
-Bug Reports and Feature Requests::
-Jolokia uses GitHub for
-https://github.com/jolokia/jolokia/issues[bug tracking,role=externalLink]
-and release management. Please fill in any
-issue you find or feature requests you have.
+The best place to get Jolokia support is the https://github.com/jolokia/jolokia/issues[GitHub,role=externalLink] page where Jolokia is being developed. You can ask questions and report issues directly and simply as GitHub issues and you'll find developers from different time zones ready to answer your questions.
 
 [#Source]
 === Source
@@ -78,16 +45,10 @@ Only real names are allowed here.
 * After finishing your implementation, send a
 https://help.github.com/pull-requests[pull request,role=externalLink].
 * After briefly reviewing the code contribution, it will
-integrated into the master repository.
+integrated into relevant branch of the repository.
 
 Please note, that all the contributed code must be
 licensed under link:license.html[Apache License] Version 2 and you must sign-off the contribution (see above).
-
-=== T-Shirts
-
-If you like the software and want to spread the word, we have some quite some cool T-Shirts,
-Baseball Caps, Coffee Mugs, ... over there in our
-https://jolokia.spreadshirt.de[merchandising shop,role=externalLink].
 
 === Your Support for Jolokia
 
