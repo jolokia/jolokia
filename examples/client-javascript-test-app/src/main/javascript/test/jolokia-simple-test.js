@@ -188,14 +188,14 @@ $(document).ready(function () {
     QUnit.test("version (sync)", assert => {
         let value = j4p.version({ method: "post" });
         assert.ok(value.protocol >= 6, "Protocol >= 4");
-        assert.ok(j4p.CLIENT_VERSION === value.agent, "Client version: " + j4p.CLIENT_VERSION);
+        assert.ok(semverLite.gte(j4p.CLIENT_VERSION, value["agent"]), "Client version: " + j4p.CLIENT_VERSION);
     });
 
     QUnit.test("version (async)", assert => {
         let done = assert.async();
         let value = j4p.version({
             jsonp: true, success: function (val) {
-                assert.ok(val.agent === j4p.CLIENT_VERSION, "Agent version " + j4p.CLIENT_VERSION);
+                assert.ok(semverLite.gte(j4p.CLIENT_VERSION, val["agent"]), "Agent version " + j4p.CLIENT_VERSION);
                 done();
             }
         });

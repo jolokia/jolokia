@@ -1044,17 +1044,16 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <additionalparam>-Xdoclint:none</additionalparam>
-    <currentStableVersion>2.0.0-M4</currentStableVersion>
-    <currentSnapshotVersion>2.0.0-SNAPSHOT</currentSnapshotVersion>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
     <sonar.projectKey>org.jolokia:jolokia-2.0</sonar.projectKey>
-    <github.global.server>github</github.global.server>
+
+    <!-- A version used for documentation -->
+    <currentStableVersion>2.0.0-M4</currentStableVersion>
+    <protocolVersion>7.2</protocolVersion>
 
     <version.servlet-api>5.0.0</version.servlet-api>
-
     <version.jetty>11.0.16</version.jetty>
-    <version.undertow>2.3.8.Final</version.undertow>
-
     <version.spring>6.0.12</version.spring>
     <version.log4j2>2.20.0</version.log4j2>
   </properties>

@@ -106,7 +106,7 @@ $(document).ready(function () {
                         success: function (response) {
                             assert.equal(response.request.type, "version", "Type must be version");
                             assert.ok(response.value.protocol >= 6.0, "Protocol must be greater or equal 4.0");
-                            assert.ok(response.value["agent"] === j4p["CLIENT_VERSION"], "Agent version check");
+                            assert.ok(semverLite.gte(j4p.CLIENT_VERSION, response.value["agent"]), "Agent version check");
                             done();
                         }
                     })
@@ -174,7 +174,7 @@ $(document).ready(function () {
                     success: function (response, idx) {
                         switch (idx) {
                             case 0:
-                                assert.ok(response.value["agent"] === j4p["CLIENT_VERSION"], "Version request");
+                                assert.ok(semverLite.gte(j4p.CLIENT_VERSION, response.value["agent"]), "Version request");
                                 break;
                             case 1:
                                 assert.equal(response.request.type, "read", "Read request");
@@ -195,7 +195,7 @@ $(document).ready(function () {
                 {
                     success: [
                         function (response) {
-                            assert.ok(response.value["agent"] === j4p["CLIENT_VERSION"], "Version request");
+                            assert.ok(semverLite.gte(j4p.CLIENT_VERSION, response.value["agent"]), "Version request");
                             done();
                         },
                         function (response) {
@@ -218,7 +218,7 @@ $(document).ready(function () {
                     success: [
                         function (response, idx) {
                             assert.equal(idx, 0, "Success 1st request");
-                            assert.ok(response.value["agent"] === j4p["CLIENT_VERSION"], "Version request");
+                            assert.ok(semverLite.gte(j4p.CLIENT_VERSION, response.value["agent"]), "Version request");
                             done();
                         },
                         function () {

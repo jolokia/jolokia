@@ -17,6 +17,10 @@ package org.jolokia.server.core;
  */
 
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
 /**
  * Class holding the version of this agent and the protocol.
  *
@@ -25,10 +29,27 @@ package org.jolokia.server.core;
  */
 public final class Version {
 
-    private static final String VERSION = "2.0.0-M4";
+    private static final String VERSION;
 
     // Major.Minor version of protocol
-    private static final String PROTOCOL = "7.2";
+    private static final String PROTOCOL;
+
+    static {
+        String version;
+        String protocol;
+        try (InputStream is = Version.class.getResourceAsStream("/version.properties")) {
+            Properties props = new Properties();
+            props.load(is);
+            version = props.getProperty("jolokia.version");
+            protocol = props.getProperty("protocol.version");
+        } catch (IOException e) {
+            // should never happen, unless this code is repackaged in different project
+            version = "2.0.0";
+            protocol = "7.2";
+        }
+        VERSION = version;
+        PROTOCOL = protocol;
+    }
 
     private Version() {}
 
