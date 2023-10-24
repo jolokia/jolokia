@@ -16,208 +16,216 @@
 
 // Poller tests
 
-$(document).ready(function() {
+$(document).ready(function () {
 
-    module("Poller");
-    asyncTest("Simple registered request",function() {
-        var counter1 = 1,
+    QUnit.module("Poller");
+
+    QUnit.test("Simple registered request", assert => {
+        let done = assert.async();
+        let counter1 = 1,
             counter2 = 1;
-        var j4p = new Jolokia("/jolokia");
+        let j4p = new Jolokia("/jolokia");
 
-        j4p.register(function(resp) {
+        j4p.register(function () {
             counter1++;
-        },{ type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage", path: "used"});
-        j4p.register(function(resp) {
+        }, { type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage", path: "used" });
+        j4p.register(function () {
             counter2++;
-        },{ type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage", path: "max"});
+        }, { type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage", path: "max" });
 
-        equal(j4p.jobs().length,2,"Two jobs registered");
+        assert.equal(j4p.jobs().length, 2, "Two jobs registered");
 
-        ok(!j4p.isRunning(),"Poller should not be running");
+        assert.ok(!j4p.isRunning(), "Poller should not be running");
         j4p.start(100);
-        ok(j4p.isRunning(),"Poller should be running");
-        setTimeout(function() {
+        assert.ok(j4p.isRunning(), "Poller should be running");
+        setTimeout(function () {
             j4p.stop();
-            ok(!j4p.isRunning(),"Poller should be stopped");
-            equal(counter1,3,"Request1 should have been called 3 times");
-            equal(counter2,3,"Request2 should have been called 3 times");
-            start();
-        },280);
+            assert.ok(!j4p.isRunning(), "Poller should be stopped");
+            assert.equal(counter1, 3, "Request1 should have been called 3 times");
+            assert.equal(counter2, 3, "Request2 should have been called 3 times");
+            done();
+        }, 280);
     });
 
-    asyncTest("Starting and stopping",function() {
-        var j4p = new Jolokia("/jolokia");
-        var counter = 1;
+    QUnit.test("Starting and stopping", assert => {
+        let done = assert.async();
+        let j4p = new Jolokia("/jolokia");
+        let counter = 1;
 
-        j4p.register(function(resp) {
-            counter++;
-            },{ type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage", path: "used"},
-            { type: "SEARCH", mbean: "java.lang:type=*"});
+        j4p.register(function () {
+                counter++;
+            }, { type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage", path: "used" },
+            { type: "SEARCH", mbean: "java.lang:type=*" });
         j4p.start(100);
-        setTimeout(function() {
+        setTimeout(function () {
             j4p.stop();
-            setTimeout(function() {
-                equal(counter,4,"Request should have been called 4 times")
-                ok(!j4p.isRunning(),"Poller should be stopped");
-                start();
-            },300);
-        },350);
-
+            setTimeout(function () {
+                assert.equal(counter, 4, "Request should have been called 4 times")
+                assert.ok(!j4p.isRunning(), "Poller should be stopped");
+                done();
+            }, 300);
+        }, 350);
     });
 
-    asyncTest("Registering- and Deregistering",function() {
-        var j4p = new Jolokia("/jolokia");
-        var counter1 = 1,
+    QUnit.test("Registering- and Deregistering", assert => {
+        let done = assert.async();
+        let j4p = new Jolokia("/jolokia");
+        let counter1 = 1,
             counter2 = 1;
-        var id1 = j4p.register(function(resp) {
+        let id1 = j4p.register(function () {
             counter1++;
-        },{ type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage", path: "used"});
-        var id2 = j4p.register(function(resp) {
+        }, { type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage", path: "used" });
+        let id2 = j4p.register(function () {
             counter2++;
-        },{ type: "EXEC", mbean: "java.lang:type=Memory", operation: "gc"});
+        }, { type: "EXEC", mbean: "java.lang:type=Memory", operation: "gc" });
         j4p.start(300);
-        equal(j4p.jobs().length,2,"2 jobs registered");
-        setTimeout(function() {
-            equal(counter1,3,"Req1 should be called 2 times");
-            equal(counter2,3,"Req2 should be called 2 times");
+        assert.equal(j4p.jobs().length, 2, "2 jobs registered");
+        setTimeout(function () {
+            assert.equal(counter1, 3, "Req1 should be called 2 times");
+            assert.equal(counter2, 3, "Req2 should be called 2 times");
             j4p.unregister(id1);
-            equal(j4p.jobs().length,1,"1 job remaining");
-            setTimeout(function() {
-                equal(counter1,3,"Req1 stays at 2 times since it was unregistered");
-                equal(counter2,5,"Req2 should continue to be requested, now for 4 times");
+            assert.equal(j4p.jobs().length, 1, "1 job remaining");
+            setTimeout(function () {
+                assert.equal(counter1, 3, "Req1 stays at 2 times since it was unregistered");
+                assert.equal(counter2, 5, "Req2 should continue to be requested, now for 4 times");
                 j4p.unregister(id2);
-                equal(j4p.jobs().length,0,"No job remaining");
+                assert.equal(j4p.jobs().length, 0, "No job remaining");
                 // Handles should stay stable, so the previous unregister of id1 should not change
                 // the meaining of id2 (see http://jolokia.963608.n3.nabble.com/Possible-bug-in-the-scheduler-tp4023893.html
                 // for details)
-                setTimeout(function() {
+                setTimeout(function () {
                     j4p.stop();
-                    equal(counter1,3,"Req1 stays at 3 times since it was unregistered");
-                    equal(counter2,5,"Req2 stays at 4 times since it was unregistered");
-                    start();
-                },300);
-            },650);
-        },750)
+                    assert.equal(counter1, 3, "Req1 stays at 3 times since it was unregistered");
+                    assert.equal(counter2, 5, "Req2 stays at 4 times since it was unregistered");
+                    done();
+                }, 300);
+            }, 650);
+        }, 750)
     });
 
-    asyncTest("Multiple requests",function() {
-        var j4p = new Jolokia("/jolokia");
-        var counter = 1;
-        j4p.register(function(resp1,resp2,resp3,resp4) {
-                equal(resp1.status,200);
-                equal(resp2.status,200);
-                ok(resp1.value > 0);
-                ok(resp2.value > 0);
-                equal(resp1.request.attribute,"HeapMemoryUsage");
-                equal(resp2.request.attribute,"ThreadCount");
-                equal(resp3.status,404);
-                ok(!resp4);
+    QUnit.test("Multiple requests", assert => {
+        let done = assert.async();
+        let j4p = new Jolokia("/jolokia");
+        let counter = 1;
+        j4p.register(function (resp1, resp2, resp3, resp4) {
+                assert.equal(resp1.status, 200);
+                assert.equal(resp2.status, 200);
+                assert.ok(resp1.value > 0);
+                assert.ok(resp2.value > 0);
+                assert.equal(resp1.request.attribute, "HeapMemoryUsage");
+                assert.equal(resp2.request.attribute, "ThreadCount");
+                assert.equal(resp3.status, 404);
+                assert.ok(!resp4);
                 counter++
-            },{ type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage", path: "used"},
-            { type: "READ", mbean: "java.lang:type=Threading", attribute: "ThreadCount"},
-            { type: "READ", mbean: "bla.blu:type=foo", attribute: "blubber"});
+            }, { type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage", path: "used" },
+            { type: "READ", mbean: "java.lang:type=Threading", attribute: "ThreadCount" },
+            { type: "READ", mbean: "bla.blu:type=foo", attribute: "blubber" });
         j4p.start(200);
-        setTimeout(function() {
+        setTimeout(function () {
             j4p.stop();
-            equal(counter,3,"Req should be called 3 times");
-            start();
-        },500);
+            assert.equal(counter, 3, "Req should be called 3 times");
+            done();
+        }, 500);
     })
 
-    asyncTest("Config merging",function() {
-        var j4p = new Jolokia("/jolokia");
+    QUnit.test("Config merging", assert => {
+        let done = assert.async();
+        let j4p = new Jolokia("/jolokia");
         j4p.register({
-                callback: function(resp1,resp2) {
-                    ok(!resp1.error_value);
-                    ok(resp1.stacktrace);
-                    ok(resp2.error_value);
-                    ok(!resp2.stackTrace);
+                callback: function (resp1, resp2) {
+                    assert.ok(!resp1.error_value);
+                    assert.ok(resp1.stacktrace);
+                    assert.ok(resp2.error_value);
+                    assert.ok(!resp2.stackTrace);
                 },
                 config: {
                     serializeException: true
                 }
             },
-            { type: "READ", mbean: "bla.blu:type=foo", attribute: "blubber", config: { serializeException: false}},
-            { type: "READ", mbean: "bla.blu:type=foo", attribute: "blubber", config: { includeStackTrace: false}}
+            { type: "READ", mbean: "bla.blu:type=foo", attribute: "blubber", config: { serializeException: false } },
+            { type: "READ", mbean: "bla.blu:type=foo", attribute: "blubber", config: { includeStackTrace: false } }
         );
         j4p.start(200);
-        setTimeout(function() {
+        setTimeout(function () {
             j4p.stop();
-            start();
-        },300);
+            done();
+        }, 300);
     });
 
-    asyncTest("OnlyIfModified test - callback",function() {
-        var j4p = new Jolokia("/jolokia");
-        var counter = {
+    QUnit.test("OnlyIfModified test - callback", assert => {
+        let done = assert.async();
+        let j4p = new Jolokia("/jolokia");
+        let counter = {
             1: 0,
             3: 0
         };
         j4p.register({
-                callback: function() {
+                callback: function () {
                     counter[arguments.length]++;
                 },
                 onlyIfModified: true
             },
-            { type: "LIST", config: { maxDepth: 2}},
-            { type: "LIST", config: { maxDepth: 1}},
-            { type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage", path: "used"}
+            { type: "LIST", config: { maxDepth: 2 } },
+            { type: "LIST", config: { maxDepth: 1 } },
+            { type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage", path: "used" }
         );
         j4p.start(200);
-        setTimeout(function() {
+        setTimeout(function () {
             j4p.stop();
-            equal(counter[3],1);
-            equal(counter[1],1);
-            start();
-        },500);
+            assert.equal(counter[3], 1);
+            assert.equal(counter[1], 1);
+            done();
+        }, 500);
     });
 
-    asyncTest("OnlyIfModified test - success and error ",function() {
-        var j4p = new Jolokia("/jolokia");
-        var counter = 0;
+    QUnit.test("OnlyIfModified test - success and error ", assert => {
+        let done = assert.async();
+        let j4p = new Jolokia("/jolokia");
+        let counter = 0;
         j4p.register({
-                success: function(resp1) {
+                success: function () {
                     counter++;
                 },
-                error: function(resp1) {
+                error: function () {
                     counter++;
                 },
                 onlyIfModified: true
             },
-            { type: "LIST", config: { maxDepth: 2}}
+            { type: "LIST", config: { maxDepth: 2 } }
         );
         j4p.start(200);
-        setTimeout(function() {
+        setTimeout(function () {
             j4p.stop();
             // Should have been called only once
-            equal(counter,1);
-            start();
-        },600);
+            assert.equal(counter, 1);
+            done();
+        }, 600);
     });
 
-    asyncTest("Multiple requests with success/error callbacks",function() {
-        var j4p = new Jolokia("/jolokia");
-        var counterS = 1,
+    QUnit.test("Multiple requests with success/error callbacks", assert => {
+        let done = assert.async();
+        let j4p = new Jolokia("/jolokia");
+        let counterS = 1,
             counterE = 1;
         j4p.register({
-                success: function(resp) {
+                success: function () {
                     counterS++;
                 },
-                error: function(resp) {
+                error: function (resp) {
                     counterE++;
-                    equal(resp.status,404);
+                    assert.equal(resp.status, 404);
                 }
             },
-            { type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage", path: "used"},
-            { type: "READ", mbean: "java.lang:type=Threading", attribute: "ThreadCount"},
-            { type: "READ", mbean: "bla.blu:type=foo", attribute: "blubber"});
+            { type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage", path: "used" },
+            { type: "READ", mbean: "java.lang:type=Threading", attribute: "ThreadCount" },
+            { type: "READ", mbean: "bla.blu:type=foo", attribute: "blubber" });
         j4p.start(200);
-        setTimeout(function() {
+        setTimeout(function () {
             j4p.stop();
-            equal(counterS,5,"Req should be called 4 times successfully");
-            equal(counterE,3,"One error request, twice");
-            start();
-        },500);
+            assert.equal(counterS, 5, "Req should be called 4 times successfully");
+            assert.equal(counterE, 3, "One error request, twice");
+            done();
+        }, 500);
     });
 
 });

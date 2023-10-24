@@ -1,3 +1,4 @@
+<!doctype html>
 <!--
   ~ Copyright 2009-2013 Roland Huss
   ~
@@ -14,7 +15,7 @@
   ~ limitations under the License.
   -->
 
-<html>
+<html lang="en">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <title>Jolokia plot demo</title>
@@ -22,7 +23,6 @@
   <script type="text/javascript" src="../scripts/support/jquery.flot.js"></script>
   <script type="text/javascript" src="../scripts/lib/jolokia.js"></script>
   <script type="text/javascript" src="../scripts/lib/jolokia-simple.js"></script>
-  <script type="text/javascript" src="../scripts/lib/json2.js"></script>
 </head>
 <body>
 <h1>Jolokia Memory Plot Demo</h1>
@@ -30,40 +30,39 @@
 <div id="memory" style="width:600px;height:300px;margin-top: 20px;"></div>
 <input type="submit" id="gc" value="Garbage Collection"/>
 
-<script id="source" language="javascript" type="text/javascript">
+<script id="source" type="text/javascript">
+    let j4p = new Jolokia("/jolokia");
+    let data = [];
 
-  var j4p = new Jolokia("/jolokia");
-  var data = [];
-
-  function run() {
-    j4p.request({
-                  type: "read",
-                  mbean: "java.lang:type=Memory",
-                  attribute: "HeapMemoryUsage"
-                },
-                {
-                  success: function(resp) {
-                    var value = resp.value.used / (1024 * 1024);
-                    var time = resp.timestamp * 1000;
+    function run() {
+        j4p.request({
+                type: "read",
+                mbean: "java.lang:type=Memory",
+                attribute: "HeapMemoryUsage"
+            },
+            {
+                success: function(resp) {
+                    let value = resp.value.used / (1024 * 1024);
+                    let time = resp.timestamp * 1000;
                     data.push([time, value]);
-                    $.plot($("#memory"),[data],
-                           {
-                             xaxis: { mode: "time" },
-                             grid: { backgroundColor: { colors: ["#fff", "#eee"] }}
-                           });
-                    setTimeout(run,1000);
-                  }
-                });
-    
-  }
-  $("#gc").click(function() {
-    j4p.execute("java.lang:type=Memory","gc", {
-      success: function() {
-        console.log("Garbage collection performed");
-      }
+                    $.plot($("#memory"), [data],
+                        {
+                            xaxis: { mode: "time" },
+                            grid: { backgroundColor: { colors: ["#fff", "#eee"] } }
+                        });
+                    setTimeout(run, 1000);
+                }
+            });
+    }
+
+    $("#gc").click(function() {
+        j4p.execute("java.lang:type=Memory", "gc", {
+            success: function() {
+                console.log("Garbage collection performed");
+            }
+        });
     });
-  });
-  run();
+    run();
 </script>
 </body>
 

@@ -1,3 +1,4 @@
+<!doctype html>
 <!--
   ~ Copyright 2009-2013 Roland Huss
   ~
@@ -15,21 +16,15 @@
   -->
 
 <!-- Jolokia JavaScript Client Lib Unit test -->
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-                    "http://www.w3.org/TR/html4/loose.dtd">
-<html>
+<html lang="en">
 <head>
   <title>Jolokia JavaScript Testsuite</title>
   <script type="text/javascript" src="scripts/jquery-3.7.1.js"></script>
-  <script type="text/javascript" src="scripts/support/qunit.js"></script>
+  <script type="text/javascript" src="scripts/support/qunit-2.20.0.js"></script>
   <script type="text/javascript" src="scripts/lib/jolokia.js"></script>
 
-  <!-- Test Suite:-->
-  <script type="text/javascript" src="scripts/test/jolokia-test.js"></script>
-
-  <link rel="stylesheet" href="css/qunit.css" type="text/css" media="screen" />
+  <link rel="stylesheet" href="css/qunit-2.20.0.css" type="text/css" media="screen">
 </head>
-
 <body>
 <h1 id="qunit-header">Jolokia QUnit Testsuite</h1>
 <h2 id="qunit-banner"></h2>
@@ -37,5 +32,7 @@
 <h2 id="qunit-userAgent"></h2>
 <ol id="qunit-tests"></ol>
 <div id="qunit-fixture">test markup, will be hidden</div>
+<!-- Test Suite:-->
+<script type="text/javascript" src="scripts/test/jolokia-test.js"></script>
 </body>
 </html>

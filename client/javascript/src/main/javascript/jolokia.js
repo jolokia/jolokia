@@ -979,6 +979,7 @@
 
         // Escape a path part, can be used as a static method outside this function too
         Jolokia.prototype.escape = Jolokia.escape = function (part) {
+            // TODO: review GET URL path encoding
             return encodeURIComponent(part.replace(/!/g, "!!").replace(/\//g, "!/"));
         };
 
