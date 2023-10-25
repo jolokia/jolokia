@@ -22,6 +22,8 @@ While link:reference/html/index.html[reference manual] contains all the details 
 
 The most important feature of Jolokia is to provide a _protocol adaptor_ for accessing MBeanServer instances and managed beans available in single or multiple JVMs.
 
+image::images/jolokia_architecture.png[]
+
 Chapter 5.3 of https://jcp.org/en/jsr/detail?id=3[JMX Specification 1.4] defines two means of remote access to JVM's MBeanServer instances:
 
 * _connector_, which is a way to remotely expose the management interface. For RMI protocol (which is the only mandatory protocol as specified by JMX), it is a remote view of `javax.management.remote.rmi.RMIServer` interface. This approach requires active _connector server_ running in the JVM which' MBeanServer instances we want to access remotely.

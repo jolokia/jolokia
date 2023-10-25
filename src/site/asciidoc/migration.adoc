@@ -26,6 +26,7 @@ _draft_
 * OSGi code registers `org.jolokia.server.core.osgi.OsgiAgentServlet` using Whiteboard Specification instead of Http Service specification
 * `listenForHttpService` option is replaced (with deprecation) with `registerWhiteboardServlet` option
 * list artifact IDs and their usage
+* https://github.com/jolokia/jolokia/issues/612 about request dispatchers/handlers
 
 === JavaScript Client
 

@@ -1,47 +1,190 @@
 # How to release Jolokia
 
+There are two major steps required to release Jolokia:
+* test, build and deploy Jolokia artifacts to Maven Central
+* build and publish the website
+
 ## Build and test
 
-* Build the project
+Building the project is a straightforward step. Jolokia is a Maven project and there's nothing unusual in build configuration, no exotic plugins involved and no antrun tasks.
 
 ```console
 mvn clean install
 ```
 
-* Check integration tests (with `jmx4perl/it/it.pl`)
-* Check JavaScript tests
+Maven build will involve invocation of standard unit and integration tests. If you have a firewall enabled, there may
+be problems running UDP multicast tests:
 
 ```console
-mvn clean install jetty:run -pl examples/client-javascript-test-app
-firefox http://localhost:8080/jolokia-all-test.html
+[ERROR] Tests run: 9, Failures: 2, Errors: 0, Skipped: 0, Time elapsed: 4.068 s <<< FAILURE! -- in TestSuite
+[ERROR] org.jolokia.service.discovery.MulticastSocketListenerThreadTest.simple -- Time elapsed: 1.168 s <<< FAILURE!
+java.lang.AssertionError: Exactly one in message with the send id should have been received expected [1] but found [0]
+	at org.testng.Assert.fail(Assert.java:110)
+	at org.testng.Assert.failNotEquals(Assert.java:1413)
+	at org.testng.Assert.assertEqualsImpl(Assert.java:149)
+	at org.testng.Assert.assertEquals(Assert.java:131)
+	at org.testng.Assert.assertEquals(Assert.java:1240)
+	at org.jolokia.service.discovery.MulticastSocketListenerThreadTest.simple(MulticastSocketListenerThreadTest.java:78)
+...
+
+[ERROR] org.jolokia.service.discovery.DiscoveryMulticastResponderTest.enabledLookup -- Time elapsed: 1.323 s <<< FAILURE!
+java.lang.AssertionError: expected [false] but found [true]
+	at org.testng.Assert.fail(Assert.java:110)
+	at org.testng.Assert.failNotEquals(Assert.java:1413)
+	at org.testng.Assert.assertFalse(Assert.java:78)
+	at org.testng.Assert.assertFalse(Assert.java:88)
+	at org.jolokia.service.discovery.DiscoveryMulticastResponderTest.lookup(DiscoveryMulticastResponderTest.java:56)
+	at org.jolokia.service.discovery.DiscoveryMulticastResponderTest.enabledLookup(DiscoveryMulticastResponderTest.java:25)
+...
 ```
 
-## Increase version numbers
+This can be fixed by proper firewall configuration. Here's an example of `nft` command on Fedora with `FedoraServer` default zone:
+```console
+# firewall-cmd --get-default-zone 
+FedoraServer
 
-Make changes to the following files and check in and push.
+# nft add rule inet firewalld filter_IN_FedoraServer_allow ip daddr 239.192.48.84 accept
+
+# nft -a list chain inet firewalld filter_IN_FedoraServer_allow
+table inet firewalld {
+	chain filter_IN_FedoraServer_allow { # handle 206
+		...
+		ip daddr 239.192.48.84 accept # handle 501
+	}
+}
+
+(run the tests)
+
+# nft delete rule inet firewalld filter_IN_FedoraServer_allow handle 501
+```
+
+There are however additional tests that should be run a bit outside of standard `mvn clean install`.
+
+Instead of complex configuration that would be required for frameworks like [Selenium][1], Javascript tests are run
+from the web browser after running examples/client-javascript-test-app application:
 
 ```console
-vi src/docbkx/index.xml
-vi agent/core/src/main/java/org/jolokia/Version.java
-vi pom.xml
-# --> <currentStableVersion>2.0.0</currentStableVersion>
-#     <currentSnapshotVersion>2.0.1-SNAPSHOT</currentSnapshotVersion>
-vi src/changes/changes.xml # and update date
+$ mvn clean package -DskipTests jetty:run-war -f examples/client-javascript-test-app
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -------< org.jolokia:jolokia-example-client-javascript-test-app >-------
+[INFO] Building jolokia-example-client-javascript-test-app 2.0.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ war ]---------------------------------
+...
+[INFO] Started o.e.j.m.p.MavenWebAppContext@11cc9e1e{JSON JMX Agent,/,file:///data/sources/github.com/jolokia/jolokia/examples/client-javascript-test-app/target/jolokia-example-client-javascript-test-app-2.0.0-SNAPSHOT/,AVAILABLE}{/data/sources/github.com/jolokia/jolokia/examples/client-javascript-test-app/target/jolokia-example-client-javascript-test-app-2.0.0-SNAPSHOT.war}
+[INFO] Started ServerConnector@714b6999{HTTP/1.1, (http/1.1)}{0.0.0.0:8080}
+[INFO] Started Server@59e0d521{STARTING}[11.0.16,sto=0] @5879ms
+[INFO] Scan interval ms = 10
 ```
 
-### JavaScript client version
+JavaScript tests are run by browsing to one of:
+* http://localhost:8080/jolokia-test.html - tests for `jolokia.js`
+* http://localhost:8080/jolokia-simple-test.html - tests for `jolokia-simple.js`
+* http://localhost:8080/jolokia-poller-test.html - tests for polling part of `jolokia.js`
+* http://localhost:8080/jolokia-all-test.html - all tests combined.
 
-For the JavaScript client project, `npm version` should automatically update the version in `package.json`, `jolokia.js`, and `jolokia-cubism.js`.
+JavaScript tests are run with the help of [QUnit][3]. To make the work smoother without a need to rebuild `client/javascript`
+and `examples/client-javascript-test-app`, there's one handy `makeLinks.sh` shell script (for Linux) that replaces the target
+files with symbolic links to original locations.
 
+Just `cd` into correct directory and run the script:
 ```console
-cd client/javascript/
-npm install
-npm version <major|minor|patch>
+$ cd examples/client-javascript-test-app/
+ 
+$ ./makeLinks.sh 
++ cd target/
+++ find . -type d -name 'jolokia-example-client-javascript-test-app-*'
++ WARUNPACKED=./jolokia-example-client-javascript-test-app-2.0.0-SNAPSHOT
++ '[' -d ./jolokia-example-client-javascript-test-app-2.0.0-SNAPSHOT ']'
++ cd ./jolokia-example-client-javascript-test-app-2.0.0-SNAPSHOT
++ rm jolokia-all-test.html
++ rm jolokia-chat.html
++ rm jolokia-poller-test.html
++ rm jolokia-simple-test.html
++ rm jolokia-test.html
++ rm demo/plot.html
++ ln -s ../../src/main/webapp/jolokia-all-test.html .
++ ln -s ../../src/main/webapp/jolokia-chat.html .
++ ln -s ../../src/main/webapp/jolokia-poller-test.html .
++ ln -s ../../src/main/webapp/jolokia-simple-test.html .
++ ln -s ../../src/main/webapp/jolokia-test.html .
++ ln -s ../../src/main/webapp/demo/plot.html demo
+...
 ```
 
-Check in and push the changes.
+With the symbolic links created, just change the test files or `jolokia.js` in your IDE of choice and re-run the tests.
+
+## Manage version numbers
+
+There's an unresolved [MRELEASE-798][2] issue for maven-release-plugin that describes a scenario which would be very
+useful in Jolokia project.
+`mvn release:prepare` + `mvn release:perform` is the standard deployment procedure for Maven projects, but it only
+automatically updates the versions in POM files, creating well known pairs of commits like:
+
+```
+* (2022-12-26 10:23:51 +0100) fffaa40d [maven-release-plugin] prepare for next development iteration <Roland Huß>
+* (2022-12-26 10:23:47 +0100) 42dec09d [maven-release-plugin] prepare release v1.7.2 <Roland Huß> (tag: v1.7.2)
+```
+
+The problem is that Jolokia also includes JavaScript files (and descriptors like `package.json`) which contain
+version numbers.
+
+There are well established practices used when a released version is used in Java applications - usually through `*.properties` files and Maven filtering. However when Javascript projects are intermixed with Java it's getting more difficult.
+
+Jolokia 2 has exactly **four** versions stored in various places. However in some places the version is managed automatically (thanks to maven-release-plugin and Maven filtering).
+
+* _Maven version_ - managed automatically by maven-release-plugin with `-SNAPSHOT` qualifier in-between releases. This version may be used in Java code with `*.properties` files stored in `src/main/resources` with filtering enabled. This version is available in filtered resources when using `${project.version}` placeholder.
+* _Current stable version_ - this is the last released version defined in main `pom.xml` as `<properties>/<currentStableVersion>` value. This version is needed, because documentation should not refer to `${project.version}` directly (which is `-SNAPSHOT` qualified most of the time). And usually documentation is being updated for some time after the release.
+* _Jolokia protocol version_ - this is the version of protocol and is unrelated to Java/Maven version. Should be managed manually in main `pom.xml` using `<protocolVersion>` Maven property.
+* _JavaScript package/client version_ - this is the `version` field of `package.json` for Jolokia JavaScript client. It uses different convention than Maven/Java version (no `-SNAPSHOT` qualifier for example).
+
+### Maven version change
+
+This is done automatically by using `maven-release-plugin`. No manual work should be required.
+
+### Current stable version change
+
+After successful release, main `pom.xml` should have `<currentStableVersion>` property updated to match the
+latest Maven version set by `maven-release-plugin`. Then we can continue work on documentation. There's no need to
+set this version anywhere else, because it's propagated through Maven properties to maven plugins that generate the
+site (like maven-site-plugin or `npx` invocation through `frontend-maven-plugin`).
+
+### Jolokia protocol version change
+
+This is done during normal development and such change is never part of the release process itself. Protocol version
+change should be related to particular [GitHub issue][4].
+
+### JavaScript package/client version change
+
+This can be done just before the release (recommended), but if there are only JavaScript code changes and we want to
+deploy new Jolokia JavaScript client package to [NPM Registry][5], it's enough to:
+
+* run `npm version <new version>` command
+* commit and push the changes
+
+`npm version` updates version in `package.json`, but additionally (see `man npm version`) runs commands from
+`scripts/version` field of `package.json`:
+
+```json
+{
+  "scripts": {
+    "version": "node --no-warnings ./scripts/update-version.mjs"
+  }
+}
+```
+
+We'll get `client/javascript/src/main/javascript/jolokia.js` and `client/javascript/src/main/javascript/jolokia-cubism.js`
+updated as well.
+
+## Update the changelog
+
+Before the release it's worth updating the changelog in `src/changes/changes.xml`, but it can also be done after
+the release, because this XML file is processed during `mvn site` generation.
 
 ## Deploy and release
+
+`<review from here>`
 
 ### Build release and deploy it on labs
 
@@ -150,4 +293,8 @@ mvn -Pdist deploy
 
 * Adapt URI and version number in root-repository.xml on labs.consol.de to us a httppgp URL
 
-
+[1]: https://www.selenium.dev
+[2]: https://issues.apache.org/jira/browse/MRELEASE-798
+[3]: https://qunitjs.com
+[4]: https://github.com/jolokia/jolokia/issues
+[5]: https://www.npmjs.com

@@ -163,6 +163,7 @@
             Execution id can be used to provide configuration for cli invocation, like:
             $ mvn -N com.github.eirslett:frontend-maven-plugin:install-node-and-npm@install-node-and-npm
             $ mvn -N com.github.eirslett:frontend-maven-plugin:npm@npm-install
+            $ mvn -N com.github.eirslett:frontend-maven-plugin:npx@antora-documentation
           -->
           <execution>
             <id>install-node-and-npm</id>
@@ -192,7 +193,7 @@
             </goals>
             <phase>pre-site</phase>
             <configuration>
-              <arguments>antora generate antora-playbook.yml</arguments>
+              <arguments>antora generate --attribute jolokia-version=${currentStableVersion} antora-playbook.yml</arguments>
               <workingDirectory>src/documentation</workingDirectory>
             </configuration>
           </execution>
