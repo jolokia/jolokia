@@ -117,7 +117,7 @@ public class ListHandler extends AbstractCommandHandler<JolokiaListRequest> {
     // ==========================================================================================================
 
     /**
-     * Prepare an objectname patttern from a path (or "null" if no path is given)
+     * Prepare an objectname pattern from a path (or "null" if no path is given)
      * @param pPathStack path
      * @return created object name (either plain or a pattern)
      */
