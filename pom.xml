@@ -546,9 +546,9 @@
   </issueManagement>
 
   <scm>
-    <connection>scm:git:git://github.com/jolokia/jolokia.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/jolokia/jolokia.git</developerConnection>
-    <tag>HEAD</tag>
+    <connection>scm:git:git://github.com/grgrzybek/jolokia.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/grgrzybek/jolokia.git</developerConnection>
+    <tag>2.0</tag>
     <url>git://github.com/jolokia/jolokia.git</url>
   </scm>
 

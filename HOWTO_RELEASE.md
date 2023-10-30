@@ -184,9 +184,27 @@ the release, because this XML file is processed during `mvn site` generation.
 
 ## Deploy and release
 
-`<review from here>`
+The important part of the release is to sign the artifacts with your GPG key. GPG keys can be checked using `gpg -k`
+command and the output should contains something like:
 
-### Build release and deploy it on labs
+```console
+$ gpg -k
+/home/ggrzybek/.gnupg/pubring.kbx
+---------------------------------
+...
+pub   rsa4096 2020-09-02 [SC]
+      4C8BD038EE847AB3A6A586EEDB593BFCBBDC099E
+...
+```
+
+Last 8 bytes of the public key fingerprint is the key ID. Here it's `DB593BFCBBDC099E`. This value should be set/used
+in `-Dgpg.keyname` parameter for `maven-gpg-plugin`. Adding `-Dgpg.useagent=true` will open OS specific dialog to
+provide key password (it is `true` by default).
+
+### Build release and deploy it to OSSRH
+
+Jolokia uses Sonatype's Open Source Software Repository Hosting (OSSRH) service to deploy artifacts to Maven Central.
+Please check instructions and more information [here][6].
 
 ```console
 git clone git@github.com:jolokia/jolokia.git -b 2.0
@@ -298,3 +316,4 @@ mvn -Pdist deploy
 [3]: https://qunitjs.com
 [4]: https://github.com/jolokia/jolokia/issues
 [5]: https://www.npmjs.com
+[6]: https://central.sonatype.org/publish/
