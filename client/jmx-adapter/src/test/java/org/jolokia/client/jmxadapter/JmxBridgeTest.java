@@ -143,6 +143,7 @@ public class JmxBridgeTest {
         "java.lang:type=OperatingSystem.CpuLoad",
         "java.lang:name=G1 Young Generation,type=GarbageCollector.CollectionTime",
         "java.lang:name=G1 Young Generation,type=GarbageCollector.LastGcInfo",
+        "java.lang:name=G1 Young Generation,type=GarbageCollector.CollectionCount",
         "java.lang:name=G1 Old Gen,type=MemoryPool.PeakUsage",
         "java.lang:name=G1 Old Gen,type=MemoryPool.Usage",
         "java.lang:name=G1 Survivor Space,type=MemoryPool.PeakUsage",
