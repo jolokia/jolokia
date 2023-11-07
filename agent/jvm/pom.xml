@@ -40,7 +40,7 @@
       <dependency>
         <groupId>org.eclipse.jetty</groupId>
         <artifactId>jetty-server</artifactId>
-        <version>${version.jetty}</version>
+        <version>${version.org.eclipse.jetty}</version>
         <exclusions>
           <exclusion>
             <artifactId>jetty-jakarta-servlet-api</artifactId>
@@ -51,7 +51,7 @@
       <dependency>
         <groupId>org.eclipse.jetty</groupId>
         <artifactId>jetty-servlet</artifactId>
-        <version>${version.jetty}</version>
+        <version>${version.org.eclipse.jetty}</version>
       </dependency>
 
     </dependencies>
@@ -307,7 +307,7 @@
           <plugin>
             <groupId>org.vafer</groupId>
             <artifactId>jdeb</artifactId>
-            <version>1.10</version>
+            <version>${plugin.org.vafer.jdeb}</version>
 
             <executions>
               <execution>

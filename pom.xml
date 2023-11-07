@@ -172,7 +172,7 @@
             </goals>
             <phase>pre-site</phase>
             <configuration>
-              <nodeVersion>v18.17.1</nodeVersion>
+              <nodeVersion>${version.nodejs}</nodeVersion>
             </configuration>
           </execution>
           <execution>
@@ -265,7 +265,7 @@
         <plugin>
           <groupId>org.apache.felix</groupId>
           <artifactId>maven-bundle-plugin</artifactId>
-          <version>5.1.9</version>
+          <version>${plugin.org.apache.felix.maven-bundle-plugin}</version>
           <configuration>
             <instructions>
               <Bundle-Version>${project.version}</Bundle-Version>
@@ -277,7 +277,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.11.0</version>
+          <version>${plugin.maven-compiler-plugin}</version>
           <configuration>
             <source>11</source>
             <testSource>11</testSource>
@@ -291,55 +291,55 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-assembly-plugin</artifactId>
-          <version>3.6.0</version>
+          <version>${plugin.maven-assembly-plugin}</version>
         </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-shade-plugin</artifactId>
-          <version>3.5.0</version>
+          <version>${plugin.maven-shade-plugin}</version>
         </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-release-plugin</artifactId>
-          <version>3.0.1</version>
+          <version>${plugin.maven-release-plugin}</version>
         </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-dependency-plugin</artifactId>
-          <version>3.6.0</version>
+          <version>${plugin.maven-dependency-plugin}</version>
         </plugin>
 
         <plugin>
           <groupId>com.agilejava.docbkx</groupId>
           <artifactId>docbkx-maven-plugin</artifactId>
-          <version>2.0.17</version>
+          <version>${plugin.com.agilejava.docbkx-maven-plugin}</version>
         </plugin>
 
         <plugin>
           <groupId>org.asciidoctor</groupId>
           <artifactId>asciidoctor-maven-plugin</artifactId>
-          <version>2.2.4</version>
+          <version>${plugin.org.asciidoctor.asciidoctor-maven-plugin}</version>
         </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-gpg-plugin</artifactId>
-          <version>3.1.0</version>
+          <version>${plugin.maven-gpg-plugin}</version>
         </plugin>
 
         <plugin>
           <groupId>org.apache.felix</groupId>
           <artifactId>maven-scr-plugin</artifactId>
-          <version>1.15.0</version>
+          <version>${plugin.org.apache.felix.maven-scr-plugin}</version>
         </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-jar-plugin</artifactId>
-          <version>3.3.0</version>
+          <version>${plugin.maven-jar-plugin}</version>
           <configuration>
             <archive>
               <addMavenDescriptor>true</addMavenDescriptor>
@@ -350,19 +350,19 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-war-plugin</artifactId>
-          <version>3.4.0</version>
+          <version>${plugin.maven-war-plugin}</version>
         </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-deploy-plugin</artifactId>
-          <version>3.1.1</version>
+          <version>${plugin.maven-deploy-plugin}</version>
         </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>3.1.2</version>
+          <version>${plugin.maven-surefire-plugin}</version>
           <configuration>
             <argLine>
               <!--
@@ -380,31 +380,31 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-failsafe-plugin</artifactId>
-          <version>3.1.2</version>
+          <version>${plugin.maven-failsafe-plugin}</version>
         </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-resources-plugin</artifactId>
-          <version>3.3.1</version>
+          <version>${plugin.maven-resources-plugin}</version>
         </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-install-plugin</artifactId>
-          <version>3.1.1</version>
+          <version>${plugin.maven-install-plugin}</version>
         </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-antrun-plugin</artifactId>
-          <version>3.1.0</version>
+          <version>${plugin.maven-antrun-plugin}</version>
         </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-site-plugin</artifactId>
-          <version>3.12.1</version>
+          <version>${plugin.maven-site-plugin}</version>
           <configuration>
             <validate>false</validate>
             <!-- comma separated list - available as $locale Velocity variable -->
@@ -432,7 +432,7 @@
               -->
               <groupId>org.asciidoctor</groupId>
               <artifactId>asciidoctor-maven-plugin</artifactId>
-              <version>2.2.4</version>
+              <version>${plugin.org.asciidoctor.asciidoctor-maven-plugin}</version>
             </dependency>
           </dependencies>
         </plugin>
@@ -440,12 +440,12 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-project-info-reports-plugin</artifactId>
-          <version>3.4.5</version>
+          <version>${plugin.maven-project-info-reports-plugin}</version>
           <dependencies>
             <dependency>
               <groupId>org.apache.bcel</groupId>
               <artifactId>bcel</artifactId>
-              <version>6.7.0</version>
+              <version>${version.org.apache.bcel}</version>
             </dependency>
           </dependencies>
         </plugin>
@@ -453,13 +453,13 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-source-plugin</artifactId>
-          <version>3.3.0</version>
+          <version>${plugin.maven-source-plugin}</version>
         </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
-          <version>3.5.0</version>
+          <version>${plugin.maven-javadoc-plugin}</version>
           <configuration>
             <doclint>none</doclint>
           </configuration>
@@ -468,25 +468,25 @@
         <plugin>
           <groupId>org.apache.rat</groupId>
           <artifactId>apache-rat-plugin</artifactId>
-          <version>0.11</version>
+          <version>${plugin.org.apache.rat.apache-rat-plugin}</version>
         </plugin>
 
         <plugin>
           <groupId>com.github.github</groupId>
           <artifactId>site-maven-plugin</artifactId>
-          <version>0.11</version>
+          <version>${plugin.com.github.site-maven-plugin}</version>
         </plugin>
 
         <plugin>
           <groupId>com.devspan.mojo.javascript</groupId>
           <artifactId>javascript-maven-plugin</artifactId>
-          <version>0.9.3</version>
+          <version>${plugin.com.devspan.mojo.javascript-maven-plugin}</version>
         </plugin>
 
         <plugin>
           <groupId>com.github.eirslett</groupId>
           <artifactId>frontend-maven-plugin</artifactId>
-          <version>1.14.0</version>
+          <version>${plugin.com.github.eirslett.frontend-maven-plugin}</version>
         </plugin>
 
       </plugins>
@@ -496,7 +496,7 @@
       <extension>
         <groupId>org.apache.maven.wagon</groupId>
         <artifactId>wagon-ssh-external</artifactId>
-        <version>2.7</version>
+        <version>${version.org.apache.maven.wagon}</version>
       </extension>
     </extensions>
   </build>
@@ -507,7 +507,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-project-info-reports-plugin</artifactId>
-        <version>2.7</version>
+        <version>${plugin.maven-project-info-reports-plugin}</version>
         <reportSets>
           <reportSet>
             <reports>
@@ -526,7 +526,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-changes-plugin</artifactId>
-        <version>2.11</version>
+        <version>${plugin.maven-changes-plugin}</version>
         <reportSets>
           <reportSet>
             <reports>
@@ -741,6 +741,12 @@
       <groupId>org.testng</groupId>
       <artifactId>testng</artifactId>
       <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.webjars</groupId>
+          <artifactId>jquery</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
@@ -748,6 +754,13 @@
       <artifactId>easymock</artifactId>
       <scope>test</scope>
     </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
+    </dependency>
+
   </dependencies>
 
   <!-- Overall version management for Jolokia itself. This POM should not be treated as Jolokia BOM -->
@@ -900,7 +913,7 @@
       <dependency>
         <groupId>com.googlecode.json-simple</groupId>
         <artifactId>json-simple</artifactId>
-        <version>1.1.1</version>
+        <version>${version.com.googlecode.json-simple}</version>
         <exclusions>
           <!-- That's a bug in json-simple that junit is referenced without scope test -->
           <exclusion>
@@ -915,7 +928,7 @@
       <dependency>
         <groupId>jakarta.servlet</groupId>
         <artifactId>jakarta.servlet-api</artifactId>
-        <version>${version.servlet-api}</version>
+        <version>${version.jakarta.servlet-api}</version>
       </dependency>
 
       <!-- OSGi dependencies -->
@@ -923,24 +936,22 @@
       <dependency>
         <groupId>org.osgi</groupId>
         <artifactId>osgi.core</artifactId>
-        <!-- we support wide range of OSGI Core API, so please keep 6.0.0 -->
-        <version>6.0.0</version>
+        <version>${version.org.osgi.core}</version>
       </dependency>
       <dependency>
         <groupId>org.osgi</groupId>
         <artifactId>org.osgi.service.log</artifactId>
-        <!-- we support early log service too -->
-        <version>1.3.0</version>
+        <version>${version.org.osgi.service.log}</version>
       </dependency>
       <dependency>
         <groupId>org.osgi</groupId>
         <artifactId>org.osgi.service.cm</artifactId>
-        <version>1.6.1</version>
+        <version>${version.org.osgi.service.cm}</version>
       </dependency>
       <dependency>
         <groupId>org.osgi</groupId>
         <artifactId>org.osgi.service.servlet</artifactId>
-        <version>2.0.0</version>
+        <version>${version.org.osgi.service.servlet}</version>
       </dependency>
 
       <!-- Test dependencies -->
@@ -948,8 +959,7 @@
       <dependency>
         <groupId>org.testng</groupId>
         <artifactId>testng</artifactId>
-        <!-- 7.5.x is the last minor version supporting JDK 8 -->
-        <version>7.5.1</version>
+        <version>${version.org.testng}</version>
         <exclusions>
           <exclusion>
             <groupId>junit</groupId>
@@ -963,29 +973,25 @@
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
           </exclusion>
-          <exclusion>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-          </exclusion>
         </exclusions>
       </dependency>
 
       <dependency>
         <groupId>org.easymock</groupId>
         <artifactId>easymock</artifactId>
-        <version>5.1.0</version>
+        <version>${version.org.easymock}</version>
       </dependency>
 
       <dependency>
         <groupId>org.wiremock</groupId>
         <artifactId>wiremock</artifactId>
-        <version>3.1.0</version>
+        <version>${version.org.wiremock}</version>
       </dependency>
 
       <dependency>
         <groupId>org.awaitility</groupId>
         <artifactId>awaitility</artifactId>
-        <version>4.2.0</version>
+        <version>${version.org.awaitility}</version>
       </dependency>
 
       <!-- Other dependencies -->
@@ -993,34 +999,34 @@
       <dependency>
         <groupId>org.apache.httpcomponents</groupId>
         <artifactId>httpcore</artifactId>
-        <version>4.4.16</version>
+        <version>${version.org.apache.httpcomponents.httpcore}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.httpcomponents</groupId>
         <artifactId>httpclient</artifactId>
-        <version>4.5.14</version>
+        <version>${version.org.apache.httpcomponents.httpclient}</version>
       </dependency>
 
       <dependency>
         <groupId>commons-codec</groupId>
         <artifactId>commons-codec</artifactId>
-        <version>1.16.0</version>
+        <version>${version.commons-codec}</version>
       </dependency>
 
       <dependency>
         <groupId>io.fabric8</groupId>
         <artifactId>kubernetes-client</artifactId>
-        <version>6.8.0</version>
+        <version>${version.io.fabric8.kubernetes-client}</version>
       </dependency>
       <dependency>
         <groupId>io.fabric8</groupId>
         <artifactId>kubernetes-httpclient-okhttp</artifactId>
-        <version>6.8.0</version>
+        <version>${version.io.fabric8.kubernetes-client}</version>
       </dependency>
       <dependency>
         <groupId>io.fabric8</groupId>
         <artifactId>kubernetes-server-mock</artifactId>
-        <version>6.8.0</version>
+        <version>${version.io.fabric8.kubernetes-client}</version>
         <exclusions>
           <exclusion>
             <groupId>junit</groupId>
@@ -1032,12 +1038,12 @@
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
-        <version>1.7.36</version>
+        <version>${version.org.slf4j}</version>
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-simple</artifactId>
-        <version>1.7.36</version>
+        <version>${version.org.slf4j}</version>
       </dependency>
 
     </dependencies>
@@ -1049,14 +1055,84 @@
 
     <sonar.projectKey>org.jolokia:jolokia-2.0</sonar.projectKey>
 
-    <!-- A version used for documentation -->
+    <!-- A version used in documentation -->
     <currentStableVersion>2.0.0-M4</currentStableVersion>
+    <!-- Jolokia protocol version -->
     <protocolVersion>7.2</protocolVersion>
 
-    <version.servlet-api>5.0.0</version.servlet-api>
-    <version.jetty>11.0.16</version.jetty>
-    <version.spring>6.0.12</version.spring>
-    <version.log4j2>2.20.0</version.log4j2>
+    <!--
+      Versions are specified in one place, so updates can be discovered with single command:
+      $ mvn org.codehaus.mojo:versions-maven-plugin:2.16.1:display-property-updates -DallowMajorUpdates=false -N
+    -->
+
+    <!-- Versions of Maven plugins (org.apache.maven.plugins) -->
+
+    <plugin.maven-antrun-plugin>3.1.0</plugin.maven-antrun-plugin>
+    <plugin.maven-assembly-plugin>3.6.0</plugin.maven-assembly-plugin>
+    <plugin.maven-changes-plugin>2.12.1</plugin.maven-changes-plugin>
+    <plugin.maven-compiler-plugin>3.11.0</plugin.maven-compiler-plugin>
+    <plugin.maven-dependency-plugin>3.6.1</plugin.maven-dependency-plugin>
+    <plugin.maven-deploy-plugin>3.1.1</plugin.maven-deploy-plugin>
+    <plugin.maven-failsafe-plugin>3.2.2</plugin.maven-failsafe-plugin>
+    <plugin.maven-gpg-plugin>3.1.0</plugin.maven-gpg-plugin>
+    <plugin.maven-install-plugin>3.1.1</plugin.maven-install-plugin>
+    <plugin.maven-jar-plugin>3.3.0</plugin.maven-jar-plugin>
+    <plugin.maven-javadoc-plugin>3.6.2</plugin.maven-javadoc-plugin>
+    <!-- don't use 3.x (non-boxed org.apache.maven.reporting.AbstractMavenReportRenderer#verbatimLink()) -->
+    <plugin.maven-project-info-reports-plugin>2.9</plugin.maven-project-info-reports-plugin>
+    <plugin.maven-release-plugin>3.0.1</plugin.maven-release-plugin>
+    <plugin.maven-resources-plugin>3.3.1</plugin.maven-resources-plugin>
+    <plugin.maven-shade-plugin>3.5.1</plugin.maven-shade-plugin>
+    <plugin.maven-site-plugin>3.12.1</plugin.maven-site-plugin>
+    <plugin.maven-source-plugin>3.3.0</plugin.maven-source-plugin>
+    <plugin.maven-surefire-plugin>3.2.2</plugin.maven-surefire-plugin>
+    <plugin.maven-war-plugin>3.4.0</plugin.maven-war-plugin>
+
+    <!-- Versions of Maven plugins (other plugins) -->
+
+    <plugin.com.agilejava.docbkx-maven-plugin>2.0.17</plugin.com.agilejava.docbkx-maven-plugin>
+    <plugin.com.devspan.mojo.javascript-maven-plugin>0.9.3</plugin.com.devspan.mojo.javascript-maven-plugin>
+    <plugin.com.github.eirslett.frontend-maven-plugin>1.14.2</plugin.com.github.eirslett.frontend-maven-plugin>
+    <plugin.com.github.site-maven-plugin>0.12</plugin.com.github.site-maven-plugin>
+    <plugin.org.apache.felix.maven-bundle-plugin>5.1.9</plugin.org.apache.felix.maven-bundle-plugin>
+    <plugin.org.apache.felix.maven-scr-plugin>1.26.4</plugin.org.apache.felix.maven-scr-plugin>
+    <plugin.org.apache.rat.apache-rat-plugin>0.15</plugin.org.apache.rat.apache-rat-plugin>
+    <plugin.org.asciidoctor.asciidoctor-maven-plugin>2.2.4</plugin.org.asciidoctor.asciidoctor-maven-plugin>
+    <plugin.org.codehaus.mojo.build-helper-maven-plugin>3.4.0</plugin.org.codehaus.mojo.build-helper-maven-plugin>
+    <plugin.org.jacoco.jacoco-maven-plugin>0.7.6.201602180812</plugin.org.jacoco.jacoco-maven-plugin>
+    <plugin.org.vafer.jdeb>1.10</plugin.org.vafer.jdeb>
+
+    <!-- Versions of build-related dependencies -->
+
+    <version.org.apache.bcel>6.7.0</version.org.apache.bcel>
+    <version.org.apache.maven.wagon>2.7</version.org.apache.maven.wagon>
+    <version.nodejs>v18.17.1</version.nodejs>
+
+    <!-- Versions of test-related dependencies -->
+
+    <version.org.awaitility>4.2.0</version.org.awaitility>
+    <version.org.easymock>5.2.0</version.org.easymock>
+    <version.org.testng>7.8.0</version.org.testng>
+    <version.org.wiremock>3.3.1</version.org.wiremock>
+
+    <!-- Versions of actual Maven dependencies -->
+
+    <version.com.googlecode.json-simple>1.1.1</version.com.googlecode.json-simple>
+    <version.commons-codec>1.16.0</version.commons-codec>
+    <version.io.fabric8.kubernetes-client>6.9.2</version.io.fabric8.kubernetes-client>
+    <version.jakarta.servlet-api>5.0.0</version.jakarta.servlet-api>
+    <version.org.apache.httpcomponents.httpclient>4.5.14</version.org.apache.httpcomponents.httpclient>
+    <version.org.apache.httpcomponents.httpcore>4.4.16</version.org.apache.httpcomponents.httpcore>
+    <version.org.apache.logging.log4j>2.20.0</version.org.apache.logging.log4j>
+    <version.org.eclipse.jetty>11.0.16</version.org.eclipse.jetty>
+    <!-- we support wide range of OSGI Core API, so please keep 6.0.0 -->
+    <version.org.osgi.core>6.0.0</version.org.osgi.core>
+    <version.org.osgi.service.cm>1.6.1</version.org.osgi.service.cm>
+    <!-- we support early log service too -->
+    <version.org.osgi.service.log>1.3.0</version.org.osgi.service.log>
+    <version.org.osgi.service.servlet>2.0.0</version.org.osgi.service.servlet>
+    <version.org.slf4j>1.7.36</version.org.slf4j>
+    <version.org.springframework>6.0.12</version.org.springframework>
   </properties>
 
   <distributionManagement>
@@ -1086,7 +1162,7 @@
     </profile>
 
     <profile>
-      <!-- Distribution to maven central. This is default deployment target -->
+      <!-- Distribution to Maven Central. This is default deployment target -->
       <id>dist</id>
       <modules>
         <module>src/assembly</module>
@@ -1143,7 +1219,7 @@
           <plugin>
             <groupId>com.github.github</groupId>
             <artifactId>site-maven-plugin</artifactId>
-            <version>0.12</version>
+            <version>${plugin.com.github.site-maven-plugin}</version>
             <configuration>
               <message>Creating site for Jolokia ${project.version}</message>
             </configuration>
@@ -1169,7 +1245,7 @@
           <plugin>
             <groupId>org.jacoco</groupId>
             <artifactId>jacoco-maven-plugin</artifactId>
-            <version>0.7.6.201602180812</version>
+            <version>${plugin.org.jacoco.jacoco-maven-plugin}</version>
             <executions>
               <execution>
                 <id>jacoco-initialize</id>

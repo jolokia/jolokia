@@ -73,7 +73,7 @@
             </goals>
             <phase>generate-resources</phase>
             <configuration>
-              <nodeVersion>v18.17.1</nodeVersion>
+              <nodeVersion>${version.nodejs}</nodeVersion>
             </configuration>
           </execution>
           <execution>
