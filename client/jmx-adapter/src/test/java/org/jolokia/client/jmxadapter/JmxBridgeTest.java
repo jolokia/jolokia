@@ -422,7 +422,7 @@ public class JmxBridgeTest {
                                 objectName.getCanonicalName(), klass);
                         try {
                             method.invoke(nativeProxy);
-                            System.err.println("Failed calling" + method + " on " + objectName + " but succeeds with native proxy ");
+                            System.err.println("Failed calling " + method + " on " + objectName + " but succeeds with native proxy ");
                             throw e;
                         } catch (InvocationTargetException ignore) {
                         }
