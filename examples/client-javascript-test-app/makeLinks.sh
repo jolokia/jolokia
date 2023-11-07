@@ -14,7 +14,6 @@
 # libraries and redeploying Jetty.
 # So we can simply create symbolic links to relevant files
 
-
 cd target/ || { echo "Please run \"mvn clean package jetty:run-war\" first" && exit; }
 
 WARUNPACKED=$(find . -type d -name "jolokia-example-client-javascript-test-app-*")

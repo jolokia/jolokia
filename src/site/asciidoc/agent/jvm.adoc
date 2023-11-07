@@ -27,8 +27,9 @@ attaching an agent to a running Java process.
 For using this agent, the following argument to the Java
 application to instrument has to be given:
 
+[,subs="attributes,verbatim"]
 ----
--javaagent:/path/to/jolokia-jvm-<version>-agent.jar
+-javaagent:/path/to/jolokia-jvm-{jolokia-version}-agent.jar
 ----
 
 By default, the agent will listen on port 8778, but this can be configured
@@ -52,8 +53,9 @@ the later values.
 For attaching the agent dynamically to a running Java process, the following
 command can be used to get a quick help
 
+[,subs="attributes,verbatim"]
 ----
-java -jar /path/to/jolokia-jvm-<version>-agent.jar --help
+java -jar /path/to/jolokia-jvm-{jolokia-version}-agent.jar --help
 ----
 
 For more details and usage examples please refer to the

@@ -135,7 +135,7 @@ There are well established practices used when a released version is used in Jav
 Jolokia 2 has exactly **four** versions stored in various places. However in some places the version is managed automatically (thanks to maven-release-plugin and Maven filtering).
 
 * _Maven version_ - managed automatically by maven-release-plugin with `-SNAPSHOT` qualifier in-between releases. This version may be used in Java code with `*.properties` files stored in `src/main/resources` with filtering enabled. This version is available in filtered resources when using `${project.version}` placeholder.
-* _Current stable version_ - this is the last released version defined in main `pom.xml` as `<properties>/<currentStableVersion>` value. This version is needed, because documentation should not refer to `${project.version}` directly (which is `-SNAPSHOT` qualified most of the time). And usually documentation is being updated for some time after the release.
+* _Current stable version_ - this is the recently released version defined in main `pom.xml` as `<properties>/<currentStableVersion>` value. This version is needed, because documentation should not refer to `${project.version}` directly (which is `-SNAPSHOT` qualified most of the time). And usually documentation is being updated for some time after the release.
 * _Jolokia protocol version_ - this is the version of protocol and is unrelated to Java/Maven version. Should be managed manually in main `pom.xml` using `<protocolVersion>` Maven property.
 * _JavaScript package/client version_ - this is the `version` field of `package.json` for Jolokia JavaScript client. It uses different convention than Maven/Java version (no `-SNAPSHOT` qualifier for example).
 

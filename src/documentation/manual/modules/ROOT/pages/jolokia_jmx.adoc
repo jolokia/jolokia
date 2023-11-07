@@ -188,12 +188,12 @@ comes with a custom Spring configuration syntax.
 For Maven based projects, a simple dependency declaration is
 sufficient:
 
-[,xml]
+[,xml,subs="attributes,verbatim"]
 ----
 <dependency>
   <groupId>org.jolokia</groupId>
   <artifactId>jolokia-spring</artifactId>
-  <version>1.1.0</version>
+  <version>{jolokia-version}</version>
 </dependency>
 ----
 
@@ -377,13 +377,13 @@ with a default setup if you use a variant of the
 predefined Spring configuration for starting up Jolokia with
 default values automatically:
 
-[,xml]
+[,xml,subs="attributes,verbatim"]
 ----
 <dependency>
   <groupId>org.jolokia</groupId>
   <artifactId>jolokia-spring</artifactId>
   <classifier>plugin</classifier>
-  <version>1.1.0</version>
+  <version>{jolokia-version}</version>
 </dependency>
 ----
 

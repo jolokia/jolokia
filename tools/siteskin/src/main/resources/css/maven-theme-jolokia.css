@@ -241,11 +241,12 @@ table.tableblock, table.bodyTable {
   padding: 2px 5px;
 }
 .tableblock td, .bodyTable td {
-  padding: 3px 5px 1px 5px;
+  padding: 5px;
   vertical-align: top;
 }
 .tableblock td, .bodyTable td figure {
   margin-bottom: -6px;
+  margin-top: -4px;
 }
 .bodyTable tr:nth-of-type(2n+1) {
   background-color: #f8f8f8;
@@ -256,6 +257,9 @@ div.listingblock, div.source {
   padding: 5px;
   background-color: #f8f8f8;
   margin-left: 1em;
+}
+div.content>pre {
+  font-family: monospace;
 }
 div.listingblock#apache-license {
   font-family: monospace;

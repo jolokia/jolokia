@@ -80,70 +80,9 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-release-plugin</artifactId>
-<!--        <configuration>-->
-<!--          <autoVersionSubmodules>true</autoVersionSubmodules>-->
-<!--          <goals>deploy docbkx:generate-html docbkx:generate-pdf package</goals>-->
-<!--        </configuration>-->
-      </plugin>
-
-      <plugin>
-        <!-- 2.0: not enabled by default after moving to asciidoc -->
-        <groupId>com.agilejava.docbkx</groupId>
-        <artifactId>docbkx-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <goals>
-              <goal>generate-html</goal>
-              <goal>generate-pdf</goal>
-            </goals>
-            <configuration>
-              <imgSrcPath>file:///${project.basedir}/src/docbkx/images/</imgSrcPath>
-            </configuration>
-<!--            <phase>pre-site</phase>-->
-          </execution>
-        </executions>
-        <dependencies>
-          <dependency>
-            <groupId>org.docbook</groupId>
-            <artifactId>docbook-xml</artifactId>
-            <version>4.4</version>
-            <scope>runtime</scope>
-          </dependency>
-        </dependencies>
         <configuration>
-          <includes>index.xml</includes>
-          <xincludeSupported>true</xincludeSupported>
-          <tableBordersWithCss>true</tableBordersWithCss>
-          <imgSrcPath>images/</imgSrcPath>
-          <foCustomization>src/docbkx/styles/reference-pdf.xsl</foCustomization>
-          <htmlStylesheet>css/stylesheet.css</htmlStylesheet>
-          <!-- produce single-page html output -->
-          <chunkedOutput>true</chunkedOutput>
-          <highlightSource>1</highlightSource>
-          <htmlCustomization>src/docbkx/styles/reference-html-chunk.xsl</htmlCustomization>
-          <entities>
-            <entity>
-              <name>version</name>
-              <value>${project.version}</value>
-            </entity>
-          </entities>
-          <postProcess>
-            <copy todir="${project.basedir}/target/site/reference">
-              <fileset dir="${project.basedir}/target/docbkx">
-                <include name="**/*.html" />
-                <include name="**/*.pdf" />
-              </fileset>
-            </copy>
-            <copy todir="${project.basedir}/target/site/reference/html">
-              <fileset dir="${project.basedir}/src/docbkx">
-                <include name="**/*.css" />
-                <include name="**/*.png" />
-                <include name="**/*.gif" />
-                <include name="**/*.jpg" />
-              </fileset>
-            </copy>
-            <move file="${project.basedir}/target/site/reference/pdf/index.pdf" tofile="${project.basedir}/target/site/reference/pdf/jolokia-reference.pdf" failonerror="false" />
-          </postProcess>
+          <autoVersionSubmodules>true</autoVersionSubmodules>
+          <goals>pre-site deploy</goals>
         </configuration>
       </plugin>
 
@@ -174,6 +113,7 @@
             <configuration>
               <nodeVersion>${version.nodejs}</nodeVersion>
             </configuration>
+            <inherited>false</inherited>
           </execution>
           <execution>
             <id>npm-install</id>
@@ -193,7 +133,12 @@
             </goals>
             <phase>pre-site</phase>
             <configuration>
-              <arguments>antora generate --attribute jolokia-version=${currentStableVersion} antora-playbook.yml</arguments>
+              <arguments>
+                antora generate
+                --attribute jolokia-version=${currentStableVersion}
+                --attribute javascript-maven-plugin-version=${plugin.com.devspan.mojo.javascript-maven-plugin}
+                antora-playbook.yml
+              </arguments>
               <workingDirectory>src/documentation</workingDirectory>
             </configuration>
           </execution>
@@ -210,6 +155,7 @@
             <goals>
               <goal>copy-resources</goal>
             </goals>
+            <inherited>false</inherited>
             <configuration>
               <outputDirectory>${project.build.directory}/site/reference/html</outputDirectory>
               <resources>
@@ -228,6 +174,7 @@
             <goals>
               <goal>copy-resources</goal>
             </goals>
+            <inherited>false</inherited>
             <configuration>
               <outputDirectory>${project.build.directory}/site</outputDirectory>
               <resources>
@@ -419,7 +366,7 @@
               <attributes>
                 <!-- Add required rouge styles in '/css/site.css' -->
                 <source-highlighter>rouge</source-highlighter>
-                <currentStableVersion>${currentStableVersion}</currentStableVersion>
+                <jolokia-version>${currentStableVersion}</jolokia-version>
               </attributes>
             </asciidoc>
           </configuration>
@@ -511,12 +458,12 @@
         <reportSets>
           <reportSet>
             <reports>
-              <report>dependency-convergence</report>
               <report>dependency-management</report>
               <report>project-team</report>
               <report>cim</report>
               <report>issue-tracking</report>
               <report>scm</report>
+              <report>plugin-management</report>
               <report>plugins</report>
             </reports>
           </reportSet>

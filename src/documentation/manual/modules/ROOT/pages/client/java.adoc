@@ -100,12 +100,12 @@ https://hc.apache.org/httpcomponents-client-ga/index.html[HttpClient],
 For Maven users, the following dependency is sufficient (it will include
 the other two as transitive dependencies):
 
-[,xml]
+[,xml,subs="attributes,verbatim"]
 ----
 <dependency>
   <groupId>org.jolokia</groupId>
   <artifactId>jolokia-client-java</artifactId>
-  <version>1.2.2</version>
+  <version>{jolokia-version}</version>
 </dependency>
 ----
 

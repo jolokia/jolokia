@@ -367,7 +367,7 @@ https://labs.consol.de/maven/repository/org/jolokia/jolokia-server-core[Jolokia'
 resository]. Maven users can declare a
 dependency on this jar artifact:
 
-[,xml]
+[,xml,subs="attributes,verbatim"]
 ----
 <project>
   <!-- ....  -->
@@ -375,7 +375,7 @@ dependency on this jar artifact:
     <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-server-core</artifactId>
-      <version>${jolokia.version}</version>
+      <version>{jolokia-version}</version>
     </dependency>
   </dependencies>
   <!-- .... -->
