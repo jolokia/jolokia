@@ -61,15 +61,10 @@
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-service-serializer</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-service-history</artifactId>
-    </dependency>
 
     <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-client-java</artifactId>
-      <version>${project.version}</version>
     </dependency>
 
     <!-- JSON -->

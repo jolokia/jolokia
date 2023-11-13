@@ -139,16 +139,25 @@ Jolokia 2 has exactly **four** versions stored in various places. However in som
 * _Jolokia protocol version_ - this is the version of protocol and is unrelated to Java/Maven version. Should be managed manually in main `pom.xml` using `<protocolVersion>` Maven property.
 * _JavaScript package/client version_ - this is the `version` field of `package.json` for Jolokia JavaScript client. It uses different convention than Maven/Java version (no `-SNAPSHOT` qualifier for example).
 
-### Maven version change
-
-This is done automatically by using `maven-release-plugin`. No manual work should be required.
-
 ### Current stable version change
 
 After successful release, main `pom.xml` should have `<currentStableVersion>` property updated to match the
 latest Maven version set by `maven-release-plugin`. Then we can continue work on documentation. There's no need to
 set this version anywhere else, because it's propagated through Maven properties to maven plugins that generate the
 site (like maven-site-plugin or `npx` invocation through `frontend-maven-plugin`).
+
+However, during the deployment, a Maven Assembly is created that contains:
+* released jars
+* source code
+* reference manual
+
+Reference manual is generated using Antora and version number is passed as asciidoctor attribute. That's why the
+`<currentStableVersion>` SHOULD be set just before the release to a value specified later as `-DreleaseVersion`
+parameter for `mvn release:prepare` invocation.
+
+### Maven version change
+
+This is done automatically by using `maven-release-plugin`. No manual work should be required.
 
 ### Jolokia protocol version change
 
@@ -162,6 +171,7 @@ deploy new Jolokia JavaScript client package to [NPM Registry][5], it's enough t
 
 * run `npm version <new version>` command
 * commit and push the changes
+* continue with NPM release procedure
 
 `npm version` updates version in `package.json`, but additionally (see `man npm version`) runs commands from
 `scripts/version` field of `package.json`:
@@ -205,6 +215,8 @@ provide key password (it is `true` by default).
 
 Jolokia uses Sonatype's Open Source Software Repository Hosting (OSSRH) service to deploy artifacts to Maven Central.
 Please check instructions and more information [here][6].
+If `developmentVersion`, `releaseVersion` or `tag` properties are not specified, you'll be prompted to provide required
+values in the console.
 
 ```console
 git clone git@github.com:jolokia/jolokia.git -b 2.0

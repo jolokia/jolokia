@@ -70,6 +70,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
         <configuration>
+          <tarLongFileMode>gnu</tarLongFileMode>
           <descriptors>
             <descriptor>src/assembly/dist-bin.xml</descriptor>
             <descriptor>src/assembly/dist-source.xml</descriptor>
@@ -1112,7 +1113,7 @@
       <!-- Distribution to Maven Central. This is default deployment target -->
       <id>dist</id>
       <modules>
-        <module>src/assembly</module>
+        <module>assembly</module>
       </modules>
 
       <build>

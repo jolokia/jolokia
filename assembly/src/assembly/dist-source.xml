@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
   ~ Copyright 2009-2013 Roland Huss
   ~
@@ -14,7 +15,8 @@
   ~ limitations under the License.
   -->
 
-<assembly>
+<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.2.0 https://maven.apache.org/xsd/assembly-2.2.0.xsd">
   <id>source</id>
   <formats>
     <format>tar.gz</format>
@@ -22,7 +24,7 @@
   </formats>
   <fileSets>
     <fileSet>
-      <directory>${project.basedir}/../..</directory>
+      <directory>${project.basedir}/..</directory>
       <useDefaultExcludes>true</useDefaultExcludes>
       <excludes>
         <exclude>**/target/**</exclude>
@@ -30,9 +32,12 @@
         <exclude>**/*.psd</exclude>
         <exclude>**/*.ipr</exclude>
         <exclude>**/*.iml</exclude>
+        <exclude>**/*.sh</exclude>
         <exclude>**/*.releaseBackup</exclude>
         <exclude>**/release.properties</exclude>
         <exclude>**/*.iws</exclude>
+        <exclude>.node/**</exclude>
+        <exclude>**/node_modules/**</exclude>
         <exclude>*.pl</exclude>
         <exclude>.editorconfig</exclude>
         <exclude>.gitignore</exclude>
@@ -41,6 +46,9 @@
         <exclude>.github/**</exclude>
         <exclude>HOWTO_RELEASE.md</exclude>
         <exclude>todo-2.0.md</exclude>
+        <exclude>**/dependency-reduced-pom.xml</exclude>
+        <exclude>**/package-lock.json</exclude>
+        <exclude>**/src/documentation/build/**</exclude>
       </excludes>
     </fileSet>
   </fileSets>

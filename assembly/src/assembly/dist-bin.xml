@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
   ~ Copyright 2009-2013 Roland Huss
   ~
@@ -14,7 +15,8 @@
   ~ limitations under the License.
   -->
 
-<assembly>
+<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.2.0 https://maven.apache.org/xsd/assembly-2.2.0.xsd">
   <id>bin</id>
   <formats>
     <format>tar.gz</format>
@@ -23,12 +25,13 @@
   <includeBaseDirectory>true</includeBaseDirectory>
   <baseDirectory>jolokia-${project.version}</baseDirectory>
   <moduleSets>
+    <!-- agents -->
     <moduleSet>
       <includes>
-        <include>org.jolokia:jolokia-war</include>
+        <include>org.jolokia:jolokia-agent-jvm</include>
       </includes>
       <binaries>
-        <outputFileNameMapping>jolokia.war</outputFileNameMapping>
+        <outputFileNameMapping>jolokia-agent-jvm.jar</outputFileNameMapping>
         <outputDirectory>agents</outputDirectory>
         <unpack>false</unpack>
         <includeDependencies>false</includeDependencies>
@@ -37,10 +40,10 @@
     </moduleSet>
     <moduleSet>
       <includes>
-        <include>org.jolokia:jolokia-war-unsecured</include>
+        <include>org.jolokia:jolokia-agent-osgi</include>
       </includes>
       <binaries>
-        <outputFileNameMapping>jolokia-unsecured.war</outputFileNameMapping>
+        <outputFileNameMapping>jolokia-agent-osgi.jar</outputFileNameMapping>
         <outputDirectory>agents</outputDirectory>
         <unpack>false</unpack>
         <includeDependencies>false</includeDependencies>
@@ -49,10 +52,10 @@
     </moduleSet>
     <moduleSet>
       <includes>
-        <include>org.jolokia:jolokia-osgi</include>
+        <include>org.jolokia:jolokia-agent-war</include>
       </includes>
       <binaries>
-        <outputFileNameMapping>jolokia-osgi.jar</outputFileNameMapping>
+        <outputFileNameMapping>jolokia-agent.war</outputFileNameMapping>
         <outputDirectory>agents</outputDirectory>
         <unpack>false</unpack>
         <includeDependencies>false</includeDependencies>
@@ -61,31 +64,32 @@
     </moduleSet>
     <moduleSet>
       <includes>
-        <include>org.jolokia:jolokia-osgi-bundle</include>
+        <include>org.jolokia:jolokia-agent-war-unsecured</include>
       </includes>
       <binaries>
-        <outputFileNameMapping>jolokia-osgi-bundle.jar</outputFileNameMapping>
+        <outputFileNameMapping>jolokia-agent-unsecured.war</outputFileNameMapping>
         <outputDirectory>agents</outputDirectory>
         <unpack>false</unpack>
         <includeDependencies>false</includeDependencies>
       </binaries>
       <useAllReactorProjects>true</useAllReactorProjects>
     </moduleSet>
+    <!-- clients -->
     <moduleSet>
       <includes>
-        <include>org.jolokia:jolokia-jvm</include>
+        <include>org.jolokia:jolokia-client-java</include>
       </includes>
       <binaries>
-        <outputFileNameMapping>jolokia-jvm.jar</outputFileNameMapping>
-        <outputDirectory>agents</outputDirectory>
+        <outputFileNameMapping>jolokia-client.jar</outputFileNameMapping>
+        <outputDirectory>clients/java</outputDirectory>
         <unpack>false</unpack>
-        <includeDependencies>false</includeDependencies>
+        <includeDependencies>true</includeDependencies>
       </binaries>
       <useAllReactorProjects>true</useAllReactorProjects>
     </moduleSet>
     <moduleSet>
       <includes>
-        <include>org.jolokia:jolokia-jmx</include>
+        <include>org.jolokia:jolokia-support-jmx</include>
       </includes>
       <binaries>
         <outputFileNameMapping>jolokia-jmx.jar</outputFileNameMapping>
@@ -97,7 +101,7 @@
     </moduleSet>
     <moduleSet>
       <includes>
-        <include>org.jolokia:jolokia-spring</include>
+        <include>org.jolokia:jolokia-support-spring</include>
       </includes>
       <binaries>
         <outputFileNameMapping>jolokia-spring.jar</outputFileNameMapping>
@@ -107,59 +111,42 @@
       </binaries>
       <useAllReactorProjects>true</useAllReactorProjects>
     </moduleSet>
-    <moduleSet>
-      <includes>
-        <include>org.jolokia:jolokia-client-java</include>
-      </includes>
-      <binaries>
-        <outputFileNameMapping>jolokia-client.jar</outputFileNameMapping>
-        <outputDirectory>client/java</outputDirectory>
-        <unpack>false</unpack>
-        <includeDependencies>true</includeDependencies>
-      </binaries>
-      <useAllReactorProjects>true</useAllReactorProjects>
-    </moduleSet>
   </moduleSets>
   <fileSets>
     <fileSet>
       <includes>
         <include>README</include>
       </includes>
-      <outputDirectory></outputDirectory>
+      <outputDirectory />
     </fileSet>
     <fileSet>
+      <directory>..</directory>
       <includes>
-        <include>../../LICENSE</include>
-        <include>../../NOTICE</include>
+        <include>LICENSE</include>
+        <include>NOTICE</include>
       </includes>
+      <outputDirectory />
     </fileSet>
     <fileSet>
-      <directory>../../target/site/reference/pdf</directory>
-      <includes>
-        <include>*.pdf</include>
-      </includes>
-      <outputDirectory>reference/pdf</outputDirectory>
-    </fileSet>
-    <fileSet>
-      <directory>../../target/site/reference/html</directory>
+      <directory>../src/documentation/build/site</directory>
       <includes>
         <include>**/*</include>
       </includes>
       <outputDirectory>reference/html</outputDirectory>
     </fileSet>
     <fileSet>
-      <directory>../../client/javascript/target/compressed</directory>
+      <directory>../client/javascript/target/compressed</directory>
       <includes>
         <include>**/*.js</include>
       </includes>
-      <outputDirectory>client/javascript</outputDirectory>
+      <outputDirectory>clients/javascript</outputDirectory>
     </fileSet>
     <fileSet>
-      <directory>../../client/javascript/target/scripts</directory>
+      <directory>../client/javascript/target/scripts</directory>
       <includes>
         <include>**/*.js</include>
       </includes>
-      <outputDirectory>client/javascript</outputDirectory>
+      <outputDirectory>clients/javascript</outputDirectory>
     </fileSet>
   </fileSets>
 </assembly>

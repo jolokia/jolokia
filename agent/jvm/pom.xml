@@ -165,10 +165,7 @@
             </goals>
             <configuration>
               <minimizeJar>false</minimizeJar>
-              <shadedArtifactAttached>true</shadedArtifactAttached>
-              <finalName>jolokia-agent</finalName>
-              <shadedClassifierName>agent</shadedClassifierName>
-              <createDependencyReducedPom>false</createDependencyReducedPom>
+              <createDependencyReducedPom>true</createDependencyReducedPom>
               <relocations>
                 <relocation>
                   <shadedPattern>org.jolokia.shaded.</shadedPattern>
@@ -196,56 +193,71 @@
               </artifactSet>
               <filters>
                 <filter>
+                  <artifact>com.googlecode.json-simple:json-simple</artifact>
+                  <excludes>
+                    <exclude>META-INF/*.MF</exclude>
+                  </excludes>
+                </filter>
+                <filter>
                   <artifact>org.jolokia:jolokia-server-core</artifact>
                   <excludes>
+                    <exclude>META-INF/*.MF</exclude>
                     <exclude>org/jolokia/server/core/osgi/**</exclude>
                   </excludes>
                 </filter>
                 <filter>
                   <artifact>org.jolokia:jolokia-server-detector</artifact>
                   <excludes>
+                    <exclude>META-INF/*.MF</exclude>
                     <exclude>org/jolokia/server/detector/osgi/**</exclude>
                   </excludes>
                 </filter>
                 <filter>
                   <artifact>org.jolokia:jolokia-service-serializer</artifact>
                   <excludes>
+                    <exclude>META-INF/*.MF</exclude>
                     <exclude>org/jolokia/service/serializer/osgi/**</exclude>
                   </excludes>
                 </filter>
                 <filter>
                   <artifact>org.jolokia:jolokia-service-jmx</artifact>
                   <excludes>
+                    <exclude>META-INF/*.MF</exclude>
                     <exclude>org/jolokia/service/jmx/osgi/**</exclude>
                   </excludes>
                 </filter>
                 <filter>
                   <artifact>org.jolokia:jolokia-service-discovery</artifact>
                   <excludes>
+                    <exclude>META-INF/*.MF</exclude>
                     <exclude>org/jolokia/service/discovery/osgi/**</exclude>
                   </excludes>
                 </filter>
                 <filter>
                   <artifact>org.jolokia:jolokia-service-history</artifact>
                   <excludes>
+                    <exclude>META-INF/*.MF</exclude>
                     <exclude>org/jolokia/service/history/osgi/**</exclude>
                   </excludes>
                 </filter>
                 <filter>
                   <artifact>org.jolokia:jolokia-service-jsr160</artifact>
                   <excludes>
+                    <exclude>META-INF/*.MF</exclude>
                     <exclude>org/jolokia/service/jsr160/osgi/**</exclude>
                   </excludes>
                 </filter>
                 <filter>
                   <artifact>org.jolokia:jolokia-service-notif-pull</artifact>
                   <excludes>
+                    <exclude>META-INF/*.MF</exclude>
                     <exclude>org/jolokia/service/notif/pull/osgi/**</exclude>
                   </excludes>
                 </filter>
                 <filter>
                   <artifact>org.jolokia:jolokia-service-notif-sse</artifact>
                   <excludes>
+                    <exclude>META-INF/*.MF</exclude>
                     <exclude>org/jolokia/service/notif/sse/osgi/**</exclude>
                   </excludes>
                 </filter>

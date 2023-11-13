@@ -18,3 +18,4 @@ felix
 test-output
 src/documentation/build/
 .node/
+dependency-reduced-pom.xml
