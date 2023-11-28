@@ -17,7 +17,7 @@
 // TODO: move to grid layout to get the nice tiles
 == Overview
 
-image:images/features/overview.png["Jolokia",role=right,link=features/overview.html]
+image:images/features/overview.png["Jolokia",role="right feature",link=features/overview.html]
 Jolokia is an HTTP/JSON bridge for remote JMX access. It
 is an alternative to standard JSR 160 connectors, using
 an agent based approach. The client communicates with
@@ -30,7 +30,7 @@ link:features/overview.html[More ...]
 
 == JMX Proxy
 
-image:images/features/proxy.png["Proxy",role=right,link=features/proxy.html]
+image:images/features/proxy.png["Proxy",role="right feature",link=features/proxy.html]
 Jolokia can operate in an agentless mode
 where the only requirement on the target platform is the
 standard JSR-160 export of its MBeanServer. A proxy
@@ -42,7 +42,7 @@ transparently. link:features/proxy.html[More ...]
 
 == Fast
 
-image:images/features/fast.png["Fast",role=right,link=features/fast.html]
+image:images/features/fast.png["Fast",role="right feature",link=features/fast.html]
 Jolokia uses the super fast JSON serialization library
 https://code.google.com/p/json-simple/[json-simple,role=externalLink]
 for parsing requests and creating responses. Although
@@ -55,7 +55,7 @@ and low startup times. link:features/fast.html[More ...]
 
 == Firewall friendly
 
-image:images/features/firewall.png["Firewall",role=right,link=features/firewall.html]
+image:images/features/firewall.png["Firewall",role="right feature",link=features/firewall.html]
 The usage of HTTP as transport protocol makes Jolokia a
 perfect choice for firewall setups. It can seemlessly
 operate over multiple HTTP-Proxy hops. link:features/firewall.html[More ...]
@@ -66,7 +66,7 @@ operate over multiple HTTP-Proxy hops. link:features/firewall.html[More ...]
 
 == Bulk-Requests
 
-image:images/features/bulk_requests.png["Bulk Requests",role=right,link=features/bulk-requests.html]
+image:images/features/bulk_requests.png["Bulk Requests",role="right feature",link=features/bulk-requests.html]
 Jolokia can process many JMX requests within a single
 network roundtrip. A HTTP POST request can encapsulate
 multiple Jolokia requests in its JSON payload which gets
@@ -79,7 +79,7 @@ multi check feature. link:features/bulk-requests.html[More ...]
 
 == Secure
 
-image:images/features/secure.png["Secure",role=right,link=features/security.html]
+image:images/features/secure.png["Secure",role="right feature",link=features/security.html]
 In addition to standard HTTP security Jolokia supports a
 custom policy with fine grained restrictions based on
 multiple properties like the client's IP address or
@@ -90,7 +90,7 @@ link:features/security.html[More ...]
 
 == Simple
 
-image:images/features/simple.png["Simple",role=right,link=features/simple.html]
+image:images/features/simple.png["Simple",role="right feature",link=features/simple.html]
 It's simple. The agent is easy to install, often easier
 than setting up a standard JSR-160 RMI
 connector. Jolokia agents can be accessed with a Web
@@ -103,7 +103,7 @@ HTTP library. link:features/simple.html[More ...]
 
 == Polyglot
 
-image:images/features/polyglot.png["Polyglot",role=right,link=features/polyglot.html]
+image:images/features/polyglot.png["Polyglot",role="right feature",link=features/polyglot.html]
 Thanks to the widely adopted standards HTTP and JSON,
 Jolokia is able to effortlessly bridge the Java centric
 technology JMX to non-Java platforms.

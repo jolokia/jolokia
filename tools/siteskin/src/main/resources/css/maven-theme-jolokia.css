@@ -273,6 +273,22 @@ div.listingblock#apache-license .content {
   padding: 5px;
   background-color: #f8f8f8;
 }
+div.imageblock.text-center div.content img {
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
+span.feature a.image {
+  display: block
+}
+span.feature a.image:hover {
+  background-color: white;
+}
+span.feature a.image:active,a.image:visited,a.image:focus {
+  background-color: white;
+  border: none;
+  outline: none;
+}
 
 div.note table {
   position: relative;
