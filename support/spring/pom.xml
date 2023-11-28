@@ -41,11 +41,7 @@
       <scope>test</scope>
     </dependency>
 
-    <dependency>
-      <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-service-jmx</artifactId>
-    </dependency>
-
+    <!-- With jolokia-agent-jvm we'll transitively get all required dependencies -->
     <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-agent-jvm</artifactId>

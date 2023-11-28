@@ -27,6 +27,7 @@ _draft_
 * https://github.com/jolokia/jolokia/issues/612 about request dispatchers/handlers
 * no more jolokia-spring-plugin.jar, because `/META-INF/spring/*.xml` was handled by Spring-DM.
 * 3 jars are required now at least (service-jmx and service-serializer in addition to server-core)
+* classifier for standalone agent changed in 1.7.0 from `agent` to empty, but it messed up with transitive dependencies. Because the artifact id itself changed from `jolokia-jvm` to `jolokia-agent-jvm`, we've decided to add `standalone` classifier to not have a jar like `jolokia-agent-jvm-2.0.0-agent.jar`.
 
 === JavaScript Client
 

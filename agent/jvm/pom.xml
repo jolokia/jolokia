@@ -167,7 +167,9 @@
             </goals>
             <configuration>
               <minimizeJar>false</minimizeJar>
-              <createDependencyReducedPom>true</createDependencyReducedPom>
+              <createDependencyReducedPom>false</createDependencyReducedPom>
+              <shadedClassifierName>standalone</shadedClassifierName>
+              <shadedArtifactAttached>true</shadedArtifactAttached>
               <relocations>
                 <relocation>
                   <shadedPattern>org.jolokia.shaded.</shadedPattern>

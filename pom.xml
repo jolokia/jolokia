@@ -794,6 +794,12 @@
       </dependency>
       <dependency>
         <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-agent-jvm</artifactId>
+        <version>${project.version}</version>
+        <classifier>standalone</classifier>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
         <artifactId>jolokia-agent-osgi</artifactId>
         <version>${project.version}</version>
       </dependency>
