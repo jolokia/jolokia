@@ -20,5 +20,5 @@ ln -s ../../../tools/siteskin/src/main/resources/css/site.css ./css
 ln -s ../../../tools/siteskin/src/main/resources/css/text.css ./css
 ln -s ../../../src/site/resources/css/style.css ./css
 
-rm ./reference/html/_/css/*.css
+rm ./reference/html/_/css/jolokia.css
 ln -s ../../../../../../src/documentation/supplemental-ui/css/jolokia.css ./reference/html/_/css

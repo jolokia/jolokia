@@ -70,7 +70,7 @@ div.top_link a {
   display: block;
   padding: 10px 15px 0 15px;
   height: 25px;
-  color: #BBBABA;
+  color: #d7d7d7;
 }
 div.top_link a:hover,
 div.top_link a:active {
@@ -331,13 +331,16 @@ div.source {
 
 div.teaser {
   background: url(../images/teaser_bg2.png) left top no-repeat;
-  color: #e7d3cb;
+  color: #f7e9e5;
   font-size: 20px;
   padding: 11px 13px 0;
   margin: 2px;
   line-height: 150%;
   height: 82px;
   border-radius: 3px 3px 0 0;
+}
+div.teaser div.subtitle {
+  font-size: 16px;
 }
 
 /* special Logo header on index page */

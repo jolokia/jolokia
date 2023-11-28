@@ -151,6 +151,10 @@
         <artifactId>maven-resources-plugin</artifactId>
         <executions>
           <execution>
+            <!--
+              This execution puts Antora-generated manual into the place where maven-site-plugin will
+              generate the site.
+            -->
             <id>copy-antora-documentation</id>
             <phase>pre-site</phase>
             <goals>
@@ -170,6 +174,10 @@
             </configuration>
           </execution>
           <execution>
+            <!--
+              While these images could be part of Antora's supplemental-ui, having them mixed with Asciidoc
+              pages makes it better look directly at GitHub (images are rendered together with Asciidoc)
+            -->
             <id>copy-site-images</id>
             <phase>pre-site</phase>
             <goals>
@@ -258,12 +266,6 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-dependency-plugin</artifactId>
           <version>${plugin.maven-dependency-plugin}</version>
-        </plugin>
-
-        <plugin>
-          <groupId>com.agilejava.docbkx</groupId>
-          <artifactId>docbkx-maven-plugin</artifactId>
-          <version>${plugin.com.agilejava.docbkx-maven-plugin}</version>
         </plugin>
 
         <plugin>
@@ -1110,7 +1112,6 @@
 
     <!-- Versions of Maven plugins (other plugins) -->
 
-    <plugin.com.agilejava.docbkx-maven-plugin>2.0.17</plugin.com.agilejava.docbkx-maven-plugin>
     <plugin.com.devspan.mojo.javascript-maven-plugin>0.9.3</plugin.com.devspan.mojo.javascript-maven-plugin>
     <plugin.com.github.eirslett.frontend-maven-plugin>1.14.2</plugin.com.github.eirslett.frontend-maven-plugin>
     <plugin.com.github.site-maven-plugin>0.12</plugin.com.github.site-maven-plugin>
