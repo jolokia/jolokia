@@ -137,10 +137,9 @@
             <Embed-Dependency>
               jolokia-server-core;inline=true,
               jolokia-server-detector;inline=true,
-              jolokia-service-jmx;inline=true,
               jolokia-service-serializer;inline=true,
+              jolokia-service-jmx;inline=true,
               jolokia-service-discovery;inline=true,
-              jolokia-service-history;inline=true,
               jolokia-service-history;inline=true,
               jolokia-service-jsr160;inline=true,
               jolokia-service-notif-pull;inline=true,
@@ -148,29 +147,64 @@
               json-simple;inline=true
             </Embed-Dependency>
             <Export-Package>
+              <!-- jolokia-server-core -->
+              org.jolokia.server.core,
+              org.jolokia.server.core.backend,
               org.jolokia.server.core.config,
               org.jolokia.server.core.detector,
               org.jolokia.server.core.http,
+              org.jolokia.server.core.osgi,
+              org.jolokia.server.core.osgi.security,
+              org.jolokia.server.core.osgi.util,
               org.jolokia.server.core.request,
               org.jolokia.server.core.request.notification,
               org.jolokia.server.core.restrictor,
-              !org.jolokia.server.core.service.impl,
-              org.jolokia.server.core.service.*,
+              org.jolokia.server.core.restrictor.policy,
               org.jolokia.server.core.service,
-              org.jolokia.server.core.util.*,
-              org.jolokia.server.core,
+              org.jolokia.server.core.service.api,
+              !org.jolokia.server.core.service.impl,
+              org.jolokia.server.core.service.notification,
+              org.jolokia.server.core.service.request,
+              org.jolokia.server.core.service.serializer,
+              org.jolokia.server.core.util,
+              org.jolokia.server.core.util.jmx,
+              <!-- jolokia-service-serializer -->
+              org.jolokia.service.serializer,
+              org.jolokia.service.serializer.json,
+              org.jolokia.service.serializer.json.simplifier,
+              org.jolokia.service.serializer.object,
+              org.jolokia.service.serializer.osgi,
+              <!-- jolokia-service-jmx -->
+              org.jolokia.service.jmx,
+              org.jolokia.service.jmx.api,
+              org.jolokia.service.jmx.handler,
+              org.jolokia.service.jmx.handler.list,
+              org.jolokia.service.jmx.handler.notification,
+              org.jolokia.service.jmx.osgi,
+              <!-- jolokia-service-discovery -->
+              org.jolokia.service.discovery,
+              org.jolokia.service.discovery.osgi,
+              <!-- jolokia-service-jsr160 -->
+              org.jolokia.service.jsr160,
+              org.jolokia.service.jsr160.osgi,
+              <!-- jolokia-service-notif-pull -->
+              org.jolokia.service.notif.pull,
               org.jolokia.service.notif.pull.osgi,
+              <!-- jolokia-service-notif-sse -->
+              org.jolokia.service.notif.sse,
               org.jolokia.service.notif.sse.osgi,
-              org.jolokia.service.jmx.api
+              <!-- json-simple -->
+              org.json.simple
             </Export-Package>
             <Import-Package>
-              org.jolokia.osgi.servlet;version="${project.version}",
-              org.jolokia.restrictor;version="${project.version}",
-              org.jolokia.util;version="${project.version}",
-              org.osgi.framework;version="[1.0.0,2.0.0)",
-              org.osgi.service.http;version="[1.0.0,2.0.0)";resolution:=optional,
+              !java.*,
+              jakarta.servlet;version="5.0.0",
+              jakarta.servlet.http;version="5.0.0",
+              org.jboss.mx.util;resolution:=optional,
+              org.osgi.framework;version="[1.8.0,2.0.0)",
               org.osgi.service.cm;version="[1.0.0,2.0.0)";resolution:=optional,
               org.osgi.service.log;version="[1.0.0,2.0.0)",
+              org.osgi.service.servlet;version="[2,3)";resolution:=optional,
               org.osgi.util.tracker;version="[1.0.0,2.0.0)",
               *
             </Import-Package>
