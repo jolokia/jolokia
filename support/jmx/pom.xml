@@ -53,7 +53,6 @@
     <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-service-serializer</artifactId>
-      <version>${project.version}</version>
     </dependency>
 
     <!-- JSON -->

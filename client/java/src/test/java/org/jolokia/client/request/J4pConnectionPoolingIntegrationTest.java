@@ -16,9 +16,9 @@ package org.jolokia.client.request;
  *  limitations under the License.
  */
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonFactoryBuilder;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.Options;
 import org.apache.http.conn.ConnectionPoolTimeoutException;
@@ -28,6 +28,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import javax.management.ObjectName;
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
@@ -119,16 +121,21 @@ public class J4pConnectionPoolingIntegrationTest {
     }
 
     private String getJsonResponse(String message) {
-        final ObjectMapper objectMapper = new ObjectMapper();
-        final ObjectNode node = objectMapper.createObjectNode();
-
-        final ArrayNode arrayNode = objectMapper.createArrayNode();
-        arrayNode.add("java.lang:type=Memory");
-        node.putArray("value").addAll(arrayNode);
-
-        node.put("status", 200);
-        node.put("timestamp", 1244839118);
-
-        return node.toString();
+        JsonFactory factory = new JsonFactoryBuilder().build();
+        StringWriter sw = new StringWriter();
+        try (JsonGenerator gen = factory.createGenerator(sw)) {
+            gen.writeStartObject();
+            gen.writeArrayFieldStart("value");
+            gen.writeString("java.lang:type=Memory");
+            gen.writeEndArray();
+            gen.writeFieldName("status");
+            gen.writeNumber(200);
+            gen.writeFieldName("timestamp");
+            gen.writeNumber(1244839118);
+            gen.writeEndObject();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return sw.toString();
     }
 }
