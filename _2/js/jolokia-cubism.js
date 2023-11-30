@@ -15,16 +15,39 @@
  */
 
 /**
- * Jolokia integration into cubism (http://square.github.com/cubism/)
+ * Jolokia integration into cubism (https://square.github.io/cubism/)
  *
- * This integration requires the following
+ * This integration requires the following:
+ * - cubism
+ * - d3.js
  */
+"use strict";
 
-(function () {
+// Uses Node, AMD or browser globals to create a module.
+(function (root, factory) {
+    if (typeof define === "function" && define.amd) {
+        // AMD. Register as an anonymous module.
+        define(["cubism", "./jolokia"], factory);
+    } else if (typeof module === "object" && module.exports) {
+        // Node. Does not work with strict CommonJS, but
+        // only CommonJS-like environments that support module.exports,
+        // like Node.
+        module.exports = factory(require("cubism"), require("./jolokia"));
+    } else {
+        // Browser globals
+        if (root.Jolokia) {
+            factory(root.cubism, root.Jolokia);
+        } else {
+            console.error("No " + (root.cubism ? "Cubism" : "Jolokia") + " definition found. " +
+                          "Please include jolokia.js and cubism.js before jolokia-cubism.js");
+        }
+    }
+}(typeof self !== "undefined" ? self : this, function (cubism, Jolokia) {
+
     var builder = function (cubism,Jolokia) {
-        
-        var VERSION = "1.1.3";
-        
+
+        var VERSION = "2.0.0-m4.0";
+
         var ctx_jolokia = function (url, opts) {
             var source = {},
                 context = this,
@@ -255,24 +278,5 @@
         return ctx_jolokia;
     };
 
-    // =====================================================================================================
-    // Register either at the global Jolokia object global or as an AMD module
-    (function (root) {
-        if (typeof define === 'function' && define.amd) {
-            // AMD. Register as a named module
-            define(["cubism","jolokia"],function (cubism,Jolokia) {
-                return builder(cubism,Jolokia);
-            });
-        } else {
-            if (root.Jolokia && root.cubism) {
-                builder(root.cubism,root.Jolokia);
-            } else {
-                console.error("No " + (root.cubism ? "Cubism" : "Jolokia") + " definition found. " +
-                              "Please include jolokia.js and cubism.js before jolokia-cubism.js");
-            }
-        }
-    })(this);
-})();
-
-
-
+    return builder(cubism, Jolokia);
+}));

@@ -15,18 +15,40 @@
  */
 
 /* =================================
- * Jolokia Javascript Client Library
+ * Jolokia JavaScript Client Library
  * =================================
  *
- * Requires jquery.js and json2.js
- * (if no native JSON.stringify() support is available)
+ * Requires jquery.js.
  */
+"use strict";
 
-(function() {
+// Uses Node, AMD or browser globals to create a module.
+(function (root, factory) {
+    if (typeof define === "function" && define.amd) {
+        // AMD. Register as an anonymous module.
+        define(["jquery"], factory);
+    } else if (typeof module === "object" && module.exports) {
+        // Node. Does not work with strict CommonJS, but
+        // only CommonJS-like environments that support module.exports,
+        // like Node.
+        var jquery = require("jquery");
+        // To get along with jest-environment-jsdom
+        if (typeof jquery.fn !== "undefined") {
+            module.exports = factory(jquery);
+        } else {
+            var jsdom = require("jsdom");
+            var dom = new jsdom.JSDOM("");
+            module.exports = factory(jquery(dom.window));
+        }
+    } else {
+        // Browser globals
+        root.Jolokia = factory(root.jQuery);
+    }
+}(typeof self !== "undefined" ? self : this, function (jQuery) {
 
     var _jolokiaConstructorFunc = function ($) {
 
-        // Default paramerters for GET and POST requests
+        // Default parameters for GET and POST requests
         var DEFAULT_CLIENT_PARAMS = {
             type:"POST",
             jsonp:false
@@ -60,19 +82,19 @@
         function Jolokia(param) {
             // If called without 'new', we are constructing an object
             // nevertheless
-            if (!(this instanceof arguments.callee)) {
+            if (typeof this === "undefined") {
                 return new Jolokia(param);
             }
 
-            // Jolokia Javascript Client version
-            this.CLIENT_VERSION = "1.2.2";
+            // Jolokia JavaScript Client version
+            this.CLIENT_VERSION = "2.0.0-m4.0";
 
             // Registered requests for fetching periodically
             var jobs = [];
 
             // Our client id and notification backend config
-            // Is null as long as notification are not used
-            var notifConfig = null;
+            // Is null as long as notifications are not used
+            var client = null;
 
             // Options used for every request
             var agentOptions = {};
@@ -80,11 +102,14 @@
             // State of the scheduler
             var pollerIsRunning = false;
 
+            // Seal this in a closure so that it can be referenced from unnamed functions easily
+            var jolokia = this;
+
             // Allow a single URL parameter as well
             if (typeof param === "string") {
                 param = {url:param};
             }
-            $.extend(agentOptions, DEFAULT_CLIENT_PARAMS, param);
+            Jolokia.assignObject(agentOptions, DEFAULT_CLIENT_PARAMS, param);
 
             // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             // Public methods
@@ -107,7 +132,7 @@
              *     that bulk request cannot be used with JSONP requests). Also, when using a
              *     <code>read</code> type request for multiple attributes, this also can
              *     only be sent as "post" requests. If not given, a HTTP method is determined
-             *     dyamically. If a method is selected which doesn't fit to the request, an error
+             *     dynamically. If a method is selected which doesn't fit to the request, an error
              *     is raised.
              *   </dd>
              *   <dt>jsonp</dt>
@@ -130,12 +155,12 @@
              *     than OK (200) which happens if the request JMX operation fails. This callback receives
              *     the full Jolokia response object (with a key <code>error</code> set). If no error callback
              *     is given, but an asynchronous operation is performed, the error response is printed
-             *     to the Javascript console by default.
+             *     to the JavaScript console by default.
              *   </dd>
              *   <dt>ajaxError</dt>
              *   <dd>
              *     Global error callback called when the Ajax request itself failed. It obtains the same arguments
-             *     as the error callback given for <code>jQuery.ajax()</code>, i.e. the <code>XmlHttpResonse</code>,
+             *     as the error callback given for <code>jQuery.ajax()</code>, i.e. the <code>XmlHttpResponse</code>,
              *     a text status and an error thrown. Refer to the jQuery documentation for more information about
              *     this error handler.
              *   </dd>
@@ -160,7 +185,7 @@
              *   <dd>
              *     If set to true, errors during JMX operations and JSON serialization
              *     are ignored. Otherwise if a single deserialization fails, the whole request
-             *     returns with an error. This works only for certain operations like pattern reads..
+             *     returns with an error. This works only for certain operations like pattern reads.
              *   </dd>
              * </dl>
              *
@@ -168,14 +193,14 @@
              * @param params parameters used for sending the request
              * @return the response object if called synchronously or nothing if called for asynchronous operation.
              */
-            this.request = function (request, params) {
-                var opts = $.extend({}, agentOptions, params);
+            jolokia.request = function (request, params) {
+                var opts = mergeInDefaults(params);
                 assertNotNull(opts.url, "No URL given");
 
                 var ajaxParams = {};
 
                 // Copy over direct params for the jQuery ajax call
-                $.each(["username", "password", "timeout"], function (i, key) {
+                ["username", "password", "timeout"].forEach(function (key) {
                     if (opts[key]) {
                         ajaxParams[key] = opts[key];
                     }
@@ -205,11 +230,11 @@
                 }
 
                 if (extractMethod(request, opts) === "post") {
-                    $.extend(ajaxParams, POST_AJAX_PARAMS);
+                    Jolokia.assignObject(ajaxParams, POST_AJAX_PARAMS);
                     ajaxParams.data = JSON.stringify(request);
                     ajaxParams.url = ensureTrailingSlash(opts.url);
                 } else {
-                    $.extend(ajaxParams, GET_AJAX_PARAMS);
+                    Jolokia.assignObject(ajaxParams, GET_AJAX_PARAMS);
                     ajaxParams.dataType = opts.jsonp ? "jsonp" : "json";
                     ajaxParams.url = opts.url + "/" + constructGetUrlPath(request);
                 }
@@ -227,7 +252,7 @@
                     var success_callback = constructCallbackDispatcher(opts.success);
                     var error_callback = constructCallbackDispatcher(opts.error);
                     ajaxParams.success = function (data) {
-                        var responses = $.isArray(data) ? data : [ data ];
+                        var responses = Array.isArray(data) ? data : [ data ];
                         for (var idx = 0; idx < responses.length; idx++) {
                             var resp = responses[idx];
                             if (Jolokia.isError(resp)) {
@@ -249,7 +274,7 @@
                     ajaxParams.async = false;
                     var xhr = $.ajax(ajaxParams);
                     if (httpSuccess(xhr)) {
-                        return $.parseJSON(xhr.responseText);
+                        return JSON.parse(xhr.responseText);
                     } else {
                         return null;
                     }
@@ -285,7 +310,7 @@
              * @param request, request, .... One or more requests to be registered for this single callback
              * @return handle which can be used for unregistering the request again or for correlation purposes in the callbacks
              */
-            this.register = function() {
+            jolokia.register = function() {
                 if (arguments.length < 2) {
                     throw "At a least one request must be provided";
                 }
@@ -306,7 +331,7 @@
                         throw "Either 'callback' or ('success' and 'error') callback must be provided " +
                               "when registering a Jolokia job";
                     }
-                    job = $.extend(job,{
+                    job = Jolokia.assignObject(job,{
                         config: callback.config,
                         onlyIfModified: callback.onlyIfModified
                     });
@@ -328,74 +353,24 @@
                 return addJob(job);
             };
 
-            this.registerNotification = function(opts) {
-                // Check that client is registered
-                checkNotificationRegistration.call(this);
-
-                // Add a notification request
-                var resp = this.request({
-                    type: "notification",
-                    command: "add",
-                    mode: "pull",
-                    client: notifConfig.id,
-                    mbean: opts.mbean,
-                    filter: opts.filter,
-                    config: opts.config,
-                    handback: opts.handback
-                });
-                if (Jolokia.isError(resp)) {
-                    throw new Error("Cannot not add notification subscription for " + opts.mbean +
-                                    " (client: " + notifConfig.id + "): " + resp.error);
-                }
-                var handle = resp.value;
-                // Add a job for periodically fetching the value and calling the callback with the response
-                var job = {
-                    callback: function(resp) {
-                        if (!Jolokia.isError(resp)) {
-                            var notifs = resp.value;
-                            if (notifs && notifs.notifications.length) {
-                                opts.callback(notifs);
-                            }
-                        }
-                    },
-                    requests: [{
-                            type: "exec",
-                            mbean: notifConfig.backend.pull.store,
-                            operation: "pull",
-                            arguments: [ notifConfig.id, handle ]
-                        }],
-                    pull: { client: notifConfig.id, handle: handle}
-                };
-                return addJob(job);
-            };
 
             /**
              * Unregister one or more request which has been registered with {@link #register}. As parameter
              * the handle returned during the registration process must be given
              * @param handle the job handle to unregister
              */
-            this.unregister = function(handle) {
+            jolokia.unregister = function(handle) {
                 if (handle < jobs.length) {
-                    var job = jobs[handle];
-                    if (job && job.pull) {
-                        // Unregister notification
-                        var resp = this.request({
-                            type: "notification",
-                            command: "remove",
-                            client: job.pull.client,
-                            handle: job.pull.handle
-                        });
-                    }
                     delete jobs[handle];
                 }
             };
 
 
             /**
-             * Return an array of handles for currently registered jobs.
-             * @return Array of job handles or an empty array
+             * Return an array of jobIds for currently registered jobs.
+             * @return Array of job jobIds or an empty array
              */
-            this.jobs = function() {
+            jolokia.jobs = function() {
                 var ret = [],
                     len = jobs.length;
                 for (var i = 0; i < len; i++) {
@@ -416,7 +391,7 @@
              *
              * @param interval interval in milliseconds between two polling attempts
              */
-            this.start = function(interval) {
+            jolokia.start = function(interval) {
                 interval = interval || agentOptions.fetchInterval || 30000;
                 if (pollerIsRunning) {
                     if (interval === agentOptions.fetchInterval) {
@@ -424,10 +399,10 @@
                         return;
                     }
                     // Re-start with new interval
-                    this.stop();
+                    jolokia.stop();
                 }
                 agentOptions.fetchInterval = interval;
-                this.timerId = setInterval(callJolokia(this,jobs), interval);
+                jolokia.timerId = setInterval(callJolokia(jolokia,jobs), interval);
 
                 pollerIsRunning = true;
             };
@@ -435,12 +410,12 @@
             /**
              * Stop the poller. If the poller is not running, no operation is performed.
              */
-            this.stop = function() {
-                if (!pollerIsRunning && this.timerId != undefined) {
+            jolokia.stop = function() {
+                if (!pollerIsRunning && jolokia.timerId != undefined) {
                     return;
                 }
-                clearInterval(this.timerId);
-                this.timerId = null;
+                clearInterval(jolokia.timerId);
+                jolokia.timerId = null;
 
                 pollerIsRunning = false;
             };
@@ -449,11 +424,74 @@
              * Check whether the poller is running.
              * @return true if the poller is running, false otherwise.
              */
-            this.isRunning = function() {
+            jolokia.isRunning = function() {
                 return pollerIsRunning;
             };
 
             // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            // Notification handling
+
+            jolokia.addNotificationListener = function(opts) {
+                // Check that client is registered
+                ensureNotificationRegistration();
+
+                // Notification mode. Typically "pull" or "sse"
+                var mode = extractNotificationMode(opts);
+
+                notificationHandlerFunc("lazy-init",mode)();
+
+                // Add a notification request
+                var resp = jolokia.request({
+                    type: "notification",
+                    command: "add",
+                    mode: mode,
+                    client: client.id,
+                    mbean: opts.mbean,
+                    filter: opts.filter,
+                    config: opts.config,
+                    handback: opts.handback
+                });
+                if (Jolokia.isError(resp)) {
+                    throw new Error("Cannot not add notification subscription for " + opts.mbean +
+                                    " (client: " + client.id + "): " + resp.error);
+                }
+                var handle = { id: resp.value, mode: mode };
+                notificationHandlerFunc("add",mode)(handle, opts);
+                return handle;
+            };
+
+            jolokia.removeNotificationListener = function(handle) {
+                notificationHandlerFunc("remove",handle.mode)(handle);
+                // Unregister notification
+                jolokia.request({
+                    type:    "notification",
+                    command: "remove",
+                    client:  client.id,
+                    handle:  handle.id
+                });
+            };
+
+            jolokia.unregisterNotificationClient = function() {
+                var backends = client.backend || {};
+                for (mode in NOTIFICATION_HANDLERS) {
+                    if (NOTIFICATION_HANDLERS.hasOwnProperty(mode) && backends[mode]) {
+                        notificationHandlerFunc("unregister")()
+                    }
+                }
+                jolokia.request({
+                    type:    "notification",
+                    command: "unregister",
+                    client: client.id
+                });
+            };
+
+            // ===================================================================
+            // Private methods
+
+            // Merge a set of parameters with the defaults values
+            function mergeInDefaults(params) {
+                return Jolokia.assignObject({}, agentOptions, params);
+            }
 
             // Add a job to the job queue
             function addJob(job) {
@@ -464,23 +502,138 @@
 
             // Check that this agent is registered as a notification client.
             // If not, do a register call
-            function checkNotificationRegistration() {
-                if (!notifConfig) {
-                    var resp = this.request({
+            function ensureNotificationRegistration() {
+                if (!client) {
+                    var resp = jolokia.request({
                         type:    "notification",
                         command: "register"
                     });
                     if (Jolokia.isError(resp)) {
-                        throw new Error("Can not register client for notifications: " + resp.error);
+                        throw new Error("Can not register client for notifications: " + resp.error +
+                                        "\nTrace:\n" + resp.stacktrace);
                     } else {
-                        notifConfig = resp.value;
+                        client = resp.value;
                     }
                 }
             }
+
+            // Get notification mode with a sane default based on which is provided
+            // by the backend
+            function extractNotificationMode(opts) {
+                var backends = client.backend || {};
+                // A mode given takes precedence
+                var mode = opts.mode;
+                if (!mode) {
+                    // Try 'sse' first as default then 'pull'.
+                    mode = backends["sse"] ? "sse" : (backends["pull"] ? "pull" : undefined);
+                    // If only one backend is configured, that's the default
+                    if (!mode && backends.length == 1) {
+                        return backends[0];
+                    }
+                }
+                if (!mode || !backends[mode]) {
+                    throw new Error("Notification mode must be one of " + Object.keys(backends) + (mode ? " and not " + mode : ""));
+                }
+                return mode
+            }
+
+            // Call a function from the handlers defined below, depending on the mode
+            // "this" is set to the handler object.
+            function notificationHandlerFunc(what, mode) {
+                var notifHandler = NOTIFICATION_HANDLERS[mode];
+                if (!notifHandler) {
+                    throw new Error("Unsupported notification mode '" + mode + "'");
+                }
+                return function() {
+                    // Fix 'this' context to the notifHandler object which holds some state objects
+                    return notifHandler[what].apply(notifHandler,Array.prototype.slice.call(arguments));
+                }
+            }
+
+            // ===== Notification handler state vars and functions ...
+            // Notification handler definition for various notification modes
+            var NOTIFICATION_HANDLERS = {
+                // Pull mode for notifications
+                pull : {
+                    add: function(handle, opts) {
+                        // Add a job for periodically fetching the value and calling the callback with the response
+                        var job = {
+                            callback: function (resp) {
+                                if (!Jolokia.isError(resp)) {
+                                    var notifs = resp.value;
+                                    if (notifs && notifs.notifications && notifs.notifications.length > 0) {
+                                        opts.callback(notifs);
+                                    }
+                                }
+                            },
+                            requests: [{
+                                type:      "exec",
+                                mbean:     client.backend.pull.store,
+                                operation: "pull",
+                                arguments: [client.id, handle.id]
+                            }]
+                        };
+                        this.jobIds[handle.id] = addJob(job);
+                    },
+                    remove: function(handle) {
+                        // Remove notification subscription from server
+                        var job = this.jobIds[handle.id];
+                        if (job) {
+                            // Remove from scheduler
+                            jolokia.unregister(job);
+                            delete this.jobIds[handle.id];
+                        }
+                    },
+                    unregister: function() {
+                        // Remove all notification jobs from scheduler
+                        for (var handleId in this.jobIds) {
+                            if (this.jobIds.hasOwnProperty(handleId)) {
+                                var jobId = this.jobIds[handleId];
+                                jolokia.unregister(jobId);
+                            }
+                        }
+                        this.jobIds = {}
+                    },
+                    jobIds: {}
+                },
+
+                // Server sent event mode
+                sse : {
+                    "lazy-init": function() {
+                        if (!this.eventSource) {
+                            this.eventSource = new EventSource(agentOptions.url + "/notification/open/" + client.id + "/sse");
+                            var dispatcher = this.dispatchMap;
+                            this.eventSource.addEventListener("message", function (event) {
+                                var data = JSON.parse(event.data);
+                                var callback = dispatcher[data.handle];
+                                if (callback != null) {
+                                    callback(data);
+                                }
+                            });
+                        }
+                    },
+                    add: function(handle, opts) {
+                        this.dispatchMap[handle.id] = opts.callback;
+                    },
+                    remove: function(handle) {
+                        delete this.dispatchMap[handle.id];
+                    },
+                    unregister: function() {
+                        this.dispatchMap = {};
+                        this.eventSource = null;
+                    },
+
+                    // Map for dispatching SSE return notifications
+                    dispatchMap : {},
+
+                    // SSE event-source
+                    eventSource : null
+                }
+            };
         }
 
         // ========================================================================
-        // Private Methods:
+        // Private Functions:
 
         // Create a function called by a timer, which requests the registered requests
         // calling the stored callback on receipt. jolokia and jobs are put into the closure
@@ -488,8 +641,7 @@
             return function() {
                 var errorCbs = [],
                     successCbs = [],
-                    i, j,
-                    len = jobs.length;
+                    i, j;
                 var requests = [];
                 for (i in jobs) {
                     if (!jobs.hasOwnProperty(i)) {
@@ -544,7 +696,7 @@
                 // Add the proper ifModifiedSince parameter if already called at least once
                 extra = job.onlyIfModified && job.lastModified ? { ifModifiedSince: job.lastModified } : {};
 
-            request.config = $.extend({}, config, request.config, extra);
+            request.config = Jolokia.assignObject({}, config, request.config, extra);
             return request;
         }
 
@@ -569,7 +721,7 @@
             };
 
             function addResponse(resp,j) {
-                // Only remember responses with values and remember lowest timetamp, too.
+                // Only remember responses with values and remember lowest timestamp, too.
                 if (resp.status != 304) {
                     if (lastModified == 0 || resp.timestamp < lastModified ) {
                         lastModified = resp.timestamp;
@@ -618,24 +770,24 @@
                 return function () {
                 };
             }
-            var callbackArray = $.isArray(callback) ? callback : [ callback ];
+            var callbackArray = Array.isArray(callback) ? callback : [ callback ];
             return function (response, idx) {
                 callbackArray[idx % callbackArray.length](response, idx);
             }
         }
 
         // Extract the HTTP-Method to use and make some sanity checks if
-        // the method was provided as part of the options, but dont fit
+        // the method was provided as part of the options, but don't fit
         // to the request given
         function extractMethod(request, opts) {
             var methodGiven = opts && opts.method ? opts.method.toLowerCase() : null,
                     method;
             if (methodGiven) {
                 if (methodGiven === "get") {
-                    if ($.isArray(request)) {
+                    if (Array.isArray(request)) {
                         throw new Error("Cannot use GET with bulk requests");
                     }
-                    if (request.type.toLowerCase() === "read" && $.isArray(request.attribute)) {
+                    if (request.type.toLowerCase() === "read" && Array.isArray(request.attribute)) {
                         throw new Error("Cannot use GET for read with multiple attributes");
                     }
                     if (request.target) {
@@ -648,9 +800,9 @@
                 method = methodGiven;
             } else {
                 // Determine method dynamically
-                method = $.isArray(request) ||
+                method = Array.isArray(request) ||
                          request.config ||
-                         (request.type.toLowerCase() === "read" && $.isArray(request.attribute)) ||
+                         (request.type.toLowerCase() === "read" && Array.isArray(request.attribute)) ||
                          request.target ?
                         "post" : "get";
             }
@@ -664,7 +816,7 @@
         // to an URL as GET query parameters
         function addProcessingParameters(url, opts) {
             var sep = url.indexOf("?") > 0 ? "&" : "?";
-            $.each(PROCESSING_PARAMS, function (i, key) {
+            PROCESSING_PARAMS.forEach(function (key) {
                 if (opts[key] != null) {
                     url += sep + key + "=" + opts[key];
                     sep = "&";
@@ -684,9 +836,9 @@
             var extractor = GET_URL_EXTRACTORS[type];
             assertNotNull(extractor, "Unknown request type " + type);
             var result = extractor(request);
-            var parts = result.parts || {};
+            var parts = result.parts || [];
             var url = type;
-            $.each(parts, function (i, v) {
+            parts.forEach(function (v) {
                 url += "/" + Jolokia.escape(v)
             });
             if (result.path) {
@@ -713,7 +865,7 @@
             "read": function(request) {
                 if (request.attribute == null) {
                     // Path gets ignored for multiple attribute fetch
-                    return { parts:[ request.mbean ] };
+                    return { parts:[ request.mbean, '*' ], path:request.path };
                 } else {
                     return { parts:[ request.mbean, request.attribute ], path:request.path };
                 }
@@ -724,7 +876,7 @@
             "exec": function(request) {
                 var ret = [ request.mbean, request.operation ];
                 if (request.arguments && request.arguments.length > 0) {
-                    $.each(request.arguments, function (index, value) {
+                    request.arguments.forEach(function (value) {
                         ret.push(valueToString(value));
                     });
                 }
@@ -779,7 +931,7 @@
             if (value == null) {
                 return "[null]";
             }
-            if ($.isArray(value)) {
+            if (Array.isArray(value)) {
                 var ret = "";
                 for (var i = 0; i < value.length; i++) {
                     ret += value == null ? "[null]" : singleValueToString(value[i]);
@@ -827,6 +979,7 @@
 
         // Escape a path part, can be used as a static method outside this function too
         Jolokia.prototype.escape = Jolokia.escape = function (part) {
+            // TODO: review GET URL path encoding
             return encodeURIComponent(part.replace(/!/g, "!!").replace(/\//g, "!/"));
         };
 
@@ -839,23 +992,39 @@
             return resp.status == null || resp.status != 200;
         };
 
+        /**
+         * Polyfill method for $.extend and Object.assign.
+         */
+        Jolokia.prototype.assignObject = Jolokia.assignObject = function() {
+            /*
+            if (typeof Object.assign === "function") {
+                return Object.assign.apply(Object, arguments);
+            }
+            */
+            var target = arguments[0]
+            var sources = Array.prototype.slice.call(arguments, 1);
+            if (target === undefined || target === null) {
+                throw new Error("Cannot assign object to undefined or null");
+            }
+
+            sources.forEach(function (source) {
+                if (source === undefined || source === null) {
+                    return;
+                }
+                Object.keys(source).forEach(function (key) {
+                    if (Object.prototype.hasOwnProperty.call(source, key)) {
+                        target[key] = source[key];
+                    }
+                });
+            })
+
+            return target;
+        }
+
         // Return back exported function/constructor
         return Jolokia;
     };
 
-    // =====================================================================================================
-    // Register either as global or as AMD module
-
-    (function (root, factory) {
-        if (typeof define === 'function' && define.amd) {
-            // AMD. Register as a named module
-            define(["jquery"], factory);
-        } else {
-            // Browser globals
-            root.Jolokia = factory(root.jQuery);
-        }
-    }(this, function (jQuery) {
-        return _jolokiaConstructorFunc(jQuery);
-    }));
-}());
+    return _jolokiaConstructorFunc(jQuery);
+}));
 

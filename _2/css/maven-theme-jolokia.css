@@ -70,7 +70,7 @@ div.top_link a {
   display: block;
   padding: 10px 15px 0 15px;
   height: 25px;
-  color: #BBBABA;
+  color: #d7d7d7;
 }
 div.top_link a:hover,
 div.top_link a:active {
@@ -184,6 +184,12 @@ table.tableblock,
 div.listingblock {
   margin: 0 0 0.7em 0;
 }
+div.paragraph>div.title {
+  color: #555;
+  margin: 0.4em 0;
+  font-weight: bold;
+  font-size: 14px;
+}
 
 div.ulist li {
   line-height: 1.7em;
@@ -241,9 +247,12 @@ table.tableblock, table.bodyTable {
   padding: 2px 5px;
 }
 .tableblock td, .bodyTable td {
-  line-height: 1.7em;
-  padding: 1px 5px 1px 5px;
+  padding: 5px;
   vertical-align: top;
+}
+.tableblock td, .bodyTable td figure {
+  margin-bottom: -6px;
+  margin-top: -4px;
 }
 .bodyTable tr:nth-of-type(2n+1) {
   background-color: #f8f8f8;
@@ -254,6 +263,9 @@ div.listingblock, div.source {
   padding: 5px;
   background-color: #f8f8f8;
   margin-left: 1em;
+}
+div.content>pre {
+  font-family: monospace;
 }
 div.listingblock#apache-license {
   font-family: monospace;
@@ -267,12 +279,28 @@ div.listingblock#apache-license .content {
   padding: 5px;
   background-color: #f8f8f8;
 }
+div.imageblock.text-center div.content img {
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
+span.feature a.image {
+  display: block
+}
+span.feature a.image:hover {
+  background-color: white;
+}
+span.feature a.image:active,a.image:visited,a.image:focus {
+  background-color: white;
+  border: none;
+  outline: none;
+}
 
 div.note table {
   position: relative;
   margin-top: 2em;
   margin-left: 2em;
-  border: 1px solid #ddd;
+  border: 1px dotted #3366aa;
   background-color: #f8f8f8;
 }
 div.note table td.icon {
@@ -289,7 +317,10 @@ div.note table td.icon {
   border-radius: 4px;
 }
 div.note table td.content {
-  padding: 1em;
+  padding: 0.8em;
+}
+div.note table td.content div.paragraph {
+  margin: 0
 }
 
 /* Styles for doxia pages other than Asciidoc (like Maven reports) */
@@ -309,13 +340,16 @@ div.source {
 
 div.teaser {
   background: url(../images/teaser_bg2.png) left top no-repeat;
-  color: #e7d3cb;
+  color: #f7e9e5;
   font-size: 20px;
   padding: 11px 13px 0;
   margin: 2px;
   line-height: 150%;
   height: 82px;
   border-radius: 3px 3px 0 0;
+}
+div.teaser div.subtitle {
+  font-size: 16px;
 }
 
 /* special Logo header on index page */

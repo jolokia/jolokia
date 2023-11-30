@@ -145,14 +145,6 @@ puristic solution, the later is provided for a quick startup
 for initial testing the OSGi agent (but should be replaced
 with the minimal bundle for production setups).</p>
 </dd>
-<dt class="hdlist1"><em>Mule agent</em></dt>
-<dd>
-<p><a href="https://www.mulesoft.org/">Mule</a> is one of the leading Open Source
-Enterprise Service Busses<sup class="footnote">[<a id="_footnoteref_3" class="footnote" href="#_footnotedef_3" title="View footnote.">3</a>]</sup> (ESB). It provides a management API
-into which a dedicated Jolokia agent plugs in nicely. This
-agent includes an embedded Jetty for providing JMX HTTP
-access.</p>
-</dd>
 <dt class="hdlist1"><em>JVM agent</em></dt>
 <dd>
 <p>Starting with Java 6 the JDK provided by Oracle contains a
@@ -160,9 +152,9 @@ lightweight HTTP-Server which is used e.g. for the reference
 WebService stack implementation included in Java 6. Using
 the Java-agent API (normally used by profilers and other
 development tools requiring the instrumentation during the
-class loading phase), the JVM 6 Jolokia agent is the most
+class loading phase), the JVM 11+ Jolokia agent is the most
 generic one. It is able to instrument <em>any</em>
-Java application running on a Oracle JDK 6<sup class="footnote">[<a id="_footnoteref_4" class="footnote" href="#_footnotedef_4" title="View footnote.">4</a>]</sup>.
+Java application running on a Oracle JDK 11+<sup class="footnote">[<a id="_footnoteref_3" class="footnote" href="#_footnotedef_3" title="View footnote.">3</a>]</sup>.
 This Jolokia agent variant is fully featured, however tends to
 be a bit slow since the
 provided HTTP-Server is not optimized for performance. However
@@ -452,7 +444,7 @@ property <code>jolokia.discoveryEnabled</code> set to
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>discoveryAgentUrl</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Sets the URL to respond for multicast discovery requests. If
 given, <code>discoveryEnabled</code> is set
-implicetly to true. This URL can also be provied by an
+implicitly to true. This URL can also be provided by an
 environment variable
 <code>JOLOKIA_DISCOVERY_AGENT_URL</code> or the system
 property <code>jolokia.discoveryUrl</code>. Within the value you can use the
@@ -520,9 +512,9 @@ startup. Currently the following extra options are supported:</p>
 <td class="tableblock halign-left valign-top"><p class="tableblock">glassfish</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">bootAmx</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">If <code>false</code> and the agent is running on
-Glassfish, this will cause the AMX subsystem not to be booted
+GlassFish, this will cause the AMX subsystem not to be booted
 during startup. By default, AMX which contains all relevant
-MBeans for monitoring Glassfish is booted.</p></td>
+MBeans for monitoring GlassFish is booted.</p></td>
 </tr>
 </tbody>
 </table>
@@ -621,7 +613,7 @@ dependency on this jar artifact:</p>
     &lt;dependency&gt;
       &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
       &lt;artifactId&gt;jolokia-server-core&lt;/artifactId&gt;
-      &lt;version&gt;${jolokia.version}&lt;/version&gt;
+      &lt;version&gt;2.0.0-M4&lt;/version&gt;
     &lt;/dependency&gt;
   &lt;/dependencies&gt;
   &lt;!-- .... --&gt;
@@ -632,7 +624,7 @@ dependency on this jar artifact:</p>
 <p>The <code>org.jolokia.core.http.Agent</code> can be
 subclassed, too in order to provide a custom restrictor or a
 custom log handler. See <a href="#security-restrictor">[security-restrictor]</a>
-for details.<sup class="footnote">[<a id="_footnoteref_5" class="footnote" href="#_footnotedef_5" title="View footnote.">5</a>]</sup></p>
+for details.<sup class="footnote">[<a id="_footnoteref_4" class="footnote" href="#_footnotedef_4" title="View footnote.">4</a>]</sup></p>
 </div>
 <div class="paragraph">
 <p>Also, multiple Jolokia agents can be deployed in the same JVM
@@ -642,7 +634,7 @@ Jolokia-specific MBeans on the single
 deployments it is important to use the
 <code>mbeanQualifier</code> init parameter to
 distinguish multiple Jolokia MBeans by adding an extra
-propery to those MBeans' names. This also needs to be done if
+property to those MBeans' names. This also needs to be done if
 multiple webapps containing Jolokia agents are deployed on
 the same Java EE server.</p>
 </div>
@@ -838,7 +830,7 @@ can use the same placeholders as in <code>discoveryAgentUrl</code>.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.jolokia.agentDescription</code></p></td>
 <td class="tableblock halign-left valign-top"></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">An optional description which can be used for clients to
-present a humand readable label for this agent.</p></td>
+present a human readable label for this agent.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.jolokia.dispatcherClasses</code></p></td>
@@ -911,7 +903,7 @@ agent servlet to it.</p></td>
 is used to expose the Jolokia servlet. The syntax is that
 used by the <code>org.osgi.framework.Filter</code>
 which is in turn a <a href="https://www.ietf.org/rfc/rfc1960.txt">RFC 1960 based filter</a>. The use of this property
-is described in <a href="#running-on-glassfish">Running on Glassfish v3 upwards</a></p></td>
+is described in <a href="#running-on-glassfish">Running on GlassFish v3 upwards</a></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.jolokia.useRestrictorService</code></p></td>
@@ -953,7 +945,7 @@ be overridden with a query parameter.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">When this parameter is set to <code>true</code>,
 then an exception thrown will be serialized as JSON and
 included in the response under the key
-<code>error_value</code>. No stactrace infornmation
+<code>error_value</code>. No stacktrace information
 will be included, though. This global option can be
 overridden by a query parameter of the same name.</p></td>
 </tr>
@@ -970,7 +962,7 @@ options used by detectors for post-initialization steps. See the description of
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>false</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Is set to <code>true</code> then this servlet will
 listen for multicast request (multicast-group <code>239.192.48.84</code>,
-port <code>24884</code> by default, but can be configued).
+port <code>24884</code> by default, but can be configured).
 By default this option is disabled in order to
 avoid conflicts with an Java EE standards (though this should&#8217;t
 harm anyways). This option can also be switched on with an
@@ -984,7 +976,7 @@ property <code>jolokia.discoveryEnabled</code> set to
 <td class="tableblock halign-left valign-top"></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Sets the URL to respond for multicast discovery requests. If
 given, <code>discoveryEnabled</code> is set
-implicetly to true. This URL can also be provided by an
+implicitly to true. This URL can also be provided by an
 environment variable
 <code>JOLOKIA_DISCOVERY_AGENT_URL</code> or the system
 property <code>jolokia.discoveryUrl</code>. Within the value you can use the
@@ -1038,10 +1030,10 @@ available when the agent servlet is active (i.e. when an
 </div>
 </div>
 <div class="sect2">
-<h3 id="running-on-glassfish"><a class="anchor" href="#running-on-glassfish"></a>Running on Glassfish v3 upwards</h3>
+<h3 id="running-on-glassfish"><a class="anchor" href="#running-on-glassfish"></a>Running on GlassFish v3 upwards</h3>
 <div class="paragraph">
 <p>You have a couple of choices when running Jolokia on
-Glassfish v3 and up, since Glassfish is a both a fully
+GlassFish v3 and up, since GlassFish is a both a fully
 fledged Java EE container and an OSGi container. If you
 choose to run the <a href="agents/war.html" class="xref page">Java EE Agent (WAR)</a> then it
 is completely straight forward just deploy the war
@@ -1054,7 +1046,7 @@ option with a filter to select either the Admin
 deployed to.</p>
 </div>
 <div class="paragraph">
-<p>In Glassfish 3.1.2 the OSGi bundle configuration is done in
+<p>In GlassFish 3.1.2 the OSGi bundle configuration is done in
 <code>glassfish/conf/osgi.properties</code> in version&#8217;s
 prior to this the configuration is by default in
 <code>glassfish/osgi/felix/conf/config.properties</code>
@@ -1107,7 +1099,7 @@ its
 e.g. setting the port to 9090 instead of the default port 8080, a property
 <code>org.osgi.service.http.port=9090</code> needs to be
 set. This might be useful, if this bundle is used within
-containers which already occupy the default port (Glassfish,
+containers which already occupy the default port (GlassFish,
 Eclipse Virgo) but don&#8217;t expose an OSGi HttpService.</p>
 </div>
 </div>
@@ -1163,178 +1155,11 @@ will use one or more OSGi service which register under the name
 such service is available, access to the agent is always
 denied. If one such restrictor service is available, the access
 decision is delegated to this service. When more than one
-restrictor service is available, access is ony granted if all of
+restrictor service is available, access is only granted if all of
 them individually grant access. A sample restrictor service as a
 maven project can be found in the Jolokia source at
 <code>agent/osgi/restrictor-sample</code>.</p>
 </div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="agents-mule"><a class="anchor" href="#agents-mule"></a>Mule Agent</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Jolokia&#8217;s <a href="https://www.mulesoft.org">Mule</a> agent
-uses Mule&#8217;s own agent interface for plugging into the ESB running
-in standalone mode.</p>
-</div>
-<div class="paragraph">
-<p>The agent needs to be included into the Mule configuration as
-shown in the following example, which is the way how to configure
-the agent for Mule 3:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;mule xmlns="http://www.mulesoft.org/schema/mule/core"
-      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-      xmlns:management="http://www.mulesoft.org/schema/mule/management"
-      xmlns:spring="http://www.springframework.org/schema/beans"
-      xsi:schemaLocation="
-          http://www.mulesoft.org/schema/mule/core
-          https://www.mulesoft.org/schema/mule/core/3.1/mule.xsd
-          http://www.springframework.org/schema/beans
-          https://www.springframework.org/schema/beans/spring-beans-2.5.xsd
-          http://www.mulesoft.org/schema/mule/management
-          https://www.mulesoft.org/schema/mule/management/3.1/mule-management.xsd"&gt;
-
-  &lt;!-- .... --&gt;
-  &lt;custom-agent name="jolokia-agent" class="org.jolokia.mule.JolokiaMuleAgent"&gt;
-    &lt;spring:property name="port" value="8899"/&gt;
-  &lt;/custom-agent&gt;
-  &lt;management:jmx-server/&gt;
-&lt;/mule&gt;</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>For Mule 2, the configuration is slightly different since the
-<code>&lt;custom-agent&gt;</code> is contained in the
-<code>management</code> namespace for Mule 2
-(<code>&lt;management:custom-agent&gt;</code>)</p>
-</div>
-<div class="paragraph">
-<p>This agent knows about the following configuration parameters</p>
-</div>
-<table id="agent-mule-config" class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 5. Mule agent configuration options</caption>
-<colgroup>
-<col style="width: 33.3333%;">
-<col style="width: 33.3333%;">
-<col style="width: 33.3334%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">Parameter</th>
-<th class="tableblock halign-left valign-top">Description</th>
-<th class="tableblock halign-left valign-top">Example</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>host</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Hostaddress to which the HTTP server should bind to.</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>InetAddress.getLocalHost()</code></p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>port</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Port the HTTP server should listen to.</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>8888</code></p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>user</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Use to authenticate against. This switches on security and
-requires a client to provide a user and password.</p></td>
-<td class="tableblock halign-left valign-top"></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>password</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Password to check against when security is switched on.</p></td>
-<td class="tableblock halign-left valign-top"></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>debug</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Debugging state after startup. Can be changed via the &lt;xref
-linkend="mbean-config"&gt;configuration MBean&lt;/xref&gt; during
-runtime.</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>false</code></p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>historyMaxEntries</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Entries to keep in the history. Can be changed at
-runtime via the &lt;xref linkend="mbean-config"&gt;configuration MBean&lt;/xref&gt;.</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>10</code></p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>debugMaxEntries</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Maximum number of entries to keep in the local
-debug history (if enabled). Can be changed via
-the &lt;xref linkend="mbean-config"&gt;configuration MBean&lt;/xref&gt; at runtime.</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>100</code></p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>maxDepth</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Maximum depth when traversing bean properties.
-If set to 0, depth checking is disabled</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>5</code></p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>maxCollectionSize</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Maximum size of collections returned when
-serializing to JSON. When set to 0,
-collections are never truncated.</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>0</code></p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>maxObjects</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Maximum number of objects which are traversed
-when serializing a single response. Use this
-as an airbag to avoid boosting your memory and
-network traffic. Nevertheless, when set to 0
-no limit is imposed.</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>10000</code></p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>canonicalNaming</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">This option specifies in which order the key-value
-properties within ObjectNames as returned by
-<code>list</code> or <code>search</code> are
-returned. By default this is the so called 'canonical order'
-in which the keys are sorted alphabetically. If this option
-is set to <code>false</code>, then the natural order
-is used, i.e. the object name as it was registered. This
-option can be overridden with a query parameter of the same
-name.</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>true</code></p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>includeStackTrace</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Whether to include a stacktrace of an exception in case of
-an error. By default it it set to <code>true</code>
-in which case the stacktrace is always included. If set to
-<code>false</code>, no stacktrace is included. If
-the value is <code>runtime</code> a stacktrace is
-only included for RuntimeExceptions. This global option can
-be overridden with a query parameter.</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>true</code></p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>serializeException</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">When this parameter is set to <code>true</code>,
-then an exception thrown will be serialized as JSON and
-included in the response under the key
-<code>error_value</code>. No stactrace infornmation
-will be included, though. This global option can be
-overridden by a query parameter of the same name.</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>false</code></p></td>
-</tr>
-</tbody>
-</table>
-<div class="paragraph">
-<p>The context under which the agent is reachable is fixed to
-<code>/jolokia</code>. As an alternative to this Mule agent,
-the <a href="#agents-jvm">JVM Agent</a> can be used for
-Mule, too. This agent also knows about SSL encryption and
-authentication.</p>
 </div>
 </div>
 </div>
@@ -1391,12 +1216,12 @@ jar to download looks like <code>jolokia-jvm-1.3.1-agent.jar</code>, not <code>j
 Options can be appended as a comma separated
 list. The available options are the same as described in
 <a href="#agent-war-init-params">Table 1, &#8220;Servlet init parameters&#8221;</a> plus the one described in
-table <a href="#agent-jvm-config">Table 6, &#8220;JVM agent configuration options&#8221;</a>. If an options
+table <a href="#agent-jvm-config">Table 5, &#8220;JVM agent configuration options&#8221;</a>. If an options
 contains a comma, an equal sign or a backslash, it must be
 escaped with a backslash.</p>
 </div>
 <table id="agent-jvm-config" class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 6. JVM agent configuration options</caption>
+<caption class="title">Table 5. JVM agent configuration options</caption>
 <colgroup>
 <col style="width: 33.3333%;">
 <col style="width: 33.3333%;">
@@ -1663,8 +1488,8 @@ cert contains a client flag in the extended key usage section which must be pres
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>bootAmx</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">If set to <code>true</code> and if the agent is
-attached to a Glassfish server, then during startup the
-AMX subsystem is booted so that Glassfish specific MBeans
+attached to a GlassFish server, then during startup the
+AMX subsystem is booted so that GlassFish specific MBeans
 are available. Otherwise, if set to
 <code>false</code> the AMX system is not booted.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>true</code></p></td>
@@ -1867,7 +1692,7 @@ For more documentation please visit www.jolokia.org</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Every option described in <a href="#agent-jvm-config">Table 6, &#8220;JVM agent configuration options&#8221;</a>
+<p>Every option described in <a href="#agent-jvm-config">Table 5, &#8220;JVM agent configuration options&#8221;</a>
 is reflected by a command line option for the
 launcher. Additionally, the option <code>--quiet</code>
 can be used to keep the launcher silent and
@@ -1951,7 +1776,7 @@ the memory usage of a local Java process, including
 (temporarily) attaching an Jolokia agent looks simply like in
 the following example. With a complete client library like &lt;ulink
 <a href="https://www.jmxp4perl.org">Jmx4Perl</a> even more one
-shot scripts are possible<sup class="footnote" id="_footnote_rest-comment">[<a id="_footnoteref_6" class="footnote" href="#_footnotedef_6" title="View footnote.">6</a>]</sup>.</p>
+shot scripts are possible <sup class="footnote" id="_footnote_rest-comment">[<a id="_footnoteref_5" class="footnote" href="#_footnotedef_5" title="View footnote.">5</a>]</sup>.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1980,16 +1805,13 @@ java -jar agent.jar --quiet stop $1</pre>
 <a href="#_footnoteref_2">2</a>. Of course, there is much more to OSGi, a platform and programing model which I <em>really</em> like. This is my personal pet agent, so to speak ;-).
 </div>
 <div class="footnote" id="_footnotedef_3">
-<a href="#_footnoteref_3">3</a>. <a href="https://answers.yahoo.com/question/index?qid=20071216082739AAfkxnm">What is the proper plural form of "bus"?</a>
+<a href="#_footnoteref_3">3</a>. You could even instrument a Java EE application server this way, however this is not recommended.
 </div>
 <div class="footnote" id="_footnotedef_4">
-<a href="#_footnoteref_4">4</a>. You could even instrument a Java EE application server this way, however this is not recommended.
+<a href="#_footnoteref_4">4</a>. Replace <code>org.jolokia.agent.osgi.http.AgentServlet</code> with <code>org.jolokia.core.http.AgentServlet</code> to use the servlet in a non-OSGi environment.
 </div>
 <div class="footnote" id="_footnotedef_5">
-<a href="#_footnoteref_5">5</a>. Replace <code>org.jolokia.agent.osgi.http.AgentServlet</code> with <code>org.jolokia.core.http.AgentServlet</code> to use the servlet in a non-OSGi environment.
-</div>
-<div class="footnote" id="_footnotedef_6">
-<a href="#_footnoteref_6">6</a>. And in fact, some support for launching this dynamic agent is planned for a forthcoming release of jmx4perl.
+<a href="#_footnoteref_5">5</a>. And in fact, some support for launching this dynamic agent is planned for a forthcoming release of jmx4perl.
 </div>
 </div>
 <nav class="pagination">

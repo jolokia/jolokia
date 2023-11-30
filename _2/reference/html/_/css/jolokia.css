@@ -1,8 +1,12 @@
 
 .doc {
   max-width: 90rem;
-  font-size: 1rem;
+  font-size: 1.1rem;
 }
 .nav-container {
   font-size: 1rem;
+}
+
+.doc .admonitionblock td.content {
+  border: 1px dotted #217ee7;
 }

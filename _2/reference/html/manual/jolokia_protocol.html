@@ -179,7 +179,7 @@ keep any state on the server side (except of course that
 MBeans are obviously stateful most of the time). So in this aspect, the
 communication can be considered
 <a href="https://en.wikipedia.org/wiki/Representational_State_Transfer">REST</a>
-like<sup class="footnote" id="_footnote_rest-comment">[<a id="_footnoteref_1" class="footnote" href="#_footnotedef_1" title="View footnote.">1</a>]</sup>.</p>
+like <sup class="footnote" id="_footnote_rest-comment">[<a id="_footnoteref_1" class="footnote" href="#_footnotedef_1" title="View footnote.">1</a>]</sup>.</p>
 </div>
 <div class="sect2">
 <h3 id="get-request"><a class="anchor" href="#get-request"></a>GET requests</h3>
@@ -245,9 +245,9 @@ behaviour, so Jolokia uses an own escaping mechanism.</p>
 <p>If one of the request parts contain a slash
 (<code>/</code>) (e.g. as part of you bean&#8217;s name) it
 needs to be escaped. An exclamation mark
-(<code>!</code>) is used as escape character<sup class="footnote" id="_footnote_no-backslash">[<a id="_footnoteref_2" class="footnote" href="#_footnotedef_2" title="View footnote.">2</a>]</sup>.
+(<code>!</code>) is used as escape character <sup class="footnote" id="_footnote_no-backslash">[<a id="_footnoteref_2" class="footnote" href="#_footnotedef_2" title="View footnote.">2</a>]</sup>.
 An exclamation mark itself needs to be doubled
-for escaping. Any other characted preceded by an exclamation
+for escaping. Any other character preceded by an exclamation
 mark is taken literally. Table
 <a href="#escape-rules">Table 1, &#8220;Escaping rules&#8221;</a> illustrates the escape rules as
 used in GET requests. Also, if quotes are part of an GET
@@ -286,7 +286,7 @@ request the need to be escaped  with
 </tbody>
 </table>
 <div class="paragraph">
-<p>For example, to read the atrribute <code>State</code>
+<p>For example, to read the attribute <code>State</code>
 on the MBean named
 <code>jboss.jmx:alias=jmx/rmi/RMIAdaptor</code>, an
 access URL like this has to be constructed:</p>
@@ -302,7 +302,7 @@ access URL like this has to be constructed:</p>
 do this sort of escaping transparently.</p>
 </div>
 <div class="paragraph">
-<p>Escaping can be avoided alltogether if a slightly different
+<p>Escaping can be avoided altogether if a slightly different
 variant for a request is used (which doesn&#8217;t look that
 REST-stylish, though). Instead of providing the information
 as path-info, a query parameter <code>p</code> can be
@@ -401,13 +401,13 @@ in same order as the requests in the initial bulk request.</p>
 <h3 id="responses"><a class="anchor" href="#responses"></a>Responses</h3>
 <div class="paragraph">
 <p>Responses are always encoded in UTF-8 JSON, regardless whether the
-requst was a GET or POST request.  In general, two kinds of
+request was a GET or POST request.  In general, two kinds of
 responses can be classified: In the normal case, a HTTP
 Response with response code 200 is returned, containing the
 result of the operation as a JSON payload. In case of an
 error, a 4xx or 5xx code will be returned and the JSON
 payload contains details about the error
-occured (e.g. 404 means "not found"). (See
+occurred (e.g. 404 means "not found"). (See
 <a href="https://en.wikipedia.org/wiki/List_of_HTTP_status_codes">this page</a>
 for more information about HTTP error codes..). If the processing option
 <code>ifModifiedSince</code> is given and the requested
@@ -449,7 +449,7 @@ specific.</p>
 <p>For successful requests, the <code>status</code> is
 always <code>200</code> (the HTTP success code). The
 <code>timestamp</code> contains the epoch
-time<sup class="footnote" id="_footnote_epoch-time">[<a id="_footnoteref_3" class="footnote" href="#_footnotedef_3" title="View footnote.">3</a>]</sup>
+time <sup class="footnote" id="_footnote_epoch-time">[<a id="_footnoteref_3" class="footnote" href="#_footnotedef_3" title="View footnote.">3</a>]</sup>
 when the
 request has been handled. The request leading to this
 response can be found under the attribute
@@ -501,10 +501,10 @@ some errors.</p>
 <a href="https://en.wikipedia.org/wiki/List_of_HTTP_status_codes">as it is specified for HTTP return codes</a>.
 The <code>error</code> member contains an error
 description. This is typically the message of an exception
-occured on the agent side<sup class="footnote" id="_footnote_mbeanexception-wrapping">[<a id="_footnoteref_4" class="footnote" href="#_footnotedef_4" title="View footnote.">4</a>]</sup>. Finally, <code>error_type</code> contains the Java class name
-of the exception occured.
+occurred on the agent side<sup class="footnote" id="_footnote_mbeanexception-wrapping">[<a id="_footnoteref_4" class="footnote" href="#_footnotedef_4" title="View footnote.">4</a>]</sup>. Finally, <code>error_type</code> contains the Java class name
+of the exception occurred.
 The <code>stacktrace</code> contains a Java stacktrace
-occured on the server side (if any stacktrace is available).</p>
+occurred on the server side (if any stacktrace is available).</p>
 </div>
 <div class="paragraph">
 <p>For each type of operation, the format of the
@@ -1788,7 +1788,7 @@ converted into a JSON object. Note, however, that JSON
 Object keys are <em>always strings</em>.</p>
 </li>
 <li>
-<p>Enums are converted to their canonical name<sup class="footnote" id="_footnote_enum-serial-jboss">[<a id="_footnoteref_5" class="footnote" href="#_footnotedef_5" title="View footnote.">5</a>]</sup>.</p>
+<p>Enums are converted to their canonical name <sup class="footnote" id="_footnote_enum-serial-jboss">[<a id="_footnoteref_5" class="footnote" href="#_footnotedef_5" title="View footnote.">5</a>]</sup>.</p>
 </li>
 <li>
 <p><code>javax.management.openmbean.CompositeData</code>
@@ -1992,7 +1992,7 @@ for <code>exec</code> operations) differs from
 from the object serializaton as used as response values
 which is described in
 <a href="#serialization-response">Response value serialization</a>. Not all types are
-supported for upstream serialization<sup class="footnote" id="_footnote_upstream-serialization-comment">[<a id="_footnoteref_6" class="footnote" href="#_footnotedef_6" title="View footnote.">6</a>]</sup>
+supported for upstream serialization <sup class="footnote" id="_footnote_upstream-serialization-comment">[<a id="_footnoteref_6" class="footnote" href="#_footnotedef_6" title="View footnote.">6</a>]</sup>
 and the capabilities differ also for POST and GET requests.
 <code>GET</code> upstream serialization is limited to
 basic types and simple arrays. POST requests on the other
@@ -2121,7 +2121,7 @@ access to the Enum&#8217;s class. This is true for all Enums
 shipped with the JDK (like
 <code>TimeUnit</code>). Custom enums can not be
 used for upstream serialization by default since the
-Jolokia Agent is not able to contruct an instance of it
+Jolokia Agent is not able to construct an instance of it
 because of missing type information.</p>
 </div>
 <div class="paragraph">
@@ -2230,7 +2230,7 @@ look like</p>
 <div class="sect2">
 <h3 id="serialization-mxbean"><a class="anchor" href="#serialization-mxbean"></a>Jolokia and MXBeans</h3>
 <div class="paragraph">
-<p>The <a href="https://download.oracle.com/javase/6/docs/api/javax/management/MXBean.html">MXBean Framework</a> is availale in
+<p>The <a href="https://download.oracle.com/javase/6/docs/api/javax/management/MXBean.html">MXBean Framework</a> is available in
 the JRE since version 6 and allows for easy creation and
 registration of own MBeans. MXBeans are some what the
 successor for standard MBeans and support an annotation driven
@@ -2259,7 +2259,7 @@ representation which is quite artificial. E.g a map with
 two keys <code>kind</code> and
 <code>hotness</code> will be converted by the MXBean
 framework to a TabularData object which in turn would be
-translated by Jolokia to the following JSON struture</p>
+translated by Jolokia to the following JSON structure</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -2476,7 +2476,7 @@ in the future.</p>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>agent_id</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Each agent has a unique id which can be either provided
 during startup of the agent in form of a configuration
-parameter or being autodetected. If autodected, the id has
+parameter or being autodetected. If autodetected, the id has
 several parts: The IP, the process id, hashcode of the agent
 and its type. This field will be always provided.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>10.9.11.87-23455-9184ef-osgi</code></p></td>

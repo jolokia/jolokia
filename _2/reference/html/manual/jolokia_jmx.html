@@ -154,7 +154,7 @@ configuration. This is described in <a href="#jvm-spring">Spring Support</a>.</p
 <p>For JBoss 7 there is a slight issue when creating a new <code>MBeanServer</code>. For this to work,
 a <code>jboss-deployment-structure</code> with a dependency on
 <code>org.jboss.as.jmx</code> must be added. For an example see the
-<a href="https://github.com/rhuss/jolokia/blob/master/it/war/src/main/webapp/WEB-INF/jboss-deployment-structure.xml">integration test war</a>, the location
+<a href="https://github.com/jolokia/jolokia/blob/main/it/war/src/main/webapp/WEB-INF/jboss-deployment-structure.xml">integration test war</a>, the location
 to where to put this file is explained in the <a href="https://docs.jboss.org/author/display/AS7/Developer+Guide#DeveloperGuide-JBossDeploymentStructureFile">JBoss documentation</a>.</p>
 </div>
 </div>
@@ -166,6 +166,10 @@ to where to put this file is explained in the <a href="https://docs.jboss.org/au
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">MBeanServer jolokiaServer = JolokiaMBeanServerUtil.getJolokiaMBeanServer();</code></pre>
 </div>
+</div>
+<div class="paragraph">
+<p>Internally, <code>javax.management.MBeanServerFactory.newMBeanServer()</code> is called, so it&#8217;s not returned when
+calling <code>javax.management.MBeanServerFactory.findMBeanServer()</code>.</p>
 </div>
 <div class="paragraph">
 <p>This server is treated specially by a Jolokia Agent:</p>
@@ -222,7 +226,8 @@ detectors</em> a queried in turn.</p>
 </li>
 <li>
 <p>All MBeanServers returned by
-<code>MBeanServerFactory.findMBeanServer(null)</code> are
+<code>MBeanServerFactory.findMBeanServer(null)</code> (which should return all the <code>MBeanServers</code> created with
+<code>MBeanServerFactory.createMBeanServer()</code>, but not the ones created by <code>javax.management.MBeanServerFactory.newMBeanServer()</code>) are
 called if not already tried previously.</p>
 </li>
 <li>
@@ -292,7 +297,7 @@ differences:</p>
 <ul>
 <li>
 <p>MXBeans are a standard mechanism which are available on every
-JVM since 1.5.<sup class="footnote" id="_footnote_jbos-mxbean">[<a id="_footnoteref_1" class="footnote" href="#_footnotedef_1" title="View footnote.">1</a>]</sup></p>
+JVM since 1.5.<sup class="footnote" id="_footnote_jboss-mxbean">[<a id="_footnoteref_1" class="footnote" href="#_footnotedef_1" title="View footnote.">1</a>]</sup></p>
 </li>
 <li>
 <p>Serialization of complex Java Beans is more powerful with
@@ -305,7 +310,7 @@ work. MXBeans work with the PlatformMBeanServer, too.</p>
 </li>
 <li>
 <p>JsonMBean work also with JMX support libraries which use
-<code>ModelMBean</code>'s unde the hood. E.g.
+<code>ModelMBean</code>'s under the hood. E.g.
 <a href="https://static.springsource.org/spring/docs/3.0.x/reference/jmx.html">Spring
 JMX</a> uses a ModelMBean for
 <code>@ManagedResource</code> annotated
@@ -339,7 +344,7 @@ sufficient:</p>
 <pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
   &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
   &lt;artifactId&gt;jolokia-spring&lt;/artifactId&gt;
-  &lt;version&gt;1.1.0&lt;/version&gt;
+  &lt;version&gt;2.0.0-M4&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -348,7 +353,7 @@ sufficient:</p>
 <div class="paragraph">
 <p>With this in place, the following configuration can be used to
 fire up a Jolokia JVM based agent using the HTTP server which
-comes with OpenJDK/Oracle JVMs (Version 6 or later).</p>
+comes with OpenJDK/Oracle JVMs (Version 11 or later).</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -357,9 +362,9 @@ comes with OpenJDK/Oracle JVMs (Version 6 or later).</p>
        xmlns:jolokia="http://www.jolokia.org/jolokia-spring/schema/config"
        xsi:schemaLocation="
            http://www.springframework.org/schema/beans
-           http://www.springframework.org/schema/beans/spring-beans.xsd
+           https://www.springframework.org/schema/beans/spring-beans.xsd
            http://www.jolokia.org/jolokia-spring/schema/config
-           http://www.jolokia.org/jolokia-spring/schema/config/jolokia-config.xsd"&gt;
+           https://www.jolokia.org/jolokia-spring/schema/config/jolokia-config.xsd"&gt;
 
   &lt;jolokia:agent lookupConfig="false" systemPropertiesMode="never"&gt;
     &lt;jolokia:config autoStart="true" host="0.0.0.0" port="8778" .... /&gt;
@@ -467,11 +472,11 @@ only base Spring bean configurations (including an Spring EL expression):</p>
        xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="
            http://www.springframework.org/schema/beans
-           http://www.springframework.org/schema/beans/spring-beans.xsd
+           https://www.springframework.org/schema/beans/spring-beans.xsd
            http://www.springframework.org/schema/context
-           http://www.springframework.org/schema/context/spring-context.xsd
+           https://www.springframework.org/schema/context/spring-context.xsd
            http://www.springframework.org/schema/util
-           http://www.springframework.org/schema/util/spring-util.xsd"&gt;
+           https://www.springframework.org/schema/util/spring-util.xsd"&gt;
 
   &lt;bean name="server" id="jolokia" class="org.jolokia.jvmagent.spring.SpringJolokiaAgent"&gt;
     &lt;property name="lookupConfig" value="false"/&gt;
@@ -519,11 +524,11 @@ except when annotated with <code>@JsonMBean</code>.</p>
        xmlns:jolokia="http://www.jolokia.org/jolokia-spring/schema/config"
        xsi:schemaLocation="
            http://www.springframework.org/schema/beans
-           http://www.springframework.org/schema/beans/spring-beans.xsd
+           https://www.springframework.org/schema/beans/spring-beans.xsd
            http://www.jolokia.org/jolokia-spring/schema/config
-           http://www.jolokia.org/jolokia-spring/schema/config/jolokia-config.xsd
+           https://www.jolokia.org/jolokia-spring/schema/config/jolokia-config.xsd
            http://www.springframework.org/schema/context
-           http://www.springframework.org/schema/context/spring-context.xsd"&gt;
+           https://www.springframework.org/schema/context/spring-context.xsd"&gt;
 
   &lt;context:mbean-export server="jolokiaServer"/&gt;
   &lt;jolokia:mbean-server id="jolokiaServer"/&gt;
@@ -538,7 +543,7 @@ except when annotated with <code>@JsonMBean</code>.</p>
 <p>There is an even simpler way to startup a Jolokia JVM agent
 with a default setup if you use a variant of the
 <code>jolokia-spring</code> module with the classifier
-<code>plugin</code>. This artefact contains a
+<code>plugin</code>. This artifact contains a
 predefined Spring configuration for starting up Jolokia with
 default values automatically:</p>
 </div>
@@ -548,7 +553,7 @@ default values automatically:</p>
   &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
   &lt;artifactId&gt;jolokia-spring&lt;/artifactId&gt;
   &lt;classifier&gt;plugin&lt;/classifier&gt;
-  &lt;version&gt;1.1.0&lt;/version&gt;
+  &lt;version&gt;2.0.0-M4&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -587,7 +592,7 @@ Spring application context. An <code>order</code>
 attribute can be used if multiple config declarations are
 present: the higher the order, the higher the priority. But
 then again, instead of using the plugin with an external
-configuration it is probably better to us an explicite
+configuration it is probably better to us an explicit
 <code>&lt;jolokia:agent&gt;</code> declaration, since
 you have to add to a Spring configuration file anyway.</p>
 </div>

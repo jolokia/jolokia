@@ -379,7 +379,7 @@ property <code>jolokia.discoveryEnabled</code> set to
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>discoveryAgentUrl</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Sets the URL to respond for multicast discovery requests. If
 given, <code>discoveryEnabled</code> is set
-implicetly to true. This URL can also be provied by an
+implicitly to true. This URL can also be provided by an
 environment variable
 <code>JOLOKIA_DISCOVERY_AGENT_URL</code> or the system
 property <code>jolokia.discoveryUrl</code>. Within the value you can use the
@@ -447,9 +447,9 @@ startup. Currently the following extra options are supported:</p>
 <td class="tableblock halign-left valign-top"><p class="tableblock">glassfish</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">bootAmx</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">If <code>false</code> and the agent is running on
-Glassfish, this will cause the AMX subsystem not to be booted
+GlassFish, this will cause the AMX subsystem not to be booted
 during startup. By default, AMX which contains all relevant
-MBeans for monitoring Glassfish is booted.</p></td>
+MBeans for monitoring GlassFish is booted.</p></td>
 </tr>
 </tbody>
 </table>
@@ -548,7 +548,7 @@ dependency on this jar artifact:</p>
     &lt;dependency&gt;
       &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
       &lt;artifactId&gt;jolokia-server-core&lt;/artifactId&gt;
-      &lt;version&gt;${jolokia.version}&lt;/version&gt;
+      &lt;version&gt;2.0.0-M4&lt;/version&gt;
     &lt;/dependency&gt;
   &lt;/dependencies&gt;
   &lt;!-- .... --&gt;
@@ -569,7 +569,7 @@ Jolokia-specific MBeans on the single
 deployments it is important to use the
 <code>mbeanQualifier</code> init parameter to
 distinguish multiple Jolokia MBeans by adding an extra
-propery to those MBeans' names. This also needs to be done if
+property to those MBeans' names. This also needs to be done if
 multiple webapps containing Jolokia agents are deployed on
 the same Java EE server.</p>
 </div>

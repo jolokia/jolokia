@@ -131,7 +131,7 @@ of JSR-160 connector&#8217;s seeked <em>transparent
 remoteness</em>. RMI has some arguable conceptually
 advantages, but hiding all remote aspects proved to have quite
 some disadvantages when it comes to the programming
-model. Explicite awareness of a 'heavy-weight' remote call is
+model. Explicit awareness of a 'heavy-weight' remote call is
 better than false transparency in order to know the price tag.</p>
 </li>
 </ul>
@@ -217,7 +217,7 @@ the other two as transitive dependencies):</p>
 <pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
   &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
   &lt;artifactId&gt;jolokia-client-java&lt;/artifactId&gt;
-  &lt;version&gt;1.2.2&lt;/version&gt;
+  &lt;version&gt;2.0.0-M4&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -563,7 +563,7 @@ ObjectName (which can be a pattern). A
 specifying an <em>inner path</em>, too.</p>
 <div class="paragraph">
 <p><code>J4pReadResponse</code> is the
-corresponding response type and allows typed acces to the
+corresponding response type and allows typed access to the
 fetched value for a single attribute fetch or to multiple
 values for a multi attribute read. In the latter case, the
 found object and attributes names can be retrieved as
@@ -651,7 +651,7 @@ the Jolokia is running on.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="client-java-execptions"><a class="anchor" href="#client-java-execptions"></a>Exceptions</h3>
+<h3 id="client-java-exceptions"><a class="anchor" href="#client-java-exceptions"></a>Exceptions</h3>
 <div class="paragraph">
 <p>In case of an error when executing a request a
 <code>J4pException</code> or one its subclass is

@@ -102,10 +102,10 @@
 </aside>
 <article class="doc">
 <div class="sect1">
-<h2 id="client-javascript"><a class="anchor" href="#client-javascript"></a>Javascript Client Library</h2>
+<h2 id="client-javascript"><a class="anchor" href="#client-javascript"></a>JavaScript Client Library</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The Jolokia Javascript library provides a Javascript API to the
+<p>The Jolokia JavaScript library provides a JavaScript API to the
 to the Jolokia agent. It comes with two layers, a
 basic one which allows for sending Jolokia requests to the agent
 synchronously or asynchronously and one with a simplified API
@@ -131,7 +131,7 @@ console.log("Heap Memory used: " + value);</code></pre>
 <div class="sect2">
 <h3 id="js-installation"><a class="anchor" href="#js-installation"></a>Installation</h3>
 <div class="paragraph">
-<p>The Jolokia Javascript library is distributed in two parts, in
+<p>The Jolokia JavaScript library is distributed in two parts, in
 compressed and uncompressed forms:</p>
 </div>
 <div class="dlist">
@@ -198,7 +198,7 @@ layer is a single <code>request()</code> method,
 which takes two arguments: A request object and an optional
 options object. For example, a synchronous request for obtaining
 the agent&#8217;s version for a agent running on the same server which
-delivered the Javascript looks like:</p>
+delivered the JavaScript looks like:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -285,7 +285,7 @@ bulk request cannot be used with JSONP requests). Also, when
 using a <code>read</code> type request for multiple
 attributes, this also can only be sent as "post"
 requests. If not given, a HTTP method is determined
-dyamically. If a method is selected which doesn&#8217;t fit to the
+dynamically. If a method is selected which doesn&#8217;t fit to the
 request, an error is raised.</p></td>
 </tr>
 <tr>
@@ -315,7 +315,7 @@ OK (200) which happens if the request JMX operation
 fails. This callback receives the full Jolokia response
 object (with a key <code>error</code> set). If no error
 callback is given, but an asynchronous operation is
-performed, the error response is printed to the Javascript
+performed, the error response is printed to the JavaScript
 console by default.</p></td>
 </tr>
 <tr>
@@ -411,7 +411,7 @@ only when the returned Jolokia response has a status code of
 <code>200</code>, otherwise the callback(s) given with
 the <code>error</code> option are consulted. If no error
 callback is given, the error is printed on the console by
-default. As for success callbacks, error callbacks reveive the
+default. As for success callbacks, error callbacks receive the
 Jolokia error response as a JSON object.</p>
 </div>
 <div class="paragraph">
@@ -489,8 +489,8 @@ for details).</p>
 <p>The Jolokia agent also supports
 <a href="https://en.wikipedia.org/wiki/JSONP">JSONP</a> requests
 for cases where the Jolokia agent is served on a different server or port
-than the Javascript client. By default, such access is forbidden by the so called
-<em>same-origin-policy</em>. To swith on JSONP, the
+than the JavaScript client. By default, such access is forbidden by the so called
+<em>same-origin-policy</em>. To switch on JSONP, the
 option <code>jsonp</code> should be set to
 <code>"true"</code>.</p>
 </div>
@@ -500,7 +500,7 @@ agent supports two HTTP methods, <code>GET</code> and
 <code>POST</code>. <code>POST</code> is more
 powerful since it supports more features. e.g. bulk requests and
 JMX proxy requests are only possible with POST. By default, the
-Jolokia Javascript library selects an HTTP method automatically,
+Jolokia JavaScript library selects an HTTP method automatically,
 which is <code>GET</code> for simple cases and <code>POST</code>
 for more sophisticated requests. The HTTP method can be
 overridden by setting the option <code>method</code> to
@@ -666,7 +666,7 @@ additional server-specific information. See
 <a href="#version">[version]</a> for more information about this
 method.</p>
 <div class="paragraph">
-<p>A sample return value for a Glassfish server looks like:</p>
+<p>A sample return value for a GlassFish server looks like:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -764,7 +764,7 @@ function is called only with the responses, which carry a
 value. If none of the registered requests produced a
 response with value (i.e. the server decided that there
 was no update for any request), then a call to the callback function is
-skipped competely.</p>
+skipped completely.</p>
 </div>
 <div class="paragraph">
 <p><code>register()</code> returns a handle which can be used
@@ -877,7 +877,7 @@ otherwise.</p>
 <div class="sect2">
 <h3 id="js-cubism"><a class="anchor" href="#js-cubism"></a>Jolokia as a Cubism Source</h3>
 <div class="paragraph">
-<p><a href="https://square.github.com/cubism/">Cubism</a> is a Javascript library for
+<p><a href="https://square.github.com/cubism/">Cubism</a> is a JavaScript library for
 plotting time-series data and is based on &lt;ulink
 <a href="https://d3js.org/">d3.js</a>. Jolokia comes with a plugin for Cubism and
 can act as a data source. The usage is quite simple: After
@@ -949,7 +949,7 @@ communications to the server.</p>
 <div class="paragraph">
 <p>From this source object, a
 <a href="https://github.com/square/cubism/wiki/Metric">metric</a>
-object can be easily created. This metric object embrasses one
+object can be easily created. This metric object embraces one
 or more Jolokia requests which are send to the server
 periodically. The response(s) are then used for calculating a
 single numerical value which gets plotted. For example:</p>
@@ -1032,7 +1032,7 @@ that many milliseconds ago and substract them from each other.
 <code>keepDelay</code>:: How many milliseconds before the oldest shown value should be
 kept in memory, which e.g. is necessary for delta
 charts. When <code>delta</code> is given, this
-value is implicetly set.</p>
+value is implicitly set.</p>
 </div>
 <div class="paragraph">
 <p>One or more metric objects can now be converted to charts and
@@ -1060,7 +1060,7 @@ d3.select("#charts").call(function(div) {
 <div class="sect2">
 <h3 id="js-maven"><a class="anchor" href="#js-maven"></a>Maven integration</h3>
 <div class="paragraph">
-<p>For Maven users' convenience, the Jolokia Javascript package is
+<p>For Maven users' convenience, the Jolokia JavaScript package is
 also available as a JavaScript artifact. It can be easily
 included with help of the
 <code>javascript-maven-plugin</code>.</p>
@@ -1069,7 +1069,7 @@ included with help of the
 <div class="content">
 <div class="title">Recommended plugin</div>
 <div class="paragraph">
-<p>Unfortunately, the "offical" version of this plugin hosted on
+<p>Unfortunately, the "official" version of this plugin hosted on
 Codehaus has been stuck at version
 <code>1.0-alpha-1-SNAPSHOT</code>. Although it is quite
 usable, in order to avoid a snapshot dependency, it is
@@ -1092,7 +1092,7 @@ be used within a <code>pom.xml</code>:</p>
       &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
       &lt;artifactId&gt;jolokia-client-javascript&lt;/artifactId&gt;
       &lt;type&gt;javascript&lt;/type&gt;
-      &lt;version&gt;1.0.5&lt;/version&gt;
+      &lt;version&gt;2.0.0-M4&lt;/version&gt;
     &lt;/dependency&gt;
     ....
   &lt;/dependencies&gt;
