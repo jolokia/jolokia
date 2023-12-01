@@ -3,17 +3,20 @@ package org.jolokia.service.serializer.json;
 import org.jolokia.server.core.service.serializer.SerializeOptions;
 import org.jolokia.server.core.service.serializer.ValueFaultHandler;
 import org.jolokia.service.serializer.json.simplifier.BigIntegerSimplifier;
+import org.jolokia.service.serializer.json.simplifier.FileSimplifier;
 import org.jolokia.service.serializer.json.simplifier.UrlSimplifier;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import javax.management.AttributeNotFoundException;
+import java.io.File;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Stack;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author Neven Radovanović
@@ -25,11 +28,13 @@ public class SimplifiersTest {
     private BigIntegerSimplifier bigIntegerSimplifier;
     private UrlSimplifier urlSimplifier;
     private ObjectToJsonConverter converter;
+    private FileSimplifier fileSimplifier;
 
     @BeforeMethod
     public void setup() {
         bigIntegerSimplifier = new BigIntegerSimplifier();
         urlSimplifier = new UrlSimplifier();
+        fileSimplifier = new FileSimplifier();
 
         // Needed for subclassing final object
         converter = new ObjectToJsonConverter(null);
@@ -55,6 +60,13 @@ public class SimplifiersTest {
         URL url = new URL("https://www.jolokia.org");
         Object result = urlSimplifier.extractObject(converter, url, new Stack<>(), false);
         assertEquals(result, url);
+    }
+
+    @Test
+    public void fileSimplifier() throws AttributeNotFoundException {
+        File file = new File("/etc/os-release");
+        Object result = fileSimplifier.extractObject(converter, file, new Stack<>(), true);
+        assertTrue(result.toString().contains("{\"name\":\"os-release\""));
     }
 
     @Test

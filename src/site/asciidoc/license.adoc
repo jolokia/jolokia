@@ -31,19 +31,13 @@ but please don't reuse it for something different than Jolokia.
 Jolokia uses some 3rd party software, which is delivered as part of
 the agents. These are
 
-* https://code.google.com/p/json-simple/[json-simple,role=externalLink] released
+* https://code.google.com/archive/p/json-simple/[json-simple,role=externalLink] released
 under the Apache License 2.0 as well.
-* The OSGi bundle includes the
-https://github.com/apache/felix-dev/tree/master/http[Apache
-Felix HttpService Bundle,role=externalLink] which is licensed under the APL.
-* This web-site uses the https://960.gs/[960 Grid System,role=externalLink] for its
-layout. This is released under the GPL and MIT license.
-* The reference guide's stylesheets are adapted from
-https://www.gradle.org[Gradle,role=externalLink], which are released under the
-Apache License.
-* Syntax Highlighting is done with help of
-https://github.com/googlearchive/code-prettify[google-code-prettify,role=externalLink],
-Apache licensed, too.
+* The reference guide is using https://antora.org/[Antora site generator]
+* The reference guide's stylesheets are using https://gitlab.com/antora/antora-ui-default[Antora Default UI] with minor CSS changes
+* `jolokia-client-kubernetes` is using https://github.com/fabric8io/kubernetes-client/[Fabric8 Kubernetes Client] under the Apache License 2.0
+* `jolokia-support-spring` and Spring-related examples are using https://spring.io/projects/spring-framework[Spring Framework] and https://spring.io/projects/spring-boot[Spring Boot] under the Apache License 2.0
+* `jolokia-client-java` is based on https://hc.apache.org/httpcomponents-client-4.5.x/index.html[Apache HTTP Client 4] under the Apache License 2.0
 
 === Apache License
 

@@ -92,7 +92,9 @@ public class JolokiaMBeanServerHolder implements JolokiaMBeanServerHolderMBean {
 
     // Create a proxy for the MBeanServer
     private static MBeanServer createJolokiaMBeanServer(Serializer pSerializer) {
-        return (MBeanServer) Proxy.newProxyInstance(JolokiaMBeanServerHolder.class.getClassLoader(), new Class[]{MBeanServer.class},                                                    new JolokiaMBeanServerHandler(pSerializer));
+        return (MBeanServer) Proxy.newProxyInstance(JolokiaMBeanServerHolder.class.getClassLoader(),
+                new Class[]{MBeanServer.class},
+                new JolokiaMBeanServerHandler(pSerializer));
     }
 
     /**
