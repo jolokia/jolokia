@@ -24,94 +24,81 @@
   </formats>
   <includeBaseDirectory>true</includeBaseDirectory>
   <baseDirectory>jolokia-${project.version}</baseDirectory>
-  <moduleSets>
+  <dependencySets>
     <!-- agents -->
-    <moduleSet>
+    <dependencySet>
       <includes>
-        <include>org.jolokia:jolokia-agent-jvm</include>
+        <include>org.jolokia:jolokia-agent-jvm:jar:standalone</include>
       </includes>
-      <binaries>
-        <outputFileNameMapping>jolokia-agent-jvm.jar</outputFileNameMapping>
-        <outputDirectory>agents</outputDirectory>
-        <unpack>false</unpack>
-        <includeDependencies>false</includeDependencies>
-      </binaries>
-      <useAllReactorProjects>true</useAllReactorProjects>
-    </moduleSet>
-    <moduleSet>
+      <outputFileNameMapping>jolokia-agent-jvm-standalone.jar</outputFileNameMapping>
+      <outputDirectory>agents</outputDirectory>
+      <unpack>false</unpack>
+      <useTransitiveDependencies>false</useTransitiveDependencies>
+      <useProjectArtifact>false</useProjectArtifact>
+    </dependencySet>
+    <dependencySet>
       <includes>
         <include>org.jolokia:jolokia-agent-osgi</include>
       </includes>
-      <binaries>
-        <outputFileNameMapping>jolokia-agent-osgi.jar</outputFileNameMapping>
-        <outputDirectory>agents</outputDirectory>
-        <unpack>false</unpack>
-        <includeDependencies>false</includeDependencies>
-      </binaries>
-      <useAllReactorProjects>true</useAllReactorProjects>
-    </moduleSet>
-    <moduleSet>
+      <outputFileNameMapping>jolokia-agent-osgi.jar</outputFileNameMapping>
+      <outputDirectory>agents</outputDirectory>
+      <unpack>false</unpack>
+      <useTransitiveDependencies>false</useTransitiveDependencies>
+      <useProjectArtifact>false</useProjectArtifact>
+    </dependencySet>
+    <dependencySet>
       <includes>
-        <include>org.jolokia:jolokia-agent-war</include>
+        <include>org.jolokia:jolokia-agent-war:war</include>
       </includes>
-      <binaries>
-        <outputFileNameMapping>jolokia-agent.war</outputFileNameMapping>
-        <outputDirectory>agents</outputDirectory>
-        <unpack>false</unpack>
-        <includeDependencies>false</includeDependencies>
-      </binaries>
-      <useAllReactorProjects>true</useAllReactorProjects>
-    </moduleSet>
-    <moduleSet>
+      <outputFileNameMapping>jolokia-agent.war</outputFileNameMapping>
+      <outputDirectory>agents</outputDirectory>
+      <unpack>false</unpack>
+      <useTransitiveDependencies>false</useTransitiveDependencies>
+      <useProjectArtifact>false</useProjectArtifact>
+    </dependencySet>
+    <dependencySet>
       <includes>
-        <include>org.jolokia:jolokia-agent-war-unsecured</include>
+        <include>org.jolokia:jolokia-agent-war-unsecured:war</include>
       </includes>
-      <binaries>
-        <outputFileNameMapping>jolokia-agent-unsecured.war</outputFileNameMapping>
-        <outputDirectory>agents</outputDirectory>
-        <unpack>false</unpack>
-        <includeDependencies>false</includeDependencies>
-      </binaries>
-      <useAllReactorProjects>true</useAllReactorProjects>
-    </moduleSet>
+      <outputFileNameMapping>jolokia-agent-unsecured.war</outputFileNameMapping>
+      <outputDirectory>agents</outputDirectory>
+      <unpack>false</unpack>
+      <useTransitiveDependencies>false</useTransitiveDependencies>
+      <useProjectArtifact>false</useProjectArtifact>
+    </dependencySet>
     <!-- clients -->
-    <moduleSet>
+    <dependencySet>
       <includes>
         <include>org.jolokia:jolokia-client-java</include>
       </includes>
-      <binaries>
-        <outputFileNameMapping>jolokia-client.jar</outputFileNameMapping>
-        <outputDirectory>clients/java</outputDirectory>
-        <unpack>false</unpack>
-        <includeDependencies>true</includeDependencies>
-      </binaries>
-      <useAllReactorProjects>true</useAllReactorProjects>
-    </moduleSet>
-    <moduleSet>
+      <outputFileNameMapping>jolokia-client-java.jar</outputFileNameMapping>
+      <outputDirectory>clients/java</outputDirectory>
+      <unpack>false</unpack>
+      <useTransitiveDependencies>false</useTransitiveDependencies>
+      <useProjectArtifact>false</useProjectArtifact>
+    </dependencySet>
+    <!-- support -->
+    <dependencySet>
       <includes>
         <include>org.jolokia:jolokia-support-jmx</include>
       </includes>
-      <binaries>
-        <outputFileNameMapping>jolokia-jmx.jar</outputFileNameMapping>
-        <outputDirectory>jmx</outputDirectory>
-        <unpack>false</unpack>
-        <includeDependencies>false</includeDependencies>
-      </binaries>
-      <useAllReactorProjects>true</useAllReactorProjects>
-    </moduleSet>
-    <moduleSet>
+      <outputFileNameMapping>jolokia-support-jmx.jar</outputFileNameMapping>
+      <outputDirectory>support</outputDirectory>
+      <unpack>false</unpack>
+      <useTransitiveDependencies>false</useTransitiveDependencies>
+      <useProjectArtifact>false</useProjectArtifact>
+    </dependencySet>
+    <dependencySet>
       <includes>
         <include>org.jolokia:jolokia-support-spring</include>
       </includes>
-      <binaries>
-        <outputFileNameMapping>jolokia-spring.jar</outputFileNameMapping>
-        <outputDirectory>jmx</outputDirectory>
-        <unpack>false</unpack>
-        <includeDependencies>false</includeDependencies>
-      </binaries>
-      <useAllReactorProjects>true</useAllReactorProjects>
-    </moduleSet>
-  </moduleSets>
+      <outputFileNameMapping>jolokia-support-spring.jar</outputFileNameMapping>
+      <outputDirectory>support</outputDirectory>
+      <unpack>false</unpack>
+      <useTransitiveDependencies>false</useTransitiveDependencies>
+      <useProjectArtifact>false</useProjectArtifact>
+    </dependencySet>
+  </dependencySets>
   <fileSets>
     <fileSet>
       <includes>

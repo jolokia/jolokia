@@ -56,4 +56,42 @@
     </plugins>
   </build>
 
+  <dependencies>
+
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-agent-war</artifactId>
+      <type>war</type>
+    </dependency>
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-agent-war-unsecured</artifactId>
+      <type>war</type>
+    </dependency>
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-agent-jvm</artifactId>
+      <classifier>standalone</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-agent-osgi</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-client-java</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-support-jmx</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-support-spring</artifactId>
+    </dependency>
+
+  </dependencies>
+
 </project>
