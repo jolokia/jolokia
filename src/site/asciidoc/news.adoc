@@ -15,12 +15,14 @@
 ////
 == News
 
-=== Jolokia has a new home!
+=== Jolokia 2 is released!
 
 [.news-date]
 2023-12-01
 
 After years of preparation, reviewing, restructuring, refactoring and polishing, Jolokia 2.0 is released and available in https://repo.maven.apache.org/maven2/org/jolokia/[Maven Central].
+
+=== Jolokia has a new home!
 
 [.news-date]
 2023-07-13

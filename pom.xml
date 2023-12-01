@@ -196,6 +196,30 @@
               </resources>
             </configuration>
           </execution>
+          <execution>
+            <!--
+              Jolokia Javascript files are copied into documentation to be used by some examples
+            -->
+            <id>copy-javascript</id>
+            <phase>pre-site</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <inherited>false</inherited>
+            <configuration>
+              <outputDirectory>${project.build.directory}/site/js</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>client/javascript/src/main/javascript</directory>
+                  <includes>
+                    <include>jolokia.js</include>
+                    <include>jolokia-cubism.js</include>
+                    <include>jolokia-simple.js</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
 

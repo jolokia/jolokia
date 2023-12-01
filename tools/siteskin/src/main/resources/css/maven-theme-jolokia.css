@@ -184,6 +184,12 @@ table.tableblock,
 div.listingblock {
   margin: 0 0 0.7em 0;
 }
+div.paragraph>div.title {
+  color: #555;
+  margin: 0.4em 0;
+  font-weight: bold;
+  font-size: 14px;
+}
 
 div.ulist li {
   line-height: 1.7em;
@@ -294,7 +300,7 @@ div.note table {
   position: relative;
   margin-top: 2em;
   margin-left: 2em;
-  border: 1px solid #ddd;
+  border: 1px dotted #3366aa;
   background-color: #f8f8f8;
 }
 div.note table td.icon {
@@ -311,7 +317,10 @@ div.note table td.icon {
   border-radius: 4px;
 }
 div.note table td.content {
-  padding: 1em;
+  padding: 0.8em;
+}
+div.note table td.content div.paragraph {
+  margin: 0
 }
 
 /* Styles for doxia pages other than Asciidoc (like Maven reports) */
