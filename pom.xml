@@ -1202,6 +1202,7 @@
       <modules>
         <module>support/spring</module>
         <module>examples/spring</module>
+        <module>examples/spring-boot</module>
       </modules>
     </profile>
 
