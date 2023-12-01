@@ -304,6 +304,7 @@ public class OsgiAgentActivator implements BundleActivator {
         properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/*");
         properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
                 String.format("(%s=jolokia)", HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME));
+        properties.put("load-on-startup", "0"); // Pax Web specific property
         Dictionary<String, String> config = getConfiguration();
         for (Enumeration<String> e = config.keys(); e.hasMoreElements(); ) {
             String key = e.nextElement();

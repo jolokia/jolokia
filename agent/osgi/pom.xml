@@ -131,7 +131,6 @@
           <instructions>
             <Bundle-SymbolicName>org.jolokia.agent.osgi</Bundle-SymbolicName>
             <Bundle-Description>Jolokia OSGi Agent Bundle</Bundle-Description>
-
             <Bundle-Activator>org.jolokia.agent.osgi.JolokiaBundleActivator</Bundle-Activator>
             <DynamicImport-Package>org.osgi.service.cm;version=1.2</DynamicImport-Package>
             <Embed-Dependency>
@@ -184,6 +183,9 @@
               <!-- jolokia-service-discovery -->
               org.jolokia.service.discovery,
               org.jolokia.service.discovery.osgi,
+              <!-- jolokia-service-history -->
+              org.jolokia.service.history,
+              org.jolokia.service.history.osgi,
               <!-- jolokia-service-jsr160 -->
               org.jolokia.service.jsr160,
               org.jolokia.service.jsr160.osgi,
@@ -204,7 +206,7 @@
               org.osgi.framework;version="[1.8.0,2.0.0)",
               org.osgi.service.cm;version="[1.0.0,2.0.0)";resolution:=optional,
               org.osgi.service.log;version="[1.0.0,2.0.0)",
-              org.osgi.service.servlet;version="[2,3)";resolution:=optional,
+              org.osgi.service.servlet.context;version="[2.0,3)";resolution:=optional,
               org.osgi.util.tracker;version="[1.0.0,2.0.0)",
               *
             </Import-Package>
