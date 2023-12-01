@@ -31,6 +31,20 @@
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
+  <dependencyManagement>
+    <dependencies>
+
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-framework-bom</artifactId>
+        <version>${version.org.springframework}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+    </dependencies>
+  </dependencyManagement>
+
   <dependencies>
 
     <!-- Jolokia own artifacts -->
@@ -54,7 +68,6 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-context</artifactId>
-      <version>${version.org.springframework}</version>
     </dependency>
 
     <dependency>

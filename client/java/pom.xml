@@ -32,33 +32,6 @@
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
-  <dependencyManagement>
-    <dependencies>
-
-      <!-- Other dependencies -->
-
-      <dependency>
-        <groupId>org.eclipse.jetty</groupId>
-        <artifactId>jetty-bom</artifactId>
-        <version>${version.org.eclipse.jetty}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.eclipse.jetty</groupId>
-        <artifactId>jetty-server</artifactId>
-        <version>${version.org.eclipse.jetty}</version>
-        <exclusions>
-          <exclusion>
-            <groupId>org.eclipse.jetty.toolchain</groupId>
-            <artifactId>jetty-jakarta-servlet-api</artifactId>
-          </exclusion>
-        </exclusions>
-      </dependency>
-
-    </dependencies>
-  </dependencyManagement>
-
   <dependencies>
 
     <!-- Jolokia own artifacts -->
@@ -130,11 +103,19 @@
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-server</artifactId>
+      <version>${version.org.eclipse.jetty}</version>
       <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.eclipse.jetty.toolchain</groupId>
+          <artifactId>jetty-jakarta-servlet-api</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-servlet</artifactId>
+      <version>${version.org.eclipse.jetty}</version>
       <scope>test</scope>
     </dependency>
 
