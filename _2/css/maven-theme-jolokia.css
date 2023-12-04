@@ -386,6 +386,7 @@ dt {
 }
 dd {
   margin-left: 30px;
+  margin-bottom: 1em;
 }
 
 span.right {
