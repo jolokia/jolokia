@@ -24,27 +24,37 @@ installation and how to access the client.
 
 In order to start on a green field, we are installing a
 fresh Tomcat in which the agent-war is going to be
-installed. Download Tomcat 7 from its
-https://tomcat.apache.org/download-70.cgi[site,role=externalLink] and
+installed. Download Tomcat 10 from its
+https://tomcat.apache.org/download-10.cgi[site,role=externalLink] and
 extract it:
 
 [source,bash]
 ----
-$ tar zxvf apache-tomcat-7.*.tar.gz
-$ cd apache-tomcat-7.*
-$ TC=`pwd`
+$ unzip apache-tomcat-10.1.16.zip
+$ cd apache-tomcat-10.1.16/
+$ TC=$(pwd)
 ----
 
 Download the Jolokia WAR-agent and copy it into Tomcat's
-webapp directory:
+`webapps/` directory:
 
-[source,bash]
+[source,bash,subs="attributes,verbatim"]
 ----
-$ cd $TC/webapps
-$ wget \
-    https://repo1.maven.org/maven2/org/jolokia/jolokia-war/1.2.3/jolokia-war-1.2.3.war
-$ mv jolokia-war-1.2.3.war jolokia.war
+$ artifact=jolokia-agent-war
+$ version={jolokia-version}
+$ wget https://repo1.maven.org/maven2/org/jolokia/$artifact/$version/$artifact-$version.war \
+-O $TC/webapps/jolokia.war
 ----
+
+If `jolokia-agent-war-unsecured-{jolokia-version}.war` was used, it's be everything, but for standard WAR Agent we have to ensure that Tomcat has a user with `jolokia` role is configured in security realm.
+
+Just add:
+[source,xml]
+----
+<user username="jolokia" password="jolokia" roles="jolokia"/>
+----
+
+to `${TC}/conf/tomcat-users.xml`.
 
 === Startup and Verification
 
@@ -55,70 +65,115 @@ Now the container can be started with:
 $ $TC/bin/catalina.sh start
 ----
 
-In order to verify the installation, point your browser to https://localhost:8080/jolokia/version which should show up something like
+In order to verify the installation, point your browser to http://localhost:8080/jolokia/version[] which should show (after authenticating using `jolokia/jolokia` credentials) something like:
 
 image::images/jolokia_browser_version.png["Show up version",role=text-center]
+
+We can also access the agent using `curl` command:
+
+[source,bash]
+----
+$ curl -u jolokia:jolokia -i http://localhost:8080/jolokia/read/java.lang:type=Runtime/Name
+HTTP/1.1 200
+Cache-Control: no-cache
+Pragma: no-cache
+Date: Mon, 04 Dec 2023 11:02:59 GMT
+Expires: Mon, 04 Dec 2023 10:02:59 GMT
+Content-Type: text/plain;charset=utf-8
+Transfer-Encoding: chunked
+
+{"request":{"mbean":"java.lang:type=Runtime","attribute":"Name","type":"read"},
+    "value":"78033@everfree.forest","status":200,"timestamp":1701687779}
+----
 
 === A simple Java Client
 
 Let's try out the client side of Jolokia. This example will
-print out the memory usage of your tomcat:
+print out the memory usage of your Tomcat server:
 
 [source,java]
 ----
-import org.jolokia.client.*;
-import org.jolokia.client.request.*;
 import java.util.Map;
+
+import org.jolokia.client.J4pClient;
+import org.jolokia.client.request.J4pReadRequest;
+import org.jolokia.client.request.J4pReadResponse;
 
 public class JolokiaDemo {
 
     public static void main(String[] args) throws Exception {
-        J4pClient j4pClient = new J4pClient("https://localhost:8080/jolokia");
+        J4pClient j4pClient = J4pClient.url("http://localhost:8080/jolokia")
+                .user("jolokia")
+                .password("jolokia")
+                .build();
         J4pReadRequest req = new J4pReadRequest("java.lang:type=Memory", "HeapMemoryUsage");
         J4pReadResponse resp = j4pClient.execute(req);
-        Map<String,Long> vals = resp.getValue();
+        Map<String, Long> vals = resp.getValue();
         long used = vals.get("used");
         long max = vals.get("max");
         int usage = (int) (used * 100 / max);
-        System.out.println("Memory usage: used: " + used +
-                " / max: " + max + " = " + usage + "%");
+        System.out.println("Memory usage: used: " + used + " / max: " + max + " = " + usage + "%");
     }
+
 }
 ----
 
 Save this code-snippet under `JolokiaDemo.java`. Then download
 
-* https://repo1.maven.org/maven2/org/jolokia/jolokia-client-java/1.2.3/jolokia-client-java-1.2.3.jar[jolokia-client-java-1.2.3.jar,role=externalLink]
-* https://mirrors.ibiblio.org/pub/mirrors/maven2/com/googlecode/json-simple/json-simple/1.1.1/json-simple-1.1.1.jar[json-simple,role=externalLink]
-* https://mirrors.ibiblio.org/pub/mirrors/maven2/org/apache/httpcomponents/httpclient-osgi/4.3.3/httpclient-osgi-4.3.3.jar[httpclient-osgi-4.3.3.jar,role=externalLink]
-* https://mirrors.ibiblio.org/pub/mirrors/maven2/org/apache/httpcomponents/httpcore/4.3.3/httpcore-4.3.3.jar[httpcore-4.3.3.jar,role=externalLink]
-* https://mirrors.ibiblio.org/pub/mirrors/maven2/commons-logging/commons-logging/1.1.1/commons-logging-1.1.1.jar[commons-logging-1.1.1.jar,role=externalLink]
+* https://repo1.maven.org/maven2/org/jolokia/jolokia-client-java/{jolokia-version}/jolokia-client-java-{jolokia-version}.jar[jolokia-client-java-{jolokia-version},role=externalLink]
+* https://repo1.maven.org/maven2/org/apache/httpcomponents/httpclient/4.5.14/httpclient-4.5.14.jar[httpclient-4.5.14.jar,role=externalLink]
+* https://repo1.maven.org/maven2/org/apache/httpcomponents/httpcore/4.4.16/httpcore-4.4.16.jar[httpcore-4.4.16.jar,role=externalLink]
+* https://repo1.maven.org/maven2/com/googlecode/json-simple/json-simple/1.1.1/json-simple-1.1.1.jar[json-simple-1.1.1.jar,role=externalLink]
+* https://repo1.maven.org/maven2/commons-logging/commons-logging/1.2/commons-logging-1.2.jar[commons-logging-1.2.jar,role=externalLink]
+* https://repo1.maven.org/maven2/commons-codec/commons-codec/1.16.0/commons-codec-1.16.0.jar[commons-codec-1.16.0.jar,role=externalLink]
 
-and put it into the same directory as this demo
-class. Finally, compile the demo and let it run:
+and put these libraries into the same directory as this demo class. Finally, compile the demo and let it run:
 
-[source,bash]
+[source,bash,subs="attributes,verbatim"]
 ----
-$ export CLASSPATH=json-simple-1.1.1.jar:jolokia-client-java-1.2.3.jar:\
-    httpcore-4.3.3.jar:httpclient-osgi-4.3.3.jar:commons-logging-1.1.1.jar:.
+$ export CLASSPATH=.:\
+jolokia-client-java-{jolokia-version}.jar:\
+httpclient-4.5.14.jar:\
+httpcore-4.4.16.jar:\
+json-simple-1.1.1.jar:\
+commons-logging-1.2.jar:\
+commons-codec-1.16.0.jar
 
 $ javac JolokiaDemo.java
+
 $ java JolokiaDemo
-Memory usage: used: 9526648 / max: 129957888 = 7%
+Memory usage: used: 53792744 / max: 8334082048 = 0%
 ----
 
-If you are using Maven, please don't worry about the
-dependencies which just have been downloaded manually for the
-sake of demonstration. Jolokia's Java client library comes
-with a well defined dependency set, so Maven will do the
-magic. (In fact, the client library only depends on
-jsons-simple and http-components directly)
+If you are using Maven, it is enough to include single dependency:
+[,xml,subs="attributes,verbatim"]
+----
+<dependency>
+    <groupId>org.jolokia</groupId>
+    <artifactId>jolokia-client-java</artifactId>
+    <version>{jolokia-version}</version>
+</dependency>
+----
+
+Remaining dependencies are available transitively:
+
+[,subs="attributes,verbatim"]
+----
++- org.jolokia:jolokia-client-java:jar:{jolokia-version}:compile
+   +- com.googlecode.json-simple:json-simple:jar:1.1.1:compile
+   +- org.apache.httpcomponents:httpcore:jar:4.4.16:compile
+   +- org.apache.httpcomponents:httpclient:jar:4.5.14:compile
+   |  \- commons-logging:commons-logging:jar:1.2:compile
+   \- commons-codec:commons-codec:jar:1.16.0:compile
+----
 
 === Install Jmx4Perl
 
+NOTE: This section is a tribute to link:about.html[Perl origins of Jolokia].
+
 The five minutes are probably over now, but I highly
 recommend to install
-https://www.jmx4perl.org[jmx4perl,role=externalLink] right
+https://metacpan.org/dist/jmx4perl[jmx4perl,role=externalLink] right
 now. Beside providing a Perl language binding for Jolokia,
 there are some cool command line tools included which are
 useful on their own.
@@ -141,14 +196,19 @@ installed with `cpan` if you have Perl installed:
 [source,bash]
 ----
 $ perl -MCPAN -e shell
-Terminal does not support AddHistory.
 
-cpan shell -- CPAN exploration and modules installation (v1.9205)
-ReadLine support available (maybe install Bundle::CPAN or Bundle::CPANxxl?)
+cpan shell -- CPAN exploration and modules installation (v2.36)
+Enter 'h' for help.
 
-cpan[1]> install JMX::Jmx4Perl
+cpan[1]>
+
+
+cpan[1]> notest install JMX::Jmx4Perl
 ...
-...
+Jmx4Perl comes with a set of supporting scripts, which
+are not necessarily required for using JMX::Jmx4Perl
+programmatically.
+
 jmx4perl
 ========
 
@@ -157,12 +217,12 @@ jmx4perl is a command line utility for accessing Jolokia agents
 and easy inspection of the JMX space.
 
 Install 'jmx4perl' ? (y/n) [y ]
-....
+...
 ----
 
 You will be asked for each featured script whether it should
 be installed in addition to the core Perl modules. Each of
-these scripts (jmx4perl, j4psh, jolokia, check_jmx4perl) will
+these scripts (`jmx4perl`, `j4psh`, `jolokia`, `check_jmx4perl`) will
 introduce a set of new depedencies of Perl modules which in
 turn might depend on other Perl modules or system
 libraries. Perl modules are resolved and installed
@@ -173,19 +233,56 @@ installed locally. It is recommended to install
 `libxml2-dev` with the package management tool of
 your OS (e.g. `apt-get install libxml2-dev`
 ). Alternatively, the OS package for XML::LibXML could be
-used. (e.g. `libxml-libxml-perl` for
-Ubuntu)
+used (e.g. `libxml-libxml-perl` for
+Ubuntu).
 
-When jmx4perl is installed, try out jmx4perl:
+When using non-root installation for Perl _site_, these environment variables are required (`cpan` shell suggests adding them to your `~/.bashrc`):
 
 [source,bash]
 ----
+export PATH="$HOME/perl5/bin${PATH:+:${PATH}}"
+export PERL5LIB="$HOME/perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}"
+export PERL_LOCAL_LIB_ROOT="$HOME/perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}}"
+export PERL_MB_OPT="--install_base \"$HOME/perl5\""
+export PERL_MM_OPT="INSTALL_BASE=$HOME/perl5"
+----
+
+When jmx4perl is installed, we can try it out:
+
 $ jmx4perl https://localhost:8080/jolokia list
-....
-$ jmx4perl https://localhost:8080/jolokia \
-    read java.lang:type=Memory HeapMemoryUsage
-$ jmx4perl --help
-$ man jmx4perl
+[source,bash]
+----
+$ jmx4perl --user jolokia --password jolokia http://localhost:8080/jolokia list java.lang:type=Runtime
+Attributes:
+    BootClassPath                       java.lang.String [ro], "BootClassPath"
+    BootClassPathSupported              boolean [ro], "BootClassPathSupported"
+    ClassPath                           java.lang.String [ro], "ClassPath"
+    InputArguments                      [Ljava.lang.String; [ro], "InputArguments"
+    LibraryPath                         java.lang.String [ro], "LibraryPath"
+    ManagementSpecVersion               java.lang.String [ro], "ManagementSpecVersion"
+    Name                                java.lang.String [ro], "Name"
+    ObjectName                          javax.management.ObjectName [ro], "ObjectName"
+    Pid                                 long [ro], "Pid"
+    SpecName                            java.lang.String [ro], "SpecName"
+    SpecVendor                          java.lang.String [ro], "SpecVendor"
+    SpecVersion                         java.lang.String [ro], "SpecVersion"
+    StartTime                           long [ro], "StartTime"
+    SystemProperties                    javax.management.openmbean.TabularData [ro], "SystemProperties"
+    Uptime                              long [ro], "Uptime"
+    VmName                              java.lang.String [ro], "VmName"
+    VmVendor                            java.lang.String [ro], "VmVendor"
+    VmVersion                           java.lang.String [ro], "VmVersion"
+Class: sun.management.RuntimeImpl
+Description: Information on the management interface of the MBean
+
+$ jmx4perl --user jolokia --password jolokia http://localhost:8080/jolokia \
+read java.lang:type=Memory HeapMemoryUsage
+    {
+      committed => 532676608,
+      init => 524288000,
+      max => 8334082048,
+      used => 53380576
+    }
 ----
 
 Next, I recommend to try out `j4psh`.  For
