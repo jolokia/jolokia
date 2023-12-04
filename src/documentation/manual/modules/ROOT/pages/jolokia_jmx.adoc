@@ -64,6 +64,9 @@ The Jolokia MBeanServer can be easily created and used with a locator:
 MBeanServer jolokiaServer = JolokiaMBeanServerUtil.getJolokiaMBeanServer();
 ----
 
+Internally, `javax.management.MBeanServerFactory.newMBeanServer()` is called, so it's not returned when
+calling `javax.management.MBeanServerFactory.findMBeanServer()`.
+
 This server is treated specially by a Jolokia Agent:
 
 * Every MBean registered at the Jolokia MBeanServer will never
@@ -101,7 +104,8 @@ if available.
 * Next every `MBeanServer` as detected by the _server
 detectors_ a queried in turn.
 * All MBeanServers returned by
-`MBeanServerFactory.findMBeanServer(null)` are
+`MBeanServerFactory.findMBeanServer(null)` (which should return all the `MBeanServers` created with
+`MBeanServerFactory.createMBeanServer()`, but not the ones created by `javax.management.MBeanServerFactory.newMBeanServer()`) are
 called if not already tried previously.
 * Finally, the
 `ManagementFactory.getPlatformMBeanServer()` is

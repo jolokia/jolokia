@@ -16,13 +16,13 @@
 
 == Concepts
 
-While link:reference/html/index.html[reference manual] contains all the details about Jolokia protocol, configuration, agents, etc., this page contains information about some high level concepts and core classes which are required to understand Jolokia goals.
+While link:reference/html/index.html[reference manual] contains all the details about Jolokia protocol, configuration, agents, etc., this page highlights some high level concepts and core classes which are required to understand Jolokia goals.
 
 === Main feature
 
 The most important feature of Jolokia is to provide a _protocol adaptor_ for accessing MBeanServer instances and managed beans available in single or multiple JVMs.
 
-image::images/jolokia_architecture.png[]
+image::images/jolokia_architecture.png[role=text-center]
 
 Chapter 5.3 of https://jcp.org/en/jsr/detail?id=3[JMX Specification 1.4] defines two means of remote access to JVM's MBeanServer instances:
 
@@ -43,13 +43,10 @@ There are 3 kinds of agents supported by Jolokia:
 
 JVM agent:: An agent installed using https://docs.oracle.com/en/java/javase/11/docs/api/jdk.attach/com/sun/tools/attach/VirtualMachine.html[JVM Attach API,role=externalLink] or https://docs.oracle.com/en/java/javase/11/docs/api/java.instrument/java/lang/instrument/package-summary.html[Java Instrument API,role=externalLink].
 
-// TODO: Servlet 4 vs Servlet 6
 WAR agent:: An agent started from WAR application with `org.jolokia.server.core.http.AgentServlet` servlet declared.
 
-// TODO: Move to OSGi CMPN Whiteboard
-OSGi agent:: An agent started from a bundle, which registers `org.jolokia.server.core.osgi.OsgiAgentServlet` using https://docs.osgi.org/specification/osgi.cmpn/8.0.0/service.http.html[OSGi CMPN R8 Http Service].
+OSGi agent:: An agent started from a bundle, which registers `org.jolokia.server.core.osgi.OsgiAgentServlet` using https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard Specification for Jakarta™ Servlet].
 
-// TODO: use Netty/Undertow/Vert.x/Tomcat/Jetty for JVM Agent?
 JVM Agent uses JDK's https://docs.oracle.com/en/java/javase/11/docs/api/jdk.httpserver/com/sun/net/httpserver/package-summary.html[own HTTP server]. WAR agent just runs inside Servlet container and OSGi agent uses whatever HTTP server is available in the OSGi runtime.
 
 [#support-classes]
@@ -62,27 +59,27 @@ For all the agents, Jolokia uses the same set of classes for two kinds of proces
 
 ===== Initialization stage
 
-* `org.jolokia.server.core.config.Configuration` - interface for accessing the configuration
-* `org.jolokia.server.core.service.api.LogHandler` - interface used for logging, delegates to underlying (Servlet, OSGi Logging, `stdout`) logging mechanism
-* `org.jolokia.server.core.service.api.JolokiaServiceManager` - interface used to configure and discover services used throughout Jolokia
-* `org.jolokia.server.core.service.api.JolokiaContext` - single access point to access configuration, Jolokia services and register MBeans in platform MBeanServer
-* `org.jolokia.server.core.detector.ServerDetector` - used to detect platofm-specific `javax.management.MBeanServer` instances (which may not be detected using `javax.management.MBeanServerFactory.findMBeanServer(null)`)
+`org.jolokia.server.core.config.Configuration`:: an interface for accessing the configuration
+`org.jolokia.server.core.service.api.LogHandler`:: an interface used for logging, delegates to underlying (Servlet, OSGi Logging, `stdout`) logging mechanism
+`org.jolokia.server.core.service.api.JolokiaServiceManager`:: an interface used to configure and discover services used throughout Jolokia
+`org.jolokia.server.core.service.api.JolokiaContext`:: single access point to access configuration, Jolokia services and register MBeans in platform MBeanServer
+`org.jolokia.server.core.detector.ServerDetector`:: is used to detect platofm-specific `javax.management.MBeanServer` instances (which may not be detected using `javax.management.MBeanServerFactory.findMBeanServer(null)`)
 
 ===== Request processing stage
 
-* `org.jolokia.server.core.service.api.Restrictor` - ACL style interface for restricting remote access
-* `org.jolokia.server.core.http.HttpRequestHandler` - translates HTTP request into `JolokiaRequest`
-* `org.jolokia.server.core.request.JolokiaRequest` - represents generic Jolokia request
-* `org.jolokia.server.core.backend.BackendManager` - handles generic `JolokiaRequest`
-* `org.jolokia.server.core.backend.RequestDispatcher` - used by backend manager to process `JolokiaRequest`
-* `org.jolokia.server.core.service.request.RequestInterceptor` - used to process a result JSON from request dispatcher
-* `org.jolokia.server.core.service.request.RequestHandler` - a service obtained from `JolokiaContext`. Request dispatcher obtains available handlers from `JolokiaContext` (and `JolokiaServiceManager`) and passes the incoming request to each of the handlers.
+`org.jolokia.server.core.service.api.Restrictor`:: ACL style interface for restricting remote access
+`org.jolokia.server.core.http.HttpRequestHandler`:: translates HTTP request into `JolokiaRequest`
+`org.jolokia.server.core.request.JolokiaRequest`:: represents generic Jolokia request
+`org.jolokia.server.core.backend.BackendManager`:: handles generic `JolokiaRequest`
+`org.jolokia.server.core.backend.RequestDispatcher`:: is used by backend manager to process `JolokiaRequest`
+`org.jolokia.server.core.service.request.RequestInterceptor`:: is used to process a result JSON from request dispatcher
+`org.jolokia.server.core.service.request.RequestHandler`:: a service obtained from `JolokiaContext`. Request dispatcher obtains available handlers from `JolokiaContext` (and `JolokiaServiceManager`) and passes the incoming request to each of the handlers.
 
 ===== Available request handlers
 
 Jolokia provides several implementations of `org.jolokia.server.core.service.request.RequestHandler`:
 
-* `org.jolokia.service.jmx.LocalRequestHandler` which directly calls `javax.management.MBeanServer` (actually a merged view of available MBeanServer instances)
-* `org.jolokia.service.jsr160.Jsr160RequestHandler` which calls remote `MBeanServer` through JSR-160 connector (`javax.management.remote.JMXConnector`)
-* `org.jolokia.support.spring.backend.SpringRequestHandler` which operates on beans obtained from Spring's `org.springframework.context.ApplicationContext` using `name` key from target `javax.management.ObjectName`.
-* `org.jolokia.server.core.service.impl.VersionRequestHandler` which doesn't really call any MBean, but simply returns version information of Jolokia agent.
+`org.jolokia.server.core.service.impl.VersionRequestHandler`:: doesn't really call any MBean, but simply returns version information of Jolokia agent.
+`org.jolokia.service.jmx.LocalRequestHandler`:: most important handler, which directly calls `javax.management.MBeanServer` (actually a merged view of available MBeanServer instances)
+`org.jolokia.service.jsr160.Jsr160RequestHandler`:: calls remote `MBeanServer` through JSR-160 connector (`javax.management.remote.JMXConnector`)
+`org.jolokia.support.spring.backend.SpringRequestHandler`:: operates on beans obtained from Spring's `org.springframework.context.ApplicationContext` using `name` key from target `javax.management.ObjectName`.
