@@ -33,7 +33,7 @@ Tomcat server (without any error handling, though):
 [source,bash,options=nowrap]
 ----
 #!/bin/bash
-base_url="https://localhost:8080/jolokia"
+base_url="http://localhost:8080/jolokia"
 memory_url="${base_url}/read/java.lang:type=Memory/HeapMemoryUsage"
 used=`wget -q -O - "${memory_url}/used" | sed 's/^.*"value":\([0-9]*\).*$/\1/'`
 max=`wget -q -O - "${memory_url}/max" | sed 's/^.*"value":\([0-9]*\).*$/\1/'`
@@ -55,7 +55,7 @@ this case with a single HTTP request):
 #!/usr/bin/perl
 use JMX::Jmx4Perl;
 use strict;
-my $jmx = new JMX::Jmx4Perl(url => "https://localhost:8080/jolokia");
+my $jmx = new JMX::Jmx4Perl(url => "http://localhost:8080/jolokia");
 my $memory = $jmx->get_attribute("java.lang:type=Memory","HeapMemoryUsage");
 if ($memory->{"used"} / $memory->{"max"} > 0.9) {
     system("/etc/init.d/tomcat restart");
@@ -110,7 +110,7 @@ import java.util.Map;
 public class JolokiaSample {
 
     public static void main(String[] args) throws Exception {
-        J4pClient j4pClient = new J4pClient("https://localhost:8080/jolokia");
+        J4pClient j4pClient = new J4pClient("http://localhost:8080/jolokia");
         J4pReadRequest req = new J4pReadRequest("java.lang:type=Memory",
                                                 "HeapMemoryUsage");
         J4pReadResponse resp = j4pClient.execute(req);

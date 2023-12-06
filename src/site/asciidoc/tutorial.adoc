@@ -249,7 +249,7 @@ export PERL_MM_OPT="INSTALL_BASE=$HOME/perl5"
 
 When jmx4perl is installed, we can try it out:
 
-$ jmx4perl https://localhost:8080/jolokia list
+$ jmx4perl http://localhost:8080/jolokia list
 [source,bash]
 ----
 $ jmx4perl --user jolokia --password jolokia http://localhost:8080/jolokia list java.lang:type=Runtime
@@ -302,4 +302,4 @@ https://vimeo.com/20215477[screencast,role=externalLink].
 
 That's all for now, I hope you enjoyed this first ride. For
 the next steps I recommend to have a look into
-link:reference/html/index.html[reference manual].
+link:reference/html/manual/index.html[reference manual].

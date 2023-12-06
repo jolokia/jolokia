@@ -37,7 +37,7 @@ By Jolokia _agent_ we mean an _entity_ that exposes internal structure o the app
 |Core agent functionality which is sufficient to run Jolokia agent with JMX access and JSON serialization
 
 |`jolokia-jmx`
-|Helper module that makes it easier to register MBean using Jolokia own https://jolokia.org/reference/html/jmx.html[JMX MBean Server]
+|Helper module that makes it easier to register MBean using Jolokia own link:reference/html/manual/jmx.html[JMX MBean Server]
 |`jolokia-jsr160`
 |Agent module that adds JSR 160 request dispatcher which allows Jolokia to operate on MBeans registered in remote MBean Servers using JSR-160 JMX Remote protocol.
 

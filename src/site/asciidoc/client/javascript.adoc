@@ -34,7 +34,7 @@ proxy calls
 
 Documentation for the JavaScript library can be found in the
 reference manual in the chapter
-link:../reference/html/clients.html#client-javascript[JavaScript
+link:../reference/html/manual/clients.html#client-javascript[JavaScript
 Client Library].
 
 === Installation

@@ -104,13 +104,13 @@ HTTP `GET`
 request reads the used heap memory statistics of the instrumented JVM:
 
 ----
-https://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage
+http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage
 ----
 
-`https://localhost:8080/jolokia` is the base URL
+`http://localhost:8080/jolokia` is the base URL
 under which the agent is reachable.
 The same request can be done by POSTing the following body
-to the URL `https://localhost:8080/jolokia`:
+to the URL `http://localhost:8080/jolokia`:
 
 [source,json]
 ----

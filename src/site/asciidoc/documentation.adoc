@@ -25,9 +25,8 @@ sample Java application.
 
 === Reference Manual
 
-link:reference/html/index.html[reference manual] contains a comprehensive
-documentation to Jolokia, its agents and client bindings. There is also
-a link:reference/pdf/jolokia-reference.pdf[PDF version].
+link:reference/html/manual/index.html[reference manual] contains a comprehensive
+documentation to Jolokia, its agents and client bindings.
 
 === Talks and Screencast
 

@@ -16,7 +16,7 @@
 
 == Concepts
 
-While link:reference/html/index.html[reference manual] contains all the details about Jolokia protocol, configuration, agents, etc., this page highlights some high level concepts and core classes which are required to understand Jolokia goals.
+While link:reference/html/manual/index.html[reference manual] contains all the details about Jolokia protocol, configuration, agents, etc., this page highlights some high level concepts and core classes which are required to understand Jolokia goals.
 
 === Main feature
 

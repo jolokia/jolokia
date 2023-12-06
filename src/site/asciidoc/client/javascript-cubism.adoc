@@ -27,7 +27,7 @@ like a
 https://vis.berkeley.edu/papers/horizon/[horizon,role=externalLink]
 chart. The Jolokia integration polls the Jolokia agent
 periodically and remembers the values locally. It uses the
-link:../reference/html/clients.html#js-poller[scheduling
+link:../reference/html/manual/clients.html#js-poller[scheduling
 facility] of the Jolokia JavaScript library by sending a
 single bulk request for fetching the data for all charts and is
 hence very efficient.
@@ -78,7 +78,7 @@ and follows the general pattern used by Cubism. You first
 create a Jolokia source from the Cubism context and create
 metrics from this source. When a metric is created, it
 registers one or more Jolokia request for the
-link:../reference/html/clients.html#js-poller[Jolokia scheduler]
+link:../reference/html/manual/clients.html#js-poller[Jolokia scheduler]
 
 [source,javascript]
 ----
@@ -118,7 +118,7 @@ measuring only the increase rate for ten seconds.
 This sample also shows how to use wildcard patterns in a read
 request to fetch multiple values at once in a generic
 fashion. Wildcard reading is explained in detail in the
-link:../reference/html/protocol.html#read[reference manual].
+link:../reference/html/manual/protocol.html#read[reference manual].
 
 [source,javascript]
 ----

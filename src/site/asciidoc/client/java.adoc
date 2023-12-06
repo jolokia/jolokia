@@ -31,4 +31,4 @@ System.out.println(resp.getValue());
 
 This client library is described in detail with all
 configuration options in the
-link:../reference/html/clients.html#client-java[reference manual].
+link:../reference/html/manual/clients.html#client-java[reference manual].

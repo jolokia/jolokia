@@ -57,7 +57,7 @@ simple URL. Although this is still a bit cryptic, it is a good
 test to check the installation of Jolokia.
 
 Assuming that the agent is reachable under
-https://localhost:8080/jolokia, memory usage can
+http://localhost:8080/jolokia, memory usage can
 be checked with the browser:
 
 image::../images/jolokia_browser.png["Browser Snapshot",role=text-center]
