@@ -1,0 +1,67 @@
+////
+  Copyright 2009-2023 Roland Huss
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+        https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+
+== Using `curl`
+
+We can of course use any HTTP client to access Jolokia agent.
+One of the most popular and powerful tools is the https://curl.se/[`curl`] command.
+
+We can access the agent with simple GET requests:
+
+[,bash,options=nowrap]
+----
+$ curl -s -u \
+jolokia:jolokia http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage | jq .
+{
+  "request": {
+    "mbean": "java.lang:type=Memory",
+    "attribute": "HeapMemoryUsage",
+    "type": "read"
+  },
+  "value": {
+    "init": 524288000,
+    "committed": 532676608,
+    "max": 8334082048,
+    "used": 53842272
+  },
+  "status": 200,
+  "timestamp": 1701866205
+}
+----
+
+but it's also easy to send POST requests for example:
+[,bash,options=nowrap]
+----
+$ curl -s -u jolokia:jolokia \
+-H'Content-Type: application/json' \
+-XPOST -d '{"mbean":"java.lang:type=Memory","attribute":"HeapMemoryUsage","type":"read"}' \
+http://localhost:8080/jolokia | jq .
+{
+  "request": {
+    "mbean": "java.lang:type=Memory",
+    "attribute": "HeapMemoryUsage",
+    "type": "read"
+  },
+  "value": {
+    "init": 524288000,
+    "committed": 532676608,
+    "max": 8334082048,
+    "used": 53842272
+  },
+  "status": 200,
+  "timestamp": 1701866282
+}
+----

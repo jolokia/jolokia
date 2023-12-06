@@ -28,8 +28,8 @@ The JavaScript client binding provides the following features:
 serving the Javscript file
 * Support for all Jolokia features like bulk requests or JMX
 proxy calls
-* Simple access methods like `get_attribute` or
-`exec` in addition to a generic
+* Simple access methods like `getAttribute` or
+`execute` in addition to a generic
 `request` method.
 
 Documentation for the JavaScript library can be found in the
@@ -47,16 +47,13 @@ generic `request()`
 method. `jolokia-simple.js` adds to this
 definition methods for a simplified access, which are easier
 to use but less powerful. In addition these libs require
-https://www.jquery.com[jQuery] and, if the target
-brosers don't support native JSON serialization,
-https://github.com/douglascrockford/JSON-js[json2.js]. A typical setup in an HTML page
+https://www.jquery.com[jQuery]. A typical setup in an HTML page
 using the library looks like:
 
-[source,html]
+[,html]
 ----
 <head>
-    <script type="text/javascript" src="jquery-1.7.2.js"></script>
-    <script type="text/javascript" src="json2.js"></script>
+    <script type="text/javascript" src="jquery-3.7.1.js"></script>
     <script type="text/javascript" src="jolokia.js"></script>
     <script type="text/javascript" src="jolokia-simple.js"></script>
 </head>
@@ -77,47 +74,34 @@ Heap Memory from a Jolokia agent:
 // Host which serves this document:
 var j4p = new Jolokia("/jolokia");
 
-// Request the memory information asynchronously and print it on
-// the console
+// Request the memory information asynchronously and print it on the console
 j4p.request({
-    type: "read",
-    mbean: "java.lang:type=Memory",
-    attribute: "HeapMemoryUsage"
-},
-{
-    success: function(response) {
-        console.log(JSON.stringify(response));
-        console.log("Heap-Memory used: " + response.value.used);
-    }
-});
+        type: "read",
+        mbean: "java.lang:type=Memory",
+        attribute: "HeapMemoryUsage"
+    },
+    {
+        success: function(response) {
+            console.log(JSON.stringify(response));
+            console.log("Heap-Memory used: " + response.value["used"]);
+        }
+    });
 
 // Same as above, but synchronously and with the simple API:
 console.log("Heap-Memory used:" +
-            j4p.getAttribute("java.lang.type=Memory","HeapMemoryUsage","used"));
+            j4p.getAttribute("java.lang:type=Memory","HeapMemoryUsage","used"));
 ----
-
-== Jolokia as Cubism source
-
-https://square.github.com/cubism/[Cubism] is a
-https://d3js.org/[d3.js] plugin for plotting time
-series data. It can be easily be used with Jolokia for
-periodically reading JMX attributes and plotting them in the
-browser.
-
-More details on the Jolokia-Cubism integration along with some
-demo can be found on an
-link:javascript-cubism.html[extra page].
 
 == Testing
 
-This library comes with a test webapplication for
-integration testing this library from within a browser. The
-submodule `test-app` creates a WAR artifact which
+Jolokia comes with a test web application for
+integration testing. It contains https://qunitjs.com/[QUnit] based tests that run within a browser. The
+submodule `examples/client-javascript-test-app` creates a WAR artifact which
 can be deployed in a servlet container. The Jolokia agent is
 contained and reachable under the URL
 `/jolokia`. The unit tests can be found at
 
-[cols=2*]
+[cols=2*,role=bodyTable]
 |===
 |`jolokia-test.html`
 |QUnit tests for the base library
@@ -129,19 +113,18 @@ contained and reachable under the URL
 |All the tests above combined
 |===
 
-This `test-app` is also configured for Jetty, so
-a
+This Maven module is using `jetty-maven-plugin`, so we can run the application using:
 
 [source,bash]
 ----
-mvn jetty:run-exploded
+$ mvn clean package jetty:run-war -f examples/client-javascript-test-app/
 ----
 
-will startup a Jetty and deploy this test application.
+Jetty server will be started with the test application deployed.
 
-In order to simplify development of unit-test a shell script
-`makeLinks.sh` is included which can be used in
-unix like OSs to create symbolic links to the JavaScript
+In order to simplify development of unit tests, a shell script
+`makeLinks.sh` is included in `examples/client-javascript-test-app` module, which can be used in
+Linux like OS'es to create symbolic links to the JavaScript and HTML
 files in the source directories. A typical workflow looks
 like:
 
@@ -149,9 +132,9 @@ like:
 +
 [source,bash]
 ----
-mvn clean install
-sh makeLinks.sh
-mvn jetty:run-exploded
+$ cd examples/client-javascript-test-app/
+$ mvn clean package jetty:run-war
+$ ./makeLinks.sh # in separate terminal window
 ----
 * Edit and save the JavaScript files (e.g. `jolokia.js`
 or `jolokia-test.js`)

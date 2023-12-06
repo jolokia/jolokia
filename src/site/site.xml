@@ -73,6 +73,7 @@
       <item name="Java" href="client/java.html"/>
       <item name="JavaScript" href="client/javascript.html"/>
       <item name="Perl" href="client/perl.html"/>
+      <item name="Curl" href="client/curl.html"/>
     </menu>
     <!--
       https://maven.apache.org/plugins/maven-site-plugin/examples/sitedescriptor.html#including-generated-content

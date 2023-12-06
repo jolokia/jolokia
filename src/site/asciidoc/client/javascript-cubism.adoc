@@ -14,6 +14,7 @@
   limitations under the License.
 ////
 
+// TODO: check and update if needed
 == Jolokia-Cubism Integration
 
 https://square.github.com/cubism/[Cubism,role=externalLink] is a

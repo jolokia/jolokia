@@ -17,16 +17,19 @@
 == Jolokia Java Client library
 
 The Jolokia Java client bindings provide typeless access to a
-remote JMX MBeanServer. Its programming model follows a
-request-response paradigm and  is easy to use:
+remote JMX `MBeanServer`. Its programming model follows a
+request-response paradigm and is easy to use:
 
 [source,java,options=nowrap]
 ----
-J4pClient j4pClient = new J4pClient("http://localhost:8080/jolokia");
-J4pReadRequest req = new J4pReadRequest("java.lang:type=Memory","HeapMemoryUsage");
+J4pClient j4pClient = J4pClient.url("http://localhost:8080/jolokia")
+        .user("jolokia")
+        .password("jolokia")
+        .build();
+J4pReadRequest req = new J4pReadRequest("java.lang:type=Memory", "HeapMemoryUsage");
 req.setPath("used");
 J4pReadResponse resp = j4pClient.execute(req);
-System.out.println(resp.getValue());
+System.out.println("Memory used: " + resp.getValue());
 ----
 
 This client library is described in detail with all

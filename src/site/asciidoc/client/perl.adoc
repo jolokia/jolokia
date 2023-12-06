@@ -18,9 +18,9 @@
 
 As described in this link:../about.html[story], Jolokia has its origins
 in the Perl world where it starts as a simple solution for monitoring
-Java Java EE applications with
+Java EE applications with
 https://www.nagios.org[Nagios]. https://www.jmx4perl.org[Jmx4perl]
-was its former name, which in addition the agents contains
+was its former name, which in addition to the agents contains
 powerfule Perl modules for accessing Jolokia instrumented
 servers. These modules are the foundation for tools like
 `check_jmx4perl`, a Nagios plugin with a rich feature set,
@@ -38,13 +38,17 @@ use JMX::Jmx4Perl::Alias;   # Import MBean aliases
 # Basic usage
 print "Memory Used: ",
       JMX::Jmx4Perl
-          ->new(url => "http://localhost:8080/jolokia")
-          ->get_attribute(MEMORY_HEAP_USED);
+          ->new(url => "http://localhost:8080/jolokia",
+                user => "jolokia",
+                password => "jolokia")
+          ->get_attribute(MEMORY_HEAP_USED), "\n";
 
 # Advanced:
 my $jmx = new JMX::Jmx4Perl(url => "http://localhost:8080/jolokia",
-                           product => "jboss");
-my $request = new JMX::Jmx4Perl::Request({type => READ,
+                            user => "jolokia",
+                            password => "jolokia",
+                            product => "tomcat");
+my $request = new JMX::Jmx4Perl::Request({type => "read",
                                          mbean => "java.lang:type=Memory",
                                          attribute => "HeapMemoryUsage",
                                          path => "used"});
@@ -53,4 +57,4 @@ print "Memory used: ",$response->value(),"\n";
 ----
 
 More information about jmx4perl can be found on its
-https://search.cpan.org/~roland/jmx4perl/[CPAN page].
+https://metacpan.org/dist/jmx4perl[CPAN page].

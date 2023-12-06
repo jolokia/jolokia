@@ -31,7 +31,7 @@ can be deployed in a servlet container. The Jolokia agent is
 contained and reachable under the URL
 `/jolokia`. The unit tests can be found at
 
-[cols="1,1"]
+[cols=2*,role=bodyTable]
 |===
 |`jolokia-test.html`
 |QUnit tests for the base library
@@ -43,27 +43,29 @@ contained and reachable under the URL
 |All the tests above combined
 |===
 
-This `test-app` is also configured for Jetty, so a
+This Maven module is using `jetty-maven-plugin`, so we can run the application using:
 
+[source,bash]
 ----
-mvn jetty:run-exploded
+$ mvn clean package jetty:run-war -f examples/client-javascript-test-app/
 ----
 
-will startup a Jetty and deploy this test application.
+Jetty server will be started with the test application deployed.
 
-In order to simplify development of unit-test a shell script
-`makeLinks.sh` is included which can be used in
-unix like OSs to create symbolic links to the JavaScript
+In order to simplify development of unit tests, a shell script
+`makeLinks.sh` is included in `examples/client-javascript-test-app` module, which can be used in
+Linux like OS'es to create symbolic links to the JavaScript and HTML
 files in the source directories. A typical workflow looks
 like:
 
 * Initialize:
 +
+[source,bash]
 ----
-mvn clean install
-sh makeLinks.sh
-mvn jetty:run-exploded
+$ cd examples/client-javascript-test-app/
+$ mvn clean package jetty:run-war
+$ ./makeLinks.sh # in separate terminal window
 ----
 * Edit and save the JavaScript files (e.g. `jolokia.js`
-or `jolokia-test.js`
+or `jolokia-test.js`)
 * Reload the test HTML files in the browser
