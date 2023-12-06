@@ -33,7 +33,7 @@ The example below shows how to connect programmatically via a JSR-160 `JMXConnec
 
 For this example to work you need the following prerequisites:
 
-* Jolokia's `remote-jmx-adapter-{jolokia-version}-standalone.jar`
+* Jolokia's `remote-jmx-adapter-{jolokia-version}-javaagent.jar`
 must be on the classpath. See the link:../../download.html[Download page] for the latest versions of this adapter jar.
 * Jolokia has to be accessible running at
 http://localhost:8778/jolokia/. If user/password authentication is enabled for the agent, uncomment the line below and insert your credentials.
@@ -70,10 +70,10 @@ If you are running a Jolokia-enabled JVM within a Kubernetes Pod, you can direct
 
 Before compiling and running the example below, please check that the following prerequesites are met:
 
-* Jolokia's `remote-jmx-adapter-{jolokia-version}-standalone.jar`
+* Jolokia's `remote-jmx-adapter-{jolokia-version}-javaagent.jar`
 must be on the classpath. See the link:../../download.html[Download page] for the latest versions of this adapter jar.
 * In addition, the Jolokia Kubernetes extension
-`jolokia-kubernetes-{jolokia-version}-standalone.jar`
+`jolokia-kubernetes-{jolokia-version}-javaagent.jar`
 must be on the classpath. This can be also downloaded from the
 link:../../download.html[Download page].
 * Configuration and authentication for the Kubernetes context setup are as usual. I.e., you must be able to run `kubectl` with the cluster to connect to. You can check this by `kubectl get namespace`.
@@ -110,8 +110,8 @@ You need to add the Jolokia connector client libraries when launching `jconsole`
 [,bash,subs="attributes,verbatim"]
 ----
 java \
-  -classpath "jolokia-jmx-adapter-{jolokia-version}-standalone.jar:\
-              jolokia-kubernetes-{jolokia-version}-standalone.jar:\
+  -classpath "jolokia-jmx-adapter-{jolokia-version}-javaagent.jar:\
+              jolokia-kubernetes-{jolokia-version}-javaagent.jar:\
               $JAVA_HOME/lib/jconsole.jar:\
               $JAVA_HOME/classes" \
   -Dapplication.home=$JAVA_HOME \

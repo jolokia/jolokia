@@ -71,7 +71,7 @@
     <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-agent-jvm</artifactId>
-      <classifier>standalone</classifier>
+      <classifier>javaagent</classifier>
     </dependency>
     <dependency>
       <groupId>org.jolokia</groupId>

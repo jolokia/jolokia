@@ -28,9 +28,9 @@
     <!-- agents -->
     <dependencySet>
       <includes>
-        <include>org.jolokia:jolokia-agent-jvm:jar:standalone</include>
+        <include>org.jolokia:jolokia-agent-jvm:jar:javaagent</include>
       </includes>
-      <outputFileNameMapping>jolokia-agent-jvm-standalone.jar</outputFileNameMapping>
+      <outputFileNameMapping>jolokia-agent-jvm-javaagent.jar</outputFileNameMapping>
       <outputDirectory>agents</outputDirectory>
       <unpack>false</unpack>
       <useTransitiveDependencies>false</useTransitiveDependencies>

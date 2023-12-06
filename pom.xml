@@ -817,7 +817,7 @@
         <groupId>org.jolokia</groupId>
         <artifactId>jolokia-agent-jvm</artifactId>
         <version>${project.version}</version>
-        <classifier>standalone</classifier>
+        <classifier>javaagent</classifier>
       </dependency>
       <dependency>
         <groupId>org.jolokia</groupId>
