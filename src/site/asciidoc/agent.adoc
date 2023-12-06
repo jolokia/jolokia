@@ -19,33 +19,34 @@
 Various agents are available for providing Jolokia
 services in different environments:
 
-* *WAR Agent* for deployment as web application in a Java EE Server.
+* *WAR Agent* for deployment as web application in a Jakarta EE Server.
 * *OSGi Agent* for deployment in an OSGi container. This
-agent is packaged as a bundle and comes in two flavors (minimal,
-all-in-one).
-* *JVM Agent* which can be used with any Oracle/Sun based JVM,
-Version 11 or later.
+agent is packaged as a bundle and requires an https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN 8.1 Whiteboard extender].
+* *JVM Agent* which can be used with any Oracle/Sun based JVM, Version 11 or later.
 
 === WAR Agent
 
-The WAR agent `jolokia.war` deploys as a regular web archive
-(WAR) in a Java EE server. Deployment is simple (often only a copy in a
+NOTE: Jolokia 2.0 uses Jakarta EE 9+ (Servlet API 5+ with `pass:[jakarta.servlet.*]` packages),
+while Jolokia 1.x uses JavaEE/JakartaEE up to version 8 (Servlet API up to version 4 with `pass:[javax.servlet.*]` packages)
+
+The WAR agent `jolokia-agent-war.war` deploys as a regular web archive
+(WAR) in a Jakarta EE server. Deployment is simple (often only a copy in a
 certain directory) and the agent can be tuned like a normal web
 application. Setting it up the agent servlet for secure
 communication is a well known business (but specific to every
-application server) and the same as for any other web archive. The
-runtime behaviour like connection pooling or dedicated HTTP
-connector can be tuned very easily (for Tomcat, see this
-https://labs.consol.de/blog/nagios/putting-jmx4perl-on-the-fast-lane-for-tomcat/[example,role=externalLink]
-for setting up an extra HTTP connector for this agent).
+application server) and the same as for any other web archive.
+
+`jolokia-agent-war-unsecured.war` is a flavor of WAR agent without `<security-constraint>` elements declared in its `WEB-INF/web.xml`.
 
 Also, this is the agent for the link:features/proxy.adoc[proxy mode] where it is
 deployed in a simple, dedicated application server like Tomcat or
 Jetty.
 
-The WAR agent has been tested to work on
+This is the most widely used agent. Read more about the
+link:agent/war.adoc[WAR agent] and its installation.
 
-// TODO: verify
+The WAR agent for Jolokia 1.x has been tested to work on:
+
 * JBoss 4.2.3, 5.1.0, 6.1.0, 7.0.2, 7.1.1, 8.0.0
 * Oracle WebLogic 9.2.3.0, 10.0.2.0, 10.3.6.0
 * Glassfish 2.1.1, 3.0.1, 3.1.2, 4.0.0
@@ -58,25 +59,34 @@ The WAR agent has been tested to work on
 * Spring dm Server 2.0.0.RELEASE
 * Eclipse Virgo 2.1.0
 
-This is the most widely used agent. Read more about the
-link:agent/war.adoc[WAR agent] and its installation.
+The WAR agent for Jolokia 2.0 has been (as of December 2023) tested with:
+
+* Apache Tomcat 10.1.16
+* Eclipse Jetty 11.0.18
+* WildFly 30.0.1.Final
+* Openliberty 23.0.0.11
+
+NOTE: One of the initial goals of https://github.com/fabric8io/docker-maven-plugin[docker-maven-plugin] was to test Jolokia with different application servers!
 
 === OSGi Agent
 
-// TODO: verify OSGi links
 For an https://www.osgi.org[OSGi,role=externalLink] environment an agent packaged as
-an OSGi bundle is provided. The bundle comes in two flavors: The
-minimal bundle `jolokia-osgi.jar`, including only the
+an OSGi bundle is provided.
+
+In Jolokia 1.x there were two flavors of the bundle:
+
+* minimal bundle `jolokia-osgi.jar`, including only the
 agent itself (and an https://code.google.com/p/json-simple/[json-simple,role=externalLink] embedded), which
-requires an already installed https://www.osgi.org/javadoc/r4v42/org/osgi/service/http/HttpService.html[OSGi HTTP service,role=externalLink] like
-the https://wiki.ops4j.org/display/paxweb/Pax+Web[Pax-Web HTTP-Service,role=externalLink]. A second version
-`jolokia-osgi-bundle.jar` is an all-in-one bundle, including the
-Pax Web HTTP-Service. This bundle is useful for quick installations,
-where no HTTP-Service is already existent. However, for best fitting
+requires an already installed https://www.osgi.org/javadoc/r4v42/org/osgi/service/http/HttpService.html[OSGi HTTP service,role=externalLink] implementation, for example https://github.com/ops4j/org.ops4j.pax.web[Pax-Web HTTP Service,role=externalLink].
+* `jolokia-osgi-bundle.jar` is an all-in-one bundle, including the
+https://github.com/apache/felix-dev/tree/master/http[Felix HTTP Service implementation]. This bundle is useful for quick installations, where no HTTP Service is available. However, for best fitting
 the OSGi philosophy, the usage of the minimal bundle is
 recommended.
 
-The OSGi agent has been tested with the following containers:
+In Jolokia 2, there's only single `jolokia-agent-osgi.jar` and it's no longer using https://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.http.html[OSGi CMPN HTTP Service]. Instead, https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard Specification for Jakarta™ Servlet] is used and Jolokia registers its `org.jolokia.server.core.osgi.OsgiAgentServlet` as Whiteboard service.
+This approach requires existing https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard Specification for Jakarta™ Servlet] implementation.
+
+The OSGi agent for Jolokia 1.x has been tested with the following containers:
 
 * Felix 2.0.5, 3.0.8, 3.2.2, 4.2.1
 * Equinox 3.5.2, 3.6.1, 3.7.1, 3.8.1
@@ -84,23 +94,61 @@ The OSGi agent has been tested with the following containers:
 * Virgo 2.1.0, 3.0.1
 * Knopflerfish 3.2.0
 
+The OSGi agent for Jolokia 2.0 has been (as of December 2023) tested with:
+
+* Karaf 4.5.0 with Pax Web 10 (dev)
+
 Read more about the
 link:agent/osgi.adoc[OSGi agent] and its installation.
 
 === JVM Agent
 
-Since Java 5 it is possible to start so called _JVM agents_ in
-advance before starting a Java application. This technique is used
+Since Java™ 5 it is possible to start so called _JVM agents_ in
+advance before starting a Java™ application. This technique is used
 e.g. by profiling tools for installing global classloaders in order
-to instrument classes. Additionally, Sun's Java 6 JVM comes with a
+to instrument classes. Additionally, Java™ 6 JVM (and later) comes with a
 simple embedded HTTP-Server which is used e.g. for exposing web
-services with the default JAXWS implementation coming with Java 6.
+services with the default JAXWS implementation coming with Java™ 6.
 
-This Jolokia agent uses the agent API and the `HTTPServer` to
-allow instrumenting _any_ Java application running with a Sun Java 6
+This Jolokia agent uses the agent API and the `com.sun.net.httpserver.HttpServer` to
+allow instrumenting _any_ Java™ application running with a Java™ 6
 VM, not only application servers.
 
-The JVM Agent has been tested with:
+There are two ways to install a JVM agent in Java application.
+
+First is to use `-javaagent` command line option like this:
+[source,shell,subs="attributes,verbatim"]
+----
+$ java -cp target/classes:... -javaagent:\
+jolokia-agent-jvm-{jolokia-version}-javaagent.jar=port=7778 \
+com.example.Main
+----
+
+Second one is to use https://docs.oracle.com/en/java/javase/11/docs/api/jdk.attach/module-summary.html[JVM Attach API] and install an agent within running JVM process. `jolokia-agent-jvm-{jolokia-version}-javaagent.jar` is a JAR with main class that uses this API, so we can invoke this JAR with `start <pid>` command:
+
+[source,shell,subs="attributes,verbatim"]
+----
+$ java -jar jolokia-agent-jvm-{jolokia-version}-javaagent.jar start --port 7778 34870
+Started Jolokia for PID 34870
+http://127.0.0.1:7778/jolokia/
+----
+
+NOTE: Dynamic loading of agents will be removed at some point. See https://openjdk.org/jeps/451[JEP 451] for details.
+
+When dynamically loading a JVM agent using JDK 21 and newer, we'll get this warning:
+[source,shell,subs="attributes,verbatim"]
+----
+WARNING: A Java agent has been loaded dynamically (jolokia-agent-jvm-{jolokia-version}-javaagent.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading
+         to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage
+         for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+----
+
+That's why the preferred method is to use `-javaagent` JVM option.
+
+The JVM Agent for Jolokia 1.x has been tested with:
 
 * Camel 2.8.1
 * ActiveMQ 5.5.0
@@ -108,5 +156,10 @@ The JVM Agent has been tested with:
 * Terracotta 3.2.1
 * HornetQ 2.2.14
 
-Read more about the
-link:agent/jvm.html[JVM agent] and its installation.
+The JVM Agent for Jolokia 2.x has been (as of December 2023) tested with:
+
+* Camel 4.1.0
+* ActiveMQ 6.0.1
+* ActiveMQ Artemis 2.31.2
+
+Read more about the link:agent/jvm.html[JVM agent] and its installation.

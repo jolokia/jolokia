@@ -17,27 +17,19 @@
 == OSGi Agent
 
 For using an agent within an OSGi container, Jolokia comes with
-agents packaged OSGi bundles. They come in two flavours:
+an agent packaged as OSGi bundle.
 
-* The standard bundle which requires an OSGi HttpService
-as specified by the OSGi group. Prominent implementations of this
-service are https://wiki.ops4j.org/display/paxweb/Pax+Web[Pax Web,role=externalLink] and
-https://felix.apache.org/site/apache-felix-http-service.html[Apache
-Felix HttpService,role=externalLink]. This bundle fits best the OSGi philosophy of
-modularity and is hence the recommended bundle.
-* A all-in-one bundle with no external dependencies except to the
-`org.osgi.service.log.LogService` OSGi bundle. It includes the
-Apache Felix HttpService which in turn includes a Jetty server. T
-embedded Jetty server and is suitable for situations where ease of
-deployment is more important than modularity.
+NOTE: Jolokia 1.x provided an _all-in-one_ bundle with https://github.com/apache/felix-dev/tree/master/http[Felix HTTP Service] implementation packaged. This is no longer the case in Jolokia 2.x.
 
-Note, that some OSGi container (like Eclipse Virgo) comes with a so
+The requirement for target OSGi runtime is to provide an implementation of https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[Servlet Whiteboard extender]. Jolokia 2.0 registers its `org.jolokia.server.core.osgi.OsgiAgentServlet` as Whiteboard service, which is the processed by Whiteboard extender.
+
+Because OSGi runtimes are still in the process of moving away from JavaEE to JakartaEE with new packages namespace, I tested Jolokia 2.x with Karaf 4.5 using dev version of Pax Web 10 (still under development).
+
+Note, that some OSGi containers (like Apache Karaf with Pax Web) come with a so
 called _Web extender_ which allows for deployment of standard
-Webarchives (war). For such container, there is a choice between the
+Webarchives (WAR archives). For such container, there is a choice between the
 OSGi bundle and the WAR agent, where the later is probably easier to
-deploy since there is already an HTTP server running in such
-containers, which not necessarily export an OSGi HTTP service
-required by the standard bundle.
+deploy.
 
 More details about the OSGi agents can be found in the
-link:../reference/html/agents.html#agents-osgi[Jolokia reference manual].
+link:../reference/html/manual/agents.html#agents-osgi[Jolokia reference manual].

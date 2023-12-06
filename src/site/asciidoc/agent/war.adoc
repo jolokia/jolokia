@@ -16,15 +16,18 @@
 
 == Webarchive (WAR) Agent
 
-This agent is most suitable for Java EE environments. It gets deployed
-as a usual web archive. The specific deployment procedure depends on
-the Java EE server in used. E.g. for Tomcat, copy the war agent into the `webapps/` directory.
+NOTE: Jolokia 2.0 uses Jakarta EE 9+ (Servlet API 5+ with `pass:[jakarta.servlet.*]` packages),
+while Jolokia 1.x uses JavaEE/JakartaEE up to version 8 (Servlet API up to version 4 with `pass:[javax.servlet.*]` packages)
 
-The war agent comes in two flavors:
+This agent is most suitable for Jakarta EE environments. It gets deployed
+as a usual web archive (WAR). The specific deployment procedure depends on
+the Jakarta EE server in used. E.g. for Tomcat, copy the WAR agent into the `webapps/` directory.
 
-* `jolokia.war` which is secured with a role "jolokia". So you need to setup your servlet container to connect
-this role to your authentication setup (like the `tomcat-users.xml` for Tomcat)
-* `jolokia-unsecured.war` is completely unsecured and might be useful for a quick evaluation. *Please note that this unauthenticated access should be ony used for development purposes. Check out link:../reference/html/agents.html#agent-war-security[reference manual] for details how to enable security.*
+The WAR agent comes in two flavors:
+
+* `jolokia-agent-war.war` which is secured with a role "jolokia". So you need to setup your servlet container to link
+this role with your authentication setup (like the `conf/tomcat-users.xml` for Tomcat)
+* `jolokia-agent-war-unsecured.war` is completely unsecured and might be useful for a quick evaluation. *Please note that this unauthenticated access should be ony used for development purposes. Check out link:../reference/html/manual/agents.html#agent-war-security[reference manual] for details how to enable security.*
 
 As soon as it is deployed, the agents offers its services under the
 URL of the deployed web application. For Tomcat running with its
@@ -35,4 +38,4 @@ http://localhost:8080/jolokia
 ----
 
 Setup and configuration of the WAR agent is explained detailed in
-the link:../reference/html/agents.html#agents-war[reference manual].
+the link:../reference/html/manual/agents.html#agents-war[reference manual].

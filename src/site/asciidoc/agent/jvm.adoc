@@ -19,17 +19,17 @@
 Another variant is Jolokia's JVM agent which does not need any special container
 environment. The only dependency is on Oracle's JDK 11 or later as runtime,
 since it contains a lightweight HTTP Server used for
-exporting the Jolokia protocol. This agent is the most generic one which can
-instrument <any> Java application using a JDK11+. It is suitable for
+exposing the Jolokia protocol. This agent is the most generic one which can
+instrument _any_ Java application using a JDK11+. It is suitable for
 situations where the other agents don't fit. Also, it can be used for dynamically
-attaching an agent to a running Java process.
+attaching an agent to a running Java process (this option however https://openjdk.org/jeps/451[is going to be removed after JDK 21]).
 
 For using this agent, the following argument to the Java
 application to instrument has to be given:
 
 [,subs="attributes,verbatim"]
 ----
--javaagent:/path/to/jolokia-jvm-{jolokia-version}-agent.jar
+$ java ... -javaagent:/path/to/jolokia-agent-jvm-{jolokia-version}-javaagent.jar
 ----
 
 By default, the agent will listen on port 8778, but this can be configured
@@ -37,15 +37,17 @@ as well as other aspects like authentication:
 
 * Provide options on the commandline as key-value pairs:
 +
+[,subs="attributes,verbatim"]
 ----
--javaagent:agent.jar=port=7777,host=localhost
+$ java ... -javaagent:jolokia-agent-jvm-{jolokia-version}-javaagent.jar=port=7777,host=localhost
 ----
 * Via a properties file
 +
+[,subs="attributes,verbatim"]
 ----
--javaagent:agent.jar=config=/path/to/config.properties
+$ java ... -javaagent:jolokia-agent-jvm-{jolokia-version}-javaagent.jar=config=/path/to/config.properties
 ----
-* Via packaging a jolokia-agent.properties top level in the agent.jar
+* Via packaging a `jolokia-agent.properties` top level in the `agent.jar`
 
 Options are used in the given precedence, the former overwriting
 the later values.
@@ -55,8 +57,10 @@ command can be used to get a quick help
 
 [,subs="attributes,verbatim"]
 ----
-java -jar /path/to/jolokia-jvm-{jolokia-version}-agent.jar --help
+java -jar /path/to/jolokia-agent-jvm-{jolokia-version}-javaagent.jar --help
 ----
 
+NOTE: Dynamic loading of agents will be removed at some point. See https://openjdk.org/jeps/451[JEP 451] for details.
+
 For more details and usage examples please refer to the
-link:../reference/html/agents.html#agents-jvm[reference manual].
+link:../reference/html/manual/agents.html#agents-jvm[reference manual].
