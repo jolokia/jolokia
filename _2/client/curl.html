@@ -148,8 +148,8 @@
             <div class="naviitems">
     <ul>
                   <li class="none">
-            <strong>Java</strong>
-          </li>
+                          <a href="../client/java.html" title="Java">Java</a>
+            </li>
                   <li class="none">
                           <a href="../client/javascript.html" title="JavaScript">JavaScript</a>
             </li>
@@ -157,8 +157,8 @@
                           <a href="../client/perl.html" title="Perl">Perl</a>
             </li>
                   <li class="none">
-                          <a href="../client/curl.html" title="Curl">Curl</a>
-            </li>
+            <strong>Curl</strong>
+          </li>
           </ul>
     </div>
       </div>
@@ -181,29 +181,61 @@
     <div class="main">
       <!-- Page content -->
       <div class="sect1">
-<h2 id="jolokia_java_client_library">Jolokia Java Client library</h2>
+<h2 id="using_curl">Using <code>curl</code></h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The Jolokia Java client bindings provide typeless access to a
-remote JMX <code>MBeanServer</code>. Its programming model follows a
-request-response paradigm and is easy to use:</p>
+<p>We can of course use any HTTP client to access Jolokia agent.
+One of the most popular and powerful tools is the <a href="https://curl.se/"><code>curl</code></a> command.</p>
+</div>
+<div class="paragraph">
+<p>We can access the agent with simple GET requests:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight nowrap"><code data-lang="java"><span class="nc">J4pClient</span> <span class="n">j4pClient</span> <span class="o">=</span> <span class="nc">J4pClient</span><span class="o">.</span><span class="na">url</span><span class="o">(</span><span class="s">"http://localhost:8080/jolokia"</span><span class="o">)</span>
-        <span class="o">.</span><span class="na">user</span><span class="o">(</span><span class="s">"jolokia"</span><span class="o">)</span>
-        <span class="o">.</span><span class="na">password</span><span class="o">(</span><span class="s">"jolokia"</span><span class="o">)</span>
-        <span class="o">.</span><span class="na">build</span><span class="o">();</span>
-<span class="nc">J4pReadRequest</span> <span class="n">req</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">J4pReadRequest</span><span class="o">(</span><span class="s">"java.lang:type=Memory"</span><span class="o">,</span> <span class="s">"HeapMemoryUsage"</span><span class="o">);</span>
-<span class="n">req</span><span class="o">.</span><span class="na">setPath</span><span class="o">(</span><span class="s">"used"</span><span class="o">);</span>
-<span class="nc">J4pReadResponse</span> <span class="n">resp</span> <span class="o">=</span> <span class="n">j4pClient</span><span class="o">.</span><span class="na">execute</span><span class="o">(</span><span class="n">req</span><span class="o">);</span>
-<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Memory used: "</span> <span class="o">+</span> <span class="n">resp</span><span class="o">.</span><span class="na">getValue</span><span class="o">());</span></code></pre>
+<pre class="rouge highlight nowrap"><code data-lang="bash"><span class="nv">$ </span>curl <span class="nt">-s</span> <span class="nt">-u</span> <span class="se">\</span>
+jolokia:jolokia http://localhost:8080/jolokia/read/java.lang:type<span class="o">=</span>Memory/HeapMemoryUsage | jq <span class="nb">.</span>
+<span class="o">{</span>
+  <span class="s2">"request"</span>: <span class="o">{</span>
+    <span class="s2">"mbean"</span>: <span class="s2">"java.lang:type=Memory"</span>,
+    <span class="s2">"attribute"</span>: <span class="s2">"HeapMemoryUsage"</span>,
+    <span class="s2">"type"</span>: <span class="s2">"read"</span>
+  <span class="o">}</span>,
+  <span class="s2">"value"</span>: <span class="o">{</span>
+    <span class="s2">"init"</span>: 524288000,
+    <span class="s2">"committed"</span>: 532676608,
+    <span class="s2">"max"</span>: 8334082048,
+    <span class="s2">"used"</span>: 53842272
+  <span class="o">}</span>,
+  <span class="s2">"status"</span>: 200,
+  <span class="s2">"timestamp"</span>: 1701866205
+<span class="o">}</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>This client library is described in detail with all
-configuration options in the
-<a href="../reference/html/manual/clients.html#client-java">reference manual</a>.</p>
+<p>but it&#8217;s also easy to send POST requests for example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="bash"><span class="nv">$ </span>curl <span class="nt">-s</span> <span class="nt">-u</span> jolokia:jolokia <span class="se">\</span>
+<span class="nt">-H</span><span class="s1">'Content-Type: application/json'</span> <span class="se">\</span>
+<span class="nt">-XPOST</span> <span class="nt">-d</span> <span class="s1">'{"mbean":"java.lang:type=Memory","attribute":"HeapMemoryUsage","type":"read"}'</span> <span class="se">\</span>
+http://localhost:8080/jolokia | jq <span class="nb">.</span>
+<span class="o">{</span>
+  <span class="s2">"request"</span>: <span class="o">{</span>
+    <span class="s2">"mbean"</span>: <span class="s2">"java.lang:type=Memory"</span>,
+    <span class="s2">"attribute"</span>: <span class="s2">"HeapMemoryUsage"</span>,
+    <span class="s2">"type"</span>: <span class="s2">"read"</span>
+  <span class="o">}</span>,
+  <span class="s2">"value"</span>: <span class="o">{</span>
+    <span class="s2">"init"</span>: 524288000,
+    <span class="s2">"committed"</span>: 532676608,
+    <span class="s2">"max"</span>: 8334082048,
+    <span class="s2">"used"</span>: 53842272
+  <span class="o">}</span>,
+  <span class="s2">"status"</span>: 200,
+  <span class="s2">"timestamp"</span>: 1701866282
+<span class="o">}</span></code></pre>
+</div>
 </div>
 </div>
 </div>
