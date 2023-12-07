@@ -198,27 +198,27 @@
 <p><code>org.jolokia.server.core.http.AgentServlet</code> which is part of <code>org.jolokia:jolokia-server-core</code> library is now implementing Servlet API 5 from Jakarta EE 9 specification. In fact it should be compatible with any newer Jakarta EE specification (e.g., 10) and Servlet API (e.g., 6).</p>
 </div>
 <div class="paragraph">
-<p>This concerns also the derived <code>org.jolokia.server.core.osgi.OsgiAgentServlet</code> from <code>org.jolokia:jolokia-agent-osgi</code> which now works with new <a href="https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html">OSGi CMPN Whiteboard Specification for Jakarta™ Servlet</a> based on Jakarta EE 9+. This means that Jolokia 2.0 OSGi bundle won&#8217;t work with Karaf 4.4 which uses Jakarta EE specification based on <code>javax</code> packages.</p>
+<p>This concerns also the derived <code>org.jolokia.server.core.osgi.OsgiAgentServlet</code> from <code>org.jolokia:jolokia-agent-osgi</code> which now works with new <a href="https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html" class="externalLink">OSGi CMPN Whiteboard Specification for Jakarta™ Servlet</a> based on Jakarta EE 9+. This means that Jolokia 2.0 OSGi bundle won&#8217;t work with Karaf 4.4 which uses Jakarta EE specification based on <code>javax</code> packages.</p>
 </div>
 <div class="paragraph">
-<p><a href="https://github.com/apache/felix-dev/tree/master/http">Felix HTTP</a> has PoC module based on Jetty 12 that implements two Servlet APIs (<code>javax</code> and <code>jakarta</code>) and at [current state] it should support Jolokia 2.</p>
+<p><a href="https://github.com/apache/felix-dev/tree/master/http" class="externalLink">Felix HTTP</a> has PoC module based on Jetty 12 that implements two Servlet APIs (<code>javax</code> and <code>jakarta</code>) and at [current state] it should support Jolokia 2.</p>
 </div>
 <div class="paragraph">
-<p>In <a href="https://github.com/ops4j/org.ops4j.pax.web">Pax Web</a> there&#8217;s work pending on Pax Web 10 which also should support old and new Servlet API packages.</p>
+<p>In <a href="https://github.com/ops4j/org.ops4j.pax.web" class="externalLink">Pax Web</a> there&#8217;s work pending on Pax Web 10 which also should support old and new Servlet API packages.</p>
 </div>
 <div class="paragraph">
-<p>Moving to JakartaEE 9+ impacted Jolokia&#8217;s WAR agents - these use <code><a href="https://jakarta.ee/xml/ns/jakartaee" class="bare">https://jakarta.ee/xml/ns/jakartaee</a></code> namespace in <code>WEB-INF/web.xml</code> and should work in these web application servers:</p>
+<p>Moving to JakartaEE 9+ impacted Jolokia&#8217;s WAR agents - these use <code>https://jakarta.ee/xml/ns/jakartaee</code> namespace in <code>WEB-INF/web.xml</code> and should work in these web application servers:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p><a href="https://eclipse.dev/jetty/download.php">Jetty 11 and newer</a></p>
+<p><a href="https://eclipse.dev/jetty/download.php" class="externalLink">Jetty 11 and newer</a></p>
 </li>
 <li>
-<p><a href="https://tomcat.apache.org/download-10.cgi">Tomcat 10 and newer</a></p>
+<p><a href="https://tomcat.apache.org/download-10.cgi" class="externalLink">Tomcat 10 and newer</a></p>
 </li>
 <li>
-<p><a href="https://github.com/undertow-io/undertow/">Undertow 2.3 and newer</a></p>
+<p><a href="https://github.com/undertow-io/undertow/" class="externalLink">Undertow 2.3 and newer</a></p>
 </li>
 </ul>
 </div>
@@ -232,10 +232,10 @@
 <p>Jolokia 1.x includes <code>org.jolokia:jolokia-client-javascript</code> Maven module, which packages <code>jolokia.js</code>, <code>jolokia-simple.js</code> and other libraries.</p>
 </div>
 <div class="paragraph">
-<p>In Jolokia 2, the same Maven module can be used in your Java application, but additionally, official <a href="https://www.npmjs.com/package/jolokia.js">NPM package</a> is available. You can install it with <code>npm i jolokia.js</code> or <code>yarn add jolokia.js</code>.</p>
+<p>In Jolokia 2, the same Maven module can be used in your Java application, but additionally, official <a href="https://www.npmjs.com/package/jolokia.js" class="externalLink">NPM package</a> is available. You can install it with <code>npm i jolokia.js</code> or <code>yarn add jolokia.js</code>.</p>
 </div>
 <div class="paragraph">
-<p>There are <a href="https://www.npmjs.com/search?q=jolokia">several other Jolokia NPM packages available</a>, so mind that <code>jolokia.js</code> is the official one.</p>
+<p>There are <a href="https://www.npmjs.com/search?q=jolokia" class="externalLink">several other Jolokia NPM packages available</a>, so mind that <code>jolokia.js</code> is the official one.</p>
 </div>
 <div class="paragraph">
 <p>The minimum supported JavaScript version is now ES5. For environments with ES3 and older JavaScript versions, keep using old versions of the JavaScript client provided with Jolokia 1.x.</p>
@@ -314,10 +314,10 @@
 <div class="ulist">
 <ul>
 <li>
-<p><code>jolokia-roo:jolokia-roo</code> for <a href="https://spring.io/projects/spring-roo">Spring Roo</a> is no longer available. Spring Roo was kind of experiment before highly successful <a href="https://spring.io/projects/spring-boot">Spring Boot</a>.</p>
+<p><code>jolokia-roo:jolokia-roo</code> for <a href="https://spring.io/projects/spring-roo" class="externalLink">Spring Roo</a> is no longer available. Spring Roo was kind of experiment before highly successful <a href="https://spring.io/projects/spring-boot" class="externalLink">Spring Boot</a>.</p>
 </li>
 <li>
-<p><code>org.jolokia:jolokia-osgi-bundle</code> (with embedded <a href="https://github.com/apache/felix-dev/tree/master/http">Felix HTTP</a>) is no longer available. Normal <code>org.jolokia:jolokia-agent-osgi</code> should be used with OSGi runtime supporting <a href="https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html">OSGi CMPN Whiteboard Specification for Jakarta™ Servlet</a></p>
+<p><code>org.jolokia:jolokia-osgi-bundle</code> (with embedded <a href="https://github.com/apache/felix-dev/tree/master/http" class="externalLink">Felix HTTP</a>) is no longer available. Normal <code>org.jolokia:jolokia-agent-osgi</code> should be used with OSGi runtime supporting <a href="https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html" class="externalLink">OSGi CMPN Whiteboard Specification for Jakarta™ Servlet</a></p>
 </li>
 <li>
 <p><code>org.jolokia:jolokia-mule</code> agent is no longer available, but because Jolokia 2 (and 1) simply provides servlet implementation, it can be used in any environment hosting a servlet container</p>
@@ -340,7 +340,7 @@
 <div class="ulist">
 <ul>
 <li>
-<p><code>listenForHttpService</code> option is now deprecated and <code>registerWhiteboardServlet</code> should be used instead in OSGi environments. The reason is that Jolokia 2 switched from <a href="https://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.http.html">OSGi CMPN Http Service</a> to <a href="https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html">OSGi CMPN Whiteboard Specification for Jakarta™ Servlet</a>.</p>
+<p><code>listenForHttpService</code> option is now deprecated and <code>registerWhiteboardServlet</code> should be used instead in OSGi environments. The reason is that Jolokia 2 switched from <a href="https://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.http.html" class="externalLink">OSGi CMPN Http Service</a> to <a href="https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html" class="externalLink">OSGi CMPN Whiteboard Specification for Jakarta™ Servlet</a>.</p>
 </li>
 </ul>
 </div>

@@ -10,3 +10,19 @@
 .doc .admonitionblock td.content {
   border: 1px dotted #217ee7;
 }
+
+nav.nav-menu h3.title a {
+  font-size: 1.4rem;
+}
+
+.toolbar {
+  font-size: 1.1rem;
+}
+
+a { text-decoration: none; }
+a:focus { outline: 1px dotted }
+a:link, a:visited { color:#a20000; }
+
+a.nav-link {
+  font-size: 1.2rem;
+}

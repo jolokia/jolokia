@@ -194,13 +194,13 @@ an agent packaged as OSGi bundle.</p>
 <div class="title">Note</div>
 </td>
 <td class="content">
-Jolokia 1.x provided an <em>all-in-one</em> bundle with <a href="https://github.com/apache/felix-dev/tree/master/http">Felix HTTP Service</a> implementation packaged. This is no longer the case in Jolokia 2.x.
+Jolokia 1.x provided an <em>all-in-one</em> bundle with <a href="https://github.com/apache/felix-dev/tree/master/http" class="externalLink">Felix HTTP Service</a> implementation packaged. This is no longer the case in Jolokia 2.x.
 </td>
 </tr>
 </table>
 </div>
 <div class="paragraph">
-<p>The requirement for target OSGi runtime is to provide an implementation of <a href="https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html">Servlet Whiteboard extender</a>. Jolokia 2.0 registers its <code>org.jolokia.server.core.osgi.OsgiAgentServlet</code> as Whiteboard service, which is the processed by Whiteboard extender.</p>
+<p>The requirement for target OSGi runtime is to provide an implementation of <a href="https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html" class="externalLink">OSGi CMPN Whiteboard Specification for Jakarta™ Servlet</a> extender. Jolokia 2.0 registers its <code>org.jolokia.server.core.osgi.OsgiAgentServlet</code> as Whiteboard service, which is the processed by Whiteboard extender.</p>
 </div>
 <div class="paragraph">
 <p>Because OSGi runtimes are still in the process of moving away from JavaEE to JakartaEE with new packages namespace, I tested Jolokia 2.x with Karaf 4.5 using dev version of Pax Web 10 (still under development).</p>

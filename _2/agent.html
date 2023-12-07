@@ -194,7 +194,7 @@ services in different environments:</p>
 </li>
 <li>
 <p><strong>OSGi Agent</strong> for deployment in an OSGi container. This
-agent is packaged as a bundle and requires an <a href="https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html">OSGi CMPN 8.1 Whiteboard extender</a>.</p>
+agent is packaged as a bundle and requires an <a href="https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html" class="externalLink">OSGi CMPN Whiteboard Specification for Jakarta™ Servlet</a> extender.</p>
 </li>
 <li>
 <p><strong>JVM Agent</strong> which can be used with any Oracle/Sun based JVM, Version 11 or later.</p>
@@ -228,13 +228,13 @@ application server) and the same as for any other web archive.</p>
 <p><code>jolokia-agent-war-unsecured.war</code> is a flavor of WAR agent without <code>&lt;security-constraint&gt;</code> elements declared in its <code>WEB-INF/web.xml</code>.</p>
 </div>
 <div class="paragraph">
-<p>Also, this is the agent for the <a href="features/proxy.adoc">proxy mode</a> where it is
+<p>Also, this is the agent for the <a href="features/proxy.html">proxy mode</a> where it is
 deployed in a simple, dedicated application server like Tomcat or
 Jetty.</p>
 </div>
 <div class="paragraph">
 <p>This is the most widely used agent. Read more about the
-<a href="agent/war.adoc">WAR agent</a> and its installation.</p>
+<a href="agent/war.html">WAR agent</a> and its installation.</p>
 </div>
 <div class="paragraph">
 <p>The WAR agent for Jolokia 1.x has been tested to work on:</p>
@@ -302,7 +302,7 @@ Jetty.</p>
 <div class="title">Note</div>
 </td>
 <td class="content">
-One of the initial goals of <a href="https://github.com/fabric8io/docker-maven-plugin">docker-maven-plugin</a> was to test Jolokia with different application servers!
+One of the initial goals of <a href="https://github.com/fabric8io/docker-maven-plugin" class="externalLink">docker-maven-plugin</a> was to test Jolokia with different application servers!
 </td>
 </tr>
 </table>
@@ -326,15 +326,15 @@ requires an already installed <a href="https://www.osgi.org/javadoc/r4v42/org/os
 </li>
 <li>
 <p><code>jolokia-osgi-bundle.jar</code> is an all-in-one bundle, including the
-<a href="https://github.com/apache/felix-dev/tree/master/http">Felix HTTP Service implementation</a>. This bundle is useful for quick installations, where no HTTP Service is available. However, for best fitting
+<a href="https://github.com/apache/felix-dev/tree/master/http" class="externalLink">Felix HTTP Service implementation</a>. This bundle is useful for quick installations, where no HTTP Service is available. However, for best fitting
 the OSGi philosophy, the usage of the minimal bundle is
 recommended.</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>In Jolokia 2, there&#8217;s only single <code>jolokia-agent-osgi.jar</code> and it&#8217;s no longer using <a href="https://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.http.html">OSGi CMPN HTTP Service</a>. Instead, <a href="https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html">OSGi CMPN Whiteboard Specification for Jakarta™ Servlet</a> is used and Jolokia registers its <code>org.jolokia.server.core.osgi.OsgiAgentServlet</code> as Whiteboard service.
-This approach requires existing <a href="https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html">OSGi CMPN Whiteboard Specification for Jakarta™ Servlet</a> implementation.</p>
+<p>In Jolokia 2, there&#8217;s only single <code>jolokia-agent-osgi.jar</code> and it&#8217;s no longer using <a href="https://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.http.html" class="externalLink">OSGi CMPN HTTP Service</a>. Instead, <a href="https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html" class="externalLink">OSGi CMPN Whiteboard Specification for Jakarta™ Servlet</a> is used and Jolokia registers its <code>org.jolokia.server.core.osgi.OsgiAgentServlet</code> as Whiteboard service.
+This approach requires existing <a href="https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html" class="externalLink">OSGi CMPN Whiteboard Specification for Jakarta™ Servlet</a> implementation.</p>
 </div>
 <div class="paragraph">
 <p>The OSGi agent for Jolokia 1.x has been tested with the following containers:</p>
@@ -370,7 +370,7 @@ This approach requires existing <a href="https://docs.osgi.org/specification/osg
 </div>
 <div class="paragraph">
 <p>Read more about the
-<a href="agent/osgi.adoc">OSGi agent</a> and its installation.</p>
+<a href="agent/osgi.html">OSGi agent</a> and its installation.</p>
 </div>
 </div>
 <div class="sect2">
@@ -402,7 +402,7 @@ com.example.Main</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Second one is to use <a href="https://docs.oracle.com/en/java/javase/11/docs/api/jdk.attach/module-summary.html">JVM Attach API</a> and install an agent within running JVM process. <code>jolokia-agent-jvm-2.0.0-javaagent.jar</code> is a JAR with main class that uses this API, so we can invoke this JAR with <code>start &lt;pid&gt;</code> command:</p>
+<p>Second one is to use <a href="https://docs.oracle.com/en/java/javase/11/docs/api/jdk.attach/module-summary.html" class="externalLink">JVM Attach API</a> and install an agent within running JVM process. <code>jolokia-agent-jvm-2.0.0-javaagent.jar</code> is a JAR with main class that uses this API, so we can invoke this JAR with <code>start &lt;pid&gt;</code> command:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -418,7 +418,7 @@ http://127.0.0.1:7778/jolokia/</code></pre>
 <div class="title">Note</div>
 </td>
 <td class="content">
-Dynamic loading of agents will be removed at some point. See <a href="https://openjdk.org/jeps/451">JEP 451</a> for details.
+Dynamic loading of agents will be removed at some point. See <a href="https://openjdk.org/jeps/451" class="externalLink">JEP 451</a> for details.
 </td>
 </tr>
 </table>
