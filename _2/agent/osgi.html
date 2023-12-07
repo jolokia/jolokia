@@ -200,15 +200,16 @@ Jolokia 1.x provided an <em>all-in-one</em> bundle with <a href="https://github.
 </table>
 </div>
 <div class="paragraph">
-<p>The requirement for target OSGi runtime is to provide an implementation of <a href="https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html" class="externalLink">OSGi CMPN Whiteboard Specification for Jakarta™ Servlet</a> extender. Jolokia 2.0 registers its <code>org.jolokia.server.core.osgi.OsgiAgentServlet</code> as Whiteboard service, which is the processed by Whiteboard extender.</p>
+<p>The requirement for target OSGi runtime is to provide an implementation of <a href="https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html" class="externalLink">OSGi CMPN Whiteboard Specification for Jakarta™ Servlet</a> extender. Jolokia 2.0 registers its <code>org.jolokia.server.core.osgi.OsgiAgentServlet</code> as Whiteboard service, which is then processed by Whiteboard extender.</p>
 </div>
 <div class="paragraph">
-<p>Because OSGi runtimes are still in the process of moving away from JavaEE to JakartaEE with new packages namespace, I tested Jolokia 2.x with Karaf 4.5 using dev version of Pax Web 10 (still under development).</p>
+<p>Because OSGi runtimes are still in the process of moving away from JavaEE towards JakartaEE (with new packages namespace),
+I tested Jolokia 2 with Karaf 4.5 using dev version of Pax Web 10 (still in development).</p>
 </div>
 <div class="paragraph">
 <p>Note, that some OSGi containers (like Apache Karaf with Pax Web) come with a so
 called <em>Web extender</em> which allows for deployment of standard
-Webarchives (WAR archives). For such container, there is a choice between the
+WAR archives. For such container, there is a choice between the
 OSGi bundle and the WAR agent, where the later is probably easier to
 deploy.</p>
 </div>
