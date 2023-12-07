@@ -38,3 +38,11 @@ a.externalLink {
 code { font-family: monospace }
 strong { font-weight: bold }
 em { font-style: italic }
+
+mark {
+  background-color: #3366aa;
+  color: white;
+  padding: 0 5px;
+  border-radius: 5px;
+  font-weight: bold;
+}

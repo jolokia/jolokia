@@ -1543,6 +1543,49 @@ the domain names (first level) and the MBean&#8217;s properties
 (second level). The final values of the maps don&#8217;t have any
 meaning and are dummy values.</p>
 </div>
+<div id="notification" class="listingblock">
+<div class="title">Client registration</div>
+<div class="content">
+<pre>$ curl -H'Content-Type: application/json' -s -u jolokia:jolokia -XPOST -d '{"type":"notification","command":"register"}' http://localhost:8080/jolokia/ | jq .
+{
+  "request": {
+    "type": "notification",
+    "command": "register"
+  },
+  "value": {
+    "backend": {
+      "pull": {
+        "maxEntries": 100,
+        "store": "jolokia:type=NotificationStore,agent=192.168.0.221-52184-29e6eb25-servlet"
+      },
+      "sse": {
+        "backChannel.contentType": "text/event-stream",
+        "backChannel.encoding": "UTF-8"
+      }
+    },
+    "id": "51fc0ba5-4a35-48a8-a3aa-760119f3316b"
+  },
+  "status": 200,
+  "timestamp": 1701876605
+}</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Client unregistration</div>
+<div class="content">
+<pre>$ curl -H'Content-Type: application/json' -s -u jolokia:jolokia -XPOST -d '{"type":"notification","command":"unregister","client":"51fc0ba5-4a35-48a8-a3aa-760119f3316b"}' http://localhost:8080/jolokia/ | jq .
+{
+  "request": {
+    "client": "51fc0ba5-4a35-48a8-a3aa-760119f3316b",
+    "type": "notification",
+    "command": "unregister"
+  },
+  "value": null,
+  "status": 200,
+  "timestamp": 1701876674
+}</pre>
+</div>
+</div>
 </div>
 </div>
 <div class="sect2">

@@ -129,7 +129,7 @@ Java Visual VM a Jolokia plugin can be downloaded from <a href="https://skarsaun
 <div class="ulist">
 <ul>
 <li>
-<p>Jolokia&#8217;s <code>remote-jmx-adapter-2.0.0-M4-standalone.jar</code>
+<p>Jolokia&#8217;s <code>remote-jmx-adapter-2.0.0-javaagent.jar</code>
 must be on the classpath. See the <a href="../../download.html">Download page</a> for the latest versions of this adapter jar.</p>
 </li>
 <li>
@@ -175,12 +175,12 @@ public class ConnectWithJolokiaDemo {
 <div class="ulist">
 <ul>
 <li>
-<p>Jolokia&#8217;s <code>remote-jmx-adapter-2.0.0-M4-standalone.jar</code>
+<p>Jolokia&#8217;s <code>remote-jmx-adapter-2.0.0-javaagent.jar</code>
 must be on the classpath. See the <a href="../../download.html">Download page</a> for the latest versions of this adapter jar.</p>
 </li>
 <li>
 <p>In addition, the Jolokia Kubernetes extension
-<code>jolokia-kubernetes-2.0.0-M4-standalone.jar</code>
+<code>jolokia-kubernetes-2.0.0-javaagent.jar</code>
 must be on the classpath. This can be also downloaded from the
 <a href="../../download.html">Download page</a>.</p>
 </li>
@@ -224,8 +224,8 @@ You need to add the Jolokia connector client libraries when launching <code>jcon
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">java \
-  -classpath "jolokia-jmx-adapter-2.0.0-M4-standalone.jar:\
-              jolokia-kubernetes-2.0.0-M4-standalone.jar:\
+  -classpath "jolokia-jmx-adapter-2.0.0-javaagent.jar:\
+              jolokia-kubernetes-2.0.0-javaagent.jar:\
               $JAVA_HOME/lib/jconsole.jar:\
               $JAVA_HOME/classes" \
   -Dapplication.home=$JAVA_HOME \
