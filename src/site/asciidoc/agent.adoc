@@ -76,7 +76,7 @@ an OSGi bundle is provided.
 In Jolokia 1.x there were two flavors of the bundle:
 
 * minimal bundle `jolokia-osgi.jar`, including only the
-agent itself (and an https://code.google.com/p/json-simple/[json-simple,role=externalLink] embedded), which
+agent itself (and an https://code.google.com/archive/p/json-simple/[json-simple,role=externalLink] embedded), which
 requires an already installed https://www.osgi.org/javadoc/r4v42/org/osgi/service/http/HttpService.html[OSGi HTTP service,role=externalLink] implementation, for example https://github.com/ops4j/org.ops4j.pax.web[Pax-Web HTTP Service,role=externalLink].
 * `jolokia-osgi-bundle.jar` is an all-in-one bundle, including the
 https://github.com/apache/felix-dev/tree/master/http[Felix HTTP Service implementation]. This bundle is useful for quick installations, where no HTTP Service is available. However, for best fitting

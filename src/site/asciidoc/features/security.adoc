@@ -17,16 +17,16 @@
 == JMX Proxy
 
 image:../images/features/secure_large.png["Security",role=right]
-Security in Jolokia is provided on two levels: The transport
+Security in Jolokia is provided at two levels: The transport
 channel (HTTP) is secured the standard way as it is defined in
-the Java EE specifications. The agent itself can be configured to
+the Jakarta EE specifications. The agent itself can be configured to
 use a very fine grained policy which can restrict access on
 the MBean level for various parameters.
 
 In especially, the policy can restrict access to:
 
 * certain client host IPs or subnets
-* certain Jolokia operations (read, exec, list, search)
+* certain Jolokia operations (read, exec, list, search, notification)
 * specific MBean attributes (read and write) and operations
 
 The security definitions support a wildcard notation and
@@ -58,7 +58,6 @@ The following example shows a sample policy file:
   </commands>
 
   <allow>
-
     <mbean>
       <name>java.lang:type=Memory</name>
       <attribute mode="read">Verbose</attribute>
@@ -80,6 +79,11 @@ The following example shows a sample policy file:
       <name>com.mchange.v2.c3p0:type=PooledDataSource,*</name>
       <attribute>properties</attribute>
     </mbean>
+    <mbean>
+      <name>jdk.management.jfr:type=FlightRecorder</name>
+      <attribute>*</attribute>
+      <operation>*</operation>
+    </mbean>
   </deny>
 
 </restrict>
@@ -91,6 +95,11 @@ FQDN. A  subnetmask can be given, too, for specifying a subnet
 for the access. The netmask can be given either in CIDR format
 (e.g "/16") or as a full netmask (e.g. "/255.255.0.0").
 
+The address to check is obtained from:
+
+* in WAR agent: `jakarta.servlet.ServletRequest.getRemoteHost()` or `jakarta.servlet.ServletRequest.getRemoteAddr()` depending on `allowDnsReverseLookup` configuration option
+* in JVM agent: `com.sun.net.httpserver.HttpExchange.getRemoteAddress()`
+
 The list of allowed commands, which are given in
 `<commands>` section determine which Jolokia
 operations are allowed in general.  For each command type
@@ -101,7 +110,7 @@ command is disabled by default. For certain MBeans it can be
 selectively be enabled by using an `<allow>`
 section below. Within the allow and deny sections, MBean names
 and attribute/operation names can be specified with a pattern
-using wildcards (?,*)
+using wildcards (`?`,`*`)
 
 === Next
 

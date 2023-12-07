@@ -22,7 +22,7 @@ parameters can be observed. Memory and thread consumption,
 database connection pool utilisation, HTTP request response
 for various web application are examples for valuable metrics
 to monitor. Typically, 10-20 monitored attributes are a good
-setup for a single Java EE server.
+setup for a single Jakarta EE server.
 
 With the traditional approach using JSR-160 JMX connectors,
 a connection is opened, and for each attribute queried a
@@ -42,7 +42,7 @@ other results.
 
 === Example
 
-Let's have a look at an example. Jolokias client libraries
+Let's have a look at an example. Jolokia client libraries
 (currently available for link:../client/javascript.html[JavaScript],
 link:../client/java.html[Java] and
 link:../client/perl.html[Perl]) make the usage of bulk
@@ -50,12 +50,20 @@ request easy by providing an extra layer of abstraction:
 
 [source,java,options=nowrap]
 ----
-J4pClient j4pClient = new J4pClient("http://localhost:8080/jolokia/");
-J4pRequest req1 = new J4pExecRequest("java.lang:type=Memory","gc");
-J4pRequest req2 = new J4pReadRequest("java.lang:type=Memory","HeapMemoryUsage");
-List<J4pResponse<J4pRequest>> responses = j4pClient.execute(req1,req2);
-Map memVals = responses.get(1).getValue();
-System.out.println("Memory used: " + memVals.get("used"));
+J4pClient j4pClient = J4pClient.url("http://localhost:8080/jolokia")
+        .user("jolokia")
+        .password("jolokia")
+        .build();
+J4pReadRequest req1 = new J4pReadRequest("java.lang:type=Memory", "HeapMemoryUsage");
+J4pExecRequest req2 = new J4pExecRequest("java.lang:type=Memory", "gc");
+J4pReadRequest req3 = new J4pReadRequest("java.lang:type=Memory", "HeapMemoryUsage");
+List<J4pResponse<J4pRequest>> responses = j4pClient.execute(req1, req2, req3);
+Map<String, Object> m1 = responses.get(0).getValue();
+Map<String, Object> m2 = responses.get(2).getValue();
+System.out.println("Memory usage before gc(): used: " + m1.get("used")
+        + " / max: " + m1.get("max"));
+System.out.println("Memory usage after gc(): used: " + m2.get("used")
+        + " / max: " + m2.get("max"));
 ----
 
 This gets translated in the following JSON request, which is
@@ -65,16 +73,21 @@ been set up in the `j4pClient` object above):
 [source,json]
 ----
 [
-    {
-        "operation":"gc",
-        "mbean":"java.lang:type=Memory",
-        "type":"EXEC"
-    },
-    {
-        "mbean":"java.lang:type=Memory",
-        "attribute":"HeapMemoryUsage",
-        "type":"READ"
-    }
+  {
+    "mbean":"java.lang:type=Memory",
+    "attribute":"HeapMemoryUsage",
+    "type":"read"
+  },
+  {
+    "operation":"gc",
+    "mbean":"java.lang:type=Memory",
+    "type":"exec"
+  },
+  {
+    "mbean":"java.lang:type=Memory",
+    "attribute":"HeapMemoryUsage",
+    "type":"read"
+  }
 ]
 ----
 
@@ -84,38 +97,53 @@ this:
 [source,json]
 ----
 [
-    {
-        "timestamp":1285442161,
-        "status":200,
-        "request": {
-            "mbean":"java.lang:type=Memory",
-            "operation":"gc",
-            "type":"exec"
-        },
-        "value":null
+  {
+    "request": {
+      "mbean": "java.lang:type=Memory",
+      "attribute": "HeapMemoryUsage",
+      "type": "read"
     },
-    {
-        "timestamp":1285442161,
-        "status":200,
-        "request": {
-            "mbean":"java.lang:type=Memory",
-            "attribute":"HeapMemoryUsage",
-            "type":"read"
-        },
-        "value": {
-            "max":"129957888",
-            "committed":"85000192",
-            "init":"0",
-            "used":"3660720"
-        }
-    }
+    "value": {
+      "init": 524288000,
+      "committed": 71303168,
+      "max": 8334082048,
+      "used": 13881840
+    },
+    "status": 200,
+    "timestamp": 1701935299
+  },
+  {
+    "request": {
+      "mbean": "java.lang:type=Memory",
+      "type": "exec",
+      "operation": "gc"
+    },
+    "value": null,
+    "status": 200,
+    "timestamp": 1701935300
+  },
+  {
+    "request": {
+      "mbean": "java.lang:type=Memory",
+      "attribute": "HeapMemoryUsage",
+      "type": "read"
+    },
+    "value": {
+      "init": 524288000,
+      "committed": 71303168,
+      "max": 8334082048,
+      "used": 13842720
+    },
+    "status": 200,
+    "timestamp": 1701935300
+  }
 ]
 ----
 
 Another example how bulk requests can be used is the
 https://www.nagios.org/[Nagios,role=externalLink]
 Plugin
-https://search.cpan.org/~roland/jmx4perl/scripts/check_jmx4perl[check_jmx4perl,role=externalLink],
+https://metacpan.org/dist/jmx4perl/view/scripts/check_jmx4perl[check_jmx4perl,role=externalLink],
 which uses bulk requests
 for its _multi check_ features, which allows for a
 single Nagios check monitor as many JMX attributes and

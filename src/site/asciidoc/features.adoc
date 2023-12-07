@@ -14,7 +14,6 @@
   limitations under the License.
 ////
 
-// TODO: move to grid layout to get the nice tiles
 == Overview
 
 image:images/features/overview.png["Jolokia",role="right feature",link=features/overview.html]
@@ -44,7 +43,7 @@ transparently. link:features/proxy.html[More ...]
 
 image:images/features/fast.png["Fast",role="right feature",link=features/fast.html]
 Jolokia uses the super fast JSON serialization library
-https://code.google.com/p/json-simple/[json-simple,role=externalLink]
+https://code.google.com/archive/p/json-simple/[json-simple,role=externalLink]
 for parsing requests and creating responses. Although
 the binary protocols (JRMP or IIOP) used by the standard
 JSR-160 connectors are naturally much more compact than a
@@ -110,6 +109,5 @@ technology JMX to non-Java platforms.
 link:client/java.adoc[Java],
 link:client/perl.adoc[Perl] and
 link:client/javascript.adoc[JavaScript] client
-libraries are already available, other language bindings
-are in the pipeline (e.g. Scala).
+libraries are available.
 link:features/polyglot.html[More ...]

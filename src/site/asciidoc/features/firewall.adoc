@@ -22,7 +22,7 @@ it plays nicely with even complex firewall setups. For the
 client within a firewall it is easy to access Jolokia agents
 outside over an HTTP proxy, even over multiple hops. Also
 since HTTP is such a widely adopted protocol, it is much
-better accepted than RMI, which mostly specific to the Java
+better accepted than RMI, which is mostly specific to the Java
 world (or CORBA world if using IIOP). Hence chances are much
 higher to get an agreement with the firewall policies in
 place.
@@ -30,8 +30,8 @@ place.
 Since HTTP use a single, fixed port it is easy to let Jolokia
 communicate through an SSH tunnel, too. This is not easy with
 the standard JSR-160 protocol RMI, which uses random
-ports. There are solutions to fix the port, but they are
-horrible complicated.
+ports. There are solutions to use fixed port number, but they are
+horribly complicated.
 
 With Jolokia's link:proxy.html[proxy mode] there are
 even more options to let the Java servers without any agent

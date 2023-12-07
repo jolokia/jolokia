@@ -31,9 +31,7 @@ The Jolokia protocol supports the following operations:
 * Searching for MBean Names by pattern
 * Listing of MBean Meta-data like supported attributes,
 operations and notifications
-
-Up to now JMX _notifications_ are not supported yet (but
-these are on the roadmap for a future version).
+* #new in Jolokia 2# Registering to and receiving JMX notifications
 
 Jolokia's overall architecture is shown in the next
 diagram. The agent translates between JSON over HTTP and calls
@@ -53,7 +51,7 @@ access restriction on MBean operation and attribute
 level.
 ** Merging of multiple `MBeanServer` into one
 virtual view, so there's no need to know in advance
-which MBean is registered on which
+which MBean is registered in which
 `MBeanServer`. With JSR-160 the target
 `MBeanServer` has to be known in advance.
 ** History mode for storing previous fetched values in a
@@ -115,30 +113,30 @@ to the URL `http://localhost:8080/jolokia`:
 [source,json]
 ----
 {
-    "mbean":"java.lang:type=Memory",
-    "attribute":"HeapMemoryUsage",
-    "type":"READ"
+  "type":"read",
+  "mbean":"java.lang:type=Memory",
+  "attribute":"HeapMemoryUsage"
 }
 ----
 
-In both cases, the response contains an JSON object:
+In both cases, the full response contains a JSON object:
 
 [source,json]
 ----
 {
-    "timestamp":1285531108,
-    "status":200,
-    "request": {
-        "mbean":"java.lang:type=Memory",
-        "attribute":"HeapMemoryUsage",
-        "type":"read"
-    },
-    "value": {
-        "max":"129957888",
-        "committed":"85000192",
-        "init":"0",
-        "used":"7713440"
-    }
+  "request": {
+    "mbean": "java.lang:type=Memory",
+    "attribute": "HeapMemoryUsage",
+    "type": "read"
+  },
+  "value": {
+    "init": 524288000,
+    "committed": 532676608,
+    "max": 8334082048,
+    "used": 49609240
+  },
+  "status": 200,
+  "timestamp": 1701934145
 }
 ----
 

@@ -18,14 +18,14 @@
 
 image:../images/features/polyglot_large.png["Polyglot",role=right]
 The next examples demonstrate the usage of Jolokia with
-various different clients.  The samples check for memory and
+various different clients. The samples check for memory and
 performs some action if the used heap memory exceeds a certain
 threshold. No error handling was included in order to focus on
 the Jolokia logic.
 
 === Bash
 
-Jolokia can be contacted withot any client library directly
+Jolokia can be contacted without any client library directly
 from a Bash script. This example checks, that the Memory used doesn't
 exceeds 90% of the available memory, and if so, restarts the
 Tomcat server (without any error handling, though):
@@ -35,18 +35,18 @@ Tomcat server (without any error handling, though):
 #!/bin/bash
 base_url="http://localhost:8080/jolokia"
 memory_url="${base_url}/read/java.lang:type=Memory/HeapMemoryUsage"
-used=`wget -q -O - "${memory_url}/used" | sed 's/^.*"value":\([0-9]*\).*$/\1/'`
-max=`wget -q -O - "${memory_url}/max" | sed 's/^.*"value":\([0-9]*\).*$/\1/'`
+used=`curl -u jolokia:jolokia -H'Content-Type: application/json' -s "${memory_url}/used" | jq .value`
+max=`curl -u jolokia:jolokia -H'Content-Type: application/json' -s "${memory_url}/max" | jq .value`
 usage=$((${used}*100/${max}))
 if [ $usage -gt 90 ]; then
-  /etc/init.d/tomcat restart
-  sleep 120
+  ${TC}/bin/catalina.sh stop 10
+  ${TC}/bin/catalina.sh start
 fi
 ----
 
 === Perl
 
-Using the https://www.jmx4perl.org[jmx4perl]
+Using the https://metacpan.org/dist/jmx4perl[jmx4perl]
 client library, this can be done even simpler in Perl (and in
 this case with a single HTTP request):
 
@@ -55,10 +55,12 @@ this case with a single HTTP request):
 #!/usr/bin/perl
 use JMX::Jmx4Perl;
 use strict;
-my $jmx = new JMX::Jmx4Perl(url => "http://localhost:8080/jolokia");
-my $memory = $jmx->get_attribute("java.lang:type=Memory","HeapMemoryUsage");
+my $jmx = new JMX::Jmx4Perl(url => "http://localhost:8080/jolokia"
+                            user => "jolokia", password => "jolokia");
+my $memory = $jmx->get_attribute("java.lang:type=Memory", "HeapMemoryUsage");
 if ($memory->{"used"} / $memory->{"max"} > 0.9) {
-    system("/etc/init.d/tomcat restart");
+    system("${TC}/bin/catalina.sh stop 10");
+    system("${TC}/bin/catalina.sh start");
     sleep(120);
 }
 ----
@@ -81,8 +83,8 @@ j4p.request({
     attribute: "HeapMemoryUsage"
 },{
     success: function(resp) {
-        if (resp.value.used / resp.value.max > 0.9) {
-            alert("Memory exceeds 90% threshold");
+        if (resp.value["used"] / resp.value["max"] > 0.9) {
+            console.error("Memory exceeds 90% threshold");
         }
     }
 });
@@ -110,38 +112,27 @@ import java.util.Map;
 public class JolokiaSample {
 
     public static void main(String[] args) throws Exception {
-        J4pClient j4pClient = new J4pClient("http://localhost:8080/jolokia");
+        J4pClient j4pClient = J4pClient.url("http://localhost:8080/jolokia")
+                .user("jolokia")
+                .password("jolokia")
+                .build();
         J4pReadRequest req = new J4pReadRequest("java.lang:type=Memory",
-                                                "HeapMemoryUsage");
+                "HeapMemoryUsage");
         J4pReadResponse resp = j4pClient.execute(req);
-        Map<String,String> vals = resp.getValue();
-        int used = Integer.parseInt(vals.get("used"));
-        int max = Integer.parseInt(vals.get("max"));
-        int usage = (int) (used * 100 / max);
-        if (usage > 1) {
+        Map<String, Object> vals = resp.getValue();
+        long used = (long) vals.get("used");
+        long max = (long) vals.get("max");
+        long usage = used * 100 / max;
+        if (usage > 90) {
             System.out.println("Memory usage exceeds 90% (used: " + used +
-                               " / max: " + max + " = " + usage + "%)");
+                    " / max: " + max + " = " + usage + "%)");
         }
     }
 }
 ----
-
-=== Roadmap
-
-In fact, serving non-java environments is one of the most
-outstanding strengths of Jolokia. The focus for the future
-evolution of Jolokia is to provide more client
-libraries. Top on the list are Groovy and Scala. If you like
-to add a client library in your favourite language, go
-ahead, we would be happy to include it. Currently, the
-tendency is to keep JVM based languages (+ JavaScript) under
-the Jolokia umbrella, but support for others (like
-https://www.jmx4perl.org[jmx4perl]) hosted
-elsewhere is in our focus as well. But well, let's see ;-).
 
 === Next
 
 * Read an introduction and link:overview.html[overview] for Jolokia.
 * See why Jolokia plays nicely with your link:firewall.html[firewall].
 * Go Back to the link:../features.html[Features Overview].
-
