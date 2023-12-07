@@ -21,7 +21,7 @@ services in different environments:
 
 * *WAR Agent* for deployment as web application in a Jakarta EE Server.
 * *OSGi Agent* for deployment in an OSGi container. This
-agent is packaged as a bundle and requires an https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN 8.1 Whiteboard extender].
+agent is packaged as a bundle and requires an https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard Specification for Jakarta™ Servlet,role=externalLink] extender.
 * *JVM Agent* which can be used with any Oracle/Sun based JVM, Version 11 or later.
 
 === WAR Agent
@@ -38,12 +38,12 @@ application server) and the same as for any other web archive.
 
 `jolokia-agent-war-unsecured.war` is a flavor of WAR agent without `<security-constraint>` elements declared in its `WEB-INF/web.xml`.
 
-Also, this is the agent for the link:features/proxy.adoc[proxy mode] where it is
+Also, this is the agent for the xref:features/proxy.adoc[proxy mode] where it is
 deployed in a simple, dedicated application server like Tomcat or
 Jetty.
 
 This is the most widely used agent. Read more about the
-link:agent/war.adoc[WAR agent] and its installation.
+xref:agent/war.adoc[WAR agent] and its installation.
 
 The WAR agent for Jolokia 1.x has been tested to work on:
 
@@ -66,7 +66,7 @@ The WAR agent for Jolokia 2.0 has been (as of December 2023) tested with:
 * WildFly 30.0.1.Final
 * Openliberty 23.0.0.11
 
-NOTE: One of the initial goals of https://github.com/fabric8io/docker-maven-plugin[docker-maven-plugin] was to test Jolokia with different application servers!
+NOTE: One of the initial goals of https://github.com/fabric8io/docker-maven-plugin[docker-maven-plugin,role=externalLink] was to test Jolokia with different application servers!
 
 === OSGi Agent
 
@@ -79,12 +79,12 @@ In Jolokia 1.x there were two flavors of the bundle:
 agent itself (and an https://code.google.com/archive/p/json-simple/[json-simple,role=externalLink] embedded), which
 requires an already installed https://www.osgi.org/javadoc/r4v42/org/osgi/service/http/HttpService.html[OSGi HTTP service,role=externalLink] implementation, for example https://github.com/ops4j/org.ops4j.pax.web[Pax-Web HTTP Service,role=externalLink].
 * `jolokia-osgi-bundle.jar` is an all-in-one bundle, including the
-https://github.com/apache/felix-dev/tree/master/http[Felix HTTP Service implementation]. This bundle is useful for quick installations, where no HTTP Service is available. However, for best fitting
+https://github.com/apache/felix-dev/tree/master/http[Felix HTTP Service implementation,role=externalLink]. This bundle is useful for quick installations, where no HTTP Service is available. However, for best fitting
 the OSGi philosophy, the usage of the minimal bundle is
 recommended.
 
-In Jolokia 2, there's only single `jolokia-agent-osgi.jar` and it's no longer using https://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.http.html[OSGi CMPN HTTP Service]. Instead, https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard Specification for Jakarta™ Servlet] is used and Jolokia registers its `org.jolokia.server.core.osgi.OsgiAgentServlet` as Whiteboard service.
-This approach requires existing https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard Specification for Jakarta™ Servlet] implementation.
+In Jolokia 2, there's only single `jolokia-agent-osgi.jar` and it's no longer using https://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.http.html[OSGi CMPN HTTP Service,role=externalLink]. Instead, https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard Specification for Jakarta™ Servlet,role=externalLink] is used and Jolokia registers its `org.jolokia.server.core.osgi.OsgiAgentServlet` as Whiteboard service.
+This approach requires existing https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard Specification for Jakarta™ Servlet,role=externalLink] implementation.
 
 The OSGi agent for Jolokia 1.x has been tested with the following containers:
 
@@ -99,7 +99,7 @@ The OSGi agent for Jolokia 2.0 has been (as of December 2023) tested with:
 * Karaf 4.5.0 with Pax Web 10 (dev)
 
 Read more about the
-link:agent/osgi.adoc[OSGi agent] and its installation.
+xref:agent/osgi.adoc[OSGi agent] and its installation.
 
 === JVM Agent
 
@@ -124,7 +124,7 @@ jolokia-agent-jvm-{jolokia-version}-javaagent.jar=port=7778 \
 com.example.Main
 ----
 
-Second one is to use https://docs.oracle.com/en/java/javase/11/docs/api/jdk.attach/module-summary.html[JVM Attach API] and install an agent within running JVM process. `jolokia-agent-jvm-{jolokia-version}-javaagent.jar` is a JAR with main class that uses this API, so we can invoke this JAR with `start <pid>` command:
+Second one is to use https://docs.oracle.com/en/java/javase/11/docs/api/jdk.attach/module-summary.html[JVM Attach API,role=externalLink] and install an agent within running JVM process. `jolokia-agent-jvm-{jolokia-version}-javaagent.jar` is a JAR with main class that uses this API, so we can invoke this JAR with `start <pid>` command:
 
 [source,shell,subs="attributes,verbatim"]
 ----
@@ -133,7 +133,7 @@ Started Jolokia for PID 34870
 http://127.0.0.1:7778/jolokia/
 ----
 
-NOTE: Dynamic loading of agents will be removed at some point. See https://openjdk.org/jeps/451[JEP 451] for details.
+NOTE: Dynamic loading of agents will be removed at some point. See https://openjdk.org/jeps/451[JEP 451,role=externalLink] for details.
 
 When dynamically loading a JVM agent using JDK 21 and newer, we'll get this warning:
 [source,shell,subs="attributes,verbatim"]
@@ -162,4 +162,4 @@ The JVM Agent for Jolokia 2.x has been (as of December 2023) tested with:
 * ActiveMQ 6.0.1
 * ActiveMQ Artemis 2.31.2
 
-Read more about the link:agent/jvm.html[JVM agent] and its installation.
+Read more about the xref:agent/jvm.adoc[JVM agent] and its installation.

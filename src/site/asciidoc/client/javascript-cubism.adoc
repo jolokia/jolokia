@@ -19,7 +19,7 @@
 
 https://square.github.com/cubism/[Cubism,role=externalLink] is a
 fine JavaScript library for plotting timeseries data based on
-https://d3js.org/[d3.js]. It provides support for
+https://d3js.org/[d3.js,role=externalLink]. It provides support for
 various backend sources like
 https://graphite.wikidot.com/[Graphite,role=externalLink] or
 https://square.github.com/cube/[Cube,role=externalLink] and also for
@@ -46,7 +46,7 @@ is a plain Tomcat 7. The memory charts show the heap memory
 usage as a fraction of the maximum available heap. Note that
 different colors indicate different value ranges in this
 https://github.com/square/cubism/wiki/Horizon[horizon
-chart]. The activity of the two garbage collectors for
+chart,role=externalLink]. The activity of the two garbage collectors for
 the young and old generation are shown below. Feel free to
 trigger a garbage collection on your own by pressing the
 button and look how the chart is changing.
@@ -62,8 +62,8 @@ The second demo visualizes the number of requests served by
 this Tomcat instance. The requests are grouped by 10s, so
 the values are the number of requests received in the last
 10 seconds. The green charts show the requests for the
-https://jolokia.org/jolokia[Jolokia agent] and the
-href="https://labs.consol.de/jenkins[Jenkins  CI server]. Since this demo queries the Jolokia
+https://jolokia.org/jolokia[Jolokia agent,role=externalLink] and the
+href="https://labs.consol.de/jenkins[Jenkins CI server,role=externalLink]. Since this demo queries the Jolokia
 agent every second, the first chart should show up at least
 10 request per 10 seconds. Finally the number of requests
 served by all deployed servlets is drawn in blue.
@@ -119,7 +119,7 @@ measuring only the increase rate for ten seconds.
 This sample also shows how to use wildcard patterns in a read
 request to fetch multiple values at once in a generic
 fashion. Wildcard reading is explained in detail in the
-link:../reference/html/manual/protocol.html#read[reference manual].
+link:../reference/html/manual/jolokia_protocol.html#read[reference manual].
 
 [source,javascript]
 ----

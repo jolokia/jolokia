@@ -18,7 +18,7 @@
 
 === Tutorial
 
-link:tutorial.html[Tutorial] provides a quick start to Jolokia. It
+xref:tutorial.adoc[Tutorial] provides a quick start to Jolokia. It
 demonstrates how to deploy a WAR-agent, how to check the installation
 via a Web browser and demonstrates the client usage with a small
 sample Java application.
@@ -30,6 +30,6 @@ documentation to Jolokia, its agents and client bindings.
 
 === Talks and Screencast
 
-In this link:talks.html[section] various talks along with slides and some example screencasts
+In this xref:talks.adoc[section] various talks along with slides and some example screencasts
 are collected. They give short impressions what can be done with Jolokia and
 its clients.

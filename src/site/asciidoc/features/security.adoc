@@ -114,6 +114,6 @@ using wildcards (`?`,`*`)
 
 === Next
 
-* Jolokia is really link:fast.html[fast]. See why.
-* Learn more about Jolokia's link:proxy.html[Proxy Mode] and agentless operation.
-* Go Back to the link:../features.html[Features Overview].
+* Jolokia is really xref:fast.adoc[fast]. See why.
+* Learn more about Jolokia's xref:proxy.adoc[Proxy Mode] and agentless operation.
+* Go Back to the xref:../features.adoc[Features Overview].

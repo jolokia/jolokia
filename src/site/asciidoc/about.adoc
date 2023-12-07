@@ -58,7 +58,7 @@ want to use WebServices for monitoring, either (although
 https://dmtf.org/standards/wsman[WS-Management,role=externalLink] is an
 interesting approach).
 
-That was the birth of https://www.jmx4perl.org[jmx4perl,role=externalLink] in May
+That was the birth of https://metacpan.org/dist/jmx4perl[jmx4perl,role=externalLink] in May
 2009. Coming from a strong Perl background (being a SGI system
 administrator at university in my former life), my initial goal
 was to use pure Perl for accessing remote JMX information without

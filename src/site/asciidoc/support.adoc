@@ -51,7 +51,7 @@ https://help.github.com/pull-requests[pull request,role=externalLink].
 integrated into relevant branch of the repository.
 
 Please note, that all the contributed code must be
-licensed under link:license.html[Apache License] Version 2 and you must sign-off the contribution (see above).
+licensed under xref:license.adoc[Apache License] Version 2 and you must sign-off the contribution (see above).
 
 === Your Support for Jolokia
 

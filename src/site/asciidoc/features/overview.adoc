@@ -44,9 +44,9 @@ This approach has some advantages:
 
 * With help of the agent Jolokia is able to provide services
 which go beyond the functionality of JSR-160 connectors:
-** link:bulk-requests.html[Bulk requests] which
+** xref:bulk-requests.adoc[Bulk requests] which
 allow for multiple JMX calls within a single request
-** Fine grained link:security.html[security] with
+** Fine grained xref:security.adoc[security] with
 access restriction on MBean operation and attribute
 level.
 ** Merging of multiple `MBeanServer` into one
@@ -59,18 +59,18 @@ cache on the server side, along with a time stamp. This
 is especially useful to calculate the change of JMX
 attributes without need of a client storage.
 ** No Java is required on the
-link:polyglot.html[client] side due to the platform
+xref:polyglot.adoc[client] side due to the platform
 neutral nature of HTTP and JSON.
 ** JSON serialization allows for deep access into returned
 objects without having custom type definitions installed
 on the client side.
 * Since HTTP uses a single predefined port, this setup plays nicely with
-link:firewall.adoc[firewall] configuration. The
+xref:firewall.adoc[firewall] configuration. The
 JSR-160 default connector in contrast is not that smart
 since RMI uses a random port for its communication by
 default.
 * As paradox as it might sound, setting up an agent is often
-link:simple.html[easier] than setting up the
+xref:simple.adoc[easier] than setting up the
 configuration for JSR-160 JMX export, especially when it
 comes to security. Typically, for JSR-160 export startup
 files and configuration of the application server has to be
@@ -86,7 +86,7 @@ updating Jolokia normally implies a redeployment of the
 agent. These are all good reasons, for which Jolokia has an
 answer, too. By installing a dedicated Java EE-Server with an
 deployed agent, Jolokia can operate in
-link:proxy.html[proxy mode], in which case it translate
+xref:proxy.adoc[proxy mode], in which case it translate
 Jolokia JSON request into JSR-160 client request for operation
 on the target server. Vice versa, the result over a JSR-160
 connector then gets translated into a JSON response which is
@@ -97,7 +97,7 @@ returned to Jolokia client.
 In order to get a feeling how the Jolokia protocol looks like,
 here is an example of a simple Jolokia request and
 response. Assuming that an
-link:../agent.html[agent] is installed, the following
+xref:../agent.adoc[agent] is installed, the following
 HTTP `GET`
 request reads the used heap memory statistics of the instrumented JVM:
 
@@ -142,7 +142,7 @@ In both cases, the full response contains a JSON object:
 
 === Next
 
-* Learn something about link:bulk-requests.html[bulk JMX requests].
-* See why jolokia is the link:polyglot.html[perfect choice] for non-Java environments
+* Learn something about xref:bulk-requests.adoc[bulk JMX requests].
+* See why jolokia is the xref:polyglot.adoc[perfect choice] for non-Java environments
 to access Java servers via JMX.
-* Go Back to the link:../features.html[Features Overview].
+* Go Back to the xref:../features.adoc[Features Overview].

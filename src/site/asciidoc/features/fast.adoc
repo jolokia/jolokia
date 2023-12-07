@@ -36,7 +36,7 @@ has been confirmed that it scales up very well in a Nagios
 environment with 500 servers monitoring about 10 parameters on
 each server every 5 minutes.
 
-Especially link:bulk-requests.html[bulk requests] can
+Especially xref:bulk-requests.adoc[bulk requests] can
 speed up monitoring considerably. This unique feature, which
 is not available for JSR-160 connectors, allows for quering
 many parameters with a single server turnaround.
@@ -46,7 +46,7 @@ library https://code.google.com/archive/p/json-simple/[json-simple,role=external
 JSON itself is a very compact data format with small overhead
 compared to RMI, this adds to the good performance experience.
 
-NOTE: https://code.google.com/archive/p/json-simple/[json-simple] is not a new library and since 2012 (last release) Java ecosystem was enriched with many JSON related libraries. We may review this subject, but for now, json-simple is really simple and sufficient (e.g., no complex data binding, thus no CVEs related to _gadgets_ and remote code execution).
+NOTE: https://code.google.com/archive/p/json-simple/[json-simple,role=externalLink] is not a new library and since 2012 (last release) Java ecosystem was enriched with many JSON related libraries. We may review this subject, but for now, json-simple is really simple and sufficient (e.g., no complex data binding, thus no CVEs related to _gadgets_ and remote code execution).
 
 In summary, all these facts indicate that the Jolokia is
 faster than standard JSR-160 connectors with communication of
@@ -55,6 +55,6 @@ ground.
 
 === Next
 
-* Jolokia is link:simple.html[simple]. Really.
-* See why how Jolokia can link:security.html[secure] JMX access in a very fine granular way.
-* Go Back to the link:../features.html[Features Overview].
+* Jolokia is xref:simple.adoc[simple]. Really.
+* See why how Jolokia can xref:security.adoc[secure] JMX access in a very fine granular way.
+* Go Back to the xref:../features.adoc[Features Overview].

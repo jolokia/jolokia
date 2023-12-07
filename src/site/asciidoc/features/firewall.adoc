@@ -33,13 +33,13 @@ the standard JSR-160 protocol RMI, which uses random
 ports. There are solutions to use fixed port number, but they are
 horribly complicated.
 
-With Jolokia's link:proxy.html[proxy mode] there are
+With Jolokia's xref:proxy.adoc[proxy mode] there are
 even more options to let the Java servers without any agent
 within the firewall to be reached from the outside over HTTP.
 
 There has been efforts to put JSR-160 on a different protocol
 stack, but they are either not a standard solution, requiring
-a special client setup (like https://mx4j.sourceforge.net/[MX4J]) or seemed to
+a special client setup (like https://mx4j.sourceforge.net/[MX4J,role=externalLink]) or seemed to
 have been dropped (WS connector which uses SOAP
 had its last pre-release in October 2008). Up to now, the only
 solution which allows for a smooth, firewall friendly setup is
@@ -47,7 +47,7 @@ a JMX Bridge (or Proxy), like Jolokia.
 
 === Next
 
-* See why jolokia is the link:polyglot.html[perfect choice] for non-Java environments
+* See why jolokia is the xref:polyglot.adoc[perfect choice] for non-Java environments
 to access Java servers via JMX.
-* Jolokia is link:simple.html[simple]. Really.
-* Go Back to the link:../features.html[Features Overview].
+* Jolokia is xref:simple.adoc[simple]. Really.
+* Go Back to the xref:../features.adoc[Features Overview].

@@ -46,7 +46,7 @@ fi
 
 === Perl
 
-Using the https://metacpan.org/dist/jmx4perl[jmx4perl]
+Using the https://metacpan.org/dist/jmx4perl[jmx4perl,role=externalLink]
 client library, this can be done even simpler in Perl (and in
 this case with a single HTTP request):
 
@@ -69,7 +69,7 @@ if ($memory->{"used"} / $memory->{"max"} > 0.9) {
 
 The JSON based Jolokia protocol fits perfectly in the
 JavaScript world. Jolokia provides a
-link:../client/javascript.html[JavaScript client
+xref:../client/javascript.adoc[JavaScript client
 library] which makes it a piece of cake to access JMX
 information directly from within the browser. A variant of
 the memory example above looks in JavaScript like this:
@@ -133,6 +133,6 @@ public class JolokiaSample {
 
 === Next
 
-* Read an introduction and link:overview.html[overview] for Jolokia.
-* See why Jolokia plays nicely with your link:firewall.html[firewall].
-* Go Back to the link:../features.html[Features Overview].
+* Read an introduction and xref:overview.html[overview] for Jolokia.
+* See why Jolokia plays nicely with your xref:firewall.adoc[firewall].
+* Go Back to the xref:../features.adoc[Features Overview].

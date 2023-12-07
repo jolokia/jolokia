@@ -97,7 +97,7 @@ recommended for production use.
 |https://github.com/jolokia/jolokia/releases/download/v{jolokia-version}/jolokia-cubism-min.js[jolokia-cubism-min.js,role=externalLink]
 |===
 
-Jolokia JavaScript library is also available in https://www.npmjs.com/package/jolokia.js[NPM Registry]. In your project you just need to use `npm` or `yarn`
+Jolokia JavaScript library is also available in https://www.npmjs.com/package/jolokia.js[NPM Registry,role=externalLink]. In your project you just need to use `npm` or `yarn`
 
 [source,bash,subs="attributes,verbatim"]
 ----
@@ -159,7 +159,7 @@ Java client library can also be used as a Maven dependency:
 </dependency>
 ----
 
-More information about available Jolokia modules can be found on link:libraries.html[Libraries page].
+More information about available Jolokia modules can be found on xref:libraries.adoc[Libraries page].
 
 The released Jolokia artifacts are available from
 https://search.maven.org/[Maven Central,role=externalLink].

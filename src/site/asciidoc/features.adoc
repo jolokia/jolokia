@@ -25,7 +25,7 @@ response payload represented in JSON. It transparently
 bridges to the JMX world, talking to clients on the
 frontend via a REST-like protocol and to a JMX
 MBeanServer on the backend.
-link:features/overview.html[More ...]
+xref:features/overview.adoc[More ...]
 
 == JMX Proxy
 
@@ -37,7 +37,7 @@ listens on the front side for Jolokia requests via
 JSON/HTTP and propagates these to the target server
 through remote JSR-160 JMX calls. Bulk requests get
 dispatched into multiple JSR-160 requests on the proxy
-transparently. link:features/proxy.html[More ...]
+transparently. xref:features/proxy.adoc[More ...]
 
 == Fast
 
@@ -50,14 +50,14 @@ JSR-160 connectors are naturally much more compact than a
 textual representation like JSON and although they have
 some performance advantages, Jolokia balances this for
 many use cases with advanced features like bulk requests
-and low startup times. link:features/fast.html[More ...]
+and low startup times. xref:features/fast.adoc[More ...]
 
 == Firewall friendly
 
 image:images/features/firewall.png["Firewall",role="right feature",link=features/firewall.html]
 The usage of HTTP as transport protocol makes Jolokia a
 perfect choice for firewall setups. It can seemlessly
-operate over multiple HTTP-Proxy hops. link:features/firewall.html[More ...]
+operate over multiple HTTP-Proxy hops. xref:features/firewall.adoc[More ...]
 
 ++++
 <div style="clear: both"></div>
@@ -74,7 +74,7 @@ increase performance drastically especially for
 monitoring use cases where many different JMX parameters
 are observed at once. The Nagios plugin
 `check_jmx4perl` uses bulk requests for its
-multi check feature. link:features/bulk-requests.html[More ...]
+multi check feature. xref:features/bulk-requests.adoc[More ...]
 
 == Secure
 
@@ -85,7 +85,7 @@ multiple properties like the client's IP address or
 subnet, the MBean names and their attributes and
 operations. The policy is defined in an XML format with
 support for allow/deny sections and wildcards.
-link:features/security.html[More ...]
+xref:features/security.adoc[More ...]
 
 == Simple
 
@@ -98,7 +98,7 @@ encoding enables easy access from any client
 platform. The client libraries' API are designed for a
 simple, typeless usage, using a request-response
 paradigma. They are not harder to use than any other
-HTTP library. link:features/simple.html[More ...]
+HTTP library. xref:features/simple.adoc[More ...]
 
 == Polyglot
 
@@ -106,8 +106,8 @@ image:images/features/polyglot.png["Polyglot",role="right feature",link=features
 Thanks to the widely adopted standards HTTP and JSON,
 Jolokia is able to effortlessly bridge the Java centric
 technology JMX to non-Java platforms.
-link:client/java.adoc[Java],
-link:client/perl.adoc[Perl] and
-link:client/javascript.adoc[JavaScript] client
+xref:client/java.adoc[Java],
+xref:client/perl.adoc[Perl] and
+xref:client/javascript.adoc[JavaScript] client
 libraries are available.
-link:features/polyglot.html[More ...]
+xref:features/polyglot.adoc[More ...]

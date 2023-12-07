@@ -16,7 +16,7 @@
 
 == License
 
-Jolokia is released under the https://www.apache.org/licenses/LICENSE-2.0[Apache License], Version 2.0.
+Jolokia is released under the https://www.apache.org/licenses/LICENSE-2.0[Apache License,role=externalLink], Version 2.0.
 The license is appended below.
 
 === www.jolokia.org
@@ -33,11 +33,11 @@ the agents. These are
 
 * https://code.google.com/archive/p/json-simple/[json-simple,role=externalLink] released
 under the Apache License 2.0 as well.
-* The reference guide is using https://antora.org/[Antora site generator]
-* The reference guide's stylesheets are using https://gitlab.com/antora/antora-ui-default[Antora Default UI] with minor CSS changes
-* `jolokia-client-kubernetes` is using https://github.com/fabric8io/kubernetes-client/[Fabric8 Kubernetes Client] under the Apache License 2.0
-* `jolokia-support-spring` and Spring-related examples are using https://spring.io/projects/spring-framework[Spring Framework] and https://spring.io/projects/spring-boot[Spring Boot] under the Apache License 2.0
-* `jolokia-client-java` is based on https://hc.apache.org/httpcomponents-client-4.5.x/index.html[Apache HTTP Client 4] under the Apache License 2.0
+* The reference guide is using https://antora.org/[Antora site generator,role=externalLink]
+* The reference guide's stylesheets are using https://gitlab.com/antora/antora-ui-default[Antora Default UI,role=externalLink] with minor CSS changes
+* `jolokia-client-kubernetes` is using https://github.com/fabric8io/kubernetes-client/[Fabric8 Kubernetes Client,role=externalLink] under the Apache License 2.0
+* `jolokia-support-spring` and Spring-related examples are using https://spring.io/projects/spring-framework[Spring Framework] and https://spring.io/projects/spring-boot[Spring Boot,role=externalLink] under the Apache License 2.0
+* `jolokia-client-java` is based on https://hc.apache.org/httpcomponents-client-4.5.x/index.html[Apache HTTP Client 4,role=externalLink] under the Apache License 2.0
 
 === Apache License
 

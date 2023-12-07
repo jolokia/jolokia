@@ -43,9 +43,9 @@ other results.
 === Example
 
 Let's have a look at an example. Jolokia client libraries
-(currently available for link:../client/javascript.html[JavaScript],
-link:../client/java.html[Java] and
-link:../client/perl.html[Perl]) make the usage of bulk
+(currently available for xref:../client/javascript.adoc[JavaScript],
+xref:../client/java.adoc[Java] and
+xref:../client/perl.adoc[Perl]) make the usage of bulk
 request easy by providing an extra layer of abstraction:
 
 [source,java,options=nowrap]
@@ -151,6 +151,6 @@ operations as required.
 
 === Next
 
-* Learn more about Jolokia's link:proxy.html[Proxy Mode] and agentless operation.
-* Read an introduction and link:overview.html[overview] for Jolokia.
-* Go Back to the link:../features.html[Features Overview].
+* Learn more about Jolokia's xref:proxy.adoc[Proxy Mode] and agentless operation.
+* Read an introduction and xref:overview.adoc[overview] for Jolokia.
+* Go Back to the xref:../features.adoc[Features Overview].

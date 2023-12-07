@@ -20,18 +20,18 @@ image:../images/features/simple_large.png["Simple",role=right]
 For Jolokia to work, an agent must be deployed, the one way or
 the other. But this is a common business:
 
-* The link:../agent/war.html[WAR Agent] gets deployed as any other
+* The xref:../agent/war.adoc[WAR Agent] gets deployed as any other
 Jakarta EE web application. Often this is as simple as
 copy of the agent WAR into a certain directory
 (like `webapps/` for Tomcat). Or it gets deployed via an administrative
 user interface (web GUI or command line tool). In any case,
 the procedure should be familar to any Java developer or
 administrator dealing with Jakarta EE applications.
-* The link:../agent/osgi.html[OSGi Agent] gets deployed as any other
+* The xref:../agent/osgi.adoc[OSGi Agent] gets deployed as any other
 OSGi bundle, which is also a well known procedure (although
 specific to each OSGi container). For the pure bundle, there
-is a requirement for an OSGi runtime to include https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[Whiteboard Specification for Jakarta™ Servlet] implementation.
-* The link:../agent/jvm.html[JVM JDK 11 Agent] requires for its setup
+is a requirement for an OSGi runtime to include https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard Specification for Jakarta™ Servlet,role=externalLink] implementation.
+* The xref:../agent/jvm.adoc[JVM JDK 11 Agent] requires for its setup
 some extra command line parameter for the JVM, but this
 shouldn't be a big deal either.
 
@@ -69,6 +69,6 @@ Try:
 
 === Next
 
-* See why Jolokia plays nicely with your link:firewall.html[firewall].
-* Jolokia is really link:fast.html[fast]. See why.
-* Go Back to the link:../features.html[Features Overview].
+* See why Jolokia plays nicely with your xref:firewall.adoc[firewall].
+* Jolokia is really xref:fast.adoc[fast]. See why.
+* Go Back to the xref:../features.adoc[Features Overview].

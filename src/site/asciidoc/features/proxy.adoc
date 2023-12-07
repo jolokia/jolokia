@@ -44,7 +44,7 @@ target parameters are included in the request.
 The standard (but often forgotten) _remoting_ technology for Java applications is RMI.
 
 In order to access a `javax.management.MBeanServer` available withing a remote JVM, we should actually
-access a _remote view_ of this interface. It is possible using https://docs.oracle.com/en/java/javase/11/management/monitoring-and-management-using-jmx-technology.html#GUID-F08985BB-629A-4FBF-A0CB-8762DF7590E0[Remote Monitoring and Management].
+access a _remote view_ of this interface. It is possible using https://docs.oracle.com/en/java/javase/11/management/monitoring-and-management-using-jmx-technology.html#GUID-F08985BB-629A-4FBF-A0CB-8762DF7590E0[Remote Monitoring and Management,role=externalLink].
 
 The connection is established between two entities specified in "Chapter 13, Connectors" of the unified JMX specification (combined JSR-3 and JSR-160):
 
@@ -165,7 +165,7 @@ The result may look like:
 Operating Jolokia as a JMX proxy has some limitations
 compared to a native agent deployment:
 
-* link:bulk-requests.html[Bulk requests] are
+* xref:bulk-requests.adoc[Bulk requests] are
 possible but not as efficient as for direct operation. The
 reason is, that JSR-160 remoting doesn't know about bulk
 requests, so that a Jolokia bulk request arriving at the
@@ -188,6 +188,6 @@ some sort of optional JSR-160 connection pooling.
 
 === Next
 
-* See why how Jolokia can link:security.html[secure] JMX access in a very fine granular way.
-* Learn something about link:bulk-requests.html[bulk JMX requests].
-* Go Back to the link:../features.html[Features Overview].
+* See why how Jolokia can xref:security.adoc[secure] JMX access in a very fine granular way.
+* Learn something about xref:bulk-requests.adoc[bulk JMX requests].
+* Go Back to the xref:../features.adoc[Features Overview].

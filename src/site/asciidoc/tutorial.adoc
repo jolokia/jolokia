@@ -169,7 +169,7 @@ Remaining dependencies are available transitively:
 
 === Install Jmx4Perl
 
-NOTE: This section is a tribute to link:about.html[Perl origins of Jolokia].
+NOTE: This section is a tribute to xref:about.adoc[Perl origins of Jolokia].
 
 The five minutes are probably over now, but I highly
 recommend to install

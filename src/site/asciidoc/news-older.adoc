@@ -119,7 +119,7 @@ In any case, enjoy the summer. Happy hacking ;-)
 2018-06-25
 
 As https://matmannion.com/jolokiapwn/"[reported,role=externalLink] by security consultant Mat Mannion, there is a massive set of Jolokia agents reachable unsecured from the Internet.
-While its obviously not recommended to run Jolokia unsecured or even expose it publicly, authentication is enabled now by default in `jolokia.war`. So in order to continue to the link:agent/war.adoc[WAR-agent] you have to setup
+While its obviously not recommended to run Jolokia unsecured or even expose it publicly, authentication is enabled now by default in `jolokia.war`. So in order to continue to the xref:agent/war.adoc[WAR-agent] you have to setup
 your servlet's container authentication to associate enabled users with the role `jolokia` (like by adding it
 to `tomcat-users.xml`).
 
@@ -141,7 +141,7 @@ security options.
 Two security issues for Jolokia have recently been discovered by Olga Barinova of
 https://www.gdssecurity.com/[Gotham Digital Science,role=externalLink]:
 
-* The Jolokia link:reference/html/manual/proxy.html[JMX proxy mode,role=externalLink] is vulnerable
+* The Jolokia link:reference/html/manual/proxy_mode.html[JMX proxy mode,role=externalLink] is vulnerable
 to remote code execution in a specific scenario. Note that this only affects the
 link:reference/html/manual/agents.html#agents-war[WAR agent,role=externalLink], which
 has the proxy mode enabled by default.
@@ -170,7 +170,7 @@ This file then can be referenced by a system property, an env variable or direct
 in the war file.
 
 For the configuration options of the Jolokia proxy please refer to
-the link:reference/html/manual/proxy.html[Proxy Mode,role=externalLink] section of the reference manual.
+the link:reference/html/manual/proxy_mode.html[Proxy Mode,role=externalLink] section of the reference manual.
 
 Finally, we always recommend using a dedicated server when using the JMX proxy mode, e.g. a Jetty or Tomcat
 servlet container.
@@ -391,7 +391,7 @@ enable https is simply to add
 disable cert validation then and it is recommended to use
 basic-authentication to authenticate the connection.
 
-The changes affect the link:agent/jvm.adoc[JVM agent] only
+The changes affect the xref:agent/jvm.adoc[JVM agent] only
 and are explained in the
 link:reference/html/manual/agents.html#agents-jvm[reference manual,role=externalLink].
 
@@ -487,7 +487,7 @@ now and you have much more influence of the SSL
 setup. Kudos to https://github.com/nevenr[Neven Radovanović,role=externalLink] for
 providing a patch.
 * The Mule agent has been updated to support Mule
-3.5. Thanks to href="https://github.com/FeiWongReed[Fei Wong Reed]
+3.5. Thanks to href="https://github.com/FeiWongReed[Fei Wong Reed,role=externalLink]
 for the pull request.
 * The configuration option "policyLocation" has now system
 property and environment expansions.
@@ -498,10 +498,10 @@ changes.
           
 If you want to get a quick introduction into Jolokia and a
 peek preview to Jolokia 2.0 come to my "Tools in Action"
-session at https://cfp.devoxx.be/2014/talk/LVC-7834/Spicing_up_JMX_with_Jolokia[Devoxx]
+session at https://cfp.devoxx.be/2014/talk/LVC-7834/Spicing_up_JMX_with_Jolokia[Devoxx,role=externalLink]
 2014 in Antwerp.
 
-Last announcement for now: I started a blog at https://ro14nd.de about
+Last announcement for now: I started a blog at https://ro14nd.de[,role=externalLink] about
 various technical topics like Jolokia, Docker or other
 stuff.
 
@@ -525,10 +525,10 @@ rock solid.
 * Bug fixes. Yep.
 
 The biggest new feature with the most impact is path
-wildcard support. You probably know link:reference/html/manual/protocol.html#read[pattern read
+wildcard support. You probably know link:reference/html/manual/jolokia_protocol.html#read[pattern read
 requests] which allow for fetching multiple patterns by
 using patterns for MBean names and attributes (not to be
-confused with link:reference/html/manual/protocol.html#post-request[bulk
+confused with link:reference/html/manual/jolokia_protocol.html#post-request[bulk
 requests]). When using pattern read requests, the value
 in the returned JSON structure is not a single return value
 for an attribute but a more complex structure containing the
@@ -544,7 +544,7 @@ patterns, which match a complete 'level' in the JSON
 object. This makes it easy to fetch all same-named
 attributes on arbitrary MBeans and extract only parts of
 their values. In fact, it is not so easy explain wildcard
-pathes, but here is a try (another try can be found in the link:reference/html/manual/protocol.html#read[reference manual]):
+pathes, but here is a try (another try can be found in the link:reference/html/manual/jolokia_protocol.html#read[reference manual]):
 
 * If using a literal path, then everything works as expected:
 The value the path points to is returned. Mostly this is a
@@ -570,7 +570,7 @@ open an issue if any suspicious behaviour during
 path-wildcard using occurs.
 
 Finally, I would also like to mention a new GitHub project
-https://github.com/jolokia/jolokia-extra[jolokia-extra]
+https://github.com/rhuss/jolokia-extra[jolokia-extra,role=externalLink]
 which holds additional goodies. One design goal of Jolokia
 is to keep it focused. That's not so easy as there are tons
 of ideas out there, all backed by a particular use case. And
@@ -582,7 +582,7 @@ be of general interest but are still pearls. That's what
 is for.
 
 The beginning makes a 1.5 year old https://github.com/jolokia/jolokia/pull/50[pull
-request] from https://github.com/mplonka[Marcin Płonka,role=externalLink]
+request,role=externalLink] from https://github.com/mplonka[Marcin Płonka,role=externalLink]
 (Thanks a lot and sorry for the long, long delay,
 BTW). It's all about simplifying access to JSR-77 enabled
 Java EE-Servers. You should know that https://jcp.org/en/jsr/detail?id=77[JSR 77: J2EE
@@ -642,7 +642,7 @@ production
 (and not only for servers exposed to the bad internet directly). This is especially important if you can
 access
 Jolokia agents directly via a browser which is also used for internet access
-(hint: https://en.wikipedia.org/wiki/Cross-site_request_forgery[CSRF]).
+(hint: https://en.wikipedia.org/wiki/Cross-site_request_forgery[CSRF,role=externalLink]).
 
 No news about 2.0 ? Yes, indeed. The giant is still sleeping, "Jolokia forever", you know. But the
 pressure rises, for some conferences I have some CFPs out which hopefully will lead to some nice CDD sessions
@@ -670,20 +670,20 @@ It can be easily enabled for the WAR agent by using servlet init parameters, sys
 variables.
 All the nifty details can be found in the link:reference/html/manual/index.html[reference manual].
 
-The protocol for the discovery mechanism is also link:reference/html/manual/protocol.html#discovery[specified]
+The protocol for the discovery mechanism is also link:reference/html/manual/jolokia_protocol.html#discovery[specified]
 in the reference manual. One of the first clients
-supporting this discovery mode is https://search.cpan.org/~roland/jmx4perl/lib/JMX/Jmx4Perl.pm[Jmx4Perl]
+supporting this discovery mode is https://search.cpan.org/~roland/jmx4perl/lib/JMX/Jmx4Perl.pm[Jmx4Perl,role=externalLink]
 in its newest version. The Jolokia
 Java client will follow in one of the next minor releases.
 
 But you don't need client support for multicast requests if you know already the URL for one agent. Each
 agent registers a MBean `jolokia:type=Discovery` which perform the multicast discovery request for
 you if you trigger the operation `lookupAgents`. The returned value contains the agent information
-and is described link:reference/html/manual/mbeans.html#mbean-discovery[here].
+and is described link:reference/html/manual/jolokia_mbeans.html#mbean-discovery[here].
 
 This feature has been tested in various environments, but since low level networking can be, well, "painful",
 I would
-ask you to open an https://github.com/jolokia/jolokia/issues[issue] in case of any problems.
+ask you to open an https://github.com/jolokia/jolokia/issues[issue,role=externalLink] in case of any problems.
 
 Although it has been quiet some time with respect to the shiny new Jolokia 2.0, I'm quite close to a first
 milestone. All planned features has been implemented in an initial version, what's missing is to finish the
@@ -696,14 +696,14 @@ refactoring and modularisation of the Jolokia core. More on this later, please s
 2013-11-08
 
 This is by far the smallest release ever: A
-https://github.com/jolokia/jolokia/commit/98e62c0478b166d188e0c9f173b278a59eed1fc8#diff-cdf118c56620542b85bc48650eb8ddb6R162[single char]
+https://github.com/jolokia/jolokia/commit/98e62c0478b166d188e0c9f173b278a59eed1fc8#diff-cdf118c56620542b85bc48650eb8ddb6R162[single char,role=externalLink]
 has been added on top of 1.1.4 fixing a silly bug when
 using Glassfish with the AMX system. So, no need to update if you are not using Glassfish.
 
 Next week is Devoxx time and as last year (and the years before) you have the change to meet
-https://twitter.com/ro14nd[me]
+https://twitter.com/ro14nd[me,role=externalLink]
 in Antwerp. Ping me or look for the guy with the
-https://jolokia.spreadshirt.de/men-s-hooded-jacket-A17809556/[Jolokia hoodie] ;-)
+https://jolokia.spreadshirt.de/men-s-hooded-jacket-A17809556/[Jolokia hoodie,role=externalLink] ;-)
 
 === Step by step ... 1.1.4
 
@@ -725,11 +725,11 @@ That's it and I hope you enjoy this release. I know, I'm late with 2.0, but as t
 much to do in 'real life' (i.e. feeding my family ;-). But I still hope to get it out this year, and yes, the
 2.0 branch is growing (slowly).
 
-BTW, the slides to my talk for the small but very fine https://www.jayday.de[JayDay 2013] are
-https://www.jolokia.org/jayday-2013[online], too.
+BTW, the slides to my talk for the small but very fine https://www.jayday.de[JayDay 2013,role=externalLink] are
+https://www.jolokia.org/jayday-2013[online,role=externalLink], too.
 These are "implemented" in JavaScript including live demos, where the JavaScript can be directly inserted
 in the browser (tested with Chrome & Firefox). For the sample code, simply push the blue buttons at the
-bottom of a https://www.jolokia.org/jayday-2013/#/step-20[demo slide].
+bottom of a https://www.jolokia.org/jayday-2013/#/step-20[demo slide,role=externalLink].
 
 === Small fixes with 1.1.3
 
@@ -741,7 +741,7 @@ some issues
 with the JavaScript client's
 basic authentication and cross origin requests has been fixed. Otherwise I'm busy with 2.0 (and tons
 of other stuff ...). You can have a sneak preview of Jolokia 2.0 on this
-https://github.com/jolokia/jolokia/tree/2.0[branch]
+https://github.com/jolokia/jolokia/tree/2.0[branch,role=externalLink]
 including basic notification support and quite some refactoring with respect to the service architecture.
 
 So please stay tuned ....
@@ -755,7 +755,7 @@ In order to ease waiting for 2.0, Jolokia version 1.1.2 has been released. It co
 bug fixes as explained in the link:changes-report.html[changelog]. Depending on the bug reports and
 pull request dropping in there might be even a 1.1.3 release before 2.0 will be finished.
 
-In the meantime, you can also see Jolokia live at https://www.jayday.de/[JayDay] where I will give
+In the meantime, you can also see Jolokia live at https://www.jayday.de/[JayDay,role=externalLink] where I will give
 a talk about
 Jolokia's JavaScript support. The forthcoming JMX notification support will presented, too. It is also
 a good chance to have a cold bavarian beer with me ;-)
@@ -770,7 +770,7 @@ some small goodies.
 
 * `BigDecimal` and `BigInteger` can
 now be used for operation arguments and return values.
-* A new processing parameter link:reference/html/manual/protocol.html#processing-parameters[`ifModifiedSince`]
+* A new processing parameter link:reference/html/manual/jolokia_protocol.html#processing-parameters[`ifModifiedSince`]
 has been introduced. This parameter can be used with a
 timestamp for fetching the list of available MBeans only
 when there has been some changes in the MBean registration
@@ -815,7 +815,7 @@ This is the last feature release in the 1.x series. Work has
 already started on exciting new features for Jolokia
 2.0. E.g. JMX notification support is coming, an initial
 pull model has been already implemented (on branch
-https://github.com/jolokia/jolokia/tree/notification[notification]). There
+https://github.com/jolokia/jolokia/tree/notification[notification,role=externalLink]). There
 are even more ideas and some refactorings will happening
 along with some modest changes in the module structure. So,
 please stay tuned ...
@@ -844,7 +844,7 @@ application context and agent will be fired up during startup:
 </jolokia:agent>
 ----
 
-More details can be found here in the link:reference/html/manual/jmx.html#jvm-spring[reference manual].
+More details can be found here in the link:reference/html/manual/jolokia_jmx.html#jvm-spring[reference manual].
 
 The new `jolokia-jmx` module provides an own
 MBeanServer which never gets exposed via JSR-160
@@ -858,7 +858,7 @@ types to JSON even for JSR-160 connections:
 
 image::images/jconsole-json-mbean.png[]
 
-The details can be found link:reference/html/manual/jmx.html[here].
+The details can be found link:reference/html/manual/jolokia_jmx.html[here].
 
 Several new processing options enter the scene. These can be
 given either as global configuration parameters or as query
@@ -876,19 +876,19 @@ That's it for now, all changes are summarized as always in the link:changes-repo
 Some other, more organizational stuff for now:
 
 * Bugtracking and feature requests switch over completely to
-https://github.com/jolokia/jolokia/issues[GitHub].
+https://github.com/jolokia/jolokia/issues[GitHub,role=externalLink].
 Since I'm currently collecting features for 2.0, it's a good time for feature requests ;-). All ideas
 entered
-https://jolokia.idea.informer.com/[jolokia.idea.informer.com] has been transformed into
+https://jolokia.idea.informer.com/[jolokia.idea.informer.com,role=externalLink] has been transformed into
 GitHub issues.
 * If you are close to Germany it might be of interest to you, that I'm giving a training on Jolokia and
 Jmx4Perl,
 with focus on Java Monitoring with Nagios. This will happen at 16./17.04.2013 in Munich, details can be
 found on our
-https://www.consol.de/open-source-monitoring/schulungen/java-monitoring-mit-nagios/[web site]
+https://www.consol.de/open-source-monitoring/schulungen/java-monitoring-mit-nagios/[web site,role=externalLink]
 (in german).
 
-And finally a very **hot** recommendation: Please have a look at https://hawt.io[hawt.io]
+And finally a very **hot** recommendation: Please have a look at https://hawt.io[hawt.io,role=externalLink]
 a super cool
 HTML5 console which uses Jolokia for backend communication exclusively. Most of the new ideas included in this
 Jolokia release were inspired by discussions with James Strachan, one of the driving forces behind hawt.
@@ -907,13 +907,13 @@ fixes. More on this in the link:changes-report.html[changelog].
 
 Some other tidbits:
 
-* The new link:talks.adoc[Talks and Screencast] section collects some fancy multimedia introducing
+* The new xref:talks.adoc[Talks and Screencast] section collects some fancy multimedia introducing
 Jolokia
-* I'm going to talk about Jolokia at https://www.jayday.de/?lang=en[jayday 2012], a brand new,
+* I'm going to talk about Jolokia at https://www.jayday.de/?lang=en[jayday 2012,role=externalLink], a brand new,
 low cost
 conference in Munich on 3th December 2012. Hopefully there will be some brand new stuff to show, too.
 * Some completely irrelevant stuff: Jolokia T-Shirts can be found in the
-https://jolokia.spreadshirt.de/[Jolokia Shop]
+https://jolokia.spreadshirt.de/[Jolokia Shop,role=externalLink]
 The shop was too easy to setup for not doing it ;-) And they look freaking hot ....
 
 === Cubism support in 1.0.5
@@ -924,11 +924,11 @@ The shop was too easy to setup for not doing it ;-) And they look freaking hot .
 Jolokia 1.0.5 has been released. Beside minor link:changes-report.html[improvements and bug fixes],
 one great new feature has been introduced: As already
 mentioned Jolokia has now support for
-https://github.com/square/cubism/[Cubism], a fine
+https://github.com/square/cubism/[Cubism,role=externalLink], a fine
 time series charting library based on
-https://d3js.org/[d3.js]. Cubism provides
+https://d3js.org/[d3.js,role=externalLink]. Cubism provides
 support for an innovative charting type, the
-https://vis.berkeley.edu/papers/horizon/[horizon charts]:
+https://vis.berkeley.edu/papers/horizon/[horizon charts,role=externalLink]:
 
 image::images/jolokia_cubism_demo_2.png[]
 
@@ -937,19 +937,19 @@ image::images/jolokia_cubism_demo_1.png[]
 A very cool live demo where a Jolokia JavaScript client
 fetches live data from our servers and plot it with Cubism
 can be found on this
-link:client/javascript-cubism.adoc[demo page].
+xref:client/javascript-cubism.adoc[demo page].
 The documentation can be found in the link:reference/html/manual/clients.html#js-cubism[reference manual].
 
 Jolokia uses also a
-https://github.com/jolokia/jolokia/actions[GitHub workflow]
+https://github.com/jolokia/jolokia/actions[GitHub workflow,role=externalLink]
 build in addition to our own
-https://labs.consol.de/jenkins[CI Server]. (Did I
+https://labs.consol.de/jenkins[CI Server,role=externalLink]. (Did I
 mentioned already, that we have a quite I high
-https://sonarcloud.io/project/overview?id=org.jolokia%3Ajolokia[Sonar]
+https://sonarcloud.io/project/overview?id=org.jolokia%3Ajolokia[Sonar,role=externalLink]
 score ?).
 
 That's it for now. The next months of my open-source work
 will be spent now on
-https://github.com/rhuss/aji[Ají], Jolokia's new
+https://github.com/rhuss/aji[Ají,role=externalLink], Jolokia's new
 fancy sister. Sorry for pushing thinks like notifications
 down the Jolokia back-log, but it's not forgotten.
