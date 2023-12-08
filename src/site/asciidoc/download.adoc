@@ -114,7 +114,7 @@ my-project@ ~/projects/my-project
 
 [NOTE]
 ====
-*Jolokia 2.0*: In Jolokia 2.0 the functionality has been split up into multiple modules, so that you need to declare those modules separately as dependencies. Including only `jolokia-server-core.jar` is usually not good enough.
+*Jolokia 2.0*: In Jolokia 2.0 the functionality has been split into multiple modules, so that you need to declare those modules separately as dependencies. Including only `jolokia-server-core.jar` is usually not good enough.
 ====
 
 The main agent functionality is encapsulated in a `jolokia-server-core` jar:
