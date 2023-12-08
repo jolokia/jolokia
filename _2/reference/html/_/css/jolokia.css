@@ -26,3 +26,23 @@ a:link, a:visited { color:#a20000; }
 a.nav-link {
   font-size: 1.2rem;
 }
+
+main.article {
+  display: flex;
+  flex-direction: column;
+}
+
+main>.content {
+  flex: 1;
+}
+
+footer.footer {
+  /*position: sticky;*/
+  /*bottom: 0;*/
+  padding: 0 .5rem;
+  background-color: #fafafa;
+  max-height: calc(50% + 2.5rem);
+  line-height: 2.5rem;
+  border-top: 1px solid #e1e1e1;
+  text-align: right;
+}
