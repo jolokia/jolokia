@@ -18,12 +18,12 @@
 
 JMX (Java Management Extensions) is _the_
 standard management solution in the Java world. Since JDK 1.5 it
-is available in every Java Virtual Machine and especially Java EE
+is available in every Java Virtual Machine and especially Java EE / JakartaEE
 application servers use JMX for their management business.
 
 I love JMX. It is a well crafted specification, created in times
 where other concepts like EJBs failed spectacularly. Even more
-than ten years after its incubation it is still the one-and-only
+than twenty years after its incubation it is still the one-and-only
 when it comes to management in the Java world.  Especially the
 various levels of sophistications for implementing MBeans,
 starting with dead simple _Standard MBeans_ and
@@ -32,9 +32,10 @@ ending in very flexible _Open MBeans_ and _MXBeans_, are impressive.
 However, some of the advanced JMX concepts didn't really appeal to the
 public and are now effectively obsolete. Add-on standards like
 https://jcp.org/en/jsr/detail?id=77[JSR-77] didn't
-received the adoption level they deserved. And then there is
-https://jcp.org/en/jsr/detail?id=160[JSR-160],
-JMX remoting. This specification is designed for ease of usage
+receive the adoption level they deserved. And then there is
+https://jcp.org/en/jsr/detail?id=160[JSR-160,
+JMX remoting] (which was incorporated into https://jcp.org/en/jsr/detail?id=3[JSR-3, JMX 1.4]).
+This specification is designed for ease of usage
 and has the ambition to transparently hide the technical details
 behind the remote communication so that is makes (nearly) no
 difference, whether MBeans are invoked locally or
@@ -53,6 +54,25 @@ single remote server roundtrip. A fine grained security mechanism
 can restrict the JMX access on specific JMX operations. Other
 features like the JSR-160 proxy mode or history tracking are
 specific to Jolokia, too.
+
+Technically, JMX specification defines a _JMX agent_:
+
+[quote]
+____
+A JMX agent is a management entity that runs in a Java Virtual Machine (JVM) and
+acts as the liaison between the MBeans and the management application. A JMX
+agent is composed of an _MBean server_, a set of MBeans representing _managed
+resources_, a minimum number of _agent services_ implemented as MBeans, and typically
+at least one _protocol adaptor_ or _connector_.
+____
+
+And then defines the methods of accessing the _JMX agent_:
+
+* _connectors_ which expose the MBeanServer through a remote interface accessible by the client. The remote interface _represents_ the managed, remote MBeanServer
+* _protocol adaptors_ which provide access to MBeanServer using protocol-specific messages.
+
+JMX specification mentions https://en.wikipedia.org/wiki/Simple_Network_Management_Protocol[SNMP] as the protocol.
+Jolokia uses HTTP and thus can be viewed as JMX _protocol adaptor_.
 
 This reference manual explains the details of Jolokia. After an
 overview of Jolokia's architecture in xref:architecture.adoc[],

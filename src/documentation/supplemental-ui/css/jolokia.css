@@ -1,4 +1,9 @@
 
+@media screen and (min-width: 1024px) {
+  html {
+    font-size: 11px
+  }
+}
 .doc {
   max-width: 90rem;
   font-size: 1.1rem;
