@@ -64,8 +64,9 @@
             <Bundle-Description>Jolokia restrictor service (sample)</Bundle-Description>
 
             <Bundle-Version>${project.version}</Bundle-Version>
-            <Bundle-Activator>org.jolokia.agent.osgi.restrictor.RestrictorSampleActivator</Bundle-Activator>
+            <Bundle-Activator>org.jolokia.osgi.restrictor.RestrictorSampleActivator</Bundle-Activator>
             <Bundle-Name>Jolokia restrictor service (sample)</Bundle-Name>
+            <Import-Package>*</Import-Package>
           </instructions>
         </configuration>
       </plugin>

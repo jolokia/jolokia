@@ -16,33 +16,22 @@
 [#agents-osgi]
 == OSGi Agents
 
-****
-There are several free implementations available of OSGi
-`HttpService`. This bundle has been tested with the
-https://wiki.ops4j.org/display/paxweb/Pax+Web[Pax Web]
-and
-https://felix.apache.org/site/apache-felix-http-service.html[Apache
-Felix] `HttpService`, both of which come with an embedded Jetty
-as servlet container by default.
-****
+Jolokia agent is also available as
+https://www.osgi.org[OSGi,role=externalLink] bundle. The Jolokia 1.x OSGi agent
+had two versions (with and without packaged https://github.com/apache/felix-dev/tree/master/http[Felix HTTP Service,role=externalLink] bundles).
+In Jolokia 2 there's only one bundle
+which requires a https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard extender,role=externalLink] implementation available in target OSGi runtime.
 
-Jolokia agents are also available as
-https://www.osgi.org[OSGi] bundles. There are two
-flavors of this agent: A nearly bare agent
-`jolokia-osgi.jar` declaring all its package
-dependencies as imports in its Manifest and an all-in-one bundle
-`jolokia-osgi-bundle.jar` with minimal
-dependencies. The pure bundle fits best with the OSGi philosophy and is
-hence the recommended bundle. The all-in-one monster is good for a
-quick start since normally no additional bundles are required.
+****
+In OSGi world, transition to JakartaEE 9+ (with `jakarta.servlet` packages) is a bit slower. Jolokia 2 has been
+tested with dev version of Pax Web 10 using Undertow 2.3, running in dev version of Karaf 4.5.
+****
 
 [#agents-osgi-pure]
-=== jolokia-osgi.jar
+=== jolokia-agent-osgi.jar
 
-This bundle depends mostly on a running
-https://www.osgi.org/javadoc/r4v42/org/osgi/service/http/HttpService.html[OSGi
-HttpService] which it uses for registering the agent
-servlet.
+This bundle depends on availability of https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard extender,role=externalLink] which tracks instances of `jakarta.servlet.Servlet` OSGi services.
+Jolokia 2 registers such OSGi servlet service when new `registerWhiteboardServlet` option is set to `true` (which is the default).
 
 All package imports of this bundle are listed in
 <<table-agents-osgi-deps>>. Note that the
@@ -60,14 +49,17 @@ missing package dependency during the resolve phase while
 installing `jolokia-osgi.jar`.
 
 [#table-agents-osgi-deps]
-.Package Imports of jolokia-osgi.jar (SB: exported by system bundle)
+.Package Imports of jolokia-osgi.jar
 |===
-|Package|SB
+|Package|from System Bundle
 
 |`javax.management`
 |X
 
 |`javax.management.openmbean`
+|X
+
+|`javax.management.relation`
 |X
 
 |`javax.management.remote`
@@ -76,11 +68,20 @@ installing `jolokia-osgi.jar`.
 |`javax.naming`
 |X
 
-|`javax.servlet`
+|`jakarta.servlet`
 |
 
-|`javax.servlet.http`
+|`jakarta.servlet.http`
 |
+
+|`javax.crypto`
+|X
+
+|`javax.crypto.spec`
+|X
+
+|`javax.xml.datatype`
+|X
 
 |`javax.xml.parsers`
 |X
@@ -88,11 +89,14 @@ installing `jolokia-osgi.jar`.
 |`org.osgi.framework`
 |X
 
-|`org.osgi.service.http`
+|`org.osgi.service.cm`
 |
 
 |`org.osgi.service.log`
-|?
+|
+
+|`org.osgi.service.servlet.context`
+|
 
 |`org.osgi.util.tracker`
 |X
@@ -104,28 +108,27 @@ installing `jolokia-osgi.jar`.
 |X
 |===
 
-This agent bundle consumes two services by default: As stated
-above, an
-`org.osgi.service.http.HttpService` which
-is used to register (deregister) the Jolokia agent as a servlet
-under the context `/jolokia` by default as soon
-as the `HttpService` becomes available (unavailable). Secondly, an
-`org.osgi.service.log.LogService` is used
-for logging, if available. If such a service is not registered,
-the Jolokia bundle uses the standard
-`HttpServlet.log()` method for its
-logging needs.
+This agent bundle consumes two services by default:
+
+* `org.osgi.service.log.LogService` is used for logging, if available. If such a service is not registered,
+the Jolokia bundle uses the standard `HttpServlet.log()` method for its logging needs.
+* `org.osgi.service.cm.ConfigurationAdmin` is used to load configuration from `org.jolokia.osgi` PID in OSGi environment
+with Configuration Admin service available.
+
+In Jolokia 1, https://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.http.html[OSGi CMPN HTTP Service,role=externalLink]
+was used to register Jolokia servlet. In Jolokia 2 a different pattern is used. Instead of using some service directly by
+Jolokia, a servlet is registered as OSGi service which is then processed (_extended_) using https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard extender,role=externalLink]
 
 The Jolokia OSGi bundle can be configured via the OSGi Configuration Admin
 service using the PID `org.jolokia.osgi`
 (e.g. if using Apache Karaf, place properties in
-`etc/org.jolokia.osgi.cfg`), or alternatively via global
+`etc/org.jolokia.osgi.cfg` file), or alternatively via global
 properties which typically can be configured in a configuration file of
 the OSGi container. All properties start with the prefix
 `org.jolokia` and are listed in
 <<table-agents-osgi-properties>>. They are mostly the
 same as the `init-param` options for
-a Jolokia servlet when used in a Java EE WAR artifact.
+a Jolokia servlet when used in a Jakarta EE WAR artifact.
 
 [#table-agents-osgi-properties]
 .Jolokia Bundle Properties
@@ -134,13 +137,11 @@ a Jolokia servlet when used in a Java EE WAR artifact.
 
 |`org.jolokia.user`
 |
-|User used for authentication with HTTP Basic
-Authentication. If not given, no authentication is used.
+|User used for authentication with HTTP Basic Authentication. If not given, no authentication is used.
 
 |`org.jolokia.password`
 |
-|Password used for authentication with HTTP Basic
-Authentication.
+|Password used for authentication with HTTP Basic Authentication.
 
 |`org.jolokia.agentContext`
 |`/jolokia`
@@ -196,29 +197,19 @@ no limit is imposed.
 |Number of entries to keep in the history. This can be changed at
 runtime via the Jolokia config MBean.
 
-|`org.jolokia.listenForHttpService`
+|`org.jolokia.registerWhiteboardServlet`
 |`true`
-|If `true` the bundle listens for an OSGi
-`HttpService` and if available registers an
-agent servlet to it.
-
-|`org.jolokia.httpServiceFilter`
-|
-|Can be any valid OSGi filter for locating a which
-`org.osgi.service.http.HttpService`
-is used to expose the Jolokia servlet. The syntax is that
-used by the `org.osgi.framework.Filter`
-which is in turn a https://www.ietf.org/rfc/rfc1960.txt[RFC 1960 based filter]. The use of this property
-is described in <<running-on-glassfish>>
+|If `true` the bundle registers `org.jolokia.server.core.osgi.OsgiAgentServlet` OSGi service. If `false`, it's your
+responsibility to register this servlet in some way.
 
 |`org.jolokia.useRestrictorService`
 |`false`
 |If `true` the Jolokia agent will use any
-`org.jolokia.core.service.Restrictor`
+`org.jolokia.server.core.service.api.Restrictor`
 service for applying access restrictions. If this option is
 `false` the standard method of looking up a
 security policy file is used, as described in
-<<security-policy>>.
+xref:security.adoc#security-policy[Policy based security].
 
 |`org.jolokia.canonicalNaming`
 |`true`
@@ -233,11 +224,10 @@ option can be overridden with a query parameter of the same
 name.
 
 |`org.jolokia.includeStackTrace`
-|`true`
+|`false`
 |Whether to include a stacktrace of an exception in case of
-an error. By default it it set to `true`
-in which case the stacktrace is always included. If set to
-`false`, no stacktrace is included. If
+an error. By default it it set to `false`
+in which case the stacktrace is never included. If
 the value is `runtime` a stacktrace is
 only included for RuntimeExceptions. This global option can
 be overridden with a query parameter.
@@ -256,7 +246,7 @@ overridden by a query parameter of the same name.
 |An optional JSON representation for application specific
 options used by detectors for post-initialization steps. See the description of
 `detectorOptions` in
-<<agent-war-init-params>> for details.
+xref:agents/war.adoc#agent-war-init-params[Servlet init parameters] for details.
 
 |`org.jolokia.discoveryEnabled`
 |`false`
@@ -312,105 +302,37 @@ successfully authenticates. In any case if no such Authenticator service can be 
 |===
 
 This bundle also exports the service
-`org.jolokia.server.core.osgi.servlet.JolokiaContext`
+`jakarta.servlet.ServletContext`
 which can be used to obtain context information of the
 registered agent like the context path under which this
 servlet can be reached. Additionally, it exports
-`org.osgi.service.http.HttpContext`, which
+`org.osgi.service.servlet.context.ServletContextHelper`, which
 is used for authentication. Note that this service is only
 available when the agent servlet is active (i.e. when an
-`HttpService` is registered).
-
-[#running-on-glassfish]
-=== Running on GlassFish v3 upwards
-
-You have a couple of choices when running Jolokia on
-GlassFish v3 and up, since GlassFish is a both a fully
-fledged Java EE container and an OSGi container. If you
-choose to run the xref:agents/war.adoc[Java EE Agent (WAR)] then it
-is completely straight forward just deploy the war
-in the normal way. If you choose to deploy
-the xref:agents/osgi.adoc[OSGi Agents] then you will need
-to configure the `org.jolokia.httpServiceFilter`
-option with a filter to select either the Admin
-`HttpService` (`4848` by default) or the Default
-`HttpService` which is where WAR files are
-deployed to.
-
-In GlassFish 3.1.2 the OSGi bundle configuration is done in
-`glassfish/conf/osgi.properties` in version's
-prior to this the configuration is by default in
-`glassfish/osgi/felix/conf/config.properties`
-or if you are using Equinox
-`glassfish/osgi/equinox/configuration/config.ini`
-
-----
-# Restrict the jolokia http service selection to the admin host
-org.jolokia.httpServiceFilter=(VirtualServer=__asadmin)
-# Or alternatively to the normal http service use : (VirtualServer=server)
-----
-
-Deploying the bundle can be either be done by coping the
-`jolokia-osgi.jar` into the domain
-`glassfish/domains/<domain>/autodeploy/bundles`
-directory or it can be added to all instances by copying the jar
-to `glassfish/modules/autostart`
-
-By default the agent will be available on `http://localhost:<port>/osgi/jolokia`
-rather than `http://localhost:<port>/jolokia` as with WAR deployment.
-
-[#agents-osgi-bundle]
-=== jolokia-osgi-bundle.jar
-
-The all-in-one bundle includes an implementation of
-`org.osgi.service.http.HttpService`,
-i.e. the
-https://felix.apache.org/site/apache-felix-http-service.html[Felix
-implementation]. The `HttpService` will be registered as
-OSGi service during startup, so it is available for other
-bundles as well. The only package import requirement for this
-bundle is `org.osgi.service.LogService`,
-since the Felix Webservice requires this during startup. As
-mentioned above, normally the `LogService` interface gets exported
-by default in the standard containers, but if not, you need to
-install it e.g. from the OSGi
-https://repo1.maven.org/maven2/org/osgi/org.osgi.compendium/4.2.0/org.osgi.compendium-4.2.0.jar[compendium]
-definitions.
-
-This bundle can be configured the same way as the pure bundle as
-described in <<agents-osgi-pure>>. Additionally,
-the embedded Felix HttpService can be configured as described in
-its
-https://felix.apache.org/site/apache-felix-http-service.html#ApacheFelixHTTPService-ConfigurationProperties[documentation].
-e.g. setting the port to 9090 instead of the default port 8080, a property
-`org.osgi.service.http.port=9090` needs to be
-set. This might be useful, if this bundle is used within
-containers which already occupy the default port (GlassFish,
-Eclipse Virgo) but don't expose an OSGi HttpService.
+whiteboard servlet is registered).
 
 [#agents-osgi-servlet]
 === Programmatic servlet registration
 
 It is also possible to register the Jolokia agent servlet
 manually instead of relying of the OSGi bundle activator which
-comes with the agents. For this use case
-`jolokia-osgi.jar` should be used. This
-bundle exports the package
-`org.jolokia.server.core.osgi.servlet` which includes
-the servlet class `JolokiaServlet`. This
+comes with the OSGi agent.
+`jolokia-agent-osgi.jar` bundle exports the package
+`org.jolokia.server.core.osgi` which includes
+the servlet class `org.jolokia.server.core.osgi.OsgiAgentServlet`. This
 class has three constructors: A default constructor without
 arguments, one with a single
 `BundleContext` argument and finally one
-with an additional `Restrictor` (see
-<<security-restrictor>> for details how access
-restrictions can be applied). The constructor with a
+with an additional `org.jolokia.server.core.service.api.Restrictor` (see
+xref:security.adoc#security-restrictor[Jolokia Restrictors] for details how access
+restrictions can be applied).
+The constructor with a
 `BundleContext` as its argument has the
 advantage that it will use an OSGi
 `LogService` if available and adds various
 OSGi server detectors which adds server information like product
 name and version to the `version`
-command. Refer to <<version>> for details about the
-server infos provided.
+command. Refer to xref:protocol/version.adoc#version[Getting the agent version] for details about the server information provided.
 
 Please note that for this use case the bundle
 `org.jolokia.agent.osgi` should not be
@@ -419,25 +341,66 @@ _resolved_. Otherwise, as soon as an OSGi
 HttpService registers, this bundle will try to add yet another
 agent servlet to this service, which is probably not what you
 want. Alternatively, the bundle property
-`org.jolokia.listenForHttpService` can be set
+`org.jolokia.registerWhiteboardServlet` can be set
 to `false` in which case there will be never an
-automatic servlet registration to an HttpService.
+automatic servlet registration.
 
 === Restrictor service
 
-As described in <<security-restrictor>>, the
+As described in xref:security.adoc#security-restrictor[Jolokia Restrictors], the
 Jolokia agent can use custom restrictors implementing the
 interface
-`org.jolokia.core.service.Restrictor`. If the
+`org.jolokia.server.core.service.api.Restrictor`. If the
 bundle property
 `org.jolokia.useRestrictorService` is set to
-true and no restrictor is configured by other means, the agent
-will use one or more OSGi service which register under the name
-`org.jolokia.core.service.Restrictor`. If no
+`true` and no restrictor is configured by other means, the agent
+will use one or more OSGi service with
+`org.jolokia.server.core.service.api.Restrictor` interface. If no
 such service is available, access to the agent is always
 denied. If one such restrictor service is available, the access
 decision is delegated to this service. When more than one
 restrictor service is available, access is only granted if all of
 them individually grant access. A sample restrictor service as a
 maven project can be found in the Jolokia source at
-`agent/osgi/restrictor-sample`.
+`examples/osgi-restrictor`.
+
+Here's an example where this custom restrictor is installed and configured (because by default `org.jolokia.useRestrictorService` is set to `false`):
+
+[,subs="attributes,verbatim"]
+----
+karaf@root()> install -s mvn:org.jolokia/jolokia-example-osgi-restrictor/{jolokia-version}
+Register sample restrictor service
+Bundle ID: 68
+
+karaf@root()> config:property-set --pid org.jolokia.osgi org.jolokia.useRestrictorService true
+
+karaf@root()> restart org.jolokia.agent.osgi
+----
+
+Then we can only access MBeans from `java.lang` domain:
+
+----
+$ curl -s http://localhost:8181/jolokia/read/java.lang:type=Runtime/Name | jq .
+{
+  "request": {
+    "mbean": "java.lang:type=Runtime",
+    "attribute": "Name",
+    "type": "read"
+  },
+  "value": "94143@everfree.forest",
+  "status": 200,
+  "timestamp": 1702305458
+}
+
+$ curl -s http://localhost:8181/jolokia/read/java.nio:type=BufferPool,name=direct/Count | jq .
+{
+  "request": {
+    "mbean": "java.nio:name=direct,type=BufferPool",
+    "attribute": "Count",
+    "type": "read"
+  },
+  "error_type": "java.lang.Exception",
+  "error": "java.lang.Exception : Reading attribute Count is forbidden for MBean java.nio:name=direct,type=BufferPool",
+  "status": 403
+}
+----

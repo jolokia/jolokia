@@ -124,6 +124,11 @@ public class TestJolokiaContext implements JolokiaContext {
         return config.getConfig(pKey);
     }
 
+    @Override
+    public String getConfig(ConfigKey pKey, boolean checkSysOrEnv) {
+        return config.getConfig(pKey, checkSysOrEnv);
+    }
+
     public Set<ConfigKey> getConfigKeys() {
         return config.getConfigKeys();
     }
