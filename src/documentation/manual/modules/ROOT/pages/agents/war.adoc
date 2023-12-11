@@ -242,11 +242,11 @@ by the autodetected local host name/address. Also with `${env:ENV_VAR}` and
 
 |`multicastGroup`
 |The multicast group IPv4 address. This group IP can be also given as an environment variable `JOLOKIA_MULTICAST_GROUP` or a system property `jolokia.multicastGroup`
-|`239.192.48.84`
+|Default: `239.192.48.84`
 
 |`multicastPort`
 |The multicast port. This port can be also given as an environment variable `JOLOKIA_MULTICAST_PORT` or a system property `jolokia.multicastPort`
-|`24884`
+|Default: `24884`
 
 |`agentId`
 |A unique ID for this agent. By default a unique id is
@@ -305,11 +305,11 @@ Jakarta EE security is enabled by default by adding the required information wit
 
 .Using jmx4perl's `jolokia` tool
 ****
-https://metacpan.org/dist/jmx4perl[jmx4perl] comes
+https://metacpan.org/dist/jmx4perl[jmx4perl,role=externalLink] comes
 with a nice command line utility called
-https://metacpan.org/dist/jmx4perl/view/scripts/jolokia[jolokia]
+`https://metacpan.org/dist/jmx4perl/view/scripts/jolokia[jolokia,role=externalLink]`
 which allows for an easy setup of security within a given
-`jolokia.war`. See xref:tools.adoc#tools-jmx4perl[] for
+`jolokia.war`. See xref:tools.adoc#tools-jmx4perl[Jmx4Perl] for
 more details.
 ****
 

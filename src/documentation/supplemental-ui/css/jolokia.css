@@ -27,6 +27,10 @@ nav.nav-menu h3.title a {
 a { text-decoration: none; }
 a:focus { outline: 1px dotted }
 a:link, a:visited { color:#a20000; }
+a.externalLink {
+  background: url("../img/external.png") right center no-repeat;
+  padding-right: 15px;
+}
 
 a.nav-link {
   font-size: 1.2rem;
@@ -50,4 +54,8 @@ footer.footer {
   line-height: 2.5rem;
   border-top: 1px solid #e1e1e1;
   text-align: right;
+}
+
+code {
+  background: transparent !important;
 }
