@@ -50,7 +50,7 @@ public final class OptionsAndArgs {
             "sslProtocol", "sslCipherSuite",
             // Jolokia options:
             "historyMaxEntries", "debug!", "debugMaxEntries",
-            "logHandlerClass", "dispatcherClasses", "maxDepth", "maxCollectionSize",
+            "logHandlerClass", "maxDepth", "maxCollectionSize",
             "maxObjects", "restrictorClass", "policyLocation", "mbeanQualifier",
             "canonicalNaming", "includeStackTrace", "serializeException",
             "discoveryEnabled", "discoveryAgentUrl", "agentId", "agentDescription",

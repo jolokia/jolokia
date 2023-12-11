@@ -160,19 +160,6 @@ can use the same placeholders as in `discoveryAgentUrl`.
 |An optional description which can be used for clients to
 present a human readable label for this agent.
 
-|`org.jolokia.dispatcherClasses`
-|
-|Class names (comma separated) of request dispatchers used in
-addition to the LocalRequestDispatcher. E.g using a value
-of
-`org.jolokia.service.jsr160.Jsr160RequestHandler`
-allows the agent to play the role of a JSR-160 proxy.
-By default no extract dispatchers are enabled.
-You can use the system property `org.jolokia.jsr160ProxyEnabled` or the
-environment variable `JOLOKIA_JSR160_PROXY_ENABLED` to enable the the JSR-160 proxy.
-In that case you should be sure that you enable authentication for the web application to protect access
-to the proxy.
-
 |`org.jolokia.debug`
 |`false`
 |Debugging state after startup. This can be changed via the

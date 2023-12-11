@@ -439,14 +439,6 @@
       </xs:annotation>
     </xs:attribute>
 
-    <xs:attribute name="dispatcherClasses" type="xs:string">
-      <xs:annotation>
-        <xs:documentation>
-          Request Dispatcher to use in addition to the local dispatcher.
-        </xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-
     <xs:attribute name="maxDepth" type="xs:positiveInteger">
       <xs:annotation>
         <xs:documentation>

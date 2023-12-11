@@ -66,7 +66,6 @@ abstract public class AbstractJ4pIntegrationTest {
                     .getHttpConfiguration().setUriCompliance(jolokiaCompliance);
             ServletContextHandler jettyContext = new ServletContextHandler(jettyServer, "/");
             ServletHolder holder = new ServletHolder(new AgentServlet());
-            holder.setInitParameter("dispatcherClasses", "org.jolokia.jsr160.Jsr160RequestDispatcher");
             jettyContext.addServlet(holder, "/j4p/*");
 
             SecurityHandler securityHandler = createSecurityHandler();

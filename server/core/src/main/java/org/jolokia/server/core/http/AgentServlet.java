@@ -183,9 +183,9 @@ public class AgentServlet extends HttpServlet {
         StaticConfiguration config = new StaticConfiguration(
                 Collections.singletonMap(ConfigKey.AGENT_ID.getKeyValue(),
                                          NetworkUtil.getAgentId(this.hashCode(), "servlet")));
-        // From ServletContext ....
+        // From ServletConfig ....
         config.update(new ServletConfigFacade(pServletConfig));
-        // ... and ServletConfig
+        // ... and ServletContext
         config.update(new ServletContextFacade(getServletContext()));
         // Add any environment parameters found
         config.update(configFromEnvironment());

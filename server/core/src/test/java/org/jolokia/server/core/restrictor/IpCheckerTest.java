@@ -33,7 +33,7 @@ public class IpCheckerTest {
     @Test
     public void basics() {
         String [][] fixture = new String[][]{
-                // IP-tocheck, expected net/ip, result
+                // IP-to check, expected net/ip, result
                 { "10.0.15.16", "10.0.15.16", "true" },
                 { "10.0.15.16", "10.0.0.1/16", "true"},
                 { "10.0.15.16", "10.0.0.1/24", "false"},

@@ -112,6 +112,10 @@ There's also a second _flavor_ of `org.jolokia:jolokia-agent-jvm` with `javaagen
 === Configuration option changes
 
 * `listenForHttpService` option is now deprecated and `registerWhiteboardServlet` should be used instead in OSGi environments. The reason is that Jolokia 2 switched from https://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.http.html[OSGi CMPN Http Service,role=externalLink] to https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard Specification for Jakarta™ Servlet,role=externalLink].
+* `dispatcherClasses` option is removed. In Jolokia 1.x it was used to add `org.jolokia.service.jsr160.Jsr160RequestHandler` to a list of available request handlers. In Jolokia 2, this class is dicovered using new service extension model of Jolokia, when `jolokia-service-jsr160` is available on the CLASSPATH (or in `WEB-INF/lib` of the WAR, which is the case for `jolokia-agent-war`).
+* Jolokia checks some configuration values also from system properties and environment variables. For example `discoveryAgentUrl` option can be specified as `jolokia.discoveryAgentUrl` system property or `JOLOKIA_DISCOVERY_AGENT_URL` environment variable. However some options had different format of related system property. In Jolokia 1.x, `jsr160ProxyAllowedTargets` could be specified as `org.jolokia.jsr160ProxyAllowedTargets` system property. Now all system properties have `jolokia.` prefix only.
+* `allowDnsReverseLookup` option defaults to `false` in Jolokia 2.
+* `includeStackTrace` option defaults to `false` in Jolokia 2.
 
 === Jolokia MBean changes
 

@@ -46,11 +46,6 @@ public enum ConfigKey {
     DEBUG_MAX_ENTRIES("debugMaxEntries",true, false, "100"),
 
     /**
-     * Request Dispatcher to use in addition to the local dispatcher.
-     */
-    DISPATCHER_CLASSES("dispatcherClasses", true, false),
-
-    /**
      * Path to a white list of patterns which are matched against possible
      * JMX service URL for incoming requests
      */
@@ -101,8 +96,7 @@ public enum ConfigKey {
      * Whether a reverse DNS lookup is allowed or not. Reverse DNS lookups might happen for checking
      * host based restrictions, but might be costly.
      */
-    // TODO-2.0 : Default to 'false'
-    ALLOW_DNS_REVERSE_LOOKUP("allowDnsReverseLookup", true, false, Constants.TRUE),
+    ALLOW_DNS_REVERSE_LOOKUP("allowDnsReverseLookup", true, false, Constants.FALSE),
 
     /**
      * Runtime configuration (i.e. must come in with a request)
@@ -117,8 +111,7 @@ public enum ConfigKey {
      * should be included or "runtime" if only {@link RuntimeException}s should
      * be included. Default is "true"
      */
-    // TODO-2.0: Default to 'false'
-    INCLUDE_STACKTRACE("includeStackTrace", true, true, Constants.TRUE),
+    INCLUDE_STACKTRACE("includeStackTrace", true, true, Constants.FALSE),
 
     /**
      * Whether to include a JSON serialized version of the exception. If set

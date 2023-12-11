@@ -26,14 +26,6 @@
     <servlet-class>org.jolokia.server.core.http.AgentServlet</servlet-class>
     <init-param>
       <description>
-        Class names (comma separated) of RequestDispatcher used in addition
-        to the LocalRequestDispatcher
-      </description>
-      <param-name>dispatcherClasses</param-name>
-      <param-value>org.jolokia.service.jsr160.Jsr160RequestHandler</param-value>
-    </init-param>
-    <init-param>
-      <description>
         Debugging state after startup. Can be changed via
         the Config MBean during runtime
       </description>
@@ -121,7 +113,7 @@
         can be overridden with a query parameter.
       </description>
       <param-name>includeStackTrace</param-name>
-      <param-value>true</param-value>
+      <param-value>false</param-value>
     </init-param>
     <init-param>
       <description>

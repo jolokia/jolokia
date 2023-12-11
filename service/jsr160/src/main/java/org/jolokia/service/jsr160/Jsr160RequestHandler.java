@@ -58,7 +58,7 @@ public class Jsr160RequestHandler extends AbstractRequestHandler {
     private Set<String> whiteList;
     private Set<String> blackList;
 
-    public static final String ALLOWED_TARGETS_SYSPROP = "org.jolokia.jsr160ProxyAllowedTargets";
+    public static final String ALLOWED_TARGETS_SYSPROP = "jolokia.jsr160ProxyAllowedTargets";
     public static final String ALLOWED_TARGETS_ENV = "JOLOKIA_JSR160_PROXY_ALLOWED_TARGETS";
 
     /**

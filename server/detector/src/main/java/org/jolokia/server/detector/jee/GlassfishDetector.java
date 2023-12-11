@@ -45,7 +45,7 @@ public class GlassfishDetector extends AbstractServerDetector {
     private static final Pattern GLASSFISH_VERSION = Pattern.compile("^.*(?:Glassfish|Payara).*\\sv?(.*?)$",Pattern.CASE_INSENSITIVE);
     private static final Pattern GLASSFISH_FULL_VERSION = Pattern.compile("^.*(?:Glassfish|Payara).*?\\sv?([.\\d]+).*$",Pattern.CASE_INSENSITIVE);
 
-     private static final Pattern PAYARA_VERSION = Pattern.compile("^.*Payara.*\\sv?(.*?)$",Pattern.CASE_INSENSITIVE);
+    private static final Pattern PAYARA_VERSION = Pattern.compile("^.*Payara.*\\sv?(.*?)$",Pattern.CASE_INSENSITIVE);
     private static final Pattern PAYARA_FULL_VERSION = Pattern.compile("^.*Payara.*?\\sv?([.\\d]+).*$",Pattern.CASE_INSENSITIVE);
 
     private static final String GLASSFISH_NAME = "glassfish";

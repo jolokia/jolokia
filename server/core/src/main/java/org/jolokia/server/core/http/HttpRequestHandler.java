@@ -335,7 +335,7 @@ public class HttpRequestHandler {
     private void addErrorInfo(JSONObject pErrorResp, Throwable pExp, JolokiaRequest pJmxReq) {
         if (Boolean.parseBoolean(jolokiaCtx.getConfig(ConfigKey.ALLOW_ERROR_DETAILS))) {
             String includeStackTrace = pJmxReq != null ?
-                    pJmxReq.getParameter(ConfigKey.INCLUDE_STACKTRACE) : "true";
+                    pJmxReq.getParameter(ConfigKey.INCLUDE_STACKTRACE) : "false";
             if (includeStackTrace.equalsIgnoreCase("true") ||
                 (includeStackTrace.equalsIgnoreCase("runtime") && pExp instanceof RuntimeException)) {
                 StringWriter writer = new StringWriter();
