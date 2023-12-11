@@ -433,6 +433,7 @@ include::protocol/write.adoc[]
 include::protocol/exec.adoc[]
 include::protocol/search.adoc[]
 include::protocol/list.adoc[]
+include::protocol/notification.adoc[]
 include::protocol/version.adoc[]
 
 [#processing-parameters]

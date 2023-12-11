@@ -26,7 +26,7 @@ the MBean level for various parameters.
 In especially, the policy can restrict access to:
 
 * certain client host IPs or subnets
-* certain Jolokia operations (read, exec, list, search, notification)
+* certain Jolokia operations (read, write, exec, list, search, notification)
 * specific MBean attributes (read and write) and operations
 
 The security definitions support a wildcard notation and
@@ -89,7 +89,7 @@ The following example shows a sample policy file:
 </restrict>
 ----
 
-This sample policy contains a ist of remote hosts which are
+This sample policy contains a list of remote hosts which are
 allowed to access this agent. The name can be given as IP or
 FQDN. A  subnetmask can be given, too, for specifying a subnet
 for the access. The netmask can be given either in CIDR format
@@ -98,6 +98,7 @@ for the access. The netmask can be given either in CIDR format
 The address to check is obtained from:
 
 * in WAR agent: `jakarta.servlet.ServletRequest.getRemoteHost()` or `jakarta.servlet.ServletRequest.getRemoteAddr()` depending on `allowDnsReverseLookup` configuration option
+** In Tomcat, the remote address value comes from `java.net.Socket.getInetAddress()` call
 * in JVM agent: `com.sun.net.httpserver.HttpExchange.getRemoteAddress()`
 
 The list of allowed commands, which are given in

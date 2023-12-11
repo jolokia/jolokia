@@ -78,7 +78,7 @@ version:: Getting version and server information
 In the following example, access is granted to the
 `read`, `list`,
 `search` and `version` command, but
-not to `write` and `exec`
+not to `write`, `notification` and `exec`
 operations.
 
 [,xml]
