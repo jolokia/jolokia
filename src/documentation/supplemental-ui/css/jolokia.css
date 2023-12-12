@@ -59,3 +59,11 @@ footer.footer {
 code {
   background: transparent !important;
 }
+
+mark {
+  background-color: #3366aa;
+  color: white;
+  padding: 0 5px;
+  border-radius: 5px;
+  font-weight: bold;
+}

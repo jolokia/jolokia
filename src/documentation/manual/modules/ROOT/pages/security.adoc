@@ -39,7 +39,7 @@ specified within a `<remote>` section,
 which contains one or more `<host>`
 elements. The source can be given either as an IP address,
 a host name, or a netmask given in
-https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing[CIDR format]
+https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing[CIDR format,role=externalLink]
 (e.g. `10.0.0.0/16` for all clients coming from the 10.0
 network). The following allows access from localhost and all
 clients whose IP addresses start with "10.0". For all other
@@ -73,6 +73,7 @@ write:: Setting of MBean attributes
 exec:: Execution of JMX operations
 list:: List the available MBeans along with their supported
 search:: Searching for MBeans
+notification:: #New in Jolokia 2# Subscribing to and receiving notifications
 version:: Getting version and server information
 
 In the following example, access is granted to the
@@ -91,7 +92,7 @@ operations.
 </commands>
 ----
 
-=== Allow and deny access to certain MBeans</title>
+=== Allow and deny access to certain MBeans
 
 Within an `<allow>` section, access
 to MBeans can be granted regardless of the
@@ -152,13 +153,13 @@ completely, any HTTP method can be used.
 
 Jolokia (since version 1.0.3) supports the W3C specification
 for https://www.w3.org/TR/cors/[Cross-Origin
-Resource Sharing] (also known as "CORS") which allows
+Resource Sharing,role=externalLink] (also known as "CORS") which allows
 browser to access resources which are located on a different
 server than the calling script is loaded from. This
 specification provides a controlled way to come around the
 _same origin policy_. Most
 https://caniuse.com/#search=CORS[contemporary
-browsers] support CORS.
+browsers,role=externalLink] support CORS.
 
 By default Jolokia allows cross origin access from any
 host. This can be limited to certain hosts by using
@@ -189,11 +190,11 @@ If neither `Origin:` nor `Referer:` is given and strict checking is enabled, the
 
 Please note that `<strict-checking/>` might not be good enough because of potential
 browser bugs which could allow to forge the origin header. Examples of these issues are
-https://blog.bentkowski.info/2018/06/setting-arbitrary-request-headers-in.html[arbitrary header injection]
+https://blog.bentkowski.info/2018/06/setting-arbitrary-request-headers-in.html[arbitrary header injection,role=externalLink]
 or https://www.brokenbrowser.com/referer-spoofing-defeating-xss-filter/[referer and origin
-spoofing]. User facing application which uses Jolokia has backend should consider to implement
+spoofing,role=externalLink]. User facing application which uses Jolokia has backend should consider to implement
 additional measures like using the
-https://tools.ietf.org/html/draft-west-first-party-cookies-07[same-site] flag
+https://tools.ietf.org/html/draft-west-first-party-cookies-07[same-site,role=externalLink] flag
 on the session cookie.
 
 === Example for a security policy
@@ -208,6 +209,7 @@ restrictions:
 * Read access to the C3P0 connection pool is restricted to
 forbid fetching the pool's properties, which in fact
 contains the DB password as clear text.
+* Access to `jdk.management.jfr:type=FlightRecorder` MBean is denied (see https://nvd.nist.gov/vuln/detail/CVE-2022-41678[CVE-2022-41678,role=externalLink])
 
 [,xml]
 ----
@@ -239,6 +241,11 @@ contains the DB password as clear text.
       <name>com.mchange.v2.c3p0:type=PooledDataSource,*</name>
       <attribute>properties</attribute>
     </mbean>
+    <mbean>
+      <name>jdk.management.jfr:type=FlightRecorder</name>
+      <attribute>*</attribute>
+      <operation>*</operation>
+    </mbean>
   </deny>
 
 </restrict>
@@ -252,13 +259,13 @@ A great tool which helps in repackaging an agent for
 inclusion of a `jolokia-access.xml`
 policy file
 is the command line tool
-https://search.cpan.org/~roland/jmx4perl/scripts/jolokia[jolokia],
+https://search.cpan.org/~roland/jmx4perl/scripts/jolokia[jolokia,role=externalLink],
 which comes with the
-https://www.jmx4perl.org[jmx4perl] distribution. See
+https://metacpan.org/dist/jmx4perl[jmx4perl,role=externalLink] distribution. See
 xref:tools.adoc[] for an introduction.
 ****
 
-But how do the agents lookup the policy file ? By default,
+But how do the agents lookup the policy file? By default,
 the agents will lookup for a policy file top-level in the
 classpath under the name
 `jolokia-access.xml`. Hence for the war
@@ -286,16 +293,16 @@ The parameter specified with `policyLocation` can contain placeholders:
 
 * `$ip`: IP - Address
 * `$host`: Host - Address
-* `$\{prop:foo}`: System property _foo_
-* `$\{env:FOO}`: Environment variable _FOO_
+* `${prop:foo}`: System property _foo_
+* `${env:FOO}`: Environment variable _FOO_
 
 [#security-restrictor]
 == Jolokia Restrictors
 
-In order to provide fine grained security, Jolokia using the
+In order to provide fine grained security, Jolokia is using the
 abstract concept of an _Restrictor_. It is
 represented by the Java interface
-`org.jolokia.core.service.Restrictor` and
+`org.jolokia.server.core.service.api.Restrictor` and
 comes with several implementations. The most prominent one is
 the `PolicyRestrictor` which is described
 in <<security-policy>>. This is also the
@@ -303,12 +310,12 @@ restrictor which is active by default. For special needs, it is
 possible to provide a custom implementation of this
 interface for the WAR and OSGi agents. It is recommended to
 subclass either
-`org.jolokia.core.restrictor.AllowAllRestrictor`
+`org.jolokia.server.core.restrictor.AllowAllRestrictor`
 or
-`org.jolokia.core.restrictor.DenyAllRestrictor`.
+`org.jolokia.server.core.restrictor.DenyAllRestrictor`.
 
 For the WAR agent (xref:agents.adoc#agents-war[Java EE Agent (WAR)]), a subclass
-of `org.jolokia.core.http.AgentServlet` should
+of `org.jolokia.server.core.http.AgentServlet` should
 be created which overrides the
 `createRestrictor()`
 
@@ -317,27 +324,29 @@ be created which overrides the
 public class RestrictedAgentServlet extends AgentServlet {
 
   @Override
-  protected Restrictor createRestrictor(String policyLocation) {
-    return new MyOwnRestrictor();
+  protected Restrictor createRestrictor(Configuration pConfig, LogHandler pLogHandler) {
+    String policyLocation = pConfig.getConfig(ConfigKey.POLICY_LOCATION);
+    return new MyOwnRestrictor(policyLocation, ...);
   }
+
 }
 ----
 
-`policyLocation` is a URL pointing to the
+`pConfig` is a configuration object from which we can get a URL pointing to the
 policy file, which is either the default value
 `classpath:/jolokia-access.xml` or the
 value specified with the init parameter
 `policyLocation`. This servlet can then be
 easily configured in a custom `web.xml`
-the same way as the Jolokia agent.
+the same way as the Jolokia WAR agent.
 
 For programmatic usage there is an even simpler way:
-`AgentServlet` provides an constructor
+`AgentServlet` provides a constructor
 which takes an restrictor as argument, so no subclassing is
 required in this case.
 
 For an OSGi agent (xref:agents.adoc#agents-osgi[OSGi Agents]),
-`org.jolokia.server.core.osgi.servlet.JolokiaServlet`
+`org.jolokia.server.core.osgi.OsgiAgentServlet`
 is the proper extension point. It can be subclassed the same
 way as shown above and allows a restrictor implementation as
 constructor parameter, too. In contrast to

@@ -30,15 +30,8 @@ asciidoc:
   attributes:
     page-pagination: ''
     xrefstyle: 'full'
-#    sectnums: true
-#    partnums: true
-#    leveloffset: '+1'
 
 ui:
   bundle:
     url: 'https://gitlab.com/antora/antora-ui-default/-/jobs/artifacts/HEAD/raw/build/ui-bundle.zip?job=bundle-stable'
   supplemental_files: ./supplemental-ui
-
-#antora:
-#  extensions:
-#  - '@antora/lunr-extension'
