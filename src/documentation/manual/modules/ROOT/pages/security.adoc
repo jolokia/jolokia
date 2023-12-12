@@ -314,7 +314,7 @@ subclass either
 or
 `org.jolokia.server.core.restrictor.DenyAllRestrictor`.
 
-For the WAR agent (xref:agents.adoc#agents-war[Java EE Agent (WAR)]), a subclass
+For the WAR agent (xref:agents.adoc#agents-war[Jakarta EE Agent (WAR)]), a subclass
 of `org.jolokia.server.core.http.AgentServlet` should
 be created which overrides the
 `createRestrictor()`

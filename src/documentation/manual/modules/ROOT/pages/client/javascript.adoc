@@ -678,7 +678,7 @@ otherwise.
 === Jolokia as a Cubism Source
 
 https://square.github.com/cubism/[Cubism] is a JavaScript library for
-plotting time-series data and is based on <ulink
+plotting time-series data and is based on
 https://d3js.org/[d3.js]. Jolokia comes with a plugin for Cubism and
 can act as a data source. The usage is quite simple: After
 creating a Jolokia Cubism source, one or more JSON request can
@@ -701,7 +701,7 @@ link:/download.html[jolokia.js],
 https://www.jquery.com[JQuery],
 https://square.github.com/cubism/[Cubism] and
 https://d3js.org/[d3.js]. `jolokia-cubism.js`
-registers itself as an <ulink
+registers itself as an
 https://requirejs.org/docs/whyamd.html[AMD] module
 if running within an AMD environment.
 

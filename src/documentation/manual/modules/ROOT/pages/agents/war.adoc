@@ -14,7 +14,7 @@
   limitations under the License.
 ////
 [#agents-war]
-== Java EE Agent (WAR)
+== Jakarta EE Agent (WAR)
 
 [#war-agent-installation]
 === Installation and Configuration

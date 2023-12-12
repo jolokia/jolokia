@@ -128,7 +128,7 @@ an MBean for JSR-160 connectors (see below).
 [#json-mbean]
 == @JsonMBean
 
-JMX 1.4 introduced <ulink
+JMX 1.4 introduced
 https://docs.oracle.com/javase/6/docs/api/javax/management/MXBean.html[MXBeans]
 which allows for nearly arbitrary data to be translated into so
 called OpenData which are accessible via JMX. For example,

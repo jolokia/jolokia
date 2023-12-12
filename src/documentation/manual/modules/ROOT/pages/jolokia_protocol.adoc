@@ -918,7 +918,7 @@ Although to the outside only open types are exposed by the
 MXBean framework, MXBean themselves can use more complex
 data types. The framework will translate forth and back
 between the custom and open types according to certain rules
-as declared in the MXBean <ulink
+as declared in the MXBean
 https://download.oracle.com/javase/6/docs/api/javax/management/MXBean.html[specification].
 Most of the translations to open types fits naturally to
 Jolokia's serialization, except for the translation of `Map`.

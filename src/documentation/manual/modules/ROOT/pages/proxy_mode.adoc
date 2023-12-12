@@ -20,54 +20,34 @@ Using Jolokia in proxy mode enables for agentless operation
 on the target server. A dedicated agent deployment proxies by
 accepting Jolokia requests as input, translating them to JSR-160
 requests for the target. This setup is described in
-xref:architecture.adoc[]. As noted there, the real target is
+xref:architecture.adoc#proxy-mode[Proxy Mode]. As noted there, the real target is
 given within the original request, which must be sent as a POST
 request.
 
 Agents of all types support the proxy mode. However, since one
 has usually the free choice of platform for a dedicated Jolokia
 proxy, an environment optimized for HTTP communication should be
-used. These are either servlet container or Java EE server hosting
-the WAR agent or an OSGi runtime with an OSGi HttpService (which
+used. These are either servlet container or Jakarta EE server hosting
+the WAR agent or an OSGi runtime with an https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard extender,role=externalLink] (which
 in turn is typically based on an embedded servlet container like
-Tomcat or Jetty). The other agent, the JVM agent
-are not that well suited for this job and do not contain the proxy.
+Tomcat, Jetty or Undertow).
 
-Please note that the proxy mode is _not_ switched on by default
-since version 1.5.0. You have to explicitly switch it on for the WAR or OSGI agent:
+In Jolokia 1.x, proxy mode is turned on or off depending on `dispatcherClasses` option. If it contains `org.jolokia.jsr160.Jsr160RequestDispatcher`, proxy mode will be enabled, because this special dispatcher will be used.
 
-* Repackaging the `jolokia.war` and adapt `web.xml` to
-include the init option `dispatcherClasses` with a value `org.jolokia.jsr160.Jsr160RequestDispatcher`.
-* Set the system property `org.jolokia.jsr160ProxyEnabled` to `true`
-* Set the environment variable `JOLOKIA_JSR160_PROXY_ENABLED` to `true`
+In Jolokia 2, `org.jolokia.service.jsr160.Jsr160RequestHandler` is detected as Jolokia service, so it's a matter of having `jolokia-service-jsr160.jar` on the CLASSPATH.
 
-The first option requires you to repackage the `jolokia.war` and add the following section to
-the `web.xml` descriptor:
-
-[,xml]
-----
-<init-param>
-  <description>
-    Classnames (comma separated) of RequestDispatcher used in addition
-    to the LocalRequestDispatcher
-  </description>
-  <param-name>dispatcherClasses</param-name>
-  <param-value>org.jolokia.jsr160.Jsr160RequestDispatcher</param-value>
-</init-param>
-----
-
-The two other options by using a Java system property or an environment variable do not require a repackaging, so
-these are the recommended way.
+`jolokia-agent-war.war` includes `WEB-INF/lib/jolokia-service-jsr160.jar`, so proxy mode is enabled. If you want to remove
+proxy support, you have to repackage `jolokia-agent-war.war` without this library.
 
 Additionally you can configured a white list with patterns for all allowed JMX service URL in a Jolokia Request.
-This white list is a plain text file which contains <ulink
-https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html[Patterns] line by line. Lines starting with `#` are ignored.
+This white list is a plain text file which contains
+https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/regex/Pattern.html[RegExp patterns,role=externalLink] line by line. Lines starting with `#` are ignored.
 Pattern matching is performed case insensitive. This file can be configured in various ways:
 
-* Repackaging the `jolokia.war` and adapt `web.xml` to
+* Repackaging the `jolokia-agent-war.war` and adapt `web.xml` to
 include the init option `jsr160ProxyAllowedTargets` with a file path to the white list. This should
-be an absolute path or a relative path if you know where your Java EE server sets the current directory.
-* Set the system property `org.jolokia.jsr160ProxyAllowedTargets` to the path of the whitelist
+be an absolute path or a relative path if you know where your Jakarta EE server sets the current directory.
+* Set the system property `jolokia.jsr160ProxyAllowedTargets` to the path of the whitelist
 * Set the environment variable `JOLOKIA_JSR160_PROXY_ALLOWED_TARGETS` to the path of the
 whitelist.
 
@@ -78,7 +58,7 @@ By default the following patterns are disallowed, but you can re-enable them whe
 service:jmx:rmi:///jndi/ldap:.*
 ----
 
-In any case it is highly recommended to use a dedicated Java EE servlet server for the JSR-160 proxy which
+In any case it is highly recommended to use a dedicated Jakarta EE servlet server for the JSR-160 proxy which
 is secured by configuring the server authentication properly for this servlet. An unprotected Jolokia proxy can be
 tricked to execute local code by a malicious attacker. As said previously, the Jolokia proxy should be avoided if
 possible in favor of direct access over the Jolokia protocol.

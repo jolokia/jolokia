@@ -18,7 +18,7 @@
 
 JMX (Java Management Extensions) is _the_
 standard management solution in the Java world. Since JDK 1.5 it
-is available in every Java Virtual Machine and especially Java EE / JakartaEE
+is available in every Java Virtual Machine and especially JavaEE / JakartaEE
 application servers use JMX for their management business.
 
 I love JMX. It is a well crafted specification, created in times
