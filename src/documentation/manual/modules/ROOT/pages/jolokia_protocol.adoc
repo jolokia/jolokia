@@ -26,6 +26,9 @@ Keep in mind
 that many web servers log the requested path of every request, including
 parameters passed to a GET request, so sending messages over GET
 often bloats server logs.
+
+Another important aspect is that some ObjectNames may be complex (for example in Camel or ActiveMQ/Artemis) and POST
+request is much more suitable when working with such MBeans.
 ****
 
 Jolokia requests can be sent in two ways: Either as a HTTP GET
@@ -34,23 +37,23 @@ completely in the URL. Or as a POST request where the request is
 put into a JSON payload in the HTTP request's body. GET based
 requests are mostly suitable for simple use cases and for
 testing the agent via a browser. The focus here is on
-simplicity.  POST based requests uses a JSON representation of
+simplicity. POST based requests uses a JSON representation of
 the request within the HTTP body. They are more appropriate for
 complex requests and provide some additional features (e.g. bulk
 requests are only possible with POST).
 
-The response returned by the agent uses always JSON for its data
+The response returned by the agent always uses JSON for its data
 representation. It has the same format regardless whether GET or
 POST requests are used.
 
 The rest of this chapter is divided into two parts: First, the
-general structure of requests and responses are explained after
-which the representation of Jolokia supported operations defined.
+general structure of requests and responses is explained after
+which the representation of Jolokia supported operations is defined.
 
 NOTE: Unfortunately the term _operation_ is
 used in different contexts which should be
 distinguished from one another. _Jolokia operations_ denote
-the various kind of Jolokia requests, whereas _JMX
+the various kind of Jolokia requests (`read`, `exec`, ...), whereas _JMX
 operations_ are methods which can be invoked on an JMX
 MBean. Whenever the context requires it, this documents uses
 _Jolokia_ or _JMX_ as prefix.
@@ -60,37 +63,67 @@ _Jolokia_ or _JMX_ as prefix.
 
 Jolokia knows about two different styles of handling
 requests, which are distinguished by the HTTP method used: GET
-or POST. Regardless of what method is used, the agent doesn't
+or POST. Regardless of which method is used, the agent doesn't
 keep any state on the server side (except of course that
 MBeans are obviously stateful most of the time). So in this aspect, the
 communication can be considered
-https://en.wikipedia.org/wiki/Representational_State_Transfer[REST]
-like footnote:rest-comment[
+https://en.wikipedia.org/wiki/Representational_State_Transfer[REST,role=externalLink]
+likefootnote:rest-comment[
 This document will avoid the term REST as much as
 possible in order to avoid provoking any dogmatic
 resentments.].
 
-[#get-request]
+=== Some Servlet API concepts
+
+Before proceeding, let's review some important concepts from https://jakarta.ee/specifications/servlet/5.0/jakarta-servlet-spec-5.0[Jakarta Servlet Specification 5,role=externalLink].
+
+https://jakarta.ee/specifications/servlet/5.0/jakarta-servlet-spec-5.0#request-path-elements[Chapter 3.5. Request Path Elements,role=externalLink] splits full URI used to access Java Servlet container into three parts (query string is not included here):
+
+----
+requestURI = contextPath + servletPath + pathInfo
+----
+
+These 4 elements are accessed using these API calls:
+
+* `jakarta.servlet.http.HttpServletRequest.getRequestURI()`
+* `jakarta.servlet.http.HttpServletRequest.getContextPath()`
+* `jakarta.servlet.http.HttpServletRequest.getServletPath()`
+* `jakarta.servlet.http.HttpServletRequest.getPathInfo()`
+
+Request URI:: this is simply full URI without query string
+
+Context path:: this fragment selects the web application (one of potentially many running in single Servlet container). On Tomcat it is derived from the file name of WAR archive in `webapps/` directory. It may be `/` (for special `ROOT.war` on Tomcat).
+
+Servlet path:: this is more complicated, as it indicates part of the URI that is used to select single servlet within single web application. When servlet mapping (`<servlet-mapping>/<url-pattern>` element in `WEB-INF/web.xml`) is `/path` or `pass:[/path/*]`, servlet path is `/path`. Jolokia Agent WAR uses `pass:[/*]`  mapping, so servlet path is empty.
+
+Path info:: this is the URI part after servlet path, so for Jolokia, it is simply everything after `/jolokia` (when WAR agent is deployed to Tomcat as `webapps/jolokia.war`).
+
+[#get-requests]
 === GET requests
 
 The simplest way to access the Jolokia agent is by sending
 HTTP GET requests. These requests encode all their
-parameters within the access URL. Typically, Jolokia uses
-the path-info part of an URL to extract the
-parameters. Within the path-info, each part is separated by
-a slash (`/`).  In general, the request URL
+parameters within the access URL. Jolokia uses
+the _path info_ part of an URL to extract the
+parameters. Within the _path info_, each part is separated by
+a slash (`/`). In general, the request URL
 looks like
 ----
 <base-url>/<type>/<arg1>/<arg2>/..../
 ----
 
 The `<base-url>` specifies the URL
-under which the agent is accessible. It normally looks like
-`http://localhost:8080/jolokia`, but depends on
-your deployment setup. The last part of this URL is the
+under which the agent is accessible and consists of protocol (`http` or `https`), host, port and
+a _context path_.
+
+It normally looks like
+`\http://localhost:8080/jolokia`, but depends on
+your deployment setup.
+The last part of such URL is the
 _context root_ of the deployed agent,
 which by default is based on the agent's filename
 (e.g. `jolokia.war`).
+
 `<type>` specifies one of the
 supported Jolokia operations (described in the next
 section), followed by one or more operation-specific
@@ -108,7 +141,10 @@ reachable under the base URL
 http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage
 ----
 
-.Why escaping ?
+=== Escaping rules in GET requests
+
+#TODO# escaping
+
 ****
 You might wonder why simple URI encoding isn't enough for
 escaping slashes. The reason is that JBoss/Tomcat has a
@@ -183,15 +219,15 @@ This format _must_ be used for GET
 requests containing backslashes (`\`) since
 backslashes can not be sent as part of an URL at all.
 
-[#post-request]
+[#post-requests]
 === POST requests
 
 POST requests are the most powerful way to communicate
 with the Jolokia agent. There are fewer escaping issues and it
 allows for features which are not available with GET
-requests. POST requests uses a fixed URL and put their payload
+requests. POST requests use a single Jolokia URL and put their payload
 within the HTTP request's body. This payload is represented
-in https://www.json.org[JSON], a
+in https://www.json.org[JSON,role=externalLink], a
 data serialization format originating from the JavaScript
 world.
 
@@ -212,7 +248,7 @@ Processing parameters are always optional, though.
 
 A sample read request in JSON format looks like the
 following example. It has a `type`
-"read"
+`read`
 (case doesn't matter) and the three attributes
 `mbean`, `attribute`
 and `path` which are specific to a read
@@ -225,7 +261,7 @@ request.
   "type" : "read",
   "mbean" : "java.lang:type=Memory",
   "attribute" : "HeapMemoryUsage",
-  "path" : "used",
+  "path" : "used"
 }
 ----
 
@@ -242,7 +278,7 @@ Jolokia requests into a JSON array:
     "type" : "read",
     "attribute" : "HeapMemoryUsage",
     "mbean" : "java.lang:type=Memory",
-    "path" : "used",
+    "path" : "used"
   },
   {
     "type" : "search",
@@ -260,13 +296,13 @@ in same order as the requests in the initial bulk request.
 
 Responses are always encoded in UTF-8 JSON, regardless whether the
 request was a GET or POST request.  In general, two kinds of
-responses can be classified: In the normal case, a HTTP
-Response with response code 200 is returned, containing the
+responses can be classified: In the normal case, an HTTP
+Response with response code `200` is returned, containing the
 result of the operation as a JSON payload. In case of an
-error, a 4xx or 5xx code will be returned and the JSON
+error, a `4xx` or `5xx` code will be returned and the JSON
 payload contains details about the error
-occurred (e.g. 404 means "not found"). (See
-https://en.wikipedia.org/wiki/List_of_HTTP_status_codes[this page]
+occurred (e.g. `404` means "not found"). (See
+https://en.wikipedia.org/wiki/List_of_HTTP_status_codes[this page,role=externalLink]
 for more information about HTTP error codes..). If the processing option
 `ifModifiedSince` is given and the requested
 value as been not changed since then, a response code of 304 is returned.
@@ -278,7 +314,7 @@ for each request type except for the
 `value` attribute which is request type
 specific.
 
-The format of a single Jolokia response is
+The format of a single Jolokia response is:
 
 .JSON Response
 [#response-example,json]
@@ -286,7 +322,7 @@ The format of a single Jolokia response is
 {
   "value": .... ,
   "status" : 200,
-  "timestamp" : 1244839118,
+  "timestamp" : 1702391068,
   "request": {
     "type": ...,
     ....
@@ -294,7 +330,7 @@ The format of a single Jolokia response is
   "history": [
     {
       "value": ... ,
-      "timestamp" : 1244839045
+      "timestamp" : 1702391069
     },
     ....
   ]
@@ -304,7 +340,7 @@ The format of a single Jolokia response is
 For successful requests, the `status` is
 always `200` (the HTTP success code). The
 `timestamp` contains the epoch
-time footnote:epoch-time[Seconds since 1.1.1970]
+timefootnote:epoch-time[Seconds since 1.1.1970]
 when the
 request has been handled. The request leading to this
 response can be found under the attribute
@@ -326,12 +362,9 @@ response looks like
 [,json]
 ----
 {
-  "status": 400,
-  "error_type": "java.lang.IllegalArgumentException",
-  "error": "java.lang.IllegalArgumentException: Invalid request type 'java.lang:type=Memory'",
-  "stacktrace": "java.lang.IllegalArgumentException: Invalid request type 'java.lang:type=Memory'\n
-    \tat org.cpan.jmx4perl.JmxRequest.extractType(Unknown Source)\n
-    \tat org.cpan.jmx4perl.JmxRequest.<init>(Unknown Source) ...."
+  "error_type": "java.lang.UnsupportedOperationException",
+  "error": "java.lang.UnsupportedOperationException : No type with name 'java.lang:type=Memory' exists",
+  "status": 400
 }
 ----
 
@@ -350,17 +383,15 @@ some errors.
 
 I.e. the `status` has a code in the range
 `400 .. 499` or `500 .. 599`
-https://en.wikipedia.org/wiki/List_of_HTTP_status_codes[as it is specified for HTTP return codes].
+https://en.wikipedia.org/wiki/List_of_HTTP_status_codes[as it is specified for HTTP return codes,role=externalLink].
 The `error` member contains an error
 description. This is typically the message of an exception
-occurred on the agent sidefootnote:mbeanexception-wrapping[
-If the server exception
+occurred on the agent sidefootnote:mbeanexception-wrapping[If the server exception
 is a subtype of `MBeanException`, the wrapped
-exception's message is used.
-]. Finally, `error_type` contains the Java class name
+exception's message is used.]. Finally, `error_type` contains the Java class name
 of the exception occurred.
 The `stacktrace` contains a Java stacktrace
-occurred on the server side (if any stacktrace is available).
+occurred on the server side (if any stacktrace is available and `includeStackTrace` option is set to `true`).
 
 For each type of operation, the format of the
 `value` entry is explained in
@@ -377,43 +408,54 @@ is best explained by an example:
 The attribute `HeapMemoryUsage` of the MBean
 `java.lang:type=Memory` can be
 requested with the URL
-`http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage`
+`\http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage`
 which returns a complex JSON structure like
 
 [,json]
 ----
 {
-  "status" : 200,
-  "value" :  {
-    "committed" : 18292736,
-    "used" : 15348352,
-    "max" : 532742144,
-    "init" : 0
+  "request": {
+    "mbean": "java.lang:type=Memory",
+    "attribute": "HeapMemoryUsage",
+    "type": "read"
   },
-  "request" : { .... },
-  "timestamp" : ....
+  "value": {
+    "init": 524288000,
+    "committed": 532676608,
+    "max": 8334082048,
+    "used": 27145000
+  },
+  "status": 200,
+  "timestamp": 1702392020
 }
 ----
 
 In order to get to the value for used heap memory you should
 specify an inner path `used`, so that the
 request
-`http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage/used`
-results in a response of `15348352`for the value:
+`\http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage/used`
+results in a response of `27145000`for the value:
 
 [,json]
 ----
 {
-  "status" : 200,
-  "value" :  15348352,
-  "request" : { .... },
-  "timestamp" : ....
+  "request": {
+    "path": "used",
+    "mbean": "java.lang:type=Memory",
+    "attribute": "HeapMemoryUsage",
+    "type": "read"
+  },
+  "value": 27145000,
+  "status": 200,
+  "timestamp": 1702392075
 }
 ----
 
 If the attribute contains arrays at some level, use a numeric
 index (0 based) as part of the inner path if you want to
 traverse into this array.
+
+#TODO# escaping
 
 For both, GET and POST requests, paths must be escaped as
 described in <<escape-rules>> when they
@@ -470,8 +512,8 @@ JSON request below the key `config`:
 ----
 
 If a POST request carries also query parameters in the URL, these processing parameters
-are merged with the ones given within the request. Configuration options given in the
-request take precedence over the ones given as query parameters.
+are merged with the ones given within the request body. Configuration options given in the
+request body take precedence over the ones given as query parameters.
 
 The list of known processing parameters is:
 
@@ -505,7 +547,7 @@ If set to `false` then the default unsorted property list is returned.
 `includeStackTrace`:: If set to `true`, then in case of an error the stack trace is included.
 With `false` no stack trace will be returned, and when this parameter
 is set to `runtime` only for RuntimeExceptions a stack trace is put into
-the error response. Default is `true` if not set otherwise in the global
+the error response. Default is `false` if not set otherwise in the global
 agent configuration.
 
 `serializeException`:: If this parameter is set to `true` then a serialized version of the
@@ -518,7 +560,7 @@ configuration option is configured otherwise.
 `ifModifiedSince`:: If this parameter is given, its value is interpreted as epoch time (seconds since 1.1.1970) and
 if the requested value did not change since this time, an empty response (with no `value`)
 is returned and the response status code is set to 304 ("Not modified"). This
-option is currently only supported for `LIST` requests. The time value can be
+option is currently only supported for `list` requests. The time value can be
 extracted from a previous' response `timestamp`.
 
 [#serialization]
@@ -534,12 +576,12 @@ completely into a JSON value object. It can detect cycles in
 the object graph and provides a way to limit the depth of
 serialization. For certain types (like
 `File` or
-`ObjectName`) it uses simplifier to not
+`ObjectName`) it uses a service `org.jolokia.service.serializer.json.simplifier.SimplifierExtractor` to not
 expose internal and redundant information.
 
 Object values used for values in
-_write_ operations and arguments in
-_exec_, type support is limited to a
+`write` operations and arguments in
+`exec`, type support is limited to a
 handful of data types.
 
 [#serialization-response]
@@ -556,7 +598,7 @@ The following types are directly supported:
 * `java.util.Map` gets
 converted into a JSON object. Note, however, that JSON
 Object keys are _always strings_.
-* Enums are converted to their canonical name footnote:enum-serial-jboss[
+* Enums are converted to their canonical namefootnote:enum-serial-jboss[
 For JBoss older than version 7, there might be use cases
 when custom enums need to be serialized. In this case,
 the type information must be available to the agent,
@@ -609,21 +651,21 @@ the object and the values are serialized (recursively) as
 described.
 
 `TabularData` serialization depends on
-the type of the index.  It is serialized into one or multiple
+the type of the index. It is serialized into one or multiple
 nested JSON objects where the keys are derived from its
 `TabularType.indexNames()`. If there is
 a single valued index with a simple type (i.e. an instance of
 `javax.management.openmbean.SimpleType`),
 the index's value is the key and a
-`TabularData`'s row (which in turn is a
+``TabularData``'s row (which in turn is a
 `CompositeData`) is a map. With multi
 valued, simple typed, keys, the map is nested (first level:
 first index's value, second level: second index's value and
 so on). For the serialization of
 `TabularData` resulting from a
-`https://download.oracle.com/javase/6/docs/api/javax/management/MXBean.html[MXBean]`
+https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/MXBean.html[MXBean,role=externalLink]
 translation for maps, see
-<<serialization-mxbean>>.  If any of the declared
+<<serialization-mxbean>>. If any of the declared
 index keys of a `TabularData` is a
 complex type (i.e. not a `SimpleType`),
 then this simple serialization into maps of maps is not
@@ -642,9 +684,9 @@ For example if there is a single valued key
 [,json]
 ----
 {
-  "mykey1" : { "key" : "mkey1", "item" : "value1", .... }
-  "mykey2" : { "key" : "mkey2", "item" : "value2", .... }
-  ....
+  "mykey1" : { "key" : "mkey1", "item" : "value1", .... },
+  "mykey2" : { "key" : "mkey2", "item" : "value2", .... },
+  ...
 }
 ----
 
@@ -659,13 +701,13 @@ names here are `key` and
 ----
 {
   "mykey1" : {
-    "myinner1" : { "key" : "mkey1", "innerkey" : "myinner1", "item" : "value1", .... }
-    "myinner2" : { "key" : "mkey1", "innerkey" : "myinner2", "item" : "value1", .... }
+    "myinner1" : { "key" : "mkey1", "innerkey" : "myinner1", "item" : "value1", .... },
+    "myinner2" : { "key" : "mkey1", "innerkey" : "myinner2", "item" : "value1", .... },
     ....
   },
   "mykey2" : {
-    "second1" : { "key" : "mkey2", "innerkey" : "second1", "item" : "value1", .... }
-    "second2" : { "key" : "mkey2", "innerkey" : "second2", "item" : "value1", .... }
+    "second1" : { "key" : "mkey2", "innerkey" : "second1", "item" : "value1", .... },
+    "second2" : { "key" : "mkey2", "innerkey" : "second2", "item" : "value1", .... },
     ....
   },
   ....
@@ -674,8 +716,8 @@ names here are `key` and
 If keys are used, which themselves are complex objects (like
 `CompositeData`), this hierarchical map structure can not be
 used. In this case an object with two keys is returned:
-"`indexNames`" holds the name of the key
-index and "`values`" is an array of all
+`indexNames` holds the name of the key
+index and `values` is an array of all
 rows which are represented as JSON objects:
 
 [,json]
@@ -689,7 +731,7 @@ rows which are represented as JSON objects:
   ]
 }
 ----
-<para>
+
 Beside this special behaviour for
 `TabularData`, serialization can be
 influenced by certain processing parameters given with the
@@ -737,10 +779,10 @@ and the capabilities differ also for POST and GET requests.
 `GET` upstream serialization is limited to
 basic types and simple arrays. POST requests on the other
 support a much large set of types, including the
-serialization of `Map`s,
-`List`s and all
-https://download.oracle.com/javase/6/docs/api/javax/management/openmbean/OpenType.html[Open
-Types].
+serialization of ``Map``s,
+``List``s and all
+https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/openmbean/OpenType.html[Open
+Types,role=externalLink].
 
 ==== GET request values
 
@@ -798,7 +840,7 @@ takes a `Map` argument, the argument
 can be given as a JSON object. Be aware, however, that JSON
 maps (objects) only support strings as keys.
 
-The agent knows how to convert an JSON array to Java
+The agent knows how to convert a JSON array to Java
 Arrays (of a basic type) or Lists, depending on the
 requirement as dictated by the MBeans operation or
 attribute signature. Numbers in JSON are always transfered
@@ -817,7 +859,8 @@ Jolokia Agent is not able to construct an instance of it
 because of missing type information.
 
 Upstream serialization also supports
-https://download.oracle.com/javase/6/docs/api/javax/management/openmbean/OpenType.html[OpenTypes].
+https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/openmbean/OpenType.html[Open
+Types,role=externalLink].
 If the signature of JMX exec operation or the value type
 of a JMX attribute is a `OpenType`,
 they are serialized as follows:
@@ -826,13 +869,13 @@ they are serialized as follows:
 * `ArrayType` is extracted from a
 `JSONArray` where the elements are
 serialized recursively with this algorithms. Only
-`ArrayType`s with element type
+``ArrayType``s with element type
 `CompositeType` or
 `SimpleType` are supported.
 * `CompositeType` is extracted
 recursively from a `JSONObject`
 where there the string keys must fit to the
-`CompositeType`'s item names and
+``CompositeType``'s item names and
 the values must be serializable as open types.
 * `TabularType` is converted from
 `JSONObject`. If it is single index
@@ -906,8 +949,8 @@ look like
 [#serialization-mxbean]
 === Jolokia and MXBeans
 
-The https://download.oracle.com/javase/6/docs/api/javax/management/MXBean.html[MXBean Framework] is available in
-the JRE since version 6 and allows for easy creation and
+The https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/MXBean.html[MXBean Framework,role=externalLink] is available in
+the JDK since version 6 and allows for easy creation and
 registration of own MBeans. MXBeans are some what the
 successor for standard MBeans and support an annotation driven
 as well as a naming convention driven programming model. The
@@ -919,7 +962,7 @@ MXBean framework, MXBean themselves can use more complex
 data types. The framework will translate forth and back
 between the custom and open types according to certain rules
 as declared in the MXBean
-https://download.oracle.com/javase/6/docs/api/javax/management/MXBean.html[specification].
+https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/MXBean.html[specification,role=externalLink].
 Most of the translations to open types fits naturally to
 Jolokia's serialization, except for the translation of `Map`.
 
@@ -972,14 +1015,14 @@ along with a timestamp. If history tracking is switched on,
 then the agent will put the list of historical values specific
 for this request into the response. History tracking is
 toggled by an MBean operation on a Jolokia-owned MBean (see
-<<mbeans>>). This has to be done individually for each
+xref:jolokia_mbeans.adoc[]). This has to be done individually for each
 attribute or JMX operation to be tracked.
 
 A `history` entry is contained in every
 response for which history tracking was switched on. A certain
 JMX operation on an Jolokia specific MBean has to be executed
 to turn history tracking on for a specific attribute or
-operation. See <<mbeans>> for details.The
+operation. See xref:jolokia_mbeans.adoc[] for details.The
 `history` property of the JSON response
 contains an array of json objects which have two attributes:
 `value` containing the historical value
@@ -1020,7 +1063,7 @@ request. A typical proxy request looks like
 section is a JSR-160 service URL for the target server
 reachable from within the proxy agent. `user`
 and `password` are optional credentials used
-for the JSR-160 communication.
+for the JSR-160 Remote communication.
 
 [#discovery]
 == Agent Discovery
@@ -1039,13 +1082,13 @@ might hide behind a proxy, too. So, if in doubt you should
 configure the agent URL from outside to allow external clients
 to be discovered. The configuration options for enabling
 multicast requests are described in the
-<<agent-jvm-config,JVM>> and
-<<agent-war-init-params,WAR>> agent configuration
+xref:agents/jvm.adoc#agent-jvm-config[JVM agent configuration options] and
+xref:agents/war.adoc#agent-war-init-params[Servlet init parameters] agent configuration
 sections.
 
 A agent which is enabled for multicast discovery will only
 respond to a multicast request if the
-<<security-policy,restrictor>> allows
+xref:security.adoc#security-policy[Policy based security] allows
 connections from the source IP. Otherwise a multicast request
 will be simply ignored. For example, if you have configured
 your agent to only allow request from a central monitoring
@@ -1058,7 +1101,7 @@ discovery feature enabled by default which can be switched off
 via `--discoveryEnabled=true` command line parameter or the
 corresponding configuration option. For the WAR agent and OSGi
 agents this feature is switched off by default since auto
-detection doesn't work always. It can be enabled with the init
+detection doesn't always work. It can be enabled with the init
 parameter `discoveryEnabled` (in which case the auto discovery
 described above is enabled) or better with `discoveryAgentUrl`
 with the URL. Alternatively, a system property can be used
@@ -1078,18 +1121,30 @@ the following format
 }
 ----
 
+We can use a tool like https://nmap.org/ncat/[netcat,role=externalLink] to check the discovery:
+
+[shell,subs="attributes,verbatim"]
+----
+$ nc -u localhost 24884
+{"type":"query"}
+{"agent_version":"{jolokia-version}","agent_id":"192.168.0.221-67980-7e985ce9-servlet",
+"server_product":"tomcat","type":"response","server_vendor":"Apache",
+"server_version":"10.1.16","secured":true,"url":"http:\/\/192.168.0.221:8080\/jolokia"}
+----
+
 Any agent enabled for discovery will respond to requester on the same socket with an answer which looks like
 
-[,json]
+[,json,subs="attributes,verbatim"]
 ----
 {
+  "agent_version": "{jolokia-version}",
+  "agent_id": "192.168.0.221-67980-7e985ce9-servlet",
+  "server_product": "tomcat",
   "type": "response",
-  "agent_description" : "Atlantis Tomcat",
-  "agent_id" : "10.9.11.18-58613-81b087d-servlet",
-  "url": "http://10.9.11.25:8778/jolokia",
-  "server_vendor" : "Apache",
-  "server_product" : "Tomcat",
-  "server_version" : "7.0.35"
+  "server_vendor": "Apache",
+  "server_version": "10.1.16",
+  "secured": true,
+  "url": "http://192.168.0.221:8080/jolokia"
 }
 ----
 
@@ -1107,6 +1162,7 @@ in the future.
 
 [#discovery-response]
 .Response properties
+[cols="15,~,~"]
 |===
 |Property|Description|Example
 
@@ -1121,7 +1177,7 @@ during startup of the agent in form of a configuration
 parameter or being autodetected. If autodetected, the id has
 several parts: The IP, the process id, hashcode of the agent
 and its type. This field will be always provided.
-|`10.9.11.87-23455-9184ef-osgi`
+|`192.168.0.221-67980-7e985ce9-servlet`
 
 |`agent_description`
 |An optional description which can be used as a UI label if
@@ -1137,7 +1193,7 @@ URL is used. If autodetected it is taken from the first HTTP
 request processed by the servlet. Hence no URL is available
 until this first request was processed. This property might
 be empty.
-|`http://10.9.11.87:8080/jolokia`
+|`\http://192.168.0.221:8080/jolokia`
 
 |`secured`
 |Whether the agent was configured for authentication or not.
@@ -1154,8 +1210,7 @@ field is included if it could be automatically detected.
 
 |`server_version`
 |The container's version (if detected)
-|`7.0.50`
-
+|`10.1.16`
 |===
 
 [#versions]
