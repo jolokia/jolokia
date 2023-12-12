@@ -132,6 +132,7 @@ a Jolokia servlet when used in a Jakarta EE WAR artifact.
 
 [#table-agents-osgi-properties]
 .Jolokia Bundle Properties
+[cols="15,~,~"]
 |===
 |Property|Default|Description
 

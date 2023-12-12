@@ -117,7 +117,7 @@ VM, not only application servers.
 There are two ways to install a JVM agent in Java application.
 
 First is to use `-javaagent` command line option like this:
-[source,shell,subs="attributes,verbatim"]
+[,subs="attributes,verbatim"]
 ----
 $ java -cp target/classes:... -javaagent:\
 jolokia-agent-jvm-{jolokia-version}-javaagent.jar=port=7778 \
@@ -126,7 +126,7 @@ com.example.Main
 
 Second one is to use https://docs.oracle.com/en/java/javase/11/docs/api/jdk.attach/module-summary.html[JVM Attach API,role=externalLink] and install an agent within running JVM process. `jolokia-agent-jvm-{jolokia-version}-javaagent.jar` is a JAR with main class that uses this API, so we can invoke this JAR with `start <pid>` command:
 
-[source,shell,subs="attributes,verbatim"]
+[,subs="attributes,verbatim"]
 ----
 $ java -jar jolokia-agent-jvm-{jolokia-version}-javaagent.jar start --port 7778 34870
 Started Jolokia for PID 34870
@@ -136,7 +136,7 @@ http://127.0.0.1:7778/jolokia/
 NOTE: Dynamic loading of agents will be removed at some point. See https://openjdk.org/jeps/451[JEP 451,role=externalLink] for details.
 
 When dynamically loading a JVM agent using JDK 21 and newer, we'll get this warning:
-[source,shell,subs="attributes,verbatim"]
+[,subs="attributes,verbatim"]
 ----
 WARNING: A Java agent has been loaded dynamically (jolokia-agent-jvm-{jolokia-version}-javaagent.jar)
 WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading

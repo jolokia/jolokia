@@ -107,7 +107,7 @@ public class ConnectInKubernetesDemo {
 As an alternative to connecting programmatically to the Jolokia agent, you can also leverage `jconsole` to explore JMX on the remote JVM.
 You need to add the Jolokia connector client libraries when launching `jconsole` like in:
 
-[,bash,subs="attributes,verbatim"]
+[,subs="attributes,verbatim"]
 ----
 java \
   -classpath "jolokia-jmx-adapter-{jolokia-version}-javaagent.jar:\

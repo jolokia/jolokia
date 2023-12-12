@@ -57,7 +57,7 @@ command can be used to get a quick help
 
 [,subs="attributes,verbatim"]
 ----
-java -jar /path/to/jolokia-agent-jvm-{jolokia-version}-javaagent.jar --help
+$ java -jar /path/to/jolokia-agent-jvm-{jolokia-version}-javaagent.jar --help
 ----
 
 NOTE: Dynamic loading of agents will be removed at some point. See https://openjdk.org/jeps/451[JEP 451,role=externalLink] for details.

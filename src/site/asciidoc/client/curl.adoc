@@ -21,7 +21,7 @@ One of the most popular and powerful tools is the https://curl.se/[`curl`,role=e
 
 We can access the agent with simple GET requests:
 
-[,bash,options=nowrap]
+[source,bash,options=nowrap]
 ----
 $ curl -s -u \
 jolokia:jolokia http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage | jq .
@@ -43,7 +43,7 @@ jolokia:jolokia http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMem
 ----
 
 but it's also easy to send POST requests for example:
-[,bash,options=nowrap]
+[source,bash,options=nowrap]
 ----
 $ curl -s -u jolokia:jolokia \
 -H'Content-Type: application/json' \
