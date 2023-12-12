@@ -31,6 +31,8 @@
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
+  <url>https://jolokia.org/</url>
+
   <dependencyManagement>
     <dependencies>
 
@@ -87,6 +89,8 @@
           <testSource>17</testSource>
           <target>17</target>
           <testTarget>17</testTarget>
+          <release>17</release>
+          <testRelease>17</testRelease>
         </configuration>
       </plugin>
     </plugins>

@@ -21,7 +21,7 @@
   <artifactId>jolokia-example-spring-boot</artifactId>
   <version>2.0.0-SNAPSHOT</version>
 
-  <name>jolokia-example-spring</name>
+  <name>jolokia-example-spring-boot</name>
   <description>Jolokia :: Support :: Spring Boot :: Sample</description>
 
   <parent>
@@ -30,6 +30,8 @@
     <version>2.0.0-SNAPSHOT</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
+
+  <url>https://jolokia.org/</url>
 
   <dependencyManagement>
     <dependencies>
@@ -117,6 +119,8 @@
           <testSource>17</testSource>
           <target>17</target>
           <testTarget>17</testTarget>
+          <release>17</release>
+          <testRelease>17</testRelease>
         </configuration>
       </plugin>
     </plugins>

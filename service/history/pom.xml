@@ -32,6 +32,8 @@
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
+  <url>https://jolokia.org/</url>
+
   <dependencies>
 
     <!-- Jolokia own artifacts -->

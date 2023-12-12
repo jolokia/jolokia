@@ -32,6 +32,8 @@
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
+  <url>https://jolokia.org/</url>
+
   <dependencies>
 
     <!-- Jolokia own artifacts -->
@@ -56,9 +58,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-war-plugin</artifactId>
-        <configuration>
-          <warName>jolokia-it</warName>
-        </configuration>
       </plugin>
     </plugins>
   </build>

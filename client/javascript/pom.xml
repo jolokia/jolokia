@@ -32,6 +32,8 @@
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
+  <url>https://jolokia.org/</url>
+
   <properties>
     <sonar.language>js</sonar.language>
     <sonar.dynamicAnalysis>false</sonar.dynamicAnalysis>

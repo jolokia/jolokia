@@ -32,4 +32,6 @@
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
+  <url>https://jolokia.org/</url>
+
 </project>
