@@ -7,7 +7,6 @@ package org.jolokia.service.discovery;
 import java.io.IOException;
 import java.net.*;
 
-import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.util.NetworkUtil;
 
@@ -23,9 +22,6 @@ class MulticastSocketListenerThread extends Thread {
 
     // Jolokia services
     private final JolokiaContext context;
-
-    private final String multicastGroup;
-    private final int multicastPort;
 
     // Address to listen to
     private final InetAddress address;
