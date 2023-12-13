@@ -33,17 +33,21 @@ public class NotificationStoreTest {
     public void testSimple() {
         Object handback = new Object();
         NotificationSubscription subcr = createNotificationSubscription(handback);
-        NotificationStore store = new NotificationStore(subcr,1);
-        store.add(new Notification("test.test",this,1));
+        NotificationStore store = new NotificationStore(subcr,2);
+        store.add(new Notification("test.test1",this,1));
         assertEquals(store.getDropped(),0);
         store.add(new Notification("test.test2",this,2));
+        assertEquals(store.getDropped(),0);
+        store.add(new Notification("test.test3",this,3));
         assertEquals(store.getDropped(),1);
         NotificationResult notifs = store.fetchAndClear();
-        assertEquals(notifs.getNotifications().size(),1);
+        assertEquals(notifs.getNotifications().size(),2);
         assertEquals(notifs.getDropped(),1);
         assertEquals(notifs.getHandback(),handback);
         assertEquals(notifs.getNotifications().get(0).getSequenceNumber(),2);
+        assertEquals(notifs.getNotifications().get(1).getSequenceNumber(),3);
         assertEquals(notifs.getNotifications().get(0).getType(),"test.test2");
+        assertEquals(notifs.getNotifications().get(1).getType(),"test.test3");
         notifs = store.fetchAndClear();
         assertEquals(notifs.getNotifications().size(),0);
         assertEquals(notifs.getDropped(),0);

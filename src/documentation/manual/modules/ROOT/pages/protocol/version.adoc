@@ -45,38 +45,52 @@ A version POST request has only a single key
 
 The response value for a version request looks like:
 
-[,json]
+[,json,subs="attributes,verbatim"]
 ----
 {
-  "timestamp": 1287143106,
-  "status": 200,
   "request": {
     "type": "version"
   },
   "value": {
-    "protocol": "7.1",
-    "agent": "1.2.0",
+    "agent": "{jolokia-version}",
+    "protocol": "7.2",
+    "details": {
+      "agent_version": "{jolokia-version}",
+      "agent_id": "192.168.0.221-21185-5ce94d31-servlet",
+      "server_product": "tomcat",
+      "server_vendor": "Apache",
+      "server_version": "10.1.16",
+      "secured": true,
+      "url": "http://192.168.0.221:8080/jolokia"
+    },
+    "id": "192.168.0.221-21185-5ce94d31-servlet",
     "config": {
-      "agentDescription": "Servicemix ESB",
-      "agentId": "EF87BE-jvm",
-      "agentType": "jvm",
-      "serializeException": "false"
+      "maxDepth": "15",
+      "discoveryEnabled": "false",
+      "agentId": "192.168.0.221-21185-5ce94d31-servlet",
+      "maxCollectionSize": "0",
+      "debug": "false",
+      "canonicalNaming": "true",
+      "historyMaxEntries": "10",
+      "serializeException": "false",
+      "includeStackTrace": "false",
+      "maxObjects": "0",
+      "detectorOptions": "{}",
+      "debugMaxEntries": "100"
     },
     "info": {
-      "product": "glassfish",
-      "vendor": "Oracle",
-      "version": "4.0",
-      "extraInfo": {
-        "amxBooted": false
-      }
+      "proxy": {},
+      "jmx": {}
     }
-  }
+  },
+  "status": 200,
+  "timestamp": 1702482830
 }
 ----
 
 `protocol` in the response value contains the
 protocol version used, `agent` is the version of
-the Jolokia agent. See <<versions>> for the various
+the Jolokia agent. See xref:jolokia_protocol.adoc#versions[Jolokia protocol versions] for the various
 protocol versions and the interoperability. If the agent is able
 to detect the server, additional meta information about this
 server is returned (i.e. the product name, the vendor and

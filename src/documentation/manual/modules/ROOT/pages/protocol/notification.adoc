@@ -13,12 +13,48 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 ////
-[#notification]
 
-.Client registration
+[#notification]
+=== Using JMX notifications (notification) #new in Jolokia 2#
+
+A new feature of Jolokia 2 is access to https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/Notification.html[JMX notifications,role=externalLink].
+While reading/writing attributes, executing operations or listing/searching MBeans is implemented as single request-response operation, with notifications the flow of messages is more complex.
+
+There are 4 groups of subcommands for Jolokia `notification` operation:
+
+* Client registration/unregistration: `register` and `unregister` commands
+* Adding/removing/listing the listeners: `add`, `remove` and `list` commands
+* Ping (to refresh the registered client): `ping` command
+* Configuring a channel to a stream of notifications: `open` command
+
+[#notification-registration]
+==== Client registration
+
+In order to subscribe to JMX notification, a _client_ has to be registered, so Jolokia agent can be aware of the entities for which notifications should be collected and returned.
+
+The GET URL for client registration has the following format:
 
 ----
-$ curl -H'Content-Type: application/json' -s -u jolokia:jolokia -XPOST -d '{"type":"notification","command":"register"}' http://localhost:8080/jolokia/ | jq .
+<base-url>/notification/register
+----
+
+The equivalend POST JSON payload is:
+
+[,json]
+----
+{
+  "type": "notification",
+  "command": "register"
+}
+----
+
+There are no additional parameters in GET URL request or POST JSON payload.
+
+The general format of the JSON response is described in
+xref:jolokia_protocol.adoc#responses[Responses] in detail. A typical response for client registration is:
+
+[,json]
+----
 {
   "request": {
     "type": "notification",
@@ -28,33 +64,540 @@ $ curl -H'Content-Type: application/json' -s -u jolokia:jolokia -XPOST -d '{"typ
     "backend": {
       "pull": {
         "maxEntries": 100,
-        "store": "jolokia:type=NotificationStore,agent=192.168.0.221-52184-29e6eb25-servlet"
+        "store": "jolokia:type=NotificationStore,agent=192.168.0.221-21185-7e985ce9-servlet"
       },
       "sse": {
         "backChannel.contentType": "text/event-stream",
         "backChannel.encoding": "UTF-8"
       }
     },
-    "id": "51fc0ba5-4a35-48a8-a3aa-760119f3316b"
+    "id": "d77475dc-c7a7-4f71-b988-52b7f0252ca3"
   },
   "status": 200,
-  "timestamp": 1701876605
+  "timestamp": 1702464211
 }
 ----
 
-.Client unregistration
+The `value` field in the response contains two important fields:
+
+* `id` is an identifier of registered client, which is used in other notification-related Jolokia operations
+* `backend` is a collection of available _backends_ (See more in <<accessing-notification-stream>>). Jolokia 2 supports `sse` and `pull` backends. Other backends (like `websocket`) may be added in the future.
+
+`pull` backend:: In this implementation, notifications are collected within the Jolokia Agent and client has to _fetch_ (_pull_) them by calling `pull` operation on `jolokia:type=NotificationStore` MBean.
+
+`sse` backend:: In this mode https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events[Server Sent Events,role=externalLink] are used (See https://html.spec.whatwg.org/multipage/server-sent-events.html#server-sent-events[WhatWG specification,role=externalLink]).
+
+[#notification-unregistration]
+==== Client unregistration
+
+In order to unsubscribe from Jolokia notification mechanism, an existing client has to be unregistered, by passing an existing client ID.
+
+The GET URL for client registration has the following format:
 
 ----
-$ curl -H'Content-Type: application/json' -s -u jolokia:jolokia -XPOST -d '{"type":"notification","command":"unregister","client":"51fc0ba5-4a35-48a8-a3aa-760119f3316b"}' http://localhost:8080/jolokia/ | jq .
+<base-url>/notification/unregister/<client-id>
+----
+
+.GET Unregistration Request
+[cols="15,~,30"]
+|===
+|Part|Description|Example
+
+|`<client-id>`
+|Client ID of previously registered client
+|`d77475dc-c7a7-4f71-b988-52b7f0252ca3`
+|===
+
+The equivalend POST JSON payload is:
+
+[,json]
+----
+{
+  "type": "notification",
+  "command": "unregister",
+  "client": "<client-id>"
+}
+----
+
+.POST Unregistration Request
+[cols="15,~,30"]
+|===
+|Key|Description|Example
+
+|`type`
+|*`notification`*
+|
+
+|`command`
+|*`unregister`*
+|
+
+|`client`
+|Client ID of previously registered client
+|`d77475dc-c7a7-4f71-b988-52b7f0252ca3`
+|===
+
+A typical response for client unregistration is:
+
+[,json]
+----
 {
   "request": {
-    "client": "51fc0ba5-4a35-48a8-a3aa-760119f3316b",
+    "client": "d77475dc-c7a7-4f71-b988-52b7f0252ca3",
     "type": "notification",
     "command": "unregister"
   },
   "value": null,
   "status": 200,
-  "timestamp": 1701876674
+  "timestamp": 1702464913
 }
 ----
 
+The returned `value` is simply `null`.
+
+[#notification-add]
+==== Adding a notification listener
+
+Having registered a notification client, we can now use notification listeners. The underlying JMX call is `javax.management.MBeanServerConnection.addNotificationListener()` method which requires several parameters:
+
+* `ObjectName`: The name of the MBean on which the listener should be added
+* `NotificationListener`: The listener object which will handle the notifications emitted by the registered MBean.
+* `NotificationFilter`: The filter object. It can be used to filter notifications specific to a given MBean
+* `Object`: any _handback_ object which will be passed to a listener when notification arrives - this is how Jolokia can get back to the client which added a JMX notification listener.
+
+The GET URL for adding a notification listener has the following format:
+
+----
+<base-url>/notification/add/<client-id>/<mode>/<mbean name>/<filter1>,.../<config>/<handback>
+----
+
+.GET AddNotification Request
+[cols="15,~,30"]
+|===
+|Part|Description|Example
+
+|`<client-id>`
+|Client ID of previously registered client
+|`d77475dc-c7a7-4f71-b988-52b7f0252ca3`
+
+|`<mode>`
+|One of supported modes of notification handling: `pull` or `sse`
+|`pull`
+
+|`<mbean name>`
+|The
+https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/ObjectName.html[ObjectName,role=externalLink]
+of the MBean for which we're registering a notification listener
+|`JMImplementation:type=MBeanServerDelegate`
+
+|`<filter1>`, `<filter2>`, ...
+|Comma-separated list notifications we're interested in (and supported by given `<mbean name>`). If we want all
+notifications, a space (`%20`) or empty string (`%22%22`) can be passed. See filter rules in link:https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/NotificationFilterSupport.html#enableType(java.lang.String)[NotificationFilterSupport.enableType() Javadoc,role=externalLink]
+|`JMX.mbean.registered`
+
+|`<config>`
+|This optional part can be passed to a notification listener as JSON object
+|`{"priority":"normal"}`
+
+|`<handback>`
+|This optional part can be passed to a notification listener and will be returned for each related notification. In GET request it can only be a String value.
+|`my-correlation-ID-1234`
+|===
+
+The equivalent POST JSON payload is:
+
+[,json]
+----
+{
+  "type": "notification",
+  "command": "add",
+  "client": "1cddf91c-423e-46d8-ac9a-2eb6d8b213c7",
+  "mode": "pull",
+  "mbean": "JMImplementation:type=MBeanServerDelegate",
+  "filter": [],
+  "handback": "id-1234"
+}
+----
+
+.POST AddNotification Request
+[cols="15,~,30"]
+|===
+|Key|Description|Example
+
+|`type`
+|*`notification`*
+|
+
+|`command`
+|*`add`*
+|
+
+|`client`
+|Client ID of previously registered client
+|`d77475dc-c7a7-4f71-b988-52b7f0252ca3`
+
+|`mode`
+|One of supported modes of notification handling: `pull` or `sse`
+|`pull`
+
+|`mbean`
+|The
+https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/ObjectName.html[ObjectName,role=externalLink]
+of the MBean for which we're registering a notification listener
+|`JMImplementation:type=MBeanServerDelegate`
+
+|`filter`
+|A JSON array of notification notifications we're interested in (and supported by given `mbean`). If we want all
+notifications, a space (`%20`) or empty string (`%22%22`) can be passed. See filter rules in link:https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/NotificationFilterSupport.html#enableType(java.lang.String)[NotificationFilterSupport.enableType() Javadoc,role=externalLink]
+|`[ "JMX.mbean.registered", "JMX.mbean.unregistered" ]`
+
+|`config`
+|This optional part can be passed to a notification listener as JSON object
+|`{"priority":"normal"}`
+
+|`handback`
+|This optional part can be passed to a notification listener and will be returned for each related notification.
+|`{ "my-correlation-ID": "1234" }`
+|===
+
+A typical response for added notification listener is:
+
+[,json]
+----
+{
+  "request": {
+    "mode": "pull",
+    "mbean": "JMImplementation:type=MBeanServerDelegate",
+    "client": "1cddf91c-423e-46d8-ac9a-2eb6d8b213c7",
+    "type": "notification",
+    "handback": "id-1234",
+    "command": "add"
+  },
+  "value": "2",
+  "status": 200,
+  "timestamp": 1702472334
+}
+----
+
+The returned `value` is a _handle_ to the added listener, required when removing the listener in the future.
+
+[#notification-list]
+==== Checking existing notification listeners
+
+To check existing listener registrations for previously registered client, we can use `list` command of `notification` operation.
+
+The GET URL for listing client listener registrations has the following format:
+
+----
+<base-url>/notification/list/<client-id>
+----
+
+.GET Unregistration Request
+[cols="15,~,30"]
+|===
+|Part|Description|Example
+
+|`<client-id>`
+|Client ID of previously registered client
+|`d77475dc-c7a7-4f71-b988-52b7f0252ca3`
+|===
+
+The equivalend POST JSON payload is:
+
+[,json]
+----
+{
+  "type": "notification",
+  "command": "list",
+  "client": "<client-id>"
+}
+----
+
+.POST Unregistration Request
+[cols="15,~,30"]
+|===
+|Key|Description|Example
+
+|`type`
+|*`notification`*
+|
+
+|`command`
+|*`list`*
+|
+
+|`client`
+|Client ID of previously registered client
+|`d77475dc-c7a7-4f71-b988-52b7f0252ca3`
+|===
+
+A typical response for listing the registrations is:
+
+[,json]
+----
+{
+  "request": {
+    "client": "1cddf91c-423e-46d8-ac9a-2eb6d8b213c7",
+    "type": "notification",
+    "command": "list"
+  },
+  "value": {
+    "1": {
+      "mbean": "JMImplementation:type=MBeanServerDelegate",
+      "handback": "id-1234"
+    },
+    "2": {
+      "filter": [
+        "java.management.memory.threshold.exceeded"
+      ],
+      "mbean": "java.lang:type=Memory"
+    }
+  },
+  "status": 200,
+  "timestamp": 1702472848
+}
+----
+
+The returned `value` is a collection of listener registrations with their details, keyed by _handle_ id.
+
+[#notification-remove]
+==== Removing a notification listener
+
+When a notification listener for a given client is no longer needed, we can remove using `remove` command of `notification` operation.
+
+The GET URL for removing client listener registrations has the following format:
+
+----
+<base-url>/notification/remove/<client-id>/<handle>
+----
+
+.GET Unregistration Request
+[cols="15,~,30"]
+|===
+|Part|Description|Example
+
+|`<client-id>`
+|Client ID of previously registered client
+|`d77475dc-c7a7-4f71-b988-52b7f0252ca3`
+
+|`<handle>`
+|A _handle_ of previously added listener
+|`1`
+|===
+
+The equivalend POST JSON payload is:
+
+[,json]
+----
+{
+  "type": "notification",
+  "command": "remove",
+  "client": "<client-id>",
+  "handle": "<handle-id>"
+}
+----
+
+.POST Unregistration Request
+[cols="15,~,30"]
+|===
+|Key|Description|Example
+
+|`type`
+|*`notification`*
+|
+
+|`command`
+|*`remove`*
+|
+
+|`client`
+|Client ID of previously registered client
+|`d77475dc-c7a7-4f71-b988-52b7f0252ca3`
+
+|`handle`
+|A _handle_ of previously added listener
+|`1`
+|===
+
+A typical response for listing the registrations is:
+
+[,json]
+----
+{
+  "request": {
+    "client": "1cddf91c-423e-46d8-ac9a-2eb6d8b213c7",
+    "handle": "1",
+    "type": "notification",
+    "command": "remove"
+  },
+  "value": null,
+  "status": 200,
+  "timestamp": 1702473703
+}
+----
+
+The returned `value` is simply `null`.
+
+// [#notification-ping]
+// ==== Refreshing notification subscription
+
+[#accessing-notification-stream]
+==== Accessing notification stream
+
+When a listener is added for a client (see <<notification-add>>), a mode indicates a desired _notification backend_.
+
+For `pull` backend, there's actually no _back channel_ over which we can receive the notifications. Instead we should be
+calling an MBean operation on an MBean representing the backend. The details are available when client was first registered:
+
+[,json]
+----
+"backend": {
+  "pull": {
+    "maxEntries": 100,
+    "store": "jolokia:type=NotificationStore,agent=192.168.0.221-21185-7e985ce9-servlet"
+  },
+  ...
+----
+
+If we want to access notifications collected in `pull` backend, we have to call `org.jolokia.service.notif.pull.PullNotificationStoreMBean.pull(String pClientId, String pHandle)` MBean operation on `jolokia:type=NotificationStore,agent=<agent-id>` MBean which can be done with Jolokia `exec` operation.
+
+For example, having registered a notification listener for `JMImplementation:type=MBeanServerDelegate` MBean, we can get notified about MBean registrations/unregistrations. Accessing the pull notification store can be done with `exec` operation like this:
+
+[,shell]
+----
+$ curl -s -u jolokia:jolokia 'http://localhost:8080/jolokia/exec/jolokia:type=NotificationStore,agent=192.168.0.221-21185-7e985ce9-servlet/pull(java.lang.String,java.lang.String)/1cddf91c-423e-46d8-ac9a-2eb6d8b213c7/2' | jq .
+{
+  "request": {
+    "mbean": "jolokia:agent=192.168.0.221-21185-7e985ce9-servlet,type=NotificationStore",
+    "arguments": [
+      "1cddf91c-423e-46d8-ac9a-2eb6d8b213c7",
+      "2"
+    ],
+    "type": "exec",
+    "operation": "pull(java.lang.String,java.lang.String)"
+  },
+  "value": {
+    "dropped": 0,
+    "handle": "2",
+    "handback": "id-1234",
+    "notifications": [
+      {
+        "timeStamp": 1702473332222,
+        "sequenceNumber": 248,
+        "userData": null,
+        "mBeanName": {
+          "objectName": "Catalina:name=HttpRequest3,type=RequestProcessor,worker=\"http-nio-8080\""
+        },
+        "source": {
+          "objectName": "JMImplementation:type=MBeanServerDelegate"
+        },
+        "message": "",
+        "type": "JMX.mbean.registered"
+      },
+      {
+        "timeStamp": 1702473390407,
+        "sequenceNumber": 249,
+        "userData": null,
+        "mBeanName": {
+          "objectName": "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/,name=jsp,type=JspMonitor"
+        },
+        "source": {
+          "objectName": "JMImplementation:type=MBeanServerDelegate"
+        },
+        "message": "",
+        "type": "JMX.mbean.unregistered"
+      },
+...
+----
+
+On the other hand, `sse` notification store works differently. Here's the information received during client registration:
+
+[,json]
+----
+"sse": {
+  "backChannel.contentType": "text/event-stream",
+  "backChannel.encoding": "UTF-8"
+}
+----
+
+Instead of providing us with Mbean name to access when needed (_pull_ the notifications out if it by calling an MBean operation), `sse` backend needs a channel associated with client connection. This is where `open` command for `notification` operation comes into play.
+
+When calling `open` command for `sse` backed notifications, the request (`HttpServletRequest`) is put into https://jakarta.ee/specifications/servlet/5.0/jakarta-servlet-spec-5.0#asynchronous-processing[asynchronous mode,role=externalLink] and connection is not closed.
+
+The GET URL for openning a backend channel for notification acces is:
+
+----
+<base-url>/notification/open/<client-id>/<mode>
+----
+
+.GET Open Notification Channel Request
+[cols="15,~,30"]
+|===
+|Part|Description|Example
+
+|`<client-id>`
+|Client ID of previously registered client
+|`d77475dc-c7a7-4f71-b988-52b7f0252ca3`
+
+|`<mode>`
+|A mode of notification delivery. Only `sse` is useful.
+|`sse`
+|===
+
+The equivalend POST JSON payload is:
+
+[,json]
+----
+{
+  "type": "notification",
+  "command": "open",
+  "client": "<client-id>",
+  "mode": "<mode>"
+}
+----
+
+.POST Open Notification Channel Request
+[cols="15,~,30"]
+|===
+|Key|Description|Example
+
+|`type`
+|*`notification`*
+|
+
+|`command`
+|*`open`*
+|
+
+|`client`
+|Client ID of previously registered client
+|`d77475dc-c7a7-4f71-b988-52b7f0252ca3`
+
+|`mode`
+|A mode of notification delivery. Only `sse` is useful.
+|`sse`
+|===
+
+The notifications are returned to the client as they're delivered from JMX. Here's a sample interaction:
+
+----
+$ curl -i -u jolokia:jolokia 'http://localhost:8080/jolokia/notification/open/c72e2f07-e5ec-47a0-b9b4-3036b16614a0/sse'
+HTTP/1.1 200
+Cache-Control: private
+Content-Type: text/event-stream;charset=UTF-8
+Transfer-Encoding: chunked
+Date: Wed, 13 Dec 2023 15:49:39 GMT
+
+:
+:
+:
+:
+:
+id: 363
+data: {"dropped":0,"handle":"2","handback":null,"notifications":[{"timeStamp":1702482067031,"sequenceNumber":363,"userData":null,"mBeanName":{"objectName":"Catalina:J2EEApplication=none,J2EEServer=none,WebModule=\/\/localhost\/,name=jsp,type=JspMonitor"},"source":{"objectName":"JMImplementation:type=MBeanServerDelegate"},"message":"","type":"JMX.mbean.unregistered"}]}
+
+id: 364
+data: {"dropped":0,"handle":"2","handback":null,"notifications":[{"timeStamp":1702482067031,"sequenceNumber":364,"userData":null,"mBeanName":{"objectName":"Catalina:J2EEApplication=none,J2EEServer=none,WebModule=\/\/localhost\/,j2eeType=Filter,name=Tomcat WebSocket (JSR356) Filter"},"source":{"objectName":"JMImplementation:type=MBeanServerDelegate"},"message":"","type":"JMX.mbean.unregistered"}]}
+----
+
+The returned data is structured according to https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events[`text/event-stream` Mime type]. `id` and `data` fields are used, where `id` matches the `sequenceNumber` from the JSON payload.

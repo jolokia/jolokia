@@ -17,10 +17,10 @@
 [#exec]
 === Executing JMX operations (exec)
 
-Beside attribute provides a way for the execution of exposed JMX
-operations with optional arguments. The same as for writing
-attributes, Jolokia must be able to serialize the arguments. See
-<<serialization>> for details. Execution of
+With Jolokia we can also execute exposed JMX
+operations with optional arguments. Just as when writing
+attributes, Jolokia must be able to serialize the operation arguments. See
+xref:jolokia_protocol.adoc#serialization[Object serialization] for details. Execution of
 overloaded methods is supported. The JMX specifications recommends
 to avoid overloaded methods when exposing them via JMX, though.
 
@@ -33,6 +33,7 @@ The format of an GET exec request is
 ----
 
 .GET Exec Request
+[cols="15,~,30"]
 |===
 |Part|Description|Example
 
@@ -52,7 +53,7 @@ as signature.
 |`<arg1>`, `<arg2>`, `...`
 |String representation for the arguments required to execute this
 operation. Only certain data types can be used here as
-described in <serialization-request>>.
+described in xref:jolokia_protocol.adoc#serialization-request[Request parameter serialization].
 |`/true/true/`
 |===
 
@@ -65,6 +66,7 @@ http://localhost:8080/jolokia/exec/java.lang:type=Memory/gc
 ==== POST exec request
 
 .POST Exec Request
+[cols="15,~,30"]
 |===
 |Key|Description|Example
 
@@ -83,7 +85,7 @@ described above.
 
 |`arguments`
 |An array of arguments for invoking this operation. The value must be serializable as described in
-<<serialization-request>>.
+xref:jolokia_protocol.adoc#serialization-request[Request parameter serialization].
 |`[true, true]`
 |===
 
@@ -94,23 +96,23 @@ arguments are for):
 [,json]
 ----
 {
-  "type": "EXEC",
+  "type": "exec",
   "mbean": "java.lang:type=Threading",
-  "operation": "dumpAllThreads",
+  "operation": "dumpAllThreads(boolean, boolean)",
   "arguments": [ true, true ]
 }
 ----
 
-[#response-exec
+[#response-exec]
 ==== Exec response
 
 For an `exec` operation, the response
 contains the return value of the
 operation. `null` is returned if either the
 operation returns a null value or the operation is declared as
-void. A typical response for an URL like
+void. A typical response for an URL like (mind that double quote (`"`) has to be encoded with `%22`):
 ----
-http://localhost:8080/jolokia/exec/java.util.logging:type=Logging/setLoggerLevel/global/INFO
+http://localhost:8080/jolokia/exec/java.util.logging:type=Logging/setLoggerLevel/%22%22/INFO
 ----
 
 looks like
@@ -118,15 +120,19 @@ looks like
 [,json]
 ----
 {
+  "request": {
+    "mbean": "java.util.logging:type=Logging",
+    "arguments": [
+      "",
+      "INFO"
+    ],
+    "type": "exec",
+    "operation": "setLoggerLevel"
+  },
   "value": null,
   "status": 200,
-  "request": {
-    "type": "exec",
-    "mbean": "java.util.logging:type=Logging",
-    "operation": "setLoggerLevel",
-    "arguments": [ "global", "INFO" ]
-  }
+  "timestamp": 1702456520
 }
 ----
 
-The return value get serialized as described in <<serialization>>.
+The return value get serialized as described in xref:jolokia_protocol.adoc#serialization-request[Request parameter serialization].

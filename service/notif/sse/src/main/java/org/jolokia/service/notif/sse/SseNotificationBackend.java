@@ -67,12 +67,12 @@ public class SseNotificationBackend extends AbstractJolokiaService<NotificationB
             /** {@inheritDoc} */
             public void handleNotification(Notification notification, Object handback) {
                 BackChannel backChannel = client.getBackChannel(getNotifType());
-                if (backChannel != null) {
-                        JolokiaContext ctx = getJolokiaContext();
-                        Serializer serializer = ctx.getMandatoryService(Serializer.class);
-                        NotificationResult result =
-                                new NotificationResult(pSubscription.getHandle(), Collections.singletonList(notification),
-                                                       handback, 0);
+                if (backChannel != null && !backChannel.isClosed()) {
+                    JolokiaContext ctx = getJolokiaContext();
+                    Serializer serializer = ctx.getMandatoryService(Serializer.class);
+                    NotificationResult result =
+                            new NotificationResult(pSubscription.getHandle(), Collections.singletonList(notification),
+                                                   handback, 0);
                     try {
                         long id = notification.getSequenceNumber();
                         String data =

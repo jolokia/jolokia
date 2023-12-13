@@ -4,11 +4,23 @@
     font-size: 11px
   }
 }
+@media screen and (min-width: 1216px) {
+  aside.toc.sidebar {
+    flex-basis: 18rem;
+  }
+}
+
 .doc {
   max-width: 90rem;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
 }
 .nav-container {
+  font-size: 1rem;
+}
+.doc table.tableblock {
+  font-size: 1rem;
+}
+.doc p code {
   font-size: 1rem;
 }
 

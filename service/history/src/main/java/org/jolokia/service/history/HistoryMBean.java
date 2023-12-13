@@ -70,7 +70,7 @@ public interface HistoryMBean {
      * @param pOperation operation to track
      * @param pTarget remote target or null for a loal mbean
      * @param pMaxEntries max last entries to remember, if 0 history tracking is switched off.
-     * @deprecated use {@see #setHistoryLimitForOperation} instead
+     * @deprecated use {@link #setHistoryLimitForOperation} instead
      */
     void setHistoryEntriesForOperation(String pMBean,String pOperation,String pTarget,int pMaxEntries)
             throws MalformedObjectNameException;

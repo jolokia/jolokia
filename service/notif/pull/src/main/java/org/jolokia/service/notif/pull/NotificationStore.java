@@ -49,7 +49,7 @@ public class NotificationStore {
      */
     synchronized void add(Notification pNotification) {
         if (entries.size() >= maxEntries) {
-            entries.remove(entries.last());
+            entries.remove(entries.first());
             dropped++;
         }
         entries.add(pNotification);
@@ -63,7 +63,7 @@ public class NotificationStore {
      */
     NotificationResult fetchAndClear() {
         ArrayList<Notification> notifs = new ArrayList<>(entries);
-        NotificationResult ret = new  NotificationResult(subscription.getHandle(),notifs, subscription.getHandback(),dropped);
+        NotificationResult ret = new NotificationResult(subscription.getHandle(),notifs, subscription.getHandback(),dropped);
         entries.clear();
         subscription.ping();
         dropped = 0;

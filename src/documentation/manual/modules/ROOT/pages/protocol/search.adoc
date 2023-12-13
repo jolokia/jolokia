@@ -18,7 +18,7 @@
 === Searching MBeans (search)
 
 With the Jolokia search operation the agent can be queried for
-MBeans with a given pattern.  Searching will be performed on every
+MBeans matching a given pattern. Searching will be performed on every
 `MBeanServer` found by the agent.
 
 [#get-search]
@@ -35,11 +35,11 @@ argument `pattern` for
 specifying the search parameter like in
 
 ----
-http://localhost:8080/jolokia/search/*:j2eeType=J2EEServer,*
+http://localhost:8080/jolokia/search/*:j2eeType=Servlet,*
 ----
 
 You can use patterns as described
-https://java.sun.com/j2se/1.5.0/docs/api/javax/management/ObjectName.html[here],
+https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/ObjectName.html[here,role=externalLink],
 i.e. it may contain wildcards like `*` and
 `?`. The Mbean names matching the query
 are returned as a list within the response.
@@ -50,6 +50,7 @@ are returned as a list within the response.
 A search POST request knows the following keys:
 
 .POST Search Request
+[cols="15,~,30"]
 |===
 |Key|Description|Example
 
@@ -68,7 +69,7 @@ domain `java.lang`
 [,json]
 ----
 {
-  "type": "SEARCH",
+  "type": "search",
   "mbean": "java.lang:*"
 }
 ----
@@ -82,25 +83,35 @@ list if there was no match.
 For example, the request
 
 ----
-http://localhost:8888/jolokia/search/*:j2eeType=J2EEServer,*
+http://localhost:8888/jolokia/search/*:j2eeType=Servlet,*
 ----
 
 [,json]
 ----
 {
+  "request": {
+    "mbean": "*:j2eeType=Servlet,*",
+    "type": "search"
+  },
   "value": [
-    "jboss.management.local:j2eeType=J2EEServer,name=Local"
+    "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/manager,j2eeType=Servlet,name=Status",
+    "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/manager,j2eeType=Servlet,name=JMXProxy",
+    "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/manager,j2eeType=Servlet,name=jsp",
+    "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/manager,j2eeType=Servlet,name=HTMLManager",
+    "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/jolokia,j2eeType=Servlet,name=jsp",
+    "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/,j2eeType=Servlet,name=default",
+    "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/jolokia,j2eeType=Servlet,name=jolokia-agent",
+    "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/,j2eeType=Servlet,name=jsp",
+    "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/jolokia,j2eeType=Servlet,name=default",
+    "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/manager,j2eeType=Servlet,name=Manager",
+    "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/manager,j2eeType=Servlet,name=default"
   ],
   "status": 200,
-  "timestamp": 1245305648,
-  "request": {
-    "mbean": "*:j2eeType=J2EEServer,*",
-    "type": "search"
-  }
+  "timestamp": 1702458409
 }
 ----
 
 The returned MBean names are properly
-https://download.oracle.com/javase/1.5.0/docs/api/javax/management/ObjectName.html[quoted]
+https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/ObjectName.html[quoted,role=externalLink]
 so that they can be directly used as
 input for other requests.

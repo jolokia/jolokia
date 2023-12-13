@@ -38,8 +38,8 @@ initiated by giving a list of attributes to the request. For a
 POST request this is an JSON array, for a GET request it is a
 comma separated list of attribute names (where slashes and
 exclamation marks must be escaped as described in
-<<escape-rules>>). If no attribute is provided, then all
-attributes are fetched.  The MBean name can be given as a pattern
+xref:jolokia_protocol.adoc#escape-rules[Escaping rules]). If no attribute is provided, then all
+attributes are fetched. The MBean name can be given as a pattern
 in which case the attributes are read on all matching MBeans. If a
 MBean pattern and multiple attributes are requested, then only the
 value of attributes which matches both are returned, the others
@@ -47,24 +47,48 @@ are ignored.
 
 Paths can be used with pattern and multiple attribute read as well. In order to
 skip the extra value levels introduced by a pattern read, the wildcard
-`\*` can be used. For example, a read request for the MBean Pattern
+`pass:[*]` can be used. For example, a read request for the MBean Pattern
 `pass:[java.lang:type=GarbageCollector,*]` for the Attribute `LastGcInfo`
 returns a complex structure holding information about the last garbage collection. If one is
-interested only for the duration of the garbage collection, a path `used` could be used if
-this request wouldn't be a pattern request (i.e. refers a specific, single MBean). But in this case since a
-nested map with MBean and Attribute names is returned, the path `pass:[*/*/used]` has to be used
-in order to skip the two extra levels for applying the path. The two levels are returned nevertheless, though.
+looking only for the used memory during garbage collection, a path `used` could be used if
+this request wouldn't be a pattern request (i.e. refers a specific, single MBean).
+But in this case since a
+nested map with MBean and Attribute names is returned, the path `pass:[*/*/*/*/used]` has to be used
+in order to skip the extra levels (for different heaps/spaces) for applying the path.
 Note that in the following example the final value is _not_ the full GC-Info but only the
-value of its `used` entry:
+value of its `used` entry for different spaces:
 
 [,json]
 ----
 "value": {
-  "java.lang:name=PS MarkSweep,type=GarbageCollector": {
-    "LastGcInfo": null
-  },
-  "java.lang:name=PS Scavenge,type=GarbageCollector": {
-    "LastGcInfo": 7
+  "java.lang:name=G1 Young Generation,type=GarbageCollector": {
+    "LastGcInfo": {
+      "duration": 3,
+      "memoryUsageBeforeGc": {
+        "CodeHeap 'profiled nmethods'": 4780288,
+        "G1 Old Gen": 4934656,
+        "CodeHeap 'non-profiled nmethods'": 928256,
+        "G1 Survivor Space": 4194304,
+        "Compressed Class Space": 1331528,
+        "Metaspace": 12812816,
+        "G1 Eden Space": 20971520,
+        "CodeHeap 'non-nmethods'": 1271296
+      },
+      "GcThreadCount": 5,
+      "startTime": 786,
+      "endTime": 789,
+      "id": 2,
+      "memoryUsageAfterGc": {
+        "CodeHeap 'profiled nmethods'": 4780288,
+        "G1 Old Gen": 9082880,
+        "CodeHeap 'non-profiled nmethods'": 928256,
+        "G1 Survivor Space": 2597960,
+        "Compressed Class Space": 1331528,
+        "Metaspace": 12812816,
+        "G1 Eden Space": 0,
+        "CodeHeap 'non-nmethods'": 1271296
+      }
+    }
   }
 }
 ----
@@ -80,7 +104,7 @@ _removed_ in the answer so that at the end
 you get back a structure with the values on the wildcard levels
 and the leaves of the matched parts.
 * If used with wildcards, paths behave also like
-filters. E.g. you can use a path `pass:[*/*/used]` on
+filters. E.g. you can use a path `pass:[*/*/*/*/used]` on
 the MBean pattern `java.lang:*` and get back
 only that portions which contains "used" as key, all others are
 ignored.
@@ -95,12 +119,13 @@ The GET URL for a read request has the following format:
 ----
 
 .GET Read Request
+[cols="15,~,30"]
 |===
 |Part|Description|Example
 
 |`<mbean name>`
 |The
-https://download.oracle.com/javase/6/docs/api/javax/management/ObjectName.html[ObjectName]
+https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/ObjectName.html[ObjectName,role=externalLink]
 of the MBean for which the attribute should be fetched. It
 contains two parts: A domain part and a list of properties
 which are separated by `:`. Properties
@@ -111,15 +136,15 @@ multiple MBeans are queried for the attribute value.
 
 |`<attribute name>`
 |Name of attribute to read. This can be a list of Attribute
-names separated by comma. Slashes and exclamations marks need
-to be escaped as described in <xref
-<<escape-rules>>. If no attribute is given, all
+names separated by comma. According to URI compliance, some special characters need to be
+escaped as described in
+xref:jolokia_protocol.adoc#escape-rules[Escaping rules]. If no attribute is given, all
 attributes are read.
 |`HeapMemoryUsage`
 
 |`<inner path>`
 |This optional part describes an _inner
-path_ as described in <<paths>>
+path_ as described in xref:jolokia_protocol.adoc#paths[Paths]
 |`used`
 |===
 
@@ -135,10 +160,10 @@ A the keys available for read POST requests are shown in the
 following table.
 
 .POST Read Request
+[cols="15,~,30"]
 |===
 |Key|Description|Example
 
-<tr>
 |`type`
 |*`read`*
 |
@@ -151,11 +176,13 @@ following table.
 |Attribute name to read or a JSON array containing a list
 of attributes to read. No attribute is given, then all attributes
 are read.
-|`HeapMemoryUsage`, `[ "HeapMemoryUsage", "NonHeapMemoryUsage" ]`
+a|`HeapMemoryUsage`
+
+`[ "HeapMemoryUsage", "NonHeapMemoryUsage" ]`
 
 |`path`
 |Inner path for accessing the value of a complex value
-(<<paths>>)
+(xref:jolokia_protocol.adoc#paths[Paths])
 |`used`
 |===
 
@@ -173,49 +200,49 @@ The following request fetches the number of active threads:
 ==== Read response
 
 The general format of the JSON response is described in
-<<responses>> in detail.  A typical response for an
-attribute read operation for an URL like
+xref:jolokia_protocol.adoc#responses[Responses] in detail.  A typical response for an
+attribute read operation for a GET request with URL like:
 
 ----
-http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage/
+http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage
 ----
 
 [,json]
 ----
 {
-  "value": {
-    "init": 134217728,
-    "max": 532742144,
-    "committed": 133365760,
-    "used": 19046472
-  },
-  "status": 200,
-  "timestamp": 1244839118,
   "request": {
     "mbean": "java.lang:type=Memory",
-    "type": "read",
-    "attribute": "HeapMemoryUsage"
+    "attribute": "HeapMemoryUsage",
+    "type": "read"
   },
   "history": [
     {
       "value": {
-        "init": 134217728,
-        "max": 532742144,
-        "committed": 133365760,
-        "used": 18958208
+        "init": 524288000,
+        "committed": 532676608,
+        "max": 8334082048,
+        "used": 78027104
       },
-      "timestamp": 1244839045
+      "timestamp": 1702454713
     },
-    ....
-  ]
+    ...
+  ],
+  "value": {
+    "init": 524288000,
+    "committed": 532676608,
+    "max": 8334082048,
+    "used": 86415712
+  },
+  "status": 200,
+  "timestamp": 1702454822
 }
 ----
 The `value` contains the response's
 value. For simple data types it is a scalar value, more complex
 types are serialized into a JSON object. See
-<<serialization>> for detail on object serialization.
+xref:jolokia_protocol.adoc#serialization[Object serialization] for detail on object serialization.
 
-For a read request to a single MBean with multiple attributes, the
+For a read request of a single MBean with multiple attributes, the
 returned value is a JSON object with the attribute names as keys
 and their values as values. For example a request to
 `http://localhost:8080/jolokia/read/java.lang:type=Memory`
@@ -224,22 +251,31 @@ leads to
 [,json]
 ----
 {
-  "timestamp": 1317151518,
-  "status": 200,
   "request": {
     "mbean": "java.lang:type=Memory",
     "type": "read"
   },
   "value": {
-    "Verbose": false,
     "ObjectPendingFinalizationCount": 0,
-    "NonHeapMemoryUsage": {
-      "max": 136314880, "committed": 26771456, "init": 24317952, "used": 15211720
-    },
+    "Verbose": false,
     "HeapMemoryUsage": {
-      "max": 129957888, "committed": 129957888, "init": 0, "used": 2880008
+      "init": 524288000,
+      "committed": 532676608,
+      "max": 8334082048,
+      "used": 94804320
+    },
+    "NonHeapMemoryUsage": {
+      "init": 7667712,
+      "committed": 38928384,
+      "max": -1,
+      "used": 36905512
+    },
+    "ObjectName": {
+      "objectName": "java.lang:type=Memory"
     }
-  }
+  },
+  "status": 200,
+  "timestamp": 1702454894
 }
 ----
 
@@ -253,8 +289,6 @@ returns something like
 [,json]
 ----
 {
-  "timestamp": 1317151980,
-  "status": 200,
   "request": {
     "mbean": "java.lang:type=*",
     "attribute": "HeapMemoryUsage",
@@ -263,9 +297,14 @@ returns something like
   "value": {
     "java.lang:type=Memory": {
       "HeapMemoryUsage": {
-        "max": 129957888, "committed": 129957888, "init": 0, "used": 3080912
+        "init": 524288000,
+        "committed": 532676608,
+        "max": 8334082048,
+        "used": 103192928
       }
     }
-  }
+  },
+  "status": 200,
+  "timestamp": 1702454978
 }
 ----

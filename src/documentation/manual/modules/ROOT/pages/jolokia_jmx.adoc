@@ -261,7 +261,6 @@ values. There are three modes available:
 |===
 |Mode|Description
 
-<tr>
 |`never`
 |No lookup is done on system properties as all. This is the
 default mode.

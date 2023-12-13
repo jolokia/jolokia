@@ -23,12 +23,13 @@ additional `value` element.
 [#get-write]
 ==== GET write request
 
-Writing an attribute wit an GET request, an URL with the following format has to be used:
+Writing an attribute with a GET request, an URL with the following format has to be used:
 ----
 <base url>/write/<mbean name>/<attribute name>/<value>/<inner path>
 ----
 
 .GET Write Request
+[cols="15,~,30"]
 |====
 |Part|Description|Example
 
@@ -42,15 +43,15 @@ Writing an attribute wit an GET request, an URL with the following format has to
 
 |`<value>`
 |The attribute name to value. The value must be serializable as described in
-<<serialization-request>>.
-
+xref:jolokia_protocol.adoc#serialization-request[Request parameter serialization].
 |`true`
-|`<path>`
+
+|`<inner path>`
 |Inner path for accessing the parent object on which to set the value.
-(See also <<paths>>). Note, that this is
+(See also xref:jolokia_protocol.adoc#paths[Paths]). Note, that this is
 _not_ the path to the attribute itself,
 but to the object carrying this attribute. With a given
-path it is possible to deeply set an value on a complex
+path it is possible to deeply set a value on a complex
 object.
 |
 |====
@@ -67,8 +68,8 @@ http://localhost:8080/jolokia/write/java.lang:type=Memory/Verbose/true
 
 The keys which are evaluated for a POST write request are:
 
-
 .POST Write Request
+[cols="15,~,30"]
 |===
 |Key|Description|Example
 
@@ -86,16 +87,16 @@ The keys which are evaluated for a POST write request are:
 
 |`value`
 |The attribute name to value. The value must be serializable as described in
-<<serialization-request>>.
+xref:jolokia_protocol.adoc#serialization-request[Request parameter serialization].
 |`true`
 
 |`path`
 |An optional inner path for specifying an inner object on which to set the
-value. See <<paths>> for more on inner paths.
+value. See xref:jolokia_protocol.adoc#paths[Paths] for more on inner paths.
 |
 |===
 
-[#response-write
+[#response-write]
 ==== Write response
 
 As response for a write operation the old attribute's value is
@@ -110,14 +111,15 @@ off for class loading at the time this request was sent)
 [,json]
 ----
 {
-  "value": "false",
-  "status": 200,
   "request": {
     "mbean": "java.lang:type=ClassLoading",
-    "type": "write",
     "attribute": "Verbose",
+    "type": "write",
     "value": "true"
-  }
+  },
+  "value": false,
+  "status": 200,
+  "timestamp": 1702455595
 }
 ----
 

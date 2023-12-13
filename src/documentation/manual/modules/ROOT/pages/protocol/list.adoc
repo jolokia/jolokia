@@ -32,7 +32,7 @@ The GET request format for a Jolokia list request is
 <base-url>/list/<inner path>
 ----
 
-The `<inner path>`, as described in <<paths>>
+The `<inner path>`, as described in xref:jolokia_protocol.adoc#paths[Paths]
 specifies a subset of the complete response. You can
 use this to select a specific domain, MBean or
 attribute/operation. See the next section for the format of the
@@ -44,6 +44,7 @@ complete response.
 A list POST request has the following keys:
 
 .POST list Request
+[cols="15,~,30"]
 |===
 |Key|Description|Example
 
@@ -53,7 +54,7 @@ A list POST request has the following keys:
 
 |`path`
 |Inner path for accessing the value of a subset of the complete list
-<<paths>>).
+xref:jolokia_protocol.adoc#paths[Paths]).
 
 |`java.lang/type=Memory/attr`
 |===
@@ -63,7 +64,7 @@ The following request fetches the information about the MBean `java.lang:type=Me
 [,json]
 ----
 {
-  "type": "LIST",
+  "type": "list",
   "path": "java.lang/type=Memory"
 }
 ----
@@ -141,6 +142,10 @@ results in an answer
 [,json]
 ----
 {
+  "request": {
+    "path": "java.lang/type=Memory",
+    "type": "list"
+  },
   "value": {
     "op": {
       "gc": {
@@ -149,35 +154,48 @@ results in an answer
         "desc": "gc"
       }
     },
-    "class": "sun.management.MemoryImpl",
+    "notif": {
+      "javax.management.Notification": {
+        "types": [
+          "java.management.memory.threshold.exceeded",
+          "java.management.memory.collection.threshold.exceeded"
+        ],
+        "name": "javax.management.Notification",
+        "desc": "Memory Notification"
+      }
+    },
     "attr": {
-      "NonHeapMemoryUsage": {
-        "type": "javax.management.openmbean.CompositeData",
+      "ObjectPendingFinalizationCount": {
         "rw": false,
-        "desc": "NonHeapMemoryUsage"
+        "type": "int",
+        "desc": "ObjectPendingFinalizationCount"
       },
       "Verbose": {
-        "type": "boolean",
         "rw": true,
+        "type": "boolean",
         "desc": "Verbose"
       },
       "HeapMemoryUsage": {
-        "type": "javax.management.openmbean.CompositeData",
         "rw": false,
+        "type": "javax.management.openmbean.CompositeData",
         "desc": "HeapMemoryUsage"
       },
-      "ObjectPendingFinalizationCount": {
-        "type": "int",
+      "NonHeapMemoryUsage": {
         "rw": false,
-        "desc": "ObjectPendingFinalizationCount"
+        "type": "javax.management.openmbean.CompositeData",
+        "desc": "NonHeapMemoryUsage"
+      },
+      "ObjectName": {
+        "rw": false,
+        "type": "javax.management.ObjectName",
+        "desc": "ObjectName"
       }
-    }
+    },
+    "class": "sun.management.MemoryImpl",
+    "desc": "Information on the management interface of the MBean"
   },
   "status": 200,
-  "request": {
-    "type": "list",
-    "path": "java.lang/type=Memory"
-  }
+  "timestamp": 1702463340
 }
 ----
 

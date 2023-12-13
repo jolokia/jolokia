@@ -1162,7 +1162,7 @@ in the future.
 
 [#discovery-response]
 .Response properties
-[cols="15,~,~"]
+[cols="15,~,30"]
 |===
 |Property|Description|Example
 

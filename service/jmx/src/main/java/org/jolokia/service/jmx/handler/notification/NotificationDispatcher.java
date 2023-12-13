@@ -65,6 +65,7 @@ public class NotificationDispatcher {
                 return null;
             case OPEN:
                 listenerDelegate.openChannel((OpenCommand) pCommand);
+                // an EmptyResponseException will be thrown up the stack to org.jolokia.server.core.http.AgentServlet.handle()
             case LIST:
                 return listenerDelegate.list(client);
         }
