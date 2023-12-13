@@ -110,7 +110,7 @@ additional <code>value</code> element.</p>
 <div class="sect3">
 <h4 id="get-write"><a class="anchor" href="#get-write"></a>GET write request</h4>
 <div class="paragraph">
-<p>Writing an attribute wit an GET request, an URL with the following format has to be used:</p>
+<p>Writing an attribute with a GET request, an URL with the following format has to be used:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -120,9 +120,9 @@ additional <code>value</code> element.</p>
 <table class="tableblock frame-all grid-all stretch">
 <caption class="title">Table 1. GET Write Request</caption>
 <colgroup>
-<col style="width: 33.3333%;">
-<col style="width: 33.3333%;">
-<col style="width: 33.3334%;">
+<col style="width: 15%;">
+<col>
+<col style="width: 30%;">
 </colgroup>
 <thead>
 <tr>
@@ -145,16 +145,16 @@ additional <code>value</code> element.</p>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;value&gt;</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">The attribute name to value. The value must be serializable as described in
-<a href="#serialization-request">[serialization-request]</a>.</p></td>
+<a href="../jolokia_protocol.html#serialization-request" class="xref page">Request parameter serialization</a>.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>true</code></p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;path&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;inner path&gt;</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Inner path for accessing the parent object on which to set the value.
-(See also <a href="#paths">[paths]</a>). Note, that this is
+(See also <a href="../jolokia_protocol.html#paths" class="xref page">Paths</a>). Note, that this is
 <em>not</em> the path to the attribute itself,
 but to the object carrying this attribute. With a given
-path it is possible to deeply set an value on a complex
+path it is possible to deeply set a value on a complex
 object.</p></td>
 <td class="tableblock halign-left valign-top"></td>
 </tr>
@@ -178,9 +178,9 @@ something like</p>
 <table class="tableblock frame-all grid-all stretch">
 <caption class="title">Table 2. POST Write Request</caption>
 <colgroup>
-<col style="width: 33.3333%;">
-<col style="width: 33.3333%;">
-<col style="width: 33.3334%;">
+<col style="width: 15%;">
+<col>
+<col style="width: 30%;">
 </colgroup>
 <thead>
 <tr>
@@ -208,21 +208,20 @@ something like</p>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>value</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">The attribute name to value. The value must be serializable as described in
-<a href="#serialization-request">[serialization-request]</a>.</p></td>
+<a href="../jolokia_protocol.html#serialization-request" class="xref page">Request parameter serialization</a>.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>true</code></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>path</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">An optional inner path for specifying an inner object on which to set the
-value. See <a href="#paths">[paths]</a> for more on inner paths.</p></td>
+value. See <a href="../jolokia_protocol.html#paths" class="xref page">Paths</a> for more on inner paths.</p></td>
 <td class="tableblock halign-left valign-top"></td>
 </tr>
 </tbody>
 </table>
-<div class="paragraph">
-<p>[#response-write
-==== Write response</p>
 </div>
+<div class="sect3">
+<h4 id="response-write"><a class="anchor" href="#response-write"></a>Write response</h4>
 <div class="paragraph">
 <p>As response for a write operation the old attribute&#8217;s value is
 returned. For a request</p>
@@ -239,14 +238,15 @@ off for class loading at the time this request was sent)</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "value": "false",
-  "status": 200,
   "request": {
     "mbean": "java.lang:type=ClassLoading",
-    "type": "write",
     "attribute": "Verbose",
+    "type": "write",
     "value": "true"
-  }
+  },
+  "value": false,
+  "status": 200,
+  "timestamp": 1702455595
 }</code></pre>
 </div>
 </div>
@@ -260,7 +260,8 @@ the additional <code>value</code> element in the request
 </article>
   </div>
 <footer class="footer">
-  This page was built using the Antora default UI. The source code for this UI is licensed under the terms of the MPL-2.0 license.
+  This page was built using the Antora default UI. The source code for this UI is licensed under the terms of the MPL-2.0 license. | Copyright © 2010 -
+  2023 Roland Huß
 </footer>
 <script id="site-script" src="../../_/js/site.js" data-ui-root-path="../../_"></script>
 <script async src="../../_/js/vendor/highlight.js"></script>

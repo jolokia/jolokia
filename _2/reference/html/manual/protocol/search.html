@@ -105,7 +105,7 @@
 <h3 id="search"><a class="anchor" href="#search"></a>Searching MBeans (search)</h3>
 <div class="paragraph">
 <p>With the Jolokia search operation the agent can be queried for
-MBeans with a given pattern.  Searching will be performed on every
+MBeans matching a given pattern. Searching will be performed on every
 <code>MBeanServer</code> found by the agent.</p>
 </div>
 <div class="sect3">
@@ -125,12 +125,12 @@ specifying the search parameter like in</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>http://localhost:8080/jolokia/search/*:j2eeType=J2EEServer,*</pre>
+<pre>http://localhost:8080/jolokia/search/*:j2eeType=Servlet,*</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>You can use patterns as described &lt;ulink
-<a href="https://java.sun.com/j2se/1.5.0/docs/api/javax/management/ObjectName.html">here</a>,
+<p>You can use patterns as described
+<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/ObjectName.html" class="externalLink">here</a>,
 i.e. it may contain wildcards like <code>*</code> and
 <code>?</code>. The Mbean names matching the query
 are returned as a list within the response.</p>
@@ -144,9 +144,9 @@ are returned as a list within the response.</p>
 <table class="tableblock frame-all grid-all stretch">
 <caption class="title">Table 1. POST Search Request</caption>
 <colgroup>
-<col style="width: 33.3333%;">
-<col style="width: 33.3333%;">
-<col style="width: 33.3334%;">
+<col style="width: 15%;">
+<col>
+<col style="width: 30%;">
 </colgroup>
 <thead>
 <tr>
@@ -175,7 +175,7 @@ domain <code>java.lang</code></p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "type": "SEARCH",
+  "type": "search",
   "mbean": "java.lang:*"
 }</code></pre>
 </div>
@@ -192,27 +192,37 @@ list if there was no match.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>http://localhost:8888/jolokia/search/*:j2eeType=J2EEServer,*</pre>
+<pre>http://localhost:8888/jolokia/search/*:j2eeType=Servlet,*</pre>
 </div>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "request": {
+    "mbean": "*:j2eeType=Servlet,*",
+    "type": "search"
+  },
   "value": [
-    "jboss.management.local:j2eeType=J2EEServer,name=Local"
+    "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/manager,j2eeType=Servlet,name=Status",
+    "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/manager,j2eeType=Servlet,name=JMXProxy",
+    "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/manager,j2eeType=Servlet,name=jsp",
+    "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/manager,j2eeType=Servlet,name=HTMLManager",
+    "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/jolokia,j2eeType=Servlet,name=jsp",
+    "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/,j2eeType=Servlet,name=default",
+    "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/jolokia,j2eeType=Servlet,name=jolokia-agent",
+    "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/,j2eeType=Servlet,name=jsp",
+    "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/jolokia,j2eeType=Servlet,name=default",
+    "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/manager,j2eeType=Servlet,name=Manager",
+    "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/manager,j2eeType=Servlet,name=default"
   ],
   "status": 200,
-  "timestamp": 1245305648,
-  "request": {
-    "mbean": "*:j2eeType=J2EEServer,*",
-    "type": "search"
-  }
+  "timestamp": 1702458409
 }</code></pre>
 </div>
 </div>
 <div class="paragraph">
 <p>The returned MBean names are properly
-<a href="https://download.oracle.com/javase/1.5.0/docs/api/javax/management/ObjectName.html">quoted</a>
+<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/ObjectName.html" class="externalLink">quoted</a>
 so that they can be directly used as
 input for other requests.</p>
 </div>
@@ -221,7 +231,8 @@ input for other requests.</p>
 </article>
   </div>
 <footer class="footer">
-  This page was built using the Antora default UI. The source code for this UI is licensed under the terms of the MPL-2.0 license.
+  This page was built using the Antora default UI. The source code for this UI is licensed under the terms of the MPL-2.0 license. | Copyright © 2010 -
+  2023 Roland Huß
 </footer>
 <script id="site-script" src="../../_/js/site.js" data-ui-root-path="../../_"></script>
 <script async src="../../_/js/vendor/highlight.js"></script>

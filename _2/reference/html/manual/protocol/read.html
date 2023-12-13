@@ -138,8 +138,8 @@ initiated by giving a list of attributes to the request. For a
 POST request this is an JSON array, for a GET request it is a
 comma separated list of attribute names (where slashes and
 exclamation marks must be escaped as described in
-<a href="#escape-rules">[escape-rules]</a>). If no attribute is provided, then all
-attributes are fetched.  The MBean name can be given as a pattern
+<a href="../jolokia_protocol.html#escape-rules" class="xref page">Escaping rules</a>). If no attribute is provided, then all
+attributes are fetched. The MBean name can be given as a pattern
 in which case the attributes are read on all matching MBeans. If a
 MBean pattern and multiple attributes are requested, then only the
 value of attributes which matches both are returned, the others
@@ -148,24 +148,48 @@ are ignored.</p>
 <div class="paragraph">
 <p>Paths can be used with pattern and multiple attribute read as well. In order to
 skip the extra value levels introduced by a pattern read, the wildcard
-<code>\*</code> can be used. For example, a read request for the MBean Pattern
+<code>*</code> can be used. For example, a read request for the MBean Pattern
 <code>java.lang:type=GarbageCollector,*</code> for the Attribute <code>LastGcInfo</code>
 returns a complex structure holding information about the last garbage collection. If one is
-interested only for the duration of the garbage collection, a path <code>used</code> could be used if
-this request wouldn&#8217;t be a pattern request (i.e. refers a specific, single MBean). But in this case since a
-nested map with MBean and Attribute names is returned, the path <code>*/*/used</code> has to be used
-in order to skip the two extra levels for applying the path. The two levels are returned nevertheless, though.
+looking only for the used memory during garbage collection, a path <code>used</code> could be used if
+this request wouldn&#8217;t be a pattern request (i.e. refers a specific, single MBean).
+But in this case since a
+nested map with MBean and Attribute names is returned, the path <code>*/*/*/*/used</code> has to be used
+in order to skip the extra levels (for different heaps/spaces) for applying the path.
 Note that in the following example the final value is <em>not</em> the full GC-Info but only the
-value of its <code>used</code> entry:</p>
+value of its <code>used</code> entry for different spaces:</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">"value": {
-  "java.lang:name=PS MarkSweep,type=GarbageCollector": {
-    "LastGcInfo": null
-  },
-  "java.lang:name=PS Scavenge,type=GarbageCollector": {
-    "LastGcInfo": 7
+  "java.lang:name=G1 Young Generation,type=GarbageCollector": {
+    "LastGcInfo": {
+      "duration": 3,
+      "memoryUsageBeforeGc": {
+        "CodeHeap 'profiled nmethods'": 4780288,
+        "G1 Old Gen": 4934656,
+        "CodeHeap 'non-profiled nmethods'": 928256,
+        "G1 Survivor Space": 4194304,
+        "Compressed Class Space": 1331528,
+        "Metaspace": 12812816,
+        "G1 Eden Space": 20971520,
+        "CodeHeap 'non-nmethods'": 1271296
+      },
+      "GcThreadCount": 5,
+      "startTime": 786,
+      "endTime": 789,
+      "id": 2,
+      "memoryUsageAfterGc": {
+        "CodeHeap 'profiled nmethods'": 4780288,
+        "G1 Old Gen": 9082880,
+        "CodeHeap 'non-profiled nmethods'": 928256,
+        "G1 Survivor Space": 2597960,
+        "Compressed Class Space": 1331528,
+        "Metaspace": 12812816,
+        "G1 Eden Space": 0,
+        "CodeHeap 'non-nmethods'": 1271296
+      }
+    }
   }
 }</code></pre>
 </div>
@@ -189,7 +213,7 @@ and the leaves of the matched parts.</p>
 </li>
 <li>
 <p>If used with wildcards, paths behave also like
-filters. E.g. you can use a path <code>*/*/used</code> on
+filters. E.g. you can use a path <code>*/*/*/*/used</code> on
 the MBean pattern <code>java.lang:*</code> and get back
 only that portions which contains "used" as key, all others are
 ignored.</p>
@@ -209,9 +233,9 @@ ignored.</p>
 <table class="tableblock frame-all grid-all stretch">
 <caption class="title">Table 1. GET Read Request</caption>
 <colgroup>
-<col style="width: 33.3333%;">
-<col style="width: 33.3333%;">
-<col style="width: 33.3334%;">
+<col style="width: 15%;">
+<col>
+<col style="width: 30%;">
 </colgroup>
 <thead>
 <tr>
@@ -224,7 +248,7 @@ ignored.</p>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;mbean name&gt;</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">The
-<a href="https://download.oracle.com/javase/6/docs/api/javax/management/ObjectName.html">ObjectName</a>
+<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/ObjectName.html" class="externalLink">ObjectName</a>
 of the MBean for which the attribute should be fetched. It
 contains two parts: A domain part and a list of properties
 which are separated by <code>:</code>. Properties
@@ -236,16 +260,16 @@ multiple MBeans are queried for the attribute value.</p></td>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;attribute name&gt;</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Name of attribute to read. This can be a list of Attribute
-names separated by comma. Slashes and exclamations marks need
-to be escaped as described in &lt;xref
-<a href="#escape-rules">[escape-rules]</a>. If no attribute is given, all
+names separated by comma. According to URI compliance, some special characters need to be
+escaped as described in
+<a href="../jolokia_protocol.html#escape-rules" class="xref page">Escaping rules</a>. If no attribute is given, all
 attributes are read.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>HeapMemoryUsage</code></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;inner path&gt;</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">This optional part describes an <em>inner
-path</em> as described in <a href="#paths">[paths]</a></p></td>
+path</em> as described in <a href="../jolokia_protocol.html#paths" class="xref page">Paths</a></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>used</code></p></td>
 </tr>
 </tbody>
@@ -268,17 +292,18 @@ following table.</p>
 <table class="tableblock frame-all grid-all stretch">
 <caption class="title">Table 2. POST Read Request</caption>
 <colgroup>
-<col style="width: 33.3333%;">
-<col style="width: 33.3333%;">
-<col style="width: 33.3334%;">
+<col style="width: 15%;">
+<col>
+<col style="width: 30%;">
 </colgroup>
-<tbody>
+<thead>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Key</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Description</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Example</p>
-<p class="tableblock">&lt;tr&gt;</p></td>
+<th class="tableblock halign-left valign-top">Key</th>
+<th class="tableblock halign-left valign-top">Description</th>
+<th class="tableblock halign-left valign-top">Example</th>
 </tr>
+</thead>
+<tbody>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>type</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><strong><code>read</code></strong></p></td>
@@ -294,12 +319,17 @@ following table.</p>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Attribute name to read or a JSON array containing a list
 of attributes to read. No attribute is given, then all attributes
 are read.</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>HeapMemoryUsage</code>, <code>[ "HeapMemoryUsage", "NonHeapMemoryUsage" ]</code></p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p><code>HeapMemoryUsage</code></p>
+</div>
+<div class="paragraph">
+<p><code>[ "HeapMemoryUsage", "NonHeapMemoryUsage" ]</code></p>
+</div></div></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>path</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Inner path for accessing the value of a complex value
-(<a href="#paths">[paths]</a>)</p></td>
+(<a href="../jolokia_protocol.html#paths" class="xref page">Paths</a>)</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>used</code></p></td>
 </tr>
 </tbody>
@@ -321,42 +351,42 @@ are read.</p></td>
 <h4 id="response-read"><a class="anchor" href="#response-read"></a>Read response</h4>
 <div class="paragraph">
 <p>The general format of the JSON response is described in
-<a href="#responses">[responses]</a> in detail.  A typical response for an
-attribute read operation for an URL like</p>
+<a href="../jolokia_protocol.html#responses" class="xref page">Responses</a> in detail.  A typical response for an
+attribute read operation for a GET request with URL like:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage/</pre>
+<pre>http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage</pre>
 </div>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "value": {
-    "init": 134217728,
-    "max": 532742144,
-    "committed": 133365760,
-    "used": 19046472
-  },
-  "status": 200,
-  "timestamp": 1244839118,
   "request": {
     "mbean": "java.lang:type=Memory",
-    "type": "read",
-    "attribute": "HeapMemoryUsage"
+    "attribute": "HeapMemoryUsage",
+    "type": "read"
   },
   "history": [
     {
       "value": {
-        "init": 134217728,
-        "max": 532742144,
-        "committed": 133365760,
-        "used": 18958208
+        "init": 524288000,
+        "committed": 532676608,
+        "max": 8334082048,
+        "used": 78027104
       },
-      "timestamp": 1244839045
+      "timestamp": 1702454713
     },
-    ....
-  ]
+    ...
+  ],
+  "value": {
+    "init": 524288000,
+    "committed": 532676608,
+    "max": 8334082048,
+    "used": 86415712
+  },
+  "status": 200,
+  "timestamp": 1702454822
 }</code></pre>
 </div>
 </div>
@@ -364,10 +394,10 @@ attribute read operation for an URL like</p>
 <p>The <code>value</code> contains the response&#8217;s
 value. For simple data types it is a scalar value, more complex
 types are serialized into a JSON object. See
-<a href="#serialization">[serialization]</a> for detail on object serialization.</p>
+<a href="../jolokia_protocol.html#serialization" class="xref page">Object serialization</a> for detail on object serialization.</p>
 </div>
 <div class="paragraph">
-<p>For a read request to a single MBean with multiple attributes, the
+<p>For a read request of a single MBean with multiple attributes, the
 returned value is a JSON object with the attribute names as keys
 and their values as values. For example a request to
 <code><a href="http://localhost:8080/jolokia/read/java.lang:type=Memory" class="bare">http://localhost:8080/jolokia/read/java.lang:type=Memory</a></code>
@@ -376,22 +406,31 @@ leads to</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "timestamp": 1317151518,
-  "status": 200,
   "request": {
     "mbean": "java.lang:type=Memory",
     "type": "read"
   },
   "value": {
-    "Verbose": false,
     "ObjectPendingFinalizationCount": 0,
-    "NonHeapMemoryUsage": {
-      "max": 136314880, "committed": 26771456, "init": 24317952, "used": 15211720
-    },
+    "Verbose": false,
     "HeapMemoryUsage": {
-      "max": 129957888, "committed": 129957888, "init": 0, "used": 2880008
+      "init": 524288000,
+      "committed": 532676608,
+      "max": 8334082048,
+      "used": 94804320
+    },
+    "NonHeapMemoryUsage": {
+      "init": 7667712,
+      "committed": 38928384,
+      "max": -1,
+      "used": 36905512
+    },
+    "ObjectName": {
+      "objectName": "java.lang:type=Memory"
     }
-  }
+  },
+  "status": 200,
+  "timestamp": 1702454894
 }</code></pre>
 </div>
 </div>
@@ -406,8 +445,6 @@ returns something like</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "timestamp": 1317151980,
-  "status": 200,
   "request": {
     "mbean": "java.lang:type=*",
     "attribute": "HeapMemoryUsage",
@@ -416,10 +453,15 @@ returns something like</p>
   "value": {
     "java.lang:type=Memory": {
       "HeapMemoryUsage": {
-        "max": 129957888, "committed": 129957888, "init": 0, "used": 3080912
+        "init": 524288000,
+        "committed": 532676608,
+        "max": 8334082048,
+        "used": 103192928
       }
     }
-  }
+  },
+  "status": 200,
+  "timestamp": 1702454978
 }</code></pre>
 </div>
 </div>
@@ -428,7 +470,8 @@ returns something like</p>
 </article>
   </div>
 <footer class="footer">
-  This page was built using the Antora default UI. The source code for this UI is licensed under the terms of the MPL-2.0 license.
+  This page was built using the Antora default UI. The source code for this UI is licensed under the terms of the MPL-2.0 license. | Copyright © 2010 -
+  2023 Roland Huß
 </footer>
 <script id="site-script" src="../../_/js/site.js" data-ui-root-path="../../_"></script>
 <script async src="../../_/js/vendor/highlight.js"></script>

@@ -63,6 +63,7 @@
   * list
   * version
   * search
+  * notification
 
   A missing <commands> section implies that every operation type is allowed (and can
   be selectively controlled by a <deny> section)
@@ -75,8 +76,8 @@
     <command>list</command>
     <command>version</command>
     <command>search</command>
+    <command>notification</command>
   </commands>
-
 
   <!-- 
   Restrict access only via the specified methods
@@ -151,5 +152,11 @@
       <name>com.mchange.v2.c3p0:type=PooledDataSource,*</name>
       <attribute>properties</attribute>
     </mbean>
+    <mbean>
+      <name>jdk.management.jfr:type=FlightRecorder</name>
+      <attribute>*</attribute>
+      <operation>*</operation>
+    </mbean>
   </deny>
+
 </restrict>

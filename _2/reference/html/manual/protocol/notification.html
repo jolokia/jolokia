@@ -101,11 +101,65 @@
   <div class="toc-menu"></div>
 </aside>
 <article class="doc">
-<div id="notification" class="listingblock">
-<div class="title">Client registration</div>
+<div class="sect2">
+<h3 id="notification"><a class="anchor" href="#notification"></a>Using JMX notifications (notification) <mark>new in Jolokia 2</mark></h3>
+<div class="paragraph">
+<p>A new feature of Jolokia 2 is access to <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/Notification.html" class="externalLink">JMX notifications</a>.
+While reading/writing attributes, executing operations or listing/searching MBeans is implemented as single request-response operation, with notifications the flow of messages is more complex.</p>
+</div>
+<div class="paragraph">
+<p>There are 4 groups of subcommands for Jolokia <code>notification</code> operation:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Client registration/unregistration: <code>register</code> and <code>unregister</code> commands</p>
+</li>
+<li>
+<p>Adding/removing/listing the listeners: <code>add</code>, <code>remove</code> and <code>list</code> commands</p>
+</li>
+<li>
+<p>Ping (to refresh the registered client): <code>ping</code> command</p>
+</li>
+<li>
+<p>Configuring a channel to a stream of notifications: <code>open</code> command</p>
+</li>
+</ul>
+</div>
+<div class="sect3">
+<h4 id="notification-registration"><a class="anchor" href="#notification-registration"></a>Client registration</h4>
+<div class="paragraph">
+<p>In order to subscribe to JMX notification, a <em>client</em> has to be registered, so Jolokia agent can be aware of the entities for which notifications should be collected and returned.</p>
+</div>
+<div class="paragraph">
+<p>The GET URL for client registration has the following format:</p>
+</div>
+<div class="listingblock">
 <div class="content">
-<pre>$ curl -H'Content-Type: application/json' -s -u jolokia:jolokia -XPOST -d '{"type":"notification","command":"register"}' http://localhost:8080/jolokia/ | jq .
-{
+<pre>&lt;base-url&gt;/notification/register</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The equivalend POST JSON payload is:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "type": "notification",
+  "command": "register"
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>There are no additional parameters in GET URL request or POST JSON payload.</p>
+</div>
+<div class="paragraph">
+<p>The general format of the JSON response is described in
+<a href="../jolokia_protocol.html#responses" class="xref page">Responses</a> in detail. A typical response for client registration is:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
   "request": {
     "type": "notification",
     "command": "register"
@@ -114,40 +168,756 @@
     "backend": {
       "pull": {
         "maxEntries": 100,
-        "store": "jolokia:type=NotificationStore,agent=192.168.0.221-52184-29e6eb25-servlet"
+        "store": "jolokia:type=NotificationStore,agent=192.168.0.221-21185-7e985ce9-servlet"
       },
       "sse": {
         "backChannel.contentType": "text/event-stream",
         "backChannel.encoding": "UTF-8"
       }
     },
-    "id": "51fc0ba5-4a35-48a8-a3aa-760119f3316b"
+    "id": "d77475dc-c7a7-4f71-b988-52b7f0252ca3"
   },
   "status": 200,
-  "timestamp": 1701876605
-}</pre>
+  "timestamp": 1702464211
+}</code></pre>
 </div>
+</div>
+<div class="paragraph">
+<p>The <code>value</code> field in the response contains two important fields:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>id</code> is an identifier of registered client, which is used in other notification-related Jolokia operations</p>
+</li>
+<li>
+<p><code>backend</code> is a collection of available <em>backends</em> (See more in <a href="#accessing-notification-stream">Accessing notification stream</a>). Jolokia 2 supports <code>sse</code> and <code>pull</code> backends. Other backends (like <code>websocket</code>) may be added in the future.</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>pull</code> backend</dt>
+<dd>
+<p>In this implementation, notifications are collected within the Jolokia Agent and client has to <em>fetch</em> (<em>pull</em>) them by calling <code>pull</code> operation on <code>jolokia:type=NotificationStore</code> MBean.</p>
+</dd>
+<dt class="hdlist1"><code>sse</code> backend</dt>
+<dd>
+<p>In this mode <a href="https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events" class="externalLink">Server Sent Events</a> are used (See <a href="https://html.spec.whatwg.org/multipage/server-sent-events.html#server-sent-events" class="externalLink">WhatWG specification</a>).</p>
+</dd>
+</dl>
+</div>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="notification-unregistration"><a class="anchor" href="#notification-unregistration"></a>Client unregistration</h4>
+<div class="paragraph">
+<p>In order to unsubscribe from Jolokia notification mechanism, an existing client has to be unregistered, by passing an existing client ID.</p>
+</div>
+<div class="paragraph">
+<p>The GET URL for client registration has the following format:</p>
 </div>
 <div class="listingblock">
-<div class="title">Client unregistration</div>
 <div class="content">
-<pre>$ curl -H'Content-Type: application/json' -s -u jolokia:jolokia -XPOST -d '{"type":"notification","command":"unregister","client":"51fc0ba5-4a35-48a8-a3aa-760119f3316b"}' http://localhost:8080/jolokia/ | jq .
-{
+<pre>&lt;base-url&gt;/notification/unregister/&lt;client-id&gt;</pre>
+</div>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. GET Unregistration Request</caption>
+<colgroup>
+<col style="width: 15%;">
+<col>
+<col style="width: 30%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Part</th>
+<th class="tableblock halign-left valign-top">Description</th>
+<th class="tableblock halign-left valign-top">Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;client-id&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Client ID of previously registered client</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>d77475dc-c7a7-4f71-b988-52b7f0252ca3</code></p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>The equivalend POST JSON payload is:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "type": "notification",
+  "command": "unregister",
+  "client": "&lt;client-id&gt;"
+}</code></pre>
+</div>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 2. POST Unregistration Request</caption>
+<colgroup>
+<col style="width: 15%;">
+<col>
+<col style="width: 30%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Key</th>
+<th class="tableblock halign-left valign-top">Description</th>
+<th class="tableblock halign-left valign-top">Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>type</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong><code>notification</code></strong></p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>command</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong><code>unregister</code></strong></p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>client</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Client ID of previously registered client</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>d77475dc-c7a7-4f71-b988-52b7f0252ca3</code></p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>A typical response for client unregistration is:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
   "request": {
-    "client": "51fc0ba5-4a35-48a8-a3aa-760119f3316b",
+    "client": "d77475dc-c7a7-4f71-b988-52b7f0252ca3",
     "type": "notification",
     "command": "unregister"
   },
   "value": null,
   "status": 200,
-  "timestamp": 1701876674
-}</pre>
+  "timestamp": 1702464913
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The returned <code>value</code> is simply <code>null</code>.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="notification-add"><a class="anchor" href="#notification-add"></a>Adding a notification listener</h4>
+<div class="paragraph">
+<p>Having registered a notification client, we can now use notification listeners. The underlying JMX call is <code>javax.management.MBeanServerConnection.addNotificationListener()</code> method which requires several parameters:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>ObjectName</code>: The name of the MBean on which the listener should be added</p>
+</li>
+<li>
+<p><code>NotificationListener</code>: The listener object which will handle the notifications emitted by the registered MBean.</p>
+</li>
+<li>
+<p><code>NotificationFilter</code>: The filter object. It can be used to filter notifications specific to a given MBean</p>
+</li>
+<li>
+<p><code>Object</code>: any <em>handback</em> object which will be passed to a listener when notification arrives - this is how Jolokia can get back to the client which added a JMX notification listener.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The GET URL for adding a notification listener has the following format:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;base-url&gt;/notification/add/&lt;client-id&gt;/&lt;mode&gt;/&lt;mbean name&gt;/&lt;filter1&gt;,.../&lt;config&gt;/&lt;handback&gt;</pre>
+</div>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 3. GET AddNotification Request</caption>
+<colgroup>
+<col style="width: 15%;">
+<col>
+<col style="width: 30%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Part</th>
+<th class="tableblock halign-left valign-top">Description</th>
+<th class="tableblock halign-left valign-top">Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;client-id&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Client ID of previously registered client</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>d77475dc-c7a7-4f71-b988-52b7f0252ca3</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;mode&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">One of supported modes of notification handling: <code>pull</code> or <code>sse</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>pull</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;mbean name&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The
+<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/ObjectName.html" class="externalLink">ObjectName</a>
+of the MBean for which we&#8217;re registering a notification listener</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>JMImplementation:type=MBeanServerDelegate</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;filter1&gt;</code>, <code>&lt;filter2&gt;</code>, &#8230;&#8203;</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Comma-separated list notifications we&#8217;re interested in (and supported by given <code>&lt;mbean name&gt;</code>). If we want all
+notifications, a space (<code>%20</code>) or empty string (<code>%22%22</code>) can be passed. See filter rules in <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/NotificationFilterSupport.html#enableType(java.lang.String)" class="externalLink">NotificationFilterSupport.enableType() Javadoc</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>JMX.mbean.registered</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;config&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">This optional part can be passed to a notification listener as JSON object</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>{"priority":"normal"}</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;handback&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">This optional part can be passed to a notification listener and will be returned for each related notification. In GET request it can only be a String value.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>my-correlation-ID-1234</code></p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>The equivalent POST JSON payload is:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "type": "notification",
+  "command": "add",
+  "client": "1cddf91c-423e-46d8-ac9a-2eb6d8b213c7",
+  "mode": "pull",
+  "mbean": "JMImplementation:type=MBeanServerDelegate",
+  "filter": [],
+  "handback": "id-1234"
+}</code></pre>
+</div>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 4. POST AddNotification Request</caption>
+<colgroup>
+<col style="width: 15%;">
+<col>
+<col style="width: 30%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Key</th>
+<th class="tableblock halign-left valign-top">Description</th>
+<th class="tableblock halign-left valign-top">Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>type</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong><code>notification</code></strong></p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>command</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong><code>add</code></strong></p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>client</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Client ID of previously registered client</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>d77475dc-c7a7-4f71-b988-52b7f0252ca3</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>mode</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">One of supported modes of notification handling: <code>pull</code> or <code>sse</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>pull</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>mbean</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The
+<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/ObjectName.html" class="externalLink">ObjectName</a>
+of the MBean for which we&#8217;re registering a notification listener</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>JMImplementation:type=MBeanServerDelegate</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>filter</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A JSON array of notification notifications we&#8217;re interested in (and supported by given <code>mbean</code>). If we want all
+notifications, a space (<code>%20</code>) or empty string (<code>%22%22</code>) can be passed. See filter rules in <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/NotificationFilterSupport.html#enableType(java.lang.String)" class="externalLink">NotificationFilterSupport.enableType() Javadoc</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>[ "JMX.mbean.registered", "JMX.mbean.unregistered" ]</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>config</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">This optional part can be passed to a notification listener as JSON object</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>{"priority":"normal"}</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>handback</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">This optional part can be passed to a notification listener and will be returned for each related notification.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>{ "my-correlation-ID": "1234" }</code></p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>A typical response for added notification listener is:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "request": {
+    "mode": "pull",
+    "mbean": "JMImplementation:type=MBeanServerDelegate",
+    "client": "1cddf91c-423e-46d8-ac9a-2eb6d8b213c7",
+    "type": "notification",
+    "handback": "id-1234",
+    "command": "add"
+  },
+  "value": "2",
+  "status": 200,
+  "timestamp": 1702472334
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The returned <code>value</code> is a <em>handle</em> to the added listener, required when removing the listener in the future.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="notification-list"><a class="anchor" href="#notification-list"></a>Checking existing notification listeners</h4>
+<div class="paragraph">
+<p>To check existing listener registrations for previously registered client, we can use <code>list</code> command of <code>notification</code> operation.</p>
+</div>
+<div class="paragraph">
+<p>The GET URL for listing client listener registrations has the following format:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;base-url&gt;/notification/list/&lt;client-id&gt;</pre>
+</div>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 5. GET Unregistration Request</caption>
+<colgroup>
+<col style="width: 15%;">
+<col>
+<col style="width: 30%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Part</th>
+<th class="tableblock halign-left valign-top">Description</th>
+<th class="tableblock halign-left valign-top">Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;client-id&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Client ID of previously registered client</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>d77475dc-c7a7-4f71-b988-52b7f0252ca3</code></p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>The equivalend POST JSON payload is:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "type": "notification",
+  "command": "list",
+  "client": "&lt;client-id&gt;"
+}</code></pre>
+</div>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 6. POST Unregistration Request</caption>
+<colgroup>
+<col style="width: 15%;">
+<col>
+<col style="width: 30%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Key</th>
+<th class="tableblock halign-left valign-top">Description</th>
+<th class="tableblock halign-left valign-top">Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>type</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong><code>notification</code></strong></p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>command</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong><code>list</code></strong></p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>client</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Client ID of previously registered client</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>d77475dc-c7a7-4f71-b988-52b7f0252ca3</code></p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>A typical response for listing the registrations is:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "request": {
+    "client": "1cddf91c-423e-46d8-ac9a-2eb6d8b213c7",
+    "type": "notification",
+    "command": "list"
+  },
+  "value": {
+    "1": {
+      "mbean": "JMImplementation:type=MBeanServerDelegate",
+      "handback": "id-1234"
+    },
+    "2": {
+      "filter": [
+        "java.management.memory.threshold.exceeded"
+      ],
+      "mbean": "java.lang:type=Memory"
+    }
+  },
+  "status": 200,
+  "timestamp": 1702472848
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The returned <code>value</code> is a collection of listener registrations with their details, keyed by <em>handle</em> id.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="notification-remove"><a class="anchor" href="#notification-remove"></a>Removing a notification listener</h4>
+<div class="paragraph">
+<p>When a notification listener for a given client is no longer needed, we can remove using <code>remove</code> command of <code>notification</code> operation.</p>
+</div>
+<div class="paragraph">
+<p>The GET URL for removing client listener registrations has the following format:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;base-url&gt;/notification/remove/&lt;client-id&gt;/&lt;handle&gt;</pre>
+</div>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 7. GET Unregistration Request</caption>
+<colgroup>
+<col style="width: 15%;">
+<col>
+<col style="width: 30%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Part</th>
+<th class="tableblock halign-left valign-top">Description</th>
+<th class="tableblock halign-left valign-top">Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;client-id&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Client ID of previously registered client</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>d77475dc-c7a7-4f71-b988-52b7f0252ca3</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;handle&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A <em>handle</em> of previously added listener</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>1</code></p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>The equivalend POST JSON payload is:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "type": "notification",
+  "command": "remove",
+  "client": "&lt;client-id&gt;",
+  "handle": "&lt;handle-id&gt;"
+}</code></pre>
+</div>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 8. POST Unregistration Request</caption>
+<colgroup>
+<col style="width: 15%;">
+<col>
+<col style="width: 30%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Key</th>
+<th class="tableblock halign-left valign-top">Description</th>
+<th class="tableblock halign-left valign-top">Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>type</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong><code>notification</code></strong></p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>command</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong><code>remove</code></strong></p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>client</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Client ID of previously registered client</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>d77475dc-c7a7-4f71-b988-52b7f0252ca3</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>handle</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A <em>handle</em> of previously added listener</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>1</code></p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>A typical response for listing the registrations is:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "request": {
+    "client": "1cddf91c-423e-46d8-ac9a-2eb6d8b213c7",
+    "handle": "1",
+    "type": "notification",
+    "command": "remove"
+  },
+  "value": null,
+  "status": 200,
+  "timestamp": 1702473703
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The returned <code>value</code> is simply <code>null</code>.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="accessing-notification-stream"><a class="anchor" href="#accessing-notification-stream"></a>Accessing notification stream</h4>
+<div class="paragraph">
+<p>When a listener is added for a client (see <a href="#notification-add">Adding a notification listener</a>), a mode indicates a desired <em>notification backend</em>.</p>
+</div>
+<div class="paragraph">
+<p>For <code>pull</code> backend, there&#8217;s actually no <em>back channel</em> over which we can receive the notifications. Instead we should be
+calling an MBean operation on an MBean representing the backend. The details are available when client was first registered:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">"backend": {
+  "pull": {
+    "maxEntries": 100,
+    "store": "jolokia:type=NotificationStore,agent=192.168.0.221-21185-7e985ce9-servlet"
+  },
+  ...</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If we want to access notifications collected in <code>pull</code> backend, we have to call <code>org.jolokia.service.notif.pull.PullNotificationStoreMBean.pull(String pClientId, String pHandle)</code> MBean operation on <code>jolokia:type=NotificationStore,agent=&lt;agent-id&gt;</code> MBean which can be done with Jolokia <code>exec</code> operation.</p>
+</div>
+<div class="paragraph">
+<p>For example, having registered a notification listener for <code>JMImplementation:type=MBeanServerDelegate</code> MBean, we can get notified about MBean registrations/unregistrations. Accessing the pull notification store can be done with <code>exec</code> operation like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$ curl -s -u jolokia:jolokia 'http://localhost:8080/jolokia/exec/jolokia:type=NotificationStore,agent=192.168.0.221-21185-7e985ce9-servlet/pull(java.lang.String,java.lang.String)/1cddf91c-423e-46d8-ac9a-2eb6d8b213c7/2' | jq .
+{
+  "request": {
+    "mbean": "jolokia:agent=192.168.0.221-21185-7e985ce9-servlet,type=NotificationStore",
+    "arguments": [
+      "1cddf91c-423e-46d8-ac9a-2eb6d8b213c7",
+      "2"
+    ],
+    "type": "exec",
+    "operation": "pull(java.lang.String,java.lang.String)"
+  },
+  "value": {
+    "dropped": 0,
+    "handle": "2",
+    "handback": "id-1234",
+    "notifications": [
+      {
+        "timeStamp": 1702473332222,
+        "sequenceNumber": 248,
+        "userData": null,
+        "mBeanName": {
+          "objectName": "Catalina:name=HttpRequest3,type=RequestProcessor,worker=\"http-nio-8080\""
+        },
+        "source": {
+          "objectName": "JMImplementation:type=MBeanServerDelegate"
+        },
+        "message": "",
+        "type": "JMX.mbean.registered"
+      },
+      {
+        "timeStamp": 1702473390407,
+        "sequenceNumber": 249,
+        "userData": null,
+        "mBeanName": {
+          "objectName": "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/,name=jsp,type=JspMonitor"
+        },
+        "source": {
+          "objectName": "JMImplementation:type=MBeanServerDelegate"
+        },
+        "message": "",
+        "type": "JMX.mbean.unregistered"
+      },
+...</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>On the other hand, <code>sse</code> notification store works differently. Here&#8217;s the information received during client registration:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">"sse": {
+  "backChannel.contentType": "text/event-stream",
+  "backChannel.encoding": "UTF-8"
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Instead of providing us with Mbean name to access when needed (<em>pull</em> the notifications out if it by calling an MBean operation), <code>sse</code> backend needs a channel associated with client connection. This is where <code>open</code> command for <code>notification</code> operation comes into play.</p>
+</div>
+<div class="paragraph">
+<p>When calling <code>open</code> command for <code>sse</code> backed notifications, the request (<code>HttpServletRequest</code>) is put into <a href="https://jakarta.ee/specifications/servlet/5.0/jakarta-servlet-spec-5.0#asynchronous-processing" class="externalLink">asynchronous mode</a> and connection is not closed.</p>
+</div>
+<div class="paragraph">
+<p>The GET URL for openning a backend channel for notification acces is:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;base-url&gt;/notification/open/&lt;client-id&gt;/&lt;mode&gt;</pre>
+</div>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 9. GET Open Notification Channel Request</caption>
+<colgroup>
+<col style="width: 15%;">
+<col>
+<col style="width: 30%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Part</th>
+<th class="tableblock halign-left valign-top">Description</th>
+<th class="tableblock halign-left valign-top">Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;client-id&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Client ID of previously registered client</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>d77475dc-c7a7-4f71-b988-52b7f0252ca3</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;mode&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A mode of notification delivery. Only <code>sse</code> is useful.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>sse</code></p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>The equivalend POST JSON payload is:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "type": "notification",
+  "command": "open",
+  "client": "&lt;client-id&gt;",
+  "mode": "&lt;mode&gt;"
+}</code></pre>
+</div>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 10. POST Open Notification Channel Request</caption>
+<colgroup>
+<col style="width: 15%;">
+<col>
+<col style="width: 30%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Key</th>
+<th class="tableblock halign-left valign-top">Description</th>
+<th class="tableblock halign-left valign-top">Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>type</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong><code>notification</code></strong></p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>command</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong><code>open</code></strong></p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>client</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Client ID of previously registered client</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>d77475dc-c7a7-4f71-b988-52b7f0252ca3</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>mode</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A mode of notification delivery. Only <code>sse</code> is useful.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>sse</code></p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>The notifications are returned to the client as they&#8217;re delivered from JMX. Here&#8217;s a sample interaction:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ curl -i -u jolokia:jolokia 'http://localhost:8080/jolokia/notification/open/c72e2f07-e5ec-47a0-b9b4-3036b16614a0/sse'
+HTTP/1.1 200
+Cache-Control: private
+Content-Type: text/event-stream;charset=UTF-8
+Transfer-Encoding: chunked
+Date: Wed, 13 Dec 2023 15:49:39 GMT
+
+:
+:
+:
+:
+:
+id: 363
+data: {"dropped":0,"handle":"2","handback":null,"notifications":[{"timeStamp":1702482067031,"sequenceNumber":363,"userData":null,"mBeanName":{"objectName":"Catalina:J2EEApplication=none,J2EEServer=none,WebModule=\/\/localhost\/,name=jsp,type=JspMonitor"},"source":{"objectName":"JMImplementation:type=MBeanServerDelegate"},"message":"","type":"JMX.mbean.unregistered"}]}
+
+id: 364
+data: {"dropped":0,"handle":"2","handback":null,"notifications":[{"timeStamp":1702482067031,"sequenceNumber":364,"userData":null,"mBeanName":{"objectName":"Catalina:J2EEApplication=none,J2EEServer=none,WebModule=\/\/localhost\/,j2eeType=Filter,name=Tomcat WebSocket (JSR356) Filter"},"source":{"objectName":"JMImplementation:type=MBeanServerDelegate"},"message":"","type":"JMX.mbean.unregistered"}]}</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The returned data is structured according to <a href="https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events"><code>text/event-stream</code> Mime type</a>. <code>id</code> and <code>data</code> fields are used, where <code>id</code> matches the <code>sequenceNumber</code> from the JSON payload.</p>
+</div>
 </div>
 </div>
 </article>
   </div>
 <footer class="footer">
-  This page was built using the Antora default UI. The source code for this UI is licensed under the terms of the MPL-2.0 license.
+  This page was built using the Antora default UI. The source code for this UI is licensed under the terms of the MPL-2.0 license. | Copyright © 2010 -
+  2023 Roland Huß
 </footer>
 <script id="site-script" src="../../_/js/site.js" data-ui-root-path="../../_"></script>
 <script async src="../../_/js/vendor/highlight.js"></script>

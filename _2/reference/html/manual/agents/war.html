@@ -102,26 +102,27 @@
 </aside>
 <article class="doc">
 <div class="sect1">
-<h2 id="agents-war"><a class="anchor" href="#agents-war"></a>Java EE Agent (WAR)</h2>
+<h2 id="agents-war"><a class="anchor" href="#agents-war"></a>Jakarta EE Agent (WAR)</h2>
 <div class="sectionbody">
 <div class="sect2">
 <h3 id="war-agent-installation"><a class="anchor" href="#war-agent-installation"></a>Installation and Configuration</h3>
 <div class="paragraph">
 <p>The WAR agent is the most popular variant, and can be deployed
-in a servlet container just like any other Java EE web application.</p>
+in a servlet container just like any other Jakarta EE web application.</p>
 </div>
 <div class="sidebarblock">
 <div class="content">
 <div class="title">Tomcat example</div>
 <div class="paragraph">
-<p>A simple example for deploying the agent on Tomcat can be found
+<p>A simple example for deploying the WAR agent on Tomcat can be found
 in the Jolokia <a href="https://www.jolokia.org/tutorial.html">quickstart</a>.</p>
 </div>
 </div>
 </div>
 <div class="paragraph">
 <p>Often, installation is simply a matter of copying the agent WAR to
-a deployment directory. On other platforms an administrative Web
+a deployment directory (<code>webapps/</code> directory on Tomcat).
+On other platforms an administrative Web
 GUI or a command line tool need to be used for
 deployment. Providing detailed installation instructions for every servlet
 container is out of scope for this document.</p>
@@ -147,7 +148,7 @@ parameters, which can be configured outside the WAR
 archive. This is done differently for each servlet container
 but involves typically the editing of a configuration
 file. E.g. for
-<a href="https://tomcat.apache.org/tomcat-7.0-doc/config/context.html">Tomcat</a>,
+<a href="https://tomcat.apache.org/tomcat-10.1-doc/config/context.html#Context_Parameters">Tomcat 10.1</a>,
 the context for
 the Jolokia agent can be adapted by putting a file
 <code>jolokia.xml</code> below
@@ -164,16 +165,16 @@ content like:</p>
 </dl>
 </div>
 <div class="paragraph">
-<p>The configuration options <code>discoveryEnabled</code> and
+<p>Additionally, the configuration options <code>discoveryEnabled</code> and
 <code>discoveryAgentUrl</code> can be provided via environment
-variables or system properties, too. See the below for details.</p>
+variables or system properties, too. See below for details.</p>
 </div>
 <table id="agent-war-init-params" class="tableblock frame-all grid-all stretch">
 <caption class="title">Table 1. Servlet init parameters</caption>
 <colgroup>
-<col style="width: 33.3333%;">
-<col style="width: 33.3333%;">
-<col style="width: 33.3334%;">
+<col style="width: 15%;">
+<col>
+<col>
 </colgroup>
 <thead>
 <tr>
@@ -184,23 +185,10 @@ variables or system properties, too. See the below for details.</p>
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>dispatcherClasses</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Classnames (comma separated) of <code>RequestDispatcher</code> used in addition
-to the
-<code>LocalRequestDispatcher</code>. Dispatchers are
-a technique used by the JSR-160 proxy to dispatch (or
-'route') a request to a different destination. By default no extract dispatchers are enabled (changed in 1.5.0)
-You can use the system property <code>org.jolokia.jsr160ProxyEnabled</code> or the
-environment variable <code>JOLOKIA_JSR160_PROXY_ENABLED</code> to enable the the JSR-160 proxy.
-In that case you should be sure that you enable authentication for the web application to protect access
-to the proxy.</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.jolokia.service.jsr160.Jsr160RequestHandler</code>
-(this is the dispatcher for the JSR-160 proxy)</p></td>
-</tr>
-<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>jsr160ProxyAllowedTargets</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Path to a white list of patterns which are matched against possible
-JMX service URL for incoming requests.</p></td>
+JMX service URL for incoming requests. If no white list is specified, default blacklist is effective which
+includes <code>service:jmx:rmi:///jndi/ldap:.*</code>.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>/opt/jolokia/jsr160-proxy-allowed-patterns.txt</code></p></td>
 </tr>
 <tr>
@@ -210,26 +198,26 @@ which can read from (like a <code>file:</code> or
 <code>http:</code> URL) or with the special protocol
 <code>classpath:</code> which is used for looking up
 the policy file in the web application&#8217;s classpath. See
-<a href="#security-policy-location">[security-policy-location]</a> for details about this
+<a href="../security.html#security-policy-location" class="xref page">Policy Location</a> for details about this
 parameter.</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code><a href="file:///home/jolokia/jolokia-access.xml" class="bare">file:///home/jolokia/jolokia-access.xml</a></code>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>file:/home/jolokia/jolokia-access.xml</code>
 for a file based access to the policy file. Default is
-<code>classpath:/jolokia-access.xml</code></p></td>
+<code>classpath:/jolokia-access.xml</code>.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>restrictorClass</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Full classname of an implementation of <code>org.jolokia.restrictor.Restrictor</code>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Full classname of an implementation of <code>org.jolokia.server.core.service.api.Restrictor</code>
 which is used as a custom restrictor for securing access via Jolokia.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>com.mycompany.jolokia.CustomRestrictor</code> (which must be included in the
-war file and must implement <code>org.jolokia.restrictor.Restrictor</code>)</p></td>
+war file and must implement <code>org.jolokia.server.core.service.api.Restrictor</code>)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>allowDnsReverseLookup</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Access can be restricted based on the remote host accessing Jolokia. This host can be
 specified as address or an hostname. However, using the hostname normally requires a reverse
-DNS lookup which might slow down operations. In order to avoid this reverse DNS lookup
-set this property to <code>false</code>.</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>true</code></p></td>
+DNS lookup which might slow down operations. If you want to use reverse DNS lookup
+set this property to <code>true</code>.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>false</code></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>debug</code></p></td>
@@ -242,22 +230,30 @@ the config MBean during runtime.</p></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
 <p>Loghandler to use for providing logging output. By default
 logging is written to standard out and error but you can provide
-here a Java class implementing <code>org.jolokia.util.LogHandler</code>
-for an alternative log output. Two alternative implementations are included in
+here a Java class implementing <code>org.jolokia.server.core.service.api.LogHandler</code>
+for an alternative log output. Few implementations are included in WAR
 this agent:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p><code>org.jolokia.util.QuietLogHandler</code> which switches off
+<p><code>org.jolokia.server.core.service.impl.StdoutLogHandler</code> which logs to standard output</p>
+</li>
+<li>
+<p><code>org.jolokia.server.core.service.impl.QuietLogHandler</code> which switches off
 logging completely.</p>
 </li>
 <li>
-<p><code>org.jolokia.util.JulLogHandler</code> which uses a <code>java.util.logging</code> Logger with name <code>org.jolokia</code></p>
+<p><code>org.jolokia.server.core.service.impl.JulLogHandler</code> which uses a <code>java.util.logging</code> Logger with name <code>org.jolokia</code></p>
+</li>
+<li>
+<p><code>org.jolokia.server.core.http.AgentServlet.ServletLogHandler</code> is used by default and delegates to <code>jakarta.servlet.GenericServlet.log()</code> methods</p>
 </li>
 </ul>
 </div></div></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Example: <code>org.jolokia.util.LogHandler.Quiet</code></p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>Default: <code>org.jolokia.server.core.http.AgentServlet.ServletLogHandler</code></p>
+</div></div></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>historyMaxEntries</code></p></td>
@@ -283,7 +279,7 @@ If set to 0, depth checking is disabled</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Maximum size of collections returned when
 serializing to JSON. When set to 0,
 collections are never truncated.</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>1000</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>0</code></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>maxObjects</code></p></td>
@@ -335,7 +331,7 @@ in which case the stacktrace is always included. If set to
 the value is <code>runtime</code> a stacktrace is
 only included for RuntimeExceptions. This global option can
 be overridden with a query parameter.</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>true</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>false</code></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>serializeException</code></p></td>
@@ -349,7 +345,7 @@ overridden by a query parameter of the same name.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>allowErrorDetails</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">If set to <code>true</code> then no error details like a stack trace
+<td class="tableblock halign-left valign-top"><p class="tableblock">If set to <code>false</code> then no error details like a stack trace
 (when <code>includeStackTrace</code> is set) or a serialized exception
 (when <code>serializeExceptin</code> is set) are included. This can be user as
 a startup option to avoid exposure of error details regardless of other options.</p></td>
@@ -357,20 +353,20 @@ a startup option to avoid exposure of error details regardless of other options.
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>detectorOptions</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Extra options passed to an detector after successful
+<td class="tableblock halign-left valign-top"><p class="tableblock">Extra options passed to a detector after successful
 detection of an application server. See below for an
 explanation.</p></td>
 <td class="tableblock halign-left valign-top"></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>discoveryEnabled</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Is set to <code>true</code> then this servlet will
+<td class="tableblock halign-left valign-top"><p class="tableblock">If set to <code>true</code> then this servlet will
 listen for multicast request (multicast-group 239.192.48.84,
 port 24884 by default, but can be changed). By default this option is disabled in order to
-avoid conflicts with an Java EE standards (though this should&#8217;t
+avoid conflicts with an Jakarta EE standards (though this should&#8217;t
 harm anyways). This option can also be switched on with an
 environment variable
-<code>JOLOKIA_DISCOVERY</code> or the system
+<code>JOLOKIA_DISCOVERY_ENABLED</code> or the system
 property <code>jolokia.discoveryEnabled</code> set to
 <code>true</code>.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>false</code></p></td>
@@ -379,24 +375,24 @@ property <code>jolokia.discoveryEnabled</code> set to
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>discoveryAgentUrl</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Sets the URL to respond for multicast discovery requests. If
 given, <code>discoveryEnabled</code> is set
-implicitly to true. This URL can also be provided by an
+implicitly to <code>true</code>. This URL can also be provided by an
 environment variable
 <code>JOLOKIA_DISCOVERY_AGENT_URL</code> or the system
-property <code>jolokia.discoveryUrl</code>. Within the value you can use the
+property <code>jolokia.discoveryAgentUrl</code>. Within the value you can use the
 placeholders <code>${host}</code> and <code>${ip}</code> which gets replaced
 by the autodetected local host name/address. Also with <code>${env:ENV_VAR}</code> and
 <code>${sys:property}</code> environment and system properties can be referenced, respectively.</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code><a href="http://10.9.11.87:8080/jolokia" class="bare">http://10.9.11.87:8080/jolokia</a></code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>http://10.9.11.87:8080/jolokia</code></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>multicastGroup</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">The multicast group IPv4 address. This group IP can be also given as an environment variable <code>JOLOKIA_MULTICAST_GROUP</code> or a system property <code>jolokia.multicastGroup</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>239.192.48.84</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>239.192.48.84</code></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>multicastPort</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">The multicast port. This port can be also given as an environment variable <code>JOLOKIA_MULTICAST_PORT</code> or a system property <code>jolokia.multicastPort</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>24884</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>24884</code></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>agentId</code></p></td>
@@ -461,12 +457,12 @@ MBeans for monitoring GlassFish is booted.</p></td>
 </div>
 <div class="dlist">
 <dl>
-<dt class="hdlist1"><strong>jolokia.war</strong></dt>
+<dt class="hdlist1"><strong>jolokia-agent-war.war</strong></dt>
 <dd>
 <p>The standard agent which is secured with the role <code>jolokia</code>. You have to setup your servlet container
 to connect this role to the authentication.</p>
 </dd>
-<dt class="hdlist1"><strong>jolokia-unsecured.war</strong></dt>
+<dt class="hdlist1"><strong>jolokia-agent-war-unsecured.war</strong></dt>
 <dd>
 <p>A demo agent, which is completely unsecured. Please use this agent only for evaluation purposes, but it is
 highly recommended that use the security enabled agent <code>jolokia.war</code>.</p>
@@ -474,18 +470,18 @@ highly recommended that use the security enabled agent <code>jolokia.war</code>.
 </dl>
 </div>
 <div class="paragraph">
-<p>Java EE security is enabled by default by adding the required information within the
+<p>Jakarta EE security is enabled by default by adding the required information within the
 <code>web.xml</code>.</p>
 </div>
 <div class="sidebarblock">
 <div class="content">
 <div class="title">Using jmx4perl&#8217;s <code>jolokia</code> tool</div>
 <div class="paragraph">
-<p><a href="https://www.jmx4perl.org">jmx4perl</a> comes
+<p><a href="https://metacpan.org/dist/jmx4perl" class="externalLink">jmx4perl</a> comes
 with a nice command line utility called
-<a href="https://search.cpan.org/~roland/jmx4perl/scripts/jolokia">jolokia</a>
+<code><a href="https://metacpan.org/dist/jmx4perl/view/scripts/jolokia" class="externalLink">jolokia</a></code>
 which allows for an easy setup of security within a given
-<code>jolokia.war</code>. See <a href="#tools-jmx4perl">[tools-jmx4perl]</a> for
+<code>jolokia.war</code>. See <a href="../tools.html#tools-jmx4perl" class="xref page">Jmx4Perl</a> for
 more details.</p>
 </div>
 </div>
@@ -508,9 +504,9 @@ container, e.g. for Tomcat the role definition can be found in
 <h3 id="agent-war-programmatic"><a class="anchor" href="#agent-war-programmatic"></a>Programmatic usage of the Jolokia agent servlet</h3>
 <div class="paragraph">
 <p>The Jolokia agent servlet can be integrated into one&#8217;s own
-web-applications as well. Simply add a servlet with
+web applications as well. Simply add a servlet with
 the servlet class
-<code>org.jolokia.core.http.AgentServlet</code> to your
+<code>org.jolokia.server.core.http.AgentServlet</code> to your
 own <code>web.xml</code>. The following example maps
 the agent to the context <code>/jolokia</code>:</p>
 </div>
@@ -518,7 +514,7 @@ the agent to the context <code>/jolokia</code>:</p>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;servlet&gt;
   &lt;servlet-name&gt;jolokia-agent&lt;/servlet-name&gt;
-  &lt;servlet-class&gt;org.jolokia.core.http.AgentServlet&lt;/servlet-class&gt;
+  &lt;servlet-class&gt;org.jolokia.server.core.http.AgentServlet&lt;/servlet-class&gt;
   &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
 &lt;/servlet&gt;
 
@@ -535,9 +531,7 @@ the agent to the context <code>/jolokia</code>:</p>
 <div class="paragraph">
 <p>In order for this servlet definition to find the referenced
 Java class, the JAR <code>jolokia-server-core.jar</code> must
-be included. This jar can be found in
-<a href="https://labs.consol.de/maven/repository/org/jolokia/jolokia-server-core">Jolokia&#8217;s maven
-resository</a>. Maven users can declare a
+be included. Maven users can declare a
 dependency on this jar artifact:</p>
 </div>
 <div class="listingblock">
@@ -556,10 +550,10 @@ dependency on this jar artifact:</p>
 </div>
 </div>
 <div class="paragraph">
-<p>The <code>org.jolokia.core.http.Agent</code> can be
+<p>The <code>org.jolokia.server.core.http.AgentServlet</code> can be
 subclassed, too in order to provide a custom restrictor or a
-custom log handler. See <a href="#security-restrictor">[security-restrictor]</a>
-for details.<sup class="footnote">[<a id="_footnoteref_1" class="footnote" href="#_footnotedef_1" title="View footnote.">1</a>]</sup></p>
+custom log handler. See <a href="../security.html#security-restrictor" class="xref page">Jolokia Restrictors</a>
+for details.</p>
 </div>
 <div class="paragraph">
 <p>Also, multiple Jolokia agents can be deployed in the same JVM
@@ -571,21 +565,16 @@ deployments it is important to use the
 distinguish multiple Jolokia MBeans by adding an extra
 property to those MBeans' names. This also needs to be done if
 multiple webapps containing Jolokia agents are deployed on
-the same Java EE server.</p>
+the same Jakarta EE server.</p>
 </div>
 </div>
-</div>
-</div>
-<div id="footnotes">
-<hr>
-<div class="footnote" id="_footnotedef_1">
-<a href="#_footnoteref_1">1</a>. Replace <code>org.jolokia.agent.osgi.http.AgentServlet</code> with <code>org.jolokia.core.http.AgentServlet</code> to use the servlet in a non-OSGi environment.
 </div>
 </div>
 </article>
   </div>
 <footer class="footer">
-  This page was built using the Antora default UI. The source code for this UI is licensed under the terms of the MPL-2.0 license.
+  This page was built using the Antora default UI. The source code for this UI is licensed under the terms of the MPL-2.0 license. | Copyright © 2010 -
+  2023 Roland Huß
 </footer>
 <script id="site-script" src="../../_/js/site.js" data-ui-root-path="../../_"></script>
 <script async src="../../_/js/vendor/highlight.js"></script>

@@ -121,7 +121,7 @@ MBean author which doesn&#8217;t seem to be often the case).</p>
 </div>
 </div>
 <div class="paragraph">
-<p>The <code>&lt;inner path&gt;</code>, as described in <a href="#paths">[paths]</a>
+<p>The <code>&lt;inner path&gt;</code>, as described in <a href="../jolokia_protocol.html#paths" class="xref page">Paths</a>
 specifies a subset of the complete response. You can
 use this to select a specific domain, MBean or
 attribute/operation. See the next section for the format of the
@@ -136,9 +136,9 @@ complete response.</p>
 <table class="tableblock frame-all grid-all stretch">
 <caption class="title">Table 1. POST list Request</caption>
 <colgroup>
-<col style="width: 33.3333%;">
-<col style="width: 33.3333%;">
-<col style="width: 33.3334%;">
+<col style="width: 15%;">
+<col>
+<col style="width: 30%;">
 </colgroup>
 <thead>
 <tr>
@@ -156,7 +156,7 @@ complete response.</p>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>path</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Inner path for accessing the value of a subset of the complete list
-<a href="#paths">[paths]</a>).</p></td>
+<a href="../jolokia_protocol.html#paths" class="xref page">Paths</a>).</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>java.lang/type=Memory/attr</code></p></td>
 </tr>
 </tbody>
@@ -167,7 +167,7 @@ complete response.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "type": "LIST",
+  "type": "list",
   "path": "java.lang/type=Memory"
 }</code></pre>
 </div>
@@ -250,6 +250,10 @@ bean only. For example, a request</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "request": {
+    "path": "java.lang/type=Memory",
+    "type": "list"
+  },
   "value": {
     "op": {
       "gc": {
@@ -258,35 +262,48 @@ bean only. For example, a request</p>
         "desc": "gc"
       }
     },
-    "class": "sun.management.MemoryImpl",
+    "notif": {
+      "javax.management.Notification": {
+        "types": [
+          "java.management.memory.threshold.exceeded",
+          "java.management.memory.collection.threshold.exceeded"
+        ],
+        "name": "javax.management.Notification",
+        "desc": "Memory Notification"
+      }
+    },
     "attr": {
-      "NonHeapMemoryUsage": {
-        "type": "javax.management.openmbean.CompositeData",
+      "ObjectPendingFinalizationCount": {
         "rw": false,
-        "desc": "NonHeapMemoryUsage"
+        "type": "int",
+        "desc": "ObjectPendingFinalizationCount"
       },
       "Verbose": {
-        "type": "boolean",
         "rw": true,
+        "type": "boolean",
         "desc": "Verbose"
       },
       "HeapMemoryUsage": {
-        "type": "javax.management.openmbean.CompositeData",
         "rw": false,
+        "type": "javax.management.openmbean.CompositeData",
         "desc": "HeapMemoryUsage"
       },
-      "ObjectPendingFinalizationCount": {
-        "type": "int",
+      "NonHeapMemoryUsage": {
         "rw": false,
-        "desc": "ObjectPendingFinalizationCount"
+        "type": "javax.management.openmbean.CompositeData",
+        "desc": "NonHeapMemoryUsage"
+      },
+      "ObjectName": {
+        "rw": false,
+        "type": "javax.management.ObjectName",
+        "desc": "ObjectName"
       }
-    }
+    },
+    "class": "sun.management.MemoryImpl",
+    "desc": "Information on the management interface of the MBean"
   },
   "status": 200,
-  "request": {
-    "type": "list",
-    "path": "java.lang/type=Memory"
-  }
+  "timestamp": 1702463340
 }</code></pre>
 </div>
 </div>
@@ -308,7 +325,8 @@ meaning and are dummy values.</p>
 </article>
   </div>
 <footer class="footer">
-  This page was built using the Antora default UI. The source code for this UI is licensed under the terms of the MPL-2.0 license.
+  This page was built using the Antora default UI. The source code for this UI is licensed under the terms of the MPL-2.0 license. | Copyright © 2010 -
+  2023 Roland Huß
 </footer>
 <script id="site-script" src="../../_/js/site.js" data-ui-root-path="../../_"></script>
 <script async src="../../_/js/vendor/highlight.js"></script>

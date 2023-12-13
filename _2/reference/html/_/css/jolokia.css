@@ -1,9 +1,26 @@
 
+@media screen and (min-width: 1024px) {
+  html {
+    font-size: 11px
+  }
+}
+@media screen and (min-width: 1216px) {
+  aside.toc.sidebar {
+    flex-basis: 18rem;
+  }
+}
+
 .doc {
   max-width: 90rem;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
 }
 .nav-container {
+  font-size: 1rem;
+}
+.doc table.tableblock {
+  font-size: 1rem;
+}
+.doc p code {
   font-size: 1rem;
 }
 
@@ -22,6 +39,10 @@ nav.nav-menu h3.title a {
 a { text-decoration: none; }
 a:focus { outline: 1px dotted }
 a:link, a:visited { color:#a20000; }
+a.externalLink {
+  background: url("../img/external.png") right center no-repeat;
+  padding-right: 15px;
+}
 
 a.nav-link {
   font-size: 1.2rem;
@@ -45,4 +66,16 @@ footer.footer {
   line-height: 2.5rem;
   border-top: 1px solid #e1e1e1;
   text-align: right;
+}
+
+code {
+  background: transparent !important;
+}
+
+mark {
+  background-color: #3366aa;
+  color: white;
+  padding: 0 5px;
+  border-radius: 5px;
+  font-weight: bold;
 }

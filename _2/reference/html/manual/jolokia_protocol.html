@@ -124,6 +124,10 @@ that many web servers log the requested path of every request, including
 parameters passed to a GET request, so sending messages over GET
 often bloats server logs.</p>
 </div>
+<div class="paragraph">
+<p>Another important aspect is that some ObjectNames may be complex (for example in Camel or ActiveMQ/Artemis) and POST
+request is much more suitable when working with such MBeans.</p>
+</div>
 </div>
 </div>
 <div class="paragraph">
@@ -133,20 +137,20 @@ completely in the URL. Or as a POST request where the request is
 put into a JSON payload in the HTTP request&#8217;s body. GET based
 requests are mostly suitable for simple use cases and for
 testing the agent via a browser. The focus here is on
-simplicity.  POST based requests uses a JSON representation of
+simplicity. POST based requests uses a JSON representation of
 the request within the HTTP body. They are more appropriate for
 complex requests and provide some additional features (e.g. bulk
 requests are only possible with POST).</p>
 </div>
 <div class="paragraph">
-<p>The response returned by the agent uses always JSON for its data
+<p>The response returned by the agent always uses JSON for its data
 representation. It has the same format regardless whether GET or
 POST requests are used.</p>
 </div>
 <div class="paragraph">
 <p>The rest of this chapter is divided into two parts: First, the
-general structure of requests and responses are explained after
-which the representation of Jolokia supported operations defined.</p>
+general structure of requests and responses is explained after
+which the representation of Jolokia supported operations is defined.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -158,7 +162,7 @@ which the representation of Jolokia supported operations defined.</p>
 Unfortunately the term <em>operation</em> is
 used in different contexts which should be
 distinguished from one another. <em>Jolokia operations</em> denote
-the various kind of Jolokia requests, whereas <em>JMX
+the various kind of Jolokia requests (<code>read</code>, <code>exec</code>, &#8230;&#8203;), whereas <em>JMX
 operations</em> are methods which can be invoked on an JMX
 MBean. Whenever the context requires it, this documents uses
 <em>Jolokia</em> or <em>JMX</em> as prefix.
@@ -174,22 +178,75 @@ MBean. Whenever the context requires it, this documents uses
 <div class="paragraph">
 <p>Jolokia knows about two different styles of handling
 requests, which are distinguished by the HTTP method used: GET
-or POST. Regardless of what method is used, the agent doesn&#8217;t
+or POST. Regardless of which method is used, the agent doesn&#8217;t
 keep any state on the server side (except of course that
 MBeans are obviously stateful most of the time). So in this aspect, the
 communication can be considered
-<a href="https://en.wikipedia.org/wiki/Representational_State_Transfer">REST</a>
-like <sup class="footnote" id="_footnote_rest-comment">[<a id="_footnoteref_1" class="footnote" href="#_footnotedef_1" title="View footnote.">1</a>]</sup>.</p>
+<a href="https://en.wikipedia.org/wiki/Representational_State_Transfer" class="externalLink">REST</a>
+like<sup class="footnote" id="_footnote_rest-comment">[<a id="_footnoteref_1" class="footnote" href="#_footnotedef_1" title="View footnote.">1</a>]</sup>.</p>
 </div>
 <div class="sect2">
-<h3 id="get-request"><a class="anchor" href="#get-request"></a>GET requests</h3>
+<h3 id="_some_servlet_api_concepts"><a class="anchor" href="#_some_servlet_api_concepts"></a>Some Servlet API concepts</h3>
+<div class="paragraph">
+<p>Before proceeding, let&#8217;s review some important concepts from <a href="https://jakarta.ee/specifications/servlet/5.0/jakarta-servlet-spec-5.0" class="externalLink">Jakarta Servlet Specification 5</a>.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://jakarta.ee/specifications/servlet/5.0/jakarta-servlet-spec-5.0#request-path-elements" class="externalLink">Chapter 3.5. Request Path Elements</a> splits full URI used to access Java Servlet container into three parts (query string is not included here):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>requestURI = contextPath + servletPath + pathInfo</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>These 4 elements are accessed using these API calls:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>jakarta.servlet.http.HttpServletRequest.getRequestURI()</code></p>
+</li>
+<li>
+<p><code>jakarta.servlet.http.HttpServletRequest.getContextPath()</code></p>
+</li>
+<li>
+<p><code>jakarta.servlet.http.HttpServletRequest.getServletPath()</code></p>
+</li>
+<li>
+<p><code>jakarta.servlet.http.HttpServletRequest.getPathInfo()</code></p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Request URI</dt>
+<dd>
+<p>this is simply full URI without query string</p>
+</dd>
+<dt class="hdlist1">Context path</dt>
+<dd>
+<p>this fragment selects the web application (one of potentially many running in single Servlet container). On Tomcat it is derived from the file name of WAR archive in <code>webapps/</code> directory. It may be <code>/</code> (for special <code>ROOT.war</code> on Tomcat).</p>
+</dd>
+<dt class="hdlist1">Servlet path</dt>
+<dd>
+<p>this is more complicated, as it indicates part of the URI that is used to select single servlet within single web application. When servlet mapping (<code>&lt;servlet-mapping&gt;/&lt;url-pattern&gt;</code> element in <code>WEB-INF/web.xml</code>) is <code>/path</code> or <code>/path/*</code>, servlet path is <code>/path</code>. Jolokia Agent WAR uses <code>/*</code>  mapping, so servlet path is empty.</p>
+</dd>
+<dt class="hdlist1">Path info</dt>
+<dd>
+<p>this is the URI part after servlet path, so for Jolokia, it is simply everything after <code>/jolokia</code> (when WAR agent is deployed to Tomcat as <code>webapps/jolokia.war</code>).</p>
+</dd>
+</dl>
+</div>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="get-requests"><a class="anchor" href="#get-requests"></a>GET requests</h3>
 <div class="paragraph">
 <p>The simplest way to access the Jolokia agent is by sending
 HTTP GET requests. These requests encode all their
-parameters within the access URL. Typically, Jolokia uses
-the path-info part of an URL to extract the
-parameters. Within the path-info, each part is separated by
-a slash (<code>/</code>).  In general, the request URL
+parameters within the access URL. Jolokia uses
+the <em>path info</em> part of an URL to extract the
+parameters. Within the <em>path info</em>, each part is separated by
+a slash (<code>/</code>). In general, the request URL
 looks like</p>
 </div>
 <div class="listingblock">
@@ -199,13 +256,20 @@ looks like</p>
 </div>
 <div class="paragraph">
 <p>The <code>&lt;base-url&gt;</code> specifies the URL
-under which the agent is accessible. It normally looks like
-<code><a href="http://localhost:8080/jolokia" class="bare">http://localhost:8080/jolokia</a></code>, but depends on
-your deployment setup. The last part of this URL is the
+under which the agent is accessible and consists of protocol (<code>http</code> or <code>https</code>), host, port and
+a <em>context path</em>.</p>
+</div>
+<div class="paragraph">
+<p>It normally looks like
+<code>http://localhost:8080/jolokia</code>, but depends on
+your deployment setup.
+The last part of such URL is the
 <em>context root</em> of the deployed agent,
 which by default is based on the agent&#8217;s filename
-(e.g. <code>jolokia.war</code>).
-<code>&lt;type&gt;</code> specifies one of the
+(e.g. <code>jolokia.war</code>).</p>
+</div>
+<div class="paragraph">
+<p><code>&lt;type&gt;</code> specifies one of the
 supported Jolokia operations (described in the next
 section), followed by one or more operation-specific
 parameters separated by slashes.</p>
@@ -224,9 +288,14 @@ reachable under the base URL
 <pre>http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage</pre>
 </div>
 </div>
+</div>
+<div class="sect2">
+<h3 id="_escaping_rules_in_get_requests"><a class="anchor" href="#_escaping_rules_in_get_requests"></a>Escaping rules in GET requests</h3>
+<div class="paragraph">
+<p><mark>TODO</mark> escaping</p>
+</div>
 <div class="sidebarblock">
 <div class="content">
-<div class="title">Why escaping ?</div>
 <div class="paragraph">
 <p>You might wonder why simple URI encoding isn&#8217;t enough for
 escaping slashes. The reason is that JBoss/Tomcat has a
@@ -321,14 +390,14 @@ backslashes can not be sent as part of an URL at all.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="post-request"><a class="anchor" href="#post-request"></a>POST requests</h3>
+<h3 id="post-requests"><a class="anchor" href="#post-requests"></a>POST requests</h3>
 <div class="paragraph">
 <p>POST requests are the most powerful way to communicate
 with the Jolokia agent. There are fewer escaping issues and it
 allows for features which are not available with GET
-requests. POST requests uses a fixed URL and put their payload
+requests. POST requests use a single Jolokia URL and put their payload
 within the HTTP request&#8217;s body. This payload is represented
-in <a href="https://www.json.org">JSON</a>, a
+in <a href="https://www.json.org" class="externalLink">JSON</a>, a
 data serialization format originating from the JavaScript
 world.</p>
 </div>
@@ -351,7 +420,7 @@ Processing parameters are always optional, though.</p>
 <div class="paragraph">
 <p>A sample read request in JSON format looks like the
 following example. It has a <code>type</code>
-"read"
+<code>read</code>
 (case doesn&#8217;t matter) and the three attributes
 <code>mbean</code>, <code>attribute</code>
 and <code>path</code> which are specific to a read
@@ -364,7 +433,7 @@ request.</p>
   "type" : "read",
   "mbean" : "java.lang:type=Memory",
   "attribute" : "HeapMemoryUsage",
-  "path" : "used",
+  "path" : "used"
 }</code></pre>
 </div>
 </div>
@@ -382,7 +451,7 @@ Jolokia requests into a JSON array:</p>
     "type" : "read",
     "attribute" : "HeapMemoryUsage",
     "mbean" : "java.lang:type=Memory",
-    "path" : "used",
+    "path" : "used"
   },
   {
     "type" : "search",
@@ -402,13 +471,13 @@ in same order as the requests in the initial bulk request.</p>
 <div class="paragraph">
 <p>Responses are always encoded in UTF-8 JSON, regardless whether the
 request was a GET or POST request.  In general, two kinds of
-responses can be classified: In the normal case, a HTTP
-Response with response code 200 is returned, containing the
+responses can be classified: In the normal case, an HTTP
+Response with response code <code>200</code> is returned, containing the
 result of the operation as a JSON payload. In case of an
-error, a 4xx or 5xx code will be returned and the JSON
+error, a <code>4xx</code> or <code>5xx</code> code will be returned and the JSON
 payload contains details about the error
-occurred (e.g. 404 means "not found"). (See
-<a href="https://en.wikipedia.org/wiki/List_of_HTTP_status_codes">this page</a>
+occurred (e.g. <code>404</code> means "not found"). (See
+<a href="https://en.wikipedia.org/wiki/List_of_HTTP_status_codes" class="externalLink">this page</a>
 for more information about HTTP error codes..). If the processing option
 <code>ifModifiedSince</code> is given and the requested
 value as been not changed since then, a response code of 304 is returned.
@@ -422,7 +491,7 @@ for each request type except for the
 specific.</p>
 </div>
 <div class="paragraph">
-<p>The format of a single Jolokia response is</p>
+<p>The format of a single Jolokia response is:</p>
 </div>
 <div id="response-example" class="listingblock">
 <div class="title">JSON Response</div>
@@ -430,7 +499,7 @@ specific.</p>
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
   "value": .... ,
   "status" : 200,
-  "timestamp" : 1244839118,
+  "timestamp" : 1702391068,
   "request": {
     "type": ...,
     ....
@@ -438,7 +507,7 @@ specific.</p>
   "history": [
     {
       "value": ... ,
-      "timestamp" : 1244839045
+      "timestamp" : 1702391069
     },
     ....
   ]
@@ -449,7 +518,7 @@ specific.</p>
 <p>For successful requests, the <code>status</code> is
 always <code>200</code> (the HTTP success code). The
 <code>timestamp</code> contains the epoch
-time <sup class="footnote" id="_footnote_epoch-time">[<a id="_footnoteref_3" class="footnote" href="#_footnotedef_3" title="View footnote.">3</a>]</sup>
+time<sup class="footnote" id="_footnote_epoch-time">[<a id="_footnoteref_3" class="footnote" href="#_footnotedef_3" title="View footnote.">3</a>]</sup>
 when the
 request has been handled. The request leading to this
 response can be found under the attribute
@@ -472,12 +541,9 @@ response looks like</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "status": 400,
-  "error_type": "java.lang.IllegalArgumentException",
-  "error": "java.lang.IllegalArgumentException: Invalid request type 'java.lang:type=Memory'",
-  "stacktrace": "java.lang.IllegalArgumentException: Invalid request type 'java.lang:type=Memory'\n
-    \tat org.cpan.jmx4perl.JmxRequest.extractType(Unknown Source)\n
-    \tat org.cpan.jmx4perl.JmxRequest.&lt;init&gt;(Unknown Source) ...."
+  "error_type": "java.lang.UnsupportedOperationException",
+  "error": "java.lang.UnsupportedOperationException : No type with name 'java.lang:type=Memory' exists",
+  "status": 400
 }</code></pre>
 </div>
 </div>
@@ -498,13 +564,13 @@ some errors.</p>
 <div class="paragraph">
 <p>I.e. the <code>status</code> has a code in the range
 <code>400 .. 499</code> or <code>500 .. 599</code>
-<a href="https://en.wikipedia.org/wiki/List_of_HTTP_status_codes">as it is specified for HTTP return codes</a>.
+<a href="https://en.wikipedia.org/wiki/List_of_HTTP_status_codes" class="externalLink">as it is specified for HTTP return codes</a>.
 The <code>error</code> member contains an error
 description. This is typically the message of an exception
 occurred on the agent side<sup class="footnote" id="_footnote_mbeanexception-wrapping">[<a id="_footnoteref_4" class="footnote" href="#_footnotedef_4" title="View footnote.">4</a>]</sup>. Finally, <code>error_type</code> contains the Java class name
 of the exception occurred.
 The <code>stacktrace</code> contains a Java stacktrace
-occurred on the server side (if any stacktrace is available).</p>
+occurred on the server side (if any stacktrace is available and <code>includeStackTrace</code> option is set to <code>true</code>).</p>
 </div>
 <div class="paragraph">
 <p>For each type of operation, the format of the
@@ -524,21 +590,25 @@ is best explained by an example:</p>
 <p>The attribute <code>HeapMemoryUsage</code> of the MBean
 <code>java.lang:type=Memory</code> can be
 requested with the URL
-<code><a href="http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage" class="bare">http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage</a></code>
+<code>http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage</code>
 which returns a complex JSON structure like</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "status" : 200,
-  "value" :  {
-    "committed" : 18292736,
-    "used" : 15348352,
-    "max" : 532742144,
-    "init" : 0
+  "request": {
+    "mbean": "java.lang:type=Memory",
+    "attribute": "HeapMemoryUsage",
+    "type": "read"
   },
-  "request" : { .... },
-  "timestamp" : ....
+  "value": {
+    "init": 524288000,
+    "committed": 532676608,
+    "max": 8334082048,
+    "used": 27145000
+  },
+  "status": 200,
+  "timestamp": 1702392020
 }</code></pre>
 </div>
 </div>
@@ -546,16 +616,21 @@ which returns a complex JSON structure like</p>
 <p>In order to get to the value for used heap memory you should
 specify an inner path <code>used</code>, so that the
 request
-<code><a href="http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage/used" class="bare">http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage/used</a></code>
-results in a response of `15348352`for the value:</p>
+<code>http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage/used</code>
+results in a response of `27145000`for the value:</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "status" : 200,
-  "value" :  15348352,
-  "request" : { .... },
-  "timestamp" : ....
+  "request": {
+    "path": "used",
+    "mbean": "java.lang:type=Memory",
+    "attribute": "HeapMemoryUsage",
+    "type": "read"
+  },
+  "value": 27145000,
+  "status": 200,
+  "timestamp": 1702392075
 }</code></pre>
 </div>
 </div>
@@ -563,6 +638,9 @@ results in a response of `15348352`for the value:</p>
 <p>If the attribute contains arrays at some level, use a numeric
 index (0 based) as part of the inner path if you want to
 traverse into this array.</p>
+</div>
+<div class="paragraph">
+<p><mark>TODO</mark> escaping</p>
 </div>
 <div class="paragraph">
 <p>For both, GET and POST requests, paths must be escaped as
@@ -619,8 +697,8 @@ initiated by giving a list of attributes to the request. For a
 POST request this is an JSON array, for a GET request it is a
 comma separated list of attribute names (where slashes and
 exclamation marks must be escaped as described in
-<a href="#escape-rules">Table 1, &#8220;Escaping rules&#8221;</a>). If no attribute is provided, then all
-attributes are fetched.  The MBean name can be given as a pattern
+<a href="#escape-rules">Escaping rules</a>). If no attribute is provided, then all
+attributes are fetched. The MBean name can be given as a pattern
 in which case the attributes are read on all matching MBeans. If a
 MBean pattern and multiple attributes are requested, then only the
 value of attributes which matches both are returned, the others
@@ -629,24 +707,48 @@ are ignored.</p>
 <div class="paragraph">
 <p>Paths can be used with pattern and multiple attribute read as well. In order to
 skip the extra value levels introduced by a pattern read, the wildcard
-<code>\*</code> can be used. For example, a read request for the MBean Pattern
+<code>*</code> can be used. For example, a read request for the MBean Pattern
 <code>java.lang:type=GarbageCollector,*</code> for the Attribute <code>LastGcInfo</code>
 returns a complex structure holding information about the last garbage collection. If one is
-interested only for the duration of the garbage collection, a path <code>used</code> could be used if
-this request wouldn&#8217;t be a pattern request (i.e. refers a specific, single MBean). But in this case since a
-nested map with MBean and Attribute names is returned, the path <code>*/*/used</code> has to be used
-in order to skip the two extra levels for applying the path. The two levels are returned nevertheless, though.
+looking only for the used memory during garbage collection, a path <code>used</code> could be used if
+this request wouldn&#8217;t be a pattern request (i.e. refers a specific, single MBean).
+But in this case since a
+nested map with MBean and Attribute names is returned, the path <code>*/*/*/*/used</code> has to be used
+in order to skip the extra levels (for different heaps/spaces) for applying the path.
 Note that in the following example the final value is <em>not</em> the full GC-Info but only the
-value of its <code>used</code> entry:</p>
+value of its <code>used</code> entry for different spaces:</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">"value": {
-  "java.lang:name=PS MarkSweep,type=GarbageCollector": {
-    "LastGcInfo": null
-  },
-  "java.lang:name=PS Scavenge,type=GarbageCollector": {
-    "LastGcInfo": 7
+  "java.lang:name=G1 Young Generation,type=GarbageCollector": {
+    "LastGcInfo": {
+      "duration": 3,
+      "memoryUsageBeforeGc": {
+        "CodeHeap 'profiled nmethods'": 4780288,
+        "G1 Old Gen": 4934656,
+        "CodeHeap 'non-profiled nmethods'": 928256,
+        "G1 Survivor Space": 4194304,
+        "Compressed Class Space": 1331528,
+        "Metaspace": 12812816,
+        "G1 Eden Space": 20971520,
+        "CodeHeap 'non-nmethods'": 1271296
+      },
+      "GcThreadCount": 5,
+      "startTime": 786,
+      "endTime": 789,
+      "id": 2,
+      "memoryUsageAfterGc": {
+        "CodeHeap 'profiled nmethods'": 4780288,
+        "G1 Old Gen": 9082880,
+        "CodeHeap 'non-profiled nmethods'": 928256,
+        "G1 Survivor Space": 2597960,
+        "Compressed Class Space": 1331528,
+        "Metaspace": 12812816,
+        "G1 Eden Space": 0,
+        "CodeHeap 'non-nmethods'": 1271296
+      }
+    }
   }
 }</code></pre>
 </div>
@@ -670,7 +772,7 @@ and the leaves of the matched parts.</p>
 </li>
 <li>
 <p>If used with wildcards, paths behave also like
-filters. E.g. you can use a path <code>*/*/used</code> on
+filters. E.g. you can use a path <code>*/*/*/*/used</code> on
 the MBean pattern <code>java.lang:*</code> and get back
 only that portions which contains "used" as key, all others are
 ignored.</p>
@@ -690,9 +792,9 @@ ignored.</p>
 <table class="tableblock frame-all grid-all stretch">
 <caption class="title">Table 2. GET Read Request</caption>
 <colgroup>
-<col style="width: 33.3333%;">
-<col style="width: 33.3333%;">
-<col style="width: 33.3334%;">
+<col style="width: 15%;">
+<col>
+<col style="width: 30%;">
 </colgroup>
 <thead>
 <tr>
@@ -705,7 +807,7 @@ ignored.</p>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;mbean name&gt;</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">The
-<a href="https://download.oracle.com/javase/6/docs/api/javax/management/ObjectName.html">ObjectName</a>
+<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/ObjectName.html" class="externalLink">ObjectName</a>
 of the MBean for which the attribute should be fetched. It
 contains two parts: A domain part and a list of properties
 which are separated by <code>:</code>. Properties
@@ -717,9 +819,9 @@ multiple MBeans are queried for the attribute value.</p></td>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;attribute name&gt;</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Name of attribute to read. This can be a list of Attribute
-names separated by comma. Slashes and exclamations marks need
-to be escaped as described in &lt;xref
-<a href="#escape-rules">Table 1, &#8220;Escaping rules&#8221;</a>. If no attribute is given, all
+names separated by comma. According to URI compliance, some special characters need to be
+escaped as described in
+<a href="#escape-rules">Escaping rules</a>. If no attribute is given, all
 attributes are read.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>HeapMemoryUsage</code></p></td>
 </tr>
@@ -749,17 +851,18 @@ following table.</p>
 <table class="tableblock frame-all grid-all stretch">
 <caption class="title">Table 3. POST Read Request</caption>
 <colgroup>
-<col style="width: 33.3333%;">
-<col style="width: 33.3333%;">
-<col style="width: 33.3334%;">
+<col style="width: 15%;">
+<col>
+<col style="width: 30%;">
 </colgroup>
-<tbody>
+<thead>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Key</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Description</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Example</p>
-<p class="tableblock">&lt;tr&gt;</p></td>
+<th class="tableblock halign-left valign-top">Key</th>
+<th class="tableblock halign-left valign-top">Description</th>
+<th class="tableblock halign-left valign-top">Example</th>
 </tr>
+</thead>
+<tbody>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>type</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><strong><code>read</code></strong></p></td>
@@ -775,7 +878,12 @@ following table.</p>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Attribute name to read or a JSON array containing a list
 of attributes to read. No attribute is given, then all attributes
 are read.</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>HeapMemoryUsage</code>, <code>[ "HeapMemoryUsage", "NonHeapMemoryUsage" ]</code></p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p><code>HeapMemoryUsage</code></p>
+</div>
+<div class="paragraph">
+<p><code>[ "HeapMemoryUsage", "NonHeapMemoryUsage" ]</code></p>
+</div></div></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>path</code></p></td>
@@ -803,41 +911,41 @@ are read.</p></td>
 <div class="paragraph">
 <p>The general format of the JSON response is described in
 <a href="#responses">Responses</a> in detail.  A typical response for an
-attribute read operation for an URL like</p>
+attribute read operation for a GET request with URL like:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage/</pre>
+<pre>http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage</pre>
 </div>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "value": {
-    "init": 134217728,
-    "max": 532742144,
-    "committed": 133365760,
-    "used": 19046472
-  },
-  "status": 200,
-  "timestamp": 1244839118,
   "request": {
     "mbean": "java.lang:type=Memory",
-    "type": "read",
-    "attribute": "HeapMemoryUsage"
+    "attribute": "HeapMemoryUsage",
+    "type": "read"
   },
   "history": [
     {
       "value": {
-        "init": 134217728,
-        "max": 532742144,
-        "committed": 133365760,
-        "used": 18958208
+        "init": 524288000,
+        "committed": 532676608,
+        "max": 8334082048,
+        "used": 78027104
       },
-      "timestamp": 1244839045
+      "timestamp": 1702454713
     },
-    ....
-  ]
+    ...
+  ],
+  "value": {
+    "init": 524288000,
+    "committed": 532676608,
+    "max": 8334082048,
+    "used": 86415712
+  },
+  "status": 200,
+  "timestamp": 1702454822
 }</code></pre>
 </div>
 </div>
@@ -848,7 +956,7 @@ types are serialized into a JSON object. See
 <a href="#serialization">Object serialization</a> for detail on object serialization.</p>
 </div>
 <div class="paragraph">
-<p>For a read request to a single MBean with multiple attributes, the
+<p>For a read request of a single MBean with multiple attributes, the
 returned value is a JSON object with the attribute names as keys
 and their values as values. For example a request to
 <code><a href="http://localhost:8080/jolokia/read/java.lang:type=Memory" class="bare">http://localhost:8080/jolokia/read/java.lang:type=Memory</a></code>
@@ -857,22 +965,31 @@ leads to</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "timestamp": 1317151518,
-  "status": 200,
   "request": {
     "mbean": "java.lang:type=Memory",
     "type": "read"
   },
   "value": {
-    "Verbose": false,
     "ObjectPendingFinalizationCount": 0,
-    "NonHeapMemoryUsage": {
-      "max": 136314880, "committed": 26771456, "init": 24317952, "used": 15211720
-    },
+    "Verbose": false,
     "HeapMemoryUsage": {
-      "max": 129957888, "committed": 129957888, "init": 0, "used": 2880008
+      "init": 524288000,
+      "committed": 532676608,
+      "max": 8334082048,
+      "used": 94804320
+    },
+    "NonHeapMemoryUsage": {
+      "init": 7667712,
+      "committed": 38928384,
+      "max": -1,
+      "used": 36905512
+    },
+    "ObjectName": {
+      "objectName": "java.lang:type=Memory"
     }
-  }
+  },
+  "status": 200,
+  "timestamp": 1702454894
 }</code></pre>
 </div>
 </div>
@@ -887,8 +1004,6 @@ returns something like</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "timestamp": 1317151980,
-  "status": 200,
   "request": {
     "mbean": "java.lang:type=*",
     "attribute": "HeapMemoryUsage",
@@ -897,10 +1012,15 @@ returns something like</p>
   "value": {
     "java.lang:type=Memory": {
       "HeapMemoryUsage": {
-        "max": 129957888, "committed": 129957888, "init": 0, "used": 3080912
+        "init": 524288000,
+        "committed": 532676608,
+        "max": 8334082048,
+        "used": 103192928
       }
     }
-  }
+  },
+  "status": 200,
+  "timestamp": 1702454978
 }</code></pre>
 </div>
 </div>
@@ -915,7 +1035,7 @@ additional <code>value</code> element.</p>
 <div class="sect3">
 <h4 id="get-write"><a class="anchor" href="#get-write"></a>GET write request</h4>
 <div class="paragraph">
-<p>Writing an attribute wit an GET request, an URL with the following format has to be used:</p>
+<p>Writing an attribute with a GET request, an URL with the following format has to be used:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -925,9 +1045,9 @@ additional <code>value</code> element.</p>
 <table class="tableblock frame-all grid-all stretch">
 <caption class="title">Table 4. GET Write Request</caption>
 <colgroup>
-<col style="width: 33.3333%;">
-<col style="width: 33.3333%;">
-<col style="width: 33.3334%;">
+<col style="width: 15%;">
+<col>
+<col style="width: 30%;">
 </colgroup>
 <thead>
 <tr>
@@ -954,12 +1074,12 @@ additional <code>value</code> element.</p>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>true</code></p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;path&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;inner path&gt;</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Inner path for accessing the parent object on which to set the value.
 (See also <a href="#paths">Paths</a>). Note, that this is
 <em>not</em> the path to the attribute itself,
 but to the object carrying this attribute. With a given
-path it is possible to deeply set an value on a complex
+path it is possible to deeply set a value on a complex
 object.</p></td>
 <td class="tableblock halign-left valign-top"></td>
 </tr>
@@ -983,9 +1103,9 @@ something like</p>
 <table class="tableblock frame-all grid-all stretch">
 <caption class="title">Table 5. POST Write Request</caption>
 <colgroup>
-<col style="width: 33.3333%;">
-<col style="width: 33.3333%;">
-<col style="width: 33.3334%;">
+<col style="width: 15%;">
+<col>
+<col style="width: 30%;">
 </colgroup>
 <thead>
 <tr>
@@ -1024,10 +1144,9 @@ value. See <a href="#paths">Paths</a> for more on inner paths.</p></td>
 </tr>
 </tbody>
 </table>
-<div class="paragraph">
-<p>[#response-write
-==== Write response</p>
 </div>
+<div class="sect3">
+<h4 id="response-write"><a class="anchor" href="#response-write"></a>Write response</h4>
 <div class="paragraph">
 <p>As response for a write operation the old attribute&#8217;s value is
 returned. For a request</p>
@@ -1044,14 +1163,15 @@ off for class loading at the time this request was sent)</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "value": "false",
-  "status": 200,
   "request": {
     "mbean": "java.lang:type=ClassLoading",
-    "type": "write",
     "attribute": "Verbose",
+    "type": "write",
     "value": "true"
-  }
+  },
+  "value": false,
+  "status": 200,
+  "timestamp": 1702455595
 }</code></pre>
 </div>
 </div>
@@ -1065,9 +1185,9 @@ the additional <code>value</code> element in the request
 <div class="sect2">
 <h3 id="exec"><a class="anchor" href="#exec"></a>Executing JMX operations (exec)</h3>
 <div class="paragraph">
-<p>Beside attribute provides a way for the execution of exposed JMX
-operations with optional arguments. The same as for writing
-attributes, Jolokia must be able to serialize the arguments. See
+<p>With Jolokia we can also execute exposed JMX
+operations with optional arguments. Just as when writing
+attributes, Jolokia must be able to serialize the operation arguments. See
 <a href="#serialization">Object serialization</a> for details. Execution of
 overloaded methods is supported. The JMX specifications recommends
 to avoid overloaded methods when exposing them via JMX, though.</p>
@@ -1085,9 +1205,9 @@ to avoid overloaded methods when exposing them via JMX, though.</p>
 <table class="tableblock frame-all grid-all stretch">
 <caption class="title">Table 6. GET Exec Request</caption>
 <colgroup>
-<col style="width: 33.3333%;">
-<col style="width: 33.3333%;">
-<col style="width: 33.3334%;">
+<col style="width: 15%;">
+<col>
+<col style="width: 30%;">
 </colgroup>
 <thead>
 <tr>
@@ -1116,7 +1236,7 @@ as signature.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;arg1&gt;</code>, <code>&lt;arg2&gt;</code>, <code>&#8230;&#8203;</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">String representation for the arguments required to execute this
 operation. Only certain data types can be used here as
-described in &lt;serialization-request&gt;&gt;.</p></td>
+described in <a href="#serialization-request">Request parameter serialization</a>.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>/true/true/</code></p></td>
 </tr>
 </tbody>
@@ -1135,9 +1255,9 @@ described in &lt;serialization-request&gt;&gt;.</p></td>
 <table class="tableblock frame-all grid-all stretch">
 <caption class="title">Table 7. POST Exec Request</caption>
 <colgroup>
-<col style="width: 33.3333%;">
-<col style="width: 33.3333%;">
-<col style="width: 33.3334%;">
+<col style="width: 15%;">
+<col>
+<col style="width: 30%;">
 </colgroup>
 <thead>
 <tr>
@@ -1179,27 +1299,26 @@ arguments are for):</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "type": "EXEC",
+  "type": "exec",
   "mbean": "java.lang:type=Threading",
-  "operation": "dumpAllThreads",
+  "operation": "dumpAllThreads(boolean, boolean)",
   "arguments": [ true, true ]
 }</code></pre>
 </div>
 </div>
-<div class="paragraph">
-<p>[#response-exec
-==== Exec response</p>
 </div>
+<div class="sect3">
+<h4 id="response-exec"><a class="anchor" href="#response-exec"></a>Exec response</h4>
 <div class="paragraph">
 <p>For an <code>exec</code> operation, the response
 contains the return value of the
 operation. <code>null</code> is returned if either the
 operation returns a null value or the operation is declared as
-void. A typical response for an URL like</p>
+void. A typical response for an URL like (mind that double quote (<code>"</code>) has to be encoded with <code>%22</code>):</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>http://localhost:8080/jolokia/exec/java.util.logging:type=Logging/setLoggerLevel/global/INFO</pre>
+<pre>http://localhost:8080/jolokia/exec/java.util.logging:type=Logging/setLoggerLevel/%22%22/INFO</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1208,19 +1327,23 @@ void. A typical response for an URL like</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "request": {
+    "mbean": "java.util.logging:type=Logging",
+    "arguments": [
+      "",
+      "INFO"
+    ],
+    "type": "exec",
+    "operation": "setLoggerLevel"
+  },
   "value": null,
   "status": 200,
-  "request": {
-    "type": "exec",
-    "mbean": "java.util.logging:type=Logging",
-    "operation": "setLoggerLevel",
-    "arguments": [ "global", "INFO" ]
-  }
+  "timestamp": 1702456520
 }</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>The return value get serialized as described in <a href="#serialization">Object serialization</a>.</p>
+<p>The return value get serialized as described in <a href="#serialization-request">Request parameter serialization</a>.</p>
 </div>
 </div>
 </div>
@@ -1228,7 +1351,7 @@ void. A typical response for an URL like</p>
 <h3 id="search"><a class="anchor" href="#search"></a>Searching MBeans (search)</h3>
 <div class="paragraph">
 <p>With the Jolokia search operation the agent can be queried for
-MBeans with a given pattern.  Searching will be performed on every
+MBeans matching a given pattern. Searching will be performed on every
 <code>MBeanServer</code> found by the agent.</p>
 </div>
 <div class="sect3">
@@ -1248,12 +1371,12 @@ specifying the search parameter like in</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>http://localhost:8080/jolokia/search/*:j2eeType=J2EEServer,*</pre>
+<pre>http://localhost:8080/jolokia/search/*:j2eeType=Servlet,*</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>You can use patterns as described &lt;ulink
-<a href="https://java.sun.com/j2se/1.5.0/docs/api/javax/management/ObjectName.html">here</a>,
+<p>You can use patterns as described
+<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/ObjectName.html" class="externalLink">here</a>,
 i.e. it may contain wildcards like <code>*</code> and
 <code>?</code>. The Mbean names matching the query
 are returned as a list within the response.</p>
@@ -1267,9 +1390,9 @@ are returned as a list within the response.</p>
 <table class="tableblock frame-all grid-all stretch">
 <caption class="title">Table 8. POST Search Request</caption>
 <colgroup>
-<col style="width: 33.3333%;">
-<col style="width: 33.3333%;">
-<col style="width: 33.3334%;">
+<col style="width: 15%;">
+<col>
+<col style="width: 30%;">
 </colgroup>
 <thead>
 <tr>
@@ -1298,7 +1421,7 @@ domain <code>java.lang</code></p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "type": "SEARCH",
+  "type": "search",
   "mbean": "java.lang:*"
 }</code></pre>
 </div>
@@ -1315,27 +1438,37 @@ list if there was no match.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>http://localhost:8888/jolokia/search/*:j2eeType=J2EEServer,*</pre>
+<pre>http://localhost:8888/jolokia/search/*:j2eeType=Servlet,*</pre>
 </div>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "request": {
+    "mbean": "*:j2eeType=Servlet,*",
+    "type": "search"
+  },
   "value": [
-    "jboss.management.local:j2eeType=J2EEServer,name=Local"
+    "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/manager,j2eeType=Servlet,name=Status",
+    "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/manager,j2eeType=Servlet,name=JMXProxy",
+    "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/manager,j2eeType=Servlet,name=jsp",
+    "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/manager,j2eeType=Servlet,name=HTMLManager",
+    "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/jolokia,j2eeType=Servlet,name=jsp",
+    "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/,j2eeType=Servlet,name=default",
+    "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/jolokia,j2eeType=Servlet,name=jolokia-agent",
+    "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/,j2eeType=Servlet,name=jsp",
+    "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/jolokia,j2eeType=Servlet,name=default",
+    "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/manager,j2eeType=Servlet,name=Manager",
+    "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/manager,j2eeType=Servlet,name=default"
   ],
   "status": 200,
-  "timestamp": 1245305648,
-  "request": {
-    "mbean": "*:j2eeType=J2EEServer,*",
-    "type": "search"
-  }
+  "timestamp": 1702458409
 }</code></pre>
 </div>
 </div>
 <div class="paragraph">
 <p>The returned MBean names are properly
-<a href="https://download.oracle.com/javase/1.5.0/docs/api/javax/management/ObjectName.html">quoted</a>
+<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/ObjectName.html" class="externalLink">quoted</a>
 so that they can be directly used as
 input for other requests.</p>
 </div>
@@ -1376,9 +1509,9 @@ complete response.</p>
 <table class="tableblock frame-all grid-all stretch">
 <caption class="title">Table 9. POST list Request</caption>
 <colgroup>
-<col style="width: 33.3333%;">
-<col style="width: 33.3333%;">
-<col style="width: 33.3334%;">
+<col style="width: 15%;">
+<col>
+<col style="width: 30%;">
 </colgroup>
 <thead>
 <tr>
@@ -1407,7 +1540,7 @@ complete response.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "type": "LIST",
+  "type": "list",
   "path": "java.lang/type=Memory"
 }</code></pre>
 </div>
@@ -1490,6 +1623,10 @@ bean only. For example, a request</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "request": {
+    "path": "java.lang/type=Memory",
+    "type": "list"
+  },
   "value": {
     "op": {
       "gc": {
@@ -1498,35 +1635,48 @@ bean only. For example, a request</p>
         "desc": "gc"
       }
     },
-    "class": "sun.management.MemoryImpl",
+    "notif": {
+      "javax.management.Notification": {
+        "types": [
+          "java.management.memory.threshold.exceeded",
+          "java.management.memory.collection.threshold.exceeded"
+        ],
+        "name": "javax.management.Notification",
+        "desc": "Memory Notification"
+      }
+    },
     "attr": {
-      "NonHeapMemoryUsage": {
-        "type": "javax.management.openmbean.CompositeData",
+      "ObjectPendingFinalizationCount": {
         "rw": false,
-        "desc": "NonHeapMemoryUsage"
+        "type": "int",
+        "desc": "ObjectPendingFinalizationCount"
       },
       "Verbose": {
-        "type": "boolean",
         "rw": true,
+        "type": "boolean",
         "desc": "Verbose"
       },
       "HeapMemoryUsage": {
-        "type": "javax.management.openmbean.CompositeData",
         "rw": false,
+        "type": "javax.management.openmbean.CompositeData",
         "desc": "HeapMemoryUsage"
       },
-      "ObjectPendingFinalizationCount": {
-        "type": "int",
+      "NonHeapMemoryUsage": {
         "rw": false,
-        "desc": "ObjectPendingFinalizationCount"
+        "type": "javax.management.openmbean.CompositeData",
+        "desc": "NonHeapMemoryUsage"
+      },
+      "ObjectName": {
+        "rw": false,
+        "type": "javax.management.ObjectName",
+        "desc": "ObjectName"
       }
-    }
+    },
+    "class": "sun.management.MemoryImpl",
+    "desc": "Information on the management interface of the MBean"
   },
   "status": 200,
-  "request": {
-    "type": "list",
-    "path": "java.lang/type=Memory"
-  }
+  "timestamp": 1702463340
 }</code></pre>
 </div>
 </div>
@@ -1543,11 +1693,67 @@ the domain names (first level) and the MBean&#8217;s properties
 (second level). The final values of the maps don&#8217;t have any
 meaning and are dummy values.</p>
 </div>
-<div id="notification" class="listingblock">
-<div class="title">Client registration</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="notification"><a class="anchor" href="#notification"></a>Using JMX notifications (notification) <mark>new in Jolokia 2</mark></h3>
+<div class="paragraph">
+<p>A new feature of Jolokia 2 is access to <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/Notification.html" class="externalLink">JMX notifications</a>.
+While reading/writing attributes, executing operations or listing/searching MBeans is implemented as single request-response operation, with notifications the flow of messages is more complex.</p>
+</div>
+<div class="paragraph">
+<p>There are 4 groups of subcommands for Jolokia <code>notification</code> operation:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Client registration/unregistration: <code>register</code> and <code>unregister</code> commands</p>
+</li>
+<li>
+<p>Adding/removing/listing the listeners: <code>add</code>, <code>remove</code> and <code>list</code> commands</p>
+</li>
+<li>
+<p>Ping (to refresh the registered client): <code>ping</code> command</p>
+</li>
+<li>
+<p>Configuring a channel to a stream of notifications: <code>open</code> command</p>
+</li>
+</ul>
+</div>
+<div class="sect3">
+<h4 id="notification-registration"><a class="anchor" href="#notification-registration"></a>Client registration</h4>
+<div class="paragraph">
+<p>In order to subscribe to JMX notification, a <em>client</em> has to be registered, so Jolokia agent can be aware of the entities for which notifications should be collected and returned.</p>
+</div>
+<div class="paragraph">
+<p>The GET URL for client registration has the following format:</p>
+</div>
+<div class="listingblock">
 <div class="content">
-<pre>$ curl -H'Content-Type: application/json' -s -u jolokia:jolokia -XPOST -d '{"type":"notification","command":"register"}' http://localhost:8080/jolokia/ | jq .
-{
+<pre>&lt;base-url&gt;/notification/register</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The equivalend POST JSON payload is:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "type": "notification",
+  "command": "register"
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>There are no additional parameters in GET URL request or POST JSON payload.</p>
+</div>
+<div class="paragraph">
+<p>The general format of the JSON response is described in
+<a href="#responses">Responses</a> in detail. A typical response for client registration is:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
   "request": {
     "type": "notification",
     "command": "register"
@@ -1556,35 +1762,748 @@ meaning and are dummy values.</p>
     "backend": {
       "pull": {
         "maxEntries": 100,
-        "store": "jolokia:type=NotificationStore,agent=192.168.0.221-52184-29e6eb25-servlet"
+        "store": "jolokia:type=NotificationStore,agent=192.168.0.221-21185-7e985ce9-servlet"
       },
       "sse": {
         "backChannel.contentType": "text/event-stream",
         "backChannel.encoding": "UTF-8"
       }
     },
-    "id": "51fc0ba5-4a35-48a8-a3aa-760119f3316b"
+    "id": "d77475dc-c7a7-4f71-b988-52b7f0252ca3"
   },
   "status": 200,
-  "timestamp": 1701876605
-}</pre>
+  "timestamp": 1702464211
+}</code></pre>
 </div>
+</div>
+<div class="paragraph">
+<p>The <code>value</code> field in the response contains two important fields:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>id</code> is an identifier of registered client, which is used in other notification-related Jolokia operations</p>
+</li>
+<li>
+<p><code>backend</code> is a collection of available <em>backends</em> (See more in <a href="#accessing-notification-stream">Accessing notification stream</a>). Jolokia 2 supports <code>sse</code> and <code>pull</code> backends. Other backends (like <code>websocket</code>) may be added in the future.</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>pull</code> backend</dt>
+<dd>
+<p>In this implementation, notifications are collected within the Jolokia Agent and client has to <em>fetch</em> (<em>pull</em>) them by calling <code>pull</code> operation on <code>jolokia:type=NotificationStore</code> MBean.</p>
+</dd>
+<dt class="hdlist1"><code>sse</code> backend</dt>
+<dd>
+<p>In this mode <a href="https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events" class="externalLink">Server Sent Events</a> are used (See <a href="https://html.spec.whatwg.org/multipage/server-sent-events.html#server-sent-events" class="externalLink">WhatWG specification</a>).</p>
+</dd>
+</dl>
+</div>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="notification-unregistration"><a class="anchor" href="#notification-unregistration"></a>Client unregistration</h4>
+<div class="paragraph">
+<p>In order to unsubscribe from Jolokia notification mechanism, an existing client has to be unregistered, by passing an existing client ID.</p>
+</div>
+<div class="paragraph">
+<p>The GET URL for client registration has the following format:</p>
 </div>
 <div class="listingblock">
-<div class="title">Client unregistration</div>
 <div class="content">
-<pre>$ curl -H'Content-Type: application/json' -s -u jolokia:jolokia -XPOST -d '{"type":"notification","command":"unregister","client":"51fc0ba5-4a35-48a8-a3aa-760119f3316b"}' http://localhost:8080/jolokia/ | jq .
-{
+<pre>&lt;base-url&gt;/notification/unregister/&lt;client-id&gt;</pre>
+</div>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 10. GET Unregistration Request</caption>
+<colgroup>
+<col style="width: 15%;">
+<col>
+<col style="width: 30%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Part</th>
+<th class="tableblock halign-left valign-top">Description</th>
+<th class="tableblock halign-left valign-top">Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;client-id&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Client ID of previously registered client</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>d77475dc-c7a7-4f71-b988-52b7f0252ca3</code></p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>The equivalend POST JSON payload is:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "type": "notification",
+  "command": "unregister",
+  "client": "&lt;client-id&gt;"
+}</code></pre>
+</div>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 11. POST Unregistration Request</caption>
+<colgroup>
+<col style="width: 15%;">
+<col>
+<col style="width: 30%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Key</th>
+<th class="tableblock halign-left valign-top">Description</th>
+<th class="tableblock halign-left valign-top">Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>type</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong><code>notification</code></strong></p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>command</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong><code>unregister</code></strong></p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>client</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Client ID of previously registered client</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>d77475dc-c7a7-4f71-b988-52b7f0252ca3</code></p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>A typical response for client unregistration is:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
   "request": {
-    "client": "51fc0ba5-4a35-48a8-a3aa-760119f3316b",
+    "client": "d77475dc-c7a7-4f71-b988-52b7f0252ca3",
     "type": "notification",
     "command": "unregister"
   },
   "value": null,
   "status": 200,
-  "timestamp": 1701876674
-}</pre>
+  "timestamp": 1702464913
+}</code></pre>
 </div>
+</div>
+<div class="paragraph">
+<p>The returned <code>value</code> is simply <code>null</code>.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="notification-add"><a class="anchor" href="#notification-add"></a>Adding a notification listener</h4>
+<div class="paragraph">
+<p>Having registered a notification client, we can now use notification listeners. The underlying JMX call is <code>javax.management.MBeanServerConnection.addNotificationListener()</code> method which requires several parameters:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>ObjectName</code>: The name of the MBean on which the listener should be added</p>
+</li>
+<li>
+<p><code>NotificationListener</code>: The listener object which will handle the notifications emitted by the registered MBean.</p>
+</li>
+<li>
+<p><code>NotificationFilter</code>: The filter object. It can be used to filter notifications specific to a given MBean</p>
+</li>
+<li>
+<p><code>Object</code>: any <em>handback</em> object which will be passed to a listener when notification arrives - this is how Jolokia can get back to the client which added a JMX notification listener.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The GET URL for adding a notification listener has the following format:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;base-url&gt;/notification/add/&lt;client-id&gt;/&lt;mode&gt;/&lt;mbean name&gt;/&lt;filter1&gt;,.../&lt;config&gt;/&lt;handback&gt;</pre>
+</div>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 12. GET AddNotification Request</caption>
+<colgroup>
+<col style="width: 15%;">
+<col>
+<col style="width: 30%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Part</th>
+<th class="tableblock halign-left valign-top">Description</th>
+<th class="tableblock halign-left valign-top">Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;client-id&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Client ID of previously registered client</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>d77475dc-c7a7-4f71-b988-52b7f0252ca3</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;mode&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">One of supported modes of notification handling: <code>pull</code> or <code>sse</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>pull</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;mbean name&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The
+<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/ObjectName.html" class="externalLink">ObjectName</a>
+of the MBean for which we&#8217;re registering a notification listener</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>JMImplementation:type=MBeanServerDelegate</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;filter1&gt;</code>, <code>&lt;filter2&gt;</code>, &#8230;&#8203;</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Comma-separated list notifications we&#8217;re interested in (and supported by given <code>&lt;mbean name&gt;</code>). If we want all
+notifications, a space (<code>%20</code>) or empty string (<code>%22%22</code>) can be passed. See filter rules in <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/NotificationFilterSupport.html#enableType(java.lang.String)" class="externalLink">NotificationFilterSupport.enableType() Javadoc</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>JMX.mbean.registered</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;config&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">This optional part can be passed to a notification listener as JSON object</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>{"priority":"normal"}</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;handback&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">This optional part can be passed to a notification listener and will be returned for each related notification. In GET request it can only be a String value.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>my-correlation-ID-1234</code></p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>The equivalent POST JSON payload is:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "type": "notification",
+  "command": "add",
+  "client": "1cddf91c-423e-46d8-ac9a-2eb6d8b213c7",
+  "mode": "pull",
+  "mbean": "JMImplementation:type=MBeanServerDelegate",
+  "filter": [],
+  "handback": "id-1234"
+}</code></pre>
+</div>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 13. POST AddNotification Request</caption>
+<colgroup>
+<col style="width: 15%;">
+<col>
+<col style="width: 30%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Key</th>
+<th class="tableblock halign-left valign-top">Description</th>
+<th class="tableblock halign-left valign-top">Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>type</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong><code>notification</code></strong></p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>command</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong><code>add</code></strong></p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>client</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Client ID of previously registered client</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>d77475dc-c7a7-4f71-b988-52b7f0252ca3</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>mode</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">One of supported modes of notification handling: <code>pull</code> or <code>sse</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>pull</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>mbean</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The
+<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/ObjectName.html" class="externalLink">ObjectName</a>
+of the MBean for which we&#8217;re registering a notification listener</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>JMImplementation:type=MBeanServerDelegate</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>filter</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A JSON array of notification notifications we&#8217;re interested in (and supported by given <code>mbean</code>). If we want all
+notifications, a space (<code>%20</code>) or empty string (<code>%22%22</code>) can be passed. See filter rules in <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/NotificationFilterSupport.html#enableType(java.lang.String)" class="externalLink">NotificationFilterSupport.enableType() Javadoc</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>[ "JMX.mbean.registered", "JMX.mbean.unregistered" ]</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>config</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">This optional part can be passed to a notification listener as JSON object</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>{"priority":"normal"}</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>handback</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">This optional part can be passed to a notification listener and will be returned for each related notification.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>{ "my-correlation-ID": "1234" }</code></p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>A typical response for added notification listener is:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "request": {
+    "mode": "pull",
+    "mbean": "JMImplementation:type=MBeanServerDelegate",
+    "client": "1cddf91c-423e-46d8-ac9a-2eb6d8b213c7",
+    "type": "notification",
+    "handback": "id-1234",
+    "command": "add"
+  },
+  "value": "2",
+  "status": 200,
+  "timestamp": 1702472334
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The returned <code>value</code> is a <em>handle</em> to the added listener, required when removing the listener in the future.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="notification-list"><a class="anchor" href="#notification-list"></a>Checking existing notification listeners</h4>
+<div class="paragraph">
+<p>To check existing listener registrations for previously registered client, we can use <code>list</code> command of <code>notification</code> operation.</p>
+</div>
+<div class="paragraph">
+<p>The GET URL for listing client listener registrations has the following format:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;base-url&gt;/notification/list/&lt;client-id&gt;</pre>
+</div>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 14. GET Unregistration Request</caption>
+<colgroup>
+<col style="width: 15%;">
+<col>
+<col style="width: 30%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Part</th>
+<th class="tableblock halign-left valign-top">Description</th>
+<th class="tableblock halign-left valign-top">Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;client-id&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Client ID of previously registered client</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>d77475dc-c7a7-4f71-b988-52b7f0252ca3</code></p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>The equivalend POST JSON payload is:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "type": "notification",
+  "command": "list",
+  "client": "&lt;client-id&gt;"
+}</code></pre>
+</div>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 15. POST Unregistration Request</caption>
+<colgroup>
+<col style="width: 15%;">
+<col>
+<col style="width: 30%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Key</th>
+<th class="tableblock halign-left valign-top">Description</th>
+<th class="tableblock halign-left valign-top">Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>type</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong><code>notification</code></strong></p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>command</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong><code>list</code></strong></p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>client</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Client ID of previously registered client</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>d77475dc-c7a7-4f71-b988-52b7f0252ca3</code></p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>A typical response for listing the registrations is:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "request": {
+    "client": "1cddf91c-423e-46d8-ac9a-2eb6d8b213c7",
+    "type": "notification",
+    "command": "list"
+  },
+  "value": {
+    "1": {
+      "mbean": "JMImplementation:type=MBeanServerDelegate",
+      "handback": "id-1234"
+    },
+    "2": {
+      "filter": [
+        "java.management.memory.threshold.exceeded"
+      ],
+      "mbean": "java.lang:type=Memory"
+    }
+  },
+  "status": 200,
+  "timestamp": 1702472848
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The returned <code>value</code> is a collection of listener registrations with their details, keyed by <em>handle</em> id.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="notification-remove"><a class="anchor" href="#notification-remove"></a>Removing a notification listener</h4>
+<div class="paragraph">
+<p>When a notification listener for a given client is no longer needed, we can remove using <code>remove</code> command of <code>notification</code> operation.</p>
+</div>
+<div class="paragraph">
+<p>The GET URL for removing client listener registrations has the following format:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;base-url&gt;/notification/remove/&lt;client-id&gt;/&lt;handle&gt;</pre>
+</div>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 16. GET Unregistration Request</caption>
+<colgroup>
+<col style="width: 15%;">
+<col>
+<col style="width: 30%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Part</th>
+<th class="tableblock halign-left valign-top">Description</th>
+<th class="tableblock halign-left valign-top">Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;client-id&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Client ID of previously registered client</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>d77475dc-c7a7-4f71-b988-52b7f0252ca3</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;handle&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A <em>handle</em> of previously added listener</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>1</code></p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>The equivalend POST JSON payload is:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "type": "notification",
+  "command": "remove",
+  "client": "&lt;client-id&gt;",
+  "handle": "&lt;handle-id&gt;"
+}</code></pre>
+</div>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 17. POST Unregistration Request</caption>
+<colgroup>
+<col style="width: 15%;">
+<col>
+<col style="width: 30%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Key</th>
+<th class="tableblock halign-left valign-top">Description</th>
+<th class="tableblock halign-left valign-top">Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>type</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong><code>notification</code></strong></p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>command</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong><code>remove</code></strong></p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>client</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Client ID of previously registered client</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>d77475dc-c7a7-4f71-b988-52b7f0252ca3</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>handle</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A <em>handle</em> of previously added listener</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>1</code></p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>A typical response for listing the registrations is:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "request": {
+    "client": "1cddf91c-423e-46d8-ac9a-2eb6d8b213c7",
+    "handle": "1",
+    "type": "notification",
+    "command": "remove"
+  },
+  "value": null,
+  "status": 200,
+  "timestamp": 1702473703
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The returned <code>value</code> is simply <code>null</code>.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="accessing-notification-stream"><a class="anchor" href="#accessing-notification-stream"></a>Accessing notification stream</h4>
+<div class="paragraph">
+<p>When a listener is added for a client (see <a href="#notification-add">Adding a notification listener</a>), a mode indicates a desired <em>notification backend</em>.</p>
+</div>
+<div class="paragraph">
+<p>For <code>pull</code> backend, there&#8217;s actually no <em>back channel</em> over which we can receive the notifications. Instead we should be
+calling an MBean operation on an MBean representing the backend. The details are available when client was first registered:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">"backend": {
+  "pull": {
+    "maxEntries": 100,
+    "store": "jolokia:type=NotificationStore,agent=192.168.0.221-21185-7e985ce9-servlet"
+  },
+  ...</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If we want to access notifications collected in <code>pull</code> backend, we have to call <code>org.jolokia.service.notif.pull.PullNotificationStoreMBean.pull(String pClientId, String pHandle)</code> MBean operation on <code>jolokia:type=NotificationStore,agent=&lt;agent-id&gt;</code> MBean which can be done with Jolokia <code>exec</code> operation.</p>
+</div>
+<div class="paragraph">
+<p>For example, having registered a notification listener for <code>JMImplementation:type=MBeanServerDelegate</code> MBean, we can get notified about MBean registrations/unregistrations. Accessing the pull notification store can be done with <code>exec</code> operation like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$ curl -s -u jolokia:jolokia 'http://localhost:8080/jolokia/exec/jolokia:type=NotificationStore,agent=192.168.0.221-21185-7e985ce9-servlet/pull(java.lang.String,java.lang.String)/1cddf91c-423e-46d8-ac9a-2eb6d8b213c7/2' | jq .
+{
+  "request": {
+    "mbean": "jolokia:agent=192.168.0.221-21185-7e985ce9-servlet,type=NotificationStore",
+    "arguments": [
+      "1cddf91c-423e-46d8-ac9a-2eb6d8b213c7",
+      "2"
+    ],
+    "type": "exec",
+    "operation": "pull(java.lang.String,java.lang.String)"
+  },
+  "value": {
+    "dropped": 0,
+    "handle": "2",
+    "handback": "id-1234",
+    "notifications": [
+      {
+        "timeStamp": 1702473332222,
+        "sequenceNumber": 248,
+        "userData": null,
+        "mBeanName": {
+          "objectName": "Catalina:name=HttpRequest3,type=RequestProcessor,worker=\"http-nio-8080\""
+        },
+        "source": {
+          "objectName": "JMImplementation:type=MBeanServerDelegate"
+        },
+        "message": "",
+        "type": "JMX.mbean.registered"
+      },
+      {
+        "timeStamp": 1702473390407,
+        "sequenceNumber": 249,
+        "userData": null,
+        "mBeanName": {
+          "objectName": "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/,name=jsp,type=JspMonitor"
+        },
+        "source": {
+          "objectName": "JMImplementation:type=MBeanServerDelegate"
+        },
+        "message": "",
+        "type": "JMX.mbean.unregistered"
+      },
+...</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>On the other hand, <code>sse</code> notification store works differently. Here&#8217;s the information received during client registration:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">"sse": {
+  "backChannel.contentType": "text/event-stream",
+  "backChannel.encoding": "UTF-8"
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Instead of providing us with Mbean name to access when needed (<em>pull</em> the notifications out if it by calling an MBean operation), <code>sse</code> backend needs a channel associated with client connection. This is where <code>open</code> command for <code>notification</code> operation comes into play.</p>
+</div>
+<div class="paragraph">
+<p>When calling <code>open</code> command for <code>sse</code> backed notifications, the request (<code>HttpServletRequest</code>) is put into <a href="https://jakarta.ee/specifications/servlet/5.0/jakarta-servlet-spec-5.0#asynchronous-processing" class="externalLink">asynchronous mode</a> and connection is not closed.</p>
+</div>
+<div class="paragraph">
+<p>The GET URL for openning a backend channel for notification acces is:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;base-url&gt;/notification/open/&lt;client-id&gt;/&lt;mode&gt;</pre>
+</div>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 18. GET Open Notification Channel Request</caption>
+<colgroup>
+<col style="width: 15%;">
+<col>
+<col style="width: 30%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Part</th>
+<th class="tableblock halign-left valign-top">Description</th>
+<th class="tableblock halign-left valign-top">Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;client-id&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Client ID of previously registered client</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>d77475dc-c7a7-4f71-b988-52b7f0252ca3</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;mode&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A mode of notification delivery. Only <code>sse</code> is useful.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>sse</code></p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>The equivalend POST JSON payload is:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "type": "notification",
+  "command": "open",
+  "client": "&lt;client-id&gt;",
+  "mode": "&lt;mode&gt;"
+}</code></pre>
+</div>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 19. POST Open Notification Channel Request</caption>
+<colgroup>
+<col style="width: 15%;">
+<col>
+<col style="width: 30%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Key</th>
+<th class="tableblock halign-left valign-top">Description</th>
+<th class="tableblock halign-left valign-top">Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>type</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong><code>notification</code></strong></p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>command</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong><code>open</code></strong></p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>client</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Client ID of previously registered client</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>d77475dc-c7a7-4f71-b988-52b7f0252ca3</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>mode</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A mode of notification delivery. Only <code>sse</code> is useful.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>sse</code></p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>The notifications are returned to the client as they&#8217;re delivered from JMX. Here&#8217;s a sample interaction:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ curl -i -u jolokia:jolokia 'http://localhost:8080/jolokia/notification/open/c72e2f07-e5ec-47a0-b9b4-3036b16614a0/sse'
+HTTP/1.1 200
+Cache-Control: private
+Content-Type: text/event-stream;charset=UTF-8
+Transfer-Encoding: chunked
+Date: Wed, 13 Dec 2023 15:49:39 GMT
+
+:
+:
+:
+:
+:
+id: 363
+data: {"dropped":0,"handle":"2","handback":null,"notifications":[{"timeStamp":1702482067031,"sequenceNumber":363,"userData":null,"mBeanName":{"objectName":"Catalina:J2EEApplication=none,J2EEServer=none,WebModule=\/\/localhost\/,name=jsp,type=JspMonitor"},"source":{"objectName":"JMImplementation:type=MBeanServerDelegate"},"message":"","type":"JMX.mbean.unregistered"}]}
+
+id: 364
+data: {"dropped":0,"handle":"2","handback":null,"notifications":[{"timeStamp":1702482067031,"sequenceNumber":364,"userData":null,"mBeanName":{"objectName":"Catalina:J2EEApplication=none,J2EEServer=none,WebModule=\/\/localhost\/,j2eeType=Filter,name=Tomcat WebSocket (JSR356) Filter"},"source":{"objectName":"JMImplementation:type=MBeanServerDelegate"},"message":"","type":"JMX.mbean.unregistered"}]}</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The returned data is structured according to <a href="https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events"><code>text/event-stream</code> Mime type</a>. <code>id</code> and <code>data</code> fields are used, where <code>id</code> matches the <code>sequenceNumber</code> from the JSON payload.</p>
 </div>
 </div>
 </div>
@@ -1626,29 +2545,43 @@ provided as path info.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "timestamp": 1287143106,
-  "status": 200,
   "request": {
     "type": "version"
   },
   "value": {
-    "protocol": "7.1",
-    "agent": "1.2.0",
+    "agent": "2.0.0",
+    "protocol": "7.2",
+    "details": {
+      "agent_version": "2.0.0",
+      "agent_id": "192.168.0.221-21185-5ce94d31-servlet",
+      "server_product": "tomcat",
+      "server_vendor": "Apache",
+      "server_version": "10.1.16",
+      "secured": true,
+      "url": "http://192.168.0.221:8080/jolokia"
+    },
+    "id": "192.168.0.221-21185-5ce94d31-servlet",
     "config": {
-      "agentDescription": "Servicemix ESB",
-      "agentId": "EF87BE-jvm",
-      "agentType": "jvm",
-      "serializeException": "false"
+      "maxDepth": "15",
+      "discoveryEnabled": "false",
+      "agentId": "192.168.0.221-21185-5ce94d31-servlet",
+      "maxCollectionSize": "0",
+      "debug": "false",
+      "canonicalNaming": "true",
+      "historyMaxEntries": "10",
+      "serializeException": "false",
+      "includeStackTrace": "false",
+      "maxObjects": "0",
+      "detectorOptions": "{}",
+      "debugMaxEntries": "100"
     },
     "info": {
-      "product": "glassfish",
-      "vendor": "Oracle",
-      "version": "4.0",
-      "extraInfo": {
-        "amxBooted": false
-      }
+      "proxy": {},
+      "jmx": {}
     }
-  }
+  },
+  "status": 200,
+  "timestamp": 1702482830
 }</code></pre>
 </div>
 </div>
@@ -1709,8 +2642,8 @@ JSON request below the key <code>config</code>:</p>
 </div>
 <div class="paragraph">
 <p>If a POST request carries also query parameters in the URL, these processing parameters
-are merged with the ones given within the request. Configuration options given in the
-request take precedence over the ones given as query parameters.</p>
+are merged with the ones given within the request body. Configuration options given in the
+request body take precedence over the ones given as query parameters.</p>
 </div>
 <div class="paragraph">
 <p>The list of known processing parameters is:</p>
@@ -1761,7 +2694,7 @@ If set to <code>false</code> then the default unsorted property list is returned
 <p>If set to <code>true</code>, then in case of an error the stack trace is included.
 With <code>false</code> no stack trace will be returned, and when this parameter
 is set to <code>runtime</code> only for RuntimeExceptions a stack trace is put into
-the error response. Default is <code>true</code> if not set otherwise in the global
+the error response. Default is <code>false</code> if not set otherwise in the global
 agent configuration.</p>
 </dd>
 <dt class="hdlist1"><code>serializeException</code></dt>
@@ -1778,7 +2711,7 @@ configuration option is configured otherwise.</p>
 <p>If this parameter is given, its value is interpreted as epoch time (seconds since 1.1.1970) and
 if the requested value did not change since this time, an empty response (with no <code>value</code>)
 is returned and the response status code is set to 304 ("Not modified"). This
-option is currently only supported for <code>LIST</code> requests. The time value can be
+option is currently only supported for <code>list</code> requests. The time value can be
 extracted from a previous' response <code>timestamp</code>.</p>
 </dd>
 </dl>
@@ -1800,13 +2733,13 @@ completely into a JSON value object. It can detect cycles in
 the object graph and provides a way to limit the depth of
 serialization. For certain types (like
 <code>File</code> or
-<code>ObjectName</code>) it uses simplifier to not
+<code>ObjectName</code>) it uses a service <code>org.jolokia.service.serializer.json.simplifier.SimplifierExtractor</code> to not
 expose internal and redundant information.</p>
 </div>
 <div class="paragraph">
 <p>Object values used for values in
-<em>write</em> operations and arguments in
-<em>exec</em>, type support is limited to a
+<code>write</code> operations and arguments in
+<code>exec</code>, type support is limited to a
 handful of data types.</p>
 </div>
 <div class="sect2">
@@ -1831,7 +2764,7 @@ converted into a JSON object. Note, however, that JSON
 Object keys are <em>always strings</em>.</p>
 </li>
 <li>
-<p>Enums are converted to their canonical name <sup class="footnote" id="_footnote_enum-serial-jboss">[<a id="_footnoteref_5" class="footnote" href="#_footnotedef_5" title="View footnote.">5</a>]</sup>.</p>
+<p>Enums are converted to their canonical name<sup class="footnote" id="_footnote_enum-serial-jboss">[<a id="_footnoteref_5" class="footnote" href="#_footnotedef_5" title="View footnote.">5</a>]</sup>.</p>
 </li>
 <li>
 <p><code>javax.management.openmbean.CompositeData</code>
@@ -1899,21 +2832,21 @@ described.</p>
 </div>
 <div class="paragraph">
 <p><code>TabularData</code> serialization depends on
-the type of the index.  It is serialized into one or multiple
+the type of the index. It is serialized into one or multiple
 nested JSON objects where the keys are derived from its
 <code>TabularType.indexNames()</code>. If there is
 a single valued index with a simple type (i.e. an instance of
 <code>javax.management.openmbean.SimpleType</code>),
 the index&#8217;s value is the key and a
-<code>TabularData&#8217;s row (which in turn is a
-`CompositeData</code>) is a map. With multi
+<code>TabularData</code>'s row (which in turn is a
+<code>CompositeData</code>) is a map. With multi
 valued, simple typed, keys, the map is nested (first level:
 first index&#8217;s value, second level: second index&#8217;s value and
 so on). For the serialization of
 <code>TabularData</code> resulting from a
-<code><a href="https://download.oracle.com/javase/6/docs/api/javax/management/MXBean.html">MXBean</a></code>
+<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/MXBean.html" class="externalLink">MXBean</a>
 translation for maps, see
-<a href="#serialization-mxbean">Jolokia and MXBeans</a>.  If any of the declared
+<a href="#serialization-mxbean">Jolokia and MXBeans</a>. If any of the declared
 index keys of a <code>TabularData</code> is a
 complex type (i.e. not a <code>SimpleType</code>),
 then this simple serialization into maps of maps is not
@@ -1933,9 +2866,9 @@ values as JSON object with the corresponding rows as values
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "mykey1" : { "key" : "mkey1", "item" : "value1", .... }
-  "mykey2" : { "key" : "mkey2", "item" : "value2", .... }
-  ....
+  "mykey1" : { "key" : "mkey1", "item" : "value1", .... },
+  "mykey2" : { "key" : "mkey2", "item" : "value2", .... },
+  ...
 }</code></pre>
 </div>
 </div>
@@ -1951,13 +2884,13 @@ names here are <code>key</code> and
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
   "mykey1" : {
-    "myinner1" : { "key" : "mkey1", "innerkey" : "myinner1", "item" : "value1", .... }
-    "myinner2" : { "key" : "mkey1", "innerkey" : "myinner2", "item" : "value1", .... }
+    "myinner1" : { "key" : "mkey1", "innerkey" : "myinner1", "item" : "value1", .... },
+    "myinner2" : { "key" : "mkey1", "innerkey" : "myinner2", "item" : "value1", .... },
     ....
   },
   "mykey2" : {
-    "second1" : { "key" : "mkey2", "innerkey" : "second1", "item" : "value1", .... }
-    "second2" : { "key" : "mkey2", "innerkey" : "second2", "item" : "value1", .... }
+    "second1" : { "key" : "mkey2", "innerkey" : "second1", "item" : "value1", .... },
+    "second2" : { "key" : "mkey2", "innerkey" : "second2", "item" : "value1", .... },
     ....
   },
   ....
@@ -1968,8 +2901,8 @@ names here are <code>key</code> and
 <p>If keys are used, which themselves are complex objects (like
 <code>CompositeData</code>), this hierarchical map structure can not be
 used. In this case an object with two keys is returned:
-&#8220;indexNames&#8221; holds the name of the key
-index and &#8220;values&#8221; is an array of all
+<code>indexNames</code> holds the name of the key
+index and <code>values</code> is an array of all
 rows which are represented as JSON objects:</p>
 </div>
 <div class="listingblock">
@@ -1985,8 +2918,7 @@ rows which are represented as JSON objects:</p>
 </div>
 </div>
 <div class="paragraph">
-<p>&lt;para&gt;
-Beside this special behaviour for
+<p>Beside this special behaviour for
 <code>TabularData</code>, serialization can be
 influenced by certain processing parameters given with the
 request (see
@@ -2040,10 +2972,9 @@ and the capabilities differ also for POST and GET requests.
 <code>GET</code> upstream serialization is limited to
 basic types and simple arrays. POST requests on the other
 support a much large set of types, including the
-serialization of `Map`s,
-`List`s and all
-<a href="https://download.oracle.com/javase/6/docs/api/javax/management/openmbean/OpenType.html">Open
-Types</a>.</p>
+serialization of <code>Map</code>s,
+<code>List</code>s and all
+<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/openmbean/OpenType.html" class="externalLink">Open Types</a>.</p>
 </div>
 <div class="sect3">
 <h4 id="_get_request_values"><a class="anchor" href="#_get_request_values"></a>GET request values</h4>
@@ -2148,7 +3079,7 @@ can be given as a JSON object. Be aware, however, that JSON
 maps (objects) only support strings as keys.</p>
 </div>
 <div class="paragraph">
-<p>The agent knows how to convert an JSON array to Java
+<p>The agent knows how to convert a JSON array to Java
 Arrays (of a basic type) or Lists, depending on the
 requirement as dictated by the MBeans operation or
 attribute signature. Numbers in JSON are always transfered
@@ -2169,7 +3100,7 @@ because of missing type information.</p>
 </div>
 <div class="paragraph">
 <p>Upstream serialization also supports
-<a href="https://download.oracle.com/javase/6/docs/api/javax/management/openmbean/OpenType.html">OpenTypes</a>.
+<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/openmbean/OpenType.html" class="externalLink">Open Types</a>.
 If the signature of JMX exec operation or the value type
 of a JMX attribute is a <code>OpenType</code>,
 they are serialized as follows:</p>
@@ -2183,15 +3114,15 @@ they are serialized as follows:</p>
 <p><code>ArrayType</code> is extracted from a
 <code>JSONArray</code> where the elements are
 serialized recursively with this algorithms. Only
-<code>ArrayType`s with element type
-`CompositeType</code> or
+<code>ArrayType</code>s with element type
+<code>CompositeType</code> or
 <code>SimpleType</code> are supported.</p>
 </li>
 <li>
 <p><code>CompositeType</code> is extracted
 recursively from a <code>JSONObject</code>
 where there the string keys must fit to the
-`CompositeType&#8217;s item names and
+<code>CompositeType</code>'s item names and
 the values must be serializable as open types.</p>
 </li>
 <li>
@@ -2273,8 +3204,8 @@ look like</p>
 <div class="sect2">
 <h3 id="serialization-mxbean"><a class="anchor" href="#serialization-mxbean"></a>Jolokia and MXBeans</h3>
 <div class="paragraph">
-<p>The <a href="https://download.oracle.com/javase/6/docs/api/javax/management/MXBean.html">MXBean Framework</a> is available in
-the JRE since version 6 and allows for easy creation and
+<p>The <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/MXBean.html" class="externalLink">MXBean Framework</a> is available in
+the JDK since version 6 and allows for easy creation and
 registration of own MBeans. MXBeans are some what the
 successor for standard MBeans and support an annotation driven
 as well as a naming convention driven programming model. The
@@ -2286,8 +3217,8 @@ restriction of MXBean to reference only open types.</p>
 MXBean framework, MXBean themselves can use more complex
 data types. The framework will translate forth and back
 between the custom and open types according to certain rules
-as declared in the MXBean &lt;ulink
-<a href="https://download.oracle.com/javase/6/docs/api/javax/management/MXBean.html">specification</a>.
+as declared in the MXBean
+<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/MXBean.html" class="externalLink">specification</a>.
 Most of the translations to open types fits naturally to
 Jolokia&#8217;s serialization, except for the translation of <code>Map</code>.</p>
 </div>
@@ -2346,7 +3277,7 @@ along with a timestamp. If history tracking is switched on,
 then the agent will put the list of historical values specific
 for this request into the response. History tracking is
 toggled by an MBean operation on a Jolokia-owned MBean (see
-<a href="#mbeans">[mbeans]</a>). This has to be done individually for each
+<a href="jolokia_mbeans.html" class="xref page">Jolokia MBeans</a>). This has to be done individually for each
 attribute or JMX operation to be tracked.</p>
 </div>
 <div class="paragraph">
@@ -2354,7 +3285,7 @@ attribute or JMX operation to be tracked.</p>
 response for which history tracking was switched on. A certain
 JMX operation on an Jolokia specific MBean has to be executed
 to turn history tracking on for a specific attribute or
-operation. See <a href="#mbeans">[mbeans]</a> for details.The
+operation. See <a href="jolokia_mbeans.html" class="xref page">Jolokia MBeans</a> for details.The
 <code>history</code> property of the JSON response
 contains an array of json objects which have two attributes:
 <code>value</code> containing the historical value
@@ -2400,7 +3331,7 @@ request. A typical proxy request looks like</p>
 section is a JSR-160 service URL for the target server
 reachable from within the proxy agent. <code>user</code>
 and <code>password</code> are optional credentials used
-for the JSR-160 communication.</p>
+for the JSR-160 Remote communication.</p>
 </div>
 </div>
 </div>
@@ -2422,14 +3353,14 @@ might hide behind a proxy, too. So, if in doubt you should
 configure the agent URL from outside to allow external clients
 to be discovered. The configuration options for enabling
 multicast requests are described in the
-<a href="#agent-jvm-config">JVM</a> and
-<a href="#agent-war-init-params">WAR</a> agent configuration
+<a href="agents/jvm.html#agent-jvm-config" class="xref page">JVM agent configuration options</a> and
+<a href="agents/war.html#agent-war-init-params" class="xref page">Servlet init parameters</a> agent configuration
 sections.</p>
 </div>
 <div class="paragraph">
 <p>A agent which is enabled for multicast discovery will only
 respond to a multicast request if the
-<a href="#security-policy">restrictor</a> allows
+<a href="security.html#security-policy" class="xref page">Policy based security</a> allows
 connections from the source IP. Otherwise a multicast request
 will be simply ignored. For example, if you have configured
 your agent to only allow request from a central monitoring
@@ -2443,7 +3374,7 @@ discovery feature enabled by default which can be switched off
 via <code>--discoveryEnabled=true</code> command line parameter or the
 corresponding configuration option. For the WAR agent and OSGi
 agents this feature is switched off by default since auto
-detection doesn&#8217;t work always. It can be enabled with the init
+detection doesn&#8217;t always work. It can be enabled with the init
 parameter <code>discoveryEnabled</code> (in which case the auto discovery
 described above is enabled) or better with <code>discoveryAgentUrl</code>
 with the URL. Alternatively, a system property can be used
@@ -2465,18 +3396,31 @@ the following format</p>
 </div>
 </div>
 <div class="paragraph">
+<p>We can use a tool like <a href="https://nmap.org/ncat/" class="externalLink">netcat</a> to check the discovery:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ nc -u localhost 24884
+{"type":"query"}
+{"agent_version":"2.0.0","agent_id":"192.168.0.221-67980-7e985ce9-servlet",
+"server_product":"tomcat","type":"response","server_vendor":"Apache",
+"server_version":"10.1.16","secured":true,"url":"http:\/\/192.168.0.221:8080\/jolokia"}</pre>
+</div>
+</div>
+<div class="paragraph">
 <p>Any agent enabled for discovery will respond to requester on the same socket with an answer which looks like</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "agent_version": "2.0.0",
+  "agent_id": "192.168.0.221-67980-7e985ce9-servlet",
+  "server_product": "tomcat",
   "type": "response",
-  "agent_description" : "Atlantis Tomcat",
-  "agent_id" : "10.9.11.18-58613-81b087d-servlet",
-  "url": "http://10.9.11.25:8778/jolokia",
-  "server_vendor" : "Apache",
-  "server_product" : "Tomcat",
-  "server_version" : "7.0.35"
+  "server_vendor": "Apache",
+  "server_version": "10.1.16",
+  "secured": true,
+  "url": "http://192.168.0.221:8080/jolokia"
 }</code></pre>
 </div>
 </div>
@@ -2495,11 +3439,11 @@ address and port of the sender of the query request.</p>
 in the future.</p>
 </div>
 <table id="discovery-response" class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 10. Response properties</caption>
+<caption class="title">Table 20. Response properties</caption>
 <colgroup>
-<col style="width: 33.3333%;">
-<col style="width: 33.3333%;">
-<col style="width: 33.3334%;">
+<col style="width: 15%;">
+<col>
+<col style="width: 30%;">
 </colgroup>
 <thead>
 <tr>
@@ -2522,7 +3466,7 @@ during startup of the agent in form of a configuration
 parameter or being autodetected. If autodetected, the id has
 several parts: The IP, the process id, hashcode of the agent
 and its type. This field will be always provided.</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>10.9.11.87-23455-9184ef-osgi</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>192.168.0.221-67980-7e985ce9-servlet</code></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>agent_description</code></p></td>
@@ -2540,7 +3484,7 @@ URL is used. If autodetected it is taken from the first HTTP
 request processed by the servlet. Hence no URL is available
 until this first request was processed. This property might
 be empty.</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code><a href="http://10.9.11.87:8080/jolokia" class="bare">http://10.9.11.87:8080/jolokia</a></code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>http://192.168.0.221:8080/jolokia</code></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>secured</code></p></td>
@@ -2561,7 +3505,7 @@ field is included if it could be automatically detected.</p></td>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>server_version</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">The container&#8217;s version (if detected)</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>7.0.50</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>10.1.16</code></p></td>
 </tr>
 </tbody>
 </table>
@@ -2708,7 +3652,8 @@ implemented by jmx4perl.</p>
 </article>
   </div>
 <footer class="footer">
-  This page was built using the Antora default UI. The source code for this UI is licensed under the terms of the MPL-2.0 license.
+  This page was built using the Antora default UI. The source code for this UI is licensed under the terms of the MPL-2.0 license. | Copyright © 2010 -
+  2023 Roland Huß
 </footer>
 <script id="site-script" src="../_/js/site.js" data-ui-root-path="../_"></script>
 <script async src="../_/js/vendor/highlight.js"></script>

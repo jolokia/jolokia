@@ -117,33 +117,26 @@ install an extra piece of software, the so-called
 deployed on the target server which should be accessed via remote
 JMX (<a href="architecture.html#agent-mode" class="xref page">Agent mode</a>), or it can be installed on a
 dedicated proxy server (<a href="architecture.html#proxy-mode" class="xref page">Proxy Mode</a>). For both
-operational modes, there are four different kind of
+operational modes, there are three different kinds of
 agents<sup class="footnote">[<a id="_footnoteref_1" class="footnote" href="#_footnotedef_1" title="View footnote.">1</a>]</sup>.</p>
 </div>
 <div class="dlist">
 <dl>
 <dt class="hdlist1"><em>Webarchive (War) agent</em></dt>
 <dd>
-<p>This agent is packaged as a Java EE Webarchive (War). It is the
-standard installation artifact for Java webapplications and
+<p>This agent is packaged as a Jakarta EE Web archive (WAR). It is the
+standard installation artifact for Java web applications and
 probably one of the best known deployment formats. Jolokia ships
-with a war-agent which can be deployed like any other web
-application. This agent has been tested on many Java EE
+with a WAR agent which can be deployed like any other web
+application. This agent has been tested on many Jakarta EE
 servers, from well-known market leaders to rarer species.</p>
 </dd>
 <dt class="hdlist1"><em>OSGi agent</em></dt>
 <dd>
 <p><a href="https://www.osgi.org">OSGi</a> is a middleware specification
-focusing on modularity and a well defined dynamic lifecycle<sup class="footnote">[<a id="_footnoteref_2" class="footnote" href="#_footnotedef_2" title="View footnote.">2</a>]</sup>. The Jolokia OSGi agent
-bundles comes in two
-flavors: a minimal one with a dependency on a running
-<a href="https://www.osgi.org/javadoc/r4v42/org/osgi/service/http/HttpService.html">OSGi
-HttpService</a>, and a all-in-one bundle including an
-embedded <em>HttpService</em> implementation
-(which is exported, too). The former is the recommended,
-puristic solution, the later is provided for a quick startup
-for initial testing the OSGi agent (but should be replaced
-with the minimal bundle for production setups).</p>
+focusing on modularity and a well defined dynamic lifecycle<sup class="footnote">[<a id="_footnoteref_2" class="footnote" href="#_footnotedef_2" title="View footnote.">2</a>]</sup>. The Jolokia 1.x OSGi agent
+used to come in two flavors (with and without packaged <a href="https://github.com/apache/felix-dev/tree/master/http" class="externalLink">Felix HTTP Service</a> bundles). With Jolokia 2 there&#8217;s only one bundle
+which requires a <a href="https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html" class="externalLink">OSGi CMPN Whiteboard extender</a> implementation available in target OSGi runtime.</p>
 </dd>
 <dt class="hdlist1"><em>JVM agent</em></dt>
 <dd>
@@ -167,26 +160,27 @@ their own.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="agents-war"><a class="anchor" href="#agents-war"></a>Java EE Agent (WAR)</h2>
+<h2 id="agents-war"><a class="anchor" href="#agents-war"></a>Jakarta EE Agent (WAR)</h2>
 <div class="sectionbody">
 <div class="sect2">
 <h3 id="war-agent-installation"><a class="anchor" href="#war-agent-installation"></a>Installation and Configuration</h3>
 <div class="paragraph">
 <p>The WAR agent is the most popular variant, and can be deployed
-in a servlet container just like any other Java EE web application.</p>
+in a servlet container just like any other Jakarta EE web application.</p>
 </div>
 <div class="sidebarblock">
 <div class="content">
 <div class="title">Tomcat example</div>
 <div class="paragraph">
-<p>A simple example for deploying the agent on Tomcat can be found
+<p>A simple example for deploying the WAR agent on Tomcat can be found
 in the Jolokia <a href="https://www.jolokia.org/tutorial.html">quickstart</a>.</p>
 </div>
 </div>
 </div>
 <div class="paragraph">
 <p>Often, installation is simply a matter of copying the agent WAR to
-a deployment directory. On other platforms an administrative Web
+a deployment directory (<code>webapps/</code> directory on Tomcat).
+On other platforms an administrative Web
 GUI or a command line tool need to be used for
 deployment. Providing detailed installation instructions for every servlet
 container is out of scope for this document.</p>
@@ -212,7 +206,7 @@ parameters, which can be configured outside the WAR
 archive. This is done differently for each servlet container
 but involves typically the editing of a configuration
 file. E.g. for
-<a href="https://tomcat.apache.org/tomcat-7.0-doc/config/context.html">Tomcat</a>,
+<a href="https://tomcat.apache.org/tomcat-10.1-doc/config/context.html#Context_Parameters">Tomcat 10.1</a>,
 the context for
 the Jolokia agent can be adapted by putting a file
 <code>jolokia.xml</code> below
@@ -229,16 +223,16 @@ content like:</p>
 </dl>
 </div>
 <div class="paragraph">
-<p>The configuration options <code>discoveryEnabled</code> and
+<p>Additionally, the configuration options <code>discoveryEnabled</code> and
 <code>discoveryAgentUrl</code> can be provided via environment
-variables or system properties, too. See the below for details.</p>
+variables or system properties, too. See below for details.</p>
 </div>
 <table id="agent-war-init-params" class="tableblock frame-all grid-all stretch">
 <caption class="title">Table 1. Servlet init parameters</caption>
 <colgroup>
-<col style="width: 33.3333%;">
-<col style="width: 33.3333%;">
-<col style="width: 33.3334%;">
+<col style="width: 15%;">
+<col>
+<col>
 </colgroup>
 <thead>
 <tr>
@@ -249,23 +243,10 @@ variables or system properties, too. See the below for details.</p>
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>dispatcherClasses</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Classnames (comma separated) of <code>RequestDispatcher</code> used in addition
-to the
-<code>LocalRequestDispatcher</code>. Dispatchers are
-a technique used by the JSR-160 proxy to dispatch (or
-'route') a request to a different destination. By default no extract dispatchers are enabled (changed in 1.5.0)
-You can use the system property <code>org.jolokia.jsr160ProxyEnabled</code> or the
-environment variable <code>JOLOKIA_JSR160_PROXY_ENABLED</code> to enable the the JSR-160 proxy.
-In that case you should be sure that you enable authentication for the web application to protect access
-to the proxy.</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.jolokia.service.jsr160.Jsr160RequestHandler</code>
-(this is the dispatcher for the JSR-160 proxy)</p></td>
-</tr>
-<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>jsr160ProxyAllowedTargets</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Path to a white list of patterns which are matched against possible
-JMX service URL for incoming requests.</p></td>
+JMX service URL for incoming requests. If no white list is specified, default blacklist is effective which
+includes <code>service:jmx:rmi:///jndi/ldap:.*</code>.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>/opt/jolokia/jsr160-proxy-allowed-patterns.txt</code></p></td>
 </tr>
 <tr>
@@ -275,26 +256,26 @@ which can read from (like a <code>file:</code> or
 <code>http:</code> URL) or with the special protocol
 <code>classpath:</code> which is used for looking up
 the policy file in the web application&#8217;s classpath. See
-<a href="#security-policy-location">[security-policy-location]</a> for details about this
+<a href="security.html#security-policy-location" class="xref page">Policy Location</a> for details about this
 parameter.</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code><a href="file:///home/jolokia/jolokia-access.xml" class="bare">file:///home/jolokia/jolokia-access.xml</a></code>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>file:/home/jolokia/jolokia-access.xml</code>
 for a file based access to the policy file. Default is
-<code>classpath:/jolokia-access.xml</code></p></td>
+<code>classpath:/jolokia-access.xml</code>.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>restrictorClass</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Full classname of an implementation of <code>org.jolokia.restrictor.Restrictor</code>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Full classname of an implementation of <code>org.jolokia.server.core.service.api.Restrictor</code>
 which is used as a custom restrictor for securing access via Jolokia.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>com.mycompany.jolokia.CustomRestrictor</code> (which must be included in the
-war file and must implement <code>org.jolokia.restrictor.Restrictor</code>)</p></td>
+war file and must implement <code>org.jolokia.server.core.service.api.Restrictor</code>)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>allowDnsReverseLookup</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Access can be restricted based on the remote host accessing Jolokia. This host can be
 specified as address or an hostname. However, using the hostname normally requires a reverse
-DNS lookup which might slow down operations. In order to avoid this reverse DNS lookup
-set this property to <code>false</code>.</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>true</code></p></td>
+DNS lookup which might slow down operations. If you want to use reverse DNS lookup
+set this property to <code>true</code>.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>false</code></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>debug</code></p></td>
@@ -307,22 +288,30 @@ the config MBean during runtime.</p></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
 <p>Loghandler to use for providing logging output. By default
 logging is written to standard out and error but you can provide
-here a Java class implementing <code>org.jolokia.util.LogHandler</code>
-for an alternative log output. Two alternative implementations are included in
+here a Java class implementing <code>org.jolokia.server.core.service.api.LogHandler</code>
+for an alternative log output. Few implementations are included in WAR
 this agent:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p><code>org.jolokia.util.QuietLogHandler</code> which switches off
+<p><code>org.jolokia.server.core.service.impl.StdoutLogHandler</code> which logs to standard output</p>
+</li>
+<li>
+<p><code>org.jolokia.server.core.service.impl.QuietLogHandler</code> which switches off
 logging completely.</p>
 </li>
 <li>
-<p><code>org.jolokia.util.JulLogHandler</code> which uses a <code>java.util.logging</code> Logger with name <code>org.jolokia</code></p>
+<p><code>org.jolokia.server.core.service.impl.JulLogHandler</code> which uses a <code>java.util.logging</code> Logger with name <code>org.jolokia</code></p>
+</li>
+<li>
+<p><code>org.jolokia.server.core.http.AgentServlet.ServletLogHandler</code> is used by default and delegates to <code>jakarta.servlet.GenericServlet.log()</code> methods</p>
 </li>
 </ul>
 </div></div></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Example: <code>org.jolokia.util.LogHandler.Quiet</code></p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>Default: <code>org.jolokia.server.core.http.AgentServlet.ServletLogHandler</code></p>
+</div></div></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>historyMaxEntries</code></p></td>
@@ -348,7 +337,7 @@ If set to 0, depth checking is disabled</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Maximum size of collections returned when
 serializing to JSON. When set to 0,
 collections are never truncated.</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>1000</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>0</code></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>maxObjects</code></p></td>
@@ -400,7 +389,7 @@ in which case the stacktrace is always included. If set to
 the value is <code>runtime</code> a stacktrace is
 only included for RuntimeExceptions. This global option can
 be overridden with a query parameter.</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>true</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>false</code></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>serializeException</code></p></td>
@@ -414,7 +403,7 @@ overridden by a query parameter of the same name.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>allowErrorDetails</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">If set to <code>true</code> then no error details like a stack trace
+<td class="tableblock halign-left valign-top"><p class="tableblock">If set to <code>false</code> then no error details like a stack trace
 (when <code>includeStackTrace</code> is set) or a serialized exception
 (when <code>serializeExceptin</code> is set) are included. This can be user as
 a startup option to avoid exposure of error details regardless of other options.</p></td>
@@ -422,20 +411,20 @@ a startup option to avoid exposure of error details regardless of other options.
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>detectorOptions</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Extra options passed to an detector after successful
+<td class="tableblock halign-left valign-top"><p class="tableblock">Extra options passed to a detector after successful
 detection of an application server. See below for an
 explanation.</p></td>
 <td class="tableblock halign-left valign-top"></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>discoveryEnabled</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Is set to <code>true</code> then this servlet will
+<td class="tableblock halign-left valign-top"><p class="tableblock">If set to <code>true</code> then this servlet will
 listen for multicast request (multicast-group 239.192.48.84,
 port 24884 by default, but can be changed). By default this option is disabled in order to
-avoid conflicts with an Java EE standards (though this should&#8217;t
+avoid conflicts with an Jakarta EE standards (though this should&#8217;t
 harm anyways). This option can also be switched on with an
 environment variable
-<code>JOLOKIA_DISCOVERY</code> or the system
+<code>JOLOKIA_DISCOVERY_ENABLED</code> or the system
 property <code>jolokia.discoveryEnabled</code> set to
 <code>true</code>.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>false</code></p></td>
@@ -444,24 +433,24 @@ property <code>jolokia.discoveryEnabled</code> set to
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>discoveryAgentUrl</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Sets the URL to respond for multicast discovery requests. If
 given, <code>discoveryEnabled</code> is set
-implicitly to true. This URL can also be provided by an
+implicitly to <code>true</code>. This URL can also be provided by an
 environment variable
 <code>JOLOKIA_DISCOVERY_AGENT_URL</code> or the system
-property <code>jolokia.discoveryUrl</code>. Within the value you can use the
+property <code>jolokia.discoveryAgentUrl</code>. Within the value you can use the
 placeholders <code>${host}</code> and <code>${ip}</code> which gets replaced
 by the autodetected local host name/address. Also with <code>${env:ENV_VAR}</code> and
 <code>${sys:property}</code> environment and system properties can be referenced, respectively.</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code><a href="http://10.9.11.87:8080/jolokia" class="bare">http://10.9.11.87:8080/jolokia</a></code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>http://10.9.11.87:8080/jolokia</code></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>multicastGroup</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">The multicast group IPv4 address. This group IP can be also given as an environment variable <code>JOLOKIA_MULTICAST_GROUP</code> or a system property <code>jolokia.multicastGroup</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>239.192.48.84</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>239.192.48.84</code></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>multicastPort</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">The multicast port. This port can be also given as an environment variable <code>JOLOKIA_MULTICAST_PORT</code> or a system property <code>jolokia.multicastPort</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>24884</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>24884</code></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>agentId</code></p></td>
@@ -526,12 +515,12 @@ MBeans for monitoring GlassFish is booted.</p></td>
 </div>
 <div class="dlist">
 <dl>
-<dt class="hdlist1"><strong>jolokia.war</strong></dt>
+<dt class="hdlist1"><strong>jolokia-agent-war.war</strong></dt>
 <dd>
 <p>The standard agent which is secured with the role <code>jolokia</code>. You have to setup your servlet container
 to connect this role to the authentication.</p>
 </dd>
-<dt class="hdlist1"><strong>jolokia-unsecured.war</strong></dt>
+<dt class="hdlist1"><strong>jolokia-agent-war-unsecured.war</strong></dt>
 <dd>
 <p>A demo agent, which is completely unsecured. Please use this agent only for evaluation purposes, but it is
 highly recommended that use the security enabled agent <code>jolokia.war</code>.</p>
@@ -539,18 +528,18 @@ highly recommended that use the security enabled agent <code>jolokia.war</code>.
 </dl>
 </div>
 <div class="paragraph">
-<p>Java EE security is enabled by default by adding the required information within the
+<p>Jakarta EE security is enabled by default by adding the required information within the
 <code>web.xml</code>.</p>
 </div>
 <div class="sidebarblock">
 <div class="content">
 <div class="title">Using jmx4perl&#8217;s <code>jolokia</code> tool</div>
 <div class="paragraph">
-<p><a href="https://www.jmx4perl.org">jmx4perl</a> comes
+<p><a href="https://metacpan.org/dist/jmx4perl" class="externalLink">jmx4perl</a> comes
 with a nice command line utility called
-<a href="https://search.cpan.org/~roland/jmx4perl/scripts/jolokia">jolokia</a>
+<code><a href="https://metacpan.org/dist/jmx4perl/view/scripts/jolokia" class="externalLink">jolokia</a></code>
 which allows for an easy setup of security within a given
-<code>jolokia.war</code>. See <a href="#tools-jmx4perl">[tools-jmx4perl]</a> for
+<code>jolokia.war</code>. See <a href="tools.html#tools-jmx4perl" class="xref page">Jmx4Perl</a> for
 more details.</p>
 </div>
 </div>
@@ -573,9 +562,9 @@ container, e.g. for Tomcat the role definition can be found in
 <h3 id="agent-war-programmatic"><a class="anchor" href="#agent-war-programmatic"></a>Programmatic usage of the Jolokia agent servlet</h3>
 <div class="paragraph">
 <p>The Jolokia agent servlet can be integrated into one&#8217;s own
-web-applications as well. Simply add a servlet with
+web applications as well. Simply add a servlet with
 the servlet class
-<code>org.jolokia.core.http.AgentServlet</code> to your
+<code>org.jolokia.server.core.http.AgentServlet</code> to your
 own <code>web.xml</code>. The following example maps
 the agent to the context <code>/jolokia</code>:</p>
 </div>
@@ -583,7 +572,7 @@ the agent to the context <code>/jolokia</code>:</p>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;servlet&gt;
   &lt;servlet-name&gt;jolokia-agent&lt;/servlet-name&gt;
-  &lt;servlet-class&gt;org.jolokia.core.http.AgentServlet&lt;/servlet-class&gt;
+  &lt;servlet-class&gt;org.jolokia.server.core.http.AgentServlet&lt;/servlet-class&gt;
   &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
 &lt;/servlet&gt;
 
@@ -600,9 +589,7 @@ the agent to the context <code>/jolokia</code>:</p>
 <div class="paragraph">
 <p>In order for this servlet definition to find the referenced
 Java class, the JAR <code>jolokia-server-core.jar</code> must
-be included. This jar can be found in
-<a href="https://labs.consol.de/maven/repository/org/jolokia/jolokia-server-core">Jolokia&#8217;s maven
-resository</a>. Maven users can declare a
+be included. Maven users can declare a
 dependency on this jar artifact:</p>
 </div>
 <div class="listingblock">
@@ -621,10 +608,10 @@ dependency on this jar artifact:</p>
 </div>
 </div>
 <div class="paragraph">
-<p>The <code>org.jolokia.core.http.Agent</code> can be
+<p>The <code>org.jolokia.server.core.http.AgentServlet</code> can be
 subclassed, too in order to provide a custom restrictor or a
-custom log handler. See <a href="#security-restrictor">[security-restrictor]</a>
-for details.<sup class="footnote">[<a id="_footnoteref_4" class="footnote" href="#_footnotedef_4" title="View footnote.">4</a>]</sup></p>
+custom log handler. See <a href="security.html#security-restrictor" class="xref page">Jolokia Restrictors</a>
+for details.</p>
 </div>
 <div class="paragraph">
 <p>Also, multiple Jolokia agents can be deployed in the same JVM
@@ -636,7 +623,7 @@ deployments it is important to use the
 distinguish multiple Jolokia MBeans by adding an extra
 property to those MBeans' names. This also needs to be done if
 multiple webapps containing Jolokia agents are deployed on
-the same Java EE server.</p>
+the same Jakarta EE server.</p>
 </div>
 </div>
 </div>
@@ -644,41 +631,30 @@ the same Java EE server.</p>
 <div class="sect1">
 <h2 id="agents-osgi"><a class="anchor" href="#agents-osgi"></a>OSGi Agents</h2>
 <div class="sectionbody">
+<div class="paragraph">
+<p>Jolokia agent is also available as
+<a href="https://www.osgi.org" class="externalLink">OSGi</a> bundle. The Jolokia 1.x OSGi agent
+had two versions (with and without packaged <a href="https://github.com/apache/felix-dev/tree/master/http" class="externalLink">Felix HTTP Service</a> bundles).
+In Jolokia 2 there&#8217;s only one bundle
+which requires a <a href="https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html" class="externalLink">OSGi CMPN Whiteboard extender</a> implementation available in target OSGi runtime.</p>
+</div>
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph">
-<p>There are several free implementations available of OSGi
-<code>HttpService</code>. This bundle has been tested with the
-<a href="https://wiki.ops4j.org/display/paxweb/Pax+Web">Pax Web</a>
-and
-<a href="https://felix.apache.org/site/apache-felix-http-service.html">Apache
-Felix</a> <code>HttpService</code>, both of which come with an embedded Jetty
-as servlet container by default.</p>
+<p>In OSGi world, transition to JakartaEE 9+ (with <code>jakarta.servlet</code> packages) is a bit slower. Jolokia 2 has been
+tested with dev version of Pax Web 10 using Undertow 2.3, running in dev version of Karaf 4.5.</p>
 </div>
 </div>
-</div>
-<div class="paragraph">
-<p>Jolokia agents are also available as
-<a href="https://www.osgi.org">OSGi</a> bundles. There are two
-flavors of this agent: A nearly bare agent
-<code>jolokia-osgi.jar</code> declaring all its package
-dependencies as imports in its Manifest and an all-in-one bundle
-<code>jolokia-osgi-bundle.jar</code> with minimal
-dependencies. The pure bundle fits best with the OSGi philosophy and is
-hence the recommended bundle. The all-in-one monster is good for a
-quick start since normally no additional bundles are required.</p>
 </div>
 <div class="sect2">
-<h3 id="agents-osgi-pure"><a class="anchor" href="#agents-osgi-pure"></a>jolokia-osgi.jar</h3>
+<h3 id="agents-osgi-pure"><a class="anchor" href="#agents-osgi-pure"></a>jolokia-agent-osgi.jar</h3>
 <div class="paragraph">
-<p>This bundle depends mostly on a running
-<a href="https://www.osgi.org/javadoc/r4v42/org/osgi/service/http/HttpService.html">OSGi
-HttpService</a> which it uses for registering the agent
-servlet.</p>
+<p>This bundle depends on availability of <a href="https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html" class="externalLink">OSGi CMPN Whiteboard extender</a> which tracks instances of <code>jakarta.servlet.Servlet</code> OSGi services.
+Jolokia 2 registers such OSGi servlet service when new <code>registerWhiteboardServlet</code> option is set to <code>true</code> (which is the default).</p>
 </div>
 <div class="paragraph">
 <p>All package imports of this bundle are listed in
-<a href="#table-agents-osgi-deps">Table 3, &#8220;Package Imports of jolokia-osgi.jar (SB: exported by system bundle)&#8221;</a>. Note that the
+<a href="#table-agents-osgi-deps">Table 3, &#8220;Package Imports of jolokia-osgi.jar&#8221;</a>. Note that the
 <code>org.osgi.framework.*</code> and <code>javax.*</code>
 packages are typically exported
 by the system bundle, so no extra installation effort is
@@ -693,7 +669,7 @@ missing package dependency during the resolve phase while
 installing <code>jolokia-osgi.jar</code>.</p>
 </div>
 <table id="table-agents-osgi-deps" class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 3. Package Imports of jolokia-osgi.jar (SB: exported by system bundle)</caption>
+<caption class="title">Table 3. Package Imports of jolokia-osgi.jar</caption>
 <colgroup>
 <col style="width: 50%;">
 <col style="width: 50%;">
@@ -701,7 +677,7 @@ installing <code>jolokia-osgi.jar</code>.</p>
 <thead>
 <tr>
 <th class="tableblock halign-left valign-top">Package</th>
-<th class="tableblock halign-left valign-top">SB</th>
+<th class="tableblock halign-left valign-top">from System Bundle</th>
 </tr>
 </thead>
 <tbody>
@@ -714,6 +690,10 @@ installing <code>jolokia-osgi.jar</code>.</p>
 <td class="tableblock halign-left valign-top"><p class="tableblock">X</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>javax.management.relation</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">X</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>javax.management.remote</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">X</p></td>
 </tr>
@@ -722,12 +702,24 @@ installing <code>jolokia-osgi.jar</code>.</p>
 <td class="tableblock halign-left valign-top"><p class="tableblock">X</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>javax.servlet</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>jakarta.servlet</code></p></td>
 <td class="tableblock halign-left valign-top"></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>javax.servlet.http</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>jakarta.servlet.http</code></p></td>
 <td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>javax.crypto</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">X</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>javax.crypto.spec</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">X</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>javax.xml.datatype</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">X</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>javax.xml.parsers</code></p></td>
@@ -738,12 +730,16 @@ installing <code>jolokia-osgi.jar</code>.</p>
 <td class="tableblock halign-left valign-top"><p class="tableblock">X</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.osgi.service.http</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.osgi.service.cm</code></p></td>
 <td class="tableblock halign-left valign-top"></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.osgi.service.log</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">?</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.osgi.service.servlet.context</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.osgi.util.tracker</code></p></td>
@@ -760,36 +756,43 @@ installing <code>jolokia-osgi.jar</code>.</p>
 </tbody>
 </table>
 <div class="paragraph">
-<p>This agent bundle consumes two services by default: As stated
-above, an
-<code>org.osgi.service.http.HttpService</code> which
-is used to register (deregister) the Jolokia agent as a servlet
-under the context <code>/jolokia</code> by default as soon
-as the <code>HttpService</code> becomes available (unavailable). Secondly, an
-<code>org.osgi.service.log.LogService</code> is used
-for logging, if available. If such a service is not registered,
-the Jolokia bundle uses the standard
-<code>HttpServlet.log()</code> method for its
-logging needs.</p>
+<p>This agent bundle consumes two services by default:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>org.osgi.service.log.LogService</code> is used for logging, if available. If such a service is not registered,
+the Jolokia bundle uses the standard <code>HttpServlet.log()</code> method for its logging needs.</p>
+</li>
+<li>
+<p><code>org.osgi.service.cm.ConfigurationAdmin</code> is used to load configuration from <code>org.jolokia.osgi</code> PID in OSGi environment
+with Configuration Admin service available.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>In Jolokia 1, <a href="https://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.http.html" class="externalLink">OSGi CMPN HTTP Service</a>
+was used to register Jolokia servlet. In Jolokia 2 a different pattern is used. Instead of using some service directly by
+Jolokia, a servlet is registered as OSGi service which is then processed (<em>extended</em>) using <a href="https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html" class="externalLink">OSGi CMPN Whiteboard extender</a></p>
 </div>
 <div class="paragraph">
 <p>The Jolokia OSGi bundle can be configured via the OSGi Configuration Admin
 service using the PID <code>org.jolokia.osgi</code>
 (e.g. if using Apache Karaf, place properties in
-<code>etc/org.jolokia.osgi.cfg</code>), or alternatively via global
+<code>etc/org.jolokia.osgi.cfg</code> file), or alternatively via global
 properties which typically can be configured in a configuration file of
 the OSGi container. All properties start with the prefix
 <code>org.jolokia</code> and are listed in
 <a href="#table-agents-osgi-properties">Table 4, &#8220;Jolokia Bundle Properties&#8221;</a>. They are mostly the
 same as the <code>init-param</code> options for
-a Jolokia servlet when used in a Java EE WAR artifact.</p>
+a Jolokia servlet when used in a Jakarta EE WAR artifact.</p>
 </div>
 <table id="table-agents-osgi-properties" class="tableblock frame-all grid-all stretch">
 <caption class="title">Table 4. Jolokia Bundle Properties</caption>
 <colgroup>
-<col style="width: 33.3333%;">
-<col style="width: 33.3333%;">
-<col style="width: 33.3334%;">
+<col style="width: 15%;">
+<col>
+<col>
 </colgroup>
 <thead>
 <tr>
@@ -802,14 +805,12 @@ a Jolokia servlet when used in a Java EE WAR artifact.</p>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.jolokia.user</code></p></td>
 <td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">User used for authentication with HTTP Basic
-Authentication. If not given, no authentication is used.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">User used for authentication with HTTP Basic Authentication. If not given, no authentication is used.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.jolokia.password</code></p></td>
 <td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Password used for authentication with HTTP Basic
-Authentication.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Password used for authentication with HTTP Basic Authentication.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.jolokia.agentContext</code></p></td>
@@ -831,20 +832,6 @@ can use the same placeholders as in <code>discoveryAgentUrl</code>.</p></td>
 <td class="tableblock halign-left valign-top"></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">An optional description which can be used for clients to
 present a human readable label for this agent.</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.jolokia.dispatcherClasses</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Class names (comma separated) of request dispatchers used in
-addition to the LocalRequestDispatcher. E.g using a value
-of
-<code>org.jolokia.service.jsr160.Jsr160RequestHandler</code>
-allows the agent to play the role of a JSR-160 proxy.
-By default no extract dispatchers are enabled.
-You can use the system property <code>org.jolokia.jsr160ProxyEnabled</code> or the
-environment variable <code>JOLOKIA_JSR160_PROXY_ENABLED</code> to enable the the JSR-160 proxy.
-In that case you should be sure that you enable authentication for the web application to protect access
-to the proxy.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.jolokia.debug</code></p></td>
@@ -889,31 +876,20 @@ no limit is imposed.</p></td>
 runtime via the Jolokia config MBean.</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.jolokia.listenForHttpService</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.jolokia.registerWhiteboardServlet</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>true</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">If <code>true</code> the bundle listens for an OSGi
-<code>HttpService</code> and if available registers an
-agent servlet to it.</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.jolokia.httpServiceFilter</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Can be any valid OSGi filter for locating a which
-<code>org.osgi.service.http.HttpService</code>
-is used to expose the Jolokia servlet. The syntax is that
-used by the <code>org.osgi.framework.Filter</code>
-which is in turn a <a href="https://www.ietf.org/rfc/rfc1960.txt">RFC 1960 based filter</a>. The use of this property
-is described in <a href="#running-on-glassfish">Running on GlassFish v3 upwards</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">If <code>true</code> the bundle registers <code>org.jolokia.server.core.osgi.OsgiAgentServlet</code> OSGi service. If <code>false</code>, it&#8217;s your
+responsibility to register this servlet in some way.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.jolokia.useRestrictorService</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>false</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">If <code>true</code> the Jolokia agent will use any
-<code>org.jolokia.core.service.Restrictor</code>
+<code>org.jolokia.server.core.service.api.Restrictor</code>
 service for applying access restrictions. If this option is
 <code>false</code> the standard method of looking up a
 security policy file is used, as described in
-<a href="#security-policy">[security-policy]</a>.</p></td>
+<a href="security.html#security-policy" class="xref page">Policy based security</a>.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.jolokia.canonicalNaming</code></p></td>
@@ -930,11 +906,10 @@ name.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.jolokia.includeStackTrace</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>true</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>false</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Whether to include a stacktrace of an exception in case of
-an error. By default it it set to <code>true</code>
-in which case the stacktrace is always included. If set to
-<code>false</code>, no stacktrace is included. If
+an error. By default it it set to <code>false</code>
+in which case the stacktrace is never included. If
 the value is <code>runtime</code> a stacktrace is
 only included for RuntimeExceptions. This global option can
 be overridden with a query parameter.</p></td>
@@ -955,19 +930,19 @@ overridden by a query parameter of the same name.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">An optional JSON representation for application specific
 options used by detectors for post-initialization steps. See the description of
 <code>detectorOptions</code> in
-<a href="#agent-war-init-params">Table 1, &#8220;Servlet init parameters&#8221;</a> for details.</p></td>
+<a href="agents/war.html#agent-war-init-params" class="xref page">Servlet init parameters</a> for details.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.jolokia.discoveryEnabled</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>false</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Is set to <code>true</code> then this servlet will
+<td class="tableblock halign-left valign-top"><p class="tableblock">If set to <code>true</code> then this servlet will
 listen for multicast request (multicast-group <code>239.192.48.84</code>,
 port <code>24884</code> by default, but can be configured).
 By default this option is disabled in order to
-avoid conflicts with an Java EE standards (though this should&#8217;t
+avoid conflicts with an Jakarta EE standards (though this shouldn&#8217;t
 harm anyways). This option can also be switched on with an
 environment variable
-<code>JOLOKIA_DISCOVERY</code> or the system
+<code>JOLOKIA_DISCOVERY_ENABLED</code> or the system
 property <code>jolokia.discoveryEnabled</code> set to
 <code>true</code>.</p></td>
 </tr>
@@ -1019,88 +994,14 @@ successfully authenticates. In any case if no such Authenticator service can be 
 </table>
 <div class="paragraph">
 <p>This bundle also exports the service
-<code>org.jolokia.server.core.osgi.servlet.JolokiaContext</code>
+<code>jakarta.servlet.ServletContext</code>
 which can be used to obtain context information of the
 registered agent like the context path under which this
 servlet can be reached. Additionally, it exports
-<code>org.osgi.service.http.HttpContext</code>, which
+<code>org.osgi.service.servlet.context.ServletContextHelper</code>, which
 is used for authentication. Note that this service is only
 available when the agent servlet is active (i.e. when an
-<code>HttpService</code> is registered).</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="running-on-glassfish"><a class="anchor" href="#running-on-glassfish"></a>Running on GlassFish v3 upwards</h3>
-<div class="paragraph">
-<p>You have a couple of choices when running Jolokia on
-GlassFish v3 and up, since GlassFish is a both a fully
-fledged Java EE container and an OSGi container. If you
-choose to run the <a href="agents/war.html" class="xref page">Java EE Agent (WAR)</a> then it
-is completely straight forward just deploy the war
-in the normal way. If you choose to deploy
-the <a href="agents/osgi.html" class="xref page">OSGi Agents</a> then you will need
-to configure the <code>org.jolokia.httpServiceFilter</code>
-option with a filter to select either the Admin
-<code>HttpService</code> (<code>4848</code> by default) or the Default
-<code>HttpService</code> which is where WAR files are
-deployed to.</p>
-</div>
-<div class="paragraph">
-<p>In GlassFish 3.1.2 the OSGi bundle configuration is done in
-<code>glassfish/conf/osgi.properties</code> in version&#8217;s
-prior to this the configuration is by default in
-<code>glassfish/osgi/felix/conf/config.properties</code>
-or if you are using Equinox
-<code>glassfish/osgi/equinox/configuration/config.ini</code></p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre># Restrict the jolokia http service selection to the admin host
-org.jolokia.httpServiceFilter=(VirtualServer=__asadmin)
-# Or alternatively to the normal http service use : (VirtualServer=server)</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Deploying the bundle can be either be done by coping the
-<code>jolokia-osgi.jar</code> into the domain
-<code>glassfish/domains/&lt;domain&gt;/autodeploy/bundles</code>
-directory or it can be added to all instances by copying the jar
-to <code>glassfish/modules/autostart</code></p>
-</div>
-<div class="paragraph">
-<p>By default the agent will be available on <code><a href="http://localhost:&lt;port&gt;/osgi/jolokia" class="bare">http://localhost:&lt;port&gt;/osgi/jolokia</a></code>
-rather than <code><a href="http://localhost:&lt;port&gt;/jolokia" class="bare">http://localhost:&lt;port&gt;/jolokia</a></code> as with WAR deployment.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="agents-osgi-bundle"><a class="anchor" href="#agents-osgi-bundle"></a>jolokia-osgi-bundle.jar</h3>
-<div class="paragraph">
-<p>The all-in-one bundle includes an implementation of
-<code>org.osgi.service.http.HttpService</code>,
-i.e. the
-<a href="https://felix.apache.org/site/apache-felix-http-service.html">Felix
-implementation</a>. The <code>HttpService</code> will be registered as
-OSGi service during startup, so it is available for other
-bundles as well. The only package import requirement for this
-bundle is <code>org.osgi.service.LogService</code>,
-since the Felix Webservice requires this during startup. As
-mentioned above, normally the <code>LogService</code> interface gets exported
-by default in the standard containers, but if not, you need to
-install it e.g. from the OSGi
-<a href="https://repo1.maven.org/maven2/org/osgi/org.osgi.compendium/4.2.0/org.osgi.compendium-4.2.0.jar">compendium</a>
-definitions.</p>
-</div>
-<div class="paragraph">
-<p>This bundle can be configured the same way as the pure bundle as
-described in <a href="#agents-osgi-pure">jolokia-osgi.jar</a>. Additionally,
-the embedded Felix HttpService can be configured as described in
-its
-<a href="https://felix.apache.org/site/apache-felix-http-service.html#ApacheFelixHTTPService-ConfigurationProperties">documentation</a>.
-e.g. setting the port to 9090 instead of the default port 8080, a property
-<code>org.osgi.service.http.port=9090</code> needs to be
-set. This might be useful, if this bundle is used within
-containers which already occupy the default port (GlassFish,
-Eclipse Virgo) but don&#8217;t expose an OSGi HttpService.</p>
+whiteboard servlet is registered).</p>
 </div>
 </div>
 <div class="sect2">
@@ -1108,24 +1009,23 @@ Eclipse Virgo) but don&#8217;t expose an OSGi HttpService.</p>
 <div class="paragraph">
 <p>It is also possible to register the Jolokia agent servlet
 manually instead of relying of the OSGi bundle activator which
-comes with the agents. For this use case
-<code>jolokia-osgi.jar</code> should be used. This
-bundle exports the package
-<code>org.jolokia.server.core.osgi.servlet</code> which includes
-the servlet class <code>JolokiaServlet</code>. This
+comes with the OSGi agent.
+<code>jolokia-agent-osgi.jar</code> bundle exports the package
+<code>org.jolokia.server.core.osgi</code> which includes
+the servlet class <code>org.jolokia.server.core.osgi.OsgiAgentServlet</code>. This
 class has three constructors: A default constructor without
 arguments, one with a single
 <code>BundleContext</code> argument and finally one
-with an additional <code>Restrictor</code> (see
-<a href="#security-restrictor">[security-restrictor]</a> for details how access
-restrictions can be applied). The constructor with a
+with an additional <code>org.jolokia.server.core.service.api.Restrictor</code> (see
+<a href="security.html#security-restrictor" class="xref page">Jolokia Restrictors</a> for details how access
+restrictions can be applied).
+The constructor with a
 <code>BundleContext</code> as its argument has the
 advantage that it will use an OSGi
 <code>LogService</code> if available and adds various
 OSGi server detectors which adds server information like product
 name and version to the <code>version</code>
-command. Refer to <a href="#version">[version]</a> for details about the
-server infos provided.</p>
+command. Refer to <a href="protocol/version.html#version" class="xref page">Getting the agent version</a> for details about the server information provided.</p>
 </div>
 <div class="paragraph">
 <p>Please note that for this use case the bundle
@@ -1135,30 +1035,74 @@ server infos provided.</p>
 HttpService registers, this bundle will try to add yet another
 agent servlet to this service, which is probably not what you
 want. Alternatively, the bundle property
-<code>org.jolokia.listenForHttpService</code> can be set
+<code>org.jolokia.registerWhiteboardServlet</code> can be set
 to <code>false</code> in which case there will be never an
-automatic servlet registration to an HttpService.</p>
+automatic servlet registration.</p>
 </div>
 </div>
 <div class="sect2">
 <h3 id="_restrictor_service"><a class="anchor" href="#_restrictor_service"></a>Restrictor service</h3>
 <div class="paragraph">
-<p>As described in <a href="#security-restrictor">[security-restrictor]</a>, the
+<p>As described in <a href="security.html#security-restrictor" class="xref page">Jolokia Restrictors</a>, the
 Jolokia agent can use custom restrictors implementing the
 interface
-<code>org.jolokia.core.service.Restrictor</code>. If the
+<code>org.jolokia.server.core.service.api.Restrictor</code>. If the
 bundle property
 <code>org.jolokia.useRestrictorService</code> is set to
-true and no restrictor is configured by other means, the agent
-will use one or more OSGi service which register under the name
-<code>org.jolokia.core.service.Restrictor</code>. If no
+<code>true</code> and no restrictor is configured by other means, the agent
+will use one or more OSGi service with
+<code>org.jolokia.server.core.service.api.Restrictor</code> interface. If no
 such service is available, access to the agent is always
 denied. If one such restrictor service is available, the access
 decision is delegated to this service. When more than one
 restrictor service is available, access is only granted if all of
 them individually grant access. A sample restrictor service as a
 maven project can be found in the Jolokia source at
-<code>agent/osgi/restrictor-sample</code>.</p>
+<code>examples/osgi-restrictor</code>.</p>
+</div>
+<div class="paragraph">
+<p>Here&#8217;s an example where this custom restrictor is installed and configured (because by default <code>org.jolokia.useRestrictorService</code> is set to <code>false</code>):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>karaf@root()&gt; install -s mvn:org.jolokia/jolokia-example-osgi-restrictor/2.0.0
+Register sample restrictor service
+Bundle ID: 68
+
+karaf@root()&gt; config:property-set --pid org.jolokia.osgi org.jolokia.useRestrictorService true
+
+karaf@root()&gt; restart org.jolokia.agent.osgi</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then we can only access MBeans from <code>java.lang</code> domain:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ curl -s http://localhost:8181/jolokia/read/java.lang:type=Runtime/Name | jq .
+{
+  "request": {
+    "mbean": "java.lang:type=Runtime",
+    "attribute": "Name",
+    "type": "read"
+  },
+  "value": "94143@everfree.forest",
+  "status": 200,
+  "timestamp": 1702305458
+}
+
+$ curl -s http://localhost:8181/jolokia/read/java.nio:type=BufferPool,name=direct/Count | jq .
+{
+  "request": {
+    "mbean": "java.nio:name=direct,type=BufferPool",
+    "attribute": "Count",
+    "type": "read"
+  },
+  "error_type": "java.lang.Exception",
+  "error": "java.lang.Exception : Reading attribute Count is forbidden for MBean java.nio:name=direct,type=BufferPool",
+  "status": 403
+}</pre>
+</div>
 </div>
 </div>
 </div>
@@ -1167,22 +1111,31 @@ maven project can be found in the Jolokia source at
 <h2 id="agents-jvm"><a class="anchor" href="#agents-jvm"></a>JVM Agent</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The JVM agent is right agent when it comes to instrument an
+<p>The JVM agent is the right agent when it comes to instrument an
 arbitrary Java application which is not covered by the other
 agents. This agent can be started by any Java program by
 providing certain startup options to the JVM. Or it can be
 dynamically attached (and detached) to an already running Java
 process. This universal agent uses the
-<a href="https://download.oracle.com/javase/6/docs/technotes/guides/jvmti/index.html">JVM
-agent API</a> and is available for every Sun/Oracle JVM 1.6
-and later.</p>
+<a href="https://docs.oracle.com/en/java/javase/11/docs/api/jdk.attach/com/sun/tools/attach/VirtualMachine.html" class="externalLink">JVM Attach API</a> or <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.instrument/java/lang/instrument/package-summary.html" class="externalLink">Java Instrument API</a> and is available for every JVM 1.6 and later.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Dynamic loading of agents will be removed at some point. See <a href="https://openjdk.org/jeps/451" class="externalLink">JEP 451</a> for details.
+</td>
+</tr>
+</table>
 </div>
 <div class="sect2">
 <h3 id="jvm-agent"><a class="anchor" href="#jvm-agent"></a>Jolokia as JVM Agent</h3>
 <div class="paragraph">
 <p>The JVM agent uses the
-<a href="https://download.oracle.com/javase/6/docs/technotes/guides/jvmti/index.html">JVM
-Agent interface</a> for linking into any JVM. Under the
+<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.instrument/java/lang/instrument/package-summary.html" class="externalLink">Java Instrument API</a> for linking into any JVM at startup time. Under the
 hood it uses an HTTP-Server, which is available on every
 Oracle/Sun JVM from version 1.6 upwards.</p>
 </div>
@@ -1205,27 +1158,27 @@ performance. See below for details.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>java -javaagent:agent.jar=port=7777,host=localhost</pre>
+<pre>java -javaagent:/path/to/agent.jar=port=7777,host=localhost</pre>
 </div>
 </div>
 <div class="paragraph">
 <p><code>agent.jar</code> is the filename of the Jolokia
-JVM agent. The agent can be downloaded like the others from the <a href="https://jolokia.org/download.html">download page</a>.
-When downloading from a Maven repository you need to check for the classifier <code>agent</code> (i.e. the
-jar to download looks like <code>jolokia-jvm-1.3.1-agent.jar</code>, not <code>jolokia-jvm-1.1.5.jar</code>).
+JVM agent. The agent can be downloaded like the others from the <a href="https://jolokia.org/download.html" class="externalLink">download page</a>.
+When downloading from a Maven repository you need to check for the classifier <code>javaagent</code> (i.e. the
+jar to download looks like <code>jolokia-agent-jvm-2.0.0-javaagent.jar</code>, not <code>jolokia-agent-jvm-2.0.0.jar</code>).
 Options can be appended as a comma separated
 list. The available options are the same as described in
-<a href="#agent-war-init-params">Table 1, &#8220;Servlet init parameters&#8221;</a> plus the one described in
-table <a href="#agent-jvm-config">Table 5, &#8220;JVM agent configuration options&#8221;</a>. If an options
+<a href="agents/war.html#agent-war-init-params" class="xref page">Servlet init parameters</a> plus the one described in
+table <a href="#agent-jvm-config">Table 5, &#8220;JVM agent configuration options&#8221;</a>. If an option
 contains a comma, an equal sign or a backslash, it must be
 escaped with a backslash.</p>
 </div>
 <table id="agent-jvm-config" class="tableblock frame-all grid-all stretch">
 <caption class="title">Table 5. JVM agent configuration options</caption>
 <colgroup>
-<col style="width: 33.3333%;">
-<col style="width: 33.3333%;">
-<col style="width: 33.3334%;">
+<col style="width: 15%;">
+<col>
+<col>
 </colgroup>
 <thead>
 <tr>
@@ -1308,7 +1261,7 @@ all authenticators must match.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>authClass</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Fully qualified name of an authenticator class. Class must be on classpath and must extend
 <code>com.sun.net.httpserver.Authenticator</code>. Class can declare a constructor
-that takes one argument of a type <code>org.jolokia.core.config.Configuration</code> in which case
+that takes one argument of a type <code>org.jolokia.server.core.config.Configuration</code> in which case
 Jolokia runtime configuration will be passed (useful in cases where authenticator requires additional
 configuration). If no such constructor is found, default (no-arg) constructor will be use to create an
 instance.</p></td>
@@ -1505,15 +1458,15 @@ of course :)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>discoveryEnabled</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Is set to <code>false</code> then this agent will
+<td class="tableblock halign-left valign-top"><p class="tableblock">If set to <code>false</code> then this agent will
 not listen for multicast request (multicast-group 239.192.48.84,
 port 24884 by default, but can configured individually).
 By default this option is enabled. This option can also be switched on with an
 environment variable
-<code>JOLOKIA_DISCOVERY</code> or the system
+<code>JOLOKIA_DISCOVERY_ENABLED</code> or the system
 property <code>jolokia.discoveryEnabled</code> set to
 <code>true</code>.</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>true</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>false</code></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>discoveryAgentUrl</code></p></td>
@@ -1573,13 +1526,24 @@ contacting the agent.</p>
 </div>
 <div class="sect2">
 <h3 id="jvm-attach"><a class="anchor" href="#jvm-attach"></a>Attaching a Jolokia agent on the fly</h3>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Dynamic loading of agents will be removed at some point. See <a href="https://openjdk.org/jeps/451" class="externalLink">JEP 451</a> for details.
+</td>
+</tr>
+</table>
+</div>
 <div class="paragraph">
 <p>A Jolokia agent can be attached to any running Java process as
 long as the user has sufficient access privileges for
 accessing the process. This agent uses the
-<a href="https://download.oracle.com/javase/6/docs/jdk/api/attach/spec/com/sun/tools/attach/VirtualMachine.html">Java
-attach API</a> for dynamically attaching and detaching to
-and from the process. It works similar to JConsole connecting
+<a href="https://docs.oracle.com/en/java/javase/11/docs/api/jdk.attach/com/sun/tools/attach/VirtualMachine.html" class="externalLink">JVM Attach API</a> for dynamically attaching and detaching to
+and from the process. It works similar to JConsole or <code>jcmd</code> command connecting
 to a local process. The Jolokia advantage is, that after the
 start of the agent, it can be reached over the network.</p>
 </div>
@@ -1591,87 +1555,85 @@ application which can be reached via the
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>$ java -jar jolokia-jvm-1.3.4-agent.jar --help
+<pre>$ java -jar jolokia-agent-jvm-2.0.0-javaagent.jar --help
 
 Jolokia Agent Launcher
 ======================
 
-Usage: java -jar jolokia-jvm-1.3.4-agent.jar [options] &lt;command&gt; &lt;pid/regexp&gt;
+Usage: java -jar jolokia-agent-jvm-2.0.0-javaagent.jar [options] &lt;command&gt; &lt;pid/regexp&gt;
 
 where &lt;command&gt; is one of
-start     -- Start a Jolokia agent for the process specified
-stop      -- Stop a Jolokia agent for the process specified
-status    -- Show status of an (potentially) attached agent
-toggle    -- Toggle between start/stop (default when no command is given)
-list      -- List all attachable Java processes (default when no argument is given at all)
-encrypt   -- Encrypt a password which is given as argument or read from standard input
+    start     -- Start a Jolokia agent for the process specified
+    stop      -- Stop a Jolokia agent for the process specified
+    status    -- Show status of an (potentially) attached agent
+    toggle    -- Toggle between start/stop (default when no command is given)
+    list      -- List all attachable Java processes (default when no argument is given at all)
+    encrypt   -- Encrypt a password which is given as argument or read from standard input
 
 [options] are used for providing runtime information for attaching the agent:
 
---host &lt;host&gt;                   Hostname or IP address to which to bind on
-(default: InetAddress.getLocalHost())
---port &lt;port&gt;                   Port to listen on (default: 8778)
---agentContext &lt;context&gt;        HTTP Context under which the agent is reachable (default: /jolokia)
---agentId &lt;agent-id&gt;            VM unique identifier used by this agent (default: autogenerated)
---agentDescription &lt;desc&gt;       Agent description
---authMode &lt;mode&gt;               Authentication mode: 'basic' (default), 'jaas' or 'delegate'
---authClass &lt;class&gt;             Classname of an custom Authenticator which must be loadable from
-the classpath
---authUrl &lt;url&gt;                 URL used for a dispatcher authentication (authMode == delegate)
---authPrincipalSpec &lt;spec&gt;      Extractor specification for getting the principal
-(authMode == delegate)
---authIgnoreCerts               Whether to ignore CERTS when doing a dispatching authentication
-(authMode == delegate)
---user &lt;user&gt;                   User used for Basic-Authentication
---password &lt;password&gt;           Password used for Basic-Authentication
---quiet                         No output. "status" will exit with code 0 if the agent is running,
-1 otherwise
---verbose                       Verbose output
---executor &lt;executor&gt;           Executor policy for HTTP Threads to use (default: single)
-"fixed"  -- Thread pool with a fixed number of threads (default: 5)
-"cached" -- Cached Thread Pool, creates threads on demand
-"single" -- Single Thread
---threadNr &lt;nr threads&gt;         Number of fixed threads if "fixed" is used as executor
---backlog &lt;backlog&gt;             How many request to keep in the backlog (default: 10)
---protocol &lt;http|https&gt;         Protocol which must be either "http" or "https" (default: http)
---keystore &lt;keystore&gt;           Path to keystore (https only)
---keystorePassword &lt;pwd&gt;        Password to the keystore (https only)
---useSslClientAuthentication    Use client certificate authentication (https only)
---secureSocketProtocol &lt;name&gt;   Secure protocol (https only, default: TLS)
---keyStoreType &lt;name&gt;           Keystore type (https only, default: JKS)
---keyManagerAlgorithm &lt;name&gt;    Key manager algorithm (https only, default: SunX509)
---trustManagerAlgorithm &lt;name&gt;  Trust manager algorithm (https only, default: SunX509)
---caCert &lt;path&gt;                 Path to a PEM encoded CA cert file (https &amp; sslClientAuth only)
---serverCert &lt;path&gt;             Path to a PEM encoded server cert file (https only)
---serverKey &lt;path&gt;              Path to a PEM encoded server key file (https only)
---serverKeyAlgorithm &lt;algo&gt;     Algorithm to use for decrypting the server key (https only, default: RSA)
---clientPrincipal &lt;principal&gt;   Allow only this principal in the client cert (https &amp; sslClientAuth only)
-If supplied multiple times, any one of the clientPrincipals must match
---extendedClientCheck &lt;t|f&gt;     Additional validation of client certs for the proper key usage
-(https &amp; sslClientAuth only)
---discoveryEnabled &lt;t|f&gt;        Enable/Disable discovery multicast responses (default: true)
---discoveryAgentUrl &lt;url&gt;       The URL to use for answering discovery requests. Will be autodetected
-if not given.
---sslProtocol &lt;protocol&gt;        SSL / TLS protocol to enable, can be provided multiple times
---sslCipherSuite &lt;suite&gt;        SSL / TLS cipher suite to enable, can be provided multiple times
---debug                         Switch on agent debugging
---debugMaxEntries &lt;nr&gt;          Number of debug entries to keep in memory which can be fetched from the
-Jolokia MBean
---maxDepth &lt;depth&gt;              Maximum number of levels for serialization of beans
---maxCollectionSize &lt;size&gt;      Maximum number of element in collections to keep when serializing the
-response
---maxObjects &lt;nr&gt;               Maximum number of objects to consider for serialization
---restrictorClass &lt;class&gt;       Classname of an custom restrictor which must be loadable from the classpath
---policyLocation &lt;url&gt;          Location of a Jolokia policy file
---mbeanQualifier &lt;qualifier&gt;    Qualifier to use when registering Jolokia internal MBeans
---canonicalNaming &lt;t|f&gt;         whether to use canonicalName for ObjectNames in 'list' or 'search'
-(default: true)
---includeStackTrace &lt;t|f&gt;       whether to include StackTraces for error messages (default: true)
---serializeException &lt;t|f&gt;      whether to add a serialized version of the exception in the Jolokia
-response (default: false)
---config &lt;configfile&gt;           Path to a property file from where to read the configuration
---help                          This help documentation
---version                       Version of this agent (it's 1.3.4 btw :)
+    --host &lt;host&gt;                   Hostname or IP address to which to bind on
+                                    (default: InetAddress.getLocalHost())
+    --port &lt;port&gt;                   Port to listen on (default: 8778)
+    --agentContext &lt;context&gt;        HTTP Context under which the agent is reachable (default: /jolokia)
+    --agentId &lt;agent-id&gt;            VM unique identifier used by this agent (default: autogenerated)
+    --agentDescription &lt;desc&gt;       Agent description
+    --authMode &lt;mode&gt;               Authentication mode: 'basic' (default), 'jaas' or 'delegate'
+    --authMatch &lt;match&gt;             If MultiAuthenticator is used, this config item explains how to combine multiple authenticators
+                                     "any" -- at least one authenticator must match (default)
+                                     "all" -- all authenticators must match
+    --authClass &lt;class&gt;             Classname of an custom Authenticator which must be loadable from the classpath
+    --authUrl &lt;url&gt;                 URL used for a dispatcher authentication (authMode == delegate)
+    --authPrincipalSpec &lt;spec&gt;      Extractor specification for getting the principal (authMode == delegate)
+    --authIgnoreCerts               Whether to ignore CERTS when doing a dispatching authentication (authMode == delegate)
+    --user &lt;user&gt;                   User used for Basic-Authentication
+    --password &lt;password&gt;           Password used for Basic-Authentication
+    --quiet                         No output. "status" will exit with code 0 if the agent is running, 1 otherwise
+    --verbose                       Verbose output
+    --executor &lt;executor&gt;           Executor policy for HTTP Threads to use (default: single)
+                                     "fixed"  -- Thread pool with a fixed number of threads (default: 5)
+                                     "cached" -- Cached Thread Pool, creates threads on demand
+                                     "single" -- Single Thread
+    --threadNamePrefix &lt;prefix&gt;     Thread name prefix that executor will use while creating new thread(s)
+                                    (default: jolokia-)
+    --threadNr &lt;nr threads&gt;         Number of fixed threads if "fixed" is used as executor
+    --backlog &lt;backlog&gt;             How many request to keep in the backlog (default: 10)
+    --protocol &lt;http|https&gt;         Protocol which must be either "http" or "https" (default: http)
+    --keystore &lt;keystore&gt;           Path to keystore (https only)
+    --keystorePassword &lt;pwd&gt;        Password to the keystore (https only)
+    --useSslClientAuthentication    Use client certificate authentication (https only)
+    --secureSocketProtocol &lt;name&gt;   Secure protocol (https only, default: TLS)
+    --keyStoreType &lt;name&gt;           Keystore type (https only, default: JKS)
+    --keyManagerAlgorithm &lt;name&gt;    Key manager algorithm (https only, default: SunX509)
+    --trustManagerAlgorithm &lt;name&gt;  Trust manager algorithm (https only, default: SunX509)
+    --caCert &lt;path&gt;                 Path to a PEM encoded CA cert file (https &amp; sslClientAuth only)
+    --serverCert &lt;path&gt;             Path to a PEM encoded server cert file (https only)
+    --serverKey &lt;path&gt;              Path to a PEM encoded server key file (https only)
+    --serverKeyAlgorithm &lt;algo&gt;     Algorithm to use for decrypting the server key (https only, default: RSA)
+    --clientPrincipal &lt;principal&gt;   Allow only this principal in the client cert (https &amp; sslClientAuth only)
+                                    If supplied multiple times, any one of the clientPrincipals must match
+    --extendedClientCheck &lt;t|f&gt;     Additional validation of client certs for the proper key usage (https &amp; sslClientAuth only)
+    --discoveryEnabled &lt;t|f&gt;        Enable/Disable discovery multicast responses (default: false)
+    --discoveryAgentUrl &lt;url&gt;       The URL to use for answering discovery requests. Will be autodetected if not given.
+    --sslProtocol &lt;protocol&gt;        SSL / TLS protocol to enable, can be provided multiple times
+    --sslCipherSuite &lt;suite&gt;        SSL / TLS cipher suite to enable, can be provided multiple times
+    --debug                         Switch on agent debugging
+    --logHandlerClass &lt;class&gt;       Implementation of org.jolokia.server.core.service.api.LogHandler for logging
+                                    Available classes: org.jolokia.server.core.service.impl.QuietLogHandler
+                                                       org.jolokia.server.core.service.impl.JulLogHandler
+    --debugMaxEntries &lt;nr&gt;          Number of debug entries to keep in memory which can be fetched from the Jolokia MBean
+    --maxDepth &lt;depth&gt;              Maximum number of levels for serialization of beans
+    --maxCollectionSize &lt;size&gt;      Maximum number of element in collections to keep when serializing the response
+    --maxObjects &lt;nr&gt;               Maximum number of objects to consider for serialization
+    --restrictorClass &lt;class&gt;       Classname of an custom restrictor which must be loadable from the classpath
+    --policyLocation &lt;url&gt;          Location of a Jolokia policy file
+    --mbeanQualifier &lt;qualifier&gt;    Qualifier to use when registering Jolokia internal MBeans
+    --canonicalNaming &lt;t|f&gt;         whether to use canonicalName for ObjectNames in 'list' or 'search' (default: true)
+    --includeStackTrace &lt;t|f&gt;       whether to include StackTraces for error messages (default: false)
+    --serializeException &lt;t|f&gt;      whether to add a serialized version of the exception in the Jolokia response (default: false)
+    --config &lt;configfile&gt;           Path to a property file from where to read the configuration
+    --help                          This help documentation
+    --version                       Version of this agent (it's 2.0.0 btw :)
 
 &lt;pid/regexp&gt; can be either a numeric process id or a regular expression. A regular expression is matched
 against the processes' names (ignoring case) and must be specific enough to select exactly one process.
@@ -1683,10 +1645,9 @@ If neither &lt;command&gt; nor &lt;pid&gt; is given, a list of Java processes al
 is printed
 
 There are several possible reasons, why attaching to a process can fail:
-* The UID of this launcher must be the very *same* as the process to attach to. It's not sufficient
-to be root.
-* The JVM must have HotSpot enabled and be a JVM 1.6 or later.
-* It must be a Java process ;-)
+   * The UID of this launcher must be the very *same* as the process to attach to. It's not sufficient to be root.
+   * The JVM must have HotSpot enabled and be a JVM 1.6 or later.
+   * It must be a Java process ;-)
 
 For more documentation please visit www.jolokia.org</pre>
 </div>
@@ -1762,7 +1723,7 @@ operation and with 1 otherwise.</p>
 <dd>
 <p>Encrypt the keystore password. You can add the password to encrypt
 as an additional argument or, if not given, it is read from standard input.
-The output of this command is the encrypted password in the format <code>[[&#8230;&#8203;.]]</code>,
+The output of this command is the encrypted password in the format <code>[[....]]</code>,
 which should be used literally (excluding the final newline) for the keystore password
 when using the option <code>keystorePassword</code> in the agent configuration.</p>
 </dd>
@@ -1774,23 +1735,23 @@ when using the option <code>keystorePassword</code> in the agent configuration.<
 queries. For example, a simple shell script for printing out
 the memory usage of a local Java process, including
 (temporarily) attaching an Jolokia agent looks simply like in
-the following example. With a complete client library like &lt;ulink
-<a href="https://www.jmxp4perl.org">Jmx4Perl</a> even more one
-shot scripts are possible <sup class="footnote" id="_footnote_rest-comment">[<a id="_footnoteref_5" class="footnote" href="#_footnotedef_5" title="View footnote.">5</a>]</sup>.</p>
+the following example. With a complete client library like
+<a href="https://metacpan.org/dist/jmx4perl" class="externalLink">jmx4perl</a> even more one
+shot scripts are possible <sup class="footnote" id="_footnote_rest-comment">[<a id="_footnoteref_4" class="footnote" href="#_footnotedef_4" title="View footnote.">4</a>]</sup>.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>#!/bin/sh
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#!/bin/sh
 
-url=`java -jar agent.jar start $1 | tail -1`
+url=`java -jar jolokia-agent-jvm-2.0.0-javaagent.jar start $1 | tail -1`
 
 memory_url="${url}read/java.lang:type=Memory/HeapMemoryUsage"
-used=`wget -q -O - "${memory_url}/used" | sed 's/^.*"value":\([0-9]*\).*$/\1/'`
-max=`wget -q -O - "${memory_url}/max" | sed 's/^.*"value":\([0-9]*\).*$/\1/'`
+used=`curl -s "${memory_url}/used" | jq .value`
+max=`curl -s "${memory_url}/max" | jq .value`
 usage=$((${used}*100/${max}))
 echo "Memory Usage: $usage %"
 
-java -jar agent.jar --quiet stop $1</pre>
+java -jar jolokia-agent-jvm-2.0.0-javaagent.jar --quiet stop $1</code></pre>
 </div>
 </div>
 </div>
@@ -1799,19 +1760,16 @@ java -jar agent.jar --quiet stop $1</pre>
 <div id="footnotes">
 <hr>
 <div class="footnote" id="_footnotedef_1">
-<a href="#_footnoteref_1">1</a>. Although the proxy mode is available for all four agents, you are normally free to setup the proxy environment. The recommendation here is the war-agent for which very lightweight servlet container exists. Tomcat or Jetty are both a perfect choice for a Jolokia proxy server.
+<a href="#_footnoteref_1">1</a>. Although the proxy mode is available for all three agents, you are normally free to setup the proxy environment. The recommendation here is the WAR agent for which very lightweight servlet container exists. Tomcat, Jetty or Undertow are all a perfect choice for a Jolokia proxy server.
 </div>
 <div class="footnote" id="_footnotedef_2">
 <a href="#_footnoteref_2">2</a>. Of course, there is much more to OSGi, a platform and programing model which I <em>really</em> like. This is my personal pet agent, so to speak ;-).
 </div>
 <div class="footnote" id="_footnotedef_3">
-<a href="#_footnoteref_3">3</a>. You could even instrument a Java EE application server this way, however this is not recommended.
+<a href="#_footnoteref_3">3</a>. You could even instrument a Jakarta EE application server this way, however this is not recommended because WAR agent is much more suitable.
 </div>
 <div class="footnote" id="_footnotedef_4">
-<a href="#_footnoteref_4">4</a>. Replace <code>org.jolokia.agent.osgi.http.AgentServlet</code> with <code>org.jolokia.core.http.AgentServlet</code> to use the servlet in a non-OSGi environment.
-</div>
-<div class="footnote" id="_footnotedef_5">
-<a href="#_footnoteref_5">5</a>. And in fact, some support for launching this dynamic agent is planned for a forthcoming release of jmx4perl.
+<a href="#_footnoteref_4">4</a>. And in fact, some support for launching this dynamic agent is planned for a forthcoming release of jmx4perl.
 </div>
 </div>
 <nav class="pagination">
@@ -1821,7 +1779,8 @@ java -jar agent.jar --quiet stop $1</pre>
 </article>
   </div>
 <footer class="footer">
-  This page was built using the Antora default UI. The source code for this UI is licensed under the terms of the MPL-2.0 license.
+  This page was built using the Antora default UI. The source code for this UI is licensed under the terms of the MPL-2.0 license. | Copyright © 2010 -
+  2023 Roland Huß
 </footer>
 <script id="site-script" src="../_/js/site.js" data-ui-root-path="../_"></script>
 <script async src="../_/js/vendor/highlight.js"></script>

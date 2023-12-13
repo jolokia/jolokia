@@ -139,36 +139,50 @@ provided as path info.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "timestamp": 1287143106,
-  "status": 200,
   "request": {
     "type": "version"
   },
   "value": {
-    "protocol": "7.1",
-    "agent": "1.2.0",
+    "agent": "2.0.0",
+    "protocol": "7.2",
+    "details": {
+      "agent_version": "2.0.0",
+      "agent_id": "192.168.0.221-21185-5ce94d31-servlet",
+      "server_product": "tomcat",
+      "server_vendor": "Apache",
+      "server_version": "10.1.16",
+      "secured": true,
+      "url": "http://192.168.0.221:8080/jolokia"
+    },
+    "id": "192.168.0.221-21185-5ce94d31-servlet",
     "config": {
-      "agentDescription": "Servicemix ESB",
-      "agentId": "EF87BE-jvm",
-      "agentType": "jvm",
-      "serializeException": "false"
+      "maxDepth": "15",
+      "discoveryEnabled": "false",
+      "agentId": "192.168.0.221-21185-5ce94d31-servlet",
+      "maxCollectionSize": "0",
+      "debug": "false",
+      "canonicalNaming": "true",
+      "historyMaxEntries": "10",
+      "serializeException": "false",
+      "includeStackTrace": "false",
+      "maxObjects": "0",
+      "detectorOptions": "{}",
+      "debugMaxEntries": "100"
     },
     "info": {
-      "product": "glassfish",
-      "vendor": "Oracle",
-      "version": "4.0",
-      "extraInfo": {
-        "amxBooted": false
-      }
+      "proxy": {},
+      "jmx": {}
     }
-  }
+  },
+  "status": 200,
+  "timestamp": 1702482830
 }</code></pre>
 </div>
 </div>
 <div class="paragraph">
 <p><code>protocol</code> in the response value contains the
 protocol version used, <code>agent</code> is the version of
-the Jolokia agent. See <a href="#versions">[versions]</a> for the various
+the Jolokia agent. See <a href="../jolokia_protocol.html#versions" class="xref page">Jolokia protocol versions</a> for the various
 protocol versions and the interoperability. If the agent is able
 to detect the server, additional meta information about this
 server is returned (i.e. the product name, the vendor and
@@ -179,7 +193,8 @@ optionally some extra information added by the server detector).</p>
 </article>
   </div>
 <footer class="footer">
-  This page was built using the Antora default UI. The source code for this UI is licensed under the terms of the MPL-2.0 license.
+  This page was built using the Antora default UI. The source code for this UI is licensed under the terms of the MPL-2.0 license. | Copyright © 2010 -
+  2023 Roland Huß
 </footer>
 <script id="site-script" src="../../_/js/site.js" data-ui-root-path="../../_"></script>
 <script async src="../../_/js/vendor/highlight.js"></script>

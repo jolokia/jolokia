@@ -104,10 +104,10 @@
 <div class="sect2">
 <h3 id="exec"><a class="anchor" href="#exec"></a>Executing JMX operations (exec)</h3>
 <div class="paragraph">
-<p>Beside attribute provides a way for the execution of exposed JMX
-operations with optional arguments. The same as for writing
-attributes, Jolokia must be able to serialize the arguments. See
-<a href="#serialization">[serialization]</a> for details. Execution of
+<p>With Jolokia we can also execute exposed JMX
+operations with optional arguments. Just as when writing
+attributes, Jolokia must be able to serialize the operation arguments. See
+<a href="../jolokia_protocol.html#serialization" class="xref page">Object serialization</a> for details. Execution of
 overloaded methods is supported. The JMX specifications recommends
 to avoid overloaded methods when exposing them via JMX, though.</p>
 </div>
@@ -124,9 +124,9 @@ to avoid overloaded methods when exposing them via JMX, though.</p>
 <table class="tableblock frame-all grid-all stretch">
 <caption class="title">Table 1. GET Exec Request</caption>
 <colgroup>
-<col style="width: 33.3333%;">
-<col style="width: 33.3333%;">
-<col style="width: 33.3334%;">
+<col style="width: 15%;">
+<col>
+<col style="width: 30%;">
 </colgroup>
 <thead>
 <tr>
@@ -155,7 +155,7 @@ as signature.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;arg1&gt;</code>, <code>&lt;arg2&gt;</code>, <code>&#8230;&#8203;</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">String representation for the arguments required to execute this
 operation. Only certain data types can be used here as
-described in &lt;serialization-request&gt;&gt;.</p></td>
+described in <a href="../jolokia_protocol.html#serialization-request" class="xref page">Request parameter serialization</a>.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>/true/true/</code></p></td>
 </tr>
 </tbody>
@@ -174,9 +174,9 @@ described in &lt;serialization-request&gt;&gt;.</p></td>
 <table class="tableblock frame-all grid-all stretch">
 <caption class="title">Table 2. POST Exec Request</caption>
 <colgroup>
-<col style="width: 33.3333%;">
-<col style="width: 33.3333%;">
-<col style="width: 33.3334%;">
+<col style="width: 15%;">
+<col>
+<col style="width: 30%;">
 </colgroup>
 <thead>
 <tr>
@@ -205,7 +205,7 @@ described above.</p></td>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>arguments</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">An array of arguments for invoking this operation. The value must be serializable as described in
-<a href="#serialization-request">[serialization-request]</a>.</p></td>
+<a href="../jolokia_protocol.html#serialization-request" class="xref page">Request parameter serialization</a>.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>[true, true]</code></p></td>
 </tr>
 </tbody>
@@ -218,27 +218,26 @@ arguments are for):</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "type": "EXEC",
+  "type": "exec",
   "mbean": "java.lang:type=Threading",
-  "operation": "dumpAllThreads",
+  "operation": "dumpAllThreads(boolean, boolean)",
   "arguments": [ true, true ]
 }</code></pre>
 </div>
 </div>
-<div class="paragraph">
-<p>[#response-exec
-==== Exec response</p>
 </div>
+<div class="sect3">
+<h4 id="response-exec"><a class="anchor" href="#response-exec"></a>Exec response</h4>
 <div class="paragraph">
 <p>For an <code>exec</code> operation, the response
 contains the return value of the
 operation. <code>null</code> is returned if either the
 operation returns a null value or the operation is declared as
-void. A typical response for an URL like</p>
+void. A typical response for an URL like (mind that double quote (<code>"</code>) has to be encoded with <code>%22</code>):</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>http://localhost:8080/jolokia/exec/java.util.logging:type=Logging/setLoggerLevel/global/INFO</pre>
+<pre>http://localhost:8080/jolokia/exec/java.util.logging:type=Logging/setLoggerLevel/%22%22/INFO</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -247,26 +246,31 @@ void. A typical response for an URL like</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "request": {
+    "mbean": "java.util.logging:type=Logging",
+    "arguments": [
+      "",
+      "INFO"
+    ],
+    "type": "exec",
+    "operation": "setLoggerLevel"
+  },
   "value": null,
   "status": 200,
-  "request": {
-    "type": "exec",
-    "mbean": "java.util.logging:type=Logging",
-    "operation": "setLoggerLevel",
-    "arguments": [ "global", "INFO" ]
-  }
+  "timestamp": 1702456520
 }</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>The return value get serialized as described in <a href="#serialization">[serialization]</a>.</p>
+<p>The return value get serialized as described in <a href="../jolokia_protocol.html#serialization-request" class="xref page">Request parameter serialization</a>.</p>
 </div>
 </div>
 </div>
 </article>
   </div>
 <footer class="footer">
-  This page was built using the Antora default UI. The source code for this UI is licensed under the terms of the MPL-2.0 license.
+  This page was built using the Antora default UI. The source code for this UI is licensed under the terms of the MPL-2.0 license. | Copyright © 2010 -
+  2023 Roland Huß
 </footer>
 <script id="site-script" src="../../_/js/site.js" data-ui-root-path="../../_"></script>
 <script async src="../../_/js/vendor/highlight.js"></script>

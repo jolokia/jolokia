@@ -105,22 +105,31 @@
 <h2 id="agents-jvm"><a class="anchor" href="#agents-jvm"></a>JVM Agent</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The JVM agent is right agent when it comes to instrument an
+<p>The JVM agent is the right agent when it comes to instrument an
 arbitrary Java application which is not covered by the other
 agents. This agent can be started by any Java program by
 providing certain startup options to the JVM. Or it can be
 dynamically attached (and detached) to an already running Java
 process. This universal agent uses the
-<a href="https://download.oracle.com/javase/6/docs/technotes/guides/jvmti/index.html">JVM
-agent API</a> and is available for every Sun/Oracle JVM 1.6
-and later.</p>
+<a href="https://docs.oracle.com/en/java/javase/11/docs/api/jdk.attach/com/sun/tools/attach/VirtualMachine.html" class="externalLink">JVM Attach API</a> or <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.instrument/java/lang/instrument/package-summary.html" class="externalLink">Java Instrument API</a> and is available for every JVM 1.6 and later.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Dynamic loading of agents will be removed at some point. See <a href="https://openjdk.org/jeps/451" class="externalLink">JEP 451</a> for details.
+</td>
+</tr>
+</table>
 </div>
 <div class="sect2">
 <h3 id="jvm-agent"><a class="anchor" href="#jvm-agent"></a>Jolokia as JVM Agent</h3>
 <div class="paragraph">
 <p>The JVM agent uses the
-<a href="https://download.oracle.com/javase/6/docs/technotes/guides/jvmti/index.html">JVM
-Agent interface</a> for linking into any JVM. Under the
+<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.instrument/java/lang/instrument/package-summary.html" class="externalLink">Java Instrument API</a> for linking into any JVM at startup time. Under the
 hood it uses an HTTP-Server, which is available on every
 Oracle/Sun JVM from version 1.6 upwards.</p>
 </div>
@@ -143,27 +152,27 @@ performance. See below for details.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>java -javaagent:agent.jar=port=7777,host=localhost</pre>
+<pre>java -javaagent:/path/to/agent.jar=port=7777,host=localhost</pre>
 </div>
 </div>
 <div class="paragraph">
 <p><code>agent.jar</code> is the filename of the Jolokia
-JVM agent. The agent can be downloaded like the others from the <a href="https://jolokia.org/download.html">download page</a>.
-When downloading from a Maven repository you need to check for the classifier <code>agent</code> (i.e. the
-jar to download looks like <code>jolokia-jvm-1.3.1-agent.jar</code>, not <code>jolokia-jvm-1.1.5.jar</code>).
+JVM agent. The agent can be downloaded like the others from the <a href="https://jolokia.org/download.html" class="externalLink">download page</a>.
+When downloading from a Maven repository you need to check for the classifier <code>javaagent</code> (i.e. the
+jar to download looks like <code>jolokia-agent-jvm-2.0.0-javaagent.jar</code>, not <code>jolokia-agent-jvm-2.0.0.jar</code>).
 Options can be appended as a comma separated
 list. The available options are the same as described in
-<a href="#agent-war-init-params">[agent-war-init-params]</a> plus the one described in
-table <a href="#agent-jvm-config">Table 1, &#8220;JVM agent configuration options&#8221;</a>. If an options
+<a href="war.html#agent-war-init-params" class="xref page">Servlet init parameters</a> plus the one described in
+table <a href="#agent-jvm-config">Table 1, &#8220;JVM agent configuration options&#8221;</a>. If an option
 contains a comma, an equal sign or a backslash, it must be
 escaped with a backslash.</p>
 </div>
 <table id="agent-jvm-config" class="tableblock frame-all grid-all stretch">
 <caption class="title">Table 1. JVM agent configuration options</caption>
 <colgroup>
-<col style="width: 33.3333%;">
-<col style="width: 33.3333%;">
-<col style="width: 33.3334%;">
+<col style="width: 15%;">
+<col>
+<col>
 </colgroup>
 <thead>
 <tr>
@@ -246,7 +255,7 @@ all authenticators must match.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>authClass</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Fully qualified name of an authenticator class. Class must be on classpath and must extend
 <code>com.sun.net.httpserver.Authenticator</code>. Class can declare a constructor
-that takes one argument of a type <code>org.jolokia.core.config.Configuration</code> in which case
+that takes one argument of a type <code>org.jolokia.server.core.config.Configuration</code> in which case
 Jolokia runtime configuration will be passed (useful in cases where authenticator requires additional
 configuration). If no such constructor is found, default (no-arg) constructor will be use to create an
 instance.</p></td>
@@ -443,15 +452,15 @@ of course :)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>discoveryEnabled</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Is set to <code>false</code> then this agent will
+<td class="tableblock halign-left valign-top"><p class="tableblock">If set to <code>false</code> then this agent will
 not listen for multicast request (multicast-group 239.192.48.84,
 port 24884 by default, but can configured individually).
 By default this option is enabled. This option can also be switched on with an
 environment variable
-<code>JOLOKIA_DISCOVERY</code> or the system
+<code>JOLOKIA_DISCOVERY_ENABLED</code> or the system
 property <code>jolokia.discoveryEnabled</code> set to
 <code>true</code>.</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>true</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>false</code></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>discoveryAgentUrl</code></p></td>
@@ -511,13 +520,24 @@ contacting the agent.</p>
 </div>
 <div class="sect2">
 <h3 id="jvm-attach"><a class="anchor" href="#jvm-attach"></a>Attaching a Jolokia agent on the fly</h3>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Dynamic loading of agents will be removed at some point. See <a href="https://openjdk.org/jeps/451" class="externalLink">JEP 451</a> for details.
+</td>
+</tr>
+</table>
+</div>
 <div class="paragraph">
 <p>A Jolokia agent can be attached to any running Java process as
 long as the user has sufficient access privileges for
 accessing the process. This agent uses the
-<a href="https://download.oracle.com/javase/6/docs/jdk/api/attach/spec/com/sun/tools/attach/VirtualMachine.html">Java
-attach API</a> for dynamically attaching and detaching to
-and from the process. It works similar to JConsole connecting
+<a href="https://docs.oracle.com/en/java/javase/11/docs/api/jdk.attach/com/sun/tools/attach/VirtualMachine.html" class="externalLink">JVM Attach API</a> for dynamically attaching and detaching to
+and from the process. It works similar to JConsole or <code>jcmd</code> command connecting
 to a local process. The Jolokia advantage is, that after the
 start of the agent, it can be reached over the network.</p>
 </div>
@@ -529,87 +549,85 @@ application which can be reached via the
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>$ java -jar jolokia-jvm-1.3.4-agent.jar --help
+<pre>$ java -jar jolokia-agent-jvm-2.0.0-javaagent.jar --help
 
 Jolokia Agent Launcher
 ======================
 
-Usage: java -jar jolokia-jvm-1.3.4-agent.jar [options] &lt;command&gt; &lt;pid/regexp&gt;
+Usage: java -jar jolokia-agent-jvm-2.0.0-javaagent.jar [options] &lt;command&gt; &lt;pid/regexp&gt;
 
 where &lt;command&gt; is one of
-start     -- Start a Jolokia agent for the process specified
-stop      -- Stop a Jolokia agent for the process specified
-status    -- Show status of an (potentially) attached agent
-toggle    -- Toggle between start/stop (default when no command is given)
-list      -- List all attachable Java processes (default when no argument is given at all)
-encrypt   -- Encrypt a password which is given as argument or read from standard input
+    start     -- Start a Jolokia agent for the process specified
+    stop      -- Stop a Jolokia agent for the process specified
+    status    -- Show status of an (potentially) attached agent
+    toggle    -- Toggle between start/stop (default when no command is given)
+    list      -- List all attachable Java processes (default when no argument is given at all)
+    encrypt   -- Encrypt a password which is given as argument or read from standard input
 
 [options] are used for providing runtime information for attaching the agent:
 
---host &lt;host&gt;                   Hostname or IP address to which to bind on
-(default: InetAddress.getLocalHost())
---port &lt;port&gt;                   Port to listen on (default: 8778)
---agentContext &lt;context&gt;        HTTP Context under which the agent is reachable (default: /jolokia)
---agentId &lt;agent-id&gt;            VM unique identifier used by this agent (default: autogenerated)
---agentDescription &lt;desc&gt;       Agent description
---authMode &lt;mode&gt;               Authentication mode: 'basic' (default), 'jaas' or 'delegate'
---authClass &lt;class&gt;             Classname of an custom Authenticator which must be loadable from
-the classpath
---authUrl &lt;url&gt;                 URL used for a dispatcher authentication (authMode == delegate)
---authPrincipalSpec &lt;spec&gt;      Extractor specification for getting the principal
-(authMode == delegate)
---authIgnoreCerts               Whether to ignore CERTS when doing a dispatching authentication
-(authMode == delegate)
---user &lt;user&gt;                   User used for Basic-Authentication
---password &lt;password&gt;           Password used for Basic-Authentication
---quiet                         No output. "status" will exit with code 0 if the agent is running,
-1 otherwise
---verbose                       Verbose output
---executor &lt;executor&gt;           Executor policy for HTTP Threads to use (default: single)
-"fixed"  -- Thread pool with a fixed number of threads (default: 5)
-"cached" -- Cached Thread Pool, creates threads on demand
-"single" -- Single Thread
---threadNr &lt;nr threads&gt;         Number of fixed threads if "fixed" is used as executor
---backlog &lt;backlog&gt;             How many request to keep in the backlog (default: 10)
---protocol &lt;http|https&gt;         Protocol which must be either "http" or "https" (default: http)
---keystore &lt;keystore&gt;           Path to keystore (https only)
---keystorePassword &lt;pwd&gt;        Password to the keystore (https only)
---useSslClientAuthentication    Use client certificate authentication (https only)
---secureSocketProtocol &lt;name&gt;   Secure protocol (https only, default: TLS)
---keyStoreType &lt;name&gt;           Keystore type (https only, default: JKS)
---keyManagerAlgorithm &lt;name&gt;    Key manager algorithm (https only, default: SunX509)
---trustManagerAlgorithm &lt;name&gt;  Trust manager algorithm (https only, default: SunX509)
---caCert &lt;path&gt;                 Path to a PEM encoded CA cert file (https &amp; sslClientAuth only)
---serverCert &lt;path&gt;             Path to a PEM encoded server cert file (https only)
---serverKey &lt;path&gt;              Path to a PEM encoded server key file (https only)
---serverKeyAlgorithm &lt;algo&gt;     Algorithm to use for decrypting the server key (https only, default: RSA)
---clientPrincipal &lt;principal&gt;   Allow only this principal in the client cert (https &amp; sslClientAuth only)
-If supplied multiple times, any one of the clientPrincipals must match
---extendedClientCheck &lt;t|f&gt;     Additional validation of client certs for the proper key usage
-(https &amp; sslClientAuth only)
---discoveryEnabled &lt;t|f&gt;        Enable/Disable discovery multicast responses (default: true)
---discoveryAgentUrl &lt;url&gt;       The URL to use for answering discovery requests. Will be autodetected
-if not given.
---sslProtocol &lt;protocol&gt;        SSL / TLS protocol to enable, can be provided multiple times
---sslCipherSuite &lt;suite&gt;        SSL / TLS cipher suite to enable, can be provided multiple times
---debug                         Switch on agent debugging
---debugMaxEntries &lt;nr&gt;          Number of debug entries to keep in memory which can be fetched from the
-Jolokia MBean
---maxDepth &lt;depth&gt;              Maximum number of levels for serialization of beans
---maxCollectionSize &lt;size&gt;      Maximum number of element in collections to keep when serializing the
-response
---maxObjects &lt;nr&gt;               Maximum number of objects to consider for serialization
---restrictorClass &lt;class&gt;       Classname of an custom restrictor which must be loadable from the classpath
---policyLocation &lt;url&gt;          Location of a Jolokia policy file
---mbeanQualifier &lt;qualifier&gt;    Qualifier to use when registering Jolokia internal MBeans
---canonicalNaming &lt;t|f&gt;         whether to use canonicalName for ObjectNames in 'list' or 'search'
-(default: true)
---includeStackTrace &lt;t|f&gt;       whether to include StackTraces for error messages (default: true)
---serializeException &lt;t|f&gt;      whether to add a serialized version of the exception in the Jolokia
-response (default: false)
---config &lt;configfile&gt;           Path to a property file from where to read the configuration
---help                          This help documentation
---version                       Version of this agent (it's 1.3.4 btw :)
+    --host &lt;host&gt;                   Hostname or IP address to which to bind on
+                                    (default: InetAddress.getLocalHost())
+    --port &lt;port&gt;                   Port to listen on (default: 8778)
+    --agentContext &lt;context&gt;        HTTP Context under which the agent is reachable (default: /jolokia)
+    --agentId &lt;agent-id&gt;            VM unique identifier used by this agent (default: autogenerated)
+    --agentDescription &lt;desc&gt;       Agent description
+    --authMode &lt;mode&gt;               Authentication mode: 'basic' (default), 'jaas' or 'delegate'
+    --authMatch &lt;match&gt;             If MultiAuthenticator is used, this config item explains how to combine multiple authenticators
+                                     "any" -- at least one authenticator must match (default)
+                                     "all" -- all authenticators must match
+    --authClass &lt;class&gt;             Classname of an custom Authenticator which must be loadable from the classpath
+    --authUrl &lt;url&gt;                 URL used for a dispatcher authentication (authMode == delegate)
+    --authPrincipalSpec &lt;spec&gt;      Extractor specification for getting the principal (authMode == delegate)
+    --authIgnoreCerts               Whether to ignore CERTS when doing a dispatching authentication (authMode == delegate)
+    --user &lt;user&gt;                   User used for Basic-Authentication
+    --password &lt;password&gt;           Password used for Basic-Authentication
+    --quiet                         No output. "status" will exit with code 0 if the agent is running, 1 otherwise
+    --verbose                       Verbose output
+    --executor &lt;executor&gt;           Executor policy for HTTP Threads to use (default: single)
+                                     "fixed"  -- Thread pool with a fixed number of threads (default: 5)
+                                     "cached" -- Cached Thread Pool, creates threads on demand
+                                     "single" -- Single Thread
+    --threadNamePrefix &lt;prefix&gt;     Thread name prefix that executor will use while creating new thread(s)
+                                    (default: jolokia-)
+    --threadNr &lt;nr threads&gt;         Number of fixed threads if "fixed" is used as executor
+    --backlog &lt;backlog&gt;             How many request to keep in the backlog (default: 10)
+    --protocol &lt;http|https&gt;         Protocol which must be either "http" or "https" (default: http)
+    --keystore &lt;keystore&gt;           Path to keystore (https only)
+    --keystorePassword &lt;pwd&gt;        Password to the keystore (https only)
+    --useSslClientAuthentication    Use client certificate authentication (https only)
+    --secureSocketProtocol &lt;name&gt;   Secure protocol (https only, default: TLS)
+    --keyStoreType &lt;name&gt;           Keystore type (https only, default: JKS)
+    --keyManagerAlgorithm &lt;name&gt;    Key manager algorithm (https only, default: SunX509)
+    --trustManagerAlgorithm &lt;name&gt;  Trust manager algorithm (https only, default: SunX509)
+    --caCert &lt;path&gt;                 Path to a PEM encoded CA cert file (https &amp; sslClientAuth only)
+    --serverCert &lt;path&gt;             Path to a PEM encoded server cert file (https only)
+    --serverKey &lt;path&gt;              Path to a PEM encoded server key file (https only)
+    --serverKeyAlgorithm &lt;algo&gt;     Algorithm to use for decrypting the server key (https only, default: RSA)
+    --clientPrincipal &lt;principal&gt;   Allow only this principal in the client cert (https &amp; sslClientAuth only)
+                                    If supplied multiple times, any one of the clientPrincipals must match
+    --extendedClientCheck &lt;t|f&gt;     Additional validation of client certs for the proper key usage (https &amp; sslClientAuth only)
+    --discoveryEnabled &lt;t|f&gt;        Enable/Disable discovery multicast responses (default: false)
+    --discoveryAgentUrl &lt;url&gt;       The URL to use for answering discovery requests. Will be autodetected if not given.
+    --sslProtocol &lt;protocol&gt;        SSL / TLS protocol to enable, can be provided multiple times
+    --sslCipherSuite &lt;suite&gt;        SSL / TLS cipher suite to enable, can be provided multiple times
+    --debug                         Switch on agent debugging
+    --logHandlerClass &lt;class&gt;       Implementation of org.jolokia.server.core.service.api.LogHandler for logging
+                                    Available classes: org.jolokia.server.core.service.impl.QuietLogHandler
+                                                       org.jolokia.server.core.service.impl.JulLogHandler
+    --debugMaxEntries &lt;nr&gt;          Number of debug entries to keep in memory which can be fetched from the Jolokia MBean
+    --maxDepth &lt;depth&gt;              Maximum number of levels for serialization of beans
+    --maxCollectionSize &lt;size&gt;      Maximum number of element in collections to keep when serializing the response
+    --maxObjects &lt;nr&gt;               Maximum number of objects to consider for serialization
+    --restrictorClass &lt;class&gt;       Classname of an custom restrictor which must be loadable from the classpath
+    --policyLocation &lt;url&gt;          Location of a Jolokia policy file
+    --mbeanQualifier &lt;qualifier&gt;    Qualifier to use when registering Jolokia internal MBeans
+    --canonicalNaming &lt;t|f&gt;         whether to use canonicalName for ObjectNames in 'list' or 'search' (default: true)
+    --includeStackTrace &lt;t|f&gt;       whether to include StackTraces for error messages (default: false)
+    --serializeException &lt;t|f&gt;      whether to add a serialized version of the exception in the Jolokia response (default: false)
+    --config &lt;configfile&gt;           Path to a property file from where to read the configuration
+    --help                          This help documentation
+    --version                       Version of this agent (it's 2.0.0 btw :)
 
 &lt;pid/regexp&gt; can be either a numeric process id or a regular expression. A regular expression is matched
 against the processes' names (ignoring case) and must be specific enough to select exactly one process.
@@ -621,10 +639,9 @@ If neither &lt;command&gt; nor &lt;pid&gt; is given, a list of Java processes al
 is printed
 
 There are several possible reasons, why attaching to a process can fail:
-* The UID of this launcher must be the very *same* as the process to attach to. It's not sufficient
-to be root.
-* The JVM must have HotSpot enabled and be a JVM 1.6 or later.
-* It must be a Java process ;-)
+   * The UID of this launcher must be the very *same* as the process to attach to. It's not sufficient to be root.
+   * The JVM must have HotSpot enabled and be a JVM 1.6 or later.
+   * It must be a Java process ;-)
 
 For more documentation please visit www.jolokia.org</pre>
 </div>
@@ -700,7 +717,7 @@ operation and with 1 otherwise.</p>
 <dd>
 <p>Encrypt the keystore password. You can add the password to encrypt
 as an additional argument or, if not given, it is read from standard input.
-The output of this command is the encrypted password in the format <code>[[&#8230;&#8203;.]]</code>,
+The output of this command is the encrypted password in the format <code>[[....]]</code>,
 which should be used literally (excluding the final newline) for the keystore password
 when using the option <code>keystorePassword</code> in the agent configuration.</p>
 </dd>
@@ -712,23 +729,23 @@ when using the option <code>keystorePassword</code> in the agent configuration.<
 queries. For example, a simple shell script for printing out
 the memory usage of a local Java process, including
 (temporarily) attaching an Jolokia agent looks simply like in
-the following example. With a complete client library like &lt;ulink
-<a href="https://www.jmxp4perl.org">Jmx4Perl</a> even more one
+the following example. With a complete client library like
+<a href="https://metacpan.org/dist/jmx4perl" class="externalLink">jmx4perl</a> even more one
 shot scripts are possible <sup class="footnote" id="_footnote_rest-comment">[<a id="_footnoteref_1" class="footnote" href="#_footnotedef_1" title="View footnote.">1</a>]</sup>.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>#!/bin/sh
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#!/bin/sh
 
-url=`java -jar agent.jar start $1 | tail -1`
+url=`java -jar jolokia-agent-jvm-2.0.0-javaagent.jar start $1 | tail -1`
 
 memory_url="${url}read/java.lang:type=Memory/HeapMemoryUsage"
-used=`wget -q -O - "${memory_url}/used" | sed 's/^.*"value":\([0-9]*\).*$/\1/'`
-max=`wget -q -O - "${memory_url}/max" | sed 's/^.*"value":\([0-9]*\).*$/\1/'`
+used=`curl -s "${memory_url}/used" | jq .value`
+max=`curl -s "${memory_url}/max" | jq .value`
 usage=$((${used}*100/${max}))
 echo "Memory Usage: $usage %"
 
-java -jar agent.jar --quiet stop $1</pre>
+java -jar jolokia-agent-jvm-2.0.0-javaagent.jar --quiet stop $1</code></pre>
 </div>
 </div>
 </div>
@@ -743,7 +760,8 @@ java -jar agent.jar --quiet stop $1</pre>
 </article>
   </div>
 <footer class="footer">
-  This page was built using the Antora default UI. The source code for this UI is licensed under the terms of the MPL-2.0 license.
+  This page was built using the Antora default UI. The source code for this UI is licensed under the terms of the MPL-2.0 license. | Copyright © 2010 -
+  2023 Roland Huß
 </footer>
 <script id="site-script" src="../../_/js/site.js" data-ui-root-path="../../_"></script>
 <script async src="../../_/js/vendor/highlight.js"></script>

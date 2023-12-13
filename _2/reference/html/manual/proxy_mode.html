@@ -113,7 +113,7 @@
 on the target server. A dedicated agent deployment proxies by
 accepting Jolokia requests as input, translating them to JSR-160
 requests for the target. This setup is described in
-<a href="architecture.html" class="xref page">Architecture</a>. As noted there, the real target is
+<a href="architecture.html#proxy-mode" class="xref page">Proxy Mode</a>. As noted there, the real target is
 given within the original request, which must be sent as a POST
 request.</p>
 </div>
@@ -121,65 +121,36 @@ request.</p>
 <p>Agents of all types support the proxy mode. However, since one
 has usually the free choice of platform for a dedicated Jolokia
 proxy, an environment optimized for HTTP communication should be
-used. These are either servlet container or Java EE server hosting
-the WAR agent or an OSGi runtime with an OSGi HttpService (which
+used. These are either servlet container or Jakarta EE server hosting
+the WAR agent or an OSGi runtime with an <a href="https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html" class="externalLink">OSGi CMPN Whiteboard extender</a> (which
 in turn is typically based on an embedded servlet container like
-Tomcat or Jetty). The other agent, the JVM agent
-are not that well suited for this job and do not contain the proxy.</p>
+Tomcat, Jetty or Undertow).</p>
 </div>
 <div class="paragraph">
-<p>Please note that the proxy mode is <em>not</em> switched on by default
-since version 1.5.0. You have to explicitly switch it on for the WAR or OSGI agent:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>Repackaging the <code>jolokia.war</code> and adapt <code>web.xml</code> to
-include the init option <code>dispatcherClasses</code> with a value <code>org.jolokia.jsr160.Jsr160RequestDispatcher</code>.</p>
-</li>
-<li>
-<p>Set the system property <code>org.jolokia.jsr160ProxyEnabled</code> to <code>true</code></p>
-</li>
-<li>
-<p>Set the environment variable <code>JOLOKIA_JSR160_PROXY_ENABLED</code> to <code>true</code></p>
-</li>
-</ul>
+<p>In Jolokia 1.x, proxy mode is turned on or off depending on <code>dispatcherClasses</code> option. If it contains <code>org.jolokia.jsr160.Jsr160RequestDispatcher</code>, proxy mode will be enabled, because this special dispatcher will be used.</p>
 </div>
 <div class="paragraph">
-<p>The first option requires you to repackage the <code>jolokia.war</code> and add the following section to
-the <code>web.xml</code> descriptor:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;init-param&gt;
-  &lt;description&gt;
-    Classnames (comma separated) of RequestDispatcher used in addition
-    to the LocalRequestDispatcher
-  &lt;/description&gt;
-  &lt;param-name&gt;dispatcherClasses&lt;/param-name&gt;
-  &lt;param-value&gt;org.jolokia.jsr160.Jsr160RequestDispatcher&lt;/param-value&gt;
-&lt;/init-param&gt;</code></pre>
-</div>
+<p>In Jolokia 2, <code>org.jolokia.service.jsr160.Jsr160RequestHandler</code> is detected as Jolokia service, so it&#8217;s a matter of having <code>jolokia-service-jsr160.jar</code> on the CLASSPATH.</p>
 </div>
 <div class="paragraph">
-<p>The two other options by using a Java system property or an environment variable do not require a repackaging, so
-these are the recommended way.</p>
+<p><code>jolokia-agent-war.war</code> includes <code>WEB-INF/lib/jolokia-service-jsr160.jar</code>, so proxy mode is enabled. If you want to remove
+proxy support, you have to repackage <code>jolokia-agent-war.war</code> without this library.</p>
 </div>
 <div class="paragraph">
 <p>Additionally you can configured a white list with patterns for all allowed JMX service URL in a Jolokia Request.
-This white list is a plain text file which contains &lt;ulink
-<a href="https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html">Patterns</a> line by line. Lines starting with <code>#</code> are ignored.
+This white list is a plain text file which contains
+<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/regex/Pattern.html" class="externalLink">RegExp patterns</a> line by line. Lines starting with <code>#</code> are ignored.
 Pattern matching is performed case insensitive. This file can be configured in various ways:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>Repackaging the <code>jolokia.war</code> and adapt <code>web.xml</code> to
+<p>Repackaging the <code>jolokia-agent-war.war</code> and adapt <code>web.xml</code> to
 include the init option <code>jsr160ProxyAllowedTargets</code> with a file path to the white list. This should
-be an absolute path or a relative path if you know where your Java EE server sets the current directory.</p>
+be an absolute path or a relative path if you know where your Jakarta EE server sets the current directory.</p>
 </li>
 <li>
-<p>Set the system property <code>org.jolokia.jsr160ProxyAllowedTargets</code> to the path of the whitelist</p>
+<p>Set the system property <code>jolokia.jsr160ProxyAllowedTargets</code> to the path of the whitelist</p>
 </li>
 <li>
 <p>Set the environment variable <code>JOLOKIA_JSR160_PROXY_ALLOWED_TARGETS</code> to the path of the
@@ -197,7 +168,7 @@ service:jmx:rmi:///jndi/ldap:.*</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>In any case it is highly recommended to use a dedicated Java EE servlet server for the JSR-160 proxy which
+<p>In any case it is highly recommended to use a dedicated Jakarta EE servlet server for the JSR-160 proxy which
 is secured by configuring the server authentication properly for this servlet. An unprotected Jolokia proxy can be
 tricked to execute local code by a malicious attacker. As said previously, the Jolokia proxy should be avoided if
 possible in favor of direct access over the Jolokia protocol.</p>
@@ -269,7 +240,8 @@ non trusted environment. Also the new whitelist feature prevents redirecting to 
 </article>
   </div>
 <footer class="footer">
-  This page was built using the Antora default UI. The source code for this UI is licensed under the terms of the MPL-2.0 license.
+  This page was built using the Antora default UI. The source code for this UI is licensed under the terms of the MPL-2.0 license. | Copyright © 2010 -
+  2023 Roland Huß
 </footer>
 <script id="site-script" src="../_/js/site.js" data-ui-root-path="../_"></script>
 <script async src="../_/js/vendor/highlight.js"></script>

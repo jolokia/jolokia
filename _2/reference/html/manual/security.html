@@ -138,7 +138,7 @@ specified within a <code>&lt;remote&gt;</code> section,
 which contains one or more <code>&lt;host&gt;</code>
 elements. The source can be given either as an IP address,
 a host name, or a netmask given in
-<a href="https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing">CIDR format</a>
+<a href="https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing" class="externalLink">CIDR format</a>
 (e.g. <code>10.0.0.0/16</code> for all clients coming from the 10.0
 network). The following allows access from localhost and all
 clients whose IP addresses start with "10.0". For all other
@@ -192,6 +192,10 @@ completely, access to all commands is allowed.</p>
 <dd>
 <p>Searching for MBeans</p>
 </dd>
+<dt class="hdlist1">notification</dt>
+<dd>
+<p><mark>New in Jolokia 2</mark> Subscribing to and receiving notifications</p>
+</dd>
 <dt class="hdlist1">version</dt>
 <dd>
 <p>Getting version and server information</p>
@@ -202,7 +206,7 @@ completely, access to all commands is allowed.</p>
 <p>In the following example, access is granted to the
 <code>read</code>, <code>list</code>,
 <code>search</code> and <code>version</code> command, but
-not to <code>write</code> and <code>exec</code>
+not to <code>write</code>, <code>notification</code> and <code>exec</code>
 operations.</p>
 </div>
 <div class="listingblock">
@@ -217,7 +221,7 @@ operations.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_allow_and_deny_access_to_certain_mbeanstitle"><a class="anchor" href="#_allow_and_deny_access_to_certain_mbeanstitle"></a>Allow and deny access to certain MBeans&lt;/title&gt;</h3>
+<h3 id="_allow_and_deny_access_to_certain_mbeans"><a class="anchor" href="#_allow_and_deny_access_to_certain_mbeans"></a>Allow and deny access to certain MBeans</h3>
 <div class="paragraph">
 <p>Within an <code>&lt;allow&gt;</code> section, access
 to MBeans can be granted regardless of the
@@ -283,14 +287,12 @@ completely, any HTTP method can be used.</p>
 <h3 id="_cross_origin_resource_sharing_cors_restrictions"><a class="anchor" href="#_cross_origin_resource_sharing_cors_restrictions"></a>Cross-Origin Resource Sharing (CORS) restrictions</h3>
 <div class="paragraph">
 <p>Jolokia (since version 1.0.3) supports the W3C specification
-for <a href="https://www.w3.org/TR/cors/">Cross-Origin
-Resource Sharing</a> (also known as "CORS") which allows
+for <a href="https://www.w3.org/TR/cors/" class="externalLink">Cross-Origin Resource Sharing</a> (also known as "CORS") which allows
 browser to access resources which are located on a different
 server than the calling script is loaded from. This
 specification provides a controlled way to come around the
 <em>same origin policy</em>. Most
-<a href="https://caniuse.com/#search=CORS">contemporary
-browsers</a> support CORS.</p>
+<a href="https://caniuse.com/#search=CORS" class="externalLink">contemporary browsers</a> support CORS.</p>
 </div>
 <div class="paragraph">
 <p>By default Jolokia allows cross origin access from any
@@ -324,11 +326,10 @@ If neither <code>Origin:</code> nor <code>Referer:</code> is given and strict ch
 <div class="paragraph">
 <p>Please note that <code>&lt;strict-checking/&gt;</code> might not be good enough because of potential
 browser bugs which could allow to forge the origin header. Examples of these issues are
-<a href="https://blog.bentkowski.info/2018/06/setting-arbitrary-request-headers-in.html">arbitrary header injection</a>
-or <a href="https://www.brokenbrowser.com/referer-spoofing-defeating-xss-filter/">referer and origin
-spoofing</a>. User facing application which uses Jolokia has backend should consider to implement
+<a href="https://blog.bentkowski.info/2018/06/setting-arbitrary-request-headers-in.html" class="externalLink">arbitrary header injection</a>
+or <a href="https://www.brokenbrowser.com/referer-spoofing-defeating-xss-filter/" class="externalLink">referer and origin spoofing</a>. User facing application which uses Jolokia has backend should consider to implement
 additional measures like using the
-<a href="https://tools.ietf.org/html/draft-west-first-party-cookies-07">same-site</a> flag
+<a href="https://tools.ietf.org/html/draft-west-first-party-cookies-07" class="externalLink">same-site</a> flag
 on the session cookie.</p>
 </div>
 </div>
@@ -356,6 +357,9 @@ restrictions:</p>
 <p>Read access to the C3P0 connection pool is restricted to
 forbid fetching the pool&#8217;s properties, which in fact
 contains the DB password as clear text.</p>
+</li>
+<li>
+<p>Access to <code>jdk.management.jfr:type=FlightRecorder</code> MBean is denied (see <a href="https://nvd.nist.gov/vuln/detail/CVE-2022-41678" class="externalLink">CVE-2022-41678</a>)</p>
 </li>
 </ul>
 </div>
@@ -389,6 +393,11 @@ contains the DB password as clear text.</p>
       &lt;name&gt;com.mchange.v2.c3p0:type=PooledDataSource,*&lt;/name&gt;
       &lt;attribute&gt;properties&lt;/attribute&gt;
     &lt;/mbean&gt;
+    &lt;mbean&gt;
+      &lt;name&gt;jdk.management.jfr:type=FlightRecorder&lt;/name&gt;
+      &lt;attribute&gt;*&lt;/attribute&gt;
+      &lt;operation&gt;*&lt;/operation&gt;
+    &lt;/mbean&gt;
   &lt;/deny&gt;
 
 &lt;/restrict&gt;</code></pre>
@@ -404,15 +413,15 @@ contains the DB password as clear text.</p>
 inclusion of a <code>jolokia-access.xml</code>
 policy file
 is the command line tool
-<a href="https://search.cpan.org/~roland/jmx4perl/scripts/jolokia">jolokia</a>,
+<a href="https://search.cpan.org/~roland/jmx4perl/scripts/jolokia" class="externalLink">jolokia</a>,
 which comes with the
-<a href="https://www.jmx4perl.org">jmx4perl</a> distribution. See
+<a href="https://metacpan.org/dist/jmx4perl" class="externalLink">jmx4perl</a> distribution. See
 <a href="tools.html" class="xref page">Tools</a> for an introduction.</p>
 </div>
 </div>
 </div>
 <div class="paragraph">
-<p>But how do the agents lookup the policy file ? By default,
+<p>But how do the agents lookup the policy file? By default,
 the agents will lookup for a policy file top-level in the
 classpath under the name
 <code>jolokia-access.xml</code>. Hence for the war
@@ -448,10 +457,10 @@ output.</p>
 <p><code>$host</code>: Host - Address</p>
 </li>
 <li>
-<p><code>$\{prop:foo}</code>: System property <em>foo</em></p>
+<p><code>${prop:foo}</code>: System property <em>foo</em></p>
 </li>
 <li>
-<p><code>$\{env:FOO}</code>: Environment variable <em>FOO</em></p>
+<p><code>${env:FOO}</code>: Environment variable <em>FOO</em></p>
 </li>
 </ul>
 </div>
@@ -462,10 +471,10 @@ output.</p>
 <h2 id="security-restrictor"><a class="anchor" href="#security-restrictor"></a>Jolokia Restrictors</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>In order to provide fine grained security, Jolokia using the
+<p>In order to provide fine grained security, Jolokia is using the
 abstract concept of an <em>Restrictor</em>. It is
 represented by the Java interface
-<code>org.jolokia.core.service.Restrictor</code> and
+<code>org.jolokia.server.core.service.api.Restrictor</code> and
 comes with several implementations. The most prominent one is
 the <code>PolicyRestrictor</code> which is described
 in <a href="#security-policy">Policy based security</a>. This is also the
@@ -473,13 +482,13 @@ restrictor which is active by default. For special needs, it is
 possible to provide a custom implementation of this
 interface for the WAR and OSGi agents. It is recommended to
 subclass either
-<code>org.jolokia.core.restrictor.AllowAllRestrictor</code>
+<code>org.jolokia.server.core.restrictor.AllowAllRestrictor</code>
 or
-<code>org.jolokia.core.restrictor.DenyAllRestrictor</code>.</p>
+<code>org.jolokia.server.core.restrictor.DenyAllRestrictor</code>.</p>
 </div>
 <div class="paragraph">
-<p>For the WAR agent (<a href="agents.html#agents-war" class="xref page">Java EE Agent (WAR)</a>), a subclass
-of <code>org.jolokia.core.http.AgentServlet</code> should
+<p>For the WAR agent (<a href="agents.html#agents-war" class="xref page">Jakarta EE Agent (WAR)</a>), a subclass
+of <code>org.jolokia.server.core.http.AgentServlet</code> should
 be created which overrides the
 <code>createRestrictor()</code></p>
 </div>
@@ -488,30 +497,32 @@ be created which overrides the
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public class RestrictedAgentServlet extends AgentServlet {
 
   @Override
-  protected Restrictor createRestrictor(String policyLocation) {
-    return new MyOwnRestrictor();
+  protected Restrictor createRestrictor(Configuration pConfig, LogHandler pLogHandler) {
+    String policyLocation = pConfig.getConfig(ConfigKey.POLICY_LOCATION);
+    return new MyOwnRestrictor(policyLocation, ...);
   }
+
 }</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p><code>policyLocation</code> is a URL pointing to the
+<p><code>pConfig</code> is a configuration object from which we can get a URL pointing to the
 policy file, which is either the default value
 <code>classpath:/jolokia-access.xml</code> or the
 value specified with the init parameter
 <code>policyLocation</code>. This servlet can then be
 easily configured in a custom <code>web.xml</code>
-the same way as the Jolokia agent.</p>
+the same way as the Jolokia WAR agent.</p>
 </div>
 <div class="paragraph">
 <p>For programmatic usage there is an even simpler way:
-<code>AgentServlet</code> provides an constructor
+<code>AgentServlet</code> provides a constructor
 which takes an restrictor as argument, so no subclassing is
 required in this case.</p>
 </div>
 <div class="paragraph">
 <p>For an OSGi agent (<a href="agents.html#agents-osgi" class="xref page">OSGi Agents</a>),
-<code>org.jolokia.server.core.osgi.servlet.JolokiaServlet</code>
+<code>org.jolokia.server.core.osgi.OsgiAgentServlet</code>
 is the proper extension point. It can be subclassed the same
 way as shown above and allows a restrictor implementation as
 constructor parameter, too. In contrast to
@@ -530,7 +541,8 @@ restrictor as an OSGi service. See
 </article>
   </div>
 <footer class="footer">
-  This page was built using the Antora default UI. The source code for this UI is licensed under the terms of the MPL-2.0 license.
+  This page was built using the Antora default UI. The source code for this UI is licensed under the terms of the MPL-2.0 license. | Copyright © 2010 -
+  2023 Roland Huß
 </footer>
 <script id="site-script" src="../_/js/site.js" data-ui-root-path="../_"></script>
 <script async src="../_/js/vendor/highlight.js"></script>
