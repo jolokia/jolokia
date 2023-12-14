@@ -33,8 +33,8 @@ which also serves this script.
 
 [,javascript]
 ----
-var j4p = new Jolokia("/jolokia");
-var value = j4p.getAttribute("java.lang:type=Memory", "HeapMemoryUsage", "used");
+let j4p = new Jolokia("/jolokia");
+let value = j4p.getAttribute("java.lang:type=Memory", "HeapMemoryUsage", "used");
 console.log("Heap Memory used: " + value);
 ----
 
@@ -52,26 +52,23 @@ after `jolokia.js` since it adds methods
 to the `Jolokia` object definition.
 
 All four files can be obtained from the
-link:/download.html[download
-page]. For production environments the compressed version
+link:/download.html[download page].
+For production environments the compressed version
 is highly recommended since the extensive API documentation
 included in the original version is stripped off here. For Maven
 users there is an even better way to integrate them, described in
 <<js-maven>>.
 
 `jolokia.js` uses
-https://www.jquery.com[jQuery], which must be
-included as well. If the target platform doesn't support native
-JSON serialization,
-https://github.com/douglascrockford/JSON-js[json2.js]
-needs to be included as well. As sample HTML head for including
-all necessary parts looks like:
+https://www.jquery.com[jQuery,role=externalLink], which must be
+included as well. Since Jolokia 2 is compliant with ES5, using https://github.com/douglascrockford/JSON-js[json2.js,role=externalLink] is no longer required.
+
+As sample HTML head for including all necessary parts looks like:
 
 [,html]
 ----
 <head>
-  <script src="jquery-1.7.2.js"></script>
-  <script src="json2.js"></script>
+  <script src="jquery-3.7.1.js"></script>
   <script src="jolokia-min.js"></script>
   <script src="jolokia-simple-min.js"></script>
 </head>
@@ -87,9 +84,9 @@ overriding are given there.
 [#js-request]
 === Usage
 
-All function of this library are available as methods of the
-`Jolokia` object. The options needs to be
-instantiated as usual and takes a set of default options, which
+All functions of this library are available as methods of the
+`Jolokia` object. The `options` argument needs to be
+instantiated as usual and it takes a set of default options, which
 can be overwritten by subsequent requests. On the most basic
 layer is a single `request()` method,
 which takes two arguments: A request object and an optional
@@ -99,8 +96,8 @@ delivered the JavaScript looks like:
 
 [,javascript]
 ----
-var j4p = new Jolokia({ "url": "/jolokia" });
-var response = j4p.request({ "type": "version" }, { "method": "post" });
+let j4p = new Jolokia({ "url": "/jolokia" });
+let response = j4p.request({ "type": "version" }, { "method": "post" });
 console.log("Agent Version: " + response.value.agent);
 ----
 
@@ -116,7 +113,7 @@ single string argument (`new Jolokia("/jolokia")`).
 Jolokia requests and responses are represented as JSON
 objects. They have exactly the same format, which is expected
 and returned by the agent as defined in
-<<protocol>> for POST requests. All request types are
+xref:jolokia_protocol.adoc[] for POST requests. All request types are
 supported.
 
 The `request()` expects as its first
@@ -133,14 +130,14 @@ the Jolokia agent:
 
 [,javascript]
 ----
-var j4p = new Jolokia({ "url": "/jolokia" });
-var req1 = { "type": "read", "mbean": "java.lang:type=Memory", "attribute": "HeapMemoryUsage" };
-var req2 = { "type": "list" };
-var response = j4p.request(req1);
-var responses = j4p.request([ req1, req2 ]);
+let j4p = new Jolokia({ "url": "/jolokia" });
+let req1 = { "type": "read", "mbean": "java.lang:type=Memory", "attribute": "HeapMemoryUsage" };
+let req2 = { "type": "list" };
+let response = j4p.request(req1);
+let responses = j4p.request([ req1, req2 ]);
 ----
 
-[#s-request-options]
+[#js-request-options]
 ==== Request options
 
 Each request can be influenced by a set of optional options
@@ -148,11 +145,12 @@ provided either as default during construction of the
 `Jolokia` object or as optional last
 parameter for the request object. Also a request can carry a
 `config` attribute, which can be used for all
-processing parameters (<<processing-parameters>>).
+processing parameters (xref:jolokia_protocol.adoc#processing-parameters[Processing parameters]).
 The known options are summarized in <<js-request-options-table>>
 
 [#js-request-options-table]
 .Request options
+[cols="20,~"]
 |===
 |Key|Description
 
@@ -257,7 +255,6 @@ scheduler (<<js-request-options-table>>)
 then this feature can be used to get the callbacks called
 only if a value is returned. For the normal request, the
 error callback is called which must check the status itself.
-
 |===
 
 [#js-request-sync-async]
@@ -267,7 +264,7 @@ Requests can be send either synchronously or asynchronously via
 Ajax. If a `success` callback is given in the
 request options, the request is performed asynchronously via an
 Ajax HTTP request. The callback gets these arguments: a Jolokia JSON
-response object (see <<request-response>>) and an
+response object (see xref:jolokia_protocol.adoc#request-response[Requests and Responses]) and an
 integer index indicating for which response this callback is being
 called. For bulk requests, this index corresponds to the array
 index of the request which lead to this response. The value of
@@ -287,7 +284,7 @@ callbacks.
 
 [,javascript]
 ----
-var j4p = new Jolokia("/jolokia");
+let j4p = new Jolokia("/jolokia");
 
 // Single request with a single success callback
 j4p.request(
@@ -347,18 +344,18 @@ callback `ajaxError` is called with the
 object. It has the same signature as the underlying
 `error` callback of the
 `jQuery.ajax()` call. (See the
-https://api.jquery.com/jQuery.ajax/[jQuery documentation]
+https://api.jquery.com/jQuery.ajax/[jQuery documentation,role=externalLink]
 for details).
 
 The Jolokia agent also supports
-https://en.wikipedia.org/wiki/JSONP[JSONP] requests
+https://en.wikipedia.org/wiki/JSONP[JSONP,role=externalLink] requests
 for cases where the Jolokia agent is served on a different server or port
 than the JavaScript client. By default, such access is forbidden by the so called
 _same-origin-policy_. To switch on JSONP, the
 option `jsonp` should be set to
 `"true"`.
 
-As explained in <<request-response>> the Jolokia
+As explained in xref:jolokia_protocol.adoc#request-response[Requests and Responses] the Jolokia
 agent supports two HTTP methods, `GET` and
 `POST`. `POST` is more
 powerful since it supports more features. e.g. bulk requests and
@@ -378,7 +375,7 @@ used with `POST`.
 (i.e. the `attribute` request parameter is
 an array of string values) can only be used with
 `POST`.
-* The JMX proxy mode (see <<proxy>>) can only be used
+* The JMX proxy mode (see xref:proxy_mode.adoc[]) can only be used
 with `POST`.
 * JSONP can only be used with `GET` and only
 in asynchronous mode (i.e. a `success`
@@ -414,7 +411,7 @@ can be optionally given, and the optional request options are
 given as last argument(s). The return value for synchronous
 operations are the attribute's value, for asynchronous
 operations (i.e. `opts.success != null`) it is
-`null`. See <<read>> for
+`null`. See xref:protocol/read.adoc[Reading attributes (read)] for
 details.
 +
 For example, the following method call can be used
@@ -422,7 +419,7 @@ to synchronously fetch the current heap memory usage:
 +
 [,javascript]
 ----
-var memoryUsed = j4p.getAttribute("java.lang:type=Memory", "HeapMemoryUsage", "used");
+let memoryUsed = j4p.getAttribute("java.lang:type=Memory", "HeapMemoryUsage", "used");
 ----
 
 `setAttribute(mbean, attribute, value, path, opts)`:: For setting an JMX attribute, this method takes the MBean's
@@ -430,7 +427,7 @@ name `mbean`, the attribute
 `attribute` and the value to set as
 `value`. The optional `path` is the
 _inner path_ of the attribute on which
-to set the value (see <<write>> for
+to set the value (see xref:protocol/write.adoc[Writing attributes (write)] for
 details). The old value of the attribute is returned or
 given to a `success` callback.
 +
@@ -438,7 +435,7 @@ To enable verbose mode in the memory-handling beans, use
 +
 [,javascript]
 ----
-var gsLoggingWasOn = j4p.setAttribute("java.lang:type=Memory", "Verbose", true);
+let gsLoggingWasOn = j4p.setAttribute("java.lang:type=Memory", "Verbose", true);
 ----
 
 `execute(mbean, operation, arg1, arg2, ..., opts)`:: With this method, a JMX operation can be executed on the
@@ -446,14 +443,14 @@ MBean `mbean`. Beside the operation's name
 `operation`, one or more arguments can be given
 depending on the signature of the JMX operation. The
 return value is the return value of the operation. See
-<<exec>> for details.
+xref:protocol/exec.adoc[Executing JMX operations (exec)] for details.
 +
 The following exampled asynchronously fetches a thread dump
 as a JSON object and logs it into the console:
 +
 [,javascript]
 ----
-j4p.execute("java.lang:type=Threading", "dumpAllThreads", true, true, {
+j4p.execute("java.lang:type=Threading", "dumpAllThreads(boolean,boolean)", true, true, {
   "success": function(value) {
     console.log(JSON.stringify(value));
   }
@@ -463,14 +460,14 @@ j4p.execute("java.lang:type=Threading", "dumpAllThreads", true, true, {
 `search(mBeanPattern, opts)`:: Searches for one or more MBeans whose object names fit the
 pattern `mBeanPattern`. The return value is a list
 of strings with the matching MBean names or `null`
-if none is found. See <<search>> for details.
+if none is found. See xref:protocol/search.adoc[Searching MBeans (search)] for details.
 +
 The following example looks up all application servers
 available in all domains:
 +
 [,javascript]
 ----
-var appServerNames = j4p.search("*:j2eeType=J2EEServer,*");
+let servletNames = j4p.search("*:j2eeType=Servlet,*");
 ----
 
 `list(path, opts)`:: For getting meta information about registered MBeans,
@@ -478,7 +475,7 @@ the `list` command can be used. The
 optional `path` points into this meta
 information for retrieving partial information. The format
 of the return value is described in detail in
-<<list>>.
+xref:protocol/list.adoc[Listing MBeans (list)].
 +
 This example fetches only the meta information for the
 attributes of the
@@ -486,28 +483,38 @@ attributes of the
 +
 [,javascript]
 ----
-var attributesMeta = j4p.list("java.lang/type=OperatingSystem/attr");
+let attributesMeta = j4p.list("java.lang/type=OperatingSystem/attr");
 ----
 
 `version(opts)`:: The `version` method returns the
 agent's version, the protocol version, and possibly some
 additional server-specific information. See
-<<version>> for more information about this
+xref:protocol/version.adoc[Getting the agent version (version)] for more information about this
 method.
 +
-A sample return value for a GlassFish server looks like:
+A sample return value for an Apache Tomcat server looks like:
 +
-[,json]
+[,json,subs="attributes,verbatim"]
 ----
 {
-  "protocol": "4.0",
-  "agent": "0.82",
+  "agent": "{jolokia-version}",
+  "protocol": "7.2",
+  "details": {
+    "agent_version": "2.0.0-SNAPSHOT",
+    "agent_id": "192.168.0.221-72527-6baa8838-servlet",
+    "server_product": "tomcat",
+    "server_vendor": "Apache",
+    "server_version": "10.1.16",
+    "secured": true,
+    "url": "http://192.168.0.221:8080/jolokia"
+  },
+  "id": "192.168.0.221-72527-6baa8838-servlet",
+  "config": {
+    ...
+  },
   "info": {
-    "product": "glassfish",
-    "vendor": "Sun",
-    "extraInfo": {
-      "amxBooted": false
-    }
+    "proxy": {},
+    "jmx": {}
   }
 }
 ----
@@ -527,12 +534,12 @@ every 10 seconds and prints out the used memory on the console:
 
 [,javascript]
 ----
-var j4p = new Jolokia("/jolokia")
+let j4p = new Jolokia("/jolokia")
 handle = j4p.register(function(resp) {
   console.log("HeapMemory used: " + resp.value);
 },
 {
-  "type": "READ",
+  "type": "read",
   "mbean": "java.lang:type=Memory",
   "attribute": "HeapMemoryUsage", "path": "used"
 });
@@ -597,13 +604,13 @@ handle = j4p.register(function(resp1, resp2) {
   console.log("ThreadCount: " + resp2.value);
 },
 {
-  "type": "READ",
+  "type": "read",
   "mbean": "java.lang:type=Memory",
   "attribute": "HeapMemoryUsage",
   "path": "used"
 },
 {
-  "type": "READ",
+  "type": "read",
   "mbean": "java.lang:type=Threading",
   "attribute": "ThreadCount"
 });
@@ -630,13 +637,13 @@ j4p.register(
     "onlyIfModified": true
   },
   {
-    "type": "LIST",
+    "type": "list",
     "config": {
       "maxDepth": 2
     }
   },
   {
-    "type": "READ",
+    "type": "read",
     "mbean": "java.lang:type=Threading",
     "attribute": "ThreadCount",
     "config": {
@@ -644,7 +651,7 @@ j4p.register(
     }
   },
   {
-    "type": "READ",
+    "type": "read",
     "mbean": "bla.blu:type=foo",
     "attribute": "blubber"
   }
@@ -674,158 +681,158 @@ has been stopped.
 `true` if this is the case, `false`
 otherwise.
 
-[#js-cubism]
-=== Jolokia as a Cubism Source
-
-https://square.github.com/cubism/[Cubism] is a JavaScript library for
-plotting time-series data and is based on
-https://d3js.org/[d3.js]. Jolokia comes with a plugin for Cubism and
-can act as a data source. The usage is quite simple: After
-creating a Jolokia Cubism source, one or more JSON request can
-be registered, which are queried periodically. No matter how
-many requests are registered, only a single HTTP request is sent
-to the server after each period. Cubism is then responsible for
-plotting the data.
-
-<<fig-jolokia-cubism-example>>  shows a sample for a memory plot. More examples can
-be found on this link:../../client/javascript-cubism.html[page].
-
-[#fig-jolokia-cubism-example]
-.Horizon Chart for Heap-Memory Usage
-image::jolokia-cubism-memory-horizon.png[]
-
-`jolokia-cubism.js` can be downloaded from
-the link:/download.html[downlad page] and also
-comes with a minified version. As dependencies it requires
-link:/download.html[jolokia.js],
-https://www.jquery.com[JQuery],
-https://square.github.com/cubism/[Cubism] and
-https://d3js.org/[d3.js]. `jolokia-cubism.js`
-registers itself as an
-https://requirejs.org/docs/whyamd.html[AMD] module
-if running within an AMD environment.
-
-In order to use Jolokia with Cubism, you first need to create a
-Cubism https://github.com/square/cubism/wiki/Context[context]. Next use
-`context.jolokia()` for creating a connection to the
-Jolokia agent.
-
-[,javascript]
-----
-var context = cubism.context();
-
-// Create a source for Jolokia metrics pointing to the agent
-// at 'http://jolokia.org/jolokia'
-var jolokia = context.jolokia("http://jolokia.org/jolokia");
-----
-
-The method `context.jolokia()` can take various
-kind of arguments:
-
-* A single string as in the example above is used as the
-agent's URL. Additionally, options as key-value pairs can be
-given as an additional argument. The possible keys are
-described in <<js-request-options-table>>. If
-the URL is omitted, but only an option object is provided,
-then this object must also contain a key `url`
-for specifying the agent URL.
-* Alternatively, an already instantiated Jolokia object can be
-provided as single argument, which then is used for all
-communications to the server.
-
-From this source object, a
-https://github.com/square/cubism/wiki/Metric[metric]
-object can be easily created. This metric object embraces one
-or more Jolokia requests which are send to the server
-periodically. The response(s) are then used for calculating a
-single numerical value which gets plotted. For example:
-
-[,javascript]
-----
-// Read periodically the Heap-Memory use and take 'HeapMemory Usage' as name/label.
-var metricMem = jolokia.metric({
-  "type": "read",
-  "mbean": "java.lang:type=Memory",
-  "attribute": "HeapMemoryUsage",
-  "path": "used"
-},
-"HeapMemory Usage");
-
-// Example for a callback function for evaluating responses
-// dynamically. In this case, the first
-// argument is a function, which gets feed with all response objects
-// (one in this case). The requests objects are given next, and an
-// options object as last argument.
-var metricReq = jolokia.metric(
-  function (resp) {
-    var attrs = resp.value;
-    var sum = 0;
-    for (var key in attrs) {
-      sum += attrs[key].requestCount;
-    }
-    return sum;
-  },
-  {
-    "type": "read",
-    "mbean": "Catalina:j2eeType=Servlet,*",
-    "attribute": "requestCount"
-  },
-  {
-    "name": "All",
-    "delta": 101000
-  }
-);
-----
-
-`metric()` is a factory method which can be
-called in various ways.
-
-* If the first argument is a Jolokia request object (i.e. not
-a function), this request is used for sending requests
-periodically.
-* If the first argument is a function, this function is used
-for calculating the numeric value to be plotted. The rest of
-the arguments can be one or more request objects, which are
-registered and their responses are put as arguments to the
-given callback function.
-* The last argument, if an object but not a Jolokia request
-(i.e. there is no `type` key), is
-taken as an option object which is described below.
-* Finally, if the last argument is a pure string, then this
-string is used as name for the chart.
-
-An object which can be given as last argument is used for fine
-tuning the metrics:
-`name`:: Name used in charts. The name can also be given
-alternatively as a string directly as last argument (but
-then without any other options)
-`delta`:: Delta value in milliseconds for creating delta (velocity)
-charts. This is done by taking the value measured
-that many milliseconds ago and substract them from each other.
-`keepDelay`:: How many milliseconds before the oldest shown value should be
-kept in memory, which e.g. is necessary for delta
-charts. When `delta` is given, this
-value is implicitly set.
-
-One or more metric objects can now be converted to charts and
-added to a website with `d3.js`. This is done
-in the usual cubism way as described here. In our example, in
-order to append charts to a `div` with id
-`chart` the following code can be used:
-
-[,javascript]
-----
-// Use d3 to attach the metrics with a specific graph type
-// ('horizon' in this case) to the document
-d3.select("#charts").call(function(div) {
-  div.append("div")
-    .data([ metricMem, metricReq ])
-    .call(context.horizon())
-});
-----
-
-For a complete API documentation please refer to the
-https://github.com/square/cubism/wiki/API-Reference[Cubism API].
+// [#js-cubism]
+// === Jolokia as a Cubism Source
+//
+// https://square.github.com/cubism/[Cubism] is a JavaScript library for
+// plotting time-series data and is based on
+// https://d3js.org/[d3.js]. Jolokia comes with a plugin for Cubism and
+// can act as a data source. The usage is quite simple: After
+// creating a Jolokia Cubism source, one or more JSON request can
+// be registered, which are queried periodically. No matter how
+// many requests are registered, only a single HTTP request is sent
+// to the server after each period. Cubism is then responsible for
+// plotting the data.
+//
+// <<fig-jolokia-cubism-example>>  shows a sample for a memory plot. More examples can
+// be found on this link:../../client/javascript-cubism.html[page].
+//
+// [#fig-jolokia-cubism-example]
+// .Horizon Chart for Heap-Memory Usage
+// image::jolokia-cubism-memory-horizon.png[]
+//
+// `jolokia-cubism.js` can be downloaded from
+// the link:/download.html[downlad page] and also
+// comes with a minified version. As dependencies it requires
+// link:/download.html[jolokia.js],
+// https://www.jquery.com[JQuery],
+// https://square.github.com/cubism/[Cubism] and
+// https://d3js.org/[d3.js]. `jolokia-cubism.js`
+// registers itself as an
+// https://requirejs.org/docs/whyamd.html[AMD] module
+// if running within an AMD environment.
+//
+// In order to use Jolokia with Cubism, you first need to create a
+// Cubism https://github.com/square/cubism/wiki/Context[context]. Next use
+// `context.jolokia()` for creating a connection to the
+// Jolokia agent.
+//
+// [,javascript]
+// ----
+// let context = cubism.context();
+//
+// // Create a source for Jolokia metrics pointing to the agent
+// // at 'http://jolokia.org/jolokia'
+// let jolokia = context.jolokia("http://jolokia.org/jolokia");
+// ----
+//
+// The method `context.jolokia()` can take various
+// kind of arguments:
+//
+// * A single string as in the example above is used as the
+// agent's URL. Additionally, options as key-value pairs can be
+// given as an additional argument. The possible keys are
+// described in <<js-request-options-table>>. If
+// the URL is omitted, but only an option object is provided,
+// then this object must also contain a key `url`
+// for specifying the agent URL.
+// * Alternatively, an already instantiated Jolokia object can be
+// provided as single argument, which then is used for all
+// communications to the server.
+//
+// From this source object, a
+// https://github.com/square/cubism/wiki/Metric[metric]
+// object can be easily created. This metric object embraces one
+// or more Jolokia requests which are send to the server
+// periodically. The response(s) are then used for calculating a
+// single numerical value which gets plotted. For example:
+//
+// [,javascript]
+// ----
+// // Read periodically the Heap-Memory use and take 'HeapMemory Usage' as name/label.
+// let metricMem = jolokia.metric({
+//   "type": "read",
+//   "mbean": "java.lang:type=Memory",
+//   "attribute": "HeapMemoryUsage",
+//   "path": "used"
+// },
+// "HeapMemory Usage");
+//
+// // Example for a callback function for evaluating responses
+// // dynamically. In this case, the first
+// // argument is a function, which gets feed with all response objects
+// // (one in this case). The requests objects are given next, and an
+// // options object as last argument.
+// let metricReq = jolokia.metric(
+//   function (resp) {
+//       let attrs = resp.value;
+//       let sum = 0;
+//     for (let key in attrs) {
+//       sum += attrs[key].requestCount;
+//     }
+//     return sum;
+//   },
+//   {
+//     "type": "read",
+//     "mbean": "Catalina:j2eeType=Servlet,*",
+//     "attribute": "requestCount"
+//   },
+//   {
+//     "name": "All",
+//     "delta": 101000
+//   }
+// );
+// ----
+//
+// `metric()` is a factory method which can be
+// called in various ways.
+//
+// * If the first argument is a Jolokia request object (i.e. not
+// a function), this request is used for sending requests
+// periodically.
+// * If the first argument is a function, this function is used
+// for calculating the numeric value to be plotted. The rest of
+// the arguments can be one or more request objects, which are
+// registered and their responses are put as arguments to the
+// given callback function.
+// * The last argument, if an object but not a Jolokia request
+// (i.e. there is no `type` key), is
+// taken as an option object which is described below.
+// * Finally, if the last argument is a pure string, then this
+// string is used as name for the chart.
+//
+// An object which can be given as last argument is used for fine
+// tuning the metrics:
+// `name`:: Name used in charts. The name can also be given
+// alternatively as a string directly as last argument (but
+// then without any other options)
+// `delta`:: Delta value in milliseconds for creating delta (velocity)
+// charts. This is done by taking the value measured
+// that many milliseconds ago and substract them from each other.
+// `keepDelay`:: How many milliseconds before the oldest shown value should be
+// kept in memory, which e.g. is necessary for delta
+// charts. When `delta` is given, this
+// value is implicitly set.
+//
+// One or more metric objects can now be converted to charts and
+// added to a website with `d3.js`. This is done
+// in the usual cubism way as described here. In our example, in
+// order to append charts to a `div` with id
+// `chart` the following code can be used:
+//
+// [,javascript]
+// ----
+// // Use d3 to attach the metrics with a specific graph type
+// // ('horizon' in this case) to the document
+// d3.select("#charts").call(function(div) {
+//   div.append("div")
+//     .data([ metricMem, metricReq ])
+//     .call(context.horizon())
+// });
+// ----
+//
+// For a complete API documentation please refer to the
+// https://github.com/square/cubism/wiki/API-Reference[Cubism API].
 
 [#js-maven]
 === Maven integration
@@ -834,17 +841,6 @@ For Maven users' convenience, the Jolokia JavaScript package is
 also available as a JavaScript artifact. It can be easily
 included with help of the
 `javascript-maven-plugin`.
-
-.Recommended plugin
-****
-Unfortunately, the "official" version of this plugin hosted on
-Codehaus has been stuck at version
-`1.0-alpha-1-SNAPSHOT`. Although it is quite
-usable, in order to avoid a snapshot dependency, it is
-recommended to use a fork of this plugin hosted on
-https://github.com/harlanji/javascript-maven-tools[GitHub] and deployed at the
-https://oss.sonatype.org/content/groups/public[Sonatype Maven repository].
-****
 
 The following example shows a sample configuration which could
 be used within a `pom.xml`:
@@ -886,13 +882,6 @@ be used within a `pom.xml`:
     ...
   </build>
   ...
-  <pluginRepositories>
-    <pluginRepository>
-      <id>sonatype-oss</id>
-      <url>https://oss.sonatype.org/content/groups/public</url>
-    </pluginRepository>
-  </pluginRepositories>
-  ...
 </project>
 ----
 
@@ -906,14 +895,13 @@ files use something like this:
 [,html]
 ----
 <head>
-  <script src="jquery-1.7.2.js"></script>
-  <script src="scripts/libk/json2.js"></script>
+  <script src="jquery-3.7.1.js"></script>
   <script src="scripts/lib/jolokia.js"></script>
   <script src="scripts/lib/jolokia-simple.js"></script>
 </head>
 ----
 
-`jQuery.js` has to be included on its own,
+`jquery.js` has to be included on its own,
 though and is not included within the dependency. If the
 compressed version of `jolokia.js` should
 be used, add a
@@ -922,4 +910,4 @@ be used, add a
 include `scripts/lib/jolokia-min.js`
 
 A full working example can be found in the Jolokia sources at
-`client/javascript/test-app/pom.xml`.
+`examples/client-javascript-test-app/pom.xml`.

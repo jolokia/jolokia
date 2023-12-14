@@ -50,7 +50,7 @@ one or more `J4pResponse` objects as result.
 .What the heck is this "J4p"?
 ****
 That's a reminiscence to Jolokia's roots which lies in
-https://www.jmx4perl.org[Jmx4Perl]. It is always good
+https://metacpan.org/dist/jmx4perl[Jmx4Perl,role=externalLink]. It is always good
 to remember where one comes from ;-)
 ****
 
@@ -77,7 +77,10 @@ import org.jolokia.client.request.*;
 
 public class MemoryDemo {
   public static void main(String[] args) {
-    J4pClient client = new J4pClient("http://localhost:8080/jolokia");
+    J4pClient client = J4pClient.url("http://localhost:8080/jolokia")
+        .user("jolokia")
+        .password("jolokia")
+        .build();
     J4pReadRequest request =
         new J4pReadRequest("java.lang:type=Memory", "HeapMemoryUsage");
     request.setPath("used");
@@ -87,15 +90,14 @@ public class MemoryDemo {
 }
 ----
 
-In order to compile and run this sample, two support libraries
-are required in addition to
-`jolokia-client-java.jar` (link:../../download.html[Download]):
+In order to compile and run this sample, `jolokia-client-java.jar` library is needed (see link:/download.html[Download]) as well as
+some additional support libraries:
 
-* Apache
-https://hc.apache.org/httpcomponents-client-ga/index.html[HttpClient],
-4.3.3 (https://hc.apache.org/downloads.cgi[Download])
-* https://code.google.com/p/json-simple/[json-simple],
-1.1 (https://code.google.com/p/json-simple/downloads/list[Download])
+* https://repo1.maven.org/maven2/org/apache/httpcomponents/httpclient/4.5.14/httpclient-4.5.14.jar[httpclient-4.5.14.jar,role=externalLink]
+* https://repo1.maven.org/maven2/org/apache/httpcomponents/httpcore/4.4.16/httpcore-4.4.16.jar[httpcore-4.4.16.jar,role=externalLink]
+* https://repo1.maven.org/maven2/com/googlecode/json-simple/json-simple/1.1.1/json-simple-1.1.1.jar[json-simple-1.1.1.jar,role=externalLink]
+* https://repo1.maven.org/maven2/commons-logging/commons-logging/1.2/commons-logging-1.2.jar[commons-logging-1.2.jar,role=externalLink]
+* https://repo1.maven.org/maven2/commons-codec/commons-codec/1.16.0/commons-codec-1.16.0.jar[commons-codec-1.16.0.jar,role=externalLink]
 
 For Maven users, the following dependency is sufficient (it will include
 the other two as transitive dependencies):
@@ -103,9 +105,9 @@ the other two as transitive dependencies):
 [,xml,subs="attributes,verbatim"]
 ----
 <dependency>
-  <groupId>org.jolokia</groupId>
-  <artifactId>jolokia-client-java</artifactId>
-  <version>{jolokia-version}</version>
+    <groupId>org.jolokia</groupId>
+    <artifactId>jolokia-client-java</artifactId>
+    <version>{jolokia-version}</version>
 </dependency>
 ----
 
@@ -135,6 +137,7 @@ The builder supports the following parameters with the given
 defaults:
 
 .J4pClient parameters
+[cols="15,~,20"]
 |===
 |Parameter|Description|Default
 
@@ -165,7 +168,7 @@ authenticator is set.Only used when `user` is set, too.
 |A JMX JSR-160 ServiceURL which should be used by the agent
 as the _real_ target. This parameter should
 be set if the client is used for accessing the agent in
-<<proxy,proxy mode>>.
+xref:proxy_mode.adoc[].
 |
 
 |`targetUser`
@@ -269,14 +272,14 @@ messages.
 
 |`proxy`
 |Determines http proxy server. It can be defined as
-`http://user:password@host:port`. _user_ and
+`\http://user:password@host:port`. _user_ and
 _password_ are optional.
 |
 
 |`useProxyFromEnvironment`
 |Set the proxy for this client based on `http_proxy` system environment variable.
-Expect formats are `http://user:pass@host:port` or `http://host:port`
-Example: `http://tom:sEcReT@my.proxy.com:8080`
+Expect formats are `\http://user:pass@host:port` or `\http://host:port`
+Example: `\http://tom:sEcReT@my.proxy.com:8080`
 |
 
 |`responseExtractor`
@@ -313,6 +316,7 @@ method. The possible options are shown in table
 
 [#client-java-queryopts]
 .J4pClient query parameters
+[cols="20,~"]
 |===
 |J4pQueryParameter enum|Description
 
@@ -357,7 +361,6 @@ they are created. The allowed values are either
 order (== alphabetical sorted) is used or
 `false` for getting the keys as
 registered. Default is `true`
-
 |===
 
 [#client-java-requests]
@@ -376,7 +379,7 @@ for the return values of the
 
 The constructor of each kind of request can take a
 `J4pTargetConfig` as argument for using a
-request in <<proxy,proxy mode>>. This
+request in xref:proxy_mode.adoc[]. This
 configurational object holds the JMX service url and
 (optionally) credentials for JSR-160 authentication. When
 given, this proxy target specification overrides any default
@@ -400,7 +403,7 @@ well.
 +
 For more information on fetching the value of multiple
 attributes and multiple MBeans at once, please refer to
-<<read>> or the Javadoc of
+xref:protocol/read.adoc[Reading attributes (read)] or the Javadoc of
 `J4pReadResponse`.
 
 `J4pWriteRequest` and `J4pWriteResponse`:: A `J4pWriteRequest` is used to set
@@ -409,10 +412,9 @@ object and attribute name the value must be give in the
 constructor as well. Optionally a `path`
 can be provided, too. Only certain types for the given
 value can be serialized properly for calling the Jolokia
-agent as described in
-<<serialization-request>>.
+agent as described in xref:jolokia_protocol.adoc#serialization-request[Request parameter serialization].
 +
-The old value is returned as `J4pWriteResponse`'s value.
+The old value is returned as ``J4pWriteResponse``'s value.
 
 `J4pExecRequest` and `J4pExecResponse`:: ``J4pExecRequest``'s are used for
 executing operation on MBeans. The constructor takes as
@@ -420,7 +422,7 @@ mandatory arguments the MBean's object name, the operation
 name and any arguments required by the operation. Only
 certain types for the given arguments can be serialized
 properly for calling the Jolokia agent as described in
-<<serialization-request>>.
+xref:jolokia_protocol.adoc#serialization-request[Request parameter serialization].
 +
 The returned `J4pExecResponse`
 contains the return value of the operation called.
@@ -436,7 +438,7 @@ list of found object names.
 `J4pListRequest` should be used. It
 can be used with a _inner path_ to
 obtain only a subtree of the response, otherwise the whole
-tree as described in <<response-list>> is
+tree as described in xref:jolokia_protocol.adoc#response-list[List response] is
 returned. With the query parameter
 `maxDepth` can be used to restrict the
 depth of returned tree.
@@ -444,7 +446,7 @@ depth of returned tree.
 The single value of a
 `J4pListResponse` is a tree (or
 subtree) as a JSON object, which has the format described
-in <<response-list>>.
+in xref:jolokia_protocol.adoc#response-list[List response].
 
 `J4pVersionRequest` and `J4pVersionResponse`:: A `J4pVersionRequest` request the
 Jolokia agent's version information and takes no
@@ -477,7 +479,7 @@ exception is of type
 `J4pRemoteException`:: Generic exception thrown when an exception occurred on the
 remote side. This is the case when the JSON response
 obtained is an error response as described in
-<<responses>>. The error type, error value, the
+xref:jolokia_protocol.adoc#responses[Responses]. The error type, error value, the
 status, the request leading to this error and the remote
 stacktrace as string) can be obtained from this exception.
 

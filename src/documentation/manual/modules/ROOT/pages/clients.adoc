@@ -19,10 +19,8 @@
 Three client implementations exists for Jolokia: Jmx4Perl, the
 Perl binding (the grandmother of all clients ;-), a Java library
 and a JavaScript library. This reference describes the client
-bindings bundled with Jolokia. More JVM based client libraries
-are planned for inclusion in Jolokia (e.g. Groovy, Scala or
-JRuby). Information about Jmx4Perl can be found
-https://www.jmx4perl.org[elsewhere].
+bindings bundled with Jolokia. Information about Jmx4Perl can be found
+https://metacpan.org/dist/jmx4perl[elsewhere,role=externalLink].
 
 include::client/javascript.adoc[]
 include::client/java.adoc[]
