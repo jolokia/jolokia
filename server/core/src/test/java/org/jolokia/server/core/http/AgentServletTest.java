@@ -540,7 +540,7 @@ public class AgentServletTest {
         ByteArrayOutputStream sw = initRequestResponseMocks(
                 () -> {
                     expect(request.getHeader("Origin")).andReturn(null);
-                    expect(request.getRemoteHost()).andThrow(new IllegalStateException());
+                    expect(request.getRemoteAddr()).andThrow(new IllegalStateException());
                 },
                 getStandardResponseSetup());
         expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
