@@ -6,6 +6,7 @@ import java.util.SortedSet;
 import javax.management.*;
 
 import org.jolokia.server.core.config.ConfigKey;
+import org.jolokia.server.core.config.Configuration;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 
 /**

@@ -8,6 +8,7 @@ import javax.management.*;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.config.Configuration;
 import org.jolokia.server.core.service.api.*;
+import org.jolokia.server.core.util.DebugStore;
 import org.jolokia.server.core.util.HttpMethod;
 import org.jolokia.server.core.util.RequestType;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
@@ -23,6 +24,8 @@ public class JolokiaContextImpl implements JolokiaContext {
     // Service manager associated with the context
     private final JolokiaServiceManagerImpl serviceManager;
 
+    private DebugStore debugStore;
+
     /**
      * New context associated with the given service manager
      *
@@ -30,6 +33,10 @@ public class JolokiaContextImpl implements JolokiaContext {
      */
     JolokiaContextImpl(JolokiaServiceManagerImpl pServiceManager) {
         serviceManager = pServiceManager;
+    }
+
+    public void setDebugStore(DebugStore debugStore) {
+        this.debugStore = debugStore;
     }
 
     /** {@inheritDoc} */
@@ -91,22 +98,31 @@ public class JolokiaContextImpl implements JolokiaContext {
 
     /** {@inheritDoc} */
     public boolean isDebug() {
-        return getLog().isDebug();
+        return getLog().isDebug() || debugStore != null && debugStore.isDebug();
     }
 
     /** {@inheritDoc} */
     public void debug(String message) {
         getLog().debug(message);
+        if (debugStore != null) {
+            debugStore.log(message);
+        }
     }
 
     /** {@inheritDoc} */
     public void info(String message) {
         getLog().info(message);
+        if (debugStore != null) {
+            debugStore.log(message);
+        }
     }
 
     /** {@inheritDoc} */
     public void error(String message, Throwable t) {
         getLog().error(message, t);
+        if (debugStore != null) {
+            debugStore.log(message, t);
+        }
     }
 
     /** {@inheritDoc} */

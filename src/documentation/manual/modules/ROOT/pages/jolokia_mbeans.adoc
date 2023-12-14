@@ -17,7 +17,7 @@
 = Jolokia MBeans
 
 Besides bridging JMX to the HTTP/JSON world, the Jolokia agents
-also install their own MBeans which provide the extra services
+also register their own MBeans which provide the extra services
 described in this chapter.
 
 [#mbean-config]
@@ -25,13 +25,9 @@ described in this chapter.
 
 This MBean, which is registered under the name
 `jolokia:type=Config`, allows changing
-configuration parameters. Changes are non-persistent and get
+debug-related configuration parameters. Changes are non-persistent and get
 lost after a restart of the hosting application
-server. Debugging mode and the history store can be configured with
-this MBean.
-
-[#mbean-debugging]
-=== Debugging
+server.
 
 Debugging can be switched on by setting the attribute
 `Debug`. When debugging is switched on, the
@@ -44,14 +40,13 @@ turn contain their requests) sent to the client. Finally, the
 operation `resetDebugInfo` clears the debug
 history.
 
-[#mbean-history]
-=== History store
+image::debug-mbean.png[]
 
-The _history store_ can be used to remember
-attribute and return values within the agent's memory. The
-Nagios check `check_jmx4perl`, for instance,
-uses this feature for its delta check, which measures
-changes in attribute values. In order to
+[#mbean-history]
+== History MBean
+
+The `jolokia:type=History` can be used to remember
+attribute and return values within the agent's memory. In order to
 switch on history tracking, two operations are provided:
 
 *`setHistoryLimitForOperation`*:: JMX operation for switching on tracking of the execution of
@@ -93,23 +88,82 @@ response will contain an extra field
 `history` which contains a list with
 historical values along with the timestamp when it was
 recorded. This format is described in detail in
-<<history>>.
+xref:jolokia_protocol.adoc#history[Tracking historical values].
 
 [#mbean-serverhandler]
 == Server Handler
 
 The MBean
 `jolokia:type=ServerHandler` has a single
-operation `mBeanServersInfo` with no
+operation `mBeanServersInfo()` with no
 arguments. This operation can be used to dump out the name of
 all registered MBeans on all found MBeanServers. It is helpful to
 get a quick and condensed overview of the available JMX
 information.
 
+[,shell]
+----
+$ curl -s -u jolokia:jolokia 'http://localhost:8080/jolokia/exec/jolokia:agent=192.168.0.221-72527-5d9f8cd3-servlet,type=ServerHandler/mBeanServersInfo()' | jq -r .value
+Found 1 MBeanServers
+    ++ com.sun.jmx.mbeanserver.JmxMBeanServer@75a1cd57: default domain = DefaultDomain, 108 MBeans
+        Domains:
+         == JMImplementation
+              type=MBeanServerDelegate
+         == java.util.logging
+              type=Logging
+         == jdk.management.jfr
+              type=FlightRecorder
+         == java.lang
+              name=Metaspace Manager,type=MemoryManager
+              name=Metaspace,type=MemoryPool
+              name=CodeHeap 'profiled nmethods',type=MemoryPool
+              type=ClassLoading
+              type=Runtime
+              name=CodeCacheManager,type=MemoryManager
+              type=OperatingSystem
+              name=Compressed Class Space,type=MemoryPool
+              type=Threading
+              name=CodeHeap 'non-nmethods',type=MemoryPool
+              name=G1 Eden Space,type=MemoryPool
+              name=G1 Old Gen,type=MemoryPool
+              name=G1 Survivor Space,type=MemoryPool
+              name=G1 Young Generation,type=GarbageCollector
+              type=Memory
+              type=Compilation
+              name=G1 Old Generation,type=GarbageCollector
+              name=CodeHeap 'non-profiled nmethods',type=MemoryPool
+         == com.sun.management
+              type=HotSpotDiagnostic
+              type=DiagnosticCommand
+         == java.nio
+              name=mapped - 'non-volatile memory',type=BufferPool
+              name=direct,type=BufferPool
+              name=mapped,type=BufferPool
+         == Users
+              database=UserDatabase,type=User,username="jolokia"
+              database=UserDatabase,rolename="jolokia",type=Role
+              database=UserDatabase,rolename="manager-gui",type=Role
+              database=UserDatabase,type=User,username="tomcat"
+              database=UserDatabase,type=UserDatabase
+         == Catalina
+              context=/,host=localhost,type=Manager
+              context=/manager,host=localhost,name=BasicAuthenticator,type=Valve
+...
+              type=Engine
+         == jolokia
+              agent=192.168.0.221-72527-5d9f8cd3-servlet,type=History
+              agent=192.168.0.221-72527-5d9f8cd3-servlet,type=Config
+              agent=192.168.0.221-72527-5d9f8cd3-servlet,type=Discovery
+              agent=192.168.0.221-72527-5d9f8cd3-servlet,type=NotificationStore
+              agent=192.168.0.221-72527-5d9f8cd3-servlet,type=ServerHandler
+
+Platform MBeanServer: com.sun.jmx.mbeanserver.JmxMBeanServer@75a1cd57
+----
+
 [#mbean-discovery]
 == Discovery MBean
 
-`jolokia:type=Discovery` can be used to detect other MBeans by
+`jolokia:type=Discovery` can be used to detect other Jolokia Agents by
 sending multicast discovery UDP requests. Every agent which has discovery enabled will respond with information
 about the agent itself and the access URL. The MBean itself ha two operations: `lookupAgents`
 and `lookupAgentsWithTimeout` which either use a default timeout of one second for waiting
@@ -118,31 +172,33 @@ JSON array which contains JSON objects, one for each agent discovered.
 
 A return value of these operation could look like:
 
-[,json]
+[,json,subs="attributes,verbatim"]
 ----
 [
   {
-    "agent_id" : "10.9.11.25-58613-81b087d-servlet",
-    "url": "http://10.9.11.25:8778/jolokia",
-    "secured": false,
-    "server_vendor" : "Apache",
-    "server_product" : "Tomcat",
-    "server_version" : "7.0.35"
+    "agent_version": "{jolokia-version}",
+    "agent_id": "192.168.0.221-72527-6baa8838-servlet",
+    "server_product": "tomcat",
+    "server_vendor": "Apache",
+    "server_version": "10.1.16",
+    "secured": true,
+    "url": "http://192.168.0.221:8080/jolokia"
   },
   {
-    "agent_id" : "10.9.11.87-23455-9184ef-osgi",
-    "agent_description": "My OSGi container",
-    "url": "http://10.9.11.87:8080/jolokia",
-    "secured": true,
-    "server_vendor" : "Apache",
-    "server_product" : "Felix",
-    "server_version" : "4.2.1"
+    "agent_version": "{jolokia-version}",
+    "agent_id": "192.168.0.221-89505-1328eb8a-osgi",
+    "server_product": "felix",
+    "server_vendor": "Apache",
+    "server_version": "7.0.5",
+    "secured": false,
+    "url": "http://192.168.0.221:8181/jolokia"
   }
 ]
 ----
 
 [#discovery-mbean-response]
 .Response properties
+[cols="15,~,30"]
 |===
 |Property|Description|Example
 
@@ -152,12 +208,12 @@ during startup of the agent in form of a configuration
 parameter or being autodetected. If autodected, the id has
 several parts: The IP, the process id, hashcode of the agent
 and its type. This field will be always provided.
-|`10.9.11.87-23455-9184ef-osgi`
+|`192.168.0.221-72527-6baa8838-servlet`
 
 |`agent_description`
 |An optional description which can be used as a UI label if
 given.
-|`ServiceMix ESB`
+|`Apache Tomcat`
 
 |`url`
 |The URL how this agent can be contacted. This URL is
@@ -168,7 +224,7 @@ URL is used. If autodetected it is taken from the first HTTP
 request processed by the servlet. Hence no URL is available
 until this first request was processed. This property might
 be empty.
-|`http://10.9.11.87:8080/jolokia`
+|`\http://192.168.0.221:8080/jolokia`
 
 |`secured`
 |Whether the agent was configured for authentication or not.
@@ -185,6 +241,5 @@ field is included if it could be automatically detected.
 
 |`server_version`
 |The container's version (if detected)
-|`7.0.50`
-
+|`10.1.16`
 |===

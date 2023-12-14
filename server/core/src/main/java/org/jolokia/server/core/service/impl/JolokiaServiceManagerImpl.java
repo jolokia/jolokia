@@ -20,12 +20,15 @@ import java.util.*;
 
 import javax.management.*;
 
+import org.jolokia.server.core.backend.MBeanServerHandler;
+import org.jolokia.server.core.backend.MBeanServerHandlerMBean;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.config.Configuration;
 import org.jolokia.server.core.detector.*;
 import org.jolokia.server.core.service.api.*;
 import org.jolokia.server.core.service.request.RequestHandler;
 import org.jolokia.server.core.service.request.RequestInterceptor;
+import org.jolokia.server.core.util.DebugStore;
 import org.jolokia.server.core.util.jmx.DefaultMBeanServerAccess;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 import org.json.simple.parser.JSONParser;
@@ -76,7 +79,11 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
     private MBeanRegistry mbeanRegistry;
 
     // Access for JMX MBeanServers
-    private MBeanServerAccess mbeanServerAccess;
+    private DefaultMBeanServerAccess mbeanServerAccess;
+
+    private final DebugStore debugStore;
+
+    private ObjectName mBeanServerHandlerName;
 
     /**
      * Create the implementation of a service manager
@@ -102,6 +109,9 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
         detectorLookup = pDetectorLookup != null ? pDetectorLookup : new ClasspathServerDetectorLookup();
         // The version request handler must be always present and always be first
         addService(new VersionRequestHandler());
+        // DebugStore is also a service, so we can integrate it with JolokiaContext
+        debugStore = new DebugStore();
+        addService(debugStore);
     }
 
 
@@ -171,9 +181,19 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
 
             // Create context and remember
             jolokiaContext = new JolokiaContextImpl(this);
+            jolokiaContext.setDebugStore(debugStore);
 
             // Create the MBean registry
             mbeanRegistry = new MBeanRegistry();
+
+            // register jolokia:type=ServerHandler
+            MBeanServerHandler mBeanServerHandler = new MBeanServerHandler(mbeanServerAccess);
+            try {
+                mBeanServerHandlerName = new ObjectName(MBeanServerHandlerMBean.OBJECT_NAME + ",agent=" + getAgentDetails().getAgentId());
+                jolokiaContext.registerMBean(mBeanServerHandler, mBeanServerHandlerName.toString());
+            } catch (JMException e) {
+                jolokiaContext.error("Cannot register MBean " + mBeanServerHandlerName + ": " + e, e);
+            }
 
             // Initialize all services in the proper order
             List<Class<? extends JolokiaService<?>>> serviceTypes = getServiceTypes();
@@ -205,6 +225,12 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
                 mbeanRegistry.destroy();
             } catch (JMException e) {
                 logHandler.error("Cannot unregister own MBeans: " + e, e);
+            }
+            if (mBeanServerHandlerName != null) {
+                try {
+                    jolokiaContext.unregisterMBean(mBeanServerHandlerName);
+                } catch (MBeanRegistrationException ignored) {
+                }
             }
             for (JolokiaServiceLookup factory : serviceLookups) {
                 factory.destroy();
@@ -304,7 +330,7 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
         }
     }
 
-    private MBeanServerAccess createMBeanServerAccess(SortedSet<ServerDetector> pDetectors) {
+    private DefaultMBeanServerAccess createMBeanServerAccess(SortedSet<ServerDetector> pDetectors) {
         Set<MBeanServerConnection> mbeanServers = new HashSet<>();
         for (ServerDetector detector : pDetectors) {
             Set<MBeanServerConnection> found = detector.getMBeanServers();

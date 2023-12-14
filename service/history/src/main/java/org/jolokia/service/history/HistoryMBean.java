@@ -16,7 +16,7 @@ import org.json.simple.JSONObject;
 public interface HistoryMBean {
 
     // Name under which this bean gets registered
-    String OBJECT_NAME = "jolokia:type=Config";
+    String OBJECT_NAME = "jolokia:type=History";
 
     // Operations
 

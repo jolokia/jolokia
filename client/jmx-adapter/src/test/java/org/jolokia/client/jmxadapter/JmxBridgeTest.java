@@ -517,7 +517,7 @@ public class JmxBridgeTest {
         throws IOException, AttributeNotFoundException, InstanceNotFoundException,
         InvalidAttributeValueException {
         this.adapter.setAttribute(
-            RemoteJmxAdapter.getObjectName("jolokia:type=Config,agent=local-jvm"),
+            RemoteJmxAdapter.getObjectName("jolokia:type=History,agent=local-jvm"),
             new Attribute("HistoryMaxEntries", null));
     }
 

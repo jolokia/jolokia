@@ -123,6 +123,8 @@ Jolokia 1 registers `jolokia:type=Config` which combines _history_ and _debug_ a
 
 image::images/jolokia1-mbeans.png["Jolokia 1 jolokia:type=Config MBean",role=text-center]
 
-Jolokia registers just a _history_ MBean under this ObjectName and also `agent=<agentId>` is added to Jolokia MBean names.
+Jolokia 2 registers `jolokia:type=Config` with just _debug_ attributes and operations, while _history_ part is contained in separate `jolokia:type=History` MBean.
 
-image::images/jolokia2-mbeans.png["Jolokia 2 jolokia:type=Config MBean",role=text-center]
+Also `agent=<agentId>` key is added to all Jolokia MBean names.
+
+image::images/jolokia2-mbeans.png["Jolokia 2 MBeans",role=text-center]

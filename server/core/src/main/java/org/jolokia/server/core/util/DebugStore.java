@@ -1,9 +1,3 @@
-package org.jolokia.server.core.util;
-
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.LinkedList;
-
 /*
  * Copyright 2009-2013 Roland Huss
  *
@@ -19,7 +13,27 @@ import java.util.LinkedList;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.server.core.util;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.LinkedList;
+
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.MBeanRegistrationException;
+import javax.management.MalformedObjectNameException;
+import javax.management.NotCompliantMBeanException;
+import javax.management.ObjectName;
+
+import org.jolokia.server.core.backend.Config;
+import org.jolokia.server.core.backend.ConfigMBean;
+import org.jolokia.server.core.service.api.AbstractJolokiaService;
+import org.jolokia.server.core.service.api.AgentDetails;
+import org.jolokia.server.core.service.api.JolokiaContext;
+import org.jolokia.server.core.service.api.JolokiaService;
+
+import static org.jolokia.server.core.config.ConfigKey.DEBUG;
+import static org.jolokia.server.core.config.ConfigKey.DEBUG_MAX_ENTRIES;
 
 /**
  * Simple store for remembering debug info and returning it via a JMX operation
@@ -28,22 +42,54 @@ import java.util.LinkedList;
  * @author roland
  * @since Jun 15, 2009
  */
-public class DebugStore {
+public class DebugStore extends AbstractJolokiaService<JolokiaService.Init> {
 
     @SuppressWarnings("PMD.LooseCoupling")
     private final LinkedList<Entry> debugEntries = new LinkedList<>();
+
+    private ObjectName debugStoreObjectName;
+
     private int maxDebugEntries;
     private boolean isDebug;
 
-    /**
-     * Create the debug store for holding debug messages
-     *
-     * @param pMaxDebugEntries how many messages to keep
-     * @param pDebug whether debug is switched on
-     */
-    public DebugStore(int pMaxDebugEntries, boolean pDebug) {
-        maxDebugEntries = pMaxDebugEntries;
-        isDebug = pDebug;
+    public DebugStore() {
+        super(Init.class, 0 /* no order required */);
+    }
+
+    public DebugStore(int maxDebugEntries, boolean isDebug) {
+        super(Init.class, 0 /* no order required */);
+        this.maxDebugEntries = maxDebugEntries;
+        this.isDebug = isDebug;
+    }
+
+    @Override
+    public void init(JolokiaContext pJolokiaContext) {
+        super.init(pJolokiaContext);
+
+        AgentDetails details = pJolokiaContext.getAgentDetails();
+        String agentId = details.getAgentId();
+        String oName = ConfigMBean.OBJECT_NAME + ",agent=" + agentId;
+
+        maxDebugEntries = Integer.parseInt(pJolokiaContext.getConfig(DEBUG_MAX_ENTRIES));
+        isDebug = Boolean.parseBoolean(pJolokiaContext.getConfig(DEBUG));
+
+        Config config = new Config(this, oName);
+        try {
+            debugStoreObjectName = new ObjectName(oName);
+            pJolokiaContext.registerMBean(config, oName);
+        } catch (MalformedObjectNameException | NotCompliantMBeanException | MBeanRegistrationException e) {
+            pJolokiaContext.error("Problem registering " + oName + " MBean", e);
+        } catch (InstanceAlreadyExistsException e) {
+            pJolokiaContext.info(oName + " MBean is already registered");
+        }
+    }
+
+    @Override
+    public void destroy() throws Exception {
+        if (debugStoreObjectName != null) {
+            getJolokiaContext().unregisterMBean(debugStoreObjectName);
+            debugStoreObjectName = null;
+        }
     }
 
     /**

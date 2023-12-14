@@ -10,7 +10,7 @@ import static javax.management.MBeanServerNotification.*;
 /**
  * Class managing the set of available MBeanServers
  */
-class MBeanServers implements NotificationListener {
+public class MBeanServers implements NotificationListener {
 
     // All detected MBeanServces
     private final Set<MBeanServerConnection> detectedMBeanServers;
