@@ -865,7 +865,7 @@ If the signature of JMX exec operation or the value type
 of a JMX attribute is a `OpenType`,
 they are serialized as follows:
 
-* `SimpleType`s are extracted from their corresponding JSON type.
+* ``SimpleType``s are extracted from their corresponding JSON type.
 * `ArrayType` is extracted from a
 `JSONArray` where the elements are
 serialized recursively with this algorithms. Only

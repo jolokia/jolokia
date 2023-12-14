@@ -88,142 +88,6 @@
       </plugin>
 
       <plugin>
-        <!--
-          Antora is invoked using npm/npx
-        -->
-        <groupId>com.github.eirslett</groupId>
-        <artifactId>frontend-maven-plugin</artifactId>
-        <inherited>false</inherited>
-        <configuration>
-          <installDirectory>.node</installDirectory>
-        </configuration>
-        <executions>
-          <!--
-            Mind that "generate-resources" is default phase for "install-node-and-npm" and "npm-install goals"
-            Execution id can be used to provide configuration for cli invocation, like:
-            $ mvn -N com.github.eirslett:frontend-maven-plugin:install-node-and-npm@install-node-and-npm
-            $ mvn -N com.github.eirslett:frontend-maven-plugin:npm@npm-install
-            $ mvn -N com.github.eirslett:frontend-maven-plugin:npx@antora-documentation
-          -->
-          <execution>
-            <id>install-node-and-npm</id>
-            <goals>
-              <goal>install-node-and-npm</goal>
-            </goals>
-            <phase>pre-site</phase>
-            <configuration>
-              <nodeVersion>${version.nodejs}</nodeVersion>
-            </configuration>
-            <inherited>false</inherited>
-          </execution>
-          <execution>
-            <id>npm-install</id>
-            <goals>
-              <goal>npm</goal>
-            </goals>
-            <phase>pre-site</phase>
-            <configuration>
-              <arguments>install</arguments>
-              <workingDirectory>src/documentation</workingDirectory>
-            </configuration>
-          </execution>
-          <execution>
-            <id>antora-documentation</id>
-            <goals>
-              <goal>npx</goal>
-            </goals>
-            <phase>pre-site</phase>
-            <configuration>
-              <arguments>
-                antora generate
-                --attribute jolokia-version=${currentStableVersion}
-                --attribute javascript-maven-plugin-version=${plugin.com.devspan.mojo.javascript-maven-plugin}
-                antora-playbook.yml
-              </arguments>
-              <workingDirectory>src/documentation</workingDirectory>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-resources-plugin</artifactId>
-        <executions>
-          <execution>
-            <!--
-              This execution puts Antora-generated manual into the place where maven-site-plugin will
-              generate the site.
-            -->
-            <id>copy-antora-documentation</id>
-            <phase>pre-site</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <inherited>false</inherited>
-            <configuration>
-              <outputDirectory>${project.build.directory}/site/reference/html</outputDirectory>
-              <resources>
-                <resource>
-                  <directory>${project.basedir}/src/documentation/build/site</directory>
-                  <includes>
-                    <include>**/*</include>
-                  </includes>
-                </resource>
-              </resources>
-            </configuration>
-          </execution>
-          <execution>
-            <!--
-              While these images could be part of Antora's supplemental-ui, having them mixed with Asciidoc
-              pages makes it better look directly at GitHub (images are rendered together with Asciidoc)
-            -->
-            <id>copy-site-images</id>
-            <phase>pre-site</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <inherited>false</inherited>
-            <configuration>
-              <outputDirectory>${project.build.directory}/site</outputDirectory>
-              <resources>
-                <resource>
-                  <directory>src/site/asciidoc</directory>
-                  <includes>
-                    <include>images/**/*</include>
-                  </includes>
-                </resource>
-              </resources>
-            </configuration>
-          </execution>
-          <execution>
-            <!--
-              Jolokia Javascript files are copied into documentation to be used by some examples
-            -->
-            <id>copy-javascript</id>
-            <phase>pre-site</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <inherited>false</inherited>
-            <configuration>
-              <outputDirectory>${project.build.directory}/site/js</outputDirectory>
-              <resources>
-                <resource>
-                  <directory>client/javascript/src/main/javascript</directory>
-                  <includes>
-                    <include>jolokia.js</include>
-                    <include>jolokia-cubism.js</include>
-                    <include>jolokia-simple.js</include>
-                  </includes>
-                </resource>
-              </resources>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
         <groupId>org.apache.rat</groupId>
         <artifactId>apache-rat-plugin</artifactId>
         <configuration>
@@ -272,6 +136,12 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-assembly-plugin</artifactId>
           <version>${plugin.maven-assembly-plugin}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>${plugin.maven-clean-plugin}</version>
         </plugin>
 
         <plugin>
@@ -1111,6 +981,7 @@
     <plugin.maven-antrun-plugin>3.1.0</plugin.maven-antrun-plugin>
     <plugin.maven-assembly-plugin>3.6.0</plugin.maven-assembly-plugin>
     <plugin.maven-changes-plugin>2.12.1</plugin.maven-changes-plugin>
+    <plugin.maven-clean-plugin>3.3.2</plugin.maven-clean-plugin>
     <plugin.maven-compiler-plugin>3.11.0</plugin.maven-compiler-plugin>
     <plugin.maven-dependency-plugin>3.6.1</plugin.maven-dependency-plugin>
     <plugin.maven-deploy-plugin>3.1.1</plugin.maven-deploy-plugin>
@@ -1262,21 +1133,179 @@
           </plugin>
 
           <plugin>
-            <groupId>com.github.github</groupId>
-            <artifactId>site-maven-plugin</artifactId>
-            <version>${plugin.com.github.site-maven-plugin}</version>
-            <configuration>
-              <message>Creating site for Jolokia ${project.version}</message>
-            </configuration>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-clean-plugin</artifactId>
             <executions>
               <execution>
+                <id>clean-antora-documentation</id>
+                <phase>clean</phase>
                 <goals>
-                  <goal>site</goal>
+                  <goal>clean</goal>
                 </goals>
-                <phase>site</phase>
+                <inherited>false</inherited>
+                <configuration>
+                  <filesets>
+                    <fileset>
+                      <directory>src/documentation/build</directory>
+                    </fileset>
+                  </filesets>
+                </configuration>
               </execution>
             </executions>
           </plugin>
+
+          <plugin>
+            <!--
+              Antora is invoked using npm/npx
+            -->
+            <groupId>com.github.eirslett</groupId>
+            <artifactId>frontend-maven-plugin</artifactId>
+            <inherited>false</inherited>
+            <configuration>
+              <installDirectory>.node</installDirectory>
+            </configuration>
+            <executions>
+              <!--
+                Mind that "generate-resources" is default phase for "install-node-and-npm" and "npm-install goals"
+                Execution id can be used to provide configuration for cli invocation, like:
+                $ mvn -N com.github.eirslett:frontend-maven-plugin:install-node-and-npm@install-node-and-npm
+                $ mvn -N com.github.eirslett:frontend-maven-plugin:npm@npm-install
+                $ mvn -N com.github.eirslett:frontend-maven-plugin:npx@antora-documentation
+              -->
+              <execution>
+                <id>install-node-and-npm</id>
+                <goals>
+                  <goal>install-node-and-npm</goal>
+                </goals>
+                <phase>pre-site</phase>
+                <configuration>
+                  <nodeVersion>${version.nodejs}</nodeVersion>
+                </configuration>
+                <inherited>false</inherited>
+              </execution>
+              <execution>
+                <id>npm-install</id>
+                <goals>
+                  <goal>npm</goal>
+                </goals>
+                <phase>pre-site</phase>
+                <configuration>
+                  <arguments>install</arguments>
+                  <workingDirectory>src/documentation</workingDirectory>
+                </configuration>
+              </execution>
+              <execution>
+                <id>antora-documentation</id>
+                <goals>
+                  <goal>npx</goal>
+                </goals>
+                <phase>pre-site</phase>
+                <configuration>
+                  <arguments>
+                    antora generate
+                    --attribute jolokia-version=${currentStableVersion}
+                    --attribute javascript-maven-plugin-version=${plugin.com.devspan.mojo.javascript-maven-plugin}
+                    antora-playbook.yml
+                  </arguments>
+                  <workingDirectory>src/documentation</workingDirectory>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-resources-plugin</artifactId>
+            <executions>
+              <execution>
+                <!--
+                  This execution puts Antora-generated manual into the place where maven-site-plugin will
+                  generate the site.
+                -->
+                <id>copy-antora-documentation</id>
+                <phase>pre-site</phase>
+                <goals>
+                  <goal>copy-resources</goal>
+                </goals>
+                <inherited>false</inherited>
+                <configuration>
+                  <outputDirectory>${project.build.directory}/site/reference/html</outputDirectory>
+                  <resources>
+                    <resource>
+                      <directory>${project.basedir}/src/documentation/build/site</directory>
+                      <includes>
+                        <include>**/*</include>
+                      </includes>
+                    </resource>
+                  </resources>
+                </configuration>
+              </execution>
+              <execution>
+                <!--
+                  While these images could be part of Antora's supplemental-ui, having them mixed with Asciidoc
+                  pages makes it better look directly at GitHub (images are rendered together with Asciidoc)
+                -->
+                <id>copy-site-images</id>
+                <phase>pre-site</phase>
+                <goals>
+                  <goal>copy-resources</goal>
+                </goals>
+                <inherited>false</inherited>
+                <configuration>
+                  <outputDirectory>${project.build.directory}/site</outputDirectory>
+                  <resources>
+                    <resource>
+                      <directory>src/site/asciidoc</directory>
+                      <includes>
+                        <include>images/**/*</include>
+                      </includes>
+                    </resource>
+                  </resources>
+                </configuration>
+              </execution>
+              <execution>
+                <!--
+                  Jolokia Javascript files are copied into documentation to be used by some examples
+                -->
+                <id>copy-javascript</id>
+                <phase>pre-site</phase>
+                <goals>
+                  <goal>copy-resources</goal>
+                </goals>
+                <inherited>false</inherited>
+                <configuration>
+                  <outputDirectory>${project.build.directory}/site/js</outputDirectory>
+                  <resources>
+                    <resource>
+                      <directory>client/javascript/src/main/javascript</directory>
+                      <includes>
+                        <include>jolokia.js</include>
+                        <include>jolokia-cubism.js</include>
+                        <include>jolokia-simple.js</include>
+                      </includes>
+                    </resource>
+                  </resources>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+<!--          <plugin>-->
+<!--            <groupId>com.github.github</groupId>-->
+<!--            <artifactId>site-maven-plugin</artifactId>-->
+<!--            <version>${plugin.com.github.site-maven-plugin}</version>-->
+<!--            <configuration>-->
+<!--              <message>Creating site for Jolokia ${project.version}</message>-->
+<!--            </configuration>-->
+<!--            <executions>-->
+<!--              <execution>-->
+<!--                <goals>-->
+<!--                  <goal>site</goal>-->
+<!--                </goals>-->
+<!--                <phase>site</phase>-->
+<!--              </execution>-->
+<!--            </executions>-->
+<!--          </plugin>-->
 
         </plugins>
       </build>
