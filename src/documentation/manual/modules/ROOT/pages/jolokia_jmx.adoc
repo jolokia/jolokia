@@ -14,12 +14,12 @@
   limitations under the License.
 ////
 [#jmx]
-= Jolokia JMX
+= JMX Support
 
 The main focus of Jolokia is to allow easy access to JMX MBeans
 from everywhere. MBeans can be provided by the JVM itself, by an
 application server or an application itself, where each MBean is
-registered at a specific MBeanServer.  Multiple MBeanServers can
+registered at a specific MBeanServer. Multiple MBeanServers can
 co-exist in a single JVM. The so called
 _PlatformMBeanServer_ is always present and is
 created by the JVM during startup. Especially application servers
@@ -36,26 +36,17 @@ specially by the Jolokia agent. The Jolokia MBeanServer and its
 features are explained in <<jolokia-mbeanserver>>.
 
 Developing application specific MBeans is easy, especially if
-sttp://docs.oracle.com/javase/tutorial/jmx/mbeans/standard.html[Standard
-MBeans] are used. However, for Spring users there is even a
+http://docs.oracle.com/javase/tutorial/jmx/mbeans/standard.html[Standard
+MBeans,role=externalLink] are used. However, for Spring users there is even a
 easier, more
-https://static.springsource.org/spring/docs/3.2.1.RELEASE/spring-framework-reference/html/jmx.html[declarative
-way] for turning POJOs into MBeans. On top of this Jolokia
+https://docs.spring.io/spring-framework/reference/integration/jmx/exporting.html[declarative
+way,role=externalLink] for turning POJOs into MBeans. On top of this Jolokia
 provides an easy, declarative way for firing up a Jolokia JVM
 agent merely by including some Jolokia specific Spring
-configuration. This is described in <<jvm-spring>>.
+configuration. This is described in xref:spring.adoc[].
 
 [#jolokia-mbeanserver]
 == Jolokia MBeanServer
-
-.JBoss 7 Gotcha
-****
-For JBoss 7 there is a slight issue when creating a new `MBeanServer`. For this to work,
-a `jboss-deployment-structure` with a dependency on
-`org.jboss.as.jmx` must be added. For an example see the
-https://github.com/jolokia/jolokia/blob/main/it/war/src/main/webapp/WEB-INF/jboss-deployment-structure.xml[integration test war], the location
-to where to put this file is explained in the https://docs.jboss.org/author/display/AS7/Developer+Guide#DeveloperGuide-JBossDeploymentStructureFile[JBoss documentation].
-****
 
 The Jolokia MBeanServer can be easily created and used with a locator:
 
@@ -89,7 +80,7 @@ in a JVM. Beside the always present
 `PlatformMBeanServer` many
 application servers create own MBeanServer which not always
 can be found with standard mechanisms. Therefore Jolokia comes
-with so called ``ServerDetector``'s for many
+with so called ``ServerDetector``s for many
 known brands of applications server. These server detectors
 know how to find MBeanServer by application server specific
 means.
@@ -116,9 +107,9 @@ to give a single view on the set of available MBeans.
 For MBeans registered with the same name at different
 MBeanServers, MBeans registered in later MBeanServers are not
 visible. These hidden MBeans will never be called on
-`READ`, `WRITE` or
-`EXEC` operations. Also, for
-`LIST` operations only the meta data of the
+`read`, `write` or
+`exec` operations. Also, for
+`list` operations only the meta data of the
 visible MBeans is returned.
 
 This hiding mechanism is used by
@@ -129,11 +120,11 @@ an MBean for JSR-160 connectors (see below).
 == @JsonMBean
 
 JMX 1.4 introduced
-https://docs.oracle.com/javase/6/docs/api/javax/management/MXBean.html[MXBeans]
-which allows for nearly arbitrary data to be translated into so
-called OpenData which are accessible via JMX. For example,
+https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/MXBean.html[MXBeans,role=externalLink]
+which allow for nearly arbitrary data to be translated into so
+called _OpenData_ which are accessible via JMX. For example,
 arbitrary Java Beans are translated into a
-https://docs.oracle.com/javase/6/docs/api/javax/management/openmbean/CompositeData.html[`CompositeData`]
+https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/openmbean/CompositeData.html[`CompositeData`,role=externalLink]
 structure with property names as keys and their values in
 OpenData values.
 
@@ -158,12 +149,12 @@ MXBeans, JSON strings for JsonMBean). However, there are also
 differences:
 
 * MXBeans are a standard mechanism which are available on every
-JVM since 1.5.footnote:jboss-mxbean[
+JVM since 1.5footnote:jboss-mxbean[
 For JBoss prior to version 7 there are some slight issues
 since JBoss used to replace the standard MBeanServer with an
 own variant. See this
 https://community.jboss.org/thread/167796[discussion]
-for details.]
+for details.].
 * Serialization of complex Java Beans is more powerful with
 JsonMBeans, e.g. Jolokia can detect self (or cyclic) object
 references. MXBeans will cause an error in this case.
@@ -171,256 +162,12 @@ references. MXBeans will cause an error in this case.
 work. MXBeans work with the PlatformMBeanServer, too.
 * JsonMBean work also with JMX support libraries which use
 ``ModelMBean``'s under the hood. E.g.
-https://static.springsource.org/spring/docs/3.0.x/reference/jmx.html[Spring
-JMX] uses a ModelMBean for
+https://docs.spring.io/spring-framework/reference/integration/jmx.html[Spring
+JMX,role=externalLink] uses a ModelMBean for
 `@ManagedResource` annotated
 MBeans. `@JsonMBean` can be easily added,
 whereas `@MXBean` wouldn't work here.
 
 The Jolokia MBeanServer and the
 `@JsonMBean` annotation are contained in the
-Maven module `jolokia-jmx`.
-
-[#jvm-spring]
-== Spring Support
-
-A Jolokia agent can be easily integrated into a Spring application
-context. A dedicated artifact
-`jolokia-spring` can be used, which
-comes with a custom Spring configuration syntax.
-
-For Maven based projects, a simple dependency declaration is
-sufficient:
-
-[,xml,subs="attributes,verbatim"]
-----
-<dependency>
-  <groupId>org.jolokia</groupId>
-  <artifactId>jolokia-spring</artifactId>
-  <version>{jolokia-version}</version>
-</dependency>
-----
-
-[#jvm-spring-agent]
-=== JVM agent
-
-With this in place, the following configuration can be used to
-fire up a Jolokia JVM based agent using the HTTP server which
-comes with OpenJDK/Oracle JVMs (Version 11 or later).
-
-[,xml]
-----
-<beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:jolokia="http://www.jolokia.org/jolokia-spring/schema/config"
-       xsi:schemaLocation="
-           http://www.springframework.org/schema/beans
-           https://www.springframework.org/schema/beans/spring-beans.xsd
-           http://www.jolokia.org/jolokia-spring/schema/config
-           https://www.jolokia.org/jolokia-spring/schema/config/jolokia-config.xsd">
-
-  <jolokia:agent lookupConfig="false" systemPropertiesMode="never">
-    <jolokia:config autoStart="true" host="0.0.0.0" port="8778" .... />
-  </jolokia:agent>
-</beans>
-----
-
-There are two directives available:
-`<jolokia:agent>` declares a Jolokia
-server with a configuration as defined in an embedded
-`<jolokia:config>` configuration
-section.
-
-.IDE support
-****
-With a decent IDE like IntelliJ IDEA you get completion support
-on the configuration attributes so it can be easily determined
-which configuration options are available. Even better, there is also
-some documentation for each attribute (e.g. by using "Quick
-documentation" with ^Q in IDEA with).
-****
-
-`<jolokia:agent>` has an attribute
-`lookupConfig`. If set to
-`true`, externally defined
-`<jolokia:config>` sections will be
-looked up, too and merged with the embedded configuration. A
-`<jolokia:config>` has an
-`order` attribute, which determines the
-config merge order: The higher order configs will be merged
-later and hence will override conflicting parameters. By
-default, external config lookup is disabled.
-
-The attribute `systemPropertiesMode`
-determines, how system properties with a  prefix
-`jolokia.` can be used as configuration
-values. There are three modes available:
-
-[#jvm-spring-system-properties]
-.System properties modes
-|===
-|Mode|Description
-
-|`never`
-|No lookup is done on system properties as all. This is the
-default mode.
-
-
-|`fallback`
-|System properties with a prefix
-`jolokia.` are used as fallback
-configuration values if not specified locally in the
-Spring application
-context. E.g. `jolokia.port=8888` will
-change the port on which the agent is listening to 8888 if
-the port is not explicitly specified in the
-configuration.
-
-|`override`
-|System properties with a prefix
-`jolokia.` are used as configuration
-values even if they are specified locally in the Spring
-application
-context. E.g. `jolokia.port=8888` will
-change the port on which the agent is listening to 8888 in
-any case.
-
-|===
-
-`<jolokia:config>` takes as attributes all
-the configuration parameters for the JVM agent as described in
-<<agent-jvm-config>>. In addition, the is an extra
-attribute `autoStart` which allows for
-automatically starting the HTTP server during the initialization
-of the application context. By default this is set to
-`true`, so the server starts up automatically
-by default.
-
-Just in case you don't want to use the Jolokia Spring namespace you can also
-use plain beans to configure a JVM agent. The following examples shows the example above with
-only base Spring bean configurations (including an Spring EL expression):
-
-[,xml]
-----
-<beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:context="http://www.springframework.org/schema/context"
-       xmlns:util="http://www.springframework.org/schema/util"
-       xsi:schemaLocation="
-           http://www.springframework.org/schema/beans
-           https://www.springframework.org/schema/beans/spring-beans.xsd
-           http://www.springframework.org/schema/context
-           https://www.springframework.org/schema/context/spring-context.xsd
-           http://www.springframework.org/schema/util
-           https://www.springframework.org/schema/util/spring-util.xsd">
-
-  <bean name="server" id="jolokia" class="org.jolokia.jvmagent.spring.SpringJolokiaAgent">
-    <property name="lookupConfig" value="false"/>
-    <property name="systemPropertiesMode" value="never"/>
-    <property name="config">
-      <bean class="org.jolokia.jvmagent.spring.SpringJolokiaConfigHolder">
-        <property name="config">
-          <util:map>
-            <entry key="autoStart" value="true"/>
-            <entry key="host" value="0.0.0.0"/>
-            <entry key="port" value="#{configuration['jmx.jolokiaPort']}"/>
-            ...
-          </util:map>
-        </property>
-      </bean>
-    </property>
-  </bean>
-
-</beans>
-----
-
-This style however is only recommended if there are some issues with the Jolokia spring configuration setup
-(like using Spring EL expressions in Jolokia versions earlier than 1.2.4). Otherwise, the Jolokia configuration
-namespace is much easier to read.
-
-[#jvm-spring-mbean-server]
-=== Jolokia MBeanServer
-
-With `<jolokia:mbean-server>` the Jolokia
-MBeanServer can be specified. This is especially useful for
-adding it to `<context:mbean-export>`
-so that this MBeanServer is used for registering
-`@ManagedResource` and
-`@JsonMBean`. Remember, MBean registered at
-the Jolokia MBeanServer never will show up in an JSR-160 client
-except when annotated with `@JsonMBean`.
-
-[,xml]
-----
-<beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:context="http://www.springframework.org/schema/context"
-       xmlns:jolokia="http://www.jolokia.org/jolokia-spring/schema/config"
-       xsi:schemaLocation="
-           http://www.springframework.org/schema/beans
-           https://www.springframework.org/schema/beans/spring-beans.xsd
-           http://www.jolokia.org/jolokia-spring/schema/config
-           https://www.jolokia.org/jolokia-spring/schema/config/jolokia-config.xsd
-           http://www.springframework.org/schema/context
-           https://www.springframework.org/schema/context/spring-context.xsd">
-
-  <context:mbean-export server="jolokiaServer"/>
-  <jolokia:mbean-server id="jolokiaServer"/>
-
-</beans>
-----
-
-[#jvm-spring-plugin]
-=== Jolokia Spring plugin
-
-There is an even simpler way to startup a Jolokia JVM agent
-with a default setup if you use a variant of the
-`jolokia-spring` module with the classifier
-`plugin`. This artifact contains a
-predefined Spring configuration for starting up Jolokia with
-default values automatically:
-
-[,xml,subs="attributes,verbatim"]
-----
-<dependency>
-  <groupId>org.jolokia</groupId>
-  <artifactId>jolokia-spring</artifactId>
-  <classifier>plugin</classifier>
-  <version>{jolokia-version}</version>
-</dependency>
-----
-
-Beside putting this jar into the classpath (along with its
-dependencies) the only requirement is, that the Spring
-application context needs to pickup
-`classpath:META-INF/spring/jolokia.xml`. Luckily,
-many Spring based containers like the
-https://camel.apache.org/camel-maven-plugin.html[Camel
-Maven Plugin] do this automatically for you, nothing
-has to be configured here. Otherwise this
-application context path has to be added manually, but in this case it is
-probably easier to use the non-plugin version (without
-classifier) and declare the Jolokia server explicitly in an
-existing Spring configuration file as described above.
-
-By default, the Jolokia agent starts on port 8778 on every
-IP-Address of the host _without_
-security.
-
-The configuration can be tweaked via system properties as
-described in
-<<jvm-spring-system-properties>>. I.e. the plugin
-doesn't specify any configuration on its own and uses a
-`systemPropertiesMode` of
-`fallback`.
-
-As an alternative, the default settings can be customized by
-providing a standalone
-`<jolokia:config>` somewhere in the
-Spring application context. An `order`
-attribute can be used if multiple config declarations are
-present: the higher the order, the higher the priority. But
-then again, instead of using the plugin with an external
-configuration it is probably better to us an explicit
-`<jolokia:agent>` declaration, since
-you have to add to a Spring configuration file anyway.
+Maven module `jolokia-support-jmx`.
