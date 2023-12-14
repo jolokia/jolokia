@@ -309,8 +309,7 @@ https://metacpan.org/dist/jmx4perl[jmx4perl,role=externalLink] comes
 with a nice command line utility called
 `https://metacpan.org/dist/jmx4perl/view/scripts/jolokia[jolokia,role=externalLink]`
 which allows for an easy setup of security within a given
-`jolokia.war`. See xref:tools.adoc#tools-jmx4perl[Jmx4Perl] for
-more details.
+`jolokia.war`.
 ****
 
 All

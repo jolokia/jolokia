@@ -261,8 +261,7 @@ policy file
 is the command line tool
 https://search.cpan.org/~roland/jmx4perl/scripts/jolokia[jolokia,role=externalLink],
 which comes with the
-https://metacpan.org/dist/jmx4perl[jmx4perl,role=externalLink] distribution. See
-xref:tools.adoc[] for an introduction.
+https://metacpan.org/dist/jmx4perl[jmx4perl,role=externalLink] distribution.
 ****
 
 But how do the agents lookup the policy file? By default,
