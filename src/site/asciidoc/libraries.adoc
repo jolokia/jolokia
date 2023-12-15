@@ -22,8 +22,8 @@ This page describes available Maven artifacts and shows changes introduced in Jo
 
 In Jolokia 1.x, there are two groups of Maven modules:
 
-* https://github.com/jolokia/jolokia/tree/v1.7.2/agent[agent modules,role=externalLink]
-* https://github.com/jolokia/jolokia/tree/v1.7.2/client[client modules,role=externalLink]
+* https://github.com/jolokia/jolokia/tree/v1.7.2/agent[agent modules,role=externalLink,window=_blank]
+* https://github.com/jolokia/jolokia/tree/v1.7.2/client[client modules,role=externalLink,window=_blank]
 
 .Agent modules
 
@@ -45,13 +45,13 @@ By Jolokia _agent_ we mean an _entity_ that exposes internal structure o the app
 |A standalone Jolokia agent that can be configured using `-javaagent` JVM argument and uses JDK own HTTP server to expose JMX over HTTP
 
 |`jolokia-spring`
-|Spring agent that extends `jolokia-jvm` by adding https://spring.io/projects/spring-framework[Spring Framework,role=externalLink] integration (e.g., dedicated https://docs.spring.io/spring-framework/docs/3.2.1.RELEASE/spring-framework-reference/html/extensible-xml.html[Spring XML namespace handler,role=externalLink])
+|Spring agent that extends `jolokia-jvm` by adding https://spring.io/projects/spring-framework[Spring Framework,role=externalLink,window=_blank] integration (e.g., dedicated https://docs.spring.io/spring-framework/docs/3.2.1.RELEASE/spring-framework-reference/html/extensible-xml.html[Spring XML namespace handler,role=externalLink,window=_blank])
 
 |`jolokia-osgi`
-|OSGi agent that uses https://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.http.html[OSGi CMPN Http Service,role=externalLink] API to register Jolokia Agent Servlet within OSGi runtime
+|OSGi agent that uses https://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.http.html[OSGi CMPN Http Service,role=externalLink,window=_blank] API to register Jolokia Agent Servlet within OSGi runtime
 
 |`jolokia-osgi-bundle`
-|OSGi agent which is packaged with https://github.com/apache/felix-dev/tree/master/http[Felix HTTP service,role=externalLink]
+|OSGi agent which is packaged with https://github.com/apache/felix-dev/tree/master/http[Felix HTTP service,role=externalLink,window=_blank]
 
 |`jolokia-war`
 |WAR agent which is packaged as standard Web Application compliant with Servlet API 4
@@ -69,16 +69,16 @@ Client modules are used to connect to available Jolokia Agent over HTTP protocol
 |Artifact ID|Description
 
 |`jolokia-client-java`
-|Dedicated client based on https://hc.apache.org/httpcomponents-client-4.5.x/index.html[Apache HTTP Client 4,role=externalLink]
+|Dedicated client based on https://hc.apache.org/httpcomponents-client-4.5.x/index.html[Apache HTTP Client 4,role=externalLink,window=_blank]
 
 |`jolokia-client-javascript`
 |Maven module containing Javascript libraries
 
 |`jolokia-jmx-adapter`
-|Special _reversed_ client library. It contains implementation of `javax.management.remote.JMXConnectorProvider` allowing to use standard JMX Remote API to access external Jolokia Agent. It can be used in tools like JConsole or https://www.oracle.com/java/technologies/jdk-mission-control.html[Java Mission Control,role=externalLink]. It uses JMX URIs in the form of `service:jmx:jolokia://<host>:<port>/jolokia/<path>`.
+|Special _reversed_ client library. It contains implementation of `javax.management.remote.JMXConnectorProvider` allowing to use standard JMX Remote API to access external Jolokia Agent. It can be used in tools like JConsole or https://www.oracle.com/java/technologies/jdk-mission-control.html[Java Mission Control,role=externalLink,window=_blank]. It uses JMX URIs in the form of `service:jmx:jolokia://<host>:<port>/jolokia/<path>`.
 
 |`jolokia-kubernetes`
-|An implementation of `javax.management.remote.JMXConnectorProvider` handling JMX URIs in the form of `service:jmx:kubernetes///<namespace>/http(s):<pod>:port/jolokia` to access JMX Agents exposed inside accessible Kubernetes cluster. It uses https://kubernetes.io/docs/tasks/access-application-cluster/access-cluster-services/#manually-constructing-apiserver-proxy-urls[Kubernetes Proxy URLs,role=externalLink].
+|An implementation of `javax.management.remote.JMXConnectorProvider` handling JMX URIs in the form of `service:jmx:kubernetes///<namespace>/http(s):<pod>:port/jolokia` to access JMX Agents exposed inside accessible Kubernetes cluster. It uses https://kubernetes.io/docs/tasks/access-application-cluster/access-cluster-services/#manually-constructing-apiserver-proxy-urls[Kubernetes Proxy URLs,role=externalLink,window=_blank].
 |===
 
 === Jolokia 2.0 modules
@@ -93,11 +93,11 @@ Maven artifacts are also renamed. We follow a convention where artifact ID (whic
 
 We have now 5 groups of modules:
 
-* https://github.com/jolokia/jolokia/tree/2.0/server[server modules,role=externalLink]
-* https://github.com/jolokia/jolokia/tree/2.0/service[service modules,role=externalLink]
-* https://github.com/jolokia/jolokia/tree/2.0/agent[agent modules,role=externalLink]
-* https://github.com/jolokia/jolokia/tree/2.0/client[client modules,role=externalLink]
-* https://github.com/jolokia/jolokia/tree/2.0/support[support modules,role=externalLink]
+* https://github.com/jolokia/jolokia/tree/2.0/server[server modules,role=externalLink,window=_blank]
+* https://github.com/jolokia/jolokia/tree/2.0/service[service modules,role=externalLink,window=_blank]
+* https://github.com/jolokia/jolokia/tree/2.0/agent[agent modules,role=externalLink,window=_blank]
+* https://github.com/jolokia/jolokia/tree/2.0/client[client modules,role=externalLink,window=_blank]
+* https://github.com/jolokia/jolokia/tree/2.0/support[support modules,role=externalLink,window=_blank]
 
 .Server modules
 
@@ -177,7 +177,7 @@ Agent modules are used in various runtime environments to configure and start Jo
 |A standalone Jolokia agent that can be configured using `-javaagent` JVM argument and uses JDK own HTTP server to expose JMX over HTTP
 
 |`jolokia-agent-osgi`
-|OSGi agent that uses https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard Specification for Jakarta™ Servlet,role=externalLink] to register Jolokia Agent Servlet within OSGi runtime
+|OSGi agent that uses https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard Specification for Jakarta™ Servlet,role=externalLink,window=_blank] to register Jolokia Agent Servlet within OSGi runtime
 
 |`jolokia-agent-war`
 |WAR agent which is packaged as standard Web Application compliant with Servlet API 5+ (JakartaEE 9+)
@@ -195,16 +195,16 @@ Client modules are used to connect to running Jolokia Agents.
 |Artifact ID|Description
 
 |`jolokia-client-java`
-|dedicated client based on https://hc.apache.org/httpcomponents-client-4.5.x/index.html[Apache HTTP Client 4,role=externalLink]
+|dedicated client based on https://hc.apache.org/httpcomponents-client-4.5.x/index.html[Apache HTTP Client 4,role=externalLink,window=_blank]
 
 |`jolokia-client-javascript`
 |Maven module containing Javascript libraries
 
 |`jolokia-client-jmx-adapter`
-|Special _reversed_ client library. It contains implementation of `javax.management.remote.JMXConnectorProvider` allowing to use standard JMX Remote API to access external Jolokia Agent. It can be used in tools like JConsole or https://www.oracle.com/java/technologies/jdk-mission-control.html[Java Mission Control,role=externalLink]. It uses JMX URIs in the form of `service:jmx:jolokia://<host>:<port>/jolokia/<path>`.
+|Special _reversed_ client library. It contains implementation of `javax.management.remote.JMXConnectorProvider` allowing to use standard JMX Remote API to access external Jolokia Agent. It can be used in tools like JConsole or https://www.oracle.com/java/technologies/jdk-mission-control.html[Java Mission Control,role=externalLink,window=_blank]. It uses JMX URIs in the form of `service:jmx:jolokia://<host>:<port>/jolokia/<path>`.
 
 |`jolokia-client-kubernetes`
-|An implementation of `javax.management.remote.JMXConnectorProvider` handling JMX URIs in the form of `service:jmx:kubernetes///<namespace>/http(s):<pod>:port/jolokia` to access JMX Agents exposed inside accessible Kubernetes cluster. It uses https://kubernetes.io/docs/tasks/access-application-cluster/access-cluster-services/#manually-constructing-apiserver-proxy-urls[Kubernetes Proxy URLs,role=externalLink].
+|An implementation of `javax.management.remote.JMXConnectorProvider` handling JMX URIs in the form of `service:jmx:kubernetes///<namespace>/http(s):<pod>:port/jolokia` to access JMX Agents exposed inside accessible Kubernetes cluster. It uses https://kubernetes.io/docs/tasks/access-application-cluster/access-cluster-services/#manually-constructing-apiserver-proxy-urls[Kubernetes Proxy URLs,role=externalLink,window=_blank].
 |===
 
 .Support modules

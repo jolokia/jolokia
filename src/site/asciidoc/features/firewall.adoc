@@ -39,7 +39,7 @@ within the firewall to be reached from the outside over HTTP.
 
 There has been efforts to put JSR-160 on a different protocol
 stack, but they are either not a standard solution, requiring
-a special client setup (like https://mx4j.sourceforge.net/[MX4J,role=externalLink]) or seemed to
+a special client setup (like https://mx4j.sourceforge.net/[MX4J,role=externalLink,window=_blank]) or seemed to
 have been dropped (WS connector which uses SOAP
 had its last pre-release in October 2008). Up to now, the only
 solution which allows for a smooth, firewall friendly setup is

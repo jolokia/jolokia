@@ -30,7 +30,7 @@ administrator dealing with Jakarta EE applications.
 * The xref:../agent/osgi.adoc[OSGi Agent] gets deployed as any other
 OSGi bundle, which is also a well known procedure (although
 specific to each OSGi container). For the pure bundle, there
-is a requirement for an OSGi runtime to include https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard Specification for Jakarta™ Servlet,role=externalLink] implementation.
+is a requirement for an OSGi runtime to include https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard Specification for Jakarta™ Servlet,role=externalLink,window=_blank] implementation.
 * The xref:../agent/jvm.adoc[JVM JDK 11 Agent] requires for its setup
 some extra command line parameter for the JVM, but this
 shouldn't be a big deal either.

@@ -39,7 +39,7 @@ http://localhost:8080/jolokia/search/*:j2eeType=Servlet,*
 ----
 
 You can use patterns as described
-https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/ObjectName.html[here,role=externalLink],
+https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/ObjectName.html[here,role=externalLink,window=_blank],
 i.e. it may contain wildcards like `*` and
 `?`. The Mbean names matching the query
 are returned as a list within the response.
@@ -112,6 +112,6 @@ http://localhost:8888/jolokia/search/*:j2eeType=Servlet,*
 ----
 
 The returned MBean names are properly
-https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/ObjectName.html[quoted,role=externalLink]
+https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/ObjectName.html[quoted,role=externalLink,window=_blank]
 so that they can be directly used as
 input for other requests.

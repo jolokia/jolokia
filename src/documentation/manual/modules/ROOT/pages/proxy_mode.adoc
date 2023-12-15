@@ -28,7 +28,7 @@ Agents of all types support the proxy mode. However, since one
 has usually the free choice of platform for a dedicated Jolokia
 proxy, an environment optimized for HTTP communication should be
 used. These are either servlet container or Jakarta EE server hosting
-the WAR agent or an OSGi runtime with an https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard extender,role=externalLink] (which
+the WAR agent or an OSGi runtime with an https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard extender,role=externalLink,window=_blank] (which
 in turn is typically based on an embedded servlet container like
 Tomcat, Jetty or Undertow).
 
@@ -41,7 +41,7 @@ proxy support, you have to repackage `jolokia-agent-war.war` without this librar
 
 Additionally you can configured a white list with patterns for all allowed JMX service URL in a Jolokia Request.
 This white list is a plain text file which contains
-https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/regex/Pattern.html[RegExp patterns,role=externalLink] line by line. Lines starting with `#` are ignored.
+https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/regex/Pattern.html[RegExp patterns,role=externalLink,window=_blank] line by line. Lines starting with `#` are ignored.
 Pattern matching is performed case insensitive. This file can be configured in various ways:
 
 * Repackaging the `jolokia-agent-war.war` and adapt `web.xml` to

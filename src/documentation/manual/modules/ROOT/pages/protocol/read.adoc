@@ -125,7 +125,7 @@ The GET URL for a read request has the following format:
 
 |`<mbean name>`
 |The
-https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/ObjectName.html[ObjectName,role=externalLink]
+https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/ObjectName.html[ObjectName,role=externalLink,window=_blank]
 of the MBean for which the attribute should be fetched. It
 contains two parts: A domain part and a list of properties
 which are separated by `:`. Properties

@@ -60,8 +60,8 @@ users there is an even better way to integrate them, described in
 <<js-maven>>.
 
 `jolokia.js` uses
-https://www.jquery.com[jQuery,role=externalLink], which must be
-included as well. Since Jolokia 2 is compliant with ES5, using https://github.com/douglascrockford/JSON-js[json2.js,role=externalLink] is no longer required.
+https://www.jquery.com[jQuery,role=externalLink,window=_blank], which must be
+included as well. Since Jolokia 2 is compliant with ES5, using https://github.com/douglascrockford/JSON-js[json2.js,role=externalLink,window=_blank] is no longer required.
 
 As sample HTML head for including all necessary parts looks like:
 
@@ -344,11 +344,11 @@ callback `ajaxError` is called with the
 object. It has the same signature as the underlying
 `error` callback of the
 `jQuery.ajax()` call. (See the
-https://api.jquery.com/jQuery.ajax/[jQuery documentation,role=externalLink]
+https://api.jquery.com/jQuery.ajax/[jQuery documentation,role=externalLink,window=_blank]
 for details).
 
 The Jolokia agent also supports
-https://en.wikipedia.org/wiki/JSONP[JSONP,role=externalLink] requests
+https://en.wikipedia.org/wiki/JSONP[JSONP,role=externalLink,window=_blank] requests
 for cases where the Jolokia agent is served on a different server or port
 than the JavaScript client. By default, such access is forbidden by the so called
 _same-origin-policy_. To switch on JSONP, the

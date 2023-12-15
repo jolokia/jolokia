@@ -17,7 +17,7 @@
 == Using `curl`
 
 We can of course use any HTTP client to access Jolokia agent.
-One of the most popular and powerful tools is the https://curl.se/[`curl`,role=externalLink] command.
+One of the most popular and powerful tools is the https://curl.se/[`curl`,role=externalLink,window=_blank] command.
 
 We can access the agent with simple GET requests:
 

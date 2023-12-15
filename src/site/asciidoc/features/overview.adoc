@@ -19,7 +19,7 @@
 image:../images/features/overview_large.png["Overview",role=right]
 Jolokia is an agent based approach for remote JMX access. It
 is an alternative to standard
-https://jcp.org/en/jsr/detail?id=160[JSR 160,role=externalLink]
+https://jcp.org/en/jsr/detail?id=160[JSR 160,role=externalLink,window=_blank]
 connectors. The communication between client and agent goes
 over HTTP (either GET or POST), where the request and response
 payload is represented in JSON.

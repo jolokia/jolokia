@@ -43,7 +43,7 @@ transparently. xref:features/proxy.adoc[More ...]
 
 image:images/features/fast.png["Fast",role="right feature",link=features/fast.html]
 Jolokia uses the super fast JSON serialization library
-https://code.google.com/archive/p/json-simple/[json-simple,role=externalLink]
+https://code.google.com/archive/p/json-simple/[json-simple,role=externalLink,window=_blank]
 for parsing requests and creating responses. Although
 the binary protocols (JRMP or IIOP) used by the standard
 JSR-160 connectors are naturally much more compact than a

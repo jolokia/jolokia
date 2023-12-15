@@ -47,7 +47,7 @@ generic `request()`
 method. `jolokia-simple.js` adds to this
 definition methods for a simplified access, which are easier
 to use but less powerful. In addition these libs require
-https://www.jquery.com[jQuery,role=externalLink]. A typical setup in an HTML page
+https://www.jquery.com[jQuery,role=externalLink,window=_blank]. A typical setup in an HTML page
 using the library looks like:
 
 [,html]
@@ -95,7 +95,7 @@ console.log("Heap-Memory used:" +
 == Testing
 
 Jolokia comes with a test web application for
-integration testing. It contains https://qunitjs.com/[QUnit,role=externalLink] based tests that run within a browser. The
+integration testing. It contains https://qunitjs.com/[QUnit,role=externalLink,window=_blank] based tests that run within a browser. The
 submodule `examples/client-javascript-test-app` creates a WAR artifact which
 can be deployed in a servlet container. The Jolokia agent is
 contained and reachable under the URL

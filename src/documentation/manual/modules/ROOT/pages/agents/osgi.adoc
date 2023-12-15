@@ -17,10 +17,10 @@
 == OSGi Agents
 
 Jolokia agent is also available as
-https://www.osgi.org[OSGi,role=externalLink] bundle. The Jolokia 1.x OSGi agent
-had two versions (with and without packaged https://github.com/apache/felix-dev/tree/master/http[Felix HTTP Service,role=externalLink] bundles).
+https://www.osgi.org[OSGi,role=externalLink,window=_blank] bundle. The Jolokia 1.x OSGi agent
+had two versions (with and without packaged https://github.com/apache/felix-dev/tree/master/http[Felix HTTP Service,role=externalLink,window=_blank] bundles).
 In Jolokia 2 there's only one bundle
-which requires a https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard extender,role=externalLink] implementation available in target OSGi runtime.
+which requires a https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard extender,role=externalLink,window=_blank] implementation available in target OSGi runtime.
 
 ****
 In OSGi world, transition to JakartaEE 9+ (with `jakarta.servlet` packages) is a bit slower. Jolokia 2 has been
@@ -30,7 +30,7 @@ tested with dev version of Pax Web 10 using Undertow 2.3, running in dev version
 [#agents-osgi-pure]
 === jolokia-agent-osgi.jar
 
-This bundle depends on availability of https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard extender,role=externalLink] which tracks instances of `jakarta.servlet.Servlet` OSGi services.
+This bundle depends on availability of https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard extender,role=externalLink,window=_blank] which tracks instances of `jakarta.servlet.Servlet` OSGi services.
 Jolokia 2 registers such OSGi servlet service when new `registerWhiteboardServlet` option is set to `true` (which is the default).
 
 All package imports of this bundle are listed in
@@ -115,9 +115,9 @@ the Jolokia bundle uses the standard `HttpServlet.log()` method for its logging 
 * `org.osgi.service.cm.ConfigurationAdmin` is used to load configuration from `org.jolokia.osgi` PID in OSGi environment
 with Configuration Admin service available.
 
-In Jolokia 1, https://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.http.html[OSGi CMPN HTTP Service,role=externalLink]
+In Jolokia 1, https://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.http.html[OSGi CMPN HTTP Service,role=externalLink,window=_blank]
 was used to register Jolokia servlet. In Jolokia 2 a different pattern is used. Instead of using some service directly by
-Jolokia, a servlet is registered as OSGi service which is then processed (_extended_) using https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard extender,role=externalLink]
+Jolokia, a servlet is registered as OSGi service which is then processed (_extended_) using https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard extender,role=externalLink,window=_blank]
 
 The Jolokia OSGi bundle can be configured via the OSGi Configuration Admin
 service using the PID `org.jolokia.osgi`

@@ -67,7 +67,7 @@ or POST. Regardless of which method is used, the agent doesn't
 keep any state on the server side (except of course that
 MBeans are obviously stateful most of the time). So in this aspect, the
 communication can be considered
-https://en.wikipedia.org/wiki/Representational_State_Transfer[REST,role=externalLink]
+https://en.wikipedia.org/wiki/Representational_State_Transfer[REST,role=externalLink,window=_blank]
 likefootnote:rest-comment[
 This document will avoid the term REST as much as
 possible in order to avoid provoking any dogmatic
@@ -75,9 +75,9 @@ resentments.].
 
 === Some Servlet API concepts
 
-Before proceeding, let's review some important concepts from https://jakarta.ee/specifications/servlet/5.0/jakarta-servlet-spec-5.0[Jakarta Servlet Specification 5,role=externalLink].
+Before proceeding, let's review some important concepts from https://jakarta.ee/specifications/servlet/5.0/jakarta-servlet-spec-5.0[Jakarta Servlet Specification 5,role=externalLink,window=_blank].
 
-https://jakarta.ee/specifications/servlet/5.0/jakarta-servlet-spec-5.0#request-path-elements[Chapter 3.5. Request Path Elements,role=externalLink] splits full URI used to access Java Servlet container into three parts (query string is not included here):
+https://jakarta.ee/specifications/servlet/5.0/jakarta-servlet-spec-5.0#request-path-elements[Chapter 3.5. Request Path Elements,role=externalLink,window=_blank] splits full URI used to access Java Servlet container into three parts (query string is not included here):
 
 ----
 requestURI = contextPath + servletPath + pathInfo
@@ -227,7 +227,7 @@ with the Jolokia agent. There are fewer escaping issues and it
 allows for features which are not available with GET
 requests. POST requests use a single Jolokia URL and put their payload
 within the HTTP request's body. This payload is represented
-in https://www.json.org[JSON,role=externalLink], a
+in https://www.json.org[JSON,role=externalLink,window=_blank], a
 data serialization format originating from the JavaScript
 world.
 
@@ -302,7 +302,7 @@ result of the operation as a JSON payload. In case of an
 error, a `4xx` or `5xx` code will be returned and the JSON
 payload contains details about the error
 occurred (e.g. `404` means "not found"). (See
-https://en.wikipedia.org/wiki/List_of_HTTP_status_codes[this page,role=externalLink]
+https://en.wikipedia.org/wiki/List_of_HTTP_status_codes[this page,role=externalLink,window=_blank]
 for more information about HTTP error codes..). If the processing option
 `ifModifiedSince` is given and the requested
 value as been not changed since then, a response code of 304 is returned.
@@ -383,7 +383,7 @@ some errors.
 
 I.e. the `status` has a code in the range
 `400 .. 499` or `500 .. 599`
-https://en.wikipedia.org/wiki/List_of_HTTP_status_codes[as it is specified for HTTP return codes,role=externalLink].
+https://en.wikipedia.org/wiki/List_of_HTTP_status_codes[as it is specified for HTTP return codes,role=externalLink,window=_blank].
 The `error` member contains an error
 description. This is typically the message of an exception
 occurred on the agent sidefootnote:mbeanexception-wrapping[If the server exception
@@ -663,7 +663,7 @@ valued, simple typed, keys, the map is nested (first level:
 first index's value, second level: second index's value and
 so on). For the serialization of
 `TabularData` resulting from a
-https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/MXBean.html[MXBean,role=externalLink]
+https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/MXBean.html[MXBean,role=externalLink,window=_blank]
 translation for maps, see
 <<serialization-mxbean>>. If any of the declared
 index keys of a `TabularData` is a
@@ -782,7 +782,7 @@ support a much large set of types, including the
 serialization of ``Map``s,
 ``List``s and all
 https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/openmbean/OpenType.html[Open
-Types,role=externalLink].
+Types,role=externalLink,window=_blank].
 
 ==== GET request values
 
@@ -860,7 +860,7 @@ because of missing type information.
 
 Upstream serialization also supports
 https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/openmbean/OpenType.html[Open
-Types,role=externalLink].
+Types,role=externalLink,window=_blank].
 If the signature of JMX exec operation or the value type
 of a JMX attribute is a `OpenType`,
 they are serialized as follows:
@@ -949,7 +949,7 @@ look like
 [#serialization-mxbean]
 === Jolokia and MXBeans
 
-The https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/MXBean.html[MXBean Framework,role=externalLink] is available in
+The https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/MXBean.html[MXBean Framework,role=externalLink,window=_blank] is available in
 the JDK since version 6 and allows for easy creation and
 registration of own MBeans. MXBeans are some what the
 successor for standard MBeans and support an annotation driven
@@ -962,7 +962,7 @@ MXBean framework, MXBean themselves can use more complex
 data types. The framework will translate forth and back
 between the custom and open types according to certain rules
 as declared in the MXBean
-https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/MXBean.html[specification,role=externalLink].
+https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/MXBean.html[specification,role=externalLink,window=_blank].
 Most of the translations to open types fits naturally to
 Jolokia's serialization, except for the translation of `Map`.
 
@@ -1121,7 +1121,7 @@ the following format
 }
 ----
 
-We can use a tool like https://nmap.org/ncat/[netcat,role=externalLink] to check the discovery:
+We can use a tool like https://nmap.org/ncat/[netcat,role=externalLink,window=_blank] to check the discovery:
 
 [shell,subs="attributes,verbatim"]
 ----

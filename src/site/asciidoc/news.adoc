@@ -20,7 +20,7 @@
 [.news-date]
 2023-12-01
 
-After years of preparation, reviewing, restructuring, refactoring and polishing, Jolokia 2.0 is released and available in https://repo.maven.apache.org/maven2/org/jolokia/[Maven Central,role=externalLink].
+After years of preparation, reviewing, restructuring, refactoring and polishing, Jolokia 2.0 is released and available in https://repo.maven.apache.org/maven2/org/jolokia/[Maven Central,role=externalLink,window=_blank].
 
 === Jolokia has a new home!
 
@@ -29,7 +29,7 @@ After years of preparation, reviewing, restructuring, refactoring and polishing,
 
 Yes, finally we moved Jolokia from my (rhuss) personal
 account to a dedicated GitHub organisation:
-https://github.com/jolokia[https://github.com/jolokia,role=externalLink].
+https://github.com/jolokia[https://github.com/jolokia,role=externalLink,window=_blank].
 I'm super happy that the story of Jolokia continues and you
 will see quite some new faces very soon. Thanks Tadayoshi,
 Grzegorz, Aurélien and all the other fine folks from Red Hat

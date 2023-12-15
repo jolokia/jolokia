@@ -26,17 +26,17 @@ However there are other aspects that need to be considered when moving from Jolo
 
 `org.jolokia.server.core.http.AgentServlet` which is part of `org.jolokia:jolokia-server-core` library is now implementing Servlet API 5 from Jakarta EE 9 specification. In fact it should be compatible with any newer Jakarta EE specification (e.g., 10) and Servlet API (e.g., 6).
 
-This concerns also the derived `org.jolokia.server.core.osgi.OsgiAgentServlet` from `org.jolokia:jolokia-agent-osgi` which now works with new https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard Specification for Jakarta™ Servlet,role=externalLink] based on Jakarta EE 9+. This means that Jolokia 2.0 OSGi bundle won't work with Karaf 4.4 which uses Jakarta EE specification based on `javax` packages.
+This concerns also the derived `org.jolokia.server.core.osgi.OsgiAgentServlet` from `org.jolokia:jolokia-agent-osgi` which now works with new https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard Specification for Jakarta™ Servlet,role=externalLink,window=_blank] based on Jakarta EE 9+. This means that Jolokia 2.0 OSGi bundle won't work with Karaf 4.4 which uses Jakarta EE specification based on `javax` packages.
 
-https://github.com/apache/felix-dev/tree/master/http[Felix HTTP,role=externalLink] has PoC module based on Jetty 12 that implements two Servlet APIs (`javax` and `jakarta`) and at [current state] it should support Jolokia 2.
+https://github.com/apache/felix-dev/tree/master/http[Felix HTTP,role=externalLink,window=_blank] has PoC module based on Jetty 12 that implements two Servlet APIs (`javax` and `jakarta`) and at [current state] it should support Jolokia 2.
 
-In https://github.com/ops4j/org.ops4j.pax.web[Pax Web,role=externalLink] there's work pending on Pax Web 10 which also should support old and new Servlet API packages.
+In https://github.com/ops4j/org.ops4j.pax.web[Pax Web,role=externalLink,window=_blank] there's work pending on Pax Web 10 which also should support old and new Servlet API packages.
 
 Moving to JakartaEE 9+ impacted Jolokia's WAR agents - these use `\https://jakarta.ee/xml/ns/jakartaee` namespace in `WEB-INF/web.xml` and should work in these web application servers:
 
-* https://eclipse.dev/jetty/download.php[Jetty 11 and newer,role=externalLink]
-* https://tomcat.apache.org/download-10.cgi[Tomcat 10 and newer,role=externalLink]
-* https://github.com/undertow-io/undertow/[Undertow 2.3 and newer,role=externalLink]
+* https://eclipse.dev/jetty/download.php[Jetty 11 and newer,role=externalLink,window=_blank]
+* https://tomcat.apache.org/download-10.cgi[Tomcat 10 and newer,role=externalLink,window=_blank]
+* https://github.com/undertow-io/undertow/[Undertow 2.3 and newer,role=externalLink,window=_blank]
 
 Of course all JakartaEE 9+ compliant servers are supported.
 
@@ -44,9 +44,9 @@ Of course all JakartaEE 9+ compliant servers are supported.
 
 Jolokia 1.x includes `org.jolokia:jolokia-client-javascript` Maven module, which packages `jolokia.js`, `jolokia-simple.js` and other libraries.
 
-In Jolokia 2, the same Maven module can be used in your Java application, but additionally, official https://www.npmjs.com/package/jolokia.js[NPM package,role=externalLink] is available. You can install it with `npm i jolokia.js` or `yarn add jolokia.js`.
+In Jolokia 2, the same Maven module can be used in your Java application, but additionally, official https://www.npmjs.com/package/jolokia.js[NPM package,role=externalLink,window=_blank] is available. You can install it with `npm i jolokia.js` or `yarn add jolokia.js`.
 
-There are https://www.npmjs.com/search?q=jolokia[several other Jolokia NPM packages available,role=externalLink], so mind that `jolokia.js` is the official one.
+There are https://www.npmjs.com/search?q=jolokia[several other Jolokia NPM packages available,role=externalLink,window=_blank], so mind that `jolokia.js` is the official one.
 
 The minimum supported JavaScript version is now ES5. For environments with ES3 and older JavaScript versions, keep using old versions of the JavaScript client provided with Jolokia 1.x.
 
@@ -101,8 +101,8 @@ There's also a second _flavor_ of `org.jolokia:jolokia-agent-jvm` with `javaagen
 
 === Removed modules
 
-* `jolokia-roo:jolokia-roo` for https://spring.io/projects/spring-roo[Spring Roo,role=externalLink] is no longer available. Spring Roo was kind of experiment before highly successful https://spring.io/projects/spring-boot[Spring Boot,role=externalLink].
-* `org.jolokia:jolokia-osgi-bundle` (with embedded https://github.com/apache/felix-dev/tree/master/http[Felix HTTP,role=externalLink]) is no longer available. Normal `org.jolokia:jolokia-agent-osgi` should be used with OSGi runtime supporting https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard Specification for Jakarta™ Servlet,role=externalLink]
+* `jolokia-roo:jolokia-roo` for https://spring.io/projects/spring-roo[Spring Roo,role=externalLink,window=_blank] is no longer available. Spring Roo was kind of experiment before highly successful https://spring.io/projects/spring-boot[Spring Boot,role=externalLink,window=_blank].
+* `org.jolokia:jolokia-osgi-bundle` (with embedded https://github.com/apache/felix-dev/tree/master/http[Felix HTTP,role=externalLink,window=_blank]) is no longer available. Normal `org.jolokia:jolokia-agent-osgi` should be used with OSGi runtime supporting https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard Specification for Jakarta™ Servlet,role=externalLink,window=_blank]
 * `org.jolokia:jolokia-mule` agent is no longer available, but because Jolokia 2 (and 1) simply provides servlet implementation, it can be used in any environment hosting a servlet container
 
 === Changed modules
@@ -111,7 +111,7 @@ There's also a second _flavor_ of `org.jolokia:jolokia-agent-jvm` with `javaagen
 
 === Configuration option changes
 
-* `listenForHttpService` option is now deprecated and `registerWhiteboardServlet` should be used instead in OSGi environments. The reason is that Jolokia 2 switched from https://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.http.html[OSGi CMPN Http Service,role=externalLink] to https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard Specification for Jakarta™ Servlet,role=externalLink].
+* `listenForHttpService` option is now deprecated and `registerWhiteboardServlet` should be used instead in OSGi environments. The reason is that Jolokia 2 switched from https://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.http.html[OSGi CMPN Http Service,role=externalLink,window=_blank] to https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard Specification for Jakarta™ Servlet,role=externalLink,window=_blank].
 * `dispatcherClasses` option is removed. In Jolokia 1.x it was used to add `org.jolokia.service.jsr160.Jsr160RequestHandler` to a list of available request handlers. In Jolokia 2, this class is dicovered using new service extension model of Jolokia, when `jolokia-service-jsr160` is available on the CLASSPATH (or in `WEB-INF/lib` of the WAR, which is the case for `jolokia-agent-war`).
 * Jolokia checks some configuration values also from system properties and environment variables. For example `discoveryAgentUrl` option can be specified as `jolokia.discoveryAgentUrl` system property or `JOLOKIA_DISCOVERY_AGENT_URL` environment variable. However some options had different format of related system property. In Jolokia 1.x, `jsr160ProxyAllowedTargets` could be specified as `org.jolokia.jsr160ProxyAllowedTargets` system property. Now all system properties have `jolokia.` prefix only.
 * `allowDnsReverseLookup` option defaults to `false` in Jolokia 2.
@@ -128,3 +128,7 @@ Jolokia 2 registers `jolokia:type=Config` with just _debug_ attributes and opera
 Also `agent=<agentId>` key is added to all Jolokia MBean names.
 
 image::images/jolokia2-mbeans.png["Jolokia 2 MBeans",role=text-center]
+
+=== Other changes
+
+* For Spring support, in `jolokia-config.xsd`, references to SLF4J (enumerations, config options) are renamed from `sl4j` to `slf4j`. Also `log4j2` enum is used instead of `log4j`.

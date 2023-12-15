@@ -39,7 +39,7 @@ specified within a `<remote>` section,
 which contains one or more `<host>`
 elements. The source can be given either as an IP address,
 a host name, or a netmask given in
-https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing[CIDR format,role=externalLink]
+https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing[CIDR format,role=externalLink,window=_blank]
 (e.g. `10.0.0.0/16` for all clients coming from the 10.0
 network). The following allows access from localhost and all
 clients whose IP addresses start with "10.0". For all other
@@ -153,13 +153,13 @@ completely, any HTTP method can be used.
 
 Jolokia (since version 1.0.3) supports the W3C specification
 for https://www.w3.org/TR/cors/[Cross-Origin
-Resource Sharing,role=externalLink] (also known as "CORS") which allows
+Resource Sharing,role=externalLink,window=_blank] (also known as "CORS") which allows
 browser to access resources which are located on a different
 server than the calling script is loaded from. This
 specification provides a controlled way to come around the
 _same origin policy_. Most
 https://caniuse.com/#search=CORS[contemporary
-browsers,role=externalLink] support CORS.
+browsers,role=externalLink,window=_blank] support CORS.
 
 By default Jolokia allows cross origin access from any
 host. This can be limited to certain hosts by using
@@ -190,11 +190,11 @@ If neither `Origin:` nor `Referer:` is given and strict checking is enabled, the
 
 Please note that `<strict-checking/>` might not be good enough because of potential
 browser bugs which could allow to forge the origin header. Examples of these issues are
-https://blog.bentkowski.info/2018/06/setting-arbitrary-request-headers-in.html[arbitrary header injection,role=externalLink]
+https://blog.bentkowski.info/2018/06/setting-arbitrary-request-headers-in.html[arbitrary header injection,role=externalLink,window=_blank]
 or https://www.brokenbrowser.com/referer-spoofing-defeating-xss-filter/[referer and origin
-spoofing,role=externalLink]. User facing application which uses Jolokia has backend should consider to implement
+spoofing,role=externalLink,window=_blank]. User facing application which uses Jolokia has backend should consider to implement
 additional measures like using the
-https://tools.ietf.org/html/draft-west-first-party-cookies-07[same-site,role=externalLink] flag
+https://tools.ietf.org/html/draft-west-first-party-cookies-07[same-site,role=externalLink,window=_blank] flag
 on the session cookie.
 
 === Example for a security policy
@@ -209,7 +209,7 @@ restrictions:
 * Read access to the C3P0 connection pool is restricted to
 forbid fetching the pool's properties, which in fact
 contains the DB password as clear text.
-* Access to `jdk.management.jfr:type=FlightRecorder` MBean is denied (see https://nvd.nist.gov/vuln/detail/CVE-2022-41678[CVE-2022-41678,role=externalLink])
+* Access to `jdk.management.jfr:type=FlightRecorder` MBean is denied (see https://nvd.nist.gov/vuln/detail/CVE-2022-41678[CVE-2022-41678,role=externalLink,window=_blank])
 
 [,xml]
 ----
@@ -259,9 +259,9 @@ A great tool which helps in repackaging an agent for
 inclusion of a `jolokia-access.xml`
 policy file
 is the command line tool
-https://search.cpan.org/~roland/jmx4perl/scripts/jolokia[jolokia,role=externalLink],
+https://search.cpan.org/~roland/jmx4perl/scripts/jolokia[jolokia,role=externalLink,window=_blank],
 which comes with the
-https://metacpan.org/dist/jmx4perl[jmx4perl,role=externalLink] distribution.
+https://metacpan.org/dist/jmx4perl[jmx4perl,role=externalLink,window=_blank] distribution.
 ****
 
 But how do the agents lookup the policy file? By default,

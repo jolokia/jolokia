@@ -19,14 +19,14 @@
 image:images/jolokia_home.png["Jolokia, homegrown",role="jolokiaLogo right"] All started up early 2009 when my colleague Gerhard Lausser,
 our local Nagios guru, came up in my office and complained
 heavily about how damned hard it is to monitor Java EE servers
-with https://www.nagios.org[Nagios,role=externalLink]. As you might
+with https://www.nagios.org[Nagios,role=externalLink,window=_blank]. As you might
 know, Nagios uses a plethora of plugins for doing the hard
 monitoring stuff. These are running locally on a central
 Nagios host contacting the watched systems mostly remotely
 with various techniques. For Java applications,
-https://www.oracle.com/java/technologies/javase/javamanagement.html[JMX,role=externalLink]
+https://www.oracle.com/java/technologies/javase/javamanagement.html[JMX,role=externalLink,window=_blank]
 is of course the proper choice which provides
-https://jcp.org/en/jsr/detail?id=160[JSR-160,role=externalLink]
+https://jcp.org/en/jsr/detail?id=160[JSR-160,role=externalLink,window=_blank]
 connectors remote access to the local MBeans. At this time,
 indeed several JMX Nagios plugins were already
 present. However, they all suffer from the same problem:
@@ -49,16 +49,16 @@ I'm not really happy with JSR-160's focus on Java based remote
 protocols. There has been some efforts to make these more
 friendly to the outside world (e.g. a
 https://ws-jmx-connector.dev.java.net/[JSR-160
-WebService connector,role=externalLink] as defined in JSR-262), but it seems
+WebService connector,role=externalLink,window=_blank] as defined in JSR-262), but it seems
 there is not much momentum anymore behind these. In fact, the
 last update on
-https://jcp.org/en/jsr/detail?id=262[JSR-262,role=externalLink] was in
+https://jcp.org/en/jsr/detail?id=262[JSR-262,role=externalLink,window=_blank] was in
 May 2008 and it is marked as "inactive". And frankly, I don't
 want to use WebServices for monitoring, either (although
-https://dmtf.org/standards/wsman[WS-Management,role=externalLink] is an
+https://dmtf.org/standards/wsman[WS-Management,role=externalLink,window=_blank] is an
 interesting approach).
 
-That was the birth of https://metacpan.org/dist/jmx4perl[jmx4perl,role=externalLink] in May
+That was the birth of https://metacpan.org/dist/jmx4perl[jmx4perl,role=externalLink,window=_blank] in May
 2009. Coming from a strong Perl background (being a SGI system
 administrator at university in my former life), my initial goal
 was to use pure Perl for accessing remote JMX information without
@@ -69,20 +69,20 @@ a JSON payload to local JMX calls (and vice versa for the response),
 was really lightweight. It knew how to read and set attributes and
 how to execute operations. It had a list mode for looking up all
 registered MBeans. And it was
-https://labs.consol.de/maven/repository/org/jmx4perl/j4p-agent/0.16/j4p-agent-0.16.war[38kb,role=externalLink] in size.
+https://labs.consol.de/maven/repository/org/jmx4perl/j4p-agent/0.16/j4p-agent-0.16.war[38kb,role=externalLink,window=_blank] in size.
 
 The jmx4perl agent is now ~ 200kb 'large' with many more
 features (search, bulk requests, security, ....) but I still call it
 lighweight ;-). The perl part consists now of a powerful
 Nagios plugin called
-https://search.cpan.org/~roland/jmx4perl/scripts/check_jmx4perl[check_jmx4perl,role=externalLink],
+https://search.cpan.org/~roland/jmx4perl/scripts/check_jmx4perl[check_jmx4perl,role=externalLink,window=_blank],
 a command line tool called
-https://search.cpan.org/~roland/jmx4perl/scripts/jmx4perl[jmx4perl,role=externalLink],
+https://search.cpan.org/~roland/jmx4perl/scripts/jmx4perl[jmx4perl,role=externalLink,window=_blank],
 a Perl library named
-https://search.cpan.org/~roland/jmx4perl/lib/JMX/Jmx4Perl.pm[JMX::Jmx4Perl,role=externalLink]
+https://search.cpan.org/~roland/jmx4perl/lib/JMX/Jmx4Perl.pm[JMX::Jmx4Perl,role=externalLink,window=_blank]
 and a readline based (with context sensitive tab completion on
 MBean names) JMX shell called
-https://search.cpan.org/~roland/jmx4perl/scripts/j4psh[j4psh,role=externalLink].
+https://search.cpan.org/~roland/jmx4perl/scripts/j4psh[j4psh,role=externalLink,window=_blank].
 
 From the feedback I got, it seems that the Nagios world is happy
 now. But since I think that this agent based approach provides also a
@@ -97,7 +97,7 @@ the agent part has become ... Jolokia.
 
 Jolokia is one of the world hottest chili pepper with a
 Scoville rating of at most
-https://en.wikipedia.org/wiki/Scoville_scale#List_of_Scoville_ratings["1,075,000",role=externalLink]. I'm
+https://en.wikipedia.org/wiki/Scoville_scale#List_of_Scoville_ratings["1,075,000",role=externalLink,window=_blank]. I'm
 a chili head and grow chilis since 2006. I love chilis as much
 as JMX. That's the main reason.
 
@@ -107,20 +107,20 @@ hottest one ;-)
 
 == Who am I
 
-My name is https://github.com/rhuss[Roland Huss,role=externalLink]
+My name is https://github.com/rhuss[Roland Huss,role=externalLink,window=_blank]
 and during the last decades, I mainly acted as Java wizard,
 transforming large XML documents into huge stacktraces.
 
 == Acknowledgments
 
 * https://www.amazon.de/Nagios-Praxisbuch-Open-Source-Monitoring-Unternehmen/dp/3827328004[Gerhard
-Lausser,role=externalLink] for pushing me hard to come up with jmx4perl and a
+Lausser,role=externalLink,window=_blank] for pushing me hard to come up with jmx4perl and a
 way to allow JMX usage from a Java hostile environment.
-* My former employer https://www.consol.com[ConSol*,role=externalLink] for supporting the development of Jolokia.
-* https://www.allez.de[Allez,role=externalLink] (and especially
+* My former employer https://www.consol.com[ConSol*,role=externalLink,window=_blank] for supporting the development of Jolokia.
+* https://www.allez.de[Allez,role=externalLink,window=_blank] (and especially
 Sorin Anca) for the artwork and this very fine logo.
 * https://www.wanderinghorse.net/home/stephan/[Stephan
-Beal,role=externalLink] for ironing out my dump english and proofreading the
+Beal,role=externalLink,window=_blank] for ironing out my dump english and proofreading the
 documentation.
 
 == Legal stuff

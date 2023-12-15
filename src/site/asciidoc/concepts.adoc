@@ -24,12 +24,12 @@ The most important feature of Jolokia is to provide a _protocol adaptor_ for acc
 
 image::images/jolokia_architecture.png[role=text-center]
 
-Chapter 5.3 of https://jcp.org/en/jsr/detail?id=3[JMX Specification 1.4,role=externalLink] defines two means of remote access to JVM's MBeanServer instances:
+Chapter 5.3 of https://jcp.org/en/jsr/detail?id=3[JMX Specification 1.4,role=externalLink,window=_blank] defines two means of remote access to JVM's MBeanServer instances:
 
 * _connector_, which is a way to remotely expose the management interface. For RMI protocol (which is the only mandatory protocol as specified by JMX), it is a remote view of `javax.management.remote.rmi.RMIServer` interface. This approach requires active _connector server_ running in the JVM which' MBeanServer instances we want to access remotely.
 * _protocol adaptor_, where there is no direct remote representation of an MBeanServer. Instead a set of specific protocol operations is mapped to a set of operations on MBeanServer. For HTTP protocol, operations like GET or POST with details specified in HTTP payloads may be used to operate on an MBeanServer. And this is the approach taken by Jolokia.
 
-NOTE: JMX _connectors_ were originally defined in details in https://jcp.org/en/jsr/detail?id=160[JMX Remote API Specification (JSR-160),role=externalLink]. JSR-160 was then merged with https://jcp.org/en/jsr/detail?id=3[JMX Specification 1.4 (JSR-3),role=externalLink] itself.
+NOTE: JMX _connectors_ were originally defined in details in https://jcp.org/en/jsr/detail?id=160[JMX Remote API Specification (JSR-160),role=externalLink,window=_blank]. JSR-160 was then merged with https://jcp.org/en/jsr/detail?id=3[JMX Specification 1.4 (JSR-3),role=externalLink,window=_blank] itself.
 
 === Jolokia architecture
 
@@ -41,13 +41,13 @@ Each kind of Jolokia supported _agent_ uses the same set of xref:#support-classe
 
 There are 3 kinds of agents supported by Jolokia:
 
-JVM agent:: An agent installed using https://docs.oracle.com/en/java/javase/11/docs/api/jdk.attach/com/sun/tools/attach/VirtualMachine.html[JVM Attach API,role=externalLink] or https://docs.oracle.com/en/java/javase/11/docs/api/java.instrument/java/lang/instrument/package-summary.html[Java Instrument API,role=externalLink].
+JVM agent:: An agent installed using https://docs.oracle.com/en/java/javase/11/docs/api/jdk.attach/com/sun/tools/attach/VirtualMachine.html[JVM Attach API,role=externalLink,window=_blank] or https://docs.oracle.com/en/java/javase/11/docs/api/java.instrument/java/lang/instrument/package-summary.html[Java Instrument API,role=externalLink,window=_blank].
 
 WAR agent:: An agent started from WAR application with `org.jolokia.server.core.http.AgentServlet` servlet declared.
 
-OSGi agent:: An agent started from a bundle, which registers `org.jolokia.server.core.osgi.OsgiAgentServlet` using https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard Specification for Jakarta™ Servlet,role=externalLink].
+OSGi agent:: An agent started from a bundle, which registers `org.jolokia.server.core.osgi.OsgiAgentServlet` using https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard Specification for Jakarta™ Servlet,role=externalLink,window=_blank].
 
-JVM Agent uses JDK's https://docs.oracle.com/en/java/javase/11/docs/api/jdk.httpserver/com/sun/net/httpserver/package-summary.html[own HTTP server,role=externalLink]. WAR agent just runs inside Servlet container and OSGi agent uses whatever HTTP server is available in the OSGi runtime.
+JVM Agent uses JDK's https://docs.oracle.com/en/java/javase/11/docs/api/jdk.httpserver/com/sun/net/httpserver/package-summary.html[own HTTP server,role=externalLink,window=_blank]. WAR agent just runs inside Servlet container and OSGi agent uses whatever HTTP server is available in the OSGi runtime.
 
 [#support-classes]
 ==== Jolokia support classes

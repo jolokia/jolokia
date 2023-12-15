@@ -141,9 +141,9 @@ this:
 ----
 
 Another example how bulk requests can be used is the
-https://www.nagios.org/[Nagios,role=externalLink]
+https://www.nagios.org/[Nagios,role=externalLink,window=_blank]
 Plugin
-https://metacpan.org/dist/jmx4perl/view/scripts/check_jmx4perl[check_jmx4perl,role=externalLink],
+https://metacpan.org/dist/jmx4perl/view/scripts/check_jmx4perl[check_jmx4perl,role=externalLink,window=_blank],
 which uses bulk requests
 for its _multi check_ features, which allows for a
 single Nagios check monitor as many JMX attributes and

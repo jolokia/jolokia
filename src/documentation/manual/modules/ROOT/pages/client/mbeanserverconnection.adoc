@@ -22,8 +22,8 @@ This allows you to use tools that leverage a JSR-160 `MBeanServerConnection` suc
 .Recommended plugins
 ****
 For Java Mission Control, a set of plugins are provided at
-https://github.com/skarsaune/jmc-cloud-extensions/[role=externalLink] and for
-Java Visual VM a Jolokia plugin can be downloaded from https://skarsaune.github.io/jolokia-jmc-update-site/visualvm/org-jolokia-jmx-plugin.nbm[role=externalLink]
+https://github.com/skarsaune/jmc-cloud-extensions/[role=externalLink,window=_blank] and for
+Java Visual VM a Jolokia plugin can be downloaded from https://skarsaune.github.io/jolokia-jmc-update-site/visualvm/org-jolokia-jmx-plugin.nbm[role=externalLink,window=_blank]
 ****
 
 [#remote-jmx-example]

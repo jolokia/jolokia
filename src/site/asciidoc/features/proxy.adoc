@@ -44,7 +44,7 @@ target parameters are included in the request.
 The standard (but often forgotten) _remoting_ technology for Java applications is RMI.
 
 In order to access a `javax.management.MBeanServer` available withing a remote JVM, we should actually
-access a _remote view_ of this interface. It is possible using https://docs.oracle.com/en/java/javase/11/management/monitoring-and-management-using-jmx-technology.html#GUID-F08985BB-629A-4FBF-A0CB-8762DF7590E0[Remote Monitoring and Management,role=externalLink].
+access a _remote view_ of this interface. It is possible using https://docs.oracle.com/en/java/javase/11/management/monitoring-and-management-using-jmx-technology.html#GUID-F08985BB-629A-4FBF-A0CB-8762DF7590E0[Remote Monitoring and Management,role=externalLink,window=_blank].
 
 The connection is established between two entities specified in "Chapter 13, Connectors" of the unified JMX specification (combined JSR-3 and JSR-160):
 

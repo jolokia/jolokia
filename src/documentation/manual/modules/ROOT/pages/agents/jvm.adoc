@@ -23,15 +23,15 @@ agents. This agent can be started by any Java program by
 providing certain startup options to the JVM. Or it can be
 dynamically attached (and detached) to an already running Java
 process. This universal agent uses the
-https://docs.oracle.com/en/java/javase/11/docs/api/jdk.attach/com/sun/tools/attach/VirtualMachine.html[JVM Attach API,role=externalLink] or https://docs.oracle.com/en/java/javase/11/docs/api/java.instrument/java/lang/instrument/package-summary.html[Java Instrument API,role=externalLink] and is available for every JVM 1.6 and later.
+https://docs.oracle.com/en/java/javase/11/docs/api/jdk.attach/com/sun/tools/attach/VirtualMachine.html[JVM Attach API,role=externalLink,window=_blank] or https://docs.oracle.com/en/java/javase/11/docs/api/java.instrument/java/lang/instrument/package-summary.html[Java Instrument API,role=externalLink,window=_blank] and is available for every JVM 1.6 and later.
 
-NOTE: Dynamic loading of agents will be removed at some point. See https://openjdk.org/jeps/451[JEP 451,role=externalLink] for details.
+NOTE: Dynamic loading of agents will be removed at some point. See https://openjdk.org/jeps/451[JEP 451,role=externalLink,window=_blank] for details.
 
 [#jvm-agent]
 === Jolokia as JVM Agent
 
 The JVM agent uses the
-https://docs.oracle.com/en/java/javase/11/docs/api/java.instrument/java/lang/instrument/package-summary.html[Java Instrument API,role=externalLink] for linking into any JVM at startup time. Under the
+https://docs.oracle.com/en/java/javase/11/docs/api/java.instrument/java/lang/instrument/package-summary.html[Java Instrument API,role=externalLink,window=_blank] for linking into any JVM at startup time. Under the
 hood it uses an HTTP-Server, which is available on every
 Oracle/Sun JVM from version 1.6 upwards.
 
@@ -54,7 +54,7 @@ java -javaagent:/path/to/agent.jar=port=7777,host=localhost
 ----
 
 `agent.jar` is the filename of the Jolokia
-JVM agent. The agent can be downloaded like the others from the https://jolokia.org/download.html[download page,role=externalLink].
+JVM agent. The agent can be downloaded like the others from the https://jolokia.org/download.html[download page,role=externalLink,window=_blank].
 When downloading from a Maven repository you need to check for the classifier `javaagent` (i.e. the
 jar to download looks like `jolokia-agent-jvm-{jolokia-version}-javaagent.jar`, not `jolokia-agent-jvm-{jolokia-version}.jar`).
 Options can be appended as a comma separated
@@ -339,12 +339,12 @@ contacting the agent.
 [#jvm-attach]
 === Attaching a Jolokia agent on the fly
 
-NOTE: Dynamic loading of agents will be removed at some point. See https://openjdk.org/jeps/451[JEP 451,role=externalLink] for details.
+NOTE: Dynamic loading of agents will be removed at some point. See https://openjdk.org/jeps/451[JEP 451,role=externalLink,window=_blank] for details.
 
 A Jolokia agent can be attached to any running Java process as
 long as the user has sufficient access privileges for
 accessing the process. This agent uses the
-https://docs.oracle.com/en/java/javase/11/docs/api/jdk.attach/com/sun/tools/attach/VirtualMachine.html[JVM Attach API,role=externalLink] for dynamically attaching and detaching to
+https://docs.oracle.com/en/java/javase/11/docs/api/jdk.attach/com/sun/tools/attach/VirtualMachine.html[JVM Attach API,role=externalLink,window=_blank] for dynamically attaching and detaching to
 and from the process. It works similar to JConsole or `jcmd` command connecting
 to a local process. The Jolokia advantage is, that after the
 start of the agent, it can be reached over the network.
@@ -524,7 +524,7 @@ queries. For example, a simple shell script for printing out
 the memory usage of a local Java process, including
 (temporarily) attaching an Jolokia agent looks simply like in
 the following example. With a complete client library like
-https://metacpan.org/dist/jmx4perl[jmx4perl,role=externalLink] even more one
+https://metacpan.org/dist/jmx4perl[jmx4perl,role=externalLink,window=_blank] even more one
 shot scripts are possible footnote:rest-comment[
 And in fact, some support for launching this dynamic
 agent is planned for a forthcoming release of jmx4perl.].

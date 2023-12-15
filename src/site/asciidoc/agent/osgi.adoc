@@ -19,9 +19,9 @@
 For using an agent within an OSGi container, Jolokia comes with
 an agent packaged as OSGi bundle.
 
-NOTE: Jolokia 1.x provided an _all-in-one_ bundle with https://github.com/apache/felix-dev/tree/master/http[Felix HTTP Service,role=externalLink] implementation packaged. This is no longer the case in Jolokia 2.x.
+NOTE: Jolokia 1.x provided an _all-in-one_ bundle with https://github.com/apache/felix-dev/tree/master/http[Felix HTTP Service,role=externalLink,window=_blank] implementation packaged. This is no longer the case in Jolokia 2.x.
 
-The requirement for target OSGi runtime is to provide an implementation of https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard Specification for Jakarta™ Servlet,role=externalLink] extender. Jolokia 2.0 registers its `org.jolokia.server.core.osgi.OsgiAgentServlet` as Whiteboard service, which is then processed by Whiteboard extender.
+The requirement for target OSGi runtime is to provide an implementation of https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard Specification for Jakarta™ Servlet,role=externalLink,window=_blank] extender. Jolokia 2.0 registers its `org.jolokia.server.core.osgi.OsgiAgentServlet` as Whiteboard service, which is then processed by Whiteboard extender.
 
 Because OSGi runtimes are still in the process of moving away from JavaEE towards JakartaEE (with new packages namespace),
 I tested Jolokia 2 with Karaf 4.5 using dev version of Pax Web 10 (still in development).

@@ -16,11 +16,11 @@
 
 == JayDay 2013
 
-The slides to my talk for the small but very fine link:https://www.jayday.de[JayDay 2013,role=externalLink] are
-link:https://ro14nd.de/talks/2013/jayday-javascript-jmx/index.html[online,role=externalLink].
+The slides to my talk for the small but very fine link:https://www.jayday.de[JayDay 2013,role=externalLink,window=_blank] are
+link:https://ro14nd.de/talks/2013/jayday-javascript-jmx/index.html[online,role=externalLink,window=_blank].
 These are "implemented" in JavaScript including live demos, where the JavaScript can be directly inserted
 in the browser (tested with Chrome and Firefox). For the sample code, simply push the blue buttons at the
-bottom of a link:https://ro14nd.de/talks/2013/jayday-javascript-jmx/index.html#/step-20[demo slide,role=externalLink].
+bottom of a link:https://ro14nd.de/talks/2013/jayday-javascript-jmx/index.html#/step-20[demo slide,role=externalLink,window=_blank].
 
 [.text-center]
 image::images/jayday2013_title.png[role="no-hover text-center",link=https://ro14nd.de/talks/2013/jayday-javascript-jmx/index.html]
@@ -28,8 +28,8 @@ image::images/jayday2013_title.png[role="no-hover text-center",link=https://ro14
 == Devoxx 2011
 
 Here's my talk from Devoxx 2011 which is now freely
-available on link:https://www.parleys.com[Parleys,role=externalLink]. Well, as explained
-https://labs.consol.de/lang/de/blog/devoxx/devoxx-2011-day-1/#jolokia[here,role=externalLink] I was quite nervous on my first Devoxx
+available on link:https://www.parleys.com[Parleys,role=externalLink,window=_blank]. Well, as explained
+https://labs.consol.de/lang/de/blog/devoxx/devoxx-2011-day-1/#jolokia[here,role=externalLink,window=_blank] I was quite nervous on my first Devoxx
 talk, so please concentrate on the facts and fade out the speaker ;-)
 
 [.text-center]
@@ -44,7 +44,7 @@ talk, so please concentrate on the facts and fade out the speaker ;-)
 </object>
 ++++
 
-The slides with included videos are also available at link:https://www.slideshare.net/roland.huss/jolokia-devoxx[Slideshare,role=externalLink]:
+The slides with included videos are also available at link:https://www.slideshare.net/roland.huss/jolokia-devoxx[Slideshare,role=externalLink,window=_blank]:
 
 ++++
 <div style="width:510px; margin-left: auto; margin-right: auto;">
@@ -54,8 +54,8 @@ The slides with included videos are also available at link:https://www.slideshar
 
 == OSMC 2011
 
-This link:https://www.netways.de/index.php?id=3031&L=1[talk,role=externalLink]
-from the link:https://www.netways.de/en/osmc/y2011/overview/[Open Source Monitoring Conference,role=externalLink]
+This link:https://www.netways.de/index.php?id=3031&L=1[talk,role=externalLink,window=_blank]
+from the link:https://www.netways.de/en/osmc/y2011/overview/[Open Source Monitoring Conference,role=externalLink,window=_blank]
 was given 2011 in Nuremberg.
 It focuses on the integration of
 Jolokia within Nagios and was given in German. I was the

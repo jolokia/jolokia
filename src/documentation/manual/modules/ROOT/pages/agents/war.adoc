@@ -305,9 +305,9 @@ Jakarta EE security is enabled by default by adding the required information wit
 
 .Using jmx4perl's `jolokia` tool
 ****
-https://metacpan.org/dist/jmx4perl[jmx4perl,role=externalLink] comes
+https://metacpan.org/dist/jmx4perl[jmx4perl,role=externalLink,window=_blank] comes
 with a nice command line utility called
-`https://metacpan.org/dist/jmx4perl/view/scripts/jolokia[jolokia,role=externalLink]`
+`https://metacpan.org/dist/jmx4perl/view/scripts/jolokia[jolokia,role=externalLink,window=_blank]`
 which allows for an easy setup of security within a given
 `jolokia.war`.
 ****

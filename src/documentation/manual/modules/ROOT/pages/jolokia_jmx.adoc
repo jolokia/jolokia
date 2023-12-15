@@ -37,10 +37,10 @@ features are explained in <<jolokia-mbeanserver>>.
 
 Developing application specific MBeans is easy, especially if
 http://docs.oracle.com/javase/tutorial/jmx/mbeans/standard.html[Standard
-MBeans,role=externalLink] are used. However, for Spring users there is even a
+MBeans,role=externalLink,window=_blank] are used. However, for Spring users there is even a
 easier, more
 https://docs.spring.io/spring-framework/reference/integration/jmx/exporting.html[declarative
-way,role=externalLink] for turning POJOs into MBeans. On top of this Jolokia
+way,role=externalLink,window=_blank] for turning POJOs into MBeans. On top of this Jolokia
 provides an easy, declarative way for firing up a Jolokia JVM
 agent merely by including some Jolokia specific Spring
 configuration. This is described in xref:spring.adoc[].
@@ -120,11 +120,11 @@ an MBean for JSR-160 connectors (see below).
 == @JsonMBean
 
 JMX 1.4 introduced
-https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/MXBean.html[MXBeans,role=externalLink]
+https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/MXBean.html[MXBeans,role=externalLink,window=_blank]
 which allow for nearly arbitrary data to be translated into so
 called _OpenData_ which are accessible via JMX. For example,
 arbitrary Java Beans are translated into a
-https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/openmbean/CompositeData.html[`CompositeData`,role=externalLink]
+https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/openmbean/CompositeData.html[`CompositeData`,role=externalLink,window=_blank]
 structure with property names as keys and their values in
 OpenData values.
 
@@ -163,7 +163,7 @@ work. MXBeans work with the PlatformMBeanServer, too.
 * JsonMBean work also with JMX support libraries which use
 ``ModelMBean``'s under the hood. E.g.
 https://docs.spring.io/spring-framework/reference/integration/jmx.html[Spring
-JMX,role=externalLink] uses a ModelMBean for
+JMX,role=externalLink,window=_blank] uses a ModelMBean for
 `@ManagedResource` annotated
 MBeans. `@JsonMBean` can be easily added,
 whereas `@MXBean` wouldn't work here.

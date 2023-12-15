@@ -46,7 +46,7 @@ fi
 
 === Perl
 
-Using the https://metacpan.org/dist/jmx4perl[jmx4perl,role=externalLink]
+Using the https://metacpan.org/dist/jmx4perl[jmx4perl,role=externalLink,window=_blank]
 client library, this can be done even simpler in Perl (and in
 this case with a single HTTP request):
 

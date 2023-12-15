@@ -17,7 +17,7 @@
 [#notification]
 === Using JMX notifications (notification) #new in Jolokia 2#
 
-A new feature of Jolokia 2 is access to https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/Notification.html[JMX notifications,role=externalLink].
+A new feature of Jolokia 2 is access to https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/Notification.html[JMX notifications,role=externalLink,window=_blank].
 While reading/writing attributes, executing operations or listing/searching MBeans is implemented as single request-response operation, with notifications the flow of messages is more complex.
 
 There are 4 groups of subcommands for Jolokia `notification` operation:
@@ -85,7 +85,7 @@ The `value` field in the response contains two important fields:
 
 `pull` backend:: In this implementation, notifications are collected within the Jolokia Agent and client has to _fetch_ (_pull_) them by calling `pull` operation on `jolokia:type=NotificationStore` MBean.
 
-`sse` backend:: In this mode https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events[Server Sent Events,role=externalLink] are used (See https://html.spec.whatwg.org/multipage/server-sent-events.html#server-sent-events[WhatWG specification,role=externalLink]).
+`sse` backend:: In this mode https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events[Server Sent Events,role=externalLink,window=_blank] are used (See https://html.spec.whatwg.org/multipage/server-sent-events.html#server-sent-events[WhatWG specification,role=externalLink,window=_blank]).
 
 [#notification-unregistration]
 ==== Client unregistration
@@ -186,13 +186,13 @@ The GET URL for adding a notification listener has the following format:
 
 |`<mbean name>`
 |The
-https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/ObjectName.html[ObjectName,role=externalLink]
+https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/ObjectName.html[ObjectName,role=externalLink,window=_blank]
 of the MBean for which we're registering a notification listener
 |`JMImplementation:type=MBeanServerDelegate`
 
 |`<filter1>`, `<filter2>`, ...
 |Comma-separated list notifications we're interested in (and supported by given `<mbean name>`). If we want all
-notifications, a space (`%20`) or empty string (`%22%22`) can be passed. See filter rules in link:https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/NotificationFilterSupport.html#enableType(java.lang.String)[NotificationFilterSupport.enableType() Javadoc,role=externalLink]
+notifications, a space (`%20`) or empty string (`%22%22`) can be passed. See filter rules in link:https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/NotificationFilterSupport.html#enableType(java.lang.String)[NotificationFilterSupport.enableType() Javadoc,role=externalLink,window=_blank]
 |`JMX.mbean.registered`
 
 |`<config>`
@@ -242,13 +242,13 @@ The equivalent POST JSON payload is:
 
 |`mbean`
 |The
-https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/ObjectName.html[ObjectName,role=externalLink]
+https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/ObjectName.html[ObjectName,role=externalLink,window=_blank]
 of the MBean for which we're registering a notification listener
 |`JMImplementation:type=MBeanServerDelegate`
 
 |`filter`
 |A JSON array of notification notifications we're interested in (and supported by given `mbean`). If we want all
-notifications, a space (`%20`) or empty string (`%22%22`) can be passed. See filter rules in link:https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/NotificationFilterSupport.html#enableType(java.lang.String)[NotificationFilterSupport.enableType() Javadoc,role=externalLink]
+notifications, a space (`%20`) or empty string (`%22%22`) can be passed. See filter rules in link:https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/NotificationFilterSupport.html#enableType(java.lang.String)[NotificationFilterSupport.enableType() Javadoc,role=externalLink,window=_blank]
 |`[ "JMX.mbean.registered", "JMX.mbean.unregistered" ]`
 
 |`config`
@@ -522,7 +522,7 @@ On the other hand, `sse` notification store works differently. Here's the inform
 
 Instead of providing us with Mbean name to access when needed (_pull_ the notifications out if it by calling an MBean operation), `sse` backend needs a channel associated with client connection. This is where `open` command for `notification` operation comes into play.
 
-When calling `open` command for `sse` backed notifications, the request (`HttpServletRequest`) is put into https://jakarta.ee/specifications/servlet/5.0/jakarta-servlet-spec-5.0#asynchronous-processing[asynchronous mode,role=externalLink] and connection is not closed.
+When calling `open` command for `sse` backed notifications, the request (`HttpServletRequest`) is put into https://jakarta.ee/specifications/servlet/5.0/jakarta-servlet-spec-5.0#asynchronous-processing[asynchronous mode,role=externalLink,window=_blank] and connection is not closed.
 
 The GET URL for openning a backend channel for notification acces is:
 

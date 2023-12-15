@@ -19,7 +19,7 @@
 As described in this xref:../about.adoc[story], Jolokia has its origins
 in the Perl world where it starts as a simple solution for monitoring
 Java EE applications with
-https://www.nagios.org[Nagios,role=externalLink]. https://metacpan.org/dist/jmx4perl[Jmx4perl,role=externalLink]
+https://www.nagios.org[Nagios,role=externalLink,window=_blank]. https://metacpan.org/dist/jmx4perl[Jmx4perl,role=externalLink,window=_blank]
 was its former name, which in addition to the agents contains
 powerfule Perl modules for accessing Jolokia instrumented
 servers. These modules are the foundation for tools like
@@ -57,4 +57,4 @@ print "Memory used: ",$response->value(),"\n";
 ----
 
 More information about jmx4perl can be found on its
-https://metacpan.org/dist/jmx4perl[CPAN page,role=externalLink].
+https://metacpan.org/dist/jmx4perl[CPAN page,role=externalLink,window=_blank].

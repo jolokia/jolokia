@@ -83,7 +83,7 @@ applications.
 image::architecture.png[]
 
 But there are more options. Specialized agents are able to use an OSGi
-mechanism for exposing web components (https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard Specification for Jakarta™ Servlet,role=externalLink] in Jolokia 2 and https://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.http.html[OSGi CMPN HTTP Service,role=externalLink] in Jolokia 1).
+mechanism for exposing web components (https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard Specification for Jakarta™ Servlet,role=externalLink,window=_blank] in Jolokia 2 and https://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.http.html[OSGi CMPN HTTP Service,role=externalLink,window=_blank] in Jolokia 1).
 The JVM agent uses the HTTP-Server included
 with every modern JVM and can be attached dynamically to any
 running Java process. Agents are described in detail in

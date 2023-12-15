@@ -22,7 +22,7 @@ since it contains a lightweight HTTP Server used for
 exposing the Jolokia protocol. This agent is the most generic one which can
 instrument _any_ Java application using a JDK11+. It is suitable for
 situations where the other agents don't fit. Also, it can be used for dynamically
-attaching an agent to a running Java process (this option however https://openjdk.org/jeps/451[is going to be removed after JDK 21,role=externalLink]).
+attaching an agent to a running Java process (this option however https://openjdk.org/jeps/451[is going to be removed after JDK 21,role=externalLink,window=_blank]).
 
 For using this agent, the following argument to the Java
 application to instrument has to be given:
@@ -60,7 +60,7 @@ command can be used to get a quick help
 $ java -jar /path/to/jolokia-agent-jvm-{jolokia-version}-javaagent.jar --help
 ----
 
-NOTE: Dynamic loading of agents will be removed at some point. See https://openjdk.org/jeps/451[JEP 451,role=externalLink] for details.
+NOTE: Dynamic loading of agents will be removed at some point. See https://openjdk.org/jeps/451[JEP 451,role=externalLink,window=_blank] for details.
 
 For more details and usage examples please refer to the
 link:../reference/html/manual/agents.html#agents-jvm[reference manual].
