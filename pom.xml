@@ -767,51 +767,40 @@
         </exclusions>
       </dependency>
 
-      <!--
-        Jackson dependencies are explicitly managed with scope=test. Jolokia doesn't need Jackson at runtime
-        Except for jolokia-client-kubernetes and Spring-related examples.
-      -->
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-annotations</artifactId>
         <version>${version.com.fasterxml.jackson.core}</version>
-        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-core</artifactId>
         <version>${version.com.fasterxml.jackson.core}</version>
-        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-databind</artifactId>
         <version>${version.com.fasterxml.jackson.core}</version>
-        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>com.fasterxml.jackson.dataformat</groupId>
         <artifactId>jackson-dataformat-yaml</artifactId>
         <version>${version.com.fasterxml.jackson.core}</version>
-        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>com.fasterxml.jackson.datatype</groupId>
         <artifactId>jackson-datatype-jdk8</artifactId>
         <version>${version.com.fasterxml.jackson.core}</version>
-        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>com.fasterxml.jackson.datatype</groupId>
         <artifactId>jackson-datatype-jsr310</artifactId>
         <version>${version.com.fasterxml.jackson.core}</version>
-        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>com.fasterxml.jackson.module</groupId>
         <artifactId>jackson-module-parameter-names</artifactId>
         <version>${version.com.fasterxml.jackson.core}</version>
-        <scope>test</scope>
       </dependency>
 
       <!-- JakartaEE dependencies -->
@@ -1148,6 +1137,7 @@
         <module>support/spring</module>
         <module>examples/spring</module>
         <module>examples/spring-boot</module>
+        <module>examples/spring-boot-actuator</module>
       </modules>
     </profile>
 

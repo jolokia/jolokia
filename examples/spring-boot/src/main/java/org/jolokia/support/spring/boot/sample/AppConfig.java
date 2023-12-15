@@ -21,9 +21,10 @@ import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.http.AgentServlet;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-@org.springframework.context.annotation.Configuration
-public class Configuration {
+@Configuration
+public class AppConfig {
 
     @Bean
     public ServletRegistrationBean<AgentServlet> jolokia() {
@@ -31,6 +32,7 @@ public class Configuration {
         jolokiaServlet.setLoadOnStartup(0);
         jolokiaServlet.setAsyncSupported(true);
         jolokiaServlet.setInitParameters(Map.of(ConfigKey.DEBUG.getKeyValue(), "true"));
+        jolokiaServlet.setInitParameters(Map.of(ConfigKey.AGENT_DESCRIPTION.getKeyValue(), "Spring Servlet Jolokia Agent"));
         return jolokiaServlet;
     }
 

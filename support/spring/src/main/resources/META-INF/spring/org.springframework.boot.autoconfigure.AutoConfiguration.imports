@@ -14,17 +14,4 @@
 # limitations under the License.
 #
 
-status = INFO
-verbose = false
-dest = out
-
-appender.stdout.type = Console
-appender.stdout.name = stdout
-appender.stdout.layout.type = PatternLayout
-appender.stdout.layout.pattern = %d{HH:mm:ss} %level {%thread} [%C] (%F:%L) : %msg%n
-
-rootLogger.level = info
-rootLogger.appenderRef.stdout.ref = stdout
-
-logger.jolokia.name = org.jolokia
-logger.jolokia.level = debug
+org.jolokia.support.spring.actuator.JolokiaEndpointAutoConfiguration

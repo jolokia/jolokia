@@ -38,7 +38,7 @@ java.lang.AssertionError: expected [false] but found [true]
 ...
 ```
 
-This can be fixed by proper firewall configuration. Here's an example of `nft` command on Fedora with `FedoraServer` default zone:
+This can be fixed with proper firewall configuration. Here's an example of `nft` command on Fedora with `FedoraServer` default zone:
 ```console
 # firewall-cmd --get-default-zone 
 FedoraServer
