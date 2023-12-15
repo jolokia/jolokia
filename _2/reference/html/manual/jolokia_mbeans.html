@@ -61,10 +61,10 @@
     <a class="nav-link" href="clients.html">Clients</a>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="jolokia_jmx.html">Jolokia JMX</a>
+    <a class="nav-link" href="jolokia_jmx.html">JMX Support</a>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="tools.html">Tools</a>
+    <a class="nav-link" href="spring.html">Spring Support</a>
   </li>
 </ul>
   </li>
@@ -112,7 +112,7 @@
 <div class="sectionbody">
 <div class="paragraph">
 <p>Besides bridging JMX to the HTTP/JSON world, the Jolokia agents
-also install their own MBeans which provide the extra services
+also register their own MBeans which provide the extra services
 described in this chapter.</p>
 </div>
 </div>
@@ -123,13 +123,10 @@ described in this chapter.</p>
 <div class="paragraph">
 <p>This MBean, which is registered under the name
 <code>jolokia:type=Config</code>, allows changing
-configuration parameters. Changes are non-persistent and get
+debug-related configuration parameters. Changes are non-persistent and get
 lost after a restart of the hosting application
-server. Debugging mode and the history store can be configured with
-this MBean.</p>
+server.</p>
 </div>
-<div class="sect2">
-<h3 id="mbean-debugging"><a class="anchor" href="#mbean-debugging"></a>Debugging</h3>
 <div class="paragraph">
 <p>Debugging can be switched on by setting the attribute
 <code>Debug</code>. When debugging is switched on, the
@@ -142,15 +139,19 @@ turn contain their requests) sent to the client. Finally, the
 operation <code>resetDebugInfo</code> clears the debug
 history.</p>
 </div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/debug-mbean.png" alt="debug mbean">
 </div>
-<div class="sect2">
-<h3 id="mbean-history"><a class="anchor" href="#mbean-history"></a>History store</h3>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="mbean-history"><a class="anchor" href="#mbean-history"></a>History MBean</h2>
+<div class="sectionbody">
 <div class="paragraph">
-<p>The <em>history store</em> can be used to remember
-attribute and return values within the agent&#8217;s memory. The
-Nagios check <code>check_jmx4perl</code>, for instance,
-uses this feature for its delta check, which measures
-changes in attribute values. In order to
+<p>The <code>jolokia:type=History</code> can be used to remember
+attribute and return values within the agent&#8217;s memory. In order to
 switch on history tracking, two operations are provided:</p>
 </div>
 <div class="dlist">
@@ -203,8 +204,7 @@ response will contain an extra field
 <code>history</code> which contains a list with
 historical values along with the timestamp when it was
 recorded. This format is described in detail in
-<a href="#history">[history]</a>.</p>
-</div>
+<a href="jolokia_protocol.html#history" class="xref page">Tracking historical values</a>.</p>
 </div>
 </div>
 </div>
@@ -214,11 +214,70 @@ recorded. This format is described in detail in
 <div class="paragraph">
 <p>The MBean
 <code>jolokia:type=ServerHandler</code> has a single
-operation <code>mBeanServersInfo</code> with no
+operation <code>mBeanServersInfo()</code> with no
 arguments. This operation can be used to dump out the name of
 all registered MBeans on all found MBeanServers. It is helpful to
 get a quick and condensed overview of the available JMX
 information.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-shell hljs" data-lang="shell">$ curl -s -u jolokia:jolokia 'http://localhost:8080/jolokia/exec/jolokia:agent=192.168.0.221-72527-5d9f8cd3-servlet,type=ServerHandler/mBeanServersInfo()' | jq -r .value
+Found 1 MBeanServers
+    ++ com.sun.jmx.mbeanserver.JmxMBeanServer@75a1cd57: default domain = DefaultDomain, 108 MBeans
+        Domains:
+         == JMImplementation
+              type=MBeanServerDelegate
+         == java.util.logging
+              type=Logging
+         == jdk.management.jfr
+              type=FlightRecorder
+         == java.lang
+              name=Metaspace Manager,type=MemoryManager
+              name=Metaspace,type=MemoryPool
+              name=CodeHeap 'profiled nmethods',type=MemoryPool
+              type=ClassLoading
+              type=Runtime
+              name=CodeCacheManager,type=MemoryManager
+              type=OperatingSystem
+              name=Compressed Class Space,type=MemoryPool
+              type=Threading
+              name=CodeHeap 'non-nmethods',type=MemoryPool
+              name=G1 Eden Space,type=MemoryPool
+              name=G1 Old Gen,type=MemoryPool
+              name=G1 Survivor Space,type=MemoryPool
+              name=G1 Young Generation,type=GarbageCollector
+              type=Memory
+              type=Compilation
+              name=G1 Old Generation,type=GarbageCollector
+              name=CodeHeap 'non-profiled nmethods',type=MemoryPool
+         == com.sun.management
+              type=HotSpotDiagnostic
+              type=DiagnosticCommand
+         == java.nio
+              name=mapped - 'non-volatile memory',type=BufferPool
+              name=direct,type=BufferPool
+              name=mapped,type=BufferPool
+         == Users
+              database=UserDatabase,type=User,username="jolokia"
+              database=UserDatabase,rolename="jolokia",type=Role
+              database=UserDatabase,rolename="manager-gui",type=Role
+              database=UserDatabase,type=User,username="tomcat"
+              database=UserDatabase,type=UserDatabase
+         == Catalina
+              context=/,host=localhost,type=Manager
+              context=/manager,host=localhost,name=BasicAuthenticator,type=Valve
+...
+              type=Engine
+         == jolokia
+              agent=192.168.0.221-72527-5d9f8cd3-servlet,type=History
+              agent=192.168.0.221-72527-5d9f8cd3-servlet,type=Config
+              agent=192.168.0.221-72527-5d9f8cd3-servlet,type=Discovery
+              agent=192.168.0.221-72527-5d9f8cd3-servlet,type=NotificationStore
+              agent=192.168.0.221-72527-5d9f8cd3-servlet,type=ServerHandler
+
+Platform MBeanServer: com.sun.jmx.mbeanserver.JmxMBeanServer@75a1cd57</code></pre>
+</div>
 </div>
 </div>
 </div>
@@ -226,7 +285,7 @@ information.</p>
 <h2 id="mbean-discovery"><a class="anchor" href="#mbean-discovery"></a>Discovery MBean</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><code>jolokia:type=Discovery</code> can be used to detect other MBeans by
+<p><code>jolokia:type=Discovery</code> can be used to detect other Jolokia Agents by
 sending multicast discovery UDP requests. Every agent which has discovery enabled will respond with information
 about the agent itself and the access URL. The MBean itself ha two operations: <code>lookupAgents</code>
 and <code>lookupAgentsWithTimeout</code> which either use a default timeout of one second for waiting
@@ -240,21 +299,22 @@ JSON array which contains JSON objects, one for each agent discovered.</p>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">[
   {
-    "agent_id" : "10.9.11.25-58613-81b087d-servlet",
-    "url": "http://10.9.11.25:8778/jolokia",
-    "secured": false,
-    "server_vendor" : "Apache",
-    "server_product" : "Tomcat",
-    "server_version" : "7.0.35"
+    "agent_version": "2.0.0",
+    "agent_id": "192.168.0.221-72527-6baa8838-servlet",
+    "server_product": "tomcat",
+    "server_vendor": "Apache",
+    "server_version": "10.1.16",
+    "secured": true,
+    "url": "http://192.168.0.221:8080/jolokia"
   },
   {
-    "agent_id" : "10.9.11.87-23455-9184ef-osgi",
-    "agent_description": "My OSGi container",
-    "url": "http://10.9.11.87:8080/jolokia",
-    "secured": true,
-    "server_vendor" : "Apache",
-    "server_product" : "Felix",
-    "server_version" : "4.2.1"
+    "agent_version": "2.0.0",
+    "agent_id": "192.168.0.221-89505-1328eb8a-osgi",
+    "server_product": "felix",
+    "server_vendor": "Apache",
+    "server_version": "7.0.5",
+    "secured": false,
+    "url": "http://192.168.0.221:8181/jolokia"
   }
 ]</code></pre>
 </div>
@@ -262,9 +322,9 @@ JSON array which contains JSON objects, one for each agent discovered.</p>
 <table id="discovery-mbean-response" class="tableblock frame-all grid-all stretch">
 <caption class="title">Table 1. Response properties</caption>
 <colgroup>
-<col style="width: 33.3333%;">
-<col style="width: 33.3333%;">
-<col style="width: 33.3334%;">
+<col style="width: 15%;">
+<col>
+<col style="width: 30%;">
 </colgroup>
 <thead>
 <tr>
@@ -281,13 +341,13 @@ during startup of the agent in form of a configuration
 parameter or being autodetected. If autodected, the id has
 several parts: The IP, the process id, hashcode of the agent
 and its type. This field will be always provided.</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>10.9.11.87-23455-9184ef-osgi</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>192.168.0.221-72527-6baa8838-servlet</code></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>agent_description</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">An optional description which can be used as a UI label if
 given.</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>ServiceMix ESB</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Apache Tomcat</code></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>url</code></p></td>
@@ -299,7 +359,7 @@ URL is used. If autodetected it is taken from the first HTTP
 request processed by the servlet. Hence no URL is available
 until this first request was processed. This property might
 be empty.</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code><a href="http://10.9.11.87:8080/jolokia" class="bare">http://10.9.11.87:8080/jolokia</a></code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>http://192.168.0.221:8080/jolokia</code></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>secured</code></p></td>
@@ -320,7 +380,7 @@ field is included if it could be automatically detected.</p></td>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>server_version</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">The container&#8217;s version (if detected)</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>7.0.50</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>10.1.16</code></p></td>
 </tr>
 </tbody>
 </table>

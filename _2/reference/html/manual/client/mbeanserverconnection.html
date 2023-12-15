@@ -59,10 +59,10 @@
     <a class="nav-link" href="../clients.html">Clients</a>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="../jolokia_jmx.html">Jolokia JMX</a>
+    <a class="nav-link" href="../jolokia_jmx.html">JMX Support</a>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="../tools.html">Tools</a>
+    <a class="nav-link" href="../spring.html">Spring Support</a>
   </li>
 </ul>
   </li>
@@ -113,8 +113,8 @@ This allows you to use tools that leverage a JSR-160 <code>MBeanServerConnection
 <div class="title">Recommended plugins</div>
 <div class="paragraph">
 <p>For Java Mission Control, a set of plugins are provided at
-<a href="https://github.com/skarsaune/jmc-cloud-extensions/" class="bare">https://github.com/skarsaune/jmc-cloud-extensions/</a> and for
-Java Visual VM a Jolokia plugin can be downloaded from <a href="https://skarsaune.github.io/jolokia-jmc-update-site/visualvm/org-jolokia-jmx-plugin.nbm" class="bare">https://skarsaune.github.io/jolokia-jmc-update-site/visualvm/org-jolokia-jmx-plugin.nbm</a></p>
+<a href="https://github.com/skarsaune/jmc-cloud-extensions/" class="bare externalLink" target="_blank" rel="noopener">https://github.com/skarsaune/jmc-cloud-extensions/</a> and for
+Java Visual VM a Jolokia plugin can be downloaded from <a href="https://skarsaune.github.io/jolokia-jmc-update-site/visualvm/org-jolokia-jmx-plugin.nbm" class="bare externalLink" target="_blank" rel="noopener">https://skarsaune.github.io/jolokia-jmc-update-site/visualvm/org-jolokia-jmx-plugin.nbm</a></p>
 </div>
 </div>
 </div>
@@ -130,7 +130,7 @@ Java Visual VM a Jolokia plugin can be downloaded from <a href="https://skarsaun
 <ul>
 <li>
 <p>Jolokia&#8217;s <code>remote-jmx-adapter-2.0.0-javaagent.jar</code>
-must be on the classpath. See the <a href="../../download.html">Download page</a> for the latest versions of this adapter jar.</p>
+must be on the classpath. See the <a href="/download.html">Download page</a> for the latest versions of this adapter jar.</p>
 </li>
 <li>
 <p>Jolokia has to be accessible running at
@@ -145,15 +145,15 @@ import javax.management.ObjectName;
 import java.util.Arrays;
 
 public class ConnectWithJolokiaDemo {
-  public static void main(String[] args) {
-    Map options = new HashMap();
+  public static void main(String[] args) throws Exception {
+    Map&lt;String, Object&gt; options = new HashMap&lt;&gt;();
     // Add user &amp; password if the Agent is secured:
-    // options.put(JMXConnector.CREDENTIALS, Arrays.asList("myuser", "mypassword"));
+    options.put(JMXConnector.CREDENTIALS, new String[] { "jolokia", "jolokia" });
 
     // https will be used if port number fits the pattern *443
     // or if options contains "jmx.remote.x.check.stub"-&gt;"true"
     JMXConnector connector = JMXConnectorFactory.connect(
-        new JMXServiceURL("service:jmx:jolokia://localhost:8778/jolokia/"),
+        new JMXServiceURL("service:jmx:jolokia://localhost:8778/jolokia"),
         options);
     connector.connect();
     System.out.println("Memory used: " +
@@ -176,13 +176,13 @@ public class ConnectWithJolokiaDemo {
 <ul>
 <li>
 <p>Jolokia&#8217;s <code>remote-jmx-adapter-2.0.0-javaagent.jar</code>
-must be on the classpath. See the <a href="../../download.html">Download page</a> for the latest versions of this adapter jar.</p>
+must be on the classpath. See the <a href="/download.html">Download page</a> for the latest versions of this adapter jar.</p>
 </li>
 <li>
 <p>In addition, the Jolokia Kubernetes extension
 <code>jolokia-kubernetes-2.0.0-javaagent.jar</code>
 must be on the classpath. This can be also downloaded from the
-<a href="../../download.html">Download page</a>.</p>
+<a href="/download.html">Download page</a>.</p>
 </li>
 <li>
 <p>Configuration and authentication for the Kubernetes context setup are as usual. I.e., you must be able to run <code>kubectl</code> with the cluster to connect to. You can check this by <code>kubectl get namespace</code>.</p>
@@ -223,14 +223,18 @@ You need to add the Jolokia connector client libraries when launching <code>jcon
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>java \
-  -classpath "jolokia-jmx-adapter-2.0.0-javaagent.jar:\
-              jolokia-kubernetes-2.0.0-javaagent.jar:\
-              $JAVA_HOME/lib/jconsole.jar:\
-              $JAVA_HOME/classes" \
-  -Dapplication.home=$JAVA_HOME \
-  -Xms8m -Djconsole.showOutputViewer \
-  sun.tools.jconsole.JConsole</pre>
+<pre>java -cp jolokia-agent-jvm-2.0.0-javaagent.jar:\
+jolokia-client-jmx-adapter-2.0.0-standalone.jar:\
+jolokia-client-kubernetes-2.0.0-standalone.jar \
+-Djconsole.showOutputViewer sun.tools.jconsole.JConsole</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>After adding these Jolokia jars to <code>sun.tools.jconsole.JConsole</code> class we can then access remote server using Jolokia JMX URL:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="../_images/jconsole.png" alt="jconsole">
 </div>
 </div>
 </div>

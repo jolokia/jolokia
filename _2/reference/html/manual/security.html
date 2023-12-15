@@ -61,10 +61,10 @@
     <a class="nav-link" href="clients.html">Clients</a>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="jolokia_jmx.html">Jolokia JMX</a>
+    <a class="nav-link" href="jolokia_jmx.html">JMX Support</a>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="tools.html">Tools</a>
+    <a class="nav-link" href="spring.html">Spring Support</a>
   </li>
 </ul>
   </li>
@@ -138,7 +138,7 @@ specified within a <code>&lt;remote&gt;</code> section,
 which contains one or more <code>&lt;host&gt;</code>
 elements. The source can be given either as an IP address,
 a host name, or a netmask given in
-<a href="https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing" class="externalLink">CIDR format</a>
+<a href="https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing" class="externalLink" target="_blank" rel="noopener">CIDR format</a>
 (e.g. <code>10.0.0.0/16</code> for all clients coming from the 10.0
 network). The following allows access from localhost and all
 clients whose IP addresses start with "10.0". For all other
@@ -287,12 +287,12 @@ completely, any HTTP method can be used.</p>
 <h3 id="_cross_origin_resource_sharing_cors_restrictions"><a class="anchor" href="#_cross_origin_resource_sharing_cors_restrictions"></a>Cross-Origin Resource Sharing (CORS) restrictions</h3>
 <div class="paragraph">
 <p>Jolokia (since version 1.0.3) supports the W3C specification
-for <a href="https://www.w3.org/TR/cors/" class="externalLink">Cross-Origin Resource Sharing</a> (also known as "CORS") which allows
+for <a href="https://www.w3.org/TR/cors/" class="externalLink" target="<em>blank">Cross-Origin Resource Sharing</a> (also known as "CORS") which allows
 browser to access resources which are located on a different
 server than the calling script is loaded from. This
 specification provides a controlled way to come around the
-<em>same origin policy</em>. Most
-<a href="https://caniuse.com/#search=CORS" class="externalLink">contemporary browsers</a> support CORS.</p>
+_same origin policy</em>. Most
+<a href="https://caniuse.com/#search=CORS" class="externalLink" target="_blank" rel="noopener">contemporary browsers</a> support CORS.</p>
 </div>
 <div class="paragraph">
 <p>By default Jolokia allows cross origin access from any
@@ -326,10 +326,10 @@ If neither <code>Origin:</code> nor <code>Referer:</code> is given and strict ch
 <div class="paragraph">
 <p>Please note that <code>&lt;strict-checking/&gt;</code> might not be good enough because of potential
 browser bugs which could allow to forge the origin header. Examples of these issues are
-<a href="https://blog.bentkowski.info/2018/06/setting-arbitrary-request-headers-in.html" class="externalLink">arbitrary header injection</a>
-or <a href="https://www.brokenbrowser.com/referer-spoofing-defeating-xss-filter/" class="externalLink">referer and origin spoofing</a>. User facing application which uses Jolokia has backend should consider to implement
+<a href="https://blog.bentkowski.info/2018/06/setting-arbitrary-request-headers-in.html" class="externalLink" target="_blank" rel="noopener">arbitrary header injection</a>
+or <a href="https://www.brokenbrowser.com/referer-spoofing-defeating-xss-filter/" class="externalLink" target="_blank" rel="noopener">referer and origin spoofing</a>. User facing application which uses Jolokia has backend should consider to implement
 additional measures like using the
-<a href="https://tools.ietf.org/html/draft-west-first-party-cookies-07" class="externalLink">same-site</a> flag
+<a href="https://tools.ietf.org/html/draft-west-first-party-cookies-07" class="externalLink" target="_blank" rel="noopener">same-site</a> flag
 on the session cookie.</p>
 </div>
 </div>
@@ -359,7 +359,7 @@ forbid fetching the pool&#8217;s properties, which in fact
 contains the DB password as clear text.</p>
 </li>
 <li>
-<p>Access to <code>jdk.management.jfr:type=FlightRecorder</code> MBean is denied (see <a href="https://nvd.nist.gov/vuln/detail/CVE-2022-41678" class="externalLink">CVE-2022-41678</a>)</p>
+<p>Access to <code>jdk.management.jfr:type=FlightRecorder</code> MBean is denied (see <a href="https://nvd.nist.gov/vuln/detail/CVE-2022-41678" class="externalLink" target="_blank" rel="noopener">CVE-2022-41678</a>)</p>
 </li>
 </ul>
 </div>
@@ -413,10 +413,9 @@ contains the DB password as clear text.</p>
 inclusion of a <code>jolokia-access.xml</code>
 policy file
 is the command line tool
-<a href="https://search.cpan.org/~roland/jmx4perl/scripts/jolokia" class="externalLink">jolokia</a>,
+<a href="https://search.cpan.org/~roland/jmx4perl/scripts/jolokia" class="externalLink" target="_blank" rel="noopener">jolokia</a>,
 which comes with the
-<a href="https://metacpan.org/dist/jmx4perl" class="externalLink">jmx4perl</a> distribution. See
-<a href="tools.html" class="xref page">Tools</a> for an introduction.</p>
+<a href="https://metacpan.org/dist/jmx4perl" class="externalLink" target="_blank" rel="noopener">jmx4perl</a> distribution.</p>
 </div>
 </div>
 </div>

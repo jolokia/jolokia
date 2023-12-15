@@ -61,10 +61,10 @@
     <a class="nav-link" href="clients.html">Clients</a>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="jolokia_jmx.html">Jolokia JMX</a>
+    <a class="nav-link" href="jolokia_jmx.html">JMX Support</a>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="tools.html">Tools</a>
+    <a class="nav-link" href="spring.html">Spring Support</a>
   </li>
 </ul>
   </li>
@@ -114,10 +114,8 @@
 <p>Three client implementations exists for Jolokia: Jmx4Perl, the
 Perl binding (the grandmother of all clients ;-), a Java library
 and a JavaScript library. This reference describes the client
-bindings bundled with Jolokia. More JVM based client libraries
-are planned for inclusion in Jolokia (e.g. Groovy, Scala or
-JRuby). Information about Jmx4Perl can be found
-<a href="https://www.jmx4perl.org">elsewhere</a>.</p>
+bindings bundled with Jolokia. Information about Jmx4Perl can be found
+<a href="https://metacpan.org/dist/jmx4perl" class="externalLink" target="_blank" rel="noopener">elsewhere</a>.</p>
 </div>
 </div>
 </div>
@@ -143,8 +141,8 @@ which also serves this script.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">var j4p = new Jolokia("/jolokia");
-var value = j4p.getAttribute("java.lang:type=Memory", "HeapMemoryUsage", "used");
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">let j4p = new Jolokia("/jolokia");
+let value = j4p.getAttribute("java.lang:type=Memory", "HeapMemoryUsage", "used");
 console.log("Heap Memory used: " + value);</code></pre>
 </div>
 </div>
@@ -172,8 +170,8 @@ to the <code>Jolokia</code> object definition.</p>
 </div>
 <div class="paragraph">
 <p>All four files can be obtained from the
-<a href="/download.html">download
-page</a>. For production environments the compressed version
+<a href="/download.html">download page</a>.
+For production environments the compressed version
 is highly recommended since the extensive API documentation
 included in the original version is stripped off here. For Maven
 users there is an even better way to integrate them, described in
@@ -181,18 +179,16 @@ users there is an even better way to integrate them, described in
 </div>
 <div class="paragraph">
 <p><code>jolokia.js</code> uses
-<a href="https://www.jquery.com">jQuery</a>, which must be
-included as well. If the target platform doesn&#8217;t support native
-JSON serialization,
-<a href="https://github.com/douglascrockford/JSON-js">json2.js</a>
-needs to be included as well. As sample HTML head for including
-all necessary parts looks like:</p>
+<a href="https://www.jquery.com" class="externalLink" target="_blank" rel="noopener">jQuery</a>, which must be
+included as well. Since Jolokia 2 is compliant with ES5, using <a href="https://github.com/douglascrockford/JSON-js" class="externalLink" target="_blank" rel="noopener">json2.js</a> is no longer required.</p>
+</div>
+<div class="paragraph">
+<p>As sample HTML head for including all necessary parts looks like:</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;head&gt;
-  &lt;script src="jquery-1.7.2.js"&gt;&lt;/script&gt;
-  &lt;script src="json2.js"&gt;&lt;/script&gt;
+  &lt;script src="jquery-3.7.1.js"&gt;&lt;/script&gt;
   &lt;script src="jolokia-min.js"&gt;&lt;/script&gt;
   &lt;script src="jolokia-simple-min.js"&gt;&lt;/script&gt;
 &lt;/head&gt;</code></pre>
@@ -210,9 +206,9 @@ overriding are given there.</p>
 <div class="sect2">
 <h3 id="js-request"><a class="anchor" href="#js-request"></a>Usage</h3>
 <div class="paragraph">
-<p>All function of this library are available as methods of the
-<code>Jolokia</code> object. The options needs to be
-instantiated as usual and takes a set of default options, which
+<p>All functions of this library are available as methods of the
+<code>Jolokia</code> object. The <code>options</code> argument needs to be
+instantiated as usual and it takes a set of default options, which
 can be overwritten by subsequent requests. On the most basic
 layer is a single <code>request()</code> method,
 which takes two arguments: A request object and an optional
@@ -222,8 +218,8 @@ delivered the JavaScript looks like:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">var j4p = new Jolokia({ "url": "/jolokia" });
-var response = j4p.request({ "type": "version" }, { "method": "post" });
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">let j4p = new Jolokia({ "url": "/jolokia" });
+let response = j4p.request({ "type": "version" }, { "method": "post" });
 console.log("Agent Version: " + response.value.agent);</code></pre>
 </div>
 </div>
@@ -240,7 +236,7 @@ single string argument (<code>new Jolokia("/jolokia")</code>).</p>
 <p>Jolokia requests and responses are represented as JSON
 objects. They have exactly the same format, which is expected
 and returned by the agent as defined in
-<a href="#protocol">[protocol]</a> for POST requests. All request types are
+<a href="jolokia_protocol.html" class="xref page">Jolokia Protocol</a> for POST requests. All request types are
 supported.</p>
 </div>
 <div class="paragraph">
@@ -259,30 +255,30 @@ the Jolokia agent:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">var j4p = new Jolokia({ "url": "/jolokia" });
-var req1 = { "type": "read", "mbean": "java.lang:type=Memory", "attribute": "HeapMemoryUsage" };
-var req2 = { "type": "list" };
-var response = j4p.request(req1);
-var responses = j4p.request([ req1, req2 ]);</code></pre>
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">let j4p = new Jolokia({ "url": "/jolokia" });
+let req1 = { "type": "read", "mbean": "java.lang:type=Memory", "attribute": "HeapMemoryUsage" };
+let req2 = { "type": "list" };
+let response = j4p.request(req1);
+let responses = j4p.request([ req1, req2 ]);</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="s-request-options"><a class="anchor" href="#s-request-options"></a>Request options</h4>
+<h4 id="js-request-options"><a class="anchor" href="#js-request-options"></a>Request options</h4>
 <div class="paragraph">
 <p>Each request can be influenced by a set of optional options
 provided either as default during construction of the
 <code>Jolokia</code> object or as optional last
 parameter for the request object. Also a request can carry a
 <code>config</code> attribute, which can be used for all
-processing parameters (<a href="#processing-parameters">[processing-parameters]</a>).
+processing parameters (<a href="jolokia_protocol.html#processing-parameters" class="xref page">Processing parameters</a>).
 The known options are summarized in <a href="#js-request-options-table">Table 1, &#8220;Request options&#8221;</a></p>
 </div>
 <table id="js-request-options-table" class="tableblock frame-all grid-all stretch">
 <caption class="title">Table 1. Request options</caption>
 <colgroup>
-<col style="width: 50%;">
-<col style="width: 50%;">
+<col style="width: 20%;">
+<col>
 </colgroup>
 <thead>
 <tr>
@@ -420,7 +416,7 @@ error callback is called which must check the status itself.</p></td>
 Ajax. If a <code>success</code> callback is given in the
 request options, the request is performed asynchronously via an
 Ajax HTTP request. The callback gets these arguments: a Jolokia JSON
-response object (see <a href="#request-response">[request-response]</a>) and an
+response object (see <a href="jolokia_protocol.html#request-response" class="xref page">Requests and Responses</a>) and an
 integer index indicating for which response this callback is being
 called. For bulk requests, this index corresponds to the array
 index of the request which lead to this response. The value of
@@ -441,7 +437,7 @@ callbacks.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">var j4p = new Jolokia("/jolokia");
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">let j4p = new Jolokia("/jolokia");
 
 // Single request with a single success callback
 j4p.request(
@@ -502,20 +498,20 @@ callback <code>ajaxError</code> is called with the
 object. It has the same signature as the underlying
 <code>error</code> callback of the
 <code>jQuery.ajax()</code> call. (See the
-<a href="https://api.jquery.com/jQuery.ajax/">jQuery documentation</a>
+<a href="https://api.jquery.com/jQuery.ajax/" class="externalLink" target="_blank" rel="noopener">jQuery documentation</a>
 for details).</p>
 </div>
 <div class="paragraph">
 <p>The Jolokia agent also supports
-<a href="https://en.wikipedia.org/wiki/JSONP">JSONP</a> requests
+<a href="https://en.wikipedia.org/wiki/JSONP" class="externalLink" target="<em>blank">JSONP</a> requests
 for cases where the Jolokia agent is served on a different server or port
 than the JavaScript client. By default, such access is forbidden by the so called
-<em>same-origin-policy</em>. To switch on JSONP, the
+_same-origin-policy</em>. To switch on JSONP, the
 option <code>jsonp</code> should be set to
 <code>"true"</code>.</p>
 </div>
 <div class="paragraph">
-<p>As explained in <a href="#request-response">[request-response]</a> the Jolokia
+<p>As explained in <a href="jolokia_protocol.html#request-response" class="xref page">Requests and Responses</a> the Jolokia
 agent supports two HTTP methods, <code>GET</code> and
 <code>POST</code>. <code>POST</code> is more
 powerful since it supports more features. e.g. bulk requests and
@@ -543,7 +539,7 @@ an array of string values) can only be used with
 <code>POST</code>.</p>
 </li>
 <li>
-<p>The JMX proxy mode (see <a href="#proxy">[proxy]</a>) can only be used
+<p>The JMX proxy mode (see <a href="proxy_mode.html" class="xref page">Proxy Mode</a>) can only be used
 with <code>POST</code>.</p>
 </li>
 <li>
@@ -590,7 +586,7 @@ can be optionally given, and the optional request options are
 given as last argument(s). The return value for synchronous
 operations are the attribute&#8217;s value, for asynchronous
 operations (i.e. <code>opts.success != null</code>) it is
-<code>null</code>. See <a href="#read">[read]</a> for
+<code>null</code>. See <a href="protocol/read.html" class="xref page">Reading attributes (read)</a> for
 details.</p>
 <div class="paragraph">
 <p>For example, the following method call can be used
@@ -598,7 +594,7 @@ to synchronously fetch the current heap memory usage:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">var memoryUsed = j4p.getAttribute("java.lang:type=Memory", "HeapMemoryUsage", "used");</code></pre>
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">let memoryUsed = j4p.getAttribute("java.lang:type=Memory", "HeapMemoryUsage", "used");</code></pre>
 </div>
 </div>
 </dd>
@@ -609,7 +605,7 @@ name <code>mbean</code>, the attribute
 <code>attribute</code> and the value to set as
 <code>value</code>. The optional <code>path</code> is the
 <em>inner path</em> of the attribute on which
-to set the value (see <a href="#write">[write]</a> for
+to set the value (see <a href="protocol/write.html" class="xref page">Writing attributes (write)</a> for
 details). The old value of the attribute is returned or
 given to a <code>success</code> callback.</p>
 <div class="paragraph">
@@ -617,7 +613,7 @@ given to a <code>success</code> callback.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">var gsLoggingWasOn = j4p.setAttribute("java.lang:type=Memory", "Verbose", true);</code></pre>
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">let gsLoggingWasOn = j4p.setAttribute("java.lang:type=Memory", "Verbose", true);</code></pre>
 </div>
 </div>
 </dd>
@@ -628,14 +624,14 @@ MBean <code>mbean</code>. Beside the operation&#8217;s name
 <code>operation</code>, one or more arguments can be given
 depending on the signature of the JMX operation. The
 return value is the return value of the operation. See
-<a href="#exec">[exec]</a> for details.</p>
+<a href="protocol/exec.html" class="xref page">Executing JMX operations (exec)</a> for details.</p>
 <div class="paragraph">
 <p>The following exampled asynchronously fetches a thread dump
 as a JSON object and logs it into the console:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">j4p.execute("java.lang:type=Threading", "dumpAllThreads", true, true, {
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">j4p.execute("java.lang:type=Threading", "dumpAllThreads(boolean,boolean)", true, true, {
   "success": function(value) {
     console.log(JSON.stringify(value));
   }
@@ -648,14 +644,14 @@ as a JSON object and logs it into the console:</p>
 <p>Searches for one or more MBeans whose object names fit the
 pattern <code>mBeanPattern</code>. The return value is a list
 of strings with the matching MBean names or <code>null</code>
-if none is found. See <a href="#search">[search]</a> for details.</p>
+if none is found. See <a href="protocol/search.html" class="xref page">Searching MBeans (search)</a> for details.</p>
 <div class="paragraph">
 <p>The following example looks up all application servers
 available in all domains:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">var appServerNames = j4p.search("*:j2eeType=J2EEServer,*");</code></pre>
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">let servletNames = j4p.search("*:j2eeType=Servlet,*");</code></pre>
 </div>
 </div>
 </dd>
@@ -666,7 +662,7 @@ the <code>list</code> command can be used. The
 optional <code>path</code> points into this meta
 information for retrieving partial information. The format
 of the return value is described in detail in
-<a href="#list">[list]</a>.</p>
+<a href="protocol/list.html" class="xref page">Listing MBeans (list)</a>.</p>
 <div class="paragraph">
 <p>This example fetches only the meta information for the
 attributes of the
@@ -674,7 +670,7 @@ attributes of the
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">var attributesMeta = j4p.list("java.lang/type=OperatingSystem/attr");</code></pre>
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">let attributesMeta = j4p.list("java.lang/type=OperatingSystem/attr");</code></pre>
 </div>
 </div>
 </dd>
@@ -683,22 +679,32 @@ attributes of the
 <p>The <code>version</code> method returns the
 agent&#8217;s version, the protocol version, and possibly some
 additional server-specific information. See
-<a href="#version">[version]</a> for more information about this
+<a href="protocol/version.html" class="xref page">Getting the agent version (version)</a> for more information about this
 method.</p>
 <div class="paragraph">
-<p>A sample return value for a GlassFish server looks like:</p>
+<p>A sample return value for an Apache Tomcat server looks like:</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "protocol": "4.0",
-  "agent": "0.82",
+  "agent": "2.0.0",
+  "protocol": "7.2",
+  "details": {
+    "agent_version": "2.0.0-SNAPSHOT",
+    "agent_id": "192.168.0.221-72527-6baa8838-servlet",
+    "server_product": "tomcat",
+    "server_vendor": "Apache",
+    "server_version": "10.1.16",
+    "secured": true,
+    "url": "http://192.168.0.221:8080/jolokia"
+  },
+  "id": "192.168.0.221-72527-6baa8838-servlet",
+  "config": {
+    ...
+  },
   "info": {
-    "product": "glassfish",
-    "vendor": "Sun",
-    "extraInfo": {
-      "amxBooted": false
-    }
+    "proxy": {},
+    "jmx": {}
   }
 }</code></pre>
 </div>
@@ -723,12 +729,12 @@ every 10 seconds and prints out the used memory on the console:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">var j4p = new Jolokia("/jolokia")
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">let j4p = new Jolokia("/jolokia")
 handle = j4p.register(function(resp) {
   console.log("HeapMemory used: " + resp.value);
 },
 {
-  "type": "READ",
+  "type": "read",
   "mbean": "java.lang:type=Memory",
   "attribute": "HeapMemoryUsage", "path": "used"
 });
@@ -802,13 +808,13 @@ as arguments:</p>
   console.log("ThreadCount: " + resp2.value);
 },
 {
-  "type": "READ",
+  "type": "read",
   "mbean": "java.lang:type=Memory",
   "attribute": "HeapMemoryUsage",
   "path": "used"
 },
 {
-  "type": "READ",
+  "type": "read",
   "mbean": "java.lang:type=Threading",
   "attribute": "ThreadCount"
 });</code></pre>
@@ -836,13 +842,13 @@ order):</p>
     "onlyIfModified": true
   },
   {
-    "type": "LIST",
+    "type": "list",
     "config": {
       "maxDepth": 2
     }
   },
   {
-    "type": "READ",
+    "type": "read",
     "mbean": "java.lang:type=Threading",
     "attribute": "ThreadCount",
     "config": {
@@ -850,7 +856,7 @@ order):</p>
     }
   },
   {
-    "type": "READ",
+    "type": "read",
     "mbean": "bla.blu:type=foo",
     "attribute": "blubber"
   }
@@ -895,209 +901,12 @@ otherwise.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="js-cubism"><a class="anchor" href="#js-cubism"></a>Jolokia as a Cubism Source</h3>
-<div class="paragraph">
-<p><a href="https://square.github.com/cubism/">Cubism</a> is a JavaScript library for
-plotting time-series data and is based on
-<a href="https://d3js.org/">d3.js</a>. Jolokia comes with a plugin for Cubism and
-can act as a data source. The usage is quite simple: After
-creating a Jolokia Cubism source, one or more JSON request can
-be registered, which are queried periodically. No matter how
-many requests are registered, only a single HTTP request is sent
-to the server after each period. Cubism is then responsible for
-plotting the data.</p>
-</div>
-<div class="paragraph">
-<p><a href="#fig-jolokia-cubism-example">Figure 1, &#8220;Horizon Chart for Heap-Memory Usage&#8221;</a>  shows a sample for a memory plot. More examples can
-be found on this <a href="../../client/javascript-cubism.html">page</a>.</p>
-</div>
-<div id="fig-jolokia-cubism-example" class="imageblock">
-<div class="content">
-<img src="_images/jolokia-cubism-memory-horizon.png" alt="jolokia cubism memory horizon">
-</div>
-<div class="title">Figure 1. Horizon Chart for Heap-Memory Usage</div>
-</div>
-<div class="paragraph">
-<p><code>jolokia-cubism.js</code> can be downloaded from
-the <a href="/download.html">downlad page</a> and also
-comes with a minified version. As dependencies it requires
-<a href="/download.html">jolokia.js</a>,
-<a href="https://www.jquery.com">JQuery</a>,
-<a href="https://square.github.com/cubism/">Cubism</a> and
-<a href="https://d3js.org/">d3.js</a>. <code>jolokia-cubism.js</code>
-registers itself as an
-<a href="https://requirejs.org/docs/whyamd.html">AMD</a> module
-if running within an AMD environment.</p>
-</div>
-<div class="paragraph">
-<p>In order to use Jolokia with Cubism, you first need to create a
-Cubism <a href="https://github.com/square/cubism/wiki/Context">context</a>. Next use
-<code>context.jolokia()</code> for creating a connection to the
-Jolokia agent.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">var context = cubism.context();
-
-// Create a source for Jolokia metrics pointing to the agent
-// at 'http://jolokia.org/jolokia'
-var jolokia = context.jolokia("http://jolokia.org/jolokia");</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>The method <code>context.jolokia()</code> can take various
-kind of arguments:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>A single string as in the example above is used as the
-agent&#8217;s URL. Additionally, options as key-value pairs can be
-given as an additional argument. The possible keys are
-described in <a href="#js-request-options-table">Table 1, &#8220;Request options&#8221;</a>. If
-the URL is omitted, but only an option object is provided,
-then this object must also contain a key <code>url</code>
-for specifying the agent URL.</p>
-</li>
-<li>
-<p>Alternatively, an already instantiated Jolokia object can be
-provided as single argument, which then is used for all
-communications to the server.</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>From this source object, a
-<a href="https://github.com/square/cubism/wiki/Metric">metric</a>
-object can be easily created. This metric object embraces one
-or more Jolokia requests which are send to the server
-periodically. The response(s) are then used for calculating a
-single numerical value which gets plotted. For example:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">// Read periodically the Heap-Memory use and take 'HeapMemory Usage' as name/label.
-var metricMem = jolokia.metric({
-  "type": "read",
-  "mbean": "java.lang:type=Memory",
-  "attribute": "HeapMemoryUsage",
-  "path": "used"
-},
-"HeapMemory Usage");
-
-// Example for a callback function for evaluating responses
-// dynamically. In this case, the first
-// argument is a function, which gets feed with all response objects
-// (one in this case). The requests objects are given next, and an
-// options object as last argument.
-var metricReq = jolokia.metric(
-  function (resp) {
-    var attrs = resp.value;
-    var sum = 0;
-    for (var key in attrs) {
-      sum += attrs[key].requestCount;
-    }
-    return sum;
-  },
-  {
-    "type": "read",
-    "mbean": "Catalina:j2eeType=Servlet,*",
-    "attribute": "requestCount"
-  },
-  {
-    "name": "All",
-    "delta": 101000
-  }
-);</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p><code>metric()</code> is a factory method which can be
-called in various ways.</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>If the first argument is a Jolokia request object (i.e. not
-a function), this request is used for sending requests
-periodically.</p>
-</li>
-<li>
-<p>If the first argument is a function, this function is used
-for calculating the numeric value to be plotted. The rest of
-the arguments can be one or more request objects, which are
-registered and their responses are put as arguments to the
-given callback function.</p>
-</li>
-<li>
-<p>The last argument, if an object but not a Jolokia request
-(i.e. there is no <code>type</code> key), is
-taken as an option object which is described below.</p>
-</li>
-<li>
-<p>Finally, if the last argument is a pure string, then this
-string is used as name for the chart.</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>An object which can be given as last argument is used for fine
-tuning the metrics:
-<code>name</code>:: Name used in charts. The name can also be given
-alternatively as a string directly as last argument (but
-then without any other options)
-<code>delta</code>:: Delta value in milliseconds for creating delta (velocity)
-charts. This is done by taking the value measured
-that many milliseconds ago and substract them from each other.
-<code>keepDelay</code>:: How many milliseconds before the oldest shown value should be
-kept in memory, which e.g. is necessary for delta
-charts. When <code>delta</code> is given, this
-value is implicitly set.</p>
-</div>
-<div class="paragraph">
-<p>One or more metric objects can now be converted to charts and
-added to a website with <code>d3.js</code>. This is done
-in the usual cubism way as described here. In our example, in
-order to append charts to a <code>div</code> with id
-<code>chart</code> the following code can be used:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">// Use d3 to attach the metrics with a specific graph type
-// ('horizon' in this case) to the document
-d3.select("#charts").call(function(div) {
-  div.append("div")
-    .data([ metricMem, metricReq ])
-    .call(context.horizon())
-});</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>For a complete API documentation please refer to the
-<a href="https://github.com/square/cubism/wiki/API-Reference">Cubism API</a>.</p>
-</div>
-</div>
-<div class="sect2">
 <h3 id="js-maven"><a class="anchor" href="#js-maven"></a>Maven integration</h3>
 <div class="paragraph">
 <p>For Maven users' convenience, the Jolokia JavaScript package is
 also available as a JavaScript artifact. It can be easily
 included with help of the
 <code>javascript-maven-plugin</code>.</p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="title">Recommended plugin</div>
-<div class="paragraph">
-<p>Unfortunately, the "official" version of this plugin hosted on
-Codehaus has been stuck at version
-<code>1.0-alpha-1-SNAPSHOT</code>. Although it is quite
-usable, in order to avoid a snapshot dependency, it is
-recommended to use a fork of this plugin hosted on
-<a href="https://github.com/harlanji/javascript-maven-tools">GitHub</a> and deployed at the
-<a href="https://oss.sonatype.org/content/groups/public">Sonatype Maven repository</a>.</p>
-</div>
-</div>
 </div>
 <div class="paragraph">
 <p>The following example shows a sample configuration which could
@@ -1140,13 +949,6 @@ be used within a <code>pom.xml</code>:</p>
     ...
   &lt;/build&gt;
   ...
-  &lt;pluginRepositories&gt;
-    &lt;pluginRepository&gt;
-      &lt;id&gt;sonatype-oss&lt;/id&gt;
-      &lt;url&gt;https://oss.sonatype.org/content/groups/public&lt;/url&gt;
-    &lt;/pluginRepository&gt;
-  &lt;/pluginRepositories&gt;
-  ...
 &lt;/project&gt;</code></pre>
 </div>
 </div>
@@ -1161,15 +963,14 @@ files use something like this:</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;head&gt;
-  &lt;script src="jquery-1.7.2.js"&gt;&lt;/script&gt;
-  &lt;script src="scripts/libk/json2.js"&gt;&lt;/script&gt;
+  &lt;script src="jquery-3.7.1.js"&gt;&lt;/script&gt;
   &lt;script src="scripts/lib/jolokia.js"&gt;&lt;/script&gt;
   &lt;script src="scripts/lib/jolokia-simple.js"&gt;&lt;/script&gt;
 &lt;/head&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p><code>jQuery.js</code> has to be included on its own,
+<p><code>jquery.js</code> has to be included on its own,
 though and is not included within the dependency. If the
 compressed version of <code>jolokia.js</code> should
 be used, add a
@@ -1179,7 +980,7 @@ include <code>scripts/lib/jolokia-min.js</code></p>
 </div>
 <div class="paragraph">
 <p>A full working example can be found in the Jolokia sources at
-<code>client/javascript/test-app/pom.xml</code>.</p>
+<code>examples/client-javascript-test-app/pom.xml</code>.</p>
 </div>
 </div>
 </div>
@@ -1234,7 +1035,7 @@ one or more <code>J4pResponse</code> objects as result.</p>
 <div class="title">What the heck is this "J4p"?</div>
 <div class="paragraph">
 <p>That&#8217;s a reminiscence to Jolokia&#8217;s roots which lies in
-<a href="https://www.jmx4perl.org">Jmx4Perl</a>. It is always good
+<a href="https://metacpan.org/dist/jmx4perl" class="externalLink" target="_blank" rel="noopener">Jmx4Perl</a>. It is always good
 to remember where one comes from ;-)</p>
 </div>
 </div>
@@ -1263,7 +1064,10 @@ import org.jolokia.client.request.*;
 
 public class MemoryDemo {
   public static void main(String[] args) {
-    J4pClient client = new J4pClient("http://localhost:8080/jolokia");
+    J4pClient client = J4pClient.url("http://localhost:8080/jolokia")
+        .user("jolokia")
+        .password("jolokia")
+        .build();
     J4pReadRequest request =
         new J4pReadRequest("java.lang:type=Memory", "HeapMemoryUsage");
     request.setPath("used");
@@ -1274,20 +1078,25 @@ public class MemoryDemo {
 </div>
 </div>
 <div class="paragraph">
-<p>In order to compile and run this sample, two support libraries
-are required in addition to
-<code>jolokia-client-java.jar</code> (<a href="../../download.html">Download</a>):</p>
+<p>In order to compile and run this sample, <code>jolokia-client-java.jar</code> library is needed (see <a href="/download.html">Download</a>) as well as
+some additional support libraries:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>Apache
-<a href="https://hc.apache.org/httpcomponents-client-ga/index.html">HttpClient</a>,
-4.3.3 (<a href="https://hc.apache.org/downloads.cgi">Download</a>)</p>
+<p><a href="https://repo1.maven.org/maven2/org/apache/httpcomponents/httpclient/4.5.14/httpclient-4.5.14.jar" class="externalLink" target="_blank" rel="noopener">httpclient-4.5.14.jar</a></p>
 </li>
 <li>
-<p><a href="https://code.google.com/p/json-simple/">json-simple</a>,
-1.1 (<a href="https://code.google.com/p/json-simple/downloads/list">Download</a>)</p>
+<p><a href="https://repo1.maven.org/maven2/org/apache/httpcomponents/httpcore/4.4.16/httpcore-4.4.16.jar" class="externalLink" target="_blank" rel="noopener">httpcore-4.4.16.jar</a></p>
+</li>
+<li>
+<p><a href="https://repo1.maven.org/maven2/com/googlecode/json-simple/json-simple/1.1.1/json-simple-1.1.1.jar" class="externalLink" target="_blank" rel="noopener">json-simple-1.1.1.jar</a></p>
+</li>
+<li>
+<p><a href="https://repo1.maven.org/maven2/commons-logging/commons-logging/1.2/commons-logging-1.2.jar" class="externalLink" target="_blank" rel="noopener">commons-logging-1.2.jar</a></p>
+</li>
+<li>
+<p><a href="https://repo1.maven.org/maven2/commons-codec/commons-codec/1.16.0/commons-codec-1.16.0.jar" class="externalLink" target="_blank" rel="noopener">commons-codec-1.16.0.jar</a></p>
 </li>
 </ul>
 </div>
@@ -1298,9 +1107,9 @@ the other two as transitive dependencies):</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
-  &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
-  &lt;artifactId&gt;jolokia-client-java&lt;/artifactId&gt;
-  &lt;version&gt;2.0.0&lt;/version&gt;
+    &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
+    &lt;artifactId&gt;jolokia-client-java&lt;/artifactId&gt;
+    &lt;version&gt;2.0.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -1334,9 +1143,9 @@ defaults:</p>
 <table class="tableblock frame-all grid-all stretch">
 <caption class="title">Table 2. J4pClient parameters</caption>
 <colgroup>
-<col style="width: 33.3333%;">
-<col style="width: 33.3333%;">
-<col style="width: 33.3334%;">
+<col style="width: 15%;">
+<col>
+<col style="width: 20%;">
 </colgroup>
 <thead>
 <tr>
@@ -1378,7 +1187,7 @@ authenticator is set.Only used when <code>user</code> is set, too.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">A JMX JSR-160 ServiceURL which should be used by the agent
 as the <em>real</em> target. This parameter should
 be set if the client is used for accessing the agent in
-<a href="#proxy">proxy mode</a>.</p></td>
+<a href="proxy_mode.html" class="xref page">Proxy Mode</a>.</p></td>
 <td class="tableblock halign-left valign-top"></td>
 </tr>
 <tr>
@@ -1496,15 +1305,15 @@ messages.</p></td>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>proxy</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Determines http proxy server. It can be defined as
-<code><a href="http://user:password@host:port" class="bare">http://user:password@host:port</a></code>. <em>user</em> and
+<code>http://user:password@host:port</code>. <em>user</em> and
 <em>password</em> are optional.</p></td>
 <td class="tableblock halign-left valign-top"></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>useProxyFromEnvironment</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Set the proxy for this client based on <code>http_proxy</code> system environment variable.
-Expect formats are <code><a href="http://user:pass@host:port" class="bare">http://user:pass@host:port</a></code> or <code><a href="http://host:port" class="bare">http://host:port</a></code>
-Example: <code><a href="http://tom:sEcReT@my.proxy.com:8080" class="bare">http://tom:sEcReT@my.proxy.com:8080</a></code></p></td>
+Expect formats are <code>http://user:pass@host:port</code> or <code>http://host:port</code>
+Example: <code>http://tom:sEcReT@my.proxy.com:8080</code></p></td>
 <td class="tableblock halign-left valign-top"></td>
 </tr>
 <tr>
@@ -1546,8 +1355,8 @@ method. The possible options are shown in table
 <table id="client-java-queryopts" class="tableblock frame-all grid-all stretch">
 <caption class="title">Table 3. J4pClient query parameters</caption>
 <colgroup>
-<col style="width: 50%;">
-<col style="width: 50%;">
+<col style="width: 20%;">
+<col>
 </colgroup>
 <thead>
 <tr>
@@ -1626,7 +1435,7 @@ for the return values of the
 <div class="paragraph">
 <p>The constructor of each kind of request can take a
 <code>J4pTargetConfig</code> as argument for using a
-request in <a href="#proxy">proxy mode</a>. This
+request in <a href="proxy_mode.html" class="xref page">Proxy Mode</a>. This
 configurational object holds the JMX service url and
 (optionally) credentials for JSR-160 authentication. When
 given, this proxy target specification overrides any default
@@ -1655,7 +1464,7 @@ well.</p>
 <div class="paragraph">
 <p>For more information on fetching the value of multiple
 attributes and multiple MBeans at once, please refer to
-<a href="#read">[read]</a> or the Javadoc of
+<a href="protocol/read.html" class="xref page">Reading attributes (read)</a> or the Javadoc of
 <code>J4pReadResponse</code>.</p>
 </div>
 </dd>
@@ -1667,10 +1476,9 @@ object and attribute name the value must be give in the
 constructor as well. Optionally a <code>path</code>
 can be provided, too. Only certain types for the given
 value can be serialized properly for calling the Jolokia
-agent as described in
-<a href="#serialization-request">[serialization-request]</a>.</p>
+agent as described in <a href="jolokia_protocol.html#serialization-request" class="xref page">Request parameter serialization</a>.</p>
 <div class="paragraph">
-<p>The old value is returned as `J4pWriteResponse&#8217;s value.</p>
+<p>The old value is returned as <code>J4pWriteResponse</code>'s value.</p>
 </div>
 </dd>
 <dt class="hdlist1"><code>J4pExecRequest</code> and <code>J4pExecResponse</code></dt>
@@ -1681,7 +1489,7 @@ mandatory arguments the MBean&#8217;s object name, the operation
 name and any arguments required by the operation. Only
 certain types for the given arguments can be serialized
 properly for calling the Jolokia agent as described in
-<a href="#serialization-request">[serialization-request]</a>.</p>
+<a href="jolokia_protocol.html#serialization-request" class="xref page">Request parameter serialization</a>.</p>
 <div class="paragraph">
 <p>The returned <code>J4pExecResponse</code>
 contains the return value of the operation called.</p>
@@ -1703,7 +1511,7 @@ list of found object names.</p>
 <code>J4pListRequest</code> should be used. It
 can be used with a <em>inner path</em> to
 obtain only a subtree of the response, otherwise the whole
-tree as described in <a href="#response-list">[response-list]</a> is
+tree as described in <a href="jolokia_protocol.html#response-list" class="xref page">List response</a> is
 returned. With the query parameter
 <code>maxDepth</code> can be used to restrict the
 depth of returned tree.</p>
@@ -1711,7 +1519,7 @@ depth of returned tree.</p>
 <p>The single value of a
 <code>J4pListResponse</code> is a tree (or
 subtree) as a JSON object, which has the format described
-in <a href="#response-list">[response-list]</a>.</p>
+in <a href="jolokia_protocol.html#response-list" class="xref page">List response</a>.</p>
 </div>
 </dd>
 <dt class="hdlist1"><code>J4pVersionRequest</code> and <code>J4pVersionResponse</code></dt>
@@ -1759,7 +1567,7 @@ exception is of type
 <p>Generic exception thrown when an exception occurred on the
 remote side. This is the case when the JSON response
 obtained is an error response as described in
-<a href="#responses">[responses]</a>. The error type, error value, the
+<a href="jolokia_protocol.html#responses" class="xref page">Responses</a>. The error type, error value, the
 status, the request leading to this error and the remote
 stacktrace as string) can be obtained from this exception.</p>
 </dd>
@@ -1799,8 +1607,8 @@ This allows you to use tools that leverage a JSR-160 <code>MBeanServerConnection
 <div class="title">Recommended plugins</div>
 <div class="paragraph">
 <p>For Java Mission Control, a set of plugins are provided at
-<a href="https://github.com/skarsaune/jmc-cloud-extensions/" class="bare">https://github.com/skarsaune/jmc-cloud-extensions/</a> and for
-Java Visual VM a Jolokia plugin can be downloaded from <a href="https://skarsaune.github.io/jolokia-jmc-update-site/visualvm/org-jolokia-jmx-plugin.nbm" class="bare">https://skarsaune.github.io/jolokia-jmc-update-site/visualvm/org-jolokia-jmx-plugin.nbm</a></p>
+<a href="https://github.com/skarsaune/jmc-cloud-extensions/" class="bare externalLink" target="_blank" rel="noopener">https://github.com/skarsaune/jmc-cloud-extensions/</a> and for
+Java Visual VM a Jolokia plugin can be downloaded from <a href="https://skarsaune.github.io/jolokia-jmc-update-site/visualvm/org-jolokia-jmx-plugin.nbm" class="bare externalLink" target="_blank" rel="noopener">https://skarsaune.github.io/jolokia-jmc-update-site/visualvm/org-jolokia-jmx-plugin.nbm</a></p>
 </div>
 </div>
 </div>
@@ -1816,7 +1624,7 @@ Java Visual VM a Jolokia plugin can be downloaded from <a href="https://skarsaun
 <ul>
 <li>
 <p>Jolokia&#8217;s <code>remote-jmx-adapter-2.0.0-javaagent.jar</code>
-must be on the classpath. See the <a href="../../download.html">Download page</a> for the latest versions of this adapter jar.</p>
+must be on the classpath. See the <a href="/download.html">Download page</a> for the latest versions of this adapter jar.</p>
 </li>
 <li>
 <p>Jolokia has to be accessible running at
@@ -1831,15 +1639,15 @@ import javax.management.ObjectName;
 import java.util.Arrays;
 
 public class ConnectWithJolokiaDemo {
-  public static void main(String[] args) {
-    Map options = new HashMap();
+  public static void main(String[] args) throws Exception {
+    Map&lt;String, Object&gt; options = new HashMap&lt;&gt;();
     // Add user &amp; password if the Agent is secured:
-    // options.put(JMXConnector.CREDENTIALS, Arrays.asList("myuser", "mypassword"));
+    options.put(JMXConnector.CREDENTIALS, new String[] { "jolokia", "jolokia" });
 
     // https will be used if port number fits the pattern *443
     // or if options contains "jmx.remote.x.check.stub"-&gt;"true"
     JMXConnector connector = JMXConnectorFactory.connect(
-        new JMXServiceURL("service:jmx:jolokia://localhost:8778/jolokia/"),
+        new JMXServiceURL("service:jmx:jolokia://localhost:8778/jolokia"),
         options);
     connector.connect();
     System.out.println("Memory used: " +
@@ -1862,13 +1670,13 @@ public class ConnectWithJolokiaDemo {
 <ul>
 <li>
 <p>Jolokia&#8217;s <code>remote-jmx-adapter-2.0.0-javaagent.jar</code>
-must be on the classpath. See the <a href="../../download.html">Download page</a> for the latest versions of this adapter jar.</p>
+must be on the classpath. See the <a href="/download.html">Download page</a> for the latest versions of this adapter jar.</p>
 </li>
 <li>
 <p>In addition, the Jolokia Kubernetes extension
 <code>jolokia-kubernetes-2.0.0-javaagent.jar</code>
 must be on the classpath. This can be also downloaded from the
-<a href="../../download.html">Download page</a>.</p>
+<a href="/download.html">Download page</a>.</p>
 </li>
 <li>
 <p>Configuration and authentication for the Kubernetes context setup are as usual. I.e., you must be able to run <code>kubectl</code> with the cluster to connect to. You can check this by <code>kubectl get namespace</code>.</p>
@@ -1909,14 +1717,18 @@ You need to add the Jolokia connector client libraries when launching <code>jcon
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>java \
-  -classpath "jolokia-jmx-adapter-2.0.0-javaagent.jar:\
-              jolokia-kubernetes-2.0.0-javaagent.jar:\
-              $JAVA_HOME/lib/jconsole.jar:\
-              $JAVA_HOME/classes" \
-  -Dapplication.home=$JAVA_HOME \
-  -Xms8m -Djconsole.showOutputViewer \
-  sun.tools.jconsole.JConsole</pre>
+<pre>java -cp jolokia-agent-jvm-2.0.0-javaagent.jar:\
+jolokia-client-jmx-adapter-2.0.0-standalone.jar:\
+jolokia-client-kubernetes-2.0.0-standalone.jar \
+-Djconsole.showOutputViewer sun.tools.jconsole.JConsole</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>After adding these Jolokia jars to <code>sun.tools.jconsole.JConsole</code> class we can then access remote server using Jolokia JMX URL:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/jconsole.png" alt="jconsole">
 </div>
 </div>
 </div>
@@ -1924,7 +1736,7 @@ You need to add the Jolokia connector client libraries when launching <code>jcon
 </div>
 <nav class="pagination">
   <span class="prev"><a href="jolokia_mbeans.html">Jolokia MBeans</a></span>
-  <span class="next"><a href="jolokia_jmx.html">Jolokia JMX</a></span>
+  <span class="next"><a href="jolokia_jmx.html">JMX Support</a></span>
 </nav>
 </article>
   </div>

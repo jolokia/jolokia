@@ -59,10 +59,10 @@
     <a class="nav-link" href="../clients.html">Clients</a>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="../jolokia_jmx.html">Jolokia JMX</a>
+    <a class="nav-link" href="../jolokia_jmx.html">JMX Support</a>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="../tools.html">Tools</a>
+    <a class="nav-link" href="../spring.html">Spring Support</a>
   </li>
 </ul>
   </li>
@@ -151,7 +151,7 @@ one or more <code>J4pResponse</code> objects as result.</p>
 <div class="title">What the heck is this "J4p"?</div>
 <div class="paragraph">
 <p>That&#8217;s a reminiscence to Jolokia&#8217;s roots which lies in
-<a href="https://www.jmx4perl.org">Jmx4Perl</a>. It is always good
+<a href="https://metacpan.org/dist/jmx4perl" class="externalLink" target="_blank" rel="noopener">Jmx4Perl</a>. It is always good
 to remember where one comes from ;-)</p>
 </div>
 </div>
@@ -180,7 +180,10 @@ import org.jolokia.client.request.*;
 
 public class MemoryDemo {
   public static void main(String[] args) {
-    J4pClient client = new J4pClient("http://localhost:8080/jolokia");
+    J4pClient client = J4pClient.url("http://localhost:8080/jolokia")
+        .user("jolokia")
+        .password("jolokia")
+        .build();
     J4pReadRequest request =
         new J4pReadRequest("java.lang:type=Memory", "HeapMemoryUsage");
     request.setPath("used");
@@ -191,20 +194,25 @@ public class MemoryDemo {
 </div>
 </div>
 <div class="paragraph">
-<p>In order to compile and run this sample, two support libraries
-are required in addition to
-<code>jolokia-client-java.jar</code> (<a href="../../download.html">Download</a>):</p>
+<p>In order to compile and run this sample, <code>jolokia-client-java.jar</code> library is needed (see <a href="/download.html">Download</a>) as well as
+some additional support libraries:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>Apache
-<a href="https://hc.apache.org/httpcomponents-client-ga/index.html">HttpClient</a>,
-4.3.3 (<a href="https://hc.apache.org/downloads.cgi">Download</a>)</p>
+<p><a href="https://repo1.maven.org/maven2/org/apache/httpcomponents/httpclient/4.5.14/httpclient-4.5.14.jar" class="externalLink" target="_blank" rel="noopener">httpclient-4.5.14.jar</a></p>
 </li>
 <li>
-<p><a href="https://code.google.com/p/json-simple/">json-simple</a>,
-1.1 (<a href="https://code.google.com/p/json-simple/downloads/list">Download</a>)</p>
+<p><a href="https://repo1.maven.org/maven2/org/apache/httpcomponents/httpcore/4.4.16/httpcore-4.4.16.jar" class="externalLink" target="_blank" rel="noopener">httpcore-4.4.16.jar</a></p>
+</li>
+<li>
+<p><a href="https://repo1.maven.org/maven2/com/googlecode/json-simple/json-simple/1.1.1/json-simple-1.1.1.jar" class="externalLink" target="_blank" rel="noopener">json-simple-1.1.1.jar</a></p>
+</li>
+<li>
+<p><a href="https://repo1.maven.org/maven2/commons-logging/commons-logging/1.2/commons-logging-1.2.jar" class="externalLink" target="_blank" rel="noopener">commons-logging-1.2.jar</a></p>
+</li>
+<li>
+<p><a href="https://repo1.maven.org/maven2/commons-codec/commons-codec/1.16.0/commons-codec-1.16.0.jar" class="externalLink" target="_blank" rel="noopener">commons-codec-1.16.0.jar</a></p>
 </li>
 </ul>
 </div>
@@ -215,9 +223,9 @@ the other two as transitive dependencies):</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
-  &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
-  &lt;artifactId&gt;jolokia-client-java&lt;/artifactId&gt;
-  &lt;version&gt;2.0.0&lt;/version&gt;
+    &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
+    &lt;artifactId&gt;jolokia-client-java&lt;/artifactId&gt;
+    &lt;version&gt;2.0.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -251,9 +259,9 @@ defaults:</p>
 <table class="tableblock frame-all grid-all stretch">
 <caption class="title">Table 1. J4pClient parameters</caption>
 <colgroup>
-<col style="width: 33.3333%;">
-<col style="width: 33.3333%;">
-<col style="width: 33.3334%;">
+<col style="width: 15%;">
+<col>
+<col style="width: 20%;">
 </colgroup>
 <thead>
 <tr>
@@ -295,7 +303,7 @@ authenticator is set.Only used when <code>user</code> is set, too.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">A JMX JSR-160 ServiceURL which should be used by the agent
 as the <em>real</em> target. This parameter should
 be set if the client is used for accessing the agent in
-<a href="#proxy">proxy mode</a>.</p></td>
+<a href="../proxy_mode.html" class="xref page">Proxy Mode</a>.</p></td>
 <td class="tableblock halign-left valign-top"></td>
 </tr>
 <tr>
@@ -413,15 +421,15 @@ messages.</p></td>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>proxy</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Determines http proxy server. It can be defined as
-<code><a href="http://user:password@host:port" class="bare">http://user:password@host:port</a></code>. <em>user</em> and
+<code>http://user:password@host:port</code>. <em>user</em> and
 <em>password</em> are optional.</p></td>
 <td class="tableblock halign-left valign-top"></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>useProxyFromEnvironment</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Set the proxy for this client based on <code>http_proxy</code> system environment variable.
-Expect formats are <code><a href="http://user:pass@host:port" class="bare">http://user:pass@host:port</a></code> or <code><a href="http://host:port" class="bare">http://host:port</a></code>
-Example: <code><a href="http://tom:sEcReT@my.proxy.com:8080" class="bare">http://tom:sEcReT@my.proxy.com:8080</a></code></p></td>
+Expect formats are <code>http://user:pass@host:port</code> or <code>http://host:port</code>
+Example: <code>http://tom:sEcReT@my.proxy.com:8080</code></p></td>
 <td class="tableblock halign-left valign-top"></td>
 </tr>
 <tr>
@@ -463,8 +471,8 @@ method. The possible options are shown in table
 <table id="client-java-queryopts" class="tableblock frame-all grid-all stretch">
 <caption class="title">Table 2. J4pClient query parameters</caption>
 <colgroup>
-<col style="width: 50%;">
-<col style="width: 50%;">
+<col style="width: 20%;">
+<col>
 </colgroup>
 <thead>
 <tr>
@@ -543,7 +551,7 @@ for the return values of the
 <div class="paragraph">
 <p>The constructor of each kind of request can take a
 <code>J4pTargetConfig</code> as argument for using a
-request in <a href="#proxy">proxy mode</a>. This
+request in <a href="../proxy_mode.html" class="xref page">Proxy Mode</a>. This
 configurational object holds the JMX service url and
 (optionally) credentials for JSR-160 authentication. When
 given, this proxy target specification overrides any default
@@ -572,7 +580,7 @@ well.</p>
 <div class="paragraph">
 <p>For more information on fetching the value of multiple
 attributes and multiple MBeans at once, please refer to
-<a href="#read">[read]</a> or the Javadoc of
+<a href="../protocol/read.html" class="xref page">Reading attributes (read)</a> or the Javadoc of
 <code>J4pReadResponse</code>.</p>
 </div>
 </dd>
@@ -584,10 +592,9 @@ object and attribute name the value must be give in the
 constructor as well. Optionally a <code>path</code>
 can be provided, too. Only certain types for the given
 value can be serialized properly for calling the Jolokia
-agent as described in
-<a href="#serialization-request">[serialization-request]</a>.</p>
+agent as described in <a href="../jolokia_protocol.html#serialization-request" class="xref page">Request parameter serialization</a>.</p>
 <div class="paragraph">
-<p>The old value is returned as `J4pWriteResponse&#8217;s value.</p>
+<p>The old value is returned as <code>J4pWriteResponse</code>'s value.</p>
 </div>
 </dd>
 <dt class="hdlist1"><code>J4pExecRequest</code> and <code>J4pExecResponse</code></dt>
@@ -598,7 +605,7 @@ mandatory arguments the MBean&#8217;s object name, the operation
 name and any arguments required by the operation. Only
 certain types for the given arguments can be serialized
 properly for calling the Jolokia agent as described in
-<a href="#serialization-request">[serialization-request]</a>.</p>
+<a href="../jolokia_protocol.html#serialization-request" class="xref page">Request parameter serialization</a>.</p>
 <div class="paragraph">
 <p>The returned <code>J4pExecResponse</code>
 contains the return value of the operation called.</p>
@@ -620,7 +627,7 @@ list of found object names.</p>
 <code>J4pListRequest</code> should be used. It
 can be used with a <em>inner path</em> to
 obtain only a subtree of the response, otherwise the whole
-tree as described in <a href="#response-list">[response-list]</a> is
+tree as described in <a href="../jolokia_protocol.html#response-list" class="xref page">List response</a> is
 returned. With the query parameter
 <code>maxDepth</code> can be used to restrict the
 depth of returned tree.</p>
@@ -628,7 +635,7 @@ depth of returned tree.</p>
 <p>The single value of a
 <code>J4pListResponse</code> is a tree (or
 subtree) as a JSON object, which has the format described
-in <a href="#response-list">[response-list]</a>.</p>
+in <a href="../jolokia_protocol.html#response-list" class="xref page">List response</a>.</p>
 </div>
 </dd>
 <dt class="hdlist1"><code>J4pVersionRequest</code> and <code>J4pVersionResponse</code></dt>
@@ -676,7 +683,7 @@ exception is of type
 <p>Generic exception thrown when an exception occurred on the
 remote side. This is the case when the JSON response
 obtained is an error response as described in
-<a href="#responses">[responses]</a>. The error type, error value, the
+<a href="../jolokia_protocol.html#responses" class="xref page">Responses</a>. The error type, error value, the
 status, the request leading to this error and the remote
 stacktrace as string) can be obtained from this exception.</p>
 </dd>

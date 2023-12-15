@@ -59,10 +59,10 @@
     <a class="nav-link" href="../clients.html">Clients</a>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="../jolokia_jmx.html">Jolokia JMX</a>
+    <a class="nav-link" href="../jolokia_jmx.html">JMX Support</a>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="../tools.html">Tools</a>
+    <a class="nav-link" href="../spring.html">Spring Support</a>
   </li>
 </ul>
   </li>
@@ -104,7 +104,7 @@
 <div class="sect2">
 <h3 id="notification"><a class="anchor" href="#notification"></a>Using JMX notifications (notification) <mark>new in Jolokia 2</mark></h3>
 <div class="paragraph">
-<p>A new feature of Jolokia 2 is access to <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/Notification.html" class="externalLink">JMX notifications</a>.
+<p>A new feature of Jolokia 2 is access to <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/Notification.html" class="externalLink" target="_blank" rel="noopener">JMX notifications</a>.
 While reading/writing attributes, executing operations or listing/searching MBeans is implemented as single request-response operation, with notifications the flow of messages is more complex.</p>
 </div>
 <div class="paragraph">
@@ -200,7 +200,7 @@ While reading/writing attributes, executing operations or listing/searching MBea
 </dd>
 <dt class="hdlist1"><code>sse</code> backend</dt>
 <dd>
-<p>In this mode <a href="https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events" class="externalLink">Server Sent Events</a> are used (See <a href="https://html.spec.whatwg.org/multipage/server-sent-events.html#server-sent-events" class="externalLink">WhatWG specification</a>).</p>
+<p>In this mode <a href="https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events" class="externalLink" target="_blank" rel="noopener">Server Sent Events</a> are used (See <a href="https://html.spec.whatwg.org/multipage/server-sent-events.html#server-sent-events" class="externalLink" target="_blank" rel="noopener">WhatWG specification</a>).</p>
 </dd>
 </dl>
 </div>
@@ -365,14 +365,14 @@ While reading/writing attributes, executing operations or listing/searching MBea
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;mbean name&gt;</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">The
-<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/ObjectName.html" class="externalLink">ObjectName</a>
+<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/ObjectName.html" class="externalLink" target="_blank" rel="noopener">ObjectName</a>
 of the MBean for which we&#8217;re registering a notification listener</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>JMImplementation:type=MBeanServerDelegate</code></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;filter1&gt;</code>, <code>&lt;filter2&gt;</code>, &#8230;&#8203;</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Comma-separated list notifications we&#8217;re interested in (and supported by given <code>&lt;mbean name&gt;</code>). If we want all
-notifications, a space (<code>%20</code>) or empty string (<code>%22%22</code>) can be passed. See filter rules in <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/NotificationFilterSupport.html#enableType(java.lang.String)" class="externalLink">NotificationFilterSupport.enableType() Javadoc</a></p></td>
+notifications, a space (<code>%20</code>) or empty string (<code>%22%22</code>) can be passed. See filter rules in <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/NotificationFilterSupport.html#enableType(java.lang.String)" class="externalLink" target="_blank" rel="noopener">NotificationFilterSupport.enableType() Javadoc</a></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>JMX.mbean.registered</code></p></td>
 </tr>
 <tr>
@@ -441,14 +441,14 @@ notifications, a space (<code>%20</code>) or empty string (<code>%22%22</code>) 
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>mbean</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">The
-<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/ObjectName.html" class="externalLink">ObjectName</a>
+<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/ObjectName.html" class="externalLink" target="_blank" rel="noopener">ObjectName</a>
 of the MBean for which we&#8217;re registering a notification listener</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>JMImplementation:type=MBeanServerDelegate</code></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>filter</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">A JSON array of notification notifications we&#8217;re interested in (and supported by given <code>mbean</code>). If we want all
-notifications, a space (<code>%20</code>) or empty string (<code>%22%22</code>) can be passed. See filter rules in <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/NotificationFilterSupport.html#enableType(java.lang.String)" class="externalLink">NotificationFilterSupport.enableType() Javadoc</a></p></td>
+notifications, a space (<code>%20</code>) or empty string (<code>%22%22</code>) can be passed. See filter rules in <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/NotificationFilterSupport.html#enableType(java.lang.String)" class="externalLink" target="_blank" rel="noopener">NotificationFilterSupport.enableType() Javadoc</a></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>[ "JMX.mbean.registered", "JMX.mbean.unregistered" ]</code></p></td>
 </tr>
 <tr>
@@ -797,7 +797,7 @@ calling an MBean operation on an MBean representing the backend. The details are
 <p>Instead of providing us with Mbean name to access when needed (<em>pull</em> the notifications out if it by calling an MBean operation), <code>sse</code> backend needs a channel associated with client connection. This is where <code>open</code> command for <code>notification</code> operation comes into play.</p>
 </div>
 <div class="paragraph">
-<p>When calling <code>open</code> command for <code>sse</code> backed notifications, the request (<code>HttpServletRequest</code>) is put into <a href="https://jakarta.ee/specifications/servlet/5.0/jakarta-servlet-spec-5.0#asynchronous-processing" class="externalLink">asynchronous mode</a> and connection is not closed.</p>
+<p>When calling <code>open</code> command for <code>sse</code> backed notifications, the request (<code>HttpServletRequest</code>) is put into <a href="https://jakarta.ee/specifications/servlet/5.0/jakarta-servlet-spec-5.0#asynchronous-processing" class="externalLink" target="_blank" rel="noopener">asynchronous mode</a> and connection is not closed.</p>
 </div>
 <div class="paragraph">
 <p>The GET URL for openning a backend channel for notification acces is:</p>

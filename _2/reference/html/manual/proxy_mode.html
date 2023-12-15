@@ -61,10 +61,10 @@
     <a class="nav-link" href="clients.html">Clients</a>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="jolokia_jmx.html">Jolokia JMX</a>
+    <a class="nav-link" href="jolokia_jmx.html">JMX Support</a>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="tools.html">Tools</a>
+    <a class="nav-link" href="spring.html">Spring Support</a>
   </li>
 </ul>
   </li>
@@ -122,7 +122,7 @@ request.</p>
 has usually the free choice of platform for a dedicated Jolokia
 proxy, an environment optimized for HTTP communication should be
 used. These are either servlet container or Jakarta EE server hosting
-the WAR agent or an OSGi runtime with an <a href="https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html" class="externalLink">OSGi CMPN Whiteboard extender</a> (which
+the WAR agent or an OSGi runtime with an <a href="https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html" class="externalLink" target="_blank" rel="noopener">OSGi CMPN Whiteboard extender</a> (which
 in turn is typically based on an embedded servlet container like
 Tomcat, Jetty or Undertow).</p>
 </div>
@@ -139,7 +139,7 @@ proxy support, you have to repackage <code>jolokia-agent-war.war</code> without 
 <div class="paragraph">
 <p>Additionally you can configured a white list with patterns for all allowed JMX service URL in a Jolokia Request.
 This white list is a plain text file which contains
-<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/regex/Pattern.html" class="externalLink">RegExp patterns</a> line by line. Lines starting with <code>#</code> are ignored.
+<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/regex/Pattern.html" class="externalLink" target="_blank" rel="noopener">RegExp patterns</a> line by line. Lines starting with <code>#</code> are ignored.
 Pattern matching is performed case insensitive. This file can be configured in various ways:</p>
 </div>
 <div class="ulist">

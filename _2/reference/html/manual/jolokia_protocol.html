@@ -61,10 +61,10 @@
     <a class="nav-link" href="clients.html">Clients</a>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="jolokia_jmx.html">Jolokia JMX</a>
+    <a class="nav-link" href="jolokia_jmx.html">JMX Support</a>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="tools.html">Tools</a>
+    <a class="nav-link" href="spring.html">Spring Support</a>
   </li>
 </ul>
   </li>
@@ -182,16 +182,16 @@ or POST. Regardless of which method is used, the agent doesn&#8217;t
 keep any state on the server side (except of course that
 MBeans are obviously stateful most of the time). So in this aspect, the
 communication can be considered
-<a href="https://en.wikipedia.org/wiki/Representational_State_Transfer" class="externalLink">REST</a>
+<a href="https://en.wikipedia.org/wiki/Representational_State_Transfer" class="externalLink" target="_blank" rel="noopener">REST</a>
 like<sup class="footnote" id="_footnote_rest-comment">[<a id="_footnoteref_1" class="footnote" href="#_footnotedef_1" title="View footnote.">1</a>]</sup>.</p>
 </div>
 <div class="sect2">
 <h3 id="_some_servlet_api_concepts"><a class="anchor" href="#_some_servlet_api_concepts"></a>Some Servlet API concepts</h3>
 <div class="paragraph">
-<p>Before proceeding, let&#8217;s review some important concepts from <a href="https://jakarta.ee/specifications/servlet/5.0/jakarta-servlet-spec-5.0" class="externalLink">Jakarta Servlet Specification 5</a>.</p>
+<p>Before proceeding, let&#8217;s review some important concepts from <a href="https://jakarta.ee/specifications/servlet/5.0/jakarta-servlet-spec-5.0" class="externalLink" target="_blank" rel="noopener">Jakarta Servlet Specification 5</a>.</p>
 </div>
 <div class="paragraph">
-<p><a href="https://jakarta.ee/specifications/servlet/5.0/jakarta-servlet-spec-5.0#request-path-elements" class="externalLink">Chapter 3.5. Request Path Elements</a> splits full URI used to access Java Servlet container into three parts (query string is not included here):</p>
+<p><a href="https://jakarta.ee/specifications/servlet/5.0/jakarta-servlet-spec-5.0#request-path-elements" class="externalLink" target="_blank" rel="noopener">Chapter 3.5. Request Path Elements</a> splits full URI used to access Java Servlet container into three parts (query string is not included here):</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -397,7 +397,7 @@ with the Jolokia agent. There are fewer escaping issues and it
 allows for features which are not available with GET
 requests. POST requests use a single Jolokia URL and put their payload
 within the HTTP request&#8217;s body. This payload is represented
-in <a href="https://www.json.org" class="externalLink">JSON</a>, a
+in <a href="https://www.json.org" class="externalLink" target="_blank" rel="noopener">JSON</a>, a
 data serialization format originating from the JavaScript
 world.</p>
 </div>
@@ -477,7 +477,7 @@ result of the operation as a JSON payload. In case of an
 error, a <code>4xx</code> or <code>5xx</code> code will be returned and the JSON
 payload contains details about the error
 occurred (e.g. <code>404</code> means "not found"). (See
-<a href="https://en.wikipedia.org/wiki/List_of_HTTP_status_codes" class="externalLink">this page</a>
+<a href="https://en.wikipedia.org/wiki/List_of_HTTP_status_codes" class="externalLink" target="_blank" rel="noopener">this page</a>
 for more information about HTTP error codes..). If the processing option
 <code>ifModifiedSince</code> is given and the requested
 value as been not changed since then, a response code of 304 is returned.
@@ -564,7 +564,7 @@ some errors.</p>
 <div class="paragraph">
 <p>I.e. the <code>status</code> has a code in the range
 <code>400 .. 499</code> or <code>500 .. 599</code>
-<a href="https://en.wikipedia.org/wiki/List_of_HTTP_status_codes" class="externalLink">as it is specified for HTTP return codes</a>.
+<a href="https://en.wikipedia.org/wiki/List_of_HTTP_status_codes" class="externalLink" target="_blank" rel="noopener">as it is specified for HTTP return codes</a>.
 The <code>error</code> member contains an error
 description. This is typically the message of an exception
 occurred on the agent side<sup class="footnote" id="_footnote_mbeanexception-wrapping">[<a id="_footnoteref_4" class="footnote" href="#_footnotedef_4" title="View footnote.">4</a>]</sup>. Finally, <code>error_type</code> contains the Java class name
@@ -807,7 +807,7 @@ ignored.</p>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;mbean name&gt;</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">The
-<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/ObjectName.html" class="externalLink">ObjectName</a>
+<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/ObjectName.html" class="externalLink" target="_blank" rel="noopener">ObjectName</a>
 of the MBean for which the attribute should be fetched. It
 contains two parts: A domain part and a list of properties
 which are separated by <code>:</code>. Properties
@@ -1376,7 +1376,7 @@ specifying the search parameter like in</p>
 </div>
 <div class="paragraph">
 <p>You can use patterns as described
-<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/ObjectName.html" class="externalLink">here</a>,
+<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/ObjectName.html" class="externalLink" target="_blank" rel="noopener">here</a>,
 i.e. it may contain wildcards like <code>*</code> and
 <code>?</code>. The Mbean names matching the query
 are returned as a list within the response.</p>
@@ -1468,7 +1468,7 @@ list if there was no match.</p>
 </div>
 <div class="paragraph">
 <p>The returned MBean names are properly
-<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/ObjectName.html" class="externalLink">quoted</a>
+<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/ObjectName.html" class="externalLink" target="_blank" rel="noopener">quoted</a>
 so that they can be directly used as
 input for other requests.</p>
 </div>
@@ -1698,7 +1698,7 @@ meaning and are dummy values.</p>
 <div class="sect2">
 <h3 id="notification"><a class="anchor" href="#notification"></a>Using JMX notifications (notification) <mark>new in Jolokia 2</mark></h3>
 <div class="paragraph">
-<p>A new feature of Jolokia 2 is access to <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/Notification.html" class="externalLink">JMX notifications</a>.
+<p>A new feature of Jolokia 2 is access to <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/Notification.html" class="externalLink" target="_blank" rel="noopener">JMX notifications</a>.
 While reading/writing attributes, executing operations or listing/searching MBeans is implemented as single request-response operation, with notifications the flow of messages is more complex.</p>
 </div>
 <div class="paragraph">
@@ -1794,7 +1794,7 @@ While reading/writing attributes, executing operations or listing/searching MBea
 </dd>
 <dt class="hdlist1"><code>sse</code> backend</dt>
 <dd>
-<p>In this mode <a href="https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events" class="externalLink">Server Sent Events</a> are used (See <a href="https://html.spec.whatwg.org/multipage/server-sent-events.html#server-sent-events" class="externalLink">WhatWG specification</a>).</p>
+<p>In this mode <a href="https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events" class="externalLink" target="_blank" rel="noopener">Server Sent Events</a> are used (See <a href="https://html.spec.whatwg.org/multipage/server-sent-events.html#server-sent-events" class="externalLink" target="_blank" rel="noopener">WhatWG specification</a>).</p>
 </dd>
 </dl>
 </div>
@@ -1959,14 +1959,14 @@ While reading/writing attributes, executing operations or listing/searching MBea
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;mbean name&gt;</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">The
-<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/ObjectName.html" class="externalLink">ObjectName</a>
+<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/ObjectName.html" class="externalLink" target="_blank" rel="noopener">ObjectName</a>
 of the MBean for which we&#8217;re registering a notification listener</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>JMImplementation:type=MBeanServerDelegate</code></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>&lt;filter1&gt;</code>, <code>&lt;filter2&gt;</code>, &#8230;&#8203;</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Comma-separated list notifications we&#8217;re interested in (and supported by given <code>&lt;mbean name&gt;</code>). If we want all
-notifications, a space (<code>%20</code>) or empty string (<code>%22%22</code>) can be passed. See filter rules in <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/NotificationFilterSupport.html#enableType(java.lang.String)" class="externalLink">NotificationFilterSupport.enableType() Javadoc</a></p></td>
+notifications, a space (<code>%20</code>) or empty string (<code>%22%22</code>) can be passed. See filter rules in <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/NotificationFilterSupport.html#enableType(java.lang.String)" class="externalLink" target="_blank" rel="noopener">NotificationFilterSupport.enableType() Javadoc</a></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>JMX.mbean.registered</code></p></td>
 </tr>
 <tr>
@@ -2035,14 +2035,14 @@ notifications, a space (<code>%20</code>) or empty string (<code>%22%22</code>) 
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>mbean</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">The
-<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/ObjectName.html" class="externalLink">ObjectName</a>
+<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/ObjectName.html" class="externalLink" target="_blank" rel="noopener">ObjectName</a>
 of the MBean for which we&#8217;re registering a notification listener</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>JMImplementation:type=MBeanServerDelegate</code></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>filter</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">A JSON array of notification notifications we&#8217;re interested in (and supported by given <code>mbean</code>). If we want all
-notifications, a space (<code>%20</code>) or empty string (<code>%22%22</code>) can be passed. See filter rules in <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/NotificationFilterSupport.html#enableType(java.lang.String)" class="externalLink">NotificationFilterSupport.enableType() Javadoc</a></p></td>
+notifications, a space (<code>%20</code>) or empty string (<code>%22%22</code>) can be passed. See filter rules in <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/NotificationFilterSupport.html#enableType(java.lang.String)" class="externalLink" target="_blank" rel="noopener">NotificationFilterSupport.enableType() Javadoc</a></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>[ "JMX.mbean.registered", "JMX.mbean.unregistered" ]</code></p></td>
 </tr>
 <tr>
@@ -2391,7 +2391,7 @@ calling an MBean operation on an MBean representing the backend. The details are
 <p>Instead of providing us with Mbean name to access when needed (<em>pull</em> the notifications out if it by calling an MBean operation), <code>sse</code> backend needs a channel associated with client connection. This is where <code>open</code> command for <code>notification</code> operation comes into play.</p>
 </div>
 <div class="paragraph">
-<p>When calling <code>open</code> command for <code>sse</code> backed notifications, the request (<code>HttpServletRequest</code>) is put into <a href="https://jakarta.ee/specifications/servlet/5.0/jakarta-servlet-spec-5.0#asynchronous-processing" class="externalLink">asynchronous mode</a> and connection is not closed.</p>
+<p>When calling <code>open</code> command for <code>sse</code> backed notifications, the request (<code>HttpServletRequest</code>) is put into <a href="https://jakarta.ee/specifications/servlet/5.0/jakarta-servlet-spec-5.0#asynchronous-processing" class="externalLink" target="_blank" rel="noopener">asynchronous mode</a> and connection is not closed.</p>
 </div>
 <div class="paragraph">
 <p>The GET URL for openning a backend channel for notification acces is:</p>
@@ -2844,7 +2844,7 @@ valued, simple typed, keys, the map is nested (first level:
 first index&#8217;s value, second level: second index&#8217;s value and
 so on). For the serialization of
 <code>TabularData</code> resulting from a
-<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/MXBean.html" class="externalLink">MXBean</a>
+<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/MXBean.html" class="externalLink" target="_blank" rel="noopener">MXBean</a>
 translation for maps, see
 <a href="#serialization-mxbean">Jolokia and MXBeans</a>. If any of the declared
 index keys of a <code>TabularData</code> is a
@@ -2974,7 +2974,7 @@ basic types and simple arrays. POST requests on the other
 support a much large set of types, including the
 serialization of <code>Map</code>s,
 <code>List</code>s and all
-<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/openmbean/OpenType.html" class="externalLink">Open Types</a>.</p>
+<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/openmbean/OpenType.html" class="externalLink" target="_blank" rel="noopener">Open Types</a>.</p>
 </div>
 <div class="sect3">
 <h4 id="_get_request_values"><a class="anchor" href="#_get_request_values"></a>GET request values</h4>
@@ -3100,7 +3100,7 @@ because of missing type information.</p>
 </div>
 <div class="paragraph">
 <p>Upstream serialization also supports
-<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/openmbean/OpenType.html" class="externalLink">Open Types</a>.
+<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/openmbean/OpenType.html" class="externalLink" target="_blank" rel="noopener">Open Types</a>.
 If the signature of JMX exec operation or the value type
 of a JMX attribute is a <code>OpenType</code>,
 they are serialized as follows:</p>
@@ -3108,7 +3108,7 @@ they are serialized as follows:</p>
 <div class="ulist">
 <ul>
 <li>
-<p>`SimpleType`s are extracted from their corresponding JSON type.</p>
+<p><code>SimpleType</code>s are extracted from their corresponding JSON type.</p>
 </li>
 <li>
 <p><code>ArrayType</code> is extracted from a
@@ -3204,7 +3204,7 @@ look like</p>
 <div class="sect2">
 <h3 id="serialization-mxbean"><a class="anchor" href="#serialization-mxbean"></a>Jolokia and MXBeans</h3>
 <div class="paragraph">
-<p>The <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/MXBean.html" class="externalLink">MXBean Framework</a> is available in
+<p>The <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/MXBean.html" class="externalLink" target="_blank" rel="noopener">MXBean Framework</a> is available in
 the JDK since version 6 and allows for easy creation and
 registration of own MBeans. MXBeans are some what the
 successor for standard MBeans and support an annotation driven
@@ -3218,7 +3218,7 @@ MXBean framework, MXBean themselves can use more complex
 data types. The framework will translate forth and back
 between the custom and open types according to certain rules
 as declared in the MXBean
-<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/MXBean.html" class="externalLink">specification</a>.
+<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/MXBean.html" class="externalLink" target="_blank" rel="noopener">specification</a>.
 Most of the translations to open types fits naturally to
 Jolokia&#8217;s serialization, except for the translation of <code>Map</code>.</p>
 </div>
@@ -3396,7 +3396,7 @@ the following format</p>
 </div>
 </div>
 <div class="paragraph">
-<p>We can use a tool like <a href="https://nmap.org/ncat/" class="externalLink">netcat</a> to check the discovery:</p>
+<p>We can use a tool like <a href="https://nmap.org/ncat/" class="externalLink" target="_blank" rel="noopener">netcat</a> to check the discovery:</p>
 </div>
 <div class="listingblock">
 <div class="content">

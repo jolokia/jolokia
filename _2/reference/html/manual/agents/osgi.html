@@ -59,10 +59,10 @@
     <a class="nav-link" href="../clients.html">Clients</a>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="../jolokia_jmx.html">Jolokia JMX</a>
+    <a class="nav-link" href="../jolokia_jmx.html">JMX Support</a>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="../tools.html">Tools</a>
+    <a class="nav-link" href="../spring.html">Spring Support</a>
   </li>
 </ul>
   </li>
@@ -106,10 +106,10 @@
 <div class="sectionbody">
 <div class="paragraph">
 <p>Jolokia agent is also available as
-<a href="https://www.osgi.org" class="externalLink">OSGi</a> bundle. The Jolokia 1.x OSGi agent
-had two versions (with and without packaged <a href="https://github.com/apache/felix-dev/tree/master/http" class="externalLink">Felix HTTP Service</a> bundles).
+<a href="https://www.osgi.org" class="externalLink" target="_blank" rel="noopener">OSGi</a> bundle. The Jolokia 1.x OSGi agent
+had two versions (with and without packaged <a href="https://github.com/apache/felix-dev/tree/master/http" class="externalLink" target="_blank" rel="noopener">Felix HTTP Service</a> bundles).
 In Jolokia 2 there&#8217;s only one bundle
-which requires a <a href="https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html" class="externalLink">OSGi CMPN Whiteboard extender</a> implementation available in target OSGi runtime.</p>
+which requires a <a href="https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html" class="externalLink" target="_blank" rel="noopener">OSGi CMPN Whiteboard extender</a> implementation available in target OSGi runtime.</p>
 </div>
 <div class="sidebarblock">
 <div class="content">
@@ -122,7 +122,7 @@ tested with dev version of Pax Web 10 using Undertow 2.3, running in dev version
 <div class="sect2">
 <h3 id="agents-osgi-pure"><a class="anchor" href="#agents-osgi-pure"></a>jolokia-agent-osgi.jar</h3>
 <div class="paragraph">
-<p>This bundle depends on availability of <a href="https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html" class="externalLink">OSGi CMPN Whiteboard extender</a> which tracks instances of <code>jakarta.servlet.Servlet</code> OSGi services.
+<p>This bundle depends on availability of <a href="https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html" class="externalLink" target="_blank" rel="noopener">OSGi CMPN Whiteboard extender</a> which tracks instances of <code>jakarta.servlet.Servlet</code> OSGi services.
 Jolokia 2 registers such OSGi servlet service when new <code>registerWhiteboardServlet</code> option is set to <code>true</code> (which is the default).</p>
 </div>
 <div class="paragraph">
@@ -244,9 +244,9 @@ with Configuration Admin service available.</p>
 </ul>
 </div>
 <div class="paragraph">
-<p>In Jolokia 1, <a href="https://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.http.html" class="externalLink">OSGi CMPN HTTP Service</a>
+<p>In Jolokia 1, <a href="https://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.http.html" class="externalLink" target="<em>blank">OSGi CMPN HTTP Service</a>
 was used to register Jolokia servlet. In Jolokia 2 a different pattern is used. Instead of using some service directly by
-Jolokia, a servlet is registered as OSGi service which is then processed (<em>extended</em>) using <a href="https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html" class="externalLink">OSGi CMPN Whiteboard extender</a></p>
+Jolokia, a servlet is registered as OSGi service which is then processed (_extended</em>) using <a href="https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html" class="externalLink" target="_blank" rel="noopener">OSGi CMPN Whiteboard extender</a></p>
 </div>
 <div class="paragraph">
 <p>The Jolokia OSGi bundle can be configured via the OSGi Configuration Admin

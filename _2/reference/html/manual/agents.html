@@ -61,10 +61,10 @@
     <a class="nav-link" href="clients.html">Clients</a>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="jolokia_jmx.html">Jolokia JMX</a>
+    <a class="nav-link" href="jolokia_jmx.html">JMX Support</a>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="tools.html">Tools</a>
+    <a class="nav-link" href="spring.html">Spring Support</a>
   </li>
 </ul>
   </li>
@@ -135,8 +135,8 @@ servers, from well-known market leaders to rarer species.</p>
 <dd>
 <p><a href="https://www.osgi.org">OSGi</a> is a middleware specification
 focusing on modularity and a well defined dynamic lifecycle<sup class="footnote">[<a id="_footnoteref_2" class="footnote" href="#_footnotedef_2" title="View footnote.">2</a>]</sup>. The Jolokia 1.x OSGi agent
-used to come in two flavors (with and without packaged <a href="https://github.com/apache/felix-dev/tree/master/http" class="externalLink">Felix HTTP Service</a> bundles). With Jolokia 2 there&#8217;s only one bundle
-which requires a <a href="https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html" class="externalLink">OSGi CMPN Whiteboard extender</a> implementation available in target OSGi runtime.</p>
+used to come in two flavors (with and without packaged <a href="https://github.com/apache/felix-dev/tree/master/http" class="externalLink" target="_blank" rel="noopener">Felix HTTP Service</a> bundles). With Jolokia 2 there&#8217;s only one bundle
+which requires a <a href="https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html" class="externalLink" target="_blank" rel="noopener">OSGi CMPN Whiteboard extender</a> implementation available in target OSGi runtime.</p>
 </dd>
 <dt class="hdlist1"><em>JVM agent</em></dt>
 <dd>
@@ -535,12 +535,11 @@ highly recommended that use the security enabled agent <code>jolokia.war</code>.
 <div class="content">
 <div class="title">Using jmx4perl&#8217;s <code>jolokia</code> tool</div>
 <div class="paragraph">
-<p><a href="https://metacpan.org/dist/jmx4perl" class="externalLink">jmx4perl</a> comes
+<p><a href="https://metacpan.org/dist/jmx4perl" class="externalLink" target="_blank" rel="noopener">jmx4perl</a> comes
 with a nice command line utility called
-<code><a href="https://metacpan.org/dist/jmx4perl/view/scripts/jolokia" class="externalLink">jolokia</a></code>
+<code><a href="https://metacpan.org/dist/jmx4perl/view/scripts/jolokia" class="externalLink" target="_blank" rel="noopener">jolokia</a></code>
 which allows for an easy setup of security within a given
-<code>jolokia.war</code>. See <a href="tools.html#tools-jmx4perl" class="xref page">Jmx4Perl</a> for
-more details.</p>
+<code>jolokia.war</code>.</p>
 </div>
 </div>
 </div>
@@ -633,10 +632,10 @@ the same Jakarta EE server.</p>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Jolokia agent is also available as
-<a href="https://www.osgi.org" class="externalLink">OSGi</a> bundle. The Jolokia 1.x OSGi agent
-had two versions (with and without packaged <a href="https://github.com/apache/felix-dev/tree/master/http" class="externalLink">Felix HTTP Service</a> bundles).
+<a href="https://www.osgi.org" class="externalLink" target="_blank" rel="noopener">OSGi</a> bundle. The Jolokia 1.x OSGi agent
+had two versions (with and without packaged <a href="https://github.com/apache/felix-dev/tree/master/http" class="externalLink" target="_blank" rel="noopener">Felix HTTP Service</a> bundles).
 In Jolokia 2 there&#8217;s only one bundle
-which requires a <a href="https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html" class="externalLink">OSGi CMPN Whiteboard extender</a> implementation available in target OSGi runtime.</p>
+which requires a <a href="https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html" class="externalLink" target="_blank" rel="noopener">OSGi CMPN Whiteboard extender</a> implementation available in target OSGi runtime.</p>
 </div>
 <div class="sidebarblock">
 <div class="content">
@@ -649,7 +648,7 @@ tested with dev version of Pax Web 10 using Undertow 2.3, running in dev version
 <div class="sect2">
 <h3 id="agents-osgi-pure"><a class="anchor" href="#agents-osgi-pure"></a>jolokia-agent-osgi.jar</h3>
 <div class="paragraph">
-<p>This bundle depends on availability of <a href="https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html" class="externalLink">OSGi CMPN Whiteboard extender</a> which tracks instances of <code>jakarta.servlet.Servlet</code> OSGi services.
+<p>This bundle depends on availability of <a href="https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html" class="externalLink" target="_blank" rel="noopener">OSGi CMPN Whiteboard extender</a> which tracks instances of <code>jakarta.servlet.Servlet</code> OSGi services.
 Jolokia 2 registers such OSGi servlet service when new <code>registerWhiteboardServlet</code> option is set to <code>true</code> (which is the default).</p>
 </div>
 <div class="paragraph">
@@ -771,9 +770,9 @@ with Configuration Admin service available.</p>
 </ul>
 </div>
 <div class="paragraph">
-<p>In Jolokia 1, <a href="https://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.http.html" class="externalLink">OSGi CMPN HTTP Service</a>
+<p>In Jolokia 1, <a href="https://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.http.html" class="externalLink" target="<em>blank">OSGi CMPN HTTP Service</a>
 was used to register Jolokia servlet. In Jolokia 2 a different pattern is used. Instead of using some service directly by
-Jolokia, a servlet is registered as OSGi service which is then processed (<em>extended</em>) using <a href="https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html" class="externalLink">OSGi CMPN Whiteboard extender</a></p>
+Jolokia, a servlet is registered as OSGi service which is then processed (_extended</em>) using <a href="https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html" class="externalLink" target="_blank" rel="noopener">OSGi CMPN Whiteboard extender</a></p>
 </div>
 <div class="paragraph">
 <p>The Jolokia OSGi bundle can be configured via the OSGi Configuration Admin
@@ -1117,7 +1116,7 @@ agents. This agent can be started by any Java program by
 providing certain startup options to the JVM. Or it can be
 dynamically attached (and detached) to an already running Java
 process. This universal agent uses the
-<a href="https://docs.oracle.com/en/java/javase/11/docs/api/jdk.attach/com/sun/tools/attach/VirtualMachine.html" class="externalLink">JVM Attach API</a> or <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.instrument/java/lang/instrument/package-summary.html" class="externalLink">Java Instrument API</a> and is available for every JVM 1.6 and later.</p>
+<a href="https://docs.oracle.com/en/java/javase/11/docs/api/jdk.attach/com/sun/tools/attach/VirtualMachine.html" class="externalLink" target="_blank" rel="noopener">JVM Attach API</a> or <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.instrument/java/lang/instrument/package-summary.html" class="externalLink" target="_blank" rel="noopener">Java Instrument API</a> and is available for every JVM 1.6 and later.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -1126,7 +1125,7 @@ process. This universal agent uses the
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-Dynamic loading of agents will be removed at some point. See <a href="https://openjdk.org/jeps/451" class="externalLink">JEP 451</a> for details.
+Dynamic loading of agents will be removed at some point. See <a href="https://openjdk.org/jeps/451" class="externalLink" target="_blank" rel="noopener">JEP 451</a> for details.
 </td>
 </tr>
 </table>
@@ -1135,7 +1134,7 @@ Dynamic loading of agents will be removed at some point. See <a href="https://op
 <h3 id="jvm-agent"><a class="anchor" href="#jvm-agent"></a>Jolokia as JVM Agent</h3>
 <div class="paragraph">
 <p>The JVM agent uses the
-<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.instrument/java/lang/instrument/package-summary.html" class="externalLink">Java Instrument API</a> for linking into any JVM at startup time. Under the
+<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.instrument/java/lang/instrument/package-summary.html" class="externalLink" target="_blank" rel="noopener">Java Instrument API</a> for linking into any JVM at startup time. Under the
 hood it uses an HTTP-Server, which is available on every
 Oracle/Sun JVM from version 1.6 upwards.</p>
 </div>
@@ -1163,7 +1162,7 @@ performance. See below for details.</p>
 </div>
 <div class="paragraph">
 <p><code>agent.jar</code> is the filename of the Jolokia
-JVM agent. The agent can be downloaded like the others from the <a href="https://jolokia.org/download.html" class="externalLink">download page</a>.
+JVM agent. The agent can be downloaded like the others from the <a href="https://jolokia.org/download.html" class="externalLink" target="_blank" rel="noopener">download page</a>.
 When downloading from a Maven repository you need to check for the classifier <code>javaagent</code> (i.e. the
 jar to download looks like <code>jolokia-agent-jvm-2.0.0-javaagent.jar</code>, not <code>jolokia-agent-jvm-2.0.0.jar</code>).
 Options can be appended as a comma separated
@@ -1533,7 +1532,7 @@ contacting the agent.</p>
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-Dynamic loading of agents will be removed at some point. See <a href="https://openjdk.org/jeps/451" class="externalLink">JEP 451</a> for details.
+Dynamic loading of agents will be removed at some point. See <a href="https://openjdk.org/jeps/451" class="externalLink" target="_blank" rel="noopener">JEP 451</a> for details.
 </td>
 </tr>
 </table>
@@ -1542,7 +1541,7 @@ Dynamic loading of agents will be removed at some point. See <a href="https://op
 <p>A Jolokia agent can be attached to any running Java process as
 long as the user has sufficient access privileges for
 accessing the process. This agent uses the
-<a href="https://docs.oracle.com/en/java/javase/11/docs/api/jdk.attach/com/sun/tools/attach/VirtualMachine.html" class="externalLink">JVM Attach API</a> for dynamically attaching and detaching to
+<a href="https://docs.oracle.com/en/java/javase/11/docs/api/jdk.attach/com/sun/tools/attach/VirtualMachine.html" class="externalLink" target="_blank" rel="noopener">JVM Attach API</a> for dynamically attaching and detaching to
 and from the process. It works similar to JConsole or <code>jcmd</code> command connecting
 to a local process. The Jolokia advantage is, that after the
 start of the agent, it can be reached over the network.</p>
@@ -1736,7 +1735,7 @@ queries. For example, a simple shell script for printing out
 the memory usage of a local Java process, including
 (temporarily) attaching an Jolokia agent looks simply like in
 the following example. With a complete client library like
-<a href="https://metacpan.org/dist/jmx4perl" class="externalLink">jmx4perl</a> even more one
+<a href="https://metacpan.org/dist/jmx4perl" class="externalLink" target="_blank" rel="noopener">jmx4perl</a> even more one
 shot scripts are possible <sup class="footnote" id="_footnote_rest-comment">[<a id="_footnoteref_4" class="footnote" href="#_footnotedef_4" title="View footnote.">4</a>]</sup>.</p>
 </div>
 <div class="listingblock">

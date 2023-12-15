@@ -59,10 +59,10 @@
     <a class="nav-link" href="../clients.html">Clients</a>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="../jolokia_jmx.html">Jolokia JMX</a>
+    <a class="nav-link" href="../jolokia_jmx.html">JMX Support</a>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="../tools.html">Tools</a>
+    <a class="nav-link" href="../spring.html">Spring Support</a>
   </li>
 </ul>
   </li>
@@ -111,7 +111,7 @@ agents. This agent can be started by any Java program by
 providing certain startup options to the JVM. Or it can be
 dynamically attached (and detached) to an already running Java
 process. This universal agent uses the
-<a href="https://docs.oracle.com/en/java/javase/11/docs/api/jdk.attach/com/sun/tools/attach/VirtualMachine.html" class="externalLink">JVM Attach API</a> or <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.instrument/java/lang/instrument/package-summary.html" class="externalLink">Java Instrument API</a> and is available for every JVM 1.6 and later.</p>
+<a href="https://docs.oracle.com/en/java/javase/11/docs/api/jdk.attach/com/sun/tools/attach/VirtualMachine.html" class="externalLink" target="_blank" rel="noopener">JVM Attach API</a> or <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.instrument/java/lang/instrument/package-summary.html" class="externalLink" target="_blank" rel="noopener">Java Instrument API</a> and is available for every JVM 1.6 and later.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -120,7 +120,7 @@ process. This universal agent uses the
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-Dynamic loading of agents will be removed at some point. See <a href="https://openjdk.org/jeps/451" class="externalLink">JEP 451</a> for details.
+Dynamic loading of agents will be removed at some point. See <a href="https://openjdk.org/jeps/451" class="externalLink" target="_blank" rel="noopener">JEP 451</a> for details.
 </td>
 </tr>
 </table>
@@ -129,7 +129,7 @@ Dynamic loading of agents will be removed at some point. See <a href="https://op
 <h3 id="jvm-agent"><a class="anchor" href="#jvm-agent"></a>Jolokia as JVM Agent</h3>
 <div class="paragraph">
 <p>The JVM agent uses the
-<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.instrument/java/lang/instrument/package-summary.html" class="externalLink">Java Instrument API</a> for linking into any JVM at startup time. Under the
+<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.instrument/java/lang/instrument/package-summary.html" class="externalLink" target="_blank" rel="noopener">Java Instrument API</a> for linking into any JVM at startup time. Under the
 hood it uses an HTTP-Server, which is available on every
 Oracle/Sun JVM from version 1.6 upwards.</p>
 </div>
@@ -157,7 +157,7 @@ performance. See below for details.</p>
 </div>
 <div class="paragraph">
 <p><code>agent.jar</code> is the filename of the Jolokia
-JVM agent. The agent can be downloaded like the others from the <a href="https://jolokia.org/download.html" class="externalLink">download page</a>.
+JVM agent. The agent can be downloaded like the others from the <a href="https://jolokia.org/download.html" class="externalLink" target="_blank" rel="noopener">download page</a>.
 When downloading from a Maven repository you need to check for the classifier <code>javaagent</code> (i.e. the
 jar to download looks like <code>jolokia-agent-jvm-2.0.0-javaagent.jar</code>, not <code>jolokia-agent-jvm-2.0.0.jar</code>).
 Options can be appended as a comma separated
@@ -527,7 +527,7 @@ contacting the agent.</p>
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-Dynamic loading of agents will be removed at some point. See <a href="https://openjdk.org/jeps/451" class="externalLink">JEP 451</a> for details.
+Dynamic loading of agents will be removed at some point. See <a href="https://openjdk.org/jeps/451" class="externalLink" target="_blank" rel="noopener">JEP 451</a> for details.
 </td>
 </tr>
 </table>
@@ -536,7 +536,7 @@ Dynamic loading of agents will be removed at some point. See <a href="https://op
 <p>A Jolokia agent can be attached to any running Java process as
 long as the user has sufficient access privileges for
 accessing the process. This agent uses the
-<a href="https://docs.oracle.com/en/java/javase/11/docs/api/jdk.attach/com/sun/tools/attach/VirtualMachine.html" class="externalLink">JVM Attach API</a> for dynamically attaching and detaching to
+<a href="https://docs.oracle.com/en/java/javase/11/docs/api/jdk.attach/com/sun/tools/attach/VirtualMachine.html" class="externalLink" target="_blank" rel="noopener">JVM Attach API</a> for dynamically attaching and detaching to
 and from the process. It works similar to JConsole or <code>jcmd</code> command connecting
 to a local process. The Jolokia advantage is, that after the
 start of the agent, it can be reached over the network.</p>
@@ -730,7 +730,7 @@ queries. For example, a simple shell script for printing out
 the memory usage of a local Java process, including
 (temporarily) attaching an Jolokia agent looks simply like in
 the following example. With a complete client library like
-<a href="https://metacpan.org/dist/jmx4perl" class="externalLink">jmx4perl</a> even more one
+<a href="https://metacpan.org/dist/jmx4perl" class="externalLink" target="_blank" rel="noopener">jmx4perl</a> even more one
 shot scripts are possible <sup class="footnote" id="_footnote_rest-comment">[<a id="_footnoteref_1" class="footnote" href="#_footnotedef_1" title="View footnote.">1</a>]</sup>.</p>
 </div>
 <div class="listingblock">
