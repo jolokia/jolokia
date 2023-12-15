@@ -1027,7 +1027,7 @@
     <plugin.maven-compiler-plugin>3.11.0</plugin.maven-compiler-plugin>
     <plugin.maven-dependency-plugin>3.6.1</plugin.maven-dependency-plugin>
     <plugin.maven-deploy-plugin>3.1.1</plugin.maven-deploy-plugin>
-    <plugin.maven-failsafe-plugin>3.2.2</plugin.maven-failsafe-plugin>
+    <plugin.maven-failsafe-plugin>3.2.3</plugin.maven-failsafe-plugin>
     <plugin.maven-gpg-plugin>3.1.0</plugin.maven-gpg-plugin>
     <plugin.maven-install-plugin>3.1.1</plugin.maven-install-plugin>
     <plugin.maven-jar-plugin>3.3.0</plugin.maven-jar-plugin>
@@ -1039,13 +1039,13 @@
     <plugin.maven-shade-plugin>3.5.1</plugin.maven-shade-plugin>
     <plugin.maven-site-plugin>3.12.1</plugin.maven-site-plugin>
     <plugin.maven-source-plugin>3.3.0</plugin.maven-source-plugin>
-    <plugin.maven-surefire-plugin>3.2.2</plugin.maven-surefire-plugin>
+    <plugin.maven-surefire-plugin>3.2.3</plugin.maven-surefire-plugin>
     <plugin.maven-war-plugin>3.4.0</plugin.maven-war-plugin>
 
     <!-- Versions of Maven plugins (other plugins) -->
 
     <plugin.com.devspan.mojo.javascript-maven-plugin>0.9.3</plugin.com.devspan.mojo.javascript-maven-plugin>
-    <plugin.com.github.eirslett.frontend-maven-plugin>1.14.2</plugin.com.github.eirslett.frontend-maven-plugin>
+    <plugin.com.github.eirslett.frontend-maven-plugin>1.15.0</plugin.com.github.eirslett.frontend-maven-plugin>
     <plugin.com.github.site-maven-plugin>0.12</plugin.com.github.site-maven-plugin>
     <plugin.org.apache.felix.maven-bundle-plugin>5.1.9</plugin.org.apache.felix.maven-bundle-plugin>
     <plugin.org.apache.felix.maven-scr-plugin>1.26.4</plugin.org.apache.felix.maven-scr-plugin>
