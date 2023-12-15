@@ -766,10 +766,52 @@
           </exclusion>
         </exclusions>
       </dependency>
+
+      <!--
+        Jackson dependencies are explicitly managed with scope=test. Jolokia doesn't need Jackson at runtime
+        Except for jolokia-client-kubernetes and Spring-related examples.
+      -->
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-annotations</artifactId>
+        <version>${version.com.fasterxml.jackson.core}</version>
+        <scope>test</scope>
+      </dependency>
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-core</artifactId>
         <version>${version.com.fasterxml.jackson.core}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>${version.com.fasterxml.jackson.core}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.dataformat</groupId>
+        <artifactId>jackson-dataformat-yaml</artifactId>
+        <version>${version.com.fasterxml.jackson.core}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.datatype</groupId>
+        <artifactId>jackson-datatype-jdk8</artifactId>
+        <version>${version.com.fasterxml.jackson.core}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.datatype</groupId>
+        <artifactId>jackson-datatype-jsr310</artifactId>
+        <version>${version.com.fasterxml.jackson.core}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.module</groupId>
+        <artifactId>jackson-module-parameter-names</artifactId>
+        <version>${version.com.fasterxml.jackson.core}</version>
+        <scope>test</scope>
       </dependency>
 
       <!-- JakartaEE dependencies -->
@@ -1021,6 +1063,7 @@
 
     <!-- Versions of test-related dependencies -->
 
+    <version.com.fasterxml.jackson.core>2.16.0</version.com.fasterxml.jackson.core>
     <version.org.awaitility>4.2.0</version.org.awaitility>
     <version.org.easymock>5.2.0</version.org.easymock>
     <version.org.testng>7.8.0</version.org.testng>
@@ -1028,7 +1071,6 @@
 
     <!-- Versions of actual Maven dependencies -->
 
-    <version.com.fasterxml.jackson.core>2.15.2</version.com.fasterxml.jackson.core>
     <version.com.googlecode.json-simple>1.1.1</version.com.googlecode.json-simple>
     <version.commons-codec>1.16.0</version.commons-codec>
     <version.io.fabric8.kubernetes-client>6.9.2</version.io.fabric8.kubernetes-client>
