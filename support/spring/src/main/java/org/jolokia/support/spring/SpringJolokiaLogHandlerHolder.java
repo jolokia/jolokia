@@ -61,12 +61,11 @@ public class SpringJolokiaLogHandlerHolder implements InitializingBean {
     // to avoid hard dependencies on all those logging frameworks
     enum LogHandlerType {
         STDOUT("stdout","org.jolokia.server.core.service.impl.StdoutLogHandler"),
-        QUIET("stdout","org.jolokia.server.core.service.impl.QuietLogHandler"),
+        QUIET("quiet","org.jolokia.server.core.service.impl.QuietLogHandler"),
         JUL("jul","org.jolokia.server.core.service.impl.JulLogHandler"),
         LOG4J2("log4j2","org.jolokia.support.spring.log.Log4j2LogHandler"),
-        SL4J("sl4j","org.jolokia.support.spring.log.Sl4jLogHandler"),
+        SLF4J("slf4j","org.jolokia.support.spring.log.Slf4jLogHandler"),
         COMMONS("commons","org.jolokia.support.spring.log.CommonsLogHandler");
-
 
         private final String className;
         private final String type; // NOPMD

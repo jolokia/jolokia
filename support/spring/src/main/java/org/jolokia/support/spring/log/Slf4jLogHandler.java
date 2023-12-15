@@ -5,21 +5,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Loghandler using SL4J
+ * Loghandler using SLF4J
  *
  * @author roland
  * @since 21.10.13
  */
-public class Sl4jLogHandler implements LogHandler {
+public class Slf4jLogHandler implements LogHandler {
 
     private final Logger logger;
 
     /**
-     * Constructor for a {@link LogHandler} using commons SL4J
+     * Constructor for a {@link LogHandler} using commons SLF4J
      *
      * @param pCategory the logging category. If null, org.jolokia is used as category
      */
-    public Sl4jLogHandler(String pCategory) {
+    public Slf4jLogHandler(String pCategory) {
         logger = LoggerFactory.getLogger(pCategory != null ? pCategory : "org.jolokia");
     }
 

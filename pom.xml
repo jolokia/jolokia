@@ -999,6 +999,32 @@
         <version>${version.org.slf4j}</version>
       </dependency>
 
+      <dependency>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-api</artifactId>
+        <version>${version.org.apache.logging.log4j}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-core</artifactId>
+        <version>${version.org.apache.logging.log4j}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-jul</artifactId>
+        <version>${version.org.apache.logging.log4j}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-slf4j-impl</artifactId>
+        <version>${version.org.apache.logging.log4j}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-slf4j2-impl</artifactId>
+        <version>${version.org.apache.logging.log4j}</version>
+      </dependency>
+
     </dependencies>
   </dependencyManagement>
 
@@ -1072,7 +1098,7 @@
 
     <!-- Versions of optional and example-related dependencies -->
 
-    <version.org.apache.logging.log4j>2.20.0</version.org.apache.logging.log4j>
+    <version.org.apache.logging.log4j>2.22.0</version.org.apache.logging.log4j>
     <version.org.slf4j>1.7.36</version.org.slf4j>
     <version.org.slf4j2>2.0.9</version.org.slf4j2>
 
@@ -1330,6 +1356,28 @@
                         <include>jolokia.js</include>
                         <include>jolokia-cubism.js</include>
                         <include>jolokia-simple.js</include>
+                      </includes>
+                    </resource>
+                  </resources>
+                </configuration>
+              </execution>
+              <execution>
+                <!--
+                  We need https://jolokia.org/jolokia-config.xsd
+                -->
+                <id>copy-xsd</id>
+                <phase>pre-site</phase>
+                <goals>
+                  <goal>copy-resources</goal>
+                </goals>
+                <inherited>false</inherited>
+                <configuration>
+                  <outputDirectory>${project.build.directory}/site</outputDirectory>
+                  <resources>
+                    <resource>
+                      <directory>support/spring/src/main/resources/org/jolokia/support/spring</directory>
+                      <includes>
+                        <include>jolokia-config.xsd</include>
                       </includes>
                     </resource>
                   </resources>

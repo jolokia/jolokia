@@ -5,7 +5,7 @@ import org.apache.commons.logging.LogFactory;
 import org.jolokia.server.core.service.api.LogHandler;
 
 /**
- * Log Handler useing SL4J (which is a dependency of Spring anyways.
+ * Log Handler using Commons Logging (which is a dependency of Spring anyways).
  *
  * @author roland
  * @since 17.10.13

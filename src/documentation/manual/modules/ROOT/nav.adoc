@@ -7,3 +7,4 @@
 * xref:jolokia_mbeans.adoc[]
 * xref:clients.adoc[]
 * xref:jolokia_jmx.adoc[]
+* xref:spring.adoc[]

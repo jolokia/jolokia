@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <!--
-  ~ Copyright 2009-2012  Roland Huss
+  ~ Copyright 2009-2013  Roland Huss
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -135,7 +134,7 @@
     <xs:attribute name="type">
       <xs:annotation>
         <xs:documentation>
-          Specify which logging backend to use. Available are "log4j" for Log4J, "sl4j" for SL4J,
+          Specify which logging backend to use. Available are "log4j2" for Log4J2, "slf4j" for SLF4J,
           "jul" for java.util.logging, "commons" for Commons Logging and "logback" for, well, LogBack.
           The corresponding libraries must be in the classpath, otherwise things get nasty.
           How I love this logging heaven !
@@ -143,8 +142,8 @@
       </xs:annotation>
       <xs:simpleType>
         <xs:restriction base="xs:string">
-          <xs:enumeration value="log4j"/>
-          <xs:enumeration value="sl4j"/>
+          <xs:enumeration value="log4j2"/>
+          <xs:enumeration value="slf4j"/>
           <xs:enumeration value="jul"/>
           <xs:enumeration value="commons"/>
         </xs:restriction>

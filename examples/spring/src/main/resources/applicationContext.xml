@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright 2009-2012  Roland Huss
+  ~ Copyright 2009-2023  Roland Huss
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -14,15 +14,16 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:jolokia="http://www.jolokia.org/jolokia-spring/schema/config"
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:util="http://www.springframework.org/schema/util"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
-       http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd
-       http://www.jolokia.org/jolokia-spring/schema/config https://www.jolokia.org/jolokia-spring/schema/config/jolokia-config.xsd http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd">
+       xsi:schemaLocation="
+           http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd
+           http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd
+           http://www.jolokia.org/jolokia-spring/schema/config https://www.jolokia.org/jolokia-config.xsd">
 
   <context:property-placeholder system-properties-mode="ENVIRONMENT"/>
 
@@ -34,14 +35,12 @@
     <entry key="jmx.jolokiaPort" value="8778"/>
   </util:map>
 
-
-  <jolokia:agent id="jolokia" lookupConfig="true" lookupServices="true" exposeApplicationContext="true">
-    <jolokia:config id="blub2"
-            autoStart="true"
-            port="#{configuration['jmx.jolokiaPort']}"
-            host="127.0.0.1"
-            />
-    <jolokia:log type="sl4j"/>
+  <jolokia:agent id="jolokia" lookupConfig="true" lookupServices="true" systemPropertiesMode="override"
+                 exposeApplicationContext="true">
+    <jolokia:config autoStart="true"
+                    port="#{configuration['jmx.jolokiaPort']}"
+                    host="127.0.0.1"/>
+    <jolokia:log type="slf4j"/>
   </jolokia:agent>
 
 </beans>

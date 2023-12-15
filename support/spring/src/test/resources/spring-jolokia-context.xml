@@ -45,7 +45,7 @@
             port="#{configuration['jmx.jolokiaPort']}"
             host="127.0.0.1"
             />
-    <jolokia:log type="sl4j"/>
+    <jolokia:log type="slf4j"/>
   </jolokia:agent>
 
   <bean class="org.jolokia.support.spring.DummyRequestHandler"/>
