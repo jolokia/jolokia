@@ -73,6 +73,7 @@ This document will avoid the term REST as much as
 possible in order to avoid provoking any dogmatic
 resentments.].
 
+[#servlet-api-concepts]
 === Some Servlet API concepts
 
 Before proceeding, let's review some important concepts from https://jakarta.ee/specifications/servlet/5.0/jakarta-servlet-spec-5.0[Jakarta Servlet Specification 5,role=externalLink,window=_blank].
@@ -143,23 +144,33 @@ http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage
 
 === Escaping rules in GET requests
 
-#TODO# escaping
+GET requests are easy and straightforward - you can easily type them in browser address bar, bookmark or use with `curl`. However, there are limitations.
+
+https://datatracker.ietf.org/doc/html/rfc2396#section-3.3[RFC 2396,role=externalLink,window=_blank] and newer https://datatracker.ietf.org/doc/html/rfc3986#section-3.3[RFC 3986,role=externalLink,window=_blank] specify what is and what is not allowed in the URL (which is a subset of URI). https://datatracker.ietf.org/doc/html/rfc7230#section-2.7.3[RFC 7230,role=externalLink,window=_blank] specifies usage of URIs within HTTP protocol.
+
+As mentioned in <<servlet-api-concepts>>, Jolokia uses _path info_ to identify the type of operation to perform and its specific arguments (mbean names, attribute names for `read`/`write` operations or method name and arguments for `exec` operations).
+
+RFC 3986 mentions that a URI:
+
+* path component with data organized in hierarchical form, where _segments_ are separated by `/` character (implicitly stating that `/` is forbidden as part of the segment)
+* query component with data organized in non-hierarchical form
+
+Also (and RFC 2396 says this explictly, while newer RFC 3986 only highlights the convention), some characters in the segments may have special meaning (usually to implement the _path parameters_). These are `;`, `,` and `=`. Finally, by the definition, `?` separates the path part from the query part, so `?` can't be part of the path (and any segment of the path).
+
+The problem is that mbean names or attribute values may use various characters which are illegal from the point of view of URI or HTTP specifications.
+
+That's where Jolokia URI encoding steps in. In theory https://en.wikipedia.org/wiki/Percent-encoding[URI encoding,role=externalLink,window=_blank] should be sufficient, but it simply is not.
 
 ****
 You might wonder why simple URI encoding isn't enough for
-escaping slashes. The reason is that JBoss/Tomcat has a
-strange behaviour when returning an HTTP response
-`HTTP/1.x 400 Invalid URI: noSlash` for
-any URL which contains an escaped slash in the path info
-(i.e. `%2F`). The reason behind this
-behaviour is security related, slashes get decoded on the
-agent side before the agent-servlet gets the
-request. Other appservers might exhibit a similar
+escaping slashes. The reason is simple - security.
+For example, Tomcat returns HTTP error 400 with `Invalid URI: [The encoded slash character is not allowed]` message if you encode `/` as `%2F`. Jetty returns `Bad Message 400, reason: Ambiguous URI empty segment` when two slashes are used (`//`).
+Other appservers might exhibit a similar
 behaviour, so Jolokia uses an own escaping mechanism.
 ****
 
-If one of the request parts contain a slash
-(`/`) (e.g. as part of you bean's name) it
+If one of the Jolokia request parts contain a slash
+(`/`) (e.g. as part of you bean's name, which is often the case with Camel or ActiveMQ) it
 needs to be escaped. An exclamation mark
 (`!`) is used as escape character footnote:no-backslash[
 A backslash (`\`) can not be used, since
@@ -201,7 +212,7 @@ access URL like this has to be constructed:
 ----
 
 Client libraries like
-https://search.cpan.org/~roland/jmx4perl[JMX::Jmx4Perl]
+https://search.cpan.org/~roland/jmx4perl[JMX::Jmx4Perl,role=externalLink,window=_blank]
 do this sort of escaping transparently.
 
 Escaping can be avoided altogether if a slightly different
@@ -218,6 +229,8 @@ http://localhost:8080/jolokia?p=/read/jboss.jmx:alias=jmx%2Frmi%2FRMIAdaptor/Sta
 This format _must_ be used for GET
 requests containing backslashes (`\`) since
 backslashes can not be sent as part of an URL at all.
+
+Summarizing, the recommended approach is to use POST requests if possible. If GET has to be used and escaping may be confusing with the server you used, use `p` query parameter. For GET requests with path segments, be careful about the escaping rules.
 
 [#post-requests]
 === POST requests
@@ -454,8 +467,6 @@ results in a response of `27145000`for the value:
 If the attribute contains arrays at some level, use a numeric
 index (0 based) as part of the inner path if you want to
 traverse into this array.
-
-#TODO# escaping
 
 For both, GET and POST requests, paths must be escaped as
 described in <<escape-rules>> when they
