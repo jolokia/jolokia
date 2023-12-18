@@ -291,7 +291,23 @@ md5sum src/site/resources/jolokia.meta > src/site/resources/jolokia.meta.md5
 
 ## Recreate website (`~/jolokia`)
 
+Just run maven-site-plugin. In Jolokia, we use Asciidoc and [frontend-maven-plugin][7] for npm/Javascript stuff. All
+plugins are configured in relevant Maven lifecycle phases, so it's enough to run:
 
+```console
+mvn clean site -N -Pdist
+```
+
+While we could use `com.github.github:site-maven-plugin`, I've simply copied the content of `target/site` to `gh-pages`
+branch of Jolokia and pushed the changes:
+
+```console
+git checkout gh-pages
+# copy changed site
+git add .
+git commit -m '[site] Generate new Jolokia site'
+git push origin HEAD
+```
 
 [1]: https://www.selenium.dev
 [2]: https://issues.apache.org/jira/browse/MRELEASE-798
@@ -299,3 +315,4 @@ md5sum src/site/resources/jolokia.meta > src/site/resources/jolokia.meta.md5
 [4]: https://github.com/jolokia/jolokia/issues
 [5]: https://www.npmjs.com
 [6]: https://central.sonatype.org/publish/
+[7]: https://github.com/eirslett/frontend-maven-plugin
