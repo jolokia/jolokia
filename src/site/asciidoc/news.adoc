@@ -18,9 +18,35 @@
 === Jolokia 2 is released!
 
 [.news-date]
-2023-12-01
+2023-12-19
 
-After years of preparation, reviewing, restructuring, refactoring and polishing, Jolokia 2.0 is released and available in https://repo.maven.apache.org/maven2/org/jolokia/[Maven Central,role=externalLink,window=_blank].
+image::images/christmas-peppers.png[role="right"]
+
+Jolokia 2.0 arrives: A new chapter begins!
+
+We are excited to announce the long-awaited release of Jolokia 2.0, now available in https://repo.maven.apache.org/maven2/org/jolokia/[Maven Central,role=externalLink,window=_blank].
+
+This release is a result of our dedicated effort in reviewing, restructuring, refactoring, and polishing. Here's what Jolokia 2.0 brings to the table:
+
+* Support for JakartaEE 9+ (Servlet API 5+ with `jakarta.servlet` packages)
+* Enhanced connectivity with JMX notifications
+* Integration with Spring Boot 3 and Spring Framework 6
+* A fresh, pluggable service-based architecture
+* A revamped and user-friendly link:reference/html/index.html[Reference Manual] powered by Antora
+* JDK 11 is the minimal version of JDK required. (No worries, we're still supporting Jolokia 1.x with minimal version of JDK 1.6 supported).
+
+And that's not all. We're already planning more frequent updates, including exciting new features like websockets support and IPv6.
+
+Jolokia 2 also gears up to seamlessly integrate with the upcoming https://github.com/orgs/hawtio/projects/1[Hawtio 4.0,role=externalLink,window=_blank]!
+
+It should be straightforward to upgrade to new Jolokia 2 in JVM agent mode. WAR agent users should use any compatible JakartaEE 9+ container. Check out our xref:migration.adoc[Migration to 2.x] guide for more information.
+
+Your support and patience over these years have been incredible. We're grateful for your enduring loyalty. Let's end this year on a high note and step into 2024 with new energy and possibilities!
+
+Warm regards, +
+Grzegorz, Tadayoshi, Roland
+
+image::images/jolokia2-presents.png[role="text-center"]
 
 === Jolokia has a new home!
 

@@ -856,7 +856,7 @@ with `@JsonMBean` and register it at the Jolokia
 MBeanServer your get automatic translation of complex data
 types to JSON even for JSR-160 connections:
 
-image::images/jconsole-json-mbean.png[]
+image::images/jconsole-json-mbean.png[role="text-center"]
 
 The details can be found link:reference/html/manual/jolokia_jmx.html[here].
 
@@ -930,9 +930,9 @@ https://d3js.org/[d3.js,role=externalLink,window=_blank]. Cubism provides
 support for an innovative charting type, the
 https://vis.berkeley.edu/papers/horizon/[horizon charts,role=externalLink,window=_blank]:
 
-image::images/jolokia_cubism_demo_2.png[]
+image::images/jolokia_cubism_demo_2.png[role="text-center"]
 
-image::images/jolokia_cubism_demo_1.png[]
+image::images/jolokia_cubism_demo_1.png[role="text-center"]
 
 A very cool live demo where a Jolokia JavaScript client
 fetches live data from our servers and plot it with Cubism
