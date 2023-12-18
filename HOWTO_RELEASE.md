@@ -234,7 +234,7 @@ mvn -Dmaven.repo.local=/tmp/repo \
 ### Copy assembly to GitHub
 
 * Create a new release ("Draft a release" - Button)
-* Upload `tar.gz` and `zip` files from `target/checkout/src/assembly/target`
+* Upload `tar.gz` and `zip` files from `target/checkout/assembly/target`
 * Upload all JavaScript files in `target/checkout/client/javascript/target`:
     * `compressed/jolokia-*.js`
     * `scripts/jolokia*.js`
@@ -242,6 +242,8 @@ mvn -Dmaven.repo.local=/tmp/repo \
     * `agent/jvm/target/*.deb`
 
 ### Deploy to Sonatype staging
+
+(_should be done automatically with `mvn release:perform`_)
 
 ```console
 cd target/checkout
@@ -289,29 +291,7 @@ md5sum src/site/resources/jolokia.meta > src/site/resources/jolokia.meta.md5
 
 ## Recreate website (`~/jolokia`)
 
-### Update version number in `site.xml` to next dev version
 
-```console
-vi ./src/site/site.xml
-```
-
-### Update Skin version to next snapshot
-
-```console
-vi tools/site-skin/pom.xml
-git commit -a
-```
-
-### Adapted tracking code
-
-```console
-git co analytics
-git rebase master
-cd tools/site-skin; mvn clean install;
-cd ../..
-mvn clean install
-mvn -N -Pdist site
-```
 
 [1]: https://www.selenium.dev
 [2]: https://issues.apache.org/jira/browse/MRELEASE-798
