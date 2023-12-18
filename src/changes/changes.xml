@@ -23,9 +23,21 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
-    <release version="2.0.0-SNAPSHOT" description="Release 2.0.0">
+    <release version="2.0.0" description="Release 2.0.0" date="2023-12-19">
+      <action dev="grgrzybek" type="add" issue="568">
+        Support for Spring Boot 3
+      </action>
+      <action dev="grgrzybek" type="add" issue="562">
+        Add Jolokia BOM
+      </action>
+      <action dev="grgrzybek" type="add" issue="558">
+        Move site and documentation to Asciidoc
+      </action>
       <action dev="tadayosi" type="add" issue="555">
         The new Jolokia 2.0 release with support for Jakarta EE 9+ and Spring Boot 3
+      </action>
+      <action dev="roland" type="add" issue="94">
+        Add JMX Notification support
       </action>
     </release>
     <release version="2.0.0-M4" description="Release 2.0.0-M4" date="2023-10-13">
