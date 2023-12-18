@@ -203,7 +203,7 @@ div.sect2 {
 }
 div.imageblock.right {
   float: right;
-  margin-right: 15px;
+  margin-right: -70px;
 }
 
 section>h2, .sect1 h2 {

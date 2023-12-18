@@ -186,7 +186,7 @@ communication can be considered
 like<sup class="footnote" id="_footnote_rest-comment">[<a id="_footnoteref_1" class="footnote" href="#_footnotedef_1" title="View footnote.">1</a>]</sup>.</p>
 </div>
 <div class="sect2">
-<h3 id="_some_servlet_api_concepts"><a class="anchor" href="#_some_servlet_api_concepts"></a>Some Servlet API concepts</h3>
+<h3 id="servlet-api-concepts"><a class="anchor" href="#servlet-api-concepts"></a>Some Servlet API concepts</h3>
 <div class="paragraph">
 <p>Before proceeding, let&#8217;s review some important concepts from <a href="https://jakarta.ee/specifications/servlet/5.0/jakarta-servlet-spec-5.0" class="externalLink" target="_blank" rel="noopener">Jakarta Servlet Specification 5</a>.</p>
 </div>
@@ -292,27 +292,50 @@ reachable under the base URL
 <div class="sect2">
 <h3 id="_escaping_rules_in_get_requests"><a class="anchor" href="#_escaping_rules_in_get_requests"></a>Escaping rules in GET requests</h3>
 <div class="paragraph">
-<p><mark>TODO</mark> escaping</p>
+<p>GET requests are easy and straightforward - you can easily type them in browser address bar, bookmark or use with <code>curl</code>. However, there are limitations.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://datatracker.ietf.org/doc/html/rfc2396#section-3.3" class="externalLink" target="_blank" rel="noopener">RFC 2396</a> and newer <a href="https://datatracker.ietf.org/doc/html/rfc3986#section-3.3" class="externalLink" target="_blank" rel="noopener">RFC 3986</a> specify what is and what is not allowed in the URL (which is a subset of URI). <a href="https://datatracker.ietf.org/doc/html/rfc7230#section-2.7.3" class="externalLink" target="_blank" rel="noopener">RFC 7230</a> specifies usage of URIs within HTTP protocol.</p>
+</div>
+<div class="paragraph">
+<p>As mentioned in <a href="#servlet-api-concepts">Some Servlet API concepts</a>, Jolokia uses <em>path info</em> to identify the type of operation to perform and its specific arguments (mbean names, attribute names for <code>read</code>/<code>write</code> operations or method name and arguments for <code>exec</code> operations).</p>
+</div>
+<div class="paragraph">
+<p>RFC 3986 mentions that a URI:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>path component with data organized in hierarchical form, where <em>segments</em> are separated by <code>/</code> character (implicitly stating that <code>/</code> is forbidden as part of the segment)</p>
+</li>
+<li>
+<p>query component with data organized in non-hierarchical form</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Also (and RFC 2396 says this explictly, while newer RFC 3986 only highlights the convention), some characters in the segments may have special meaning (usually to implement the <em>path parameters</em>). These are <code>;</code>, <code>,</code> and <code>=</code>. Finally, by the definition, <code>?</code> separates the path part from the query part, so <code>?</code> can&#8217;t be part of the path (and any segment of the path).</p>
+</div>
+<div class="paragraph">
+<p>The problem is that mbean names or attribute values may use various characters which are illegal from the point of view of URI or HTTP specifications.</p>
+</div>
+<div class="paragraph">
+<p>That&#8217;s where Jolokia URI encoding steps in. In theory <a href="https://en.wikipedia.org/wiki/Percent-encoding" class="externalLink" target="_blank" rel="noopener">URI encoding</a> should be sufficient, but it simply is not.</p>
 </div>
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph">
 <p>You might wonder why simple URI encoding isn&#8217;t enough for
-escaping slashes. The reason is that JBoss/Tomcat has a
-strange behaviour when returning an HTTP response
-<code>HTTP/1.x 400 Invalid URI: noSlash</code> for
-any URL which contains an escaped slash in the path info
-(i.e. <code>%2F</code>). The reason behind this
-behaviour is security related, slashes get decoded on the
-agent side before the agent-servlet gets the
-request. Other appservers might exhibit a similar
+escaping slashes. The reason is simple - security.
+For example, Tomcat returns HTTP error 400 with <code>Invalid URI: [The encoded slash character is not allowed]</code> message if you encode <code>/</code> as <code>%2F</code>. Jetty returns <code>Bad Message 400, reason: Ambiguous URI empty segment</code> when two slashes are used (<code>//</code>).
+Other appservers might exhibit a similar
 behaviour, so Jolokia uses an own escaping mechanism.</p>
 </div>
 </div>
 </div>
 <div class="paragraph">
-<p>If one of the request parts contain a slash
-(<code>/</code>) (e.g. as part of you bean&#8217;s name) it
+<p>If one of the Jolokia request parts contain a slash
+(<code>/</code>) (e.g. as part of you bean&#8217;s name, which is often the case with Camel or ActiveMQ) it
 needs to be escaped. An exclamation mark
 (<code>!</code>) is used as escape character <sup class="footnote" id="_footnote_no-backslash">[<a id="_footnoteref_2" class="footnote" href="#_footnotedef_2" title="View footnote.">2</a>]</sup>.
 An exclamation mark itself needs to be doubled
@@ -367,7 +390,7 @@ access URL like this has to be constructed:</p>
 </div>
 <div class="paragraph">
 <p>Client libraries like
-<a href="https://search.cpan.org/~roland/jmx4perl">JMX::Jmx4Perl</a>
+<a href="https://search.cpan.org/~roland/jmx4perl" class="externalLink" target="_blank" rel="noopener">JMX::Jmx4Perl</a>
 do this sort of escaping transparently.</p>
 </div>
 <div class="paragraph">
@@ -387,6 +410,9 @@ example above, the alternative is</p>
 <p>This format <em>must</em> be used for GET
 requests containing backslashes (<code>\</code>) since
 backslashes can not be sent as part of an URL at all.</p>
+</div>
+<div class="paragraph">
+<p>Summarizing, the recommended approach is to use POST requests if possible. If GET has to be used and escaping may be confusing with the server you used, use <code>p</code> query parameter. For GET requests with path segments, be careful about the escaping rules.</p>
 </div>
 </div>
 <div class="sect2">
@@ -638,9 +664,6 @@ results in a response of `27145000`for the value:</p>
 <p>If the attribute contains arrays at some level, use a numeric
 index (0 based) as part of the inner path if you want to
 traverse into this array.</p>
-</div>
-<div class="paragraph">
-<p><mark>TODO</mark> escaping</p>
 </div>
 <div class="paragraph">
 <p>For both, GET and POST requests, paths must be escaped as
