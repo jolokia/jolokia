@@ -198,6 +198,13 @@ div.ulist li {
 div.main>div.sect2 {
   padding: 0 15px 15px 15px;
 }
+div.sect2 {
+  clear: both;
+}
+div.imageblock.right {
+  float: right;
+  margin-right: 15px;
+}
 
 section>h2, .sect1 h2 {
   background: linear-gradient(to bottom, #d2d2d2 0%, #c2c2c2 20%, #c2c2c2 100%);
