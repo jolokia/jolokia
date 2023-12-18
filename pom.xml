@@ -390,8 +390,8 @@
   </issueManagement>
 
   <scm>
-    <connection>scm:git:git://github.com/grgrzybek/jolokia.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/grgrzybek/jolokia.git</developerConnection>
+    <connection>scm:git:git://github.com/jolokia/jolokia.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/jolokia/jolokia.git</developerConnection>
     <tag>2.0</tag>
     <url>git://github.com/jolokia/jolokia.git</url>
   </scm>
@@ -576,6 +576,10 @@
     <contributor>
       <name>Zisis Lianas</name>
       <url>https://github.com/zisisli</url>
+    </contributor>
+    <contributor>
+      <name>Grzegorz Grzybek</name>
+      <url>https://github.com/grgrzybek</url>
     </contributor>
   </contributors>
 
