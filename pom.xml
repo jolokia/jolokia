@@ -1373,6 +1373,28 @@
                   </resources>
                 </configuration>
               </execution>
+              <execution>
+                <!--
+                  We need https://jolokia.org/jolokia-spring/schema/config/jolokia-config.xsd
+                -->
+                <id>copy-xsd-old</id>
+                <phase>pre-site</phase>
+                <goals>
+                  <goal>copy-resources</goal>
+                </goals>
+                <inherited>false</inherited>
+                <configuration>
+                  <outputDirectory>${project.build.directory}/site/jolokia-spring/schema/config</outputDirectory>
+                  <resources>
+                    <resource>
+                      <directory>support/spring/src/main/resources/org/jolokia/support/spring</directory>
+                      <includes>
+                        <include>jolokia-config.xsd</include>
+                      </includes>
+                    </resource>
+                  </resources>
+                </configuration>
+              </execution>
             </executions>
           </plugin>
 
