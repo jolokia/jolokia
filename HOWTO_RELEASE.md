@@ -284,7 +284,7 @@ vi src/site/resources/jolokia.meta
 ```console
 gpg --allow-weak-digest-algos --digest-algo=SHA1 --local-user roland@jolokia.org -a -b src/site/resources/jolokia.meta
 shasum src/site/resources/jolokia.meta > src/site/resources/jolokia.meta.sha1
-md5 -q src/site/resources/jolokia.meta > src/site/resources/jolokia.meta.md5
+md5sum src/site/resources/jolokia.meta > src/site/resources/jolokia.meta.md5
 ```
 
 ## Recreate website (`~/jolokia`)
@@ -312,16 +312,6 @@ cd ../..
 mvn clean install
 mvn -N -Pdist site
 ```
-
-## Snapshot release
-
-* Set version number in `Version.java`, `jolokia.js`, `jolokia-cubism.js`, `test-app/pom.xml`, `docbkx/index.xml`
-
-```console
-mvn -Pdist deploy
-```
-
-* Adapt URI and version number in root-repository.xml on labs.consol.de to us a httppgp URL
 
 [1]: https://www.selenium.dev
 [2]: https://issues.apache.org/jira/browse/MRELEASE-798
