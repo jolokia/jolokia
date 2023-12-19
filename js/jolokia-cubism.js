@@ -15,30 +15,61 @@
  */
 
 /**
- * Jolokia integration into cubism (http://square.github.com/cubism/)
+ * Jolokia integration into cubism (https://square.github.io/cubism/)
  *
- * This integration requires the following
+ * This integration requires the following:
+ * - cubism
+ * - d3.js
  */
+"use strict";
 
-(function () {
+// Uses Node, AMD or browser globals to create a module.
+(function (root, factory) {
+    if (typeof define === "function" && define.amd) {
+        // AMD. Register as an anonymous module.
+        define(["cubism", "./jolokia"], factory);
+    } else if (typeof module === "object" && module.exports) {
+        // Node. Does not work with strict CommonJS, but
+        // only CommonJS-like environments that support module.exports,
+        // like Node.
+        module.exports = factory(require("cubism"), require("./jolokia"));
+    } else {
+        // Browser globals
+        if (root.Jolokia) {
+            factory(root.cubism, root.Jolokia);
+        } else {
+            console.error("No " + (root.cubism ? "Cubism" : "Jolokia") + " definition found. " +
+                          "Please include jolokia.js and cubism.js before jolokia-cubism.js");
+        }
+    }
+}(typeof self !== "undefined" ? self : this, function (cubism, Jolokia) {
+
     var builder = function (cubism,Jolokia) {
-        
-        var VERSION = "1.1.1";
-        
+
+        var VERSION = "2.0.0";
+
         var ctx_jolokia = function (url, opts) {
             var source = {},
                 context = this,
                 j4p = createAgent(url, opts),
                 step = 5e3;                    // 5 seconds by default
 
-            // Connecto to start and stop events
-            context.on("start",function() {
-                j4p.start();
-            });
+            try
+            {
+                // Connect to start and stop events
+                context.on("start",function() {
+                    j4p.start();
+                });
 
-            context.on("stop",function() {
-                j4p.stop();
-            });
+                context.on("stop",function() {
+                    j4p.stop();
+                });
+            }
+            catch(err)
+            {
+                // Still waiting for pull request https://github.com/square/cubism/pull/19 for supporting
+                // "start" and "stop" events
+            }
 
             /**
              * Factory method for create a metric objects which has various variants.
@@ -47,7 +78,7 @@
              * is used for sending requests periodically.
              *
              * If the first argument is a function, this function is used for calculating the numeric value
-             * to be plotted. The rest of the argumens can be one or more request objects, which are registered and their
+             * to be plotted. The rest of the arguments can be one or more request objects, which are registered and their
              * responses are put as arguments to the given callback function.
              *
              * The last argument, if an object but not a Jolokia request (i.e. there is no <code>type</code> key), is
@@ -148,11 +179,11 @@
                 j4p.start(newStep);
             };
 
-            // Stop fetching of values in the backgorund
-            source.stop = j4p.stop;
+            // Stop fetching of values in the background
+            source.stop = function() { j4p.stop() };
 
             // Check whether the scheduler is running
-            source.isRunning = j4p.isRunning;
+            source.isRunning = function() { return j4p.isRunning() };
 
             // Startup poller which will call the agent periodically
             return source;
@@ -247,24 +278,5 @@
         return ctx_jolokia;
     };
 
-    // =====================================================================================================
-    // Register either at the global Jolokia object global or as an AMD module
-    (function (root) {
-        if (typeof define === 'function' && define.amd) {
-            // AMD. Register as a named module
-            define(["cubism","jolokia"],function (cubism,Jolokia) {
-                return builder(cubism,Jolokia);
-            });
-        } else {
-            if (root.Jolokia && root.cubism) {
-                builder(root.cubism,root.Jolokia);
-            } else {
-                console.error("No " + (root.cubism ? "Cubism" : "Jolokia") + " definition found. " +
-                              "Please include jolokia.js and cubism.js before jolokia-cubism.js");
-            }
-        }
-    })(this);
-})();
-
-
-
+    return builder(cubism, Jolokia);
+}));

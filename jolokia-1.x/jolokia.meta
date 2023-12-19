@@ -1,0 +1,162 @@
+{
+   "repositories" : [
+      "http://repo1.maven.org/maven2"
+   ],
+   "snapshots-repositories" : [
+      "https://oss.sonatype.org/content/repositories/snapshots"
+   ],
+   "versions" : {
+      "1.7.2" : {
+         "jmx4perl" : "[1.00,2.00)"
+      },
+      "1.7.1" : {
+         "jmx4perl" : "[1.00,2.00)"
+      },
+      "1.7.0" : {
+         "jmx4perl" : "[1.00,2.00)"
+      },
+      "1.6.2" : {
+         "jmx4perl" : "[1.00,2.00)"
+      },
+      "1.6.1" : {
+         "jmx4perl" : "[1.00,2.00)"
+      },
+      "1.6.0" : {
+         "jmx4perl" : "[1.00,2.00)"
+      },
+      "1.5.0" : {
+         "jmx4perl" : "[1.00,2.00)"
+      },
+      "1.4.0" : {
+         "jmx4perl" : "[1.00,2.00)"
+      },
+      "1.3.7" : {
+         "jmx4perl" : "[1.00,2.00)"
+      },
+      "1.3.6" : {
+         "jmx4perl" : "[1.00,2.00)"
+      },
+      "1.3.5" : {
+         "jmx4perl" : "[1.00,2.00)"
+      },
+      "1.3.4" : {
+         "jmx4perl" : "[1.00,2.00)"
+      },
+      "1.3.3" : {
+         "jmx4perl" : "[1.00,2.00)"
+      },
+      "1.3.2" : {
+         "jmx4perl" : "[1.00,2.00)"
+      },
+      "1.3.1" : {
+         "jmx4perl" : "[1.00,2.00)"
+      },
+      "1.3.0" : {
+         "jmx4perl" : "[1.00,2.00)"
+      },
+      "1.2.3" : {
+         "jmx4perl" : "[1.00,2.00)"
+      },
+      "1.2.2" : {
+         "jmx4perl" : "[1.00,2.00)"
+      },
+      "1.2.1" : {
+         "jmx4perl" : "[1.00,2.00)"
+      },
+      "1.2.0" : {
+         "jmx4perl" : "[1.00,2.00)"
+      },
+      "1.1.5" : {
+         "jmx4perl" : "[1.00,2.00)"
+      },
+      "1.1.4" : {
+         "jmx4perl" : "[1.00,2.00)"
+      },
+      "1.1.3" : {
+         "jmx4perl" : "[1.00,2.00)"
+      },
+      "1.1.2" : {
+         "jmx4perl" : "[1.00,2.00)"
+      },
+      "1.1.1" : {
+         "jmx4perl" : "[1.00,2.00)"
+      },
+      "1.1.0" : {
+         "jmx4perl" : "[1.00,2.00)"
+      },
+      "1.0.6" : {
+         "jmx4perl" : "[1.00,2.00)"
+      },
+      "1.0.5" : {
+         "jmx4perl" : "[1.00,2.00)"
+      },
+      "1.0.4" : {
+         "jmx4perl" : "[1.00,2.00)"
+      },
+      "1.0.3" : {
+         "jmx4perl" : "[1.00,2.00)"
+      },
+      "1.0.2" : {
+         "jmx4perl" : "[1.00,2.00)"
+      },
+      "1.0.1" : {
+         "jmx4perl" : "[1.00,2.00)"
+      },
+      "1.0.0" : {
+         "jmx4perl" : "[1.00,2.00)"
+      },
+      "0.95" : {
+         "jmx4perl" : "[0.95,1.0)"
+      }, 
+      "0.91" : {
+         "jmx4perl" : "[0.90,1.0)"
+      },
+      "0.90" : {
+         "jmx4perl" : "[0.90,1.0)"
+      },
+      "0.83" : {
+         "jmx4perl" : "[0.73,1.0)"
+      },
+      "0.82" : {
+         "jmx4perl" : "[0.73,1.0)"
+      },
+      "0.81" : {
+         "jmx4perl" : "[0.73,1.0)"
+      }
+   },
+   "mapping" : {
+      "osgi" : [
+         "jolokia-osgi",
+         "jolokia-osgi-%v.jar",
+         "jolokia.jar"
+      ],
+      "mule" : [
+         "jolokia-mule",
+         "jolokia-mule-%v.jar",
+         "jolokia-mule.jar"
+      ],
+      "osgi-bundle" : [
+         "jolokia-osgi-bundle",
+         "jolokia-osgi-bundle-%v.jar",
+         "jolokia-bundle.jar"
+      ],
+      "jdk6" : [
+         "jolokia-jvm-jdk6",
+         "jolokia-jvm-jdk6-%v-agent.jar",
+         "jolokia.jar"
+      ],
+      "jvm" : [
+         "jolokia-jvm",
+         "jolokia-jvm-%v-agent.jar",
+         "jolokia.jar"
+      ],
+      "war" : [
+         "jolokia-war",
+         "jolokia-war-%v.war",
+         "jolokia.war"
+      ]
+   },
+   "templates" : {
+      "jolokia-access.xml" : "http://www.jolokia.org/templates/jolokia-access.xml"
+   }
+}
