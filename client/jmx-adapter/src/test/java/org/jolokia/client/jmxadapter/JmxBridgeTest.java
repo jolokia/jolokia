@@ -169,7 +169,8 @@ public class JmxBridgeTest {
         "java.lang:type=OperatingSystem.ProcessCpuTimeByNS",
         "java.lang:type=OperatingSystem.ProcessPhysicalMemorySize",
         "java.lang:type=Memory.GCMasterThreadCpuUsed",
-        "java.lang:type=OperatingSystem.SystemLoadAverage");
+        "java.lang:type=OperatingSystem.SystemLoadAverage",
+        "java.lang:type=OperatingSystem.OpenFileDescriptorCount");
 
     //Attributes that give runtime exception on some JVM versions and therefore not suitable for brute force tests
     private static final Collection<String> UNSAFE_ATTRIBUTES = Set.of(
