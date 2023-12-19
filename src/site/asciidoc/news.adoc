@@ -33,7 +33,7 @@ This release is a result of our dedicated effort in reviewing, restructuring, re
 * A revamped and user-friendly link:reference/html/index.html[Reference Manual] powered by Antora
 * JDK 11 is the minimal version of JDK required. Spring related Jolokia modules require JDK 17. (No worries, we're still supporting Jolokia 1.x with minimal version of JDK 1.6 supported).
 
-And that's not all. We're already planning more frequent updates, including exciting new features like websockets support and IPv6.
+And that's not all. We're already planning more frequent updates, including exciting new features like websockets and IPv6 support.
 
 Jolokia 2 also gears up to seamlessly integrate with the upcoming https://github.com/orgs/hawtio/projects/1[Hawtio 4.0,role=externalLink,window=_blank]!
 
