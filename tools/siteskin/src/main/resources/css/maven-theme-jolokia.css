@@ -204,6 +204,7 @@ div.sect2 {
 div.imageblock.right {
   float: right;
   margin-right: -70px;
+  margin-left: 20px;
 }
 
 section>h2, .sect1 h2 {
