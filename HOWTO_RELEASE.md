@@ -291,7 +291,9 @@ md5sum src/site/resources/jolokia.meta > src/site/resources/jolokia.meta.md5
 
 ## Recreate website (`~/jolokia`)
 
-Just run maven-site-plugin. In Jolokia, we use Asciidoc and [frontend-maven-plugin][7] for npm/Javascript stuff. All
+First, update skin version used in `src/site/site.xml` to new version.
+
+Then just run maven-site-plugin. In Jolokia, we use Asciidoc and [frontend-maven-plugin][7] for npm/Javascript stuff. All
 plugins are configured in relevant Maven lifecycle phases, so it's enough to run:
 
 ```console

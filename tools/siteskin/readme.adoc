@@ -31,6 +31,8 @@ So the `css/site.css` is a place where further customization may be added.
 
 `META-INF/maven/site.vm` template may use some Velocity context parameters specified by https://github.com/apache/maven-doxia-sitetools/blob/doxia-sitetools-1.11.1/doxia-site-renderer/src/main/java/org/apache/maven/doxia/siterenderer/DefaultSiteRenderer.java#L542-L620[Doxia site renderer]. Probably the most important is `$relativePath`.
 
+See also: https://maven.apache.org/doxia/doxia-sitetools/doxia-site-renderer/index.html#velocity-processing.
+
 == Technical details for the curious
 
 `maven-site-plugin` is using https://maven.apache.org/doxia/[Doxia] to process documents in various formats into HTML (usually) site. These formats include https://maven.apache.org/doxia/references/index.html[some obvious and more exotic ones] - `.apt`, `.fml`, `.md`, ...
