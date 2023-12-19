@@ -355,7 +355,7 @@
         <reportSets>
           <reportSet>
             <reports>
-              <report>dependency-management</report>
+<!--              <report>dependency-management</report>-->
               <report>project-team</report>
               <report>cim</report>
               <report>issue-tracking</report>
