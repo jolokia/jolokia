@@ -18,33 +18,39 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.jolokia</groupId>
   <artifactId>jolokia-it-core</artifactId>
-  <version>1.7.3-SNAPSHOT</version>
-  <name>jolokia-it-core</name>
+  <version>2.0.1-SNAPSHOT</version>
   <packaging>bundle</packaging>
-  <description>Core classes for integration tests</description>
+
+  <name>jolokia-it-core</name>
+  <description>Jolokia :: IT :: Core Tests</description>
 
   <parent>
     <groupId>org.jolokia</groupId>
-    <artifactId>jolokia-it-parent</artifactId>
-    <version>1.7.3-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
+    <artifactId>jolokia-parent</artifactId>
+    <version>2.0.1-SNAPSHOT</version>
+    <relativePath>../../pom.xml</relativePath>
   </parent>
 
+  <url>https://jolokia.org/</url>
+
   <dependencies>
+
+    <!-- Jolokia own artifacts -->
+
     <dependency>
       <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-jmx</artifactId>
-      <version>${project.version}</version>
+      <artifactId>jolokia-support-jmx</artifactId>
     </dependency>
+
+    <!-- OSGi dependencies -->
 
     <dependency>
       <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.core</artifactId>
-      <version>4.2.0</version>
+      <artifactId>osgi.core</artifactId>
       <scope>provided</scope>
     </dependency>
+
   </dependencies>
 
   <build>
@@ -58,7 +64,7 @@
           <instructions>
             <Bundle-SymbolicName>org.jolokia.it</Bundle-SymbolicName>
             <Bundle-Version>${project.version}</Bundle-Version>
-            <Bundle-Activator>org.jolokia.it.Activator</Bundle-Activator>
+            <Bundle-Activator>org.jolokia.it.core.ItActivator</Bundle-Activator>
             <Bundle-Name>Jolokia Integration Test Bundle</Bundle-Name>
             <!-- Needed because we export an embedded package only -->
             <Import-Package>
@@ -74,11 +80,12 @@
         <configuration>
           <archive>
             <manifestEntries>
-              <Premain-Class>org.jolokia.it.ItSetup</Premain-Class>
+              <Premain-Class>org.jolokia.it.core.ItSetup</Premain-Class>
             </manifestEntries>
           </archive>
         </configuration>
       </plugin>
     </plugins>
   </build>
+
 </project>

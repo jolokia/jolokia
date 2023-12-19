@@ -1,0 +1,2 @@
+# Serializer for unit tests
+org.jolokia.server.core.util.TestSerializer,100

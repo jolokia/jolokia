@@ -1,0 +1,6 @@
+org.jolokia.service.serializer.json.simplifier.ClassSimplifier
+org.jolokia.service.serializer.json.simplifier.FileSimplifier
+org.jolokia.service.serializer.json.simplifier.DomElementSimplifier
+org.jolokia.service.serializer.json.simplifier.UrlSimplifier
+org.jolokia.service.serializer.json.simplifier.ObjectNameSimplifier
+org.jolokia.service.serializer.json.simplifier.BigIntegerSimplifier

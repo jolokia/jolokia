@@ -1,0 +1,118 @@
+= A skin for maven-site-plugin
+
+Skin project may be generated using:
+
+----
+$ mvn archetype:generate \
+    -DarchetypeGroupId=org.apache.maven.archetypes \
+    -DarchetypeArtifactId=maven-archetype-site-skin \
+    -DarchetypeVersion=1.4
+----
+
+It'll generate a Maven project with several files:
+
+* `src/main/resources/META-INF/maven/site.vm` - main https://velocity.apache.org/[Velocity] template for the site layout
+* `src/main/resources/META-INF/maven/site-macros.vm` - supporting Velocity macros
+* `src/main/resources/css/maven-base.css` - base theme CSS
+* `src/main/resources/css/maven-theme.css` - more specific theme CSS
+* `src/main/resources/css/print.css` - CSS for `media="print"`
+* `src/main/resources/images/*` - images
+
+`site.vm` includes CSS in this order:
+
+[,css]
+----
+@import url("$relativePath/css/maven-base.css");
+@import url("$relativePath/css/maven-theme.css");
+@import url("$relativePath/css/site.css");
+----
+
+So the `css/site.css` is a place where further customization may be added.
+
+`META-INF/maven/site.vm` template may use some Velocity context parameters specified by https://github.com/apache/maven-doxia-sitetools/blob/doxia-sitetools-1.11.1/doxia-site-renderer/src/main/java/org/apache/maven/doxia/siterenderer/DefaultSiteRenderer.java#L542-L620[Doxia site renderer]. Probably the most important is `$relativePath`.
+
+See also: https://maven.apache.org/doxia/doxia-sitetools/doxia-site-renderer/index.html#velocity-processing.
+
+== Technical details for the curious
+
+`maven-site-plugin` is using https://maven.apache.org/doxia/[Doxia] to process documents in various formats into HTML (usually) site. These formats include https://maven.apache.org/doxia/references/index.html[some obvious and more exotic ones] - `.apt`, `.fml`, `.md`, ...
+
+When focusing on Asciidoc, there's no standard support, but Doxia (and maven-site-plugin) can be configured to process these documents as well - just add this dependency to `maven-site-plugin`:
+
+[,xml]
+----
+<dependencies>
+  <dependency>
+    <groupId>org.asciidoctor</groupId>
+    <artifactId>asciidoctor-maven-plugin</artifactId>
+    <version>2.2.4</version>
+  </dependency>
+</dependencies>
+----
+
+The integration is _established_ with `asciidoctor-maven-plugin-2.2.4.jar/META-INF/plexus/components.xml` component descriptor.
+
+For the record, here's runtime Doxia configuration:
+
+----
+parserManager = {org.apache.maven.doxia.parser.manager.DefaultParserManager@4366}
+ parsers: java.util.Map  = {org.eclipse.sisu.wire.EntryMapAdapter@4370}  size = 10
+  {@4384} "xhtml" -> {org.apache.maven.doxia.module.xhtml.XhtmlParser@4389}
+  {@4390} "confluence" -> {org.apache.maven.doxia.module.confluence.ConfluenceParser@4401}
+  {@4346} "markdown" -> {org.apache.maven.doxia.module.markdown.MarkdownParser@4569}
+  {@4570} "twiki" -> {org.apache.maven.doxia.module.twiki.TWikiParser@4601}
+  {@4602} "fml" -> {org.apache.maven.doxia.module.fml.FmlParser@4604}
+  {@4605} "docbook" -> {org.apache.maven.doxia.module.docbook.DocBookParser@4726}
+  {@4329} "asciidoc" -> {org.asciidoctor.maven.site.AsciidoctorDoxiaParser@4260}
+  {@4727} "xdoc" -> {org.apache.maven.doxia.module.xdoc.XdocParser@4729}
+  {@4730} "xhtml5" -> {org.apache.maven.doxia.module.xhtml5.Xhtml5Parser@4732}
+  {@4304} "apt" -> {org.apache.maven.doxia.module.apt.AptParser@4734}
+----
+
+When designing a site layout, it's worth knowing where the actual document end up. From Doxia/Velocity point of view, the content is available under `$bodyContent` variable and Doxia processors generate embedded-friendly markup.
+
+For example this Asciidoc document:
+
+----
+= index
+
+content
+
+== chapter
+
+index
+
+=== subchapter
+
+text
+----
+
+is translated into this HTML fragment:
+
+[,html]
+----
+<h1>index</h1>
+<div id="preamble">
+  <div class="sectionbody">
+    <div class="paragraph">
+      <p>content</p>
+    </div>
+  </div>
+</div>
+<div class="sect1">
+  <h2 id="chapter">chapter</h2>
+  <div class="sectionbody">
+    <div class="paragraph">
+      <p>index</p>
+    </div>
+    <div class="sect2">
+      <h3 id="subchapter">subchapter</h3>
+      <div class="paragraph">
+        <p>text</p>
+      </div>
+    </div>
+  </div>
+</div>
+----
+
+So we have obvious `<h1>`, `<h2>` and less obvious `<div class="sectN">` sections.

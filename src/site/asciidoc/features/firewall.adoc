@@ -1,0 +1,53 @@
+////
+  Copyright 2009-2023 Roland Huss
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+        https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+
+== Firewall friendly
+
+image:../images/features/firewall_large.png["Firewall",role=right]
+Since Jolokia uses HTTP (or HTTPS) for its transport protocol,
+it plays nicely with even complex firewall setups. For the
+client within a firewall it is easy to access Jolokia agents
+outside over an HTTP proxy, even over multiple hops. Also
+since HTTP is such a widely adopted protocol, it is much
+better accepted than RMI, which is mostly specific to the Java
+world (or CORBA world if using IIOP). Hence chances are much
+higher to get an agreement with the firewall policies in
+place.
+
+Since HTTP use a single, fixed port it is easy to let Jolokia
+communicate through an SSH tunnel, too. This is not easy with
+the standard JSR-160 protocol RMI, which uses random
+ports. There are solutions to use fixed port number, but they are
+horribly complicated.
+
+With Jolokia's xref:proxy.adoc[proxy mode] there are
+even more options to let the Java servers without any agent
+within the firewall to be reached from the outside over HTTP.
+
+There has been efforts to put JSR-160 on a different protocol
+stack, but they are either not a standard solution, requiring
+a special client setup (like https://mx4j.sourceforge.net/[MX4J,role=externalLink,window=_blank]) or seemed to
+have been dropped (WS connector which uses SOAP
+had its last pre-release in October 2008). Up to now, the only
+solution which allows for a smooth, firewall friendly setup is
+a JMX Bridge (or Proxy), like Jolokia.
+
+=== Next
+
+* See why jolokia is the xref:polyglot.adoc[perfect choice] for non-Java environments
+to access Java servers via JMX.
+* Jolokia is xref:simple.adoc[simple]. Really.
+* Go Back to the xref:../features.adoc[Features Overview].

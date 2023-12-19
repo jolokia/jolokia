@@ -20,8 +20,8 @@ package org.jolokia.jvmagent.client.util;
  * Process descriptor, immutable
  */
 public class ProcessDescription {
-    private String id;
-    private String display;
+    private final String id;
+    private final String display;
 
     /**
      * Constructor for process descriptor

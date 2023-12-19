@@ -18,27 +18,26 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.jolokia</groupId>
   <artifactId>jolokia-client-javascript</artifactId>
-  <version>1.7.3-SNAPSHOT</version>
-  <name>jolokia-client-javascript</name>
+  <version>2.0.1-SNAPSHOT</version>
   <packaging>javascript</packaging>
-  <description>JavaScript client library for Jolokia agents</description>
+
+  <name>jolokia-client-javascript</name>
+  <description>Jolokia :: Client :: JavaScript</description>
 
   <parent>
     <groupId>org.jolokia</groupId>
-    <artifactId>jolokia-client-parent</artifactId>
-    <version>1.7.3-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
+    <artifactId>jolokia-parent</artifactId>
+    <version>2.0.1-SNAPSHOT</version>
+    <relativePath>../../pom.xml</relativePath>
   </parent>
+
+  <url>https://jolokia.org/</url>
 
   <properties>
     <sonar.language>js</sonar.language>
     <sonar.dynamicAnalysis>false</sonar.dynamicAnalysis>
   </properties>
-  
-  <dependencies>
-  </dependencies>
 
   <build>
     <sourceDirectory>src/main/javascript</sourceDirectory>
@@ -47,14 +46,14 @@
       <plugin>
         <groupId>com.devspan.mojo.javascript</groupId>
         <artifactId>javascript-maven-plugin</artifactId>
-        <version>0.9.3</version>
         <configuration>
+          <excludes>**/*test.js</excludes>
           <scriptClassifier>min</scriptClassifier>
           <compressor>jsmin</compressor>
           <skipStats>false</skipStats>
         </configuration>
         <extensions>true</extensions>
-         <executions>
+        <executions>
           <execution>
             <goals>
               <goal>attach-compressed</goal>
@@ -62,14 +61,56 @@
           </execution>
         </executions>
       </plugin>
-
+      <plugin>
+        <groupId>com.github.eirslett</groupId>
+        <artifactId>frontend-maven-plugin</artifactId>
+        <configuration>
+          <installDirectory>../../.node</installDirectory>
+        </configuration>
+        <executions>
+          <execution>
+            <id>install node and npm</id>
+            <goals>
+              <goal>install-node-and-npm</goal>
+            </goals>
+            <phase>generate-resources</phase>
+            <configuration>
+              <nodeVersion>${version.nodejs}</nodeVersion>
+            </configuration>
+          </execution>
+          <execution>
+            <id>npm install</id>
+            <goals>
+              <goal>npm</goal>
+            </goals>
+            <phase>generate-resources</phase>
+            <configuration>
+              <arguments>install</arguments>
+            </configuration>
+          </execution>
+          <execution>
+            <id>npm run check</id>
+            <goals>
+              <goal>npm</goal>
+            </goals>
+            <phase>test</phase>
+            <configuration>
+              <arguments>run check</arguments>
+            </configuration>
+          </execution>
+          <execution>
+            <id>npm test</id>
+            <goals>
+              <goal>npm</goal>
+            </goals>
+            <phase>test</phase>
+            <configuration>
+              <arguments>test</arguments>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 
-  <pluginRepositories>
-    <pluginRepository>
-      <id>sonatype-oss</id>
-      <url>https://oss.sonatype.org/content/groups/public</url>
-    </pluginRepository>
-  </pluginRepositories>
 </project>

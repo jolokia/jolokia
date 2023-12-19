@@ -44,7 +44,7 @@ public final class J4pSearchResponse extends J4pResponse<J4pSearchRequest> {
      */
     public List<ObjectName> getObjectNames() {
         List<String> names = getMBeanNames();
-        List<ObjectName> ret = new ArrayList<ObjectName>(names.size());
+        List<ObjectName> ret = new ArrayList<>(names.size());
         for (String name : names) {
             try {
                 ret.add(new ObjectName(name));

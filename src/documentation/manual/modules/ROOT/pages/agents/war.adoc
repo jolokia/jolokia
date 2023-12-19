@@ -1,0 +1,388 @@
+////
+  Copyright 2009-2023 Roland Huss
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+[#agents-war]
+== Jakarta EE Agent (WAR)
+
+[#war-agent-installation]
+=== Installation and Configuration
+
+The WAR agent is the most popular variant, and can be deployed
+in a servlet container just like any other Jakarta EE web application.
+
+.Tomcat example
+****
+A simple example for deploying the WAR agent on Tomcat can be found
+in the Jolokia https://www.jolokia.org/tutorial.html[quickstart].
+****
+
+Often, installation is simply a matter of copying the agent WAR to
+a deployment directory (`webapps/` directory on Tomcat).
+On other platforms an administrative Web
+GUI or a command line tool need to be used for
+deployment. Providing detailed installation instructions for every servlet
+container is out of scope for this document.
+
+The servlet itself can be configured in two ways:
+
+**Servlet Init Parameters**::
+Jolokia can be configured with `init-param`
+declarations within the servlet definition in
+`WEB-INF/web.xml`. The known parameters are
+described in <<agent-war-init-params>>. The
+stock agent needs to be repackaged, though, in order to modify
+the internal `web.xml`.
+
+**Servlet Context Parameters**::
+A more convenient possibility might be to use servlet context
+parameters, which can be configured outside the WAR
+archive. This is done differently for each servlet container
+but involves typically the editing of a configuration
+file. E.g. for
+https://tomcat.apache.org/tomcat-10.1-doc/config/context.html#Context_Parameters[Tomcat 10.1],
+the context for
+the Jolokia agent can be adapted by putting a file
+`jolokia.xml` below
+`$TC/conf/Catalina/localhost/` with a
+content like:
++
+[,xml]
+----
+<Context>
+  <Parameter name="maxDepth" value="1"/>
+</Context>
+----
+
+Additionally, the configuration options `discoveryEnabled` and
+`discoveryAgentUrl` can be provided via environment
+variables or system properties, too. See below for details.
+
+[#agent-war-init-params]
+.Servlet init parameters
+[cols="15,~,~"]
+|===
+|Parameter|Description|Example
+
+|`jsr160ProxyAllowedTargets`
+|Path to a white list of patterns which are matched against possible
+JMX service URL for incoming requests. If no white list is specified, default blacklist is effective which
+includes `pass:[service:jmx:rmi:///jndi/ldap:.*]`.
+|`/opt/jolokia/jsr160-proxy-allowed-patterns.txt`
+
+|`policyLocation`
+|Location of the policy file to use. This is either a URL
+which can read from (like a `file:` or
+`http:` URL) or with the special protocol
+`classpath:` which is used for looking up
+the policy file in the web application's classpath. See
+xref:security.adoc#security-policy-location[Policy Location] for details about this
+parameter.
+|`file:/home/jolokia/jolokia-access.xml`
+for a file based access to the policy file. Default is
+`classpath:/jolokia-access.xml`.
+
+|`restrictorClass`
+|Full classname of an implementation of `org.jolokia.server.core.service.api.Restrictor`
+which is used as a custom restrictor for securing access via Jolokia.
+|`com.mycompany.jolokia.CustomRestrictor` (which must be included in the
+war file and must implement `org.jolokia.server.core.service.api.Restrictor`)
+
+|`allowDnsReverseLookup`
+|Access can be restricted based on the remote host accessing Jolokia. This host can be
+specified as address or an hostname. However, using the hostname normally requires a reverse
+DNS lookup which might slow down operations. If you want to use reverse DNS lookup
+set this property to `true`.
+|Default: `false`
+
+|`debug`
+|Debugging state after startup. Can be changed via
+the config MBean during runtime.
+|Default: `false`
+
+|`logHandlerClass`
+a|Loghandler to use for providing logging output. By default
+logging is written to standard out and error but you can provide
+here a Java class implementing `org.jolokia.server.core.service.api.LogHandler`
+for an alternative log output. Few implementations are included in WAR
+this agent:
+
+* `org.jolokia.server.core.service.impl.StdoutLogHandler` which logs to standard output
+* `org.jolokia.server.core.service.impl.QuietLogHandler` which switches off
+logging completely.
+* `org.jolokia.server.core.service.impl.JulLogHandler` which uses a `java.util.logging` Logger with name `org.jolokia`
+* `org.jolokia.server.core.http.AgentServlet.ServletLogHandler` is used by default and delegates to `jakarta.servlet.GenericServlet.log()` methods
+a|Default: `org.jolokia.server.core.http.AgentServlet.ServletLogHandler`
+
+|`historyMaxEntries`
+|Entries to keep in the history. Can be changed at
+runtime via the config MBean.
+|Default: `10`
+
+|`debugMaxEntries`
+|Maximum number of entries to keep in the local
+debug history (if enabled). Can be changed via
+the config MBean at runtime.
+|Default: `100`
+
+|`maxDepth`
+|Maximum depth when traversing bean properties.
+If set to 0, depth checking is disabled
+|Default: `15`
+
+|`maxCollectionSize`
+|Maximum size of collections returned when
+serializing to JSON. When set to 0,
+collections are never truncated.
+|Default: `0`
+
+|`maxObjects`
+|Maximum number of objects which are traversed
+when serializing a single response. Use this
+as an airbag to avoid boosting your memory and
+network traffic. Nevertheless, when set to 0
+no limit is imposed.
+|Default: `0`
+
+|`mbeanQualifier`
+|Qualifier to add to the ObjectName of Jolokia's own
+MBeans. This can become necessary if more than one agent is
+active within a servlet container. This qualifier is added
+to the `ObjectName` of this agent with a
+comma. For example a `mbeanQualifier`
+with the value `qualifier=own` will
+result in Jolokia server handler MBean with the name
+`jolokia:type=ServerHandler,qualifier=own`
+|
+
+|`mimeType`
+|MIME to use for the JSON responses. Only `application/json` and
+`text/plain` are allowed.
+If any other type is given, Jolokia falls back to `text/plain`.
+|Default: `text/plain`
+
+|`canonicalNaming`
+|This option specifies in which order the key-value
+properties within ObjectNames as returned by
+`list` or `search` are
+returned. By default this is the so called 'canonical order'
+in which the keys are sorted alphabetically. If this option
+is set to `false`, then the natural order
+is used, i.e. the object name as it was registered. This
+option can be overridden with a query parameter of the same
+name.
+|Default: `true`
+
+|`includeStackTrace`
+|Whether to include a stacktrace of an exception in case of
+an error. By default it it set to `true`
+in which case the stacktrace is always included. If set to
+`false`, no stacktrace is included. If
+the value is `runtime` a stacktrace is
+only included for RuntimeExceptions. This global option can
+be overridden with a query parameter.
+|Default: `false`
+
+|`serializeException`
+|When this parameter is set to `true`,
+then an exception thrown will be serialized as JSON and
+included in the response under the key
+`error_value`. No stacktrace information
+will be included, though. This global option can be
+overridden by a query parameter of the same name.
+|Default: `false`
+
+|`allowErrorDetails`
+|If set to `false` then no error details like a stack trace
+(when `includeStackTrace` is set) or a serialized exception
+(when `serializeExceptin` is set) are included. This can be user as
+a startup option to avoid exposure of error details regardless of other options.
+|Default: `true`
+
+|`detectorOptions`
+|Extra options passed to a detector after successful
+detection of an application server. See below for an
+explanation.
+|
+
+|`discoveryEnabled`
+|If set to `true` then this servlet will
+listen for multicast request (multicast-group 239.192.48.84,
+port 24884 by default, but can be changed). By default this option is disabled in order to
+avoid conflicts with an Jakarta EE standards (though this should't
+harm anyways). This option can also be switched on with an
+environment variable
+`JOLOKIA_DISCOVERY_ENABLED` or the system
+property `jolokia.discoveryEnabled` set to
+`true`.
+|Default: `false`
+
+|`discoveryAgentUrl`
+|Sets the URL to respond for multicast discovery requests. If
+given, `discoveryEnabled` is set
+implicitly to `true`. This URL can also be provided by an
+environment variable
+`JOLOKIA_DISCOVERY_AGENT_URL` or the system
+property `jolokia.discoveryAgentUrl`. Within the value you can use the
+placeholders `$\{host}` and `$\{ip}` which gets replaced
+by the autodetected local host name/address. Also with `${env:ENV_VAR}` and
+`${sys:property}` environment and system properties can be referenced, respectively.
+|`\http://10.9.11.87:8080/jolokia`
+
+|`multicastGroup`
+|The multicast group IPv4 address. This group IP can be also given as an environment variable `JOLOKIA_MULTICAST_GROUP` or a system property `jolokia.multicastGroup`
+|Default: `239.192.48.84`
+
+|`multicastPort`
+|The multicast port. This port can be also given as an environment variable `JOLOKIA_MULTICAST_PORT` or a system property `jolokia.multicastPort`
+|Default: `24884`
+
+|`agentId`
+|A unique ID for this agent. By default a unique id is
+calculated. If provided it should be ensured that this id is
+unique among all agent reachable via multicast requests used
+by the discovery mechanism. It is recommended not to set
+this value. Within the `agentId` specification you
+can use the same placeholders as in `discoveryAgentUrl`.
+|`my-unique-agent-id`
+
+|`agentDescription`
+|An optional description which can be used for clients to
+present a human readable label for this agent.
+|`Monitoring agent`
+|===
+
+Jolokia has various detectors which can detect the brand and
+version of an application server it is running in. This version
+is revealed with the `version` command. With
+the configuration parameter `detectorOptions`
+extra options can be passed to the detectors. These options take
+the form of a JSON object, where the keys are productnames and
+the values other JSON objects containing the specific
+configuration. This configuration is feed to a successful
+detector which can do some extra initialization on agent
+startup. Currently the following extra options are supported:
+
+[#agent-war-detector-options]
+.Detector Options
+|===
+|Product|Option|Description
+
+|glassfish
+|bootAmx
+|If `false` and the agent is running on
+GlassFish, this will cause the AMX subsystem not to be booted
+during startup. By default, AMX which contains all relevant
+MBeans for monitoring GlassFish is booted.
+|===
+
+[#agent-war-security]
+=== Security Setup
+
+The WAR agent comes in two flavors:
+
+**jolokia-agent-war.war**::
+The standard agent which is secured with the role `jolokia`. You have to setup your servlet container
+to connect this role to the authentication.
+
+**jolokia-agent-war-unsecured.war**::
+A demo agent, which is completely unsecured. Please use this agent only for evaluation purposes, but it is
+highly recommended that use the security enabled agent `jolokia.war`.
+
+Jakarta EE security is enabled by default by adding the required information within the
+`web.xml`.
+
+.Using jmx4perl's `jolokia` tool
+****
+https://metacpan.org/dist/jmx4perl[jmx4perl,role=externalLink,window=_blank] comes
+with a nice command line utility called
+`https://metacpan.org/dist/jmx4perl/view/scripts/jolokia[jolokia,role=externalLink,window=_blank]`
+which allows for an easy setup of security within a given
+`jolokia.war`.
+****
+
+All
+current client libraries are able to use BASIC HTTP authentication
+with user and password. The
+`<login-config>` should be set
+accordingly. The `<security-constraint>`
+specifies the URL pattern (which is in the default setup specify
+all resources provided by the Jolokia servlet) and a role name `jolokia`
+which is used to find the proper authentication credentials. This
+role must be referenced outside the agent WAR within the servlet
+container, e.g. for Tomcat the role definition can be found in
+`$TOMCAT/config/tomcat-users.xml`.
+
+[#agent-war-programmatic]
+=== Programmatic usage of the Jolokia agent servlet
+
+The Jolokia agent servlet can be integrated into one's own
+web applications as well. Simply add a servlet with
+the servlet class
+`org.jolokia.server.core.http.AgentServlet` to your
+own `web.xml`. The following example maps
+the agent to the context `/jolokia`:
+
+[,xml]
+----
+<servlet>
+  <servlet-name>jolokia-agent</servlet-name>
+  <servlet-class>org.jolokia.server.core.http.AgentServlet</servlet-class>
+  <load-on-startup>1</load-on-startup>
+</servlet>
+
+<servlet-mapping>
+  <servlet-name>jolokia-agent</servlet-name>
+  <url-pattern>/jolokia/*</url-pattern>
+</servlet-mapping>
+----
+
+Of course, any init parameter as described in
+<<agent-war-init-params>> can be used here as well.
+
+In order for this servlet definition to find the referenced
+Java class, the JAR `jolokia-server-core.jar` must
+be included. Maven users can declare a
+dependency on this jar artifact:
+
+[,xml,subs="attributes,verbatim"]
+----
+<project>
+  <!-- ....  -->
+  <dependencies>
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-server-core</artifactId>
+      <version>{jolokia-version}</version>
+    </dependency>
+  </dependencies>
+  <!-- .... -->
+</project>
+----
+
+The `org.jolokia.server.core.http.AgentServlet` can be
+subclassed, too in order to provide a custom restrictor or a
+custom log handler. See xref:security.adoc#security-restrictor[Jolokia Restrictors]
+for details.
+
+Also, multiple Jolokia agents can be deployed in the same JVM
+without problem. However, since the agent deploys some
+Jolokia-specific MBeans on the single
+`PlatformMBeansServer`, for multi-agent
+deployments it is important to use the
+`mbeanQualifier` init parameter to
+distinguish multiple Jolokia MBeans by adding an extra
+property to those MBeans' names. This also needs to be done if
+multiple webapps containing Jolokia agents are deployed on
+the same Jakarta EE server.

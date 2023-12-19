@@ -2,14 +2,14 @@ package org.jolokia.jvmagent;
 
 import com.sun.net.httpserver.Authenticator;
 import com.sun.net.httpserver.HttpExchange;
-import org.jolokia.config.Configuration;
+import org.jolokia.server.core.config.Configuration;
 
 /**
  * Class that facilitates custom authenticator tests
  */
 public class Dummy extends Authenticator {
 
-    private Configuration config;
+    private final Configuration config;
 
     public Dummy() {
         throw new UnsupportedOperationException("I expect to get some config parameters, use another constructor");

@@ -1,0 +1,27 @@
+////
+  Copyright 2009-2023 Roland Huss
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+[#clients]
+= Clients
+
+Three client implementations exists for Jolokia: Jmx4Perl, the
+Perl binding (the grandmother of all clients ;-), a Java library
+and a JavaScript library. This reference describes the client
+bindings bundled with Jolokia. Information about Jmx4Perl can be found
+https://metacpan.org/dist/jmx4perl[elsewhere,role=externalLink,window=_blank,window=_blank].
+
+include::client/javascript.adoc[]
+include::client/java.adoc[]
+include::client/mbeanserverconnection.adoc[]

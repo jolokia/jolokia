@@ -57,7 +57,7 @@ public final class AgentLauncher {
             Object vm = options.needsVm() ? vmHandler.attachVirtualMachine() : null;
 
             // Dispatch command
-            int exitCode = 0;
+            int exitCode;
             try {
                 exitCode = dispatcher.dispatchCommand(vm,vmHandler);
             } catch (InvocationTargetException e) {

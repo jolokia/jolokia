@@ -29,12 +29,12 @@ import com.sun.net.httpserver.HttpServer;
  */
 class CleanupThread extends Thread {
 
-    private HttpServer server;
-    private ThreadGroup threadGroup;
+    private final HttpServer server;
+    private final ThreadGroup threadGroup;
     private boolean active = true;
 
     /**
-     * Constructor associating the clean up thread with an HTTP-Server
+     * Constructor associating the cleanup thread with an HTTP-Server
      *
      * @param pServer HTTP server to observe
      * @param pThreadGroup thread group needed for proper cleanup
@@ -56,7 +56,7 @@ class CleanupThread extends Thread {
                 // and when all finished, finish as well. This is in order to avoid
                 // hanging endless because the HTTP Server thread cant be set into
                 // daemon mode
-                Thread threads[] = enumerateThreads();
+                Thread[] threads = enumerateThreads();
                 retry = joinThreads(threads);
             }
         } finally {
@@ -89,45 +89,45 @@ class CleanupThread extends Thread {
             }
         }
         // Trim array
-        Thread ret[] = new Thread[nrThreads];
+        Thread[] ret = new Thread[nrThreads];
         System.arraycopy(threads,0,ret,0,nrThreads);
         return ret;
     }
 
     // Join threads, return false if only our own threads are left.
-    private boolean joinThreads(Thread pThreads[]) {
-        for (int i=0;i< pThreads.length;i++) {
-            final Thread t = pThreads[i];
-            if (t == null ||
-                    t.isDaemon() ||
-                    t.getThreadGroup() == null || // has died on us
-                    t.getThreadGroup().equals(threadGroup) ||
-                    checkExcludedNames(t.getName()))
-            {
-                // These are threads which should not prevent the server from stopping.
+    private boolean joinThreads(Thread[] pThreads) {
+        for (final Thread t : pThreads) {
+            if (isDaemonLikeThread(t)) {
                 continue;
             }
             try {
                 t.join();
             } catch (Exception ex) {
                 // Ignore that one.
-            } finally {
-                // We just joined a 'foreign' thread, so we redo the loop
-                return true;
             }
+            // We just joined a 'foreign' thread, so we redo the loop
+            return true;
         }
         // All 'foreign' threads has finished, hence we are prepared to stop
         return false;
     }
-
-    private boolean checkExcludedNames(String pName) {
-        for (String s : new String[] {
-                "WrapperListener_stop_runner", // Tanuki Java Service Wrapper (#116)
-                "DestroyJavaVM"
-        }) {
-            if (pName.startsWith(s)) {
-                return true;
-            }
+  private static final String[] DAEMON_THREAD_NAMES = new String[] {
+            // Tanuki Java Service Wrapper (#116)
+            "WrapperListener_stop_runner",
+            // Shutdown thread
+            "DestroyJavaVM"
+    }; // Check for threads which should not prevent the server from stopping.
+    private boolean isDaemonLikeThread(Thread pThread) {
+        // Daemon or part of our thread group
+        if (pThread.isDaemon() ||
+            pThread.getThreadGroup() == null || // has died on us
+            pThread.getThreadGroup().equals(threadGroup)) {
+            return true;
+        }
+        for (String name : DAEMON_THREAD_NAMES) {
+           if (pThread.getName().startsWith(name)) {
+               return true;
+           }
         }
         return false;
     }

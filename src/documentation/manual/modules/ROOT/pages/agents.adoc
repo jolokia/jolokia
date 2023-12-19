@@ -1,0 +1,68 @@
+////
+  Copyright 2009-2023 Roland Huss
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+[#agents]
+= Agents
+
+Jolokia is an agent based approach to JMX, which requires that clients
+install an extra piece of software, the so-called
+_agent_. This software either needs to be
+deployed on the target server which should be accessed via remote
+JMX (xref:architecture.adoc#agent-mode[Agent mode]), or it can be installed on a
+dedicated proxy server (xref:architecture.adoc#proxy-mode[Proxy Mode]). For both
+operational modes, there are three different kinds of
+agentsfootnote:[Although the proxy mode is available for all three agents, you
+are normally free to setup the proxy environment. The
+recommendation here is the WAR agent for which very
+lightweight servlet container exists. Tomcat, Jetty or Undertow are all
+a perfect choice for a Jolokia proxy server.].
+
+_Webarchive (War) agent_::
+This agent is packaged as a Jakarta EE Web archive (WAR). It is the
+standard installation artifact for Java web applications and
+probably one of the best known deployment formats. Jolokia ships
+with a WAR agent which can be deployed like any other web
+application. This agent has been tested on many Jakarta EE
+servers, from well-known market leaders to rarer species.
+
+_OSGi agent_::
+https://www.osgi.org[OSGi] is a middleware specification
+focusing on modularity and a well defined dynamic lifecyclefootnote:[Of course, there is much more to OSGi, a platform and
+programing model which I _really_
+like. This is my personal pet agent, so to speak ;-).]. The Jolokia 1.x OSGi agent
+used to come in two flavors (with and without packaged https://github.com/apache/felix-dev/tree/master/http[Felix HTTP Service,role=externalLink,window=_blank] bundles). With Jolokia 2 there's only one bundle
+which requires a https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard extender,role=externalLink,window=_blank] implementation available in target OSGi runtime.
+
+_JVM agent_::
+Starting with Java 6 the JDK provided by Oracle contains a
+lightweight HTTP-Server which is used e.g. for the reference
+WebService stack implementation included in Java 6. Using
+the Java-agent API (normally used by profilers and other
+development tools requiring the instrumentation during the
+class loading phase), the JVM 11+ Jolokia agent is the most
+generic one. It is able to instrument _any_
+Java application running on a Oracle JDK 11+footnote:[
+You could even instrument a Jakarta EE application server this way,
+however this is not recommended because WAR agent is much more suitable.].
+This Jolokia agent variant is fully featured, however tends to
+be a bit slow since the
+provided HTTP-Server is not optimized for performance. However
+it is useful for servers like Hadoop or Teracotta, which do
+not provide convenient hooks for an HTTP-exporting agent on
+their own.
+
+include::agents/war.adoc[]
+include::agents/osgi.adoc[]
+include::agents/jvm.adoc[]

@@ -22,9 +22,10 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 import com.sun.tools.attach.*;
+import com.sun.tools.attach.spi.AttachProvider;
 import org.easymock.EasyMock;
 import org.easymock.IArgumentMatcher;
-import org.jolokia.Version;
+import org.jolokia.server.core.Version;
 import org.jolokia.jvmagent.JvmAgent;
 import org.jolokia.jvmagent.client.util.*;
 import org.testng.annotations.*;
@@ -36,7 +37,6 @@ import static org.testng.Assert.*;
  * @author roland
  * @since 12.08.11
  */
-@Test(groups = "java6")
 public class CommandDispatcherTest {
 
     private PrintStream outBack, errBack;
@@ -49,13 +49,13 @@ public class CommandDispatcherTest {
     }
 
     @Test
-    public void stop() throws AgentInitializationException, IOException, AgentLoadException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    public void stop() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         testCommand("stop", false, 1);
         testCommand("stop", true, 0);
     }
 
     @Test
-    public void toggle() throws AgentInitializationException, IOException, AgentLoadException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    public void toggle() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         testCommand("toggle", false, 0);
         testCommand("toggle", true, 0);
     }
@@ -90,7 +90,7 @@ public class CommandDispatcherTest {
         CommandDispatcher d = new CommandDispatcher(opts("list"));
 
         VirtualMachineHandlerOperations vmh = createMock(VirtualMachineHandlerOperations.class);
-        List<ProcessDescription> ret = new ArrayList<ProcessDescription>();
+        List<ProcessDescription> ret = new ArrayList<>();
         ret.add(new ProcessDescription("12","TestProcess"));
         expect(vmh.listProcesses()).andReturn(ret);
         replay(vmh);
@@ -101,15 +101,15 @@ public class CommandDispatcherTest {
     }
 
     @Test
-    public void descriptionWithPattern() throws AgentInitializationException, InvocationTargetException, IOException, NoSuchMethodException, AgentLoadException, IllegalAccessException {
+    public void descriptionWithPattern() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         CommandDispatcher d = new CommandDispatcher(opts("start","blub"));
 
         VirtualMachineHandlerOperations vmh = createMock(VirtualMachineHandlerOperations.class);
-        VirtualMachine vm = createMock(VirtualMachine.class);
+        MockableVirtualMachine vm = createMock(MockableVirtualMachine.class);
         expect(vmh.getSystemProperties(EasyMock.eq(vm))).andReturn(getProperties(false));
         expect(vmh.getSystemProperties(EasyMock.eq(vm))).andReturn(getProperties(true));
         // Agent should be loaded for successful switch
-        vmh.loadAgent(EasyMock.eq(vm), EasyMock.<String>anyObject(), EasyMock.<String>anyObject());
+        vmh.loadAgent(EasyMock.eq(vm), EasyMock.anyObject(), EasyMock.anyObject());
 
         expect(vmh.findProcess(patternMatcher("blub"))).andReturn(new ProcessDescription("18", "bla blub blie"));
         replay(vm, vmh);
@@ -134,7 +134,7 @@ public class CommandDispatcherTest {
     }
 
     @Test
-    public void status() throws IOException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    public void status() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         testStatus(true,0);
         testStatus(false,1);
     }
@@ -144,7 +144,7 @@ public class CommandDispatcherTest {
         CommandDispatcher d = new CommandDispatcher(opts("start", "42"));
 
         VirtualMachineHandlerOperations vmh = createMock(VirtualMachineHandlerOperations.class);
-        final VirtualMachine vm = createMock(VirtualMachine.class);
+        final MockableVirtualMachine vm = createMock(MockableVirtualMachine.class);
         expect(vm.getSystemProperties()).andThrow(new IOException());
         expect(vmh.getSystemProperties(EasyMock.eq(vm))).andThrow(new ProcessingException("", new IOException(),
                 new OptionsAndArgs(CommandDispatcher.getAvailableCommands())));
@@ -162,19 +162,19 @@ public class CommandDispatcherTest {
 
     // ======================================================================================================
 
-    private void testCommand(String pCommand, boolean pActive, int pRc, String... pProcess) throws IOException, AgentLoadException, AgentInitializationException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    private void testCommand(String pCommand, boolean pActive, int pRc, String... pProcess) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         String p = pProcess.length > 0 ? pProcess[0] : "42";
         CommandDispatcher d = new CommandDispatcher(opts(pCommand,p));
 
         VirtualMachineHandlerOperations vmh = createMock(VirtualMachineHandlerOperations.class);
-        VirtualMachine vm = createMock(VirtualMachine.class);
+        MockableVirtualMachine vm = createMock(MockableVirtualMachine.class);
         expect(vmh.getSystemProperties(EasyMock.eq(vm))).andReturn(getProperties(pActive)).times(pCommand.equals("toggle") ? 2 : 1);
         if (!pActive && !pCommand.equals("stop")) {
             expect(vmh.getSystemProperties(EasyMock.eq(vm))).andReturn(getProperties(true));
         }
         if (pRc == 0) {
             // Agent should be loaded for successful switch
-            vmh.loadAgent(EasyMock.eq(vm), EasyMock.<String>anyObject(), EasyMock.<String>anyObject());
+            vmh.loadAgent(EasyMock.eq(vm), EasyMock.anyObject(), EasyMock.anyObject());
         }
         replay(vm,vmh);
 
@@ -184,10 +184,10 @@ public class CommandDispatcherTest {
         verify(vm,vmh);
     }
 
-    private void testStatus(boolean pActive,int pRc) throws IOException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    private void testStatus(boolean pActive,int pRc) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         CommandDispatcher d = new CommandDispatcher(opts("status", "18"));
 
-        VirtualMachine vm = createMock(VirtualMachine.class);
+        MockableVirtualMachine vm = createMock(MockableVirtualMachine.class);
         VirtualMachineHandlerOperations vmh = createMock(VirtualMachineHandlerOperations.class);
         expect(vmh.getSystemProperties(EasyMock.eq(vm))).andReturn(getProperties(pActive)).anyTimes();
         replay(vm, vmh);
@@ -237,6 +237,10 @@ public class CommandDispatcherTest {
         return new OptionsAndArgs(CommandDispatcher.getAvailableCommands(),args);
     }
 
-
+    public static abstract class MockableVirtualMachine extends VirtualMachine {
+        protected MockableVirtualMachine(AttachProvider provider, String id) {
+            super(provider, id);
+        }
+    }
 
 }

@@ -23,10 +23,10 @@ import org.jolokia.client.jmxadapter.RemoteJmxAdapter;
 
 public class KubernetesJmxConnector extends JolokiaJmxConnector {
 
-  private static Pattern POD_PATTERN = Pattern
+  private static final Pattern POD_PATTERN = Pattern
       .compile(
           "/?(?<namespace>[^/]+)/(?<protocol>https?:)?(?<podPattern>[^/^:]+)(?<port>:[^/]+)?/(?<path>.+)");
-  private static Map<String,KubernetesClient> apiClients= Collections.synchronizedMap(new HashMap<String, KubernetesClient>());
+  private static final Map<String,KubernetesClient> apiClients = Collections.synchronizedMap(new HashMap<>());
   public static String KUBERNETES_CLIENT_CONTEXT ="kubernetes.client.context";
 
   public KubernetesJmxConnector(JMXServiceURL serviceURL,
@@ -68,7 +68,7 @@ public class KubernetesJmxConnector extends JolokiaJmxConnector {
     }
     return client;
   }
-  
+
   /**
    * Manually reset any cached config. To be uses in case you have changed your kubeconfig
    */
@@ -140,7 +140,7 @@ public class KubernetesJmxConnector extends JolokiaJmxConnector {
 
   private static HashMap<String, String> createHeadersForProbe(
       Map<String, Object> env) {
-    final HashMap<String, String> headers = new HashMap<String, String>();
+    final HashMap<String, String> headers = new HashMap<>();
     String[] credentials = (String[]) env.get(JMXConnector.CREDENTIALS);
     if (credentials != null) {
       MinimalHttpClientAdapter.authenticate(headers, credentials[0], credentials[1]);

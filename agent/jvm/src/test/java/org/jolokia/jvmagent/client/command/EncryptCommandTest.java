@@ -1,7 +1,7 @@
 package org.jolokia.jvmagent.client.command;
 
 import org.jolokia.jvmagent.client.util.OptionsAndArgs;
-import org.jolokia.util.JolokiaCipher;
+import org.jolokia.server.core.util.JolokiaCipher;
 import org.testng.annotations.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -17,7 +17,7 @@ import static org.testng.Assert.assertEquals;
  */
 public class EncryptCommandTest {
 
-    class JCPPTest implements JolokiaCipher.KeyHolder {
+    static class JCPPTest implements JolokiaCipher.KeyHolder {
         @Override
         public String getKey() {
             return "changeit";

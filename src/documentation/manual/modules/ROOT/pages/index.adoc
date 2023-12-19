@@ -1,0 +1,88 @@
+////
+  Copyright 2009-2023 Roland Huss
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+// :chapter-number: 0
+= Introduction
+
+JMX (Java Management Extensions) is _the_
+standard management solution in the Java world. Since JDK 1.5 it
+is available in every Java Virtual Machine and especially JavaEE / JakartaEE
+application servers use JMX for their management business.
+
+I love JMX. It is a well crafted specification, created in times
+where other concepts like EJBs failed spectacularly. Even more
+than twenty years after its incubation it is still the one-and-only
+when it comes to management in the Java world.  Especially the
+various levels of sophistications for implementing MBeans,
+starting with dead simple _Standard MBeans_ and
+ending in very flexible _Open MBeans_ and _MXBeans_, are impressive.
+
+However, some of the advanced JMX concepts didn't really appeal to the
+public and are now effectively obsolete. Add-on standards like
+https://jcp.org/en/jsr/detail?id=77[JSR-77] didn't
+receive the adoption level they deserved. And then there is
+https://jcp.org/en/jsr/detail?id=160[JSR-160,
+JMX remoting] (which was incorporated into https://jcp.org/en/jsr/detail?id=3[JSR-3, JMX 1.4]).
+This specification is designed for ease of usage
+and has the ambition to transparently hide the technical details
+behind the remote communication so that is makes (nearly) no
+difference, whether MBeans are invoked locally or
+remotely. Unfortunately, the underlying transport protocol (RMI)
+and programing model is very Java centric and is not usable
+outside the Java world.
+
+This is where Jolokia steps in. It is an agent based approach,
+living side by side with JSR-160, but uses the much more open HTTP
+for its transport business where the data payload is serialized in
+JSON. This opens a whole new world for different, non-Java
+clients. Beside this protocol switch, Jolokia provides new
+features for JMX remoting, which are not available in JSR-160
+connectors: Bulk requests allow for multiple JMX operations with a
+single remote server roundtrip. A fine grained security mechanism
+can restrict the JMX access on specific JMX operations. Other
+features like the JSR-160 proxy mode or history tracking are
+specific to Jolokia, too.
+
+Technically, JMX specification defines a _JMX agent_:
+
+[quote]
+____
+A JMX agent is a management entity that runs in a Java Virtual Machine (JVM) and
+acts as the liaison between the MBeans and the management application. A JMX
+agent is composed of an _MBean server_, a set of MBeans representing _managed
+resources_, a minimum number of _agent services_ implemented as MBeans, and typically
+at least one _protocol adaptor_ or _connector_.
+____
+
+And then defines the methods of accessing the _JMX agent_:
+
+* _connectors_ which expose the MBeanServer through a remote interface accessible by the client. The remote interface _represents_ the managed, remote MBeanServer
+* _protocol adaptors_ which provide access to MBeanServer using protocol-specific messages.
+
+JMX specification mentions https://en.wikipedia.org/wiki/Simple_Network_Management_Protocol[SNMP] as the protocol.
+Jolokia uses HTTP and thus can be viewed as JMX _protocol adaptor_.
+
+This reference manual explains the details of Jolokia. After an
+overview of Jolokia's architecture in xref:architecture.adoc[],
+installation and configuration of the
+various Jolokia agents are described in xref:agents.adoc[].
+Jolokia's security policy mechanism
+(xref:security.adoc[]) and proxy mode (xref:proxy_mode.adoc[]) are
+covered in the following chapters. For implementors of Jolokia
+client bindings the protocol definition is probably the most
+interesting part (xref:jolokia_protocol.adoc[]). Jolokia itself
+comes with the preregistered MBeans listed in
+xref:jolokia_mbeans.adoc[]. The available client bindings are described
+in xref:clients.adoc[].

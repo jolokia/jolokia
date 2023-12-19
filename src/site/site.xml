@@ -15,44 +15,48 @@
   ~ limitations under the License.
   -->
 
-<project name="Jolokia">
+<project name="Jolokia" xmlns="http://maven.apache.org/DECORATION/1.8.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://maven.apache.org/DECORATION/1.8.0 https://maven.apache.org/xsd/decoration-1.8.0.xsd">
+
   <publishDate position="bottom"/>
   <version position="bottom"/>
 
   <skin> 
     <groupId>org.jolokia</groupId> 
-    <artifactId>jolokia-site-skin</artifactId>
-    <version>1.7.3-SNAPSHOT</version>
+    <artifactId>jolokia-tools-siteskin</artifactId>
+    <version>2.0.1-SNAPSHOT</version>
   </skin>  
-  
+
   <bannerLeft>
     <name>Jolokia</name>
     <src>images/header.png</src>
-    <href>http://www.jolokia.org</href>
+    <href>https://jolokia.org</href>
   </bannerLeft>
   
   <body>
     <links>
       <item name="Home" href="index.html"/>
       <item name="Download" href="download.html"/>
-      <item name="Features" href="features-nb.html"/>
+      <item name="Features" href="features.html"/>
       <item name="Documentation" href="documentation.html"/>
       <item name="Support" href="support.html"/>
       <item name="Blog" href="https://ro14nd.de"/>
-      <item name="About" href="http://www.jolokia.org/about.html"/>
+      <item name="About" href="about.html"/>
     </links>
 
     <menu name="Jolokia" inherit="top">
       <item name="Download" href="download.html"/>
-      <item name="Features" href="features-nb.html"/>
+      <item name="Libraries" href="libraries.html"/>
+      <item name="Migration to 2.0" href="migration.html"/>
+      <item name="Features" href="features.html"/>
       <item name="Support" href="support.html"/>
-      <item name="Forum" href="forum.html"/>
-      <item name="IRC" href="irc.html"/>
       <item name="License" href="license.html"/>
     </menu>
 
     <menu name="Documentation" inherit="top">
       <item name="Overview" href="documentation.html"/>
+      <item name="Concepts" href="concepts.html"/>
       <item name="Tutorial" href="tutorial.html"/>
       <item name="Reference Manual" href="reference/html/index.html"/>
       <item name="Talks and Screencasts" href="talks.html"/>
@@ -63,14 +67,21 @@
       <item name="Web Archive (war)" href="agent/war.html"/>
       <item name="Osgi" href="agent/osgi.html"/>
       <item name="JVM" href="agent/jvm.html"/>
-      <item name="Mule" href="agent/mule.html"/>
     </menu>
 
     <menu name="Clients" inherit="top">
       <item name="Java" href="client/java.html"/>
-      <item name="Javascript" href="client/javascript.html"/>
+      <item name="JavaScript" href="client/javascript.html"/>
       <item name="Perl" href="client/perl.html"/>
+      <item name="Curl" href="client/curl.html"/>
     </menu>
+    <!--
+      https://maven.apache.org/plugins/maven-site-plugin/examples/sitedescriptor.html#including-generated-content
+      The currently available preset menus are:
+       - reports - a menu with links to all the generated reports for your project
+       - parent - a menu with a link to the parent project's site
+       - modules - a menu containing the links to the sites of the submodules of this project
+    -->
     <menu ref="reports" inherit="bottom"/>
   </body>  
 </project>

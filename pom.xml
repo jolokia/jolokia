@@ -17,28 +17,65 @@
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.jolokia</groupId>
-  <artifactId>jolokia</artifactId>
-  <version>1.7.3-SNAPSHOT</version>
-  <name>jolokia-parent</name>
-  <description>jolokia parent pom</description>
 
+  <groupId>org.jolokia</groupId>
+  <artifactId>jolokia-parent</artifactId>
+  <version>2.0.1-SNAPSHOT</version>
+
+  <name>${project.artifactId}</name>
+  <description>Jolokia :: Parent :: POM</description>
   <packaging>pom</packaging>
 
-  <url>http://www.jolokia.org</url>
+  <url>https://jolokia.org/</url>
 
   <modules>
-    <module>agent</module>
-    <module>it</module>
-    <module>client</module>
+    <module>bom</module>
+
+    <module>tools/siteskin</module>
     <module>tools/test-util</module>
+
+    <module>server/core</module>
+    <module>server/detector</module>
+
+    <module>service/serializer</module>
+    <module>service/jmx</module>
+    <module>service/discovery</module>
+    <module>service/history</module>
+    <module>service/jsr160</module>
+    <module>service/notif/pull</module>
+    <module>service/notif/sse</module>
+
+    <module>agent/war</module>
+    <module>agent/war-unsecured</module>
+    <module>agent/jvm</module>
+    <module>agent/osgi</module>
+
+    <module>it/core</module>
+    <module>it/war</module>
+
+    <module>client/java</module>
+    <module>client/javascript</module>
+    <module>client/jmx-adapter</module>
+    <module>client/kubernetes</module>
+
+    <module>support/jmx</module>
+
+    <module>examples/osgi-restrictor</module>
+    <module>examples/client-javascript-test-app</module>
   </modules>
 
   <build>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <tarLongFileMode>gnu</tarLongFileMode>
+          <descriptors>
+            <descriptor>src/assembly/dist-bin.xml</descriptor>
+            <descriptor>src/assembly/dist-source.xml</descriptor>
+          </descriptors>
+        </configuration>
       </plugin>
 
       <plugin>
@@ -46,74 +83,7 @@
         <artifactId>maven-release-plugin</artifactId>
         <configuration>
           <autoVersionSubmodules>true</autoVersionSubmodules>
-          <goals>deploy docbkx:generate-html docbkx:generate-pdf package</goals>
-        </configuration>
-      </plugin>
-
-      <plugin>
-        <groupId>com.agilejava.docbkx</groupId>
-        <artifactId>docbkx-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>docbkx-html</id>
-            <goals>
-              <goal>generate-html</goal>
-            </goals>
-            <phase>pre-site</phase>
-          </execution>
-          <execution>
-            <id>docbkx-pdf</id>
-            <goals>
-              <goal>generate-pdf</goal>
-            </goals>
-            <configuration>
-              <imgSrcPath>file:///${project.basedir}/src/docbkx/images/</imgSrcPath>
-            </configuration>
-            <phase>pre-site</phase>
-          </execution>
-        </executions>
-        <dependencies>
-          <dependency>
-            <groupId>org.docbook</groupId>
-            <artifactId>docbook-xml</artifactId>
-            <version>4.4</version>
-            <scope>runtime</scope>
-          </dependency>
-        </dependencies>
-        <configuration>
-          <includes>index.xml</includes>
-          <xincludeSupported>true</xincludeSupported>
-          <tableBordersWithCss>true</tableBordersWithCss>
-          <imgSrcPath>images/</imgSrcPath>
-          <foCustomization>src/docbkx/styles/reference-pdf.xsl</foCustomization>
-          <htmlStylesheet>css/stylesheet.css</htmlStylesheet>
-          <!-- produce single-page html output -->
-          <chunkedOutput>true</chunkedOutput>
-          <highlightSource>1</highlightSource>
-          <htmlCustomization>src/docbkx/styles/reference-html-chunk.xsl</htmlCustomization>
-          <entities>
-            <entity>
-              <name>version</name>
-              <value>${project.version}</value>
-            </entity>
-          </entities>
-          <postProcess>
-            <copy todir="${project.basedir}/target/site/reference">
-              <fileset dir="${project.basedir}/target/docbkx">
-                <include name="**/*.html" />
-                <include name="**/*.pdf" />
-              </fileset>
-            </copy>
-            <copy todir="${project.basedir}/target/site/reference/html">
-              <fileset dir="${project.basedir}/src/docbkx">
-                <include name="**/*.css" />
-                <include name="**/*.png" />
-                <include name="**/*.gif" />
-                <include name="**/*.jpg" />
-              </fileset>
-            </copy>
-            <move file="${project.basedir}/target/site/reference/pdf/index.pdf" tofile="${project.basedir}/target/site/reference/pdf/jolokia-reference.pdf" failonerror="false" />
-          </postProcess>
+          <goals>pre-site deploy</goals>
         </configuration>
       </plugin>
 
@@ -135,65 +105,85 @@
     <!-- plugin versions -->
     <pluginManagement>
       <plugins>
+
         <plugin>
           <groupId>org.apache.felix</groupId>
           <artifactId>maven-bundle-plugin</artifactId>
-          <version>2.3.7</version>
+          <version>${plugin.org.apache.felix.maven-bundle-plugin}</version>
           <configuration>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>${project.artifactId}</artifactId>
-            <version>${project.version}</version>
-            <packaging>${project.packaging}</packaging>
+            <instructions>
+              <Bundle-Version>${project.version}</Bundle-Version>
+              <Bundle-Name>${project.description}</Bundle-Name>
+            </instructions>
           </configuration>
         </plugin>
 
         <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.8.1</version>
+          <version>${plugin.maven-compiler-plugin}</version>
           <configuration>
-            <meminitial>128m</meminitial>
-            <maxmem>512m</maxmem>
+            <source>11</source>
+            <testSource>11</testSource>
+            <target>11</target>
+            <testTarget>11</testTarget>
+            <release>11</release>
+            <testRelease>11</testRelease>
           </configuration>
         </plugin>
 
         <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-assembly-plugin</artifactId>
-          <version>3.3.0</version>
+          <version>${plugin.maven-assembly-plugin}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>${plugin.maven-clean-plugin}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-shade-plugin</artifactId>
+          <version>${plugin.maven-shade-plugin}</version>
         </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-release-plugin</artifactId>
-          <version>2.5.1</version>
+          <version>${plugin.maven-release-plugin}</version>
         </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-dependency-plugin</artifactId>
-          <version>2.9</version>
+          <version>${plugin.maven-dependency-plugin}</version>
         </plugin>
 
         <plugin>
-          <groupId>com.agilejava.docbkx</groupId>
-          <artifactId>docbkx-maven-plugin</artifactId>
-          <version>2.0.6</version>
+          <groupId>org.asciidoctor</groupId>
+          <artifactId>asciidoctor-maven-plugin</artifactId>
+          <version>${plugin.org.asciidoctor.asciidoctor-maven-plugin}</version>
         </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-gpg-plugin</artifactId>
-          <version>1.6</version>
+          <version>${plugin.maven-gpg-plugin}</version>
         </plugin>
 
         <plugin>
           <groupId>org.apache.felix</groupId>
           <artifactId>maven-scr-plugin</artifactId>
-          <version>1.15.0</version>
+          <version>${plugin.org.apache.felix.maven-scr-plugin}</version>
         </plugin>
 
         <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-jar-plugin</artifactId>
-          <version>2.5</version>
+          <version>${plugin.maven-jar-plugin}</version>
           <configuration>
             <archive>
               <addMavenDescriptor>true</addMavenDescriptor>
@@ -202,82 +192,145 @@
         </plugin>
 
         <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-war-plugin</artifactId>
-          <version>3.3.1</version>
+          <version>${plugin.maven-war-plugin}</version>
         </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-shade-plugin</artifactId>
-          <version>3.2.4</version>
-        </plugin>
-
-        <plugin>
           <artifactId>maven-deploy-plugin</artifactId>
-          <version>2.8.2</version>
+          <version>${plugin.maven-deploy-plugin}</version>
         </plugin>
 
         <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>2.22.2</version>
-        </plugin>
-
-        <plugin>
-          <artifactId>maven-failsafe-plugin</artifactId>
-          <version>2.22.2</version>
-        </plugin>
-
-        <plugin>
-          <artifactId>maven-resources-plugin</artifactId>
-          <version>2.7</version>
-        </plugin>
-
-        <plugin>
-          <artifactId>maven-install-plugin</artifactId>
-          <version>2.5.2</version>
-        </plugin>
-
-        <plugin>
-          <artifactId>maven-antrun-plugin</artifactId>
-          <version>1.7</version>
-        </plugin>
-
-        <plugin>
-          <artifactId>maven-site-plugin</artifactId>
-          <version>3.4</version>
+          <version>${plugin.maven-surefire-plugin}</version>
           <configuration>
-            <validate>false</validate>
+            <argLine>
+              <!--
+                deny all reflective access except:
+                 - java.base/java.lang for Easymock (see https://github.com/easymock/easymock/issues/235 - should be fixed now)
+                 - java.management/javax.management.modelmbean for org.jolokia.jmx.JolokiaMBeanServerTest
+              -->
+              --illegal-access=deny
+<!--              &#45;&#45;add-opens java.base/java.lang=ALL-UNNAMED-->
+              --add-opens java.management/javax.management.modelmbean=ALL-UNNAMED
+            </argLine>
           </configuration>
         </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-failsafe-plugin</artifactId>
+          <version>${plugin.maven-failsafe-plugin}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>${plugin.maven-resources-plugin}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>${plugin.maven-install-plugin}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-antrun-plugin</artifactId>
+          <version>${plugin.maven-antrun-plugin}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-site-plugin</artifactId>
+          <version>${plugin.maven-site-plugin}</version>
+          <configuration>
+            <validate>false</validate>
+            <!-- comma separated list - available as $locale Velocity variable -->
+            <locales>en</locales>
+            <!--
+              Don't worry about IDE warning (maven-site-plugin doesn't handle "asciidoc" property).
+              This is actually handled by asciidoctor-maven-plugin dependency in
+              org.asciidoctor.maven.site.SiteConversionConfigurationParser.processAsciiDocConfig() - "asciidoctor"
+              child of org.codehaus.plexus.util.xml.Xpp3Dom is parsed as XML.
+            -->
+            <asciidoc>
+              <attributes>
+                <!-- Add required rouge styles in '/css/site.css' -->
+                <source-highlighter>rouge</source-highlighter>
+                <jolokia-version>${currentStableVersion}</jolokia-version>
+              </attributes>
+            </asciidoc>
+          </configuration>
+          <dependencies>
+            <dependency>
+              <!-- https://docs.asciidoctor.org/maven-tools/latest/site-integration/setup-and-configuration/ -->
+              <!--
+                asciidoctor-maven-plugin-2.2.4.jar/META-INF/plexus/components.xml allows maven-site-plugin
+                to use src/site/asciidoc (in addition to src/site/apt, src/site/xdoc, ...)
+              -->
+              <groupId>org.asciidoctor</groupId>
+              <artifactId>asciidoctor-maven-plugin</artifactId>
+              <version>${plugin.org.asciidoctor.asciidoctor-maven-plugin}</version>
+            </dependency>
+          </dependencies>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-project-info-reports-plugin</artifactId>
-          <version>2.7</version>
+          <version>${plugin.maven-project-info-reports-plugin}</version>
+          <dependencies>
+            <dependency>
+              <groupId>org.apache.bcel</groupId>
+              <artifactId>bcel</artifactId>
+              <version>${version.org.apache.bcel}</version>
+            </dependency>
+          </dependencies>
         </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-source-plugin</artifactId>
-          <version>2.4</version>
+          <version>${plugin.maven-source-plugin}</version>
         </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
-          <version>2.10.1</version>
+          <version>${plugin.maven-javadoc-plugin}</version>
+          <configuration>
+            <doclint>none</doclint>
+          </configuration>
         </plugin>
 
         <plugin>
           <groupId>org.apache.rat</groupId>
           <artifactId>apache-rat-plugin</artifactId>
-          <version>0.11</version>
+          <version>${plugin.org.apache.rat.apache-rat-plugin}</version>
         </plugin>
 
         <plugin>
           <groupId>com.github.github</groupId>
           <artifactId>site-maven-plugin</artifactId>
-          <version>0.12</version>
+          <version>${plugin.com.github.site-maven-plugin}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>com.devspan.mojo.javascript</groupId>
+          <artifactId>javascript-maven-plugin</artifactId>
+          <version>${plugin.com.devspan.mojo.javascript-maven-plugin}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>com.github.eirslett</groupId>
+          <artifactId>frontend-maven-plugin</artifactId>
+          <version>${plugin.com.github.eirslett.frontend-maven-plugin}</version>
         </plugin>
 
       </plugins>
@@ -287,26 +340,27 @@
       <extension>
         <groupId>org.apache.maven.wagon</groupId>
         <artifactId>wagon-ssh-external</artifactId>
-        <version>2.7</version>
+        <version>${version.org.apache.maven.wagon}</version>
       </extension>
     </extensions>
   </build>
 
   <reporting>
     <plugins>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-project-info-reports-plugin</artifactId>
-        <version>2.7</version>
+        <version>${plugin.maven-project-info-reports-plugin}</version>
         <reportSets>
           <reportSet>
             <reports>
-              <report>dependency-convergence</report>
-              <report>dependency-management</report>
+<!--              <report>dependency-management</report>-->
               <report>project-team</report>
               <report>cim</report>
               <report>issue-tracking</report>
               <report>scm</report>
+              <report>plugin-management</report>
               <report>plugins</report>
             </reports>
           </reportSet>
@@ -316,7 +370,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-changes-plugin</artifactId>
-        <version>2.11</version>
+        <version>${plugin.maven-changes-plugin}</version>
         <reportSets>
           <reportSet>
             <reports>
@@ -325,8 +379,8 @@
           </reportSet>
         </reportSets>
       </plugin>
-    </plugins>
 
+    </plugins>
   </reporting>
 
   <!-- ===========================================================  -->
@@ -338,7 +392,7 @@
   <scm>
     <connection>scm:git:git://github.com/jolokia/jolokia.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/jolokia/jolokia.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>2.0</tag>
     <url>git://github.com/jolokia/jolokia.git</url>
   </scm>
 
@@ -349,8 +403,8 @@
 
   <licenses>
     <license>
-      <name>Apache 2</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <name>Apache License, Version 2.0</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
       <distribution>repo</distribution>
       <comments>A business-friendly OSS license</comments>
     </license>
@@ -461,7 +515,7 @@
       <url>https://github.com/mjr5749</url>
     </contributor>
     <contributor>
-      <name>Neven Radovanović</name>
+      <name>Neven Radovanoviƒá</name>
       <url>https://github.com/nevenr</url>
     </contributor>
     <contributor>
@@ -523,23 +577,191 @@
       <name>Zisis Lianas</name>
       <url>https://github.com/zisisli</url>
     </contributor>
+    <contributor>
+      <name>Grzegorz Grzybek</name>
+      <url>https://github.com/grgrzybek</url>
+    </contributor>
   </contributors>
 
-  <!-- Overall version management -->
+  <!-- Test dependencies for all modules-->
+  <dependencies>
+    <dependency>
+      <groupId>org.testng</groupId>
+      <artifactId>testng</artifactId>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.webjars</groupId>
+          <artifactId>jquery</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>org.easymock</groupId>
+      <artifactId>easymock</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+  </dependencies>
+
+  <!-- Overall version management for Jolokia itself. This POM should not be treated as Jolokia BOM -->
   <dependencyManagement>
     <dependencies>
 
+      <!-- Jolokia own artifacts - should be the same as in BOM -->
+
       <dependency>
-        <groupId>javax.servlet</groupId>
-        <artifactId>servlet-api</artifactId>
-        <version>2.4</version>
-        <scope>provided</scope>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-tools-test</artifactId>
+        <version>${project.version}</version>
       </dependency>
+
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-server-core</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-server-core</artifactId>
+        <classifier>tests</classifier>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-server-detector</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-service-serializer</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-service-jmx</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-service-discovery</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-service-history</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-service-jsr160</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-service-notif-pull</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-service-notif-sse</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-agent-war</artifactId>
+        <type>war</type>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-agent-war-unsecured</artifactId>
+        <type>war</type>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-agent-jvm</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-agent-jvm</artifactId>
+        <version>${project.version}</version>
+        <classifier>javaagent</classifier>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-agent-osgi</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-it-core</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-it-war</artifactId>
+        <type>war</type>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-client-java</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-client-javascript</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-client-javascript</artifactId>
+        <!-- This type is required by com.devspan.mojo.javascript:javascript-maven-plugin -->
+        <type>javascript</type>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-client-javascript</artifactId>
+        <classifier>compressed</classifier>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-client-jmx-adapter</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-client-kubernetes</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-support-jmx</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-support-spring</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <!-- JSON -->
 
       <dependency>
         <groupId>com.googlecode.json-simple</groupId>
         <artifactId>json-simple</artifactId>
-        <version>1.1.1</version>
+        <version>${version.com.googlecode.json-simple}</version>
         <exclusions>
           <!-- That's a bug in json-simple that junit is referenced without scope test -->
           <exclusion>
@@ -550,57 +772,350 @@
       </dependency>
 
       <dependency>
-        <groupId>org.osgi</groupId>
-        <artifactId>org.osgi.core</artifactId>
-        <version>4.2.0</version>
-        <scope>provided</scope>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-annotations</artifactId>
+        <version>${version.com.fasterxml.jackson.core}</version>
       </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-core</artifactId>
+        <version>${version.com.fasterxml.jackson.core}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>${version.com.fasterxml.jackson.core}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.dataformat</groupId>
+        <artifactId>jackson-dataformat-yaml</artifactId>
+        <version>${version.com.fasterxml.jackson.core}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.datatype</groupId>
+        <artifactId>jackson-datatype-jdk8</artifactId>
+        <version>${version.com.fasterxml.jackson.core}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.datatype</groupId>
+        <artifactId>jackson-datatype-jsr310</artifactId>
+        <version>${version.com.fasterxml.jackson.core}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.module</groupId>
+        <artifactId>jackson-module-parameter-names</artifactId>
+        <version>${version.com.fasterxml.jackson.core}</version>
+      </dependency>
+
+      <!-- JakartaEE dependencies -->
+
+      <dependency>
+        <groupId>jakarta.servlet</groupId>
+        <artifactId>jakarta.servlet-api</artifactId>
+        <version>${version.jakarta.servlet-api}</version>
+      </dependency>
+
+      <!-- OSGi dependencies -->
 
       <dependency>
         <groupId>org.osgi</groupId>
-        <artifactId>org.osgi.compendium</artifactId>
-        <version>4.2.0</version>
-        <scope>provided</scope>
+        <artifactId>osgi.core</artifactId>
+        <version>${version.org.osgi.core}</version>
       </dependency>
+      <dependency>
+        <groupId>org.osgi</groupId>
+        <artifactId>org.osgi.service.log</artifactId>
+        <version>${version.org.osgi.service.log}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.osgi</groupId>
+        <artifactId>org.osgi.service.cm</artifactId>
+        <version>${version.org.osgi.service.cm}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.osgi</groupId>
+        <artifactId>org.osgi.service.servlet</artifactId>
+        <version>${version.org.osgi.service.servlet}</version>
+      </dependency>
+
+      <!-- Test dependencies -->
 
       <dependency>
         <groupId>org.testng</groupId>
         <artifactId>testng</artifactId>
-        <version>6.8.8</version>
-        <scope>test</scope>
+        <version>${version.org.testng}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.beanshell</groupId>
+            <artifactId>bsh</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
 
       <dependency>
-        <groupId>org.mortbay.jetty</groupId>
-        <artifactId>jetty</artifactId>
-        <version>6.1.26</version>
-        <scope>test</scope>
+        <groupId>org.easymock</groupId>
+        <artifactId>easymock</artifactId>
+        <version>${version.org.easymock}</version>
       </dependency>
+
+      <dependency>
+        <groupId>org.wiremock</groupId>
+        <artifactId>wiremock</artifactId>
+        <version>${version.org.wiremock}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>com.networknt</groupId>
+            <artifactId>json-schema-validator</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>net.javacrumbs.json-unit</groupId>
+            <artifactId>json-unit-core</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>net.sf.jopt-simple</groupId>
+            <artifactId>jopt-simple</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-alpn-client</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-alpn-java-client</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-alpn-java-server</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-alpn-server</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-proxy</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-webapp</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.xmlunit</groupId>
+            <artifactId>xmlunit-core</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.xmlunit</groupId>
+            <artifactId>xmlunit-legacy</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.xmlunit</groupId>
+            <artifactId>xmlunit-placeholders</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+      <dependency>
+        <groupId>org.awaitility</groupId>
+        <artifactId>awaitility</artifactId>
+        <version>${version.org.awaitility}</version>
+      </dependency>
+
+      <!-- Other dependencies -->
+
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpcore</artifactId>
+        <version>${version.org.apache.httpcomponents.httpcore}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpclient</artifactId>
+        <version>${version.org.apache.httpcomponents.httpclient}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>commons-codec</groupId>
+        <artifactId>commons-codec</artifactId>
+        <version>${version.commons-codec}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.fabric8</groupId>
+        <artifactId>kubernetes-client</artifactId>
+        <version>${version.io.fabric8.kubernetes-client}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.fabric8</groupId>
+        <artifactId>kubernetes-httpclient-okhttp</artifactId>
+        <version>${version.io.fabric8.kubernetes-client}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.fabric8</groupId>
+        <artifactId>kubernetes-server-mock</artifactId>
+        <version>${version.io.fabric8.kubernetes-client}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>${version.org.slf4j}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-simple</artifactId>
+        <version>${version.org.slf4j}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-api</artifactId>
+        <version>${version.org.apache.logging.log4j}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-core</artifactId>
+        <version>${version.org.apache.logging.log4j}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-jul</artifactId>
+        <version>${version.org.apache.logging.log4j}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-slf4j-impl</artifactId>
+        <version>${version.org.apache.logging.log4j}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-slf4j2-impl</artifactId>
+        <version>${version.org.apache.logging.log4j}</version>
+      </dependency>
+
     </dependencies>
   </dependencyManagement>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <currentStableVersion>1.7.2</currentStableVersion>
-    <currentSnapshotVersion>1.7.3-SNAPSHOT</currentSnapshotVersion>
-    <github.global.server>github</github.global.server>
-  </properties>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-  <repositories>
-    <repository>
-      <id>sonatype-nexus-snapshots</id>
-      <name>Sonatype Nexus Snapshots</name>
-      <url>
-        http://oss.sonatype.org/content/repositories/snapshots
-      </url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
+    <sonar.projectKey>org.jolokia:jolokia-2.0</sonar.projectKey>
+
+    <!-- A version used in documentation -->
+    <currentStableVersion>2.0.0</currentStableVersion>
+    <!-- Jolokia protocol version -->
+    <protocolVersion>7.3</protocolVersion>
+
+    <!--
+      Versions are specified in one place, so updates can be discovered with single command:
+      $ mvn org.codehaus.mojo:versions-maven-plugin:2.16.1:display-property-updates -DallowMajorUpdates=false -N
+    -->
+
+    <!-- Versions of Maven plugins (org.apache.maven.plugins) -->
+
+    <plugin.maven-antrun-plugin>3.1.0</plugin.maven-antrun-plugin>
+    <plugin.maven-assembly-plugin>3.6.0</plugin.maven-assembly-plugin>
+    <plugin.maven-changes-plugin>2.12.1</plugin.maven-changes-plugin>
+    <plugin.maven-clean-plugin>3.3.2</plugin.maven-clean-plugin>
+    <plugin.maven-compiler-plugin>3.11.0</plugin.maven-compiler-plugin>
+    <plugin.maven-dependency-plugin>3.6.1</plugin.maven-dependency-plugin>
+    <plugin.maven-deploy-plugin>3.1.1</plugin.maven-deploy-plugin>
+    <plugin.maven-failsafe-plugin>3.2.3</plugin.maven-failsafe-plugin>
+    <plugin.maven-gpg-plugin>3.1.0</plugin.maven-gpg-plugin>
+    <plugin.maven-install-plugin>3.1.1</plugin.maven-install-plugin>
+    <plugin.maven-jar-plugin>3.3.0</plugin.maven-jar-plugin>
+    <plugin.maven-javadoc-plugin>3.6.3</plugin.maven-javadoc-plugin>
+    <!-- don't use 3.x (non-boxed org.apache.maven.reporting.AbstractMavenReportRenderer#verbatimLink()) -->
+    <plugin.maven-project-info-reports-plugin>2.9</plugin.maven-project-info-reports-plugin>
+    <plugin.maven-release-plugin>3.0.1</plugin.maven-release-plugin>
+    <plugin.maven-resources-plugin>3.3.1</plugin.maven-resources-plugin>
+    <plugin.maven-shade-plugin>3.5.1</plugin.maven-shade-plugin>
+    <plugin.maven-site-plugin>3.12.1</plugin.maven-site-plugin>
+    <plugin.maven-source-plugin>3.3.0</plugin.maven-source-plugin>
+    <plugin.maven-surefire-plugin>3.2.3</plugin.maven-surefire-plugin>
+    <plugin.maven-war-plugin>3.4.0</plugin.maven-war-plugin>
+
+    <!-- Versions of Maven plugins (other plugins) -->
+
+    <plugin.com.devspan.mojo.javascript-maven-plugin>0.9.3</plugin.com.devspan.mojo.javascript-maven-plugin>
+    <plugin.com.github.eirslett.frontend-maven-plugin>1.15.0</plugin.com.github.eirslett.frontend-maven-plugin>
+    <plugin.com.github.site-maven-plugin>0.12</plugin.com.github.site-maven-plugin>
+    <plugin.org.apache.felix.maven-bundle-plugin>5.1.9</plugin.org.apache.felix.maven-bundle-plugin>
+    <plugin.org.apache.felix.maven-scr-plugin>1.26.4</plugin.org.apache.felix.maven-scr-plugin>
+    <plugin.org.apache.rat.apache-rat-plugin>0.15</plugin.org.apache.rat.apache-rat-plugin>
+    <plugin.org.asciidoctor.asciidoctor-maven-plugin>2.2.4</plugin.org.asciidoctor.asciidoctor-maven-plugin>
+    <plugin.org.codehaus.mojo.build-helper-maven-plugin>3.4.0</plugin.org.codehaus.mojo.build-helper-maven-plugin>
+    <plugin.org.jacoco.jacoco-maven-plugin>0.7.6.201602180812</plugin.org.jacoco.jacoco-maven-plugin>
+    <plugin.org.vafer.jdeb>1.10</plugin.org.vafer.jdeb>
+
+    <!-- Versions of build-related dependencies -->
+
+    <version.org.apache.bcel>6.8.0</version.org.apache.bcel>
+    <version.org.apache.maven.wagon>2.7</version.org.apache.maven.wagon>
+    <version.nodejs>v18.17.1</version.nodejs>
+
+    <!-- Versions of test-related dependencies -->
+
+    <version.com.fasterxml.jackson.core>2.16.0</version.com.fasterxml.jackson.core>
+    <version.org.awaitility>4.2.0</version.org.awaitility>
+    <version.org.easymock>5.2.0</version.org.easymock>
+    <version.org.eclipse.jetty>11.0.18</version.org.eclipse.jetty>
+    <version.org.testng>7.8.0</version.org.testng>
+    <version.org.wiremock>3.3.1</version.org.wiremock>
+
+    <!-- Versions of optional and example-related dependencies -->
+
+    <version.org.apache.logging.log4j>2.22.0</version.org.apache.logging.log4j>
+    <version.org.slf4j>1.7.36</version.org.slf4j>
+    <version.org.slf4j2>2.0.9</version.org.slf4j2>
+
+    <!-- Versions of actual Maven dependencies for Jolokia core/service/client libraries -->
+
+    <version.com.googlecode.json-simple>1.1.1</version.com.googlecode.json-simple>
+    <version.commons-codec>1.16.0</version.commons-codec>
+    <version.io.fabric8.kubernetes-client>6.9.2</version.io.fabric8.kubernetes-client>
+    <version.jakarta.servlet-api>5.0.0</version.jakarta.servlet-api>
+    <version.org.apache.httpcomponents.httpclient>4.5.14</version.org.apache.httpcomponents.httpclient>
+    <version.org.apache.httpcomponents.httpcore>4.4.16</version.org.apache.httpcomponents.httpcore>
+    <!-- we support wide range of OSGI Core API, so please keep 6.0.0 -->
+    <version.org.osgi.core>6.0.0</version.org.osgi.core>
+    <version.org.osgi.service.cm>1.6.1</version.org.osgi.service.cm>
+    <!-- we support early log service too -->
+    <version.org.osgi.service.log>1.3.0</version.org.osgi.service.log>
+    <version.org.osgi.service.servlet>2.0.0</version.org.osgi.service.servlet>
+
+    <!-- Versions of Maven dependencies for Jolokia Spring-related libraries (JDK17 only) -->
+
+    <!-- Spring Framework and Spring Boot should be aligned -->
+    <version.org.springframework>6.1.1</version.org.springframework>
+    <version.org.springframework.boot>3.2.0</version.org.springframework.boot>
+  </properties>
 
   <distributionManagement>
     <snapshotRepository>
@@ -611,18 +1126,30 @@
     <repository>
       <id>sonatype-nexus-staging</id>
       <name>Nexus Release Repository</name>
-      <url>
-        https://oss.sonatype.org/service/local/staging/deploy/maven2/
-      </url>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
     </repository>
   </distributionManagement>
 
   <profiles>
+
     <profile>
-      <!-- Distribution to maven central. This is default deployment target -->
+      <id>jdk17</id>
+      <activation>
+        <jdk>[17,)</jdk>
+      </activation>
+      <modules>
+        <module>support/spring</module>
+        <module>examples/spring</module>
+        <module>examples/spring-boot</module>
+        <module>examples/spring-boot-actuator</module>
+      </modules>
+    </profile>
+
+    <profile>
+      <!-- Distribution to Maven Central. This is default deployment target -->
       <id>dist</id>
       <modules>
-        <module>src/assembly</module>
+        <module>assembly</module>
       </modules>
 
       <build>
@@ -656,7 +1183,6 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.6</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
@@ -668,25 +1194,230 @@
             </executions>
             <configuration>
               <useAgent>true</useAgent>
-              <keyname>roland@jolokia.org</keyname>
+              <gpgArguments>
+                <arg>--allow-weak-digest-algos</arg>
+              </gpgArguments>
             </configuration>
           </plugin>
 
           <plugin>
-            <groupId>com.github.github</groupId>
-            <artifactId>site-maven-plugin</artifactId>
-            <configuration>
-              <message>Creating site for Jolokia ${project.version}</message>
-            </configuration>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-clean-plugin</artifactId>
             <executions>
               <execution>
+                <id>clean-antora-documentation</id>
+                <phase>clean</phase>
                 <goals>
-                  <goal>site</goal>
+                  <goal>clean</goal>
                 </goals>
-                <phase>site</phase>
+                <inherited>false</inherited>
+                <configuration>
+                  <filesets>
+                    <fileset>
+                      <directory>src/documentation/build</directory>
+                    </fileset>
+                  </filesets>
+                </configuration>
               </execution>
             </executions>
           </plugin>
+
+          <plugin>
+            <!--
+              Antora is invoked using npm/npx
+            -->
+            <groupId>com.github.eirslett</groupId>
+            <artifactId>frontend-maven-plugin</artifactId>
+            <inherited>false</inherited>
+            <configuration>
+              <installDirectory>.node</installDirectory>
+            </configuration>
+            <executions>
+              <!--
+                Mind that "generate-resources" is default phase for "install-node-and-npm" and "npm-install goals"
+                Execution id can be used to provide configuration for cli invocation, like:
+                $ mvn -N com.github.eirslett:frontend-maven-plugin:install-node-and-npm@install-node-and-npm
+                $ mvn -N com.github.eirslett:frontend-maven-plugin:npm@npm-install
+                $ mvn -N com.github.eirslett:frontend-maven-plugin:npx@antora-documentation
+              -->
+              <execution>
+                <id>install-node-and-npm</id>
+                <goals>
+                  <goal>install-node-and-npm</goal>
+                </goals>
+                <phase>pre-site</phase>
+                <configuration>
+                  <nodeVersion>${version.nodejs}</nodeVersion>
+                </configuration>
+                <inherited>false</inherited>
+              </execution>
+              <execution>
+                <id>npm-install</id>
+                <goals>
+                  <goal>npm</goal>
+                </goals>
+                <phase>pre-site</phase>
+                <configuration>
+                  <arguments>install</arguments>
+                  <workingDirectory>src/documentation</workingDirectory>
+                </configuration>
+              </execution>
+              <execution>
+                <id>antora-documentation</id>
+                <goals>
+                  <goal>npx</goal>
+                </goals>
+                <phase>pre-site</phase>
+                <configuration>
+                  <arguments>
+                    antora generate
+                    --attribute jolokia-version=${currentStableVersion}
+                    --attribute javascript-maven-plugin-version=${plugin.com.devspan.mojo.javascript-maven-plugin}
+                    antora-playbook.yml
+                  </arguments>
+                  <workingDirectory>src/documentation</workingDirectory>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-resources-plugin</artifactId>
+            <executions>
+              <execution>
+                <!--
+                  This execution puts Antora-generated manual into the place where maven-site-plugin will
+                  generate the site.
+                -->
+                <id>copy-antora-documentation</id>
+                <phase>pre-site</phase>
+                <goals>
+                  <goal>copy-resources</goal>
+                </goals>
+                <inherited>false</inherited>
+                <configuration>
+                  <outputDirectory>${project.build.directory}/site/reference/html</outputDirectory>
+                  <resources>
+                    <resource>
+                      <directory>${project.basedir}/src/documentation/build/site</directory>
+                      <includes>
+                        <include>**/*</include>
+                      </includes>
+                    </resource>
+                  </resources>
+                </configuration>
+              </execution>
+              <execution>
+                <!--
+                  While these images could be part of Antora's supplemental-ui, having them mixed with Asciidoc
+                  pages makes it better look directly at GitHub (images are rendered together with Asciidoc)
+                -->
+                <id>copy-site-images</id>
+                <phase>pre-site</phase>
+                <goals>
+                  <goal>copy-resources</goal>
+                </goals>
+                <inherited>false</inherited>
+                <configuration>
+                  <outputDirectory>${project.build.directory}/site</outputDirectory>
+                  <resources>
+                    <resource>
+                      <directory>src/site/asciidoc</directory>
+                      <includes>
+                        <include>images/**/*</include>
+                      </includes>
+                    </resource>
+                  </resources>
+                </configuration>
+              </execution>
+              <execution>
+                <!--
+                  Jolokia Javascript files are copied into documentation to be used by some examples
+                -->
+                <id>copy-javascript</id>
+                <phase>pre-site</phase>
+                <goals>
+                  <goal>copy-resources</goal>
+                </goals>
+                <inherited>false</inherited>
+                <configuration>
+                  <outputDirectory>${project.build.directory}/site/js</outputDirectory>
+                  <resources>
+                    <resource>
+                      <directory>client/javascript/src/main/javascript</directory>
+                      <includes>
+                        <include>jolokia.js</include>
+                        <include>jolokia-cubism.js</include>
+                        <include>jolokia-simple.js</include>
+                      </includes>
+                    </resource>
+                  </resources>
+                </configuration>
+              </execution>
+              <execution>
+                <!--
+                  We need https://jolokia.org/jolokia-config.xsd
+                -->
+                <id>copy-xsd</id>
+                <phase>pre-site</phase>
+                <goals>
+                  <goal>copy-resources</goal>
+                </goals>
+                <inherited>false</inherited>
+                <configuration>
+                  <outputDirectory>${project.build.directory}/site</outputDirectory>
+                  <resources>
+                    <resource>
+                      <directory>support/spring/src/main/resources/org/jolokia/support/spring</directory>
+                      <includes>
+                        <include>jolokia-config.xsd</include>
+                      </includes>
+                    </resource>
+                  </resources>
+                </configuration>
+              </execution>
+              <execution>
+                <!--
+                  We need https://jolokia.org/jolokia-spring/schema/config/jolokia-config.xsd
+                -->
+                <id>copy-xsd-old</id>
+                <phase>pre-site</phase>
+                <goals>
+                  <goal>copy-resources</goal>
+                </goals>
+                <inherited>false</inherited>
+                <configuration>
+                  <outputDirectory>${project.build.directory}/site/jolokia-spring/schema/config</outputDirectory>
+                  <resources>
+                    <resource>
+                      <directory>support/spring/src/main/resources/org/jolokia/support/spring</directory>
+                      <includes>
+                        <include>jolokia-config.xsd</include>
+                      </includes>
+                    </resource>
+                  </resources>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+<!--          <plugin>-->
+<!--            <groupId>com.github.github</groupId>-->
+<!--            <artifactId>site-maven-plugin</artifactId>-->
+<!--            <version>${plugin.com.github.site-maven-plugin}</version>-->
+<!--            <configuration>-->
+<!--              <message>Creating site for Jolokia ${project.version}</message>-->
+<!--            </configuration>-->
+<!--            <executions>-->
+<!--              <execution>-->
+<!--                <goals>-->
+<!--                  <goal>site</goal>-->
+<!--                </goals>-->
+<!--                <phase>site</phase>-->
+<!--              </execution>-->
+<!--            </executions>-->
+<!--          </plugin>-->
 
         </plugins>
       </build>
@@ -700,7 +1431,7 @@
           <plugin>
             <groupId>org.jacoco</groupId>
             <artifactId>jacoco-maven-plugin</artifactId>
-            <version>0.7.6.201602180812</version>
+            <version>${plugin.org.jacoco.jacoco-maven-plugin}</version>
             <executions>
               <execution>
                 <id>jacoco-initialize</id>
@@ -719,159 +1450,6 @@
           </plugin>
         </plugins>
       </build>
-    </profile>
-    <!-- Profile for running only Java 5 compliant tests-->
-    <profile>
-      <id>java5</id>
-      <activation>
-        <jdk>1.5</jdk>
-      </activation>
-      <build>
-        <pluginManagement>
-          <plugins>
-            <plugin>
-              <artifactId>maven-surefire-plugin</artifactId>
-              <configuration>
-                <excludedGroups>java6</excludedGroups>
-              </configuration>
-            </plugin>
-          </plugins>
-        </pluginManagement>
-      </build>
-    </profile>
-
-    <profile>
-      <id>java6</id>
-      <activation>
-        <jdk>1.6</jdk>
-      </activation>
-      <build>
-        <pluginManagement>
-          <plugins>
-            <plugin>
-              <artifactId>maven-compiler-plugin</artifactId>
-              <version>3.6.2</version>
-            </plugin>
-            <plugin>
-              <artifactId>maven-war-plugin</artifactId>
-              <version>3.1.0</version>
-            </plugin>
-            <plugin>
-              <artifactId>maven-shade-plugin</artifactId>
-              <version>2.4</version>
-            </plugin>
-            <plugin>
-              <artifactId>maven-assembly-plugin</artifactId>
-              <version>3.0.0</version>
-            </plugin>
-            <plugin>
-              <artifactId>maven-surefire-plugin</artifactId>
-              <configuration>
-                <excludedGroups>java7</excludedGroups>
-              </configuration>
-            </plugin>
-          </plugins>
-        </pluginManagement>
-      </build>
-    </profile>
-
-    <profile>
-      <id>java7</id>
-      <activation>
-        <jdk>[1.5,1.8)</jdk>
-      </activation>
-      <dependencyManagement>
-        <dependencies>
-          <dependency>
-            <groupId>org.easymock</groupId>
-            <artifactId>easymock</artifactId>
-            <version>3.4</version>
-          </dependency>
-        </dependencies>
-      </dependencyManagement>
-    </profile>
-
-    <profile>
-      <id>java8+</id>
-      <activation>
-        <jdk>[1.8,)</jdk>
-      </activation>
-      <dependencyManagement>
-        <dependencies>
-          <dependency>
-            <groupId>org.easymock</groupId>
-            <artifactId>easymock</artifactId>
-            <version>4.3</version>
-          </dependency>
-        </dependencies>
-      </dependencyManagement>
-    </profile>
-
-    <profile>
-      <id>java9+</id>
-      <activation>
-        <jdk>[9,)</jdk>
-      </activation>
-      <build>
-        <pluginManagement>
-          <plugins>
-            <plugin>
-              <artifactId>maven-surefire-plugin</artifactId>
-              <configuration>
-                <argLine>
-                  <!--
-                    deny all reflective access except:
-                     - java.base/java.lang for Easymock (see https://github.com/easymock/easymock/issues/235)
-                     - java.management/javax.management.modelmbean for org.jolokia.jmx.JolokiaMBeanServerTest
-                  -->
-                  --illegal-access=deny
-                  --add-opens java.base/java.lang=ALL-UNNAMED
-                  --add-opens java.management/javax.management.modelmbean=ALL-UNNAMED
-                </argLine>
-              </configuration>
-            </plugin>
-            <plugin>
-              <artifactId>maven-compiler-plugin</artifactId>
-              <configuration>
-                <!-- JDK 17 can't compile with source/target=1.6 anymore -->
-                <source>1.7</source>
-                <target>1.7</target>
-                <testSource>1.7</testSource>
-                <testTarget>1.7</testTarget>
-              </configuration>
-            </plugin>
-          </plugins>
-        </pluginManagement>
-      </build>
-    </profile>
-
-    <profile>
-      <id>disable-javadoc-lint</id>
-      <activation>
-        <jdk>[1.8,2.0)</jdk>
-      </activation>
-      <build>
-        <pluginManagement>
-          <plugins>
-            <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-javadoc-plugin</artifactId>
-              <version>2.10.1</version>
-              <configuration>
-                <additionalparam>-Xdoclint:none</additionalparam>
-              </configuration>
-            </plugin>
-          </plugins>
-        </pluginManagement>
-      </build>
-    </profile>
-
-    <!-- Include Roo, which is not build by default -->
-    <profile>
-      <id>roo</id>
-      <modules>
-        <module>tools/roo-addon</module>
-      </modules>
     </profile>
 
   </profiles>

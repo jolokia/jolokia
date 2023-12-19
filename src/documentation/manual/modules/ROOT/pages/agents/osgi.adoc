@@ -1,0 +1,407 @@
+////
+  Copyright 2009-2023 Roland Huss
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+[#agents-osgi]
+== OSGi Agents
+
+Jolokia agent is also available as
+https://www.osgi.org[OSGi,role=externalLink,window=_blank] bundle. The Jolokia 1.x OSGi agent
+had two versions (with and without packaged https://github.com/apache/felix-dev/tree/master/http[Felix HTTP Service,role=externalLink,window=_blank] bundles).
+In Jolokia 2 there's only one bundle
+which requires a https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard extender,role=externalLink,window=_blank] implementation available in target OSGi runtime.
+
+****
+In OSGi world, transition to JakartaEE 9+ (with `jakarta.servlet` packages) is a bit slower. Jolokia 2 has been
+tested with dev version of Pax Web 10 using Undertow 2.3, running in dev version of Karaf 4.5.
+****
+
+[#agents-osgi-pure]
+=== jolokia-agent-osgi.jar
+
+This bundle depends on availability of https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard extender,role=externalLink,window=_blank] which tracks instances of `jakarta.servlet.Servlet` OSGi services.
+Jolokia 2 registers such OSGi servlet service when new `registerWhiteboardServlet` option is set to `true` (which is the default).
+
+All package imports of this bundle are listed in
+<<table-agents-osgi-deps>>. Note that the
+`pass:[org.osgi.framework.*]` and `pass:[javax.*]`
+packages are typically exported
+by the system bundle, so no extra installation effort is
+required here. Whether the
+`pass:[org.osgi.service.*]` interfaces are
+available depends on your OSGi container. If they are not
+provided, they can be easily fetched and installed from e.g.
+https://repo1.maven.org/maven2/org/osgi/org.osgi.compendium/4.2.0/org.osgi.compendium-4.2.0.jar[maven
+central]. Often the `LogService` interface is exported
+out of the box, but not the `HttpService`. You will notice any
+missing package dependency during the resolve phase while
+installing `jolokia-osgi.jar`.
+
+[#table-agents-osgi-deps]
+.Package Imports of jolokia-osgi.jar
+|===
+|Package|from System Bundle
+
+|`javax.management`
+|X
+
+|`javax.management.openmbean`
+|X
+
+|`javax.management.relation`
+|X
+
+|`javax.management.remote`
+|X
+
+|`javax.naming`
+|X
+
+|`jakarta.servlet`
+|
+
+|`jakarta.servlet.http`
+|
+
+|`javax.crypto`
+|X
+
+|`javax.crypto.spec`
+|X
+
+|`javax.xml.datatype`
+|X
+
+|`javax.xml.parsers`
+|X
+
+|`org.osgi.framework`
+|X
+
+|`org.osgi.service.cm`
+|
+
+|`org.osgi.service.log`
+|
+
+|`org.osgi.service.servlet.context`
+|
+
+|`org.osgi.util.tracker`
+|X
+
+|`org.w3c.dom`
+|X
+
+|`org.xml.sax`
+|X
+|===
+
+This agent bundle consumes two services by default:
+
+* `org.osgi.service.log.LogService` is used for logging, if available. If such a service is not registered,
+the Jolokia bundle uses the standard `HttpServlet.log()` method for its logging needs.
+* `org.osgi.service.cm.ConfigurationAdmin` is used to load configuration from `org.jolokia.osgi` PID in OSGi environment
+with Configuration Admin service available.
+
+In Jolokia 1, https://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.http.html[OSGi CMPN HTTP Service,role=externalLink,window=_blank]
+was used to register Jolokia servlet. In Jolokia 2 a different pattern is used. Instead of using some service directly by
+Jolokia, a servlet is registered as OSGi service which is then processed (_extended_) using https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard extender,role=externalLink,window=_blank]
+
+The Jolokia OSGi bundle can be configured via the OSGi Configuration Admin
+service using the PID `org.jolokia.osgi`
+(e.g. if using Apache Karaf, place properties in
+`etc/org.jolokia.osgi.cfg` file), or alternatively via global
+properties which typically can be configured in a configuration file of
+the OSGi container. All properties start with the prefix
+`org.jolokia` and are listed in
+<<table-agents-osgi-properties>>. They are mostly the
+same as the `init-param` options for
+a Jolokia servlet when used in a Jakarta EE WAR artifact.
+
+[#table-agents-osgi-properties]
+.Jolokia Bundle Properties
+[cols="15,~,~"]
+|===
+|Property|Default|Description
+
+|`org.jolokia.user`
+|
+|User used for authentication with HTTP Basic Authentication. If not given, no authentication is used.
+
+|`org.jolokia.password`
+|
+|Password used for authentication with HTTP Basic Authentication.
+
+|`org.jolokia.agentContext`
+|`/jolokia`
+|Context path of the agent servlet
+
+|`org.jolokia.agentId`
+|
+|A unique ID for this agent. By default a unique id is
+calculated. If provided it should be ensured that this id is
+unique among all agent reachable via multicast requests used
+by the discovery mechanism. It is recommended not to set
+this value. Within the `agentId` specification you
+can use the same placeholders as in `discoveryAgentUrl`.
+
+|`org.jolokia.agentDescription`
+|
+|An optional description which can be used for clients to
+present a human readable label for this agent.
+
+|`org.jolokia.debug`
+|`false`
+|Debugging state after startup. This can be changed via the
+Config MBean (`jolokia:type=Config`) at
+runtime
+
+|`org.jolokia.debugMaxEntries`
+|`100`
+|Maximum number of entries to keep in the local debug history
+if switched on. This can be changed via the config MBean at
+runtime.
+
+|`org.jolokia.maxDepth`
+|`0`
+|Maximum depth when traversing bean properties.
+If set to 0, depth checking is disabled
+
+|`org.jolokia.maxCollectionSize`
+|`0`
+|Maximum size of collections returned when
+serializing to JSON. When set to 0,
+collections are not truncated.
+
+|`org.jolokia.maxObjects`
+|`0`
+|Maximum number of objects which are traversed
+when serializing a single response. Use this
+as an airbag to avoid boosting your memory and
+network traffic. Nevertheless, when set to 0
+no limit is imposed.
+
+|`org.jolokia.historyMaxEntries`
+|`10`
+|Number of entries to keep in the history. This can be changed at
+runtime via the Jolokia config MBean.
+
+|`org.jolokia.registerWhiteboardServlet`
+|`true`
+|If `true` the bundle registers `org.jolokia.server.core.osgi.OsgiAgentServlet` OSGi service. If `false`, it's your
+responsibility to register this servlet in some way.
+
+|`org.jolokia.useRestrictorService`
+|`false`
+|If `true` the Jolokia agent will use any
+`org.jolokia.server.core.service.api.Restrictor`
+service for applying access restrictions. If this option is
+`false` the standard method of looking up a
+security policy file is used, as described in
+xref:security.adoc#security-policy[Policy based security].
+
+|`org.jolokia.canonicalNaming`
+|`true`
+|This option specifies in which order the key-value
+properties within ObjectNames as returned by
+`list` or `search` are
+returned. By default this is the so called _canonical order_
+in which the keys are sorted alphabetically. If this option
+is set to `false`, then the natural order
+is used, i.e. the object name as it was registered. This
+option can be overridden with a query parameter of the same
+name.
+
+|`org.jolokia.includeStackTrace`
+|`false`
+|Whether to include a stacktrace of an exception in case of
+an error. By default it it set to `false`
+in which case the stacktrace is never included. If
+the value is `runtime` a stacktrace is
+only included for RuntimeExceptions. This global option can
+be overridden with a query parameter.
+
+|`org.jolokia.serializeException`
+|`false`
+|When this parameter is set to `true`,
+then an exception thrown will be serialized as JSON and
+included in the response under the key
+`error_value`. No stacktrace information
+will be included, though. This global option can be
+overridden by a query parameter of the same name.
+
+|`org.jolokia.detectorOptions`
+|
+|An optional JSON representation for application specific
+options used by detectors for post-initialization steps. See the description of
+`detectorOptions` in
+xref:agents/war.adoc#agent-war-init-params[Servlet init parameters] for details.
+
+|`org.jolokia.discoveryEnabled`
+|`false`
+|If set to `true` then this servlet will
+listen for multicast request (multicast-group `239.192.48.84`,
+port `24884` by default, but can be configured).
+By default this option is disabled in order to
+avoid conflicts with an Jakarta EE standards (though this shouldn't
+harm anyways). This option can also be switched on with an
+environment variable
+`JOLOKIA_DISCOVERY_ENABLED` or the system
+property `jolokia.discoveryEnabled` set to
+`true`.
+
+|`org.jolokia.discoveryAgentUrl`
+|
+|Sets the URL to respond for multicast discovery requests. If
+given, `discoveryEnabled` is set
+implicitly to true. This URL can also be provided by an
+environment variable
+`JOLOKIA_DISCOVERY_AGENT_URL` or the system
+property `jolokia.discoveryUrl`. Within the value you can use the
+placeholders `$\{host}` and `$\{ip}` which gets replaced
+by the autodetected local host name/address. Also with `$\{env:ENV_VAR}` and
+`$\{sys:property}` environment and system properties can be referenced, respectively.
+
+|`org.jolokia.multicastGroup`
+|`239.192.48.84`
+|The multicast group IPv4 address. This group IP can be also given as an environment variable `JOLOKIA_MULTICAST_GROUP` or a system property `jolokia.multicastGroup`
+
+|`org.jolokia.multicastPort`
+|`24884`
+|The multicast port. This port can be also given as an environment variable `JOLOKIA_MULTICAST_PORT` or a system property `jolokia.multicastPort`
+
+|`org.jolokia.realm`
+|`jolokia`
+|Sets the security realm to use. If the `authMode` is set to
+`jaas` this is also used as value for the security domain.
+E.g. for Karaf 3 and later, this realm should be `karaf` since
+all JMX MBeans are guarded by this security domain.
+
+|`org.jolokia.authMode`
+|`basic`
+|Can be either `basic` (the default), `jaas`,
+`service-all` or `service-any`. If
+`jaas` is used, the user and password which are given in the `Authorization:`
+header are used for login in via JAAS and, if successful, the return subject is used for all Jolokia operation.
+When no user is set and the `authMode` is either `service-all` or
+`service-any` then a `org.jolokia.osgi.security.Authenticator` service is looked up in the
+OSGi service registry. If more then one of such service is registered, `service-all` requires
+that all authenticators succeed, for `service-any` it is sufficient that one authenticator
+successfully authenticates. In any case if no such Authenticator service can be found, the request is rejected.
+|===
+
+This bundle also exports the service
+`jakarta.servlet.ServletContext`
+which can be used to obtain context information of the
+registered agent like the context path under which this
+servlet can be reached. Additionally, it exports
+`org.osgi.service.servlet.context.ServletContextHelper`, which
+is used for authentication. Note that this service is only
+available when the agent servlet is active (i.e. when an
+whiteboard servlet is registered).
+
+[#agents-osgi-servlet]
+=== Programmatic servlet registration
+
+It is also possible to register the Jolokia agent servlet
+manually instead of relying of the OSGi bundle activator which
+comes with the OSGi agent.
+`jolokia-agent-osgi.jar` bundle exports the package
+`org.jolokia.server.core.osgi` which includes
+the servlet class `org.jolokia.server.core.osgi.OsgiAgentServlet`. This
+class has three constructors: A default constructor without
+arguments, one with a single
+`BundleContext` argument and finally one
+with an additional `org.jolokia.server.core.service.api.Restrictor` (see
+xref:security.adoc#security-restrictor[Jolokia Restrictors] for details how access
+restrictions can be applied).
+The constructor with a
+`BundleContext` as its argument has the
+advantage that it will use an OSGi
+`LogService` if available and adds various
+OSGi server detectors which adds server information like product
+name and version to the `version`
+command. Refer to xref:protocol/version.adoc#version[Getting the agent version] for details about the server information provided.
+
+Please note that for this use case the bundle
+`org.jolokia.agent.osgi` should not be
+_started_ but left in the state
+_resolved_. Otherwise, as soon as an OSGi
+HttpService registers, this bundle will try to add yet another
+agent servlet to this service, which is probably not what you
+want. Alternatively, the bundle property
+`org.jolokia.registerWhiteboardServlet` can be set
+to `false` in which case there will be never an
+automatic servlet registration.
+
+=== Restrictor service
+
+As described in xref:security.adoc#security-restrictor[Jolokia Restrictors], the
+Jolokia agent can use custom restrictors implementing the
+interface
+`org.jolokia.server.core.service.api.Restrictor`. If the
+bundle property
+`org.jolokia.useRestrictorService` is set to
+`true` and no restrictor is configured by other means, the agent
+will use one or more OSGi service with
+`org.jolokia.server.core.service.api.Restrictor` interface. If no
+such service is available, access to the agent is always
+denied. If one such restrictor service is available, the access
+decision is delegated to this service. When more than one
+restrictor service is available, access is only granted if all of
+them individually grant access. A sample restrictor service as a
+maven project can be found in the Jolokia source at
+`examples/osgi-restrictor`.
+
+Here's an example where this custom restrictor is installed and configured (because by default `org.jolokia.useRestrictorService` is set to `false`):
+
+[,subs="attributes,verbatim"]
+----
+karaf@root()> install -s mvn:org.jolokia/jolokia-example-osgi-restrictor/{jolokia-version}
+Register sample restrictor service
+Bundle ID: 68
+
+karaf@root()> config:property-set --pid org.jolokia.osgi org.jolokia.useRestrictorService true
+
+karaf@root()> restart org.jolokia.agent.osgi
+----
+
+Then we can only access MBeans from `java.lang` domain:
+
+----
+$ curl -s http://localhost:8181/jolokia/read/java.lang:type=Runtime/Name | jq .
+{
+  "request": {
+    "mbean": "java.lang:type=Runtime",
+    "attribute": "Name",
+    "type": "read"
+  },
+  "value": "94143@everfree.forest",
+  "status": 200,
+  "timestamp": 1702305458
+}
+
+$ curl -s http://localhost:8181/jolokia/read/java.nio:type=BufferPool,name=direct/Count | jq .
+{
+  "request": {
+    "mbean": "java.nio:name=direct,type=BufferPool",
+    "attribute": "Count",
+    "type": "read"
+  },
+  "error_type": "java.lang.Exception",
+  "error": "java.lang.Exception : Reading attribute Count is forbidden for MBean java.nio:name=direct,type=BufferPool",
+  "status": 403
+}
+----

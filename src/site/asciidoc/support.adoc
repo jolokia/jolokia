@@ -1,0 +1,73 @@
+////
+  Copyright 2009-2023 Roland Huss
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+
+== Support
+
+The best place to get Jolokia support is the https://github.com/jolokia/jolokia/discussions[GitHub discussions page,role=externalLink,window=_blank] or https://github.com/jolokia/jolokia/issues[GitHub issues page,role=externalLink,window=_blank].
+You'll find Jolokia own issues and get a glance at current development status.
+
+You can ask questions, report issues and you'll find developers from different time zones ready to answer your questions.
+
+[#Source]
+=== Source
+
+Jolokia uses
+https://github.com/jolokia/jolokia[GitHub,role=externalLink,window=_blank] as source
+repository and employs a
+https://help.github.com/pull-requests/[Fork + Pull Model,role=externalLink,window=_blank]
+for development. The git clone URL is `git@github.com:jolokia/jolokia.git`.
+
+We are always looking for volunteers to enhance Jolokia. If
+you would like start to participate, we suggest the
+following way:
+
+* Check for an open feature request
+you like or open bug at
+https://github.com/jolokia/jolokia/issues[GitHub,role=externalLink,window=_blank].
+* Fork Jolokia by visiting the
+https://github.com/jolokia/jolokia[project page,role=externalLink,window=_blank]
+(use "Fork" from the menu).
+* Your contribution must be donated under the https://www.apache.org/licenses/LICENSE-2.0.html[Apache Public License,role=externalLink,window=_blank] and you
+should sign-off your commits that you conform to the https://developercertificate.org/[Developer Certificate of Origin,role=externalLink,window=_blank]
+(i.e. that you have written the code on your own). To do so, add a line `Signed-off-by: Your Name
+<your.name@example.com>` to your commit message. (`git -s` will do this for you).
+Only real names are allowed here.
+* After finishing your implementation, send a
+https://help.github.com/pull-requests[pull request,role=externalLink,window=_blank].
+* After briefly reviewing the code contribution, it will
+integrated into relevant branch of the repository.
+
+Please note, that all the contributed code must be
+licensed under xref:license.adoc[Apache License] Version 2 and you must sign-off the contribution (see above).
+
+=== Your Support for Jolokia
+
+++++
+<div style="float:right; margin-right: 50px; margin-top: 20px;">
+    <a class="FlattrButton" style="display:none;" href="https://www.jolokia.org"></a>
+</div>
+++++
+
+Jolokia is free software, released under the business friendly
+Apache License. That's mostly because I believe that open
+source software is the real driving force behind software
+innovation and I highly appreciate the fine pieces of open
+source software engineering I had the luck to use in my daily
+work. I love this.
+
+Nevertheless, if you want to support the development of
+Jolokia (it is still a hobby project) and you like this
+software you can https://www.flattr.com[flattr,role=externalLink,window=_blank] it.

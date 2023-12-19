@@ -1,5 +1,5 @@
 package org.jolokia.jvmagent.security;/*
- * 
+ *
  * Copyright 2014 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,12 +16,13 @@ package org.jolokia.jvmagent.security;/*
  */
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import javax.security.auth.Subject;
 
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
-import org.jolokia.config.ConfigKey;
+import org.jolokia.server.core.config.ConfigKey;
 
 import static org.easymock.EasyMock.*;
 
@@ -35,10 +36,10 @@ public class BaseAuthenticatorTest {
     }
 
     protected HttpExchange createHttpExchange(Headers respHeaders, Subject subject, String... reqHeaderValues) {
-        HttpExchange ex = createMock(HttpExchange.class);
+        HttpExchange ex = createMock(MockableHttpExchange.class);
         Headers reqHeaders = new Headers();
         for (int i = 0; i < reqHeaderValues.length; i+=2) {
-            reqHeaders.put(reqHeaderValues[i], Arrays.asList(reqHeaderValues[i + 1]));
+            reqHeaders.put(reqHeaderValues[i], Collections.singletonList(reqHeaderValues[i + 1]));
         }
         expect(ex.getResponseHeaders()).andStubReturn(respHeaders);
         expect(ex.getRequestHeaders()).andStubReturn(reqHeaders);
@@ -51,5 +52,7 @@ public class BaseAuthenticatorTest {
         return ex;
     }
 
+    public abstract static class MockableHttpExchange extends HttpExchange {
+    }
 
 }

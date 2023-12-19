@@ -1,0 +1,41 @@
+////
+  Copyright 2009-2023 Roland Huss
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+        https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+
+== Webarchive (WAR) Agent
+
+NOTE: Jolokia 2.0 uses Jakarta EE 9+ (Servlet API 5+ with `pass:[jakarta.servlet.*]` packages),
+while Jolokia 1.x uses JavaEE/JakartaEE up to version 8 (Servlet API up to version 4 with `pass:[javax.servlet.*]` packages)
+
+This agent is most suitable for Jakarta EE environments. It gets deployed
+as a usual web archive (WAR). The specific deployment procedure depends on
+the Jakarta EE server in used. E.g. for Tomcat, copy the WAR agent into the `webapps/` directory.
+
+The WAR agent comes in two flavors:
+
+* `jolokia-agent-war.war` which is secured with a role "jolokia". So you need to setup your servlet container to link
+this role with your authentication setup (like the `conf/tomcat-users.xml` for Tomcat)
+* `jolokia-agent-war-unsecured.war` is completely unsecured and might be useful for a quick evaluation. *Please note that this unauthenticated access should be ony used for development purposes. Check out link:../reference/html/manual/agents.html#agent-war-security[reference manual] for details how to enable security.*
+
+As soon as it is deployed, the agents offers its services under the
+URL of the deployed web application. For Tomcat running with its
+standard configuration the agent is then reachable under
+
+----
+http://localhost:8080/jolokia
+----
+
+Setup and configuration of the WAR agent is explained detailed in
+the link:../reference/html/manual/agents.html#agents-war[reference manual].

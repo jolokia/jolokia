@@ -18,8 +18,8 @@ package org.jolokia.jvmagent.client.command;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.jolokia.Version;
-import org.jolokia.config.ConfigKey;
+import org.jolokia.server.core.Version;
+import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.jvmagent.client.util.OptionsAndArgs;
 import org.jolokia.jvmagent.client.util.VirtualMachineHandlerOperations;
 
@@ -108,14 +108,14 @@ public class HelpCommand extends AbstractBaseCommand {
 "    --clientPrincipal <principal>   Allow only this principal in the client cert (https & sslClientAuth only)\n" +
 "                                    If supplied multiple times, any one of the clientPrincipals must match\n" +
 "    --extendedClientCheck <t|f>     Additional validation of client certs for the proper key usage (https & sslClientAuth only)\n" +
-"    --discoveryEnabled <t|f>        Enable/Disable discovery multicast responses (default: true)\n" +
+"    --discoveryEnabled <t|f>        Enable/Disable discovery multicast responses (default: false)\n" +
 "    --discoveryAgentUrl <url>       The URL to use for answering discovery requests. Will be autodetected if not given.\n" +
 "    --sslProtocol <protocol>        SSL / TLS protocol to enable, can be provided multiple times\n" +
 "    --sslCipherSuite <suite>        SSL / TLS cipher suite to enable, can be provided multiple times\n" +
 "    --debug                         Switch on agent debugging\n" +
-"    --logHandlerClass <class>       Implementation of org.jolokia.util.LogHandler for logging\n" +
-"                                    Available classes: org.jolokia.util.LogHandler.Quiet " +
-"                                                       org.jolokia.util.LogHandler.Jul" +
+"    --logHandlerClass <class>       Implementation of org.jolokia.server.core.service.api.LogHandler for logging\n" +
+"                                    Available classes: org.jolokia.server.core.service.impl.QuietLogHandler\n" +
+"                                                       org.jolokia.server.core.service.impl.JulLogHandler\n" +
 "    --debugMaxEntries <nr>          Number of debug entries to keep in memory which can be fetched from the Jolokia MBean\n" +
 "    --maxDepth <depth>              Maximum number of levels for serialization of beans\n" +
 "    --maxCollectionSize <size>      Maximum number of element in collections to keep when serializing the response\n" +
@@ -124,7 +124,7 @@ public class HelpCommand extends AbstractBaseCommand {
 "    --policyLocation <url>          Location of a Jolokia policy file\n" +
 "    --mbeanQualifier <qualifier>    Qualifier to use when registering Jolokia internal MBeans\n" +
 "    --canonicalNaming <t|f>         whether to use canonicalName for ObjectNames in 'list' or 'search' (default: true)\n" +
-"    --includeStackTrace <t|f>       whether to include StackTraces for error messages (default: true)\n" +
+"    --includeStackTrace <t|f>       whether to include StackTraces for error messages (default: false)\n" +
 "    --serializeException <t|f>      whether to add a serialized version of the exception in the Jolokia response (default: false)\n" +
 "    --config <configfile>           Path to a property file from where to read the configuration\n" +
 "    --help                          This help documentation\n" +

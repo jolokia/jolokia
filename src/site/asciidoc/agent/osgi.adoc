@@ -1,0 +1,36 @@
+////
+  Copyright 2009-2023 Roland Huss
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+        https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+
+== OSGi Agent
+
+For using an agent within an OSGi container, Jolokia comes with
+an agent packaged as OSGi bundle.
+
+NOTE: Jolokia 1.x provided an _all-in-one_ bundle with https://github.com/apache/felix-dev/tree/master/http[Felix HTTP Service,role=externalLink,window=_blank] implementation packaged. This is no longer the case in Jolokia 2.x.
+
+The requirement for target OSGi runtime is to provide an implementation of https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard Specification for Jakarta™ Servlet,role=externalLink,window=_blank] extender. Jolokia 2.0 registers its `org.jolokia.server.core.osgi.OsgiAgentServlet` as Whiteboard service, which is then processed by Whiteboard extender.
+
+Because OSGi runtimes are still in the process of moving away from JavaEE towards JakartaEE (with new packages namespace),
+I tested Jolokia 2 with Karaf 4.5 using dev version of Pax Web 10 (still in development).
+
+Note, that some OSGi containers (like Apache Karaf with Pax Web) come with a so
+called _Web extender_ which allows for deployment of standard
+WAR archives. For such container, there is a choice between the
+OSGi bundle and the WAR agent, where the later is probably easier to
+deploy.
+
+More details about the OSGi agents can be found in the
+link:../reference/html/manual/agents.html#agents-osgi[Jolokia reference manual].

@@ -45,7 +45,7 @@ public class JsonSerializationTest {
     public void jsonAwareSerialization() {
         JSONObject arg = new JSONObject();
         Object result = serialize(arg);
-        assertTrue(arg == result);
+        assertSame(arg, result);
     }
 
     @Test
@@ -60,53 +60,53 @@ public class JsonSerializationTest {
 
     @Test
     public void mapSerialization() {
-        Map arg = new HashMap();
-        arg.put("arg",10.0);
+        Map<String, Number> arg = new HashMap<>();
+        arg.put("arg", 10.0);
         Object result = serialize(arg);
-        assertTrue(result instanceof JSONObject);;
+        assertTrue(result instanceof JSONObject);
         JSONObject res = (JSONObject) result;
-        assertEquals(res.get("arg"),10.0);
+        assertEquals(res.get("arg"), 10.0);
     }
 
     @Test
     public void collectionSerialization() {
-        Set arg = new HashSet();
+        Set<Boolean> arg = new HashSet<>();
         arg.add(true);
         Object result = serialize(arg);
         assertTrue(result instanceof JSONArray);
         JSONArray res = (JSONArray) result;
-        assertEquals(res.size(),1);
-        assertEquals(res.get(0),true);
+        assertEquals(res.size(), 1);
+        assertEquals(res.get(0), true);
     }
 
     @Test
     public void complexSerialization() throws ParseException {
-        Map arg = new HashMap();
-        List inner = new ArrayList();
+        Map<String, Object> arg = new HashMap<>();
+        List<Object> inner = new ArrayList<>();
         inner.add(null);
         inner.add(new File("tmp"));
         inner.add(10);
         inner.add(42.0);
         inner.add(false);
-        arg.put("first","fcn");
-        arg.put("second",inner);
+        arg.put("first", "fcn");
+        arg.put("second", inner);
         Object result = serialize(arg);
         assertTrue(result instanceof JSONObject);
         JSONObject res = (JSONObject) result;
-        assertEquals(res.get("first"),"fcn");
+        assertEquals(res.get("first"), "fcn");
         assertTrue(res.get("second") instanceof JSONArray);
         JSONArray arr = (JSONArray) res.get("second");
-        assertEquals(arr.size(),5);
+        assertEquals(arr.size(), 5);
         assertNull(arr.get(0));
         assertEquals(arr.get(1), "tmp");
-        assertEquals(arr.get(2),10);
-        assertEquals(arr.get(3),42.0);
-        assertEquals(arr.get(4),false);
+        assertEquals(arr.get(2), 10);
+        assertEquals(arr.get(3), 42.0);
+        assertEquals(arr.get(4), false);
         String json = res.toJSONString();
         assertNotNull(json);
         JSONObject reparsed = (JSONObject) new JSONParser().parse(json);
         assertNotNull(reparsed);
-        assertEquals(((List) reparsed.get("second")).get(1),"tmp");
+        assertEquals(((List<?>) reparsed.get("second")).get(1), "tmp");
     }
 
 

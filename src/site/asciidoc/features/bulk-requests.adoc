@@ -1,0 +1,156 @@
+////
+  Copyright 2009-2023 Roland Huss
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+        https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+
+== Bulk Requests
+
+image:../images/features/bulk_requests_large.png["Bulk-Requests",role=right]
+In order to monitor Java application servers, a multitude of
+parameters can be observed. Memory and thread consumption,
+database connection pool utilisation, HTTP request response
+for various web application are examples for valuable metrics
+to monitor. Typically, 10-20 monitored attributes are a good
+setup for a single Jakarta EE server.
+
+With the traditional approach using JSR-160 JMX connectors,
+a connection is opened, and for each attribute queried a
+separate RMI (or optional JMXMP) request needs to be send to
+the server resulting in several client-server turnarounds.
+Wouldn't it be nice to use a single request for querying all
+those parameters?
+
+With Jolokia's *bulk requests* this is a piece
+of cake. A single HTTP POST request can carry a list of JSON
+request objects, which are dispatched by the Jolokia agent on
+the server side into multiple local JMX calls. The results are
+collected and returned as list of JSON response objects. In
+case of an exception when executing the JMX call, the error is
+propragated as part of the response without influencing the
+other results.
+
+=== Example
+
+Let's have a look at an example. Jolokia client libraries
+(currently available for xref:../client/javascript.adoc[JavaScript],
+xref:../client/java.adoc[Java] and
+xref:../client/perl.adoc[Perl]) make the usage of bulk
+request easy by providing an extra layer of abstraction:
+
+[source,java,options=nowrap]
+----
+J4pClient j4pClient = J4pClient.url("http://localhost:8080/jolokia")
+        .user("jolokia")
+        .password("jolokia")
+        .build();
+J4pReadRequest req1 = new J4pReadRequest("java.lang:type=Memory", "HeapMemoryUsage");
+J4pExecRequest req2 = new J4pExecRequest("java.lang:type=Memory", "gc");
+J4pReadRequest req3 = new J4pReadRequest("java.lang:type=Memory", "HeapMemoryUsage");
+List<J4pResponse<J4pRequest>> responses = j4pClient.execute(req1, req2, req3);
+Map<String, Object> m1 = responses.get(0).getValue();
+Map<String, Object> m2 = responses.get(2).getValue();
+System.out.println("Memory usage before gc(): used: " + m1.get("used")
+        + " / max: " + m1.get("max"));
+System.out.println("Memory usage after gc(): used: " + m2.get("used")
+        + " / max: " + m2.get("max"));
+----
+
+This gets translated in the following JSON request, which is
+transmitted to the agent via an HTTP POST request (the URL has
+been set up in the `j4pClient` object above):
+
+[source,json]
+----
+[
+  {
+    "mbean":"java.lang:type=Memory",
+    "attribute":"HeapMemoryUsage",
+    "type":"read"
+  },
+  {
+    "operation":"gc",
+    "mbean":"java.lang:type=Memory",
+    "type":"exec"
+  },
+  {
+    "mbean":"java.lang:type=Memory",
+    "attribute":"HeapMemoryUsage",
+    "type":"read"
+  }
+]
+----
+
+The answer returned is also represented in JSON and looks like
+this:
+
+[source,json]
+----
+[
+  {
+    "request": {
+      "mbean": "java.lang:type=Memory",
+      "attribute": "HeapMemoryUsage",
+      "type": "read"
+    },
+    "value": {
+      "init": 524288000,
+      "committed": 71303168,
+      "max": 8334082048,
+      "used": 13881840
+    },
+    "status": 200,
+    "timestamp": 1701935299
+  },
+  {
+    "request": {
+      "mbean": "java.lang:type=Memory",
+      "type": "exec",
+      "operation": "gc"
+    },
+    "value": null,
+    "status": 200,
+    "timestamp": 1701935300
+  },
+  {
+    "request": {
+      "mbean": "java.lang:type=Memory",
+      "attribute": "HeapMemoryUsage",
+      "type": "read"
+    },
+    "value": {
+      "init": 524288000,
+      "committed": 71303168,
+      "max": 8334082048,
+      "used": 13842720
+    },
+    "status": 200,
+    "timestamp": 1701935300
+  }
+]
+----
+
+Another example how bulk requests can be used is the
+https://www.nagios.org/[Nagios,role=externalLink,window=_blank]
+Plugin
+https://metacpan.org/dist/jmx4perl/view/scripts/check_jmx4perl[check_jmx4perl,role=externalLink,window=_blank],
+which uses bulk requests
+for its _multi check_ features, which allows for a
+single Nagios check monitor as many JMX attributes and
+operations as required.
+
+=== Next
+
+* Learn more about Jolokia's xref:proxy.adoc[Proxy Mode] and agentless operation.
+* Read an introduction and xref:overview.adoc[overview] for Jolokia.
+* Go Back to the xref:../features.adoc[Features Overview].

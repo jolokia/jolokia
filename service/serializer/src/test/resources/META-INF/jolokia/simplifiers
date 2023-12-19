@@ -1,0 +1,2 @@
+org.jolokia.service.serializer.json.simplifier.TestSimplifier
+!org.jolokia.service.serializer.json.simplifier.ObjectNameSimplifier

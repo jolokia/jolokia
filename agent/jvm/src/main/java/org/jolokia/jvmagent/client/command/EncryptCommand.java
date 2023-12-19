@@ -2,7 +2,7 @@ package org.jolokia.jvmagent.client.command;
 
 import org.jolokia.jvmagent.client.util.OptionsAndArgs;
 import org.jolokia.jvmagent.client.util.VirtualMachineHandlerOperations;
-import org.jolokia.util.*;
+import org.jolokia.server.core.util.JolokiaCipher;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -38,7 +38,7 @@ public class EncryptCommand extends AbstractBaseCommand {
             throws InvocationTargetException {
         try {
             List<String> args = pOpts.getExtraArgs();
-            String password = args.size() == 0 ?
+            String password = args.isEmpty() ?
                     getPasswordFromConsoleOrStdin(pOpts) :
                     args.get(0);
             JolokiaCipher jolokiaCipher = keyHolder != null ?

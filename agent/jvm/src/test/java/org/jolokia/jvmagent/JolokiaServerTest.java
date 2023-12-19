@@ -19,6 +19,7 @@ package org.jolokia.jvmagent;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -31,10 +32,11 @@ import java.util.Set;
 import javax.net.ssl.*;
 
 import com.sun.net.httpserver.HttpServer;
-import org.jolokia.Version;
 import org.jolokia.jvmagent.security.KeyStoreUtil;
+import org.jolokia.server.core.Version;
+import org.jolokia.server.core.util.Base64Util;
 import org.jolokia.test.util.EnvTestUtil;
-import org.jolokia.util.Base64Util;
+import org.jolokia.server.core.service.api.LogHandler;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -48,7 +50,7 @@ public class JolokiaServerTest {
 
     @Test
     public void http() throws Exception {
-        String configs[] = {
+        String[] configs = new String[]{
                 null,
                 "executor=fixed,threadNr=5",
                 "executor=cached",
@@ -67,7 +69,7 @@ public class JolokiaServerTest {
 
     @Test(expectedExceptions = IOException.class,expectedExceptionsMessageRegExp = ".*401.*")
     public void httpWithAuthenticationRejected() throws Exception {
-        Map config = new HashMap();
+        Map<String, String> config = new HashMap<>();
         config.put("user", "roland");
         config.put("password", "s!cr!t");
         config.put("port", "0");
@@ -283,15 +285,15 @@ public class JolokiaServerTest {
         String certSetup = getFullCertSetup();
         String disabledCertAlgorithms = Security.getProperty("jdk.certpath.disabledAlgorithms");
         if (disabledCertAlgorithms != null) {
-            Set<String> set = new HashSet<String>(Arrays.asList(disabledCertAlgorithms.toUpperCase().split("\\s*,\\s*")));
+            Set<String> set = new HashSet<>(Arrays.asList(disabledCertAlgorithms.toUpperCase().split("\\s*,\\s*")));
             if (set.contains("SHA1")) {
                 certSetup = getFullCertSha256Setup();
             }
         }
         JvmAgentConfig config = new JvmAgentConfig(
             prepareConfigString("host=localhost,port=" + EnvTestUtil.getFreePort() + ",protocol=https," +
-                    certSetup + ",config=" +  getResourcePath("/agent-test-specialHttpsSettings.properties")));
-        JolokiaServer server = new JolokiaServer(config, false);
+                certSetup + ",config=" +  getResourcePath("/agent-test-specialHttpsSettings.properties")));
+        JolokiaServer server = new JolokiaServer(config);
         server.start();
 
         // Skipping hostname verification because the cert doesn't have a SAN of localhost
@@ -323,7 +325,7 @@ public class JolokiaServerTest {
                     continue;
 
                 try {
-                    TrustManager tms[] = getTrustManagers(true);
+                    TrustManager[] tms = getTrustManagers(true);
                     SSLContext sc = SSLContext.getInstance(protocol);
                     sc.init(new KeyManager[0], tms, new java.security.SecureRandom());
 
@@ -360,20 +362,46 @@ public class JolokiaServerTest {
     public void invalidConfig() throws IOException, InterruptedException {
         JvmAgentConfig cfg = new JvmAgentConfig("user=roland,port=" + EnvTestUtil.getFreePort());
         Thread.sleep(1000);
-        new JolokiaServer(cfg, false);
+        new JolokiaServer(cfg);
     }
 
     @Test
     public void customHttpServer() throws IOException, NoSuchFieldException, IllegalAccessException {
         HttpServer httpServer = HttpServer.create();
-        JvmAgentConfig cfg = new JvmAgentConfig("");
-        JolokiaServer server = new JolokiaServer(httpServer, cfg, false);
-        Field field = JolokiaServer.class.getDeclaredField("httpServer");
+        JvmAgentConfig cfg = new JvmAgentConfig("port=" + EnvTestUtil.getFreePort());
+        JolokiaServer server = new JolokiaServer(httpServer,cfg,null);
+        Field field = JolokiaServer.class.getDeclaredField("useOwnServer");
         field.setAccessible(true);
-        assertNull(field.get(server));
+        assertFalse((Boolean) field.get(server));
         server.start();
         server.stop();
     }
+
+    @Test
+    public void customLogHandler1() throws Exception {
+        JvmAgentConfig cfg = new JvmAgentConfig("port=" + EnvTestUtil.getFreePort());
+        JolokiaServer server = new JolokiaServer(cfg,new CustomLogHandler());
+        server.start();
+        server.stop();
+        assertTrue(CustomLogHandler.infoCount  > 0);
+    }
+
+    @Test
+    public void customLogHandler2() throws Exception {
+        JvmAgentConfig cfg = new JvmAgentConfig("logHandlerClass=" + CustomLogHandler.class.getName() + ",port=" + EnvTestUtil.getFreePort());
+        CustomLogHandler.infoCount = 0;
+        JolokiaServer handler = new JolokiaServer(cfg);
+        handler.start();
+        handler.stop();
+        assertTrue(CustomLogHandler.infoCount > 0);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void invalidCustomLogHandler() throws Exception {
+        JvmAgentConfig cfg = new JvmAgentConfig("logHandlerClass=" + InvalidLogHandler.class.getName() + ",port=" + EnvTestUtil.getFreePort());
+        new JolokiaServer(cfg);
+    }
+
 
     // ==================================================================
 
@@ -384,7 +412,7 @@ public class JolokiaServerTest {
     private String getResourcePath(String relativeResourcePath) {
         URL ksURL = this.getClass().getResource(relativeResourcePath);
         if (ksURL != null && "file".equalsIgnoreCase(ksURL.getProtocol())) {
-            return URLDecoder.decode(ksURL.getPath());
+            return URLDecoder.decode(ksURL.getPath(), StandardCharsets.UTF_8);
         }
         throw new IllegalStateException(ksURL + " is not a file URL");
     }
@@ -415,12 +443,7 @@ public class JolokiaServerTest {
     }
 
     private HostnameVerifier createHostnameVerifier() {
-        return new HostnameVerifier() {
-            @Override
-            public boolean verify(String host, SSLSession sslSession) {
-                return true;
-            }
-        };
+        return (host, sslSession) -> true;
     }
 
     private String prepareConfigString(String pConfig) throws IOException {
@@ -459,11 +482,11 @@ public class JolokiaServerTest {
             }
 
             public void checkClientTrusted(X509Certificate[] certs, String authType) {
-                System.out.println(certs);
+                System.out.println(Arrays.toString(certs));
             }
 
             public void checkServerTrusted(X509Certificate[] certs, String authType) {
-                System.out.println(certs);
+                System.out.println(Arrays.toString(certs));
             }
         };
     }
@@ -478,7 +501,7 @@ public class JolokiaServerTest {
                              HostnameVerifier pVerifier,
                              boolean pValidateCa,
                              String pClientCert, String pUserPassword) throws Exception {
-        JolokiaServer server = new JolokiaServer(pConfig, false);
+        JolokiaServer server = new JolokiaServer(pConfig);
         server.start();
         //Thread.sleep(2000);
         HostnameVerifier oldVerifier = HttpsURLConnection.getDefaultHostnameVerifier();
@@ -488,10 +511,9 @@ public class JolokiaServerTest {
                 if (pVerifier != null) {
                     HttpsURLConnection.setDefaultHostnameVerifier(pVerifier);
                 }
-                TrustManager tms[] = null;
-                    KeyManager kms[] = null;
+                TrustManager[] tms = getTrustManagers(pValidateCa);
+                KeyManager[] kms = null;
                 SSLContext sc = SSLContext.getInstance("SSL");
-                tms = getTrustManagers(pValidateCa);
                 if (pClientCert != null) {
                     KeyStore ks = KeyStore.getInstance("PKCS12");
                     InputStream fis = getClass().getResourceAsStream("/certs/" + pClientCert + "/cert.p12");
@@ -520,20 +542,70 @@ public class JolokiaServerTest {
             server.stop();
             try {
                 Thread.sleep(10);
-            } catch (InterruptedException e) {
-
+            } catch (InterruptedException ignored) {
             }
             HttpsURLConnection.setDefaultHostnameVerifier(oldVerifier);
             HttpsURLConnection.setDefaultSSLSocketFactory(oldSslSocketFactory);
         }
     }
 
+    public static class CustomLogHandler implements LogHandler {
     // FakeSSLSocketFactory wraps a normal SSLSocketFactory so it can set the explicit SSL / TLS
     // protocol version(s) and cipher suite(s)
+        private static int debugCount, infoCount, errorCount;
+
+        public CustomLogHandler() {
+            debugCount = 0;
+            infoCount = 0;
+            errorCount = 0;
+        }
+
+        @Override
+        public void debug(String message) {
+            debugCount++;
+        }
+
+        @Override
+        public void info(String message) {
+            infoCount++;
+        }
+
+        @Override
+        public void error(String message, Throwable t) {
+            errorCount++;
+        }
+
+        @Override
+        public boolean isDebug() {
+            return false;
+        }
+    }
+
+    private static class InvalidLogHandler implements LogHandler {
+
+        @Override
+        public void debug(String message) {
+        }
+
+        @Override
+        public void info(String message) {
+        }
+
+        @Override
+        public void error(String message, Throwable t) {
+        }
+
+        @Override
+        public boolean isDebug() {
+            return false;
+        }
+    }
+
     private static class FakeSSLSocketFactory extends SSLSocketFactory {
-        private String[] cipherSuites;
-        private String[] protocols;
-        private SSLSocketFactory socketFactory;
+        private final String[] cipherSuites;
+        private final String[] protocols;
+        private final SSLSocketFactory socketFactory;
+
 
         public FakeSSLSocketFactory(SSLSocketFactory socketFactory, String[] protocols, String[] cipherSuites) {
             super();

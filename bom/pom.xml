@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2009-2023 Roland Huss
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~       http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>jolokia-bom</artifactId>
+  <version>2.0.1-SNAPSHOT</version>
+
+  <name>${project.artifactId}</name>
+  <description>Jolokia :: BOM</description>
+  <packaging>pom</packaging>
+
+  <parent>
+    <groupId>org.jolokia</groupId>
+    <artifactId>jolokia-parent</artifactId>
+    <version>2.0.1-SNAPSHOT</version>
+  </parent>
+
+  <url>https://jolokia.org/</url>
+
+  <licenses>
+    <license>
+      <name>Apache 2</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+      <comments>A business-friendly OSS license</comments>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <name>Roland Huss</name>
+      <id>roland</id>
+      <email>roland@jolokia.org</email>
+      <url>https://github.com/rhuss</url>
+      <roles>
+        <role>Developer, Architect</role>
+      </roles>
+    </developer>
+  </developers>
+
+  <contributors>
+    <contributor>
+      <name>Greg Bowyer</name>
+      <email>gbowyer@fastmail.co.uk</email>
+      <url>https://github.com/GregBowyer</url>
+    </contributor>
+    <contributor>
+      <name>Arnab Biswas</name>
+      <email>arnabbiswas1@outlook.com</email>
+      <url>https://github.com/arnabbiswas1</url>
+    </contributor>
+    <contributor>
+      <name>Benson Margulies</name>
+      <email>benson@basistech.com</email>
+      <url>https://github.com/benson-basis</url>
+    </contributor>
+    <contributor>
+      <name>Hiram Chirino</name>
+      <email>hiram@hiramchirino.com</email>
+      <url>https://github.com/chirino</url>
+    </contributor>
+    <contributor>
+      <name>Tom McMillen</name>
+      <email>tgmcmillen@yahoo.co.uk</email>
+      <url>https://github.com/cymantic</url>
+    </contributor>
+    <contributor>
+      <name>Dejan Bosanac</name>
+      <url>https://github.com/dejanb</url>
+    </contributor>
+    <contributor>
+      <name>Alex Coomans</name>
+      <email>alex@alexcoomans.com</email>
+      <url>https://github.com/drcapulet</url>
+    </contributor>
+    <contributor>
+      <name>elnkwelch</name>
+      <url>https://github.com/elnkwelch</url>
+    </contributor>
+    <contributor>
+      <name>Georgy Bolyuba</name>
+      <email>georgy@bolyuba.com</email>
+      <url>https://github.com/georgy</url>
+    </contributor>
+    <contributor>
+      <name>Hemant Kumar</name>
+      <email>hemant@codemancers.com</email>
+      <url>https://github.com/gnufied</url>
+    </contributor>
+    <contributor>
+      <name>Gerald Quintana</name>
+      <email>gerald.quintana@gmail.com</email>
+      <url>https://github.com/gquintana</url>
+    </contributor>
+    <contributor>
+      <name>Jochen Cordes</name>
+      <url>https://github.com/jcordes73</url>
+    </contributor>
+    <contributor>
+      <name>Jürgen Hermann</name>
+      <url>https://github.com/jhermann</url>
+    </contributor>
+    <contributor>
+      <name>jpamador</name>
+      <url>https://github.com/jpamador</url>
+    </contributor>
+    <contributor>
+      <name>James Strachan</name>
+      <email>james.strachan@gmail.com</email>
+      <url>https://github.com/jstrachan</url>
+    </contributor>
+    <contributor>
+      <name>Khai Nguyen</name>
+      <url>https://github.com/khaing211</url>
+    </contributor>
+    <contributor>
+      <name>Maros Marsalek</name>
+      <email>maros.mars@gmail.com</email>
+      <url>https://github.com/marosmars</url>
+    </contributor>
+    <contributor>
+      <name>Martin Vitez</name>
+      <url>https://github.com/matejj</url>
+    </contributor>
+    <contributor>
+      <name>mikael</name>
+      <url>https://github.com/Mikael</url>
+    </contributor>
+    <contributor>
+      <name>Michael Richards</name>
+      <url>https://github.com/mjr5749</url>
+    </contributor>
+    <contributor>
+      <name>Neven Radovanoviƒá</name>
+      <url>https://github.com/nevenr</url>
+    </contributor>
+    <contributor>
+      <name>ogis-nakagawa</name>
+      <email>Nakagawa_Michio@ogis-ri.co.jp</email>
+      <url>https://github.com/ogis-nakagawa</url>
+    </contributor>
+    <contributor>
+      <name>Robert Gründler</name>
+      <email>robert@dubture.com</email>
+      <url>https://github.com/pulse00</url>
+    </contributor>
+    <contributor>
+      <name>Roland Mai</name>
+      <email>roland.mai@gmail.com</email>
+      <url>https://github.com/roland</url>
+    </contributor>
+    <contributor>
+      <name>Ryan Goulding</name>
+      <email>ryandgoulding@gmail.com</email>
+      <url>https://github.com/ryandgoulding</url>
+    </contributor>
+    <contributor>
+      <name>Senthil Supramaniam</name>
+      <url>https://github.com/senthilnest</url>
+    </contributor>
+    <contributor>
+      <name>Stephan Beal</name>
+      <email>sgbeal@googlemail.com</email>
+      <url>https://github.com/sgbeal</url>
+    </contributor>
+    <contributor>
+      <name>Jean-Philippe Melanson</name>
+      <url>https://github.com/srirachapills</url>
+    </contributor>
+    <contributor>
+      <name>Tadayoshi Sato</name>
+      <url>https://github.com/tadayosi</url>
+    </contributor>
+    <contributor>
+      <name>Gareth Davis</name>
+      <email>gareth.davis@mac.com</email>
+      <url>https://github.com/tempredirect</url>
+    </contributor>
+    <contributor>
+      <name>Tokuhiro Matsuno</name>
+      <url>https://github.com/tokuhirom</url>
+    </contributor>
+    <contributor>
+      <name>twhite</name>
+      <url>https://github.com/twhite</url>
+    </contributor>
+    <contributor>
+      <name>Maciek Sakrejda</name>
+      <email>m.sakrejda@gmail.com</email>
+      <url>https://github.com/uhoh-itsmaciek</url>
+    </contributor>
+    <contributor>
+      <name>Zisis Lianas</name>
+      <url>https://github.com/zisisli</url>
+    </contributor>
+  </contributors>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-tools-test</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-server-core</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-server-core</artifactId>
+        <classifier>tests</classifier>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-server-detector</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-service-serializer</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-service-jmx</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-service-discovery</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-service-history</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-service-jsr160</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-service-notif-pull</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-service-notif-sse</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-agent-war</artifactId>
+        <type>war</type>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-agent-war-unsecured</artifactId>
+        <type>war</type>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-agent-jvm</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-agent-jvm</artifactId>
+        <version>${project.version}</version>
+        <classifier>javaagent</classifier>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-agent-osgi</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-it-core</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-it-war</artifactId>
+        <type>war</type>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-client-java</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-client-javascript</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-client-javascript</artifactId>
+        <classifier>compressed</classifier>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-client-jmx-adapter</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-client-kubernetes</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-support-jmx</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-support-spring</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+</project>

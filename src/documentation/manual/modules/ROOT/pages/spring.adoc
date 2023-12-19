@@ -1,0 +1,381 @@
+////
+  Copyright 2009-2023 Roland Huss
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+[#spring]
+= Spring Support
+
+A lot has changed since Jolokia initial release. While Spring Framework was already popular back then, in the meantime we've observed a general shift away from XML into Java and annotation-based configuration.
+
+W also can't forget about popularity of https://spring.io/projects/spring-boot[Spring Boot,role=externalLink,window=_blank].
+
+== Support for Jolokia in Spring Boot
+
+Jolokia support was added to Spring Boot https://github.com/spring-projects/spring-boot/commit/2d058570ca9834b24b43e3d6387ef5aa5264d0e4[in version 0.5.0,role=externalLink,window=_blank]. It was https://github.com/spring-projects/spring-boot/commit/86334403ed547ade2cff7376ac327a773d0dafc7[Jolokia 1.1.5,role=externalLink,window=_blank].
+
+Jolokia support is based on the concept of https://docs.spring.io/spring-boot/docs/2.7.18/reference/html/actuator.html#actuator.jmx.jolokia[_actuator_,role=externalLink,window=_blank] and when Spring Boot detects Jolokia libraries on the CLASSPATH, special `/actuator/jolokia` endpoint becomes available.
+
+Spring Boot uses auto-configuration to detect potential `@Configuration` classes and this mechanism is described in https://docs.spring.io/spring-boot/docs/2.7.18/reference/htmlsingle/#features.developing-auto-configuration.locating-auto-configuration-candidates[Locating Auto-configuration Candidates,role=externalLink,window=_blank] chapter of Spring Boot documentation.
+
+In particular, `org.springframework.boot:spring-boot-actuator-autoconfigure` library declares https://docs.spring.io/spring-boot/docs/2.7.18/api/org/springframework/boot/actuate/autoconfigure/jolokia/JolokiaEndpointAutoConfiguration.html[org.springframework.boot.actuate.autoconfigure.jolokia.JolokiaEndpointAutoConfiguration,role=externalLink,window=_blank] in `/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports` and when Jolokia libraries are available on the CLASSPATH, special `org.springframework.boot.actuate.autoconfigure.jolokia.JolokiaEndpoint` annotated with `@org.springframework.boot.actuate.endpoint.web.annotation.ServletEndpoint` is available. This makes Jolokia's AgentServlet part of actuator infrastructure of Spring Boot.
+
+However, Spring Boot 3, which https://spring.io/blog/2022/05/24/preparing-for-spring-boot-3-0[moved to JDK 17 and JakartaEE 9+,role=externalLink,window=_blank] removed support for Jolokia in `org.springframework.boot:spring-boot-actuator-autoconfigure`. See https://github.com/spring-projects/spring-boot/issues/28704[this issue,role=externalLink,window=_blank] for more details.
+
+To get fuller picture, https://github.com/spring-projects/spring-boot/issues/37568[an attempt to restore Spring Boot 3 support for Jolokia 2 was closed,role=externalLink,window=_blank], with https://github.com/jolokia/jolokia/issues/568#issuecomment-1786634151[good explanation,role=externalLink,window=_blank].
+
+The following paragraphs describe support for Spring Framework and Spring Boot in Jolokia (so the opposite of the above).
+
+== Adding Jolokia Spring support library
+
+Maven users can simply add this dependency to their project:
+
+[,xml,subs="attributes,verbatim"]
+----
+<dependency>
+  <groupId>org.jolokia</groupId>
+  <artifactId>jolokia-support-spring</artifactId>
+  <version>{jolokia-version}</version>
+</dependency>
+----
+
+Transitive dependencies for Jolokia core and service libraries will be automatically available.
+
+== Support for Spring Framework in Jolokia
+
+Fundamental support for integrating Jolokia with Spring Framework application is through https://docs.spring.io/spring-framework/reference/core/appendix/xml-custom.html[XML Schema Authoring,role=externalLink,window=_blank].
+
+Using custom XML Schema https://jolokia.org/jolokia-config.xsd[available here] we can author Spring XML configuration files where Jolokia agent can easily be declared.
+
+Here's an example Spring XML configuration which starts `org.jolokia.support.spring.SpringJolokiaAgent` (an extension of xref:agents/jvm.adoc[Jolokia JVM Agent]'s `org.jolokia.jvmagent.JolokiaServer`). This agent
+uses JDK's own HTTP Server which comes with OpenJDK/Oracle JVMs (Version 1.6 or later).
+
+[,xml]
+----
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jolokia="http://www.jolokia.org/jolokia-spring/schema/config"
+       xsi:schemaLocation="
+           http://www.springframework.org/schema/beans
+           https://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.jolokia.org/jolokia-spring/schema/config
+           https://www.jolokia.org/jolokia-config.xsd">
+
+  <jolokia:agent lookupConfig="false" systemPropertiesMode="never">
+    <jolokia:config autoStart="true" host="0.0.0.0" port="8778" .... />
+  </jolokia:agent>
+
+</beans>
+----
+
+.IDE support
+****
+With a decent IDE like IntelliJ IDEA you get completion support
+on the configuration attributes so it can be easily determined
+which configuration options are available. Even better, there is also
+some documentation for each attribute (e.g. by using "Quick
+documentation" with CTRL-Q in IDEA).
+****
+
+Just in case you don't want to use the Jolokia Spring namespace you can also
+use plain beans to configure a JVM agent. The following examples shows the example above with
+only base Spring bean configurations (including an Spring EL expression):
+
+[,xml]
+----
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="
+           http://www.springframework.org/schema/beans
+           https://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/context
+           https://www.springframework.org/schema/context/spring-context.xsd
+           http://www.springframework.org/schema/util
+           https://www.springframework.org/schema/util/spring-util.xsd">
+
+  <util:map id="configuration">
+    <entry key="jmx.jolokiaPort" value="8778"/>
+  </util:map>
+
+  <bean name="server" id="jolokia" class="org.jolokia.support.spring.SpringJolokiaAgent">
+    <property name="lookupConfig" value="false"/>
+    <property name="systemPropertiesMode" value="never"/>
+    <property name="config">
+      <bean class="org.jolokia.support.spring.SpringJolokiaConfigHolder">
+        <property name="config">
+          <util:map>
+            <entry key="autoStart" value="true"/>
+            <entry key="host" value="0.0.0.0"/>
+            <entry key="port" value="#{configuration['jmx.jolokiaPort']}"/>
+          </util:map>
+        </property>
+      </bean>
+    </property>
+  </bean>
+
+</beans>
+----
+
+This style is not recommended, as Jolokia configuration namespace is much easier to read.
+
+Jolokia custom XML Schema supports few top-level elements which are described next.
+
+An example of application based on pure Spring Framework is available at `examples/spring` in https://github.com/jolokia/jolokia[Jolokia GitHub repository,role=externalLink,window=_blank].
+
+=== `<jolokia:agent>`
+
+`<jolokia:agent>` declares a Jolokia server with a configuration as defined in an embedded `<jolokia:config>` configuration section.
+
+Supported attributes are:
+
+[cols="15,~,15"]
+|===
+|Name|Description|Default value
+
+|`lookupConfig`
+|If set to `true`, Spring's application context is searched for additional beans of `org.jolokia.support.spring.SpringJolokiaConfigHolder` class (declared either directly or using `<jolokia:config>`) that are used to configure the agent.
+|`false`
+
+|`lookupServices`
+|If set to `true`, Spring's application context is searched for additional beans of `org.jolokia.server.core.service.api.JolokiaService`. These beans are added to Jolokia internal context as services used by the Agent.
+|`false`
+
+|`systemPropertiesMode`
+a|Specifies how system properties with `jolokia.` prefix (the prefix is then stripped) affect Jolokia Agent configuration. There are three modes available:
+
+* `never` - No lookup is done on system properties as all. This is the default mode.
+* `fallback` - System properties with a prefix `jolokia.` are used as fallback
+configuration values if not specified locally in the
+Spring application
+context. E.g. `jolokia.port=8888` will
+change the port on which the agent is listening to 8888 if
+the port is not explicitly specified in the
+configuration.
+* `override` - System properties with a prefix
+`jolokia.` are used as configuration
+values even if they are specified locally in the Spring
+application
+context. E.g. `jolokia.port=8888` will
+change the port on which the agent is listening to 8888 in
+any case.
+|`never`
+
+|`exposeApplicationContext`
+|If set to `true`, additional `org.jolokia.support.spring.backend.SpringRequestHandler` is added to the agent, so we can invoke Spring bean operations using Jolokia protocol.
+|`false`
+|===
+
+`<jolokia:agent>` element may contain child `<jolokia:config>` element that can be used to configure the agent in-place.
+`<jolokia:config>` takes as attributes all
+the configuration parameters for the JVM agent as described in
+xref:agents/jvm.adoc#agent-jvm-config[JVM agent configuration options]. In addition, there is an extra
+attribute `autoStart` which allows for
+automatically starting the HTTP server during the initialization
+of the application context. By default this is set to
+`true`, so the server starts up automatically. `<jolokia:config>` has an
+`order` attribute, which determines the
+config merge order: The higher order configs will be merged
+later and hence will override conflicting parameters. By
+default, external config lookup is disabled.
+
+`<jolokia:log>` child element may be specified to configure one of the supported log handles used by Jolokia. These are:
+
+* `stdout` - log to standard output
+* `quiet` - don't log
+* `jul` - use `java.util.logging`
+* `slf4j` - use https://www.slf4j.org/[Simple Logging Framework for Java,role=externalLink,window=_blank], which is usually combined with Logback or Log4j2.
+* `log4j2` - use https://logging.apache.org/log4j/2.x/index.html[Apache Logging Log4j2,role=externalLink,window=_blank] directly
+* `commons` - use https://commons.apache.org/proper/commons-logging/[Apache Commons Logging,role=externalLink,window=_blank]
+
+[#jvm-spring-mbean-server]
+=== <jolokia:mbean-server>
+
+With `<jolokia:mbean-server>` the Jolokia specific
+MBeanServer can be specified. This is especially useful for
+adding it to `<context:mbean-export>`
+so that this MBeanServer is used for registering
+`@ManagedResource` and
+`@JsonMBean`. Remember, MBean registered at
+the Jolokia MBeanServer never will show up in an JSR-160 client
+except when annotated with `@JsonMBean`.
+
+See xref:jolokia_jmx.adoc[] for more information.
+
+[,xml]
+----
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jolokia="http://www.jolokia.org/jolokia-spring/schema/config"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+           http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd
+           http://www.jolokia.org/jolokia-spring/schema/config https://www.jolokia.org/jolokia-config.xsd">
+
+  <context:mbean-export server="jolokiaServer"/>
+  <jolokia:mbean-server id="jolokiaServer"/>
+
+</beans>
+----
+
+== Support for Spring Boot in Jolokia
+
+https://spring.io/projects/spring-boot[Spring Boot,role=externalLink,window=_blank] is using all functionality from Spring Framework and adds a lot of convenient programming and architecture patterns (idioms) for developers.
+
+With pure Spring Framework, we had to declare `org.jolokia.support.spring.SpringJolokiaAgent` directly or using `<jolokia:agent>` custom element. We could also use `@Configuration` and `@Bean` annotations. However Spring Boot provides several other methods to provide Jolokia functionality to your Spring application.
+
+=== Registering Agent servlet as Spring bean
+
+https://docs.spring.io/spring-boot/docs/3.2.0/reference/htmlsingle/#web.servlet.embedded-container.servlets-filters-listeners["Servlets, Filters, and Listeners",role=externalLink,window=_blank] can be registered directly as `@Bean` annotated beans and Spring Boot will register them directly into embedded servlet container.
+
+In simplest form we could use:
+
+[,java]
+----
+@Configuration
+public class AppConfig {
+
+  @Bean
+  public AgentServlet jolokia() {
+    return new AgentServlet();
+  }
+
+}
+----
+
+However without a way to specify URL mapping we may conflict with registration of Spring's own `DispatcherServlet`.
+
+This is why it's better to declare beans of `org.springframework.boot.web.servlet.ServletRegistrationBean` class:
+
+[,java]
+----
+@Configuration
+public class AppConfig {
+
+  @Bean
+  public ServletRegistrationBean<AgentServlet> jolokia() {
+    ServletRegistrationBean<AgentServlet> jolokiaServlet = new ServletRegistrationBean<>(new AgentServlet(), "/jolokia/*");
+    jolokiaServlet.setLoadOnStartup(0);
+    jolokiaServlet.setAsyncSupported(true);
+    jolokiaServlet.setInitParameters(Map.of(ConfigKey.DEBUG.getKeyValue(), "true"));
+    jolokiaServlet.setInitParameters(Map.of(ConfigKey.AGENT_DESCRIPTION.getKeyValue(), "Spring Servlet Jolokia Agent"));
+    return jolokiaServlet;
+  }
+
+}
+----
+
+This is enough for Spring Boot with `org.springframework.boot:spring-boot-starter-web` starter to register Jolokia Servlet under `/jolokia/*` mapping.
+
+An example of application using Spring Boot is available at `examples/spring-boot` in https://github.com/jolokia/jolokia[Jolokia GitHub repository,role=externalLink,window=_blank].
+
+=== Registering Agent servlet under Spring Boot actuator
+
+https://docs.spring.io/spring-boot/docs/3.2.0/reference/htmlsingle/#actuator.endpoints[Spring Boot actuator endpoints,role=externalLink,window=_blank] allow to access various controls in your application.
+
+While Spring Boot 3 removed auto-configuration of Jolokia 1 actuator endpoint (because of JakartaEE 9+ incompatibility with Jolokia 1 servlet), Jolokia 2 now provides own auto-configuration in `org.jolokia:jolokia-support-spring`.
+
+With just few dependencies:
+
+[,xml,subs="attributes,verbatim"]
+----
+<dependency>
+  <groupId>org.jolokia</groupId>
+  <artifactId>jolokia-support-spring</artifactId>
+  <version>{jolokia-version}</version>
+</dependency>
+
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-actuator</artifactId>
+  <version>${version.spring-boot}</version>
+</dependency>
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-web</artifactId>
+  <version>${version.spring-boot}</version>
+</dependency>
+----
+
+We can run a Spring Boot application without single Jolokia bean configuration. This is entire `main()` method:
+
+[,java]
+----
+@SpringBootApplication
+public class Application {
+
+  public static void main(String[] args) {
+    SpringApplication.run(Application.class);
+  }
+
+}
+----
+
+And this is the `application.properties` configuration file:
+
+----
+server.port = 8181
+
+management.endpoint.jolokia.config.debug = true
+management.endpoint.jolokia.config.agentDescription = Jolokia Spring Boot Actuator agent
+
+management.endpoints.web.exposure.include = health, jolokia
+----
+
+Having all this, Spring Boot with actuator enabled will discover Jolokia own auto-configuration.
+Because https://docs.spring.io/spring-boot/docs/3.2.0/reference/htmlsingle/#actuator.endpoints.exposing[Jolokia is properly exposed,role=externalLink,window=_blank], we may now access Jolokia Agent using `\http://localhost:8181/actuator/jolokia` URL:
+
+[,subs="attributes,verbatim"]
+----
+$ curl -s 'http://localhost:8181/actuator/jolokia' | jq .
+{
+  "request": {
+    "type": "version"
+  },
+  "value": {
+    "agent": "{jolokia-version}",
+    "protocol": "7.2",
+    "details": {
+      "agent_version": "{jolokia-version}",
+      "agent_id": "192.168.0.221-91398-4ee6c0f5-servlet",
+      "agent_description": "Jolokia Spring Boot Actuator agent",
+      "secured": false,
+      "url": "http://192.168.0.221:8181/actuator/jolokia"
+    },
+    "id": "192.168.0.221-91398-4ee6c0f5-servlet",
+    "config": {
+      "agentId": "192.168.0.221-91398-4ee6c0f5-servlet",
+      "debug": "true",
+      "agentDescription": "Jolokia Spring Boot Actuator agent"
+    },
+    "info": {
+      "proxy": {},
+      "jmx": {}
+    }
+  },
+  "status": 200,
+  "timestamp": 1702653722
+}
+----
+
+`/jolokia` actuator is listed under http://localhost:8181/actuator:
+
+image::jolokia-endpoints-json.png[]
+
+What's more, with IDE support, Jolokia configuration properties are suggested:
+
+image::jolokia-actuator-endpoint.png[]
+
+An example of application using Spring Boot and its actuator features is available at `examples/spring-boot-actuator` in https://github.com/jolokia/jolokia[Jolokia GitHub repository,role=externalLink,window=_blank].

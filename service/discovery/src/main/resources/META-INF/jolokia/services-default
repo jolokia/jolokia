@@ -1,0 +1,4 @@
+# ============================================
+# Discovery Listener and MBean registration
+org.jolokia.service.discovery.JolokiaDiscovery
+org.jolokia.service.discovery.DiscoveryMulticastResponder

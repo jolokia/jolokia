@@ -16,43 +16,22 @@
   -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>jolokia-test-util</artifactId>
-  <version>1.7.3-SNAPSHOT</version>
+  <artifactId>jolokia-tools-test</artifactId>
+  <version>2.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
-  <name>jolokia-test-util</name>
-  <description>test utility classes</description>
 
-  <url>http://www.jolokia.org/jolokia-parent/jolokia-test-util/</url>
+  <name>jolokia-tools-test</name>
+  <description>Jolokia :: Tools :: Test utilities</description>
 
   <parent>
     <groupId>org.jolokia</groupId>
-    <artifactId>jolokia</artifactId>
-    <version>1.7.3-SNAPSHOT</version>
+    <artifactId>jolokia-parent</artifactId>
+    <version>2.0.1-SNAPSHOT</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.testng</groupId>
-      <artifactId>testng</artifactId>
-      <scope>compile</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.easymock</groupId>
-      <artifactId>easymock</artifactId>
-      <scope>compile</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
-      <scope>provided</scope>
-    </dependency>
-
-  </dependencies>
+  <url>https://jolokia.org/</url>
 
 </project>

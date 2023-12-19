@@ -1,0 +1,165 @@
+////
+  Copyright 2009-2023 Roland Huss
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+
+== Jolokia {jolokia-version}
+
+Jolokia can be
+downloaded in two variants: As a binary release including the
+agents, client libraries and the reference manual. The source release contains the complete source
+tree mirroring the repository at
+https://github.com/jolokia/jolokia[GitHub,role=externalLink,window=_blank].
+
+* *jolokia-{jolokia-version}-bin* (
+https://github.com/jolokia/jolokia/releases/download/v{jolokia-version}/jolokia-{jolokia-version}-bin.tar.gz[tar.gz,role=externalLink,window=_blank] |
+https://github.com/jolokia/jolokia/releases/download/v{jolokia-version}/jolokia-{jolokia-version}-bin.zip[zip,role=externalLink,window=_blank])
+* *jolokia-{jolokia-version}-source* (
+https://github.com/jolokia/jolokia/releases/download/v{jolokia-version}/jolokia-{jolokia-version}-source.tar.gz[tar.gz,role=externalLink,window=_blank] |
+https://github.com/jolokia/jolokia/releases/download/v{jolokia-version}/jolokia-{jolokia-version}-source.zip[zip,role=externalLink,window=_blank])
+
+The agents and the client library can be downloaded directly
+from Maven Central:
+
+[%header,cols=2*,role=bodyTable]
+|===
+|Artifact
+|Download
+
+|WAR-Agent
+|https://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-agent-war/{jolokia-version}/jolokia-agent-war-{jolokia-version}.war[jolokia-agent-war-{jolokia-version}.war,role=externalLink,window=_blank]
+
+|WAR-Agent (unsecured)
+|https://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-agent-war-unsecured/{jolokia-version}/jolokia-agent-war-unsecured-{jolokia-version}.war[jolokia-agent-war-unsecured-{jolokia-version}.war,role=externalLink,window=_blank]
+
+|Osgi-Agent
+|https://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-agent-osgi/{jolokia-version}/jolokia-agent-osgi-{jolokia-version}.jar[jolokia-agent-osgi-{jolokia-version}.jar,role=externalLink,window=_blank]
+
+|JVM-Agent
+|https://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-agent-jvm/{jolokia-version}/jolokia-agent-jvm-{jolokia-version}-javaagent.jar[jolokia-jvm-{jolokia-version}-javaagent.jar,role=externalLink,window=_blank]
+
+|Java Client Library
+|https://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-client-java/{jolokia-version}/jolokia-client-java-{jolokia-version}.jar[jolokia-client-java-{jolokia-version}.jar,role=externalLink,window=_blank]
+
+|Jolokia JSR-160 JMX Adapter
+|https://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-client-jmx-adapter/{jolokia-version}/jolokia-client-jmx-adapter-{jolokia-version}.jar[jolokia-client-jmx-adapter-{jolokia-version}.jar,role=externalLink,window=_blank]
+
+|Jolokia JSR-160 JMX Adapter Kubernetes Extension
+|https://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-client-kubernetes/{jolokia-version}/jolokia-client-kubernetes-{jolokia-version}.jar[jolokia-client-kubernetes-{jolokia-version}.jar,role=externalLink,window=_blank]
+|===
+
+=== JavaScript Library
+
+The Jolokia JavaScript client library comes in two variants:
+`jolokia.js` contains the basics and can be used
+with its `request()` for sending JSON
+requests. `jolokia-simple.js` adds on this code
+and provides a simplified API for Jolokia request, but is
+slightly less powerful. Finally,
+`jolokia-cubism.js` contains the Jolokia
+https://square.github.com/cubism/[Cubism,role=externalLink,window=_blank] integration which adds Jolokia as a data
+source. The `-min` versions are
+compressed with all documentation stripped off and
+recommended for production use.
+
+[%header,cols=2*,role=bodyTable]
+|===
+|Script
+|Download
+
+|Base script
+|https://github.com/jolokia/jolokia/releases/download/v{jolokia-version}/jolokia.js[jolokia.js,role=externalLink,window=_blank]
+
+|Base script, compressed
+|https://github.com/jolokia/jolokia/releases/download/v{jolokia-version}/jolokia-min.js[jolokia-min.js,role=externalLink,window=_blank]
+
+|Simplified API
+|https://github.com/jolokia/jolokia/releases/download/v{jolokia-version}/jolokia-simple.js[jolokia-simple.js,role=externalLink,window=_blank]
+
+|Simplified API, compressed
+|https://github.com/jolokia/jolokia/releases/download/v{jolokia-version}/jolokia-simple-min.js[jolokia-simple-min.js,role=externalLink,window=_blank]
+
+|Jolokia Cubism Integration
+|https://github.com/jolokia/jolokia/releases/download/v{jolokia-version}/jolokia-cubism.js[jolokia-cubism.js,role=externalLink,window=_blank]
+
+|Jolokia Cubism Integration, compressed
+|https://github.com/jolokia/jolokia/releases/download/v{jolokia-version}/jolokia-cubism-min.js[jolokia-cubism-min.js,role=externalLink,window=_blank]
+|===
+
+Jolokia JavaScript library is also available in https://www.npmjs.com/package/jolokia.js[NPM Registry,role=externalLink,window=_blank]. In your project you just need to use `npm` or `yarn`
+
+[source,bash,subs="attributes,verbatim"]
+----
+$ npm i jolokia.js
+
+added 2 packages in 361ms
+
+$ npm list
+my-project@ ~/projects/my-project
+└── jolokia.js@{jolokia-version}
+----
+
+=== Maven
+
+[NOTE]
+====
+*Jolokia 2.0*: In Jolokia 2.0 the functionality has been split into multiple modules, so that you need to declare those modules separately as dependencies. Including only `jolokia-server-core.jar` is usually not good enough.
+====
+
+The main agent functionality is encapsulated in a `jolokia-server-core` jar:
+
+[source,xml,subs="attributes,verbatim"]
+----
+<dependency>
+    <groupId>org.jolokia</groupId>
+    <artifactId>jolokia-server-core</artifactId>
+    <version>{jolokia-version}</version>
+</dependency>
+----
+
+This jar contains the pluggable core Jolokia functionality that includes HTTP request handling and basic workflow. However what is also needed is:
+
+* support for actual JMX operations (read, exec, search) on detected MBean Servers
+* JSON serialization
+
+While Jolokia 1.x contained this important functionality within `jolokia-core.jar`, in Jolokia 2.0, two additional libraries are needed:
+[,xml,subs="attributes,verbatim"]
+----
+<dependency>
+    <groupId>org.jolokia</groupId>
+    <artifactId>jolokia-service-jmx</artifactId>
+    <version>{jolokia-version}</version>
+</dependency>
+<dependency>
+    <groupId>org.jolokia</groupId>
+    <artifactId>jolokia-service-serializer</artifactId>
+    <version>{jolokia-version}</version>
+</dependency>
+----
+
+Java client library can also be used as a Maven dependency:
+
+[source,xml,subs="attributes,verbatim"]
+----
+<dependency>
+    <groupId>org.jolokia</groupId>
+    <artifactId>jolokia-client-java</artifactId>
+    <version>{jolokia-version}</version>
+</dependency>
+----
+
+More information about available Jolokia modules can be found on xref:libraries.adoc[Libraries page].
+
+The released Jolokia artifacts are available from
+https://search.maven.org/[Maven Central,role=externalLink,window=_blank].

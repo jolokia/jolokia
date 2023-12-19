@@ -1,0 +1,356 @@
+////
+  Copyright 2009-2023 Roland Huss
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+[#security]
+= Security
+
+Security in JSR-160 remoting is an all-or-nothing option. Either
+all or none of your MBeans are accessible (except when your application server
+uses a SecurityManager, but that is not often the case). Jolokia, on
+the other hand, allows for fine grained security defined in an
+XML security policy file. It allows for access restrictions on
+MBean names (or patterns), attributes, operations, source IP
+address (or a subnet) and type of Jolokia operation.
+
+[#security-policy]
+== Policy based security
+
+Access to MBean and to the Jolokia agents in general can be
+restricted with an XML policy file. This policy can be configured
+for various parameters and is divided into several sections.
+
+=== IP based restrictions
+
+Overall access can be granted based on the IP address of an
+HTTP client. These restrictions are
+specified within a `<remote>` section,
+which contains one or more `<host>`
+elements. The source can be given either as an IP address,
+a host name, or a netmask given in
+https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing[CIDR format,role=externalLink,window=_blank]
+(e.g. `10.0.0.0/16` for all clients coming from the 10.0
+network). The following allows access from localhost and all
+clients whose IP addresses start with "10.0". For all other
+IP addresses access is denied.
+
+[,xml]
+----
+<remote>
+  <host>localhost</host>
+  <host>10.0.0.0/16</host>
+</remote>
+----
+
+=== Commands
+
+This section specifies the Jolokia commands for which access
+is generally granted. For each command in the list, access can
+be further restricted within the
+`<deny>` part and each command
+missing in the list, which is forbidden globally, can be
+selectively enabled for certain MBeans in the
+`<allow>` section. If the
+`<commands>` section is missing
+completely, access to all commands is allowed.
+
+All Jolokia commands described in
+xref:jolokia_protocol.adoc[] can be used in this section:
+
+read:: Reading of MBean attributes
+write:: Setting of MBean attributes
+exec:: Execution of JMX operations
+list:: List the available MBeans along with their supported
+search:: Searching for MBeans
+notification:: #New in Jolokia 2# Subscribing to and receiving notifications
+version:: Getting version and server information
+
+In the following example, access is granted to the
+`read`, `list`,
+`search` and `version` command, but
+not to `write`, `notification` and `exec`
+operations.
+
+[,xml]
+----
+<commands>
+  <command>read</command>
+  <command>list</command>
+  <command>version</command>
+  <command>search</command>
+</commands>
+----
+
+=== Allow and deny access to certain MBeans
+
+Within an `<allow>` section, access
+to MBeans can be granted regardless of the
+operations specified in the
+`<commands>` section. The reverse is
+true for the `<deny>` section: It
+rejects access to the MBeans specified here. Both sections
+contain one or more `<mbean>`
+elements which have a format like:
+
+[,xml]
+----
+<mbean>
+  <name>java.lang:type=Memory</name>
+  <attribute>*Memory*</attribute>
+  <attribute mode="read">Verbose</attribute>
+  <operation>gc</operation>
+</mbean>
+----
+
+Within the `<name>` section the name
+of the MBean is specified. This can be either a complete
+ObjectName or a MBean pattern containing wildcards. The
+value given here must conform to the JMX specification for a
+valid `ObjectName`. On this MBean (or
+_MBeans_ if `name` is a pattern),
+attributes are specified within one or more
+`<attribute>` elements and operations
+within one or more `<operation>`
+elements. The content can also be a pattern, which uses a wildcard
+`\*`. e.g. `<attribute>*</attribute>`
+specifies all attributes on the given MBean. If for an
+`<attribute>` element the XML
+attribute `mode="read"` is given, then this
+attribute can be accessed only read-only.
+
+=== HTTP method restrictions
+
+Finally, access can be restricted based on the HTTP method
+with which an Jolokia request was received with the
+`<http>` element. Method allowed
+(`post` or `get`) are
+specified with an `<method>` inner
+element. The following example restricts the access to POST
+requests only:
+
+[,xml]
+----
+<http>
+  <method>post</method>
+</http>
+----
+
+It the `<http>` section is missing
+completely, any HTTP method can be used.
+
+=== Cross-Origin Resource Sharing (CORS) restrictions
+
+Jolokia (since version 1.0.3) supports the W3C specification
+for https://www.w3.org/TR/cors/[Cross-Origin
+Resource Sharing,role=externalLink,window=_blank] (also known as "CORS") which allows
+browser to access resources which are located on a different
+server than the calling script is loaded from. This
+specification provides a controlled way to come around the
+_same origin policy_. Most
+https://caniuse.com/#search=CORS[contemporary
+browsers,role=externalLink,window=_blank] support CORS.
+
+By default Jolokia allows cross origin access from any
+host. This can be limited to certain hosts by using
+`<allow-origin>` sections within a
+`<cors>` sections. This tags can
+contain the origin URL provided by browsers with the
+`Origin:` header literally or a
+wildcard specification with `*`.
+
+[,xml]
+----
+<cors>
+  <!-- Allow cross origin access from www.jolokia.org ... -->
+  <allow-origin>https://www.jolokia.org</allow-origin>
+
+  <!-- ... and all servers from jmx4perl.org with any protocol -->
+  <allow-origin>*://*.jmx4perl.org</allow-origin>
+
+  <!-- Check for the proper origin on the server side, too -->
+  <strict-checking/>
+</cors>
+----
+
+If the option `<strict-checking/>` is given in this section, too, then the given patterns
+are not only used for CORS checking but also every request is checked on the server side whether the
+`Origin:` or `Referer:` header matches one of the given patterns.
+If neither `Origin:` nor `Referer:` is given and strict checking is enabled, then the access is denied. This useful for protecting against Cross-Site Request Forgery.
+
+Please note that `<strict-checking/>` might not be good enough because of potential
+browser bugs which could allow to forge the origin header. Examples of these issues are
+https://blog.bentkowski.info/2018/06/setting-arbitrary-request-headers-in.html[arbitrary header injection,role=externalLink,window=_blank]
+or https://www.brokenbrowser.com/referer-spoofing-defeating-xss-filter/[referer and origin
+spoofing,role=externalLink,window=_blank]. User facing application which uses Jolokia has backend should consider to implement
+additional measures like using the
+https://tools.ietf.org/html/draft-west-first-party-cookies-07[same-site,role=externalLink,window=_blank] flag
+on the session cookie.
+
+=== Example for a security policy
+
+The following complete example applies various access
+restrictions:
+
+* Access is only allowed for clients coming from localhost
+* Only HTTP Post requests are allowed
+* By default, only `read` and `list` requests are allowed.
+* A single `exec` request is allowed for triggering garbage collection.
+* Read access to the C3P0 connection pool is restricted to
+forbid fetching the pool's properties, which in fact
+contains the DB password as clear text.
+* Access to `jdk.management.jfr:type=FlightRecorder` MBean is denied (see https://nvd.nist.gov/vuln/detail/CVE-2022-41678[CVE-2022-41678,role=externalLink,window=_blank])
+
+[,xml]
+----
+<?xml version="1.0" encoding="utf-8"?>
+<restrict>
+
+  <remote>
+    <host>127.0.0.1</host>
+  </remote>
+
+  <http>
+    <method>post</method>
+  </http>
+
+  <commands>
+    <command>read</command>
+    <command>list</command>
+  </commands>
+
+  <allow>
+    <mbean>
+      <name>java.lang:type=Memory</name>
+      <operation>gc</operation>
+    </mbean>
+  </allow>
+
+  <deny>
+    <mbean>
+      <name>com.mchange.v2.c3p0:type=PooledDataSource,*</name>
+      <attribute>properties</attribute>
+    </mbean>
+    <mbean>
+      <name>jdk.management.jfr:type=FlightRecorder</name>
+      <attribute>*</attribute>
+      <operation>*</operation>
+    </mbean>
+  </deny>
+
+</restrict>
+----
+
+[#security-policy-location]
+=== Policy Location
+
+****
+A great tool which helps in repackaging an agent for
+inclusion of a `jolokia-access.xml`
+policy file
+is the command line tool
+https://search.cpan.org/~roland/jmx4perl/scripts/jolokia[jolokia,role=externalLink,window=_blank],
+which comes with the
+https://metacpan.org/dist/jmx4perl[jmx4perl,role=externalLink,window=_blank] distribution.
+****
+
+But how do the agents lookup the policy file? By default,
+the agents will lookup for a policy file top-level in the
+classpath under the name
+`jolokia-access.xml`. Hence for the war
+agent, the policy file must be packaged within the war at
+`WEB-INF/classes/jolokia-access.xml`, for
+all other agents at
+`/jolokia-access.xml`. The location can
+be overwritten with the configuration parameter
+`policyLocation`, which has to be set
+differently depending on the agent type. Please refer to
+xref:agents.adoc[] for more details. The value of this
+init parameter can be any URL which can loaded by the JVM. A
+special case is an URL with the scheme
+`classpath:` which results in a lookup of
+the policy file within the classpath. As stated above, the
+default value of this parameter is
+`classpath:/jolokia-access.xml`. If a
+non-classpath URL is provided with this parameter, and the
+target policy file could not be found then access is
+completely denied. If a classpath lookup fails then access
+is globally granted and a warning is given on standard
+output.
+
+The parameter specified with `policyLocation` can contain placeholders:
+
+* `$ip`: IP - Address
+* `$host`: Host - Address
+* `${prop:foo}`: System property _foo_
+* `${env:FOO}`: Environment variable _FOO_
+
+[#security-restrictor]
+== Jolokia Restrictors
+
+In order to provide fine grained security, Jolokia is using the
+abstract concept of an _Restrictor_. It is
+represented by the Java interface
+`org.jolokia.server.core.service.api.Restrictor` and
+comes with several implementations. The most prominent one is
+the `PolicyRestrictor` which is described
+in <<security-policy>>. This is also the
+restrictor which is active by default. For special needs, it is
+possible to provide a custom implementation of this
+interface for the WAR and OSGi agents. It is recommended to
+subclass either
+`org.jolokia.server.core.restrictor.AllowAllRestrictor`
+or
+`org.jolokia.server.core.restrictor.DenyAllRestrictor`.
+
+For the WAR agent (xref:agents.adoc#agents-war[Jakarta EE Agent (WAR)]), a subclass
+of `org.jolokia.server.core.http.AgentServlet` should
+be created which overrides the
+`createRestrictor()`
+
+[,java]
+----
+public class RestrictedAgentServlet extends AgentServlet {
+
+  @Override
+  protected Restrictor createRestrictor(Configuration pConfig, LogHandler pLogHandler) {
+    String policyLocation = pConfig.getConfig(ConfigKey.POLICY_LOCATION);
+    return new MyOwnRestrictor(policyLocation, ...);
+  }
+
+}
+----
+
+`pConfig` is a configuration object from which we can get a URL pointing to the
+policy file, which is either the default value
+`classpath:/jolokia-access.xml` or the
+value specified with the init parameter
+`policyLocation`. This servlet can then be
+easily configured in a custom `web.xml`
+the same way as the Jolokia WAR agent.
+
+For programmatic usage there is an even simpler way:
+`AgentServlet` provides a constructor
+which takes an restrictor as argument, so no subclassing is
+required in this case.
+
+For an OSGi agent (xref:agents.adoc#agents-osgi[OSGi Agents]),
+`org.jolokia.server.core.osgi.OsgiAgentServlet`
+is the proper extension point. It can be subclassed the same
+way as shown above and allows a restrictor implementation as
+constructor parameter, too. In contrast to
+`AgentServlet` this class is also OSGi
+exported and can be referenced from other
+bundles. Additionally, the OSGi agent can also pick up a
+restrictor as an OSGi service. See
+xref:agents.adoc#agents-osgi[OSGi Agents] for details.

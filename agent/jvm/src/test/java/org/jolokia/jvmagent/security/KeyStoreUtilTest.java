@@ -15,26 +15,38 @@ package org.jolokia.jvmagent.security;/*
  * limitations under the License.
  */
 
-import java.io.*;
-import java.security.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.LineNumberReader;
+import java.security.InvalidKeyException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SignatureException;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Objects;
 
-import org.jolokia.Version;
+import org.jolokia.server.core.Version;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 /**
  * @author roland
@@ -74,7 +86,7 @@ public class KeyStoreUtilTest {
 
         List<String> aliases = asList(keystore.aliases());
         assertEquals(aliases.size(), 3);
-        Map<String, String> expectedAliases = new HashMap<String, String>();
+        Map<String, String> expectedAliases = new HashMap<>();
         expectedAliases.put("cn=ca.test.jolokia.org,c=de,st=bavaria,l=pegnitz,1.2.840.113549.1.9.1=#1612726f6c616e64406a6f6c6f6b69612e6f7267,ou=dev,o=jolokia|9531696871831421790", "ca.test.jolokia.org");
         expectedAliases.put("cn=another.test.jolokia.org,ou=jolokia,o=jolokia,l=pegnitz,st=bavaria,c=us|167767600", "another.test.jolokia.org");
         expectedAliases.put("cn=another.test.jolokia.org,ou=jolokia,o=jolokia,l=pegnitz,st=bavaria,c=us|42", "another.test.jolokia.org");
@@ -132,7 +144,7 @@ public class KeyStoreUtilTest {
     }
 
     @Test
-    public void testInvalid() throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, InvalidKeySpecException {
+    public void testInvalid() throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException {
 
         for (String file : new String[]{"invalid/base64.pem", "invalid/begin.pem", "invalid/end.pem"}) {
             File invalidPem = getTempFile(file);
@@ -141,12 +153,12 @@ public class KeyStoreUtilTest {
             try {
                 KeyStoreUtil.updateWithCaPem(keystore, invalidPem);
                 fail();
-            } catch (Exception exp) {
+            } catch (Exception ignored) {
             }
             try {
                 KeyStoreUtil.updateWithServerPems(keystore, getTempFile("server/cert.pem"), invalidPem, "RSA", new char[0]);
                 fail();
-            } catch (Exception exp) {
+            } catch (Exception ignored) {
             }
         }
     }
@@ -154,6 +166,12 @@ public class KeyStoreUtilTest {
     @Test
     public void testSelfSignedCertificate() throws Exception {
         KeyStore keystore = createKeyStore();
+        long millis = System.currentTimeMillis();
+        updateKeyStoreWithSelfSignedCert(keystore);
+        System.out.printf("SelfSigned Cert: Duration = %d ms%n", System.currentTimeMillis() - millis);
+    }
+
+    private void updateKeyStoreWithSelfSignedCert(KeyStore keystore) throws NoSuchAlgorithmException, KeyStoreException {
         KeyStoreUtil.updateWithSelfSignedServerCertificate(keystore);
         X509Certificate cert = (X509Certificate) keystore.getCertificate("jolokia-agent");
         assertNotNull(cert);
@@ -172,22 +190,17 @@ public class KeyStoreUtilTest {
     private File getTempFile(String path) throws IOException {
         InputStream is = this.getClass().getResourceAsStream("/certs/" + path);
         File dest = File.createTempFile("cert-", "pem");
-        LineNumberReader reader = new LineNumberReader(new InputStreamReader(is));
-        FileWriter writer = new FileWriter(dest);
-        try {
+        try (LineNumberReader reader = new LineNumberReader(new InputStreamReader(Objects.requireNonNull(is))); FileWriter writer = new FileWriter(dest)) {
             String line;
             while ((line = reader.readLine()) != null) {
                 writer.write(line + "\n");
             }
             return dest;
-        } finally {
-            writer.close();
-            reader.close();
         }
     }
 
     private List<String> asList(Enumeration<String> enumeration) {
-        List<String> ret = new ArrayList<String>();
+        List<String> ret = new ArrayList<>();
         while (enumeration.hasMoreElements()) {
             ret.add(enumeration.nextElement());
         }

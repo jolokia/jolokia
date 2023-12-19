@@ -17,24 +17,38 @@ package org.jolokia.jvmagent.handler;
  */
 
 import java.io.*;
+import java.lang.reflect.Field;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import javax.management.MalformedObjectNameException;
 
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import org.easymock.EasyMock;
-import org.jolokia.config.ConfigKey;
-import org.jolokia.config.Configuration;
-import org.jolokia.restrictor.*;
-import org.jolokia.util.LogHandler;
+import org.jolokia.server.core.backend.BackendManager;
+import org.jolokia.server.core.backend.RequestDispatcher;
+import org.jolokia.server.core.config.ConfigKey;
+import org.jolokia.server.core.http.HttpRequestHandler;
+import org.jolokia.server.core.request.JolokiaRequestBuilder;
+import org.jolokia.server.core.service.api.JolokiaContext;
+import org.jolokia.server.core.service.serializer.Serializer;
+import org.jolokia.server.core.util.*;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.testng.annotations.*;
 
-import static org.easymock.EasyMock.*;
-import static org.testng.Assert.*;
+import static org.easymock.EasyMock.anyInt;
+import static org.easymock.EasyMock.anyLong;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author roland
@@ -43,17 +57,39 @@ import static org.testng.Assert.*;
 public class JolokiaHttpHandlerTest {
 
     private JolokiaHttpHandler handler;
+    private RequestDispatcher requestDispatcher;
 
 
     @BeforeMethod
-    public void setup() {
-        handler = new JolokiaHttpHandler(getConfig());
-        handler.start(false);
+    public void setup() throws MalformedObjectNameException, NoSuchFieldException, IllegalAccessException {
+        TestJolokiaContext ctx = getContext();
+        requestDispatcher = new TestRequestDispatcher.Builder()
+                .request(new JolokiaRequestBuilder(RequestType.READ, "java.lang:type=Memory").attribute("HeapMemoryUsage").build())
+                .andReturnMapValue("used",4711L).build();
+        handler = new JolokiaHttpHandler(ctx);
+        // Not optimal since diving into internal, but the overall test is not very
+        // optimal.
+        injectRequestDispatcher(handler,requestDispatcher);
+    }
+
+    // Quick fix for replacing the request dispatcher
+    private void injectRequestDispatcher(JolokiaHttpHandler pHandler, RequestDispatcher pRequestDispatcher) throws NoSuchFieldException, IllegalAccessException {
+        Field field = pHandler.getClass().getDeclaredField("requestHandler");
+        field.setAccessible(true);
+        HttpRequestHandler rHandler = (HttpRequestHandler) field.get(pHandler);
+        field = HttpRequestHandler.class.getDeclaredField("backendManager");
+        field.setAccessible(true);
+        BackendManager bManager = (BackendManager) field.get(rHandler);
+        field = BackendManager.class.getDeclaredField("requestDispatcher");
+        field.setAccessible(true);
+        field.set(bManager,pRequestDispatcher);
     }
 
     @AfterMethod
     public void tearDown() {
-        handler.stop();
+        if (handler != null) {
+            handler = null;
+        }
     }
 
     @Test
@@ -64,12 +100,12 @@ public class JolokiaHttpHandlerTest {
         expect(exchange.getRequestMethod()).andReturn("GET");
 
         Headers header = new Headers();
-        ByteArrayOutputStream out = prepareResponse(handler, exchange, header);
+        ByteArrayOutputStream out = prepareResponse(exchange, header);
 
-        handler.doHandle(exchange);
+        handler.handle(exchange);
 
         assertEquals(header.getFirst("content-type"),"text/javascript; charset=utf-8");
-        String result = out.toString("utf-8");
+        String result = out.toString(StandardCharsets.UTF_8);
         assertTrue(result.endsWith("});"));
         assertTrue(result.startsWith("data({"));
     }
@@ -92,9 +128,9 @@ public class JolokiaHttpHandlerTest {
         expect(exchange.getRequestMethod()).andReturn("GET");
 
         Headers header = new Headers();
-        ByteArrayOutputStream out = prepareResponse(handler, exchange, header);
+        ByteArrayOutputStream out = prepareResponse(exchange, header);
 
-        handler.doHandle(exchange);
+        handler.handle(exchange);
 
         assertEquals(header.getFirst("content-type"),expected + "; charset=utf-8");
     }
@@ -110,8 +146,10 @@ public class JolokiaHttpHandlerTest {
     }
 
     private void checkInvalidCallback(boolean streaming) throws URISyntaxException, IOException, ParseException {
-        JolokiaHttpHandler handler = new JolokiaHttpHandler(getConfig(ConfigKey.SERIALIZE_EXCEPTION, Boolean.toString(streaming)));
-        handler.start(false);
+        JolokiaContext ctx = new TestJolokiaContext.Builder()
+            .config(ConfigKey.SERIALIZE_EXCEPTION, Boolean.toString(streaming))
+            .build();
+        JolokiaHttpHandler handler = new JolokiaHttpHandler(ctx);
 
         HttpExchange exchange = prepareExchange("http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage?callback=evilCallback();data");
 
@@ -119,19 +157,16 @@ public class JolokiaHttpHandlerTest {
         expect(exchange.getRequestMethod()).andReturn("GET");
 
         Headers header = new Headers();
-        ByteArrayOutputStream out = prepareResponse(handler, exchange, header);
-
-        handler.doHandle(exchange);
+        ByteArrayOutputStream out = prepareResponse(exchange, header);
+        handler.handle(exchange);
 
         assertEquals(header.getFirst("content-type"),"text/plain; charset=utf-8");
-        String result = out.toString("utf-8");
+        String result = out.toString(StandardCharsets.UTF_8);
         JSONObject resp = (JSONObject) new JSONParser().parse(result);
         assertTrue(resp.containsKey("error"));
         assertEquals(resp.get("error_type"), IllegalArgumentException.class.getName());
         assertTrue(((String) resp.get("error")).contains("callback"));
         assertFalse(((String) resp.get("error")).contains("evilCallback"));
-
-        handler.stop();
     }
 
 
@@ -144,12 +179,12 @@ public class JolokiaHttpHandlerTest {
 
         prepareMemoryPostReadRequest(exchange);
         Headers header = new Headers();
-        ByteArrayOutputStream out = prepareResponse(handler, exchange, header);
+        ByteArrayOutputStream out = prepareResponse(exchange, header);
 
-        handler.doHandle(exchange);
+        handler.handle(exchange);
 
         assertEquals(header.getFirst("content-type"),"text/javascript; charset=utf-8");
-        String result = out.toString("utf-8");
+        String result = out.toString(StandardCharsets.UTF_8);
         assertTrue(result.endsWith("});"));
         assertTrue(result.startsWith("data({"));
         assertTrue(result.contains("\"used\""));
@@ -176,122 +211,13 @@ public class JolokiaHttpHandlerTest {
         // Simple GET method
         expect(exchange.getRequestMethod()).andReturn("PUT");
         Headers header = new Headers();
-        ByteArrayOutputStream out = prepareResponse(handler, exchange, header);
-        handler.doHandle(exchange);
+        ByteArrayOutputStream out = prepareResponse(exchange, header);
+        handler.handle(exchange);
 
         JSONObject resp = (JSONObject) new JSONParser().parse(out.toString());
         assertTrue(resp.containsKey("error"));
         assertEquals(resp.get("error_type"), IllegalArgumentException.class.getName());
         assertTrue(((String) resp.get("error")).contains("PUT"));
-    }
-
-    @Test(expectedExceptions = IllegalStateException.class,expectedExceptionsMessageRegExp = ".*not.*started.*")
-    public void handlerNotStarted() throws URISyntaxException, IOException {
-        JolokiaHttpHandler newHandler = new JolokiaHttpHandler(getConfig());
-        newHandler.doHandle(prepareExchange("http://localhost:8080/"));
-
-    }
-
-    @Test
-    public void customRestrictor() throws URISyntaxException, IOException, ParseException {
-        System.setProperty("jolokia.test1.policy.location","access-restrictor.xml");
-        System.setProperty("jolokia.test2.policy.location","access-restrictor");
-        for (String[] params : new String[][] {
-                {"classpath:/access-restrictor.xml","not allowed"},
-                {"file:///not-existing.xml","No access"},
-                {"classpath:/${prop:jolokia.test1.policy.location}", "not allowed"},
-                {"classpath:/${prop:jolokia.test2.policy.location}.xml", "not allowed"}
-        }) {
-            Configuration config = getConfig(ConfigKey.POLICY_LOCATION,params[0]);
-            JSONObject resp = simpleMemoryGetReadRequest(config);
-            assertTrue(resp.containsKey("error"));
-            assertTrue(((String) resp.get("error")).contains(params[1]));
-        }
-    }
-
-    @Test
-    public void customTestRestrictorTrue() throws URISyntaxException, IOException, ParseException {
-
-        Configuration config = getConfig(ConfigKey.RESTRICTOR_CLASS,  AllowAllRestrictor.class.getName());
-        JSONObject resp = simpleMemoryGetReadRequest(config);
-        assertFalse(resp.containsKey("error"));
-
-    }
-
-    @Test
-    public void customTestRestrictorFalse() throws URISyntaxException, IOException, ParseException {
-        Configuration config = getConfig(ConfigKey.RESTRICTOR_CLASS, DenyAllRestrictor.class.getName());
-        JSONObject resp = simpleMemoryGetReadRequest(config);
-        assertTrue(resp.containsKey("error"));
-        assertTrue(((String) resp.get("error")).contains("No access"));
-    }
-
-    @Test
-    public void customTestRestrictorWithConfigTrue() throws URISyntaxException, IOException, ParseException {
-        Configuration config = getConfig(
-                ConfigKey.RESTRICTOR_CLASS, TestRestrictorWithConfig.class.getName(),
-                ConfigKey.POLICY_LOCATION, "true"
-        );
-        JSONObject resp = simpleMemoryGetReadRequest(config);
-        assertFalse(resp.containsKey("error"));
-    }
-
-    @Test
-    public void customTestRestrictorWithConfigFalse() throws URISyntaxException, IOException, ParseException {
-        Configuration config = getConfig(
-                ConfigKey.RESTRICTOR_CLASS, TestRestrictorWithConfig.class.getName(),
-                ConfigKey.POLICY_LOCATION, "false"
-        );
-        JSONObject resp = simpleMemoryGetReadRequest(config);
-        assertTrue(resp.containsKey("error"));
-        assertTrue(((String) resp.get("error")).contains("No access"));
-    }
-
-    @Test
-    public void restrictorWithNoReverseDnsLookup() throws URISyntaxException, IOException, ParseException {
-        Configuration config = getConfig(
-                ConfigKey.RESTRICTOR_CLASS, TestReverseDnsLookupRestrictor.class.getName(),
-                ConfigKey.ALLOW_DNS_REVERSE_LOOKUP, "false");
-        InetSocketAddress address = new InetSocketAddress(8080);
-        TestReverseDnsLookupRestrictor.expectedRemoteHostsToCheck = new String[] { address.getAddress().getHostAddress() };
-        JSONObject resp = simpleMemoryGetReadRequest(config);
-        assertFalse(resp.containsKey("error"));
-    }
-
-    @Test
-    public void restrictorWithReverseDnsLookup() throws URISyntaxException, IOException, ParseException {
-        Configuration config = getConfig(
-                ConfigKey.RESTRICTOR_CLASS, TestReverseDnsLookupRestrictor.class.getName(),
-                ConfigKey.ALLOW_DNS_REVERSE_LOOKUP, "true");
-        InetSocketAddress address = new InetSocketAddress(8080);
-        TestReverseDnsLookupRestrictor.expectedRemoteHostsToCheck = new String[] {
-                address.getHostName(),
-                address.getAddress().getHostAddress()
-        };
-        JSONObject resp = simpleMemoryGetReadRequest(config);
-        assertFalse(resp.containsKey("error"));
-    }
-
-    @Test
-    public void customLogHandler1() throws Exception {
-        JolokiaHttpHandler handler = new JolokiaHttpHandler(getConfig(), new CustomLogHandler());
-        handler.start(false);
-        handler.stop();
-        assertTrue(CustomLogHandler.infoCount  > 0);
-    }
-
-    @Test
-    public void customLogHandler2() throws Exception {
-        CustomLogHandler.infoCount = 0;
-        JolokiaHttpHandler handler = new JolokiaHttpHandler(getConfig(ConfigKey.LOGHANDLER_CLASS,CustomLogHandler.class.getName()));
-        handler.start(false);
-        handler.stop();
-        assertTrue(CustomLogHandler.infoCount > 0);
-    }
-
-    @Test(expectedExceptions = IllegalArgumentException.class)
-    public void invalidCustomLogHandler() throws Exception {
-        new JolokiaHttpHandler(getConfig(ConfigKey.LOGHANDLER_CLASS,InvalidLogHandler.class.getName()));
     }
 
     @Test
@@ -303,17 +229,18 @@ public class JolokiaHttpHandlerTest {
 
         prepareMemoryPostReadRequest(exchange);
         Headers header = new Headers();
-        prepareResponse(handler, exchange, header);
-        handler.doHandle(exchange);
+        ByteArrayOutputStream out = prepareResponse(exchange, header);
+
+        handler.handle(exchange);
 
         assertEquals(header.getFirst("content-type"), "text/plain; charset=utf-8");
         assertEquals(header.getFirst("Access-Control-Allow-Origin"),"http://localhost:8080/");
     }
 
-    private void prepareMemoryPostReadRequest(HttpExchange pExchange) throws UnsupportedEncodingException {
+    private void prepareMemoryPostReadRequest(HttpExchange pExchange) {
         expect(pExchange.getRequestMethod()).andReturn("POST");
         String response = "{\"mbean\":\"java.lang:type=Memory\",\"attribute\":\"HeapMemoryUsage\",\"type\":\"read\"}";
-        byte[] buf = response.getBytes("utf-8");
+        byte[] buf = response.getBytes(StandardCharsets.UTF_8);
         InputStream is = new ByteArrayInputStream(buf);
         expect(pExchange.getRequestBody()).andReturn(is);
     }
@@ -326,27 +253,26 @@ public class JolokiaHttpHandlerTest {
         expect(exchange.getRequestMethod()).andReturn("OPTIONS");
 
         Headers header = new Headers();
-        ByteArrayOutputStream out = prepareResponse(handler, exchange, header);
-        handler.doHandle(exchange);
+        ByteArrayOutputStream out = prepareResponse(exchange, header);
+        handler.handle(exchange);
         assertEquals(header.getFirst("Access-Control-Allow-Origin"),"http://localhost:8080/");
         assertEquals(header.getFirst("Access-Control-Allow-Headers"),"X-Bla, X-Blub");
         assertNotNull(header.getFirst("Access-Control-Max-Age"));
     }
 
     @Test
-    public void usingStreamingJSON() throws IOException, URISyntaxException, ParseException {
-        Configuration config = getConfig(ConfigKey.STREAMING, "true");
-        JolokiaHttpHandler newHandler = new JolokiaHttpHandler(config);
-        newHandler.start(false);
+    public void usingStreamingJSON() throws IOException, URISyntaxException, ParseException, NoSuchFieldException, IllegalAccessException {
+        handler = new JolokiaHttpHandler(getContext(ConfigKey.STREAMING, "true"));
+        injectRequestDispatcher(handler,requestDispatcher);
 
-        HttpExchange exchange = prepareExchange("http://localhost:8080/jolokia/list?maxDepth=1");
+        HttpExchange exchange = prepareExchange("http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage");
         expect(exchange.getRequestMethod()).andReturn("GET");
 
         Headers header = new Headers();
-        ByteArrayOutputStream out = prepareResponse(newHandler, exchange, header);
-        newHandler.doHandle(exchange);
+        ByteArrayOutputStream out = prepareResponse(exchange, header);
+        handler.doHandle(exchange);
 
-        String result = out.toString("utf-8");
+        String result = out.toString(StandardCharsets.UTF_8);
 
         assertNull(header.getFirst("Content-Length"));
         JSONObject resp = (JSONObject) new JSONParser().parse(result);
@@ -357,11 +283,12 @@ public class JolokiaHttpHandlerTest {
         return prepareExchange(pUri,"Origin","");
     }
 
-    private HttpExchange prepareExchange(String pUri,String ... pHeaders) throws URISyntaxException {
-        HttpExchange exchange = EasyMock.createMock(HttpExchange.class);
+    static HttpExchange prepareExchange(String pUri,String ... pHeaders) throws URISyntaxException {
+        HttpExchange exchange = EasyMock.createMock(MockableHttpExchange.class);
         URI uri = new URI(pUri);
         expect(exchange.getRequestURI()).andReturn(uri);
         expect(exchange.getRemoteAddress()).andReturn(new InetSocketAddress(8080));
+        expect(exchange.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE)).andStubReturn(null);
         Headers headers = new Headers();
         expect(exchange.getRequestHeaders()).andReturn(headers).anyTimes();
         for (int i = 0; i < pHeaders.length; i += 2) {
@@ -370,23 +297,7 @@ public class JolokiaHttpHandlerTest {
         return exchange;
     }
 
-    private JSONObject simpleMemoryGetReadRequest(Configuration config) throws URISyntaxException, IOException, ParseException {
-        JolokiaHttpHandler newHandler = new JolokiaHttpHandler(config);
-        HttpExchange exchange = prepareExchange("http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage");
-        // Simple GET method
-        expect(exchange.getRequestMethod()).andReturn("GET");
-        Headers header = new Headers();
-        ByteArrayOutputStream out = prepareResponse(handler, exchange, header);
-        newHandler.start(false);
-        try {
-            newHandler.doHandle(exchange);
-        } finally {
-            newHandler.stop();
-        }
-        return (JSONObject) new JSONParser().parse(out.toString());
-    }
-
-    private ByteArrayOutputStream prepareResponse(JolokiaHttpHandler handler, HttpExchange exchange, Headers header) throws IOException {
+    static ByteArrayOutputStream prepareResponse(HttpExchange exchange, Headers header) throws IOException {
         expect(exchange.getResponseHeaders()).andReturn(header).anyTimes();
         exchange.sendResponseHeaders(anyInt(),anyLong());
 
@@ -397,60 +308,23 @@ public class JolokiaHttpHandlerTest {
     }
 
     private static boolean debugToggle = false;
-    public Configuration getConfig(Object ... extra) {
-        ArrayList list = new ArrayList();
+    public TestJolokiaContext getContext(Object... extra) {
+        List<Object> list = new ArrayList<>();
         list.add(ConfigKey.AGENT_CONTEXT);
         list.add("/jolokia");
         list.add(ConfigKey.DEBUG);
         list.add(debugToggle ? "true" : "false");
         list.add(ConfigKey.AGENT_ID);
         list.add(UUID.randomUUID().toString());
-        for (Object e : extra) {
-            list.add(e);
-        }
-        Configuration config = new Configuration(list.toArray());
+        Collections.addAll(list, extra);
         debugToggle = !debugToggle;
-        return config;
+        return new TestJolokiaContext.Builder()
+                .config(list.toArray())
+                .services(Serializer.class,new TestSerializer())
+                .build();
     }
 
-    public static class CustomLogHandler implements LogHandler {
-
-        private static int debugCount, infoCount, errorCount;
-
-        public CustomLogHandler() {
-            debugCount = 0;
-            infoCount = 0;
-            errorCount = 0;
-        }
-
-        @Override
-        public void debug(String message) {
-            debugCount++;
-        }
-
-        @Override
-        public void info(String message) {
-            infoCount++;
-        }
-
-        @Override
-        public void error(String message, Throwable t) {
-            errorCount++;
-        }
+    public abstract static class MockableHttpExchange extends HttpExchange {
     }
 
-    private class InvalidLogHandler implements LogHandler {
-
-        @Override
-        public void debug(String message) {
-        }
-
-        @Override
-        public void info(String message) {
-        }
-
-        @Override
-        public void error(String message, Throwable t) {
-        }
-    }
 }

@@ -59,13 +59,13 @@ public final class J4pReadResponse extends J4pResponse<J4pReadRequest> {
         if (mBean.isPattern()) {
             // The result value contains the list of fetched object names
             JSONObject values = getValue();
-            Set<ObjectName> ret = new HashSet<ObjectName>();
+            Set<ObjectName> ret = new HashSet<>();
             for (Object name : values.keySet()) {
                 ret.add(new ObjectName((String) name));
             }
             return ret;
         } else {
-            return Arrays.asList(mBean);
+            return List.of(mBean);
         }
     }
 
@@ -83,6 +83,7 @@ public final class J4pReadResponse extends J4pResponse<J4pReadRequest> {
         if (requestMBean.isPattern()) {
             // We need to got down one level in the returned values
             JSONObject attributes = getAttributesForObjectNameWithPatternRequest(pObjectName);
+            //noinspection unchecked
             return attributes.keySet();
         } else {
             if (pObjectName != null && !pObjectName.equals(requestMBean)) {
@@ -116,6 +117,7 @@ public final class J4pReadResponse extends J4pResponse<J4pReadRequest> {
             return request.getAttributes();
         } else {
             JSONObject attributes = getValue();
+            //noinspection unchecked
             return attributes.keySet();
         }
     }
@@ -145,9 +147,10 @@ public final class J4pReadResponse extends J4pResponse<J4pReadRequest> {
                 throw new IllegalArgumentException("No attribute " + pAttribute + " for ObjectName " + pObjectName + " returned for" +
                         " the given request");
             }
+            //noinspection unchecked
             return (V) mAttributes.get(pAttribute);
         } else {
-            return (V) getValue(pAttribute);
+            return getValue(pAttribute);
         }
     }
 
@@ -179,7 +182,7 @@ public final class J4pReadResponse extends J4pResponse<J4pReadRequest> {
                 throw new IllegalArgumentException("Given attribute " + pAttribute + " doesnt match single attribute " +
                         "given " + request.getAttribute() + " in the request");
             }
-            return (V) getValue();
+            return getValue();
         } else {
             JSONObject attributes = getValue();
             if (pAttribute == null) {
@@ -188,6 +191,7 @@ public final class J4pReadResponse extends J4pResponse<J4pReadRequest> {
             if (!attributes.containsKey(pAttribute)) {
                 throw new IllegalArgumentException("No such key " + pAttribute + " in the set of returned attribute values");
             }
+            //noinspection unchecked
             return (V) attributes.get(pAttribute);
         }
     }

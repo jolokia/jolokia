@@ -1,0 +1,141 @@
+////
+  Copyright 2009-2023 Roland Huss
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+        https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+
+== JavaScript Client Library
+
+Jolokia's JavaScript client library allows for easy access to
+the Jolokia agent from within JavaScript scripts. It
+encapsulates the JSON/HTTP access within a simple object
+layer.
+
+The JavaScript client binding provides the following features:
+
+* Synchronous and asynchronous operations
+* Support for JSONP for accessing servers other than the one
+serving the Javscript file
+* Support for all Jolokia features like bulk requests or JMX
+proxy calls
+* Simple access methods like `getAttribute` or
+`execute` in addition to a generic
+`request` method.
+
+Documentation for the JavaScript library can be found in the
+reference manual in the chapter
+link:../reference/html/manual/clients.html#client-javascript[JavaScript
+Client Library].
+
+=== Installation
+
+The Jolokia JavaScript library can be downloaded from the
+xref:../download.adoc[download page]. It is divided
+into two scripts: `jolokia.js` contains the basic
+`Jolokia` object definition which provides the
+generic `request()`
+method. `jolokia-simple.js` adds to this
+definition methods for a simplified access, which are easier
+to use but less powerful. In addition these libs require
+https://www.jquery.com[jQuery,role=externalLink,window=_blank]. A typical setup in an HTML page
+using the library looks like:
+
+[,html]
+----
+<head>
+    <script type="text/javascript" src="jquery-3.7.1.js"></script>
+    <script type="text/javascript" src="jolokia.js"></script>
+    <script type="text/javascript" src="jolokia-simple.js"></script>
+</head>
+----
+
+For production setup, the minified versions
+(e.g. `jolokia-min.js`) are recommended since the
+original are blown up with inline documentation.
+
+=== Example
+
+The following simple example shows how to fetch the used
+Heap Memory from a Jolokia agent:
+
+[source,javascript,options=nowrap]
+----
+// Create a new jolokia client accessing the agent on the same
+// Host which serves this document:
+var j4p = new Jolokia("/jolokia");
+
+// Request the memory information asynchronously and print it on the console
+j4p.request({
+        type: "read",
+        mbean: "java.lang:type=Memory",
+        attribute: "HeapMemoryUsage"
+    },
+    {
+        success: function(response) {
+            console.log(JSON.stringify(response));
+            console.log("Heap-Memory used: " + response.value["used"]);
+        }
+    });
+
+// Same as above, but synchronously and with the simple API:
+console.log("Heap-Memory used:" +
+            j4p.getAttribute("java.lang:type=Memory","HeapMemoryUsage","used"));
+----
+
+== Testing
+
+Jolokia comes with a test web application for
+integration testing. It contains https://qunitjs.com/[QUnit,role=externalLink,window=_blank] based tests that run within a browser. The
+submodule `examples/client-javascript-test-app` creates a WAR artifact which
+can be deployed in a servlet container. The Jolokia agent is
+contained and reachable under the URL
+`/jolokia`. The unit tests can be found at
+
+[cols=2*,role=bodyTable]
+|===
+|`jolokia-test.html`
+|QUnit tests for the base library
+
+|`jolokia-simple-test.html`
+|QUnit tests for the simple API
+
+|`jolokia-all-test.html`
+|All the tests above combined
+|===
+
+This Maven module is using `jetty-maven-plugin`, so we can run the application using:
+
+[source,bash]
+----
+$ mvn clean package jetty:run-war -f examples/client-javascript-test-app/
+----
+
+Jetty server will be started with the test application deployed.
+
+In order to simplify development of unit tests, a shell script
+`makeLinks.sh` is included in `examples/client-javascript-test-app` module, which can be used in
+Linux like OS'es to create symbolic links to the JavaScript and HTML
+files in the source directories. A typical workflow looks
+like:
+
+* Initialize:
++
+[source,bash]
+----
+$ cd examples/client-javascript-test-app/
+$ mvn clean package jetty:run-war
+$ ./makeLinks.sh # in separate terminal window
+----
+* Edit and save the JavaScript files (e.g. `jolokia.js`
+or `jolokia-test.js`)
+* Reload the test HTML files in the browser

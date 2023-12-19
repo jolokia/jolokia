@@ -1,0 +1,223 @@
+////
+  Copyright 2009-2023 Roland Huss
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+
+== Jolokia Maven modules
+
+This page describes available Maven artifacts and shows changes introduced in Jolokia 2.0
+
+=== Jolokia 1.x modules
+
+In Jolokia 1.x, there are two groups of Maven modules:
+
+* https://github.com/jolokia/jolokia/tree/v1.7.2/agent[agent modules,role=externalLink,window=_blank]
+* https://github.com/jolokia/jolokia/tree/v1.7.2/client[client modules,role=externalLink,window=_blank]
+
+.Agent modules
+
+By Jolokia _agent_ we mean an _entity_ that exposes internal structure o the application (JMX) to outside world (HTTP clients). Assuming this analogy, the agent modules include (groupId is `org.jolokia`, artifactId is shown in the table):
+
+[%autowidth.stretch,role=bodyTable]
+|===
+|Artifact ID|Description
+
+|`jolokia-core`
+|Core agent functionality which is sufficient to run Jolokia agent with JMX access and JSON serialization
+
+|`jolokia-jmx`
+|Helper module that makes it easier to register MBean using Jolokia own link:reference/html/manual/jolokia_jmx.html[JMX MBean Server]
+|`jolokia-jsr160`
+|Agent module that adds JSR 160 request dispatcher which allows Jolokia to operate on MBeans registered in remote MBean Servers using JSR-160 JMX Remote protocol.
+
+|`jolokia-jvm`
+|A standalone Jolokia agent that can be configured using `-javaagent` JVM argument and uses JDK own HTTP server to expose JMX over HTTP
+
+|`jolokia-spring`
+|Spring agent that extends `jolokia-jvm` by adding https://spring.io/projects/spring-framework[Spring Framework,role=externalLink,window=_blank] integration (e.g., dedicated https://docs.spring.io/spring-framework/docs/3.2.1.RELEASE/spring-framework-reference/html/extensible-xml.html[Spring XML namespace handler,role=externalLink,window=_blank])
+
+|`jolokia-osgi`
+|OSGi agent that uses https://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.http.html[OSGi CMPN Http Service,role=externalLink,window=_blank] API to register Jolokia Agent Servlet within OSGi runtime
+
+|`jolokia-osgi-bundle`
+|OSGi agent which is packaged with https://github.com/apache/felix-dev/tree/master/http[Felix HTTP service,role=externalLink,window=_blank]
+
+|`jolokia-war`
+|WAR agent which is packaged as standard Web Application compliant with Servlet API 4
+
+|`jolokia-war-unsecured`
+|WAR agent without security enabled
+|===
+
+.Client modules
+
+Client modules are used to connect to available Jolokia Agent over HTTP protocol:
+
+[%autowidth.stretch,role=bodyTable]
+|===
+|Artifact ID|Description
+
+|`jolokia-client-java`
+|Dedicated client based on https://hc.apache.org/httpcomponents-client-4.5.x/index.html[Apache HTTP Client 4,role=externalLink,window=_blank]
+
+|`jolokia-client-javascript`
+|Maven module containing Javascript libraries
+
+|`jolokia-jmx-adapter`
+|Special _reversed_ client library. It contains implementation of `javax.management.remote.JMXConnectorProvider` allowing to use standard JMX Remote API to access external Jolokia Agent. It can be used in tools like JConsole or https://www.oracle.com/java/technologies/jdk-mission-control.html[Java Mission Control,role=externalLink,window=_blank]. It uses JMX URIs in the form of `service:jmx:jolokia://<host>:<port>/jolokia/<path>`.
+
+|`jolokia-kubernetes`
+|An implementation of `javax.management.remote.JMXConnectorProvider` handling JMX URIs in the form of `service:jmx:kubernetes///<namespace>/http(s):<pod>:port/jolokia` to access JMX Agents exposed inside accessible Kubernetes cluster. It uses https://kubernetes.io/docs/tasks/access-application-cluster/access-cluster-services/#manually-constructing-apiserver-proxy-urls[Kubernetes Proxy URLs,role=externalLink,window=_blank].
+|===
+
+=== Jolokia 2.0 modules
+
+Jolokia 2 is fully restructured to embrace modularization and pluggability. This makes the _core_ library slimmer. However more libraries than just _core_ are required to provide basic functionality.
+
+Maven artifacts are also renamed. We follow a convention where artifact ID (which physically is all we get in the resulting file/jar name) fully identifies the contained functionality. That's why for example we've renamed:
+
+* `jolokia-core` to `jolokia-server-core`
+* `jolokia-jvm` to `jolokia-agent-jvm`
+* `jolokia-jsr160` to `jolokia-service-jsr160`
+
+We have now 5 groups of modules:
+
+* https://github.com/jolokia/jolokia/tree/2.0/server[server modules,role=externalLink,window=_blank]
+* https://github.com/jolokia/jolokia/tree/2.0/service[service modules,role=externalLink,window=_blank]
+* https://github.com/jolokia/jolokia/tree/2.0/agent[agent modules,role=externalLink,window=_blank]
+* https://github.com/jolokia/jolokia/tree/2.0/client[client modules,role=externalLink,window=_blank]
+* https://github.com/jolokia/jolokia/tree/2.0/support[support modules,role=externalLink,window=_blank]
+
+.Server modules
+
+One module provides core Jolokia functionality:
+
+[%autowidth.stretch,role=bodyTable]
+|===
+|Artifact ID|Description
+
+|`jolokia-server-core`
+|It's roughly the same as Jolokia 1 `jolokia-core` but without serializers, request dispatchers and additional services (like history or discovery)
+|===
+
+Core Jolokia library is extended with pluggable services which are implemented in service modules and discovered using a method similar to `java.util.ServiceLoader` with additiona features.
+
+These services are declared in `/META-INF/jolokia/<kind>[-default]` files:
+
+[%autowidth.stretch,role=bodyTable]
+|===
+|kind|interface|description
+
+|`services`
+|`org.jolokia.server.core.service.api.JolokiaService`
+|Generic Jolokia service which is looked-up using more specific interface and use in Jolokia core.
+
+|`detectors`
+|`org.jolokia.server.core.detector.ServerDetector`
+|A service used to find appserver specific `MBeanServer` instances
+
+|`simplifiers`
+|`org.jolokia.service.serializer.json.simplifier.SimplifierExtractor`
+|A service used by `org.jolokia.service.serializer.json.ObjectToJsonConverter` to convert specific Java objects to JSON representation (for example `java.io.File` is changed into JSON containing `name`, `exists`, `length`, ... properties)
+|===
+
+.Service modules
+
+Core Jolokia library discovers services in libraries available on `CLASSPATH`.
+
+[%autowidth.stretch,role=bodyTable]
+|===
+|Artifact ID|Description
+
+|`jolokia-server-detector`
+|S set of built-in services which can be used to detect extra, non-discoverable (see `javax.management.MBeanServerFactory.findMBeanServer()`) `MBeanServer` instances, specific to given application server
+
+|`jolokia-service-discovery`
+|Registers `jolokia:type=Discovery` MBean and starts UDP multicast listener to detect other Jolokia Agent processes
+
+|`jolokia-service-history`
+|Registers `jolokia:type=Config` MBean which is also a `org.jolokia.server.core.service.request.RequestInterceptor` service. This is used to keep a configurable history of agent invocations.
+
+|`jolokia-service-jmx`
+|Mandatory service that adds `org.jolokia.service.jmx.LocalRequestHandler` handler and set of commands. Without this service we wouldn't even be able to access any MBean available within JVM.
+
+|`jolokia-service-jsr160`
+|A service that adds `org.jolokia.service.jsr160.Jsr160RequestHandler` that can be used to access remotely-available MBeans (using JSR-160 Remote JMX).
+
+|`jolokia-service-notif-pull`
+|A notification service using pulling method
+
+|`jolokia-service-notif-sse`
+|A notification service using Server-Sent Events
+
+|`jolokia-service-serializer`
+|Mandatory service that is used to convert Java objects into JSON representation.
+|===
+
+.Agent modules
+
+Agent modules are used in various runtime environments to configure and start Jolokia Agent.
+
+[%autowidth.stretch,role=bodyTable]
+|===
+|Artifact ID|Description
+
+|`jolokia-agent-jvm`
+|A standalone Jolokia agent that can be configured using `-javaagent` JVM argument and uses JDK own HTTP server to expose JMX over HTTP
+
+|`jolokia-agent-osgi`
+|OSGi agent that uses https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard Specification for Jakarta™ Servlet,role=externalLink,window=_blank] to register Jolokia Agent Servlet within OSGi runtime
+
+|`jolokia-agent-war`
+|WAR agent which is packaged as standard Web Application compliant with Servlet API 5+ (JakartaEE 9+)
+
+|`jolokia-agent-war-unsecured`
+|WAR agent without security enabled
+|===
+
+.Client modules
+
+Client modules are used to connect to running Jolokia Agents.
+
+[%autowidth.stretch,role=bodyTable]
+|===
+|Artifact ID|Description
+
+|`jolokia-client-java`
+|dedicated client based on https://hc.apache.org/httpcomponents-client-4.5.x/index.html[Apache HTTP Client 4,role=externalLink,window=_blank]
+
+|`jolokia-client-javascript`
+|Maven module containing Javascript libraries
+
+|`jolokia-client-jmx-adapter`
+|Special _reversed_ client library. It contains implementation of `javax.management.remote.JMXConnectorProvider` allowing to use standard JMX Remote API to access external Jolokia Agent. It can be used in tools like JConsole or https://www.oracle.com/java/technologies/jdk-mission-control.html[Java Mission Control,role=externalLink,window=_blank]. It uses JMX URIs in the form of `service:jmx:jolokia://<host>:<port>/jolokia/<path>`.
+
+|`jolokia-client-kubernetes`
+|An implementation of `javax.management.remote.JMXConnectorProvider` handling JMX URIs in the form of `service:jmx:kubernetes///<namespace>/http(s):<pod>:port/jolokia` to access JMX Agents exposed inside accessible Kubernetes cluster. It uses https://kubernetes.io/docs/tasks/access-application-cluster/access-cluster-services/#manually-constructing-apiserver-proxy-urls[Kubernetes Proxy URLs,role=externalLink,window=_blank].
+|===
+
+.Support modules
+
+Supporting libraries for miscellaneous purposes.
+
+[%autowidth.stretch,role=bodyTable]
+|===
+|Artifact ID|Description
+
+|`jolokia-support-jmx`
+|Helper library that adds Jolokia-specific `MBeanServer` and utilities for easier MBean registration
+
+|`jolokia-support-spring`
+|Spring support library (Spring Boot, Spring Framework)
+|===

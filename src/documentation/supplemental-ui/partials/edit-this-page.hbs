@@ -1,0 +1,3 @@
+{{#if (and page.editUrl (or env.FORCE_SHOW_EDIT_PAGE_LINK (not page.origin.private)))}}
+<div class="edit-this-page"><a href="{{page.editUrl}}">Help improving this page</a></div>
+{{/if}}

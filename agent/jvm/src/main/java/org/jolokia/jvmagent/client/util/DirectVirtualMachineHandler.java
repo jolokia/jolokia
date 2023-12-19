@@ -78,7 +78,7 @@ class DirectVirtualMachineHandler implements VirtualMachineHandlerOperations {
 
     @Override
     public List<ProcessDescription> listProcesses() {
-        List<ProcessDescription> ret = new ArrayList<ProcessDescription>();
+        List<ProcessDescription> ret = new ArrayList<>();
         for (VirtualMachineDescriptor descriptor : VirtualMachine.list()) {
             ret.add(new ProcessDescription(descriptor.id(), descriptor.displayName()));
         }
@@ -94,11 +94,7 @@ class DirectVirtualMachineHandler implements VirtualMachineHandlerOperations {
     public void loadAgent(Object pVm, String jarFilePath, String args) {
         try {
             ((VirtualMachine) pVm).loadAgent(jarFilePath, args);
-        } catch (AgentLoadException e) {
-            throw new ProcessingException("Error while loading Jolokia agent to a JVM process", e, options);
-        } catch (AgentInitializationException e) {
-            throw new ProcessingException("Error while loading Jolokia agent to a JVM process", e, options);
-        } catch (IOException e) {
+        } catch (AgentLoadException | AgentInitializationException | IOException e) {
             throw new ProcessingException("Error while loading Jolokia agent to a JVM process", e, options);
         }
     }

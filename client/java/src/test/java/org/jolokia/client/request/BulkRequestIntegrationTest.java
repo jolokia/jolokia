@@ -30,6 +30,7 @@ import org.testng.annotations.Test;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.fail;
 import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertNotNull;
 import static org.testng.AssertJUnit.assertTrue;
 
 /**
@@ -42,7 +43,7 @@ public class BulkRequestIntegrationTest extends AbstractJ4pIntegrationTest {
     public void simpleBulkRequest() throws MalformedObjectNameException, J4pException {
         J4pRequest req1 = new J4pExecRequest(itSetup.getOperationMBean(),"fetchNumber","inc");
         J4pVersionRequest req2 = new J4pVersionRequest();
-        List resp = j4pClient.execute(req1,req2);
+        List<?> resp = j4pClient.execute(req1,req2);
         assertEquals(resp.size(),2);
         assertTrue(resp.get(0) instanceof J4pExecResponse);
         assertTrue(resp.get(1) instanceof J4pVersionResponse);
@@ -54,12 +55,12 @@ public class BulkRequestIntegrationTest extends AbstractJ4pIntegrationTest {
 
     @Test
     public void simpleBulkRequestWithOptions() throws MalformedObjectNameException, J4pException {
-        J4pRequest req1 = new J4pReadRequest(itSetup.getAttributeMBean(),"ComplexNestedValue");
+        J4pRequest req1 = new J4pReadRequest(itSetup.getAttributeMBean(), "ComplexNestedValue");
         J4pVersionRequest req2 = new J4pVersionRequest();
-        Map<J4pQueryParameter,String> params = new HashMap<J4pQueryParameter, String>();
-        params.put(J4pQueryParameter.MAX_DEPTH,"2");
-        List resps = j4pClient.execute(Arrays.asList(req1,req2),params);
-        assertEquals(resps.size(),2);
+        Map<J4pQueryParameter, String> params = new HashMap<>();
+        params.put(J4pQueryParameter.MAX_DEPTH, "2");
+        List<?> resps = j4pClient.execute(Arrays.asList(req1, req2), params);
+        assertEquals(resps.size(), 2);
         J4pReadResponse resp = (J4pReadResponse) resps.get(0);
         JSONObject value = resp.getValue();
         JSONArray inner = (JSONArray) value.get("Blub");
@@ -74,12 +75,12 @@ public class BulkRequestIntegrationTest extends AbstractJ4pIntegrationTest {
             j4pClient.execute(requests);
             fail();
         } catch (J4pBulkRemoteException e) {
-            List results = e.getResults();
+            List<?> results = e.getResults();
             assertEquals(3, results.size());
             results = e.getResponses();
             assertEquals(2, results.size());
             assertTrue(results.get(0) instanceof J4pReadResponse);
-            assertEquals("Bla", ((J4pReadResponse) results.get(0)).<String>getValue());
+            assertEquals("Bla", ((J4pReadResponse) results.get(0)).getValue());
             assertTrue(results.get(1) instanceof J4pReadResponse);
 
             results = e.getRemoteExceptions();
@@ -125,10 +126,10 @@ public class BulkRequestIntegrationTest extends AbstractJ4pIntegrationTest {
 
     private void verifyOptionalBulkResponses(List<J4pReadResponse> resp) {
         assertEquals(3, resp.size());
-        assertTrue(resp.get(0) instanceof J4pReadResponse);
-        assertEquals("Bla", ((J4pReadResponse) resp.get(0)).<String>getValue());
+        assertNotNull(resp.get(0));
+        assertEquals("Bla", resp.get(0).getValue());
         assertNull(resp.get(1));
-        assertTrue(resp.get(2) instanceof J4pReadResponse);
+        assertNotNull(resp.get(2));
     }
 
 }

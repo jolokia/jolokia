@@ -18,72 +18,106 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.jolokia</groupId>
-  <artifactId>jolokia-osgi</artifactId>
-  <version>1.7.3-SNAPSHOT</version>
-  <name>jolokia-osgi</name>
+  <artifactId>jolokia-agent-osgi</artifactId>
+  <version>2.0.1-SNAPSHOT</version>
   <packaging>bundle</packaging>
-  <description>osgi agent</description>
+
+  <name>jolokia-agent-osgi</name>
+  <description>Jolokia :: Agent :: OSGi Bundle</description>
 
   <parent>
     <groupId>org.jolokia</groupId>
-    <artifactId>jolokia-agent-parent</artifactId>
-    <version>1.7.3-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
+    <artifactId>jolokia-parent</artifactId>
+    <version>2.0.1-SNAPSHOT</version>
+    <relativePath>../../pom.xml</relativePath>
   </parent>
 
+  <url>https://jolokia.org/</url>
+
   <dependencies>
+
+    <!-- Jolokia own artifacts -->
+
     <dependency>
       <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-core</artifactId>
-      <version>${project.version}</version>
+      <artifactId>jolokia-tools-test</artifactId>
+      <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-jsr160</artifactId>
-      <version>${project.version}</version>
+      <artifactId>jolokia-server-core</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-server-detector</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-service-serializer</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-service-jmx</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-service-discovery</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-service-history</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-service-jsr160</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-service-notif-pull</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-service-notif-sse</artifactId>
+    </dependency>
+
+    <!-- JSON -->
 
     <dependency>
       <groupId>com.googlecode.json-simple</groupId>
       <artifactId>json-simple</artifactId>
     </dependency>
 
+    <!-- JakartaEE dependencies -->
+
     <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
       <scope>provided</scope>
     </dependency>
 
+    <!-- OSGi dependencies -->
 
     <dependency>
       <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.core</artifactId>
+      <artifactId>osgi.core</artifactId>
       <scope>provided</scope>
     </dependency>
-
     <dependency>
       <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.compendium</artifactId>
+      <artifactId>org.osgi.service.log</artifactId>
       <scope>provided</scope>
     </dependency>
-
     <dependency>
-      <groupId>org.testng</groupId>
-      <artifactId>testng</artifactId>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.service.servlet</artifactId>
+      <scope>provided</scope>
     </dependency>
-
     <dependency>
-      <groupId>org.easymock</groupId>
-      <artifactId>easymock</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-test-util</artifactId>
-      <version>${project.version}</version>
-      <scope>test</scope>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.service.cm</artifactId>
+      <scope>provided</scope>
     </dependency>
 
   </dependencies>
@@ -97,64 +131,93 @@
 
         <configuration>
           <instructions>
-            <Bundle-SymbolicName>org.jolokia.osgi</Bundle-SymbolicName>
-            <Bundle-Description>Jolokia agent exposing JMX via HTTP/JSON</Bundle-Description>
-
-            <Bundle-Version>${project.version}</Bundle-Version>
-            <Bundle-Activator>org.jolokia.osgi.JolokiaActivator</Bundle-Activator>
-            <Bundle-Name>Jolokia Agent</Bundle-Name>
-            <Embed-Directory>lib</Embed-Directory>
+            <Bundle-SymbolicName>org.jolokia.agent.osgi</Bundle-SymbolicName>
+            <Bundle-Description>Jolokia OSGi Agent Bundle</Bundle-Description>
+            <Bundle-Activator>org.jolokia.agent.osgi.JolokiaBundleActivator</Bundle-Activator>
+            <DynamicImport-Package>org.osgi.service.cm;version=1.2</DynamicImport-Package>
             <Embed-Dependency>
-              json-simple;inline=false,
-              jolokia-core;inline=true,
-              jolokia-jsr160;inline=true
+              jolokia-server-core;inline=true,
+              jolokia-server-detector;inline=true,
+              jolokia-service-serializer;inline=true,
+              jolokia-service-jmx;inline=true,
+              jolokia-service-discovery;inline=true,
+              jolokia-service-history;inline=true,
+              jolokia-service-jsr160;inline=true,
+              jolokia-service-notif-pull;inline=true,
+              jolokia-service-notif-sse;inline=true,
+              json-simple;inline=true
             </Embed-Dependency>
             <Export-Package>
-              org.jolokia.osgi.security;version="${project.version}",
-              org.jolokia.osgi.servlet;uses:="org.osgi.service.http,org.osgi.framework,javax.servlet";version="${project.version}",
-              org.jolokia.restrictor;uses:="javax.management,javax.xml.parsers,org.w3c.dom,org.xml.sax";version="${project.version}",
-              org.jolokia.util;version="${project.version}",
-              org.jolokia.converter;version="${project.version}",
-              org.jolokia.converter.json;version="${project.version}",
-              org.jolokia.converter.object;version="${project.version}",
+              <!-- jolokia-server-core -->
+              org.jolokia.server.core,
+              org.jolokia.server.core.backend,
+              org.jolokia.server.core.config,
+              org.jolokia.server.core.detector,
+              org.jolokia.server.core.http,
+              org.jolokia.server.core.osgi,
+              org.jolokia.server.core.osgi.security,
+              org.jolokia.server.core.osgi.util,
+              org.jolokia.server.core.request,
+              org.jolokia.server.core.request.notification,
+              org.jolokia.server.core.restrictor,
+              org.jolokia.server.core.restrictor.policy,
+              org.jolokia.server.core.service,
+              org.jolokia.server.core.service.api,
+              !org.jolokia.server.core.service.impl,
+              org.jolokia.server.core.service.notification,
+              org.jolokia.server.core.service.request,
+              org.jolokia.server.core.service.serializer,
+              org.jolokia.server.core.util,
+              org.jolokia.server.core.util.jmx,
+              <!-- jolokia-service-serializer -->
+              org.jolokia.service.serializer,
+              org.jolokia.service.serializer.json,
+              org.jolokia.service.serializer.json.simplifier,
+              org.jolokia.service.serializer.object,
+              org.jolokia.service.serializer.osgi,
+              <!-- jolokia-service-jmx -->
+              org.jolokia.service.jmx,
+              org.jolokia.service.jmx.api,
+              org.jolokia.service.jmx.handler,
+              org.jolokia.service.jmx.handler.list,
+              org.jolokia.service.jmx.handler.notification,
+              org.jolokia.service.jmx.osgi,
+              <!-- jolokia-service-discovery -->
+              org.jolokia.service.discovery,
+              org.jolokia.service.discovery.osgi,
+              <!-- jolokia-service-history -->
+              org.jolokia.service.history,
+              org.jolokia.service.history.osgi,
+              <!-- jolokia-service-jsr160 -->
+              org.jolokia.service.jsr160,
+              org.jolokia.service.jsr160.osgi,
+              <!-- jolokia-service-notif-pull -->
+              org.jolokia.service.notif.pull,
+              org.jolokia.service.notif.pull.osgi,
+              <!-- jolokia-service-notif-sse -->
+              org.jolokia.service.notif.sse,
+              org.jolokia.service.notif.sse.osgi,
+              <!-- json-simple -->
+              org.json.simple
             </Export-Package>
             <Import-Package>
-              org.jolokia.osgi.servlet;version="${project.version}",
-              org.jolokia.restrictor;version="${project.version}",
-              org.jolokia.util;version="${project.version}",
-              org.osgi.framework;version="[1.0.0,2.0.0)",
-              org.osgi.service.http;version="[1.0.0,2.0.0)";resolution:=optional,
+              !java.*,
+              jakarta.servlet;version="5.0.0",
+              jakarta.servlet.http;version="5.0.0",
+              com.ibm.websphere.management;resolution:=optional,
+              org.jboss.mx.util;resolution:=optional,
+              org.osgi.framework;version="[1.8.0,2.0.0)",
               org.osgi.service.cm;version="[1.0.0,2.0.0)";resolution:=optional,
               org.osgi.service.log;version="[1.0.0,2.0.0)",
+              org.osgi.service.servlet.context;version="[2.0,3)",
               org.osgi.util.tracker;version="[1.0.0,2.0.0)",
               *
             </Import-Package>
           </instructions>
         </configuration>
       </plugin>
-
-      <plugin>
-        <groupId>org.ops4j</groupId>
-        <artifactId>maven-pax-plugin</artifactId>
-        <version>1.4</version>
-        <configuration>
-          <noDependencies>false</noDependencies>
-          <profiles>log,web,compendium</profiles>
-        </configuration>
-      </plugin>
-
     </plugins>
   </build>
-
-  <pluginRepositories>
-    <pluginRepository>
-      <id>ops4j.releases</id>
-      <url>https://repository.ops4j.org/maven2</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </pluginRepository>
-  </pluginRepositories>
 
   <reporting>
     <plugins>
@@ -174,6 +237,7 @@
 
   <profiles>
     <profile>
+      <!-- TODO: check -->
       <!-- Distribution profile adaption for get also the embedded classes into the sources jar-->
       <id>dist</id>
       <build>
@@ -193,12 +257,7 @@
                   <artifactItems>
                     <artifactItem>
                       <groupId>org.jolokia</groupId>
-                      <artifactId>jolokia-core</artifactId>
-                      <classifier>sources</classifier>
-                    </artifactItem>
-                    <artifactItem>
-                      <groupId>org.jolokia</groupId>
-                      <artifactId>jolokia-jsr160</artifactId>
+                      <artifactId>jolokia-server-core</artifactId>
                       <classifier>sources</classifier>
                     </artifactItem>
                     <artifactItem>
@@ -216,7 +275,7 @@
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>build-helper-maven-plugin</artifactId>
-            <version>1.9</version>
+            <version>${plugin.org.codehaus.mojo.build-helper-maven-plugin}</version>
             <executions>
               <execution>
                 <id>add-source</id>

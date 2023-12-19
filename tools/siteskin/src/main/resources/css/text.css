@@ -1,0 +1,48 @@
+:root {
+  --main-font-size: 12px; /* 1rem = 12px */
+  --main-font-color: #2A2828;
+}
+
+hr {
+  border: 0 #ccc solid;
+  border-top-width: 1px;
+  clear: both;
+  height: 0
+}
+
+h1 { font-size: 2.1rem }
+h2 { font-size: 1.9rem }
+h3 { font-size: 1.75rem }
+h4 { font-size: 1.6rem }
+h5 { font-size: 1.42rem }
+h6 { font-size: 1.25rem }
+
+ol { list-style: decimal }
+ul { list-style: disc }
+li { margin-left: 30px }
+
+/*p, dl, hr, h1, h2, h3, h4, h5, h6, ol, ul, pre, table, address, fieldset {*/
+/*  margin-bottom: 1.5rem*/
+/*}*/
+
+a { text-decoration: none; }
+a:focus { outline: 1px dotted }
+a:link, a:visited { color:#a20000; }
+a:active, a:hover { background: #E9E9E9; }
+a:active.no-hover, a:hover.no-hover { background: none; }
+a.externalLink {
+  background: url("../images/external.png") right center no-repeat;
+  padding-right: 15px;
+}
+
+code { font-family: monospace }
+strong { font-weight: bold }
+em { font-style: italic }
+
+mark {
+  background-color: #3366aa;
+  color: white;
+  padding: 0 5px;
+  border-radius: 5px;
+  font-weight: bold;
+}

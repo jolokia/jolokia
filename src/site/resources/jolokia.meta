@@ -6,6 +6,9 @@
       "https://oss.sonatype.org/content/repositories/snapshots"
    ],
    "versions" : {
+      "2.0.0" : {
+         "jmx4perl" : "[2.00,3.00)"
+      },
       "1.7.2" : {
          "jmx4perl" : "[1.00,2.00)"
       },
@@ -129,11 +132,6 @@
          "jolokia-osgi",
          "jolokia-osgi-%v.jar",
          "jolokia.jar"
-      ],
-      "mule" : [
-         "jolokia-mule",
-         "jolokia-mule-%v.jar",
-         "jolokia-mule.jar"
       ],
       "osgi-bundle" : [
          "jolokia-osgi-bundle",

@@ -1,0 +1,7 @@
+# Command handlers for handling various Jolokia request typs
+org.jolokia.service.jmx.handler.ExecHandler
+org.jolokia.service.jmx.handler.ListHandler
+org.jolokia.service.jmx.handler.NotificationHandler
+org.jolokia.service.jmx.handler.ReadHandler
+org.jolokia.service.jmx.handler.SearchHandler
+org.jolokia.service.jmx.handler.WriteHandler

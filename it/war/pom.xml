@@ -18,42 +18,48 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.jolokia</groupId>
   <artifactId>jolokia-it-war</artifactId>
-  <version>1.7.3-SNAPSHOT</version>
-  <name>jolokia-it-war</name>
+  <version>2.0.1-SNAPSHOT</version>
   <packaging>war</packaging>
-  <description>Servlet for integration tests</description>
+
+  <name>jolokia-it-war</name>
+  <description>Jolokia :: IT :: Servlet</description>
 
   <parent>
     <groupId>org.jolokia</groupId>
-    <artifactId>jolokia-it-parent</artifactId>
-    <version>1.7.3-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
+    <artifactId>jolokia-parent</artifactId>
+    <version>2.0.1-SNAPSHOT</version>
+    <relativePath>../../pom.xml</relativePath>
   </parent>
 
+  <url>https://jolokia.org/</url>
+
   <dependencies>
+
+    <!-- Jolokia own artifacts -->
+
     <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-it-core</artifactId>
-      <version>${project.version}</version>
     </dependency>
+
+    <!-- JakartaEE dependencies -->
+
     <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
       <scope>provided</scope>
     </dependency>
+
   </dependencies>
+
   <build>
     <plugins>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-war-plugin</artifactId>
-        <configuration>
-          <warName>jolokia-it</warName>
-        </configuration>
       </plugin>
     </plugins>
   </build>
 
-  
 </project>

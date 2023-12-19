@@ -1,0 +1,148 @@
+////
+  Copyright 2009-2023 Roland Huss
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+        https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+
+== Overview
+
+image:../images/features/overview_large.png["Overview",role=right]
+Jolokia is an agent based approach for remote JMX access. It
+is an alternative to standard
+https://jcp.org/en/jsr/detail?id=160[JSR 160,role=externalLink,window=_blank]
+connectors. The communication between client and agent goes
+over HTTP (either GET or POST), where the request and response
+payload is represented in JSON.
+
+The Jolokia protocol supports the following operations:
+
+* Reading and writing JMX attributes
+* Execution of JMX operations
+* Searching for MBean Names by pattern
+* Listing of MBean Meta-data like supported attributes,
+operations and notifications
+* #new in Jolokia 2# Registering to and receiving JMX notifications
+
+Jolokia's overall architecture is shown in the next
+diagram. The agent translates between JSON over HTTP and calls
+to local MBeans, including a JSON serialization of the return
+values.
+
+image::../images/jolokia_architecture.png["Architecture",role=text-center]
+
+This approach has some advantages:
+
+* With help of the agent Jolokia is able to provide services
+which go beyond the functionality of JSR-160 connectors:
+** xref:bulk-requests.adoc[Bulk requests] which
+allow for multiple JMX calls within a single request
+** Fine grained xref:security.adoc[security] with
+access restriction on MBean operation and attribute
+level.
+** Merging of multiple `MBeanServer` into one
+virtual view, so there's no need to know in advance
+which MBean is registered in which
+`MBeanServer`. With JSR-160 the target
+`MBeanServer` has to be known in advance.
+** History mode for storing previous fetched values in a
+cache on the server side, along with a time stamp. This
+is especially useful to calculate the change of JMX
+attributes without need of a client storage.
+** No Java is required on the
+xref:polyglot.adoc[client] side due to the platform
+neutral nature of HTTP and JSON.
+** JSON serialization allows for deep access into returned
+objects without having custom type definitions installed
+on the client side.
+* Since HTTP uses a single predefined port, this setup plays nicely with
+xref:firewall.adoc[firewall] configuration. The
+JSR-160 default connector in contrast is not that smart
+since RMI uses a random port for its communication by
+default.
+* As paradox as it might sound, setting up an agent is often
+xref:simple.adoc[easier] than setting up the
+configuration for JSR-160 JMX export, especially when it
+comes to security. Typically, for JSR-160 export startup
+files and configuration of the application server has to be
+adapted. The standard agent gets deployed as a regular
+web-application, which is a well known procedure.
+
+The single disadvantage of this mode is, that an agent has to
+be installed. This might be for policy reasons that no
+external application is allowed to be installed. Or all
+servers to be monitored are already prepared for JSR-160 JMX
+export so an extra installation step is not welcome. Also,
+updating Jolokia normally implies a redeployment of the
+agent. These are all good reasons, for which Jolokia has an
+answer, too. By installing a dedicated Java EE-Server with an
+deployed agent, Jolokia can operate in
+xref:proxy.adoc[proxy mode], in which case it translate
+Jolokia JSON request into JSR-160 client request for operation
+on the target server. Vice versa, the result over a JSR-160
+connector then gets translated into a JSON response which is
+returned to Jolokia client.
+
+=== Example
+
+In order to get a feeling how the Jolokia protocol looks like,
+here is an example of a simple Jolokia request and
+response. Assuming that an
+xref:../agent.adoc[agent] is installed, the following
+HTTP `GET`
+request reads the used heap memory statistics of the instrumented JVM:
+
+----
+http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage
+----
+
+`http://localhost:8080/jolokia` is the base URL
+under which the agent is reachable.
+The same request can be done by POSTing the following body
+to the URL `http://localhost:8080/jolokia`:
+
+[source,json]
+----
+{
+  "type":"read",
+  "mbean":"java.lang:type=Memory",
+  "attribute":"HeapMemoryUsage"
+}
+----
+
+In both cases, the full response contains a JSON object:
+
+[source,json]
+----
+{
+  "request": {
+    "mbean": "java.lang:type=Memory",
+    "attribute": "HeapMemoryUsage",
+    "type": "read"
+  },
+  "value": {
+    "init": 524288000,
+    "committed": 532676608,
+    "max": 8334082048,
+    "used": 49609240
+  },
+  "status": 200,
+  "timestamp": 1701934145
+}
+----
+
+=== Next
+
+* Learn something about xref:bulk-requests.adoc[bulk JMX requests].
+* See why jolokia is the xref:polyglot.adoc[perfect choice] for non-Java environments
+to access Java servers via JMX.
+* Go Back to the xref:../features.adoc[Features Overview].

@@ -17,6 +17,7 @@ package org.jolokia.client.request;
  */
 
 import java.util.Map;
+import java.util.Set;
 
 import org.json.simple.JSONObject;
 
@@ -28,17 +29,26 @@ import org.json.simple.JSONObject;
  */
 public final class J4pVersionResponse extends J4pResponse<J4pVersionRequest> {
 
-    private String agentVersion;
-
-    private String protocolVersion;
+    private final String jolokiaId;
 
     private JSONObject info;
 
+    private final String agentVersion;
+
+    private final String protocolVersion;
+
+    private JSONObject details;
+
     J4pVersionResponse(J4pVersionRequest pRequest, JSONObject pResponse) {
         super(pRequest,pResponse);
-        JSONObject value = (JSONObject) getValue();
+        JSONObject value = getValue();
         agentVersion = (String) value.get("agent");
         protocolVersion = (String) value.get("protocol");
+        details = (JSONObject) value.get("details");
+        jolokiaId = (String) value.get("id");
+        if (details == null) {
+            details = new JSONObject();
+        }
         info = (JSONObject) value.get("info");
         if (info == null) {
             info = new JSONObject();
@@ -71,7 +81,7 @@ public final class J4pVersionResponse extends J4pResponse<J4pVersionRequest> {
      *         could not detect it.
      */
     public String getProduct() {
-        return (String) info.get("product");
+        return (String) details.get("server_product");
     }
 
     /**
@@ -81,17 +91,36 @@ public final class J4pVersionResponse extends J4pResponse<J4pVersionRequest> {
      * @return venor name or <code>null</code>
      */
     public String getVendor() {
-        return (String) info.get("vendor");
+        return (String) details.get("server_vendor");
     }
 
     /**
-     * Any extra information specific to a certain application server type or <code>null</code> if no
-     * extra information is provided
+     * Get the jolokia id of the server
      *
-     * @return map with string keys and value containing extra information on the server or <code>null</code>
+     * @return jolokia id
      */
-    public Map getExtraInfo() {
-        return (Map) info.get("extraInfo");
+    public String getJolokiaId() {
+        return jolokiaId;
+    }
+
+    /**
+     * Get all supported providers
+     *
+     * @return set of supported providers
+     */
+    public Set<String> getProviders() {
+        //noinspection unchecked
+        return info.keySet();
+    }
+
+    /**
+     * Get extra information for a given provider
+     *
+     * @param pProvider provider for which information is requested
+     * @return extra information for the provider, which might be null
+     */
+    public Map<?, ?> getExtraInfo(String pProvider) {
+        return (Map<?, ?>) info.get(pProvider);
     }
 }
 

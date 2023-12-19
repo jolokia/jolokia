@@ -30,6 +30,7 @@ import static org.testng.AssertJUnit.*;
  * @author roland
  * @since 23.09.11
  */
+@SuppressWarnings("ResultOfMethodCallIgnored")
 public class J4pClientBuilderTest {
 
     @Test
@@ -73,7 +74,7 @@ public class J4pClientBuilderTest {
     }
 
     @Test
-    public void testParseProxySettings_null() throws Exception {
+    public void testParseProxySettings_null() {
         assertNull(J4pClientBuilder.parseProxySettings(null));
     }
 

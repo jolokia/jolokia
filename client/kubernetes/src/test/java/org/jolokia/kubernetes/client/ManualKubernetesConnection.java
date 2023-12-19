@@ -20,6 +20,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 import org.testng.annotations.Test;
 
+@SuppressWarnings("NewClassNamingConvention")
 public class ManualKubernetesConnection {
 
     @Test(groups = "manual")

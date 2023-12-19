@@ -1,0 +1,438 @@
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: transparent url(../images/bg.png) repeat-x fixed left top;
+  color: var(--main-font-color);
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0.5rem 0;
+  font-family: "Open Sans", Verdana, Arial, Helvetica, Geneva, sans-serif;
+  font-size: var(--main-font-size)
+}
+
+div.container {
+  width: clamp(1080px, 80vw, 1440px);
+  margin-left: auto;
+  margin-right: auto;
+  border: 3px solid white;
+  background-color: white;
+  border-radius: 5px;
+  box-shadow: var(--main-font-color) 0 0 5px;
+}
+
+/* Main header with Jolokia logo */
+div.header {
+  background: linear-gradient(white, #cacaca);
+  height: 130px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 2px
+}
+div.header-image {
+  flex-direction: column;
+  background-image: url("../images/jolokia_logo.png");
+  background-repeat: no-repeat;
+  width: 333px;
+  height: 111px;
+  margin-left: 1em;
+}
+
+/* Navigation header with main links */
+nav.header {
+  height: 35px;
+  background: linear-gradient(to bottom, #ababab 0%, #6c6c6c 40%, #6c6c6c 90%, #ababab 100%);
+  margin-bottom: 2px;
+  display: flex;
+  flex-direction: row;
+}
+div.top_left {
+  background: url("../images/top_sep.png") no-repeat right top;
+  float: left;
+  width: 10px;
+  height: 35px;
+}
+div.top_sep {
+  background: url("../images/top_sep.png") no-repeat right top;
+  float: left;
+  width: 2px;
+  height: 35px;
+}
+div.top_link {
+  float: left;
+  font-size: 1.1em;
+  font-weight: normal;
+  height: 32px;
+}
+div.top_link a {
+  display: block;
+  padding: 10px 15px 0 15px;
+  height: 25px;
+  color: #d7d7d7;
+}
+div.top_link a:hover,
+div.top_link a:active {
+  background: linear-gradient(to bottom, #ababab 0%, #4d4d4d 40%, #4d4d4d 90%, #ababab 100%);
+}
+
+/* Footer with legal information */
+footer.copyright {
+  background-color: #c0c0c0;
+  color: #8e8e8e;
+  height: 20px;
+  padding-right: 5px;
+  text-align: right;
+  line-height: 20px;
+  font-size: 9px;
+  border-radius: 0 0 3px 3px;
+}
+
+/* Main area with left-side menu and main area */
+main {
+  background: linear-gradient(to bottom, #9c9c9c 0%, #c0c0c0 20%, #c0c0c0 100%);
+  display: flex;
+  flex-flow: row;
+  flex-direction: row;
+  padding: 20px 0 0 0;
+}
+
+/* Left navigation menu */
+main nav.menu {
+  box-sizing: border-box;
+  flex-shrink: 0;
+  width: 240px;
+  padding: 0 10px
+}
+main div.main {
+  box-sizing: border-box;
+  flex: auto;
+  margin-right: 10px;
+  background-color: white;
+  border-radius: 3px;
+}
+
+/* Navigation boxes (left) */
+.navibox {
+  border: 1px solid white;
+  border-radius: 3px;
+  background-color: #e8e8e8;
+  margin-bottom: 5px;
+}
+.navihead {
+  background: linear-gradient(to bottom, #dfdfdf 0%, #d6d6d6 20%, #d6d6d6 100%);
+  height: 25px;
+  line-height: 25px;
+}
+.navihead h5 {
+  color: #494949;
+  font-size: 13px;
+  font-weight: bold;
+  padding: 0 5px;
+}
+.naviitems {
+  padding: 5px;
+}
+.naviitems ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.naviitems li {
+  line-height: 18px;
+  color: #8e8e8e;
+  padding: 0;
+  margin: 2px 0;
+}
+.naviitems li a {
+  display: block;
+  font-weight: normal;
+  padding: 1px 2px;
+  border-radius: 3px;
+}
+.naviitems li strong {
+  display: block;
+  color: #a20000;
+  font-weight: normal;
+  padding: 1px 2px;
+  border-radius: 3px;
+  background-color: white;
+}
+.naviitems li a:visited, .naviitems li a:link {
+  color: #656565;
+}
+.naviitems li a:active, .naviitems li a:hover, .naviitems li strong {
+  color: #a20000;
+  background-color: white;
+}
+.naviitems li ul {
+  margin-left: 10px;
+}
+
+/* Styles for Asciidoc generated CSS classes */
+
+div.main>div.paragraph, div.sectionbody {
+  padding: 15px;
+  line-height: 1.5em;
+}
+div.paragraph,
+div.dlist,
+div.ulist,
+div.admonitionblock,
+table.tableblock,
+div.listingblock {
+  margin: 0 0 0.7em 0;
+}
+div.paragraph>div.title {
+  color: #555;
+  margin: 0.4em 0;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+div.ulist li {
+  line-height: 1.7em;
+}
+
+div.main>div.sect2 {
+  padding: 0 15px 15px 15px;
+}
+div.sect2 {
+  clear: both;
+}
+div.imageblock.right {
+  float: right;
+  margin-right: -70px;
+  margin-left: 20px;
+}
+
+.right.imageblock img {
+    box-shadow: 5px 5px 50px grey;
+}
+
+section>h2, .sect1 h2 {
+  background: linear-gradient(to bottom, #d2d2d2 0%, #c2c2c2 20%, #c2c2c2 100%);
+  margin: 2px;
+  padding-left: 15px;
+  line-height: 32px;
+  font-size: 17px;
+  color: #555;
+}
+section>h3, .sect2 h3 {
+  padding-left: 15px;
+  line-height: 32px;
+  font-size: 17px;
+  color: #555;
+  border-bottom: 1px solid #555;
+  font-weight: bold;
+  margin: 0 0 1em 0;
+}
+section p, .sect2 .paragraph {
+  margin: 0 1em 0.7em 1em;
+}
+.sect3 h4 {
+  color: #555;
+  padding-left: 15px;
+  margin: 0 0 1em 0;
+  line-height: 32px;
+  font-size: 17px;
+  border-bottom: 1px solid #ddd;
+}
+.sect4 h5 {
+  color: #555;
+  padding-left: 15px;
+  margin: 0 0 0.75em 0;
+}
+
+table.tableblock, table.bodyTable {
+  border: 1px solid #ddd;
+  margin-left: 1em;
+}
+.tableblock thead tr, .bodyTable th {
+  background: linear-gradient(to bottom, #fff 0%, #eee 50%, #eee 100%);
+  border-bottom: 1px solid #ddd;
+}
+.tableblock th, .bodyTable th {
+  font-weight: bold;
+  line-height: 2em;
+  padding: 2px 5px;
+}
+.tableblock td, .bodyTable td {
+  padding: 5px;
+  vertical-align: top;
+}
+.tableblock td, .bodyTable td figure {
+  margin-bottom: -6px;
+  margin-top: -4px;
+}
+.bodyTable tr:nth-of-type(2n+1) {
+  background-color: #f8f8f8;
+}
+
+div.listingblock, div.source {
+  border: 1px solid #bbb;
+  padding: 5px;
+  background-color: #f8f8f8;
+  margin-left: 1em;
+}
+div.content>pre {
+  font-family: monospace;
+}
+div.listingblock#apache-license {
+  font-family: monospace;
+  display: flex;
+  border: 0;
+  background-color: white;
+  justify-content: space-around;
+}
+div.listingblock#apache-license .content {
+  border: 1px solid #bbb;
+  padding: 5px;
+  background-color: #f8f8f8;
+}
+div.imageblock.text-center div.content img {
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
+span.feature a.image {
+  display: block
+}
+span.feature a.image:hover {
+  background-color: white;
+}
+span.feature a.image:active,a.image:visited,a.image:focus {
+  background-color: white;
+  border: none;
+  outline: none;
+}
+
+div.note table {
+  position: relative;
+  margin-top: 2em;
+  margin-left: 2em;
+  border: 1px dotted #3366aa;
+  background-color: #f8f8f8;
+}
+div.note table td.icon {
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  padding: 0 5px;
+  line-height: 20px;
+  /*background: #3366aa url("../images/favicon.png") no-repeat right top;*/
+  background-color: #3366aa;
+  text-transform: uppercase;
+  color: white;
+  font-weight: bold;
+  border-radius: 4px;
+}
+div.note table td.content {
+  padding: 0.8em;
+}
+div.note table td.content div.paragraph {
+  margin: 0
+}
+
+/* Styles for doxia pages other than Asciidoc (like Maven reports) */
+section>p {
+  padding: 10px 15px 5px 15px;
+  line-height: 1.5em;
+}
+section>h3 {
+  margin: 0 15px;
+}
+table.bodyTable {
+  margin: 15px 2em 15px 2em;
+}
+div.source {
+  margin: 0 15px 10px 15px;
+}
+
+div.teaser {
+  background: url(../images/teaser_bg2.png) left top no-repeat;
+  color: #f7e9e5;
+  font-size: 20px;
+  padding: 11px 13px 0;
+  margin: 2px;
+  line-height: 150%;
+  height: 82px;
+  border-radius: 3px 3px 0 0;
+}
+div.teaser div.subtitle {
+  font-size: 16px;
+}
+
+/* special Logo header on index page */
+div.teaser b, div.teaser strong {
+  color: #4a0501;
+  font-weight: bold;
+}
+
+.teaser a.externalLink:visited,.teaser a.externalLink:link {
+  background: none;
+  padding: 0;
+  color: #e7d3cb;
+}
+
+.teaser a.externalLink:hover,.teaser a.externalLink:active  {
+  background: none;
+  padding: 0;
+  color: #4a0501;
+}
+
+div.news-date {
+  position: relative;
+  text-align: right;
+  top: -40px;
+  float: right;
+  color: #aaa;
+}
+
+dt {
+  margin-left: 15px;
+  margin-bottom: 5px;
+  color: #333333;
+  font-weight: bold;
+}
+dd {
+  margin-left: 30px;
+  margin-bottom: 1em;
+}
+
+span.right {
+  float: right;
+}
+span.image.right {
+  margin: 0 0 15px 15px;
+}
+
+/* special main section for features page */
+
+div.main.features {
+  display: flex;
+  flex-flow: row wrap;
+  border-radius: 0;
+  border: 0;
+  background-color: transparent;
+}
+div.main.features div.sect1 {
+  width: 50%;
+  box-sizing: border-box;
+  padding: 0 20px 30px 20px;
+}
+div.main.features div.sect1>h2 {
+  background: linear-gradient(to bottom, #ff5525 0%, #e3311e 50%, #be1518 100%);
+  border: 2px solid white;
+  border-bottom-width: 0;
+  margin: 0;
+  border-radius: 3px 3px 0 0;
+  color: white;
+  font-size: 15px;
+  text-align: center;
+}
+div.main.features div.sect1>.sectionbody {
+  border: 1px solid white;
+  background-color: white;
+}

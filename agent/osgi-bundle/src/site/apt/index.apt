@@ -1,4 +1,0 @@
-Jolokia OSGi all-in-one Bundle
-
-  Jolokia agent as a OSGi bundle without external dependencies (a web
-  server is embedded).

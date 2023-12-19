@@ -28,7 +28,7 @@ public class MBeanExample implements MBeanExampleMBean {
 
     @Override
     public Set<String> getSetAttribute() {
-        return new HashSet<String>(Arrays.asList("foo", "bar"));
+        return new HashSet<>(Arrays.asList("foo", "bar"));
     }
 
     @Override

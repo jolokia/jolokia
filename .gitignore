@@ -1,12 +1,14 @@
 target
+dist
 *.iml
 *.ipr
 *.iws
+*.class
 *~
 /classes/
-node_modules
-.idea
-.vscode
+node_modules/
+.idea/
+.vscode/
 wiki
 felix
 .settings
@@ -14,3 +16,6 @@ felix
 .project
 .gitshots
 test-output
+src/documentation/build/
+.node/
+dependency-reduced-pom.xml

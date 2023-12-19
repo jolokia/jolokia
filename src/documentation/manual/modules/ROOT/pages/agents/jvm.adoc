@@ -1,0 +1,545 @@
+////
+  Copyright 2009-2023 Roland Huss
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+:jolokia-version:
+[#agents-jvm]
+== JVM Agent
+
+The JVM agent is the right agent when it comes to instrument an
+arbitrary Java application which is not covered by the other
+agents. This agent can be started by any Java program by
+providing certain startup options to the JVM. Or it can be
+dynamically attached (and detached) to an already running Java
+process. This universal agent uses the
+https://docs.oracle.com/en/java/javase/11/docs/api/jdk.attach/com/sun/tools/attach/VirtualMachine.html[JVM Attach API,role=externalLink,window=_blank] or https://docs.oracle.com/en/java/javase/11/docs/api/java.instrument/java/lang/instrument/package-summary.html[Java Instrument API,role=externalLink,window=_blank] and is available for every JVM 1.6 and later.
+
+NOTE: Dynamic loading of agents will be removed at some point. See https://openjdk.org/jeps/451[JEP 451,role=externalLink,window=_blank] for details.
+
+[#jvm-agent]
+=== Jolokia as JVM Agent
+
+The JVM agent uses the
+https://docs.oracle.com/en/java/javase/11/docs/api/java.instrument/java/lang/instrument/package-summary.html[Java Instrument API,role=externalLink,window=_blank] for linking into any JVM at startup time. Under the
+hood it uses an HTTP-Server, which is available on every
+Oracle/Sun JVM from version 1.6 upwards.
+
+****
+The JDK embedded HTTP-Server is not the fastest one (it is used
+e.g. for the JAXWS reference implementation), but for our
+monitoring needs the performance is sufficient. There are
+several configuration options for tuning the HTTP server's
+performance. See below for details.
+****
+
+[#jvm-agent-installation]
+==== Installation
+
+This agent gets installed by providing a single startup option
+`-javaagent` when starting the Java process.
+
+----
+java -javaagent:/path/to/agent.jar=port=7777,host=localhost
+----
+
+`agent.jar` is the filename of the Jolokia
+JVM agent. The agent can be downloaded like the others from the https://jolokia.org/download.html[download page,role=externalLink,window=_blank].
+When downloading from a Maven repository you need to check for the classifier `javaagent` (i.e. the
+jar to download looks like `jolokia-agent-jvm-{jolokia-version}-javaagent.jar`, not `jolokia-agent-jvm-{jolokia-version}.jar`).
+Options can be appended as a comma separated
+list. The available options are the same as described in
+xref:agents/war.adoc#agent-war-init-params[Servlet init parameters] plus the one described in
+table <<agent-jvm-config>>. If an option
+contains a comma, an equal sign or a backslash, it must be
+escaped with a backslash.
+
+[#agent-jvm-config]
+.JVM agent configuration options
+[cols="15,~,~"]
+|===
+|Parameter|Description|Example
+
+|`agentContext`
+|Context under which the agent is deployed. The full URL
+will be `protocol://host:port/agentContext`. The default context is
+`/jolokia`.
+|`/j4p`
+
+|`agentId`
+|A unique ID for this agent. By default a unique id is
+calculated. If provided it should be ensured that this id is
+unique among all agent reachable via multicast requests used
+by the discovery mechanism. It is recommended not to set
+this value. Within the `agentId` specification you
+can use the same placeholders as in `discoveryAgentUrl`.
+|`my-unique-agent-id`
+
+|`agentDescription`
+|An optional description which can be used for clients to
+present a human readable label for this agent.
+|`Intranet Timebooking Server`
+
+|`host`
+|Hostaddress to which the HTTP server should bind to. If "*" or "0.0.0.0" is
+given, the servers binds to every network interface.
+|`localhost`
+
+|`port`
+|Port the HTTP server should listen to. If set to 0, then an arbitrary free port
+will be selected.
+|`8778`
+
+|`user`
+|User to be used for authentication (along with a `password`)
+|
+
+|`password`
+|Password used for authentication (`user` is then required, too)
+|
+
+|`realm`
+|Sets the security realm to use. If the `authMode` is set to
+`jaas` this is also used as value for the security domain.
+E.g. for Karaf 3 and later, this realm should be `karaf` since
+all JMX MBeans are guarded by this security domain.
+|`jolokia`
+
+|`authMode`
+|Can be either `basic` (the default), `jaas` or `delegate`. If
+`jaas` is used, the user and password given in the `Authorization:`
+header are used for login in via JAAS and, if successful, the return subject is used for all Jolokia operation.
+This has only an effect, if user is set. For authentication mode `delegate`, the authentication
+decision is delegated to a service specified by `authUrl` (see below for details).
+|`basic`
+
+|`authMatch`
+|If MultiAuthenticator is used, this config item explains how to combine multiple authenticators.
+Supported values: `any` at least one authenticator must match, `all`
+all authenticators must match.
+|`any`
+
+|`authClass`
+|Fully qualified name of an authenticator class. Class must be on classpath and must extend
+`com.sun.net.httpserver.Authenticator`. Class can declare a constructor
+that takes one argument of a type `org.jolokia.server.core.config.Configuration` in which case
+Jolokia runtime configuration will be passed (useful in cases where authenticator requires additional
+configuration). If no such constructor is found, default (no-arg) constructor will be use to create an
+instance.
+|
+
+|`authUrl`
+|URL of a service used for checking the authentication. This configuration option is only effective if
+`authMode` is set to `delegate`. This URL can have a HTTP or HTTPS scheme.
+The initially provided `Authorization:` header is copied over to the request against this
+URL.
+|
+
+|`authPrincipalSpec`
+a|Expression used for extracting a principal name from the response of a delegate authentication service. This
+parameter is only in use when the `authMode` is set to `delegate`. The
+following expressions are supported:
+
+`json:path`:: a path into a JSON response which points to the principal.
+E.g. a principal spec `jason:metadata/name` will select the "name" property within the JSON
+object specified by the "metadata" property. For navigate into arrays, numeric indexes can be used.
+`empty:`:: Always extracts an empty (`""`) principal.
+If this option is not specified, not principal is extracted.
+|
+
+|`authIgnoreCerts`
+|If given, the `authMode` is set to `delegate` and the delegate URL is
+as HTTPS-URL then the server certificate as well as the server's DNS name will not be verified. This useful
+in order to avoid (or introduce) complex keymanagement issues, but is of course less secure. By default
+certs a verified with the local keystore.
+|
+
+|`protocol`
+|HTTP protocol to use. Should be either `http`
+or `https`. For the SSL stack there are various
+additional configuration options.
+|`http`
+
+|`backlog`
+|Size of request backlog before requests get discarded.
+|`10`
+
+|`executor`
+a|Threading model of the HTTP server:
+
+`fixed`:: Thread pool with a fixed number of threads (see also `threadNr`)
+`cached`:: Cached thread pool which creates threads on demand
+`single`:: A single thread only
+|`single`
+
+|`threadNamePrefix`
+|Thread name prefix that executor will use while creating new thread(s).
+|`jolokia-`
+
+|`threadNr`
+|Number of threads to be used when the
+`fixed` execution model is chosen.
+|`5`
+
+|`keystore`
+|Path to the SSL keystore to use (https only)
+|
+
+|`keystorePassword`
+|Keystore password (https only). If the password is given embedded in brackets `pass:[[[...]]]`,
+then it is treated as an encrypted password which was encrypted with `java -jar jvm-agent.jar
+encrypt`. See below for details.
+|
+
+|`useSslClientAuthentication`
+|Whether client certificates should be used for
+authentication. The presented certificate is validated that it is signed by
+a known CA which must be in the keystore (https only). (`true` or
+`false`).
+|`false`
+
+|`secureSocketProtocol`
+|Secure protocol that will be used for establishing HTTPS connection (https only)
+|`TLS`
+
+|`keyStoreType`
+|SSL keystore type to use (https only)
+|`JKS`
+
+|`keyManagerAlgorithm`
+|Key manager algorithm (https only)
+|`SunX509`
+
+|`trustManagerAlgorithm`
+|Trust manager algorithm (https only)
+|`SunX509`
+
+|`caCert`
+|If HTTPs is to be used and no `keystore` is given, then `caCert`
+can be used to point to a PEM encoded CA certification file. This is use to verify
+client certificates when `useSslClientAuthentication` is switched on (https only)
+|
+
+|`serverCert`
+|For SSL (and when no `keyStore` is used) then this path must point to server
+certificate which is presented to clients (https only)
+|
+
+|`serverKey`
+|Path to the PEM encoded key file for signing the server cert during TLS handshake. This is only
+used when no `keyStore` is used. For decrypting the key the password given with
+`keystorePassword` is used (https only).
+|
+
+|`serverKeyAlgorithm`
+|Encryption algorithm to use for decrypting the key given with `serverKey`
+(https only)
+|`RSA`
+
+|`clientPrincipal`
+|The principal which must be given in a client certificate to allow access to the agent. This can be one or
+or more relative distinguished names (RDN), separated by commas. The subject of a given client certificate
+must match on all configured RDNs. For example, when the configuration is `O=jolokia.org,OU=Dev` then a
+client certificate's subject must contain `O=jolokia.org` and `OU=Dev` to allow the request. Multiple alternative
+principals can be configured by using additional options with consecutive index suffix like in
+`clientPrincipal.1`, `clientPrincipal.2`, ... Please remember that a `,`
+separating RDNs must be escaped with a backslash (`\,`) when used on the commandline as agent arguments.
+(https and useSslAuthentication only)
+|
+
+|`extraClientCheck`
+|If switched on the agent performs an extra check for client authentication that the presented client
+cert contains a client flag in the extended key usage section which must be present.
+(https and useSslAuthentication only)
+|
+
+|`bootAmx`
+|If set to `true` and if the agent is
+attached to a GlassFish server, then during startup the
+AMX subsystem is booted so that GlassFish specific MBeans
+are available. Otherwise, if set to
+`false` the AMX system is not booted.
+|`true`
+
+|`config`
+|Path to a properties file from where the configuration
+options should be read. Such a property file can contain
+the configuration options as described here as key value
+pairs (except for the `config` property
+of course :)
+|
+
+|`discoveryEnabled`
+|If set to `false` then this agent will
+not listen for multicast request (multicast-group 239.192.48.84,
+port 24884 by default, but can configured individually).
+By default this option is enabled. This option can also be switched on with an
+environment variable
+`JOLOKIA_DISCOVERY_ENABLED` or the system
+property `jolokia.discoveryEnabled` set to
+`true`.
+|Default: `false`
+
+|`discoveryAgentUrl`
+|Sets the URL to respond for multicast discovery requests. If
+given, `discoveryEnabled` is set
+implicitly to true. This URL can also be provided by an
+environment variable
+`JOLOKIA_DISCOVERY_AGENT_URL` or the system
+property `jolokia.discoveryUrl`. Within the value you can use the
+placeholders `$\{host}` and `$\{ip}` which gets replaced
+by the autodetected local host name/address. Also with `$\{env:ENV_VAR}` and
+`$\{sys:property}` environment and system properties can be referenced, respectively.
+|`http://10.9.11.87:8778/jolokia`
+
+|`multicastGroup`
+|The multicast group IPv4 address. This group IP can be also given as an environment variable `JOLOKIA_MULTICAST_GROUP` or a system property `jolokia.multicastGroup`
+|`239.192.48.84`
+
+|`multicastPort`
+|The multicast port. This port can be also given as an environment variable `JOLOKIA_MULTICAST_PORT` or a system property `jolokia.multicastPort`
+|`24884`
+
+|`sslProtocol`
+|The list of SSL / TLS protocols enabled. Valid options are available in the documentation
+on SunJSSEProvider for your JDK version. Using only `TLSv1.1` and
+`TLSv1.2` is recommended in Java 1.7 and Java 1.8. Using only
+`TLSv1` is recommended in Java 1.6. Multiple protocols can be configured
+by using additional options with consecutive index suffixes like in
+`sslProtocol.1`, `sslProtocol.2`, ...
+|`TLSv1.2`
+
+|`sslCipherSuite`
+|The list of SSL / TLS cipher suites to enable. The table of available cipher suites is
+available under the "Default Enabled Cipher Suites" at the SunJSSEProvider documentation
+https://docs.oracle.com/javase/8/docs/technotes/guides/security/SunProviders.html#SunJSSEProvider[here].
+Multiple cipher suites can be configured by using additional options with consecutive index
+suffixes like in `sslCipherSuite.1`, `sslCipherSuite.2`, ...
+|
+
+|`policyLocation`
+|Path to the XML policy file
+|
+|===
+
+Upon successful startup the agent will print out a success
+message with the full URL which can be used by clients for
+contacting the agent.
+
+[#jvm-attach]
+=== Attaching a Jolokia agent on the fly
+
+NOTE: Dynamic loading of agents will be removed at some point. See https://openjdk.org/jeps/451[JEP 451,role=externalLink,window=_blank] for details.
+
+A Jolokia agent can be attached to any running Java process as
+long as the user has sufficient access privileges for
+accessing the process. This agent uses the
+https://docs.oracle.com/en/java/javase/11/docs/api/jdk.attach/com/sun/tools/attach/VirtualMachine.html[JVM Attach API,role=externalLink,window=_blank] for dynamically attaching and detaching to
+and from the process. It works similar to JConsole or `jcmd` command connecting
+to a local process. The Jolokia advantage is, that after the
+start of the agent, it can be reached over the network.
+
+The JAR containing the JVM  agent also contains a client
+application which can be reached via the
+`-jar` option. Call it with
+`--help` to get a short usage information:
+
+[,subs="attributes,verbatim"]
+----
+$ java -jar jolokia-agent-jvm-{jolokia-version}-javaagent.jar --help
+
+Jolokia Agent Launcher
+======================
+
+Usage: java -jar jolokia-agent-jvm-{jolokia-version}-javaagent.jar [options] <command> <pid/regexp>
+
+where <command> is one of
+    start     -- Start a Jolokia agent for the process specified
+    stop      -- Stop a Jolokia agent for the process specified
+    status    -- Show status of an (potentially) attached agent
+    toggle    -- Toggle between start/stop (default when no command is given)
+    list      -- List all attachable Java processes (default when no argument is given at all)
+    encrypt   -- Encrypt a password which is given as argument or read from standard input
+
+[options] are used for providing runtime information for attaching the agent:
+
+    --host <host>                   Hostname or IP address to which to bind on
+                                    (default: InetAddress.getLocalHost())
+    --port <port>                   Port to listen on (default: 8778)
+    --agentContext <context>        HTTP Context under which the agent is reachable (default: /jolokia)
+    --agentId <agent-id>            VM unique identifier used by this agent (default: autogenerated)
+    --agentDescription <desc>       Agent description
+    --authMode <mode>               Authentication mode: 'basic' (default), 'jaas' or 'delegate'
+    --authMatch <match>             If MultiAuthenticator is used, this config item explains how to combine multiple authenticators
+                                     "any" -- at least one authenticator must match (default)
+                                     "all" -- all authenticators must match
+    --authClass <class>             Classname of an custom Authenticator which must be loadable from the classpath
+    --authUrl <url>                 URL used for a dispatcher authentication (authMode == delegate)
+    --authPrincipalSpec <spec>      Extractor specification for getting the principal (authMode == delegate)
+    --authIgnoreCerts               Whether to ignore CERTS when doing a dispatching authentication (authMode == delegate)
+    --user <user>                   User used for Basic-Authentication
+    --password <password>           Password used for Basic-Authentication
+    --quiet                         No output. "status" will exit with code 0 if the agent is running, 1 otherwise
+    --verbose                       Verbose output
+    --executor <executor>           Executor policy for HTTP Threads to use (default: single)
+                                     "fixed"  -- Thread pool with a fixed number of threads (default: 5)
+                                     "cached" -- Cached Thread Pool, creates threads on demand
+                                     "single" -- Single Thread
+    --threadNamePrefix <prefix>     Thread name prefix that executor will use while creating new thread(s)
+                                    (default: jolokia-)
+    --threadNr <nr threads>         Number of fixed threads if "fixed" is used as executor
+    --backlog <backlog>             How many request to keep in the backlog (default: 10)
+    --protocol <http|https>         Protocol which must be either "http" or "https" (default: http)
+    --keystore <keystore>           Path to keystore (https only)
+    --keystorePassword <pwd>        Password to the keystore (https only)
+    --useSslClientAuthentication    Use client certificate authentication (https only)
+    --secureSocketProtocol <name>   Secure protocol (https only, default: TLS)
+    --keyStoreType <name>           Keystore type (https only, default: JKS)
+    --keyManagerAlgorithm <name>    Key manager algorithm (https only, default: SunX509)
+    --trustManagerAlgorithm <name>  Trust manager algorithm (https only, default: SunX509)
+    --caCert <path>                 Path to a PEM encoded CA cert file (https & sslClientAuth only)
+    --serverCert <path>             Path to a PEM encoded server cert file (https only)
+    --serverKey <path>              Path to a PEM encoded server key file (https only)
+    --serverKeyAlgorithm <algo>     Algorithm to use for decrypting the server key (https only, default: RSA)
+    --clientPrincipal <principal>   Allow only this principal in the client cert (https & sslClientAuth only)
+                                    If supplied multiple times, any one of the clientPrincipals must match
+    --extendedClientCheck <t|f>     Additional validation of client certs for the proper key usage (https & sslClientAuth only)
+    --discoveryEnabled <t|f>        Enable/Disable discovery multicast responses (default: false)
+    --discoveryAgentUrl <url>       The URL to use for answering discovery requests. Will be autodetected if not given.
+    --sslProtocol <protocol>        SSL / TLS protocol to enable, can be provided multiple times
+    --sslCipherSuite <suite>        SSL / TLS cipher suite to enable, can be provided multiple times
+    --debug                         Switch on agent debugging
+    --logHandlerClass <class>       Implementation of org.jolokia.server.core.service.api.LogHandler for logging
+                                    Available classes: org.jolokia.server.core.service.impl.QuietLogHandler
+                                                       org.jolokia.server.core.service.impl.JulLogHandler
+    --debugMaxEntries <nr>          Number of debug entries to keep in memory which can be fetched from the Jolokia MBean
+    --maxDepth <depth>              Maximum number of levels for serialization of beans
+    --maxCollectionSize <size>      Maximum number of element in collections to keep when serializing the response
+    --maxObjects <nr>               Maximum number of objects to consider for serialization
+    --restrictorClass <class>       Classname of an custom restrictor which must be loadable from the classpath
+    --policyLocation <url>          Location of a Jolokia policy file
+    --mbeanQualifier <qualifier>    Qualifier to use when registering Jolokia internal MBeans
+    --canonicalNaming <t|f>         whether to use canonicalName for ObjectNames in 'list' or 'search' (default: true)
+    --includeStackTrace <t|f>       whether to include StackTraces for error messages (default: false)
+    --serializeException <t|f>      whether to add a serialized version of the exception in the Jolokia response (default: false)
+    --config <configfile>           Path to a property file from where to read the configuration
+    --help                          This help documentation
+    --version                       Version of this agent (it's {jolokia-version} btw :)
+
+<pid/regexp> can be either a numeric process id or a regular expression. A regular expression is matched
+against the processes' names (ignoring case) and must be specific enough to select exactly one process.
+
+If no <command> is given but only a <pid> the state of the Agent will be toggled
+between "start" and "stop"
+
+If neither <command> nor <pid> is given, a list of Java processes along with their IDs
+is printed
+
+There are several possible reasons, why attaching to a process can fail:
+   * The UID of this launcher must be the very *same* as the process to attach to. It's not sufficient to be root.
+   * The JVM must have HotSpot enabled and be a JVM 1.6 or later.
+   * It must be a Java process ;-)
+
+For more documentation please visit www.jolokia.org
+----
+
+Every option described in <<agent-jvm-config>>
+is reflected by a command line option for the
+launcher. Additionally, the option `--quiet`
+can be used to keep the launcher silent and
+`--verbose` for adding some extra logging.
+
+The launcher knows various operational modes, which needs to
+be provided as a non-option argument and possibly require an
+extra argument.
+
+`start`::
+Use this to attach an agent to an already running, local
+Java process. The additional argument is either the
+_process id_ of the Java process to
+attach to or a _regular expression_
+which is matched against the Java processes names. In the
+later case, exactly one process must match, otherwise an
+exception is raised. The command will return with an
+return code of 0 if an agent has been started. If the
+agent is already running, nothing happens and the launcher
+returns with 1. The URL of the Agent will be printed to
+standard out on an extra line except when the
+`--quiet` option is used.
+
+`stop`::
+Command for stopping an running and dynamically attached
+agent. The required argument is the Java process id or
+an regular expression as described for the
+`start` command. If the agent could be
+stopped, the launcher exits with 0, it exits with 1 if
+there was no agent running.
+
+`toggle`::
+Starts or stops an dynamically attached agent,
+depending on its current state. The Java process ID is
+required as an additional argument. If an agent is
+running, `toggle` will stop it (and
+vice versa). The launcher returns with an exit code of 0
+except when the operation fails. When the agent is
+started, the full agent's URL is printed to standard
+out. `toggle` is the default command
+when only a numeric process id is given as argument or a
+regular expression which _not_ the same
+as a known command.
+
+`status`::
+Command for showing the current agent status for a given
+process. The process id or a regular expression is
+required. The launcher will return with 0 when the agent is
+running, otherwise with 1.
+
+`list`::
+List all local Java processes in a table with the
+process id and the description as columns. This is the
+default command if no non-option argument is given at
+all. `list` returns with 0 upon normal
+operation and with 1 otherwise.
+
+`encrypt`::
+Encrypt the keystore password. You can add the password to encrypt
+as an additional argument or, if not given, it is read from standard input.
+The output of this command is the encrypted password in the format `pass:[[[....]]]`,
+which should be used literally (excluding the final newline) for the keystore password
+when using the option `keystorePassword` in the agent configuration.
+
+The launcher is especially suited for
+_one-shot_, _local_
+queries. For example, a simple shell script for printing out
+the memory usage of a local Java process, including
+(temporarily) attaching an Jolokia agent looks simply like in
+the following example. With a complete client library like
+https://metacpan.org/dist/jmx4perl[jmx4perl,role=externalLink,window=_blank] even more one
+shot scripts are possible footnote:rest-comment[
+And in fact, some support for launching this dynamic
+agent is planned for a forthcoming release of jmx4perl.].
+
+[source,bash,subs="attributes,verbatim"]
+----
+#!/bin/sh
+
+url=`java -jar jolokia-agent-jvm-{jolokia-version}-javaagent.jar start $1 | tail -1`
+
+memory_url="$\{url}read/java.lang:type=Memory/HeapMemoryUsage"
+used=`curl -s "$\{memory_url}/used" | jq .value`
+max=`curl -s "$\{memory_url}/max" | jq .value`
+usage=$(($\{used}*100/$\{max}))
+echo "Memory Usage: $usage %"
+
+java -jar jolokia-agent-jvm-{jolokia-version}-javaagent.jar --quiet stop $1
+----

@@ -30,11 +30,9 @@ import java.util.regex.Pattern;
 import com.sun.net.httpserver.Authenticator;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLParameters;
-import org.jolokia.config.ConfigKey;
-import org.jolokia.config.Configuration;
 import org.jolokia.jvmagent.security.*;
-import org.jolokia.util.JolokiaCipher;
-import org.jolokia.util.NetworkUtil;
+import org.jolokia.server.core.config.*;
+import org.jolokia.server.core.util.JolokiaCipher;
 
 /**
  * Configuration required for the JolokiaServer
@@ -78,7 +76,7 @@ public class JolokiaServerConfig {
      * Constructor which prepares the server configuration from a map
      * of given config options (key: option name, value: option value).
      * Also, default values are used for any
-     * parameter not provided ({@link #getDefaultConfig(Map)}).
+     * parameter not provided ({@link #getDefaultConfig()}).
      *
      * The given configuration consist of two parts: Any global options
      * as defined in {@link ConfigKey} are used for setting up the agent.
@@ -91,35 +89,45 @@ public class JolokiaServerConfig {
      * @param pConfig the configuration options to use.
      */
     public JolokiaServerConfig(Map<String, String> pConfig) {
-        init(pConfig);
+        init(pConfig,getDefaultConfig());
     }
 
     /**
-     * Initialize the configuration with the given map
-     *
-     * @param pConfig map holding the configuration in string representation. A reference to the map will be kept
+     * Empty constructor useful for subclasses which want to do their own initialization. Note that
+     * the subclass must call {@link #init} on its own.
      */
-    protected void init(Map<String, String> pConfig) {
-        Map<String, String> finalCfg = getDefaultConfig(pConfig);
+    protected JolokiaServerConfig() { }
+
+    /**
+     * Initialization
+     *
+     * @param pConfig original config
+     * @param pDefaultConfig default config used as background
+     */
+    protected final void init(Map<String, String> pConfig,Map<String,String> pDefaultConfig) {
+        Map<String, String> finalCfg = new HashMap<>(pDefaultConfig);
         finalCfg.putAll(pConfig);
 
         prepareDetectorOptions(finalCfg);
         addJolokiaId(finalCfg);
 
-        jolokiaConfig = new Configuration();
-        jolokiaConfig.updateGlobalConfiguration(finalCfg);
+        jolokiaConfig = new StaticConfiguration(finalCfg);
         initConfigAndValidate(finalCfg);
     }
 
     // Add a unique jolokia id for this agent
     private void addJolokiaId(Map<String, String> pFinalCfg) {
         if (!pFinalCfg.containsKey(ConfigKey.AGENT_ID.getKeyValue())) {
-            pFinalCfg.put(ConfigKey.AGENT_ID.getKeyValue(), NetworkUtil.getAgentId(hashCode(),"jvm"));
+            String id = Integer.toHexString(hashCode()) + "-jvm";
+            pFinalCfg.put(ConfigKey.AGENT_ID.getKeyValue(), id);
         }
-        pFinalCfg.put(ConfigKey.AGENT_TYPE.getKeyValue(), "jvm");
     }
 
-    protected Map<String, String> getDefaultConfig(Map<String,String> pConfig) {
+    /**
+     * Read in the default configuration from a properties resource
+     * @return the default configuration
+     */
+    protected final Map<String, String> getDefaultConfig() {
         InputStream is = getClass().getResourceAsStream("/default-jolokia-agent.properties");
         return readPropertiesFromInputStream(is, "default-jolokia-agent.properties");
     }
@@ -292,14 +300,14 @@ public class JolokiaServerConfig {
     /**
      * The list of enabled SSL / TLS protocols to serve with
      *
-     * @return the list of enabled protocols
+     * @return the array of enabled protocols
      */
     public String[] getSSLProtocols() { return sslProtocols; }
 
     /**
      * The list of enabled SSL / TLS cipher suites
      *
-     * @return the list of cipher suites
+     * @return the array of cipher suites
      */
     public String[] getSSLCipherSuites() {
         return sslCipherSuites;
@@ -318,7 +326,7 @@ public class JolokiaServerConfig {
             sslProtocols = parameters.getProtocols();
         } else {
             List<String> supportedProtocols = Arrays.asList(parameters.getProtocols());
-            List<String> sslProtocolsList = new ArrayList<String>(Arrays.asList(sslProtocols));
+            List<String> sslProtocolsList = new ArrayList<>(Arrays.asList(sslProtocols));
 
             Iterator<String> pit = sslProtocolsList.iterator();
             while (pit.hasNext()) {
@@ -336,7 +344,7 @@ public class JolokiaServerConfig {
             sslCipherSuites = parameters.getCipherSuites();
         } else {
             List<String> supportedCipherSuites = Arrays.asList(parameters.getCipherSuites());
-            List<String> sslCipherSuitesList = new ArrayList<String>(Arrays.asList(sslCipherSuites));
+            List<String> sslCipherSuitesList = new ArrayList<>(Arrays.asList(sslCipherSuites));
 
             Iterator<String> cit = sslCipherSuitesList.iterator();
             while (cit.hasNext()) {
@@ -372,63 +380,74 @@ public class JolokiaServerConfig {
     }
 
     private void initCustomAuthenticator() {
-        String authenticatorClass = jolokiaConfig.get(ConfigKey.AUTH_CLASS);
+        String authenticatorClass = jolokiaConfig.getConfig(ConfigKey.AUTH_CLASS);
 
         if (authenticatorClass != null) {
-            try {
-                Class authClass = Class.forName(authenticatorClass);
-                if (!Authenticator.class.isAssignableFrom(authClass)) {
-                    throw new IllegalArgumentException("Provided authenticator class [" + authenticatorClass +
-                                                       "] is not a subclass of Authenticator");
-                }
-                lookupAuthenticator(authClass);
-            } catch (ClassNotFoundException e) {
-                throw new IllegalArgumentException("Cannot find authenticator class", e);
-            }
-        }
-    }
+            Class<?> authClass = getAuthenticatorClass(authenticatorClass);
 
-    private void lookupAuthenticator(Class pAuthClass) {
-        try {
-            // prefer constructor that takes configuration
             try {
-                Constructor constructorThatTakesConfiguration = pAuthClass.getConstructor(Configuration.class);
-                authenticator = (Authenticator) constructorThatTakesConfiguration.newInstance(this.jolokiaConfig);
+                // prefer constructor that takes configuration
+                authenticator = createFromConstructorWithConfigArg(authClass);
             } catch (NoSuchMethodException ignore) {
-                // Next try
-                authenticator = lookupAuthenticatorWithDefaultConstructor(pAuthClass, ignore);
-            } catch (InvocationTargetException e) {
-                throw new IllegalArgumentException("Cannot create an instance of custom authenticator class with configuration", e);
+                // fallback to default constructor
+                authenticator = createFromDefaultConstructor(authClass);
             }
-        } catch (InstantiationException e) {
-            throw new IllegalArgumentException("Cannot create an instance of custom authenticator class", e);
-        } catch (IllegalAccessException e) {
-            throw new IllegalArgumentException("Cannot create an instance of custom authenticator class", e);
         }
     }
 
-    private Authenticator lookupAuthenticatorWithDefaultConstructor(Class pAuthClass, NoSuchMethodException ignore) throws InstantiationException, IllegalAccessException {
-        // fallback to default constructor
+    private Authenticator createFromConstructorWithConfigArg(Class<?> pAuthClass) throws NoSuchMethodException {
         try {
-            Constructor defaultConstructor = pAuthClass.getConstructor();
+            Constructor<?> constructorThatTakesConfiguration = pAuthClass.getConstructor(Configuration.class);
+            return (Authenticator) constructorThatTakesConfiguration.newInstance(this.jolokiaConfig);
+        }
+        catch (InvocationTargetException e) {
+            throw new IllegalArgumentException("Cannot invoke 1-arg constructor for custom authenticator " + pAuthClass, e);
+        } catch (InstantiationException e) {
+            throw new IllegalArgumentException("Cannot create an instance of custom authenticator class " + pAuthClass, e);
+        } catch (IllegalAccessException e) {
+            throw new IllegalArgumentException("Cannot access 1-arg constructor for custom authenticator class" + pAuthClass +
+                                               " (is the constructor 'private' ?)", e);
+        }
+    }
+
+    private Authenticator createFromDefaultConstructor(Class<?> pAuthClass) {
+        try {
+            Constructor<?> defaultConstructor = pAuthClass.getConstructor();
             return (Authenticator) defaultConstructor.newInstance();
         } catch (NoSuchMethodException e) {
-            e.initCause(ignore);
-            throw new IllegalArgumentException("Cannot create an instance of custom authenticator class, no default constructor to use", e);
+            throw new IllegalArgumentException("Cannot create an instance of custom authenticator class, " +
+                                               "no default constructor available for " + pAuthClass, e);
         } catch (InvocationTargetException e) {
-            e.initCause(ignore);
-            throw new IllegalArgumentException("Cannot create an instance of custom authenticator using default constructor", e);
+            throw new IllegalArgumentException("Cannot invoke default constructor for custom authenticator " + pAuthClass, e);
+        } catch (InstantiationException e) {
+            throw new IllegalArgumentException("Cannot create an instance of custom authenticator class " + pAuthClass, e);
+        } catch (IllegalAccessException e) {
+            throw new IllegalArgumentException("Cannot access default constructor for custom authenticator class" + pAuthClass +
+                                               " (is the constructor 'private' ?)", e);
+        }
+    }
+
+    private Class<?> getAuthenticatorClass(String pAuthenticatorClass) {
+        try {
+            Class<?> authClass = Class.forName(pAuthenticatorClass);
+            if (!Authenticator.class.isAssignableFrom(authClass)) {
+                throw new IllegalArgumentException("Provided authenticator class [" + pAuthenticatorClass +
+                                                   "] is not a subclass of Authenticator");
+            }
+            return authClass;
+        } catch (ClassNotFoundException e) {
+            throw new IllegalArgumentException("Cannot find authenticator class", e);
         }
     }
 
     private void initAuthenticatorFromAuthMode() {
-        String user = jolokiaConfig.get(ConfigKey.USER);
-        String password = jolokiaConfig.get(ConfigKey.PASSWORD);
+        String user = jolokiaConfig.getConfig(ConfigKey.USER);
+        String password = jolokiaConfig.getConfig(ConfigKey.PASSWORD);
 
-        String authMode = jolokiaConfig.get(ConfigKey.AUTH_MODE);
-        String realm = jolokiaConfig.get(ConfigKey.REALM);
+        String authMode = jolokiaConfig.getConfig(ConfigKey.AUTH_MODE);
+        String realm = jolokiaConfig.getConfig(ConfigKey.REALM);
 
-        ArrayList<Authenticator> authenticators = new ArrayList<Authenticator>();
+        ArrayList<Authenticator> authenticators = new ArrayList<>();
 
         if (useHttps() && useSslClientAuthentication()) {
             authenticators.add(new ClientCertAuthenticator(this));
@@ -440,15 +459,15 @@ public class JolokiaServerConfig {
                     throw new IllegalArgumentException("'password' must be set if a 'user' (here: '" + user + "') is given");
                 }
 
-                authenticators.add(new UserPasswordAuthenticator(realm,user,password));
+                authenticators.add(new UserPasswordHttpAuthenticator(realm,user,password));
             }
         } else if ("jaas".equalsIgnoreCase(authMode)) {
-            authenticators.add(new JaasAuthenticator(realm));
+            authenticators.add(new JaasHttpAuthenticator(realm));
         } else if ("delegate".equalsIgnoreCase(authMode)) {
             authenticators.add(new DelegatingAuthenticator(realm,
-                                                        jolokiaConfig.get(ConfigKey.AUTH_URL),
-                                                        jolokiaConfig.get(ConfigKey.AUTH_PRINCIPAL_SPEC),
-                                                        jolokiaConfig.getAsBoolean(ConfigKey.AUTH_IGNORE_CERTS)));
+                                                        jolokiaConfig.getConfig(ConfigKey.AUTH_URL),
+                                                        jolokiaConfig.getConfig(ConfigKey.AUTH_PRINCIPAL_SPEC),
+                                                        Boolean.parseBoolean(jolokiaConfig.getConfig(ConfigKey.AUTH_IGNORE_CERTS))));
         } else {
             throw new IllegalArgumentException("No auth method '" + authMode + "' known. " +
                                                "Must be either 'basic' or 'jaas'");
@@ -461,19 +480,19 @@ public class JolokiaServerConfig {
         } else {
             // Multiple auth strategies were configured, pass auth if any of them
             // succeed.
-            authenticator = new MultiAuthenticator(MultiAuthenticator.Mode.fromString(jolokiaConfig.get(ConfigKey.AUTH_MATCH)), authenticators);
+            authenticator = new MultiAuthenticator(MultiAuthenticator.Mode.fromString(jolokiaConfig.getConfig(ConfigKey.AUTH_MATCH)), authenticators);
         }
     }
 
     private void initProtocol(Map<String, String> agentConfig) {
-        protocol = agentConfig.containsKey("protocol") ? agentConfig.get("protocol") : "http";
+        protocol = agentConfig.getOrDefault("protocol", "http");
         if (!protocol.equals("http") && !protocol.equals("https")) {
             throw new IllegalArgumentException("Invalid protocol '" + protocol + "'. Must be either 'http' or 'https'");
         }
     }
 
     private void initContext() {
-        context = jolokiaConfig.get(ConfigKey.AGENT_CONTEXT);
+        context = jolokiaConfig.getConfig(ConfigKey.AGENT_CONTEXT);
         if (context == null) {
             context = ConfigKey.AGENT_CONTEXT.getDefaultValue();
         }
@@ -495,7 +514,7 @@ public class JolokiaServerConfig {
         trustManagerAlgorithm = agentConfig.get("trustManagerAlgorithm");
 
         String auth = agentConfig.get("useSslClientAuthentication");
-        useSslClientAuthentication = auth != null && Boolean.valueOf(auth);
+        useSslClientAuthentication = Boolean.parseBoolean(auth);
 
         String password = agentConfig.get("keystorePassword");
         keystorePassword =  password != null ? decipherPasswordIfNecessary(password) : new char[0];
@@ -503,7 +522,7 @@ public class JolokiaServerConfig {
         serverKeyAlgorithm = agentConfig.get("serverKeyAlgorithm");
         clientPrincipals = extractList(agentConfig, "clientPrincipal");
         String xCheck = agentConfig.get("extendedClientCheck");
-        extendedClientCheck = xCheck != null && Boolean.valueOf(xCheck);
+        extendedClientCheck = Boolean.parseBoolean(xCheck);
 
         List<String> sslProtocolsList = extractList(agentConfig, "sslProtocol");
         if (sslProtocolsList != null) {
@@ -534,7 +553,7 @@ public class JolokiaServerConfig {
     // The first element is one without extensions
     // More elements can be given with ".1", ".2", ... added.
     private List<String> extractList(Map<String, String> pAgentConfig, String pKey) {
-        List<String> ret = new ArrayList<String>();
+        List<String> ret = new ArrayList<>();
         if (pAgentConfig.containsKey(pKey)) {
             ret.add(pAgentConfig.get(pKey));
         }
@@ -544,7 +563,7 @@ public class JolokiaServerConfig {
             ret.add(pAgentConfig.get(keyIdx));
             keyIdx = pKey + "." + ++idx;
         }
-        return ret.size() > 0 ? ret : null;
+        return !ret.isEmpty() ? ret : null;
     }
 
     private void initThreadNr(Map<String, String> pAgentConfig) {
@@ -554,7 +573,7 @@ public class JolokiaServerConfig {
     }
 
     private void initExecutor(Map<String, String> agentConfig) {
-        executor = agentConfig.containsKey("executor") ? agentConfig.get("executor") : "single";
+        executor = agentConfig.getOrDefault("executor", "single");
         if (!"single".equalsIgnoreCase(executor) &&
                 !"fixed".equalsIgnoreCase(executor) &&
                 !"cached".equalsIgnoreCase(executor)) {
@@ -585,24 +604,24 @@ public class JolokiaServerConfig {
         }
     }
 
-    protected Map<String, String> readPropertiesFromInputStream(InputStream pIs, String pLabel) {
-        Map ret = new HashMap<String, String>();
+    protected final Map<String, String> readPropertiesFromInputStream(InputStream pIs, String pLabel) {
+        Map<String, String> ret = new HashMap<>();
         if (pIs == null) {
             return ret;
         }
         Properties props = new Properties();
         try {
             props.load(pIs);
-            ret.putAll(props);
+            props.forEach((key, value) -> ret.put((String) key, (String) value));
         } catch (IOException e) {
-            throw new IllegalArgumentException("jolokia: Cannot load properties " + pLabel + " : " + e,e);
+            throw new IllegalArgumentException("jolokia: Cannot load properties " + pLabel + " : " + e, e);
         }
         return ret;
     }
 
     // Add detector specific options if given on the command line
-    protected void prepareDetectorOptions(Map<String, String> pConfig) {
-        StringBuffer detectorOpts = new StringBuffer("{");
+    private void prepareDetectorOptions(Map<String, String> pConfig) {
+        StringBuilder detectorOpts = new StringBuilder("{");
         if (pConfig.containsKey("bootAmx") && Boolean.parseBoolean(pConfig.get("bootAmx"))) {
             detectorOpts.append("\"glassfish\" : { \"bootAmx\" : true }");
         }

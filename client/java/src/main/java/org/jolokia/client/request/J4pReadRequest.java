@@ -34,7 +34,7 @@ import org.json.simple.JSONObject;
 public class J4pReadRequest extends AbtractJ4pMBeanRequest {
 
     // Name of attribute to request
-    private List<String> attributes;
+    private final List<String> attributes;
 
     // Path for extracting return value
     private String path;
@@ -140,13 +140,17 @@ public class J4pReadRequest extends AbtractJ4pMBeanRequest {
     JSONObject toJson() {
         JSONObject ret = super.toJson();
         if (hasSingleAttribute()) {
+            //noinspection unchecked
             ret.put("attribute",attributes.get(0));
         } else if (!hasAllAttributes()) {
             JSONArray attrs = new JSONArray();
+            //noinspection unchecked
             attrs.addAll(attributes);
+            //noinspection unchecked
             ret.put("attribute",attrs);
         }
         if (path != null) {
+            //noinspection unchecked
             ret.put("path",path);
         }
         return ret;
@@ -154,6 +158,7 @@ public class J4pReadRequest extends AbtractJ4pMBeanRequest {
 
     /** {@inheritDoc} */
     @Override
+    @SuppressWarnings("unchecked")
     J4pReadResponse createResponse(JSONObject pResponse) {
         return new J4pReadResponse(this,pResponse);
     }
@@ -173,7 +178,7 @@ public class J4pReadRequest extends AbtractJ4pMBeanRequest {
      * @return true if all attributes should be fetched
      */
     public boolean hasAllAttributes() {
-        return attributes.size() == 0;
+        return attributes.isEmpty();
     }
 
     /**

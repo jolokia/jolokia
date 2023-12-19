@@ -1,0 +1,63 @@
+////
+  Copyright 2009-2023 Roland Huss
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+== News
+
+=== Jolokia 2.0 arrives: A new chapter begins!
+
+[.news-date]
+2023-12-19
+
+image::images/jolokia2-presents.png[role="right"]
+
+We are excited to announce the long-awaited release of Jolokia 2.0, now available in https://repo.maven.apache.org/maven2/org/jolokia/[Maven Central,role=externalLink,window=_blank].
+
+This release is a result of our dedicated effort in reviewing, restructuring, refactoring, and polishing. Here's what Jolokia 2.0 brings to the table:
+
+* Support for JakartaEE 9+ (Servlet API 5+ with `jakarta.servlet` packages)
+* Enhanced connectivity with JMX notifications
+* Integration with Spring Boot 3 and Spring Framework 6
+* A fresh, pluggable service-based architecture
+* A revamped and user-friendly link:reference/html/index.html[Reference Manual] powered by Antora
+* JDK 11 is the minimal version of JDK required. Spring related Jolokia modules require JDK 17. (No worries, we're still supporting Jolokia 1.x with minimal version of JDK 1.6 supported).
+
+And that's not all. We're already planning more frequent updates, including exciting new features like websockets and IPv6 support.
+
+Jolokia 2 also gears up to seamlessly integrate with the upcoming https://github.com/orgs/hawtio/projects/1[Hawtio 4.0,role=externalLink,window=_blank]!
+
+It should be straightforward to upgrade to new Jolokia 2 in JVM agent mode. WAR agent users should use any compatible JakartaEE 9+ container. Check out our xref:migration.adoc[Migration to 2.x] guide for more information.
+
+Your support and patience over these years have been incredible. We're grateful for your enduring loyalty. Let's end this year on a high note and step into 2024 with new energy and possibilities!
+
+Warm regards, +
+Grzegorz, Tadayoshi, Roland
+
+// image::images/jolokia2-presents.png[role="text-center"]
+
+=== Jolokia has a new home!
+
+[.news-date]
+2023-07-13
+
+Yes, finally we moved Jolokia from my (rhuss) personal
+account to a dedicated GitHub organisation:
+https://github.com/jolokia[https://github.com/jolokia,role=externalLink,window=_blank].
+I'm super happy that the story of Jolokia continues and you
+will see quite some new faces very soon. Thanks Tadayoshi,
+Grzegorz, Aurélien and all the other fine folks from Red Hat
+who started to revive Jolokia. Also, Jolokia 2.0 becomes a realistic
+option again. Stay tuned!
+
+xref:news-older.adoc[Older news ...]

@@ -1,0 +1,139 @@
+////
+  Copyright 2009-2023 Roland Huss
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+= Architecture
+
+The main goal of Jolokia is to allow remote access to MBeans available in one or more `javax.management.MBeanServer`
+instances present in a JVM. This goal more or less matches the intent of https://jcp.org/en/jsr/detail?id=160[JSR-160 JMX Remote specification].
+
+While JSR-160 (which is actually incorporated into JSR-3 as part III "JMX Remote API Specification") mentions two remote access methods:
+
+* _connectors_
+* _protocol adaptors_
+
+The emphasis is put on the _connectors_ (and in particular - an RMI connector), while _protocol adaptors_ are summarized with:
+
+____
+For example, an HTML adaptor could display an MBean on a Web browser.
+The view provided by protocol adaptors is necessarily different for each protocol
+and *none are addressed in this phase of the JMX specification*.
+____
+
+JSR-160 _connectors_ are designed in a way that the client can transparently
+invoke MBean calls, regardless whether the MBean resides within a
+local or remote MBeanServer. This provides a good deal of
+comfort for Java clients of this API, but it is also dangerous
+_because_ it hides the remoteness of JMX
+calls. There are several subtle issues, performance
+being one of them. It _does_ matter whether a
+call is invoked locally or remotely. A caller should at least be
+aware what happens and what the consequences are. On the other
+side, there are message passing models which include remoting
+explicitly, so that the caller _knows_ from
+the programming model that she is calling a potentially expensive
+remote call. This is probably the main reason why RMI (the default
+protocol stack of JSR-160 connectors) lost market share to
+more explicit remote protocols.
+
+One problem with JSR-160 mandatory RMI connector is its reliance on RMI and its
+requirement for a complete (Java) object serialization mechanism
+for passing management information over the wire. This closes the
+door for all environments which are not Java (or more precisely, JVM)
+aware. Jolokia uses a typeless approach, where some sort of
+lightweight serialization to JSON is used (in both directions, but
+a bit _asymmetrically_ in its capabilities). Of course
+this approach has some drawbacks, too, but also quite some
+advantages. At least it is unique in the JMX world ;-).
+
+Thus the architecture of Jolokia is built on the concept of JSR-160 _protocol adaptor_ with a big dose of flexibility.
+One of the most striking difference is Jolokia's typeless approach - messages sent over HTTP are represented
+with JSON format.
+
+[#agent-mode]
+== Agent mode
+
+<<fig-architecture-overview>> illustrates the
+environment in which Jolokia operates. The agent exports on the
+frontside a JSON based protocol over HTTP that gets bridged to
+invocation of local JMX MBeans. It builts on JSR-160's _protocol adaptor_
+concept and uses a setup not defined by the specification.
+This gives Jolokia a lot of flexibility and various techniques
+are available for exporting its protocol via HTTP. The most
+prominent being to put the agent into a servlet container. This
+can be a lightweight one like Tomcat or Jetty or a full-blown
+Jakarta EE Server. Since it acts like a usual web application the
+deployment of the agent is well understood and should pose no
+entry barrier for any developer who has ever dealt with Java web
+applications.
+
+[#fig-architecture-overview]
+.Jolokia architecture
+image::architecture.png[]
+
+But there are more options. Specialized agents are able to use an OSGi
+mechanism for exposing web components (https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard Specification for Jakarta™ Servlet,role=externalLink,window=_blank] in Jolokia 2 and https://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.http.html[OSGi CMPN HTTP Service,role=externalLink,window=_blank] in Jolokia 1).
+The JVM agent uses the HTTP-Server included
+with every modern JVM and can be attached dynamically to any
+running Java process. Agents are described in detail in
+xref:agents.adoc[].
+
+Jolokia can be also integrated
+into one's own applications very easily. The `jolokia-server-core`
+library (which comes bundled as a jar), includes a servlet
+which can be easily added to a custom application.
+xref:agents.adoc#agent-war-programmatic[Programmatic usage of the Jolokia agent servlet] contains more information
+about this.
+
+[#proxy-mode]
+== Proxy Mode
+
+Proxy mode is a solution for the scenario when it is impossible to deploy
+the Jolokia agent on the target platform. For this mode, the
+only prerequisite for accessing the target server is a JSR-160
+server connector. Most of the time this happens for political reasons,
+where it is simply not allowed to deploy an extra piece of
+software or where doing so requires a lengthy approval process.
+Another reason could be that the target server already
+exports JMX via JSR-160 and you want to avoid the extra step of
+deploying the agent.
+
+This setup is a bridge scenario that hides complexity of JSR-160 remote connector acces and client uses
+Jolokia protocol to access Jolokia agent, which in turn uses standard (but a bit complex) `javax.management.MBeanServerConnection` to call target server.
+
+A dedicated proxy servlet container is needed for hosting
+`jolokia-agent-war`, which by default supports both
+the _agent mode_ and the _proxy
+mode_. A lightweight container like Tomcat or Jetty is
+a perfect choice for this kind of setup.
+
+Figure <<fig-architecture-proxy>> describes a typical setup for the proxy mode. A
+client sends a usual Jolokia request containing an extra section
+for specifying the target which should be queried. All routing
+information is contained in the request itself so that the proxy
+can act universally without the need of a specific
+configuration.
+
+[#fig-architecture-proxy]
+.Jolokia as JMX Proxy
+image::proxy.png[]
+
+Having said all that, the proxy mode has some limitations which are
+listed in xref:proxy_mode.adoc[].
+
+To summarize, the proxy mode should be used only when
+required. The agent servlet on its own is more powerful than the
+proxy mode since it eliminates an additional layer adding to the
+overall complexity and performance. Also, some features like
+merging of MBeanServers (exposing a unified view) are not available in the proxy mode.

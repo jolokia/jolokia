@@ -1,0 +1,97 @@
+////
+  Copyright 2009-2023 Roland Huss
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+
+[#version]
+=== Getting the agent version (version)
+
+The Jolokia command `version` returns the version of
+the Jolokia agent along with the protocol version.
+
+[#get-version]
+==== GET version request
+
+The GET URL for a version request has the following format:
+
+----
+<base-url>/version
+----
+
+For GET request the `version` part can be
+omitted since this is the default command if no command is
+provided as path info.
+
+[#post-version]
+==== POST version request
+
+A version POST request has only a single key
+`type` which has to be set to
+*`version`*.
+
+[#response-version]
+==== Version response
+
+The response value for a version request looks like:
+
+[,json,subs="attributes,verbatim"]
+----
+{
+  "request": {
+    "type": "version"
+  },
+  "value": {
+    "agent": "{jolokia-version}",
+    "protocol": "7.2",
+    "details": {
+      "agent_version": "{jolokia-version}",
+      "agent_id": "192.168.0.221-21185-5ce94d31-servlet",
+      "server_product": "tomcat",
+      "server_vendor": "Apache",
+      "server_version": "10.1.16",
+      "secured": true,
+      "url": "http://192.168.0.221:8080/jolokia"
+    },
+    "id": "192.168.0.221-21185-5ce94d31-servlet",
+    "config": {
+      "maxDepth": "15",
+      "discoveryEnabled": "false",
+      "agentId": "192.168.0.221-21185-5ce94d31-servlet",
+      "maxCollectionSize": "0",
+      "debug": "false",
+      "canonicalNaming": "true",
+      "historyMaxEntries": "10",
+      "serializeException": "false",
+      "includeStackTrace": "false",
+      "maxObjects": "0",
+      "detectorOptions": "{}",
+      "debugMaxEntries": "100"
+    },
+    "info": {
+      "proxy": {},
+      "jmx": {}
+    }
+  },
+  "status": 200,
+  "timestamp": 1702482830
+}
+----
+
+`protocol` in the response value contains the
+protocol version used, `agent` is the version of
+the Jolokia agent. See xref:jolokia_protocol.adoc#versions[Jolokia protocol versions] for the various
+protocol versions and the interoperability. If the agent is able
+to detect the server, additional meta information about this
+server is returned (i.e. the product name, the vendor and
+optionally some extra information added by the server detector).

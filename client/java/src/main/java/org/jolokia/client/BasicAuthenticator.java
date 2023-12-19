@@ -1,9 +1,14 @@
 package org.jolokia.client;
 
-import java.io.IOException;
-
-import org.apache.http.*;
-import org.apache.http.auth.*;
+import org.apache.http.HttpException;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpRequestInterceptor;
+import org.apache.http.auth.AuthScheme;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.AuthState;
+import org.apache.http.auth.Credentials;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.impl.auth.BasicScheme;
@@ -69,14 +74,14 @@ public class BasicAuthenticator implements J4pAuthenticator {
     static class PreemptiveAuthInterceptor implements HttpRequestInterceptor {
 
         // Auth scheme to use
-        private AuthScheme authScheme;
+        private final AuthScheme authScheme;
 
         PreemptiveAuthInterceptor(AuthScheme pScheme) {
             authScheme = pScheme;
         }
 
         /** {@inheritDoc} */
-        public void process(final HttpRequest request, final HttpContext context) throws HttpException, IOException {
+        public void process(final HttpRequest request, final HttpContext context) throws HttpException {
             AuthState authState = (AuthState) context.getAttribute(HttpClientContext.TARGET_AUTH_STATE);
 
             if (authState.getAuthScheme() == null) {

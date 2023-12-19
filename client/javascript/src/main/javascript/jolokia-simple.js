@@ -26,9 +26,29 @@
  *
  * @author roland
  */
+"use strict";
 
-(function() {
-    var builder = function($,Jolokia) {
+// Uses Node, AMD or browser globals to create a module.
+(function (root, factory) {
+    if (typeof define === "function" && define.amd) {
+        // AMD. Register as an anonymous module.
+        define(["./jolokia"], factory);
+    } else if (typeof module === "object" && module.exports) {
+        // Node. Does not work with strict CommonJS, but
+        // only CommonJS-like environments that support module.exports,
+        // like Node.
+        module.exports = factory(require("./jolokia"));
+    } else {
+        // Browser globals
+        if (root.Jolokia) {
+            factory(root.Jolokia);
+        } else {
+            console.error("No Jolokia definition found. Please include jolokia.js before jolokia-simple.js");
+        }
+    }
+}(typeof self !== "undefined" ? self : this, function (Jolokia) {
+
+    var builder = function(Jolokia) {
         /**
          * Get one or more attributes
          *
@@ -41,17 +61,17 @@
          * @return the value of the attribute, possibly a complex object
          */
         function getAttribute(mbean,attribute,path,opts) {
-            if (arguments.length === 3 && $.isPlainObject(path)) {
+            if (arguments.length === 3 && isPlainObject(path)) {
                 opts = path;
                 path = null;
-            } else if (arguments.length == 2 && $.isPlainObject(attribute)) {
+            } else if (arguments.length == 2 && isPlainObject(attribute)) {
                 opts = attribute;
                 attribute = null;
                 path = null;
             }
             var req = { type: "read", mbean: mbean, attribute: attribute };
             addPath(req,path);
-            return extractValue(this.request(req,prepareSucessCallback(opts)),opts);
+            return extractValue(this.request(req,prepareSuccessCallback(opts)),opts);
         }
 
         /**
@@ -66,13 +86,13 @@
          * @return the previous value
          */
         function setAttribute(mbean,attribute,value,path,opts) {
-            if (arguments.length === 4 && $.isPlainObject(path)) {
+            if (arguments.length === 4 && isPlainObject(path)) {
                 opts = path;
                 path = null;
             }
             var req = { type: "write", mbean: mbean, attribute: attribute, value: value };
             addPath(req,path);
-            return extractValue(this.request(req,prepareSucessCallback(opts)),opts);
+            return extractValue(this.request(req,prepareSuccessCallback(opts)),opts);
         }
 
         /**
@@ -89,7 +109,7 @@
         function execute(mbean,operation) {
             var req = { type: "exec", mbean: mbean, operation: operation };
             var opts, end = arguments.length;
-            if (arguments.length > 2 && $.isPlainObject(arguments[arguments.length-1])) {
+            if (arguments.length > 2 && isPlainObject(arguments[arguments.length-1])) {
                 opts = arguments[arguments.length-1];
                 end = arguments.length-1;
             }
@@ -100,7 +120,7 @@
                 }
                 req.arguments = args;
             }
-            return extractValue(this.request(req,prepareSucessCallback(opts)),opts);
+            return extractValue(this.request(req,prepareSuccessCallback(opts)),opts);
         }
 
         /**
@@ -119,7 +139,7 @@
          */
         function search(mbeanPattern,opts) {
             var req = { type: "search", mbean: mbeanPattern};
-            return extractValue(this.request(req,prepareSucessCallback(opts)),opts);
+            return extractValue(this.request(req,prepareSuccessCallback(opts)),opts);
         }
 
         /**
@@ -145,13 +165,13 @@
          * @param version and other meta information as object
          */
         function version(opts) {
-            return extractValue(this.request({type: "version"},prepareSucessCallback(opts)),opts);
+            return extractValue(this.request({type: "version"},prepareSuccessCallback(opts)),opts);
         }
 
 
         /**
          * Get all MBeans as registered at the specified server. A C<$path> can be
-         * specified in order to fetchy only a subset of the information. When no path is
+         * specified in order to fetch only a subset of the information. When no path is
          * given, the returned value has the following format
          *
          * <pre>
@@ -162,7 +182,7 @@
          *       {
          *           "attr" :
          *           {
-         *              &lt;atrribute name&gt; :
+         *              &lt;attribute name&gt; :
          *              {
          *                 desc : &lt;description of attribute&gt;
          *                 type : &lt;java type&gt;,
@@ -198,22 +218,21 @@
          * list&gt;/("attribute"|"operation")/&lt;index&gt;">
          * (e.g. <code>java.lang/name=Code Cache,type=MemoryPool/attribute/0</code>). A path can be
          * provided partially, in which case the remaining map/array is returned. The path given must
-         * be already properly escaped (i.e. slashes must be escaped like <code>!/</code> and exlamation
+         * be already properly escaped (i.e. slashes must be escaped like <code>!/</code> and exclamation
          * marks like <code>!!</code>.
          * See also the Jolokia Reference Manual for a more detailed discussion of inner paths and escaping.
-         *
          *
          * @param path optional path for diving into the list
          * @param opts optional opts passed to Jolokia.request()
          */
         function list(path,opts) {
-            if (arguments.length == 1 && !$.isArray(path) && $.isPlainObject(path)) {
+            if (arguments.length == 1 && !Array.isArray(path) && isPlainObject(path)) {
                 opts = path;
                 path = null;
             }
             var req = { type: "list" };
             addPath(req,path);
-            return extractValue(this.request(req,prepareSucessCallback(opts)),opts);
+            return extractValue(this.request(req,prepareSuccessCallback(opts)),opts);
         }
 
         // =======================================================================
@@ -223,9 +242,9 @@
         // taken directly
         function addPath(req,path) {
             if (path != null) {
-                if ($.isArray(path)) {
-                    req.path = $.map(path,Jolokia.escape).join("/");
-                } else {
+                if (Array.isArray(path)) {
+                    req.path = path.map(Jolokia.escape).join("/");
+                } else {1
                     req.path = path;
                 }
             }
@@ -246,9 +265,9 @@
         }
 
         // Prepare callback to receive directly the value (instead of the full blown response)
-        function prepareSucessCallback(opts) {
+        function prepareSuccessCallback(opts) {
             if (opts && opts.success) {
-                var parm = $.extend({},opts);
+                var parm = Jolokia.assignObject({}, opts);
                 parm.success = function(resp) {
                     opts.success(resp.value);
                 };
@@ -258,8 +277,12 @@
             }
         }
 
+        function isPlainObject(obj) {
+            return obj && Object.prototype.toString.call(obj) === "[object Object]";
+        }
+
         // Extend the Jolokia prototype with new functionality (mixin)
-        $.extend(Jolokia.prototype,
+        Jolokia.assignObject(Jolokia.prototype,
                 {
                     "getAttribute" : getAttribute,
                     "setAttribute" : setAttribute,
@@ -271,21 +294,5 @@
         return Jolokia;
     };
 
-    // =====================================================================================================
-    // Register either at the global Jolokia object global or as an AMD module
-    (function (root, factory) {
-        if (typeof define === 'function' && define.amd) {
-            // AMD. Register as a named module
-            define(["jquery","jolokia"], factory);
-        } else {
-            if (root.Jolokia) {
-                builder(jQuery,root.Jolokia);
-            } else {
-                console.error("No Jolokia definition found. Please include jolokia.js before jolokia-simple.js");
-            }
-        }
-    }(this, function (jQuery,Jolokia) {
-        return builder(jQuery,Jolokia);
-    }));
-})();
-
+    return builder(Jolokia);
+}));

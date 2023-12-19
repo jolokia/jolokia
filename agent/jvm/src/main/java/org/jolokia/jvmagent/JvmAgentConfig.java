@@ -20,7 +20,7 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jolokia.util.EscapeUtil;
+import org.jolokia.server.core.util.EscapeUtil;
 
 /**
  * Holds all Http-Server and Jolokia configuration.
@@ -37,10 +37,9 @@ public class JvmAgentConfig extends JolokiaServerConfig {
     private boolean isStopMode;
 
     /**
-     * Constructor which parser an agent argument string
+     * Constructor which also specifies whether initialization should be done lazy or not
      *
-     * @param pArgs arguments glued together as provided on the commandline
-     *        for an agent parameter
+     * @param pArgs arguments as given on the command line
      */
     public JvmAgentConfig(String pArgs) {
         this(split(pArgs));
@@ -52,16 +51,18 @@ public class JvmAgentConfig extends JolokiaServerConfig {
      * @param pConfig config map with key value pairs
      */
     public JvmAgentConfig(Map<String,String> pConfig) {
-        super(pConfig);
-    }
+        Map<String,String> defaultConfig = getDefaultConfig();
 
-    @Override
-    /** {@inheritDoc} */
-    protected void init(Map<String, String> pConfig) {
-        super.init(pConfig);
+        // If the key 'config' in the configuration file point to another properties file, read this in, too.
+        if (pConfig.containsKey("config")) {
+            defaultConfig.putAll(readConfig(pConfig.get("config")));
+        }
+        init(pConfig,defaultConfig);
+
         // Special mode used by the client in order to indicate whether to stop/start the server.
         initMode(pConfig);
     }
+
 
     /**
      * The mode is 'stop' indicates that the server should be stopped when used in dynamic mode
@@ -81,34 +82,16 @@ public class JvmAgentConfig extends JolokiaServerConfig {
         isStopMode = "stop".equals(mode);
     }
 
-
-    /**
-     * Beside reading the default configuration from an internal property file,
-     * also add extra configuration given in an external properties where the path
-     * to this property file is given under the key "config"
-     *
-     * @param pConfig the configuration provided during construction
-     * @return the default configuration used as fallback
-     */
-    @Override
-    protected Map<String, String> getDefaultConfig(Map<String,String> pConfig) {
-        Map<String,String> config = super.getDefaultConfig(pConfig);
-        if (pConfig.containsKey("config")) {
-            config.putAll(readConfig(pConfig.get("config")));
-        }
-        return config;
-    }
-
     // ======================================================================================
     // Parse argument
 
     // Split arguments into a map
     private static Map<String, String> split(String pAgentArgs) {
-        Map<String,String> ret = new HashMap<String, String>();
-        if (pAgentArgs != null && pAgentArgs.length() > 0) {
+        Map<String,String> ret = new HashMap<>();
+        if (pAgentArgs != null && !pAgentArgs.isEmpty()) {
             for (String arg : EscapeUtil.splitAsArray(pAgentArgs, EscapeUtil.CSV_ESCAPE, ",")) {
                 String[] prop = arg.split("=",2);
-                if (prop == null || prop.length != 2) {
+                if (prop.length != 2) {
                     throw new IllegalArgumentException("jolokia: Invalid option '" + arg + "'");
                 } else {
                     ret.put(prop[0],prop[1]);

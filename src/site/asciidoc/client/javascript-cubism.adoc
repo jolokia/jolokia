@@ -1,0 +1,144 @@
+////
+  Copyright 2009-2023 Roland Huss
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+        https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+
+// TODO: check and update if needed
+== Jolokia-Cubism Integration
+
+https://square.github.com/cubism/[Cubism,role=externalLink,window=_blank] is a
+fine JavaScript library for plotting timeseries data based on
+https://d3js.org/[d3.js,role=externalLink,window=_blank]. It provides support for
+various backend sources like
+https://graphite.wikidot.com/[Graphite,role=externalLink,window=_blank] or
+https://square.github.com/cube/[Cube,role=externalLink,window=_blank] and also for
+Jolokia. It is easy to use and provides innovative chart types
+like a
+https://vis.berkeley.edu/papers/horizon/[horizon,role=externalLink,window=_blank]
+chart. The Jolokia integration polls the Jolokia agent
+periodically and remembers the values locally. It uses the
+link:../reference/html/manual/clients.html#js-poller[scheduling
+facility] of the Jolokia JavaScript library by sending a
+single bulk request for fetching the data for all charts and is
+hence very efficient.
+
+The following sections show some simple real time demos of
+this integration. After that, some concepts are explained. The
+full JavaScript source can be downloaded
+link:../js/javascript-cubism.js[here].
+
+=== HeapMemory
+
+The following demo directly queries Jolokia's
+https://labs.consol.de/jenkins[CI,role=externalLink,window=_blank] which
+is a plain Tomcat 7. The memory charts show the heap memory
+usage as a fraction of the maximum available heap. Note that
+different colors indicate different value ranges in this
+https://github.com/square/cubism/wiki/Horizon[horizon
+chart,role=externalLink,window=_blank]. The activity of the two garbage collectors for
+the young and old generation are shown below. Feel free to
+trigger a garbage collection on your own by pressing the
+button and look how the chart is changing.
+
+++++
+<div id="memory"></div>
+<button style="margin-top: 10px; margin-left: 25px;" onclick="gc()">Trigger Garbage Collection</button>
+++++
+
+=== Requests (per 10 seconds)
+
+The second demo visualizes the number of requests served by
+this Tomcat instance. The requests are grouped by 10s, so
+the values are the number of requests received in the last
+10 seconds. The green charts show the requests for the
+https://jolokia.org/jolokia[Jolokia agent,role=externalLink,window=_blank] and the
+href="https://labs.consol.de/jenkins[Jenkins CI server,role=externalLink,window=_blank]. Since this demo queries the Jolokia
+agent every second, the first chart should show up at least
+10 request per 10 seconds. Finally the number of requests
+served by all deployed servlets is drawn in blue.
+
+++++
+<div id="request"></div>
+++++
+
+=== Examples
+
+Plotting the result of a single Jolokia request is simple
+and follows the general pattern used by Cubism. You first
+create a Jolokia source from the Cubism context and create
+metrics from this source. When a metric is created, it
+registers one or more Jolokia request for the
+link:../reference/html/manual/clients.html#js-poller[Jolokia scheduler]
+
+[source,javascript]
+----
+// Create a top-level Cubism Context
+var context = cubism.context();
+
+// Create a source for Jolokia metrics pointing to the agent
+// at 'https://jolokia.org/jolokia'
+var jolokia = context.jolokia("https://jolokia.org/jolokia");
+
+// Create a metric for the absolute Heap memory usage
+var memoryAbs = jolokia.metric({
+    type: 'read',
+    mbean: 'java.lang:type=Memory',
+    attribute: 'HeapMemoryUsage',
+    path: 'used'
+    }, "HeapMemory Usage");
+
+// Use d3 to attach the metrics with a specific graph type
+// ('horizon' in this case) to the document
+d3.select("#charts").call(function(div) {
+    div.append("div")
+        .data([memoryAbs])
+        .call(context.horizon())
+});
+----
+
+The following example present an advanced concept if more
+flexibility is required. When the first argument to
+`jolokia.metric()` is a function, this function is
+feed periodically with Jolokia response objects resulting from the
+requests object given as second argument. The final
+argument can be an options object, which in this case indicates
+the label of the chart and the type to be a delta chart,
+measuring only the increase rate for ten seconds.
+
+This sample also shows how to use wildcard patterns in a read
+request to fetch multiple values at once in a generic
+fashion. Wildcard reading is explained in detail in the
+link:../reference/html/manual/jolokia_protocol.html#read[reference manual].
+
+[source,javascript]
+----
+var allRequestsMetric = jolokia.metric(
+    function (resp) {
+        var attrs = resp.value;
+        var sum = 0;
+        for (var key in attrs) {
+            sum += attrs[key].requestCount;
+        }
+        return sum;
+    },
+    {
+        type: "read",
+        mbean: "Catalina:j2eeType=Servlet,*",
+        attribute: "requestCount"
+    },
+    {
+        name: "All Requests",
+        delta: 10 * 1000
+    });
+----

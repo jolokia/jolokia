@@ -1,0 +1,120 @@
+////
+  Copyright 2009-2023 Roland Huss
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+[#client-jmx-adapter]
+== MBeanServerConnection adapter
+
+The JMX adapter library simulates a local or remote `MBeanServerConnection` by using the Jolokia protocol for connecting to a Jolokia agent.
+This allows you to use tools that leverage a JSR-160 `MBeanServerConnection` such as JConsole, Visual VM or Java Mission Control for connecting to a Jolokia endpoint.
+
+.Recommended plugins
+****
+For Java Mission Control, a set of plugins are provided at
+https://github.com/skarsaune/jmc-cloud-extensions/[role=externalLink,window=_blank] and for
+Java Visual VM a Jolokia plugin can be downloaded from https://skarsaune.github.io/jolokia-jmc-update-site/visualvm/org-jolokia-jmx-plugin.nbm[role=externalLink,window=_blank]
+****
+
+[#remote-jmx-example]
+=== JSR-160 Connection to Jolokia
+
+The example below shows how to connect programmatically via a JSR-160 `JMXConnector` to a Jolokia enabled Java process listening on `localhost:8778`.
+
+For this example to work you need the following prerequisites:
+
+* Jolokia's `remote-jmx-adapter-{jolokia-version}-javaagent.jar`
+must be on the classpath. See the link:/download.html[Download page] for the latest versions of this adapter jar.
+* Jolokia has to be accessible running at
+http://localhost:8778/jolokia/. If user/password authentication is enabled for the agent, uncomment the line below and insert your credentials.
+
+[,java]
+----
+import javax.management.remote.*;
+import javax.management.ObjectName;
+import java.util.Arrays;
+
+public class ConnectWithJolokiaDemo {
+  public static void main(String[] args) throws Exception {
+    Map<String, Object> options = new HashMap<>();
+    // Add user & password if the Agent is secured:
+    options.put(JMXConnector.CREDENTIALS, new String[] { "jolokia", "jolokia" });
+
+    // https will be used if port number fits the pattern *443
+    // or if options contains "jmx.remote.x.check.stub"->"true"
+    JMXConnector connector = JMXConnectorFactory.connect(
+        new JMXServiceURL("service:jmx:jolokia://localhost:8778/jolokia"),
+        options);
+    connector.connect();
+    System.out.println("Memory used: " +
+        connector.getMBeanServerConnection().getAttribute(
+            ObjectName.getInstance("java.lang:type=Memory"),"HeapMemoryUsage"));
+  }
+}
+----
+
+[#kubernetes-jmx-example]
+=== JSR-160 Connection to a JVM running in Kubernetes
+
+If you are running a Jolokia-enabled JVM within a Kubernetes Pod, you can directly connect to this JVM from your local machine with the Jolokia JSR-160 connector. See the runnable example below for more details.
+
+Before compiling and running the example below, please check that the following prerequesites are met:
+
+* Jolokia's `remote-jmx-adapter-{jolokia-version}-javaagent.jar`
+must be on the classpath. See the link:/download.html[Download page] for the latest versions of this adapter jar.
+* In addition, the Jolokia Kubernetes extension
+`jolokia-kubernetes-{jolokia-version}-javaagent.jar`
+must be on the classpath. This can be also downloaded from the
+link:/download.html[Download page].
+* Configuration and authentication for the Kubernetes context setup are as usual. I.e., you must be able to run `kubectl` with the cluster to connect to. You can check this by `kubectl get namespace`.
+* For the example below, we assume a Java process running in a Pod `petclinic-6959c9b4cb-gk8np` in namespace `default` that has a Jolokia agent enabled. This agent is supposed to listen on port `8778`.
+
+[,java]
+----
+import javax.management.remote.*;
+import javax.management.ObjectName;
+import org.jolokia.kubernetes.client.KubernetesJmxConnector;
+
+public class ConnectInKubernetesDemo {
+  public static void main(String[] args) {
+    Map options = new HashMap();
+    // Add the Kubernetes context from the Kubernetes configuration that
+    // points to your cluster. By default, the currently active context
+    // is used.
+    // options.put(KubernetesJmxConnector.KUBERNETES_CLIENT_CONTEXT,
+    //             "docker-desktop");
+    JMXConnector connector = JMXConnectorFactory.connect(
+        new JMXServiceURL("service:jmx:kubernetes:///default/petclinic-6959c9b4cb-gk8np:8778/jolokia/"),
+        options);
+    connector.connect();
+    System.out.println("Memory used: " +
+        connector.getMBeanServerConnection().getAttribute(
+            ObjectName.getInstance("java.lang:type=Memory"),"HeapMemoryUsage"));
+  }
+}
+----
+
+As an alternative to connecting programmatically to the Jolokia agent, you can also leverage `jconsole` to explore JMX on the remote JVM.
+You need to add the Jolokia connector client libraries when launching `jconsole` like in:
+
+[,subs="attributes,verbatim"]
+----
+java -cp jolokia-agent-jvm-{jolokia-version}-javaagent.jar:\
+jolokia-client-jmx-adapter-{jolokia-version}-standalone.jar:\
+jolokia-client-kubernetes-{jolokia-version}-standalone.jar \
+-Djconsole.showOutputViewer sun.tools.jconsole.JConsole
+----
+
+After adding these Jolokia jars to `sun.tools.jconsole.JConsole` class we can then access remote server using Jolokia JMX URL:
+
+image::jconsole.png[]

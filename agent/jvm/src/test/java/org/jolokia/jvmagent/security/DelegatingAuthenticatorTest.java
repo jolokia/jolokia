@@ -19,16 +19,17 @@ import java.io.IOException;
 import java.io.Writer;
 
 import javax.net.ssl.*;
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-import javax.servlet.http.*;
 
 import com.sun.net.httpserver.*;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.jolokia.server.core.osgi.security.AuthorizationHeaderParser;
 import org.jolokia.test.util.EnvTestUtil;
-import org.jolokia.util.AuthorizationHeaderParser;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.servlet.Context;
-import org.mortbay.jetty.servlet.ServletHolder;
 import org.testng.annotations.*;
 
 import static org.testng.Assert.*;
@@ -44,27 +45,27 @@ public class DelegatingAuthenticatorTest extends BaseAuthenticatorTest {
 
     @DataProvider
     public static Object[][] headers() {
-        return new Object[][]{{"Authorization"}, {AuthorizationHeaderParser.JOLOKIA_ALTERNATE_AUTHORIZATION_HEADER}};
+        return new Object[][]{{"Authorization"}, { AuthorizationHeaderParser.JOLOKIA_ALTERNATE_AUTHORIZATION_HEADER}};
     }
 
     @BeforeClass
     public void setup() throws Exception {
         int port = EnvTestUtil.getFreePort();
         jettyServer = new Server(port);
-        Context jettyContext = new Context(jettyServer, "/");
+        ServletContextHandler jettyContext = new ServletContextHandler(jettyServer, "/");
         ServletHolder holder = new ServletHolder(createServlet());
         jettyContext.addServlet(holder, "/test/*");
 
         jettyServer.start();
-        url = "http://localhost:" + port + "/test";
+        url = "http://127.0.0.1:" + port + "/test";
     }
 
     private Servlet createServlet() {
         return new HttpServlet() {
-            protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+            protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
                 String auth = req.getHeader("Authorization");
                 if (auth == null || !auth.equals("Bearer blub")) {
-                    resp.setStatus(401);
+                    resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 } else {
                     resp.setContentType("text/json");
                     Writer writer = resp.getWriter();
@@ -154,7 +155,7 @@ public class DelegatingAuthenticatorTest extends BaseAuthenticatorTest {
 
     @Test
     public void invalidPath() {
-        String  data[] = new String[] { "json:never/find/me", "never",
+        String[] data = new String[] { "json:never/find/me", "never",
                                         "json:metadata/name/yet/deeper", "deeper" };
         for (int i = 0; i < data.length; i +=2) {
             DelegatingAuthenticator authenticator = new DelegatingAuthenticator("jolokia", url, data[i], false);

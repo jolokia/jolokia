@@ -6,7 +6,7 @@ import org.testng.annotations.Test;
 public class BasicAuthenticatorTest {
 
     @Test
-    public void testPreemptive() throws Exception {
+    public void testPreemptive() {
         J4pAuthenticator auth = new BasicAuthenticator().preemptive();
         HttpClientBuilder builder = HttpClientBuilder.create();
         auth.authenticate(builder, "test", "test");

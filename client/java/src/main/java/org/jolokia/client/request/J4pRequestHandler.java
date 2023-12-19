@@ -26,7 +26,9 @@ import java.util.regex.Pattern;
 
 import org.apache.http.*;
 import org.apache.http.client.methods.*;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.json.simple.*;
 import org.json.simple.parser.JSONParser;
@@ -42,10 +44,10 @@ import org.json.simple.parser.ParseException;
 public class J4pRequestHandler {
 
     // j4p agent URL for the agent server
-    private URI j4pServerUrl;
+    private final URI j4pServerUrl;
 
     // Optional default target configuration
-    private J4pTargetConfig defaultTargetConfig;
+    private final J4pTargetConfig defaultTargetConfig;
 
     /**
      * Constructor
@@ -104,6 +106,7 @@ public class J4pRequestHandler {
         JSONObject requestContent = getJsonRequestContent(pRequest);
         HttpPost postReq = new HttpPost(createRequestURI(j4pServerUrl.getPath(),queryParams));
         postReq.setEntity(new StringEntity(requestContent.toJSONString(),"utf-8"));
+        postReq.addHeader(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
         return postReq;
     }
 
@@ -115,13 +118,12 @@ public class J4pRequestHandler {
         String base = pUri.getPath();
         if (base == null) {
             return "/";
-        } else if (!base.endsWith("/")) {
-            return base + "/";
-        } else {
-            return base;
         }
+        if (!base.endsWith("/")) {
+            return base + "/";
+        }
+        return base;
     }
-
 
     /**
      * Get an HTTP Request for requesting multiples requests at once
@@ -136,9 +138,11 @@ public class J4pRequestHandler {
         HttpPost postReq = new HttpPost(createRequestURI(j4pServerUrl.getPath(),queryParams));
         for (T request : pRequests) {
             JSONObject requestContent = getJsonRequestContent(request);
+            //noinspection unchecked
             bulkRequest.add(requestContent);
         }
         postReq.setEntity(new StringEntity(bulkRequest.toJSONString(),"utf-8"));
+        postReq.addHeader(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
         return postReq;
     }
 
@@ -180,6 +184,7 @@ public class J4pRequestHandler {
     private JSONObject getJsonRequestContent(J4pRequest pRequest) {
         JSONObject requestContent = pRequest.toJson();
         if (defaultTargetConfig != null && pRequest.getTargetConfig() == null) {
+            //noinspection unchecked
             requestContent.put("target", defaultTargetConfig.toJson());
         }
         return requestContent;
@@ -206,7 +211,7 @@ public class J4pRequestHandler {
 
     // prepare query parameters
     private String prepareQueryParameters(Map<J4pQueryParameter, String> pProcessingOptions) {
-        if (pProcessingOptions != null && pProcessingOptions.size() > 0) {
+        if (pProcessingOptions != null && !pProcessingOptions.isEmpty()) {
             StringBuilder queryParams = new StringBuilder();
             for (Map.Entry<J4pQueryParameter,String> entry : pProcessingOptions.entrySet()) {
                 queryParams.append(entry.getKey().getParam()).append("=").append(entry.getValue()).append("&");

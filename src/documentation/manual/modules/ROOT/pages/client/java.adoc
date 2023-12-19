@@ -1,0 +1,499 @@
+////
+  Copyright 2009-2023 Roland Huss
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+[#client-java]
+== Java Client Library
+
+The Java client library provides an easy access to the Jolokia
+agent from within Java. Since JSR-160 connectors themselves
+provide Java based remote access to MBeans one might wonder about
+the benefits of  a Jolokia Java binding. There are several,
+though:
+
+* It provides a typeless access to remote MBeans. The big
+advantage is that for any non-OpenMBean access to custom typed
+objects is still possible without having the type information
+locally in the classpath.
+* Jolokia can be used in setups where JSR-160 connectors can not
+be used. I.e. in firewall secured environments it is much easier
+to get through to a Jolokia Agent than to an JSR-160 connector
+using RMI as transport protocol.
+* _Remoteness_ is explicit in this API instead
+of JSR-160 connector's seeked _transparent
+remoteness_. RMI has some arguable conceptually
+advantages, but hiding all remote aspects proved to have quite
+some disadvantages when it comes to the programming
+model. Explicit awareness of a 'heavy-weight' remote call is
+better than false transparency in order to know the price tag.
+
+The Java client library follows a strict request-response
+paradigm, much like the underlying HTTP. It uses generics heavily
+and can be centered around three classes:
+`J4pClient` is the client side agent, which
+has various variants of a `execute()` for
+sending requests. This method takes one or more
+`J4pRequest` objects as arguments and returns
+one or more `J4pResponse` objects as result.
+
+.What the heck is this "J4p"?
+****
+That's a reminiscence to Jolokia's roots which lies in
+https://metacpan.org/dist/jmx4perl[Jmx4Perl,role=externalLink,window=_blank]. It is always good
+to remember where one comes from ;-)
+****
+
+But before we got into the details, the next section gives a first
+tutorial to get a feeling how the API can be used.
+
+[#client-java-tutorial]
+=== Tutorial
+
+As seen in the following example, the usage is quite easy. First
+a, client object `client` is created pointing
+to a Jolokia agent at `\http://localhost:8080/jolokia`.
+A read request for querying the heap memory usage from the
+`MemoryMXBean` is created and then send via
+the `execute()` to the agent. The
+response returned is of type
+`J4pReadResponse` and holds the result
+which finally is printed out to standard output.
+
+[,java]
+----
+import org.jolokia.client.J4pClient;
+import org.jolokia.client.request.*;
+
+public class MemoryDemo {
+  public static void main(String[] args) {
+    J4pClient client = J4pClient.url("http://localhost:8080/jolokia")
+        .user("jolokia")
+        .password("jolokia")
+        .build();
+    J4pReadRequest request =
+        new J4pReadRequest("java.lang:type=Memory", "HeapMemoryUsage");
+    request.setPath("used");
+    J4pReadResponse response = client.execute(request);
+    System.out.println("Memory used: " + response.getValue());
+  }
+}
+----
+
+In order to compile and run this sample, `jolokia-client-java.jar` library is needed (see link:/download.html[Download]) as well as
+some additional support libraries:
+
+* https://repo1.maven.org/maven2/org/apache/httpcomponents/httpclient/4.5.14/httpclient-4.5.14.jar[httpclient-4.5.14.jar,role=externalLink,window=_blank]
+* https://repo1.maven.org/maven2/org/apache/httpcomponents/httpcore/4.4.16/httpcore-4.4.16.jar[httpcore-4.4.16.jar,role=externalLink,window=_blank]
+* https://repo1.maven.org/maven2/com/googlecode/json-simple/json-simple/1.1.1/json-simple-1.1.1.jar[json-simple-1.1.1.jar,role=externalLink,window=_blank]
+* https://repo1.maven.org/maven2/commons-logging/commons-logging/1.2/commons-logging-1.2.jar[commons-logging-1.2.jar,role=externalLink,window=_blank]
+* https://repo1.maven.org/maven2/commons-codec/commons-codec/1.16.0/commons-codec-1.16.0.jar[commons-codec-1.16.0.jar,role=externalLink,window=_blank]
+
+For Maven users, the following dependency is sufficient (it will include
+the other two as transitive dependencies):
+
+[,xml,subs="attributes,verbatim"]
+----
+<dependency>
+    <groupId>org.jolokia</groupId>
+    <artifactId>jolokia-client-java</artifactId>
+    <version>{jolokia-version}</version>
+</dependency>
+----
+
+[#client-client]
+=== J4pClient
+
+`J4pClient` is the entry point for sending
+requests to a remote Jolokia agent. It can be created in multiple
+ways. For simple cases, public constructors are provided taking
+the mandatory Jolokia agent URL and optionally a
+`org.apache.http.client.HttpClient`
+instance which is used for the HTTP business. The recommended style
+is to use the `J4pClientBuilder`, though. This way, all
+parameters for the HTTP communication can easily be set:
+
+[,java]
+----
+J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
+  .user("roland")
+  .password("s!cr!t")
+  .authenticator(new BasicAuthenticator().preemptive())
+  .connectionTimeout(3000)
+  .build();
+----
+
+The builder supports the following parameters with the given
+defaults:
+
+.J4pClient parameters
+[cols="15,~,20"]
+|===
+|Parameter|Description|Default
+
+|`url`
+|The URL to the Jolokia agent. This is the only mandatory parameter.
+|
+
+|`user`
+|User name when authentication is used. If not set, no
+authentication is used. If set, `password`
+must be set, too
+|
+
+|`password`
+|Password used for authentication. Only used when
+`user` is set.
+|
+
+|`authenticator`
+|Implementation of `J4pAuthenticator`. The Java client comes with
+one implementation `BasicAuthenticator` for using basic authentication.
+This class supports also _preemptive_ authentication. Call `preemptive()` to
+switch this on (see above for an example). Basic authentication is the default if no other
+authenticator is set.Only used when `user` is set, too.
+|
+
+|`target`
+|A JMX JSR-160 ServiceURL which should be used by the agent
+as the _real_ target. This parameter should
+be set if the client is used for accessing the agent in
+xref:proxy_mode.adoc[].
+|
+
+|`targetUser`
+|The JSR-160 user to use when using the proxy mode. If not
+given (and `target` is set), then no
+authentication is used for JSR-160 communication.
+|
+
+|`targetPassword`
+|JSR-160 Password to use for the proxy mode.
+|
+
+|`connectionTimeout`
+|The timeout in milliseconds until a connection is
+established. A timeout value of zero is interpreted as an
+infinite timeout.
+|`20000`
+
+|`pooledConnection`
+|Specifies, that the underlying HttpClient should use pooled
+connection manager, which is thread safe and can service
+connection requests from multiples threads
+simultaneously. This is important if the
+`J4pClient` is to be used in a multi
+threaded context. The size of the pool is restricted by the
+parameter `maxTotalConnection`.
+`ThreadSafeClientConnManager` is the
+underlying connection manager. Pooled connections are the
+default.
+|
+
+|`singleConnection`
+|Specifies that single connection should be used which
+maintains only one active connection at a time.  Even though
+`J4pClient` is still thread-safe it
+ought to be used by one execution thread only. The
+underlying connection manager is
+`SingleClientConnManager` Pooled
+connections are the default.
+|
+
+|`maxTotalConnections`
+|Defines the number of total connections to be pooled. It
+is only used when `pooledConnection` is
+used.
+|`20`
+
+|`defaultMaxConnectionsPerRoute`
+|Defines the number of total connections per route. It
+is only used when `pooledConnection` is
+used.
+|`20`
+
+|`maxConnectionPoolTimeout`
+|Defines the timeout for waiting to obtain a connection
+from the pool. This parameter is only used when
+`pooledConnections` are used.
+|`500`
+
+|`socketTimeout`
+|Defines the socket timeout (`SO_TIMEOUT`) in milliseconds,
+which is the timeout for waiting for data  or, put differently,
+a maximum period inactivity between two consecutive data packets.
+A timeout value of zero is interpreted as an infinite timeout.
+|`0`
+
+|`contentCharset`
+|Defines the charset to be used per default for encoding
+content body.
+|`ISO-8859-1`
+
+|`expectContinue`
+|Activates `Expect: 100-Continue` handshake
+for the entity enclosing methods.  The purpose of the
+`Expect: 100-Continue` handshake to allow a
+client that is sending a request message with a request body
+to determine if the origin server is willing to accept the
+request (based on the request headers) before the client
+sends the request body.  The use of the `Expect:
+100-continue` handshake can result in noticeable
+performance improvement for entity enclosing requests that
+require the target server's authentication.
+|`true`
+
+|`tcpNoDelay`
+|Determines whether Nagle's algorithm is to be used. The
+Nagle's algorithm tries to conserve bandwidth by minimizing
+the number of segments that are sent. When applications wish
+to decrease network latency and increase performance, they
+can disable Nagle's algorithm (that is enable
+`TCP_NODELAY`). Data will be sent
+earlier, at the cost of an increase in bandwidth
+consumption.
+|true
+
+|`socketBufferSize`
+|Determines the size of the internal socket buffer in bytes
+used to buffer data while receiving and transmitting HTTP
+messages.
+|`8192`
+
+|`proxy`
+|Determines http proxy server. It can be defined as
+`\http://user:password@host:port`. _user_ and
+_password_ are optional.
+|
+
+|`useProxyFromEnvironment`
+|Set the proxy for this client based on `http_proxy` system environment variable.
+Expect formats are `\http://user:pass@host:port` or `\http://host:port`
+Example: `\http://tom:sEcReT@my.proxy.com:8080`
+|
+
+|`responseExtractor`
+|A response extractor can be used for hooking into the JSON
+deserialization process when a JSON response is converted
+into a `J4pResponse` object. By
+default, the received JSON object is examined for a status
+code of 200 and only then creates a response
+object. Otherwise an exception is thrown. An extractor is
+specified by the interface
+`J4pResponseExtractor`. Beside the
+default extractor, an alternate extractor
+`ValidatingResponseExtractor` can be
+used, which instead of throwing an exception returns a
+`null` object when the response has a status of
+404. An extractor can be specified as extra argument to the
+execute method, too.
+|
+|===
+
+The `J4pClient` provides various variants
+of a `execute()` method, which takes
+either one single request or a list of requests. For a single
+request, the preferred HTTP method (GET or POST) can be
+specified optionally. The `List<R>`
+argument can be used type only for a homogeneous bulk request,
+i.e. for multiple requests of the same time. Otherwise an
+untyped list must be used.
+
+Each request can be tuned by giving a map of processing options
+along with their values to the `execute`
+method. The possible options are shown in table
+<<client-java-queryopts>>.
+
+[#client-java-queryopts]
+.J4pClient query parameters
+[cols="20,~"]
+|===
+|J4pQueryParameter enum|Description
+
+|`MAX_DEPTH`
+|Maximum traversal depth for serialization of complex
+objects. Use this with a "list" request to restrict the
+depth of the returned meta data tree.
+
+|`MAX_COLLECTION_SIZE`
+|Maximum size of collections returned during serialization.
+If larger, a collection is truncated to this size.
+
+|`MAX_OBJECTS`
+|Maximum number of objects returned in the response's value.
+
+|`IGNORE_ERRORS`
+|Option for ignoring errors during JMX operations and JSON
+serialization.  This works only for certain operations like
+pattern reads and should be either `true`
+or `false`.
+
+|`INCLUDE_STACKTRACE`
+|Whether to include a stack trace in the response when an
+error occurs.  The allowed values are
+`true` for inclusion,
+`false` if no stacktrace should be
+included or `runtime` if only
+`RuntimeException`s should be
+included. Default is `true`.
+
+|`SERIALIZE_EXCEPTION`
+|Whether to include a JSON serialized version of the
+exception. If set to `true`, the exception
+is added under the key `error_value` in
+the response. Default is `false`.
+
+|`CANONICAL_NAMING`
+|Whether property keys of `ObjectNames`
+should be ordered in the canonical way or in the way that
+they are created. The allowed values are either
+`true` in which case the canonical key
+order (== alphabetical sorted) is used or
+`false` for getting the keys as
+registered. Default is `true`
+|===
+
+[#client-java-requests]
+=== Request types
+
+For each request type a dedicated request object is provided
+which all are subclasses from
+`J4pRequest`. For all requests it can be
+specified which HTTP method is to be used by setting the
+property `preferredHttpMethod` to either
+`GET` or `POST`.
+
+Each request type has a corresponding response type which used
+for the return values of the
+`J4pClient.execute()`.
+
+The constructor of each kind of request can take a
+`J4pTargetConfig` as argument for using a
+request in xref:proxy_mode.adoc[]. This
+configurational object holds the JMX service url and
+(optionally) credentials for JSR-160 authentication. When
+given, this proxy target specification overrides any default
+proxy configuration set during the initialization of the
+`J4pClient`.
+
+`J4pReadRequest` and `J4pReadResponse`:: `J4pReadRequest` is a read request to
+get one or more attributes from one or more MBeans within
+a single request. Various constructor variants can be used
+to specify one or more attributes along with the
+ObjectName (which can be a pattern). A
+`path` can be set as property for
+specifying an _inner path_, too.
++
+`J4pReadResponse` is the
+corresponding response type and allows typed access to the
+fetched value for a single attribute fetch or to multiple
+values for a multi attribute read. In the latter case, the
+found object and attributes names can be retrieved as
+well.
++
+For more information on fetching the value of multiple
+attributes and multiple MBeans at once, please refer to
+xref:protocol/read.adoc[Reading attributes (read)] or the Javadoc of
+`J4pReadResponse`.
+
+`J4pWriteRequest` and `J4pWriteResponse`:: A `J4pWriteRequest` is used to set
+the value of an MBean attribute. Beside the mandatory
+object and attribute name the value must be give in the
+constructor as well. Optionally a `path`
+can be provided, too. Only certain types for the given
+value can be serialized properly for calling the Jolokia
+agent as described in xref:jolokia_protocol.adoc#serialization-request[Request parameter serialization].
++
+The old value is returned as ``J4pWriteResponse``'s value.
+
+`J4pExecRequest` and `J4pExecResponse`:: ``J4pExecRequest``'s are used for
+executing operation on MBeans. The constructor takes as
+mandatory arguments the MBean's object name, the operation
+name and any arguments required by the operation. Only
+certain types for the given arguments can be serialized
+properly for calling the Jolokia agent as described in
+xref:jolokia_protocol.adoc#serialization-request[Request parameter serialization].
++
+The returned `J4pExecResponse`
+contains the return value of the operation called.
+
+`J4pSearchRequest` and `J4pSearchResponse`:: A `J4pSearchRequest` contains a
+valid single MBean object name pattern which is used for
+searching MBeans.
++
+The `J4pSearchResponse` holds a
+list of found object names.
+
+`J4pListRequest` and `J4pListResponse`:: For obtaining meta data on MBeans a
+`J4pListRequest` should be used. It
+can be used with a _inner path_ to
+obtain only a subtree of the response, otherwise the whole
+tree as described in xref:jolokia_protocol.adoc#response-list[List response] is
+returned. With the query parameter
+`maxDepth` can be used to restrict the
+depth of returned tree.
++
+The single value of a
+`J4pListResponse` is a tree (or
+subtree) as a JSON object, which has the format described
+in xref:jolokia_protocol.adoc#response-list[List response].
+
+`J4pVersionRequest` and `J4pVersionResponse`:: A `J4pVersionRequest` request the
+Jolokia agent's version information and takes no
+argument.
++
+The `J4pVersionResponse` returns the
+agent's version (`agentVersion`), the
+protocol version (`protocolVersion`), the
+application server product name
+(`product`), the vendor name
+(`vendor`) and any extra info
+(`extraInfo`) specific to the platform
+the Jolokia is running on.
+
+[#client-java-exceptions]
+=== Exceptions
+
+In case of an error when executing a request a
+`J4pException` or one its subclass is
+thrown.
+
+`J4pConnectException`:: Exception thrown when the connection to the server
+fails. It contains the original
+`ConnectException` as nested value.
+
+`J4pTimeoutException`:: Exception thrown in case of an timeout. The nested
+exception is of type
+`ConnectTimeoutException`.
+
+`J4pRemoteException`:: Generic exception thrown when an exception occurred on the
+remote side. This is the case when the JSON response
+obtained is an error response as described in
+xref:jolokia_protocol.adoc#responses[Responses]. The error type, error value, the
+status, the request leading to this error and the remote
+stacktrace as string) can be obtained from this exception.
+
+`J4pBulkRemoteException`:: Exception thrown when a bulk request fails on the remote
+side. This contains a mixed list which contains the
+`J4pRemoteException` occurred as well
+as the `J4pResponse` objects for the
+requests, which succeeded. The list obtained by
+`getResults()` contains these
+objects in the same order as the list of requests given to
+`execute`. All responses and remote
+exceptions can also be obtained separately in homogeneous
+lists.
+
+`J4pException`:: Base exception thrown, when no other exception fits,
+i.e. when the exception happened on the client side. The
+original exception is contained as nested exception.

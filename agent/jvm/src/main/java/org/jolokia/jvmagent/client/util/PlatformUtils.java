@@ -28,7 +28,7 @@ public class PlatformUtils {
 
     public static VirtualMachineHandlerOperations createVMAccess(OptionsAndArgs options) {
         String version = System.getProperty("java.specification.version");
-        if (version == null || "".equals(version.trim())) {
+        if (version == null || version.trim().isEmpty()) {
             // fallback to reflection based access
             return new VirtualMachineHandler(options);
         }
@@ -70,7 +70,7 @@ public class PlatformUtils {
     }
 
     public static ProcessDescription findProcess(Pattern pPattern, List<ProcessDescription> processes) {
-        List<ProcessDescription> ret = new ArrayList<ProcessDescription>();
+        List<ProcessDescription> ret = new ArrayList<>();
         String ownId = PlatformUtils.getOwnProcessId();
 
         for (ProcessDescription desc : processes) {
@@ -81,7 +81,7 @@ public class PlatformUtils {
         }
         if (ret.size() == 1) {
             return ret.get(0);
-        } else if (ret.size() == 0) {
+        } else if (ret.isEmpty()) {
             throw new IllegalArgumentException("No attachable process found matching \"" + pPattern.pattern() + "\"");
         } else {
             StringBuilder buf = new StringBuilder();
@@ -98,7 +98,7 @@ public class PlatformUtils {
      * (but not this java process)
      *
      * @param pHandler platform-specific way to invoke operations on VM
-     * @param pOpts used to get eithe the process Id ({@link OptionsAndArgs#getPid()} or the pattern for matching a
+     * @param pOpts used to get eithe the process ID ({@link OptionsAndArgs#getPid()} or the pattern for matching a
      *        process name ({@link OptionsAndArgs#getProcessPattern()})
      * @return the numeric id as string
      * @throws IllegalArgumentException if a pattern is used and no or more than one process name matches.

@@ -16,13 +16,12 @@ package org.jolokia.client.request;
  *  limitations under the License.
  */
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.Options;
 import org.apache.http.conn.ConnectionPoolTimeoutException;
 import org.jolokia.client.J4pClient;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -40,7 +39,7 @@ public class J4pConnectionPoolingIntegrationTest {
     private WireMockServer wireMockServer;
 
     @BeforeMethod
-    public void setUp() throws Exception {
+    public void setUp() {
         wireMockServer = new WireMockServer(Options.DYNAMIC_PORT);
         wireMockServer.start();
     }
@@ -64,16 +63,16 @@ public class J4pConnectionPoolingIntegrationTest {
         final J4pClient j4pClient = createJ4pClient("http://localhost:" + wireMockServer.port() + "/test", 20, 20);
         searchParallel(j4pClient);
 
-        verify(20, getRequestedFor(urlPathMatching("/test/([a-z]*)")));
+        verify(20, getRequestedFor(urlPathMatching("/test/([a-z.:=*/]*)")));
     }
 
     private void searchParallel(J4pClient j4pClient) throws Exception {
-        stubFor(get(urlPathMatching("/test/([a-z]*)")).willReturn(aResponse().withFixedDelay(1000).withBody(getJsonResponse("test"))));
+        stubFor(get(urlPathMatching("/test/([a-z.:=*/]*)")).willReturn(aResponse().withFixedDelay(1000).withBody(getJsonResponse("test"))));
 
         final ExecutorService executorService = Executors.newFixedThreadPool(20);
         final J4pSearchRequest j4pSearchRequest = new J4pSearchRequest("java.lang:type=*");
 
-        final List<Future<Void>> requestsList = new ArrayList<Future<Void>>();
+        final List<Future<Void>> requestsList = new ArrayList<>();
 
         for (int i = 0; i < 20; i++) {
             requestsList.add(executorService.submit(new AsyncRequest(j4pClient, j4pSearchRequest)));
@@ -88,7 +87,7 @@ public class J4pConnectionPoolingIntegrationTest {
 
 
     @AfterMethod
-    public void tearDown() throws Exception {
+    public void tearDown() {
         wireMockServer.stop();
     }
 
@@ -118,17 +117,15 @@ public class J4pConnectionPoolingIntegrationTest {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private String getJsonResponse(String message) {
-        final ObjectMapper objectMapper = new ObjectMapper();
-        final ObjectNode node = objectMapper.createObjectNode();
+        JSONObject result = new JSONObject();
+        JSONArray value = new JSONArray();
+        value.add("java.lang:type=Memory");
+        result.put("value", value);
+        result.put("status", 200);
+        result.put("timestamp", 1244839118);
 
-        final ArrayNode arrayNode = objectMapper.createArrayNode();
-        arrayNode.add("java.lang:type=Memory");
-        node.putArray("value").addAll(arrayNode);
-
-        node.put("status", 200);
-        node.put("timestamp", 1244839118);
-
-        return node.toString();
+        return result.toJSONString();
     }
 }

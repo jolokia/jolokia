@@ -18,17 +18,18 @@ package org.jolokia.jvmagent;
 
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
-import java.util.List;
+import java.util.Set;
 
-import org.jolokia.backend.MBeanServerHandler;
-import org.jolokia.detector.ServerDetector;
+import org.jolokia.server.core.config.ConfigKey;
+import org.jolokia.server.core.detector.ServerDetector;
+import org.jolokia.server.core.service.impl.ClasspathServerDetectorLookup;
 
 
 /**
- * A JVM level agent using the JDK6 HTTP Server {@link com.sun.net.httpserver.HttpServer} or
+ * A JVM level agent using the JDK11+ HTTP Server {@link com.sun.net.httpserver.HttpServer} or
  * its SSL variant {@link com.sun.net.httpserver.HttpsServer}.
  *
- * Beside the configuration defined in {@link org.jolokia.config.ConfigKey}, this agent honors the following
+ * Beside the configuration defined in {@link ConfigKey}, this agent honors the following
  * additional configuration keys:
  *
  * <ul>
@@ -58,8 +59,10 @@ public final class JvmAgent {
 
     private static JolokiaServer server;
 
+    // System property used for communicating the agent's state
     public static final String JOLOKIA_AGENT_URL = "jolokia.agent";
 
+    // This Java agent classes is supposed to be used by the Java attach API only
     private JvmAgent() {}
 
     /**
@@ -69,12 +72,12 @@ public final class JvmAgent {
      * @param agentArgs arguments as given on the command line
      */
     public static void premain(String agentArgs, Instrumentation inst) {
-        startAgent(new JvmAgentConfig(agentArgs), true /* register and detect lazy */, inst);
+        startAgent(new JvmAgentConfig(agentArgs),true /* lazy */, inst);
     }
 
     /**
-     * Entry point for the agent, using dynamic attach
-     * (this is post VM initialisation attachment, via com.sun.attach)
+     * Entry point for the agent, using dynamic attach.
+     * (this is a post VM initialisation attachment, via com.sun.attach)
      *
      * @param agentArgs arguments as given on the command line
      */
@@ -93,17 +96,16 @@ public final class JvmAgent {
             public void run() {
                 try {
                     // block until the server supporting early detection is initialized
-                    awaitServerInitialization(pConfig, instrumentation);
+                    awaitServerInitialization(instrumentation);
 
-                    server = new JolokiaServer(pConfig,pLazy);
-
-                    server.start();
-                    setStateMarker();
+                    server = new JolokiaServer(pConfig);
+                    synchronized (server) {
+                        server.start(pLazy);
+                        setStateMarker();
+                    }
 
                     System.out.println("Jolokia: Agent started with URL " + server.getUrl());
-                } catch (RuntimeException exp) {
-                    System.err.println("Could not start Jolokia agent: " + exp);
-                } catch (IOException exp) {
+                } catch (RuntimeException | IOException exp) {
                     System.err.println("Could not start Jolokia agent: " + exp);
                 }
             }
@@ -115,11 +117,11 @@ public final class JvmAgent {
     /**
      * Lookup the server detectors and notify detector about the JVM startup
      *
-     * @param instrumentation
+     * @param instrumentation instrumentation used for accessing services
      * @see ServerDetector#jvmAgentStartup(Instrumentation)
      */
-    private static void awaitServerInitialization(JvmAgentConfig pConfig, final Instrumentation instrumentation) {
-        List<ServerDetector> detectors = MBeanServerHandler.lookupDetectors();
+    private static void awaitServerInitialization(final Instrumentation instrumentation) {
+        Set<ServerDetector> detectors = new ClasspathServerDetectorLookup().lookup();
         for (ServerDetector detector : detectors) {
             detector.jvmAgentStartup(instrumentation);
         }
@@ -127,10 +129,15 @@ public final class JvmAgent {
 
     private static void stopAgent() {
         try {
-            server.stop();
-            clearStateMarker();
+            if (server != null) {
+                synchronized (server) {
+                    server.stop();
+                    clearStateMarker();
+                }
+            }
         } catch (RuntimeException exp) {
             System.err.println("Could not stop Jolokia agent: " + exp);
+            exp.printStackTrace();
         }
     }
 

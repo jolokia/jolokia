@@ -1,0 +1,66 @@
+////
+  Copyright 2009-2023 Roland Huss
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+        https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+
+== JVM Agent
+
+Another variant is Jolokia's JVM agent which does not need any special container
+environment. The only dependency is on Oracle's JDK 11 or later as runtime,
+since it contains a lightweight HTTP Server used for
+exposing the Jolokia protocol. This agent is the most generic one which can
+instrument _any_ Java application using a JDK11+. It is suitable for
+situations where the other agents don't fit. Also, it can be used for dynamically
+attaching an agent to a running Java process (this option however https://openjdk.org/jeps/451[is going to be removed after JDK 21,role=externalLink,window=_blank]).
+
+For using this agent, the following argument to the Java
+application to instrument has to be given:
+
+[,subs="attributes,verbatim"]
+----
+$ java ... -javaagent:/path/to/jolokia-agent-jvm-{jolokia-version}-javaagent.jar
+----
+
+By default, the agent will listen on port 8778, but this can be configured
+as well as other aspects like authentication:
+
+* Provide options on the commandline as key-value pairs:
++
+[,subs="attributes,verbatim"]
+----
+$ java ... -javaagent:jolokia-agent-jvm-{jolokia-version}-javaagent.jar=port=7777,host=localhost
+----
+* Via a properties file
++
+[,subs="attributes,verbatim"]
+----
+$ java ... -javaagent:jolokia-agent-jvm-{jolokia-version}-javaagent.jar=config=/path/to/config.properties
+----
+* Via packaging a `jolokia-agent.properties` top level in the `agent.jar`
+
+Options are used in the given precedence, the former overwriting
+the later values.
+
+For attaching the agent dynamically to a running Java process, the following
+command can be used to get a quick help
+
+[,subs="attributes,verbatim"]
+----
+$ java -jar /path/to/jolokia-agent-jvm-{jolokia-version}-javaagent.jar --help
+----
+
+NOTE: Dynamic loading of agents will be removed at some point. See https://openjdk.org/jeps/451[JEP 451,role=externalLink,window=_blank] for details.
+
+For more details and usage examples please refer to the
+link:../reference/html/manual/agents.html#agents-jvm[reference manual].

@@ -5,16 +5,14 @@ import java.io.InputStreamReader;
 import java.net.*;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Stack;
-
 import javax.net.ssl.*;
 
 import com.sun.net.httpserver.Authenticator;
 import com.sun.net.httpserver.*;
-import org.jolokia.util.AuthorizationHeaderParser;
-import org.jolokia.util.EscapeUtil;
+import org.jolokia.server.core.osgi.security.AuthorizationHeaderParser;
+import org.jolokia.server.core.util.EscapeUtil;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -111,7 +109,7 @@ public class DelegatingAuthenticator extends Authenticator {
     // Extract principal from a JSON object
     private class JsonPathExtractor implements PrincipalExtractor {
 
-        private String path;
+        private final String path;
 
         public JsonPathExtractor(String pPath) {
             path = pPath;
@@ -119,21 +117,18 @@ public class DelegatingAuthenticator extends Authenticator {
 
         @Override
         public HttpPrincipal extract(URLConnection connection) throws IOException, ParseException {
-            final InputStreamReader isr = new InputStreamReader(connection.getInputStream());
-            try {
+            try (InputStreamReader isr = new InputStreamReader(connection.getInputStream())) {
                 Object payload = new JSONParser().parse(isr);
                 Stack<String> pathElements = EscapeUtil.extractElementsFromPath(path);
                 Object result = payload;
                 while (!pathElements.isEmpty()) {
                     if (result == null) {
-                        throw new IllegalArgumentException("No path '" + path + "' found in " + payload.toString());
+                        throw new IllegalArgumentException("No path '" + path + "' found in " + payload);
                     }
                     String key = pathElements.pop();
                     result = extractValue(result, key);
                 }
                 return new HttpPrincipal(result.toString(), realm);
-            } finally {
-                isr.close();
             }
         }
 
@@ -150,25 +145,25 @@ public class DelegatingAuthenticator extends Authenticator {
 
     private class EmptyPrincipalExtractor implements PrincipalExtractor {
         public HttpPrincipal extract(URLConnection connection) {
-            return new HttpPrincipal("",realm);
+            return new HttpPrincipal("", realm);
         }
     }
 
     // ============================================================================================
 
-      private void disableSSLCertificateChecking() {
+    private void disableSSLCertificateChecking() {
         TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
             public X509Certificate[] getAcceptedIssuers() {
                 return null;
             }
 
             @Override
-            public void checkClientTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
+            public void checkClientTrusted(X509Certificate[] arg0, String arg1) {
                 // Not implemented
             }
 
             @Override
-            public void checkServerTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
+            public void checkServerTrusted(X509Certificate[] arg0, String arg1) {
                 // Not implemented
             }
         } };
@@ -180,16 +175,8 @@ public class DelegatingAuthenticator extends Authenticator {
             sslSocketFactory = sc.getSocketFactory();
 
             // Create all-trusting host name verifier
-            HostnameVerifier allHostsValid = new HostnameVerifier() {
-                public boolean verify(String hostname, SSLSession session) {
-                    return true;
-                }
-            };
-
-            hostnameVerifier = allHostsValid;
-        } catch (KeyManagementException e) {
-            throw new IllegalArgumentException("Disabling SSL certificate failed: " + e,e);
-        } catch (NoSuchAlgorithmException e) {
+            hostnameVerifier = (hostname, session) -> true;
+        } catch (KeyManagementException | NoSuchAlgorithmException e) {
             throw new IllegalArgumentException("Disabling SSL certificate failed: " + e,e);
         }
     }

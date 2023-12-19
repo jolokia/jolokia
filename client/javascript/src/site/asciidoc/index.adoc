@@ -1,0 +1,71 @@
+////
+  Copyright 2009-2023 Roland Huss
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+
+== Jolokia JavaScript Client library
+
+The user manual for the Jolokia JavaScript client library is
+contained in
+link:/reference/html/clients.html#client-javascript[Reference
+Manual]. This document concentrates on more technical
+aspects.
+
+=== Testing
+
+This library comes with a test web application for
+integration testing this library from within a browser. The
+submodule `test-app` creates a WAR artifact which
+can be deployed in a servlet container. The Jolokia agent is
+contained and reachable under the URL
+`/jolokia`. The unit tests can be found at
+
+[cols=2*,role=bodyTable]
+|===
+|`jolokia-test.html`
+|QUnit tests for the base library
+
+|`jolokia-simple-test.html`
+|QUnit tests for the simple API
+
+|`jolokia-all-test.html`
+|All the tests above combined
+|===
+
+This Maven module is using `jetty-maven-plugin`, so we can run the application using:
+
+[source,bash]
+----
+$ mvn clean package jetty:run-war -f examples/client-javascript-test-app/
+----
+
+Jetty server will be started with the test application deployed.
+
+In order to simplify development of unit tests, a shell script
+`makeLinks.sh` is included in `examples/client-javascript-test-app` module, which can be used in
+Linux like OS'es to create symbolic links to the JavaScript and HTML
+files in the source directories. A typical workflow looks
+like:
+
+* Initialize:
++
+[source,bash]
+----
+$ cd examples/client-javascript-test-app/
+$ mvn clean package jetty:run-war
+$ ./makeLinks.sh # in separate terminal window
+----
+* Edit and save the JavaScript files (e.g. `jolokia.js`
+or `jolokia-test.js`)
+* Reload the test HTML files in the browser

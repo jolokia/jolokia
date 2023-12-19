@@ -62,10 +62,12 @@ public class J4pSearchIntegrationTest extends AbstractJ4pIntegrationTest {
 
     @Test
     public void advancedPattern() throws MalformedObjectNameException, J4pException {
-        for (J4pTargetConfig cfg : new J4pTargetConfig[] { null, getTargetProxyConfig()}) {
-            J4pSearchResponse resp = j4pClient.execute(new J4pSearchRequest(cfg,"java.lang:type=Mem*"));
-            List<String> names = resp.getMBeanNames();
-            assertEquals(names.size(),1);
-        }
+        J4pSearchResponse resp = j4pClient.execute(new J4pSearchRequest("java.lang:type=Mem*"));
+        List<String> names = resp.getMBeanNames();
+        assertEquals(names.size(),1);
+
+        resp = j4pClient.execute(new J4pSearchRequest(getTargetProxyConfig(), "java.lang:type=Mem*"));
+        names = resp.getMBeanNames();
+        assertEquals(names.size(),2);
     }
 }

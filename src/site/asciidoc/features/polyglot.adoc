@@ -1,0 +1,138 @@
+////
+  Copyright 2009-2023 Roland Huss
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+        https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+
+== Polyglot
+
+image:../images/features/polyglot_large.png["Polyglot",role=right]
+The next examples demonstrate the usage of Jolokia with
+various different clients. The samples check for memory and
+performs some action if the used heap memory exceeds a certain
+threshold. No error handling was included in order to focus on
+the Jolokia logic.
+
+=== Bash
+
+Jolokia can be contacted without any client library directly
+from a Bash script. This example checks, that the Memory used doesn't
+exceeds 90% of the available memory, and if so, restarts the
+Tomcat server (without any error handling, though):
+
+[source,bash,options=nowrap]
+----
+#!/bin/bash
+base_url="http://localhost:8080/jolokia"
+memory_url="${base_url}/read/java.lang:type=Memory/HeapMemoryUsage"
+used=`curl -u jolokia:jolokia -H'Content-Type: application/json' -s "${memory_url}/used" | jq .value`
+max=`curl -u jolokia:jolokia -H'Content-Type: application/json' -s "${memory_url}/max" | jq .value`
+usage=$((${used}*100/${max}))
+if [ $usage -gt 90 ]; then
+  ${TC}/bin/catalina.sh stop 10
+  ${TC}/bin/catalina.sh start
+fi
+----
+
+=== Perl
+
+Using the https://metacpan.org/dist/jmx4perl[jmx4perl,role=externalLink,window=_blank]
+client library, this can be done even simpler in Perl (and in
+this case with a single HTTP request):
+
+[source,bash]
+----
+#!/usr/bin/perl
+use JMX::Jmx4Perl;
+use strict;
+my $jmx = new JMX::Jmx4Perl(url => "http://localhost:8080/jolokia"
+                            user => "jolokia", password => "jolokia");
+my $memory = $jmx->get_attribute("java.lang:type=Memory", "HeapMemoryUsage");
+if ($memory->{"used"} / $memory->{"max"} > 0.9) {
+    system("${TC}/bin/catalina.sh stop 10");
+    system("${TC}/bin/catalina.sh start");
+    sleep(120);
+}
+----
+
+=== JavaScript
+
+The JSON based Jolokia protocol fits perfectly in the
+JavaScript world. Jolokia provides a
+xref:../client/javascript.adoc[JavaScript client
+library] which makes it a piece of cake to access JMX
+information directly from within the browser. A variant of
+the memory example above looks in JavaScript like this:
+
+[source,javascript]
+----
+var j4p = new Jolokia("/jolokia");
+j4p.request({
+    type: "read",
+    mbean: "java.lang:type=Memory",
+    attribute: "HeapMemoryUsage"
+},{
+    success: function(resp) {
+        if (resp.value["used"] / resp.value["max"] > 0.9) {
+            console.error("Memory exceeds 90% threshold");
+        }
+    }
+});
+----
+
+=== Java
+
+The Jolokia agents can be accessed from Java as well. The
+biggest different to JSR-160 client interfaces is, that
+Jolokia has a typeless approach. The disadvantage is of
+course, that the type of the exposed
+attribute or operation return value has to be known, but the
+big advantage is, that no Java type information for custom
+types (== custom Java classes) is required on the client
+side.
+
+The example above implemented in Java looks like:
+
+[source,java,options=nowrap]
+----
+import org.jolokia.client.*;
+import org.jolokia.client.request.*;
+import java.util.Map;
+
+public class JolokiaSample {
+
+    public static void main(String[] args) throws Exception {
+        J4pClient j4pClient = J4pClient.url("http://localhost:8080/jolokia")
+                .user("jolokia")
+                .password("jolokia")
+                .build();
+        J4pReadRequest req = new J4pReadRequest("java.lang:type=Memory",
+                "HeapMemoryUsage");
+        J4pReadResponse resp = j4pClient.execute(req);
+        Map<String, Object> vals = resp.getValue();
+        long used = (long) vals.get("used");
+        long max = (long) vals.get("max");
+        long usage = used * 100 / max;
+        if (usage > 90) {
+            System.out.println("Memory usage exceeds 90% (used: " + used +
+                    " / max: " + max + " = " + usage + "%)");
+        }
+    }
+}
+----
+
+=== Next
+
+* Read an introduction and xref:overview.html[overview] for Jolokia.
+* See why Jolokia plays nicely with your xref:firewall.adoc[firewall].
+* Go Back to the xref:../features.adoc[Features Overview].

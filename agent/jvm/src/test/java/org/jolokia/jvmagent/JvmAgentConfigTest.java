@@ -16,19 +16,27 @@ package org.jolokia.jvmagent;
  * limitations under the License.
  */
 
-import com.sun.net.httpserver.Authenticator;
-import org.jolokia.config.ConfigKey;
-import org.jolokia.config.Configuration;
-import org.jolokia.jvmagent.security.UserPasswordAuthenticator;
-import org.jolokia.util.EscapeUtil;
-import org.testng.annotations.Test;
-
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.regex.Matcher;
 
-import static org.testng.Assert.*;
+import com.sun.net.httpserver.Authenticator;
+import org.jolokia.jvmagent.security.UserPasswordHttpAuthenticator;
+import org.jolokia.server.core.config.ConfigKey;
+import org.jolokia.server.core.config.Configuration;
+import org.testng.annotations.Test;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertSame;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author roland
@@ -57,7 +65,7 @@ public class JvmAgentConfigTest {
     public void detectorArgs() {
         JvmAgentConfig config = new JvmAgentConfig("bootAmx=true");
         Configuration jConfig = config.getJolokiaConfig();
-        String detectorOpts = jConfig.get(ConfigKey.DETECTOR_OPTIONS);
+        String detectorOpts = jConfig.getConfig(ConfigKey.DETECTOR_OPTIONS);
         assertEquals(detectorOpts.replaceAll("\\s*", ""), "{\"glassfish\":{\"bootAmx\":true}}");
     }
 
@@ -97,7 +105,7 @@ public class JvmAgentConfigTest {
         JvmAgentConfig config = new JvmAgentConfig("maxDepth=42");
 
         Configuration jolokiaConfig = config.getJolokiaConfig();
-        assertEquals(jolokiaConfig.get(ConfigKey.MAX_DEPTH), "42");
+        assertEquals(jolokiaConfig.getConfig(ConfigKey.MAX_DEPTH),"42");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
@@ -113,8 +121,8 @@ public class JvmAgentConfigTest {
         Authenticator authenticator = config.getAuthenticator();
         assertNotNull(authenticator);
         assertEquals(config.getClientPrincipals().get(0),"O=jolokia.org,OU=JVM");
-        assertTrue(authenticator instanceof UserPasswordAuthenticator);
-        assertTrue(((UserPasswordAuthenticator) authenticator).checkCredentials("roland", "s!cr!t"));
+        assertTrue(authenticator instanceof UserPasswordHttpAuthenticator);
+        assertTrue(((UserPasswordHttpAuthenticator) authenticator).checkCredentials("roland","s!cr!t"));
     }
 
     @Test
@@ -154,13 +162,13 @@ public class JvmAgentConfigTest {
     }
 
     @Test
-    public void keystorePassword() throws UnknownHostException {
+    public void keystorePassword() {
         JvmAgentConfig config = new JvmAgentConfig("keystorePassword=passwd");
         assertEquals(config.getKeystorePassword(), "passwd".toCharArray());
     }
 
     @Test
-    public void keystorePasswordEncrypted() throws UnknownHostException {
+    public void keystorePasswordEncrypted() {
         JvmAgentConfig config = new JvmAgentConfig("keystorePassword=[[b4m+ADwT8u8HAoVvv3n6WLAEfFFceJHSu6rsNT1/CsHiWFzUseNMS4C2d1AtxJNC]]");
         assertEquals(config.getKeystorePassword(), "1234567890123456".toCharArray());
     }
@@ -175,7 +183,7 @@ public class JvmAgentConfigTest {
         copy(is, new FileOutputStream(out));
         String path = out.getAbsolutePath();
 
-        if (EscapeUtil.CSV_ESCAPE.equals("\\\\") && (File.separator.equals("\\"))) {
+        if (File.separator.equals("\\")) {
            /* Path can be similar to C:\...\...\...\...\Temp\prop424242424242424242.properties on Win,
               so we need to escape \ otherwise tests will fail. We need to escape it twice, once for
               list of parameter split unescaping and once more for parameter=value split unecapsulation

@@ -70,6 +70,7 @@ public class J4pSearchRequest extends AbtractJ4pMBeanRequest {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     J4pSearchResponse createResponse(JSONObject pResponse) {
         return new J4pSearchResponse(this,pResponse);
     }

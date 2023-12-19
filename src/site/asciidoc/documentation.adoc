@@ -1,0 +1,35 @@
+////
+  Copyright 2009-2023 Roland Huss
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+
+== Documentation
+
+=== Tutorial
+
+xref:tutorial.adoc[Tutorial] provides a quick start to Jolokia. It
+demonstrates how to deploy a WAR-agent, how to check the installation
+via a Web browser and demonstrates the client usage with a small
+sample Java application.
+
+=== Reference Manual
+
+link:reference/html/manual/index.html[reference manual] contains a comprehensive
+documentation to Jolokia, its agents and client bindings.
+
+=== Talks and Screencast
+
+In this xref:talks.adoc[section] various talks along with slides and some example screencasts
+are collected. They give short impressions what can be done with Jolokia and
+its clients.

@@ -1,0 +1,128 @@
+////
+  Copyright 2009-2023 Roland Huss
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+
+[#write]
+=== Writing attributes (write)
+
+Writing an attribute is quite similar to reading one, except that the request takes an
+additional `value` element.
+
+[#get-write]
+==== GET write request
+
+Writing an attribute with a GET request, an URL with the following format has to be used:
+----
+<base url>/write/<mbean name>/<attribute name>/<value>/<inner path>
+----
+
+.GET Write Request
+[cols="15,~,30"]
+|====
+|Part|Description|Example
+
+|`<mbean name>`
+|MBean's ObjectName
+|`java.lang:type=ClassLoading`
+
+|`<attribute name>`
+|Name of attribute to set
+|`Verbose`
+
+|`<value>`
+|The attribute name to value. The value must be serializable as described in
+xref:jolokia_protocol.adoc#serialization-request[Request parameter serialization].
+|`true`
+
+|`<inner path>`
+|Inner path for accessing the parent object on which to set the value.
+(See also xref:jolokia_protocol.adoc#paths[Paths]). Note, that this is
+_not_ the path to the attribute itself,
+but to the object carrying this attribute. With a given
+path it is possible to deeply set a value on a complex
+object.
+|
+|====
+
+For example, you can set the garbage collector to verbose mode by using
+something like
+
+----
+http://localhost:8080/jolokia/write/java.lang:type=Memory/Verbose/true
+----
+
+[#post-write]
+==== POST write request
+
+The keys which are evaluated for a POST write request are:
+
+.POST Write Request
+[cols="15,~,30"]
+|===
+|Key|Description|Example
+
+|`type`
+|*`write`*
+|
+
+|`mbean`
+|MBean's ObjectName
+|`java.lang:type=ClassLoading`
+
+|`attribute`
+|Name of attribute to set
+|`Verbose`
+
+|`value`
+|The attribute name to value. The value must be serializable as described in
+xref:jolokia_protocol.adoc#serialization-request[Request parameter serialization].
+|`true`
+
+|`path`
+|An optional inner path for specifying an inner object on which to set the
+value. See xref:jolokia_protocol.adoc#paths[Paths] for more on inner paths.
+|
+|===
+
+[#response-write]
+==== Write response
+
+As response for a write operation the old attribute's value is
+returned. For a request
+----
+http://localhost:8080/jolokia/write/java.lang:type=ClassLoading/Verbose/true
+----
+
+you get the answer (supposed that verbose mode was switched
+off for class loading at the time this request was sent)
+
+[,json]
+----
+{
+  "request": {
+    "mbean": "java.lang:type=ClassLoading",
+    "attribute": "Verbose",
+    "type": "write",
+    "value": "true"
+  },
+  "value": false,
+  "status": 200,
+  "timestamp": 1702455595
+}
+----
+
+The response is quite similar to the read operation except for
+the additional `value` element in the request
+(and of course, the different `type`).

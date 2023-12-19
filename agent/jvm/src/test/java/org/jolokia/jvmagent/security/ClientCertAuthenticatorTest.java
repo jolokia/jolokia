@@ -19,9 +19,7 @@ package org.jolokia.jvmagent.security;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSession;
@@ -83,14 +81,14 @@ public class ClientCertAuthenticatorTest extends BaseAuthenticatorTest {
 
 
     @Test
-    public void wrongExchange() throws Exception {
+    public void wrongExchange() {
         ClientCertAuthenticator auth = new ClientCertAuthenticator(getConfig());
         Authenticator.Result result = auth.authenticate(createHttpExchange(new Headers()));
         assertTrue(result instanceof Authenticator.Failure);
     }
 
     private JolokiaServerConfig getConfig(String ... opts) {
-        Map<String, String> config = new HashMap<String, String>();
+        Map<String, String> config = new HashMap<>();
         for (int i=0; i < opts.length; i +=2) {
             config.put(opts[i],opts[i+1]);
         }
@@ -101,10 +99,10 @@ public class ClientCertAuthenticatorTest extends BaseAuthenticatorTest {
                                              boolean withCert,
                                              boolean withExtendedUsage, String... reqHeaderValues)
         throws SSLPeerUnverifiedException, CertificateParsingException {
-        HttpsExchange ex = createMock(HttpsExchange.class);
+        HttpsExchange ex = createMock(MockableHttpsExchange.class);
         Headers reqHeaders = new Headers();
         for (int i = 0; i < reqHeaderValues.length; i+=2) {
-            reqHeaders.put(reqHeaderValues[i], Arrays.asList(reqHeaderValues[i + 1]));
+            reqHeaders.put(reqHeaderValues[i], Collections.singletonList(reqHeaderValues[i + 1]));
         }
         expect(ex.getResponseHeaders()).andStubReturn(respHeaders);
         expect(ex.getRequestHeaders()).andStubReturn(reqHeaders);
@@ -120,7 +118,7 @@ public class ClientCertAuthenticatorTest extends BaseAuthenticatorTest {
                 cert
             };
             expect(session.getPeerCertificates()).andStubReturn(certs);
-            expect(cert.getExtendedKeyUsage()).andStubReturn(Arrays.asList(withExtendedUsage ? ClientCertAuthenticator.CLIENTAUTH_OID : ""));
+            expect(cert.getExtendedKeyUsage()).andStubReturn(List.of(withExtendedUsage ? ClientCertAuthenticator.CLIENTAUTH_OID : ""));
             replay(cert);
         } else {
             expect(session.getPeerCertificates()).andStubReturn(null);
@@ -133,4 +131,8 @@ public class ClientCertAuthenticatorTest extends BaseAuthenticatorTest {
         replay(ex, session);
         return ex;
     }
+
+    public abstract static class MockableHttpsExchange extends HttpsExchange {
+    }
+
 }

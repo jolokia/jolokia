@@ -20,7 +20,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 import org.jolokia.jvmagent.client.command.CommandDispatcher;
-import org.jolokia.util.EscapeUtil;
+import org.jolokia.server.core.util.EscapeUtil;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -56,7 +56,7 @@ public class OptionsAndArgsTest {
         assertTrue(args.matches(".*host=localhost.*"));
         assertTrue(args.matches(".*user=roland.*"));
         assertTrue(args.matches(".*password=bla.*"));
-        Map<String,String> opts = new HashMap<String, String>();
+        Map<String,String> opts = new HashMap<>();
         for (String s : args.split(",")) {
             String[] p = s.split("=");
             assertEquals(p.length,2);
@@ -80,7 +80,7 @@ public class OptionsAndArgsTest {
         String DN1 = "CN=adminuser, C=XX, O=Default Company Ltd";
         String DN2 = "CN=Max Mustermann, C=DE, O=Volkswagen";
         OptionsAndArgs o = opts("--clientPrincipal",DN1,"--clientPrincipal",DN2);
-        assertTrue(o.toAgentArg().contains(EscapeUtil.escape(DN1,EscapeUtil.CSV_ESCAPE,",")));
+        assertTrue(o.toAgentArg().contains(EscapeUtil.escape(DN1, EscapeUtil.CSV_ESCAPE, ",")));
         assertTrue(o.toAgentArg().contains(EscapeUtil.escape(DN2,EscapeUtil.CSV_ESCAPE,",")));
         assertTrue(o.toAgentArg().contains("clientPrincipal"));
         assertTrue(o.toAgentArg().contains("clientPrincipal.1"));
@@ -121,7 +121,8 @@ public class OptionsAndArgsTest {
         OptionsAndArgs o = opts("bla");
         assertNull(o.getPid());
         Pattern pat = o.getProcessPattern();
-        assertEquals(pat.pattern(),"bla");
+        assertNotNull(pat);
+        assertEquals(pat.pattern(), "bla");
         assertEquals(o.getCommand(), "toggle");
     }
 
@@ -135,7 +136,7 @@ public class OptionsAndArgsTest {
     public void encrypt() {
         OptionsAndArgs o = opts("encrypt", "passwd");
         assertEquals(o.getCommand(), "encrypt");
-        assertEquals(o.getExtraArgs(), Arrays.asList("passwd"));
+        assertEquals(o.getExtraArgs(), List.of("passwd"));
 
     }
 }

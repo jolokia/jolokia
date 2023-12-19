@@ -1,0 +1,173 @@
+////
+  Copyright 2009-2023 Roland Huss
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+[#jmx]
+= JMX Support
+
+The main focus of Jolokia is to allow easy access to JMX MBeans
+from everywhere. MBeans can be provided by the JVM itself, by an
+application server or an application itself, where each MBean is
+registered at a specific MBeanServer. Multiple MBeanServers can
+co-exist in a single JVM. The so called
+_PlatformMBeanServer_ is always present and is
+created by the JVM during startup. Especially application servers
+often create additional MBeanServers for various purposes. When
+accessing an MBean remotely via JSR-160, the MBeanServer holding
+the requested MBean must be known before. Jolokia instead
+_merges_ all MBeanServers it can find to give a
+single view on all MBeans. The merging algorithm is described in
+<<mbeanserver-merging>>.
+
+For application specific MBeans, Jolokia provides an own, so
+called _Jolokia MBeanServer_ which is treated
+specially by the Jolokia agent. The Jolokia MBeanServer and its
+features are explained in <<jolokia-mbeanserver>>.
+
+Developing application specific MBeans is easy, especially if
+http://docs.oracle.com/javase/tutorial/jmx/mbeans/standard.html[Standard
+MBeans,role=externalLink,window=_blank] are used. However, for Spring users there is even a
+easier, more
+https://docs.spring.io/spring-framework/reference/integration/jmx/exporting.html[declarative
+way,role=externalLink,window=_blank] for turning POJOs into MBeans. On top of this Jolokia
+provides an easy, declarative way for firing up a Jolokia JVM
+agent merely by including some Jolokia specific Spring
+configuration. This is described in xref:spring.adoc[].
+
+[#jolokia-mbeanserver]
+== Jolokia MBeanServer
+
+The Jolokia MBeanServer can be easily created and used with a locator:
+
+[,java]
+----
+MBeanServer jolokiaServer = JolokiaMBeanServerUtil.getJolokiaMBeanServer();
+----
+
+Internally, `javax.management.MBeanServerFactory.newMBeanServer()` is called, so it's not returned when
+calling `javax.management.MBeanServerFactory.findMBeanServer()`.
+
+This server is treated specially by a Jolokia Agent:
+
+* Every MBean registered at the Jolokia MBeanServer will never
+show up remotely via JSR-160. The Jolokia MBeanServer is never
+exposed over JSR-160.
+* Each Jolokia MBeanServer registered MBean will shadow any
+MBean with the same ObjectName in any other MBeanServer
+present. See below for more details.
+* The Jolokia MBeanServer is also responsible for managing so
+called _JSON MBeans_. These are MBeans
+annotated with `@JsonMBean` on the class
+level. JSON MBean are explained in
+<<json-mbean>>
+
+[#mbeanserver-merging]
+=== MBeanServer merging
+
+Jolokia tries hard to detect as many MBeanServer as available
+in a JVM. Beside the always present
+`PlatformMBeanServer` many
+application servers create own MBeanServer which not always
+can be found with standard mechanisms. Therefore Jolokia comes
+with so called ``ServerDetector``s for many
+known brands of applications server. These server detectors
+know how to find MBeanServer by application server specific
+means.
+
+The set of available of MBeanServers is detected during
+startup and kept, except for the Jolokia MBeanServer which can
+kick in and out at any time. For Jolokia operations, all these
+MBeanServers are tried according the order given below.
+
+* *Jolokia `MBeanServer`* is queried first,
+if available.
+* Next every `MBeanServer` as detected by the _server
+detectors_ a queried in turn.
+* All MBeanServers returned by
+`MBeanServerFactory.findMBeanServer(null)` (which should return all the `MBeanServers` created with
+`MBeanServerFactory.createMBeanServer()`, but not the ones created by `javax.management.MBeanServerFactory.newMBeanServer()`) are
+called if not already tried previously.
+* Finally, the
+`ManagementFactory.getPlatformMBeanServer()` is
+used (also, if not found in a former step).
+
+All MBeans contained in all detected MBeanServers are merged
+to give a single view on the set of available MBeans.
+For MBeans registered with the same name at different
+MBeanServers, MBeans registered in later MBeanServers are not
+visible. These hidden MBeans will never be called on
+`read`, `write` or
+`exec` operations. Also, for
+`list` operations only the meta data of the
+visible MBeans is returned.
+
+This hiding mechanism is used by
+`@JsonMBean` to provide a different view of
+an MBean for JSR-160 connectors (see below).
+
+[#json-mbean]
+== @JsonMBean
+
+JMX 1.4 introduced
+https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/MXBean.html[MXBeans,role=externalLink,window=_blank]
+which allow for nearly arbitrary data to be translated into so
+called _OpenData_ which are accessible via JMX. For example,
+arbitrary Java Beans are translated into a
+https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/openmbean/CompositeData.html[`CompositeData`,role=externalLink,window=_blank]
+structure with property names as keys and their values in
+OpenData values.
+
+Jolokia provides an annotation `@JsonMBean`
+for marking an MBean as a JSON MBean. Such an MBean, if
+registered at the _Jolokia MBeanServer_
+creates a proxy on the _PlatformMBeanServer_
+where every complex value gets translated into plain strings in
+JSON format. This is true for attributes, operation return
+values and arguments. That way, a JSR-160 based console (like
+`jconsole`) can easily access complex data
+type exposed by custom MBeans. Json MBeans work for Java 6 and
+newer.
+
+[#fig-jconsole-json-mbean]
+.A JsonMBean in jconsole
+image::jconsole-json-mbean.png[]
+
+JsonMBean and MXBean are quite similar as both do a translation
+from complex data types to a standard format (OpenType for
+MXBeans, JSON strings for JsonMBean). However, there are also
+differences:
+
+* MXBeans are a standard mechanism which are available on every
+JVM since 1.5footnote:jboss-mxbean[
+For JBoss prior to version 7 there are some slight issues
+since JBoss used to replace the standard MBeanServer with an
+own variant. See this
+https://community.jboss.org/thread/167796[discussion]
+for details.].
+* Serialization of complex Java Beans is more powerful with
+JsonMBeans, e.g. Jolokia can detect self (or cyclic) object
+references. MXBeans will cause an error in this case.
+* JsonMBeans must be added to the Jolokia MBeanServer to
+work. MXBeans work with the PlatformMBeanServer, too.
+* JsonMBean work also with JMX support libraries which use
+``ModelMBean``'s under the hood. E.g.
+https://docs.spring.io/spring-framework/reference/integration/jmx.html[Spring
+JMX,role=externalLink,window=_blank] uses a ModelMBean for
+`@ManagedResource` annotated
+MBeans. `@JsonMBean` can be easily added,
+whereas `@MXBean` wouldn't work here.
+
+The Jolokia MBeanServer and the
+`@JsonMBean` annotation are contained in the
+Maven module `jolokia-support-jmx`.

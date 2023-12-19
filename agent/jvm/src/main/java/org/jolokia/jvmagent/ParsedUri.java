@@ -16,9 +16,9 @@ package org.jolokia.jvmagent;
  * limitations under the License.
  */
 
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -31,13 +31,13 @@ import java.util.*;
 public class ParsedUri {
 
     // Map of parameters as parsed from an URL
-    private Map<String, String[]> parameters;
+    private final Map<String, String[]> parameters;
 
     // Pathinfo contained in the URL
     private String pathInfo;
 
     // Enclosed URI
-    private URI uri;
+    private final URI uri;
 
     /**
      * Constructor
@@ -45,12 +45,12 @@ public class ParsedUri {
      * @param pUri URI to parse
      * @param pContext an optional context which is tripped from the path itself
      */
-    public ParsedUri(URI pUri,String ... pContext) {
+    public ParsedUri(URI pUri, String... pContext) {
         uri = pUri;
         pathInfo = pUri.getPath();
 
         if (pContext != null && pContext.length > 0 &&
-                pathInfo.startsWith(pContext[0])) {
+            pathInfo.startsWith(pContext[0])) {
             pathInfo = pathInfo.substring(pContext[0].length());
         }
 
@@ -61,7 +61,7 @@ public class ParsedUri {
         if (pUri.getQuery() != null) {
             parameters = parseQuery(pUri.getQuery());
         } else {
-            parameters = new HashMap<String, String[]>();
+            parameters = new HashMap<>();
         }
     }
 
@@ -114,44 +114,40 @@ public class ParsedUri {
 
     // parse the query
     private Map<String, String[]> parseQuery(String qs) {
-        Map<String, String[]> ret = new TreeMap<String, String[]>();
+        Map<String, String[]> ret = new TreeMap<>();
 
-        try {
-            String pairs[] = qs.split("&");
-            for (String pair : pairs) {
-                String name;
-                String value;
-                int pos = pair.indexOf('=');
-                // for "name=", the value is "", for "name" alone, the value is null
-                if (pos == -1) {
-                    name = pair;
-                    value = null;
-                } else {
-                    name = URLDecoder.decode(pair.substring(0, pos), "UTF-8");
-                    value = URLDecoder.decode(pair.substring(pos + 1, pair.length()), "UTF-8");
-                }
-                String[] values = ret.get(name);
-                if (values == null) {
-                    values = new String[]{value};
-                    ret.put(name, values);
-                } else {
-                    // That's not a very cheap algorithm to create new arrays on the fly,
-                    // but it is expected that there will be only a handful of array parameters
-                    // in an URL anyway. So, let us be dirty here ...
-                    String[] newValues = new String[values.length + 1];
-                    System.arraycopy(values,0,newValues,0,values.length);
-                    newValues[values.length] = value;
-                    ret.put(name, newValues);
-                }
+        String[] pairs = qs.split("&");
+        for (String pair : pairs) {
+            String name;
+            String value;
+            int pos = pair.indexOf('=');
+            // for "name=", the value is "", for "name" alone, the value is null
+            if (pos == -1) {
+                name = pair;
+                value = null;
+            } else {
+                name = URLDecoder.decode(pair.substring(0, pos), StandardCharsets.UTF_8);
+                value = URLDecoder.decode(pair.substring(pos + 1), StandardCharsets.UTF_8);
             }
-            return ret;
-        } catch (UnsupportedEncodingException e) {
-            throw new IllegalArgumentException("Cannot decode to UTF-8. Should not happen, though.",e);
+            String[] values = ret.get(name);
+            if (values == null) {
+                values = new String[]{value};
+                ret.put(name, values);
+            } else {
+                // That's not a very cheap algorithm to create new arrays on the fly,
+                // but it is expected that there will be only a handful of array parameters
+                // in an URL anyway. So, let us be dirty here ...
+                String[] newValues = new String[values.length + 1];
+                System.arraycopy(values, 0, newValues, 0, values.length);
+                newValues[values.length] = value;
+                ret.put(name, newValues);
+            }
         }
+        return ret;
     }
 
-    @Override
     /** {@inheritDoc} */
+    @Override
     public String toString() {
         return uri.toString();
     }

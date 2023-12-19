@@ -67,7 +67,7 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
 
     @Test
     void map() throws MalformedObjectNameException, J4pException {
-        Map map = createTestMap();
+        Map<String, Object> map = createTestMap();
         checkWrite(new String[]{"POST"}, "Map", null, map);
         checkWrite("Map","fcn","svw");
         checkWrite("Map","zahl",20L);
@@ -79,22 +79,22 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
         J4pReadRequest  rReq = new J4pReadRequest(IT_ATTRIBUTE_MBEAN,"Map");
         rReq.setPath("douglas");
         J4pReadResponse rResp = j4pClient.execute(rReq);
-        assertEquals(rResp.<String>getValue(),"hofstadter");
+        assertEquals(rResp.getValue(),"hofstadter");
     }
 
-    private Map createTestMap() {
-        Map map = new HashMap();
-        map.put("eins","fcn");
-        map.put("zwei","bvb");
-        map.put("drei",true);
-        map.put("vier",null);
-        map.put("fuenf",12L);
+    private Map<String, Object> createTestMap() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("eins", "fcn");
+        map.put("zwei", "bvb");
+        map.put("drei", true);
+        map.put("vier", null);
+        map.put("fuenf", 12L);
         return map;
     }
 
     @Test
     void list() throws MalformedObjectNameException, J4pException {
-        List list = new ArrayList();
+        List<Object> list = new ArrayList<>();
         list.add("fcn");
         list.add(42L);
         list.add(createTestMap());
@@ -110,14 +110,12 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
     @Test
     public void stringArray() throws MalformedObjectNameException, J4pException {
         try {
-            final String input[] = new String[] { "eins", "zwei", null, "drei" };
-            checkWrite("StringArray", null, input,new ResponseAssertion() {
-                public void assertResponse(J4pResponse resp) {
-                    JSONArray val = (JSONArray) resp.getValue();
-                    assertEquals(val.size(), input.length);
-                    for (int i = 0; i < input.length; i++) {
-                        assertEquals(val.get(i),input[i]);
-                    }
+            final String[] input = new String[] { "eins", "zwei", null, "drei" };
+            checkWrite("StringArray", null, input, resp -> {
+                JSONArray val = resp.getValue();
+                assertEquals(val.size(), input.length);
+                for (int i = 0; i < input.length; i++) {
+                    assertEquals(val.get(i),input[i]);
                 }
             });
         } catch (J4pRemoteException exp) {
@@ -144,30 +142,26 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
 
     @Test
     public void mxNumbers() throws MalformedObjectNameException, J4pException {
-        final Integer input[] = { 1,2 };
-        checkMxWrite("Numbers",null,input,new ResponseAssertion() {
-            public void assertResponse(J4pResponse resp) {
-                JSONArray val = (JSONArray) resp.getValue();
-                assertEquals(val.size(), input.length);
-                for (int i = 0; i < input.length; i++) {
-                    assertEquals(val.get(i),(long) input[i]);
-                }
+        final Integer[] input = { 1,2 };
+        checkMxWrite("Numbers",null,input, resp -> {
+            JSONArray val = resp.getValue();
+            assertEquals(val.size(), input.length);
+            for (int i = 0; i < input.length; i++) {
+                assertEquals(val.get(i),(long) input[i]);
             }
         });
     }
 
     @Test
     public void mxMap() throws MalformedObjectNameException, J4pException {
-        final Map<String,Long> input = new HashMap<String,Long>();
+        final Map<String,Long> input = new HashMap<>();
         input.put("roland",13L);
         input.put("heino",19L);
-        checkMxWrite(new String[] {"POST"},"Map", null, input, new ResponseAssertion() {
-            public void assertResponse(J4pResponse resp) {
-                JSONObject val = (JSONObject)resp.getValue();
-                assertEquals(val.size(), input.size());
-                for (String key : input.keySet()) {
-                    assertEquals(input.get(key),val.get(key));
-                }
+        checkMxWrite(new String[] {"POST"},"Map", null, input, resp -> {
+            JSONObject val = resp.getValue();
+            assertEquals(val.size(), input.size());
+            for (String key : input.keySet()) {
+                assertEquals(input.get(key),val.get(key));
             }
         });
     }
@@ -222,7 +216,7 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
                 if (pFinalAssert != null && pFinalAssert.length > 0) {
                     pFinalAssert[0].assertResponse(readResp);
                 } else {
-                    assertEquals("New value should be set",pValue != null ? pValue : null,readResp.getValue());
+                    assertEquals("New value should be set", pValue, readResp.getValue());
                 }
             }
         }
@@ -233,7 +227,7 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
     }
 
     private interface ResponseAssertion {
-        void assertResponse(J4pResponse resp);
+        void assertResponse(J4pResponse<?> resp);
     }
 
 

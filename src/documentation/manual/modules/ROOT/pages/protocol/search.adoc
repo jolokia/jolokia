@@ -1,0 +1,117 @@
+////
+  Copyright 2009-2023 Roland Huss
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+
+[#search]
+=== Searching MBeans (search)
+
+With the Jolokia search operation the agent can be queried for
+MBeans matching a given pattern. Searching will be performed on every
+`MBeanServer` found by the agent.
+
+[#get-search]
+==== GET search request
+
+The format of the search GET URL is:
+
+----
+<base-url>/search/<pattern>
+----
+
+This mode is used to query for certain MBean. It takes a single
+argument `pattern` for
+specifying the search parameter like in
+
+----
+http://localhost:8080/jolokia/search/*:j2eeType=Servlet,*
+----
+
+You can use patterns as described
+https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/ObjectName.html[here,role=externalLink,window=_blank],
+i.e. it may contain wildcards like `*` and
+`?`. The Mbean names matching the query
+are returned as a list within the response.
+
+[#post-search]
+==== POST search request
+
+A search POST request knows the following keys:
+
+.POST Search Request
+[cols="15,~,30"]
+|===
+|Key|Description|Example
+
+|`type`
+|*`search`*
+|
+
+|`mbean`
+|The MBean pattern to search for
+|`java.lang:*`
+|===
+
+The following request searches for all MBeans registered in the
+domain `java.lang`
+
+[,json]
+----
+{
+  "type": "search",
+  "mbean": "java.lang:*"
+}
+----
+
+[#response-search]
+==== Search response
+
+The answer is a list of MBean names which matches the pattern or an empty
+list if there was no match.
+
+For example, the request
+
+----
+http://localhost:8888/jolokia/search/*:j2eeType=Servlet,*
+----
+
+[,json]
+----
+{
+  "request": {
+    "mbean": "*:j2eeType=Servlet,*",
+    "type": "search"
+  },
+  "value": [
+    "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/manager,j2eeType=Servlet,name=Status",
+    "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/manager,j2eeType=Servlet,name=JMXProxy",
+    "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/manager,j2eeType=Servlet,name=jsp",
+    "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/manager,j2eeType=Servlet,name=HTMLManager",
+    "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/jolokia,j2eeType=Servlet,name=jsp",
+    "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/,j2eeType=Servlet,name=default",
+    "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/jolokia,j2eeType=Servlet,name=jolokia-agent",
+    "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/,j2eeType=Servlet,name=jsp",
+    "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/jolokia,j2eeType=Servlet,name=default",
+    "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/manager,j2eeType=Servlet,name=Manager",
+    "Catalina:J2EEApplication=none,J2EEServer=none,WebModule=//localhost/manager,j2eeType=Servlet,name=default"
+  ],
+  "status": 200,
+  "timestamp": 1702458409
+}
+----
+
+The returned MBean names are properly
+https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/ObjectName.html[quoted,role=externalLink,window=_blank]
+so that they can be directly used as
+input for other requests.

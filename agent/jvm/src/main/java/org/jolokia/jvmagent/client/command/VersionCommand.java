@@ -18,7 +18,7 @@ package org.jolokia.jvmagent.client.command;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.jolokia.Version;
+import org.jolokia.server.core.Version;
 import org.jolokia.jvmagent.client.util.OptionsAndArgs;
 import org.jolokia.jvmagent.client.util.VirtualMachineHandlerOperations;
 
@@ -41,7 +41,7 @@ public class VersionCommand extends AbstractBaseCommand {
         if (pOpts.isVerbose()) {
             version.append(" (Protocol: ").append(Version.getProtocolVersion()).append(")");
         }
-        System.out.println(version.toString());
+        System.out.println(version);
         return 0;
     }
 }

@@ -16,8 +16,10 @@ package org.jolokia.client.request;
  * limitations under the License.
  */
 
+import java.util.Set;
+
 import org.apache.http.client.methods.HttpPost;
-import org.jolokia.Version;
+import org.jolokia.server.core.Version;
 import org.jolokia.client.exception.J4pException;
 import org.testng.annotations.Test;
 
@@ -41,18 +43,20 @@ public class J4pVersionIntegrationTest extends AbstractJ4pIntegrationTest {
         for (J4pTargetConfig cfg : new J4pTargetConfig[] { null, getTargetProxyConfig()}) {
             J4pVersionRequest req = new J4pVersionRequest(cfg);
             req.setPreferredHttpMethod(HttpPost.METHOD_NAME);
-            J4pVersionResponse resp = (J4pVersionResponse) j4pClient.execute(req);
+            J4pVersionResponse resp = j4pClient.execute(req);
             verifyResponse(resp);
         }
     }
 
    private void verifyResponse(J4pVersionResponse pResp) {
-        assertEquals("Proper agent version", Version.getAgentVersion(), pResp.getAgentVersion());
-        assertEquals("Proper protocol version",Version.getProtocolVersion(), pResp.getProtocolVersion());
-        assertTrue("Request timestamp", pResp.getRequestDate().getTime() <= System.currentTimeMillis());
-        assertEquals("Jetty", "jetty", pResp.getProduct());
-        assertTrue("Mortbay or Eclipse", pResp.getVendor().contains("Eclipse") || pResp.getVendor().contains("Mortbay"));
-        assertNull(pResp.getExtraInfo());
+       assertEquals("Proper agent version", Version.getAgentVersion(), pResp.getAgentVersion());
+       assertEquals("Proper protocol version",Version.getProtocolVersion(), pResp.getProtocolVersion());
+       assertTrue("Request timestamp", pResp.getRequestDate().getTime() <= System.currentTimeMillis());
+       assertEquals("Jetty", "jetty", pResp.getProduct());
+       assertTrue("Mortbay or Eclipse", pResp.getVendor().contains("Eclipse") || pResp.getVendor().contains("Mortbay"));
+       Set<String> providers = pResp.getProviders();
+       assertTrue(providers.contains("jmx"));
+       assertEquals(pResp.getExtraInfo("jmx").size(),0);
     }
 
 

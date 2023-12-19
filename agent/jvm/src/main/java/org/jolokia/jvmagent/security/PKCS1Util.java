@@ -22,10 +22,10 @@ import java.security.spec.RSAPrivateCrtKeySpec;
 /**
  * This code is inspired and taken over from net.auth.core:oauth
  * (albeit in a highly stripped variation):
- * <p/>
+ * <p>
  * Source is from http://oauth.googlecode.com/svn/code/java/ which is licensed
  * under the APL (http://oauth.googlecode.com/svn/code/java/LICENSE.txt)
- * <p/>
+ * <p>
  * All credits go to the original author (zhang)
  *
  * @author roland
