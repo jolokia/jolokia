@@ -1069,7 +1069,7 @@
     <plugin.org.apache.felix.maven-bundle-plugin>5.1.9</plugin.org.apache.felix.maven-bundle-plugin>
     <plugin.org.apache.felix.maven-scr-plugin>1.26.4</plugin.org.apache.felix.maven-scr-plugin>
     <plugin.org.apache.rat.apache-rat-plugin>0.15</plugin.org.apache.rat.apache-rat-plugin>
-    <plugin.org.asciidoctor.asciidoctor-maven-plugin>2.2.4</plugin.org.asciidoctor.asciidoctor-maven-plugin>
+    <plugin.org.asciidoctor.asciidoctor-maven-plugin>2.2.5</plugin.org.asciidoctor.asciidoctor-maven-plugin>
     <plugin.org.codehaus.mojo.build-helper-maven-plugin>3.5.0</plugin.org.codehaus.mojo.build-helper-maven-plugin>
     <plugin.org.jacoco.jacoco-maven-plugin>0.7.6.201602180812</plugin.org.jacoco.jacoco-maven-plugin>
     <plugin.org.vafer.jdeb>1.10</plugin.org.vafer.jdeb>
