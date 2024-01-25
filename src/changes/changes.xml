@@ -23,6 +23,11 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
+    <release version="2.0.1" description="Release 2.0.1" date="2024-01-??">
+      <action dev="grgrzybek" type="fix" issue="650">
+        Handle management.endpoint.jolokia.enabled Spring Boot property
+      </action>
+    </release>
     <release version="2.0.0" description="Release 2.0.0" date="2023-12-19">
       <action dev="grgrzybek" type="add" issue="568">
         Support for Spring Boot 3
