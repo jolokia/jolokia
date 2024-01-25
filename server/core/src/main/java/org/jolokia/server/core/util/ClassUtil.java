@@ -21,6 +21,8 @@ import java.lang.reflect.*;
 import java.net.URL;
 import java.util.*;
 
+import org.jolokia.server.core.service.api.LogHandler;
+
 /**
  * Utility for class lookup.
  *
@@ -162,6 +164,115 @@ public final class ClassUtil {
         } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
             throw new IllegalArgumentException("Cannot instantiate " + pClass + ": " + e,e);
         }
+    }
+
+    public static LogHandler newLogHandlerInstance(String pLogHandlerClass, String pLogHandlerName, boolean pIsDebug) {
+        Class<LogHandler> cl = ClassUtil.classForName(pLogHandlerClass);
+        if (cl != null) {
+            Constructor<? extends LogHandler> bestMatch = findBestLogHandlerConstructor(cl);
+            if (bestMatch != null) {
+                try {
+                    switch (bestMatch.getParameterCount()) {
+                        case 2: {
+                            Object[] args = new Object[2];
+                            if (bestMatch.getParameters()[0].getType() == String.class) {
+                                args[0] = pLogHandlerName;
+                                args[1] = pIsDebug;
+                            } else {
+                                args[0] = pIsDebug;
+                                args[1] = pLogHandlerName;
+                            }
+                            return bestMatch.newInstance(args);
+                        }
+                        case 1: {
+                            if (bestMatch.getParameters()[0].getType() == String.class) {
+                                return bestMatch.newInstance(pLogHandlerName);
+                            } else {
+                                return bestMatch.newInstance(pIsDebug);
+                            }
+                        }
+                        case 0:
+                        default:
+                            return bestMatch.newInstance();
+                    }
+                } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                    throw new IllegalArgumentException(e.getMessage(), e);
+                }
+            } else {
+                throw new IllegalArgumentException("Can't create log handler for class " + pLogHandlerClass);
+            }
+        }
+        return null;
+    }
+
+    private static Constructor<? extends LogHandler> findBestLogHandlerConstructor(Class<? extends LogHandler> cl) {
+        // check constructors, prefer:
+        // 1a. String, boolean
+        // 1b. boolean, String
+        // 2. String
+        // 3. boolean
+        // 4. no-arg
+        // x. boolean is preferred over Boolean
+        @SuppressWarnings("unchecked")
+        Constructor<? extends LogHandler>[] ctors = (Constructor<? extends LogHandler>[]) cl.getConstructors();
+        return Arrays.stream(ctors).filter(c -> {
+            int pc = c.getParameterCount();
+            if (pc == 0) {
+                return true;
+            }
+            if (pc == 1) {
+                return c.getParameters()[0].getType() == String.class
+                        || c.getParameters()[0].getType() == Boolean.class
+                        || c.getParameters()[0].getType() == Boolean.TYPE;
+            }
+            if (pc == 2) {
+                boolean hasString = c.getParameters()[0].getType() == String.class
+                        || c.getParameters()[1].getType() == String.class;
+                boolean hasBoolean = c.getParameters()[0].getType() == Boolean.class
+                        || c.getParameters()[0].getType() == Boolean.TYPE
+                        || c.getParameters()[1].getType() == Boolean.class
+                        || c.getParameters()[1].getType() == Boolean.TYPE;
+                return hasString && hasBoolean;
+            }
+            return false;
+        }).min((c1, c2) -> {
+            if (c1.getParameterCount() != c2.getParameterCount()) {
+                return c1.getParameterCount() > c2.getParameterCount() ? -1 : 1;
+            }
+            if (c1.getParameterCount() == 2) {
+                // prefer (String, [Bb]oolean) over ([Bb]oolean, String)
+                // prefer (String, boolean) over (String, Boolean)
+                Class<?> t01 = c1.getParameters()[0].getType();
+                Class<?> t02 = c2.getParameters()[0].getType();
+                Class<?> t11 = c1.getParameters()[1].getType();
+                Class<?> t12 = c2.getParameters()[1].getType();
+                if (t01 == String.class && t02 != String.class) {
+                    return -1;
+                }
+                if (t01 != String.class && t02 == String.class) {
+                    return 1;
+                }
+                if (t01 == Boolean.TYPE && t02 == Boolean.class) {
+                    return -1;
+                }
+                return t11 == Boolean.TYPE && t12 == Boolean.class ? -1 : 1;
+            }
+            if (c1.getParameterCount() == 1) {
+                // prefer (String) over (boolean)
+                Class<?> t01 = c1.getParameters()[0].getType();
+                Class<?> t02 = c2.getParameters()[0].getType();
+                if (t01 == String.class) {
+                    return -1;
+                }
+                if (t02 == String.class) {
+                    return 1;
+                }
+                return t01 == Boolean.TYPE ? -1 : 1;
+            }
+
+            // weird, but we can't really determine...
+            return 0;
+        }).orElse(null);
     }
 
     /**

@@ -422,6 +422,7 @@ where <command> is one of
     --logHandlerClass <class>       Implementation of org.jolokia.server.core.service.api.LogHandler for logging
                                     Available classes: org.jolokia.server.core.service.impl.QuietLogHandler
                                                        org.jolokia.server.core.service.impl.JulLogHandler
+    --logHandlerName <logger name>  A logger name to be used with custom logger implementation
     --debugMaxEntries <nr>          Number of debug entries to keep in memory which can be fetched from the Jolokia MBean
     --maxDepth <depth>              Maximum number of levels for serialization of beans
     --maxCollectionSize <size>      Maximum number of element in collections to keep when serializing the response

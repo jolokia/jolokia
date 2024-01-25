@@ -58,6 +58,12 @@ public enum ConfigKey {
     LOGHANDLER_CLASS("logHandlerClass", true, false),
 
     /**
+     * Log handler name to use. It's often called <em>log category</em>.
+     * If not set, {@code org.jolokia} is used.
+     */
+    LOGHANDLER_NAME("logHandlerName", true, false, "org.jolokia"),
+
+    /**
      * Maximum traversal depth for serialization of complex objects.
      */
     MAX_DEPTH("maxDepth",true, true),

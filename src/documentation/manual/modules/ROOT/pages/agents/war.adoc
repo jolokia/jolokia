@@ -125,6 +125,10 @@ logging completely.
 * `org.jolokia.server.core.http.AgentServlet.ServletLogHandler` is used by default and delegates to `jakarta.servlet.GenericServlet.log()` methods
 a|Default: `org.jolokia.server.core.http.AgentServlet.ServletLogHandler`
 
+|`logHandlerName`
+|A parameter which may be used to configure _logger name_ which may be used with some `org.jolokia.server.core.service.api.LogHandler` implementations.
+a|Default: `org.jolokia`
+
 |`historyMaxEntries`
 |Entries to keep in the history. Can be changed at
 runtime via the config MBean.

@@ -116,6 +116,7 @@ public class HelpCommand extends AbstractBaseCommand {
 "    --logHandlerClass <class>       Implementation of org.jolokia.server.core.service.api.LogHandler for logging\n" +
 "                                    Available classes: org.jolokia.server.core.service.impl.QuietLogHandler\n" +
 "                                                       org.jolokia.server.core.service.impl.JulLogHandler\n" +
+"    --logHandlerName <logger name>  A logger name to be used with custom logger implementation\n" +
 "    --debugMaxEntries <nr>          Number of debug entries to keep in memory which can be fetched from the Jolokia MBean\n" +
 "    --maxDepth <depth>              Maximum number of levels for serialization of beans\n" +
 "    --maxCollectionSize <size>      Maximum number of element in collections to keep when serializing the response\n" +

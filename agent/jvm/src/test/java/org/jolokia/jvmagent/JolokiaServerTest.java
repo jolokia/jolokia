@@ -29,11 +29,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 import javax.net.ssl.*;
 
 import com.sun.net.httpserver.HttpServer;
 import org.jolokia.jvmagent.security.KeyStoreUtil;
 import org.jolokia.server.core.Version;
+import org.jolokia.server.core.service.api.JolokiaServiceManager;
+import org.jolokia.server.core.service.impl.JolokiaServiceManagerImpl;
+import org.jolokia.server.core.service.impl.JulLogHandler;
 import org.jolokia.server.core.util.Base64Util;
 import org.jolokia.test.util.EnvTestUtil;
 import org.jolokia.server.core.service.api.LogHandler;
@@ -396,6 +400,68 @@ public class JolokiaServerTest {
         assertTrue(CustomLogHandler.infoCount > 0);
     }
 
+    @Test
+    public void customLogHandlerJul() throws Exception {
+        JvmAgentConfig cfg = new JvmAgentConfig("logHandlerClass=" + JulLogHandler.class.getName()
+                + ",debug=true,logHandlerName=com.example,port=" + EnvTestUtil.getFreePort());
+        CustomLogHandler.infoCount = 0;
+        JolokiaServer handler = new JolokiaServer(cfg);
+        Field smf = handler.getClass().getDeclaredField("serviceManager");
+        smf.setAccessible(true);
+        JolokiaServiceManagerImpl jsm = (JolokiaServiceManagerImpl) smf.get(handler);
+        JulLogHandler logHandler = (JulLogHandler) jsm.getLogHandler();
+        Field lf = logHandler.getClass().getDeclaredField("logger");
+        lf.setAccessible(true);
+        Logger logger = (Logger) lf.get(logHandler);
+        assertNotNull(logHandler);
+        assertEquals(logger.getName(), "com.example");
+    }
+
+    @Test
+    public void customLogHandlerWithParameters1() throws Exception {
+        JvmAgentConfig cfg = new JvmAgentConfig("logHandlerClass=" + ParameterizedLogHandler1.class.getName()
+                + ",debug=true,logHandlerName=com.example,port=" + EnvTestUtil.getFreePort());
+        CustomLogHandler.infoCount = 0;
+        JolokiaServer handler = new JolokiaServer(cfg);
+        Field smf = handler.getClass().getDeclaredField("serviceManager");
+        smf.setAccessible(true);
+        JolokiaServiceManagerImpl jsm = (JolokiaServiceManagerImpl) smf.get(handler);
+        ParameterizedLogHandler1 logHandler = (ParameterizedLogHandler1) jsm.getLogHandler();
+        assertTrue(logHandler.debug2);
+        assertFalse(logHandler.debug1);
+        assertEquals(logHandler.category, "com.example");
+    }
+
+    @Test
+    public void customLogHandlerWithParameters2() throws Exception {
+        JvmAgentConfig cfg = new JvmAgentConfig("logHandlerClass=" + ParameterizedLogHandler2.class.getName()
+                + ",debug=true,port=" + EnvTestUtil.getFreePort());
+        CustomLogHandler.infoCount = 0;
+        JolokiaServer handler = new JolokiaServer(cfg);
+        Field smf = handler.getClass().getDeclaredField("serviceManager");
+        smf.setAccessible(true);
+        JolokiaServiceManagerImpl jsm = (JolokiaServiceManagerImpl) smf.get(handler);
+        ParameterizedLogHandler2 logHandler = (ParameterizedLogHandler2) jsm.getLogHandler();
+        assertFalse(logHandler.debug2);
+        assertFalse(logHandler.debug1);
+        assertEquals(logHandler.category, "org.jolokia", "Default \"org.jolokia\" value should be used");
+    }
+
+    @Test
+    public void customLogHandlerWithParameters3() throws Exception {
+        JvmAgentConfig cfg = new JvmAgentConfig("logHandlerClass=" + ParameterizedLogHandler3.class.getName()
+                + ",debug=true,port=" + EnvTestUtil.getFreePort());
+        CustomLogHandler.infoCount = 0;
+        JolokiaServer handler = new JolokiaServer(cfg);
+        Field smf = handler.getClass().getDeclaredField("serviceManager");
+        smf.setAccessible(true);
+        JolokiaServiceManagerImpl jsm = (JolokiaServiceManagerImpl) smf.get(handler);
+        ParameterizedLogHandler3 logHandler = (ParameterizedLogHandler3) jsm.getLogHandler();
+        assertTrue(logHandler.debug2);
+        assertFalse(logHandler.debug1);
+        assertNull(logHandler.category);
+    }
+
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void invalidCustomLogHandler() throws Exception {
         JvmAgentConfig cfg = new JvmAgentConfig("logHandlerClass=" + InvalidLogHandler.class.getName() + ",port=" + EnvTestUtil.getFreePort());
@@ -573,6 +639,109 @@ public class JolokiaServerTest {
         @Override
         public void error(String message, Throwable t) {
             errorCount++;
+        }
+
+        @Override
+        public boolean isDebug() {
+            return false;
+        }
+    }
+
+    public static class ParameterizedLogHandler1 implements LogHandler {
+        String category;
+        Boolean debug1 = Boolean.FALSE;
+        boolean debug2 = false;
+
+        public ParameterizedLogHandler1(String category) {
+            this.category = category;
+        }
+
+        public ParameterizedLogHandler1(String category, Boolean debug) {
+            this.category = category;
+            this.debug1 = debug;
+        }
+
+        public ParameterizedLogHandler1(String category, boolean debug) {
+            this.category = category;
+            this.debug2 = debug;
+        }
+
+        @Override
+        public void debug(String message) {
+        }
+
+        @Override
+        public void info(String message) {
+        }
+
+        @Override
+        public void error(String message, Throwable t) {
+        }
+
+        @Override
+        public boolean isDebug() {
+            return false;
+        }
+    }
+
+    public static class ParameterizedLogHandler2 implements LogHandler {
+        String category;
+        Boolean debug1 = Boolean.FALSE;
+        boolean debug2 = false;
+
+        public ParameterizedLogHandler2(String category) {
+            this.category = category;
+        }
+
+        public ParameterizedLogHandler2(Boolean debug1) {
+            this.debug1 = debug1;
+        }
+
+        public ParameterizedLogHandler2(boolean debug2) {
+            this.debug2 = debug2;
+        }
+
+        @Override
+        public void debug(String message) {
+        }
+
+        @Override
+        public void info(String message) {
+        }
+
+        @Override
+        public void error(String message, Throwable t) {
+        }
+
+        @Override
+        public boolean isDebug() {
+            return false;
+        }
+    }
+
+    public static class ParameterizedLogHandler3 implements LogHandler {
+        String category;
+        Boolean debug1 = Boolean.FALSE;
+        boolean debug2 = false;
+
+        public ParameterizedLogHandler3(Boolean debug1) {
+            this.debug1 = debug1;
+        }
+
+        public ParameterizedLogHandler3(boolean debug2) {
+            this.debug2 = debug2;
+        }
+
+        @Override
+        public void debug(String message) {
+        }
+
+        @Override
+        public void info(String message) {
+        }
+
+        @Override
+        public void error(String message, Throwable t) {
         }
 
         @Override

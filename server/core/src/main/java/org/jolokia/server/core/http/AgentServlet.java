@@ -221,9 +221,11 @@ public class AgentServlet extends HttpServlet {
      */
     protected LogHandler createLogHandler(ServletConfig pServletConfig, Configuration pConfig) {
         String logHandlerClass = pConfig.getConfig(ConfigKey.LOGHANDLER_CLASS);
+        String logHandlerName = pConfig.getConfig(ConfigKey.LOGHANDLER_NAME);
+        boolean debug = Boolean.parseBoolean(pConfig.getConfig(ConfigKey.DEBUG));
         return logHandlerClass != null ?
-                (LogHandler) ClassUtil.newInstance(logHandlerClass) :
-                new ServletLogHandler(Boolean.parseBoolean(pConfig.getConfig(ConfigKey.DEBUG)));
+                ClassUtil.newLogHandlerInstance(logHandlerClass, logHandlerName, debug) :
+                new ServletLogHandler(debug);
     }
     /**
      * Create a restrictor to use. By default this methods returns the restrictor given in the

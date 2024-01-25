@@ -218,6 +218,7 @@ public class JolokiaServer {
         LogHandler log = pLogHandler != null ?
                 pLogHandler :
                 createLogHandler(jolokiaCfg.getConfig(ConfigKey.LOGHANDLER_CLASS),
+                                 jolokiaCfg.getConfig(ConfigKey.LOGHANDLER_NAME),
                                  Boolean.parseBoolean(jolokiaCfg.getConfig(ConfigKey.DEBUG)));
 
         serviceManager =
@@ -283,9 +284,9 @@ public class JolokiaServer {
 
     // Creat a log handler from either the given class or by creating a default log handler printing
     // out to stderr
-    private LogHandler createLogHandler(String pLogHandlerClass, final boolean pIsDebug) {
+    private LogHandler createLogHandler(String pLogHandlerClass, String pLogHandlerName, final boolean pIsDebug) {
         if (pLogHandlerClass != null) {
-            return ClassUtil.newInstance(pLogHandlerClass);
+            return ClassUtil.newLogHandlerInstance(pLogHandlerClass, pLogHandlerName, pIsDebug);
         } else {
             return new StdoutLogHandler(pIsDebug);
         }

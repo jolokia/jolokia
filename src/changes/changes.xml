@@ -24,6 +24,9 @@
   </properties>
   <body>
     <release version="2.0.1" description="Release 2.0.1" date="2024-01-??">
+      <action dev="grgrzybek" type="add" issue="651">
+        Add "logHandlerName" configuration property for custom loggers
+      </action>
       <action dev="grgrzybek" type="fix" issue="650">
         Handle management.endpoint.jolokia.enabled Spring Boot property
       </action>

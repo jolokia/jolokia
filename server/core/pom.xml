@@ -140,7 +140,10 @@
               org.jolokia.server.core.request.notification,
               org.jolokia.server.core.restrictor,
               org.jolokia.server.core.restrictor.policy,
-              !org.jolokia.server.core.service.*,
+              org.jolokia.server.core.service.api,
+              org.jolokia.server.core.service.notification,
+              org.jolokia.server.core.service.request,
+              org.jolokia.server.core.service.serializer,
               org.jolokia.server.core.util,
               org.jolokia.server.core.util.jmx
             </Export-Package>
