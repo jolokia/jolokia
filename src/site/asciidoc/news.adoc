@@ -15,6 +15,17 @@
 ////
 == News
 
+=== Jolokia 2.0.1 released
+
+[.news-date]
+2024-01-26
+
+Following the big 2.0.0 release last year, we continue to improve Jolokia by clearing the backlog and adding new features and improvements.
+
+With 2.0.1 release we're fixing custom log handler configuration. We also integrate better with https://docs.spring.io/spring-boot/docs/3.2.2/reference/html/actuator.html#actuator.endpoints.enabling[Spring Boot Actuator] by handling `management.endpoint.jolokia.enabled` property.
+
+As always, please refer to https://jolokia.org/changes-report.html#a2.0.1[changelog] for more details.
+
 === Jolokia 2.0 arrives: A new chapter begins!
 
 [.news-date]

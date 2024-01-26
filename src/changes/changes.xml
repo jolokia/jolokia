@@ -23,7 +23,7 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
-    <release version="2.0.1" description="Release 2.0.1" date="2024-01-??">
+    <release version="2.0.1" description="Release 2.0.1" date="2024-01-26">
       <action dev="grgrzybek" type="add" issue="651">
         Add "logHandlerName" configuration property for custom loggers
       </action>
@@ -32,6 +32,9 @@
       </action>
       <action dev="grgrzybek" type="fix" issue="631">
         Fixed configuration of org.jolokia.server.core.service.impl.JulLogHandler
+      </action>
+      <action dev="grgrzybek" type="fix" issue="535">
+        Prevent deadlock on java.util.logging initialization in specific circumstances
       </action>
     </release>
     <release version="2.0.0" description="Release 2.0.0" date="2023-12-19">

@@ -192,6 +192,8 @@ updated as well.
 Before the release it's worth updating the changelog in `src/changes/changes.xml`, but it can also be done after
 the release, because this XML file is processed during `mvn site` generation.
 
+It's also worth adding a release note to `src/site/asciidoc/news.adoc`.
+
 ## Deploy and release
 
 The important part of the release is to sign the artifacts with your GPG key. GPG keys can be checked using `gpg -k`
