@@ -111,6 +111,12 @@ public final class JvmAgent {
             }
         };
         jolokiaStartThread.setDaemon(true);
+
+        // Ensure LogManager is initialized before starting the JolokiaStart thread.
+        // https://github.com/jolokia/jolokia/issues/535 - sun.net.httpserver.ServerImpl constructor may also
+        // concurrently lead to LogManager initialization
+        System.getLogger("org.jolokia.agent");
+
         jolokiaStartThread.start();
     }
 
