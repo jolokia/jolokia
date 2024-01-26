@@ -100,7 +100,7 @@
     <li><a href="agents.html">Agents</a></li>
   </ul>
 </nav>
-<div class="edit-this-page"><a href="https://github.com/jolokia/jolokia/tree/2.0/src/documentation/manual/modules/ROOT/pages/agents.adoc">Help improving this page</a></div>
+<div class="edit-this-page"><a href="https://github.com/jolokia/jolokia/tree/main/src/documentation/manual/modules/ROOT/pages/agents.adoc">Help improving this page</a></div>
 </div>
   <div class="content">
 <aside class="toc sidebar" data-title="Contents" data-levels="2">
@@ -311,6 +311,13 @@ logging completely.</p>
 </div></div></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
 <p>Default: <code>org.jolokia.server.core.http.AgentServlet.ServletLogHandler</code></p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>logHandlerName</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A parameter which may be used to configure <em>logger name</em> which may be used with some <code>org.jolokia.server.core.service.api.LogHandler</code> implementations.</p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>Default: <code>org.jolokia</code></p>
 </div></div></td>
 </tr>
 <tr>
@@ -1620,6 +1627,7 @@ where &lt;command&gt; is one of
     --logHandlerClass &lt;class&gt;       Implementation of org.jolokia.server.core.service.api.LogHandler for logging
                                     Available classes: org.jolokia.server.core.service.impl.QuietLogHandler
                                                        org.jolokia.server.core.service.impl.JulLogHandler
+    --logHandlerName &lt;logger name&gt;  A logger name to be used with custom logger implementation
     --debugMaxEntries &lt;nr&gt;          Number of debug entries to keep in memory which can be fetched from the Jolokia MBean
     --maxDepth &lt;depth&gt;              Maximum number of levels for serialization of beans
     --maxCollectionSize &lt;size&gt;      Maximum number of element in collections to keep when serializing the response
