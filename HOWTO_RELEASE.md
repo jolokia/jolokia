@@ -221,12 +221,12 @@ If `developmentVersion`, `releaseVersion` or `tag` properties are not specified,
 values in the console.
 
 ```console
-git clone git@github.com:jolokia/jolokia.git -b 2.0
+git clone git@github.com:jolokia/jolokia.git
 cd jolokia
 mvn -Dmaven.repo.local=/tmp/repo \
-    -DdevelopmentVersion=2.0.1-SNAPSHOT \
-    -DreleaseVersion=2.0.0 \
-    -Dtag=v2.0.0 \
+    -DdevelopmentVersion=2.0.2-SNAPSHOT \
+    -DreleaseVersion=2.0.1 \
+    -Dtag=v2.0.1 \
     -Dgpg.keyname=roland@jolokia.org \
     -Pdist release:prepare
 mvn -Dmaven.repo.local=/tmp/repo \
