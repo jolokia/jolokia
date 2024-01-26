@@ -19,6 +19,7 @@ package org.jolokia.jvmagent;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
 import java.util.List;
+import java.util.logging.LogManager;
 
 import org.jolokia.backend.MBeanServerHandler;
 import org.jolokia.detector.ServerDetector;
@@ -109,6 +110,12 @@ public final class JvmAgent {
             }
         };
         jolokiaStartThread.setDaemon(true);
+
+        // Ensure LogManager is initialized before starting the JolokiaStart thread.
+        // https://github.com/jolokia/jolokia/issues/535 - sun.net.httpserver.ServerImpl constructor may also
+        // concurrently lead to LogManager initialization
+        LogManager.getLogManager();
+
         jolokiaStartThread.start();
     }
 
