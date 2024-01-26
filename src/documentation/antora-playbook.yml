@@ -23,8 +23,8 @@ content:
   sources:
     - url: ../..
       start_path: src/documentation/manual
-      branches: "2.0"
-      edit_url: 'https://github.com/jolokia/jolokia/tree/2.0/{path}'
+      branches: "main"
+      edit_url: 'https://github.com/jolokia/jolokia/tree/main/{path}'
 
 asciidoc:
   attributes:
