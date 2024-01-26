@@ -30,6 +30,9 @@
       <action dev="grgrzybek" type="fix" issue="650">
         Handle management.endpoint.jolokia.enabled Spring Boot property
       </action>
+      <action dev="grgrzybek" type="fix" issue="631">
+        Fixed configuration of org.jolokia.server.core.service.impl.JulLogHandler
+      </action>
     </release>
     <release version="2.0.0" description="Release 2.0.0" date="2023-12-19">
       <action dev="grgrzybek" type="add" issue="568">
