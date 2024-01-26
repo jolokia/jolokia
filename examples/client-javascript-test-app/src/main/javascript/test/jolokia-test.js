@@ -106,7 +106,7 @@ $(document).ready(function () {
                         success: function (response) {
                             assert.equal(response.request.type, "version", "Type must be version");
                             assert.ok(response.value.protocol >= 6.0, "Protocol must be greater or equal 4.0");
-                            assert.ok(semverLite.gte(j4p.CLIENT_VERSION, response.value["agent"]), "Agent version check");
+                            assert.ok(minorVersionsMatch(j4p.CLIENT_VERSION, response.value["agent"]), "Agent version check");
                             done();
                         }
                     })
@@ -174,7 +174,7 @@ $(document).ready(function () {
                     success: function (response, idx) {
                         switch (idx) {
                             case 0:
-                                assert.ok(semverLite.gte(j4p.CLIENT_VERSION, response.value["agent"]), "Version request");
+                                assert.ok(minorVersionsMatch(j4p.CLIENT_VERSION, response.value["agent"]), "Version request");
                                 break;
                             case 1:
                                 assert.equal(response.request.type, "read", "Read request");
@@ -195,7 +195,7 @@ $(document).ready(function () {
                 {
                     success: [
                         function (response) {
-                            assert.ok(semverLite.gte(j4p.CLIENT_VERSION, response.value["agent"]), "Version request");
+                            assert.ok(minorVersionsMatch(j4p.CLIENT_VERSION, response.value["agent"]), "Version request");
                             done();
                         },
                         function (response) {
@@ -218,7 +218,7 @@ $(document).ready(function () {
                     success: [
                         function (response, idx) {
                             assert.equal(idx, 0, "Success 1st request");
-                            assert.ok(semverLite.gte(j4p.CLIENT_VERSION, response.value["agent"]), "Version request");
+                            assert.ok(minorVersionsMatch(j4p.CLIENT_VERSION, response.value["agent"]), "Version request");
                             done();
                         },
                         function () {
@@ -480,6 +480,26 @@ $(document).ready(function () {
                 }
             );
         });
+    }
+
+    /*
+     * Checks whether v1 is ge than v2 up to minor version.
+     * 2.0.0 should be ge 2.0.1, but 2.0.9 should not be ge 2.1.0
+     */
+    function minorVersionsMatch(v1, v2) {
+        let t1 = v1.split('.')
+        let t2 = v2.split('.')
+        if (t1.length >= 3 && t2.length >= 3) {
+            if (t1[0] < t2[0]) {
+                return false
+            }
+            if (t1[0] > t2[0]) {
+                return true
+            }
+            return t1[1] >= t2[1]
+        } else {
+            return semverLite.gte(v1, v2)
+        }
     }
 
 });

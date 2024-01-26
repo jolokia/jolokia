@@ -187,15 +187,15 @@ $(document).ready(function () {
 
     QUnit.test("version (sync)", assert => {
         let value = j4p.version({ method: "post" });
-        assert.ok(value.protocol >= 6, "Protocol >= 4");
-        assert.ok(semverLite.gte(j4p.CLIENT_VERSION, value["agent"]), "Client version: " + j4p.CLIENT_VERSION);
+        assert.ok(value.protocol >= 6, "Protocol >= 6");
+        assert.ok(minorVersionsMatch(j4p.CLIENT_VERSION, value["agent"]), "Client version: " + j4p.CLIENT_VERSION);
     });
 
     QUnit.test("version (async)", assert => {
         let done = assert.async();
         let value = j4p.version({
             jsonp: true, success: function (val) {
-                assert.ok(semverLite.gte(j4p.CLIENT_VERSION, val["agent"]), "Agent version " + j4p.CLIENT_VERSION);
+                assert.ok(minorVersionsMatch(j4p.CLIENT_VERSION, val["agent"]), "Agent version " + j4p.CLIENT_VERSION);
                 done();
             }
         });
@@ -247,4 +247,23 @@ $(document).ready(function () {
         console.log(JSON.stringify(response));
     }
 
+    /*
+     * Checks whether v1 is ge than v2 up to minor version.
+     * 2.0.0 should be ge 2.0.1, but 2.0.9 should not be ge 2.1.0
+     */
+    function minorVersionsMatch(v1, v2) {
+        let t1 = v1.split('.')
+        let t2 = v2.split('.')
+        if (t1.length >= 3 && t2.length >= 3) {
+            if (t1[0] < t2[0]) {
+                return false
+            }
+            if (t1[0] > t2[0]) {
+                return true
+            }
+            return t1[1] >= t2[1]
+        } else {
+            return semverLite.gte(v1, v2)
+        }
+    }
 });
