@@ -1068,7 +1068,7 @@
     <plugin.com.github.site-maven-plugin>0.12</plugin.com.github.site-maven-plugin>
     <plugin.org.apache.felix.maven-bundle-plugin>5.1.9</plugin.org.apache.felix.maven-bundle-plugin>
     <plugin.org.apache.felix.maven-scr-plugin>1.26.4</plugin.org.apache.felix.maven-scr-plugin>
-    <plugin.org.apache.rat.apache-rat-plugin>0.16</plugin.org.apache.rat.apache-rat-plugin>
+    <plugin.org.apache.rat.apache-rat-plugin>0.16.1</plugin.org.apache.rat.apache-rat-plugin>
     <plugin.org.asciidoctor.asciidoctor-maven-plugin>2.2.5</plugin.org.asciidoctor.asciidoctor-maven-plugin>
     <plugin.org.codehaus.mojo.build-helper-maven-plugin>3.5.0</plugin.org.codehaus.mojo.build-helper-maven-plugin>
     <plugin.org.jacoco.jacoco-maven-plugin>0.7.6.201602180812</plugin.org.jacoco.jacoco-maven-plugin>
