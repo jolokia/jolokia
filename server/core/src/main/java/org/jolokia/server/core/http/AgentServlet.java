@@ -89,7 +89,7 @@ public class AgentServlet extends HttpServlet {
     private boolean streamingEnabled;
 
     /**
-     * No argument constructor, used e.g. by an servlet
+     * No argument constructor, used e.g. by a servlet
      * descriptor when creating the servlet out of web.xml
      */
     public AgentServlet() {
@@ -228,7 +228,7 @@ public class AgentServlet extends HttpServlet {
                 new ServletLogHandler(debug);
     }
     /**
-     * Create a restrictor to use. By default this methods returns the restrictor given in the
+     * Create a restrictor to use. By default, this method returns the restrictor given in the
      * constructor or does a lookup for a policy fule,
      * but thie can be overridden in order to fine tune the creation.
      *
@@ -448,7 +448,7 @@ public class AgentServlet extends HttpServlet {
         }
     }
 
-    // Fallback used if URL creation didnt work
+    // Fallback used if URL creation didn't work
     private String plainReplacement(String pUrl, String pServletPath) {
         int idx = pUrl.lastIndexOf(pServletPath);
         String url;
@@ -523,7 +523,7 @@ public class AgentServlet extends HttpServlet {
 
     // =======================================================================
 
-    // Get parameter map either directly from an Servlet 2.4 compliant implementation
+    // Get parameter map either directly from a Servlet 2.4 compliant implementation
     // or by looking it up explictely (thanks to codewax for the patch)
     private Map<String, String[]> getParameterMap(HttpServletRequest pReq){
         try {
@@ -587,7 +587,7 @@ public class AgentServlet extends HttpServlet {
         } finally {
             if (out != null) {
                 // Always close in order to finish the request.
-                // Otherwise the thread blocks.
+                // Otherwise, the thread blocks.
                 out.close();
             }
         }
@@ -610,7 +610,7 @@ public class AgentServlet extends HttpServlet {
         // 1h  in the past since it seems, that some servlet set the date header on their
         // own so that it cannot be guaranteed that these headers are really equals.
         // It happened on Tomcat that Date: was finally set *before* Expires: in the final
-        // answers some times which seems to be an implementation peculiarity from Tomcat
+        // answers sometimes which seems to be an implementation peculiarity from Tomcat
         pResp.setDateHeader("Expires",now - 3600000);
     }
 

@@ -76,17 +76,17 @@ public class CorsChecker extends AbstractChecker<String> {
     /** {@inheritDoc} */
     @Override
     public boolean check(String pArg) {
-        return check(pArg,false);
+        return check(pArg, false);
     }
 
     public boolean check(String pOrigin, boolean pOnlyWhenStrictCheckingIsEnabled) {
-        // Method called during strict checking but we have not configured that
+        // Method called during strict checking, but we have not configured that
         // So the check passes always.
         if (pOnlyWhenStrictCheckingIsEnabled && !strictChecking) {
             return true;
         }
 
-        // If strict checking is enabled but Origin is null, the don't allow. This can
+        // If strict checking is enabled but Origin is null, then don't allow. This can
         // be the case when both Referer: and Origin: are set to null
         if (pOrigin == null && strictChecking) {
             return false;

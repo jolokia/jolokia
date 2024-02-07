@@ -42,7 +42,7 @@ public final class RestrictorFactory {
     private RestrictorFactory() {  }
 
     /**
-     * Create a restrictor restrictor to use. By default, a policy file
+     * Create a restrictor to use. By default, a policy file
      * is looked up (with the URL given by the init parameter {@link ConfigKey#POLICY_LOCATION}
      * or "/jolokia-access.xml" by default) and if not found an {@link AllowAllRestrictor} is
      * used by default.
@@ -109,10 +109,9 @@ public final class RestrictorFactory {
     }
 
     /**
-     * Lookup a restrictor based on an URL
+     * Lookup a restrictor based on a URL.
      *
      * @param pLocation classpath or URL representing the location of the policy restrictor
-     *
      * @return the restrictor created or <code>null</code> if none could be found.
      * @throws IOException if reading of the policy stream failed
      */

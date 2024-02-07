@@ -6,13 +6,12 @@ import java.util.SortedSet;
 import javax.management.*;
 
 import org.jolokia.server.core.config.ConfigKey;
-import org.jolokia.server.core.config.Configuration;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 
 /**
  * The context providing access to all Jolokia internal services. This context
  * will be given through during request handling to the various methods.
- * It is also an restrictor used for access restriction handling and responsible
+ * It is also a restrictor used for access restriction handling and responsible
  * for logging aspects.
  *
  * @author roland
@@ -41,7 +40,7 @@ public interface JolokiaContext extends LogHandler, Restrictor {
     <T extends JolokiaService<?>> T getService(Class<T> pType);
 
     /**
-     * Get a single, mandatory, service. If not present, then an exception is thrown. Also
+     * Get a single, mandatory, service. If not present, then an exception is thrown. Also,
      * an exception is raised if more than one service exist
      *
      * @param pType requested service type

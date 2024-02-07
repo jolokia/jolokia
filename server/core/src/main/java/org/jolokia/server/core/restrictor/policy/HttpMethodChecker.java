@@ -24,8 +24,8 @@ import org.w3c.dom.*;
 
 /**
  * Checker, which extracts <code>http</code> elements from the policy document which in turn
- * declares the allowed HTTP methods ("get" or "post")
- *
+ * declares the allowed HTTP methods ("get" or "post").
+ * <p>
  * Example for allowing only post calls:
  *
  * <pre>
