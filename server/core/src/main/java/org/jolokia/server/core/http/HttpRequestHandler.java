@@ -36,7 +36,7 @@ import org.json.simple.parser.ParseException;
 
 /**
  * Request handler with no dependency on the servlet API so that it can be used in
- * several different environments (like for the Sun JDK 11+ {@link com.sun.net.httpserver.HttpServer}.
+ * several different environments (like for the Sun JDK 11+ {@link com.sun.net.httpserver.HttpServer}).
  *
  * @author roland
  * @since Mar 3, 2010
@@ -81,7 +81,10 @@ public class HttpRequestHandler {
         return executeRequest(jmxReq);
     }
 
-    // Alternative query parameter for providing path info
+    /**
+     * Alternative query parameter for providing path info.
+     */
+    @SuppressWarnings("unused")
     public static final String PATH_QUERY_PARAM = "p";
 
     /**
@@ -144,7 +147,7 @@ public class HttpRequestHandler {
     /**
      * Handling an option request which is used for preflight checks before a CORS based browser request is
      * sent (for certain circumstances).
-     *
+     * <p>
      * See the <a href="http://www.w3.org/TR/cors/">CORS specification</a>
      * (section 'preflight checks') for more details.
      *
@@ -221,8 +224,8 @@ public class HttpRequestHandler {
      * lead to an error. So, each individual request is wrapped with the error handling of
      * {@link #executeRequest(JolokiaRequest)}
      * whereas the overall handling is wrapped with this method. It is hence more coarse grained,
-     * leading typically to an status code of 500.
-     *
+     * leading typically to a status code of 500.
+     * <p>
      * Summary: This method should be used as last security belt is some exception should escape
      * from a single request processing in {@link #executeRequest(JolokiaRequest)}.
      *
@@ -242,7 +245,7 @@ public class HttpRequestHandler {
 
 
     /**
-     * Get the JSON representation for a an exception
+     * Get the JSON representation for an exception.
      *
      *
      * @param pErrorCode the HTTP error code to return
@@ -279,7 +282,7 @@ public class HttpRequestHandler {
         if (!jolokiaCtx.isRemoteAccessAllowed(pHost != null ? new String[] { pHost, pAddress } : new String[] { pAddress })) {
             throw new SecurityException("No access from client " + pAddress + " allowed");
         }
-        if (!jolokiaCtx.isOriginAllowed(pOrigin,true)) {
+        if (!jolokiaCtx.isOriginAllowed(pOrigin, true)) {
             throw new SecurityException("Origin " + pOrigin + " is not allowed to call this agent");
         }
     }
@@ -366,7 +369,7 @@ public class HttpRequestHandler {
     // contains two following slashes. These slashes get collapsed
     // when calling getPathInfo() but are still present in the URI.
     // This situation can happen, when slashes are escaped and the last char
-    // of an path part is such an escaped slash
+    // of a path part is such an escaped slash
     // (e.g. "read/domain:type=name!//attribute")
     // In this case, we extract the path info on our own
 

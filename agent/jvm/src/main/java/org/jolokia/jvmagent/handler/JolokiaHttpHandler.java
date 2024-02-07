@@ -129,7 +129,7 @@ public class JolokiaHttpHandler implements HttpHandler {
     /**
      * Protocol based authentication checks called very early and before handling a request.
      * If the check fails a security exception must be thrown
-     *
+     * <p>
      * The default implementation does nothing and should be overridden for a valid check.
      *
      * @param pHttpExchange exchange to check

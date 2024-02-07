@@ -111,6 +111,7 @@ public class JolokiaServer {
      * No arg constructor usable by subclasses. The {@link #init(JolokiaServerConfig,LogHandler)} must be called later on
      * for initialization
      */
+    @SuppressWarnings("unused")
     protected JolokiaServer() {}
 
     /**
@@ -165,6 +166,7 @@ public class JolokiaServer {
      *
      * @return server configuration
      */
+    @SuppressWarnings("unused")
     public JolokiaServerConfig getServerConfig() {
         return config;
     }
@@ -173,6 +175,7 @@ public class JolokiaServer {
      * @return the address that the server is listening on. Thus, a program can initialize the server
      * with 'port 0' and then retrieve the actual running port that was bound.
      */
+    @SuppressWarnings("unused")
     public InetSocketAddress getAddress() {
         return serverAddress;
     }
@@ -198,6 +201,7 @@ public class JolokiaServer {
      *
      * @param pService service to add
      */
+    @SuppressWarnings("unused")
     protected void addService(JolokiaService<?> pService) {
         serviceManager.addService(pService);
     }
