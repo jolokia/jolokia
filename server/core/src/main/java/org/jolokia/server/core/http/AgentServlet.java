@@ -317,12 +317,13 @@ public class AgentServlet extends HttpServlet {
     }
 
     @SuppressWarnings({ "PMD.AvoidCatchingThrowable", "PMD.AvoidInstanceofChecksInCatchClause" })
-    private void handle(ServletRequestHandler pReqHandler,HttpServletRequest pReq, HttpServletResponse pResp) throws IOException {
+    private void handle(ServletRequestHandler pReqHandler, HttpServletRequest pReq, HttpServletResponse pResp) throws IOException {
         JSONAware json = null;
 
         try {
             // Check access policy
-            requestHandler.checkAccess(allowDnsReverseLookup ? pReq.getRemoteHost() : null,
+            requestHandler.checkAccess(pReq.getScheme(),
+                                       allowDnsReverseLookup ? pReq.getRemoteHost() : null,
                                        pReq.getRemoteAddr(),
                                        getOriginOrReferer(pReq));
 

@@ -1,6 +1,8 @@
 package org.jolokia.server.core.http;
 
 import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -274,16 +276,31 @@ public class HttpRequestHandler {
     /**
      * Check whether the given host and/or address is allowed to access this agent.
      *
+     * @param pRequestScheme scheme used to make the request ('http' or 'https')
      * @param pHost host to check
      * @param pAddress address to check
      * @param pOrigin (optional) origin header to check also.
      */
-    public void checkAccess(String pHost, String pAddress, String pOrigin) {
+    public void checkAccess(String pRequestScheme, String pHost, String pAddress, String pOrigin) {
         if (!jolokiaCtx.isRemoteAccessAllowed(pHost != null ? new String[] { pHost, pAddress } : new String[] { pAddress })) {
             throw new SecurityException("No access from client " + pAddress + " allowed");
         }
         if (!jolokiaCtx.isOriginAllowed(pOrigin, true)) {
             throw new SecurityException("Origin " + pOrigin + " is not allowed to call this agent");
+        }
+
+        // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Origin
+        if ("http".equals(pRequestScheme) && pOrigin != null && !"null".equals(pOrigin)) {
+            try {
+                String originScheme = new URL(pOrigin).getProtocol();
+                // Requests with HTTPS origin should not be responded over HTTP,
+                // as it compromises data confidentiality and integrity.
+                if ("https".equals(originScheme)) {
+                    throw new SecurityException("Secure origin " + pOrigin + " should not be processed over HTTP");
+                }
+            } catch (MalformedURLException e) {
+                // Ignore it, should be safe as origin is not https anyway
+            }
         }
     }
 

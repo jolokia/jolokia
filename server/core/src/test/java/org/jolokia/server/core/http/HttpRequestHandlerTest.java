@@ -50,11 +50,22 @@ public class HttpRequestHandlerTest {
     @Test
     public void accessAllowed() throws Exception {
         Restrictor restrictor = createMock(Restrictor.class);
-        expect(restrictor.isRemoteAccessAllowed("localhost","127.0.0.1")).andReturn(true);
+        expect(restrictor.isRemoteAccessAllowed("localhost", "127.0.0.1")).andReturn(true);
         expect(restrictor.isOriginAllowed(isNull(), eq(true))).andReturn(true);
         replay(restrictor);
         init(restrictor);
-        handler.checkAccess("localhost", "127.0.0.1", null);
+        handler.checkAccess("http", "localhost", "127.0.0.1", null);
+        verify(restrictor);
+    }
+
+    @Test
+    public void accessAllowedHttpOriginOverHttps() throws Exception {
+        Restrictor restrictor = createMock(Restrictor.class);
+        expect(restrictor.isRemoteAccessAllowed("localhost", "127.0.0.1")).andReturn(true);
+        expect(restrictor.isOriginAllowed("http://www.jolokia.org", true)).andReturn(true);
+        replay(restrictor);
+        init(restrictor);
+        handler.checkAccess("https", "localhost", "127.0.0.1", "http://www.jolokia.org");
         verify(restrictor);
     }
 
@@ -65,19 +76,30 @@ public class HttpRequestHandlerTest {
         replay(restrictor);
         init(restrictor);
 
-        handler.checkAccess("localhost", "127.0.0.1", null);
+        handler.checkAccess("http", "localhost", "127.0.0.1", null);
         verify(restrictor);
     }
 
     @Test(expectedExceptions = { SecurityException.class })
     public void accessDeniedViaOrigin() throws Exception {
         Restrictor restrictor = createMock(Restrictor.class);
-        expect(restrictor.isRemoteAccessAllowed("localhost","127.0.0.1")).andReturn(true);
-        expect(restrictor.isOriginAllowed("www.jolokia.org",true)).andReturn(false);
+        expect(restrictor.isRemoteAccessAllowed("localhost", "127.0.0.1")).andReturn(true);
+        expect(restrictor.isOriginAllowed("http://www.jolokia.org", true)).andReturn(false);
         replay(restrictor);
         init(restrictor);
 
-        handler.checkAccess("localhost", "127.0.0.1","www.jolokia.org");
+        handler.checkAccess("http", "localhost", "127.0.0.1", "http://www.jolokia.org");
+    }
+
+    @Test(expectedExceptions = { SecurityException.class })
+    public void accessDeniedHttpsOriginOverHttp() throws Exception {
+        Restrictor restrictor = createMock(Restrictor.class);
+        expect(restrictor.isRemoteAccessAllowed("localhost", "127.0.0.1")).andReturn(true);
+        expect(restrictor.isOriginAllowed("https://www.jolokia.org", true)).andReturn(true);
+        replay(restrictor);
+        init(restrictor);
+
+        handler.checkAccess("http", "localhost", "127.0.0.1", "https://www.jolokia.org");
     }
 
 
