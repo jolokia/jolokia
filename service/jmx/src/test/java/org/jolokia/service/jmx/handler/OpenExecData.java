@@ -17,41 +17,39 @@ package org.jolokia.service.jmx.handler;
  */
 
 
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 
-@SuppressWarnings("rawtypes")
 public class OpenExecData implements OpenExecDataMXBean {
 
-	public OpenWriteData compositeData(OpenWriteData data) {
+    public OpenWriteData compositeData(OpenWriteData data) {
         return data;
     }
 
-	public OpenWriteData[] arrayData(OpenWriteData[] data) {
+    public OpenWriteData[] arrayData(OpenWriteData[] data) {
         return data;
     }
 
-	public List listData(List<OpenWriteData> data) {
+    public List<OpenWriteData> listData(List<OpenWriteData> data) {
         return data;
     }
 
-	public Map mapData(Map<String, OpenWriteData> data) {
+    public Map<String, OpenWriteData> mapData(Map<String, OpenWriteData> data) {
         return data;
     }
 
-	public Set opSetData(Set<OpenWriteData> data) {
+    public Set<OpenWriteData> opSetData(Set<OpenWriteData> data) {
         return data;
     }
 
-	public OpenWriteData overloaded(OpenWriteData data) {
+    public OpenWriteData overloaded(OpenWriteData data) {
 
         return data;
     }
 
-	public String overloaded(String data) {
+    public String overloaded(String data) {
         return data;
     }
 
