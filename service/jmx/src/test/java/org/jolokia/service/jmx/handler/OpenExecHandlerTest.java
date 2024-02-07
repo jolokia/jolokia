@@ -62,7 +62,7 @@ public class OpenExecHandlerTest {
      */
     @Test
     public void missingField() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, MalformedObjectNameException, NotChangedException, EmptyResponseException {
-    	// set a value just for stringField, leave out intField
+        // set a value just for stringField, leave out intField
         JolokiaExecRequest request = new JolokiaRequestBuilder(EXEC, oName).
                 operation("compositeData").
                 arguments("{ \"stringField\":\"aString\" }").
@@ -78,7 +78,7 @@ public class OpenExecHandlerTest {
      */
     @Test(expectedExceptions={IllegalArgumentException.class})
     public void invalidField() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException, EmptyResponseException {
-    	// set a value just for stringField, leave out intField
+        // set a value just for stringField, leave out intField
         JolokiaExecRequest request = new JolokiaRequestBuilder(EXEC, oName).
                 operation("compositeData").
                 arguments("{ \"nonExistentField\":\"aString\" }").
@@ -92,9 +92,9 @@ public class OpenExecHandlerTest {
     @Test(expectedExceptions={ NumberFormatException.class })
     public void invalidValueForField() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException, EmptyResponseException {
         JolokiaExecRequest request = new JolokiaRequestBuilder(EXEC, oName).
-        		operation("compositeData").
-        		arguments("{ \"intField\":\"aString\" }").
-        		build();
+                operation("compositeData").
+                arguments("{ \"intField\":\"aString\" }").
+                build();
         handler.handleSingleServerRequest(getMBeanServer(), request);
     }
 
@@ -152,9 +152,9 @@ public class OpenExecHandlerTest {
     @Test
     public void nested() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException, EmptyResponseException {
         JolokiaExecRequest request = new JolokiaRequestBuilder(EXEC, oName).
-				operation("compositeData").
-				arguments("{ \"nestedClass\":{\"nestedField\":\"aString\"} }").
-				build();
+                operation("compositeData").
+                arguments("{ \"nestedClass\":{\"nestedField\":\"aString\"} }").
+                build();
         handler.handleSingleServerRequest(getMBeanServer(), request);
     }
 
@@ -164,9 +164,9 @@ public class OpenExecHandlerTest {
     @Test
     public void compositeWithArrayField() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException, EmptyResponseException {
         JolokiaExecRequest request = new JolokiaRequestBuilder(EXEC, oName).
-        		operation("compositeData").
-        		arguments("{ \"array\":[\"one\", \"two\"] }").
-        		build();
+                operation("compositeData").
+                arguments("{ \"array\":[\"one\", \"two\"] }").
+                build();
         handler.handleSingleServerRequest(getMBeanServer(), request);
     }
 
@@ -177,9 +177,9 @@ public class OpenExecHandlerTest {
     @Test(expectedExceptions={NumberFormatException.class})
     public void invalidTypeCompositeWithListField() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException, EmptyResponseException {
         JolokiaExecRequest request = new JolokiaRequestBuilder(EXEC, oName).
-        		operation("compositeData").
-        		arguments("{ \"list\":[\"one\", \"two\"] }").
-        		build();
+                operation("compositeData").
+                arguments("{ \"list\":[\"one\", \"two\"] }").
+                build();
         handler.handleSingleServerRequest(getMBeanServer(), request);
     }
 
@@ -189,9 +189,9 @@ public class OpenExecHandlerTest {
     @Test
     public void compositeWithListField() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException, EmptyResponseException {
         JolokiaExecRequest request = new JolokiaRequestBuilder(EXEC, oName).
-        		operation("compositeData").
-        		arguments("{ \"list\":[\"1\", \"2\"] }").
-        		build();
+                operation("compositeData").
+                arguments("{ \"list\":[\"1\", \"2\"] }").
+                build();
         handler.handleSingleServerRequest(getMBeanServer(), request);
     }
 
@@ -201,9 +201,9 @@ public class OpenExecHandlerTest {
     @Test
     public void compositeWithMapField() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException, EmptyResponseException {
         JolokiaExecRequest request = new JolokiaRequestBuilder(EXEC, oName).
-        		operation("compositeData").
-        		arguments("{ \"map\":{ \"5\":{\"nestedField\":\"value1\"}, \"7\":{\"nestedField\":\"value2\"} } }").
-        		build();
+                operation("compositeData").
+                arguments("{ \"map\":{ \"5\":{\"nestedField\":\"value1\"}, \"7\":{\"nestedField\":\"value2\"} } }").
+                build();
         handler.handleSingleServerRequest(getMBeanServer(), request);
     }
 
@@ -213,9 +213,9 @@ public class OpenExecHandlerTest {
     @Test
     public void compositeWithSetField() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException, EmptyResponseException {
         JolokiaExecRequest request = new JolokiaRequestBuilder(EXEC, oName).
-        		operation("compositeData").
-        		arguments("{ \"set\": [\"value1\",\"value2\"] }").
-        		build();
+                operation("compositeData").
+                arguments("{ \"set\": [\"value1\",\"value2\"] }").
+                build();
         handler.handleSingleServerRequest(getMBeanServer(), request);
     }
 
@@ -223,9 +223,9 @@ public class OpenExecHandlerTest {
     @Test
     public void overloaded() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException, EmptyResponseException {
         JolokiaExecRequest request = new JolokiaRequestBuilder(EXEC, oName).
-				operation("overloaded(javax.management.openmbean.CompositeData)").
-				arguments("{ \"stringField\": \"aString\" }").
-				build();
+                operation("overloaded(javax.management.openmbean.CompositeData)").
+                arguments("{ \"stringField\": \"aString\" }").
+                build();
         handler.handleSingleServerRequest(getMBeanServer(), request);
     }
 

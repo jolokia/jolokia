@@ -20,13 +20,12 @@ import java.util.Set;
  *  limitations under the License.
  */
 
-@SuppressWarnings("rawtypes")
 public interface OpenExecDataMXBean {
-	OpenWriteData compositeData(OpenWriteData data);
-	OpenWriteData[] arrayData(OpenWriteData[] data);
-	List listData(List<OpenWriteData> data);
-	Map mapData(Map<String, OpenWriteData> data);
-	Set opSetData(Set<OpenWriteData> data);
-	OpenWriteData overloaded(OpenWriteData data);
-	String overloaded(String data);
+    OpenWriteData compositeData(OpenWriteData data);
+    OpenWriteData[] arrayData(OpenWriteData[] data);
+    List<OpenWriteData> listData(List<OpenWriteData> data);
+    Map<String, OpenWriteData> mapData(Map<String, OpenWriteData> data);
+    Set<OpenWriteData> opSetData(Set<OpenWriteData> data);
+    OpenWriteData overloaded(OpenWriteData data);
+    String overloaded(String data);
 }
