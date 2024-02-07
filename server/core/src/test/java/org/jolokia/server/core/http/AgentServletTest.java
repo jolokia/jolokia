@@ -539,6 +539,7 @@ public class AgentServletTest {
         servlet.init(config);
         ByteArrayOutputStream sw = initRequestResponseMocks(
                 () -> {
+                    expect(request.getScheme()).andStubReturn("http");
                     expect(request.getHeader("Origin")).andReturn(null);
                     expect(request.getRemoteAddr()).andThrow(new IllegalStateException());
                 },
@@ -710,6 +711,7 @@ public class AgentServletTest {
 
     private Runnable getStandardRequestSetup() {
         return () -> {
+            expect(request.getScheme()).andStubReturn("http");
             expect(request.getHeader("Origin")).andStubReturn(null);
             expect(request.getHeader("Referer")).andStubReturn(null);
             expect(request.getRemoteHost()).andStubReturn("localhost");
@@ -732,6 +734,7 @@ public class AgentServletTest {
 
     private Runnable getDiscoveryRequestSetup(final String url) {
         return () -> {
+            expect(request.getScheme()).andStubReturn("http");
             expect(request.getHeader("Origin")).andStubReturn(null);
             expect(request.getHeader("Referer")).andStubReturn(null);
             expect(request.getRemoteHost()).andReturn("localhost");

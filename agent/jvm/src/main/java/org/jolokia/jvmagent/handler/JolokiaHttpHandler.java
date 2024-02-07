@@ -43,6 +43,7 @@ import javax.security.auth.Subject;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.HttpsExchange;
 import org.jolokia.jvmagent.ParsedUri;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.http.BackChannelHolder;
@@ -155,7 +156,9 @@ public class JolokiaHttpHandler implements HttpHandler {
 
             // Check access policy
             InetSocketAddress address = pExchange.getRemoteAddress();
-            requestHandler.checkAccess(getHostName(address),
+            String scheme = pExchange instanceof HttpsExchange ? "https" : "http";
+            requestHandler.checkAccess(scheme,
+                                       getHostName(address),
                                        address.getAddress().getHostAddress(),
                                        extractOriginOrReferer(pExchange));
             String method = pExchange.getRequestMethod();
