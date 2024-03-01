@@ -26,6 +26,9 @@ import java.lang.management.ThreadMXBean;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -395,45 +398,60 @@ public class ToOpenTypeConverter {
     }
 
     /**
-     * @param klass The Java type
+     * @param type The Java type
      * @return OpenType deducted from Java type by reflection
      * @throws OpenDataException When the open type is not found
      */
-    public static OpenType<?> introspectComplexTypeFrom(Class<?> klass) throws OpenDataException {
-        if (CompositeData.class.equals(klass) || TabularData.class.equals(klass)) {
+    public static OpenType<?> introspectComplexTypeFrom(Type type) throws OpenDataException {
+        if (CompositeData.class.equals(type) || TabularData.class.equals(type)) {
             //do not attempt to read from these classes, will have to be created from the "real" class runtime
             return null;
         }
-        if (klass.isEnum()) {
-            return STRING;
-        }
+        if (type instanceof Class) {
+            Class<?> klass = (Class<?>) type;
+            if (klass.isEnum()) {
+                return STRING;
+            }
 
-        if (klass.isPrimitive()) {
-            for (SimpleType<?> type : typeArray) {
-                if (type.getTypeName()
-                    .substring(type.getTypeName().lastIndexOf('.') + 1)
-                    .toLowerCase()
-                    .startsWith(klass.getSimpleName())) {
-                    return type;
+            if (klass.isPrimitive()) {
+                for (SimpleType<?> st : typeArray) {
+                    if (st.getTypeName()
+                        .substring(st.getTypeName().lastIndexOf('.') + 1)
+                        .toLowerCase()
+                        .startsWith(klass.getSimpleName())) {
+                        return st;
+                    }
                 }
             }
-        }
 
-        for (SimpleType<?> type : typeArray) {
-            if (klass.getName().equals(type.getClassName())) {
-                return type;
+            for (SimpleType<?> st : typeArray) {
+                if (klass.getName().equals(st.getClassName())) {
+                    return st;
+                }
             }
-        }
 
-        if (klass.isArray()) {
-            return new ArrayType<OpenType<?>>(1,
-                introspectComplexTypeRequireNonNull(klass.getComponentType()));
+            if (klass.isArray()) {
+                return new ArrayType<OpenType<?>>(1,
+                    introspectComplexTypeRequireNonNull(klass.getComponentType()));
+            }
         }
 
         List<String> names = new LinkedList<>();
         List<OpenType<?>> types = new LinkedList<>();
-        Class<?> classToIntrospect = klass;
-        while (classToIntrospect != null && !classToIntrospect.equals(Object.class)) {
+        Type typeToIntrospect = type;
+        while (typeToIntrospect != null && !typeToIntrospect.equals(Object.class)) {
+            Class<?> classToIntrospect = null;
+            Type[] actualTypes = null;
+            if (typeToIntrospect instanceof Class) {
+                classToIntrospect = (Class<?>) typeToIntrospect;
+            } else if (typeToIntrospect instanceof ParameterizedType
+                && ((ParameterizedType) typeToIntrospect).getRawType() instanceof Class) {
+                classToIntrospect = (Class<?>) ((ParameterizedType) typeToIntrospect).getRawType();
+                actualTypes = ((ParameterizedType) typeToIntrospect).getActualTypeArguments();
+            }
+            if (classToIntrospect == null) {
+                break;
+            }
             for (Method method : classToIntrospect.getDeclaredMethods()) {
                 // only introspect public instance methods
                 if (!Modifier.isStatic(method.getModifiers())
@@ -442,30 +460,43 @@ public class ToOpenTypeConverter {
                     if (method.getName().startsWith("get")) {
                         final String nameWithoutPrefix =
                             method.getName().substring(3, 4).toLowerCase() + method.getName().substring(4);
-                        recursivelyBuildSubtype(klass, names, types, method.getReturnType(), nameWithoutPrefix);
+                        Type rtype = method.getGenericReturnType();
+                        if (rtype instanceof TypeVariable) {
+                            if (actualTypes != null) {
+                                int pos = 0;
+                                for (TypeVariable<?> tp : ((TypeVariable<?>) rtype).getGenericDeclaration().getTypeParameters()) {
+                                    if (tp == rtype) {
+                                        rtype = actualTypes[pos];
+                                        break;
+                                    }
+                                    pos++;
+                                }
+                            }
+                        }
+                        recursivelyBuildSubtype(type, names, types, rtype, nameWithoutPrefix);
                     } else if (method.getName().startsWith("is")) {
                         final String nameWithoutPrefix =
                             method.getName().substring(2, 3).toLowerCase() + method.getName().substring(3);
-                        recursivelyBuildSubtype(klass, names, types, method.getReturnType(), nameWithoutPrefix);
+                        recursivelyBuildSubtype(type, names, types, method.getReturnType(), nameWithoutPrefix);
                     }
                 }
             }
-            classToIntrospect = classToIntrospect.getSuperclass();
+            typeToIntrospect = classToIntrospect.getGenericSuperclass();
         }
         if (types.isEmpty()) {
             throw new InvalidOpenTypeException(
-                "Found no fields to build composite type for class " + klass);
+                "Found no fields to build composite type for " + type);
         }
         return new CompositeType(
-            klass.getName(),
-            klass.getName(),
+            type.getTypeName(),
+            type.getTypeName(),
             names.toArray(new String[0]),
             names.toArray(new String[0]),
             types.toArray(new OpenType[0]));
     }
 
-    private static void recursivelyBuildSubtype(Class<?> klass, List<String> names,
-                                                List<OpenType<?>> types, Class<?> subType, String nameWithoutPrefix)
+    private static void recursivelyBuildSubtype(Type klass, List<String> names,
+                                                List<OpenType<?>> types, Type subType, String nameWithoutPrefix)
         throws OpenDataException {
         if (klass.equals(subType)) {
             throw new OpenDataException(
