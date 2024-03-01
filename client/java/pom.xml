@@ -164,7 +164,15 @@
         <configuration>
           <reuseForks>false</reuseForks>
           <forkCount>1</forkCount>
-          <argLine>-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=45888 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost</argLine>
+          <argLine>
+            -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=45888 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost
+            -Dcom.sun.management.jmxremote.serial.filter.pattern=java.lang.*;java.lang.reflect.Proxy;java.math.BigInteger;java.math.BigDecimal;java.util.*;javax.management.*;javax.management.modelmbean.*;javax.management.monitor.*;javax.management.openmbean.*;javax.management.relation.*;javax.management.remote.*;javax.management.remote.rmi.*;javax.management.timer.*;javax.rmi.ssl.*;java.rmi.MarshalledObject;java.rmi.dgc.*;java.rmi.server.*;javax.security.auth.Subject;org.json.simple.*;org.jolokia.**;java.io.Serializable;!*
+          </argLine>
+          <systemPropertyVariables>
+            <jdk.serialFilter>java.lang.*;java.lang.reflect.Proxy;java.math.BigInteger;java.math.BigDecimal;java.util.*;javax.management.*;javax.management.modelmbean.*;javax.management.monitor.*;javax.management.openmbean.*;javax.management.relation.*;javax.management.remote.*;javax.management.remote.rmi.*;javax.management.timer.*;javax.rmi.ssl.*;java.rmi.MarshalledObject;java.rmi.dgc.*;java.rmi.server.*;javax.security.auth.Subject;org.json.simple.*;org.jolokia.**;java.io.Serializable;!*</jdk.serialFilter>
+            <!-- see com.sun.management.jmxremote.serial.filter.pattern property in $JAVA_HOME/conf/management/management.properties -->
+            <com.sun.management.jmxremote.serial.filter.pattern>java.lang.*;java.lang.reflect.Proxy;java.math.BigInteger;java.math.BigDecimal;java.util.*;javax.management.*;javax.management.modelmbean.*;javax.management.monitor.*;javax.management.openmbean.*;javax.management.relation.*;javax.management.remote.*;javax.management.remote.rmi.*;javax.management.timer.*;javax.rmi.ssl.*;java.rmi.MarshalledObject;java.rmi.dgc.*;java.rmi.server.*;javax.security.auth.Subject;org.json.simple.*;org.jolokia.**;java.io.Serializable;!*</com.sun.management.jmxremote.serial.filter.pattern>
+          </systemPropertyVariables>
           <!--<argLine>-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=45888 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=8000</argLine>-->
         </configuration>
       </plugin>
