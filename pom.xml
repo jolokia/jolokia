@@ -1157,6 +1157,7 @@
               <configuration>
                 <argLine>
                   --illegal-access=deny
+                  --add-opens java.management/javax.management.modelmbean=ALL-UNNAMED
                 </argLine>
               </configuration>
             </plugin>
