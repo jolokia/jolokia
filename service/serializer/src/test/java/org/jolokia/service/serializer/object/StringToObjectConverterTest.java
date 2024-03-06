@@ -175,14 +175,22 @@ public class StringToObjectConverterTest {
 
     @Test
     public void arrayConversions() {
-        Object obj = converter.convertFromString(int[].class.getName(), "10,20,30");
         int[] expected = new int[] { 10,20,30};
+        Object obj = converter.convertFromString(int[].class.getName(), "10,20,30");
         for (int i = 0;i < expected.length;i++) {
             assertEquals(expected[i],((int[]) obj)[i]);
         }
         obj = converter.convertFromString(Integer[].class.getName(), "10,20,30");
         for (int i = 0;i < expected.length;i++) {
             assertEquals(expected[i],(int) ((Integer[]) obj)[i]);
+        }
+        obj = converter.convertFromString(byte[].class.getName(), "10,20,30");
+        for (int i = 0;i < expected.length;i++) {
+            assertEquals(expected[i],((byte[]) obj)[i]);
+        }
+        obj = converter.convertFromString(Byte[].class.getName(), "10,20,30");
+        for (int i = 0;i < expected.length;i++) {
+            assertEquals(expected[i],(int) ((Byte[]) obj)[i]);
         }
 
         // Escaped arrays

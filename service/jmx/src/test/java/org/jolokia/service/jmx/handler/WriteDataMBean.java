@@ -38,4 +38,12 @@ public interface WriteDataMBean {
     void setBoolean(Boolean b);
 
     String getReadOnly();
+
+    void setPrimitiveBytes(byte[] bytes);
+
+    byte[] getPrimitiveBytes();
+
+    void setBytes(Byte[] bytes);
+
+    Byte[] getBytes();
 }

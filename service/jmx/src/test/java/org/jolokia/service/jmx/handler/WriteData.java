@@ -27,6 +27,8 @@ public class WriteData implements WriteDataMBean {
     private int val;
     private Boolean bool;
     private Map map;
+    private byte[] primitiveBytes;
+    private Byte[] bytes;
 
     public int getSimple() {
         return val;
@@ -53,4 +55,24 @@ public class WriteData implements WriteDataMBean {
     }
 
     public String getReadOnly() { return "winter"; }
+
+    @Override
+    public void setPrimitiveBytes(byte[] bytes) {
+        this.primitiveBytes = bytes;
+    }
+
+    @Override
+    public byte[] getPrimitiveBytes() {
+        return primitiveBytes;
+    }
+
+    @Override
+    public void setBytes(Byte[] bytes) {
+        this.bytes = bytes;
+    }
+
+    @Override
+    public Byte[] getBytes() {
+        return bytes;
+    }
 }

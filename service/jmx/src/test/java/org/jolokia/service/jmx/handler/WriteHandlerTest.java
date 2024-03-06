@@ -18,16 +18,26 @@ package org.jolokia.service.jmx.handler;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.management.*;
 
+import org.jolokia.server.core.request.JolokiaExecRequest;
+import org.jolokia.server.core.request.JolokiaReadRequest;
+import org.jolokia.server.core.request.JolokiaRequestFactory;
+import org.jolokia.server.core.request.ProcessingParameters;
 import org.jolokia.server.core.service.serializer.Serializer;
+import org.jolokia.server.core.util.RequestType;
 import org.jolokia.service.serializer.JolokiaSerializer;
 import org.jolokia.server.core.request.JolokiaRequestBuilder;
 import org.jolokia.server.core.request.JolokiaWriteRequest;
 import org.jolokia.server.core.util.TestJolokiaContext;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.testng.annotations.*;
 
 import static org.jolokia.server.core.util.RequestType.WRITE;
@@ -102,6 +112,42 @@ public class WriteHandlerTest {
     @Test
     public void invalidValue() throws Exception {
         JolokiaWriteRequest req = new JolokiaRequestBuilder(WRITE,oName).attribute("Boolean").value(10).build();
+        handler.doHandleSingleServerRequest(getMBeanServer(), req);
+    }
+
+    @Test
+    public void primitiveByteArrayValue() throws Exception {
+        byte[] arg = new byte[] { (byte) 0x42, (byte) 0x2a };
+        JolokiaWriteRequest req = new JolokiaRequestBuilder(WRITE,oName).attribute("PrimitiveBytes").value(arg).build();
+        handler.doHandleSingleServerRequest(getMBeanServer(), req);
+    }
+
+    @Test
+    public void byteArrayValue() throws Exception {
+        Byte[] arg = new Byte[] { (byte) 0x42, (byte) 0x2a };
+        JolokiaWriteRequest req = new JolokiaRequestBuilder(WRITE,oName).attribute("Bytes").value(arg).build();
+        handler.doHandleSingleServerRequest(getMBeanServer(), req);
+    }
+
+    @Test
+    public void byteArrayRequest() throws Exception {
+        String json = "{\"type\":\"write\",\"mbean\":\"jolokia:test=write\",\"attribute\":\"Bytes\"," +
+                "\"value\":[42,-42]}";
+        JSONParser parser = new JSONParser();
+        JSONObject data = (JSONObject) parser.parse(json);
+        @SuppressWarnings("unchecked")
+        JolokiaWriteRequest req = (JolokiaWriteRequest) JolokiaRequestFactory.createPostRequest(data, new ProcessingParameters(Collections.emptyMap()));
+        handler.doHandleSingleServerRequest(getMBeanServer(), req);
+    }
+
+    @Test
+    public void primitiveByteArrayRequest() throws Exception {
+        String json = "{\"type\":\"write\",\"mbean\":\"jolokia:test=write\",\"attribute\":\"PrimitiveBytes\"," +
+                "\"value\":[42,-42]}";
+        JSONParser parser = new JSONParser();
+        JSONObject data = (JSONObject) parser.parse(json);
+        @SuppressWarnings("unchecked")
+        JolokiaWriteRequest req = (JolokiaWriteRequest) JolokiaRequestFactory.createPostRequest(data, new ProcessingParameters(Collections.emptyMap()));
         handler.doHandleSingleServerRequest(getMBeanServer(), req);
     }
 }
