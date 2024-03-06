@@ -72,8 +72,6 @@ public class WriteHandler extends AbstractCommandHandler<JolokiaWriteRequest> {
     private Object setAttribute(JolokiaWriteRequest request, MBeanServerConnection server)
             throws MBeanException, AttributeNotFoundException, InstanceNotFoundException,
             ReflectionException, IntrospectionException, InvalidAttributeValueException, IllegalAccessException, InvocationTargetException, IOException {
-        // Old value, will throw an exception if attribute is not known. That's good.
-        Object oldValue = server.getAttribute(request.getObjectName(), request.getAttributeName());
 
         MBeanInfo mInfo = server.getMBeanInfo(request.getObjectName());
         MBeanAttributeInfo aInfo = null;
@@ -84,6 +82,16 @@ public class WriteHandler extends AbstractCommandHandler<JolokiaWriteRequest> {
                 break;
             }
         }
+
+        if (aInfo == null) {
+            throw new AttributeNotFoundException("No such attribute: " + request.getAttributeName());
+        }
+
+        // it can be write-only though
+        boolean writeOnly = aInfo.isWritable() && !aInfo.isReadable();
+
+        // Old value, will throw an exception if attribute is not known. That's good.
+        Object oldValue = writeOnly ? null : server.getAttribute(request.getObjectName(), request.getAttributeName());
         Object[] values;
         if (aInfo instanceof OpenMBeanAttributeInfo) {
             OpenMBeanAttributeInfo info = (OpenMBeanAttributeInfo) aInfo;

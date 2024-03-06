@@ -46,4 +46,6 @@ public interface WriteDataMBean {
     void setBytes(Byte[] bytes);
 
     Byte[] getBytes();
+
+    void setWriteOnly(String writeOnly);
 }

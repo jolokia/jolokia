@@ -29,6 +29,7 @@ public class WriteData implements WriteDataMBean {
     private Map map;
     private byte[] primitiveBytes;
     private Byte[] bytes;
+    private String writeOnly;
 
     public int getSimple() {
         return val;
@@ -74,5 +75,9 @@ public class WriteData implements WriteDataMBean {
     @Override
     public Byte[] getBytes() {
         return bytes;
+    }
+
+    public void setWriteOnly(String value) {
+        this.writeOnly = value;
     }
 }

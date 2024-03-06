@@ -78,7 +78,6 @@ public class WriteHandlerTest {
         return ManagementFactory.getPlatformMBeanServer();
     }
 
-
     @Test
     public void simple() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
         JolokiaWriteRequest req = new JolokiaRequestBuilder(WRITE,oName).attribute("Simple").value("10").build();
@@ -86,6 +85,16 @@ public class WriteHandlerTest {
         req = new JolokiaRequestBuilder(WRITE,oName).attribute("Simple").value("20").build();
         Integer ret = (Integer) handler.doHandleSingleServerRequest(getMBeanServer(), req);
         assertEquals(ret, Integer.valueOf(10));
+        assertEquals(handler.getType(),WRITE);
+    }
+
+    @Test
+    public void writeOnly() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
+        JolokiaWriteRequest req = new JolokiaRequestBuilder(WRITE,oName).attribute("WriteOnly").value("Won't ever read it").build();
+        handler.doHandleSingleServerRequest(getMBeanServer(), req);
+        req = new JolokiaRequestBuilder(WRITE,oName).attribute("WriteOnly").value("Won't ever read it").build();
+        Object ret = handler.doHandleSingleServerRequest(getMBeanServer(), req);
+        assertNull(ret);
         assertEquals(handler.getType(),WRITE);
     }
 
