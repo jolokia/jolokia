@@ -157,7 +157,7 @@ public final class EscapeUtil {
                 String trailingEscapes = m.group(2);
                 ret.add(pattern[1].matcher(m.group(1) + (trailingEscapes != null ? trailingEscapes : "")).replaceAll("$1"));
             }
-            return ret;
+            return ret.isEmpty() ? null : ret;
         } else {
             return null;
         }

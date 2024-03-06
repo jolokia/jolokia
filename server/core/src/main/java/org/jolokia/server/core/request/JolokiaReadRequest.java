@@ -184,7 +184,7 @@ public class JolokiaReadRequest extends JolokiaObjectNameRequest {
     private void initAttribute(Object pAttrval) {
         if (pAttrval instanceof String) {
             attributeNames = EscapeUtil.split((String) pAttrval, EscapeUtil.CSV_ESCAPE, ",");
-            multiAttributeMode = attributeNames.size() > 1;
+            multiAttributeMode = attributeNames != null && attributeNames.size() > 1;
         } else if (pAttrval instanceof Collection) {
             @SuppressWarnings("unchecked")
             Collection<String> attributes = (Collection<String>) pAttrval;

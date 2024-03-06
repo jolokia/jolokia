@@ -35,6 +35,10 @@ public class EscapeUtilTest {
 
 
     Object[] PATH_SPLIT_TEST_DATA = new Object[] {
+            "",null, false,
+            "\"\"",singletonList("\"\""), false,
+            "path/",singletonList("path"), false,
+            "path/\"\"",asList("path", "\"\""), false,
             PATH_ESCAPE + PATH_ESCAPE + PATH_ESCAPE + PATH_ESCAPE,singletonList(PATH_ESCAPE + PATH_ESCAPE),true,
             "hello" + PATH_ESCAPE + PATH_ESCAPE,singletonList("hello" + PATH_ESCAPE),true,
             "hello/world", asList("hello", "world"),true,
@@ -46,6 +50,10 @@ public class EscapeUtilTest {
     };
 
     Object[] COMMA_SPLIT_TEST_DATA = new Object[] {
+            "", null,
+            "\"\"", singletonList("\"\""),
+            "path,",singletonList("path"),
+            "path,\"\"",asList("path", "\"\""),
             "type=s,name=world", asList("type=s", "name=world"),
             "hello\\,world,yeah",asList("hello,world", "yeah"),
             "hello\\,\\/world,yeah",asList("hello,/world","yeah"),
