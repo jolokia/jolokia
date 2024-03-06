@@ -447,7 +447,7 @@ In order to get to the value for used heap memory you should
 specify an inner path `used`, so that the
 request
 `\http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage/used`
-results in a response of `27145000`for the value:
+results in a response of `27145000` for the value:
 
 [,json]
 ----
