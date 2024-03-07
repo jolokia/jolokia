@@ -643,7 +643,7 @@ which returns a complex JSON structure like</p>
 specify an inner path <code>used</code>, so that the
 request
 <code>http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage/used</code>
-results in a response of `27145000`for the value:</p>
+results in a response of <code>27145000</code> for the value:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -2572,10 +2572,10 @@ provided as path info.</p>
     "type": "version"
   },
   "value": {
-    "agent": "2.0.1",
+    "agent": "2.0.2",
     "protocol": "7.2",
     "details": {
-      "agent_version": "2.0.1",
+      "agent_version": "2.0.2",
       "agent_id": "192.168.0.221-21185-5ce94d31-servlet",
       "server_product": "tomcat",
       "server_vendor": "Apache",
@@ -3425,7 +3425,7 @@ the following format</p>
 <div class="content">
 <pre>$ nc -u localhost 24884
 {"type":"query"}
-{"agent_version":"2.0.1","agent_id":"192.168.0.221-67980-7e985ce9-servlet",
+{"agent_version":"2.0.2","agent_id":"192.168.0.221-67980-7e985ce9-servlet",
 "server_product":"tomcat","type":"response","server_vendor":"Apache",
 "server_version":"10.1.16","secured":true,"url":"http:\/\/192.168.0.221:8080\/jolokia"}</pre>
 </div>
@@ -3436,7 +3436,7 @@ the following format</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "agent_version": "2.0.1",
+  "agent_version": "2.0.2",
   "agent_id": "192.168.0.221-67980-7e985ce9-servlet",
   "server_product": "tomcat",
   "type": "response",

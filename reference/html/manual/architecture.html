@@ -115,7 +115,7 @@
 instances present in a JVM. This goal more or less matches the intent of <a href="https://jcp.org/en/jsr/detail?id=160">JSR-160 JMX Remote specification</a>.</p>
 </div>
 <div class="paragraph">
-<p>While JSR-160 (which is actually incorporated into JSR-3 as part III "JMX Remote API Specification") mentions two remote access methods:</p>
+<p>While JSR-160 (which is actually incorporated into JSR-3 as part III "JMX Remote API Specification") mentions two remote access methods</p>
 </div>
 <div class="ulist">
 <ul>
@@ -123,12 +123,12 @@ instances present in a JVM. This goal more or less matches the intent of <a href
 <p><em>connectors</em></p>
 </li>
 <li>
-<p><em>protocol adaptors</em></p>
+<p><em>protocol adaptors</em>,</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>The emphasis is put on the <em>connectors</em> (and in particular - an RMI connector), while <em>protocol adaptors</em> are summarized with:</p>
+<p>the emphasis is put on the <em>connectors</em> (and in particular an RMI connector), while <em>protocol adaptors</em> are summarized with:</p>
 </div>
 <div class="quoteblock">
 <blockquote>
@@ -149,7 +149,7 @@ calls. There are several subtle issues, performance
 being one of them. It <em>does</em> matter whether a
 call is invoked locally or remotely. A caller should at least be
 aware what happens and what the consequences are. On the other
-side, there are message passing models which include remoting
+hand, there are message-passing models which include remoting
 explicitly, so that the caller <em>knows</em> from
 the programming model that she is calling a potentially expensive
 remote call. This is probably the main reason why RMI (the default
@@ -165,11 +165,11 @@ aware. Jolokia uses a typeless approach, where some sort of
 lightweight serialization to JSON is used (in both directions, but
 a bit <em>asymmetrically</em> in its capabilities). Of course
 this approach has some drawbacks, too, but also quite some
-advantages. At least it is unique in the JMX world ;-).</p>
+advantages. At least, it is unique in the JMX world ;-).</p>
 </div>
 <div class="paragraph">
-<p>Thus the architecture of Jolokia is built on the concept of JSR-160 <em>protocol adaptor</em> with a big dose of flexibility.
-One of the most striking difference is Jolokia&#8217;s typeless approach - messages sent over HTTP are represented
+<p>Thus, the architecture of Jolokia is built on the concept of JSR-160 <em>protocol adaptor</em> with a big dose of flexibility.
+One of the most striking difference is Jolokia&#8217;s typeless approach: messages sent over HTTP are represented
 with JSON format.</p>
 </div>
 </div>
@@ -180,14 +180,14 @@ with JSON format.</p>
 <div class="paragraph">
 <p><a href="#fig-architecture-overview">Figure 1, &#8220;Jolokia architecture&#8221;</a> illustrates the
 environment in which Jolokia operates. The agent exports on the
-frontside a JSON based protocol over HTTP that gets bridged to
-invocation of local JMX MBeans. It builts on JSR-160&#8217;s <em>protocol adaptor</em>
-concept and uses a setup not defined by the specification.
-This gives Jolokia a lot of flexibility and various techniques
+frontside a JSON-based protocol over HTTP that gets bridged to
+invocation of local JMX MBeans. It builds on the JSR-160&#8217;s <em>protocol adaptor</em>
+concept, and uses a setup not defined by the specification.
+This gives Jolokia a lot of flexibility, and various techniques
 are available for exporting its protocol via HTTP. The most
 prominent being to put the agent into a servlet container. This
-can be a lightweight one like Tomcat or Jetty or a full-blown
-Jakarta EE Server. Since it acts like a usual web application the
+can be a lightweight one like Tomcat or Jetty, or a full-blown
+Jakarta EE Server. Since it acts like a usual web application, the
 deployment of the agent is well understood and should pose no
 entry barrier for any developer who has ever dealt with Java web
 applications.</p>
@@ -202,7 +202,7 @@ applications.</p>
 <p>But there are more options. Specialized agents are able to use an OSGi
 mechanism for exposing web components (<a href="https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html" class="externalLink" target="_blank" rel="noopener">OSGi CMPN Whiteboard Specification for Jakarta™ Servlet</a> in Jolokia 2 and <a href="https://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.http.html" class="externalLink" target="_blank" rel="noopener">OSGi CMPN HTTP Service</a> in Jolokia 1).
 The JVM agent uses the HTTP-Server included
-with every modern JVM and can be attached dynamically to any
+with every modern JVM, and can be attached dynamically to any
 running Java process. Agents are described in detail in
 <a href="agents.html" class="xref page">Agents</a>.</p>
 </div>
@@ -223,7 +223,7 @@ about this.</p>
 <p>Proxy mode is a solution for the scenario when it is impossible to deploy
 the Jolokia agent on the target platform. For this mode, the
 only prerequisite for accessing the target server is a JSR-160
-server connector. Most of the time this happens for political reasons,
+server connector. Most of the time, this happens for political reasons,
 where it is simply not allowed to deploy an extra piece of
 software or where doing so requires a lengthy approval process.
 Another reason could be that the target server already
@@ -244,8 +244,8 @@ a perfect choice for this kind of setup.</p>
 <div class="paragraph">
 <p>Figure <a href="#fig-architecture-proxy">Figure 2, &#8220;Jolokia as JMX Proxy&#8221;</a> describes a typical setup for the proxy mode. A
 client sends a usual Jolokia request containing an extra section
-for specifying the target which should be queried. All routing
-information is contained in the request itself so that the proxy
+to specify the target which should be queried. All routing
+information is contained in the request itself, so that the proxy
 can act universally without the need of a specific
 configuration.</p>
 </div>

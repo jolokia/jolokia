@@ -687,7 +687,7 @@ method.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "agent": "2.0.1",
+  "agent": "2.0.2",
   "protocol": "7.2",
   "details": {
     "agent_version": "2.0.0-SNAPSHOT",
@@ -921,7 +921,7 @@ be used within a <code>pom.xml</code>:</p>
       &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
       &lt;artifactId&gt;jolokia-client-javascript&lt;/artifactId&gt;
       &lt;type&gt;javascript&lt;/type&gt;
-      &lt;version&gt;2.0.1&lt;/version&gt;
+      &lt;version&gt;2.0.2&lt;/version&gt;
     &lt;/dependency&gt;
     ....
   &lt;/dependencies&gt;
@@ -1109,7 +1109,7 @@ the other two as transitive dependencies):</p>
 <pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
     &lt;artifactId&gt;jolokia-client-java&lt;/artifactId&gt;
-    &lt;version&gt;2.0.1&lt;/version&gt;
+    &lt;version&gt;2.0.2&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -1623,7 +1623,7 @@ Java Visual VM a Jolokia plugin can be downloaded from <a href="https://skarsaun
 <div class="ulist">
 <ul>
 <li>
-<p>Jolokia&#8217;s <code>remote-jmx-adapter-2.0.1-javaagent.jar</code>
+<p>Jolokia&#8217;s <code>remote-jmx-adapter-2.0.2-javaagent.jar</code>
 must be on the classpath. See the <a href="/download.html">Download page</a> for the latest versions of this adapter jar.</p>
 </li>
 <li>
@@ -1669,12 +1669,12 @@ public class ConnectWithJolokiaDemo {
 <div class="ulist">
 <ul>
 <li>
-<p>Jolokia&#8217;s <code>remote-jmx-adapter-2.0.1-javaagent.jar</code>
+<p>Jolokia&#8217;s <code>remote-jmx-adapter-2.0.2-javaagent.jar</code>
 must be on the classpath. See the <a href="/download.html">Download page</a> for the latest versions of this adapter jar.</p>
 </li>
 <li>
 <p>In addition, the Jolokia Kubernetes extension
-<code>jolokia-kubernetes-2.0.1-javaagent.jar</code>
+<code>jolokia-kubernetes-2.0.2-javaagent.jar</code>
 must be on the classpath. This can be also downloaded from the
 <a href="/download.html">Download page</a>.</p>
 </li>
@@ -1717,9 +1717,9 @@ You need to add the Jolokia connector client libraries when launching <code>jcon
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>java -cp jolokia-agent-jvm-2.0.1-javaagent.jar:\
-jolokia-client-jmx-adapter-2.0.1-standalone.jar:\
-jolokia-client-kubernetes-2.0.1-standalone.jar \
+<pre>java -cp jolokia-agent-jvm-2.0.2-javaagent.jar:\
+jolokia-client-jmx-adapter-2.0.2-standalone.jar:\
+jolokia-client-kubernetes-2.0.2-standalone.jar \
 -Djconsole.showOutputViewer sun.tools.jconsole.JConsole</pre>
 </div>
 </div>
