@@ -15,6 +15,17 @@
 ////
 == News
 
+=== Jolokia 2.0.2 released
+
+[.news-date]
+2024-03-07
+
+Spring time is approaching and we've skimmed through some old issues to clean them up. Jolokia 2.0.2 is released with few minor fixes. Most notably, write-only JMX attributes are now handled correctly and heuristic Jolokia shutdown thread is replaced with proper https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Runtime.html#addShutdownHook(java.lang.Thread)[JVM shutdown hook].
+
+We've also ensured that all tests pass on IBM versions of JDK.
+
+Refer to https://jolokia.org/changes-report.html#a2.0.2[changelog] for detailed information about the release.
+
 === Jolokia 2.0.1 released
 
 [.news-date]

@@ -23,6 +23,23 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
+    <release version="2.0.2" description="Release 2.0.2" date="2024-03-07">
+      <action dev="tadayosi" type="fix" issue="656">
+        Request with HTTPS Origin over HTTP should be rejected for security
+      </action>
+      <action dev="grgrzybek" type="fix" issue="494">
+        Jolokia agent not working with an RMI-Server
+      </action>
+      <action dev="grgrzybek" type="fix" issue="409">
+        IndexOutOfBoundsException when doing a read operation with missing attribute
+      </action>
+      <action dev="grgrzybek" type="fix" issue="399">
+        CleanupThread causes memory leak
+      </action>
+      <action dev="grgrzybek" type="fix" issue="196">
+        Jolokia does not support Write-only attributes
+      </action>
+    </release>
     <release version="2.0.1" description="Release 2.0.1" date="2024-01-26">
       <action dev="grgrzybek" type="add" issue="651">
         Add "logHandlerName" configuration property for custom loggers
