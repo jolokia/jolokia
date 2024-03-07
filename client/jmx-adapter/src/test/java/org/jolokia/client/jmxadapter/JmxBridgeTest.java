@@ -170,9 +170,12 @@ public class JmxBridgeTest {
         "java.lang:type=GarbageCollector,name=global.LastGcInfo",
         "java.lang:type=OperatingSystem.ProcessCpuTimeByNS",
         "java.lang:type=OperatingSystem.ProcessPhysicalMemorySize",
+        "java.lang:type=OperatingSystem.ProcessPrivateMemorySize",
+        "java.lang:type=OperatingSystem.ProcessVirtualMemorySize",
         "java.lang:type=Memory.GCMasterThreadCpuUsed",
         "java.lang:type=OperatingSystem.SystemLoadAverage",
-        "java.lang:type=OperatingSystem.OpenFileDescriptorCount");
+        "java.lang:type=OperatingSystem.OpenFileDescriptorCount",
+        "java.lang:type=MemoryPool,name=JIT code cache.Usage");
 
     //Attributes that give runtime exception on some JVM versions and therefore not suitable for brute force tests
     private static final Collection<String> UNSAFE_ATTRIBUTES = Set.of(

@@ -586,7 +586,18 @@ public class JolokiaServerTest {
                     ks.load(fis, "1234".toCharArray());
                     KeyManagerFactory kmf;
                     if ("IBM Corporation".equals(System.getProperty("java.vendor"))) {
-                        kmf = KeyManagerFactory.getInstance("IBMX509");
+                        // Using IBM Semeru Runtime Open Edition 11.0.22.0 (build 11.0.22+7):
+                        // see https://www.ibm.com/support/pages/semeru-runtimes-security-migration-guide
+                        //  - KeyManagerFactory
+                        //    - NewSunX509 : sun.security.ssl.KeyManagerFactoryImpl$X509
+                        //      aliases: [PKIX]
+                        //    - SunX509 : sun.security.ssl.KeyManagerFactoryImpl$SunX509
+                        String runtimeName = System.getProperty("java.runtime.name");
+                        if (runtimeName != null && runtimeName.toLowerCase().contains("semeru")) {
+                            kmf = KeyManagerFactory.getInstance("SunX509");
+                        } else {
+                            kmf = KeyManagerFactory.getInstance("IBMX509");
+                        }
                     } else {
                         kmf = KeyManagerFactory.getInstance("SunX509");
                     }

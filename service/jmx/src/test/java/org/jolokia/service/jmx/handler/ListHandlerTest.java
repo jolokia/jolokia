@@ -192,8 +192,14 @@ public class ListHandlerTest extends BaseHandlerTest {
         assertTrue(ops.get("gc") instanceof Map);
         @SuppressWarnings("unchecked")
         Map<String, ?> attrs = (Map<String, ?>) res.get(ATTRIBUTES.getKey());
-        // Java 7 introduces a new attribute 'ObjectName' here
-        assertEquals(attrs.size(),attrs.containsKey("ObjectName") ? 5 : 4);
+        String vendor = System.getProperty("java.vendor");
+        if (vendor != null && vendor.toUpperCase().contains("IBM")) {
+            // let's be flexible here... number differs between 11 and 17
+            assertTrue(attrs.size() > 20);
+        } else {
+            // Java 7 introduces a new attribute 'ObjectName' here
+            assertEquals(attrs.size(), attrs.containsKey("ObjectName") ? 5 : 4);
+        }
         assertTrue(attrs.get("HeapMemoryUsage") instanceof Map);
         assertTrue(res.get(DESCRIPTION.getKey()) instanceof String);
 
