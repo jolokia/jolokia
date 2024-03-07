@@ -148,6 +148,7 @@ public class JolokiaServer {
         serviceManager.stop();
 
         if (cleaner != null) {
+            Runtime.getRuntime().removeShutdownHook(cleaner);
             cleaner.stopServer();
         }
     }
@@ -283,7 +284,7 @@ public class JolokiaServer {
         Thread starterThread = new Thread(threadGroup, () -> httpServer.start());
         starterThread.start();
         cleaner = new CleanupThread(httpServer,threadGroup);
-        cleaner.start();
+        Runtime.getRuntime().addShutdownHook(cleaner);
     }
 
     // Creat a log handler from either the given class or by creating a default log handler printing

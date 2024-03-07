@@ -19,10 +19,7 @@ package org.jolokia.jvmagent;
 import com.sun.net.httpserver.HttpServer;
 
 /**
- * Thread for stopping the HttpServer as soon as every non-daemon
- * thread has exited. This thread was inspired by the ideas from
- * Daniel Fuchs (although the implementation is different)
- * (http://blogs.sun.com/jmxetc/entry/more_on_premain_and_jmx)
+ * Thread for stopping the HttpServer configured as {@link Runtime#addShutdownHook(Thread)}.
  *
  * @author roland
  * @since Mar 3, 2010
@@ -49,20 +46,7 @@ class CleanupThread extends Thread {
     /** {@inheritDoc} */
     @Override
     public void run() {
-        try {
-            boolean retry = true;
-            while(retry && active) {
-                // Get all threads, wait for 'foreign' (== not our own threads)
-                // and when all finished, finish as well. This is in order to avoid
-                // hanging endless because the HTTP Server thread cant be set into
-                // daemon mode
-                Thread[] threads = enumerateThreads();
-                retry = joinThreads(threads);
-            }
-        } finally {
-            // All non-daemon threads stopped ==> server can be stopped, too
-            server.stop(0);
-        }
+        server.stop(0);
     }
 
     /**
@@ -70,7 +54,7 @@ class CleanupThread extends Thread {
      */
     public void stopServer() {
         active = false;
-        interrupt();
+        server.stop(0);
     }
 
     // Enumerate all active threads
