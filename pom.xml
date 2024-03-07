@@ -272,7 +272,7 @@
                 to use src/site/asciidoc (in addition to src/site/apt, src/site/xdoc, ...)
               -->
               <groupId>org.asciidoctor</groupId>
-              <artifactId>asciidoctor-maven-plugin</artifactId>
+              <artifactId>asciidoctor-converter-doxia-module</artifactId>
               <version>${plugin.org.asciidoctor.asciidoctor-maven-plugin}</version>
             </dependency>
           </dependencies>
