@@ -1111,7 +1111,7 @@
 
     <!-- Spring Framework and Spring Boot should be aligned -->
     <version.org.springframework>6.1.5</version.org.springframework>
-    <version.org.springframework.boot>3.2.3</version.org.springframework.boot>
+    <version.org.springframework.boot>3.2.4</version.org.springframework.boot>
   </properties>
 
   <distributionManagement>
