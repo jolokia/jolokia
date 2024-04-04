@@ -1040,11 +1040,11 @@
     <plugin.maven-assembly-plugin>3.7.1</plugin.maven-assembly-plugin>
     <plugin.maven-changes-plugin>2.12.1</plugin.maven-changes-plugin>
     <plugin.maven-clean-plugin>3.3.2</plugin.maven-clean-plugin>
-    <plugin.maven-compiler-plugin>3.12.1</plugin.maven-compiler-plugin>
+    <plugin.maven-compiler-plugin>3.13.0</plugin.maven-compiler-plugin>
     <plugin.maven-dependency-plugin>3.6.1</plugin.maven-dependency-plugin>
     <plugin.maven-deploy-plugin>3.1.1</plugin.maven-deploy-plugin>
     <plugin.maven-failsafe-plugin>3.2.5</plugin.maven-failsafe-plugin>
-    <plugin.maven-gpg-plugin>3.2.0</plugin.maven-gpg-plugin>
+    <plugin.maven-gpg-plugin>3.2.2</plugin.maven-gpg-plugin>
     <plugin.maven-install-plugin>3.1.1</plugin.maven-install-plugin>
     <plugin.maven-jar-plugin>3.3.0</plugin.maven-jar-plugin>
     <plugin.maven-javadoc-plugin>3.6.3</plugin.maven-javadoc-plugin>
