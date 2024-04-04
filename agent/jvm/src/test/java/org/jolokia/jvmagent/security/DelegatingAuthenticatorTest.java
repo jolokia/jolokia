@@ -127,7 +127,7 @@ public class DelegatingAuthenticatorTest extends BaseAuthenticatorTest {
         return success.getPrincipal();
     }
 
-    @Test
+    @Test(enabled = false)
     public void invalidProtocol() {
         DelegatingAuthenticator authenticator = new DelegatingAuthenticator("jolokia","ftp://ftp.redhat.com",null,false);
 

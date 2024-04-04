@@ -28,6 +28,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SignatureException;
 import java.security.UnrecoverableKeyException;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateCrtKey;
@@ -124,6 +125,39 @@ public class KeyStoreUtilTest {
         assertEquals("RSA", key.getAlgorithm());
         RSAPublicKey pubKey = (RSAPublicKey) cert.getPublicKey();
         assertEquals("RSA", pubKey.getAlgorithm());
+    }
+
+    @Test
+    public void testKeyStoreWithCertChain() throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, InvalidKeySpecException, UnrecoverableKeyException {
+        File serverPem = getTempFile("server/server-chain.pem");
+        File keyPem = getTempFile("server/key.pem");
+        KeyStore keystore = createKeyStore();
+
+        KeyStoreUtil.updateWithServerPems(keystore, serverPem, keyPem, "RSA", new char[0]);
+
+        List<String> aliases = asList(keystore.aliases());
+        assertEquals(aliases.size(), 1);
+        String alias = aliases.get(0);
+        assertTrue(alias.contains("server"));
+
+        Certificate[] chain = keystore.getCertificateChain(alias);
+        assertEquals(chain.length, 3);
+
+        String[] expectedSubjectDNs = new String[]{
+            SERVER_CERT_SUBJECT_DN,
+            "CN=Intermediate CA, OU=Test, O=jolokia.org, L=Mountain View, ST=California, C=US",
+            "CN=Root CA, OU=Test, O=jolokia.org, L=Mountain View, ST=California, C=US"
+        };
+
+        for (int i = 0; i < expectedSubjectDNs.length; i++) {
+            assertEquals(((X509Certificate) chain[i]).getSubjectDN().getName(), expectedSubjectDNs[i]);
+            RSAPublicKey pubKey = (RSAPublicKey) chain[i].getPublicKey();
+            assertEquals("RSA", pubKey.getAlgorithm());
+        }
+
+        X509Certificate serverCert = (X509Certificate) chain[0];
+        RSAPrivateCrtKey key = (RSAPrivateCrtKey) keystore.getKey(alias, new char[0]);
+        assertEquals("RSA", key.getAlgorithm());
     }
 
     @Test

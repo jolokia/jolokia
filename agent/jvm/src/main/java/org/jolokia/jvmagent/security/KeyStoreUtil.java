@@ -86,7 +86,7 @@ public class KeyStoreUtil {
             throws IOException, CertificateException, NoSuchAlgorithmException, InvalidKeySpecException, KeyStoreException {
         try (InputStream is = new FileInputStream(pServerCert)) {
             CertificateFactory certFactory = CertificateFactory.getInstance("X509");
-            X509Certificate cert = (X509Certificate) certFactory.generateCertificate(is);
+            Certificate[] certificates = certFactory.generateCertificates(is).toArray(new Certificate[1]);
 
             byte[] keyBytes = decodePem(pServerKey);
             PrivateKey privateKey;
@@ -101,8 +101,8 @@ public class KeyStoreUtil {
                 privateKey = keyFactory.generatePrivate(keySpec);
             }
 
-            String alias = cert.getSubjectX500Principal().getName();
-            pKeyStore.setKeyEntry(alias, privateKey, pPassword, new Certificate[]{cert});
+            String alias = ((X509Certificate) certificates[0]).getSubjectX500Principal().getName();
+            pKeyStore.setKeyEntry(alias, privateKey, pPassword, certificates);
         }
     }
 
