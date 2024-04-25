@@ -591,11 +591,11 @@ export interface ListRequestOptions extends BaseRequestOptions {
     error?: (error: ErrorResponse) => void;
 }
 
-export type ListResponse = JmxDomains | JmxDomain | MBeanInfo;
+export type ListResponse = JmxDomains | JmxDomain | MBeanInfo | MBeanInfoError;
 
 export type JmxDomains = Record<string, JmxDomain>;
 
-export type JmxDomain = Record<string, MBeanInfo>;
+export type JmxDomain = Record<string, MBeanInfo | MBeanInfoError>;
 
 export interface MBeanInfo {
     desc: string;
@@ -603,6 +603,10 @@ export interface MBeanInfo {
     attr?: Record<string, MBeanAttribute>;
     op?: Record<string, MBeanOperation | MBeanOperation[]>;
     notif?: Record<string, MBeanNotification>;
+}
+
+export interface MBeanInfoError {
+    error: string;
 }
 
 export interface MBeanAttribute {
