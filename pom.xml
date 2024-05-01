@@ -1046,7 +1046,7 @@
     <plugin.maven-failsafe-plugin>3.2.5</plugin.maven-failsafe-plugin>
     <plugin.maven-gpg-plugin>3.2.2</plugin.maven-gpg-plugin>
     <plugin.maven-install-plugin>3.1.1</plugin.maven-install-plugin>
-    <plugin.maven-jar-plugin>3.3.0</plugin.maven-jar-plugin>
+    <plugin.maven-jar-plugin>3.4.1</plugin.maven-jar-plugin>
     <plugin.maven-javadoc-plugin>3.6.3</plugin.maven-javadoc-plugin>
     <!-- don't use 3.x (non-boxed org.apache.maven.reporting.AbstractMavenReportRenderer#verbatimLink()) -->
     <plugin.maven-project-info-reports-plugin>2.9</plugin.maven-project-info-reports-plugin>
