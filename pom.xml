@@ -1084,7 +1084,7 @@
 
     <!-- Versions of optional and example-related dependencies -->
 
-    <version.org.apache.logging.log4j>2.22.1</version.org.apache.logging.log4j>
+    <version.org.apache.logging.log4j>2.23.1</version.org.apache.logging.log4j>
     <version.org.slf4j>1.7.36</version.org.slf4j>
     <version.org.slf4j2>2.0.11</version.org.slf4j2>
 
