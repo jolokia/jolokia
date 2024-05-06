@@ -1042,17 +1042,17 @@
     <plugin.maven-clean-plugin>3.3.2</plugin.maven-clean-plugin>
     <plugin.maven-compiler-plugin>3.13.0</plugin.maven-compiler-plugin>
     <plugin.maven-dependency-plugin>3.6.1</plugin.maven-dependency-plugin>
-    <plugin.maven-deploy-plugin>3.1.1</plugin.maven-deploy-plugin>
+    <plugin.maven-deploy-plugin>3.1.2</plugin.maven-deploy-plugin>
     <plugin.maven-failsafe-plugin>3.2.5</plugin.maven-failsafe-plugin>
     <plugin.maven-gpg-plugin>3.2.4</plugin.maven-gpg-plugin>
-    <plugin.maven-install-plugin>3.1.1</plugin.maven-install-plugin>
+    <plugin.maven-install-plugin>3.1.2</plugin.maven-install-plugin>
     <plugin.maven-jar-plugin>3.4.1</plugin.maven-jar-plugin>
     <plugin.maven-javadoc-plugin>3.6.3</plugin.maven-javadoc-plugin>
     <!-- don't use 3.x (non-boxed org.apache.maven.reporting.AbstractMavenReportRenderer#verbatimLink()) -->
     <plugin.maven-project-info-reports-plugin>2.9</plugin.maven-project-info-reports-plugin>
     <plugin.maven-release-plugin>3.0.1</plugin.maven-release-plugin>
     <plugin.maven-resources-plugin>3.3.1</plugin.maven-resources-plugin>
-    <plugin.maven-shade-plugin>3.5.2</plugin.maven-shade-plugin>
+    <plugin.maven-shade-plugin>3.5.3</plugin.maven-shade-plugin>
     <plugin.maven-site-plugin>3.12.1</plugin.maven-site-plugin>
     <plugin.maven-source-plugin>3.3.1</plugin.maven-source-plugin>
     <plugin.maven-surefire-plugin>3.2.5</plugin.maven-surefire-plugin>
@@ -1073,7 +1073,7 @@
 
     <!-- Versions of build-related dependencies -->
 
-    <version.org.apache.bcel>6.8.1</version.org.apache.bcel>
+    <version.org.apache.bcel>6.9.0</version.org.apache.bcel>
     <version.org.apache.maven.wagon>2.7</version.org.apache.maven.wagon>
     <version.nodejs>v18.17.1</version.nodejs>
 
