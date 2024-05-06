@@ -1079,7 +1079,7 @@
     <version.org.awaitility>4.2.1</version.org.awaitility>
     <version.org.easymock>5.2.0</version.org.easymock>
     <version.org.eclipse.jetty>11.0.20</version.org.eclipse.jetty>
-    <version.org.testng>7.9.0</version.org.testng>
+    <version.org.testng>7.10.2</version.org.testng>
     <version.org.wiremock>3.5.4</version.org.wiremock>
 
     <!-- Versions of optional and example-related dependencies -->
