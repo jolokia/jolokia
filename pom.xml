@@ -922,10 +922,6 @@
           </exclusion>
           <exclusion>
             <groupId>org.xmlunit</groupId>
-            <artifactId>xmlunit-legacy</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.xmlunit</groupId>
             <artifactId>xmlunit-placeholders</artifactId>
           </exclusion>
         </exclusions>
@@ -1084,7 +1080,7 @@
     <version.org.easymock>5.2.0</version.org.easymock>
     <version.org.eclipse.jetty>11.0.20</version.org.eclipse.jetty>
     <version.org.testng>7.9.0</version.org.testng>
-    <version.org.wiremock>3.4.2</version.org.wiremock>
+    <version.org.wiremock>3.5.4</version.org.wiremock>
 
     <!-- Versions of optional and example-related dependencies -->
 
