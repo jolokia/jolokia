@@ -1110,8 +1110,8 @@
     <!-- Versions of Maven dependencies for Jolokia Spring-related libraries (JDK17 only) -->
 
     <!-- Spring Framework and Spring Boot should be aligned -->
-    <version.org.springframework>6.1.5</version.org.springframework>
-    <version.org.springframework.boot>3.2.4</version.org.springframework.boot>
+    <version.org.springframework>6.1.6</version.org.springframework>
+    <version.org.springframework.boot>3.2.5</version.org.springframework.boot>
   </properties>
 
   <distributionManagement>
