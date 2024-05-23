@@ -93,7 +93,7 @@ public class BackendManager {
             json = callRequestDispatcher(pJmxReq);
             json.put("status",200 /* success */);
         } catch (NotChangedException exp) {
-            // A handled indicates that its value hasn't changed. We return an status with
+            // A handled indicates that its value hasn't changed. We return a status with
             //"304 Not Modified" similar to the HTTP status code (http://en.wikipedia.org/wiki/HTTP_status)
             json = new JSONObject();
             json.put("request",pJmxReq.toJSON());
@@ -135,7 +135,7 @@ public class BackendManager {
         try {
             return jolokiaCtx.getMandatoryService(Serializer.class).serialize(pExp, null, opts);
         } catch (AttributeNotFoundException e) {
-            // Cannot happen, since we dont use a path
+            // Cannot happen, since we don't use a path
             return null;
         }
     }

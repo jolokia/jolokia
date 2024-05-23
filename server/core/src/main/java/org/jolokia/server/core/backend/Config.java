@@ -26,14 +26,14 @@ import org.jolokia.server.core.util.DebugStore;
 
 /**
  * MBean for exporting various configuration tuning opportunities
- * to the outside world. 
+ * to the outside world.
  *
  * @author roland
  * @since Jun 12, 2009
  */
 public class Config implements ConfigMBean,MBeanRegistration {
 
-    // Stores for various informations
+    // Stores for various information
     private DebugStore debugStore;
 
     // MBean Objectname under which this bean should be registered

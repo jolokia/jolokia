@@ -30,9 +30,9 @@ public interface MBeanServerHandlerMBean {
     String OBJECT_NAME = "jolokia:type=ServerHandler";
 
     /**
-     * Get a summary information of all MBeans found on the server
+     * Get summary information of all MBeans found on the server
      *
-     * @return the servers information.
+     * @return the server's information.
      */
     String mBeanServersInfo();
 }

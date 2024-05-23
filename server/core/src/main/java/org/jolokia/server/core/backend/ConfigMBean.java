@@ -1,8 +1,5 @@
 package org.jolokia.server.core.backend;
 
-import java.io.IOException;
-import javax.management.MalformedObjectNameException;
-
 /*
  * Copyright 2009-2013 Roland Huss
  *
