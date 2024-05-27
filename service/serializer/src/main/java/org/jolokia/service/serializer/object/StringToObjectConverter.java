@@ -92,7 +92,7 @@ public class StringToObjectConverter {
     }
 
     /**
-     * Convert value from a either a given object or its string representation.
+     * Convert value from either a given object or its string representation.
      * If the value is already assignable to the given class name it is returned directly.
      *
      * @param pExpectedClassName type name of the expected type
@@ -158,7 +158,7 @@ public class StringToObjectConverter {
         Class<?> expectedClass = ClassUtil.classForName(pType);
         if (expectedClass != null) {
             for (Constructor<?> constructor : expectedClass.getConstructors()) {
-                // only support only 1 constructor parameter
+                // support only 1 constructor parameter
                 if (constructor.getParameterTypes().length == 1 &&
                     constructor.getParameterTypes()[0].isAssignableFrom(String.class)) {
                     try {

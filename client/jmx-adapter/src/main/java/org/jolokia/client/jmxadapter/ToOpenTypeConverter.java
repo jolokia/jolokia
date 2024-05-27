@@ -158,13 +158,19 @@ public class ToOpenTypeConverter {
     }
 
     /**
-     * Try to figure out open type, order of preference 1. handle simple objects, respect type
-     * introspected from MBeanInfo if any 2. Handle arrays (comes before cached types due to issues
-     * specifying multiple return values for all the Threading overloaded methods) 3. Handle hard
-     * coded tabular return types (important for visual presentation in certain tools) 4. Use cached
-     * type for attribute/item : either hardcoded to please JConsole / JVisualVM or introspected from
-     * MBeanInfo 5. Dynamically build structured type from contents (will struggle with null values
-     * for unknown entities) 6. Fail
+     * Try to figure out open type, order of preference:
+     * <ol>
+     * <li>Handle simple objects, respect type introspected from MBeanInfo if any</li>
+     * <li>Handle arrays (comes before cached types due to issues specifying multiple
+     * return values for all the Threading overloaded methods)</li>
+     * <li>Handle hard coded tabular return types (important for visual presentation
+     * in certain tools)</li>
+     * <li>Use cached type for attribute/item: either hardcoded to please JConsole / JVisualVM
+     * or introspected from MBeanInfo</li>
+     * <li>Dynamically build structured type from contents (will struggle with null values
+     * for unknown entities)</li>
+     * <li>Fail</li>
+     * </ol>
      */
     public static OpenType<?> recursivelyBuildOpenType(String name, Object rawValue,
                                                        String typeFromMBeanInfo)

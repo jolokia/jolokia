@@ -129,7 +129,7 @@ public class ObjectToJsonConverterTest {
         @SuppressWarnings("unchecked")
         Map<String, ?> result = (Map<String, ?>) converter.extractObject(name, new Stack<>(), true);
         // Since we removed the objectname simplifier from the list of simplifiers-default
-        // explicitely, the converter should return the full blown object;
+        // explicitely, the converter should return the full-blown object;
         assertEquals("type=Memory",result.get("canonicalKeyPropertyListString"));
     }
 

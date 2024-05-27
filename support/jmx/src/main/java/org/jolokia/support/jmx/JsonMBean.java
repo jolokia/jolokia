@@ -38,13 +38,13 @@ public @interface JsonMBean {
 
     /**
      * Maximum size of collections returned during serialization.
-     * If larger, the collection is truncated. By default no truncation applies
+     * If larger, the collection is truncated. By default, no truncation applies
      * @return maximum size for collections
      */
     int maxCollectionSize() default 0;
 
     /**
-     * Maximum number of objects returned by serialization. By default no truncation
+     * Maximum number of objects returned by serialization. By default, no truncation
      * applies.
      * @return maximum number of objects to return
      */
@@ -52,8 +52,8 @@ public @interface JsonMBean {
 
     /**
      * How to deal with exceptions occuring during deserialization. By default, exceptions
-     * are thrown through (and encapsulated in a IllegalArgumentException),
-     * @return
+     * are thrown through (and encapsulated in a IllegalArgumentException).
+     * @return fault handler
      */
     FaultHandler faultHandling() default FaultHandler.THROW_EXCEPTIONS;
 

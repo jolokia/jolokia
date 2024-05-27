@@ -17,6 +17,7 @@ package org.jolokia.support.jmx;
  */
 
 import java.lang.management.ManagementFactory;
+import java.lang.reflect.InvocationTargetException;
 
 import javax.management.*;
 
@@ -100,8 +101,9 @@ public final class JolokiaMBeanServerUtil {
     private static Serializer lookupSerializer() {
         try {
             Class<?> clazz = Class.forName("org.jolokia.service.serializer.JolokiaSerializer");
-            return (Serializer) clazz.newInstance();
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+            return (Serializer) clazz.getDeclaredConstructor().newInstance();
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException |
+                 InvocationTargetException e) {
             // No serializer available
             return null;
         }

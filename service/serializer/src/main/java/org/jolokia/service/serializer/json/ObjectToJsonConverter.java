@@ -33,7 +33,7 @@ import org.jolokia.server.core.util.EscapeUtil;
  * A converter which converts attribute and return values
  * into a JSON representation. It uses certain handlers for this which
  * are registered in the constructor.
- *
+ * <p>
  * Each handler gets a reference to this converter object so that it
  * can use it for a recursive solution of nested objects.
  *
@@ -101,7 +101,7 @@ public final class ObjectToJsonConverter {
      * @param pPathParts path parts to use for extraction
      * @param pOptions options used for parsing
      * @return the converter object. This either a subclass of {@link org.json.simple.JSONAware} or a basic data type like String or Long.
-     * @throws AttributeNotFoundException if within an path an attribute could not be found
+     * @throws AttributeNotFoundException if within a path an attribute could not be found
      */
     public Object serialize(Object pValue, List<String> pPathParts, SerializeOptions pOptions)
             throws AttributeNotFoundException {
@@ -128,20 +128,20 @@ public final class ObjectToJsonConverter {
 
         // Get the object pointed to do with path-1
         // We are using no limits here, since a path must have been given (see above), and hence we should
-        // be save anyway.
+        // be safe anyway.
         Object inner = extractObjectWithContext(pOuterObject, extraStack, SerializeOptions.DEFAULT, false);
 
         // Set the attribute pointed to by the path elements
-        // (depending of the parent object's type)
+        // (depending on the parent object's type)
         return setObjectValue(inner, lastPathElement, pNewValue);
     }
 
 
     /**
      * Related to {@link #extractObjectWithContext} except that
-     * it does not setup a context. This method is called back from the
+     * it does not set up a context. This method is called back from the
      * various extractors to recursively continue the extraction, hence it is public.
-     *
+     * <p>
      * This method must not be used as entry point for serialization.
      * Use {@link #serialize(Object, List, SerializeOptions)} or
      * {@link #setInnerValue(Object, Object, List)} instead.
@@ -247,7 +247,7 @@ public final class ObjectToJsonConverter {
      * Get the length of an extracted collection, but not larger than the configured limit.
      *
      * @param originalLength the orginal length
-     * @return the original length if is smaller than then the configured maximum length. Otherwise the
+     * @return the original length if is smaller than then the configured maximum length. Otherwise, the
      *         maximum length is returned.
      */
     int getCollectionLength(int originalLength) {
@@ -273,14 +273,14 @@ public final class ObjectToJsonConverter {
     }
 
     /**
-     * Setup the context with hard limits and defaults
+     * Set up the context with hard limits and defaults
      */
     void setupContext() {
         setupContext(new SerializeOptions.Builder().build());
     }
 
     /**
-     * Setup the context with the limits given in the request or with the default limits if not. In all cases,
+     * Set up the context with the limits given in the request or with the default limits if not. In all cases,
      * hard limits as defined in the servlet configuration are never exceeded.
      *
      * @param pOpts options used for parsing.
