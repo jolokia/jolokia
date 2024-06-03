@@ -1043,12 +1043,12 @@
     <plugin.maven-gpg-plugin>3.2.4</plugin.maven-gpg-plugin>
     <plugin.maven-install-plugin>3.1.2</plugin.maven-install-plugin>
     <plugin.maven-jar-plugin>3.4.1</plugin.maven-jar-plugin>
-    <plugin.maven-javadoc-plugin>3.6.3</plugin.maven-javadoc-plugin>
+    <plugin.maven-javadoc-plugin>3.7.0</plugin.maven-javadoc-plugin>
     <!-- don't use 3.x (non-boxed org.apache.maven.reporting.AbstractMavenReportRenderer#verbatimLink()) -->
     <plugin.maven-project-info-reports-plugin>2.9</plugin.maven-project-info-reports-plugin>
     <plugin.maven-release-plugin>3.0.1</plugin.maven-release-plugin>
     <plugin.maven-resources-plugin>3.3.1</plugin.maven-resources-plugin>
-    <plugin.maven-shade-plugin>3.5.3</plugin.maven-shade-plugin>
+    <plugin.maven-shade-plugin>3.6.0</plugin.maven-shade-plugin>
     <plugin.maven-site-plugin>3.12.1</plugin.maven-site-plugin>
     <plugin.maven-source-plugin>3.3.1</plugin.maven-source-plugin>
     <plugin.maven-surefire-plugin>3.2.5</plugin.maven-surefire-plugin>
