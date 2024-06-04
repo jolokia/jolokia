@@ -42,8 +42,7 @@ import org.json.simple.JSONObject;
  */
 public class BeanExtractor implements Extractor {
 
-    @SuppressWarnings("rawtypes")
-    private static final Set<Class> FINAL_CLASSES = new HashSet<>(Arrays.asList(
+    private static final Set<Class<?>> FINAL_CLASSES = new HashSet<>(Arrays.asList(
             String.class,
             Number.class,
             Byte.class,
@@ -103,10 +102,10 @@ public class BeanExtractor implements Extractor {
     public Object setObjectValue(StringToObjectConverter pConverter,Object pInner, String pAttribute, Object pValue)
             throws IllegalAccessException, InvocationTargetException {
         // Move this to plain object handler
-        String rest = new StringBuffer(pAttribute.substring(0,1).toUpperCase())
+        String rest = new StringBuilder(pAttribute.substring(0,1).toUpperCase())
                 .append(pAttribute.substring(1)).toString();
-        String setter = new StringBuffer("set").append(rest).toString();
-        String getter = new StringBuffer("get").append(rest).toString();
+        String setter = new StringBuilder("set").append(rest).toString();
+        String getter = new StringBuilder("get").append(rest).toString();
 
         Class<?> clazz = pInner.getClass();
         Method found = null;
