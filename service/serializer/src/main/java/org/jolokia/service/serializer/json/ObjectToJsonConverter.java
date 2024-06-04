@@ -256,6 +256,16 @@ public final class ObjectToJsonConverter {
     }
 
     /**
+     * Get the option for serializing long values.
+     *
+     * @return the option for serializing long values
+     */
+    String getSerializeLong() {
+        ObjectSerializationContext ctx = stackContextLocal.get();
+        return ctx.getSerializeLong();
+    }
+
+    /**
      * Get the fault handler used for dealing with exceptions during value extraction.
      *
      * @return the fault handler

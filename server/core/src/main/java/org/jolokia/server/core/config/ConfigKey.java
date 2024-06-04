@@ -80,6 +80,11 @@ public enum ConfigKey {
     MAX_OBJECTS("maxObjects",true, true),
 
     /**
+     * How to serialize long values: "none" or "string"
+     */
+    SERIALIZE_LONG("serializeLong", true, true),
+
+    /**
      * Custom restrictor to be used instead of default one
      */
     RESTRICTOR_CLASS("restrictorClass", true, false),

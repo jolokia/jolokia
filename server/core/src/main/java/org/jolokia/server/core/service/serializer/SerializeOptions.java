@@ -47,17 +47,21 @@ public final class SerializeOptions {
     // Maximum number of objects to return
     private final int maxObjects;
 
+    // How to serialize long values: "none" or "string"
+    private final String serializeLong;
+
     // Handler which determines what should be done when
     // extracting of a value fails
     private final ValueFaultHandler faultHandler;
 
     // Use a builder to construct this object
-    private SerializeOptions(int pMaxDepth, int pMaxCollectionSize, int pMaxObjects,
+    private SerializeOptions(int pMaxDepth, int pMaxCollectionSize, int pMaxObjects, String pSerializeLong,
                              ValueFaultHandler pFaultHandler) {
         maxDepth = pMaxDepth;
         maxCollectionSize = pMaxCollectionSize;
         maxObjects = pMaxObjects;
         faultHandler = pFaultHandler;
+        serializeLong = pSerializeLong;
     }
 
     /**
@@ -92,6 +96,15 @@ public final class SerializeOptions {
     }
 
     /**
+     * Get the option for serializing long values.
+     *
+     * @return the option for serializing long values
+     */
+    public String getSerializeLong() {
+        return serializeLong;
+    }
+
+    /**
      * Get the configure fault handler which determines, how extractions fault are dealt with
      *
      * @return the configured fault handler
@@ -114,6 +127,8 @@ public final class SerializeOptions {
         private int maxDepth;
         private int maxCollectionSize;
         private int maxObjects;
+
+        private String serializeLong;
 
         private ValueFaultHandler faultHandler;
         private boolean useAttributeFilter;
@@ -138,6 +153,7 @@ public final class SerializeOptions {
             hardMaxDepth = pHardMaxDepth;
             hardMaxCollectionSize = pHardMaxCollectionSize;
             hardMaxObjects = pHardMaxObjects;
+            serializeLong = "none";
             faultHandler = ValueFaultHandler.THROWING_VALUE_FAULT_HANDLER;
         }
 
@@ -178,6 +194,17 @@ public final class SerializeOptions {
         }
 
         /**
+         * Set how to serialize long values. Can be either "none" or "string".
+         *
+         * @param pSerializeLong how to serialize long values
+         * @return this builder
+         */
+        public Builder serializeLong(String pSerializeLong) {
+            serializeLong = pSerializeLong;
+            return this;
+        }
+
+        /**
          * Set the handler which determines what should be done when
          * extracting of a value fails.
          *
@@ -204,6 +231,7 @@ public final class SerializeOptions {
             useAttributeFilter = pUseFilter;
             return this;
         }
+
         /**
          * Build the convert options and reset this builder
          *
@@ -213,10 +241,11 @@ public final class SerializeOptions {
             ValueFaultHandler handler = useAttributeFilter ?
                     new PathAttributeFilterValueFaultHandler(faultHandler) :
                     faultHandler;
-            SerializeOptions opts = new SerializeOptions(maxDepth,maxCollectionSize,maxObjects,handler);
+            SerializeOptions opts = new SerializeOptions(maxDepth,maxCollectionSize,maxObjects,serializeLong,handler);
             maxDepth = 0;
             maxCollectionSize = 0;
             maxObjects = 0;
+            serializeLong = "none";
             return opts;
         }
 

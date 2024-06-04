@@ -184,6 +184,7 @@ public class BackendManager {
                     maxDepth(pJmxReq.getParameterAsInt(ConfigKey.MAX_DEPTH)).
                     maxCollectionSize(pJmxReq.getParameterAsInt(ConfigKey.MAX_COLLECTION_SIZE)).
                     maxObjects(pJmxReq.getParameterAsInt(ConfigKey.MAX_OBJECTS)).
+                    serializeLong(pJmxReq.getParameter(ConfigKey.SERIALIZE_LONG)).
                     faultHandler(pJmxReq.getValueFaultHandler()).
                                             useAttributeFilter(pJmxReq.getPathParts() != null).
                     build();

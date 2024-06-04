@@ -148,9 +148,16 @@ public class BeanExtractor implements Extractor {
 
     private Object exctractJsonifiedValue(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pPathParts)
             throws AttributeNotFoundException {
-        if (pValue.getClass().isPrimitive() || FINAL_CLASSES.contains(pValue.getClass()) || pValue instanceof JSONAware) {
+        Class<?> pClazz = pValue.getClass();
+        if (pClazz.isPrimitive() || FINAL_CLASSES.contains(pClazz) || pValue instanceof JSONAware) {
             // No further diving, use these directly
-            return pValue;
+            if (pClazz.equals(Long.class) && "string".equals(pConverter.getSerializeLong())) {
+                // Long value can exceed max safe integer in JS, so convert it to
+                // a string when the option is specified
+                return pValue.toString();
+            } else {
+                return pValue;
+            }
         } else {
             // For the rest we build up a JSON map with the attributes as keys and the value are
             List<String> attributes = extractBeanAttributes(pValue);
