@@ -51,7 +51,7 @@ public final class OptionsAndArgs {
             // Jolokia options:
             "historyMaxEntries", "debug!", "debugMaxEntries",
             "logHandlerClass", "logHandlerName", "maxDepth", "maxCollectionSize",
-            "maxObjects", "restrictorClass", "policyLocation", "mbeanQualifier",
+            "maxObjects", "serializeLong", "restrictorClass", "policyLocation", "mbeanQualifier",
             "canonicalNaming", "includeStackTrace", "serializeException",
             "discoveryEnabled", "discoveryAgentUrl", "agentId", "agentDescription",
             // Others:

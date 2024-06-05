@@ -169,6 +169,15 @@ requests. If not given, a HTTP method is determined
 dynamically. If a method is selected which doesn't fit to the
 request, an error is raised.
 
+|`dataType`
+|The type of data specified to the Ajax request. The default value is `json`,
+and the response is parsed as JSON to an object. If the value is `text`,
+the response is returned as plain text without parsing. The client is then
+responsible for parsing the response. This can be useful when a custom JSON
+parsing is necessary. +
+Jolokia Simple API (jolokia-simple.js) doesn't support `text` as dataType. +
+*Added since jolokia.js 2.0.2*
+
 |`jsonp`
 |Whether the request should be sent via JSONP (a technique
 for allowing cross domain request circumventing the infamous
@@ -200,7 +209,7 @@ console by default.
 |Global error callback called when the Ajax request itself
 failed. It obtains the same arguments as the error callback
 given for `jQuery.ajax()`, i.e. the
-`XmlHttpResonse`, a text status and an
+`XmlHttpResponse`, a text status and an
 error thrown. Refer to the jQuery documentation for more
 information about this error handler.
 
@@ -223,6 +232,15 @@ If larger, the collection is returned truncated.
 |`maxObjects`
 |Maximum number of objects contained in the response.
 
+|`serializeLong`
+|How to serialize long values in the JSON response: `none` or `string`.
+The default `none` simply serializes longs as numbers in JSON.
+If set to `string`, longs are serialized as strings.
+It can be useful when a JavaScript client consumes the JSON response,
+because numbers greater than the max safe integer don't retain their precision
+in JavaScript. +
+*Added since Jolokia 2.0.3*
+
 |`ignoreErrors`
 |If set to "true", errors during JMX operations and JSON
 serialization are ignored. Otherwise if a single
@@ -240,7 +258,7 @@ in the response object.
 
 |`includeStackTrace`
 |By default, a stacktrace is returned with every error (key: `stacktrace`)
-This can be ommitted by setting the value of this option to false.
+This can be omitted by setting the value of this option to false.
 
 |`ifModifiedSince`
 |The `LIST` operations provides an

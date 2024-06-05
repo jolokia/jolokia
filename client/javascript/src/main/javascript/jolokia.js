@@ -66,7 +66,8 @@
 
         // Processing parameters which are added to the
         // URL as query parameters if given as options
-        var PROCESSING_PARAMS = ["maxDepth", "maxCollectionSize", "maxObjects", "ignoreErrors", "canonicalNaming",
+        var PROCESSING_PARAMS = ["maxDepth", "maxCollectionSize", "maxObjects", "serializeLong",
+                                 "ignoreErrors", "canonicalNaming",
                                  "serializeException", "includeStackTrace", "ifModifiedSince"];
 
         /**
