@@ -43,6 +43,16 @@ export default class Jolokia {
      *     dynamically. If a method is selected which doesn't fit to the request, an error
      *     is raised.
      *   </dd>
+     *   <dt>dataType</dt>
+     *   <dd>
+     *     The type of data specified to the Ajax request. The default value is "json",
+     *     and the response is parsed as JSON to an object. If the value is "text",
+     *     the response is returned as plain text without parsing. The client is then
+     *     responsible for parsing the response. This can be useful when a custom JSON
+     *     parsing is necessary.
+     *     Jolokia Simple API (jolokia-simple.js) doesn't support "text" as dataType.
+     *     This option is available since jolokia.js 2.0.2.
+     *   </dd>
      *   <dt>jsonp</dt>
      *   <dd>
      *     Whether the request should be sent via JSONP (a technique for allowing cross
@@ -413,6 +423,16 @@ export interface BaseRequestOptions extends ProcessParameters {
      */
     method?: "get" | "post";
     /**
+     * The type of data specified to the Ajax request. The default value is "json",
+     * and the response is parsed as JSON to an object. If the value is "text",
+     * the response is returned as plain text without parsing. The client is then
+     * responsible for parsing the response. This can be useful when a custom JSON
+     * parsing is necessary.
+     * Jolokia Simple API (jolokia-simple.js) doesn't support "text" as dataType.
+     * This option is available since jolokia.js 2.0.2.
+     */
+    dataType?: "json" | "text";
+    /**
      * Whether the request should be sent via JSONP (a technique for allowing cross
      * domain request circumventing the infamous "same-origin-policy"). This can be
      * used only with HTTP "get" requests.
@@ -449,7 +469,7 @@ export interface RequestOptions extends BaseRequestOptions {
      * the request is performed synchronously and gives back the response as return
      * value.
      */
-    success?: (response: Response, index: number) => void;
+    success?: (response: Response | string, index: number) => void;
     /**
      * Callback in case a Jolokia error occurs. A Jolokia error is one, in which the HTTP request
      * succeeded with a status code of 200, but the response object contains a status other
@@ -471,7 +491,7 @@ export interface BulkRequestOptions extends BaseRequestOptions {
      * the request is performed synchronously and gives back the response as return
      * value.
      */
-    success?: (response: Response, index: number) => void | ((response: Response, index: number) => void)[];
+    success?: (response: Response | string, index: number) => void | ((response: Response, index: number) => void)[];
     /**
      * Callback in case a Jolokia error occurs. A Jolokia error is one, in which the HTTP request
      * succeeded with a status code of 200, but the response object contains a status other

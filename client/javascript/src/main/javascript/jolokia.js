@@ -61,7 +61,6 @@
         var POST_AJAX_PARAMS = {
             type:"POST",
             processData:false,
-            dataType:"json",
             contentType:"text/json"
         };
 
@@ -135,6 +134,16 @@
              *     dynamically. If a method is selected which doesn't fit to the request, an error
              *     is raised.
              *   </dd>
+             *   <dt>dataType</dt>
+             *   <dd>
+             *     The type of data specified to the Ajax request. The default value is "json",
+             *     and the response is parsed as JSON to an object. If the value is "text",
+             *     the response is returned as plain text without parsing. The client is then
+             *     responsible for parsing the response. This can be useful when a custom JSON
+             *     parsing is necessary.
+             *     Jolokia Simple API (jolokia-simple.js) doesn't support "text" as dataType.
+             *     This option is available since jolokia.js 2.0.2.
+             *   </dd>
              *   <dt>jsonp</dt>
              *   <dd>
              *     Whether the request should be sent via JSONP (a technique for allowing cross
@@ -200,7 +209,7 @@
                 var ajaxParams = {};
 
                 // Copy over direct params for the jQuery ajax call
-                ["username", "password", "timeout"].forEach(function (key) {
+                ["dataType", "username", "password", "timeout"].forEach(function (key) {
                     if (opts[key]) {
                         ajaxParams[key] = opts[key];
                     }
@@ -231,11 +240,19 @@
 
                 if (extractMethod(request, opts) === "post") {
                     Jolokia.assignObject(ajaxParams, POST_AJAX_PARAMS);
+                    if (!ajaxParams.dataType) {
+                        ajaxParams.dataType = "json";
+                    }
                     ajaxParams.data = JSON.stringify(request);
                     ajaxParams.url = ensureTrailingSlash(opts.url);
                 } else {
                     Jolokia.assignObject(ajaxParams, GET_AJAX_PARAMS);
-                    ajaxParams.dataType = opts.jsonp ? "jsonp" : "json";
+                    if (opts.jsonp) {
+                        ajaxParams.dataType = "jsonp";
+                    }
+                    if (!ajaxParams.dataType) {
+                        ajaxParams.dataType = "json";
+                    }
                     ajaxParams.url = opts.url + "/" + constructGetUrlPath(request);
                 }
 
@@ -252,13 +269,17 @@
                     var success_callback = constructCallbackDispatcher(opts.success);
                     var error_callback = constructCallbackDispatcher(opts.error);
                     ajaxParams.success = function (data) {
-                        var responses = Array.isArray(data) ? data : [ data ];
-                        for (var idx = 0; idx < responses.length; idx++) {
-                            var resp = responses[idx];
-                            if (Jolokia.isError(resp)) {
-                                error_callback(resp, idx);
-                            } else {
-                                success_callback(resp, idx);
+                        if (ajaxParams.dataType === "text") {
+                            success_callback(data, 0);
+                        } else {
+                            var responses = Array.isArray(data) ? data : [data];
+                            for (var idx = 0; idx < responses.length; idx++) {
+                                var resp = responses[idx];
+                                if (Jolokia.isError(resp)) {
+                                    error_callback(resp, idx);
+                                } else {
+                                    success_callback(resp, idx);
+                                }
                             }
                         }
                     };
@@ -274,7 +295,7 @@
                     ajaxParams.async = false;
                     var xhr = $.ajax(ajaxParams);
                     if (httpSuccess(xhr)) {
-                        return JSON.parse(xhr.responseText);
+                        return ajaxParams.dataType === "text" ? xhr.responseText : JSON.parse(xhr.responseText);
                     } else {
                         return null;
                     }
