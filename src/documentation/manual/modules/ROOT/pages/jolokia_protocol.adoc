@@ -538,6 +538,14 @@ and cannot be exceeded by a query parameter.
 `maxObjects`:: Number of objects to visit in total. A hard limit
 can be configured in the agent's configuration.
 
+`serializeLong`:: How to serialize long values in the JSON response: `number` or `string`.
+The default `number` simply serializes longs as numbers in JSON.
+If set to `string`, longs are serialized as strings.
+It can be useful when a JavaScript client consumes the JSON response,
+because numbers greater than the max safe integer don't retain their precision
+in JavaScript.
+*Added since Jolokia 2.0.3*
+
 `ignoreErrors`:: If set to `true`, a Jolokia operation will not return an
 error if an JMX operation fails, but includes the
 exception message as value. This is useful for e.g. the

@@ -338,7 +338,7 @@ export default class Jolokia {
 /**
  * Processing parameters that influence Jolokia operations.
  *
- * @see {@link https://jolokia.org/reference/html/protocol.html#processing-parameters}
+ * @see {@link https://jolokia.org/reference/html/manual/jolokia_protocol.html#processing-parameters}
  */
 export interface ProcessParameters {
     /**
@@ -354,6 +354,16 @@ export interface ProcessParameters {
      * Maximum number of objects contained in the response.
      */
     maxObjects?: number;
+    /**
+     * How to serialize long values in the JSON response: <code>number</code> or <code>string</code>.
+     * The default <code>number</code> simply serializes longs as numbers in JSON.
+     * If set to <code>string</code>, longs are serialized as strings.
+     * It can be useful when a JavaScript client consumes the JSON response,
+     * because numbers greater than the max safe integer don't retain their precision
+     * in JavaScript.
+     * **Added since Jolokia 2.0.3**
+     */
+    serializeLong?: "number" | "string";
     /**
      * If set to true, errors during JMX operations and JSON serialization
      * are ignored.Otherwise if a single deserialization fails, the whole request
@@ -404,7 +414,7 @@ export interface ProcessParameters {
 /**
  * Base request options that influence a Jolokia request.
  *
- * @see {@link https://jolokia.org/reference/html/clients.html#js-request-options}
+ * @see {@link https://jolokia.org/reference/html/manual/clients.html#js-request-options}
  */
 export interface BaseRequestOptions extends ProcessParameters {
     /**
