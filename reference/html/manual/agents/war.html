@@ -298,6 +298,17 @@ no limit is imposed.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>0</code></p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>serializeLong</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">How to serialize long values in the JSON response: <code>number</code> or <code>string</code>.
+The default <code>number</code> simply serializes longs as numbers in JSON.
+If set to <code>string</code>, longs are serialized as strings.
+It can be useful when a JavaScript client consumes the JSON response,
+because numbers greater than the max safe integer don&#8217;t retain their precision
+in JavaScript.<br>
+<strong>Added since Jolokia 2.0.3</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>number</code></p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>mbeanQualifier</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Qualifier to add to the ObjectName of Jolokia&#8217;s own
 MBeans. This can become necessary if more than one agent is
@@ -548,7 +559,7 @@ dependency on this jar artifact:</p>
     &lt;dependency&gt;
       &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
       &lt;artifactId&gt;jolokia-server-core&lt;/artifactId&gt;
-      &lt;version&gt;2.0.2&lt;/version&gt;
+      &lt;version&gt;2.0.3&lt;/version&gt;
     &lt;/dependency&gt;
   &lt;/dependencies&gt;
   &lt;!-- .... --&gt;

@@ -287,6 +287,16 @@ dynamically. If a method is selected which doesn&#8217;t fit to the
 request, an error is raised.</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>dataType</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The type of data specified to the Ajax request. The default value is <code>json</code>,
+and the response is parsed as JSON to an object. If the value is <code>text</code>,
+the response is returned as plain text without parsing. The client is then
+responsible for parsing the response. This can be useful when a custom JSON
+parsing is necessary.<br>
+Jolokia Simple API (jolokia-simple.js) doesn&#8217;t support <code>text</code> as dataType.<br>
+<strong>Added since jolokia.js 2.0.2</strong></p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>jsonp</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Whether the request should be sent via JSONP (a technique
 for allowing cross domain request circumventing the infamous
@@ -321,7 +331,7 @@ console by default.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Global error callback called when the Ajax request itself
 failed. It obtains the same arguments as the error callback
 given for <code>jQuery.ajax()</code>, i.e. the
-<code>XmlHttpResonse</code>, a text status and an
+<code>XmlHttpResponse</code>, a text status and an
 error thrown. Refer to the jQuery documentation for more
 information about this error handler.</p></td>
 </tr>
@@ -342,10 +352,6 @@ information about this error handler.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Maximum traversal depth for serialization of complex return values</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>canonicalProperties</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Defaults to true for canonical (sorted) property lists on object names; if set to "false" then they are turned in their unsorted format.</p></td>
-</tr>
-<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>maxCollectionSize</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Maximum size of collections returned during serialization.
 If larger, the collection is returned truncated.</p></td>
@@ -353,6 +359,16 @@ If larger, the collection is returned truncated.</p></td>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>maxObjects</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Maximum number of objects contained in the response.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>serializeLong</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">How to serialize long values in the JSON response: <code>number</code> or <code>string</code>.
+The default <code>number</code> simply serializes longs as numbers in JSON.
+If set to <code>string</code>, longs are serialized as strings.
+It can be useful when a JavaScript client consumes the JSON response,
+because numbers greater than the max safe integer don&#8217;t retain their precision
+in JavaScript.<br>
+<strong>Added since Jolokia 2.0.3</strong></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>ignoreErrors</code></p></td>
@@ -363,6 +379,10 @@ error. This works only for certain operations like pattern
 reads.</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>canonicalNaming</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Defaults to true for canonical (sorted) property lists on object names; if set to "false" then they are turned in their unsorted format.</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>serializeException</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">If true then in case of an error, the exception itself is returned in
 it JSON representation under the key <code>error_value</code>
@@ -371,7 +391,7 @@ in the response object.</p></td>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>includeStackTrace</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">By default, a stacktrace is returned with every error (key: <code>stacktrace</code>)
-This can be ommitted by setting the value of this option to false.</p></td>
+This can be omitted by setting the value of this option to false.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>ifModifiedSince</code></p></td>
@@ -669,7 +689,7 @@ method.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "agent": "2.0.2",
+  "agent": "2.0.3",
   "protocol": "7.2",
   "details": {
     "agent_version": "2.0.0-SNAPSHOT",
@@ -903,7 +923,7 @@ be used within a <code>pom.xml</code>:</p>
       &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
       &lt;artifactId&gt;jolokia-client-javascript&lt;/artifactId&gt;
       &lt;type&gt;javascript&lt;/type&gt;
-      &lt;version&gt;2.0.2&lt;/version&gt;
+      &lt;version&gt;2.0.3&lt;/version&gt;
     &lt;/dependency&gt;
     ....
   &lt;/dependencies&gt;

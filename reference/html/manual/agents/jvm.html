@@ -159,7 +159,7 @@ performance. See below for details.</p>
 <p><code>agent.jar</code> is the filename of the Jolokia
 JVM agent. The agent can be downloaded like the others from the <a href="https://jolokia.org/download.html" class="externalLink" target="_blank" rel="noopener">download page</a>.
 When downloading from a Maven repository you need to check for the classifier <code>javaagent</code> (i.e. the
-jar to download looks like <code>jolokia-agent-jvm-2.0.2-javaagent.jar</code>, not <code>jolokia-agent-jvm-2.0.2.jar</code>).
+jar to download looks like <code>jolokia-agent-jvm-2.0.3-javaagent.jar</code>, not <code>jolokia-agent-jvm-2.0.3.jar</code>).
 Options can be appended as a comma separated
 list. The available options are the same as described in
 <a href="war.html#agent-war-init-params" class="xref page">Servlet init parameters</a> plus the one described in
@@ -505,6 +505,39 @@ suffixes like in <code>sslCipherSuite.1</code>, <code>sslCipherSuite.2</code>, &
 <td class="tableblock halign-left valign-top"></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>maxDepth</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Maximum depth when traversing bean properties.
+If set to 0, depth checking is disabled</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>15</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>maxCollectionSize</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Maximum size of collections returned when
+serializing to JSON. When set to 0,
+collections are never truncated.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>0</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>maxObjects</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Maximum number of objects which are traversed
+when serializing a single response. Use this
+as an airbag to avoid boosting your memory and
+network traffic. Nevertheless, when set to 0
+no limit is imposed.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>0</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>serializeLong</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">How to serialize long values in the JSON response: <code>number</code> or <code>string</code>.
+The default <code>number</code> simply serializes longs as numbers in JSON.
+If set to <code>string</code>, longs are serialized as strings.
+It can be useful when a JavaScript client consumes the JSON response,
+because numbers greater than the max safe integer don&#8217;t retain their precision
+in JavaScript.<br>
+<strong>Added since Jolokia 2.0.3</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>number</code></p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>policyLocation</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Path to the XML policy file</p></td>
 <td class="tableblock halign-left valign-top"></td>
@@ -549,12 +582,12 @@ application which can be reached via the
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>$ java -jar jolokia-agent-jvm-2.0.2-javaagent.jar --help
+<pre>$ java -jar jolokia-agent-jvm-2.0.3-javaagent.jar --help
 
 Jolokia Agent Launcher
 ======================
 
-Usage: java -jar jolokia-agent-jvm-2.0.2-javaagent.jar [options] &lt;command&gt; &lt;pid/regexp&gt;
+Usage: java -jar jolokia-agent-jvm-2.0.3-javaagent.jar [options] &lt;command&gt; &lt;pid/regexp&gt;
 
 where &lt;command&gt; is one of
     start     -- Start a Jolokia agent for the process specified
@@ -628,7 +661,7 @@ where &lt;command&gt; is one of
     --serializeException &lt;t|f&gt;      whether to add a serialized version of the exception in the Jolokia response (default: false)
     --config &lt;configfile&gt;           Path to a property file from where to read the configuration
     --help                          This help documentation
-    --version                       Version of this agent (it's 2.0.2 btw :)
+    --version                       Version of this agent (it's 2.0.3 btw :)
 
 &lt;pid/regexp&gt; can be either a numeric process id or a regular expression. A regular expression is matched
 against the processes' names (ignoring case) and must be specific enough to select exactly one process.
@@ -738,7 +771,7 @@ shot scripts are possible <sup class="footnote" id="_footnote_rest-comment">[<a 
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#!/bin/sh
 
-url=`java -jar jolokia-agent-jvm-2.0.2-javaagent.jar start $1 | tail -1`
+url=`java -jar jolokia-agent-jvm-2.0.3-javaagent.jar start $1 | tail -1`
 
 memory_url="${url}read/java.lang:type=Memory/HeapMemoryUsage"
 used=`curl -s "${memory_url}/used" | jq .value`
@@ -746,7 +779,7 @@ max=`curl -s "${memory_url}/max" | jq .value`
 usage=$((${used}*100/${max}))
 echo "Memory Usage: $usage %"
 
-java -jar jolokia-agent-jvm-2.0.2-javaagent.jar --quiet stop $1</code></pre>
+java -jar jolokia-agent-jvm-2.0.3-javaagent.jar --quiet stop $1</code></pre>
 </div>
 </div>
 </div>

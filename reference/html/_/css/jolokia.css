@@ -1,7 +1,7 @@
 
 @media screen and (min-width: 1024px) {
   html {
-    font-size: 11px
+    font-size: 14px
   }
 }
 @media screen and (min-width: 1216px) {
@@ -9,10 +9,13 @@
     flex-basis: 18rem;
   }
 }
+.toc .toc-menu ul {
+  font-size: 0.9rem
+}
 
 .doc {
   max-width: 90rem;
-  font-size: 1.2rem;
+  font-size: 1rem;
 }
 .nav-container {
   font-size: 1rem;
@@ -23,17 +26,20 @@
 .doc p code {
   font-size: 1rem;
 }
+.doc pre {
+  font-size: 1rem;
+}
 
 .doc .admonitionblock td.content {
   border: 1px dotted #217ee7;
 }
 
 nav.nav-menu h3.title a {
-  font-size: 1.4rem;
+  font-size: 1.1rem;
 }
 
 .toolbar {
-  font-size: 1.1rem;
+  font-size: 1rem;
 }
 
 a { text-decoration: none; }
@@ -45,7 +51,7 @@ a.externalLink {
 }
 
 a.nav-link {
-  font-size: 1.2rem;
+  font-size: 1rem;
 }
 
 main.article {

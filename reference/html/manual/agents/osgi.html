@@ -343,6 +343,17 @@ network traffic. Nevertheless, when set to 0
 no limit is imposed.</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.jolokia.serializeLong</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">How to serialize long values in the JSON response: <code>number</code> or <code>string</code>.
+The default <code>number</code> simply serializes longs as numbers in JSON.
+If set to <code>string</code>, longs are serialized as strings.
+It can be useful when a JavaScript client consumes the JSON response,
+because numbers greater than the max safe integer don&#8217;t retain their precision
+in JavaScript.<br>
+<strong>Added since Jolokia 2.0.3</strong></p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.jolokia.historyMaxEntries</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>10</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Number of entries to keep in the history. This can be changed at
@@ -538,7 +549,7 @@ maven project can be found in the Jolokia source at
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>karaf@root()&gt; install -s mvn:org.jolokia/jolokia-example-osgi-restrictor/2.0.2
+<pre>karaf@root()&gt; install -s mvn:org.jolokia/jolokia-example-osgi-restrictor/2.0.3
 Register sample restrictor service
 Bundle ID: 68
 
