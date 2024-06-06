@@ -15,6 +15,15 @@
 ////
 == News
 
+=== Jolokia 2.0.3 released
+
+[.news-date]
+2024-06-06
+
+Jolokia 2.0.3 is released with 3 minor fixes. Certificate chains are handled better (thanks https://github.com/shayelkin[Shay Elkin]!) and we know allow to configure how `long` values are handled during JSON serialization.
+
+Refer to https://jolokia.org/changes-report.html#a2.0.3[changelog] for detailed information about the release.
+
 === Jolokia 2.0.2 released
 
 [.news-date]

@@ -23,6 +23,17 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
+    <release version="2.0.3" description="Release 2.0.3" date="2024-06-06">
+      <action dev="tadayosi" type="fix" issue="676">
+        Add JS type for MBeanInfoError
+      </action>
+      <action dev="shayelkin" type="fix" issue="675">
+        Load full certificate chain from pem (so Let's Encrypt certificates could be used)
+      </action>
+      <action dev="tadayosi" type="fix" issue="495">
+        Jolokia JS client does not support Long/BigInt
+      </action>
+    </release>
     <release version="2.0.2" description="Release 2.0.2" date="2024-03-07">
       <action dev="tadayosi" type="fix" issue="656">
         Request with HTTPS Origin over HTTP should be rejected for security

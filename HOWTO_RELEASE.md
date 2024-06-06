@@ -224,9 +224,9 @@ values in the console.
 git clone git@github.com:jolokia/jolokia.git
 cd jolokia
 mvn -Dmaven.repo.local=/tmp/repo \
-    -DdevelopmentVersion=2.0.2-SNAPSHOT \
-    -DreleaseVersion=2.0.1 \
-    -Dtag=v2.0.1 \
+    -DdevelopmentVersion=2.0.4-SNAPSHOT \
+    -DreleaseVersion=2.0.3 \
+    -Dtag=v2.0.3 \
     -Dgpg.keyname=roland@jolokia.org \
     -Pdist release:prepare
 mvn -Dmaven.repo.local=/tmp/repo \
