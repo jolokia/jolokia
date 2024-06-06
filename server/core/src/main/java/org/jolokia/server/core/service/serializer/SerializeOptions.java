@@ -47,7 +47,7 @@ public final class SerializeOptions {
     // Maximum number of objects to return
     private final int maxObjects;
 
-    // How to serialize long values: "none" or "string"
+    // How to serialize long values: "number" or "string"
     private final String serializeLong;
 
     // Handler which determines what should be done when
@@ -153,7 +153,7 @@ public final class SerializeOptions {
             hardMaxDepth = pHardMaxDepth;
             hardMaxCollectionSize = pHardMaxCollectionSize;
             hardMaxObjects = pHardMaxObjects;
-            serializeLong = "none";
+            serializeLong = "number";
             faultHandler = ValueFaultHandler.THROWING_VALUE_FAULT_HANDLER;
         }
 
@@ -194,7 +194,7 @@ public final class SerializeOptions {
         }
 
         /**
-         * Set how to serialize long values. Can be either "none" or "string".
+         * Set how to serialize long values. Can be either "number" or "string".
          *
          * @param pSerializeLong how to serialize long values
          * @return this builder
@@ -245,7 +245,7 @@ public final class SerializeOptions {
             maxDepth = 0;
             maxCollectionSize = 0;
             maxObjects = 0;
-            serializeLong = "none";
+            serializeLong = "number";
             return opts;
         }
 

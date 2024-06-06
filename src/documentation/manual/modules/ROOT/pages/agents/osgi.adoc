@@ -194,9 +194,9 @@ network traffic. Nevertheless, when set to 0
 no limit is imposed.
 
 |`org.jolokia.serializeLong`
-|`none`
-|How to serialize long values in the JSON response: `none` or `string`.
-The default `none` simply serializes longs as numbers in JSON.
+|`number`
+|How to serialize long values in the JSON response: `number` or `string`.
+The default `number` simply serializes longs as numbers in JSON.
 If set to `string`, longs are serialized as strings.
 It can be useful when a JavaScript client consumes the JSON response,
 because numbers greater than the max safe integer don't retain their precision

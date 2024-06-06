@@ -121,7 +121,7 @@ public class HelpCommand extends AbstractBaseCommand {
 "    --maxDepth <depth>              Maximum number of levels for serialization of beans\n" +
 "    --maxCollectionSize <size>      Maximum number of element in collections to keep when serializing the response\n" +
 "    --maxObjects <nr>               Maximum number of objects to consider for serialization\n" +
-"    --serializeLong <none|string>   How to serialize longs values\n" +
+"    --serializeLong <number|string> How to serialize longs values\n" +
 "    --restrictorClass <class>       Classname of an custom restrictor which must be loadable from the classpath\n" +
 "    --policyLocation <url>          Location of a Jolokia policy file\n" +
 "    --mbeanQualifier <qualifier>    Qualifier to use when registering Jolokia internal MBeans\n" +

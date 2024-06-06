@@ -347,14 +347,14 @@ no limit is imposed.
 |Default: `0`
 
 |`serializeLong`
-|How to serialize long values in the JSON response: `none` or `string`.
-The default `none` simply serializes longs as numbers in JSON.
+|How to serialize long values in the JSON response: `number` or `string`.
+The default `number` simply serializes longs as numbers in JSON.
 If set to `string`, longs are serialized as strings.
 It can be useful when a JavaScript client consumes the JSON response,
 because numbers greater than the max safe integer don't retain their precision
 in JavaScript. +
 *Added since Jolokia 2.0.3*
-|Default: `none`
+|Default: `number`
 
 |`policyLocation`
 |Path to the XML policy file
