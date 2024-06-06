@@ -96,6 +96,15 @@ class ObjectSerializationContext {
     }
 
     /**
+     * Get the option for serializing long values.
+     *
+     * @return the option for serializing long values
+     */
+    public String getSerializeLong() {
+        return options.getSerializeLong();
+    }
+
+    /**
      * The fault handler used for errors during serialization
      *
      * @return the value fault handler

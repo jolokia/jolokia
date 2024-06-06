@@ -193,6 +193,16 @@ as an airbag to avoid boosting your memory and
 network traffic. Nevertheless, when set to 0
 no limit is imposed.
 
+|`org.jolokia.serializeLong`
+|`number`
+|How to serialize long values in the JSON response: `number` or `string`.
+The default `number` simply serializes longs as numbers in JSON.
+If set to `string`, longs are serialized as strings.
+It can be useful when a JavaScript client consumes the JSON response,
+because numbers greater than the max safe integer don't retain their precision
+in JavaScript. +
+*Added since Jolokia 2.0.3*
+
 |`org.jolokia.historyMaxEntries`
 |`10`
 |Number of entries to keep in the history. This can be changed at

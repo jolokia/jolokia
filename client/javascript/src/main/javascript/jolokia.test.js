@@ -42,6 +42,27 @@ describe("jolokia", () => {
         expect(response.value).toBeNull();
     });
 
+    test("basic request with dataType=text", () => {
+        $.ajax = jest.fn(() => ({
+            status: 200,
+            responseText: `{
+                "request": {"type": "read", "mbean": "java.lang:type=Memory", "attribute": "HeapMemoryUsage", "path": "used"},
+                "status": 200,
+                "value": 900719925474099123,
+                "timestamp": 1694682372
+            }`
+        }));
+
+        const request = {type: "read", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage", path: "used"};
+        const jolokia = new Jolokia("/jolokia");
+        const response1 = jolokia.request(request);
+        expect(response1.status).toEqual(200);
+        expect(String(response1.value)).not.toEqual("900719925474099123");
+        const response2 = jolokia.request(request, {dataType: 'text'});
+        expect(typeof response2).toBe("string");
+        expect(response2).toContain("900719925474099123");
+    });
+
     test("bulk request (sync)", () => {
         $.ajax = jest.fn(() => ({
             status: 200,

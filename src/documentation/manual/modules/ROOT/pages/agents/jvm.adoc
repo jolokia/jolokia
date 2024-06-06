@@ -327,6 +327,35 @@ Multiple cipher suites can be configured by using additional options with consec
 suffixes like in `sslCipherSuite.1`, `sslCipherSuite.2`, ...
 |
 
+|`maxDepth`
+|Maximum depth when traversing bean properties.
+If set to 0, depth checking is disabled
+|Default: `15`
+
+|`maxCollectionSize`
+|Maximum size of collections returned when
+serializing to JSON. When set to 0,
+collections are never truncated.
+|Default: `0`
+
+|`maxObjects`
+|Maximum number of objects which are traversed
+when serializing a single response. Use this
+as an airbag to avoid boosting your memory and
+network traffic. Nevertheless, when set to 0
+no limit is imposed.
+|Default: `0`
+
+|`serializeLong`
+|How to serialize long values in the JSON response: `number` or `string`.
+The default `number` simply serializes longs as numbers in JSON.
+If set to `string`, longs are serialized as strings.
+It can be useful when a JavaScript client consumes the JSON response,
+because numbers greater than the max safe integer don't retain their precision
+in JavaScript. +
+*Added since Jolokia 2.0.3*
+|Default: `number`
+
 |`policyLocation`
 |Path to the XML policy file
 |
