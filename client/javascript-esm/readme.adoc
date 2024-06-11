@@ -2,7 +2,7 @@
 
 Changes comparing to existing jolokia.js:
 
-* no dependency on https://jquery.com/[JQuery], https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API[Fetch API] is used for requests. Switching away from `xhr`, we're dropping _synchronous AJAX_ (`xhr` has an option to perform requests in synchronous manner).
+* no dependency on https://jquery.com/[JQuery], https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API[Fetch API] is used for requests. Switching away from `xhr`, we're dropping _synchronous AJAX_ (`xhr` has an option to perform requests in synchronous manner, but it blocks the event loop and is deprecated in modern browsers for long time already).
 ** `credentials` and `headers` properties are exposed in `Jolokia()` and `Jolokia.request()` calls (with restrictions, because some values/headers may be configured explicitly)
 * no https://en.wikipedia.org/wiki/JSONP[JSONP] support
 * `jolokia.request` call based on https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises[Promises]

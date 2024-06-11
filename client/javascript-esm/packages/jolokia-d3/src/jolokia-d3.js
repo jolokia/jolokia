@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2023 Roland Huss
+ * Copyright 2009-2024 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import Jolokia from "./jolokia.js"
+import Jolokia from "jolokia.js"
 import * as d3 from "d3"
 
-class JolokiaCbsm {
+class JolokiaD3 {
   jolokia = new Jolokia({ url: "" })
 
   constructor() {
@@ -29,4 +29,4 @@ class JolokiaCbsm {
   }
 }
 
-export { JolokiaCbsm }
+export { JolokiaD3 }

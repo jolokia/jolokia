@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2023 Roland Huss
+ * Copyright 2009-2024 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,18 +23,6 @@ const DEFAULT_FETCH_PARAMS = {
   cache: "no-store",
   credentials: "same-origin",
   redirect: "error"
-}
-
-const GET_FETCH_PARAMS = {
-  ...DEFAULT_FETCH_PARAMS,
-  method: "GET"
-}
-
-const POST_FETCH_PARAMS = {
-  ...DEFAULT_FETCH_PARAMS,
-  headers: {
-    "Content-Type": "text/json"
-  }
 }
 
 // Processing parameters which are added to the URL as query parameters if given as options
@@ -168,10 +156,10 @@ function Jolokia(config) {
    * to send to remote Jolokia agent.
    * @param {RequestParams} params parameters used for sending the request which may override default configuration.
    * These are not options passed diretly (unchnaged) to `fetch()` call
-   * @returns {object|object[]} the response object
+   * @returns {Promise} the response promise object
    */
   // TODO: prepare related method that uses pre-configured fetch() parameters (for bulk requests)
-  this.request = function(request, params) {
+  this.request = async function(request, params) {
     const opts = Object.assign({}, agentOptions, params)
     assertNotNull(opts.url, "No URL given")
 
@@ -192,10 +180,27 @@ function Jolokia(config) {
     // - signal (created based on the timeout option)
     const fetchOptions = Object.assign({}, DEFAULT_FETCH_PARAMS)
     fetchOptions.headers = {}
+
+    let method = extractMethod(request, opts)
+    let url = ensureTrailingSlash(opts.url)
+
     if (opts.headers) {
-      // If user has specified `headers` option, these are copied here. Some values may be overriden below
+      // If user has specified `headers` option, these are copied here. Some headers
+      // (Content-Type and Authorization) may be overriden below
       Object.assign(fetchOptions.headers, opts.headers)
     }
+
+    if (method === "post") {
+      fetchOptions.method = "POST"
+      fetchOptions.body = JSON.stringify(request)
+      Object.assign(fetchOptions.headers, { "Content-Type": "text/json" })
+    } else {
+      fetchOptions.method = "GET"
+      url += constructGetUrlPath(request)
+    }
+
+    // Add processing parameters as query parameters for GET or POST URL
+    url = addProcessingParameters(url, opts)
 
     // preemptive basic authentication if window.btoa is available
     // otherwise, if "WWW-Authenticate: Basic realm='realm-name'" is returned, native browser popup may be displayed
@@ -207,25 +212,30 @@ function Jolokia(config) {
       }
     }
 
-    let method = extractMethod(request, opts)
-    let url = ensureTrailingSlash(opts.url)
-
-    if (method === "post") {
-      fetchOptions.method = "POST"
-      Object.assign(fetchOptions.headers, POST_FETCH_PARAMS.headers)
-    } else {
-      fetchOptions.method = "GET"
-      url += constructGetUrlPath(request)
-    }
-
-    // Add processing parameters as query parameters for GET or POST URL
-    url = addProcessingParameters(url, opts)
-
     if (opts.timeout != null) {
       fetchOptions.signal = AbortSignal.timeout(opts.timeout)
     }
 
-    return null
+    // In original jolokia.js at this stage there was different processing depending on the existence of
+    // "success" option in passed params.
+    // without such callback the request was treated as synchronus (ajaxSettings.async = false), but we can't do
+    // it (which is good) with Fetch API
+    // callbacks (success and error) were wrapped, so:
+    //  - if null, console.warn was used
+    //  - if === "ignore", noop was used
+    //  - otherwise callback was turned into an array (not if already an array) and the actual callback was
+    //    wrapped with function(response, idx) which called the callback(s) in round-robin fashion
+
+    return fetch(url, fetchOptions)
+        .then(response => {
+          return response.json()
+        })
+        .then(json => {
+          return JSON.stringify(json)
+        })
+        // .catch(reason => {
+        //
+        // })
   }
 
   this.register = function() {}
@@ -502,6 +512,7 @@ const GET_URL_EXTRACTORS = {
    * @param {Request} _request Jolokia request object
    * @returns {object} URL configuration object for Jolokia `version` GET request
    */
+  // eslint-disable-next-line no-unused-vars
   "version": function(_request) {
     return {}
   },
@@ -533,7 +544,7 @@ const GET_URL_EXTRACTORS = {
     switch (request.command) {
       case "register":
         return { parts: [ "register" ] }
-      case "add":
+      case "add": {
         const ret = [ "add", request.client, request.mode, request.mbean ]
         const extra = []
         if (request.handback) {
@@ -550,6 +561,7 @@ const GET_URL_EXTRACTORS = {
           extra.push(" ")
         }
         return { parts: ret.concat(extra.reverse()) }
+        }
       case "remove":
         return { parts: [ "remove", request.client, request.handle ] }
       case "unregister":

@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2023 Roland Huss
+ * Copyright 2009-2024 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,35 @@
  * limitations under the License.
  */
 
-import jsdoc from 'eslint-plugin-jsdoc'
+import js from "@eslint/js"
+import jsdoc from "eslint-plugin-jsdoc"
+import workspaces from "eslint-plugin-workspaces"
+import globals from "globals"
 
 export default [
   {
-    ignores: [ "rollup.config.js" ]
+    ignores: [
+        "**/rollup.config.js",
+        "**/dist/*"
+    ],
   },
-  jsdoc.configs['flat/recommended'],
+  js.configs["recommended"],
+  jsdoc.configs["flat/recommended"],
   {
+    ...workspaces.configs["recommended"],
+    files: [ "**/*.js" ],
     languageOptions: {
       ecmaVersion: "latest",
-      sourceType: "module"
+      sourceType: "module",
+      globals: globals.browser
     },
     plugins: {
-      jsdoc
+      workspaces
+    },
+    rules: {
+      "semi": [ "error", "never" ],
+      "console": "off",
+      "no-unused-vars": [ "error", { "args": "after-used" }]
     }
   }
 ]

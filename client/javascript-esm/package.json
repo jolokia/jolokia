@@ -1,6 +1,6 @@
 {
-  "name": "jolokia.js",
-  "version": "2.1.0",
+  "name": "@jolokia/monorepo",
+  "version": "0.0.0",
   "description": "Jolokia JavaScript ES client modules",
   "private": true,
   "type": "module",
@@ -14,27 +14,23 @@
   "bugs": {
     "url": "https://github.com/jolokia/jolokia/issues"
   },
-  "keywords": [
-    "jolokia",
-    "jmx"
+  "workspaces": [
+    "packages/*"
   ],
   "scripts": {
-    "build": "yarn rollup -c",
-    "test": "yarn node --experimental-vm-modules $(yarn bin jest)"
-  },
-  "dependencies": {
-    "d3": "^7.9.0",
-    "d3-selection": "3"
+    "build": "yarn build:jolokia && yarn build:jolokia-d3",
+    "build:jolokia": "yarn workspace jolokia.js build:jolokia",
+    "build:jolokia-d3": "yarn workspace @jolokia/d3 build:jolokia-d3",
+    "test:jolokia": "yarn workspace jolokia.js test:jolokia"
   },
   "devDependencies": {
     "@eslint/js": "^9.4.0",
-    "@jest/globals": "^29.7.0",
-    "@rollup/plugin-node-resolve": "^15.2.3",
-    "@rollup/plugin-terser": "^0.4.4",
     "eslint": "^9.4.0",
     "eslint-plugin-jsdoc": "^48.2.7",
-    "jest": "^29.7.0",
-    "rollup": "^4.18.0"
+    "eslint-plugin-workspaces": "^0.10.1",
+    "express": "^4.19.2",
+    "globals": "^15.4.0",
+    "supertest": "^7.0.0"
   },
   "packageManager": "yarn@4.2.2+sha256.1aa43a5304405be7a7cb9cb5de7b97de9c4e8ddd3273e4dad00d6ae3eb39f0ef"
 }

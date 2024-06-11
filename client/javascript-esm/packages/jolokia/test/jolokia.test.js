@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2023 Roland Huss
+ * Copyright 2009-2024 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,27 @@
  * limitations under the License.
  */
 
-import { describe, expect, test } from "@jest/globals"
-import Jolokia from "../src/jolokia.js"
+import { afterAll, beforeAll, describe, expect, it, test } from "@jest/globals"
+import request from "supertest"
 
-describe("Jolokia", () => {
+import http from "node:http"
+import Jolokia from "../src/jolokia.js"
+import app from "./app"
+
+const port = 3000
+let server
+
+beforeAll(() => {
+  server = http.createServer({}, app).listen(port, () => {
+    console.info(`Listening at http://localhost:${port}`)
+  })
+})
+
+afterAll(() => {
+  server.close()
+})
+
+describe("Jolokia Tests", () => {
 
   test("Jolokia instance creation", () => {
     const jolokia1 = new Jolokia({ url: "http://localhost" })
@@ -48,7 +65,7 @@ describe("Jolokia", () => {
       expected[k] = typeof j[k]
     }
 
-    expect(Object.keys(expected).length).toBe(11)
+    expect(Object.keys(expected).length).toBe(12)
 
     expect(expected["request"]).toBe("function")
     expect(expected["register"]).toBe("function")
@@ -61,7 +78,29 @@ describe("Jolokia", () => {
     expect(expected["removeNotificationListener"]).toBe("function")
     expect(expected["unregisterNotificationClient"]).toBe("function")
 
+    expect(expected["escape"]).toBe("function")
+
     expect(expected["CLIENT_VERSION"]).toBe("string")
+  })
+
+})
+
+describe("Jolokia HTTP tests", () => {
+
+  it("Test express.js config", async() => {
+    return request(server)
+        .get("/jolokia/version")
+        .expect(200)
+        .then((response) => {
+          expect(response.body.value.agent).toBe("2.1.0")
+        })
+  })
+
+  test("Jolokia GET version", () => {
+    const jolokia = new Jolokia({ url: `http://localhost:${port}/jolokia` })
+    return jolokia.request({ type: "version" }).then(response => {
+      expect(JSON.parse(response).value.agent).toBe("2.1.0")
+    })
   })
 
 })
