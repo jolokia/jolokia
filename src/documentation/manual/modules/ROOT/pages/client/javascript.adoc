@@ -369,7 +369,7 @@ The Jolokia agent also supports
 https://en.wikipedia.org/wiki/JSONP[JSONP,role=externalLink,window=_blank] requests
 for cases where the Jolokia agent is served on a different server or port
 than the JavaScript client. By default, such access is forbidden by the so called
-_same-origin-policy_. To switch on JSONP, the
+__same-origin-policy__. To switch on JSONP, the
 option `jsonp` should be set to
 `"true"`.
 
