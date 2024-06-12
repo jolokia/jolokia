@@ -16,74 +16,35 @@
 
 const CLIENT_VERSION = "2.1.0"
 
-// Default parameters for GET and POST requests
-// See: https://developer.mozilla.org/en-US/docs/Web/API/fetch#options
-const DEFAULT_FETCH_PARAMS = {
-  method: "POST",
+/**
+ * Default parameters for GET and POST requests
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/fetch#options
+ */
+const DEFAULT_FETCH_PARAMS: RequestInit = {
   cache: "no-store",
   credentials: "same-origin",
-  redirect: "error"
+  redirect: "error",
 }
 
 // Processing parameters which are added to the URL as query parameters if given as options
-const PROCESSING_PARAMS = [
+const PROCESSING_PARAMS: string[] = [
   "maxDepth",
   "maxCollectionSize",
   "maxObjects",
+  "serializeLong",
   "ignoreErrors",
-  "canonicalNaming",
-  "serializeException",
   "includeStackTrace",
+  "serializeException",
+  "canonicalNaming",
+  "mimeType",
   "ifModifiedSince"
 ]
 
-/**
- * @typedef {object} RequestParams Request configuration object to specify additional or changed properties which
- * override Jolokia default configuration values specified at creation time.
- * @property {string} url Agent URL, which is mandatory
- * @property {string} [method] Selects HTTP method to use (`post` or `get`). Note that bulk requests can't be used with
- * `get` method. Also, when using a `read` type request for multiple attributes, this also can only be sent as `post`
- * requests. If not given, a HTTP method is determined dynamically. If a method is selected which doesn't fit to the
- * request, an error is raised.
- * @property {boolean} [jsonp] Deprecated
- * @property {Function} [success] I'll change to promise API. Callback function which is called for a successful request.
- * The callback receives the response as single argument.
- * @property {Function} [error] I'll change to promise API. Callback in case a Jolokia error occurs. A Jolokia error is
- * one, in which the HTTP requests ucceeded with a status code of 200, but the response object contains a status other
- * than `OK` (200) which happens if the request JMX operation fails. This callback receives the full Jolokia response
- * object (with a key `error` set). If no error callback is given, but an asynchronous operation is performed,
- * the error response is printed to the JavaScript console by default.
- * @property {Function} [ajaxError] I'll change to promise API. Global error callback called when the Ajax request
- * itself failed. It obtains the same arguments as the error callback given for `jQuery.ajax()`, i.e. the
- * `XmlHttpResponse`, a text status and an error thrown. Refer to the jQuery documentation for more information about
- * this error handler.
- * @property {string} [username] A username used for HTTP authentication
- * @property {string} [password] A password used for HTTP authentication
- * @property {number} [timeout=30000] Timeout for the HTTP request
- * @property {number} [maxDepth] Maximum traversal depth for serialization of complex return values
- * @property {number} [maxCollectionSize] Maximum size of collections returned during serialization. If larger,
- * the collection is returned truncated.
- * @property {number} [maxObjects] Maximum number of objects contained in the response.
- * @property {boolean} [ignoreErrors] If set to true, errors during JMX operations and JSON serialization are ignored.
- * Otherwise if a single deserialization fails, the whole request returns with an error. This works only for certain
- * operations like pattern reads.
- * @property {string} [credentials] A value for `credentials` option for `fetch()` call. Defaults to `same-origin` for
- * security reasons. If user wants cross-origin requests, this value has to be set to `include`
- * @property {object} [headers] A map of additional headers that may be pased along remote Jolokia call
- */
-
-/**
- * @typedef {RequestParams} JolokiaConfiguration Jolokia configuration object to specify default configuration values, which
- * may be changed for each request
- * @augments RequestParams
- * @property {number} [fetchInterval] interval for poll-fetching that can be changed during {@link Jolokia#start}
- */
-
-/**
+/*
  * @typedef {'read'|'write'} RequestType A type of Jolokia request
  */
 
-/**
+/*
  * @typedef {object} Request A Jolokia request object to be sent to remote Jolokia agent
  * @property {RequestType} type A type of Jolokia request according to
  * {@link https://jolokia.org/reference/html/manual/jolokia_protocol.html Jolokia protocol}
@@ -103,41 +64,236 @@ const PROCESSING_PARAMS = [
  * {@link https://jolokia.org/reference/html/manual/jolokia_protocol.html#protocol-proxy Jolokia proxy mode}
  */
 
-/**
+/*
  * @typedef {object} Job Registered request or request batch to be sent periodically to remote Jolokia agent
  * @property {number} [id] Job identifier
  */
 
 /**
+ * Processing parameters that influence Jolokia operations.
+ * See `org.jolokia.server.core.config.ConfigKey` enum values with `requestConfig=true`.
+ * These values may be specified when creating Jolokia instance, but may be overriden for each request.
+ * These are sent either as GET query parameters or within `config` key of JSON data for POST requests.
+ * @see {https://jolokia.org/reference/html/manual/jolokia_protocol.html#processing-parameters Jolokia Processing Parameters}
+ */
+type ProcessingParameters = {
+  /**
+   * Maximum traversal depth for serialization of complex return values
+   */
+  maxDepth?: number
+  /**
+   * Maximum size of collections returned during serialization. If larger, the collection is returned truncated.
+   */
+  maxCollectionSize?: number
+  /**
+   * Maximum number of objects contained in the response.
+   */
+  maxObjects?: number
+  /**
+   * How to serialize long values in the JSON response: `number` or `string`.
+   * The default `number` simply serializes longs as numbers in JSON.
+   * If set to `string`, longs are serialized as strings.
+   * It can be useful when a JavaScript client consumes the JSON response,
+   * because numbers greater than the max safe integer don't retain their precision
+   * in JavaScript.
+   * @since 2.0.3
+   */
+  serializeLong?: "number" | "string"
+  /**
+   * If set to true, errors during JMX operations and JSON serialization
+   * are ignored.Otherwise if a single deserialization fails, the whole request
+   * returns with an error. This works only for certain operations like pattern reads.
+   */
+  ignoreErrors?: boolean
+  /**
+   * If set to `true`, then in case of an error the stack trace is
+   * included. With `false` no stack trace will be returned, and when
+   * this parameter is set to `runtime` only for `RuntimeException`
+   * a stack trace is put into the error response. Default is `false`
+   * if not set otherwise in the global agent configuration.
+   */
+  includeStackTrace?: boolean | "true" | "false" | "runtime"
+  /**
+   * If this parameter is set to `true` then a serialized version of
+   * the exception is included in an error response. This value is put under the
+   * key `error_value` in the response value. By default this is set
+   * to `false` except when the agent global configuration option is
+   * configured otherwise.
+   */
+  serializeException?: boolean
+  /**
+   * Defaults to `true` to return the canonical format of property
+   * lists. If set to `false` then the default unsorted property list
+   * is returned.
+   */
+  canonicalNaming?: boolean
+  /**
+   * The MIME type to return for the response. By default, this is `text/plain`,
+   * but it can be useful for some tools to change it to `application/json`.
+   * Init parameters can be used to change the default mime type. Only `text/plain`
+   * and `application/json` are allowed. For any other value Jolokia
+   * will fallback to `text/plain`.
+   */
+  mimeType?: "text/plain" | "application/json"
+  /**
+   * If this parameter is given, its value is interpreted as epoch time (seconds
+   * since 1.1.1970) and if the requested value did not change since this time,
+   * an empty response (with no `value`) is returned and the response
+   * status code is set to 304 ("Not modified"). This option is currently only
+   * supported for `LIST` requests. The time value can be extracted
+   * from a previous response's `timestamp`.
+   */
+  ifModifiedSince?: number
+}
+
+/*
+ * @property {Function} [success] I'll change to promise API. Callback function which is called for a successful request.
+ * The callback receives the response as single argument.
+ * @property {Function} [error] I'll change to promise API. Callback in case a Jolokia error occurs. A Jolokia error is
+ * one, in which the HTTP requests ucceeded with a status code of 200, but the response object contains a status other
+ * than `OK` (200) which happens if the request JMX operation fails. This callback receives the full Jolokia response
+ * object (with a key `error` set). If no error callback is given, but an asynchronous operation is performed,
+ * the error response is printed to the JavaScript console by default.
+ */
+
+/**
+ * Narrowed list of options that can be passed directly to `fetch()` `options` argument
+ */
+type UsedFetchOptions = Pick<RequestInit, "cache" | "credentials" | "headers" | "redirect">
+
+/**
+ * Base request and configuration options which include the ones handled at server-side by Jolokia agent, but also
+ * the options used with Fetch API at client-side.
+ * We're mixing-in only selected {@link https://developer.mozilla.org/en-US/docs/Web/API/fetch#options | RequestInit}
+ * options.
+ */
+type BaseRequestOptions = ProcessingParameters & UsedFetchOptions & {
+  /**
+   * Agent URL, which is mandatory
+   */
+  url?: URL | string
+  /**
+   * Selects HTTP method to use (`post` or `get`).
+   * Note that bulk requests can't be used with `get` method. Also, when using a `read` type request for multiple
+   * attributes, this also can only be sent as `post` requests. If not given, a HTTP method is determined dynamically.
+   * If a method is selected which doesn't fit to the request, an error is raised.
+   */
+  method?: "get" | "post"
+  /**
+   * The type of data specified to the Ajax request. The default value is `json`,
+   * and the response is parsed as JSON to an object. If the value is `text`,
+   * the response is returned as plain text without parsing. The client is then
+   * responsible for parsing the response. This can be useful when a custom JSON
+   * parsing is necessary.
+   * Jolokia Simple API (jolokia-simple.js) doesn't support `text` as dataType.
+   * @since 2.0.2
+   */
+  dataType?: "json" | "text"
+  /**
+   * A username used for HTTP Basic authentication. User may also pass value for `Authorization` header directly
+   * with `headers` option.
+   */
+  username?: string
+  /**
+   * A password used for HTTP Basic authentication. User may also pass value for `Authorization` header directly
+   * with `headers` option.
+   */
+  password?: string
+  /**
+   * Timeout for the HTTP request
+   */
+  timeout?: number
+}
+
+/**
+ * Jolokia configuration object to specify default configuration values used when request-specific options are
+ * not present.
+ */
+type JolokiaConfiguration = BaseRequestOptions & {
+  /**
+   * Interval for poll-fetching that can be changed during {@link IJolokia#start}
+   */
+  fetchInterval?: number
+}
+
+type RequestOptions = BaseRequestOptions & {
+  x?: string
+}
+
+/**
+ * Main Jolokia client interface for communication with remote Jolokia agent.
+ */
+interface IJolokia {
+  /**
+   * Version of Jolokia JavaScript client library
+   */
+  readonly CLIENT_VERSION: string
+
+  /**
+   * The request method using one or more JSON requests and sending it to the agent. Beside the
+   * request a bunch of options can be given, which are merged with the options provided
+   * at the constructor (where the options given here take precedence).
+   * @param request JSON request object (or array of objects) compliant with
+   *        {@link https://jolokia.org/reference/html/manual/jolokia_protocol.html|Jolokia protocol} representing
+   *        the requests to send to remote Jolokia agent.
+   * @param params parameters used for sending the request which may override default configuration.
+   *        These are not options passed diretly (unchnaged) to `fetch()` call
+   * @returns the response promise object
+   */
+  request(request: any, params?: RequestOptions): Promise<any>
+
+  register(): void
+  unregister(): void
+
+  jobs(): void
+
+  start(interval: number): void
+  stop(): void
+  isRunning(): boolean
+
+  addNotificationListener(): void
+  removeNotificationListener(): void
+  unregisterNotificationClient(): void
+
+  escape(part: string): string
+}
+
+interface JolokiaStatic {
+  (config: JolokiaConfiguration | string): undefined
+  new (config: JolokiaConfiguration | string): IJolokia
+
+  escape(part: string): string
+}
+
+/**
  * Main Jolokia creation function/class.
  * For backward compatibility, it can be used both as function and as constructor.
- * @param {string|JolokiaConfiguration} config a string with URL of remote Jolokia agent or a configuration object
- * @returns {Jolokia} Jolokia object to access remote Jolokia agent
- * @class
+ * @param config a string with URL of remote Jolokia agent or a configuration object
+ * @returns Jolokia instance for remote Jolokia agent connection
  */
-function Jolokia(config) {
+const j = function j(this: IJolokia, config: JolokiaConfiguration | string): IJolokia | undefined {
   if (!new.target) {
     // when invoked as function, return properly create object with bound "this" reference
-    return new Jolokia(config)
+    return new (<JolokiaStatic>j)(config)
   }
 
   // ++++++++++++++++++++++++++++++++++++++++++++++++++
   // Function-scoped state not exposed as properties of Jolokia class or instance
 
   // Registered requests for fetching periodically
-  let jobs = []
+  const jobs: string[] = []
 
   // Our client id and notification backend config Is null as long as notifications are not used
   let client = null
 
   // Options used for every request
-  let agentOptions = {}
+  const agentOptions: JolokiaConfiguration = {}
 
   // State of the scheduler
   let pollerIsRunning = false
 
   // timer id for poller's setInterval call
-  let timerId = null
+  let timerId: NodeJS.Timeout | number | null = null
 
   if (typeof config === "string") {
     config = { url: config }
@@ -147,20 +303,8 @@ function Jolokia(config) {
   // ++++++++++++++++++++++++++++++++++++++++++++++++++
   // Public API (instance methods that may use function-scoped state)
 
-  /**
-   * The request method using one or more JSON requests and sending it to the agent. Beside the
-   * request a bunch of options can be given, which are merged with the options provided
-   * at the constructor (where the options given here take precedence).
-   * @param {Request|Request[]} request JSON request object (or array of objects) compliant with
-   * {@link https://jolokia.org/reference/html/manual/jolokia_protocol.html|Jolokia protocol} representing the requests
-   * to send to remote Jolokia agent.
-   * @param {RequestParams} params parameters used for sending the request which may override default configuration.
-   * These are not options passed diretly (unchnaged) to `fetch()` call
-   * @returns {Promise} the response promise object
-   */
-  // TODO: prepare related method that uses pre-configured fetch() parameters (for bulk requests)
-  this.request = async function(request, params) {
-    const opts = Object.assign({}, agentOptions, params)
+  this.request = async function(request: any, params?: RequestOptions) {
+    const opts: RequestOptions = Object.assign({}, agentOptions, params)
     assertNotNull(opts.url, "No URL given")
 
     // options object passed to fetch() (2nd argument)
@@ -178,11 +322,12 @@ function Jolokia(config) {
     // - referrer (can be passed, but not handled here)
     // - referrerPolicy (can be passed, but not handled here)
     // - signal (created based on the timeout option)
-    const fetchOptions = Object.assign({}, DEFAULT_FETCH_PARAMS)
+    // some of the options are taken from agentOptions
+    const fetchOptions: RequestInit = Object.assign({}, DEFAULT_FETCH_PARAMS)
     fetchOptions.headers = {}
 
     let method = extractMethod(request, opts)
-    let url = ensureTrailingSlash(opts.url)
+    let url = ensureTrailingSlash(opts.url!)
 
     if (opts.headers) {
       // If user has specified `headers` option, these are copied here. Some headers
@@ -204,9 +349,9 @@ function Jolokia(config) {
 
     // preemptive basic authentication if window.btoa is available
     // otherwise, if "WWW-Authenticate: Basic realm='realm-name'" is returned, native browser popup may be displayed
-    if (opts["username"] && opts["password"]) {
+    if (opts.username && opts.password) {
       if (typeof window.btoa === "function") {
-        fetchOptions.headers["Authorization"] = "Basic " + window.btoa(opts["username"] + ":" + opts["password"])
+        fetchOptions.headers["Authorization"] = "Basic " + window.btoa(opts.username + ":" + opts.password)
       } else {
         console.warn("Can't set \"Authorization\" header - no btoa() function available")
       }
@@ -245,13 +390,17 @@ function Jolokia(config) {
   this.jobs = function() {}
 
   /**
+   * @param {number} interval Interval (in ms) for poll-fetching from remote Jolokia agent.
+   */
+  /**
    * Start the poller. The interval between two polling attempts can be optionally given (in milliseconds) or
    * is taken from the parameter `fetchInterval` given at construction time. If no interval is given at all,
    * 30 seconds is the default.
    *
    * If the poller is already running (i.e. {@link #isRunning} is `true` then the scheduler
    * is restarted, but only if the new interval differs from the currently active one.
-   * @param {number} interval Interval (in ms) for poll-fetching from remote Jolokia agent.
+   *
+   * @param interval
    */
   this.start = function(interval) {
     interval = interval || agentOptions.fetchInterval || 30000
@@ -276,14 +425,14 @@ function Jolokia(config) {
     if (!pollerIsRunning) {
       return
     }
-    clearInterval(timerId)
+    clearInterval(timerId as number)
     timerId = null
     pollerIsRunning = false
   }
 
   /**
    * Check whether the poller is running.
-   * @returns {boolean} true if the poller is running, false otherwise.
+   * @returns true if the poller is running, false otherwise.
    */
   this.isRunning = function() {
     return pollerIsRunning
@@ -303,7 +452,7 @@ function Jolokia(config) {
  * @type {string}
  * @default
  */
-Object.defineProperty(Jolokia.prototype, "CLIENT_VERSION", {
+Object.defineProperty(j.prototype, "CLIENT_VERSION", {
   value: CLIENT_VERSION,
   enumerable: true,
   writable: false
@@ -315,10 +464,10 @@ Object.defineProperty(Jolokia.prototype, "CLIENT_VERSION", {
 /**
  * Escape URL part (segment) according to
  * {@link https://jolokia.org/reference/html/manual/jolokia_protocol.html#_escaping_rules_in_get_requests Jolokia escaping rules}
- * @param {string} part An URL segment for Jolokia GET URL
- * @returns {string} URL segment with Jolokia escaping rules applied
+ * @param part An URL segment for Jolokia GET URL
+ * @returns URL segment with Jolokia escaping rules applied
  */
-Jolokia.escape = Jolokia.prototype.escape = function(part) {
+j.escape = j.prototype.escape = function(part: string) {
   return encodeURIComponent(part.replace(/!/g, "!!").replace(/\//g, "!/"))
 }
 
@@ -328,12 +477,12 @@ Jolokia.escape = Jolokia.prototype.escape = function(part) {
 
 /**
  * Prepares a function that will be invoked in poll-fetching for configured requests. Passed parameters come
- * from the scope of {@link Jolokia} constructor function.
- * @param {Jolokia} jolokia The Jolokia object used to communicate with remote Jolokia agent
- * @param {Job[]} jobs Requests configured for poll-fetching
- * @returns {Function} A function which can be passed to {@link window#setInterval}
+ * from the scope of {@link IJolokia} constructor function.
+ * @param jolokia The Jolokia object used to communicate with remote Jolokia agent
+ * @param jobs Requests configured for poll-fetching
+ * @returns A function which can be passed to {@link window#setInterval}
  */
-function createJolokiaInvocation(jolokia, jobs) {
+function createJolokiaInvocation(jolokia: IJolokia, jobs: any[]) {
   return function() {
 
   }
@@ -341,11 +490,11 @@ function createJolokiaInvocation(jolokia, jobs) {
 
 /**
  * Asserts that the value is not null or undefined
- * @param {object} value A value to assert
- * @param {string} message An error message for thrown Error
- * @throws {Error} Error in case the value is null or undefined
+ * @param value A value to assert
+ * @param message An error message for thrown Error
+ * @throws Error in case the value is null or undefined
  */
-function assertNotNull(value, message) {
+function assertNotNull(value: any, message: string) {
   if (value == null) {
     throw new Error(message)
   }
@@ -354,14 +503,13 @@ function assertNotNull(value, message) {
 /**
  * Extract the HTTP-Method to use and make some sanity checks if the method was provided as part of the options,
  * but is not valid for the given request
- * @param {Request|Request[]} request JSON request object (or array of objects) compliant with
+ * @param request JSON request object (or array of objects) compliant with
  * {@link https://jolokia.org/reference/html/manual/jolokia_protocol.html|Jolokia protocol} representing the requests
  * to send to remote Jolokia agent.
- * @param {RequestParams} params parameters used for sending the request which may override default configuration.
- * These are not options passed diretly (unchnaged) to `fetch()` call
- * @returns {string} an HTTP method for given `request` and `params`
+ * @param params parameters used for sending the request which may override default configuration.
+ * @returns an HTTP method for given `request` and `params`
  */
-function extractMethod(request, params) {
+function extractMethod(request: any, params: RequestOptions) {
   let methodGiven = params?.method?.toLowerCase()
   let method
 
@@ -406,23 +554,23 @@ function extractMethod(request, params) {
 
 /**
  * Create the URL used for a GET request
- * @param {Request|Request[]} request request object sent using `GET`, where type, mbean and additional information is encoded
+ * @param request request object sent using `GET`, where type, mbean and additional information is encoded
  * in URL GET request
- * @returns {string} GET URL to be used with remote Jolokia agent
+ * @returns GET URL to be used with remote Jolokia agent
  */
-function constructGetUrlPath(request) {
-  let type = request.type
+function constructGetUrlPath(request: any) {
+  let type: string = request.type
   assertNotNull(type, "No request type given for building a GET request")
   type = type.toLowerCase()
 
-  const extractor = GET_URL_EXTRACTORS[type]
+  const extractor: (r: any) => any = GET_URL_EXTRACTORS[type]
   assertNotNull(extractor, "Unknown request type " + type)
 
   const result = extractor(request)
   const parts = result.parts || []
   let url = type
-  parts.forEach(function (v) {
-    url += "/" + Jolokia.escape(v)
+  parts.forEach(function (v: string) {
+    url += "/" + j.escape(v)
   })
   if (result.path) {
     url += (result.path[0] === '/' ? "" : "/") + result.path
@@ -433,15 +581,16 @@ function constructGetUrlPath(request) {
 /**
  * Add processing parameters given as request options
  * to an URL as GET query parameters
- * @param {string} url URL for GET or POST request
- * @param {RequestParams} opts Request configuration object
- * @returns {string} url with query parameters applied
+ * @param url URL for GET or POST request
+ * @param opts Request configuration object
+ * @returns url with query parameters applied
  */
-function addProcessingParameters(url, opts) {
+function addProcessingParameters(url: string, opts: RequestOptions) {
   let sep = url.indexOf("?") > 0 ? "&" : "?"
   PROCESSING_PARAMS.forEach(function(key) {
-    if (opts[key] != null) {
-      url += sep + key + "=" + opts[key]
+    const v = opts[key as keyof RequestOptions]
+    if (v != null) {
+      url += sep + key + "=" + v
       sep = "&"
     }
   })
@@ -452,12 +601,12 @@ function addProcessingParameters(url, opts) {
  * For POST requests it is recommended to have a trailing slash at the URL in order to avoid a redirect which then
  * results in a GET request.
  * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=331194#c1
- * @param {string} url asd
- * @returns {string} URL location with "/" appended
+ * @param url Jolokia agent URL
+ * @returns URL location with "/" appended
  */
-function ensureTrailingSlash(url) {
+function ensureTrailingSlash(url: string | URL): string {
   // Squeeze any URL to a single one, optionally adding one
-  return url.replace(/\/*$/, "/")
+  return (typeof url === "string" ? url : url.href).replace(/\/*$/, "/")
 }
 
 /**
@@ -467,14 +616,14 @@ function ensureTrailingSlash(url) {
  * The return value is an object with two properties: The 'parts' to glue together, where
  * each part gets escaped and a 'path' which is appended literally
  */
-const GET_URL_EXTRACTORS = {
+const GET_URL_EXTRACTORS: { [key: string]: (r: any) => any } = {
 
   /**
    * Function to prepare GET URL for `read` Jolokia request
-   * @param {Request} request Jolokia request object
-   * @returns {object} URL configuration object for Jolokia `read` GET request
+   * @param request Jolokia request object
+   * @returns URL configuration object for Jolokia `read` GET request
    */
-  "read": function(request) {
+  "read": function(request: any) {
     if (request.attribute == null) {
       // Path gets ignored for multiple attribute fetch
       return { parts: [ request.mbean, '*' ], path: request.path }
@@ -485,22 +634,22 @@ const GET_URL_EXTRACTORS = {
 
   /**
    * Function to prepare GET URL for `write` Jolokia request
-   * @param {Request} request Jolokia request object
-   * @returns {object} URL configuration object for Jolokia `write` GET request
+   * @param request Jolokia request object
+   * @returns URL configuration object for Jolokia `write` GET request
    */
-  "write": function(request) {
+  "write": function(request: any) {
     return { parts: [ request.mbean, request.attribute, valueToString(request.value) ], path: request.path }
   },
 
   /**
    * Function to prepare GET URL for `exec` Jolokia request
-   * @param {Request} request Jolokia request object
-   * @returns {object} URL configuration object for Jolokia `exec` GET request
+   * @param request Jolokia request object
+   * @returns URL configuration object for Jolokia `exec` GET request
    */
-  "exec": function(request) {
+  "exec": function(request: any) {
     const ret = [ request.mbean, request.operation ]
     if (request.arguments && request.arguments.length > 0) {
-      request.arguments.forEach(function(value) {
+      request.arguments.forEach(function(value: any) {
         ret.push(valueToString(value))
       })
     }
@@ -509,38 +658,38 @@ const GET_URL_EXTRACTORS = {
 
   /**
    * Function to prepare GET URL for `version` Jolokia request
-   * @param {Request} _request Jolokia request object
-   * @returns {object} URL configuration object for Jolokia `version` GET request
+   * @param _request Jolokia request object
+   * @returns URL configuration object for Jolokia `version` GET request
    */
   // eslint-disable-next-line no-unused-vars
-  "version": function(_request) {
+  "version": function(_request: any) {
     return {}
   },
 
   /**
    * Function to prepare GET URL for `search` Jolokia request
-   * @param {Request} request Jolokia request object
-   * @returns {object} URL configuration object for Jolokia `search` GET request
+   * @param request Jolokia request object
+   * @returns URL configuration object for Jolokia `search` GET request
    */
-  "search": function(request) {
+  "search": function(request: any) {
     return { parts: [ request.mbean ] }
   },
 
   /**
    * Function to prepare GET URL for `list` Jolokia request
-   * @param {Request} request Jolokia request object
-   * @returns {object} URL configuration object for Jolokia `list` GET request
+   * @param request Jolokia request object
+   * @returns URL configuration object for Jolokia `list` GET request
    */
-  "list": function(request) {
+  "list": function(request: any) {
     return { path: request.path }
   },
 
   /**
    * Function to prepare GET URL for `notification` Jolokia request
-   * @param {Request} request Jolokia request object
-   * @returns {object} URL configuration object for Jolokia `notification` GET request
+   * @param request Jolokia request object
+   * @returns URL configuration object for Jolokia `notification` GET request
    */
-  "notification": function(request) {
+  "notification": function(request: any) {
     switch (request.command) {
       case "register":
         return { parts: [ "register" ] }
@@ -578,10 +727,10 @@ const GET_URL_EXTRACTORS = {
 /**
  * Converts a value to a string for passing it to the Jolokia agent via
  * a `GET` request (`write`, `exec`). Value can be either a single object or an array
- * @param {string|object|object[]} value A value to write or pass to `exec` operation
- * @returns {string|object|object[]} Normalized value for Jolokia `write`/`exec` operation
+ * @param value A value to write or pass to `exec` operation
+ * @returns Normalized value for Jolokia `write`/`exec` operation
  */
-function valueToString(value) {
+function valueToString(value: any) {
   if (value == null) {
     return "[null]"
   }
@@ -602,10 +751,10 @@ function valueToString(value) {
 
 /**
  * Single value conversion for write/exec GET requests
- * @param {string|object} value A value to normalize
- * @returns {string} normalized value
+ * @param value A value to normalize
+ * @returns normalized value
  */
-function singleValueToString(value) {
+function singleValueToString(value: any) {
   if (typeof value === "string" && value.length === 0) {
     return "\"\""
   } else {
@@ -613,4 +762,5 @@ function singleValueToString(value) {
   }
 }
 
-export default Jolokia
+export type { IJolokia }
+export default j as JolokiaStatic

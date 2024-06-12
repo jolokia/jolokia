@@ -15,22 +15,24 @@
  */
 
 import js from "@eslint/js"
-import jsdoc from "eslint-plugin-jsdoc"
+// import jsdoc from "eslint-plugin-jsdoc"
+import tseslint from "typescript-eslint"
 import workspaces from "eslint-plugin-workspaces"
 import globals from "globals"
 
 export default [
   {
     ignores: [
-        "**/rollup.config.js",
-        "**/dist/*"
-    ],
+      "**/rollup.config.js",
+      "**/dist/*"
+    ]
   },
   js.configs["recommended"],
-  jsdoc.configs["flat/recommended"],
+  // jsdoc.configs["flat/recommended"],
+  ...tseslint.configs["recommended"],
   {
     ...workspaces.configs["recommended"],
-    files: [ "**/*.js" ],
+    files: [ "**/*.ts" ],
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",
@@ -42,7 +44,7 @@ export default [
     rules: {
       "semi": [ "error", "never" ],
       "console": "off",
-      "no-unused-vars": [ "error", { "args": "after-used" }]
+      "no-unused-vars": [ "error", { "args": "after-used" } ]
     }
   }
 ]

@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-import Jolokia from "jolokia.js"
-import * as d3 from "d3"
-
-class JolokiaD3 {
-  jolokia = new Jolokia({ url: "" })
-
-  constructor() {
-    d3.create("svg")
-  }
-
-  metric() {
-    console.info(this.jolokia)
-  }
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "declaration": true,
+    "esModuleInterop": true,
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "noEmit": true,
+    "strict": true,
+    "sourceMap": true,
+    // https://www.typescriptlang.org/docs/handbook/modules/reference.html#implied-and-enforced-options
+    "target": "ESNext",
+    "declarationDir": "dts"
+  },
+  "include": [ "src", "test" ],
+  "$schema": "https://json.schemastore.org/tsconfig"
 }
-
-export { JolokiaD3 }

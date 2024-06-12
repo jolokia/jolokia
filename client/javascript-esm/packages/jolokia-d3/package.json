@@ -13,7 +13,7 @@
     "jmx"
   ],
   "exports": {
-    ".": "./src/jolokia-d3.js"
+    ".": "./dist/jolokia-d3.mjs"
   },
   "scripts": {
     "build:jolokia-d3": "yarn rollup -c",

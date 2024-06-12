@@ -6,3 +6,61 @@ Changes comparing to existing jolokia.js:
 ** `credentials` and `headers` properties are exposed in `Jolokia()` and `Jolokia.request()` calls (with restrictions, because some values/headers may be configured explicitly)
 * no https://en.wikipedia.org/wiki/JSONP[JSONP] support
 * `jolokia.request` call based on https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises[Promises]
+* no support for global `ajaxError`
+
+== Developer notes
+
+The goal of client/javascript-esm directory is to provide a _Jolokia monorepo_ based on:
+
+* yarn workspaces to organize interdependent modules
+* https://rollupjs.org/[Rollup.js] as a bundler to provide UMD files for browsers and ES modules for browsers and other bundlers (like Webpack).
+* Typescript as main langage for source an tests
+* https://jestjs.io/[Jest] tests written in Typescript
+
+The challenge is to have as clean configuration (ESLint, Rollup, tsconfig.json, jest.config.ts) as possible and IDE
+should allow to work with multiple packages (`jolokia.js`, `@jolokia.js/d3`, ...) without a need to build anything.
+
+We can't use https://www.typescriptlang.org/docs/handbook/project-references.html[Typescript project references],
+because these can't be used with `noEmit: true`.
+
+The trick is (though there may be better ones, or this one may be proved bad) with `exports` field of `package.json`:
+
+[,json]
+----
+{
+  "exports": {
+    ".": {
+      "types": "./dist/dts/jolokia.d.ts",
+      "import": "./dist/jolokia.mjs",
+      "default": "./src/jolokia.ts"
+    }
+  }
+}
+----
+
+It is based on https://nodejs.org/docs/latest/api/packages.html#conditional-exports[Conditional exports] and has these conditions:
+
+* `import` - for users of Jolokia installed with `npm i jolokia.js` after the package is published to NPM registry
+* `default` - used when the project was not built yet (so it's used in IDE just after cloning the project)
+
+[]
+NOTE:: https://github.com/microsoft/TypeScript/issues/51862[microsoft/TypeScript#51862] mentions `development` conditional, but I'm not sure how/if it's handled at all:
++
+[,json]
+----
+{
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": {
+        "development": "./src",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "development": "./src",
+        "default": "./dist/index.js"
+      }
+    }
+  }
+}
+----

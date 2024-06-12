@@ -17,7 +17,7 @@
 import express from "express"
 
 const jolokiaRouter = express.Router()
-jolokiaRouter.get("/version", (req, res) => {
+jolokiaRouter.get("/version", (_req, res) => {
   res.status(200).json({
     request: { type: "version" },
     value: {

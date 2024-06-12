@@ -19,10 +19,10 @@ import request from "supertest"
 
 import http from "node:http"
 import Jolokia from "../src/jolokia.js"
-import app from "./app"
+import app from "./app.js"
 
 const port = 3000
-let server
+let server: http.Server
 
 beforeAll(() => {
   server = http.createServer({}, app).listen(port, () => {
@@ -46,13 +46,6 @@ describe("Jolokia Tests", () => {
   test("Jolokia client version", () => {
     const j = new Jolokia({ url: "http://localhost" })
     expect(j.CLIENT_VERSION).toMatch(/^2/)
-    try {
-      j.CLIENT_VERSION = "3.0.0"
-      // noinspection ExceptionCaughtLocallyJS
-      throw "Can't set CLIENT_VERSION"
-    } catch (e) {
-      expect(e instanceof TypeError).toBe(true)
-    }
   })
 
   test("Jolokia members", () => {
@@ -60,9 +53,9 @@ describe("Jolokia Tests", () => {
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Enumerability_and_ownership_of_properties#traversing_object_properties
     // check only enumerable properties in the object and prototype (for..in). Object.keys() doesn't include
     // properties from the prototype
-    const expected = {}
+    const expected: { [k: string]: string } = {}
     for (const k in j) {
-      expected[k] = typeof j[k]
+      expected[k] = typeof j[k as keyof typeof Jolokia]
     }
 
     expect(Object.keys(expected).length).toBe(12)
@@ -96,11 +89,10 @@ describe("Jolokia HTTP tests", () => {
         })
   })
 
-  test("Jolokia GET version", () => {
+  test("Jolokia GET version", async () => {
     const jolokia = new Jolokia({ url: `http://localhost:${port}/jolokia` })
-    return jolokia.request({ type: "version" }).then(response => {
-      expect(JSON.parse(response).value.agent).toBe("2.1.0")
-    })
+    const response = await jolokia.request({ type: "version" })
+    expect(JSON.parse(response).value.agent).toBe("2.1.0")
   })
 
 })

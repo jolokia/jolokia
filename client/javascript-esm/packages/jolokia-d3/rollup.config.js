@@ -16,6 +16,7 @@
 
 import pkg from "./package.json" assert { type: "json" }
 import { nodeResolve } from "@rollup/plugin-node-resolve"
+import typescript from "@rollup/plugin-typescript"
 import terser from "@rollup/plugin-terser"
 
 const defaultD3Output = {
@@ -30,8 +31,8 @@ const defaultD3Output = {
 }
 
 const configJolokiaD3 = {
-  input: "src/jolokia-d3.js",
-  plugins: nodeResolve(),
+  input: "src/jolokia-d3.ts",
+  plugins: [ nodeResolve(), typescript() ],
   external: [ "jolokia.js", "d3" ],
   output: [
     {
@@ -45,7 +46,7 @@ const configJolokiaD3 = {
     },
     {
       ...defaultD3Output,
-      file: `dist/jolokia-d3-${pkg.version}.mjs`,
+      file: `dist/jolokia-d3.mjs`,
       format: "esm"
     }
   ],

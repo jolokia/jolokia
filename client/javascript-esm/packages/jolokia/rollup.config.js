@@ -16,18 +16,20 @@
 
 import pkg from "./package.json" assert { type: "json" }
 import { nodeResolve } from "@rollup/plugin-node-resolve"
+import typescript from "@rollup/plugin-typescript"
 import terser from "@rollup/plugin-terser"
 
 const defaultOutput = {
   name: "Jolokia",
   indent: false,
   extend: true,
-  format: "umd"
+  format: "umd",
+  sourcemap: true
 }
 
 const configJolokia = {
-  input: "src/jolokia.js",
-  plugins: nodeResolve(),
+  input: "src/jolokia.ts",
+  plugins: [ nodeResolve(), typescript({ include: [ "src/*" ] }) ],
   output: [
     {
       ...defaultOutput,
@@ -40,7 +42,7 @@ const configJolokia = {
     },
     {
       ...defaultOutput,
-      file: `dist/jolokia-${pkg.version}.mjs`,
+      file: `dist/jolokia.mjs`,
       format: "esm"
     }
   ]
