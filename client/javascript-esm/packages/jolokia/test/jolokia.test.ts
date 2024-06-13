@@ -31,6 +31,7 @@ beforeAll(() => {
 })
 
 afterAll(() => {
+  server.closeAllConnections()
   server.close()
 })
 
@@ -80,13 +81,41 @@ describe("Jolokia Tests", () => {
 
 describe("Jolokia HTTP tests", () => {
 
-  it("Test express.js config", async() => {
+  it("Test express.js config", async () => {
     return request(server)
         .get("/jolokia/version")
         .expect(200)
         .then((response) => {
           expect(response.body.value.agent).toBe("2.1.0")
         })
+  })
+
+  // it("Test with connect timeout", async () => {
+  //   // /usr/lib/node_modules_20/undici/lib/core/connect.js:buildConnector() has hardcoded connect timeout for 10000
+  //   // see:
+  //   //  - https://tools.ietf.org/html/rfc5737
+  //   //  - https://en.wikipedia.org/wiki/Reserved_IP_addresses
+  //   const jolokia = new Jolokia({ url: "http://192.0.2.0/jolokia", timeout: 500 })
+  //   const response = await jolokia.request({ type: "version" })
+  //       .catch(error => {
+  //         console.info("GOT ERROR", error)
+  //         return error
+  //       })
+  //   expect(response).toBeInstanceOf(DOMException)
+  //   const ex = response as DOMException
+  //   expect(ex.name).toBe("TimeoutError")
+  // })
+
+  it("Test with read timeout", async () => {
+    const jolokia = new Jolokia({ url: `http://localhost:${port}/jolokia-timeout`, timeout: 500 })
+    const response = await jolokia.request({ type: "version" })
+        .catch(error => {
+          console.info("GOT ERROR", error)
+          return error
+        })
+    expect(response).toBeInstanceOf(DOMException)
+    const ex = response as DOMException
+    expect(ex.name).toBe("TimeoutError")
   })
 
   test("Jolokia GET version", async () => {

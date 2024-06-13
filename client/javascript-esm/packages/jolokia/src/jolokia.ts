@@ -378,9 +378,6 @@ const j = function j(this: IJolokia, config: JolokiaConfiguration | string): IJo
         .then(json => {
           return JSON.stringify(json)
         })
-        // .catch(reason => {
-        //
-        // })
   }
 
   this.register = function() {}

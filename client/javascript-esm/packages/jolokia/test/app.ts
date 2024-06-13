@@ -20,4 +20,11 @@ import jolokiaRouter from "./app-jolokia.js"
 const app = express()
 app.use('/jolokia', jolokiaRouter)
 
+app.use('/jolokia-timeout', express.Router().get("/version",
+    (_req, res) => {
+        setTimeout(() => {
+            res.end()
+        }, 800)
+    }))
+
 export default app
