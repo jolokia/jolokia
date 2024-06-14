@@ -3,10 +3,13 @@
 Changes comparing to existing jolokia.js:
 
 * no dependency on https://jquery.com/[JQuery], https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API[Fetch API] is used for requests. Switching away from `xhr`, we're dropping _synchronous AJAX_ (`xhr` has an option to perform requests in synchronous manner, but it blocks the event loop and is deprecated in modern browsers for long time already).
-** `credentials` and `headers` properties are exposed in `Jolokia()` and `Jolokia.request()` calls (with restrictions, because some values/headers may be configured explicitly)
+** `credentials` and `headers` properties (from `fetch()` options) are exposed in `Jolokia()` and `Jolokia.request()` calls (with restrictions, because some values/headers may be configured by Jolokia itself)
 * no https://en.wikipedia.org/wiki/JSONP[JSONP] support
 * `jolokia.request` call based on https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises[Promises]
-* no support for global `ajaxError`
+** previously, user was passing `success` and `error` options for `jolokia.request()` call and _both_ were used in successful `xhr` call (no transport error for example) - `error` was called for logical errors (when JSON returned from Jolokia contained `error` value and/or status was not `200`)
+** both `success` and `error` callbacks passed to `jolokia.request()` were used in single callback passed with https://api.jquery.com/jQuery.ajax/#jQuery-ajax-settings[`ajaxSettings.success`]
+** no support for global `ajaxError`. This callback was passed as https://api.jquery.com/jQuery.ajax/#jQuery-ajax-settings[`ajaxSettings.error`]
+** now, with https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API[Fetch API], `request()` returns a promise that resolves to a https://developer.mozilla.org/en-US/docs/Web/API/Response[Response object] and user may further resolve it to json, text, blob, ... This low-level `jolokia.request()` doesn't do anything more. Other higher-level methods may be used to deal with Jolokia/JMX specific response (exteding previous _Jolokia Simple_ library).
 
 == Developer notes
 

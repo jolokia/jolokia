@@ -18,13 +18,29 @@ import express from "express"
 import jolokiaRouter from "./app-jolokia.js"
 
 const app = express()
-app.use('/jolokia', jolokiaRouter)
 
-app.use('/jolokia-timeout', express.Router().get("/version",
-    (_req, res) => {
-        setTimeout(() => {
-            res.end()
-        }, 800)
-    }))
+// main Jolokia endpoint which simulates full hawtio/hawtio server
+app.use("/jolokia", jolokiaRouter)
+
+// a Jolokia endpoint which can be used to test read timeouts
+app.use("/jolokia-timeout", (_req, res) => {
+  setTimeout(() => {
+    res.end()
+  }, 800)
+})
+
+// a Jolokia endpoint that doesn't return proper JSON
+app.use("/jolokia-bad-json", (_req, res) => {
+  res.status(200)
+  res.set("Content-Type", "text/json")
+  res.send("<!doctype html><html lang='en'></html>")
+})
+
+// a Jolokia endpoint that doesn't pretend it returns a JSON
+app.use("/jolokia-not-json", (_req, res) => {
+  res.status(200)
+  res.set("Content-Type", "text/html")
+  res.send("<!doctype html><html lang='en'></html>")
+})
 
 export default app

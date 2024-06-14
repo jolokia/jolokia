@@ -32,7 +32,7 @@ export default [
   ...tseslint.configs["recommended"],
   {
     ...workspaces.configs["recommended"],
-    files: [ "**/*.ts" ],
+    files: [ "**/*.ts", "**/*.js" ],
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",
@@ -44,7 +44,11 @@ export default [
     rules: {
       "semi": [ "error", "never" ],
       "console": "off",
-      "no-unused-vars": [ "error", { "args": "after-used" } ]
+      // "no-unused-vars": [ "error", { "args": "after-used" } ]
+      "no-unused-vars": "off",
+      "@typescript-eslint/no-unused-vars": [ "error", {
+        "argsIgnorePattern": "^_",
+      }]
     }
   }
 ]

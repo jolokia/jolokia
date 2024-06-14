@@ -40,35 +40,6 @@ const PROCESSING_PARAMS: string[] = [
   "ifModifiedSince"
 ]
 
-/*
- * @typedef {'read'|'write'} RequestType A type of Jolokia request
- */
-
-/*
- * @typedef {object} Request A Jolokia request object to be sent to remote Jolokia agent
- * @property {RequestType} type A type of Jolokia request according to
- * {@link https://jolokia.org/reference/html/manual/jolokia_protocol.html Jolokia protocol}
- * @property {object} config Request configuration object
- * @property {string|string[]} attribute attribute(s) to read
- * @property {string} mbean target MBean for invocation or attribute access
- * @property {string} path path within Jolokia traversal for MBean domains/names
- * @property {string|object[]} [value] Value to be set with `write` request
- * @property {string} [operation] Operation name for Jolokia `exec` request
- * @property {object|object[]} [arguments] Arguments to use with Jolokia `exec` request
- * @property {string} [command] A `notification` operation command to use
- * @property {string} [client] A `notification` client ID to use
- * @property {string} [handback] A `notification` `handback` parameter
- * @property {string} [filter] A `notification` `filter` parameter
- * @property {string} [handle] A `notification` `handle` parameter
- * @property {object} target Target configuration object for
- * {@link https://jolokia.org/reference/html/manual/jolokia_protocol.html#protocol-proxy Jolokia proxy mode}
- */
-
-/*
- * @typedef {object} Job Registered request or request batch to be sent periodically to remote Jolokia agent
- * @property {number} [id] Job identifier
- */
-
 /**
  * Processing parameters that influence Jolokia operations.
  * See `org.jolokia.server.core.config.ConfigKey` enum values with `requestConfig=true`.
@@ -156,6 +127,11 @@ type ProcessingParameters = {
  * the error response is printed to the JavaScript console by default.
  */
 
+/*
+ * @typedef {object} Job Registered request or request batch to be sent periodically to remote Jolokia agent
+ * @property {number} [id] Job identifier
+ */
+
 /**
  * Narrowed list of options that can be passed directly to `fetch()` `options` argument
  */
@@ -220,6 +196,148 @@ type RequestOptions = BaseRequestOptions & {
   x?: string
 }
 
+type RequestType = "read" | "write" | "exec" | "search" | "list" | "notification" | "version"
+
+/**
+ * A Jolokia base request object to be sent to remote Jolokia agent
+ */
+interface BaseRequest {
+  /**
+   * A type of Jolokia request according to
+   * {@link https://jolokia.org/reference/html/manual/jolokia_protocol.html Jolokia protocol}
+   */
+  type: RequestType
+  /**
+   * Request configuration object
+   */
+  config?: ProcessingParameters
+
+/*
+ * @property {RequestType} type
+ * @property {object} target
+ * {@link https://jolokia.org/reference/html/manual/jolokia_protocol.html#protocol-proxy Jolokia proxy mode}
+ */
+}
+
+interface ReadRequest extends BaseRequest {
+  type: "read"
+  /**
+   * target MBean for attribute access
+   */
+  mbean: string
+  /**
+   * attribute(s) to read
+   */
+  attribute?: string | string[]
+  /**
+   * path within Jolokia traversal for MBean domains/names
+   */
+  path?: string
+}
+
+interface WriteRequest extends BaseRequest {
+  type: "write"
+  /**
+   * target MBean for attribute access
+   */
+  mbean: string
+  /**
+   * attribute to write
+   */
+  attribute: string
+  /**
+   * Value to be set for the attribute
+   */
+  value: string
+  /**
+   * path within Jolokia traversal for MBean domains/names
+   */
+  path?: string
+}
+
+interface ExecRequest extends BaseRequest {
+  type: "exec"
+  /**
+   * target MBean for invocation
+   */
+  mbean: string
+  /**
+   * Operation name for Jolokia `exec` request
+   */
+  operation: string
+  /**
+   * Arguments to use with Jolokia `exec` request
+   */
+  arguments?: unknown[]
+}
+
+interface SearchRequest extends BaseRequest {
+  type: "search"
+  /**
+   * MBean pattern for searching
+   */
+  mbean: string
+}
+
+interface ListRequest extends BaseRequest {
+  type: "list"
+  /**
+   * path within Jolokia traversal for MBean domains/names
+   */
+  path?: string
+}
+
+type NotificationMode = "sse" | "pull";
+
+interface NotificationRequest extends BaseRequest {
+  type: "notification"
+  /**
+   * operation command to use
+   */
+  command: "register" | "unregister" | "add" | "remove" | "ping" | "open" | "list"
+  /**
+   * client ID to use
+   */
+  client?: string
+  /**
+   * Notification mode to use
+   */
+  mode?: NotificationMode
+  /**
+   * MBean to use for registering notification handler
+   */
+  mbean: string
+  /**
+   * `filter` parameter
+   */
+  filter?: string[]
+  /**
+   * `handback` parameter
+   */
+  handback?: unknown
+  /**
+   * `handle` parameter
+   */
+  handle?: string
+}
+
+interface VersionRequest extends BaseRequest {
+  type: "version"
+}
+
+/**
+ * Generic Jolokia request object which combines all possible requests and can be used with tricky TypeScript
+ * function matching when using functions as values in typed object/map.
+ */
+type JRequest = Partial<ReadRequest & WriteRequest & ExecRequest & SearchRequest & ListRequest & NotificationRequest & VersionRequest> & BaseRequest
+// type JRequest = ReadRequest | WriteRequest | ExecRequest | SearchRequest | ListRequest | NotificationRequest | VersionRequest
+
+type JResponse = {
+  status: number
+  timestamp: number
+  value: any
+}
+
 /**
  * Main Jolokia client interface for communication with remote Jolokia agent.
  */
@@ -240,7 +358,7 @@ interface IJolokia {
    *        These are not options passed diretly (unchnaged) to `fetch()` call
    * @returns the response promise object
    */
-  request(request: any, params?: RequestOptions): Promise<any>
+  request(request: BaseRequest, params?: RequestOptions): Promise<string | JResponse[]>
 
   register(): void
   unregister(): void
@@ -303,7 +421,7 @@ const j = function j(this: IJolokia, config: JolokiaConfiguration | string): IJo
   // ++++++++++++++++++++++++++++++++++++++++++++++++++
   // Public API (instance methods that may use function-scoped state)
 
-  this.request = async function(request: any, params?: RequestOptions) {
+  this.request = async function(request: JRequest, params?: RequestOptions): Promise<string | JResponse[]> {
     const opts: RequestOptions = Object.assign({}, agentOptions, params)
     assertNotNull(opts.url, "No URL given")
 
@@ -326,7 +444,7 @@ const j = function j(this: IJolokia, config: JolokiaConfiguration | string): IJo
     const fetchOptions: RequestInit = Object.assign({}, DEFAULT_FETCH_PARAMS)
     fetchOptions.headers = {}
 
-    let method = extractMethod(request, opts)
+    const method = extractMethod(request, opts)
     let url = ensureTrailingSlash(opts.url!)
 
     if (opts.headers) {
@@ -364,19 +482,25 @@ const j = function j(this: IJolokia, config: JolokiaConfiguration | string): IJo
     // In original jolokia.js at this stage there was different processing depending on the existence of
     // "success" option in passed params.
     // without such callback the request was treated as synchronus (ajaxSettings.async = false), but we can't do
-    // it (which is good) with Fetch API
+    // this with Fetch API (which is good)
     // callbacks (success and error) were wrapped, so:
     //  - if null, console.warn was used
-    //  - if === "ignore", noop was used
+    //  - if "ignore", noop callback was used
     //  - otherwise callback was turned into an array (not if already an array) and the actual callback was
-    //    wrapped with function(response, idx) which called the callback(s) in round-robin fashion
+    //    wrapped with function(response, idx) which called the callback(s) in round-robin fashion for each response
+    //    (single if not bulk or multi-attribute read)
+    // Now we simply handle a Promise resolving to https://developer.mozilla.org/en-US/docs/Web/API/Response
+    // end return new promise resolving to string or an array of Jolokia responses (whether successful or failed ones)
+    // user should handle transport errors with .catch()
 
     return fetch(url, fetchOptions)
-        .then(response => {
-          return response.json()
-        })
-        .then(json => {
-          return JSON.stringify(json)
+        .then(async (response: Response): Promise<string | JResponse[]> => {
+          const ct = response.headers.get("content-type")
+          if (opts.dataType === 'text' || !ct || !(ct.startsWith("text/json") || ct.startsWith("application/json"))) {
+            return response.text()
+          }
+          const json = await response.json()
+          return Array.isArray(json) ? json : [ json ]
         })
   }
 
@@ -475,11 +599,11 @@ j.escape = j.prototype.escape = function(part: string) {
 /**
  * Prepares a function that will be invoked in poll-fetching for configured requests. Passed parameters come
  * from the scope of {@link IJolokia} constructor function.
- * @param jolokia The Jolokia object used to communicate with remote Jolokia agent
- * @param jobs Requests configured for poll-fetching
+ * @param _jolokia The Jolokia object used to communicate with remote Jolokia agent
+ * @param _jobs Requests configured for poll-fetching
  * @returns A function which can be passed to {@link window#setInterval}
  */
-function createJolokiaInvocation(jolokia: IJolokia, jobs: any[]) {
+function createJolokiaInvocation(_jolokia: IJolokia, _jobs: unknown[]) {
   return function() {
 
   }
@@ -491,7 +615,7 @@ function createJolokiaInvocation(jolokia: IJolokia, jobs: any[]) {
  * @param message An error message for thrown Error
  * @throws Error in case the value is null or undefined
  */
-function assertNotNull(value: any, message: string) {
+function assertNotNull(value: unknown, message: string) {
   if (value == null) {
     throw new Error(message)
   }
@@ -506,8 +630,8 @@ function assertNotNull(value: any, message: string) {
  * @param params parameters used for sending the request which may override default configuration.
  * @returns an HTTP method for given `request` and `params`
  */
-function extractMethod(request: any, params: RequestOptions) {
-  let methodGiven = params?.method?.toLowerCase()
+function extractMethod(request: BaseRequest, params: RequestOptions) {
+  const methodGiven = params?.method?.toLowerCase()
   let method
 
   if (!request) {
@@ -521,25 +645,26 @@ function extractMethod(request: any, params: RequestOptions) {
       if (Array.isArray(request)) {
         throw new Error("Cannot use GET with bulk requests")
       }
-      if (request.type?.toLowerCase() === "read" && Array.isArray(request.attribute)) {
+      // if (request.type === "read" && Array.isArray(request.attribute)) {
+      if (request.type?.toLowerCase() === "read" && "attribute" in request && Array.isArray(request.attribute)) {
         throw new Error("Cannot use GET for read with multiple attributes")
       }
-      if (request.target) {
+      if ("target" in request) {
         throw new Error("Cannot use GET request with proxy mode")
       }
-      if (request.config) {
+      if ("config" in request) {
         throw new Error("Cannot use GET with request specific config")
       }
       method = "get"
     } else if (methodGiven !== "post") {
       throw new Error("Illegal method \"" + methodGiven + "\"")
     }
-  } else {
+  } else {request.type?.toLowerCase() === "read" && "attribute" in request && Array.isArray(request.attribute)
     // Determine method dynamically
     if (Array.isArray(request)
-        || request.config
-        || (request.type?.toLowerCase() === "read" && Array.isArray(request.attribute))
-        || request.target) {
+        || "config" in request
+        || (request.type?.toLowerCase() === "read" && "attribute" in request && Array.isArray(request.attribute))
+        || "target" in request) {
       method = "post"
     } else {
       method = "get"
@@ -555,15 +680,15 @@ function extractMethod(request: any, params: RequestOptions) {
  * in URL GET request
  * @returns GET URL to be used with remote Jolokia agent
  */
-function constructGetUrlPath(request: any) {
-  let type: string = request.type
+function constructGetUrlPath(request: BaseRequest) {
+  let type: RequestType = request.type
   assertNotNull(type, "No request type given for building a GET request")
-  type = type.toLowerCase()
+  type = type.toLowerCase() as RequestType
 
-  const extractor: (r: any) => any = GET_URL_EXTRACTORS[type]
+  const extractor: (r: JRequest) => GetPathConfiguration = GET_URL_EXTRACTORS[type]
   assertNotNull(extractor, "Unknown request type " + type)
 
-  const result = extractor(request)
+  const result = extractor(request as JRequest)
   const parts = result.parts || []
   let url = type
   parts.forEach(function (v: string) {
@@ -606,26 +731,35 @@ function ensureTrailingSlash(url: string | URL): string {
   return (typeof url === "string" ? url : url.href).replace(/\/*$/, "/")
 }
 
+type GetPathConfiguration = {
+  parts?: string[]
+  path?: string
+}
+
 /**
  * Extractors used for preparing a GET request, i.e. for creating a stack
  * of arguments which gets appended to create the proper access URL.
  * key: lowercase request type.
  * The return value is an object with two properties: The 'parts' to glue together, where
  * each part gets escaped and a 'path' which is appended literally
+ * Note: I could not create a good TS base type for ReadRequest, WriteRequest, ... and at the same time use it as
+ * parameter of a function used as value type of GET_URL_EXTRACTORS - I had problems defining particular
+ * functions (under keys `read`, `write`, ...) with types derived from BaseRequest...
  */
-const GET_URL_EXTRACTORS: { [key: string]: (r: any) => any } = {
+const GET_URL_EXTRACTORS: { [ key in RequestType ]: (r: JRequest) => GetPathConfiguration } = {
 
   /**
    * Function to prepare GET URL for `read` Jolokia request
    * @param request Jolokia request object
    * @returns URL configuration object for Jolokia `read` GET request
    */
-  "read": function(request: any) {
+  "read": function(request: ReadRequest)  {
     if (request.attribute == null) {
       // Path gets ignored for multiple attribute fetch
       return { parts: [ request.mbean, '*' ], path: request.path }
     } else {
-      return { parts: [ request.mbean, request.attribute ], path: request.path }
+      // can't use attribute array with GET
+      return { parts: [ request.mbean, request.attribute as string ], path: request.path }
     }
   },
 
@@ -634,7 +768,7 @@ const GET_URL_EXTRACTORS: { [key: string]: (r: any) => any } = {
    * @param request Jolokia request object
    * @returns URL configuration object for Jolokia `write` GET request
    */
-  "write": function(request: any) {
+  "write": function(request: WriteRequest) {
     return { parts: [ request.mbean, request.attribute, valueToString(request.value) ], path: request.path }
   },
 
@@ -643,10 +777,10 @@ const GET_URL_EXTRACTORS: { [key: string]: (r: any) => any } = {
    * @param request Jolokia request object
    * @returns URL configuration object for Jolokia `exec` GET request
    */
-  "exec": function(request: any) {
+  "exec": function(request: ExecRequest) {
     const ret = [ request.mbean, request.operation ]
     if (request.arguments && request.arguments.length > 0) {
-      request.arguments.forEach(function(value: any) {
+      request.arguments.forEach(function(value: unknown) {
         ret.push(valueToString(value))
       })
     }
@@ -658,8 +792,7 @@ const GET_URL_EXTRACTORS: { [key: string]: (r: any) => any } = {
    * @param _request Jolokia request object
    * @returns URL configuration object for Jolokia `version` GET request
    */
-  // eslint-disable-next-line no-unused-vars
-  "version": function(_request: any) {
+  "version": function(_request: VersionRequest) {
     return {}
   },
 
@@ -668,7 +801,7 @@ const GET_URL_EXTRACTORS: { [key: string]: (r: any) => any } = {
    * @param request Jolokia request object
    * @returns URL configuration object for Jolokia `search` GET request
    */
-  "search": function(request: any) {
+  "search": function(request: SearchRequest) {
     return { parts: [ request.mbean ] }
   },
 
@@ -677,7 +810,7 @@ const GET_URL_EXTRACTORS: { [key: string]: (r: any) => any } = {
    * @param request Jolokia request object
    * @returns URL configuration object for Jolokia `list` GET request
    */
-  "list": function(request: any) {
+  "list": function(request: ListRequest) {
     return { path: request.path }
   },
 
@@ -686,13 +819,13 @@ const GET_URL_EXTRACTORS: { [key: string]: (r: any) => any } = {
    * @param request Jolokia request object
    * @returns URL configuration object for Jolokia `notification` GET request
    */
-  "notification": function(request: any) {
+  "notification": function(request: NotificationRequest) {
     switch (request.command) {
       case "register":
         return { parts: [ "register" ] }
       case "add": {
-        const ret = [ "add", request.client, request.mode, request.mbean ]
-        const extra = []
+        const ret = [ "add", valueToString(request.client), valueToString(request.mode), request.mbean ]
+        const extra: string[] = []
         if (request.handback) {
           extra.push(valueToString(request.handback))
         }
@@ -707,17 +840,20 @@ const GET_URL_EXTRACTORS: { [key: string]: (r: any) => any } = {
           extra.push(" ")
         }
         return { parts: ret.concat(extra.reverse()) }
-        }
+      }
       case "remove":
-        return { parts: [ "remove", request.client, request.handle ] }
+        return { parts: [ "remove", valueToString(request.client), valueToString(request.handle) ] }
       case "unregister":
-        return { parts: [ "unregister", request.client ] }
+        return { parts: [ "unregister", valueToString(request.client) ] }
       case "list":
-        return { parts: [ "list", request.client ] }
+        return { parts: [ "list", valueToString(request.client) ] }
       case "ping":
-        return { parts: [ "ping", request.client ] }
+        return { parts: [ "ping", valueToString(request.client) ] }
+      case "open":
+        return { parts: [ "open", valueToString(request.client), valueToString(request.mode) ] }
+      default:
+        throw new Error("Unknown command '" + request.command + "'")
     }
-    throw new Error("Unknown command '" + request.command + "'")
   }
 }
 
@@ -727,14 +863,14 @@ const GET_URL_EXTRACTORS: { [key: string]: (r: any) => any } = {
  * @param value A value to write or pass to `exec` operation
  * @returns Normalized value for Jolokia `write`/`exec` operation
  */
-function valueToString(value: any) {
+function valueToString(value: unknown) {
   if (value == null) {
     return "[null]"
   }
   if (Array.isArray(value)) {
     let ret = ""
     for (let i = 0; i < value.length; i++) {
-      let v = value[i]
+      const v = value[i]
       ret += v == null ? "[null]" : singleValueToString(value[i])
       if (i < value.length - 1) {
         ret += ","
@@ -751,7 +887,7 @@ function valueToString(value: any) {
  * @param value A value to normalize
  * @returns normalized value
  */
-function singleValueToString(value: any) {
+function singleValueToString(value: string | object) {
   if (typeof value === "string" && value.length === 0) {
     return "\"\""
   } else {
@@ -759,5 +895,5 @@ function singleValueToString(value: any) {
   }
 }
 
-export type { IJolokia }
+export type { IJolokia, JResponse as Response }
 export default j as JolokiaStatic

@@ -19,6 +19,7 @@ import request from "supertest"
 
 import http from "node:http"
 import Jolokia from "../src/jolokia.js"
+import type { Response } from "../src/jolokia.js"
 import app from "./app.js"
 
 const port = 3000
@@ -109,19 +110,50 @@ describe("Jolokia HTTP tests", () => {
   it("Test with read timeout", async () => {
     const jolokia = new Jolokia({ url: `http://localhost:${port}/jolokia-timeout`, timeout: 500 })
     const response = await jolokia.request({ type: "version" })
-        .catch(error => {
-          console.info("GOT ERROR", error)
-          return error
-        })
+        .catch(error => error)
     expect(response).toBeInstanceOf(DOMException)
     const ex = response as DOMException
     expect(ex.name).toBe("TimeoutError")
   })
 
-  test("Jolokia GET version", async () => {
+  test("Jolokia version with \"json\" type", async () => {
     const jolokia = new Jolokia({ url: `http://localhost:${port}/jolokia` })
-    const response = await jolokia.request({ type: "version" })
-    expect(JSON.parse(response).value.agent).toBe("2.1.0")
+    const response = await jolokia.request({ type: "version" }, { dataType: "json" }) as Response[]
+    expect(typeof response).toBe("object")
+    expect(response).toBeInstanceOf(Array<Response>)
+    expect(response[0].value.agent).toBe("2.1.0")
+  })
+
+  test("Jolokia version with \"text\" type", async () => {
+    const jolokia = new Jolokia({ url: `http://localhost:${port}/jolokia` })
+    const response = await jolokia.request({ type: "version" }, { dataType: "text" }) as string
+    expect(typeof response).toBe("string")
+    expect(response).toContain("2.1.0")
+  })
+
+  test("Jolokia version with bad JSON response", async () => {
+    expect.assertions(2)
+    const jolokia = new Jolokia({ url: `http://localhost:${port}/jolokia-bad-json` })
+    try {
+      await jolokia.request({ type: "version" }, { dataType: "json" })
+    } catch (error) {
+      expect((error as Error).name).toBe("SyntaxError")
+    }
+    const caughtInPromise = await jolokia.request({ type: "version" }, { dataType: "json" })
+        .catch(error => error)
+    expect((caughtInPromise as Error).name).toBe("SyntaxError")
+  })
+
+  test("Jolokia version with HTML response and forced \"text\" response", async () => {
+    const jolokia = new Jolokia({ url: `http://localhost:${port}/jolokia-not-json` })
+    const response = await jolokia.request({ type: "version" }, { dataType: "json" }) as string
+    expect(response).toContain("!doctype")
+  })
+
+  test("Jolokia version with bad JSON response, but \"text\" type", async () => {
+    const jolokia = new Jolokia({ url: `http://localhost:${port}/jolokia-bad-json` })
+    const response = await jolokia.request({ type: "version" }, { dataType: "text" }) as string
+    expect(response).toContain("!doctype")
   })
 
 })
