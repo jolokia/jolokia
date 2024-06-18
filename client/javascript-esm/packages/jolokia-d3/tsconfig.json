@@ -16,12 +16,16 @@
 
 {
   "compilerOptions": {
+    "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "declaration": true,
+    "esModuleInterop": true,
+    "lib": [ "DOM" ],
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "noEmit": true,
     "strict": true,
+    "sourceMap": true,
     // https://www.typescriptlang.org/docs/handbook/modules/reference.html#implied-and-enforced-options
     "target": "ESNext",
     "declarationDir": "dts"

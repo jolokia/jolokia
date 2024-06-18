@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-import { afterAll, beforeAll, describe, expect, it, test } from "@jest/globals"
+import { afterAll, beforeAll, describe, expect, test } from "@jest/globals"
 import request from "supertest"
 
 import http from "node:http"
-import Jolokia from "../src/jolokia.js"
-import type { Response } from "../src/jolokia.js"
+import Jolokia, { JolokiaResponse, JolokiaSuccessResponse } from "../src/jolokia.js"
 import app from "./app.js"
 
 const port = 3000
 let server: http.Server
 
 beforeAll(() => {
-  server = http.createServer({}, app).listen(port, () => {
-    console.info(`Listening at http://localhost:${port}`)
-  })
+  server = http.createServer({}, app).listen(port)
 })
 
 afterAll(() => {
@@ -60,7 +57,7 @@ describe("Jolokia Tests", () => {
       expected[k] = typeof j[k as keyof typeof Jolokia]
     }
 
-    expect(Object.keys(expected).length).toBe(12)
+    expect(Object.keys(expected).length).toBe(13)
 
     expect(expected["request"]).toBe("function")
     expect(expected["register"]).toBe("function")
@@ -74,6 +71,7 @@ describe("Jolokia Tests", () => {
     expect(expected["unregisterNotificationClient"]).toBe("function")
 
     expect(expected["escape"]).toBe("function")
+    expect(expected["isError"]).toBe("function")
 
     expect(expected["CLIENT_VERSION"]).toBe("string")
   })
@@ -82,7 +80,7 @@ describe("Jolokia Tests", () => {
 
 describe("Jolokia HTTP tests", () => {
 
-  it("Test express.js config", async () => {
+  test("Test express.js config", async () => {
     return request(server)
         .get("/jolokia/version")
         .expect(200)
@@ -107,28 +105,18 @@ describe("Jolokia HTTP tests", () => {
   //   expect(ex.name).toBe("TimeoutError")
   // })
 
-  it("Test with read timeout", async () => {
-    const jolokia = new Jolokia({ url: `http://localhost:${port}/jolokia-timeout`, timeout: 500 })
-    const response = await jolokia.request({ type: "version" })
+  test("Test with read timeout", async () => {
+    let jolokia = new Jolokia({ url: `http://localhost:${port}/jolokia-timeout`, timeout: 500 })
+    let response = await jolokia.request({ type: "version" })
         .catch(error => error)
     expect(response).toBeInstanceOf(DOMException)
     const ex = response as DOMException
     expect(ex.name).toBe("TimeoutError")
-  })
 
-  test("Jolokia version with \"json\" type", async () => {
-    const jolokia = new Jolokia({ url: `http://localhost:${port}/jolokia` })
-    const response = await jolokia.request({ type: "version" }, { dataType: "json" }) as Response[]
-    expect(typeof response).toBe("object")
+    jolokia = new Jolokia({ url: `http://localhost:${port}/jolokia-timeout`, timeout: 2000 })
+    response = await jolokia.request({ type: "version" })
     expect(response).toBeInstanceOf(Array<Response>)
     expect(response[0].value.agent).toBe("2.1.0")
-  })
-
-  test("Jolokia version with \"text\" type", async () => {
-    const jolokia = new Jolokia({ url: `http://localhost:${port}/jolokia` })
-    const response = await jolokia.request({ type: "version" }, { dataType: "text" }) as string
-    expect(typeof response).toBe("string")
-    expect(response).toContain("2.1.0")
   })
 
   test("Jolokia version with bad JSON response", async () => {
@@ -154,6 +142,132 @@ describe("Jolokia HTTP tests", () => {
     const jolokia = new Jolokia({ url: `http://localhost:${port}/jolokia-bad-json` })
     const response = await jolokia.request({ type: "version" }, { dataType: "text" }) as string
     expect(response).toContain("!doctype")
+  })
+
+})
+
+describe("Jolokia Fetch API tests", () => {
+
+  test("Jolokia GET version with \"json\" type", async () => {
+    const jolokia = new Jolokia({ url: `http://localhost:${port}/jolokia` })
+    const response = await jolokia.request({ type: "version" }, { dataType: "json" }) as JolokiaResponse[]
+    expect(typeof response).toBe("object")
+    expect(response).toBeInstanceOf(Array<Response>)
+    expect(response.length).toBe(1)
+    expect(((response[0] as JolokiaSuccessResponse).value as { [ key: string ]: unknown })["agent"]).toBe("2.1.0")
+  })
+
+  test("Jolokia POST version with \"json\" type", async () => {
+    const jolokia = new Jolokia({ url: `http://localhost:${port}/jolokia` })
+    const response = await jolokia.request({ type: "version" }, { method: "post", dataType: "json" }) as JolokiaResponse[]
+    expect(((response[0] as JolokiaSuccessResponse).value as { [ key: string ]: unknown })["agent"]).toBe("2.1.0")
+  })
+
+  test("Jolokia version with \"text\" type", async () => {
+    const jolokia = new Jolokia({ url: `http://localhost:${port}/jolokia` })
+    const response = await jolokia.request({ type: "version" }, { dataType: "text" }) as string
+    expect(typeof response).toBe("string")
+    expect(response).toContain("2.1.0")
+  })
+
+})
+
+describe("Jolokia callback tests", () => {
+
+  test("Simple success callback", async () => {
+    expect.assertions(4)
+    const jolokia = new Jolokia({ url: `http://localhost:${port}/jolokia` })
+    // the promise doesn't resolve to anything useful (undefined), but awaiting for it makes the test
+    // check all the assertions
+    await jolokia.request({ type: "version" }, {
+      method: "post",
+      success: (response, index) => {
+        expect(Array.isArray(response)).toBe(false)
+        expect(response.status).toBe(200)
+        expect(index).toBe(0)
+        expect((response.value as { [ key: string ]: unknown })["agent"]).toBe("2.1.0")
+      }
+    })
+  })
+
+  test("Simple success callback with \"text\" type", async () => {
+    expect.assertions(2)
+    const jolokia = new Jolokia({ url: `http://localhost:${port}/jolokia` })
+    await jolokia.request({ type: "version" }, {
+      method: "post",
+      dataType: "text",
+      success: (response: string) => {
+        expect(typeof response).toBe("string")
+        expect(response).toContain("2.1.0")
+      }
+    })
+  })
+
+  test("Success callback as array with one response", async () => {
+    expect.assertions(4)
+
+    const f1Results = []
+    const f2Results = []
+
+    const f1 = (response: JolokiaSuccessResponse, index: number) => {
+      expect(Array.isArray(response)).toBe(false)
+      expect(typeof response).toBe("object")
+      expect(index).toBe(0)
+      expect((response.value as { [ key: string ]: unknown })["agent"]).toBe("2.1.0")
+      f1Results.push(response)
+    }
+    const f2 = (response: JolokiaSuccessResponse, _index: number) => {
+      f2Results.push(response)
+    }
+    const jolokia = new Jolokia({ url: `http://localhost:${port}/jolokia` })
+    await jolokia.request({ type: "version" }, {
+      method: "post",
+      success: [ f1, f2 ]
+    })
+  })
+
+  test("Simple error callback", async () => {
+    expect.assertions(5)
+    const jolokia = new Jolokia({ url: `http://localhost:${port}/jolokia` })
+    // it's not hard to trick TypeScript
+    await jolokia.request({ type: "version2" as "version" }, {
+      method: "post",
+      success: (_response, _index) => {},
+      error: (response, index) => {
+        expect(Array.isArray(response)).toBe(false)
+        expect(response.status).toBe(500)
+        expect(index).toBe(0)
+        expect(response.error_type).toBe("java.lang.UnsupportedOperationException")
+        expect(response.error).toContain("No type with name 'version2' exists")
+      }
+    })
+  })
+
+  test("No success callback", async () => {
+    const originalConsole = globalThis.console
+    const messages = []
+    globalThis.console = {
+      ...originalConsole,
+      warn: function(...args) {
+        messages.push(args)
+      }
+    }
+    const jolokia = new Jolokia({ url: `http://localhost:${port}/jolokia` })
+    await jolokia.request({ type: "version" }, {
+      method: "post",
+      success: []
+    })
+    expect(messages.length).toBe(1)
+    globalThis.console = originalConsole
+  })
+
+  test("Ignored success callback", async () => {
+    const jolokia = new Jolokia({ url: `http://localhost:${port}/jolokia` })
+    await jolokia.request({ type: "version" }, {
+      method: "post",
+      success: "ignore"
+    })
+    // we can't assert anything...
   })
 
 })

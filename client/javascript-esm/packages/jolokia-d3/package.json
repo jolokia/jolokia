@@ -13,11 +13,15 @@
     "jmx"
   ],
   "exports": {
-    ".": "./dist/jolokia-d3.mjs"
+    ".": {
+      "types": "./dist/dts/jolokia-d3.d.ts",
+      "import": "./dist/jolokia-d3.mjs",
+      "default": "./src/jolokia-d3/ts"
+    }
   },
   "scripts": {
     "build:jolokia-d3": "yarn rollup -c",
-    "test": "yarn node --experimental-vm-modules $(yarn bin jest)"
+    "test:jolokia-d3": "yarn node --experimental-vm-modules $(yarn bin jest)"
   },
   "dependencies": {
     "d3": "^7.9.0",

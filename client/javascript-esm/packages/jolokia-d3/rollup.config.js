@@ -24,6 +24,7 @@ const defaultD3Output = {
   indent: false,
   extend: true,
   format: "umd",
+  sourcemap: true,
   globals: {
     "jolokia.js": "Jolokia",
     d3: "d3"
@@ -32,7 +33,7 @@ const defaultD3Output = {
 
 const configJolokiaD3 = {
   input: "src/jolokia-d3.ts",
-  plugins: [ nodeResolve(), typescript() ],
+  plugins: [ nodeResolve(), typescript({ include: [ "src/*" ] }) ],
   external: [ "jolokia.js", "d3" ],
   output: [
     {

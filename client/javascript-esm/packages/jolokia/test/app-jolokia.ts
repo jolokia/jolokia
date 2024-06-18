@@ -17,14 +17,52 @@
 import express from "express"
 
 const jolokiaRouter = express.Router()
+
+jolokiaRouter.all("*", (_req, res, next) => {
+  res.set("Content-Type", "application/json")
+  next()
+})
+
 jolokiaRouter.get("/version", (_req, res) => {
   res.status(200).json({
+    status: 200,
     request: { type: "version" },
     value: {
       agent: "2.1.0",
       protocol: "7.3"
     }
   })
+})
+
+jolokiaRouter.post("/*", (req, res) => {
+  let body = req.body
+  if (!body || !body.type) {
+    body = { type: "?" }
+  }
+
+  switch (body.type) {
+    case "version": {
+      res.status(200).json({
+        status: 200,
+        request: { type: "version" },
+        value: {
+          agent: "2.1.0",
+          protocol: "7.3"
+        }
+      })
+      break
+    }
+    default: {
+      res.status(200).json({
+        status: 500,
+        request: body,
+        error_type: "java.lang.UnsupportedOperationException",
+        error: "java.lang.UnsupportedOperationException : No type with name '" + body.type + "' exists"
+      })
+      break
+    }
+  }
+
 })
 
 export default jolokiaRouter
