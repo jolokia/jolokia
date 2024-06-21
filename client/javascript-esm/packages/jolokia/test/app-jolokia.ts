@@ -1,12 +1,12 @@
 /*
  * Copyright 2009-2024 Roland Huss
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *       http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -36,6 +36,32 @@ jolokiaRouter.get("/version", (_req, res) => {
 
 jolokiaRouter.post("/*", (req, res) => {
   let body = req.body
+
+  if (Array.isArray(body)) {
+    // bulk request
+    const response: { [ key: string ]: unknown }[] = []
+    body.forEach((v) => {
+      if (v.type === "version") {
+        response.push({
+          status: 200,
+          request: v,
+          value: {
+            agent: "2.1.0",
+            protocol: "7.3"
+          }
+        })
+      } else {
+        response.push({
+          status: 200,
+          request: v,
+          value: "Hello"
+        })
+      }
+    })
+    res.status(200).json(response)
+    return
+  }
+
   if (!body || !body.type) {
     body = { type: "?" }
   }

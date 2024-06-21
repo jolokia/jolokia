@@ -9,7 +9,12 @@ Changes comparing to existing jolokia.js:
 ** previously, user was passing `success` and `error` options for `jolokia.request()` call and _both_ were used in successful `xhr` call (no transport error for example) - `error` was called for logical errors (when JSON returned from Jolokia contained `error` value and/or status was not `200`)
 ** both `success` and `error` callbacks passed to `jolokia.request()` were used in single callback passed with https://api.jquery.com/jQuery.ajax/#jQuery-ajax-settings[`ajaxSettings.success`]
 ** no support for global `ajaxError`. This callback was passed as https://api.jquery.com/jQuery.ajax/#jQuery-ajax-settings[`ajaxSettings.error`]
-** now, with https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API[Fetch API], `request()` returns a promise that resolves to a https://developer.mozilla.org/en-US/docs/Web/API/Response[Response object] and user may further resolve it to json, text, blob, ... This low-level `jolokia.request()` doesn't do anything more. Other higher-level methods may be used to deal with Jolokia/JMX specific response (exteding previous _Jolokia Simple_ library).
+** now, with https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API[Fetch API], `request()` returns a promise that resolves to whatever is needed:
+*** a text response, when `dataType=text`
+*** a JSON response (array) by default (when `dataType=json`)
+*** `undefined`, when callbacks are specified as it is with existing jolokia.js
+*** Fetch API https://developer.mozilla.org/en-US/docs/Web/API/Response[Response object], when user specifies
+`resolve="response"` in request options. User may further resolve it to json, text, blob, ...
 
 == Developer notes
 
