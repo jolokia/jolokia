@@ -330,7 +330,7 @@ export type NotificationRequest = BaseRequest & {
   /**
    * `filter` parameter
    */
-  filter?: string[]
+  filter?: string
   /**
    * `handback` parameter
    */
@@ -383,13 +383,14 @@ export type JolokiaResponse = {
 }
 
 /**
- * Jolokia successful response
+ * Jolokia successful response. This is kind of an _envelope_ of all possible successful responses where the details
+ * (specific to given request type) are contained in `value` field.
  */
 export type JolokiaSuccessResponse = JolokiaResponse & {
   /** Original request for this response */
   request: JolokiaRequest
   /** Value returned for the request. Can be null for WriteRequest, but still the value should be available */
-  value: string | number | { [key: string]: unknown } | null
+  value: string | number | JolokiaResponseValue | null
   /** History of previous responses for given reques (if History interceptor is available) */
   history?: JolokiaResponse
 }
@@ -407,7 +408,131 @@ export type JolokiaErrorResponse = JolokiaResponse & {
   /** Stack trace as string value when `allowErrorDetails` is `true` and `includeStackTrace` is `true` or `runtime` */
   stacktrace?: string
   /** JSON-ified value of Exception created by bean extractor (using `java.lang.Exception` getters) */
-  error_value?: { [key: string]: unknown }
+  error_value?: Record<string, unknown>
+}
+
+// --- Types related to Jolokia response values - specific to Jolokia request types, but can differ
+//     also within single type. For example "notification" requests have different "command" fields with
+//     distinct responses (or no responses at all)
+
+type JolokiaResponseValue = VersionResponseValue | NotificationResponseValue | NotificationPullValue
+
+// ------ Version response
+
+/**
+ * Response matching the result of `org.jolokia.server.core.service.impl.VersionRequestHandler.handleRequest()`
+ */
+export type VersionResponseValue = {
+  /** Agent version used */
+  agent: string;
+  /** Protocol version used */
+  protocol: string;
+  /** agentId (configurable at server side) */
+  id?: string;
+  /** Details about the agent */
+  details?: AgentDetails
+  /**
+   * Additional information about the agent - for each
+   * `org.jolokia.server.core.service.request.RequestHandler.getProvider()`
+   */
+  info: Record<string, AgentInfo>
+  /** Configuration options for the agent */
+  config: Record<string, string>
+}
+
+/**
+ * Details about the agent. See `org.jolokia.server.core.service.api.AgentDetails.toJSONObject()`
+ */
+export type AgentDetails = {
+  // Agent URL as the agent sees itself
+  url: string
+  // Whether the agent is secured and an authentication is required (0,1). If not given, this info is not known
+  secured: boolean
+  // Vendor of the detected container
+  server_vendor: string
+  // The product in which the agent is running
+  server_product: string
+  // Version of the server
+  server_version: string
+  // Version of the agent
+  agent_version: string
+  // The agent id
+  agent_id: string
+  // Description of the agent (if any)
+  agent_description: string
+}
+
+/**
+ * Additional information about single Jolokia `RequestHandler`
+ */
+export type AgentInfo = {
+  product?: string
+  vendor?: string
+  version?: string
+  extraInfo?: Record<string, unknown>
+}
+
+// ------ Notification response
+//        See: org.jolokia.service.jmx.handler.notification.NotificationDispatcher.dispatch()
+
+/**
+ * Notification response values depend on the command of Notification request ({@link NotificationRequest#command})
+ * Commands `unregister`, `remove`, `ping` and `open` do not return any value.
+ */
+export type NotificationResponseValue =
+  | NotificationRegisterResponseValue
+  | NotificationAddResponseValue
+  | NotificationListResponseValue
+  | null
+
+/**
+ * Resulf of notification `register` command for registration of a new client
+ */
+export type NotificationRegisterResponseValue = {
+  /** Client id for the registered notification client (global for single Jolokia instance) */
+  id: string
+  /** Map of all `org.jolokia.server.core.service.notification.NotificationBackend` configurations */
+  backend: Record<string, NotificationBackendConfig>
+}
+
+/**
+ * Configuration if a single `org.jolokia.server.core.service.notification.NotificationBackend`
+ */
+export type NotificationBackendConfig = PullNotificationClientConfig | SseNotificationClientConfig
+
+/**
+ * A handle identifying the registered listener for given client
+ */
+export type NotificationAddResponseValue = string
+
+/**
+ * Result of notification `list` command that lists handles for given client
+ */
+export type NotificationListResponseValue = Record<string, NotificationOptions>
+
+/**
+ * Type describing a result of `pull` operation on "pull" notification MBean.
+ * See `org.jolokia.server.core.service.notification.NotificationResult`.
+ * While it's de-facto a response to generic Jolokia `exec` operation on particular bean, we provide a type
+ * definition for it.
+ */
+export type NotificationPullValue = {
+  /** Array of `javax.management.Notification` objects */
+  notifications: JMXNotification[]
+  handback: unknown
+  dropped: number
+  handle?: string
+}
+
+/**
+ * Type representing a `javax.management.Notification` object
+ */
+export type JMXNotification = {
+  message: string
+  sequenceNumber: number
+  timeStamp: number
+  type: string
+  userData: unknown
 }
 
 // --- Types related to callbacks
@@ -501,7 +626,57 @@ export type Job = {
   lastModified?: number
 }
 
-// Jolokia interfaces - public API
+// --- Types related to notifications
+
+/**
+ * Pull notification configuration options
+ */
+export type PullNotificationClientConfig = {
+  /** MBean name which will collect the notifications - need to be fetched explicitly */
+  store: string
+  /** Size of backend storage for the notifications */
+  maxEntries: number
+}
+
+/**
+ * SSE notification configuration options
+ */
+export type SseNotificationClientConfig = {
+  /** Content type for SSE notification mechanism */
+  "backChannel.contentType": string
+  /** Encoding used for SSE notification mechanism */
+  "backChannel.encoding": string
+}
+
+/**
+ * Configuration options for notification handling
+ */
+export type NotificationOptions = {
+  /** Backend mode - one of the supported modes */
+  mode?: NotificationMode
+  /** MBean on which to register a notification listener */
+  mbean?: string
+  /** List of filter on notification types which are OR-ed together */
+  filter?: string
+  /** Additional configuration used for notifications */
+  config?: Record<string, unknown>
+  /** Any value that's returned with the notification for corelation purposes */
+  handback?: string
+  /** A callback for notificaiton handling */
+  callback?: (result: NotificationPullValue) => void
+}
+
+/**
+ * Representation of registered notification listener
+ */
+export type NotificationHandle = {
+  /** Handle ID within a given client */
+  id: string
+  /** A notification mode for this handle */
+  mode: NotificationMode
+}
+
+// --- Jolokia interfaces - public API
 
 /**
  * Main Jolokia client interface for communication with remote Jolokia agent.
@@ -598,11 +773,27 @@ interface IJolokia {
    */
   isRunning(): boolean
 
-  addNotificationListener(): void
+  /**
+   * Registers a listener for single MBean returning a handle which can be used to cancel the listener
+   * registration. Passed options are used to configure the handler for notifications.
+   * @param opts
+   * @returns a promise of {@link NotificationHandle} representing an MBean notification listener for single
+   *          client (created during registration of first listener) for entire Jolokia instance
+   */
+  addNotificationListener(opts: NotificationOptions): Promise<NotificationHandle>
 
-  removeNotificationListener(): void
+  /**
+   * Unregisters previously registered listener
+   * @param handle a listener registration handler created by {@link #addNotificationListener}.
+   * @returns a promise resolving to true if listener was successfully unregistered at server side
+   */
+  removeNotificationListener(handle: NotificationHandle): Promise<boolean>
 
-  unregisterNotificationClient(): void
+  /**
+   * Removes the notification client, which is created for all the registrations.
+   * @returns a promise resolving to true if client was successfully removed at server side
+   */
+  unregisterNotificationClient(): Promise<boolean>
 
   // --- Utility functions available statically and in Jolokia.prototype (instance methods)
 

@@ -31,18 +31,24 @@ import {
   JolokiaResponse,
   JolokiaStatic,
   JolokiaSuccessResponse,
-  ListRequest,
+  ListRequest, NotificationAddResponseValue,
+  NotificationHandle,
+  NotificationMode,
+  NotificationOptions,
+  NotificationPullValue,
   NotificationRequest,
   ProcessingParameters,
+  PullNotificationClientConfig,
   ReadRequest,
   RequestOptions,
   RequestType,
   ResponseCallback,
   ResponseCallbacks,
   SearchRequest,
+  SseNotificationClientConfig,
   TextResponseCallback,
   VersionRequest,
-  WriteRequest
+  WriteRequest,
 } from "./jolokia-types.js"
 
 /**
@@ -102,7 +108,7 @@ const Jolokia = function (this: IJolokia, config: JolokiaConfiguration | string)
   const jobs: Job[] = []
 
   // Our client id and notification backend config Is null as long as notifications are not used
-  let client: number
+  let client: NotificationClient
 
   // Options used for every request (we can override them when calling Jolokia.request())
   const agentOptions: JolokiaConfiguration = {}
@@ -223,14 +229,70 @@ const Jolokia = function (this: IJolokia, config: JolokiaConfiguration | string)
   // ++++++++++++++++++++++++++++++++++++++++++++++++++
   // Public API - Notification handling
 
-  this.addNotificationListener = async function () {
+  this.addNotificationListener = async function (opts: NotificationOptions): Promise<NotificationHandle> {
+    // Check that client is registered
     await ensureNotificationRegistration(this)
+
+    // Notification mode. Typically "pull" or "sse"
+    const mode = extractNotificationMode(client, opts)
+
+    notificationHandlerFunc("lazy-init", mode)()
+
+    // Send a notification-add request which returns String handle
+    // See org.jolokia.service.jmx.handler.notification.NotificationListenerDelegate.addListener()
+    return await this.request({
+      type: "notification",
+      command: "add",
+      mode: mode,
+      client: client.id,
+      mbean: opts.mbean,
+      filter: opts.filter,
+      config: opts.config,
+      handback: opts.handback
+    }, { method: "post" }).then((responses): NotificationHandle => {
+        const resp = (responses as (JolokiaSuccessResponse | JolokiaErrorResponse)[])[0]
+        if (Jolokia.isError(resp)) {
+          throw new Error("Cannot not add notification subscription for " + opts.mbean +
+            " (client: " + client.id + "): " + (resp as JolokiaErrorResponse).error)
+        }
+        const handle: NotificationHandle = {
+          id: (resp as JolokiaSuccessResponse).value as NotificationAddResponseValue,
+          mode: mode
+        }
+        notificationHandlerFunc("add", mode)(this, handle, opts)
+        return handle
+      })
   }
 
-  this.removeNotificationListener = function () {
+  this.removeNotificationListener = async function (handle: NotificationHandle): Promise<boolean> {
+    notificationHandlerFunc("remove", handle.mode)(this, handle)
+    // Unregister notification at server-side
+    return await this.request({
+      type: "notification",
+      command: "remove",
+      client: client.id,
+      handle: handle.id
+    }, { method: "post" }).then((responses) => {
+      const resp = (responses as (JolokiaSuccessResponse | JolokiaErrorResponse)[])[0]
+      return !Jolokia.isError(resp)
+    })
   }
 
-  this.unregisterNotificationClient = function () {
+  this.unregisterNotificationClient = async function (): Promise<boolean> {
+    const backends: { [ key: string ]: unknown } = client.backend || {}
+    for (const mode in NOTIFICATION_HANDLERS) {
+      if (NOTIFICATION_HANDLERS[mode as NotificationMode] && backends[mode]) {
+        notificationHandlerFunc("unregister", mode as NotificationMode)()
+      }
+    }
+    return await this.request({
+      type: "notification",
+      command: "unregister",
+      client: client.id
+    }, { method: "post" }).then((responses) => {
+      const resp = (responses as (JolokiaSuccessResponse | JolokiaErrorResponse)[])[0]
+      return !Jolokia.isError(resp)
+    })
   }
 
   // ++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -246,26 +308,155 @@ const Jolokia = function (this: IJolokia, config: JolokiaConfiguration | string)
     return id
   }
 
-  // Check that client is registered
-  async function ensureNotificationRegistration(jolokia: IJolokia): Promise<undefined> {
+  /**
+   * Check that client is registered
+   * @param jolokia
+   */
+  async function ensureNotificationRegistration(jolokia: IJolokia): Promise<boolean> {
     if (!client) {
-      jolokia.request({
+      return jolokia.request({
         type: "notification",
         command: "register"
-      }).then(responses => {
+      }, { method: "post" }).then(responses => {
         const resp = (responses as (JolokiaSuccessResponse | JolokiaErrorResponse)[])[0]
         if (Jolokia.isError(resp)) {
           throw new Error("Can not register client for notifications: "
             + (resp as JolokiaErrorResponse).error
             + "\nTrace:\n" + (resp as JolokiaErrorResponse).stacktrace)
         } else {
-          client = (resp as JolokiaSuccessResponse).value as number
+          client = (resp as JolokiaSuccessResponse).value as NotificationClient
         }
+        return true
       })
+    } else {
+      return Promise.resolve(true)
+    }
+  }
+
+  /**
+   * Call a function from the handlers defined below, depending on the mode "this" is set to the handler object.
+   * @param what notification operation
+   * @param mode notification mode
+   */
+  function notificationHandlerFunc(what: NotificationOperation, mode: NotificationMode) {
+    const notifHandler = NOTIFICATION_HANDLERS[mode]
+    if (!notifHandler) {
+      throw new Error("Unsupported notification mode '" + mode + "'")
+    }
+    return function (jolokia?: IJolokia, handle?: NotificationHandle, opts?: NotificationOptions) {
+      // Set 'this' context to the notifHandler object which holds some state objects
+      return notifHandler[what]?.apply(notifHandler, [ jolokia, handle, opts ])
+    }
+  }
+
+  /**
+   * A map of internal notification functions + state for each notification mode. The values of this map
+   * are objects, so the functions need to be called with function.apply, so `this` is set to this object for
+   * proper state management
+   */
+  const NOTIFICATION_HANDLERS: NotificationHandlersConfig = {
+    "pull": {
+      // "pull" handler is based on server-side MBean instance collecting notifications for all registered
+      // clients. In order to get the notifications, we have to call this MBean's "pull" operation, passing
+      // client ID and handle ID
+
+      // --- operations of pull notification mechanism
+
+      add: function (this: NotificationPullHandler, _jolokia?: IJolokia, handle?: NotificationHandle, opts?: NotificationOptions) {
+        // Add a job for periodically fetching the value and calling the callback with the response
+        const job: Job = {
+          callback: function (...resp) {
+            if (resp.length > 0 && !Jolokia.isError(resp[0])) {
+              const notifs = (resp[0] as JolokiaSuccessResponse).value as NotificationPullValue
+              if (notifs && notifs.notifications && notifs.notifications.length > 0) {
+                opts?.callback?.(notifs)
+              }
+            }
+          },
+          requests: [ {
+            type: "exec",
+            mbean: (client!.backend!["pull"] as PullNotificationClientConfig).store,
+            operation: "pull",
+            arguments: [ client.id, handle!.id ]
+          } ]
+        }
+        this.jobIds[handle!.id] = addJob(job)
+      },
+
+      remove: function (this: NotificationPullHandler, jolokia?: IJolokia, handle?: NotificationHandle) {
+        // Remove notification subscription from server
+        const job = this.jobIds[handle!.id]
+        if (job != undefined) {
+          // Remove from scheduler
+          jolokia!.unregister(job)
+          delete this.jobIds[handle!.id]
+        }
+      },
+
+      unregister: function (this: NotificationPullHandler, jolokia?: IJolokia) {
+        // Remove all notification jobs from scheduler
+        for (const handleId in this.jobIds) {
+          if (this.jobIds[handleId] != undefined) {
+            jolokia!.unregister(this.jobIds[handleId])
+          }
+        }
+        this.jobIds = {}
+      },
+
+      // --- state of pull notification mechanism
+
+      jobIds: {}
+    },
+
+    "sse": {
+      // "sse" handler is based on https://developer.mozilla.org/en-US/docs/Web/API/EventSource
+      // and continuous stream of events sent over single HTTP connection with text/event-stream MIME type
+      // the messages sent are JSONified org.jolokia.server.core.service.notification.NotificationResult instances
+
+      // --- operations of sse notification mechanism
+
+      "lazy-init": function (this: NotificationSseHandler) {
+        if (!this.eventSource) {
+          this.eventSource = new EventSource(agentOptions.url + "/notification/open/" + client.id + "/sse")
+          const dispatchers = this.dispatchMap
+          this.eventSource.addEventListener("message", function (event) {
+            const data: NotificationPullValue = JSON.parse(event.data)
+            if (data.handle) {
+              const callback = dispatchers[data.handle!]
+              callback?.(data)
+            }
+          })
+        }
+      },
+
+      add: function (this: NotificationSseHandler, _jolokia?: IJolokia, handle?: NotificationHandle, opts?: NotificationOptions) {
+        this.dispatchMap[handle!.id] = opts!.callback
+      },
+
+      remove: function (this: NotificationSseHandler, _jolokia?: IJolokia, handle?: NotificationHandle) {
+        delete this.dispatchMap[handle!.id]
+      },
+
+      unregister: function (this: NotificationSseHandler) {
+        this.dispatchMap = {}
+        this.eventSource?.close()
+        this.eventSource = null
+      },
+
+      // --- state of sse notification mechanism
+
+      // Map for dispatching SSE return notifications
+      dispatchMap: {},
+
+      // SSE event-source
+      eventSource: null
     }
   }
 
 }
+
+// ++++++++++++++++++++++++++++++++++++++++++++++++++
+// Public API defined in Jolokia.prototype (or Jolokia itself (static)) - no need to access "this"
 
 /**
  * Version of Jolokia JavaScript client library
@@ -278,9 +469,6 @@ Object.defineProperty(Jolokia.prototype, "CLIENT_VERSION", {
   enumerable: true,
   writable: false
 })
-
-// ++++++++++++++++++++++++++++++++++++++++++++++++++
-// Public API defined in Jolokia.prototype (or Jolokia itself (static)) - no need to access "this"
 
 Jolokia.escape = Jolokia.prototype.escape = function (part: string): string {
   return encodeURIComponent(part.replace(/!/g, "!!").replace(/\//g, "!/"))
@@ -529,10 +717,10 @@ function createJolokiaInvocation(jobs: Job[], agentOptions: JolokiaConfiguration
     requestArguments.fetchOptions.body = JSON.stringify(requests)
 
     // callbacks are configured on each request
-    requestArguments.successCb = function(response: JolokiaSuccessResponse, index: number) {
+    requestArguments.successCb = function (response: JolokiaSuccessResponse, index: number) {
       successCbs[index](response, index)
     }
-    requestArguments.errorCb = function(response: JolokiaErrorResponse, index: number) {
+    requestArguments.errorCb = function (response: JolokiaErrorResponse, index: number) {
       errorCbs[index](response, index)
     }
 
@@ -554,7 +742,7 @@ function constructSuccessJobCallback(job: Job, jobId: number): ResponseCallback 
   if (!job.success) {
     throw "Expected 'success' callback configured for the job with ID=" + jobId
   }
-  return function(response: JolokiaSuccessResponse, index: number) {
+  return function (response: JolokiaSuccessResponse, index: number) {
     // Remember last success callback
     if (job.onlyIfModified) {
       job.lastModified = response.timestamp
@@ -573,7 +761,7 @@ function constructErrorJobCallback(job: Job, jobId: number): ErrorCallback {
   if (!job.error) {
     throw "Expected 'error' callback configured for the job with ID=" + jobId
   }
-  return function(response: JolokiaErrorResponse, index: number) {
+  return function (response: JolokiaErrorResponse, index: number) {
     if (response.status === 304) {
       // If we get a "304 - Not Modified" 'error', we do nothing
       return
@@ -600,7 +788,7 @@ function constructJobCallbackConfiguration(job: Job, jobId: number):
   let lastModified: number = 0
   return {
     cb: addResponse,
-    lcb: function(response: JolokiaSuccessResponse | JolokiaErrorResponse, index: number) {
+    lcb: function (response: JolokiaSuccessResponse | JolokiaErrorResponse, index: number) {
       addResponse(response, index)
       // Callback is called only if at least one non-cached response
       // is obtained. Update job's timestamp internally
@@ -937,6 +1125,60 @@ const GET_URL_EXTRACTORS: { [key in RequestType]: (r: GenericRequest) => GetPath
 }
 
 // --- Functions and helpers for notification handling
+
+/**
+ * Internal representation of notification client
+ */
+type NotificationClient = {
+  /** ID (UUID) of the client registered at server side where MBean notification listeners are being registered */
+  id: string
+  /** Backends supported for the client with their configuration */
+  backend?: { [ key in NotificationMode ]: PullNotificationClientConfig | SseNotificationClientConfig }
+}
+
+/**
+ * Identifiers of internal notification-related functions invoked by Notification API
+ */
+type NotificationOperation = "add" | "remove" | "unregister" | "lazy-init"
+
+/**
+ * An internal function invoked from notification API
+ */
+type NotificationFunction = (jolokia?: IJolokia, handle?: NotificationHandle, opts?: NotificationOptions) => void
+
+type NotificationModeOperations = { [ key in NotificationOperation ]?: NotificationFunction }
+type NotificationModeHandler = NotificationModeOperations & { [ key: string ]: unknown }
+type NotificationHandlersConfig = { [ key in NotificationMode ]: NotificationModeHandler }
+type NotificationPullHandler = NotificationModeOperations & {
+  jobIds: { [ key: string ]: number }
+}
+type NotificationSseHandler = NotificationModeOperations & {
+  dispatchMap: { [ key: string ]: ((result: NotificationPullValue) => void) | undefined }
+  eventSource: EventSource | null
+}
+
+/**
+ * Get notification mode with a sane default based on which is provided by the backend
+ */
+function extractNotificationMode(client: NotificationClient, opts: NotificationOptions): NotificationMode {
+  const backends: { [ key: string ]: unknown } = client.backend || {}
+  // A mode given takes precedence
+  let mode = opts.mode
+  if (!mode) {
+    // Try 'sse' first as default then 'pull'.
+    mode = backends["sse"] ? "sse" : (backends["pull"] ? "pull" : undefined)
+    // If only one backend is configured, that's the default
+    if (!mode && backends.length === 1) {
+      return Object.keys(backends)[0] as NotificationMode
+    }
+  }
+  if (!mode || !backends[mode]) {
+    throw new Error("Notification mode must be one of [" + Object.keys(backends) + "]"
+      + (mode ? ", and not \"" + mode + "\"" : ""))
+  }
+
+  return mode
+}
 
 export * from "./jolokia-types.js"
 export default Jolokia as JolokiaStatic

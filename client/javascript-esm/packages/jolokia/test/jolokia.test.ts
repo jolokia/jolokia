@@ -21,6 +21,7 @@ import http from "node:http"
 import Jolokia, {
   JolokiaResponse,
   JolokiaSuccessResponse,
+  NotificationPullValue,
   VersionRequest
 } from "../src/jolokia.js"
 import app from "./app.js"
@@ -37,7 +38,7 @@ afterAll(() => {
   server.close()
 })
 
-describe("Jolokia Tests", () => {
+describe("Jolokia basic tests", () => {
 
   test("Jolokia instance creation", () => {
     const jolokia1 = new Jolokia({ url: "http://localhost" })
@@ -428,6 +429,46 @@ describe("Jolokia job registration tests", () => {
     })
     expect(responses.length).toBe(3)
     expect(responses).toEqual([ "2.1.0", "2.1.0", "2.1.0" ])
+  })
+
+})
+
+describe("Jolokia notification tests", () => {
+
+  test("Register a client with simple notification listener", async () => {
+    expect.assertions(2 * 3 + 4)
+    const jolokia = new Jolokia({ url: `http://localhost:${port}/jolokia-notifications`, fetchInterval: 100 })
+    let threeTimes = false
+    const handle = await jolokia.addNotificationListener({
+      mode: "pull",
+      mbean: "org.jolokia:name=Hello",
+      handback: "42",
+      callback: (result: NotificationPullValue) => {
+        expect(result.handle!).toBe(handle.id)
+        expect(result.handback).toBe("42")
+
+        if (result.notifications.length == 3) {
+          threeTimes = true
+          jolokia.stop()
+        }
+      }
+    })
+    expect(jolokia.jobs().length).toBe(1)
+
+    await new Promise((resolve, _reject) => {
+      jolokia.start()
+      const id = setInterval(() => {
+        if (threeTimes) {
+          resolve(true)
+          clearInterval(id)
+        }
+      }, 100)
+    })
+    let success = await jolokia.removeNotificationListener(handle)
+    expect(success).toBe(true)
+    success = await jolokia.unregisterNotificationClient()
+    expect(success).toBe(true)
+    expect(jolokia.jobs().length).toBe(0)
   })
 
 })
