@@ -1,0 +1,48 @@
+{
+  "name": "@jolokia/monorepo",
+  "version": "0.0.0",
+  "description": "Jolokia JavaScript ES client modules",
+  "private": true,
+  "type": "module",
+  "author": "Roland Huss & Jolokia developers",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jolokia/jolokia.git"
+  },
+  "homepage": "https://jolokia.org/",
+  "bugs": {
+    "url": "https://github.com/jolokia/jolokia/issues"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "yarn build:jolokia && yarn build:jolokia-simple",
+    "test": "yarn test:jolokia && yarn test:jolokia-simple",
+    "build:jolokia": "yarn workspace jolokia.js build:jolokia",
+    "build:jolokia-simple": "yarn workspace @jolokia.js/simple build:jolokia-simple",
+    "test:jolokia": "yarn workspace jolokia.js test:jolokia",
+    "test:jolokia-simple": "yarn workspace @jolokia.js/simple test:jolokia-simple"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.4.0",
+    "@rollup/plugin-typescript": "^11.1.6",
+    "@types/d3": "^7.4.3",
+    "@types/eslint__js": "^8.42.3",
+    "@types/express": "^4.17.21",
+    "@types/supertest": "^6.0.2",
+    "eslint": "^9.4.0",
+    "eslint-plugin-jsdoc": "^48.2.7",
+    "eslint-plugin-workspaces": "^0.10.1",
+    "express": "^4.19.2",
+    "globals": "^15.4.0",
+    "supertest": "^7.0.0",
+    "ts-jest": "^29.1.4",
+    "ts-node": "^10.9.2",
+    "tslib": "^2.6.3",
+    "typescript": "^5.4.5",
+    "typescript-eslint": "^7.13.0"
+  },
+  "packageManager": "yarn@4.2.2+sha256.1aa43a5304405be7a7cb9cb5de7b97de9c4e8ddd3273e4dad00d6ae3eb39f0ef"
+}

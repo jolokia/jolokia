@@ -55,6 +55,7 @@
 
     <module>client/java</module>
     <module>client/javascript</module>
+    <module>client/javascript-esm</module>
     <module>client/jmx-adapter</module>
     <module>client/kubernetes</module>
 
