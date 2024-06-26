@@ -29,7 +29,6 @@ import {
   JolokiaErrorResponse,
   JolokiaRequest,
   JolokiaResponse,
-  JolokiaStatic,
   JolokiaSuccessResponse,
   ListRequest, NotificationAddResponseValue,
   NotificationHandle,
@@ -97,8 +96,8 @@ const PROCESSING_PARAMS: string[] = [
  */
 const Jolokia = function (this: IJolokia, config: JolokiaConfiguration | string): IJolokia | undefined {
   if (!new.target) {
-    // when invoked as function, return properly create object with bound "this" reference
-    return new (<JolokiaStatic>Jolokia)(config)
+    // when invoked as function, return properly created object with bound "this" reference
+    return new (Jolokia as IJolokia)(config)
   }
 
   // ++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -1021,12 +1020,13 @@ const GET_URL_EXTRACTORS: { [key in RequestType]: (r: GenericRequest) => GetPath
    * @returns URL configuration object for Jolokia `read` GET request
    */
   "read": function (request: ReadRequest) {
+    const path: string = valueToString(Array.isArray(request.path) ? request.path.map(Jolokia.escape).join("/") : request.path)
     if (request.attribute == null) {
       // Path gets ignored for multiple attribute fetch
-      return { parts: [ request.mbean, "*" ], path: request.path }
+      return { parts: [ request.mbean, "*" ], path }
     } else {
       // can't use attribute array with GET
-      return { parts: [ request.mbean, request.attribute as string ], path: request.path }
+      return { parts: [ request.mbean, request.attribute as string ], path }
     }
   },
 
@@ -1036,7 +1036,8 @@ const GET_URL_EXTRACTORS: { [key in RequestType]: (r: GenericRequest) => GetPath
    * @returns URL configuration object for Jolokia `write` GET request
    */
   "write": function (request: WriteRequest) {
-    return { parts: [ request.mbean, request.attribute, valueToString(request.value) ], path: request.path }
+    const path: string = valueToString(Array.isArray(request.path) ? request.path.map(Jolokia.escape).join("/") : request.path)
+    return { parts: [ request.mbean, request.attribute as string, valueToString(request.value) ], path }
   },
 
   /**
@@ -1181,4 +1182,4 @@ function extractNotificationMode(client: NotificationClient, opts: NotificationO
 }
 
 export * from "./jolokia-types.js"
-export default Jolokia as JolokiaStatic
+export default Jolokia as IJolokia

@@ -17,6 +17,7 @@
 import express from "express"
 import jolokiaRouter from "./app-jolokia.js"
 import jolokiaNotificationsRouter from "./app-jolokia-notifications.js"
+import jolokiaSimpleRouter from "./app-jolokia-simple.js"
 
 const app = express()
 app.use(express.json({ type: "*/json" }))
@@ -24,6 +25,7 @@ app.use(express.json({ type: "*/json" }))
 // main Jolokia endpoint which simulates full hawtio/hawtio server
 app.use("/jolokia", jolokiaRouter)
 app.use("/jolokia-notifications", jolokiaNotificationsRouter)
+app.use("/jolokia-simple", jolokiaSimpleRouter)
 
 // a Jolokia endpoint which can be used to test read timeouts
 app.use("/jolokia-timeout", (_req, res) => {

@@ -776,15 +776,28 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jolokia/d3@workspace:packages/jolokia-d3":
+"@jolokia.js/d3@workspace:packages/jolokia-d3":
   version: 0.0.0-use.local
-  resolution: "@jolokia/d3@workspace:packages/jolokia-d3"
+  resolution: "@jolokia.js/d3@workspace:packages/jolokia-d3"
   dependencies:
     "@jest/globals": "npm:^29.7.0"
     "@rollup/plugin-node-resolve": "npm:^15.2.3"
     "@rollup/plugin-terser": "npm:^0.4.4"
     d3: "npm:^7.9.0"
     d3-selection: "npm:3"
+    jest: "npm:^29.7.0"
+    jolokia.js: "workspace:^"
+    rollup: "npm:^4.18.0"
+  languageName: unknown
+  linkType: soft
+
+"@jolokia.js/simple@workspace:packages/jolokia-simple":
+  version: 0.0.0-use.local
+  resolution: "@jolokia.js/simple@workspace:packages/jolokia-simple"
+  dependencies:
+    "@jest/globals": "npm:^29.7.0"
+    "@rollup/plugin-node-resolve": "npm:^15.2.3"
+    "@rollup/plugin-terser": "npm:^0.4.4"
     jest: "npm:^29.7.0"
     jolokia.js: "workspace:^"
     rollup: "npm:^4.18.0"

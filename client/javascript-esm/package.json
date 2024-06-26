@@ -18,10 +18,12 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "yarn build:jolokia && yarn build:jolokia-d3",
+    "build": "yarn build:jolokia && yarn build:jolokia-simple",
+    "test": "yarn test:jolokia && yarn test:jolokia-simple",
     "build:jolokia": "yarn workspace jolokia.js build:jolokia",
-    "build:jolokia-d3": "yarn workspace @jolokia/d3 build:jolokia-d3",
-    "test:jolokia": "yarn workspace jolokia.js test:jolokia"
+    "build:jolokia-simple": "yarn workspace @jolokia.js/simple build:jolokia-simple",
+    "test:jolokia": "yarn workspace jolokia.js test:jolokia",
+    "test:jolokia-simple": "yarn workspace @jolokia.js/simple test:jolokia-simple"
   },
   "devDependencies": {
     "@eslint/js": "^9.4.0",

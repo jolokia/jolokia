@@ -234,7 +234,7 @@ export type ReadRequest = BaseRequest & {
   /**
    * path within Jolokia traversal for MBean domains/names
    */
-  path?: string
+  path?: string | string[]
 }
 
 /**
@@ -253,11 +253,11 @@ export type WriteRequest = BaseRequest & {
   /**
    * Value to be set for the attribute
    */
-  value: string
+  value: unknown
   /**
    * path within Jolokia traversal for MBean domains/names
    */
-  path?: string
+  path?: string | string[]
 }
 
 /**
@@ -304,7 +304,7 @@ export type ListRequest = BaseRequest & {
 /**
  * Type of notification mode
  */
-export type NotificationMode = "sse" | "pull";
+export type NotificationMode = "sse" | "pull"
 
 /**
  * Jolokia {@link https://jolokia.org/reference/html/manual/jolokia_protocol.html#notification notification request}
@@ -412,10 +412,46 @@ export type JolokiaErrorResponse = JolokiaResponse & {
 }
 
 // --- Types related to Jolokia response values - specific to Jolokia request types, but can differ
-//     also within single type. For example "notification" requests have different "command" fields with
-//     distinct responses (or no responses at all)
+//     also within single type. For example "notification" requests have different "command" field values with
+//     distinct responses (or no responses at all). "read" type just returns attribute values (or all attributes)
+//     for given MBean, so it's hard to craft single response value type
 
-type JolokiaResponseValue = VersionResponseValue | NotificationResponseValue | NotificationPullValue
+type JolokiaResponseValue =
+  | VersionResponseValue
+  | ReadResponseValue
+  | ExecResponseValue
+  | SearchResponseValue
+  | ListResponseValue
+  | NotificationResponseValue
+  | NotificationPullValue
+
+// ------ Read response
+
+/**
+ * Generic response value for `read` request
+ */
+export type ReadResponseValue = string | number | null | Record<string, unknown>
+
+// ------ Write response
+
+/**
+ * Generic response value for `write` request
+ */
+export type WriteResponseValue = string | number | null | Record<string, unknown>
+
+// ------ Exec response
+
+/**
+ * Generic response value for `write` request
+ */
+export type ExecResponseValue = string | number | null | Record<string, unknown>
+
+// ------ Search response
+
+/**
+ * Straightforward response for `search` reqest
+ */
+export type SearchResponseValue = string[]
 
 // ------ Version response
 
@@ -424,11 +460,11 @@ type JolokiaResponseValue = VersionResponseValue | NotificationResponseValue | N
  */
 export type VersionResponseValue = {
   /** Agent version used */
-  agent: string;
+  agent: string
   /** Protocol version used */
-  protocol: string;
+  protocol: string
   /** agentId (configurable at server side) */
-  id?: string;
+  id?: string
   /** Details about the agent */
   details?: AgentDetails
   /**
@@ -470,6 +506,121 @@ export type AgentInfo = {
   vendor?: string
   version?: string
   extraInfo?: Record<string, unknown>
+}
+
+// ------ List response
+//        these responses depend on the `path` attribute, so may be any subtree of full tree of all JMX domains
+//        also with maxDepth processing parameter you can trim the leaves of the returned tree. when a map is trimmed
+//        by Jolokia, it is replaced by string value indicating count of the map entries, so we can (with maxDepth=1)
+//        get something like this:
+//          "value": {
+//            "JMImplementation": "1",
+//            "java.util.logging": "1",
+//            "jdk.management.jfr": "1",
+//            "java.lang": "1",
+//            "com.sun.management": "1",
+//            "org.apache.logging.log4j2": "1",
+//            "grgr": "1",
+//            "java.nio": "1",
+//            "jolokia": "1"
+//          }
+
+/**
+ * All possible `list` response valies depending on the `path` parameters.
+ */
+export type ListResponseValue = JmxDomains | JmxDomain | MBeanInfo | MBeanInfoError
+
+/**
+ * Full JMX tree of domains, mbeans, attributes/operations/notifications with details
+ */
+export type JmxDomains = Record<string, JmxDomain>
+
+/**
+ * Single JMX domain with details about
+ */
+export type JmxDomain = Record<string, MBeanInfo | MBeanInfoError> | string
+
+/**
+ * Information about single MBean. With small enough `maxDepth`, we may end up just with mbean count within domain
+ * (that'w why it may be string)
+ */
+export type MBeanInfo = {
+  /** MBean description */
+  desc: string
+  /** Fully qualified Java class name of the MBean */
+  class?: string
+  /** Map of attribute definitions */
+  attr?: Record<string, MBeanAttribute>
+  /** Map of operation (possible overriden) definitions */
+  op?: Record<string, MBeanOperation | MBeanOperation[]>
+  /** Map of notification definitions */
+  notif?: Record<string, MBeanNotification>
+} | string
+
+/**
+ * Information about single MBean in case there's a problem getting such information
+ */
+export type MBeanInfoError = {
+  error: string
+}
+
+// --------- List response types related to JMX attribute, operation and notification descriptors
+//           These also may be strings like (for {"type":"list","path":"java.lang/type=Memory"} and maxDepth=1):
+//             "value": {
+//               "op": "1",
+//               "notif": "1",
+//               "attr": "1",
+//               "class": "sun.management.MemoryImpl",
+//               "desc": "Information on the management interface of the MBean"
+//             },
+//           but we won't declare such exotic type alternatives
+
+/**
+ * Description of a single MBean attribute
+ */
+export type MBeanAttribute = {
+  /** Java type */
+  type: string
+  /** Description */
+  desc: string
+  /** Read-Write flag */
+  rw: boolean
+}
+
+/**
+ * Description of a single MBean operation
+ */
+export type MBeanOperation = {
+  /** Operation arguments */
+  args: MBeanOperationArgument[]
+  /** Java return type */
+  ret: string
+  /** Description */
+  desc: string
+}
+
+/**
+ * Description of a single MBean operation's argument
+ */
+export type MBeanOperationArgument = {
+  /** Argument description */
+  desc: string
+  /** Argument name */
+  name: string
+  /** Argument type */
+  type: string
+}
+
+/**
+ * Description of a single MBean attribute
+ */
+export type MBeanNotification = {
+  /** Notification name */
+  name: string
+  /** Notification description */
+  desc: string
+  /** Notification Java types */
+  types: string[]
 }
 
 // ------ Notification response
@@ -678,10 +829,16 @@ export type NotificationHandle = {
 
 // --- Jolokia interfaces - public API
 
+interface JolokiaStatic {
+  (config: JolokiaConfiguration | string): undefined
+
+  new(config: JolokiaConfiguration | string): IJolokia
+}
+
 /**
  * Main Jolokia client interface for communication with remote Jolokia agent.
  */
-interface IJolokia {
+interface IJolokia extends JolokiaStatic {
 
   /** Version of Jolokia JavaScript client library */
   readonly CLIENT_VERSION: string
@@ -810,18 +967,6 @@ interface IJolokia {
    * @param resp response to check
    * @return true if response is an error, false otherwise
    */
-  isError(resp: JolokiaResponse): boolean
-}
-
-interface JolokiaStatic {
-  (config: JolokiaConfiguration | string): undefined
-
-  new(config: JolokiaConfiguration | string): IJolokia
-
-  // --- Utility functions available statically and in Jolokia.prototype (instance methods)
-
-  escape(part: string): string
-
   isError(resp: JolokiaResponse): boolean
 }
 

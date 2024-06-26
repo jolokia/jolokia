@@ -1,12 +1,12 @@
 {
-  "name": "@jolokia.js/d3",
+  "name": "@jolokia.js/simple",
   "version": "2.1.0",
-  "description": "Jolokia JavaScript ES D3 integration module",
+  "description": "Jolokia JavaScript ES Simple module",
   "type": "module",
   "repository": {
     "type": "git",
     "url": "https://github.com/jolokia/jolokia.git",
-    "directory": "packages/jolokia-d3"
+    "directory": "packages/jolokia-simple"
   },
   "keywords": [
     "jolokia",
@@ -14,18 +14,16 @@
   ],
   "exports": {
     ".": {
-      "types": "./dist/dts/jolokia-d3.d.ts",
-      "import": "./dist/jolokia-d3.mjs",
-      "default": "./src/jolokia-d3/ts"
+      "types": "./dist/dts/jolokia-simple.d.ts",
+      "import": "./dist/jolokia-simple.mjs",
+      "default": "./src/jolokia-simple.ts"
     }
   },
   "scripts": {
-    "build:jolokia-d3": "yarn rollup -c",
-    "test:jolokia-d3": "yarn node --experimental-vm-modules $(yarn bin jest)"
+    "build:jolokia-simple": "yarn rollup -c",
+    "test:jolokia-simple": "yarn node --experimental-vm-modules $(yarn bin jest)"
   },
   "dependencies": {
-    "d3": "^7.9.0",
-    "d3-selection": "3",
     "jolokia.js": "workspace:^"
   },
   "devDependencies": {
