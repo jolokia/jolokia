@@ -97,7 +97,11 @@ public class VersionRequestHandler extends AbstractJolokiaService<RequestHandler
         Set<ConfigKey> keys = context.getConfigKeys();
         for (ConfigKey key : keys) {
                 if (key.isGlobalConfig()) {
-                    info.put(key.getKeyValue(), context.getConfig(key));
+                    if (key == ConfigKey.PASSWORD) {
+                        info.put(key.getKeyValue(), "********");
+                    } else {
+                        info.put(key.getKeyValue(), context.getConfig(key));
+                    }
                 }
         }
         return info;
