@@ -904,7 +904,12 @@ function extractMethod(request: BaseRequest | BaseRequest[], params: RequestOpti
  */
 function ensureTrailingSlash(url: string | URL): string {
   // Squeeze any URL to a single one, optionally adding one
-  return (typeof url === "string" ? url : url.href).replace(/\/*$/, "/")
+  const v = typeof url === "string" ? url : url.href
+  let trimEnd = v.length
+  while (v[trimEnd - 1] === '/') {
+    trimEnd--
+  }
+  return v.substring(0, trimEnd) + '/'
 }
 
 /**

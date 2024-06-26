@@ -124,6 +124,21 @@ describe("Jolokia basic tests", () => {
     }
   })
 
+  test("Trailing slash handling", () => {
+    function ensureTrailingSlash(url: string): string {
+      let trimEnd = url.length
+      while (url[trimEnd - 1] === '/') {
+        trimEnd--
+      }
+      return url.substring(0, trimEnd) + '/'
+    }
+
+    expect(ensureTrailingSlash("hello")).toBe("hello/")
+    expect(ensureTrailingSlash("hello/")).toBe("hello/")
+    expect(ensureTrailingSlash("hello//")).toBe("hello/")
+    expect(ensureTrailingSlash("hello///")).toBe("hello/")
+  })
+
 })
 
 describe("Jolokia HTTP tests", () => {
