@@ -1036,14 +1036,14 @@
     <plugin.maven-antrun-plugin>3.1.0</plugin.maven-antrun-plugin>
     <plugin.maven-assembly-plugin>3.7.1</plugin.maven-assembly-plugin>
     <plugin.maven-changes-plugin>2.12.1</plugin.maven-changes-plugin>
-    <plugin.maven-clean-plugin>3.3.2</plugin.maven-clean-plugin>
+    <plugin.maven-clean-plugin>3.4.0</plugin.maven-clean-plugin>
     <plugin.maven-compiler-plugin>3.13.0</plugin.maven-compiler-plugin>
-    <plugin.maven-dependency-plugin>3.7.0</plugin.maven-dependency-plugin>
+    <plugin.maven-dependency-plugin>3.7.1</plugin.maven-dependency-plugin>
     <plugin.maven-deploy-plugin>3.1.2</plugin.maven-deploy-plugin>
-    <plugin.maven-failsafe-plugin>3.2.5</plugin.maven-failsafe-plugin>
+    <plugin.maven-failsafe-plugin>3.3.0</plugin.maven-failsafe-plugin>
     <plugin.maven-gpg-plugin>3.2.4</plugin.maven-gpg-plugin>
     <plugin.maven-install-plugin>3.1.2</plugin.maven-install-plugin>
-    <plugin.maven-jar-plugin>3.4.1</plugin.maven-jar-plugin>
+    <plugin.maven-jar-plugin>3.4.2</plugin.maven-jar-plugin>
     <plugin.maven-javadoc-plugin>3.7.0</plugin.maven-javadoc-plugin>
     <!-- don't use 3.x (non-boxed org.apache.maven.reporting.AbstractMavenReportRenderer#verbatimLink()) -->
     <plugin.maven-project-info-reports-plugin>2.9</plugin.maven-project-info-reports-plugin>
@@ -1052,7 +1052,7 @@
     <plugin.maven-shade-plugin>3.6.0</plugin.maven-shade-plugin>
     <plugin.maven-site-plugin>3.12.1</plugin.maven-site-plugin>
     <plugin.maven-source-plugin>3.3.1</plugin.maven-source-plugin>
-    <plugin.maven-surefire-plugin>3.2.5</plugin.maven-surefire-plugin>
+    <plugin.maven-surefire-plugin>3.3.0</plugin.maven-surefire-plugin>
     <plugin.maven-war-plugin>3.4.0</plugin.maven-war-plugin>
 
     <!-- Versions of Maven plugins (other plugins) -->
