@@ -120,7 +120,7 @@ public enum ConfigKey {
      * Whether to include a stack trace in the response when an error occurs.
      * The allowed values are "true" for inclusion, "false" if no stacktrace
      * should be included or "runtime" if only {@link RuntimeException}s should
-     * be included. Default is "true"
+     * be included. Default is "false"
      */
     INCLUDE_STACKTRACE("includeStackTrace", true, true, Constants.FALSE),
 
