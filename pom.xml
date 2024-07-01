@@ -1081,7 +1081,7 @@
     <version.org.easymock>5.2.0</version.org.easymock>
     <version.org.eclipse.jetty>11.0.21</version.org.eclipse.jetty>
     <version.org.testng>7.10.2</version.org.testng>
-    <version.org.wiremock>3.6.0</version.org.wiremock>
+    <version.org.wiremock>3.8.0</version.org.wiremock>
 
     <!-- Versions of optional and example-related dependencies -->
 
