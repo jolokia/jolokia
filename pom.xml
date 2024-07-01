@@ -1047,7 +1047,7 @@
     <plugin.maven-javadoc-plugin>3.7.0</plugin.maven-javadoc-plugin>
     <!-- don't use 3.x (non-boxed org.apache.maven.reporting.AbstractMavenReportRenderer#verbatimLink()) -->
     <plugin.maven-project-info-reports-plugin>2.9</plugin.maven-project-info-reports-plugin>
-    <plugin.maven-release-plugin>3.0.1</plugin.maven-release-plugin>
+    <plugin.maven-release-plugin>3.1.0</plugin.maven-release-plugin>
     <plugin.maven-resources-plugin>3.3.1</plugin.maven-resources-plugin>
     <plugin.maven-shade-plugin>3.6.0</plugin.maven-shade-plugin>
     <plugin.maven-site-plugin>3.12.1</plugin.maven-site-plugin>
