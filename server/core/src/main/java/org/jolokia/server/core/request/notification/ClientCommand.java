@@ -16,8 +16,8 @@
 
 package org.jolokia.server.core.request.notification;
 
+import java.util.Deque;
 import java.util.Map;
-import java.util.Stack;
 
 import org.json.simple.JSONObject;
 
@@ -41,7 +41,7 @@ public abstract class ClientCommand extends NotificationCommand {
      * @param pType command type
      * @param pStack stack which on top must hold the client id
      */
-    protected ClientCommand(NotificationCommandType pType, Stack<String> pStack) {
+    protected ClientCommand(NotificationCommandType pType, Deque<String> pStack) {
         super(pType);
         if (pStack.isEmpty()) {
             throw new IllegalArgumentException("No notification client given for '" + pType + "'");

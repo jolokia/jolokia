@@ -6,7 +6,7 @@ import java.net.*;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
-import java.util.Stack;
+import java.util.Deque;
 import javax.net.ssl.*;
 
 import com.sun.net.httpserver.Authenticator;
@@ -119,7 +119,7 @@ public class DelegatingAuthenticator extends Authenticator {
         public HttpPrincipal extract(URLConnection connection) throws IOException, ParseException {
             try (InputStreamReader isr = new InputStreamReader(connection.getInputStream())) {
                 Object payload = new JSONParser().parse(isr);
-                Stack<String> pathElements = EscapeUtil.extractElementsFromPath(path);
+                Deque<String> pathElements = EscapeUtil.extractElementsFromPath(path);
                 Object result = payload;
                 while (!pathElements.isEmpty()) {
                     if (result == null) {

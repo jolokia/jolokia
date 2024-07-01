@@ -105,7 +105,7 @@ public final class ObjectToJsonConverter {
      */
     public Object serialize(Object pValue, List<String> pPathParts, SerializeOptions pOptions)
             throws AttributeNotFoundException {
-        Stack<String> extraStack = pPathParts != null ? EscapeUtil.reversePath(pPathParts) : new Stack<>();
+        Deque<String> extraStack = pPathParts != null ? EscapeUtil.reversePath(pPathParts) : new LinkedList<>();
         return extractObjectWithContext(pValue, extraStack, pOptions, true);
     }
 
@@ -124,7 +124,7 @@ public final class ObjectToJsonConverter {
     public Object setInnerValue(Object pOuterObject, Object pNewValue, List<String> pPathParts)
             throws AttributeNotFoundException, IllegalAccessException, InvocationTargetException {
         String lastPathElement = pPathParts.remove(pPathParts.size()-1);
-        Stack<String> extraStack = EscapeUtil.reversePath(pPathParts);
+        Deque<String> extraStack = EscapeUtil.reversePath(pPathParts);
 
         // Get the object pointed to do with path-1
         // We are using no limits here, since a path must have been given (see above), and hence we should
@@ -152,11 +152,11 @@ public final class ObjectToJsonConverter {
      * @return extracted object either in native format or as {@link org.json.simple.JSONObject}
      * @throws AttributeNotFoundException if an attribute is not found during traversal
      */
-    public Object extractObject(Object pValue, Stack<String> pPathParts, boolean pJsonify)
+    public Object extractObject(Object pValue, Deque<String> pPathParts, boolean pJsonify)
             throws AttributeNotFoundException {
         ObjectSerializationContext stackContext = stackContextLocal.get();
         String limitReached = checkForLimits(pValue, stackContext);
-        Stack<String> pathStack = pPathParts != null ? pPathParts : new Stack<>();
+        Deque<String> pathStack = pPathParts != null ? pPathParts : new LinkedList<>();
         if (limitReached != null) {
             return limitReached;
         }
@@ -197,7 +197,7 @@ public final class ObjectToJsonConverter {
      * @return extracted value, either natively or as JSON
      * @throws AttributeNotFoundException if during traversal an attribute is not found as specified in the stack
      */
-    private Object extractObjectWithContext(Object pValue, Stack<String> pExtraArgs, SerializeOptions pOpts, boolean pJsonify)
+    private Object extractObjectWithContext(Object pValue, Deque<String> pExtraArgs, SerializeOptions pOpts, boolean pJsonify)
             throws AttributeNotFoundException {
         Object jsonResult;
         setupContext(pOpts);
@@ -330,7 +330,7 @@ public final class ObjectToJsonConverter {
 
 
 
-    private Object callHandler(Object pValue, Stack<String> pPathParts, boolean pJsonify)
+    private Object callHandler(Object pValue, Deque<String> pPathParts, boolean pJsonify)
             throws AttributeNotFoundException {
         Class<?> pClazz = pValue.getClass();
         for (Extractor handler : handlers) {

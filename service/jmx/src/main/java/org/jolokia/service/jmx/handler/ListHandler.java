@@ -69,14 +69,13 @@ public class ListHandler extends AbstractCommandHandler<JolokiaListRequest> {
         // Throw an exception if list has not changed
         checkForModifiedSince(pServerManager, pRequest);
 
-        Stack<String> originalPathStack = EscapeUtil.reversePath(pRequest.getPathParts());
+        Deque<String> originalPathStack = EscapeUtil.reversePath(pRequest.getPathParts());
         int maxDepth = pRequest.getParameterAsInt(ConfigKey.MAX_DEPTH);
         boolean useCanonicalName = pRequest.getParameterAsBool(ConfigKey.CANONICAL_NAMING);
 
         ObjectName oName = null;
         try {
-            @SuppressWarnings("unchecked")
-            Stack<String> pathStack = (Stack<String>) originalPathStack.clone();
+            Deque<String> pathStack = new LinkedList<>(originalPathStack);
             oName = objectNameFromPath(pathStack);
 
             if (oName != null) {
@@ -121,14 +120,13 @@ public class ListHandler extends AbstractCommandHandler<JolokiaListRequest> {
      * @param pPathStack path
      * @return created object name (either plain or a pattern)
      */
-    private ObjectName objectNameFromPath(Stack<String> pPathStack) throws MalformedObjectNameException {
-        if (pPathStack.empty()) {
+    private ObjectName objectNameFromPath(Deque<String> pPathStack) throws MalformedObjectNameException {
+        if (pPathStack.isEmpty()) {
             return null;
         }
-        @SuppressWarnings("unchecked")
-        Stack<String> path = (Stack<String>) pPathStack.clone();
+        Deque<String> path = new LinkedList<>(pPathStack);
         String domain = path.pop();
-        if (path.empty()) {
+        if (path.isEmpty()) {
             return new ObjectName(domain + ":*");
         }
         String props = path.pop();
@@ -153,7 +151,7 @@ public class ListHandler extends AbstractCommandHandler<JolokiaListRequest> {
          * @param pUseCanonicalName whether to use a canonical naming for the MBean property lists or the original
          * @param pProvider provider to prepend to any domain (if not null)
          */
-        public ListMBeanEachAction(int pMaxDepth, Stack<String> pPathStack, boolean pUseCanonicalName, String pProvider) {
+        public ListMBeanEachAction(int pMaxDepth, Deque<String> pPathStack, boolean pUseCanonicalName, String pProvider) {
             infoData = new MBeanInfoData(pMaxDepth,pPathStack,pUseCanonicalName,pProvider);
         }
 

@@ -111,7 +111,7 @@ public class JolokiaExecRequest extends JolokiaObjectNameRequest {
     static RequestCreator<JolokiaExecRequest> newCreator() {
         return new RequestCreator<>() {
             /** {@inheritDoc} */
-            public JolokiaExecRequest create(Stack<String> pStack, ProcessingParameters pParams) throws MalformedObjectNameException {
+            public JolokiaExecRequest create(Deque<String> pStack, ProcessingParameters pParams) throws MalformedObjectNameException {
                 return new JolokiaExecRequest(
                         pStack.pop(), // Object name
                         pStack.pop(), // Operation name

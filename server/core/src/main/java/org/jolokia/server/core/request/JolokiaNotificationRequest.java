@@ -1,7 +1,7 @@
 package org.jolokia.server.core.request;
 
+import java.util.Deque;
 import java.util.Map;
-import java.util.Stack;
 
 import javax.management.MalformedObjectNameException;
 
@@ -71,7 +71,7 @@ public class JolokiaNotificationRequest extends JolokiaRequest {
     static RequestCreator<JolokiaNotificationRequest> newCreator() {
         return new RequestCreator<>() {
             /** {@inheritDoc} */
-            public JolokiaNotificationRequest create(Stack<String> pStack, ProcessingParameters pParams) throws MalformedObjectNameException {
+            public JolokiaNotificationRequest create(Deque<String> pStack, ProcessingParameters pParams) throws MalformedObjectNameException {
                 NotificationCommand notifCommand = NotificationCommandFactory.createCommand(pStack);
                 return new JolokiaNotificationRequest(notifCommand, pParams);
             }

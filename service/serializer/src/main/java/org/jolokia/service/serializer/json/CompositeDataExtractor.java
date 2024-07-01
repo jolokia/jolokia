@@ -1,7 +1,8 @@
 package org.jolokia.service.serializer.json;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Stack;
+import java.util.Deque;
+import java.util.LinkedList;
 import javax.management.AttributeNotFoundException;
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.InvalidKeyException;
@@ -43,7 +44,7 @@ public class CompositeDataExtractor implements Extractor {
     /** {@inheritDoc} */
     @SuppressWarnings("PMD.PreserveStackTrace")
     public Object extractObject(ObjectToJsonConverter pConverter, Object pValue,
-                                Stack<String> pPathParts,boolean jsonify) throws AttributeNotFoundException {
+                                Deque<String> pPathParts, boolean jsonify) throws AttributeNotFoundException {
         CompositeData cd = (CompositeData) pValue;
 
         String pathPart = pPathParts.isEmpty() ? null : pPathParts.pop();
@@ -58,11 +59,10 @@ public class CompositeDataExtractor implements Extractor {
         }
     }
 
-    private Object extractCompleteCdAsJson(ObjectToJsonConverter pConverter, CompositeData pData, Stack<String> pPath) throws AttributeNotFoundException {
+    private Object extractCompleteCdAsJson(ObjectToJsonConverter pConverter, CompositeData pData, Deque<String> pPath) throws AttributeNotFoundException {
         JSONObject ret = new JSONObject();
         for (String key : pData.getCompositeType().keySet()) {
-            @SuppressWarnings("unchecked")
-            Stack<String> path = (Stack<String>) pPath.clone();
+            Deque<String> path = new LinkedList<>(pPath);
             try {
                 //noinspection unchecked
                 ret.put(key, pConverter.extractObject(pData.get(key), path, true));

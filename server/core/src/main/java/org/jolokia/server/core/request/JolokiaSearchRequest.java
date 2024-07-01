@@ -16,8 +16,8 @@ package org.jolokia.server.core.request;
  * limitations under the License.
  */
 
+import java.util.Deque;
 import java.util.Map;
-import java.util.Stack;
 
 import javax.management.MalformedObjectNameException;
 
@@ -73,9 +73,9 @@ public class JolokiaSearchRequest extends JolokiaObjectNameRequest {
      * @return the creator implementation
      */
     static RequestCreator<JolokiaSearchRequest> newCreator() {
-        return new RequestCreator<JolokiaSearchRequest>() {
+        return new RequestCreator<>() {
             /** {@inheritDoc} */
-            public JolokiaSearchRequest create(Stack<String> pStack, ProcessingParameters pParams) throws MalformedObjectNameException {
+            public JolokiaSearchRequest create(Deque<String> pStack, ProcessingParameters pParams) throws MalformedObjectNameException {
                 return new JolokiaSearchRequest(pStack.pop(),pParams);
             }
 

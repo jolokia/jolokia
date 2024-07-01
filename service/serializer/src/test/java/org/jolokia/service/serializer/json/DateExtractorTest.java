@@ -18,7 +18,8 @@ package org.jolokia.service.serializer.json;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
-import java.util.Stack;
+import java.util.Deque;
+import java.util.LinkedList;
 
 import javax.management.AttributeNotFoundException;
 
@@ -66,7 +67,7 @@ public class DateExtractorTest {
     @Test
     public void directExtract() throws AttributeNotFoundException {
         Date date = new Date();
-        Stack<String> stack = new Stack<>();
+        Deque<String> stack = new LinkedList<>();
         Object result = extractor.extractObject(null,date,stack,false);
         assertEquals(result,date);
         stack.add("time");
@@ -77,7 +78,7 @@ public class DateExtractorTest {
     @Test
     public void simpleJsonExtract() throws AttributeNotFoundException {
         Date date = new Date();
-        Stack<String> stack = new Stack<>();
+        Deque<String> stack = new LinkedList<>();
         Object result = extractor.extractObject(null,date,stack,true);
         assertEquals(result, DateUtil.toISO8601(date));
         stack.add("time");
@@ -89,7 +90,7 @@ public class DateExtractorTest {
     @Test(enabled = false, expectedExceptions = AttributeNotFoundException.class)
     public void simpleJsonExtractWithWrongPath() throws AttributeNotFoundException {
         Date date = new Date();
-        Stack<String> stack = new Stack<>();
+        Deque<String> stack = new LinkedList<>();
         stack.add("blablub");
 
         extractor.extractObject(converter, date, stack, true);

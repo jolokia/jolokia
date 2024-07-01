@@ -45,7 +45,7 @@ public final class NotificationCommandFactory {
      * @return the created command
      * @throws MalformedObjectNameException if an objectname part has an invalid format
      */
-    public static NotificationCommand createCommand(Stack<String> pStack) throws MalformedObjectNameException {
+    public static NotificationCommand createCommand(Deque<String> pStack) throws MalformedObjectNameException {
         String command = pStack.pop();
         NotificationCommandType type = NotificationCommandType.getTypeByName(command);
         return CREATORS.get(type).create(pStack, null);
@@ -75,7 +75,7 @@ public final class NotificationCommandFactory {
         /**
          * Create the command either from the given stack (checked first) or a given map
          */
-        NotificationCommand create(Stack<String> pStack,Map<String,?> pMap) throws MalformedObjectNameException;
+        NotificationCommand create(Deque<String> pStack,Map<String,?> pMap) throws MalformedObjectNameException;
     }
 
     // Build up the lookup map

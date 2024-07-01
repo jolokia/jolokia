@@ -61,7 +61,7 @@ public class AddCommand extends ClientCommand {
      * @param pStack path stack from where to extract the information
      * @throws MalformedObjectNameException if the given mbean name is not a valid {@link ObjectName}
      */
-    AddCommand(Stack<String> pStack) throws MalformedObjectNameException {
+    AddCommand(Deque<String> pStack) throws MalformedObjectNameException {
         super(NotificationCommandType.ADD, pStack);
         if (pStack.isEmpty()) {
             throw new IllegalArgumentException("No mode give for " + NotificationCommandType.ADD);

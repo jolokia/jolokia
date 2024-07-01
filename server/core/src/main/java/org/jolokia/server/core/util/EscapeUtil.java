@@ -62,7 +62,7 @@ public final class EscapeUtil {
      * @param pParts parts to combine
      * @return the combined path
      */
-    public static String combineToPath(List<String> pParts) {
+    public static String combineToPath(Collection<String> pParts) {
         if (pParts != null && !pParts.isEmpty()) {
             StringBuilder buf = new StringBuilder();
             Iterator<String> it = pParts.iterator();
@@ -99,7 +99,7 @@ public final class EscapeUtil {
      * @param pPath path to parse
      * @return stack of arguments in reverse order or an empty stack if path was null or empty
      */
-    public static Stack<String> extractElementsFromPath(String pPath) {
+    public static Deque<String> extractElementsFromPath(String pPath) {
         return reversePath(parsePath(pPath));
     }
 
@@ -110,8 +110,8 @@ public final class EscapeUtil {
      * @param pathParts path to reverse
      * @return reversed path or an empty stack if no path parts are given. Never return null.
      */
-    public static Stack<String> reversePath(List<String> pathParts) {
-        Stack<String> pathStack = new Stack<>();
+    public static Deque<String> reversePath(List<String> pathParts) {
+        Deque<String> pathStack = new LinkedList<>();
         if (pathParts != null) {
             // Needs first extra argument at top of the stack
             for (int i = pathParts.size() - 1;i >=0;i--) {

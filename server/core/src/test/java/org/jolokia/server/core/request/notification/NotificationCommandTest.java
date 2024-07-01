@@ -16,13 +16,7 @@
 
 package org.jolokia.server.core.request.notification;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
-import java.util.UUID;
+import java.util.*;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
@@ -188,7 +182,7 @@ public class NotificationCommandTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*MBean.*")
     public void addWithoutMBeanStack() throws Exception {
-        Stack<String> args = new Stack<>();
+        Deque<String> args = new LinkedList<>();
         args.push("pull");
         args.push(UUID.randomUUID().toString());
         args.push("add");
@@ -197,7 +191,7 @@ public class NotificationCommandTest {
 
     @Test
     public void addWithEmptyFilterAndConfig() throws MalformedObjectNameException {
-        Stack<String> args = new Stack<>();
+        Deque<String> args = new LinkedList<>();
         args.push("{}");
         args.push(" ");
         args.push("test:type=test");
@@ -220,7 +214,7 @@ public class NotificationCommandTest {
     }
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*mode.*")
     public void addWithoutModeStack() throws Exception {
-        Stack<String> args = new Stack<>();
+        Deque<String> args = new LinkedList<>();
         args.push(UUID.randomUUID().toString());
         args.push("add");
         NotificationCommandFactory.createCommand(args);
@@ -253,7 +247,7 @@ public class NotificationCommandTest {
     }
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*handle.*")
     public void removeNoHandleStack() throws Exception {
-        Stack<String> args = new Stack<>();
+        Deque<String> args = new LinkedList<>();
         args.push(UUID.randomUUID().toString());
         args.push("remove");
         NotificationCommandFactory.createCommand(args);
@@ -269,7 +263,7 @@ public class NotificationCommandTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*client.*")
     public void removeNoClientStack() throws Exception {
-        Stack<String> args = new Stack<>();
+        Deque<String> args = new LinkedList<>();
         args.push("remove");
         NotificationCommandFactory.createCommand(args);
     }
@@ -307,7 +301,7 @@ public class NotificationCommandTest {
         pCheckable.check((T) NotificationCommandFactory.createCommand(getStack(pArgs)));
     }
 
-    private Stack<String> getStack(Object[] pArgs) {
+    private Deque<String> getStack(Object[] pArgs) {
         List<String> ret = new ArrayList<>();
         ret.add((String) pArgs[1]);
         if (pArgs.length > 3) {
@@ -328,10 +322,7 @@ public class NotificationCommandTest {
                 }
             }
         }
-        Collections.reverse(ret);
-        Stack<String> st = new Stack<>();
-        st.addAll(ret);
-        return st;
+        return new LinkedList<>(ret);
     }
 
     private interface Checkable<T extends NotificationCommand> {

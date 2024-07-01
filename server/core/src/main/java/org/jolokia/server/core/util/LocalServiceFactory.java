@@ -201,7 +201,7 @@ public final class LocalServiceFactory {
 
         // Thread local holding an old order which gets restored on remove(). This is required
         // for nested service lookups
-        private static final ThreadLocal<Stack<Integer>> defaultOrders = new ThreadLocal<>();
+        private static final ThreadLocal<Deque<Integer>> defaultOrders = new ThreadLocal<>();
 
         /**
          * Parse an entry in the service definition. This should be the full qualified classname
@@ -243,9 +243,9 @@ public final class LocalServiceFactory {
 
         private static void initDefaultOrder() {
             Integer old = defaultOrderHolder.get();
-            Stack<Integer> orderStack = defaultOrders.get();
+            Deque<Integer> orderStack = defaultOrders.get();
             if (orderStack == null) {
-                orderStack = new Stack<>();
+                orderStack = new LinkedList<>();
                 defaultOrders.set(orderStack);
             }
             if (old != null) {
@@ -255,7 +255,7 @@ public final class LocalServiceFactory {
         }
 
         private static void removeDefaultOrder() {
-            Stack<Integer> orderStack = defaultOrders.get();
+            Deque<Integer> orderStack = defaultOrders.get();
             if (orderStack == null) {
                 throw new IllegalStateException("No initDefaultOrder() called before");
             }

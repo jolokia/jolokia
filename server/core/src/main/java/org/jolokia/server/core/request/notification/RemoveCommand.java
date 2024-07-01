@@ -16,8 +16,8 @@
 
 package org.jolokia.server.core.request.notification;
 
+import java.util.Deque;
 import java.util.Map;
-import java.util.Stack;
 
 import org.json.simple.JSONObject;
 
@@ -37,7 +37,7 @@ public class RemoveCommand extends ClientCommand {
      *
      * @param pStack path stack
      */
-    RemoveCommand(Stack<String> pStack) {
+    RemoveCommand(Deque<String> pStack) {
         super(NotificationCommandType.REMOVE, pStack);
         if (pStack.isEmpty()) {
             throw new IllegalArgumentException("No notification handle given for " + NotificationCommandType.REMOVE);

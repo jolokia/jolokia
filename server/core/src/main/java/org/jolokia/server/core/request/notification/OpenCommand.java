@@ -1,5 +1,5 @@
 package org.jolokia.server.core.request.notification;/*
- * 
+ *
  * Copyright 2015 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,8 +15,8 @@ package org.jolokia.server.core.request.notification;/*
  * limitations under the License.
  */
 
+import java.util.Deque;
 import java.util.Map;
-import java.util.Stack;
 
 /**
  * Command for creating and opening a channel for transmitting notifications
@@ -35,7 +35,7 @@ public class OpenCommand extends ClientCommand {
      * Constructor for GET requests
      * @param pStack path parameters
      */
-    public OpenCommand(Stack<String> pStack) {
+    public OpenCommand(Deque<String> pStack) {
         super(NotificationCommandType.OPEN, pStack);
         if (pStack.isEmpty()) {
             throw new IllegalArgumentException("No mode give for " + NotificationCommandType.OPEN);

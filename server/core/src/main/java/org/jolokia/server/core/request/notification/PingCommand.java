@@ -16,8 +16,8 @@
 
 package org.jolokia.server.core.request.notification;
 
+import java.util.Deque;
 import java.util.Map;
-import java.util.Stack;
 
 /**
  * Ping commands are used for updating a clients freshness. If
@@ -35,7 +35,7 @@ public class PingCommand extends ClientCommand {
      * Constructor for GET requests
      * @param pStack path stack
      */
-    PingCommand(Stack<String> pStack) {
+    PingCommand(Deque<String> pStack) {
         super(NotificationCommandType.PING, pStack);
     }
 

@@ -88,7 +88,7 @@ public final class JolokiaRequestFactory {
             String pathInfo = extractPathInfo(pPathInfo, pProcessingParameters);
 
             // Get all path elements as a reverse stack
-            Stack<String> elements = EscapeUtil.extractElementsFromPath(pathInfo);
+            Deque<String> elements = EscapeUtil.extractElementsFromPath(pathInfo);
 
             // Use version by default if no type is given
             type = !elements.isEmpty() ? RequestType.getTypeByName(elements.pop()) : RequestType.VERSION;
@@ -97,7 +97,7 @@ public final class JolokiaRequestFactory {
             return (R) getCreator(type).create(elements, pProcessingParameters);
         } catch (MalformedObjectNameException e) {
             throw new IllegalArgumentException("Invalid object name. " + e.getMessage(),e);
-        } catch (EmptyStackException exp) {
+        } catch (NoSuchElementException exp) {
             throw new IllegalArgumentException("Invalid arguments in pathinfo " + pPathInfo + (type != null ? " for command " + type : ""),exp);
         }
     }

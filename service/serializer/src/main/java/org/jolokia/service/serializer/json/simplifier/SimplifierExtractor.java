@@ -64,7 +64,7 @@ public abstract class SimplifierExtractor<T> implements Extractor {
     }
 
     /** {@inheritDoc} */
-    public Object extractObject(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pPathParts, boolean jsonify)
+    public Object extractObject(ObjectToJsonConverter pConverter, Object pValue, Deque<String> pPathParts, boolean jsonify)
             throws AttributeNotFoundException {
         String path = pPathParts.isEmpty() ? null : pPathParts.pop();
         ValueFaultHandler faultHandler = pConverter.getValueFaultHandler();
@@ -76,11 +76,10 @@ public abstract class SimplifierExtractor<T> implements Extractor {
         }
     }
 
-    private Object extractAll(ObjectToJsonConverter pConverter, T pValue, Stack<String> pPathParts, boolean jsonify) throws AttributeNotFoundException {
+    private Object extractAll(ObjectToJsonConverter pConverter, T pValue, Deque<String> pPathParts, boolean jsonify) throws AttributeNotFoundException {
         JSONObject ret = new JSONObject();
         for (Map.Entry<String, AttributeExtractor<T>> entry : extractorMap.entrySet()) {
-            @SuppressWarnings("unchecked")
-            Stack<String> paths = (Stack<String>) pPathParts.clone();
+            Deque<String> paths = new LinkedList<>(pPathParts);
             try {
                 Object value = entry.getValue().extract(pValue);
                 //noinspection unchecked
@@ -96,7 +95,7 @@ public abstract class SimplifierExtractor<T> implements Extractor {
         return ret;
     }
 
-    private Object extractWithPath(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pPathParts, boolean jsonify, String pPath, ValueFaultHandler pFaultHandler) throws AttributeNotFoundException {
+    private Object extractWithPath(ObjectToJsonConverter pConverter, Object pValue, Deque<String> pPathParts, boolean jsonify, String pPath, ValueFaultHandler pFaultHandler) throws AttributeNotFoundException {
         AttributeExtractor<T> extractor = extractorMap.get(pPath);
         if (extractor == null) {
             return pFaultHandler.handleException(new AttributeNotFoundException("Illegal path element " + pPath + " for object " + pValue));

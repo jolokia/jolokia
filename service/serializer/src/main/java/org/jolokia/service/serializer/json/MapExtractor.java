@@ -1,8 +1,9 @@
 package org.jolokia.service.serializer.json;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.Map;
-import java.util.Stack;
 
 import javax.management.AttributeNotFoundException;
 
@@ -56,7 +57,7 @@ public class MapExtractor implements Extractor {
      * @throws AttributeNotFoundException
      */
     public Object extractObject(ObjectToJsonConverter pConverter, Object pValue,
-                                Stack<String> pPathParts,boolean jsonify) throws AttributeNotFoundException {
+                                Deque<String> pPathParts,boolean jsonify) throws AttributeNotFoundException {
         @SuppressWarnings("unchecked")
         Map<Object,Object> map = (Map<Object,Object>) pValue;
         int length = pConverter.getCollectionLength(map.size());
@@ -68,12 +69,11 @@ public class MapExtractor implements Extractor {
         }
     }
 
-    private JSONObject extractMapValues(ObjectToJsonConverter pConverter, Stack<String> pPathParts, boolean jsonify, Map<Object, Object> pMap, int pLength) throws AttributeNotFoundException {
+    private JSONObject extractMapValues(ObjectToJsonConverter pConverter, Deque<String> pPathParts, boolean jsonify, Map<Object, Object> pMap, int pLength) throws AttributeNotFoundException {
         JSONObject ret = new JSONObject();
         int i = 0;
         for(Map.Entry<?, ?> entry : pMap.entrySet()) {
-            @SuppressWarnings("unchecked")
-            Stack<String> paths = (Stack<String>) pPathParts.clone();
+            Deque<String> paths = new LinkedList<>(pPathParts);
             try {
                 //noinspection unchecked
                 ret.put(entry.getKey(),
@@ -92,7 +92,7 @@ public class MapExtractor implements Extractor {
         return ret;
     }
 
-    private Object extractMapValueWithPath(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pPathParts, boolean jsonify, Map<Object, Object> pMap, String pPathParth) throws AttributeNotFoundException {
+    private Object extractMapValueWithPath(ObjectToJsonConverter pConverter, Object pValue, Deque<String> pPathParts, boolean jsonify, Map<Object, Object> pMap, String pPathParth) throws AttributeNotFoundException {
         for (Map.Entry<?, ?> entry : pMap.entrySet()) {
             // We dont access the map via a lookup since the key
             // are potentially object but we have to deal with string

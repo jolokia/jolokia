@@ -52,7 +52,7 @@ public class CollectionExtractor implements Extractor {
      *        should be returned. The later is required for writing an inner value
      * @return the extracted object
      */
-    public Object extractObject(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pPathParts, boolean jsonify) throws AttributeNotFoundException {
+    public Object extractObject(ObjectToJsonConverter pConverter, Object pValue, Deque<String> pPathParts, boolean jsonify) throws AttributeNotFoundException {
         Collection<?> collection = (Collection<?>) pValue;
         String pathPart = pPathParts.isEmpty() ? null : pPathParts.pop();
         int length = pConverter.getCollectionLength(collection.size());
@@ -63,7 +63,7 @@ public class CollectionExtractor implements Extractor {
         }
     }
 
-    private Object extractWithPath(ObjectToJsonConverter pConverter, Collection<?> pCollection, Stack<String> pPathParts, boolean pJsonify, String pPathPart,int pLength) throws AttributeNotFoundException {
+    private Object extractWithPath(ObjectToJsonConverter pConverter, Collection<?> pCollection, Deque<String> pPathParts, boolean pJsonify, String pPathPart,int pLength) throws AttributeNotFoundException {
         try {
             int idx = Integer.parseInt(pPathPart);
             return pConverter.extractObject(getElement(pCollection,idx,pLength), pPathParts, pJsonify);
@@ -91,14 +91,13 @@ public class CollectionExtractor implements Extractor {
         throw new IndexOutOfBoundsException("Collection index " + pIdx + " larger than size " + pLength);
     }
 
-    private Object extractListAsJson(ObjectToJsonConverter pConverter, Collection<?> pCollection, Stack<String> pPathParts, int pLength) throws AttributeNotFoundException {
+    private Object extractListAsJson(ObjectToJsonConverter pConverter, Collection<?> pCollection, Deque<String> pPathParts, int pLength) throws AttributeNotFoundException {
         @SuppressWarnings("unchecked")
         List<Object> ret = new JSONArray();
         Iterator<?> it = pCollection.iterator();
         for (int i = 0;i < pLength; i++) {
             Object val = it.next();
-            @SuppressWarnings("unchecked")
-            Stack<String> path = (Stack<String>) pPathParts.clone();
+            Deque<String> path = new LinkedList<>(pPathParts);
             ret.add(pConverter.extractObject(val, path, true));
         }
         return ret;

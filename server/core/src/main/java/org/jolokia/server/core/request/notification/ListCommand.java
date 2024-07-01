@@ -16,8 +16,8 @@
 
 package org.jolokia.server.core.request.notification;
 
+import java.util.Deque;
 import java.util.Map;
-import java.util.Stack;
 
 /**
  * List command for getting all registered notification for a client.
@@ -32,7 +32,7 @@ public class ListCommand extends ClientCommand {
      * Constructor for GET requests
      * @param pStack path stack
      */
-    ListCommand(Stack<String> pStack) {
+    ListCommand(Deque<String> pStack) {
         super(NotificationCommandType.LIST, pStack);
     }
 

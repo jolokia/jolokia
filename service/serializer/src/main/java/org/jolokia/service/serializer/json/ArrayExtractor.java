@@ -2,8 +2,9 @@ package org.jolokia.service.serializer.json;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Stack;
 
 import javax.management.AttributeNotFoundException;
 
@@ -58,7 +59,7 @@ public class ArrayExtractor implements Extractor {
      * @throws AttributeNotFoundException
      * @throws IndexOutOfBoundsException if an index is used which points outside the given list
      */
-    public Object extractObject(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pPathParts,boolean jsonify) throws AttributeNotFoundException {
+    public Object extractObject(ObjectToJsonConverter pConverter, Object pValue, Deque<String> pPathParts, boolean jsonify) throws AttributeNotFoundException {
         int length = pConverter.getCollectionLength(Array.getLength(pValue));
         String pathPart = pPathParts.isEmpty() ? null : pPathParts.pop();
         if (pathPart != null) {
@@ -108,10 +109,10 @@ public class ArrayExtractor implements Extractor {
     }
 
     @SuppressWarnings("unchecked")
-    private List<Object> extractArray(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pPath, boolean jsonify, int pLength) throws AttributeNotFoundException {
+    private List<Object> extractArray(ObjectToJsonConverter pConverter, Object pValue, Deque<String> pPath, boolean jsonify, int pLength) throws AttributeNotFoundException {
         List<Object> ret = new JSONArray();
         for (int i = 0; i < pLength; i++) {
-            Stack<String> path = (Stack<String>) pPath.clone();
+            Deque<String> path = new LinkedList<>(pPath);
             try {
                 Object obj = Array.get(pValue, i);
                 ret.add(pConverter.extractObject(obj, path, jsonify));
@@ -125,7 +126,7 @@ public class ArrayExtractor implements Extractor {
         return ret;
     }
 
-    private Object extractWithPath(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pPath, boolean jsonify, String pPathPart) throws AttributeNotFoundException {
+    private Object extractWithPath(ObjectToJsonConverter pConverter, Object pValue, Deque<String> pPath, boolean jsonify, String pPathPart) throws AttributeNotFoundException {
         try {
             Object obj = Array.get(pValue, Integer.parseInt(pPathPart));
             return pConverter.extractObject(obj, pPath, jsonify);

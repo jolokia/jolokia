@@ -17,7 +17,7 @@ package org.jolokia.service.serializer.json;
  */
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Stack;
+import java.util.Deque;
 
 import javax.management.AttributeNotFoundException;
 
@@ -54,7 +54,7 @@ public interface Extractor {
      * @return the extracted object
      * @throws AttributeNotFoundException if the inner path does not exist.
      */
-    Object extractObject(ObjectToJsonConverter pConverter,Object pValue, Stack<String> pExtraArgs,boolean jsonify)
+    Object extractObject(ObjectToJsonConverter pConverter, Object pValue, Deque<String> pExtraArgs, boolean jsonify)
             throws AttributeNotFoundException;
 
     /**

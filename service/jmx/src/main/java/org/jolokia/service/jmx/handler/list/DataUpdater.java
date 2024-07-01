@@ -16,8 +16,8 @@ package org.jolokia.service.jmx.handler.list;
  *  limitations under the License.
  */
 
+import java.util.Deque;
 import java.util.Map;
-import java.util.Stack;
 
 import javax.management.MBeanInfo;
 
@@ -47,10 +47,10 @@ abstract class DataUpdater {
      * @param pPathStack stack for further constraining the result
      */
     @SuppressWarnings("rawtypes")
-    void update(Map pMap, MBeanInfo pMBeanInfo, Stack<String> pPathStack) {
+    void update(Map pMap, MBeanInfo pMBeanInfo, Deque<String> pPathStack) {
 
-        boolean isPathEmpty = pPathStack == null || pPathStack.empty();
-        String filter = pPathStack != null && !pPathStack.empty() ? pPathStack.pop() : null;
+        boolean isPathEmpty = pPathStack == null || pPathStack.isEmpty();
+        String filter = pPathStack != null && !pPathStack.isEmpty() ? pPathStack.pop() : null;
         verifyThatPathIsEmpty(pPathStack);
 
         JSONObject attrMap = extractData(pMBeanInfo,filter);
@@ -82,7 +82,7 @@ abstract class DataUpdater {
      *
      * @param pPathStack path to check
      */
-    protected void verifyThatPathIsEmpty(Stack<String> pPathStack) {
+    protected void verifyThatPathIsEmpty(Deque<String> pPathStack) {
         if (pPathStack != null && !pPathStack.isEmpty()) {
             throw new IllegalArgumentException("Path contains extra elements not usable for a list request: " + pPathStack);
         }

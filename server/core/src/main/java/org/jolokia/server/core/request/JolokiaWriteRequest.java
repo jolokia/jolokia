@@ -133,7 +133,7 @@ public class JolokiaWriteRequest extends JolokiaObjectNameRequest {
     static RequestCreator<JolokiaWriteRequest> newCreator() {
         return new RequestCreator<>() {
             /** {@inheritDoc} */
-            public JolokiaWriteRequest create(Stack<String> pStack, ProcessingParameters pParams) throws MalformedObjectNameException {
+            public JolokiaWriteRequest create(Deque<String> pStack, ProcessingParameters pParams) throws MalformedObjectNameException {
                 return new JolokiaWriteRequest(
                         pStack.pop(), // object name
                         pStack.pop(), // attribute name

@@ -56,7 +56,7 @@ public class ObjectToJsonConverterTest {
     @Test
     public void basics() throws AttributeNotFoundException {
         @SuppressWarnings("unchecked")
-        Map<String, ?> result = (Map<String, ?>) converter.extractObject(new SelfRefBean1(), new Stack<>(), true);
+        Map<String, ?> result = (Map<String, ?>) converter.extractObject(new SelfRefBean1(), new LinkedList<>(), true);
         assertNotNull("Bean2 is set",result.get("bean2"));
         assertNotNull("Binary attribute is set",result.get("strong"));
     }
@@ -64,7 +64,7 @@ public class ObjectToJsonConverterTest {
     @Test
     public void checkDeadLockDetection() throws AttributeNotFoundException {
         @SuppressWarnings("unchecked")
-        Map<String, ?> result = (Map<String, ?>) converter.extractObject(new SelfRefBean1(), new Stack<>(), true);
+        Map<String, ?> result = (Map<String, ?>) converter.extractObject(new SelfRefBean1(), new LinkedList<>(), true);
         assertNotNull("Bean 2 is set",result.get("bean2"));
         //noinspection unchecked
         assertNotNull("Bean2:Bean1 is set",((Map<String, ?>)result.get("bean2")).get("bean1"));
@@ -77,7 +77,7 @@ public class ObjectToJsonConverterTest {
     public void maxDepth() throws AttributeNotFoundException, NoSuchFieldException, IllegalAccessException {
         setOptionsViaReflection("maxDepth",2);
         @SuppressWarnings("unchecked")
-        Map<String, ?> result = (Map<String, ?>) converter.extractObject(new SelfRefBean1(), new Stack<>(), true);
+        Map<String, ?> result = (Map<String, ?>) converter.extractObject(new SelfRefBean1(), new LinkedList<>(), true);
         @SuppressWarnings("unchecked")
         String c = (String) ((Map<String, ?>) result.get("bean2")).get("bean1");
         assertTrue("Recurence detected",c.contains("bean1: toString"));
@@ -87,7 +87,7 @@ public class ObjectToJsonConverterTest {
     public void maxObjects() throws NoSuchFieldException, IllegalAccessException, AttributeNotFoundException {
         setOptionsViaReflection("maxObjects",1);
         @SuppressWarnings("unchecked")
-        Map<String, Object> result = (Map<String, Object>) converter.extractObject(new InnerValueTestBean("foo", "bar", "baz"), new Stack<>(), true);
+        Map<String, Object> result = (Map<String, Object>) converter.extractObject(new InnerValueTestBean("foo", "bar", "baz"), new LinkedList<>(), true);
         boolean found = false;
         for (Object val : result.values()) {
             if (val instanceof String) {
@@ -112,14 +112,14 @@ public class ObjectToJsonConverterTest {
     public void customSimplifier() throws AttributeNotFoundException {
         Date date = new Date();
         @SuppressWarnings("unchecked")
-        Map<String, ?> result = (Map<String, ?>) converter.extractObject(date, new Stack<>(), true);
+        Map<String, ?> result = (Map<String, ?>) converter.extractObject(date, new LinkedList<>(), true);
         assertEquals(date.getTime(),result.get("millis"));
     }
 
     @Test
     public void fileSimplifier() throws AttributeNotFoundException {
         @SuppressWarnings("unchecked")
-        Map<String, ?> result = (Map<String, ?>) converter.extractObject(new File("/tmp"), new Stack<>(), true);
+        Map<String, ?> result = (Map<String, ?>) converter.extractObject(new File("/tmp"), new LinkedList<>(), true);
         assertNull(result.get("parent"));
     }
 
@@ -127,7 +127,7 @@ public class ObjectToJsonConverterTest {
     public void customNegativeSimpifier() throws MalformedObjectNameException, AttributeNotFoundException {
         ObjectName name = new ObjectName("java.lang:type=Memory");
         @SuppressWarnings("unchecked")
-        Map<String, ?> result = (Map<String, ?>) converter.extractObject(name, new Stack<>(), true);
+        Map<String, ?> result = (Map<String, ?>) converter.extractObject(name, new LinkedList<>(), true);
         // Since we removed the objectname simplifier from the list of simplifiers-default
         // explicitely, the converter should return the full-blown object;
         assertEquals("type=Memory",result.get("canonicalKeyPropertyListString"));

@@ -1,7 +1,8 @@
 package org.jolokia.service.serializer.json;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Stack;
+import java.util.Deque;
+import java.util.LinkedList;
 
 import javax.management.AttributeNotFoundException;
 
@@ -41,7 +42,7 @@ public class EnumExtractorTest {
 
     @Test
     public void jsonExtract() throws AttributeNotFoundException {
-        Stack<String> stack = new Stack<>();
+        Deque<String> stack = new LinkedList<>();
         assertEquals(enumExtractor.extractObject(converter, TestEnum.EINS,stack,true),"EINS");
         stack.add("EINS");
         assertEquals(enumExtractor.extractObject(converter, TestEnum.EINS,stack,true),"EINS");
@@ -49,14 +50,14 @@ public class EnumExtractorTest {
 
     @Test(expectedExceptions = AttributeNotFoundException.class)
     public void jsonExtractWithWrongPath() throws AttributeNotFoundException {
-        Stack<String> stack = new Stack<>();
+        Deque<String> stack = new LinkedList<>();
         stack.add("ZWEI");
         enumExtractor.extractObject(converter,TestEnum.EINS,stack,true);
     }
 
     @Test
     public void plainExtract() throws AttributeNotFoundException {
-        Stack<String> stack = new Stack<>();
+        Deque<String> stack = new LinkedList<>();
         Object result = enumExtractor.extractObject(converter, TestEnum.EINS,stack,false);
         assertEquals(result,TestEnum.EINS);
     }

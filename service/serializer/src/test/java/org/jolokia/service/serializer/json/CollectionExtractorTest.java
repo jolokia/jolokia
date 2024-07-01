@@ -52,7 +52,7 @@ public class CollectionExtractorTest {
     public void json() throws AttributeNotFoundException {
         assertFalse(extractor.canSetValue());
         Set<String> set = new HashSet<>(Arrays.asList("jolokia","habanero"));
-        List<?> ret = (List<?>) extractor.extractObject(converter, set, new Stack<>(), true);
+        List<?> ret = (List<?>) extractor.extractObject(converter, set, new LinkedList<>(), true);
         assertEquals(ret.size(),2);
         assertTrue(ret.contains("jolokia"));
         assertTrue(ret.contains("habanero"));
@@ -63,7 +63,7 @@ public class CollectionExtractorTest {
     public void jsonAndPath() throws AttributeNotFoundException {
         Collection<String> collection = Arrays.asList("jolokia","habanero");
 
-        Stack<String> paths = new Stack<>();
+        Deque<String> paths = new LinkedList<>();
         paths.add("1");
 
         String val = (String) extractor.extractObject(converter,collection,paths,true);
@@ -76,7 +76,7 @@ public class CollectionExtractorTest {
 
 
         for (String path : new String[] { "bla", "2"}) {
-            Stack<String> paths = new Stack<>();
+            Deque<String> paths = new LinkedList<>();
             paths.add(path);
             try {
                 extractor.extractObject(converter, collection, paths, true);
@@ -90,7 +90,7 @@ public class CollectionExtractorTest {
     @Test
     public void noJson() throws AttributeNotFoundException {
         Set<String> set = Set.of("jolokia","habanero");
-        Set<?> ret = (Set<?>) extractor.extractObject(converter, set, new Stack<>(), false);
+        Set<?> ret = (Set<?>) extractor.extractObject(converter, set, new LinkedList<>(), false);
         assertEquals(ret,set);
     }
 

@@ -382,11 +382,6 @@ public class TabularDataExtractorTest {
 
 
     private Object extract(boolean pJson,Object pValue,String ... pPathElements) throws AttributeNotFoundException {
-        Stack<String> extra = new Stack<>();
-        for (String p : pPathElements) {
-            extra.push(p);
-        }
-        Collections.reverse(extra);
-        return extractor.extractObject(converter,pValue,extra,pJson);
+        return extractor.extractObject(converter, pValue, new LinkedList<>(Arrays.asList(pPathElements)), pJson);
     }
 }

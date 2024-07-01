@@ -1,8 +1,9 @@
 package org.jolokia.service.serializer.json;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Stack;
 
 import javax.management.AttributeNotFoundException;
 
@@ -56,7 +57,7 @@ public class ListExtractor implements Extractor {
      * @throws AttributeNotFoundException
      * @throws IndexOutOfBoundsException if an index is used which points outside the given list
      */
-    public Object extractObject(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pPathParts,boolean jsonify)
+    public Object extractObject(ObjectToJsonConverter pConverter, Object pValue, Deque<String> pPathParts, boolean jsonify)
             throws AttributeNotFoundException {
         List<?> list = (List<?>) pValue;
         int length = pConverter.getCollectionLength(list.size());
@@ -109,7 +110,7 @@ public class ListExtractor implements Extractor {
         return true;
     }
 
-    private Object extractWithPath(ObjectToJsonConverter pConverter, List<?> pList, Stack<String> pStack, boolean jsonify, String pPathPart) throws AttributeNotFoundException {
+    private Object extractWithPath(ObjectToJsonConverter pConverter, List<?> pList, Deque<String> pStack, boolean jsonify, String pPathPart) throws AttributeNotFoundException {
         try {
             int idx = Integer.parseInt(pPathPart);
             return pConverter.extractObject(pList.get(idx), pStack, jsonify);
@@ -124,12 +125,11 @@ public class ListExtractor implements Extractor {
         }
     }
 
-    private Object extractListAsJson(ObjectToJsonConverter pConverter, List<?> pList, Stack<String> pPath, int pLength) throws AttributeNotFoundException {
+    private Object extractListAsJson(ObjectToJsonConverter pConverter, List<?> pList, Deque<String> pPath, int pLength) throws AttributeNotFoundException {
         @SuppressWarnings("unchecked")
         List<Object> ret = new JSONArray();
         for (int i = 0;i < pLength; i++) {
-            @SuppressWarnings("unchecked")
-            Stack<String> path = (Stack<String>) pPath.clone();
+            Deque<String> path = new LinkedList<>(pPath);
             try {
                 ret.add(pConverter.extractObject(pList.get(i), path, true));
             } catch (ValueFaultHandler.AttributeFilteredException exp) {

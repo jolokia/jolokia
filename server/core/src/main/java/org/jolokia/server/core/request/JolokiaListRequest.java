@@ -18,8 +18,6 @@ package org.jolokia.server.core.request;
 
 import java.util.*;
 
-import javax.management.MalformedObjectNameException;
-
 import org.jolokia.server.core.util.RequestType;
 
 /**
@@ -83,7 +81,7 @@ public class JolokiaListRequest extends JolokiaRequest {
     static RequestCreator<JolokiaListRequest> newCreator() {
         return new RequestCreator<>() {
             /** {@inheritDoc} */
-            public JolokiaListRequest create(Stack<String> pStack, ProcessingParameters pParams) {
+            public JolokiaListRequest create(Deque<String> pStack, ProcessingParameters pParams) {
                 return new JolokiaListRequest(
                         prepareExtraArgs(pStack), // path
                         pParams);

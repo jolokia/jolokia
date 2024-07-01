@@ -16,8 +16,8 @@
 
 package org.jolokia.server.core.request.notification;
 
+import java.util.Deque;
 import java.util.Map;
-import java.util.Stack;
 
 /**
  * Unregister a client
@@ -31,7 +31,7 @@ public class UnregisterCommand extends ClientCommand {
      * Constructor for GET requests
      * @param pStack path stack
      */
-    UnregisterCommand(Stack<String> pStack) {
+    UnregisterCommand(Deque<String> pStack) {
         super(NotificationCommandType.UNREGISTER, pStack);
     }
 

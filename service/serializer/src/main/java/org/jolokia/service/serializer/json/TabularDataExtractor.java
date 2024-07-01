@@ -109,7 +109,7 @@ public class TabularDataExtractor implements Extractor {
      * @throws AttributeNotFoundException
      */
     public Object extractObject(ObjectToJsonConverter pConverter, Object pValue,
-                                Stack<String> pPathParts,boolean pJsonify) throws AttributeNotFoundException {
+                                Deque<String> pPathParts,boolean pJsonify) throws AttributeNotFoundException {
         TabularData td = (TabularData) pValue;
         String tdPath = pPathParts.isEmpty() ? null : pPathParts.pop();
         if (tdPath != null) {
@@ -151,7 +151,7 @@ public class TabularDataExtractor implements Extractor {
                && rowType.getType("key") instanceof  SimpleType;
     }
 
-    private Object convertTabularDataToJson(TabularData pTd, Stack<String> pExtraArgs, ObjectToJsonConverter pConverter)
+    private Object convertTabularDataToJson(TabularData pTd, Deque<String> pExtraArgs, ObjectToJsonConverter pConverter)
             throws AttributeNotFoundException {
         TabularType type = pTd.getTabularType();
         if (hasComplexKeys(type)) {
@@ -174,7 +174,7 @@ public class TabularDataExtractor implements Extractor {
     }
 
     // Convert tabular data to (nested) maps. Path access is allowed here
-    private Object convertToMaps(TabularData pTd, Stack<String> pExtraArgs, ObjectToJsonConverter pConverter) throws AttributeNotFoundException {
+    private Object convertToMaps(TabularData pTd, Deque<String> pExtraArgs, ObjectToJsonConverter pConverter) throws AttributeNotFoundException {
         JSONObject ret = new JSONObject();
         TabularType type = pTd.getTabularType();
         List<String> indexNames = type.getIndexNames();
@@ -182,8 +182,7 @@ public class TabularDataExtractor implements Extractor {
         boolean found = false;
         //noinspection unchecked
         for (CompositeData cd : (Collection<CompositeData>) pTd.values()) {
-            @SuppressWarnings("unchecked")
-            Stack<String> path = (Stack<String>) pExtraArgs.clone();
+            Deque<String> path = new LinkedList<>(pExtraArgs);
             try {
                 JSONObject targetJSONObject = ret;
                 // TODO: Check whether all keys can be represented as simple types. If not, well
@@ -210,9 +209,9 @@ public class TabularDataExtractor implements Extractor {
 
     // Convert to a direct representation of the tabular data
     @SuppressWarnings("unchecked")
-    private Object convertTabularDataDirectly(TabularData pTd, Stack<String> pExtraArgs, ObjectToJsonConverter pConverter)
+    private Object convertTabularDataDirectly(TabularData pTd, Deque<String> pExtraArgs, ObjectToJsonConverter pConverter)
             throws AttributeNotFoundException {
-        if (!pExtraArgs.empty()) {
+        if (!pExtraArgs.isEmpty()) {
             throw new IllegalArgumentException("Cannot use a path for converting tabular data with complex keys (" +
                                                pTd.getTabularType().getRowType() + ")");
         }
@@ -242,7 +241,7 @@ public class TabularDataExtractor implements Extractor {
         return ret;
     }
 
-    private CompositeData extractCompositeDataFromPath(TabularData pTd, Stack<String> pPathStack)
+    private CompositeData extractCompositeDataFromPath(TabularData pTd, Deque<String> pPathStack)
             throws AttributeNotFoundException {
         // We first try it as a key
         TabularType type = pTd.getTabularType();
@@ -264,7 +263,7 @@ public class TabularDataExtractor implements Extractor {
         }
     }
 
-    private void checkPathFitsIndexNames(Stack<String> pPathStack, List<String> pIndexNames) throws AttributeNotFoundException {
+    private void checkPathFitsIndexNames(Deque<String> pPathStack, List<String> pIndexNames) throws AttributeNotFoundException {
         if (pIndexNames.size() > pPathStack.size()) {
             StringBuilder buf = new StringBuilder();
             for (int i = 0; i < pIndexNames.size(); i++) {
@@ -309,13 +308,12 @@ public class TabularDataExtractor implements Extractor {
         }
     }
 
-    private Object convertMxBeanMapToJson(TabularData pTd, Stack<String> pExtraArgs, ObjectToJsonConverter pConverter)
+    private Object convertMxBeanMapToJson(TabularData pTd, Deque<String> pExtraArgs, ObjectToJsonConverter pConverter)
             throws AttributeNotFoundException {
         JSONObject ret = new JSONObject();
         for (Object rowObject : pTd.values()) {
             CompositeData row = (CompositeData) rowObject;
-            @SuppressWarnings("unchecked")
-            Stack<String> path = (Stack<String>) pExtraArgs.clone();
+            Deque<String> path = new LinkedList<>(pExtraArgs);
             Object keyObject = row.get("key");
             if (keyObject != null) {
                 try {

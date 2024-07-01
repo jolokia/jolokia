@@ -2,7 +2,7 @@ package org.jolokia.service.serializer.json;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
-import java.util.Stack;
+import java.util.Deque;
 
 import javax.management.AttributeNotFoundException;
 
@@ -41,7 +41,7 @@ public class DateExtractor implements Extractor {
     }
 
     /** {@inheritDoc} */
-    public Object extractObject(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pPathParts, boolean jsonify) throws AttributeNotFoundException {
+    public Object extractObject(ObjectToJsonConverter pConverter, Object pValue, Deque<String> pPathParts, boolean jsonify) throws AttributeNotFoundException {
         if (!jsonify) {
             return pValue;
         }

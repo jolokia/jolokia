@@ -18,20 +18,15 @@ package org.jolokia.service.jmx.handler;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.management.*;
 
-import org.jolokia.server.core.request.JolokiaExecRequest;
-import org.jolokia.server.core.request.JolokiaReadRequest;
 import org.jolokia.server.core.request.JolokiaRequestFactory;
 import org.jolokia.server.core.request.ProcessingParameters;
 import org.jolokia.server.core.service.serializer.Serializer;
-import org.jolokia.server.core.util.RequestType;
 import org.jolokia.service.serializer.JolokiaSerializer;
 import org.jolokia.server.core.request.JolokiaRequestBuilder;
 import org.jolokia.server.core.request.JolokiaWriteRequest;

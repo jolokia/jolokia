@@ -16,10 +16,8 @@ package org.jolokia.server.core.request;
  * limitations under the License.
  */
 
+import java.util.Deque;
 import java.util.Map;
-import java.util.Stack;
-
-import javax.management.MalformedObjectNameException;
 
 import org.jolokia.server.core.util.RequestType;
 
@@ -65,7 +63,7 @@ public class JolokiaVersionRequest extends JolokiaRequest {
     static RequestCreator<JolokiaVersionRequest> newCreator() {
         return new RequestCreator<>() {
             /** {@inheritDoc} */
-            public JolokiaVersionRequest create(Stack<String> pStack, ProcessingParameters pParams) {
+            public JolokiaVersionRequest create(Deque<String> pStack, ProcessingParameters pParams) {
                 return new JolokiaVersionRequest(pParams);
             }
 

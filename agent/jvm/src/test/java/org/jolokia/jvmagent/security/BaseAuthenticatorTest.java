@@ -15,7 +15,6 @@ package org.jolokia.jvmagent.security;/*
  * limitations under the License.
  */
 
-import java.util.Arrays;
 import java.util.Collections;
 
 import javax.security.auth.Subject;

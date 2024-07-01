@@ -90,7 +90,7 @@ public class MBeanInfoData {
     private final int maxDepth;
 
     // stack for an inner path
-    private final Stack<String> pathStack;
+    private final Deque<String> pathStack;
 
     // Map holding information
     private final Map infoMap = new JSONObject();
@@ -126,11 +126,10 @@ public class MBeanInfoData {
      *                   and is left untouched.
      * @param pUseCanonicalName whether to use canonical name in listings
      */
-    public MBeanInfoData(int pMaxDepth, Stack<String> pPathStack, boolean pUseCanonicalName, String pProvider) {
+    public MBeanInfoData(int pMaxDepth, Deque<String> pPathStack, boolean pUseCanonicalName, String pProvider) {
         maxDepth = pMaxDepth;
         useCanonicalName = pUseCanonicalName;
-        //noinspection unchecked
-        pathStack = pPathStack != null ? (Stack<String>) pPathStack.clone() : new Stack<>();
+        pathStack = pPathStack != null ? new LinkedList<>(pPathStack) : new LinkedList<>();
         this.pProvider = pProvider;
     }
 
@@ -181,11 +180,11 @@ public class MBeanInfoData {
         Map mBeansMap = getOrCreateJSONObject(infoMap, addProviderIfNeeded(pName.getDomain()));
         Map mBeanMap = getOrCreateJSONObject(mBeansMap, getKeyPropertyString(pName));
         // Trim down stack to get rid of domain/property list
-        Stack<String> stack = truncatePathStack(2);
-        if (stack.empty()) {
+        Deque<String> stack = truncatePathStack(2);
+        if (stack.isEmpty()) {
             addFullMBeanInfo(mBeanMap, mBeanInfo);
         } else {
-            addPartialMBeanInfo(mBeanMap, mBeanInfo,stack);
+            addPartialMBeanInfo(mBeanMap, mBeanInfo, stack);
         }
         // Trim if required
         if (mBeanMap.isEmpty()) {
@@ -292,8 +291,8 @@ public class MBeanInfoData {
         }
     }
 
-    private void addPartialMBeanInfo(Map pMBeanMap, MBeanInfo pMBeanInfo, Stack<String> pPathStack) {
-        String what = pPathStack.empty() ? null : pPathStack.pop();
+    private void addPartialMBeanInfo(Map pMBeanMap, MBeanInfo pMBeanInfo, Deque<String> pPathStack) {
+        String what = pPathStack.isEmpty() ? null : pPathStack.pop();
         DataUpdater updater = UPDATERS.get(what);
         if (updater != null) {
             updater.update(pMBeanMap, pMBeanInfo, pPathStack);
@@ -334,14 +333,13 @@ public class MBeanInfoData {
     }
 
     // Trim down the stack by some value or return an empty stack
-    private Stack<String> truncatePathStack(int pLevel) {
+    private Deque<String> truncatePathStack(int pLevel) {
         if (pathStack.size() < pLevel) {
-            return new Stack<>();
+            return new LinkedList<>();
         } else {
             // Trim of domain and MBean properties
             // pathStack gets cloned here since the processing will eat it up
-            @SuppressWarnings("unchecked")
-            Stack<String> ret = (Stack<String>) pathStack.clone();
+            Deque<String> ret = new LinkedList<>(pathStack);
             for (int i = 0;i < pLevel;i++) {
                 ret.pop();
             }

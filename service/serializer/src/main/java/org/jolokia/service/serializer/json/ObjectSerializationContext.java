@@ -42,7 +42,7 @@ class ObjectSerializationContext {
     ));
 
     private final Set<Object>   objectsInCallStack = new HashSet<>();
-    private final Stack<Object> callStack          = new Stack<>();
+    private final Deque<Object> callStack          = new LinkedList<>();
     private final SerializeOptions options;
 
     private int objectCount = 0;

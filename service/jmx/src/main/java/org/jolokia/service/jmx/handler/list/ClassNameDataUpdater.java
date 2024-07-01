@@ -15,8 +15,8 @@
  */
 package org.jolokia.service.jmx.handler.list;
 
+import java.util.Deque;
 import java.util.Map;
-import java.util.Stack;
 
 import javax.management.MBeanInfo;
 
@@ -38,7 +38,7 @@ class ClassNameDataUpdater extends DataUpdater {
      * */
      @Override
      @SuppressWarnings("rawtypes")
-     void update(Map pMap, MBeanInfo pMBeanInfo, Stack<String> pPathStack) {
+     void update(Map pMap, MBeanInfo pMBeanInfo, Deque<String> pPathStack) {
          verifyThatPathIsEmpty(pPathStack);
          //noinspection unchecked
          pMap.put(getKey(), pMBeanInfo.getClassName());

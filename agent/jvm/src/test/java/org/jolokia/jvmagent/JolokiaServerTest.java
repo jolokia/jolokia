@@ -35,7 +35,6 @@ import javax.net.ssl.*;
 import com.sun.net.httpserver.HttpServer;
 import org.jolokia.jvmagent.security.KeyStoreUtil;
 import org.jolokia.server.core.Version;
-import org.jolokia.server.core.service.api.JolokiaServiceManager;
 import org.jolokia.server.core.service.impl.JolokiaServiceManagerImpl;
 import org.jolokia.server.core.service.impl.JulLogHandler;
 import org.jolokia.server.core.util.Base64Util;

@@ -77,7 +77,7 @@ public class BeanExtractor implements Extractor {
     /** {@inheritDoc} */
     @SuppressWarnings("PMD.CompareObjectsWithEquals")
     public Object extractObject(ObjectToJsonConverter pConverter, Object pValue,
-                                Stack<String> pPathParts, boolean jsonify)
+                                Deque<String> pPathParts, boolean jsonify)
             throws AttributeNotFoundException {
         // Wrap fault handler if a wildcard path pattern is present
         ValueFaultHandler faultHandler = pConverter.getValueFaultHandler();
@@ -146,7 +146,7 @@ public class BeanExtractor implements Extractor {
 
     // =====================================================================================================
 
-    private Object exctractJsonifiedValue(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pPathParts)
+    private Object exctractJsonifiedValue(ObjectToJsonConverter pConverter, Object pValue, Deque<String> pPathParts)
             throws AttributeNotFoundException {
         Class<?> pClazz = pValue.getClass();
         if (pClazz.isPrimitive() || FINAL_CLASSES.contains(pClazz) || pValue instanceof JSONAware) {
@@ -170,12 +170,11 @@ public class BeanExtractor implements Extractor {
         }
     }
 
-    private Object extractBeanValues(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pPathParts, List<String> pAttributes) throws AttributeNotFoundException {
+    private Object extractBeanValues(ObjectToJsonConverter pConverter, Object pValue, Deque<String> pPathParts, List<String> pAttributes) throws AttributeNotFoundException {
         @SuppressWarnings("unchecked")
         Map<String, Object> ret = new JSONObject();
         for (String attribute : pAttributes) {
-            @SuppressWarnings("unchecked")
-            Stack<String> path = (Stack<String>) pPathParts.clone();
+            Deque<String> path = new LinkedList<>(pPathParts);
             try {
                 ret.put(attribute, extractJsonifiedPropertyValue(pConverter, pValue, attribute, path));
             } catch (ValueFaultHandler.AttributeFilteredException exp) {
@@ -190,7 +189,7 @@ public class BeanExtractor implements Extractor {
     }
 
     @SuppressWarnings("PMD.CompareObjectsWithEquals")
-    private Object extractJsonifiedPropertyValue(ObjectToJsonConverter pConverter, Object pValue, String pAttribute, Stack<String> pPathParts)
+    private Object extractJsonifiedPropertyValue(ObjectToJsonConverter pConverter, Object pValue, String pAttribute, Deque<String> pPathParts)
             throws AttributeNotFoundException {
         ValueFaultHandler faultHandler = pConverter.getValueFaultHandler();
         Object value = extractBeanPropertyValue(pValue, pAttribute, faultHandler);

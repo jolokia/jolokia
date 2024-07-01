@@ -147,7 +147,7 @@ public class JolokiaReadRequest extends JolokiaObjectNameRequest {
     static RequestCreator<JolokiaReadRequest> newCreator() {
         return new RequestCreator<>() {
             /** {@inheritDoc} */
-            public JolokiaReadRequest create(Stack<String> pStack, ProcessingParameters pParams) throws MalformedObjectNameException {
+            public JolokiaReadRequest create(Deque<String> pStack, ProcessingParameters pParams) throws MalformedObjectNameException {
                 return new JolokiaReadRequest(
                         pStack.pop(),  // object name
                         popOrNull(pStack), // attribute(s) (can be null)

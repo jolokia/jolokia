@@ -36,7 +36,7 @@ public class JolokiaNotificationRequestTest {
     @Test
     public void testSimpleStack() throws Exception {
         RequestCreator<JolokiaNotificationRequest> creator = JolokiaNotificationRequest.newCreator();
-        Stack<String> args = new Stack<>();
+        Deque<String> args = new LinkedList<>();
         args.push("register");
         JolokiaNotificationRequest request = creator.create(args,getParams());
 

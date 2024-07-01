@@ -13,7 +13,7 @@ import java.io.File;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Stack;
+import java.util.LinkedList;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -44,35 +44,35 @@ public class SimplifiersTest {
     @Test
     public void bigIntegerSimplifier() throws AttributeNotFoundException {
         BigInteger bigInt = new BigInteger("12345678901234567890");
-        Object result = bigIntegerSimplifier.extractObject(converter, bigInt, new Stack<>(), false);
+        Object result = bigIntegerSimplifier.extractObject(converter, bigInt, new LinkedList<>(), false);
         assertEquals(result, bigInt);
     }
 
     @Test
     public void bigIntegerSimplifierJson() throws AttributeNotFoundException {
         BigInteger bigInt = new BigInteger("12345678901234567890");
-        Object result = bigIntegerSimplifier.extractObject(converter, bigInt, new Stack<>(), true);
+        Object result = bigIntegerSimplifier.extractObject(converter, bigInt, new LinkedList<>(), true);
         assertEquals(result.toString(), "{\"bigint\":\"12345678901234567890\"}");
     }
 
     @Test
     public void urlSimplifier() throws AttributeNotFoundException, MalformedURLException {
         URL url = new URL("https://www.jolokia.org");
-        Object result = urlSimplifier.extractObject(converter, url, new Stack<>(), false);
+        Object result = urlSimplifier.extractObject(converter, url, new LinkedList<>(), false);
         assertEquals(result, url);
     }
 
     @Test
     public void fileSimplifier() throws AttributeNotFoundException {
         File file = new File("/etc/os-release");
-        Object result = fileSimplifier.extractObject(converter, file, new Stack<>(), true);
+        Object result = fileSimplifier.extractObject(converter, file, new LinkedList<>(), true);
         assertTrue(result.toString().contains("{\"name\":\"os-release\""));
     }
 
     @Test
     public void urlSimplifierJson() throws AttributeNotFoundException, MalformedURLException {
         URL url = new URL("https://www.jolokia.org");
-        Object result = urlSimplifier.extractObject(converter, url, new Stack<>(), true);
+        Object result = urlSimplifier.extractObject(converter, url, new LinkedList<>(), true);
         assertEquals(result.toString(), "{\"url\":\"https:\\/\\/www.jolokia.org\"}");
     }
 

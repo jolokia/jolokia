@@ -41,7 +41,7 @@ abstract class RequestCreator<R extends JolokiaRequest> {
      * @return the created request object
      * @throws MalformedObjectNameException if an object name could not be created
      */
-    abstract R create(Stack<String> pStack, ProcessingParameters pParams)
+    abstract R create(Deque<String> pStack, ProcessingParameters pParams)
             throws MalformedObjectNameException;
 
     /**
@@ -62,7 +62,7 @@ abstract class RequestCreator<R extends JolokiaRequest> {
      * @param pElements stack from where to extract extra elements
      * @return the remaining elements as list (but never null).
      */
-    protected List<String> prepareExtraArgs(Stack<String> pElements) {
+    protected List<String> prepareExtraArgs(Deque<String> pElements) {
         if (pElements == null || pElements.isEmpty()) {
             return null;
         }
@@ -81,7 +81,7 @@ abstract class RequestCreator<R extends JolokiaRequest> {
      * @param stack stack to examine
      * @return null or top element
      */
-    protected String popOrNull(Stack<String> stack) {
+    protected String popOrNull(Deque<String> stack) {
         if (stack != null && !stack.isEmpty()) {
             return stack.pop();
         } else {

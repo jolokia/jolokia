@@ -1,7 +1,7 @@
 package org.jolokia.service.serializer.json;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Stack;
+import java.util.Deque;
 
 import javax.management.AttributeNotFoundException;
 
@@ -21,7 +21,7 @@ public class EnumExtractor implements Extractor {
     }
 
     /** {@inheritDoc} */
-    public Object extractObject(ObjectToJsonConverter pConverter, Object pValue, Stack<String> pPathPart, boolean jsonify) throws AttributeNotFoundException {
+    public Object extractObject(ObjectToJsonConverter pConverter, Object pValue, Deque<String> pPathPart, boolean jsonify) throws AttributeNotFoundException {
         String pathPart = pPathPart.isEmpty() ? null : pPathPart.pop();
         Enum<?> en = (Enum<?>) pValue;
         String name = en.name();
