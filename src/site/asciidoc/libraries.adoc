@@ -111,7 +111,7 @@ One module provides core Jolokia functionality:
 |It's roughly the same as Jolokia 1 `jolokia-core` but without serializers, request dispatchers and additional services (like history or discovery)
 |===
 
-Core Jolokia library is extended with pluggable services which are implemented in service modules and discovered using a method similar to `java.util.ServiceLoader` with additiona features.
+Core Jolokia library is extended with pluggable services which are implemented in service modules and discovered using a method similar to `java.util.ServiceLoader` with additional features.
 
 These services are declared in `/META-INF/jolokia/<kind>[-default]` files:
 
@@ -164,6 +164,17 @@ Core Jolokia library discovers services in libraries available on `CLASSPATH`.
 |`jolokia-service-serializer`
 |Mandatory service that is used to convert Java objects into JSON representation.
 |===
+
+Sometimes we want to select which detected services are actually _enabled_. We can configure which services to use with the help if these configuration options:
+
+* `enabledServices` - a comma-separated list of fully-qualified class names. If this configuration option is specified and is not empty, only the services from this list will be actually used.
+* `disabledServices` - a comma-separated list of fully-qualified class names. If this configuration option is specified and is not empty, all detected services (from `/META-INF/jolokia/services(-default)`) will be filtered to not include the disabled services.
+
+This additional configuration (since 2.1.0) allows to use existing `jolokia-agent-jvm-{jolokia-version}-javaagent.jar` with all services declared in `/META-INF/jolokia/services-default` and select what is actually needed in specific scenario.
+
+NOTE:: `disabledServices` option takes precedence (because the default behavior is to use all detected services). And we rather want to narrow down detected services, than pick up the ones we want.
+
+Since Jolokia 2.1.0, server detectors (which help locating `javax.management.MBeanServer` instances in several application servers) can be disabled using `disableDetectors` option, because we may simply run Jolokia agent for standalone Java application.
 
 .Agent modules
 

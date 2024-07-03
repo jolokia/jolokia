@@ -82,4 +82,14 @@ public interface JolokiaServiceManager  {
      * on all static and dynamic services. The Jolokia context returned on start is not valid anymore.
      */
     void stop();
+
+    /**
+     * A method to determine whether (based on configuration) a service class, previously detected from classpath
+     * scanning (and/or {@code /META-INF/jolokia/services(-default)}) is actually enabled
+     *
+     * @param serviceClassName
+     * @return
+     */
+    boolean isServiceEnabled(String serviceClassName);
+
 }

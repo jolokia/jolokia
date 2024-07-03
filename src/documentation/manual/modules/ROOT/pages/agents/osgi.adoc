@@ -259,6 +259,18 @@ options used by detectors for post-initialization steps. See the description of
 `detectorOptions` in
 xref:agents/war.adoc#agent-war-init-params[Servlet init parameters] for details.
 
+|`org.jolokia.enabledServices`
+|
+|A comma-separated list of fully-qualified class names. If this configuration option is specified and is not empty, only the services from this list will be actually used.
+
+|`org.jolokia.disabledServices`
+|
+|A comma-separated list of fully-qualified class names. If this configuration option is specified and is not empty, all detected services (from `/META-INF/jolokia/services(-default)`) will be filtered to not include the disabled services.
+
+|`org.jolokia.disableDetectors`
+|false
+|A flag that disables usage of `org.jolokia.server.core.detector.ServerDetector` services alltogether.
+
 |`org.jolokia.discoveryEnabled`
 |`false`
 |If set to `true` then this servlet will

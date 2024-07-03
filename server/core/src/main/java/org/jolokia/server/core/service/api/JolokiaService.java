@@ -60,4 +60,20 @@ public interface JolokiaService<T extends JolokiaService<?>> extends Comparable<
      * @param pJolokiaContext the jolokia context used
      */
     void init(JolokiaContext pJolokiaContext);
+
+    /**
+     * <p>Checks whether the detected service is enabled. If not enabled, it won't be added to service list
+     * and won't be initialized.</p>
+     *
+     * <p>In Jolokia 2, services are detected using {@code /META-INF/jolokia/services(-default)} files. However
+     * when using prepackaged distros (like jolokia-agent-jvm with {@code javaagent} classifier), we already
+     * have all the services declared in
+     * {@code jolokia-agent-jvm-<version>-javaagent.jar!/META-INF/jolokia/services-default}. However we need
+     * a way to disable detected services through configuration.</p>
+     *
+     * @param pContext context which can be used to determine whether the service is enabled
+     * @return {@code true} if the service (<em>extension</em>) should be used.
+     */
+    boolean isEnabled(JolokiaContext pContext);
+
 }

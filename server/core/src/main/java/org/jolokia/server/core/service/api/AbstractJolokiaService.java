@@ -76,6 +76,11 @@ public abstract class AbstractJolokiaService<T extends JolokiaService<?>> implem
         jolokiaContext = pJolokiaContext;
     }
 
+    @Override
+    public boolean isEnabled(JolokiaContext pContext) {
+        return pContext.isServiceEnabled(this.getClass().getName());
+    }
+
     /** {@inheritDoc} */
     public int compareTo(T pOtherService) {
         int ret = getOrder() - pOtherService.getOrder();

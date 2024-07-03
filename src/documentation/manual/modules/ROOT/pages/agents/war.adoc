@@ -230,6 +230,18 @@ detection of an application server. See below for an
 explanation.
 |
 
+|`enabledServices`
+|A comma-separated list of fully-qualified class names. If this configuration option is specified and is not empty, only the services from this list will be actually used.
+|
+
+|`disabledServices`
+|A comma-separated list of fully-qualified class names. If this configuration option is specified and is not empty, all detected services (from `/META-INF/jolokia/services(-default)`) will be filtered to not include the disabled services.
+|
+
+|`disableDetectors`
+|A flag that disables usage of `org.jolokia.server.core.detector.ServerDetector` services alltogether. Can be used when running Jolokia as an agent for standalone Java applicatin (µservices).
+|false
+
 |`discoveryEnabled`
 |If set to `true` then this servlet will
 listen for multicast request (multicast-group 239.192.48.84,
