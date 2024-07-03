@@ -189,8 +189,10 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
     /** {@inheritDoc} */
     public synchronized JolokiaContext start() {
         if (!isInitialized) {
-
-            SortedSet<ServerDetector> detectors = detectorLookup.lookup();
+            SortedSet<ServerDetector> detectors = new TreeSet<>();
+            if (!Boolean.parseBoolean(configuration.getConfig(ConfigKey.DISABLE_DETECTORS))) {
+                detectors = detectorLookup.lookup();
+            }
             mbeanServerAccess = createMBeanServerAccess(detectors);
             ServerHandle handle = detect(getDetectorOptions(),detectors,mbeanServerAccess);
             agentDetails = new AgentDetails(configuration,handle);

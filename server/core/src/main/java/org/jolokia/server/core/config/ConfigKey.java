@@ -324,6 +324,11 @@ public enum ConfigKey {
     HTTP_SERVICE_FILTER("httpServiceFilter",true,false),
 
     /**
+     * With this option we can disabled usage of {@link org.jolokia.server.core.detector.ServerDetector server detectors}.
+     */
+    DISABLE_DETECTORS("disableDetectors", true, false, Constants.FALSE),
+
+    /**
      * Extra options passed to a server handle after it has been detected. The value
      * must be a JSON object with the product name as key and another JSON object as value containing
      * the specific handle configuration.

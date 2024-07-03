@@ -25,7 +25,7 @@
   <body>
     <release version="2.1.0" description="Release 2.1.0" date="2024-?">
       <action dev="grgrzybek" type="fix" issue="698">
-        Detected classpath services can be enabled/disabled in configuration
+        Detected classpath services and server detectors can be enabled/disabled in configuration.
       </action>
     </release>
     <release version="2.0.3" description="Release 2.0.3" date="2024-06-06">

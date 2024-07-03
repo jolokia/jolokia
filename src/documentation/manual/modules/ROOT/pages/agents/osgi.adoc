@@ -267,6 +267,10 @@ xref:agents/war.adoc#agent-war-init-params[Servlet init parameters] for details.
 |
 |A comma-separated list of fully-qualified class names. If this configuration option is specified and is not empty, all detected services (from `/META-INF/jolokia/services(-default)`) will be filtered to not include the disabled services.
 
+|`org.jolokia.disableDetectors`
+|false
+|A flag that disables usage of `org.jolokia.server.core.detector.ServerDetector` services alltogether.
+
 |`org.jolokia.discoveryEnabled`
 |`false`
 |If set to `true` then this servlet will
