@@ -73,6 +73,11 @@ public abstract class AbstractServerDetector implements ServerDetector {
 
     }
 
+    @Override
+    public boolean isEnabled(JolokiaContext pContext) {
+        return true;
+    }
+
     protected Object getConfig(String pKey) {
         if (config == null) {
             return null;

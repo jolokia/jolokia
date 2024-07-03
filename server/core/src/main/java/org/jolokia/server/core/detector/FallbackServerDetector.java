@@ -31,6 +31,11 @@ class FallbackServerDetector implements ServerDetector {
     public void init(JolokiaContext context) { }
 
     /** {@inheritDoc} */
+    public boolean isEnabled(JolokiaContext pContext) {
+        return true;
+    }
+
+    /** {@inheritDoc} */
     public void destroy() throws Exception { }
 
     /**

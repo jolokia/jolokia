@@ -113,4 +113,14 @@ public interface JolokiaContext extends LogHandler, Restrictor {
      * @return the executor to use
      */
     MBeanServerAccess getMBeanServerAccess();
+
+    /**
+     * A method to determine whether (based on configuration) a service class, previously detected from classpath
+     * scanning (and/or {@code /META-INF/jolokia/services(-default)}) is actually enabled
+     *
+     * @param serviceClassName
+     * @return
+     */
+    boolean isServiceEnabled(String serviceClassName);
+
 }

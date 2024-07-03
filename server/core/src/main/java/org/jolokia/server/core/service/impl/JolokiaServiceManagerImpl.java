@@ -17,6 +17,7 @@
 package org.jolokia.server.core.service.impl;
 
 import java.util.*;
+import java.util.stream.*;
 
 import javax.management.*;
 
@@ -67,9 +68,9 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
     private final List<JolokiaServiceLookup> serviceLookups;
 
     // Instantiated services, categorized by type and ordered;
-    private final Map<Class<? extends JolokiaService<?>>,SortedSet<? extends JolokiaService<?>>> staticServices;
+    private final Map<Class<? extends JolokiaService<?>>, SortedSet<? extends JolokiaService<?>>> staticServices;
 
-    // The lowest order service registered
+    // The lowest order service registered - includes lowest order (highest priority) services from staticServices
     private final Map<Class<? extends JolokiaService<?>>, JolokiaService<?>> staticLowServices;
 
     // Jolokia context connecting to this manager
@@ -84,6 +85,17 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
     private final DebugStore debugStore;
 
     private ObjectName mBeanServerHandlerName;
+
+    /**
+     * Set of enabled services (by class name) narrowing down detected services to explicitly configured ones.
+     */
+    private Set<String> enabledServices;
+
+    /**
+     * Set of disabled services (by class name) narrowing down detected services to all <em>but</em> the ones
+     * disabled. Has higher priority than {@link #enabledServices}.
+     */
+    private Set<String> disabledServices;
 
     /**
      * Create the implementation of a service manager
@@ -112,8 +124,12 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
         // DebugStore is also a service, so we can integrate it with JolokiaContext
         debugStore = new DebugStore();
         addService(debugStore);
-    }
 
+        // prepare configuration of enabled/disabled services - even if they may be added later before start()
+        configureEnabledServices();
+
+        // user may call addServices(JolokiaServiceCreator) now before calling start()
+    }
 
     /**
      * Get the overall configuration
@@ -197,18 +213,29 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
 
             // Initialize all services in the proper order
             List<Class<? extends JolokiaService<?>>> serviceTypes = getServiceTypes();
-            for (Class<? extends JolokiaService<?>> serviceType : serviceTypes) {
+            for (Iterator<Class<? extends JolokiaService<?>>> it1 = serviceTypes.iterator(); it1.hasNext(); ) {
+                Class<? extends JolokiaService<?>> serviceType = it1.next();
                 // Initialize services
                 Set<? extends JolokiaService<?>> services = staticServices.get(serviceType);
                 if (services != null) {
-                    for (JolokiaService<?> service : services) {
-                        service.init(jolokiaContext);
+                    for (Iterator<? extends JolokiaService<?>> it2 = services.iterator(); it2.hasNext(); ) {
+                        JolokiaService<?> service = it2.next();
+                        if (service.isEnabled(jolokiaContext)) {
+                            service.init(jolokiaContext);
+                        } else {
+                            it2.remove();
+                        }
+                    }
+                    if (services.isEmpty()) {
+                        it1.remove();
                     }
                 }
             }
+            staticLowServices.values().removeIf(value -> !isServiceEnabled(value.getClass().getName()));
 
             // All dynamic service factories are initialized as well. The factory itself is responsible
             // for initializing any new services coming in with the JolokiaContext
+            // for now, only OSGi allows such dynamic services
             for (JolokiaServiceLookup lookup : serviceLookups) {
                 lookup.init(jolokiaContext);
             }
@@ -272,7 +299,7 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
 
     /**
      * Get a single service. If more than one service of the given type has been
-     * registered, return the one with the highest order. If no one has been registered
+     * registered, return the one with the lowest order (highest priority). If no one has been registered
      * return <code>null</code>
      *
      * @param pType requested service type
@@ -291,6 +318,16 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
             }
         }
         return ret;
+    }
+
+    /** {@inheritDoc} */
+    public boolean isServiceEnabled(String serviceClassName) {
+        if (disabledServices != null) {
+            return !disabledServices.contains(serviceClassName);
+        } else if (enabledServices != null) {
+            return enabledServices.contains(serviceClassName);
+        }
+        return true;
     }
 
     // Access to merged MBean servers
@@ -418,5 +455,17 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
         mbeanRegistry.unregisterMBean(pObjectName);
     }
 
+    private void configureEnabledServices() {
+        String enabledServices = configuration.getConfig(ConfigKey.ENABLED_SERVICES);
+        String disabledServices = configuration.getConfig(ConfigKey.DISABLED_SERVICES);
+
+        if (disabledServices != null && !disabledServices.trim().isEmpty()) {
+            this.disabledServices = Arrays.stream(disabledServices.split("\\s*,\\s*"))
+                .map(String::trim).collect(Collectors.toUnmodifiableSet());
+        } else if (enabledServices != null && !enabledServices.trim().isEmpty()) {
+            this.enabledServices = Arrays.stream(enabledServices.split("\\s*,\\s*"))
+                .map(String::trim).collect(Collectors.toUnmodifiableSet());
+        }
+    }
 
 }

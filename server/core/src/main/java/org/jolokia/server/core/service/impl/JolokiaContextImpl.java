@@ -97,6 +97,11 @@ public class JolokiaContextImpl implements JolokiaContext {
     }
 
     /** {@inheritDoc} */
+    public boolean isServiceEnabled(String serviceClassName) {
+        return serviceManager.isServiceEnabled(serviceClassName);
+    }
+
+    /** {@inheritDoc} */
     public boolean isDebug() {
         return getLog().isDebug() || debugStore != null && debugStore.isDebug();
     }

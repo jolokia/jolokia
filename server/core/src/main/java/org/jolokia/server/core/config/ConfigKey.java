@@ -276,7 +276,7 @@ public enum ConfigKey {
     /**
      * Whether to ignore CERTS when doing a dispatching authentication (authMode == delegate)
      */
-    AUTH_IGNORE_CERTS("authIgnoreCerts",true,false,"false"),
+    AUTH_IGNORE_CERTS("authIgnoreCerts",true,false,Constants.FALSE),
 
     /**
      * Context used for agent, used e.g. in the OSGi activator
@@ -358,7 +358,20 @@ public enum ConfigKey {
      * this can be used by clients to provide additional information to
      * the user.
      */
-    AGENT_DESCRIPTION("agentDescription",true,false);
+    AGENT_DESCRIPTION("agentDescription",true,false),
+
+    /**
+     * Comma-separated list of fully qualified class names for services that should be enabled. If not-empty,
+     * this is a enabled-list of services which narrows the list of all the services
+     * detected from {@code /META-INF/jolokia/services(-default)}.
+     */
+    ENABLED_SERVICES("enabledServices", true, false),
+
+    /**
+     * Comma-separated list of fully qualified class names for services that should be disabled even if
+     * they are detected from {@code /META-INF/jolokia/services(-default)}.
+     */
+    DISABLED_SERVICES("disabledServices", true, false);
 
     /**
      * JAAS Subject to attach to an HTTP request as attribute if JAAS based authentication is in use.

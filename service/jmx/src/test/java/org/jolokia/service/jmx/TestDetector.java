@@ -78,6 +78,11 @@ public class TestDetector implements ServerDetector {
 
     }
 
+    @Override
+    public boolean isEnabled(JolokiaContext pContext) {
+        return true;
+    }
+
     public void destroy() {
 
     }
