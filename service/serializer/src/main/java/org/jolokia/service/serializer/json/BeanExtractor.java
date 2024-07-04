@@ -10,12 +10,12 @@ import java.util.*;
 
 import javax.management.AttributeNotFoundException;
 
+import org.jolokia.server.core.util.JSONAware;
 import org.jolokia.service.serializer.object.StringToObjectConverter;
 import org.jolokia.server.core.service.serializer.ValueFaultHandler;
 import org.jolokia.server.core.util.EscapeUtil;
 
-import org.json.simple.JSONAware;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -102,10 +102,10 @@ public class BeanExtractor implements Extractor {
     public Object setObjectValue(StringToObjectConverter pConverter,Object pInner, String pAttribute, Object pValue)
             throws IllegalAccessException, InvocationTargetException {
         // Move this to plain object handler
-        String rest = new StringBuilder(pAttribute.substring(0,1).toUpperCase())
-                .append(pAttribute.substring(1)).toString();
-        String setter = new StringBuilder("set").append(rest).toString();
-        String getter = new StringBuilder("get").append(rest).toString();
+        String rest = pAttribute.substring(0, 1).toUpperCase() +
+            pAttribute.substring(1);
+        String setter = "set" + rest;
+        String getter = "get" + rest;
 
         Class<?> clazz = pInner.getClass();
         Method found = null;
@@ -171,8 +171,7 @@ public class BeanExtractor implements Extractor {
     }
 
     private Object extractBeanValues(ObjectToJsonConverter pConverter, Object pValue, Deque<String> pPathParts, List<String> pAttributes) throws AttributeNotFoundException {
-        @SuppressWarnings("unchecked")
-        Map<String, Object> ret = new JSONObject();
+        JSONObject ret = new JSONObject();
         for (String attribute : pAttributes) {
             Deque<String> path = new LinkedList<>(pPathParts);
             try {
@@ -247,8 +246,8 @@ public class BeanExtractor implements Extractor {
                 // Only for getter compliant to the beans conventions (first letter after prefix is upper case)
                 if (firstLetter.toUpperCase().equals(firstLetter)) {
                     String attribute =
-                            new StringBuffer(firstLetter.toLowerCase()).
-                                    append(name.substring(len+1)).toString();
+                        firstLetter.toLowerCase() +
+                            name.substring(len + 1);
                     pAttrs.add(attribute);
                 }
             }
@@ -261,10 +260,10 @@ public class BeanExtractor implements Extractor {
 
         Method method = null;
 
-        String suffix = new StringBuilder(pAttribute.substring(0,1).toUpperCase()).append(pAttribute.substring(1)).toString();
+        String suffix = pAttribute.substring(0, 1).toUpperCase() + pAttribute.substring(1);
         for (String pref : GETTER_PREFIX) {
             try {
-                String methodName = new StringBuilder(pref).append(suffix).toString();
+                String methodName = pref + suffix;
                 method = clazz.getMethod(methodName);
             } catch (NoSuchMethodException e) {
                 // Try next one
@@ -276,10 +275,9 @@ public class BeanExtractor implements Extractor {
         // Finally, try the attribute name directly
         if (method == null) {
             try {
-                method = clazz.getMethod(new StringBuilder(pAttribute.substring(0,1).toLowerCase())
-                        .append(pAttribute.substring(1)).toString());
-            } catch (NoSuchMethodException exp) {
-                method = null;
+                method = clazz.getMethod(pAttribute.substring(0, 1).toLowerCase() +
+                    pAttribute.substring(1));
+            } catch (NoSuchMethodException ignored) {
             }
         }
         if (method == null) {

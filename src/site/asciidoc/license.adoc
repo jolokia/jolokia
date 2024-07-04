@@ -31,8 +31,8 @@ but please don't reuse it for something different than Jolokia.
 Jolokia uses some 3rd party software, which is delivered as part of
 the agents. These are
 
-* https://code.google.com/archive/p/json-simple/[json-simple,role=externalLink,window=_blank] released
-under the Apache License 2.0 as well.
+* https://github.com/stleary/JSON-java[json.jar,role=externalLink,window=_blank] released
+under the Public Domain as well.
 * The reference guide is using https://antora.org/[Antora site generator,role=externalLink,window=_blank]
 * The reference guide's stylesheets are using https://gitlab.com/antora/antora-ui-default[Antora Default UI,role=externalLink,window=_blank] with minor CSS changes
 * `jolokia-client-kubernetes` is using https://github.com/fabric8io/kubernetes-client/[Fabric8 Kubernetes Client,role=externalLink,window=_blank] under the Apache License 2.0

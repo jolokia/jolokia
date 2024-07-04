@@ -6,7 +6,7 @@ import java.util.Map;
 import javax.management.ObjectName;
 
 import org.jolokia.server.core.service.serializer.ValueFaultHandler;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -28,7 +28,7 @@ public class MapExtractorTest extends AbstractExtractorTest {
     @Test
     public void testSimple() throws Exception {
         JSONObject object = (JSONObject) extractJson(map);
-        assertEquals(object.size(),4);
+        assertEquals(object.length(),4);
         assertTrue((Boolean) object.get("vier"));
     }
 
@@ -45,7 +45,7 @@ public class MapExtractorTest extends AbstractExtractorTest {
     @Test
     public void testWithWildcardPath() throws Exception {
         JSONObject result = (JSONObject) extractJson(map,null,"domain");
-        assertEquals(result.size(), 1);
+        assertEquals(result.length(), 1);
         assertEquals(result.get("drei"),"test");
     }
 

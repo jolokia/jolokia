@@ -20,7 +20,7 @@ import java.util.*;
 
 import org.jolokia.server.core.util.EscapeUtil;
 import org.jolokia.server.core.util.RequestType;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 import org.testng.annotations.*;
 
 import static org.jolokia.server.core.request.JolokiaRequestBuilder.createMap;
@@ -115,7 +115,7 @@ public class JolokiaRequestTest {
         }) {
             assertTrue(req.isMultiAttributeMode());
 
-            for (List<?> list : new List[] { (List<?>) req.toJSON().get("attribute"), req.getAttributeNames() }) {
+            for (List<?> list : new List[] {req.toJSON().getJSONArray("attribute").toList(), req.getAttributeNames() }) {
                 assertEquals(list.size(), 2);
                 assertTrue(list.contains("Heap/Memory/Usage"));
                 assertTrue(list.contains("NonHeapMemoryUsage"));
@@ -147,7 +147,7 @@ public class JolokiaRequestTest {
             assertFalse(req.isMultiAttributeMode());
             assertFalse(req.hasAttribute());
             assertNull(req.getAttributeName());
-            for (List<?> list : new List[] { (List<?>) req.toJSON().get("attribute"), req.getAttributeNames() }) {
+            for (List<?> list : new List[] { (List<?>) req.toJSON().opt("attribute"), req.getAttributeNames() }) {
                 assertNull(list);
             }
         }
@@ -236,7 +236,7 @@ public class JolokiaRequestTest {
             verify(req,"operation","operation");
             verify(req, "mbean", "java.lang:type=Runtime");
             JSONObject json = req.toJSON();
-            List<?> args2 = (List<?>) json.get("arguments");
+            List<?> args2 = json.getJSONArray("arguments").toList();
             assertNull(args2.get(0));
             assertEquals(args2.get(1),"");
             assertEquals(args2.get(2),"normal");

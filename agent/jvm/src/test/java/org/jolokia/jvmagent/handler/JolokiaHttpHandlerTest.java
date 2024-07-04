@@ -35,9 +35,8 @@ import org.jolokia.server.core.request.JolokiaRequestBuilder;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.serializer.Serializer;
 import org.jolokia.server.core.util.*;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.testng.annotations.*;
 
 import static org.easymock.EasyMock.anyInt;
@@ -136,16 +135,16 @@ public class JolokiaHttpHandlerTest {
     }
 
     @Test
-    public void testInvalidCallbackGetStreaming() throws IOException, URISyntaxException, ParseException {
+    public void testInvalidCallbackGetStreaming() throws IOException, URISyntaxException, JSONException {
         checkInvalidCallback(true);
     }
 
     @Test
-    public void testInvalidCallbackGetNonStreaming() throws IOException, URISyntaxException, ParseException {
+    public void testInvalidCallbackGetNonStreaming() throws IOException, URISyntaxException, JSONException {
         checkInvalidCallback(false);
     }
 
-    private void checkInvalidCallback(boolean streaming) throws URISyntaxException, IOException, ParseException {
+    private void checkInvalidCallback(boolean streaming) throws URISyntaxException, IOException, JSONException {
         JolokiaContext ctx = new TestJolokiaContext.Builder()
             .config(ConfigKey.SERIALIZE_EXCEPTION, Boolean.toString(streaming))
             .build();
@@ -162,8 +161,8 @@ public class JolokiaHttpHandlerTest {
 
         assertEquals(header.getFirst("content-type"),"text/plain; charset=utf-8");
         String result = out.toString(StandardCharsets.UTF_8);
-        JSONObject resp = (JSONObject) new JSONParser().parse(result);
-        assertTrue(resp.containsKey("error"));
+        JSONObject resp = JSONAware.parse(new StringReader(result)).getObject();
+        assertTrue(resp.has("error"));
         assertEquals(resp.get("error_type"), IllegalArgumentException.class.getName());
         assertTrue(((String) resp.get("error")).contains("callback"));
         assertFalse(((String) resp.get("error")).contains("evilCallback"));
@@ -205,7 +204,7 @@ public class JolokiaHttpHandlerTest {
     }
 
     @Test
-    public void invalidMethod() throws URISyntaxException, IOException, ParseException {
+    public void invalidMethod() throws URISyntaxException, IOException, JSONException {
         HttpExchange exchange = prepareExchange("http://localhost:8080/");
 
         // Simple GET method
@@ -214,8 +213,8 @@ public class JolokiaHttpHandlerTest {
         ByteArrayOutputStream out = prepareResponse(exchange, header);
         handler.handle(exchange);
 
-        JSONObject resp = (JSONObject) new JSONParser().parse(out.toString());
-        assertTrue(resp.containsKey("error"));
+        JSONObject resp = JSONAware.parse(new StringReader(out.toString())).getObject();
+        assertTrue(resp.has("error"));
         assertEquals(resp.get("error_type"), IllegalArgumentException.class.getName());
         assertTrue(((String) resp.get("error")).contains("PUT"));
     }
@@ -261,7 +260,7 @@ public class JolokiaHttpHandlerTest {
     }
 
     @Test
-    public void usingStreamingJSON() throws IOException, URISyntaxException, ParseException, NoSuchFieldException, IllegalAccessException {
+    public void usingStreamingJSON() throws IOException, URISyntaxException, JSONException, NoSuchFieldException, IllegalAccessException {
         handler = new JolokiaHttpHandler(getContext(ConfigKey.STREAMING, "true"));
         injectRequestDispatcher(handler,requestDispatcher);
 
@@ -275,8 +274,8 @@ public class JolokiaHttpHandlerTest {
         String result = out.toString(StandardCharsets.UTF_8);
 
         assertNull(header.getFirst("Content-Length"));
-        JSONObject resp = (JSONObject) new JSONParser().parse(result);
-        assertTrue(resp.containsKey("value"));
+        JSONObject resp = JSONAware.parse(new StringReader(result)).getObject();
+        assertTrue(resp.has("value"));
     }
 
     private HttpExchange prepareExchange(String pUri) throws URISyntaxException {

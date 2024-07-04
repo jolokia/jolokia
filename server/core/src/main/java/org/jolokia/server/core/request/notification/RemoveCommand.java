@@ -17,9 +17,8 @@
 package org.jolokia.server.core.request.notification;
 
 import java.util.Deque;
-import java.util.Map;
 
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 /**
  * Remove a listener by its handle
@@ -51,9 +50,9 @@ public class RemoveCommand extends ClientCommand {
      *
      * @param pMap request map
      */
-    RemoveCommand(Map<String, ?> pMap) {
+    RemoveCommand(JSONObject pMap) {
         super(NotificationCommandType.REMOVE, pMap);
-        handle = (String) pMap.get("handle");
+        handle = (String) pMap.opt("handle");
         if (handle == null) {
             throw new IllegalArgumentException("No notification handle given for " + NotificationCommandType.REMOVE);
         }
@@ -63,7 +62,6 @@ public class RemoveCommand extends ClientCommand {
         return handle;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public JSONObject toJSON() {
         JSONObject ret = super.toJSON();

@@ -23,7 +23,6 @@ import javax.management.*;
 
 import org.jolokia.server.core.config.*;
 import org.jolokia.server.core.restrictor.AllowAllRestrictor;
-import org.jolokia.server.core.service.api.ServerHandle;
 import org.jolokia.server.core.service.api.*;
 import org.jolokia.server.core.service.impl.StdoutLogHandler;
 import org.jolokia.server.core.service.serializer.Serializer;

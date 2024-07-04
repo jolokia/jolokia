@@ -17,12 +17,13 @@ package org.jolokia.client.request;
  */
 
 import java.io.File;
+import java.io.StringReader;
 import java.util.*;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.jolokia.client.util.JSONAware;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -55,7 +56,7 @@ public class JsonSerializationTest {
         assertTrue(result instanceof JSONArray);
         JSONArray res = (JSONArray) result;
         assertEquals(res.get(0),1);
-        assertEquals(res.size(),3);
+        assertEquals(res.length(),3);
     }
 
     @Test
@@ -75,12 +76,12 @@ public class JsonSerializationTest {
         Object result = serialize(arg);
         assertTrue(result instanceof JSONArray);
         JSONArray res = (JSONArray) result;
-        assertEquals(res.size(), 1);
+        assertEquals(res.length(), 1);
         assertEquals(res.get(0), true);
     }
 
     @Test
-    public void complexSerialization() throws ParseException {
+    public void complexSerialization() throws JSONException {
         Map<String, Object> arg = new HashMap<>();
         List<Object> inner = new ArrayList<>();
         inner.add(null);
@@ -96,17 +97,17 @@ public class JsonSerializationTest {
         assertEquals(res.get("first"), "fcn");
         assertTrue(res.get("second") instanceof JSONArray);
         JSONArray arr = (JSONArray) res.get("second");
-        assertEquals(arr.size(), 5);
-        assertNull(arr.get(0));
+        assertEquals(arr.length(), 5);
+        assertNull(arr.opt(0));
         assertEquals(arr.get(1), "tmp");
         assertEquals(arr.get(2), 10);
         assertEquals(arr.get(3), 42.0);
         assertEquals(arr.get(4), false);
-        String json = res.toJSONString();
+        String json = res.toString();
         assertNotNull(json);
-        JSONObject reparsed = (JSONObject) new JSONParser().parse(json);
+        JSONObject reparsed = JSONAware.parse(new StringReader(json)).getObject();
         assertNotNull(reparsed);
-        assertEquals(((List<?>) reparsed.get("second")).get(1), "tmp");
+        assertEquals(((JSONArray) reparsed.get("second")).get(1), "tmp");
     }
 
 

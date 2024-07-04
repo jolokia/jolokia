@@ -17,7 +17,8 @@
 package org.jolokia.server.core.request.notification;
 
 import java.util.Deque;
-import java.util.Map;
+
+import org.json.JSONObject;
 
 /**
  * Ping commands are used for updating a clients freshness. If
@@ -43,7 +44,7 @@ public class PingCommand extends ClientCommand {
      * Constructor for POST requests
      * @param pMap request map
      */
-    PingCommand(Map<String, ?> pMap) {
+    PingCommand(JSONObject pMap) {
         super(NotificationCommandType.PING, pMap);
     }
 }

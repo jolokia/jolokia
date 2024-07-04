@@ -1,19 +1,5 @@
-package org.jolokia.service.serializer.json;
-
-import java.lang.reflect.InvocationTargetException;
-import java.util.Deque;
-import java.util.LinkedList;
-import java.util.List;
-
-import javax.management.AttributeNotFoundException;
-
-import org.jolokia.server.core.service.serializer.ValueFaultHandler;
-import org.jolokia.service.serializer.object.StringToObjectConverter;
-import org.json.simple.JSONArray;
-
-
 /*
- * Copyright 2009-2013 Roland Huss
+ * Copyright 2009-2024 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,17 +13,20 @@ import org.json.simple.JSONArray;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.service.serializer.json;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
+import javax.management.AttributeNotFoundException;
 
-/**
- * Extract a {@link List}
- *
- * @author roland
- * @since Apr 19, 2009
- */
+import org.jolokia.server.core.service.serializer.ValueFaultHandler;
+import org.jolokia.service.serializer.object.StringToObjectConverter;
+import org.json.JSONArray;
+
 public class ListExtractor implements Extractor {
 
-    /** {@inheritDoc} */
+
+    @Override
     public Class<?> getType() {
         return List.class;
     }
@@ -58,7 +47,7 @@ public class ListExtractor implements Extractor {
      * @throws IndexOutOfBoundsException if an index is used which points outside the given list
      */
     public Object extractObject(ObjectToJsonConverter pConverter, Object pValue, Deque<String> pPathParts, boolean jsonify)
-            throws AttributeNotFoundException {
+        throws AttributeNotFoundException {
         List<?> list = (List<?>) pValue;
         int length = pConverter.getCollectionLength(list.size());
         String pathPart = pPathParts.isEmpty() ? null : pPathParts.pop();
@@ -83,7 +72,7 @@ public class ListExtractor implements Extractor {
      * @throws InvocationTargetException
      */
     public Object setObjectValue(StringToObjectConverter pConverter, Object pInner, String pIndex, Object  pValue)
-            throws IllegalAccessException, InvocationTargetException {
+        throws IllegalAccessException, InvocationTargetException {
         @SuppressWarnings("unchecked")
         List<Object> list = (List<Object>) pInner;
         int idx;
@@ -91,16 +80,16 @@ public class ListExtractor implements Extractor {
             idx = Integer.parseInt(pIndex);
         } catch (NumberFormatException exp) {
             throw new IllegalArgumentException("Non-numeric index for accessing collection " + pInner +
-                    ". (index = " + pIndex + ", value to set = " +  pValue + ")",exp);
+                ". (index = " + pIndex + ", value to set = " +  pValue + ")",exp);
         }
 
         // For a collection, we can infer the type within the collection. We are trying to fetch
         // the old value, and if set, we use its type. Otherwise, we simply use string as value.
         Object oldValue = list.get(idx);
         Object value =
-                oldValue != null ?
-                        pConverter.deserialize(oldValue.getClass().getName(), pValue) :
-                        pValue;
+            oldValue != null ?
+                pConverter.deserialize(oldValue.getClass().getName(), pValue) :
+                pValue;
         list.set(idx,value);
         return oldValue;
     }
@@ -117,21 +106,20 @@ public class ListExtractor implements Extractor {
         } catch (NumberFormatException exp) {
             ValueFaultHandler faultHandler = pConverter.getValueFaultHandler();
             return faultHandler.handleException(
-                    new AttributeNotFoundException("Index '" + pPathPart +  "' is not numeric for accessing list"));
+                new AttributeNotFoundException("Index '" + pPathPart +  "' is not numeric for accessing list"));
         } catch (IndexOutOfBoundsException exp) {
             ValueFaultHandler faultHandler = pConverter.getValueFaultHandler();
             return faultHandler.handleException(
-                    new AttributeNotFoundException("Index '" + pPathPart +  "' is out-of-bound for a list of size " + pList.size()));
+                new AttributeNotFoundException("Index '" + pPathPart +  "' is out-of-bound for a list of size " + pList.size()));
         }
     }
 
     private Object extractListAsJson(ObjectToJsonConverter pConverter, List<?> pList, Deque<String> pPath, int pLength) throws AttributeNotFoundException {
-        @SuppressWarnings("unchecked")
-        List<Object> ret = new JSONArray();
+        JSONArray ret = new JSONArray();
         for (int i = 0;i < pLength; i++) {
             Deque<String> path = new LinkedList<>(pPath);
             try {
-                ret.add(pConverter.extractObject(pList.get(i), path, true));
+                ret.put(pConverter.extractObject(pList.get(i), path, true));
             } catch (ValueFaultHandler.AttributeFilteredException exp) {
                 // This element is filtered out, next one ...
             }
@@ -141,6 +129,5 @@ public class ListExtractor implements Extractor {
         }
         return ret;
     }
-
 
 }

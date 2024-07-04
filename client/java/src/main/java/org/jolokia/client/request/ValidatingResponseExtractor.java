@@ -19,7 +19,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.jolokia.client.exception.J4pRemoteException;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 /**
  * A response extractor which does validation based on Jolokia status codes.
@@ -56,10 +56,12 @@ public class ValidatingResponseExtractor implements J4pResponseExtractor {
             throws J4pRemoteException {
 
         int status = 0;
-        if (pJsonResp.containsKey("status")) {
+        if (pJsonResp.has("status")) {
             Object o = pJsonResp.get("status");
             if (o instanceof Long) {
                 status = ((Long) o).intValue();
+            } else if (o instanceof Integer) {
+                status = (Integer) o;
             }
         }
 

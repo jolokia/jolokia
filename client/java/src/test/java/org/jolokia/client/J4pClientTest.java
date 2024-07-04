@@ -34,6 +34,7 @@ import org.jolokia.client.exception.J4pTimeoutException;
 import org.jolokia.client.request.J4pQueryParameter;
 import org.jolokia.client.request.J4pReadRequest;
 import org.jolokia.client.request.J4pReadResponse;
+import org.json.JSONObject;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.testng.collections.Maps;
@@ -61,8 +62,8 @@ public class J4pClientTest {
     public static final String TEST_URL = "http://localhost:8080/jolokia";
 
 	private static final String ERROR_VALUE_RESPONSE = "{" +
-			"\"error_type\":\"errorType\"" +
-			"\"status\":500" +
+			"\"error_type\":\"errorType\"," +
+			"\"status\":500," +
 			"\"error_value\":{\"test\":\"ok\"}" +
 			"}";
 
@@ -76,12 +77,12 @@ public class J4pClientTest {
     }
 
     @Test
-    public void simple() throws MalformedObjectNameException, J4pException, IOException {
+    public void simple() throws J4pException, IOException {
         HttpClient client = prepareMocks("utf-8",MEMORY_RESPONSE);
 
         J4pClient j4p = new J4pClient(TEST_URL,client);
         J4pReadResponse resp = j4p.execute(TEST_REQUEST);
-        assertEquals(((Map<?, ?>) resp.getValue()).get("max"), 530186240L);
+        assertEquals(((JSONObject) resp.getValue()).get("max"), 530186240);
     }
 
     @Test(expectedExceptions = J4pException.class,expectedExceptionsMessageRegExp = ".*JSONArray.*")
@@ -158,7 +159,7 @@ public class J4pClientTest {
 		try {
 			j4p.execute(TEST_REQUEST, options);
 		} catch (J4pRemoteException e) {
-			assertEquals(e.getErrorValue().toJSONString(), "{\"test\":\"ok\"}");
+			assertEquals(e.getErrorValue().toString(), "{\"test\":\"ok\"}");
 			throw e;
 		}
 

@@ -16,7 +16,7 @@ package org.jolokia.client.request;
  * limitations under the License.
  */
 
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
@@ -26,9 +26,9 @@ import static org.testng.Assert.assertEquals;
  * @since 27.12.11
  */
 public class J4pTargetConfigTest {
-    
+
     static String URL = "http://localhost:8080";
-    
+
     @Test
     public void simple() {
         J4pTargetConfig cfg = new J4pTargetConfig(URL,"roland","s!cr!t");

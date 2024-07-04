@@ -22,7 +22,8 @@ import javax.management.MalformedObjectNameException;
 
 import org.jolokia.server.core.util.EscapeUtil;
 import org.jolokia.server.core.util.RequestType;
-import org.json.simple.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  * A JMX request for <code>exec</code> operations, i.e. for executing JMX operations
@@ -38,7 +39,7 @@ public class JolokiaExecRequest extends JolokiaObjectNameRequest {
 
     // List of arguments for the operation to execute. Can be either already of the
     // proper type or, if not, in a string representation.
-    private final List<?> arguments;
+    private final JSONArray arguments;
 
     /**
      * Constructor for creating a JmxRequest resulting from an HTTP GET request
@@ -53,7 +54,7 @@ public class JolokiaExecRequest extends JolokiaObjectNameRequest {
                        ProcessingParameters pParams) throws MalformedObjectNameException {
         super(RequestType.EXEC, pObjectName, null /* path is not supported for exec requests */, pParams, true);
         operation = pOperation;
-        arguments = pArguments;
+        arguments = new JSONArray(pArguments);
     }
 
     /**
@@ -63,10 +64,10 @@ public class JolokiaExecRequest extends JolokiaObjectNameRequest {
      * @param pParams optional processing parameters
      * @throws MalformedObjectNameException if the object name is not in proper format
      */
-    JolokiaExecRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) throws MalformedObjectNameException {
+    JolokiaExecRequest(JSONObject pRequestMap, ProcessingParameters pParams) throws MalformedObjectNameException {
         super(pRequestMap, pParams, true);
-        arguments = (List<?>) pRequestMap.get("arguments");
-        operation = (String) pRequestMap.get("operation");
+        arguments = pRequestMap.optJSONArray("arguments");
+        operation = (String) pRequestMap.opt("operation");
     }
 
     /**
@@ -84,14 +85,13 @@ public class JolokiaExecRequest extends JolokiaObjectNameRequest {
      * @return arguments
      */
     public List<?> getArguments() {
-        return arguments;
+        return arguments == null ? Collections.emptyList() : arguments.toList();
     }
 
     /**
      * Return this request in a proper JSON representation
      * @return this object in a JSON representation
      */
-    @SuppressWarnings("unchecked")
     public JSONObject toJSON() {
         JSONObject ret = super.toJSON();
         if (arguments != null && !arguments.isEmpty()) {
@@ -120,7 +120,7 @@ public class JolokiaExecRequest extends JolokiaObjectNameRequest {
             }
 
             /** {@inheritDoc} */
-            public JolokiaExecRequest create(Map<String, ?> requestMap, ProcessingParameters pParams)
+            public JolokiaExecRequest create(JSONObject requestMap, ProcessingParameters pParams)
                     throws MalformedObjectNameException {
                 return new JolokiaExecRequest(requestMap, pParams);
             }

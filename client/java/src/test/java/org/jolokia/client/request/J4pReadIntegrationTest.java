@@ -16,6 +16,7 @@ package org.jolokia.client.request;
  * limitations under the License.
  */
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -26,7 +27,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.jolokia.client.J4pClient;
 import org.jolokia.client.exception.*;
-import org.json.simple.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -128,9 +130,9 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
             J4pReadResponse resp = j4pClient.execute(req);
             assertFalse(req.hasSingleAttribute());
             assertEquals(2,req.getAttributes().size());
-            Map<?, ?> respVal = resp.getValue();
-            assertTrue(respVal.containsKey("LongSeconds"));
-            assertTrue(respVal.containsKey("SmallMinutes"));
+            JSONObject respVal = resp.getValue();
+            assertTrue(respVal.has("LongSeconds"));
+            assertTrue(respVal.has("SmallMinutes"));
 
             Collection<String> attrs = resp.getAttributes(new ObjectName(itSetup.getAttributeMBean()));
             Set<String> attrSet = new HashSet<>(attrs);
@@ -149,7 +151,7 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
             assertTrue(allAttrs.contains("LongSeconds"));
             assertTrue(allAttrs.contains("SmallMinutes"));
 
-            Double val = resp.getValue(new ObjectName(itSetup.getAttributeMBean()),"SmallMinutes");
+            BigDecimal val = resp.getValue(new ObjectName(itSetup.getAttributeMBean()),"SmallMinutes");
             assertNotNull(val);
 
             try {
@@ -159,7 +161,7 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
                 assertTrue(exp.getMessage().contains("Aufsteiger"));
             }
 
-            Double longVal = resp.getValue("LongSeconds");
+            Integer longVal = resp.getValue("LongSeconds");
             assertNotNull(longVal);
 
             try {
@@ -192,7 +194,7 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
             assertFalse(req.hasSingleAttribute());
             assertTrue(req.hasAllAttributes());
             assertEquals(0,req.getAttributes().size());
-            Map<?, ?> respVal = resp.getValue();
+            Map<?, ?> respVal = ((JSONObject) resp.getValue()).toMap();
             assertTrue(respVal.containsKey("LongSeconds"));
             assertTrue(respVal.containsKey("SmallMinutes"));
             assertTrue(respVal.size() > 20);
@@ -214,7 +216,7 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
             assertTrue(allAttrs.contains("Name"));
             assertTrue(allAttrs.contains("Bytes"));
 
-            Long val = resp.getValue(new ObjectName(itSetup.getAttributeMBean()),"MemoryUsed");
+            Number val = resp.getValue(new ObjectName(itSetup.getAttributeMBean()),"MemoryUsed");
             assertNotNull(val);
 
             try {
@@ -224,7 +226,7 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
                 assertTrue(exp.getMessage().contains("Aufsteiger"));
             }
 
-            Long bytes = resp.getValue("Bytes");
+            Number bytes = resp.getValue("Bytes");
             assertNotNull(bytes);
 
             try {
@@ -241,11 +243,11 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
         for (J4pReadRequest req : readRequests("*:type=attribute","LongSeconds")) {
             J4pReadResponse resp = j4pClient.execute(req);
             assertEquals(1,resp.getObjectNames().size());
-            Map<?, ?> respVal = resp.getValue();
-            assertTrue(respVal.containsKey(itSetup.getAttributeMBean()));
-            Map<?, ?> attrs = (Map<?, ?>) respVal.get(itSetup.getAttributeMBean());
-            assertEquals(1,attrs.size());
-            assertTrue(attrs.containsKey("LongSeconds"));
+            JSONObject respVal = resp.getValue();
+            assertTrue(respVal.has(itSetup.getAttributeMBean()));
+            JSONObject attrs = respVal.getJSONObject(itSetup.getAttributeMBean());
+            assertEquals(1,attrs.length());
+            assertTrue(attrs.has("LongSeconds"));
 
             Set<String> attrSet = new HashSet<>(resp.getAttributes(new ObjectName(itSetup.getAttributeMBean())));
             assertEquals(1,attrSet.size());
@@ -280,13 +282,13 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
             assertNull(req.getPath());
             J4pReadResponse resp = j4pClient.execute(req);
             assertEquals(1,resp.getObjectNames().size());
-            Map<?, ?> respVal = resp.getValue();
-            Map<?, ?> attrs = (Map<?, ?>) respVal.get(itSetup.getAttributeMBean());
-            assertEquals(2,attrs.size());
-            assertTrue(attrs.containsKey("LongSeconds"));
-            assertTrue(attrs.containsKey("List"));
+            JSONObject respVal = resp.getValue();
+            JSONObject attrs = respVal.getJSONObject(itSetup.getAttributeMBean());
+            assertEquals(2,attrs.length());
+            assertTrue(attrs.has("LongSeconds"));
+            assertTrue(attrs.has("List"));
 
-            Double longVal = resp.getValue(new ObjectName(itSetup.getAttributeMBean()),"LongSeconds");
+            Integer longVal = resp.getValue(new ObjectName(itSetup.getAttributeMBean()),"LongSeconds");
             assertNotNull(longVal);
 
             try {
@@ -303,34 +305,33 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
         for (J4pReadRequest request  : readRequests("jolokia.it:type=mxbean","ComplexTestData")) {
             J4pReadResponse response = j4pClient.execute(request);
             JSONObject value = response.getValue();
-            assertEquals(value.get("number"),1968L);
+            assertEquals(value.get("number"),1968);
             assertEquals(value.get("string"),"late");
 
-            List<?> set = (List<?>) value.get("set");
-            assertEquals(set.size(),2);
-            assertTrue(set.contains(12L));
-            assertTrue(set.contains(14L));
+            JSONArray set = value.getJSONArray("set");
+            assertEquals(set.length(),2);
+            assertTrue(set.toList().contains(12));
+            assertTrue(set.toList().contains(14));
 
-            Map<?, ?> map = (Map<?, ?>) value.get("map");
-            assertEquals(map.size(),2);
+            JSONObject map = value.getJSONObject("map");
+            assertEquals(map.length(),2);
             assertEquals(map.get("kill"), true);
             assertEquals(map.get("bill"), false);
 
-            List<?> array = (List<?>) value.get("stringArray");
-            assertEquals(array.size(),2);
-            assertTrue(array.contains("toy"));
-            assertTrue(array.contains("story"));
+            JSONArray array = value.getJSONArray("stringArray");
+            assertEquals(array.length(),2);
+            assertTrue(array.toList().contains("toy"));
+            assertTrue(array.toList().contains("story"));
 
-            //noinspection unchecked
-            List<Boolean> list = (List<Boolean>) value.get("list");
+            List<?> list = value.getJSONArray("list").toList();
             assertEquals(list.size(),3);
-            assertTrue(list.get(0));
-            assertFalse(list.get(1));
-            assertTrue(list.get(2));
+            assertTrue((boolean) list.get(0));
+            assertFalse((boolean) list.get(1));
+            assertTrue((boolean) list.get(2));
 
-            Map<?, ?> complex = (Map<?, ?>) value.get("complex");
-            List<?> innerList = (List<?>) complex.get("hidden");
-            Map<?, ?> innerInnerMap = (Map<?, ?>) innerList.get(0);
+            JSONObject complex = value.getJSONObject("complex");
+            JSONArray innerList = complex.getJSONArray("hidden");
+            JSONObject innerInnerMap = (JSONObject) innerList.get(0);
             assertEquals(innerInnerMap.get("deep"), "inside");
         }
     }

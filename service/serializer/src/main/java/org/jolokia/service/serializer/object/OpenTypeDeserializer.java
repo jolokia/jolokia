@@ -53,7 +53,7 @@ public class OpenTypeDeserializer {
 
     /**
      * Handle conversion for OpenTypes. The value is expected to be in JSON (either
-     * an {@link org.json.simple.JSONAware} object or its string representation.
+     * an {@link org.jolokia.server.core.util.JSONAware} object or its string representation.
      *
      * @param pOpenType target type
      * @param pValue value to convert from

@@ -17,7 +17,8 @@
 package org.jolokia.server.core.request.notification;
 
 import java.util.Deque;
-import java.util.Map;
+
+import org.json.JSONObject;
 
 /**
  * Unregister a client
@@ -39,7 +40,7 @@ public class UnregisterCommand extends ClientCommand {
      * Constructor for POST requests
      * @param pMap request map
      */
-    UnregisterCommand(Map<String,?> pMap) {
+    UnregisterCommand(JSONObject pMap) {
         super(NotificationCommandType.UNREGISTER,pMap);
     }
 }

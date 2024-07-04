@@ -34,7 +34,7 @@ public class AttributeChecking implements AttributeCheckingMBean,MBeanRegistrati
 
     private boolean state     = false;
     private int     idx       = 0;
-    private String  name      = null;
+    private String  name      = "name";
     private String[] strings = {
             "Started",
             "Stopped"

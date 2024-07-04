@@ -38,7 +38,7 @@ public class J4pDefaultProxyTest extends AbstractJ4pIntegrationTest {
     @Test
     public void baseTest() throws MalformedObjectNameException, J4pException {
         J4pReadResponse resp = j4pClient.execute(new J4pReadRequest("java.lang:type=Memory","HeapMemoryUsage"));
-        assertFalse(resp.getRequest().toJson().containsKey("target"));
+        assertFalse(resp.getRequest().toJson().has("target"));
         assertNotNull(resp.getValue());
     }
 

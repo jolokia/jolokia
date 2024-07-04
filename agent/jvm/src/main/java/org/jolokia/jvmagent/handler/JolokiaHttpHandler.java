@@ -51,9 +51,8 @@ import org.jolokia.server.core.http.HttpRequestHandler;
 import org.jolokia.server.core.request.EmptyResponseException;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.util.IoUtil;
+import org.jolokia.server.core.util.JSONAware;
 import org.jolokia.server.core.util.MimeTypeUtil;
-import org.json.simple.JSONAware;
-import org.json.simple.JSONStreamAware;
 
 /**
  * HttpHandler for handling a Jolokia request
@@ -228,7 +227,7 @@ public class JolokiaHttpHandler implements HttpHandler {
     }
 
     private JSONAware executeGetRequest(ParsedUri parsedUri) throws EmptyResponseException {
-        return requestHandler.handleGetRequest(parsedUri.getUri().toString(),parsedUri.getPathInfo(), parsedUri.getParameterMap());
+        return JSONAware.with(requestHandler.handleGetRequest(parsedUri.getUri().toString(),parsedUri.getPathInfo(), parsedUri.getParameterMap()));
     }
 
     private JSONAware executePostRequest(HttpExchange pExchange, ParsedUri pUri) throws IOException, EmptyResponseException {
@@ -295,8 +294,7 @@ public class JolokiaHttpHandler implements HttpHandler {
     private void sendResponse(HttpExchange pExchange, ParsedUri pParsedUri, JSONAware pJson) throws IOException {
         boolean streaming = Boolean.parseBoolean(jolokiaContext.getConfig(ConfigKey.STREAMING));
         if (streaming) {
-            JSONStreamAware jsonStream = (JSONStreamAware)pJson;
-            sendStreamingResponse(pExchange, pParsedUri, jsonStream);
+            sendStreamingResponse(pExchange, pParsedUri, pJson);
         } else {
             // Fallback, send as one object
             // TODO: Remove for 2.0
@@ -304,7 +302,7 @@ public class JolokiaHttpHandler implements HttpHandler {
         }
     }
 
-    private void sendStreamingResponse(HttpExchange pExchange, ParsedUri pParsedUri, JSONStreamAware pJson) throws IOException {
+    private void sendStreamingResponse(HttpExchange pExchange, ParsedUri pParsedUri, JSONAware pJson) throws IOException {
         Headers headers = pExchange.getResponseHeaders();
         if (pJson != null) {
             headers.set("Content-Type", getMimeType(pParsedUri) + "; charset=utf-8");

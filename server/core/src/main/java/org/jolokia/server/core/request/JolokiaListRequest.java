@@ -19,6 +19,7 @@ package org.jolokia.server.core.request;
 import java.util.*;
 
 import org.jolokia.server.core.util.RequestType;
+import org.json.JSONObject;
 
 /**
  * A JMX request for <code>list</code> operations, i.e. for listing JMX metadata
@@ -44,7 +45,7 @@ public class JolokiaListRequest extends JolokiaRequest {
      * @param pRequestMap object representation of the request
      * @param pParams processing parameters
      */
-    JolokiaListRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) {
+    JolokiaListRequest(JSONObject pRequestMap, ProcessingParameters pParams) {
         super(pRequestMap, pParams,false);
     }
 
@@ -88,7 +89,7 @@ public class JolokiaListRequest extends JolokiaRequest {
             }
 
             /** {@inheritDoc} */
-            public JolokiaListRequest create(Map<String, ?> requestMap, ProcessingParameters pParams) {
+            public JolokiaListRequest create(JSONObject requestMap, ProcessingParameters pParams) {
                 return new JolokiaListRequest(requestMap, pParams);
             }
         };

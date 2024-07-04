@@ -22,7 +22,7 @@ import javax.management.AttributeNotFoundException;
 import javax.management.ObjectName;
 
 import org.jolokia.server.core.service.serializer.ValueFaultHandler;
-import org.json.simple.JSONArray;
+import org.json.JSONArray;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -36,10 +36,10 @@ public class ArrayExtractorTest extends AbstractExtractorTest {
     @Test
     public void simple() throws AttributeNotFoundException {
         JSONArray res = (JSONArray) extractJson(new String[]{"eins", "zwei", "drei"});
-        assertEquals(res.size(),3);
-        assertTrue(res.contains("eins"));
-        assertTrue(res.contains("zwei"));
-        assertTrue(res.contains("drei"));
+        assertEquals(res.length(),3);
+        assertTrue(res.toList().contains("eins"));
+        assertTrue(res.toList().contains("zwei"));
+        assertTrue(res.toList().contains("drei"));
     }
 
 
@@ -69,7 +69,7 @@ public class ArrayExtractorTest extends AbstractExtractorTest {
     public void testWithWildcardPath() throws Exception {
         ObjectName[] names = {new ObjectName("test:type=blub"),null,new ObjectName("java.lang:type=Memory")};
         JSONArray result = (JSONArray) extractJson(names,null,"domain");
-        assertEquals(result.size(),2);
+        assertEquals(result.length(),2);
         assertEquals(result.get(0),"test");
         assertEquals(result.get(1),"java.lang");
     }

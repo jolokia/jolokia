@@ -1,5 +1,6 @@
 package org.jolokia.server.core.util;
 
+import java.io.StringReader;
 import java.util.List;
 import java.util.Map;
 
@@ -9,10 +10,8 @@ import javax.management.openmbean.*;
 import org.jolokia.server.core.service.api.AbstractJolokiaService;
 import org.jolokia.server.core.service.serializer.Serializer;
 import org.jolokia.server.core.service.serializer.SerializeOptions;
-import org.json.simple.JSONAware;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * @author roland
@@ -23,7 +22,6 @@ public class TestSerializer extends AbstractJolokiaService<Serializer> implement
         super(Serializer.class, 0);
     }
 
-    @SuppressWarnings("unchecked")
     public Object serialize(Object pValue, List<String> pPathParts, SerializeOptions pOptions) throws AttributeNotFoundException {
         if (pValue instanceof Map) {
             return pValue;
@@ -47,11 +45,11 @@ public class TestSerializer extends AbstractJolokiaService<Serializer> implement
     public Object deserializeOpenType(OpenType<?> pOpenType, Object pValue) {
         try {
             if (pOpenType instanceof CompositeType) {
-                JSONAware val = (JSONAware) new JSONParser().parse(pValue.toString());
+                JSONAware val = JSONAware.parse(new StringReader(pValue.toString()));
                 return new CompositeDataSupport((CompositeType) pOpenType, (Map<String, ?>) val);
             }
             return null;
-        } catch (ParseException | OpenDataException e) {
+        } catch (JSONException | OpenDataException e) {
             throw new IllegalArgumentException(pOpenType + " " + pValue);
         }
     }

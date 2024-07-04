@@ -27,6 +27,7 @@ import org.jolokia.server.core.request.JolokiaRequestBuilder;
 import org.jolokia.server.core.util.RequestType;
 import org.jolokia.server.core.util.TestJolokiaContext;
 import org.jolokia.service.jmx.handler.list.DataKeys;
+import org.json.JSONObject;
 import org.testng.annotations.*;
 
 import static org.easymock.EasyMock.*;
@@ -75,8 +76,7 @@ public class ListHandlerMockTest extends BaseHandlerTest {
         expect(connection.queryNames(null,null)).andReturn(nameSet);
         replay(connection);
 
-        @SuppressWarnings("unchecked")
-        Map<String, ?> res = (Map<String, ?>) handler.handleAllServerRequest(getMBeanServerManager(connection), request, null);
+        Map<String, ?> res = ((JSONObject) handler.handleAllServerRequest(getMBeanServerManager(connection), request, null)).toMap();
         assertTrue(res.containsKey("java.lang"));
         @SuppressWarnings("unchecked")
         Map<String, ?> inner = (Map<String, ?>) res.get("java.lang");
@@ -101,8 +101,7 @@ public class ListHandlerMockTest extends BaseHandlerTest {
         MBeanServerConnection connection = prepareForIOException(false);
 
 
-        @SuppressWarnings("unchecked")
-        Map<String, ?> res = (Map<String, ?>) handler.handleAllServerRequest(getMBeanServerManager(connection), request, null);
+        Map<String, ?> res = ((JSONObject) handler.handleAllServerRequest(getMBeanServerManager(connection), request, null)).toMap();
         verify(connection);
         assertEquals(res.size(),1);
         @SuppressWarnings("unchecked")

@@ -5,7 +5,7 @@ import java.io.IOException;
 import javax.management.MalformedObjectNameException;
 
 import org.jolokia.server.core.request.JolokiaRequest;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 /**
  * JMX interface for the history store

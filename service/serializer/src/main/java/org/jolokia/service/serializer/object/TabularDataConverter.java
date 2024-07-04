@@ -20,7 +20,9 @@ import java.util.*;
 
 import javax.management.openmbean.*;
 
-import org.json.simple.*;
+import org.jolokia.server.core.util.JSONAware;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  * Converter for {@link TabularData}
@@ -78,10 +80,10 @@ class TabularDataConverter extends OpenTypeConverter<TabularType> {
 
     private JSONObject getAsJsonObject(Object pFrom) {
         JSONAware jsonVal = toJSON(pFrom);
-        if (!(jsonVal instanceof JSONObject)) {
-            throw new IllegalArgumentException("Expected JSON type for a TabularData is JSONObject, not " + jsonVal.getClass());
+        if (!jsonVal.isObject()) {
+            throw new IllegalArgumentException("Expected JSON type for a TabularData is JSONObject, not " + jsonVal.getArray().getClass());
         }
-        return (JSONObject) jsonVal;
+        return jsonVal.getObject();
     }
 
     private boolean checkForMapAttributeWithSimpleKey(TabularType pType) {
@@ -108,14 +110,14 @@ class TabularDataConverter extends OpenTypeConverter<TabularType> {
 
     // Check for a full table data representation and do some sanity checks
     private boolean checkForFullTabularDataRepresentation(JSONObject pValue, TabularType pType) {
-        if (pValue.containsKey("indexNames") && pValue.containsKey("values") && pValue.size() == 2) {
+        if (pValue.has("indexNames") && pValue.has("values") && pValue.length() == 2) {
             Object jsonVal = pValue.get("indexNames");
             if (!(jsonVal instanceof JSONArray)) {
                 throw new IllegalArgumentException("Index names for tabular data must given as JSON array, not " + jsonVal.getClass());
             }
             JSONArray indexNames = (JSONArray) jsonVal;
             List<String> tabularIndexNames = pType.getIndexNames();
-            if (indexNames.size() != tabularIndexNames.size()) {
+            if (indexNames.length() != tabularIndexNames.size()) {
                 throw new IllegalArgumentException("Given array with index names must have " + tabularIndexNames.size() + " entries " +
                                                    "(given: " + indexNames + ", required: " + tabularIndexNames + ")");
             }
@@ -138,12 +140,10 @@ class TabularDataConverter extends OpenTypeConverter<TabularType> {
         // This means, we will convert a JSONObject to the required format
         TabularDataSupport tabularData = new TabularDataSupport(pType);
 
-        @SuppressWarnings("unchecked")
-        Map<String, String> jsonObj = (Map<String,String>) pValue;
-        for(Map.Entry<String, String> entry : jsonObj.entrySet()) {
+        for (String key : pValue.keySet()) {
             Map<String, Object> map = new HashMap<>();
-            map.put("key", getDispatcher().deserialize(rowType.getType("key"), entry.getKey()));
-            map.put("value", getDispatcher().deserialize(rowType.getType("value"), entry.getValue()));
+            map.put("key", getDispatcher().deserialize(rowType.getType("key"), key));
+            map.put("value", getDispatcher().deserialize(rowType.getType("value"), pValue.get(key)));
 
             try {
                 CompositeData compositeData = new CompositeDataSupport(rowType, map);
@@ -158,8 +158,8 @@ class TabularDataConverter extends OpenTypeConverter<TabularType> {
 
     // Convert complex representation containing "indexNames" and "values"
     private TabularData convertTabularDataFromFullRepresentation(JSONObject pValue, TabularType pType) {
-        JSONAware jsonVal;
-        jsonVal = (JSONAware) pValue.get("values");
+        Object jsonVal;
+        jsonVal = pValue.get("values");
         if (!(jsonVal instanceof JSONArray)) {
             throw new IllegalArgumentException("Values for tabular data of type " +
                                                pType + " must given as JSON array, not " + jsonVal.getClass());
@@ -177,7 +177,8 @@ class TabularDataConverter extends OpenTypeConverter<TabularType> {
 
     private void putRowsToTabularData(TabularDataSupport pTabularData, JSONObject pValue, int pLevel) {
         TabularType type = pTabularData.getTabularType();
-        for (Object value : pValue.values()) {
+        for (String key : pValue.keySet()) {
+            Object value = pValue.get(key);
             if (!(value instanceof JSONObject)) {
                 throw new IllegalArgumentException(
                         "Cannot convert " + pValue + " to type " +

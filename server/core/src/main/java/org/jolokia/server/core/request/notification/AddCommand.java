@@ -17,13 +17,14 @@
 package org.jolokia.server.core.request.notification;
 
 import java.util.*;
+import java.util.stream.*;
 
 import javax.management.*;
 
 import org.jolokia.server.core.util.EscapeUtil;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Command for adding a notification listener for a client with optional
@@ -94,25 +95,31 @@ public class AddCommand extends ClientCommand {
      * @throws MalformedObjectNameException if the given mbean name is not a valid {@link ObjectName}
      */
     @SuppressWarnings("unchecked")
-    AddCommand(Map<String,?> pMap) throws MalformedObjectNameException {
+    AddCommand(JSONObject pMap) throws MalformedObjectNameException {
         super(NotificationCommandType.ADD, pMap);
-        if (!pMap.containsKey("mode")) {
+        if (!pMap.has("mode")) {
             throw new IllegalArgumentException("No mode give for " + NotificationCommandType.ADD);
         }
         mode = (String) pMap.get("mode");
-        if (!pMap.containsKey("mbean")) {
+        if (!pMap.has("mbean")) {
             throw new IllegalArgumentException("No MBean name given for " + NotificationCommandType.ADD);
         }
         objectName = new ObjectName((String) pMap.get("mbean"));
-        Object f = pMap.get("filter");
+        Object f = pMap.opt("filter");
         if (f != null) {
-            filter = f instanceof List ? (List<String>) f : Collections.singletonList(f.toString());
+            if (f instanceof JSONArray) {
+                filter = ((JSONArray) f).toList().stream().map(o -> (String) o).collect(Collectors.toList());
+            } else if (f instanceof List) {
+                filter = (List<String>) f;
+            } else {
+                filter = Collections.singletonList(f.toString());
+            }
         }
-        Object c = pMap.get("config");
+        Object c = pMap.opt("config");
         if (c != null) {
             config = c instanceof Map ? (Map<String, Object>) c : parseConfig(c.toString());
         }
-        handback = pMap.get("handback");
+        handback = pMap.opt("handback");
     }
 
     /**
@@ -160,7 +167,6 @@ public class AddCommand extends ClientCommand {
         return config;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public JSONObject toJSON() {
         JSONObject ret = super.toJSON();
@@ -181,11 +187,10 @@ public class AddCommand extends ClientCommand {
     // ==============================================================================================
 
     // Parse a string as configuration object
-    @SuppressWarnings("unchecked")
     private Map<String, Object> parseConfig(String pElement) {
         try {
-            return (Map<String, Object>) new JSONParser().parse(pElement);
-        } catch (ParseException | ClassCastException e) {
+            return new JSONObject(pElement).toMap();
+        } catch (JSONException | ClassCastException e) {
             throw new IllegalArgumentException("Cannot parse config '" + pElement + "' as JSON Object",e);
         }
     }

@@ -12,7 +12,7 @@ import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.request.RequestInterceptor;
 import org.jolokia.server.core.service.serializer.Serializer;
 import org.jolokia.server.core.service.serializer.SerializeOptions;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 import static org.jolokia.server.core.config.ConfigKey.*;
 
@@ -80,7 +80,6 @@ public class BackendManager {
      * @param pJmxReq request to perform
      * @return the already converted answer.
      */
-    @SuppressWarnings("unchecked")
     public JSONObject handleRequest(JolokiaRequest pJmxReq) throws JMException, IOException, EmptyResponseException {
         boolean debug = jolokiaCtx.isDebug();
 
@@ -160,18 +159,21 @@ public class BackendManager {
     }
 
     // call the an appropriate request dispatcher
-    @SuppressWarnings("unchecked")
     private JSONObject callRequestDispatcher(JolokiaRequest pJmxReq)
             throws JMException, IOException, NotChangedException, EmptyResponseException {
+        long t1 = System.currentTimeMillis();
         Object result = requestDispatcher.dispatch(pJmxReq);
+        System.out.println("GRGR: requestDispatcher.dispatch: " + (System.currentTimeMillis() - t1) + " ms");
 
         SerializeOptions opts = getSerializeOptions(pJmxReq);
 
+        t1 = System.currentTimeMillis();
         Object jsonResult =
                 jolokiaCtx.getMandatoryService(Serializer.class).serialize(
                         result,
                         pJmxReq.useReturnValueWithPath() ? pJmxReq.getPathParts() : null,
                         opts);
+        System.out.println("GRGR: serialize: " + (System.currentTimeMillis() - t1) + " ms");
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("value",jsonResult);

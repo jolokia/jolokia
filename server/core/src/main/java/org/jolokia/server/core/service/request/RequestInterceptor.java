@@ -2,7 +2,7 @@ package org.jolokia.server.core.service.request;
 
 import org.jolokia.server.core.request.JolokiaRequest;
 import org.jolokia.server.core.service.api.JolokiaService;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 /**
  * Interface describing an interceptor wrapping around a request processing.

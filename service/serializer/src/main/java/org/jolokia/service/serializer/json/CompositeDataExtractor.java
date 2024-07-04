@@ -9,7 +9,7 @@ import javax.management.openmbean.InvalidKeyException;
 
 import org.jolokia.server.core.service.serializer.ValueFaultHandler;
 import org.jolokia.service.serializer.object.StringToObjectConverter;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -64,7 +64,6 @@ public class CompositeDataExtractor implements Extractor {
         for (String key : pData.getCompositeType().keySet()) {
             Deque<String> path = new LinkedList<>(pPath);
             try {
-                //noinspection unchecked
                 ret.put(key, pConverter.extractObject(pData.get(key), path, true));
             } catch (ValueFaultHandler.AttributeFilteredException exp) {
                 // Ignore this key;

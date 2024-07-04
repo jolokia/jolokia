@@ -24,7 +24,7 @@ import java.util.Date;
 import javax.management.AttributeNotFoundException;
 
 import org.jolokia.server.core.service.serializer.ValueFaultHandler;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -72,9 +72,9 @@ public class BeanExtractorTest extends AbstractExtractorTest {
         assertEquals(res.get("text"),"Test");
         assertFalse((Boolean) res.get("flag"));
         assertEquals( ((JSONObject) res.get("inner")).get("innerText"),"innerValue");
-        assertNull(res.get("nulli"));
-        assertFalse(res.containsKey("forbiddenStream"));
-        assertTrue(res.containsKey("nulli"));
+        assertNull(res.opt("nulli"));
+        assertFalse(res.has("forbiddenStream"));
+        assertFalse(res.has("nulli"));
         assertEquals(res.get("nacked"),"nacked object");
         assertEquals(res.get("self"),"[this]");
 
@@ -82,7 +82,7 @@ public class BeanExtractorTest extends AbstractExtractorTest {
         assertEquals(inner.get("innerText"),"innerValue");
 
         JSONObject innerWithWildcardPath = (JSONObject) extractJson(this,null,"innerDate");
-        assertEquals(innerWithWildcardPath.size(),1);
+        assertEquals(innerWithWildcardPath.length(),1);
         assertTrue((Long) ((JSONObject) innerWithWildcardPath.get("inner")).get("millis") <= new Date().getTime());
 
         BeanExtractorTest test = (BeanExtractorTest) extractObject(this);

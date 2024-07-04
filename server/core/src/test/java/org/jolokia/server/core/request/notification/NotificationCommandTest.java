@@ -17,10 +17,11 @@
 package org.jolokia.server.core.request.notification;
 
 import java.util.*;
+import java.util.stream.*;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
-import org.json.simple.JSONArray;
+import org.json.JSONArray;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
@@ -286,10 +287,9 @@ public class NotificationCommandTest {
     }
 
 
-    @SuppressWarnings("unchecked")
     private JSONArray getFilterArrayList(String[] pFilter) {
         JSONArray ret = new JSONArray();
-        Collections.addAll(ret, pFilter);
+        ret.putAll(Arrays.stream(pFilter).collect(Collectors.toList()));
         return ret;
     }
 
@@ -308,11 +308,10 @@ public class NotificationCommandTest {
             for (int j = 3; j < pArgs.length; j +=2) {
                 if (pArgs[j] instanceof String) {
                     ret.add((String) pArgs[j]);
-                } else if (pArgs[j] instanceof List) {
-                    @SuppressWarnings("unchecked")
-                    List<String> argsList = (List<String>) pArgs[j];
+                } else if (pArgs[j] instanceof JSONArray) {
+                    List<Object> argsList = ((JSONArray) pArgs[j]).toList();
                     StringBuilder s = new StringBuilder();
-                    for (String a : argsList) {
+                    for (Object a : argsList) {
                         s.append(a);
                         s.append(",");
                     }

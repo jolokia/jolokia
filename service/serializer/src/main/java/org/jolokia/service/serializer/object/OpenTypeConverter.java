@@ -16,11 +16,11 @@ package org.jolokia.service.serializer.object;
  *  limitations under the License.
  */
 
+import java.io.StringReader;
 import javax.management.openmbean.*;
 
-import org.json.simple.JSONAware;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.jolokia.server.core.util.JSONAware;
+import org.json.JSONException;
 
 /**
  * Abstract base class for all open type converters
@@ -76,8 +76,8 @@ abstract class OpenTypeConverter<T extends OpenType> {
             return (JSONAware) pValue;
         } else {
             try {
-                return (JSONAware) new JSONParser().parse(pValue.toString());
-            } catch (ParseException e) {
+                return JSONAware.parse(new StringReader(pValue.toString()));
+            } catch (JSONException e) {
                 throw new IllegalArgumentException("Cannot parse JSON " + pValue + ": " + e,e);
             } catch (ClassCastException exp) {
                 throw new IllegalArgumentException("Given value " + pValue +

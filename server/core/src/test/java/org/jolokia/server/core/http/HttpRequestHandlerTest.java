@@ -31,7 +31,8 @@ import org.jolokia.server.core.service.impl.StdoutLogHandler;
 import org.jolokia.server.core.service.request.RequestHandler;
 import org.jolokia.server.core.service.serializer.Serializer;
 import org.jolokia.server.core.util.*;
-import org.json.simple.*;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.testng.annotations.Test;
 
 import static org.easymock.EasyMock.*;
@@ -106,14 +107,14 @@ public class HttpRequestHandlerTest {
     @Test
     public void get() throws Exception {
         prepareDispatcher(JolokiaReadRequest.class);
-        JSONObject response = (JSONObject) handler.handleGetRequest("/jolokia", HttpTestUtil.VERSION_GET_REQUEST, null);
+        JSONObject response = handler.handleGetRequest("/jolokia", HttpTestUtil.VERSION_GET_REQUEST, null);
         verifyDispatcher(response);
     }
 
     @Test
     public void getWithDoubleSlashes() throws Exception {
         prepareDispatcher(new String[] { "bla:type=s/lash/", "attribute" });
-        JSONObject response = (JSONObject) handler.handleGetRequest("/read/bla%3Atype%3Ds!/lash!//attribute",
+        JSONObject response = handler.handleGetRequest("/read/bla%3Atype%3Ds!/lash!//attribute",
                                                                     "/read/bla:type=s!/lash!/Ok", null);
         verifyDispatcher(response);
     }
@@ -123,7 +124,7 @@ public class HttpRequestHandlerTest {
     public void singlePost() throws Exception {
         prepareDispatcher();
         InputStream is = HttpTestUtil.createServletInputStream(HttpTestUtil.VERSION_POST_REQUEST);
-        JSONObject response = (JSONObject) handler.handlePostRequest("/jolokia", is, "utf-8", null);
+        JSONObject response = handler.handlePostRequest("/jolokia", is, "utf-8", null).getObject();
         verifyDispatcher(response);
     }
 
@@ -132,8 +133,8 @@ public class HttpRequestHandlerTest {
     public void doublePost() throws Exception {
         prepareDispatcher(2, JolokiaReadRequest.class);
         InputStream is = HttpTestUtil.createServletInputStream("[" + HttpTestUtil.VERSION_POST_REQUEST + "," + HttpTestUtil.VERSION_POST_REQUEST + "]");
-        JSONArray response = (JSONArray) handler.handlePostRequest("/jolokia", is, "utf-8", null);
-        verifyDispatcher(2, response);
+        JSONArray response = handler.handlePostRequest("/jolokia", is, "utf-8", null).getArray();
+        verifyDispatcher(2, JSONAware.with(response));
     }
 
     @Test
@@ -201,11 +202,11 @@ public class HttpRequestHandlerTest {
             init(log);
             expect(requestHandler.handleRequest(EasyMock.anyObject(),EasyMock.anyObject())).andThrow(e);
             replay(requestHandler,log);
-            JSONObject resp = (JSONObject) handler.handleGetRequest("/jolokia",
+            JSONObject resp = handler.handleGetRequest("/jolokia",
                                                                     "/read/java.lang:type=Memory/HeapMemoryUsage",null);
             assertEquals(resp.get("status"),exceptions[i+1]);
 
-            resp = handler.handleThrowable(e);
+            resp = handler.handleThrowable(e).getObject();
             assertEquals(resp.get("status"),exceptions[i+2],e.getClass().getName());
             ctx = null;
         }
@@ -273,16 +274,16 @@ public class HttpRequestHandlerTest {
     }
 
     private void verifyDispatcher(JSONObject pResponse) {
-        verifyDispatcher(1,pResponse);
+        verifyDispatcher(1,JSONAware.with(pResponse));
     }
 
     private void verifyDispatcher(int i, JSONAware response) {
         if (i == 1) {
-            JSONObject val = (JSONObject) ((JSONObject) response).get("value");
+            JSONObject val = (JSONObject) response.getObject().get("value");
             assertEquals(val.get("testString"),"hello");
         } else {
-            JSONArray ret = (JSONArray) response;
-            assertEquals(ret.size(),i);
+            JSONArray ret = response.getArray();
+            assertEquals(ret.length(),i);
             for (int j = 0; j < i; j++) {
                 JSONObject resp = (JSONObject) ret.get(j);
                 JSONObject val = (JSONObject) resp.get("value");

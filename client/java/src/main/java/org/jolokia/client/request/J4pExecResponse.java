@@ -16,7 +16,7 @@ package org.jolokia.client.request;
  * limitations under the License.
  */
 
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 /**
  * Response for an execute request

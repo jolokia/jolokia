@@ -21,7 +21,7 @@ import java.util.List;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 /**
  * Request for setting the value of an attribute, optionally
@@ -116,12 +116,9 @@ public class J4pWriteRequest extends AbtractJ4pMBeanRequest {
     @Override
     JSONObject toJson() {
         JSONObject ret = super.toJson();
-        //noinspection unchecked
         ret.put("attribute", attribute);
-        //noinspection unchecked
         ret.put("value", serializeArgumentToJson(value));
         if (path != null) {
-            //noinspection unchecked
             ret.put("path", path);
         }
         return ret;

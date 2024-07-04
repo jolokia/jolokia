@@ -56,7 +56,7 @@ import org.jolokia.client.request.J4pVersionResponse;
 import org.jolokia.client.request.J4pWriteRequest;
 import org.jolokia.server.core.util.ClassUtil;
 import org.jolokia.service.serializer.JolokiaSerializer;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 /**
  * I emulate a subset of the functionality of a native MBeanServerConnector but over a Jolokia
@@ -333,8 +333,8 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
 
         // special case, if the attribute is ObjectName
         if (rawValue instanceof JSONObject
-            && ((JSONObject) rawValue).size() == 1
-            && ((JSONObject) rawValue).containsKey("objectName")) {
+            && ((JSONObject) rawValue).length() == 1
+            && ((JSONObject) rawValue).has("objectName")) {
             return getObjectName("" + ((JSONObject) rawValue).get("objectName"));
         }
         try {

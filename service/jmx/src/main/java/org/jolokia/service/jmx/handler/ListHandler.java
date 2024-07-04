@@ -12,7 +12,7 @@ import org.jolokia.server.core.request.NotChangedException;
 import org.jolokia.server.core.util.*;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 import org.jolokia.service.jmx.handler.list.MBeanInfoData;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -87,7 +87,7 @@ public class ListHandler extends AbstractCommandHandler<JolokiaListRequest> {
             }
 
             ListMBeanEachAction action = new ListMBeanEachAction(maxDepth, pathStack, useCanonicalName, pProvider);
-            return executeListAction(pServerManager, (Map<?, ?>) pPreviousResult, oName, action);
+            return executeListAction(pServerManager, (JSONObject) pPreviousResult, oName, action);
         } catch (MalformedObjectNameException e) {
             throw new IllegalArgumentException("Invalid path within the MBean part given. (Path: " + pRequest.getPath() + ")",e);
         } catch (InstanceNotFoundException e) {
@@ -97,7 +97,7 @@ public class ListHandler extends AbstractCommandHandler<JolokiaListRequest> {
         }
     }
 
-    private Object executeListAction(MBeanServerAccess pServerManager, Map<?, ?> pPreviousResult, ObjectName pName, ListMBeanEachAction pAction)
+    private Object executeListAction(MBeanServerAccess pServerManager, JSONObject pPreviousResult, ObjectName pName, ListMBeanEachAction pAction)
             throws IOException, ReflectionException, MBeanException, AttributeNotFoundException, InstanceNotFoundException {
         if (pName == null || pName.isPattern()) {
             pServerManager.each(pName, pAction);
@@ -212,15 +212,14 @@ public class ListHandler extends AbstractCommandHandler<JolokiaListRequest> {
          * @return the meta data suitable for JSON serialization
          * @param pBaseMap the base map to merge in the result
          */
-        @SuppressWarnings({"rawtypes", "unchecked"})
-        public Object getResult(Map pBaseMap) {
+        public Object getResult(JSONObject pBaseMap) {
 
             Object result = infoData.applyPath();
-            if (pBaseMap != null && result instanceof Map) {
+            if (pBaseMap != null && result instanceof JSONObject) {
                 // Its not a final value, so we merge it in at the top level
-                Map resultMap = (Map) result;
-                for (Map.Entry entry : (Set<Map.Entry>) resultMap.entrySet()) {
-                    pBaseMap.put(entry.getKey(),entry.getValue());
+                JSONObject resultMap = (JSONObject) result;
+                for (String key : resultMap.keySet()) {
+                    pBaseMap.put(key,resultMap.get(key));
                 }
                 return pBaseMap;
             } else {

@@ -13,10 +13,10 @@ import com.sun.net.httpserver.Authenticator;
 import com.sun.net.httpserver.*;
 import org.jolokia.server.core.osgi.security.AuthorizationHeaderParser;
 import org.jolokia.server.core.util.EscapeUtil;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.jolokia.server.core.util.JSONAware;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Authenticator using JAAS for logging in with user and password for the given realm.
@@ -80,7 +80,7 @@ public class DelegatingAuthenticator extends Authenticator {
             return prepareFailure(pHttpExchange, "Cannot call delegate url " + delegateURL + ": " + e, 503);
         } catch (final IllegalArgumentException e) {
             return prepareFailure(pHttpExchange, "Illegal Argument: " + e, 400);
-        } catch (ParseException e) {
+        } catch (JSONException e) {
             return prepareFailure(pHttpExchange, "Invalid JSON response: " + e, 422);
         }
     }
@@ -103,7 +103,7 @@ public class DelegatingAuthenticator extends Authenticator {
     // =======================================================================================
 
     private interface PrincipalExtractor {
-        HttpPrincipal extract(URLConnection connection) throws IOException, ParseException;
+        HttpPrincipal extract(URLConnection connection) throws IOException, JSONException;
     }
 
     // Extract principal from a JSON object
@@ -116,9 +116,9 @@ public class DelegatingAuthenticator extends Authenticator {
         }
 
         @Override
-        public HttpPrincipal extract(URLConnection connection) throws IOException, ParseException {
+        public HttpPrincipal extract(URLConnection connection) throws IOException, JSONException {
             try (InputStreamReader isr = new InputStreamReader(connection.getInputStream())) {
-                Object payload = new JSONParser().parse(isr);
+                Object payload = JSONAware.parse(isr);
                 Deque<String> pathElements = EscapeUtil.extractElementsFromPath(path);
                 Object result = payload;
                 while (!pathElements.isEmpty()) {
@@ -133,10 +133,13 @@ public class DelegatingAuthenticator extends Authenticator {
         }
 
         private Object extractValue(Object payload, String key) {
+            if (payload instanceof JSONAware) {
+                payload = ((JSONAware) payload).isArray() ? ((JSONAware) payload).getArray() : ((JSONAware) payload).getObject();
+            }
             if (payload instanceof JSONObject) {
-                return ((JSONObject) payload).get(key);
+                return ((JSONObject) payload).opt(key);
             } else if (payload instanceof JSONArray) {
-                return ((JSONArray) payload).get(Integer.parseInt(key));
+                return ((JSONArray) payload).opt(Integer.parseInt(key));
             } else {
                 return null;
             }

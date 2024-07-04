@@ -8,7 +8,7 @@ import javax.management.MalformedObjectNameException;
 import org.jolokia.server.core.request.notification.NotificationCommand;
 import org.jolokia.server.core.request.notification.NotificationCommandFactory;
 import org.jolokia.server.core.util.RequestType;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 /**
  * A request dealing with notification requests.
@@ -39,7 +39,7 @@ public class JolokiaNotificationRequest extends JolokiaRequest {
      * @param pRequestMap object representation of the request
      * @param pParams processing parameters
      */
-    JolokiaNotificationRequest(NotificationCommand pCommand, Map<String, ?> pRequestMap, ProcessingParameters pParams) {
+    JolokiaNotificationRequest(NotificationCommand pCommand, JSONObject pRequestMap, ProcessingParameters pParams) {
         super(pRequestMap, pParams, true);
         command = pCommand;
     }
@@ -55,11 +55,11 @@ public class JolokiaNotificationRequest extends JolokiaRequest {
     }
 
     /** {@inheritDoc} */
-    @SuppressWarnings("unchecked")
     public JSONObject toJSON() {
         JSONObject ret = super.toJSON();
-        JSONObject commandJson = command.toJSON();
-        ret.putAll(commandJson);
+        for (Map.Entry<String, Object> e : command.toJSON().toMap().entrySet()) {
+            ret.put(e.getKey(), e.getValue());
+        }
         return ret;
     }
 
@@ -77,7 +77,7 @@ public class JolokiaNotificationRequest extends JolokiaRequest {
             }
 
             /** {@inheritDoc} */
-            public JolokiaNotificationRequest create(Map<String, ?> requestMap, ProcessingParameters pParams)
+            public JolokiaNotificationRequest create(JSONObject requestMap, ProcessingParameters pParams)
                     throws MalformedObjectNameException {
                 NotificationCommand notifCommand = NotificationCommandFactory.createCommand(requestMap);
                 return new JolokiaNotificationRequest(notifCommand, requestMap, pParams);

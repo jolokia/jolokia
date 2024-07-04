@@ -19,7 +19,7 @@ package org.jolokia.service.jsr160;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 /**
  * Configuration for proxy mode
@@ -44,16 +44,16 @@ public class ProxyTargetConfig {
      * </ul>
      * @param pMap map containing configuration
      */
-    public ProxyTargetConfig(Map<String,String> pMap) {
+    public ProxyTargetConfig(JSONObject pMap) {
         if (pMap == null ||  pMap.get("url") == null) {
             throw new IllegalArgumentException("No service url given for JSR-160 target");
         }
-        url = pMap.get("url");
-        String user = pMap.get("user");
+        url = pMap.getString("url");
+        String user = pMap.optString("user");
         if (user != null) {
             env = new HashMap<>();
             env.put("user",user);
-            String pwd = pMap.get("password");
+            String pwd = pMap.optString("password");
             if (pwd != null) {
                 env.put("password",pwd);
             }
@@ -83,7 +83,6 @@ public class ProxyTargetConfig {
      *
      * @return JSON object representing this proxy configuration
      */
-    @SuppressWarnings("unchecked")
     public JSONObject toJSON() {
         JSONObject ret = new JSONObject();
         ret.put("url", url);

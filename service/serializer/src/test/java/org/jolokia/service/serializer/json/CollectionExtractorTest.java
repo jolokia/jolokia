@@ -22,7 +22,7 @@ import java.util.*;
 import javax.management.AttributeNotFoundException;
 
 import org.jolokia.service.serializer.object.StringToObjectConverter;
-import org.json.simple.JSONArray;
+import org.json.JSONArray;
 import org.testng.annotations.*;
 
 import static org.testng.Assert.*;
@@ -52,11 +52,12 @@ public class CollectionExtractorTest {
     public void json() throws AttributeNotFoundException {
         assertFalse(extractor.canSetValue());
         Set<String> set = new HashSet<>(Arrays.asList("jolokia","habanero"));
-        List<?> ret = (List<?>) extractor.extractObject(converter, set, new LinkedList<>(), true);
+        Object object = extractor.extractObject(converter, set, new LinkedList<>(), true);
+        List<?> ret = ((JSONArray) object).toList();
         assertEquals(ret.size(),2);
         assertTrue(ret.contains("jolokia"));
         assertTrue(ret.contains("habanero"));
-        assertTrue(ret instanceof JSONArray);
+        assertTrue(object instanceof JSONArray);
     }
 
     @Test

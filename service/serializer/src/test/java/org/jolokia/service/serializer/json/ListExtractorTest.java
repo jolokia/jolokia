@@ -7,7 +7,7 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import org.jolokia.server.core.service.serializer.ValueFaultHandler;
-import org.json.simple.JSONArray;
+import org.json.JSONArray;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -18,7 +18,7 @@ public class ListExtractorTest extends AbstractExtractorTest {
     @Test
     public void testSimple() throws Exception {
         JSONArray result = (JSONArray) extractJson(Arrays.asList("eins","zwei","drei"));
-        assertEquals(result.size(), 3);
+        assertEquals(result.length(), 3);
         assertEquals(result.get(0),"eins");
         assertEquals(result.get(1),"zwei");
         assertEquals(result.get(2),"drei");
@@ -59,7 +59,7 @@ public class ListExtractorTest extends AbstractExtractorTest {
     public void testWildCardPath() throws Exception {
         List<Object> mixed = createMixedList();
         JSONArray result = (JSONArray) extractJson(mixed,null,"domain");
-        assertEquals(result.size(),2);
+        assertEquals(result.length(),2);
         assertEquals(result.get(0),"java.lang");
         assertEquals(result.get(1),"test");
     }

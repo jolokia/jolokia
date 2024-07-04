@@ -57,8 +57,8 @@
     <!-- JSON -->
 
     <dependency>
-      <groupId>com.googlecode.json-simple</groupId>
-      <artifactId>json-simple</artifactId>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
     </dependency>
 
     <!-- OSGi dependencies -->

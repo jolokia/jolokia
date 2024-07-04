@@ -8,7 +8,7 @@ import javax.management.openmbean.OpenDataException;
 
 import org.jolokia.server.core.service.serializer.ValueFaultHandler;
 import org.jolokia.service.serializer.util.CompositeTypeAndJson;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 import org.testng.annotations.Test;
 
 import static javax.management.openmbean.SimpleType.*;
@@ -30,7 +30,7 @@ public class CompositeDataExtractorTest extends AbstractExtractorTest {
     public void simple() throws OpenDataException, AttributeNotFoundException, MalformedObjectNameException {
         CompositeTypeAndJson ctj = getTestData();
         JSONObject result = (JSONObject) extractJson(ctj.getCompositeData());
-        assertEquals(result.size(), 4);
+        assertEquals(result.length(), 4);
         assertEquals(result.get("verein"),"FCN");
         assertEquals(result.get("platz"),17);
         assertTrue((Boolean) result.get("absteiger"));
@@ -59,7 +59,7 @@ public class CompositeDataExtractorTest extends AbstractExtractorTest {
     public void withWildCardPath() throws MalformedObjectNameException, OpenDataException, AttributeNotFoundException {
         CompositeTypeAndJson ctj = getTestData();
         JSONObject result = (JSONObject) extractJson(ctj.getCompositeData(),null,"domain");
-        assertEquals(result.size(),1);
+        assertEquals(result.length(),1);
         assertEquals(result.get("complex"),"java.lang");
     }
 

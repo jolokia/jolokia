@@ -30,6 +30,7 @@ import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 import org.jolokia.server.core.util.RequestType;
 import org.jolokia.server.core.util.TestJolokiaContext;
 import org.jolokia.service.jmx.handler.list.DataKeys;
+import org.json.JSONObject;
 import org.testng.annotations.*;
 
 import static org.easymock.EasyMock.*;
@@ -71,15 +72,15 @@ public class ListHandlerTest extends BaseHandlerTest {
             assertTrue(res.containsKey("proxy@java.lang"));
             assertTrue(res.get("proxy@java.lang") instanceof Map);
 
-            Map<String, String> baseMap = createMap("first", "second");
+            JSONObject baseMap = createMap("first", "second");
             res = execute(handler,request,baseMap);
             assertTrue(res.containsKey("java.lang"));
             assertEquals(res.get("first"), "second");
         }
     }
 
-    private Map<String, String> createMap(String... args) {
-        Map<String, String> map = new HashMap<>();
+    private JSONObject createMap(String... args) {
+        JSONObject map = new JSONObject();
         for (int i = 0; i < args.length; i+=2) {
             map.put(args[i], args[i + 1]);
         }
@@ -297,10 +298,9 @@ public class ListHandlerTest extends BaseHandlerTest {
         execute(handler, request);
     }
 
-    @SuppressWarnings("unchecked")
-    private Map<String, ?> execute(ListHandler pHandler, JolokiaListRequest pRequest, Map<?, ?> ... pPreviousResult) throws ReflectionException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, IOException, NotChangedException, EmptyResponseException {
-        return (Map<String, ?>) pHandler.handleAllServerRequest(executor, pRequest,
-                                                     pPreviousResult != null && pPreviousResult.length > 0 ? pPreviousResult[0] : null);
+    private Map<String, ?> execute(ListHandler pHandler, JolokiaListRequest pRequest, JSONObject ... pPreviousResult) throws ReflectionException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, IOException, NotChangedException, EmptyResponseException {
+        return ((JSONObject) pHandler.handleAllServerRequest(executor, pRequest,
+                                                     pPreviousResult != null && pPreviousResult.length > 0 ? pPreviousResult[0] : null)).toMap();
     }
 
 
@@ -309,15 +309,13 @@ public class ListHandlerTest extends BaseHandlerTest {
         JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST)
                 .pathParts("java.lang", "type=Runtime", OPERATIONS.getKey())
                 .build();
-        @SuppressWarnings("unchecked")
-        Map<String, ?> res = (Map<String, ?>) handler.handleAllServerRequest(executor, request, null);
+        Map<String, ?> res = ((JSONObject) handler.handleAllServerRequest(executor, request, null)).toMap();
         assertEquals(res.size(),0);
 
         request = new JolokiaRequestBuilder(RequestType.LIST)
                 .pathParts("java.lang", "type=Runtime", NOTIFICATIONS.getKey())
                 .build();
-        //noinspection unchecked
-        res = (Map<String, ?>) handler.handleAllServerRequest(executor, request, null);
+        res = ((JSONObject) handler.handleAllServerRequest(executor, request, null)).toMap();
         assertEquals(res.size(),0);
     }
 
@@ -333,8 +331,7 @@ public class ListHandlerTest extends BaseHandlerTest {
 
         expect(dummyConn.getMBeanInfo(new ObjectName("java.lang:type=Memory"))).andThrow(new InstanceNotFoundException());
         replay(dummyConn);
-        @SuppressWarnings("unchecked")
-        Map<String, ?> res = (Map<String, ?>) handler.handleAllServerRequest(executor, request, null);
+        Map<String, ?> res = ((JSONObject) handler.handleAllServerRequest(executor, request, null)).toMap();
         //noinspection unchecked
         assertEquals(((Map<String, ?>) res.get("Verbose")).get(TYPE.getKey()),"boolean");
     }

@@ -17,9 +17,10 @@ package org.jolokia.service.jmx.handler.list;
  */
 
 import java.util.Deque;
-import java.util.Map;
 
 import javax.management.MBeanInfo;
+
+import org.json.JSONObject;
 
 import static org.jolokia.service.jmx.handler.list.DataKeys.DESCRIPTION;
 
@@ -44,10 +45,8 @@ class DescriptionDataUpdater extends DataUpdater {
      * {@inheritDoc}
      */
     @Override
-     @SuppressWarnings("rawtypes")
-    void update(Map pMap, MBeanInfo pMBeanInfo, Deque<String> pPathStack) {
+    void update(JSONObject pMap, MBeanInfo pMBeanInfo, Deque<String> pPathStack) {
         verifyThatPathIsEmpty(pPathStack);
-        //noinspection unchecked
         pMap.put(getKey(), pMBeanInfo.getDescription());
     }
 }

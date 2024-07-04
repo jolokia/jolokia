@@ -21,8 +21,8 @@ import java.util.*;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  * A read request to get one or more attributes from
@@ -140,17 +140,13 @@ public class J4pReadRequest extends AbtractJ4pMBeanRequest {
     JSONObject toJson() {
         JSONObject ret = super.toJson();
         if (hasSingleAttribute()) {
-            //noinspection unchecked
             ret.put("attribute",attributes.get(0));
         } else if (!hasAllAttributes()) {
             JSONArray attrs = new JSONArray();
-            //noinspection unchecked
-            attrs.addAll(attributes);
-            //noinspection unchecked
+            attrs.putAll(attributes);
             ret.put("attribute",attrs);
         }
         if (path != null) {
-            //noinspection unchecked
             ret.put("path",path);
         }
         return ret;

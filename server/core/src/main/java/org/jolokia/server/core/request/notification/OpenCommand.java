@@ -16,7 +16,8 @@ package org.jolokia.server.core.request.notification;/*
  */
 
 import java.util.Deque;
-import java.util.Map;
+
+import org.json.JSONObject;
 
 /**
  * Command for creating and opening a channel for transmitting notifications
@@ -48,9 +49,9 @@ public class OpenCommand extends ClientCommand {
      *
      * @param pMap map containing parameters
      */
-    public OpenCommand(Map<String, ?> pMap) {
+    public OpenCommand(JSONObject pMap) {
         super(NotificationCommandType.OPEN, pMap);
-                if (!pMap.containsKey("mode")) {
+                if (!pMap.has("mode")) {
             throw new IllegalArgumentException("No mode give for " + NotificationCommandType.ADD);
         }
         mode = (String) pMap.get("mode");

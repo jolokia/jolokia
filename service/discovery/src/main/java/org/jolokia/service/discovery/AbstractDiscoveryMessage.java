@@ -2,9 +2,10 @@ package org.jolokia.service.discovery;
 
 
 import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 import org.jolokia.server.core.service.api.AgentDetails;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 /**
  * A Jolokia discover message which can be either a request
@@ -45,13 +46,13 @@ abstract class AbstractDiscoveryMessage {
 
     public byte[] getData() {
         JSONObject respond = new JSONObject();
-        //noinspection unchecked
         respond.put(MESSAGE_TYPE, type.toString().toLowerCase());
         if (agentDetails != null) {
-            //noinspection unchecked
-            respond.putAll(agentDetails.toJSONObject());
+            for (Map.Entry<String, Object> e : agentDetails.toJSONObject().toMap().entrySet()) {
+               respond.put(e.getKey(), e.getValue());
+            }
         }
-        byte[] ret = getBytes(respond.toJSONString());
+        byte[] ret = getBytes(respond.toString());
         if (ret.length > MAX_MSG_SIZE) {
             throw new IllegalArgumentException("Message to send is larger (" + ret.length + " bytes) than maximum size of " + MAX_MSG_SIZE + " bytes.");
         }

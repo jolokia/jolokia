@@ -6,6 +6,7 @@ import javax.management.MalformedObjectNameException;
 
 import org.jolokia.server.core.util.EscapeUtil;
 import org.jolokia.server.core.util.RequestType;
+import org.json.JSONObject;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -102,6 +103,16 @@ public final class JolokiaRequestFactory {
         }
     }
 
+    /**
+     * Create a single {@link JolokiaRequest}s from a JSON map representation of a request
+     *
+     * @param pRequestMap JSON representation of a {@link JolokiaRequest}
+     * @param pProcessingParams additional map of operational parameters. Must not be null.
+     * @return the created {@link JolokiaRequest}
+     */
+    public static <R extends JolokiaRequest> R createPostRequest(Map<String, ?> pRequestMap, ProcessingParameters pProcessingParams) {
+        return createPostRequest(new JSONObject(pRequestMap), pProcessingParams);
+    }
 
     /**
      * Create a single {@link JolokiaRequest}s from a JSON map representation of a request
@@ -111,9 +122,9 @@ public final class JolokiaRequestFactory {
      * @return the created {@link JolokiaRequest}
      */
     @SuppressWarnings("unchecked")
-    public static <R extends JolokiaRequest> R createPostRequest(Map<String, ?> pRequestMap, ProcessingParameters pProcessingParams) {
+    public static <R extends JolokiaRequest> R createPostRequest(JSONObject pRequestMap, ProcessingParameters pProcessingParams) {
         try {
-            ProcessingParameters paramsMerged = pProcessingParams.mergedParams((Map<String,String>) pRequestMap.get("config"));
+            ProcessingParameters paramsMerged = pProcessingParams.mergedParams(pRequestMap.optJSONObject("config"));
             RequestType type = RequestType.getTypeByName((String) pRequestMap.get("type"));
             return (R) getCreator(type).create(pRequestMap, paramsMerged);
         } catch (MalformedObjectNameException e) {
@@ -128,15 +139,18 @@ public final class JolokiaRequestFactory {
      * @param pProcessingParams processing options. Must not be null.
      * @return list with one or more {@link JolokiaRequest}
      */
-    @SuppressWarnings("unchecked")
     public static List<JolokiaRequest> createPostRequests(List<?> pJsonRequests, ProcessingParameters pProcessingParams) {
         List<JolokiaRequest> ret = new ArrayList<>();
         for (Object o : pJsonRequests) {
-            if (!(o instanceof Map)) {
+            if (!(o instanceof Map || o instanceof JSONObject)) {
                 throw new IllegalArgumentException("Not a request within the list of requests " + pJsonRequests +
                         ". Expected map, but found: " + o);
             }
-            ret.add(createPostRequest((Map<String,?>) o,pProcessingParams));
+            if (o instanceof Map) {
+                ret.add(createPostRequest(new JSONObject((Map<?, ?>) o), pProcessingParams));
+            } else {
+                ret.add(createPostRequest((JSONObject) o, pProcessingParams));
+            }
         }
         return ret;
     }

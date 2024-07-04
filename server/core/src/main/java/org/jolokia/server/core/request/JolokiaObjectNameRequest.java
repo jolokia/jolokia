@@ -17,7 +17,6 @@ package org.jolokia.server.core.request;
  */
 
 import java.util.List;
-import java.util.Map;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
@@ -25,7 +24,7 @@ import javax.management.ObjectName;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.util.ProviderUtil;
 import org.jolokia.server.core.util.RequestType;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 /**
  * Abstract Jolokia request which takes an object name.
@@ -67,15 +66,14 @@ public abstract class JolokiaObjectNameRequest extends JolokiaRequest {
      * @throws MalformedObjectNameException if the given name (key: "name")
      *        is not a valid object name (with the provider part removed if given).
      */
-    protected JolokiaObjectNameRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams, boolean pExclusive)
+    protected JolokiaObjectNameRequest(JSONObject pRequestMap, ProcessingParameters pParams, boolean pExclusive)
             throws MalformedObjectNameException {
         super(pRequestMap, pParams, pExclusive);
-        initObjectName((String) pRequestMap.get("mbean"));
+        initObjectName((String) pRequestMap.opt("mbean"));
     }
 
 
     /** {@inheritDoc} */
-    @SuppressWarnings("unchecked")
     @Override
     public JSONObject toJSON() {
         JSONObject ret = super.toJSON();

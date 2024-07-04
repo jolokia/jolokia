@@ -8,7 +8,7 @@ import javax.management.ObjectName;
 
 import org.jolokia.server.core.request.*;
 import org.jolokia.server.core.util.RequestType;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -138,7 +138,6 @@ public class HistoryStore {
      */
     public synchronized void updateAndAdd(JolokiaRequest pJmxReq, JSONObject pJson) {
         long timestamp = System.currentTimeMillis() / 1000;
-        //noinspection unchecked
         pJson.put(KEY_TIMESTAMP,timestamp);
 
         RequestType type  = pJmxReq.getType();
@@ -195,9 +194,8 @@ public class HistoryStore {
                                     HistoryEntry entry = historyStore.get(new HistoryKey(request));
                                     if (entry != null) {
                                         synchronized(entry) {
-                                            //noinspection unchecked
                                             pJson.put(KEY_HISTORY,entry.jsonifyValues());
-                                            entry.add(pJson.get(KEY_VALUE),pTimestamp);
+                                            entry.add(pJson.opt(KEY_VALUE),pTimestamp);
                                         }
                                     }
                                 }
@@ -209,7 +207,6 @@ public class HistoryStore {
                                     HistoryEntry entry = historyStore.get(new HistoryKey(request));
                                     if (entry != null) {
                                         synchronized(entry) {
-                                            //noinspection unchecked
                                             pJson.put(KEY_HISTORY,entry.jsonifyValues());
                                             entry.add(request.getValue(),pTimestamp);
                                         }
@@ -262,7 +259,6 @@ public class HistoryStore {
             if (values != null) {
                 JSONObject history = updateHistoryForPatternRead(pJmxReq, pTimestamp, values);
                 if (!history.isEmpty()) {
-                    //noinspection unchecked
                     pJson.put(KEY_HISTORY,history);
                 }
             }
@@ -277,7 +273,6 @@ public class HistoryStore {
                     pJmxReq.getObjectNameAsString(),
                     pTimestamp);
             if (!history.isEmpty()) {
-                //noinspection unchecked
                 pJson.put(KEY_HISTORY,history);
             }
         } else {
@@ -285,7 +280,7 @@ public class HistoryStore {
             // itself.
             addAttributeFromSingleValue(pJson,
                                         new HistoryKey(pJmxReq), KEY_HISTORY,
-                                        pJson.get(KEY_VALUE),
+                                        pJson.opt(KEY_VALUE),
                                         pTimestamp);
         }
     }
@@ -313,7 +308,6 @@ public class HistoryStore {
                                 pTimestamp);
             }
             if (beanHistory != null && !beanHistory.isEmpty()) {
-                //noinspection unchecked
                 history.put(beanName, beanHistory);
             }
         }
@@ -337,7 +331,6 @@ public class HistoryStore {
                 beanName,
                 pTimestamp);
         if (!beanHistory.isEmpty()) {
-            //noinspection unchecked
             ret.put(beanName, beanHistory);
         }
         return ret;
@@ -393,7 +386,6 @@ public class HistoryStore {
     private JSONObject addToHistoryEntryAndGetCurrentHistory(JSONObject pHistMap, HistoryEntry pEntry, String pAttrName,
                                                              Object pValue, long pTimestamp) {
         synchronized (pEntry) {
-            //noinspection unchecked
             pHistMap.put(pAttrName, pEntry.jsonifyValues());
             pEntry.add(pValue, pTimestamp);
         }

@@ -17,6 +17,7 @@ package org.jolokia.service.jmx.handler;
  */
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.lang.management.ManagementFactory;
 import java.util.Collections;
 import java.util.HashMap;
@@ -27,12 +28,12 @@ import javax.management.*;
 import org.jolokia.server.core.request.JolokiaRequestFactory;
 import org.jolokia.server.core.request.ProcessingParameters;
 import org.jolokia.server.core.service.serializer.Serializer;
+import org.jolokia.server.core.util.JSONAware;
 import org.jolokia.service.serializer.JolokiaSerializer;
 import org.jolokia.server.core.request.JolokiaRequestBuilder;
 import org.jolokia.server.core.request.JolokiaWriteRequest;
 import org.jolokia.server.core.util.TestJolokiaContext;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
+import org.json.JSONObject;
 import org.testng.annotations.*;
 
 import static org.jolokia.server.core.util.RequestType.WRITE;
@@ -137,10 +138,8 @@ public class WriteHandlerTest {
     public void byteArrayRequest() throws Exception {
         String json = "{\"type\":\"write\",\"mbean\":\"jolokia:test=write\",\"attribute\":\"Bytes\"," +
                 "\"value\":[42,-42]}";
-        JSONParser parser = new JSONParser();
-        JSONObject data = (JSONObject) parser.parse(json);
-        @SuppressWarnings("unchecked")
-        JolokiaWriteRequest req = (JolokiaWriteRequest) JolokiaRequestFactory.createPostRequest(data, new ProcessingParameters(Collections.emptyMap()));
+        JSONObject data = JSONAware.parse(new StringReader(json)).getObject();
+        JolokiaWriteRequest req = JolokiaRequestFactory.createPostRequest(data.toMap(), new ProcessingParameters(Collections.emptyMap()));
         handler.doHandleSingleServerRequest(getMBeanServer(), req);
     }
 
@@ -148,10 +147,8 @@ public class WriteHandlerTest {
     public void primitiveByteArrayRequest() throws Exception {
         String json = "{\"type\":\"write\",\"mbean\":\"jolokia:test=write\",\"attribute\":\"PrimitiveBytes\"," +
                 "\"value\":[42,-42]}";
-        JSONParser parser = new JSONParser();
-        JSONObject data = (JSONObject) parser.parse(json);
-        @SuppressWarnings("unchecked")
-        JolokiaWriteRequest req = (JolokiaWriteRequest) JolokiaRequestFactory.createPostRequest(data, new ProcessingParameters(Collections.emptyMap()));
+        JSONObject data = JSONAware.parse(new StringReader(json)).getObject();
+        JolokiaWriteRequest req = JolokiaRequestFactory.createPostRequest(data.toMap(), new ProcessingParameters(Collections.emptyMap()));
         handler.doHandleSingleServerRequest(getMBeanServer(), req);
     }
 }

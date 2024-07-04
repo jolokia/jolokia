@@ -23,13 +23,13 @@ import javax.management.AttributeNotFoundException;
 
 import org.jolokia.server.core.service.serializer.ValueFaultHandler;
 import org.jolokia.service.serializer.object.StringToObjectConverter;
-import org.json.simple.JSONArray;
+import org.json.JSONArray;
 
 /**
  * Extractor used for arbitrary collections. They are simply converted into JSON arrays, although
  * the order is arbitrary. Setting to a collection is not allowed.
  *
- * This extractor must be called after all more specialized extractors (like the {@link MapExtractor} or {@link ArrayExtractor}).
+ * This extractor must be called after all more specialized extractors (like the {@link JSONObjectExtractor} or {@link ArrayExtractor}).
  *
  * @author roland
  * @since 18.10.11
@@ -92,13 +92,12 @@ public class CollectionExtractor implements Extractor {
     }
 
     private Object extractListAsJson(ObjectToJsonConverter pConverter, Collection<?> pCollection, Deque<String> pPathParts, int pLength) throws AttributeNotFoundException {
-        @SuppressWarnings("unchecked")
-        List<Object> ret = new JSONArray();
+        JSONArray ret = new JSONArray();
         Iterator<?> it = pCollection.iterator();
         for (int i = 0;i < pLength; i++) {
             Object val = it.next();
             Deque<String> path = new LinkedList<>(pPathParts);
-            ret.add(pConverter.extractObject(val, path, true));
+            ret.put(pConverter.extractObject(val, path, true));
         }
         return ret;
     }

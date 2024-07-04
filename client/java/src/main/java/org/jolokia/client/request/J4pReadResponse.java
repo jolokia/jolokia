@@ -21,7 +21,7 @@ import java.util.*;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 /**
  * Response for a {@link org.jolokia.client.request.J4pType#READ} request. Since a single
@@ -60,8 +60,8 @@ public final class J4pReadResponse extends J4pResponse<J4pReadRequest> {
             // The result value contains the list of fetched object names
             JSONObject values = getValue();
             Set<ObjectName> ret = new HashSet<>();
-            for (Object name : values.keySet()) {
-                ret.add(new ObjectName((String) name));
+            for (String name : values.keySet()) {
+                ret.add(new ObjectName(name));
             }
             return ret;
         } else {
@@ -83,7 +83,6 @@ public final class J4pReadResponse extends J4pResponse<J4pReadRequest> {
         if (requestMBean.isPattern()) {
             // We need to got down one level in the returned values
             JSONObject attributes = getAttributesForObjectNameWithPatternRequest(pObjectName);
-            //noinspection unchecked
             return attributes.keySet();
         } else {
             if (pObjectName != null && !pObjectName.equals(requestMBean)) {
@@ -117,7 +116,6 @@ public final class J4pReadResponse extends J4pResponse<J4pReadRequest> {
             return request.getAttributes();
         } else {
             JSONObject attributes = getValue();
-            //noinspection unchecked
             return attributes.keySet();
         }
     }
@@ -143,7 +141,7 @@ public final class J4pReadResponse extends J4pResponse<J4pReadRequest> {
         ObjectName requestMBean = getRequest().getObjectName();
         if (requestMBean.isPattern()) {
             JSONObject mAttributes = getAttributesForObjectNameWithPatternRequest(pObjectName);
-            if (!mAttributes.containsKey(pAttribute)) {
+            if (!mAttributes.has(pAttribute)) {
                 throw new IllegalArgumentException("No attribute " + pAttribute + " for ObjectName " + pObjectName + " returned for" +
                         " the given request");
             }
@@ -188,7 +186,7 @@ public final class J4pReadResponse extends J4pResponse<J4pReadRequest> {
             if (pAttribute == null) {
                 throw new IllegalArgumentException("Cannot use null-attribute name to fetch a value from a multi-attribute request");
             }
-            if (!attributes.containsKey(pAttribute)) {
+            if (!attributes.has(pAttribute)) {
                 throw new IllegalArgumentException("No such key " + pAttribute + " in the set of returned attribute values");
             }
             //noinspection unchecked
@@ -202,7 +200,7 @@ public final class J4pReadResponse extends J4pResponse<J4pReadRequest> {
         ObjectName pMBeanFromRequest = getRequest().getObjectName();
         ObjectName objectName = pObjectName == null ? pMBeanFromRequest : pObjectName;
         JSONObject values = getValue();
-        JSONObject attributes = (JSONObject) values.get(objectName.getCanonicalName());
+        JSONObject attributes = (JSONObject) values.opt(objectName.getCanonicalName());
         if (attributes == null) {
             throw new IllegalArgumentException("No ObjectName " + objectName + " found in the set of returned " +
                     " ObjectNames for requested pattern " + pMBeanFromRequest);

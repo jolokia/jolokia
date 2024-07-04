@@ -73,7 +73,7 @@ public class SimplifiersTest {
     public void urlSimplifierJson() throws AttributeNotFoundException, MalformedURLException {
         URL url = new URL("https://www.jolokia.org");
         Object result = urlSimplifier.extractObject(converter, url, new LinkedList<>(), true);
-        assertEquals(result.toString(), "{\"url\":\"https:\\/\\/www.jolokia.org\"}");
+        assertEquals(result.toString(), "{\"url\":\"https://www.jolokia.org\"}");
     }
 
 

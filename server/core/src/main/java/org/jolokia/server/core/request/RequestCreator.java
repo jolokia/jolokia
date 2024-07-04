@@ -20,6 +20,8 @@ import java.util.*;
 
 import javax.management.MalformedObjectNameException;
 
+import org.json.JSONObject;
+
 /**
  * Base class for so called <em>request creators</em>, which are used for creating
  * {@link JolokiaRequest}s of a specific type. These creators are used by the {@link JolokiaRequestFactory} for
@@ -52,7 +54,20 @@ abstract class RequestCreator<R extends JolokiaRequest> {
      * @return the created request object
      * @throws MalformedObjectNameException if an object name could not be created
      */
-    abstract R create(Map<String, ?> requestMap, ProcessingParameters pParams)
+    R create(Map<String, ?> requestMap, ProcessingParameters pParams)
+            throws MalformedObjectNameException {
+        return create(new JSONObject(requestMap), pParams);
+    }
+
+    /**
+     * Process a POST request
+     *
+     * @param requestMap JSON representation of the request
+     * @param pParams optional query parameters
+     * @return the created request object
+     * @throws MalformedObjectNameException if an object name could not be created
+     */
+    abstract R create(JSONObject requestMap, ProcessingParameters pParams)
             throws MalformedObjectNameException;
 
 

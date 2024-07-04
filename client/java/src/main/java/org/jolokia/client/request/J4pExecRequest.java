@@ -21,8 +21,8 @@ import java.util.*;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  * A execute request for executing a JMX operation
@@ -141,15 +141,12 @@ public class J4pExecRequest extends AbtractJ4pMBeanRequest {
     @Override
     JSONObject toJson() {
         JSONObject ret = super.toJson();
-        //noinspection unchecked
         ret.put("operation",operation);
         if (!arguments.isEmpty()) {
             JSONArray args = new JSONArray();
             for (Object arg : arguments) {
-                //noinspection unchecked
-                args.add(serializeArgumentToJson(arg));
+                args.put(serializeArgumentToJson(arg));
             }
-            //noinspection unchecked
             ret.put("arguments",args);
         }
         return ret;

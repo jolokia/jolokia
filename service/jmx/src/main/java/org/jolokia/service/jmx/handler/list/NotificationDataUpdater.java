@@ -16,12 +16,12 @@
 
 package org.jolokia.service.jmx.handler.list;
 
-import java.util.Collections;
+import java.util.*;
 import javax.management.MBeanInfo;
 import javax.management.MBeanNotificationInfo;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import static org.jolokia.service.jmx.handler.list.DataKeys.*;
 
@@ -41,7 +41,6 @@ class NotificationDataUpdater extends DataUpdater {
 
     /** {@inheritDoc} */
     @Override
-    @SuppressWarnings("unchecked")
     protected JSONObject extractData(MBeanInfo pMBeanInfo, String pNotification) {
         JSONObject notMap = new JSONObject();
         for (MBeanNotificationInfo notInfo : pMBeanInfo.getNotifications()) {
@@ -51,7 +50,7 @@ class NotificationDataUpdater extends DataUpdater {
                 map.put(DESCRIPTION.getKey(), notInfo.getDescription());
                 String[] types = notInfo.getNotifTypes();
                 JSONArray tList = new JSONArray();
-                Collections.addAll(tList, types);
+                tList.putAll(Arrays.asList(types));
                 map.put(TYPES.getKey(), tList);
                 notMap.put(notInfo.getName(), map);
             }

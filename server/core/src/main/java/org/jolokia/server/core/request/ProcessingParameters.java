@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.jolokia.server.core.config.ConfigKey;
+import org.json.JSONObject;
 
 /**
  * Class encapsulating parameters used during processing
@@ -64,7 +65,7 @@ public class ProcessingParameters {
      * @return a new ProcessingParameters instance if the given config is not null. Otherwise this object
      *         is returned.
      */
-    public ProcessingParameters mergedParams(Map<String, String> pConfig) {
+    public ProcessingParameters mergedParams(JSONObject pConfig) {
         if (pConfig == null) {
             return this;
         } else {
@@ -87,13 +88,13 @@ public class ProcessingParameters {
 
     // Convert a string-string map to one with ConfigKeys. All parameters which doesn't
     // map to a ConfigKey are filtered out
-    private Map<ConfigKey, String> convertToConfigMap(Map<String, String> pParams) {
+    private Map<ConfigKey, String> convertToConfigMap(JSONObject pParams) {
         Map<ConfigKey,String> config = new HashMap<>();
         if (pParams != null) {
-            for (Map.Entry<String,?> entry : pParams.entrySet()) {
-                ConfigKey cKey = ConfigKey.getRequestConfigKey(entry.getKey());
+            for (String key : pParams.keySet()) {
+                ConfigKey cKey = ConfigKey.getRequestConfigKey(key);
                 if (cKey != null) {
-                    Object value = entry.getValue();
+                    Object value = pParams.opt(key);
                     config.put(cKey, value != null ? value.toString() : null);
                 }
             }

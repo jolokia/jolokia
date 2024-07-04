@@ -17,7 +17,8 @@
 package org.jolokia.server.core.request.notification;
 
 import java.util.Deque;
-import java.util.Map;
+
+import org.json.JSONObject;
 
 /**
  * List command for getting all registered notification for a client.
@@ -40,7 +41,7 @@ public class ListCommand extends ClientCommand {
      * Constructor for POST requests
      * @param pMap request map
      */
-    ListCommand(Map<String, ?> pMap) {
+    ListCommand(JSONObject pMap) {
         super(NotificationCommandType.LIST, pMap);
     }
 }

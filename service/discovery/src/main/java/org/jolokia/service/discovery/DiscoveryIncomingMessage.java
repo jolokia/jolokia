@@ -7,9 +7,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import org.jolokia.server.core.service.api.AgentDetails;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.jolokia.server.core.util.JSONAware;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * @author roland
@@ -67,10 +67,9 @@ public class DiscoveryIncomingMessage extends AbstractDiscoveryMessage {
 
     private Map<AgentDetails.AgentDetailProperty,Object> extractDetails(JSONObject pData) {
         Map<AgentDetails.AgentDetailProperty, Object> data = new HashMap<>();
-        //noinspection unchecked
-        for (Map.Entry<?, ?> entry : (Set<Map.Entry<?, ?>>) pData.entrySet()) {
+        for (Map.Entry<String, ?> entry : pData.toMap().entrySet()) {
             try {
-                data.put(AgentDetails.AgentDetailProperty.fromKey(entry.getKey().toString()), entry.getValue());
+                data.put(AgentDetails.AgentDetailProperty.fromKey(entry.getKey()), entry.getValue());
             } catch (IllegalArgumentException exp) {
                 // We simply ignore key which are unknown
             }
@@ -79,11 +78,10 @@ public class DiscoveryIncomingMessage extends AbstractDiscoveryMessage {
     }
 
     private JSONObject parseData(byte[] pData, int pLength) throws IOException {
-        JSONParser parser = new JSONParser();
         ByteArrayInputStream is = new ByteArrayInputStream(pData,0,pLength);
         try {
-            return (JSONObject) parser.parse(new InputStreamReader(is, StandardCharsets.UTF_8));
-        } catch (ParseException e) {
+            return JSONAware.parse(new InputStreamReader(is, StandardCharsets.UTF_8)).getObject();
+        } catch (JSONException e) {
             throw new IOException("Cannot parse discovery message as JSON",e);
         }
     }

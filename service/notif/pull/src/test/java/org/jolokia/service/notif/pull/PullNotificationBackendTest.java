@@ -25,7 +25,6 @@ import javax.management.*;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.service.notification.*;
 import org.jolokia.server.core.util.TestJolokiaContext;
-import org.json.simple.JSONObject;
 import org.testng.Assert;
 import org.testng.annotations.*;
 
@@ -58,7 +57,7 @@ public class PullNotificationBackendTest {
 
     @Test
     public void testConfig() {
-        JSONObject cfg = (JSONObject) backend.getConfig();
+        Map<String, ?> cfg = backend.getConfig();
         Assert.assertEquals(cfg.get("store"), "jolokia:type=NotificationStore,agent=test");
         Assert.assertTrue(cfg.containsKey("maxEntries"));
     }

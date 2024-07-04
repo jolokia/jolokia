@@ -15,9 +15,10 @@ import org.jolokia.server.core.backend.BackendManager;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.request.*;
-import org.json.simple.*;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.jolokia.server.core.util.JSONAware;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -69,7 +70,7 @@ public class HttpRequestHandler {
      * @param pPathInfo path of the request
      * @param pParameterMap parameters of the GET request  @return the response
      */
-    public JSONAware handleGetRequest(String pUri, String pPathInfo, Map<String, String[]> pParameterMap) throws EmptyResponseException {
+    public JSONObject handleGetRequest(String pUri, String pPathInfo, Map<String, String[]> pParameterMap) throws EmptyResponseException {
         String pathInfo = extractPathInfo(pUri, pPathInfo);
 
         JolokiaRequest jmxReq =
@@ -117,16 +118,15 @@ public class HttpRequestHandler {
      *
      * @throws IOException if reading from the input stream fails
      */
-    @SuppressWarnings("unchecked")
     public JSONAware handlePostRequest(String pUri, InputStream pInputStream, String pEncoding, Map<String, String[]>  pParameterMap)
             throws IOException, EmptyResponseException {
         if (jolokiaCtx.isDebug()) {
             jolokiaCtx.debug("URI: " + pUri);
         }
 
-        Object jsonRequest = extractJsonRequest(pInputStream,pEncoding);
-        if (jsonRequest instanceof JSONArray) {
-            List<JolokiaRequest> jolokiaRequests = JolokiaRequestFactory.createPostRequests((List<?>) jsonRequest, getProcessingParameter(pParameterMap));
+        JSONAware jsonRequest = extractJsonRequest(pInputStream,pEncoding);
+        if (jsonRequest.isArray()) {
+            List<JolokiaRequest> jolokiaRequests = JolokiaRequestFactory.createPostRequests(jsonRequest.getArray().toList(), getProcessingParameter(pParameterMap));
 
             JSONArray responseList = new JSONArray();
             for (JolokiaRequest jmxReq : jolokiaRequests) {
@@ -135,12 +135,12 @@ public class HttpRequestHandler {
                 }
                 // Call handler and retrieve return value
                 JSONObject resp = executeRequest(jmxReq);
-                responseList.add(resp);
+                responseList.put(resp);
             }
-            return responseList;
-        } else if (jsonRequest instanceof JSONObject) {
-            JolokiaRequest jmxReq = JolokiaRequestFactory.createPostRequest((Map<String, ?>) jsonRequest, getProcessingParameter(pParameterMap));
-            return executeRequest(jmxReq);
+            return JSONAware.with(responseList);
+        } else if (jsonRequest.isObject()) {
+            JolokiaRequest jmxReq = JolokiaRequestFactory.createPostRequest(jsonRequest.getObject(), getProcessingParameter(pParameterMap));
+            return JSONAware.with(executeRequest(jmxReq));
         } else {
             throw new IllegalArgumentException("Invalid JSON Request " + jsonRequest);
         }
@@ -174,16 +174,15 @@ public class HttpRequestHandler {
     }
 
 
-    private Object extractJsonRequest(InputStream pInputStream, String pEncoding) throws IOException {
+    private JSONAware extractJsonRequest(InputStream pInputStream, String pEncoding) throws IOException {
         InputStreamReader reader = null;
         try {
             reader =
                     pEncoding != null ?
                             new InputStreamReader(pInputStream, pEncoding) :
                             new InputStreamReader(pInputStream);
-            JSONParser parser = new JSONParser();
-            return parser.parse(reader);
-        } catch (ParseException exp) {
+            return JSONAware.parse(reader);
+        } catch (JSONException exp) {
             throw new IllegalArgumentException("Invalid JSON request " + reader,exp);
         }
     }
@@ -234,14 +233,14 @@ public class HttpRequestHandler {
      * @param pThrowable exception to handle
      * @return its JSON representation
      */
-    public JSONObject handleThrowable(Throwable pThrowable) {
+    public JSONAware handleThrowable(Throwable pThrowable) {
         if (pThrowable instanceof IllegalArgumentException) {
-            return getErrorJSON(400,pThrowable, null);
+            return JSONAware.with(getErrorJSON(400,pThrowable, null));
         } else if (pThrowable instanceof SecurityException) {
             // Wipe out stacktrace
-            return getErrorJSON(403,new Exception(pThrowable.getMessage()), null);
+            return JSONAware.with(getErrorJSON(403,new Exception(pThrowable.getMessage()), null));
         } else {
-            return getErrorJSON(500,pThrowable, null);
+            return JSONAware.with(getErrorJSON(500,pThrowable, null));
         }
     }
 
@@ -255,7 +254,6 @@ public class HttpRequestHandler {
      * @param pJmxReq request from where to get processing options
      * @return the json representation
      */
-    @SuppressWarnings("unchecked")
     public JSONObject getErrorJSON(int pErrorCode, Throwable pExp, JolokiaRequest pJmxReq) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("status",pErrorCode);
@@ -351,7 +349,6 @@ public class HttpRequestHandler {
     }
 
 
-    @SuppressWarnings("unchecked")
     private void addErrorInfo(JSONObject pErrorResp, Throwable pExp, JolokiaRequest pJmxReq) {
         if (Boolean.parseBoolean(jolokiaCtx.getConfig(ConfigKey.ALLOW_ERROR_DETAILS))) {
             String includeStackTrace = pJmxReq != null ?

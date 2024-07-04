@@ -26,7 +26,7 @@ import org.jolokia.server.core.request.notification.NotificationCommandFactory;
 import org.jolokia.server.core.request.notification.NotificationCommandType;
 import org.jolokia.server.core.util.EscapeUtil;
 import org.jolokia.server.core.util.RequestType;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 /**
  * Helper class for unit testing
@@ -44,7 +44,6 @@ public class JolokiaRequestBuilder {
         this(pType,(String) null);
     }
 
-    @SuppressWarnings("unchecked")
     public JolokiaRequestBuilder(RequestType pType, String pObjectName) throws MalformedObjectNameException {
         request.put("type",pType.getName());
         if (pObjectName != null) {
@@ -67,97 +66,82 @@ public class JolokiaRequestBuilder {
             case VERSION: return (R) new JolokiaVersionRequest(request,params);
             case SEARCH: return (R) new JolokiaSearchRequest(request,params);
             case LIST: return (R) new JolokiaListRequest(request,params);
-            case NOTIFICATION: return (R) new JolokiaNotificationRequest(NotificationCommandFactory.createCommand(request),
+            case NOTIFICATION: return (R) new JolokiaNotificationRequest(NotificationCommandFactory.createCommand(request.toMap()),
                                                                      params);
         }
         throw new IllegalArgumentException("Unknown type " + type);
     }
 
-    @SuppressWarnings("unchecked")
     public JolokiaRequestBuilder attribute(String pAttribute) {
         request.put("attribute",pAttribute);
         return this;
     }
 
-    @SuppressWarnings("unchecked")
     public JolokiaRequestBuilder attributes(List<String> pAttributeNames) {
         request.put("attribute", pAttributeNames);
         return this;
     }
 
-    @SuppressWarnings("unchecked")
     public JolokiaRequestBuilder attributes(String ... pAttributeNames) {
         request.put("attribute", Arrays.asList(pAttributeNames));
         return this;
     }
 
-    @SuppressWarnings("unchecked")
     public JolokiaRequestBuilder operation(String pOperation) {
         request.put("operation", pOperation);
         return this;
     }
 
-    @SuppressWarnings("unchecked")
     public JolokiaRequestBuilder value(Object pValue) {
         request.put("value", pValue);
         return this;
     }
 
-    @SuppressWarnings("unchecked")
     public JolokiaRequestBuilder pathParts(String... pExtraArgs) {
         request.put("path", EscapeUtil.combineToPath(Arrays.asList(pExtraArgs)));
         return this;
     }
 
-    @SuppressWarnings("unchecked")
     public JolokiaRequestBuilder path(String pPath) {
         request.put("path",pPath);
         return this;
     }
 
-    @SuppressWarnings("unchecked")
     public JolokiaRequestBuilder arguments(List<Object> pArguments) {
         request.put("arguments", pArguments);
         return this;
     }
 
-    @SuppressWarnings("unchecked")
     public JolokiaRequestBuilder arguments(Object ... pArguments) {
         request.put("arguments", Arrays.asList(pArguments));
         return this;
     }
 
-    @SuppressWarnings("unchecked")
     public JolokiaRequestBuilder command(NotificationCommandType pType) {
         request.put("command",pType.getType());
         return this;
     }
 
-    @SuppressWarnings("unchecked")
     public JolokiaRequestBuilder client(String client) {
         request.put("client",client);
         return this;
     }
 
-    @SuppressWarnings("unchecked")
     public JolokiaRequestBuilder handle(String handle) {
         request.put("handle",handle);
         return this;
     }
 
-    @SuppressWarnings("unchecked")
     public JolokiaRequestBuilder mode(String mode) {
         request.put("mode",mode);
         return this;
     }
 
-    @SuppressWarnings("unchecked")
     public JolokiaRequestBuilder handback(String handback) {
         request.put("handback",handback);
         return this;
     }
 
-    @SuppressWarnings("unchecked")
     public JolokiaRequestBuilder filter(String ...filter) {
         request.put("filter", Arrays.asList(filter));
         return this;

@@ -22,7 +22,7 @@ import javax.management.MalformedObjectNameException;
 
 import org.jolokia.server.core.util.EscapeUtil;
 import org.jolokia.server.core.util.RequestType;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 /**
  * A JMX request for a <code>write</code> operation
@@ -62,10 +62,10 @@ public class JolokiaWriteRequest extends JolokiaObjectNameRequest {
      * @param pParams processing parameters
      * @throws MalformedObjectNameException if the name is not a proper object name
      */
-    JolokiaWriteRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) throws MalformedObjectNameException {
+    JolokiaWriteRequest(JSONObject pRequestMap, ProcessingParameters pParams) throws MalformedObjectNameException {
         super(pRequestMap, pParams, true);
-        value = pRequestMap.get("value");
-        attributeName = (String) pRequestMap.get("attribute");
+        value = pRequestMap.opt("value");
+        attributeName = (String) pRequestMap.opt("attribute");
     }
 
     /**
@@ -110,7 +110,6 @@ public class JolokiaWriteRequest extends JolokiaObjectNameRequest {
         return ret.toString();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public JSONObject toJSON() {
         JSONObject ret = super.toJSON();
@@ -143,7 +142,7 @@ public class JolokiaWriteRequest extends JolokiaObjectNameRequest {
             }
 
             /** {@inheritDoc} */
-            public JolokiaWriteRequest create(Map<String, ?> requestMap, ProcessingParameters pParams)
+            public JolokiaWriteRequest create(JSONObject requestMap, ProcessingParameters pParams)
                     throws MalformedObjectNameException {
                 return new JolokiaWriteRequest(requestMap, pParams);
             }

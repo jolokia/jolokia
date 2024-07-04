@@ -20,8 +20,8 @@ import java.lang.reflect.Array;
 
 import javax.management.openmbean.*;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONAware;
+import org.jolokia.server.core.util.JSONAware;
+import org.json.JSONArray;
 
 /**
  * Converter for {@link ArrayType}
@@ -51,16 +51,16 @@ class ArrayTypeConverter extends OpenTypeConverter<ArrayType> {
     public Object convertToObject(ArrayType type, Object pFrom) {
         JSONAware value = toJSON(pFrom);
         // prepare each value in the array and then process the array of values
-        if (!(value instanceof JSONArray)) {
+        if (!value.isArray()) {
             throw new IllegalArgumentException(
                     "Can not convert " + value + " to type " +
                     type + " because JSON object type " + value.getClass() + " is not a JSONArray");
 
         }
 
-        JSONArray jsonArray = (JSONArray) value;
+        JSONArray jsonArray = value.getArray();
         OpenType elementOpenType = type.getElementOpenType();
-        Object[] valueArray = createTargetArray(elementOpenType, jsonArray.size());
+        Object[] valueArray = createTargetArray(elementOpenType, jsonArray.length());
 
         int i = 0;
         for (Object element : jsonArray) {

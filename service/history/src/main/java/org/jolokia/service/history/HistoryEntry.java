@@ -3,8 +3,8 @@ package org.jolokia.service.history;
 import java.io.Serializable;
 import java.util.LinkedList;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -56,14 +56,13 @@ class HistoryEntry implements Serializable {
      *
      * @return JSON array of values
      */
-    @SuppressWarnings("unchecked")
     public JSONArray jsonifyValues() {
         JSONArray jValues = new JSONArray();
         for (ValueEntry vEntry : values) {
             JSONObject o = new JSONObject();
             o.put("value",vEntry.getValue());
             o.put("timestamp",vEntry.getTimestamp());
-            jValues.add(o);
+            jValues.put(o);
         }
         return jValues;
     }

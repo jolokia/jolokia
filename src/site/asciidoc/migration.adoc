@@ -91,13 +91,13 @@ This brings in the following dependencies to your project:
 |  +- org.jolokia:jolokia-service-jsr160:jar:{jolokia-version}:compile
 |  +- org.jolokia:jolokia-service-notif-pull:jar:{jolokia-version}:compile
 |  +- org.jolokia:jolokia-service-notif-sse:jar:{jolokia-version}:compile
-|  \- com.googlecode.json-simple:json-simple:jar:1.1.1:compile
+|  \- org.json:json:jar:20240303:compile
 +- org.jolokia:jolokia-support-jmx:jar:{jolokia-version}:compile
 ----
 
 Using `org.jolokia:jolokia-agent-jvm` dependency is a safe bet, as all required libraries (except Servlet API, which is in `provided` scope, so should be also _provided_ by you) are brought in.
 
-There's also a second _flavor_ of `org.jolokia:jolokia-agent-jvm` with `javaagent` classifier (which is downloaded as `jolokia-agent-jvm-{jolokia-version}-javaagent.jar` file) that shouldn't be used as _normal_ Maven dependency. Instead this version enbeds its dependencies and provides shaded (with `maven-shade-plugin`) version of `com.googlecode.json-simple:json-simple` library. This version of JVM Agent is to be used specifically outside of Maven project - in container images or standalone applications using `-javaagent:/path/to/agent.jar` JVM argument.
+There's also a second _flavor_ of `org.jolokia:jolokia-agent-jvm` with `javaagent` classifier (which is downloaded as `jolokia-agent-jvm-{jolokia-version}-javaagent.jar` file) that shouldn't be used as _normal_ Maven dependency. Instead this version enbeds its dependencies and provides shaded (with `maven-shade-plugin`) version of `org.json:json` library. This version of JVM Agent is to be used specifically outside of Maven project - in container images or standalone applications using `-javaagent:/path/to/agent.jar` JVM argument.
 
 === Removed modules
 

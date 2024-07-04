@@ -11,7 +11,7 @@ import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.impl.StdoutLogHandler;
 import org.jolokia.server.core.util.NetworkUtil;
 import org.jolokia.server.core.util.TestJolokiaContext;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 import org.testng.Assert;
 import org.testng.SkipException;
 import org.testng.annotations.Test;

@@ -16,7 +16,7 @@ import org.jolokia.server.core.service.notification.*;
 import org.jolokia.server.core.util.TestJolokiaContext;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 import org.jolokia.server.core.util.jmx.SingleMBeanServerAccess;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 import org.testng.annotations.*;
 
 import static org.easymock.EasyMock.*;
@@ -108,7 +108,7 @@ public class NotificationDispatcherTest {
         String handle = dispatch(addCmd);
         ListCommand listCmd = createCommand(ListCommand.class,"client",id);
         JSONObject list = dispatch(listCmd);
-        assertEquals(list.size(),1);
+        assertEquals(list.length(),1);
         assertEquals( ((JSONObject) list.get("1")).get("mbean"),TEST_NAME.toString());
         assertNotNull(handle);
         RemoveCommand removeCommand = createCommand(RemoveCommand.class,"client",id,"handle",handle);
@@ -127,7 +127,7 @@ public class NotificationDispatcherTest {
         String id = registerClient();
         ListCommand cmd = createCommand(ListCommand.class,"client",id);
         JSONObject list = dispatch(cmd);
-        assertEquals(list.size(),0);
+        assertEquals(list.length(),0);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*bla.*")
@@ -159,11 +159,11 @@ public class NotificationDispatcherTest {
             constructor.setAccessible(true);
             return constructor.newInstance();
         } else {
-            constructor = pClass.getDeclaredConstructor(Map.class);
+            constructor = pClass.getDeclaredConstructor(JSONObject.class);
             constructor.setAccessible(true);
-            Map<Object, Object> args = new HashMap<>();
+            JSONObject args = new JSONObject();
             for (int i = 0; i < keyValues.length; i+=2) {
-                args.put(keyValues[i], keyValues[i+1]);
+                args.put(keyValues[i].toString(), keyValues[i+1]);
             }
             return constructor.newInstance(args);
         }

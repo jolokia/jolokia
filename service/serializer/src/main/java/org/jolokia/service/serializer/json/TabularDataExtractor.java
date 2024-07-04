@@ -8,8 +8,8 @@ import javax.management.openmbean.*;
 
 import org.jolokia.server.core.service.serializer.ValueFaultHandler;
 import org.jolokia.service.serializer.object.StringToObjectConverter;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -189,13 +189,12 @@ public class TabularDataExtractor implements Extractor {
                 // we dont do any magic and return the tabular data as an array.
                 for (int i = 0; i < indexNames.size() - 1; i++) {
                     Object indexValue = pConverter.extractObject(cd.get(indexNames.get(i)), null, true);
-                    targetJSONObject = getNextMap(targetJSONObject, indexValue);
+                    targetJSONObject = getNextMap(targetJSONObject, indexValue != null ? indexValue.toString() : "");
                 }
                 Object row = pConverter.extractObject(cd, path, true);
                 String finalIndex = indexNames.get(indexNames.size() - 1);
                 Object finalIndexValue = pConverter.extractObject(cd.get(finalIndex), null, true);
-                //noinspection unchecked
-                targetJSONObject.put(finalIndexValue, row);
+                targetJSONObject.put(finalIndexValue != null ? finalIndexValue.toString() : "", row);
                 found = true;
             } catch (ValueFaultHandler.AttributeFilteredException exp) {
                 // Ignoring filtered attributes
@@ -218,24 +217,23 @@ public class TabularDataExtractor implements Extractor {
         JSONObject ret = new JSONObject();
         JSONArray indexNames = new JSONArray();
         TabularType type = pTd.getTabularType();
-        indexNames.addAll(type.getIndexNames());
+        indexNames.putAll(type.getIndexNames());
         ret.put("indexNames",indexNames);
 
         JSONArray values = new JSONArray();
         // Here no special handling for wildcard pathes since pathes are not supported for this use case (yet)
         for (CompositeData cd : (Collection<CompositeData>) pTd.values()) {
-            values.add(pConverter.extractObject(cd, pExtraArgs, true));
+            values.put(pConverter.extractObject(cd, pExtraArgs, true));
         }
         ret.put("values",values);
 
         return ret;
     }
 
-    private JSONObject getNextMap(JSONObject pJsonObject, Object pKey) {
-        JSONObject ret = (JSONObject) pJsonObject.get(pKey);
+    private JSONObject getNextMap(JSONObject pJsonObject, String pKey) {
+        JSONObject ret = (JSONObject) pJsonObject.opt(pKey);
         if (ret == null) {
             ret = new JSONObject();
-            //noinspection unchecked
             pJsonObject.put(pKey, ret);
         }
         return ret;
@@ -318,7 +316,6 @@ public class TabularDataExtractor implements Extractor {
             if (keyObject != null) {
                 try {
                     Object value = pConverter.extractObject(row.get("value"), path, true);
-                    //noinspection unchecked
                     ret.put(keyObject.toString(), value);
                 } catch (ValueFaultHandler.AttributeFilteredException exp) {
                     // Skip to next object since attribute was filtered

@@ -29,7 +29,7 @@ import org.jolokia.server.core.config.Configuration;
 import org.jolokia.server.core.config.StaticConfiguration;
 import org.jolokia.server.core.request.*;
 import org.jolokia.server.core.util.TestJolokiaContext;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 import org.testng.annotations.*;
 
 import static org.testng.Assert.*;
@@ -124,7 +124,6 @@ public class Jsr160RequestHandlerTest {
         return preparePostReadRequestWithServiceUrl("service:jmx:test:///jndi/rmi://localhost:9999/jmxrmi", pUser, pAttribute);
     }
 
-    @SuppressWarnings("unchecked")
     private JolokiaReadRequest preparePostReadRequestWithServiceUrl(String pJmxServiceUrl, String pUser, String... pAttribute) {
         JSONObject params = new JSONObject();
         JSONObject target = new JSONObject();
@@ -140,7 +139,7 @@ public class Jsr160RequestHandlerTest {
         params.put("type","read");
         params.put("mbean","java.lang:type=Memory");
 
-        return (JolokiaReadRequest) JolokiaRequestFactory.createPostRequest(params, new TestProcessingParameters());
+        return JolokiaRequestFactory.createPostRequest(params.toMap(), new TestProcessingParameters());
     }
 
     private Jsr160RequestHandler createDispatcherPointingToLocalMBeanServer(Configuration pConfig) {

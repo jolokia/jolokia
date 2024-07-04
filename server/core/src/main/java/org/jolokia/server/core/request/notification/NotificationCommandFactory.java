@@ -20,6 +20,8 @@ import java.util.*;
 
 import javax.management.MalformedObjectNameException;
 
+import org.json.JSONObject;
+
 /**
  * This factory produces {@link NotificationCommand} objects which specify a certain aspect
  * during notification listener registration. I.e. when a request type is
@@ -52,7 +54,22 @@ public final class NotificationCommandFactory {
     }
 
     /**
-     * Create a command out of a map, possible out of a {@link org.json.simple.JSONObject}.
+     * Create a command out of a map, possible out of a {@link org.json.JSONObject}.
+     * The command name itself must be given under the key "command", the rest of the map
+     * holds the specifics for this command.
+     *
+     * @param pCommandMap parameter from which to extract the command
+     * @return the created command
+     * @throws MalformedObjectNameException if an objectname part has an invalid format
+     */
+    public static NotificationCommand createCommand(JSONObject pCommandMap) throws MalformedObjectNameException {
+        String command = (String) pCommandMap.get("command");
+        NotificationCommandType type = NotificationCommandType.getTypeByName(command);
+        return CREATORS.get(type).create(null,pCommandMap);
+    }
+
+    /**
+     * Create a command out of a map, possible out of a {@link org.json.JSONObject}.
      * The command name itself must be given under the key "command", the rest of the map
      * holds the specifics for this command.
      *
@@ -61,9 +78,7 @@ public final class NotificationCommandFactory {
      * @throws MalformedObjectNameException if an objectname part has an invalid format
      */
     public static NotificationCommand createCommand(Map<String, ?> pCommandMap) throws MalformedObjectNameException {
-        String command = (String) pCommandMap.get("command");
-        NotificationCommandType type = NotificationCommandType.getTypeByName(command);
-        return CREATORS.get(type).create(null,pCommandMap);
+        return createCommand(new JSONObject(pCommandMap));
     }
 
     // =====================================================================
@@ -75,7 +90,7 @@ public final class NotificationCommandFactory {
         /**
          * Create the command either from the given stack (checked first) or a given map
          */
-        NotificationCommand create(Deque<String> pStack,Map<String,?> pMap) throws MalformedObjectNameException;
+        NotificationCommand create(Deque<String> pStack,JSONObject pMap) throws MalformedObjectNameException;
     }
 
     // Build up the lookup map

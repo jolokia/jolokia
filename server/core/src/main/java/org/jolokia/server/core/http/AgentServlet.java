@@ -19,12 +19,7 @@ import org.jolokia.server.core.restrictor.RestrictorFactory;
 import org.jolokia.server.core.service.JolokiaServiceManagerFactory;
 import org.jolokia.server.core.service.api.*;
 import org.jolokia.server.core.service.impl.ClasspathServiceCreator;
-import org.jolokia.server.core.util.ClassUtil;
-import org.jolokia.server.core.util.IoUtil;
-import org.jolokia.server.core.util.MimeTypeUtil;
-import org.jolokia.server.core.util.NetworkUtil;
-import org.json.simple.JSONAware;
-import org.json.simple.JSONStreamAware;
+import org.jolokia.server.core.util.*;
 
 
 /*
@@ -517,7 +512,7 @@ public class AgentServlet extends HttpServlet {
         return new ServletRequestHandler() {
             /** {@inheritDoc} */
             public JSONAware handleRequest(HttpServletRequest pReq, HttpServletResponse pResp) throws EmptyResponseException {
-                return requestHandler.handleGetRequest(pReq.getRequestURI(),pReq.getPathInfo(), getParameterMap(pReq));
+                return JSONAware.with(requestHandler.handleGetRequest(pReq.getRequestURI(),pReq.getPathInfo(), getParameterMap(pReq)));
             }
         };
     }
@@ -556,7 +551,7 @@ public class AgentServlet extends HttpServlet {
             pResp.setContentLength(-1);
         } else {
             if (isStreamingEnabled(pReq)) {
-                sendStreamingResponse(pResp, callback, (JSONStreamAware) pJson);
+                sendStreamingResponse(pResp, callback, pJson);
             } else {
                 // Fallback, send as one object
                 // TODO: Remove for 2.0 where should support only streaming
@@ -571,7 +566,7 @@ public class AgentServlet extends HttpServlet {
             throw new IllegalArgumentException("Invalid callback name given, which must be a valid javascript function name");
         }
     }
-    private void sendStreamingResponse(HttpServletResponse pResp, String pCallback, JSONStreamAware pJson) throws IOException {
+    private void sendStreamingResponse(HttpServletResponse pResp, String pCallback, JSONAware pJson) throws IOException {
         Writer writer = new OutputStreamWriter(pResp.getOutputStream(), StandardCharsets.UTF_8);
         IoUtil.streamResponseAndClose(writer, pJson, pCallback);
     }

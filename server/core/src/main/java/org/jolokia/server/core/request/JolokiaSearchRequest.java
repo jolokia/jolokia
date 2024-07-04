@@ -17,11 +17,11 @@ package org.jolokia.server.core.request;
  */
 
 import java.util.Deque;
-import java.util.Map;
 
 import javax.management.MalformedObjectNameException;
 
 import org.jolokia.server.core.util.RequestType;
+import org.json.JSONObject;
 
 /**
  * A JMX request for a <code>search</code> operation, i.e. for searching MBeans.
@@ -49,7 +49,7 @@ public class JolokiaSearchRequest extends JolokiaObjectNameRequest {
      * @param pParams processing parameters
      * @throws MalformedObjectNameException if the name is not a proper object name
      */
-    JolokiaSearchRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) throws MalformedObjectNameException {
+    JolokiaSearchRequest(JSONObject pRequestMap, ProcessingParameters pParams) throws MalformedObjectNameException {
         super(pRequestMap, pParams, false);
     }
 
@@ -80,7 +80,7 @@ public class JolokiaSearchRequest extends JolokiaObjectNameRequest {
             }
 
             /** {@inheritDoc} */
-            public JolokiaSearchRequest create(Map<String, ?> requestMap, ProcessingParameters pParams)
+            public JolokiaSearchRequest create(JSONObject requestMap, ProcessingParameters pParams)
                     throws MalformedObjectNameException {
                 return new JolokiaSearchRequest(requestMap,pParams);
             }

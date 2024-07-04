@@ -20,8 +20,8 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.Options;
 import org.apache.http.conn.ConnectionPoolTimeoutException;
 import org.jolokia.client.J4pClient;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -117,15 +117,14 @@ public class J4pConnectionPoolingIntegrationTest {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private String getJsonResponse(String message) {
         JSONObject result = new JSONObject();
         JSONArray value = new JSONArray();
-        value.add("java.lang:type=Memory");
+        value.put("java.lang:type=Memory");
         result.put("value", value);
         result.put("status", 200);
         result.put("timestamp", 1244839118);
 
-        return result.toJSONString();
+        return result.toString();
     }
 }

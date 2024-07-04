@@ -29,14 +29,12 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 import javax.management.openmbean.ArrayType;
 import javax.management.openmbean.CompositeData;
@@ -50,8 +48,8 @@ import javax.management.openmbean.TabularType;
 
 import org.jolokia.server.core.util.ClassUtil;
 import org.jolokia.service.serializer.JolokiaSerializer;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  * Attempt to produce openmbean results to emulate a native JMX connection by reverse engineering
@@ -85,11 +83,11 @@ public class ToOpenTypeConverter {
                                               String typeFromMBeanInfo) throws OpenDataException {
         //special case, empty array with no type information, return object (empty list) itself
         if ("java.util.List".equals(typeFromMBeanInfo) && rawValue instanceof JSONArray) {
-            return rawValue;//JSONArray can act as a list
+            return ((JSONArray) rawValue).toList();
         } else if ("java.util.Set".equals(typeFromMBeanInfo) && rawValue instanceof JSONArray) {
-            return new HashSet<Object>((Collection<?>) rawValue);
+            return new HashSet<>(((JSONArray) rawValue).toList());
         } else if ("java.util.Map".equals(typeFromMBeanInfo) && rawValue instanceof JSONObject) {
-            return rawValue;//JSONObject is a valid Map as it is
+            return ((JSONObject) rawValue).toMap();
         } else if (rawValue instanceof JSONArray && ((JSONArray) rawValue).isEmpty()) {
             final OpenType<?> type = cachedType(name);
             if (type != null) {
@@ -120,41 +118,40 @@ public class ToOpenTypeConverter {
      */
     private static Object toPrimitiveArray(ArrayType<?> type, JSONArray rawValue) {
         if (LONG.equals(type.getElementOpenType())) {
-            long[] longArray = new long[rawValue.size()];
-            for (int i = 0; i < rawValue.size(); i++) {
+            long[] longArray = new long[rawValue.length()];
+            for (int i = 0; i < rawValue.length(); i++) {
                 longArray[i] = ((Number) rawValue.get(i)).longValue();
             }
             return longArray;
         } else if (INTEGER.equals(type.getElementOpenType())) {
-            int[] intArray = new int[rawValue.size()];
-            for (int i = 0; i < rawValue.size(); i++) {
+            int[] intArray = new int[rawValue.length()];
+            for (int i = 0; i < rawValue.length(); i++) {
                 intArray[i] = ((Number) rawValue.get(i)).intValue();
             }
             return intArray;
         } else if (DOUBLE.equals(type.getElementOpenType())) {
-            double[] doubleArray = new double[rawValue.size()];
-            for (int i = 0; i < rawValue.size(); i++) {
+            double[] doubleArray = new double[rawValue.length()];
+            for (int i = 0; i < rawValue.length(); i++) {
                 doubleArray[i] = ((Number) rawValue.get(i)).doubleValue();
             }
             return doubleArray;
         } else if (BOOLEAN.equals(type.getElementOpenType())) {
-            boolean[] booleanArray = new boolean[rawValue.size()];
-            for (int i = 0; i < rawValue.size(); i++) {
+            boolean[] booleanArray = new boolean[rawValue.length()];
+            for (int i = 0; i < rawValue.length(); i++) {
                 booleanArray[i] = rawValue.get(i) == Boolean.TRUE;
             }
             return booleanArray;
         } else if (BYTE.equals(type.getElementOpenType())) {
-            byte[] byteArray = new byte[rawValue.size()];
-            for (int i = 0; i < rawValue.size(); i++) {
+            byte[] byteArray = new byte[rawValue.length()];
+            for (int i = 0; i < rawValue.length(); i++) {
                 byteArray[i] = ((Number) rawValue.get(i)).byteValue();
             }
             return byteArray;
         }
-        //noinspection unchecked
-        return rawValue.toArray(
+        return rawValue.toList().toArray(
             (Object[]) Array
                 .newInstance(ClassUtil.classForName(type.getElementOpenType().getClassName()),
-                    rawValue.size()));
+                    rawValue.length()));
     }
 
     /**
@@ -213,11 +210,12 @@ public class ToOpenTypeConverter {
             if ("javax.management.openmbean.TabularData".equals(typeFromMBeanInfo)) {
                 //keys are typically String, if the structure is emtpy wrong type will problably not cause too much problem
                 OpenType<?> keyType = STRING, valueType = STRING;
-                @SuppressWarnings("unchecked") final Iterator<Map.Entry<?, ?>> iterator = structure.entrySet().iterator();
+                final Iterator<String> iterator = structure.keySet().iterator();
                 if (iterator.hasNext()) {
-                    final Map.Entry<?, ?> sample = iterator.next();
-                    keyType = recursivelyBuildOpenType(name + ".key", sample.getKey(), null);
-                    valueType = recursivelyBuildOpenType(name + ".value", sample.getValue(), null);
+                    final String key = iterator.next();
+                    final Object sample = structure.get(key);
+                    keyType = recursivelyBuildOpenType(name + ".key", key, null);
+                    valueType = recursivelyBuildOpenType(name + ".value", sample, null);
                 }
                 final String typeName =
                     "java.util.Map<" + keyType.getClassName() + ", " + valueType.getClassName() + ">";
@@ -232,14 +230,12 @@ public class ToOpenTypeConverter {
                         new OpenType<?>[]{keyType, valueType}),
                     new String[]{"key"});
             }
-            final String[] keys = new String[structure.size()];
-            final OpenType<?>[] types = new OpenType[structure.size()];
+            final String[] keys = new String[structure.length()];
+            final OpenType<?>[] types = new OpenType[structure.length()];
             int index = 0;
-            for (Object element : structure.entrySet()) {
-                @SuppressWarnings("unchecked")
-                Map.Entry<String, Object> entry = (Entry<String, Object>) element;
-                keys[index] = entry.getKey();
-                types[index++] = recursivelyBuildOpenType(name + "." + entry.getKey(), entry.getValue(),
+            for (String key : structure.keySet()) {
+                keys[index] = key;
+                types[index++] = recursivelyBuildOpenType(name + "." + key, structure.get(key),
                     typeFromMBeanInfo);
             }
             if (types.length == 0) {

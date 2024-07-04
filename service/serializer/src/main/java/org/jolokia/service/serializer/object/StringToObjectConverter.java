@@ -1,5 +1,6 @@
 package org.jolokia.service.serializer.object;
 
+import java.io.StringReader;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.math.BigDecimal;
@@ -15,9 +16,10 @@ import javax.management.ObjectName;
 import org.jolokia.server.core.util.ClassUtil;
 import org.jolokia.server.core.util.DateUtil;
 import org.jolokia.server.core.util.EscapeUtil;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.ParseException;
+import org.jolokia.server.core.util.JSONAware;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 
 /*
@@ -147,11 +149,14 @@ public class StringToObjectConverter {
     // Returns null if a string conversion should happen
     private Object prepareForDirectUsage(Class<?> expectedClass, Object pArgument) {
         Class<?> givenClass = pArgument.getClass();
-        if (expectedClass.isArray() && List.class.isAssignableFrom(givenClass)) {
-            return convertListToArray(expectedClass, (List<?>) pArgument);
-        } else {
-        	return expectedClass.isAssignableFrom(givenClass) ? pArgument : null;
+        if (expectedClass.isArray()) {
+            if (List.class.isAssignableFrom(givenClass)) {
+                return convertListToArray(expectedClass, (List<?>) pArgument);
+            } else if (JSONArray.class.isAssignableFrom(givenClass)) {
+                return convertListToArray(expectedClass, ((JSONArray) pArgument).toList());
+            }
         }
+        return expectedClass.isAssignableFrom(givenClass) ? pArgument : null;
     }
 
     private Object convertByConstructor(String pType, String pValue) {
@@ -333,8 +338,9 @@ public class StringToObjectConverter {
         /** {@inheritDoc} */
         public Object extract(String pValue) {
             try {
-                return new org.json.simple.parser.JSONParser().parse(pValue);
-            } catch (ParseException e) {
+                JSONAware json = JSONAware.parse(new StringReader(pValue));
+                return json.isObject() ? json.getObject().toMap() : json.getArray().toList();
+            } catch (JSONException e) {
                 throw new IllegalArgumentException("Cannot parse JSON " + pValue + ": " + e,e);
             }
         }

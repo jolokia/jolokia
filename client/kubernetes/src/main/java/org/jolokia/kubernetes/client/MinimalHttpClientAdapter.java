@@ -47,7 +47,7 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
 import org.jolokia.server.core.osgi.security.AuthorizationHeaderParser;
 import org.jolokia.server.core.util.Base64Util;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 /**
  * This is a minimum implementation of the HttpClient interface based on what is used by J4PClient
@@ -161,22 +161,18 @@ public class MinimalHttpClientAdapter implements HttpClient {
             if (responseCode >= 400) {
                 final JSONObject errorResponse = new JSONObject();
                 Throwable syntethicException = new ClientProtocolException("Failure calling Jolokia in kubernetes");
-                //noinspection unchecked
                 errorResponse.put("status", responseCode);
                 try {//the payload would be a kubernetes error response
                     syntethicException = new KubernetesClientException(convertResponseBody(response));
                 } catch (Exception ignored) {
                 }
-                //noinspection unchecked
                 errorResponse.put("error_type", syntethicException.getClass().getName());
-                //noinspection unchecked
                 errorResponse.put("error", syntethicException.getMessage());
                 final StringWriter stacktrace = new StringWriter();
                 syntethicException.printStackTrace(new PrintWriter(
                     stacktrace));
-                //noinspection unchecked
                 errorResponse.put("stacktrace", stacktrace.getBuffer().toString());
-                responseBytes = errorResponse.toJSONString().getBytes();
+                responseBytes = errorResponse.toString().getBytes();
 
             } else {
                 responseBytes = response.body().bytes();

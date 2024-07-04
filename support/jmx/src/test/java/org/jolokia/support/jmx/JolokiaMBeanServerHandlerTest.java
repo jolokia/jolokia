@@ -16,6 +16,7 @@ package org.jolokia.support.jmx;
  * limitations under the License.
  */
 
+import java.io.StringReader;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Proxy;
 import java.util.HashMap;
@@ -40,10 +41,10 @@ import javax.management.modelmbean.ModelMBeanOperationInfo;
 import javax.management.modelmbean.RequiredModelMBean;
 import javax.management.openmbean.CompositeData;
 
+import org.jolokia.server.core.util.JSONAware;
 import org.jolokia.service.serializer.JolokiaSerializer;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -57,7 +58,7 @@ import static org.testng.Assert.assertTrue;
 public class JolokiaMBeanServerHandlerTest {
 
     @Test
-    public void simple() throws NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanException, MalformedObjectNameException, AttributeNotFoundException, ReflectionException, InstanceNotFoundException, ParseException, InvalidTargetObjectTypeException, NoSuchMethodException, IntrospectionException {
+    public void simple() throws NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanException, MalformedObjectNameException, AttributeNotFoundException, ReflectionException, InstanceNotFoundException, JSONException, InvalidTargetObjectTypeException, NoSuchMethodException, IntrospectionException {
 
         MBeanServer server = createJolokiaMBeanServer();
 
@@ -70,9 +71,9 @@ public class JolokiaMBeanServerHandlerTest {
 
             MBeanServer pServer = ManagementFactory.getPlatformMBeanServer();
             String chiliS = (String) pServer.getAttribute(oName,"Chili");
-            JSONObject chiliJ = (JSONObject) new JSONParser().parse(chiliS);
+            JSONObject chiliJ = JSONAware.parse(new StringReader(chiliS)).getObject();
             assertEquals(chiliJ.get("name"), "Bhut Jolokia");
-            assertEquals(chiliJ.get("scoville"), 1000000L);
+            assertEquals(chiliJ.get("scoville"), 1000000);
 
             server.unregisterMBean(oName);
             Assert.assertFalse(pServer.isRegistered(oName));
@@ -80,7 +81,7 @@ public class JolokiaMBeanServerHandlerTest {
     }
 
     @Test
-    public void withConstraint() throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanException, AttributeNotFoundException, ReflectionException, InstanceNotFoundException, ParseException {
+    public void withConstraint() throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanException, AttributeNotFoundException, ReflectionException, InstanceNotFoundException, JSONException {
         MBeanServer server = createJolokiaMBeanServer();
 
         ObjectName oName = new ObjectName("test:type=jsonMBean");
@@ -90,8 +91,8 @@ public class JolokiaMBeanServerHandlerTest {
         MBeanServer plattformServer = ManagementFactory.getPlatformMBeanServer();
 
         String deepDive = (String) plattformServer.getAttribute(oName,"DeepDive");
-        JSONObject deepDiveS = (JSONObject) new JSONParser().parse(deepDive);
-        assertEquals(deepDiveS.size(),1);
+        JSONObject deepDiveS = JSONAware.parse(new StringReader(deepDive)).getObject();
+        assertEquals(deepDiveS.length(),1);
         // Serialization is truncated because of maxDepth = 1
         assertTrue(deepDiveS.get("map") instanceof String);
         assertTrue(deepDiveS.get("map").toString().matches(".*hot=.*Chili.*"));

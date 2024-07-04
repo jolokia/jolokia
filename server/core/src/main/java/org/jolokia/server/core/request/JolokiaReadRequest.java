@@ -22,7 +22,8 @@ import javax.management.MalformedObjectNameException;
 
 import org.jolokia.server.core.util.EscapeUtil;
 import org.jolokia.server.core.util.RequestType;
-import org.json.simple.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  * A JMX request for <code>read</code> operations, i.e. for reading JMX attributes
@@ -63,9 +64,9 @@ public class JolokiaReadRequest extends JolokiaObjectNameRequest {
      * @param pParams optional processing parameters
      * @throws MalformedObjectNameException if the object name extracted is not a proper object name.
      */
-    JolokiaReadRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) throws MalformedObjectNameException {
+    JolokiaReadRequest(JSONObject pRequestMap, ProcessingParameters pParams) throws MalformedObjectNameException {
         super(pRequestMap, pParams, true);
-        initAttribute(pRequestMap.get("attribute"));
+        initAttribute(pRequestMap.opt("attribute"));
     }
 
     /**
@@ -111,7 +112,6 @@ public class JolokiaReadRequest extends JolokiaObjectNameRequest {
     }
 
     /** {@inheritDoc} */
-    @SuppressWarnings("unchecked")
     public JSONObject toJSON() {
         JSONObject ret = super.toJSON();
         if (attributeNames != null && !attributeNames.isEmpty()) {
@@ -156,7 +156,7 @@ public class JolokiaReadRequest extends JolokiaObjectNameRequest {
             }
 
             /** {@inheritDoc} */
-            public JolokiaReadRequest create(Map<String, ?> requestMap, ProcessingParameters pParams)
+            public JolokiaReadRequest create(JSONObject requestMap, ProcessingParameters pParams)
                     throws MalformedObjectNameException {
                 return new JolokiaReadRequest(requestMap, pParams);
             }
@@ -182,6 +182,12 @@ public class JolokiaReadRequest extends JolokiaObjectNameRequest {
 
     // initialize and detect multi attribute mode
     private void initAttribute(Object pAttrval) {
+        if (pAttrval instanceof JSONArray) {
+            pAttrval = ((JSONArray) pAttrval).toList();
+        }
+        if (pAttrval instanceof JSONObject) {
+            pAttrval = ((JSONObject) pAttrval).toMap();
+        }
         if (pAttrval instanceof String) {
             attributeNames = EscapeUtil.split((String) pAttrval, EscapeUtil.CSV_ESCAPE, ",");
             multiAttributeMode = attributeNames != null && attributeNames.size() > 1;

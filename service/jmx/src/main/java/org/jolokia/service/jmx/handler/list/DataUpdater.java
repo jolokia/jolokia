@@ -17,11 +17,10 @@ package org.jolokia.service.jmx.handler.list;
  */
 
 import java.util.Deque;
-import java.util.Map;
 
 import javax.management.MBeanInfo;
 
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 /**
  * Interface for updating a {@link MBeanInfoData} for a certain aspect of an {@link MBeanInfo}
@@ -46,8 +45,7 @@ abstract class DataUpdater {
      * @param pMBeanInfo info to extract from
      * @param pPathStack stack for further constraining the result
      */
-    @SuppressWarnings("rawtypes")
-    void update(Map pMap, MBeanInfo pMBeanInfo, Deque<String> pPathStack) {
+    void update(JSONObject pMap, MBeanInfo pMBeanInfo, Deque<String> pPathStack) {
 
         boolean isPathEmpty = pPathStack == null || pPathStack.isEmpty();
         String filter = pPathStack != null && !pPathStack.isEmpty() ? pPathStack.pop() : null;
@@ -56,7 +54,6 @@ abstract class DataUpdater {
         JSONObject attrMap = extractData(pMBeanInfo,filter);
 
         if (!attrMap.isEmpty()) {
-            //noinspection unchecked
             pMap.put(getKey(), attrMap);
         } else if (!isPathEmpty) {
             throw new IllegalArgumentException("Path given but extracted value is empty");

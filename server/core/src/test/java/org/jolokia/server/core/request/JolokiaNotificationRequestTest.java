@@ -22,7 +22,7 @@ import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.request.notification.*;
 import org.jolokia.server.core.util.HttpMethod;
 import org.jolokia.server.core.util.RequestType;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -75,12 +75,12 @@ public class JolokiaNotificationRequestTest {
         map.put("config", new HashMap<>());
         JolokiaNotificationRequest request = creator.create(map,getParams());
         JSONObject ret = request.toJSON();
-        assertEquals(ret.size(), 6);
+        assertEquals(ret.length(), 6);
         assertEquals(ret.get("mbean"),"test:type=test");
         List<?> filters = (List<?>) ret.get("filter");
         assertEquals(filters.size(),2);
         assertTrue(filters.contains("filter1"));
-        assertFalse(ret.containsKey("config"));
+        assertFalse(ret.toMap().containsKey("config"));
     }
 
     private ProcessingParameters getParams() {

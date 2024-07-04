@@ -28,7 +28,7 @@ import org.jolokia.server.core.request.notification.OpenCommand;
 import org.jolokia.server.core.service.notification.*;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 import org.jolokia.server.core.request.notification.AddCommand;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 /**
  * A dedicated object for delegating notification to the real 'backends'.

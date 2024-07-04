@@ -8,10 +8,9 @@ import javax.management.openmbean.*;
 
 import org.jolokia.service.serializer.util.CompositeTypeAndJson;
 import org.jolokia.service.serializer.util.TabularTypeAndJson;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -73,12 +72,11 @@ public class OpenTypeDeserializerTest {
         converter.deserialize(SimpleType.INTEGER, "4.52");
     }
 
-
     @Test
-    public void arrayType() throws OpenDataException, ParseException {
-        ArrayType type = new ArrayType(2,STRING);
+    public void arrayType() throws OpenDataException, JSONException {
+        ArrayType<String> type = new ArrayType<>(2,STRING);
         String json = "[ \"hello\", \"world\" ]";
-        for (Object element : new Object[] { json, new JSONParser().parse(json) }) {
+        for (Object element : new Object[] { json, new JSONArray(json) }) {
             Object[] data = (Object[]) converter.deserialize(type, element);
             assertEquals(data.length,2);
             assertEquals(data[0],"hello");
@@ -88,7 +86,7 @@ public class OpenTypeDeserializerTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*JSONArray.*")
     public void arrayTypeWithWrongJson() throws OpenDataException {
-        converter.deserialize(new ArrayType(2, STRING), "{ \"hello\": \"world\"}");
+        converter.deserialize(new ArrayType<String>(2, STRING), "{ \"hello\": \"world\"}");
     }
 
     @Test
@@ -113,12 +111,12 @@ public class OpenTypeDeserializerTest {
                 )
         );
         JSONArray array = new JSONArray();
-        array.add(taj.getJson());
+        array.put(taj.getJson());
         converter.deserialize(new ArrayType(2, taj.getType()), array);
     }
 
     @Test
-    public void compositeType() throws OpenDataException, AttributeNotFoundException, ParseException {
+    public void compositeType() throws OpenDataException, AttributeNotFoundException, JSONException {
         CompositeTypeAndJson taj = new CompositeTypeAndJson(
                 STRING,"verein","FCN",
                 INTEGER,"platz",6,
@@ -162,7 +160,7 @@ public class OpenTypeDeserializerTest {
         converter.deserialize(taj.getType(), "{ \"praesident\":");
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*JSONAware.*")
+    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*Can parse only JSON objects.*")
     public void invalidJson2() throws OpenDataException {
         CompositeTypeAndJson taj = new CompositeTypeAndJson(
                 STRING,"verein","FCN"

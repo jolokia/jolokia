@@ -10,7 +10,8 @@ import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 import org.jolokia.server.core.util.jmx.SingleMBeanServerAccess;
 import org.jolokia.server.core.request.notification.AddCommand;
 import org.jolokia.test.util.CollectionTestUtil;
-import org.json.simple.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -105,13 +106,13 @@ public class NotificationListenerDelegateTest {
         expect(backend.subscribe(anyObject())).andStubReturn(null);
         replay(command, backend);
 
-        assertEquals(delegate.list(id).size(),0);
+        assertEquals(delegate.list(id).length(),0);
         try {
             delegate.addListener(executor,command);
             fail();
         } catch (IllegalArgumentException ignored) {
         }
-        assertEquals(delegate.list(id).size(),0);
+        assertEquals(delegate.list(id).length(),0);
     }
 
     private AddCommand getAddCommand(String pId, Object pHandback) {
@@ -132,9 +133,9 @@ public class NotificationListenerDelegateTest {
         JSONObject ret = reg.toJson();
         assertEquals(ret.get("mbean"),TEST_NAME.toString());
         assertEquals(ret.get("handback"),handback);
-        assertEquals(((List<?>) ret.get("filter")).get(0), "type.jmx");
-        assertEquals(((List<?>) ret.get("filter")).size(), 1);
-        Map<?, ?> config = (Map<?, ?>) ret.get("config");
+        assertEquals(((JSONArray) ret.get("filter")).get(0), "type.jmx");
+        assertEquals(((JSONArray) ret.get("filter")).length(), 1);
+        Map<?, ?> config = ret.getJSONObject("config").toMap();
         assertEquals(config.get("eins"),"zwei");
     }
 

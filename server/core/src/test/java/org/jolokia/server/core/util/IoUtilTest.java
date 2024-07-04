@@ -5,8 +5,8 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
@@ -15,7 +15,6 @@ import static org.testng.Assert.fail;
 
 
 public class IoUtilTest {
-    @SuppressWarnings("unchecked")
     @Test
     public void checkSmallWrite() throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -23,15 +22,14 @@ public class IoUtilTest {
 
         JSONObject resp = new JSONObject();
         resp.put("value", "hello");
-        String respString = resp.toJSONString();
+        String respString = resp.toString();
 
-        IoUtil.streamResponseAndClose(writer,resp,null);
+        IoUtil.streamResponseAndClose(writer,JSONAware.with(resp),null);
         assertEquals(out.size(), respString.length());
         assertEquals(out.toString(StandardCharsets.UTF_8), respString);
         assertWriterClosed(writer);
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void checkBigWrite() throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -42,17 +40,16 @@ public class IoUtilTest {
         for (int i = 0; i < 10000; i++) {
             JSONObject data = new JSONObject();
             data.put("value", "hello");
-            resp.add(data);
+            resp.put(data);
         }
-        String respString = resp.toJSONString();
+        String respString = resp.toString();
 
-        IoUtil.streamResponseAndClose(writer,resp,null);
+        IoUtil.streamResponseAndClose(writer,JSONAware.with(resp),null);
         assertEquals(out.size(), respString.length());
         assertEquals(out.toString(StandardCharsets.UTF_8), respString);
         assertWriterClosed(writer);
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void checkWriteWithCallback() throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -60,9 +57,9 @@ public class IoUtilTest {
 
         JSONObject resp = new JSONObject();
         resp.put("value", "hello");
-        String respString = "callbackFunc(" + resp.toJSONString() + ");";
+        String respString = "callbackFunc(" + resp.toString() + ");";
 
-        IoUtil.streamResponseAndClose(writer,resp,"callbackFunc");
+        IoUtil.streamResponseAndClose(writer,JSONAware.with(resp),"callbackFunc");
         assertEquals(out.size(), respString.length());
         assertEquals(out.toString(StandardCharsets.UTF_8), respString);
         assertWriterClosed(writer);

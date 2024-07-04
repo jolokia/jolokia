@@ -4,7 +4,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.jolokia.server.core.http.BackChannel;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 /**
  * A Client holds all listener registration for a specific client. Also, it knows
@@ -114,7 +114,6 @@ public class Client {
      *
      * @return JSON object for this configuration.
      */
-    @SuppressWarnings("unchecked")
     public JSONObject list() {
         JSONObject ret = new JSONObject();
         for (Map.Entry<String,ListenerRegistration> entry : listenerConfigMap.entrySet()) {

@@ -1,18 +1,5 @@
-package org.jolokia.service.serializer.json;
-
-import java.lang.reflect.InvocationTargetException;
-import java.util.Deque;
-import java.util.LinkedList;
-import java.util.Map;
-
-import javax.management.AttributeNotFoundException;
-
-import org.jolokia.server.core.service.serializer.ValueFaultHandler;
-import org.jolokia.service.serializer.object.StringToObjectConverter;
-import org.json.simple.JSONObject;
-
 /*
- * Copyright 2009-2013 Roland Huss
+ * Copyright 2009-2024 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,14 +13,16 @@ import org.json.simple.JSONObject;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.service.serializer.json;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
+import javax.management.AttributeNotFoundException;
 
-/**
- * Extractor for Maps (which turns {@link Map} into {@link JSONObject})
- *
- * @author roland
- * @since Apr 19, 2009
- */
+import org.jolokia.server.core.service.serializer.ValueFaultHandler;
+import org.jolokia.service.serializer.object.StringToObjectConverter;
+import org.json.JSONObject;
+
 public class MapExtractor implements Extractor {
     private static final int MAX_STRING_LENGTH = 400;
 
@@ -59,7 +48,7 @@ public class MapExtractor implements Extractor {
     public Object extractObject(ObjectToJsonConverter pConverter, Object pValue,
                                 Deque<String> pPathParts,boolean jsonify) throws AttributeNotFoundException {
         @SuppressWarnings("unchecked")
-        Map<Object,Object> map = (Map<Object,Object>) pValue;
+        Map<String,Object> map = (Map<String,Object>) pValue;
         int length = pConverter.getCollectionLength(map.size());
         String pathParth = pPathParts.isEmpty() ? null : pPathParts.pop();
         if (pathParth != null) {
@@ -69,15 +58,14 @@ public class MapExtractor implements Extractor {
         }
     }
 
-    private JSONObject extractMapValues(ObjectToJsonConverter pConverter, Deque<String> pPathParts, boolean jsonify, Map<Object, Object> pMap, int pLength) throws AttributeNotFoundException {
+    private JSONObject extractMapValues(ObjectToJsonConverter pConverter, Deque<String> pPathParts, boolean jsonify, Map<String, Object> pMap, int pLength) throws AttributeNotFoundException {
         JSONObject ret = new JSONObject();
         int i = 0;
-        for(Map.Entry<?, ?> entry : pMap.entrySet()) {
+        for(Map.Entry<String, Object> entry : pMap.entrySet()) {
             Deque<String> paths = new LinkedList<>(pPathParts);
             try {
-                //noinspection unchecked
                 ret.put(entry.getKey(),
-                        pConverter.extractObject(entry.getValue(), paths, jsonify));
+                    pConverter.extractObject(entry.getValue(), paths, jsonify));
                 if (++i > pLength) {
                     break;
                 }
@@ -92,7 +80,7 @@ public class MapExtractor implements Extractor {
         return ret;
     }
 
-    private Object extractMapValueWithPath(ObjectToJsonConverter pConverter, Object pValue, Deque<String> pPathParts, boolean jsonify, Map<Object, Object> pMap, String pPathParth) throws AttributeNotFoundException {
+    private Object extractMapValueWithPath(ObjectToJsonConverter pConverter, Object pValue, Deque<String> pPathParts, boolean jsonify, Map<String, Object> pMap, String pPathParth) throws AttributeNotFoundException {
         for (Map.Entry<?, ?> entry : pMap.entrySet()) {
             // We dont access the map via a lookup since the key
             // are potentially object but we have to deal with string
@@ -103,8 +91,8 @@ public class MapExtractor implements Extractor {
         }
         ValueFaultHandler faultHandler = pConverter.getValueFaultHandler();
         return faultHandler.handleException(
-                new AttributeNotFoundException("Map key '" + pPathParth +
-                                             "' is unknown for map " + trimString(pValue.toString())));
+            new AttributeNotFoundException("Map key '" + pPathParth +
+                "' is unknown for map " + trimString(pValue.toString())));
     }
 
     /**
@@ -120,7 +108,7 @@ public class MapExtractor implements Extractor {
      * @throws InvocationTargetException
      */
     public Object setObjectValue(StringToObjectConverter pConverter, Object pMap, String pKey, Object pValue)
-            throws IllegalAccessException, InvocationTargetException {
+        throws IllegalAccessException, InvocationTargetException {
         @SuppressWarnings("unchecked")
         Map<Object,Object> map = (Map<Object,Object>) pMap;
         Object oldValue = null;
@@ -136,9 +124,9 @@ public class MapExtractor implements Extractor {
             }
         }
         Object value =
-                oldValue != null ?
-                        pConverter.deserialize(oldValue.getClass().getName(), pValue) :
-                        pValue;
+            oldValue != null ?
+                pConverter.deserialize(oldValue.getClass().getName(), pValue) :
+                pValue;
         map.put(oldKey,value);
         return oldValue;
     }

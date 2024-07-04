@@ -32,7 +32,8 @@ import org.jolokia.server.core.service.serializer.Serializer;
 import org.jolokia.server.core.util.RequestType;
 import org.jolokia.server.core.util.TestJolokiaContext;
 import org.jolokia.service.serializer.JolokiaSerializer;
-import org.json.simple.*;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -103,12 +104,11 @@ public class RawObjectNameTest {
         }
         JolokiaRequest req = builder.build();
         JSONObject json = backendManager.handleRequest(req);
-        JSONAware value = (JSONAware) json.get("value");
+        Object value = json.get("value");
         String memoryKey = null;
-        @SuppressWarnings({"unchecked", "rawtypes"})
         Set<?> keys = value instanceof JSONObject ?
                 ((JSONObject) value).keySet() :
-                new HashSet<>((JSONArray) value);
+                new HashSet<>(((JSONArray) value).toList());
         for (Object key : keys) {
             String keyText = key.toString();
             if (keyText.contains("MemoryPool")) {

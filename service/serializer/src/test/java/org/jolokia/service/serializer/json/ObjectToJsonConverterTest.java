@@ -10,6 +10,7 @@ import javax.management.*;
 
 import org.jolokia.service.serializer.object.StringToObjectConverter;
 import org.jolokia.server.core.service.serializer.SerializeOptions;
+import org.json.JSONObject;
 import org.testng.annotations.*;
 
 import static org.testng.AssertJUnit.*;
@@ -55,16 +56,14 @@ public class ObjectToJsonConverterTest {
 
     @Test
     public void basics() throws AttributeNotFoundException {
-        @SuppressWarnings("unchecked")
-        Map<String, ?> result = (Map<String, ?>) converter.extractObject(new SelfRefBean1(), new LinkedList<>(), true);
+        Map<String, ?> result = ((JSONObject) converter.extractObject(new SelfRefBean1(), new LinkedList<>(), true)).toMap();
         assertNotNull("Bean2 is set",result.get("bean2"));
         assertNotNull("Binary attribute is set",result.get("strong"));
     }
 
     @Test
     public void checkDeadLockDetection() throws AttributeNotFoundException {
-        @SuppressWarnings("unchecked")
-        Map<String, ?> result = (Map<String, ?>) converter.extractObject(new SelfRefBean1(), new LinkedList<>(), true);
+        Map<String, ?> result = ((JSONObject) converter.extractObject(new SelfRefBean1(), new LinkedList<>(), true)).toMap();
         assertNotNull("Bean 2 is set",result.get("bean2"));
         //noinspection unchecked
         assertNotNull("Bean2:Bean1 is set",((Map<String, ?>)result.get("bean2")).get("bean1"));
@@ -76,18 +75,16 @@ public class ObjectToJsonConverterTest {
     @Test
     public void maxDepth() throws AttributeNotFoundException, NoSuchFieldException, IllegalAccessException {
         setOptionsViaReflection("maxDepth",2);
-        @SuppressWarnings("unchecked")
-        Map<String, ?> result = (Map<String, ?>) converter.extractObject(new SelfRefBean1(), new LinkedList<>(), true);
-        @SuppressWarnings("unchecked")
-        String c = (String) ((Map<String, ?>) result.get("bean2")).get("bean1");
+        Map<String, ?> result = ((JSONObject) converter.extractObject(new SelfRefBean1(), new LinkedList<>(), true)).toMap();
+        //noinspection unchecked
+        String c = (String) ((Map<String, Object>) result.get("bean2")).get("bean1");
         assertTrue("Recurence detected",c.contains("bean1: toString"));
     }
 
     @Test
     public void maxObjects() throws NoSuchFieldException, IllegalAccessException, AttributeNotFoundException {
         setOptionsViaReflection("maxObjects",1);
-        @SuppressWarnings("unchecked")
-        Map<String, Object> result = (Map<String, Object>) converter.extractObject(new InnerValueTestBean("foo", "bar", "baz"), new LinkedList<>(), true);
+        Map<String, Object> result = ((JSONObject) converter.extractObject(new InnerValueTestBean("foo", "bar", "baz"), new LinkedList<>(), true)).toMap();
         boolean found = false;
         for (Object val : result.values()) {
             if (val instanceof String) {
@@ -111,23 +108,20 @@ public class ObjectToJsonConverterTest {
     @Test
     public void customSimplifier() throws AttributeNotFoundException {
         Date date = new Date();
-        @SuppressWarnings("unchecked")
-        Map<String, ?> result = (Map<String, ?>) converter.extractObject(date, new LinkedList<>(), true);
+        Map<String, ?> result = ((JSONObject) converter.extractObject(date, new LinkedList<>(), true)).toMap();
         assertEquals(date.getTime(),result.get("millis"));
     }
 
     @Test
     public void fileSimplifier() throws AttributeNotFoundException {
-        @SuppressWarnings("unchecked")
-        Map<String, ?> result = (Map<String, ?>) converter.extractObject(new File("/tmp"), new LinkedList<>(), true);
+        Map<String, ?> result = ((JSONObject) converter.extractObject(new File("/tmp"), new LinkedList<>(), true)).toMap();
         assertNull(result.get("parent"));
     }
 
     @Test
     public void customNegativeSimpifier() throws MalformedObjectNameException, AttributeNotFoundException {
         ObjectName name = new ObjectName("java.lang:type=Memory");
-        @SuppressWarnings("unchecked")
-        Map<String, ?> result = (Map<String, ?>) converter.extractObject(name, new LinkedList<>(), true);
+        Map<String, ?> result = ((JSONObject) converter.extractObject(name, new LinkedList<>(), true)).toMap();
         // Since we removed the objectname simplifier from the list of simplifiers-default
         // explicitely, the converter should return the full-blown object;
         assertEquals("type=Memory",result.get("canonicalKeyPropertyListString"));
@@ -137,8 +131,7 @@ public class ObjectToJsonConverterTest {
     public void convertToJsonTest() throws AttributeNotFoundException {
         File file = new File("myFile");
 
-        @SuppressWarnings("unchecked")
-        Map<String, ?> ret = (Map<String, ?>) converter.serialize(file, null, SerializeOptions.DEFAULT);
+        Map<String, ?> ret = ((JSONObject) converter.serialize(file, null, SerializeOptions.DEFAULT)).toMap();
         assertEquals(ret.get("name"),"myFile");
         String name = (String) converter.serialize(file, List.of("name"), SerializeOptions.DEFAULT);
         assertEquals(name,"myFile");
@@ -172,8 +165,7 @@ public class ObjectToJsonConverterTest {
         }
         int v = Integer.parseInt(version);
         if (v > 6) {
-            @SuppressWarnings("unchecked")
-            Map<String, ?> ret =  (Map<String, ?>)converter.serialize(bean, null, SerializeOptions.DEFAULT);
+            Map<String, ?> ret =  ((JSONObject) converter.serialize(bean, null, SerializeOptions.DEFAULT)).toMap();
             assertNull(ret.get("transientValue"));
             assertEquals(ret.get("value"),"value");
         } else {

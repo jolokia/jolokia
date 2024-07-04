@@ -28,7 +28,7 @@ import org.jolokia.server.core.detector.DefaultServerHandle;
 import org.jolokia.server.core.service.api.ServerHandle;
 import org.jolokia.server.core.util.ClassUtil;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 /**
  * Detector for IBM Websphere 6 & 7 & 8
@@ -69,11 +69,11 @@ public class WebsphereDetector extends AbstractServerDetector {
                 String date = matcher.group(2);
                 JSONObject extraInfo = new JSONObject();
                 if (date != null) {
-                    //noinspection unchecked
                     extraInfo.put("buildDate",date);
                 }
-                //noinspection unchecked
-                return new WebsphereServerHandle(version, !extraInfo.isEmpty() ? extraInfo : null);
+                Map<String, String> extra = new HashMap<>();
+                extraInfo.toMap().forEach((k, v) -> extra.put(k, v == null ? (String) v : v.toString()));
+                return new WebsphereServerHandle(version, !extraInfo.isEmpty() ? extra : null);
             }
             return null;
         } else if (isWebsphere) {

@@ -20,7 +20,7 @@ import java.util.Map;
 
 import org.jolokia.server.core.service.api.ServerHandle;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 /**
  * Information about the the server product the agent is running in.
@@ -72,7 +72,6 @@ public class DefaultServerHandle implements ServerHandle {
         return ret;
     }
 
-    @SuppressWarnings("unchecked")
     private void addNullSafe(JSONObject pRet, String pKey, Object pValue) {
         if (pValue != null) {
             pRet.put(pKey,pValue);

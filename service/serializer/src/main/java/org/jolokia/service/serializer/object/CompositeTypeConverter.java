@@ -21,8 +21,8 @@ import java.util.Map;
 
 import javax.management.openmbean.*;
 
-import org.json.simple.JSONAware;
-import org.json.simple.JSONObject;
+import org.jolokia.server.core.util.JSONAware;
+import org.json.JSONObject;
 
 /**
  * Converter for {@link CompositeType} objects
@@ -52,14 +52,13 @@ class CompositeTypeConverter extends OpenTypeConverter<CompositeType> {
     Object convertToObject(CompositeType pType, Object pFrom) {
         // break down the composite type to its field and recurse for converting each field
         JSONAware value = toJSON(pFrom);
-        if (!(value instanceof JSONObject)) {
+        if (!value.isObject()) {
             throw new IllegalArgumentException(
                     "Conversion of " + value + " to " +
                     pType + " failed because provided JSON type " + value.getClass() + " is not a JSONObject");
         }
 
-        @SuppressWarnings("unchecked")
-        Map<String, Object> givenValues = (JSONObject) value;
+        JSONObject givenValues = value.getObject();
         Map<String, Object> compositeValues = new HashMap<>();
 
         fillCompositeWithGivenValues(pType, compositeValues, givenValues);
@@ -74,10 +73,9 @@ class CompositeTypeConverter extends OpenTypeConverter<CompositeType> {
 
     // ========================================================================================
 
-    private void fillCompositeWithGivenValues(CompositeType pType, Map<String, Object> pCompositeValues, Map<String, Object> pSourceJson) {
-        for (Map.Entry<String,Object> entry : pSourceJson.entrySet()) {
-            String key = entry.getKey();
-            Object value = entry.getValue();
+    private void fillCompositeWithGivenValues(CompositeType pType, Map<String, Object> pCompositeValues, JSONObject pSourceJson) {
+        for (String key : pSourceJson.keySet()) {
+            Object value = pSourceJson.get(key);
 
             if (!pType.containsKey(key)) {
                 //Some Oracle JVM return Objects with more fields than the overridden/official type (Example ThreadInfo)

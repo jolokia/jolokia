@@ -22,6 +22,7 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import org.jolokia.client.exception.J4pException;
+import org.json.JSONObject;
 import org.testng.annotations.Test;
 
 import static org.testng.AssertJUnit.*;
@@ -55,10 +56,10 @@ public class J4pListIntegrationTest extends AbstractJ4pIntegrationTest {
                 new J4pListRequest(getTargetProxyConfig(), new ObjectName("proxy@" + objectName))
         }) {
             J4pListResponse resp = j4pClient.execute(req);
-            Map<?, ?> val = resp.getValue();
-            assertTrue(val.containsKey("desc"));
-            assertTrue(val.containsKey("op"));
-            assertTrue(val.containsKey("attr"));
+            JSONObject val = resp.getValue();
+            assertTrue(val.has("desc"));
+            assertTrue(val.has("op"));
+            assertTrue(val.has("attr"));
         }
     }
 
@@ -69,7 +70,7 @@ public class J4pListIntegrationTest extends AbstractJ4pIntegrationTest {
                 new J4pListRequest(getTargetProxyConfig(),"jolokia.it/name=name with space," + TYPE_ESCAPED)
         }) {
             J4pListResponse resp = j4pClient.execute(req);
-            Map<?, ?> val = resp.getValue();
+            Map<?, ?> val = ((JSONObject) resp.getValue()).toMap();
             assertEquals(((Map<?, ?>) ((Map<?, ?>) val.get("attr")).get("Ok")).get("type"), "java.lang.String");
         }
     }
@@ -86,7 +87,7 @@ public class J4pListIntegrationTest extends AbstractJ4pIntegrationTest {
         };
         for (J4pListRequest req : reqs) {
             J4pListResponse resp = j4pClient.execute(req);
-            Map<?, ?> val = resp.getValue();
+            Map<?, ?> val = ((JSONObject) resp.getValue()).toMap();
             assertEquals(((Map<?, ?>) ((Map<?, ?>) val.get("attr")).get("Ok")).get("type"), "java.lang.String");
         }
     }

@@ -27,7 +27,8 @@ import org.jolokia.server.core.service.serializer.ValueFaultHandler;
 import org.jolokia.service.serializer.object.StringToObjectConverter;
 import org.jolokia.service.serializer.util.CompositeTypeAndJson;
 import org.jolokia.service.serializer.util.TabularTypeAndJson;
-import org.json.simple.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.testng.annotations.*;
 
 import static javax.management.openmbean.SimpleType.*;
@@ -71,9 +72,9 @@ public class TabularDataExtractorTest {
     public void extractMapAsJson() throws OpenDataException, AttributeNotFoundException {
         TabularData data = getMapTabularData(STRING, "key1", TEST_VALUE);
         JSONObject result = (JSONObject) extract(true, data);
-        assertNull(result.get("key2"));
+        assertNull(result.opt("key2"));
         assertEquals(result.get("key1"), TEST_VALUE);
-        assertEquals(result.size(), 1);
+        assertEquals(result.length(), 1);
     }
 
     @Test
@@ -87,7 +88,7 @@ public class TabularDataExtractorTest {
         TabularData data = prepareMxMBeanMapData("key1", "test:type=bla", "key2", "java.lang:type=Memory");
 
         JSONObject result = (JSONObject) extract(true, data, null, "domain");
-        assertEquals(result.size(), 2);
+        assertEquals(result.length(), 2);
         assertEquals(result.get("key1"),"test");
         assertEquals(result.get("key2"),"java.lang");
     }
@@ -125,22 +126,22 @@ public class TabularDataExtractorTest {
         TabularData data = getMapTabularData(cdj.getType(),cdj.getCompositeData(),TEST_VALUE);
 
         JSONObject result = (JSONObject) extract(true,data);
-        assertEquals(result.size(), 2);
-        assertTrue(result.containsKey("indexNames"));
-        assertTrue(result.containsKey("values"));
-        List<?> indexNames = (List<?>) result.get("indexNames");
+        assertEquals(result.length(), 2);
+        assertTrue(result.has("indexNames"));
+        assertTrue(result.has("values"));
+        List<?> indexNames = result.getJSONArray("indexNames").toList();
         assertEquals(indexNames.size(), 1);
         assertTrue(indexNames.contains("key"));
-        List<?> values = (List<?>) result.get("values");
-        assertEquals(values.size(),1);
+        JSONArray values = result.getJSONArray("values");
+        assertEquals(values.length(),1);
         JSONObject value = (JSONObject) values.get(0);
         JSONObject key = (JSONObject) value.get("key");
         assertEquals(key.get("name"),"roland");
         assertEquals(key.get("date"),1968);
-        assertEquals(key.size(), 2);
+        assertEquals(key.length(), 2);
 
         assertEquals(value.get("value"), TEST_VALUE);
-        assertEquals(key.size(),2);
+        assertEquals(key.length(),2);
     }
 
     @Test
@@ -177,19 +178,19 @@ public class TabularDataExtractorTest {
     void extractGenericTabularDataWithJson() throws OpenDataException, AttributeNotFoundException {
         TabularData data = getComplexTabularData();
         JSONObject result = (JSONObject) extract(true, data);
-        assertEquals(result.size(),2);
-        assertTrue(result.containsKey("meyer"));
-        assertTrue(result.containsKey("huber"));
+        assertEquals(result.length(),2);
+        assertTrue(result.has("meyer"));
+        assertTrue(result.has("huber"));
         JSONObject meyerMap = (JSONObject) result.get("meyer");
-        assertTrue(meyerMap.containsKey("xaver"));
-        assertTrue(meyerMap.containsKey("zensi"));
-        assertEquals(meyerMap.size(),2);
+        assertTrue(meyerMap.has("xaver"));
+        assertTrue(meyerMap.has("zensi"));
+        assertEquals(meyerMap.length(),2);
         JSONObject zensiMap = (JSONObject) meyerMap.get("zensi");
         assertEquals(zensiMap.get("name"),"meyer");
         assertEquals(zensiMap.get("firstname"),"zensi");
         assertEquals(zensiMap.get("age"),28);
         assertEquals(zensiMap.get("male"),false);
-        assertEquals(zensiMap.size(), 4);
+        assertEquals(zensiMap.length(), 4);
     }
 
     @Test
@@ -204,7 +205,7 @@ public class TabularDataExtractorTest {
     void extractGenericTabularDataWithPath() throws OpenDataException, AttributeNotFoundException {
         TabularData data = getComplexTabularData();
         JSONObject result = (JSONObject) extract(true,data,"meyer","xaver");
-        assertEquals(result.size(),4);
+        assertEquals(result.length(),4);
         assertEquals(result.get("age"),12);
         assertEquals(result.get("male"),true);
     }
@@ -225,7 +226,7 @@ public class TabularDataExtractorTest {
                 new Object[]{10L,new ObjectName("test:type=bundle"), false}
         ));
         JSONObject result = (JSONObject) extract(true, data, "10", "test:type=bundle");
-        assertEquals(result.size(),3);
+        assertEquals(result.length(),3);
         assertEquals(result.get("bundleId"),10L);
         assertEquals(result.get("active"),false);
     }
@@ -256,20 +257,20 @@ public class TabularDataExtractorTest {
         // Path: */*/domain --> 1. Level: 10, 20 -- 2. Level: CD key-value (e.g {id: 10, oName: test=type...}), -- 3. level: Objects
         // Here: Only ObjetNames should be picked
         JSONObject result = (JSONObject) extract(true, data, null, null,"domain");
-        assertEquals(result.size(),2); // 10 & 20
-        JSONObject inner = (JSONObject) result.get(10L);
-        assertEquals(inner.size(),1);
+        assertEquals(result.length(),2); // 10 & 20
+        JSONObject inner = (JSONObject) result.get("10");
+        assertEquals(inner.length(),1);
         assertEquals(inner.get("oName"),"test");
-        inner = (JSONObject) result.get(20L);
-        assertEquals(inner.size(),1);
+        inner = (JSONObject) result.get("20");
+        assertEquals(inner.length(),1);
         assertEquals(inner.get("oName"),"java.lang");
 
         // Path: */oName --> 1. Level: 10,20 -- 2. Level: { oName : { 10 vals}}
         result = (JSONObject) extract(true, data, null, "oName");
-        assertEquals(result.size(),2);
-        inner = (JSONObject) result.get(10L);
+        assertEquals(result.length(),2);
+        inner = (JSONObject) result.get("10");
         assertEquals(inner.get("domain"),"test");
-        inner = (JSONObject) result.get(20L);
+        inner = (JSONObject) result.get("20");
         assertEquals(inner.get("domain"),"java.lang");
     }
 
@@ -321,7 +322,7 @@ public class TabularDataExtractorTest {
         TabularData data = prepareMxMBeanMapData();
         JSONObject result = (JSONObject) extract(true, data);
         assertNotNull(result);
-        assertEquals(result.size(),0);
+        assertEquals(result.length(),0);
     }
 
     @Test
@@ -336,7 +337,7 @@ public class TabularDataExtractorTest {
         TabularData data = new TabularDataSupport(new TabularType("test","test desc",type,new String[] { "testKey"}));
         JSONObject result = (JSONObject) extract(true, data);
         assertNotNull(result);
-        assertEquals(result.size(),0);
+        assertEquals(result.length(),0);
     }
 
 

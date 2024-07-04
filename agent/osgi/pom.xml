@@ -85,8 +85,8 @@
     <!-- JSON -->
 
     <dependency>
-      <groupId>com.googlecode.json-simple</groupId>
-      <artifactId>json-simple</artifactId>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
     </dependency>
 
     <!-- JakartaEE dependencies -->
@@ -145,7 +145,7 @@
               jolokia-service-jsr160;inline=true,
               jolokia-service-notif-pull;inline=true,
               jolokia-service-notif-sse;inline=true,
-              json-simple;inline=true
+              json;inline=true
             </Embed-Dependency>
             <Export-Package>
               <!-- jolokia-server-core -->
@@ -197,8 +197,8 @@
               <!-- jolokia-service-notif-sse -->
               org.jolokia.service.notif.sse,
               org.jolokia.service.notif.sse.osgi,
-              <!-- json-simple -->
-              org.json.simple
+              <!-- org.json -->
+              org.json
             </Export-Package>
             <Import-Package>
               !java.*,
@@ -261,8 +261,8 @@
                       <classifier>sources</classifier>
                     </artifactItem>
                     <artifactItem>
-                      <groupId>com.googlecode.json-simple</groupId>
-                      <artifactId>json-simple</artifactId>
+                      <groupId>org.json</groupId>
+                      <artifactId>json</artifactId>
                       <classifier>sources</classifier>
                     </artifactItem>
                   </artifactItems>

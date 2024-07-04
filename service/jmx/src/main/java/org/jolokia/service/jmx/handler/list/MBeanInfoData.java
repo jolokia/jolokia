@@ -21,7 +21,7 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 /**
  * Tree of MBean meta data. This map is a container for one or more MBeanInfo meta data which can be obtained
@@ -83,7 +83,6 @@ import org.json.simple.JSONObject;
  * @author roland
  * @since 13.09.11
  */
-@SuppressWarnings("rawtypes")
 public class MBeanInfoData {
 
     // max depth for map to return
@@ -93,7 +92,7 @@ public class MBeanInfoData {
     private final Deque<String> pathStack;
 
     // Map holding information
-    private final Map infoMap = new JSONObject();
+    private final JSONObject infoMap = new JSONObject();
 
     // Initialise updaters
     private static final Map<String,DataUpdater> UPDATERS = new HashMap<>();
@@ -149,13 +148,11 @@ public class MBeanInfoData {
         if (maxDepth == 1 && pathStack.isEmpty()) {
             // Only add domain names with a dummy value if max depth is restricted to 1
             // But only when used without path
-            //noinspection unchecked
             infoMap.put(addProviderIfNeeded(pName.getDomain()), 1);
             return true;
         } else if (maxDepth == 2 && pathStack.isEmpty()) {
             // Add domain an object name into the map, final value is a dummy value
-            Map mBeansMap = getOrCreateJSONObject(infoMap, addProviderIfNeeded(pName.getDomain()));
-            //noinspection unchecked
+            JSONObject mBeansMap = getOrCreateJSONObject(infoMap, addProviderIfNeeded(pName.getDomain()));
             mBeansMap.put(getKeyPropertyString(pName),1);
             return true;
         }
@@ -177,8 +174,8 @@ public class MBeanInfoData {
     public void addMBeanInfo(MBeanInfo mBeanInfo, ObjectName pName)
             throws InstanceNotFoundException, IntrospectionException, IOException {
 
-        Map mBeansMap = getOrCreateJSONObject(infoMap, addProviderIfNeeded(pName.getDomain()));
-        Map mBeanMap = getOrCreateJSONObject(mBeansMap, getKeyPropertyString(pName));
+        JSONObject mBeansMap = getOrCreateJSONObject(infoMap, addProviderIfNeeded(pName.getDomain()));
+        JSONObject mBeanMap = getOrCreateJSONObject(mBeansMap, getKeyPropertyString(pName));
         // Trim down stack to get rid of domain/property list
         Deque<String> stack = truncatePathStack(2);
         if (stack.isEmpty()) {
@@ -256,9 +253,8 @@ public class MBeanInfoData {
 
     // Add an exception to the info map
     private void addException(ObjectName pName, Exception pExp) {
-        Map mBeansMap = getOrCreateJSONObject(infoMap, addProviderIfNeeded(pName.getDomain()));
-        Map mBeanMap = getOrCreateJSONObject(mBeansMap, getKeyPropertyString(pName));
-        //noinspection unchecked
+        JSONObject mBeansMap = getOrCreateJSONObject(infoMap, addProviderIfNeeded(pName.getDomain()));
+        JSONObject mBeanMap = getOrCreateJSONObject(mBeansMap, getKeyPropertyString(pName));
         mBeanMap.put(DataKeys.ERROR.getKey(), pExp.toString());
     }
 
@@ -285,13 +281,13 @@ public class MBeanInfoData {
 
     // =====================================================================================================
 
-    private void addFullMBeanInfo(Map pMBeanMap, MBeanInfo pMBeanInfo) {
+    private void addFullMBeanInfo(JSONObject pMBeanMap, MBeanInfo pMBeanInfo) {
         for (DataUpdater updater : UPDATERS.values()) {
             updater.update(pMBeanMap,pMBeanInfo,null);
         }
     }
 
-    private void addPartialMBeanInfo(Map pMBeanMap, MBeanInfo pMBeanInfo, Deque<String> pPathStack) {
+    private void addPartialMBeanInfo(JSONObject pMBeanMap, MBeanInfo pMBeanInfo, Deque<String> pPathStack) {
         String what = pPathStack.isEmpty() ? null : pPathStack.pop();
         DataUpdater updater = UPDATERS.get(what);
         if (updater != null) {
@@ -301,11 +297,10 @@ public class MBeanInfoData {
         }
     }
 
-    private Map getOrCreateJSONObject(Map pMap, String pKey) {
-        Map nMap = (Map) pMap.get(pKey);
+    private JSONObject getOrCreateJSONObject(JSONObject pMap, String pKey) {
+        JSONObject nMap = (JSONObject) pMap.opt(pKey);
         if (nMap == null) {
             nMap = new JSONObject();
-            //noinspection unchecked
             pMap.put(pKey, nMap);
         }
         return nMap;
@@ -316,16 +311,13 @@ public class MBeanInfoData {
             return 1;
         }
         JSONObject ret = new JSONObject();
-        @SuppressWarnings("unchecked")
-        Set<Map.Entry> entries = pValue.entrySet();
-        for (Map.Entry entry : entries) {
+        Set<Map.Entry<String, Object>> entries = pValue.toMap().entrySet();
+        for (Map.Entry<String, Object> entry : entries) {
             Object value = entry.getValue();
-            Object key = entry.getKey();
+            String key = entry.getKey();
             if (value instanceof JSONObject) {
-                //noinspection unchecked
                 ret.put(key, truncateJSONObject((JSONObject) value, pMaxDepth - 1));
             } else {
-                //noinspection unchecked
                 ret.put(key,value);
             }
         }
@@ -350,16 +342,16 @@ public class MBeanInfoData {
     // Navigate to sub map or leaf value
     private Object navigatePath() {
         int size = pathStack.size();
-        Map innerMap = infoMap;
+        JSONObject innerMap = infoMap;
 
         while (size > 0) {
-            Collection vals = innerMap.values();
-            if (vals.isEmpty()) {
+            Set<String> keys = innerMap.keySet();
+            if (keys.isEmpty()) {
                 return innerMap;
-            } else if (vals.size() != 1) {
-                throw new IllegalStateException("Internal: More than one key found when extracting with path: " + vals);
+            } else if (keys.size() != 1) {
+                throw new IllegalStateException("Internal: More than one key found when extracting with path: " + keys);
             }
-            Object value = vals.iterator().next();
+            Object value = innerMap.get(keys.iterator().next());
 
             // End leaf, return it ....
             if (size == 1) {

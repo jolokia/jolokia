@@ -17,9 +17,8 @@
 package org.jolokia.server.core.request.notification;
 
 import java.util.Deque;
-import java.util.Map;
 
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 /**
  * A base command which should be subclassed by every command
@@ -56,9 +55,9 @@ public abstract class ClientCommand extends NotificationCommand {
      * @param pType command type
      * @param pMap map holding the request
      */
-    protected ClientCommand(NotificationCommandType pType, Map<String, ?> pMap) {
+    protected ClientCommand(NotificationCommandType pType, JSONObject pMap) {
         super(pType);
-        client = (String) pMap.get("client");
+        client = (String) pMap.opt("client");
         if (client == null) {
             throw new IllegalArgumentException("No notification client given for '" + pType + "'");
         }
@@ -68,7 +67,6 @@ public abstract class ClientCommand extends NotificationCommand {
         return client;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public JSONObject toJSON() {
         JSONObject ret = super.toJSON();

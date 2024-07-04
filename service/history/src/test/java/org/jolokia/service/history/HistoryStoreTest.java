@@ -21,8 +21,8 @@ import java.util.*;
 import javax.management.MalformedObjectNameException;
 
 import org.jolokia.server.core.request.*;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -75,18 +75,18 @@ public class HistoryStoreTest {
                         .operation("op")
                         .build();
         store.configure(new HistoryKey(req), new HistoryLimit(2, 0L));
-        assertEquals(2,updateNTimesAsList(req,3).size(),"2 history entries");
+        assertEquals(2,updateNTimesAsList(req,3).length(),"2 history entries");
         store.configure(new HistoryKey(req), new HistoryLimit(4, 0L));
-        assertEquals(4,updateNTimesAsList(req,5).size(),"4 history entries");
+        assertEquals(4,updateNTimesAsList(req,5).length(),"4 history entries");
         store.configure(new HistoryKey(req), new HistoryLimit(12, 0L));
-        assertEquals(10,updateNTimesAsList(req,10).size(),"10 history entries (max. for store)");
+        assertEquals(10,updateNTimesAsList(req,10).length(),"10 history entries (max. for store)");
         store.setGlobalMaxEntries(20);
         assertEquals(20,store.getGlobalMaxEntries(),"Read max entries");
-        assertEquals(20,updateNTimesAsList(req,30).size(),"20 history entries (max. for store)");
+        assertEquals(20,updateNTimesAsList(req,30).length(),"20 history entries (max. for store)");
         store.reset();
         store.configure(new HistoryKey(req), new HistoryLimit(20, 0L));
         /* 5 fresh updates yield 4 history entries returned (and 5 stored) */
-        assertEquals(4,updateNTimesAsList(req,5).size(),"4 history entries after reset");
+        assertEquals(4,updateNTimesAsList(req,5).length(),"4 history entries after reset");
         store.configure(new HistoryKey(req), null);
         assertNull(updateNTimesAsList(req, 12), "History disabled");
     }
@@ -111,7 +111,7 @@ public class HistoryStoreTest {
         HistoryKey key = new HistoryKey(req);
         store.configure(key,new HistoryLimit(0,1));
         JSONArray hist = updateNTimesAsListWithSleep(req, 3, 2000);
-        assertEquals(1, hist.size(),"1 History Entry");
+        assertEquals(1, hist.length(),"1 History Entry");
     }
 
 
@@ -123,7 +123,7 @@ public class HistoryStoreTest {
                         .build();
         store.configure(new HistoryKey(req), new HistoryLimit(3, 0L));
         /* 3 fresh updates yield 2 history entries returned (and 3 stored) */
-        assertEquals(2,updateNTimesAsList(req,3,"42").size(),"2 history entries");
+        assertEquals(2,updateNTimesAsList(req,3,"42").length(),"2 history entries");
 
     }
 
@@ -135,7 +135,7 @@ public class HistoryStoreTest {
                         .value("val1")
                         .build();
         store.configure(new HistoryKey(req), new HistoryLimit(5, 0L));
-        assertEquals(3,updateNTimesAsList(req,4).size(),"4 history entries");
+        assertEquals(3,updateNTimesAsList(req,4).length(),"4 history entries");
     }
     @Test
     public void singleAttributeAsListRead() throws Exception {
@@ -147,7 +147,7 @@ public class HistoryStoreTest {
         Map<String, String> value = new HashMap<>();
         value.put("attr","42");
         JSONObject res = updateNTimesAsMap(req,4,value);
-        assertEquals(3,((List<?>) res.get("attr")).size(),"4 history entries");
+        assertEquals(3,((JSONArray) res.get("attr")).length(),"4 history entries");
     }
 
     @Test
@@ -162,8 +162,8 @@ public class HistoryStoreTest {
         value.put("attr1","val1");
         value.put("attr2","val2");
         JSONObject history = updateNTimesAsMap(req,5,value);
-        assertEquals(4, ((List<?>) history.get("attr1")).size(), "Attr1 has 3 entries");
-        assertEquals(4, ((List<?>) history.get("attr2")).size(), "Attr2 has 4 entries");
+        assertEquals(4, history.getJSONArray("attr1").toList().size(), "Attr1 has 3 entries");
+        assertEquals(4, history.getJSONArray("attr2").toList().size(), "Attr2 has 4 entries");
     }
 
     @Test
@@ -180,8 +180,8 @@ public class HistoryStoreTest {
         value.put("attr1","val1");
         value.put("attr2","val2");
         JSONObject history = updateNTimesAsMap(req,5,value);
-        assertEquals(3, ((List<?>) history.get("attr1")).size(), "Attr1 has 3 entries");
-        assertEquals(4, ((List<?>) history.get("attr2")).size(), "Attr2 has 4 entries");
+        assertEquals(3, ((JSONArray) history.get("attr1")).length(), "Attr1 has 3 entries");
+        assertEquals(4, ((JSONArray) history.get("attr2")).length(), "Attr2 has 4 entries");
     }
 
 
@@ -195,7 +195,7 @@ public class HistoryStoreTest {
                         .build();
 
         JSONArray history = updateNTimesAsList(req, 5, 4711);
-        assertEquals(history.size(), 3);
+        assertEquals(history.length(), 3);
     }
 
     @Test
@@ -223,7 +223,7 @@ public class HistoryStoreTest {
                         .build();
 
         JSONArray history = updateNTimesAsList(req, 5, 4711);
-        assertEquals(history.size(), 3);
+        assertEquals(history.length(), 3);
     }
 
 
@@ -250,11 +250,11 @@ public class HistoryStoreTest {
         mBeanMap.put("test:type=write",attr2Map);
         attr2Map.put("attr2","val2");
         JSONObject history = updateNTimesAsMap(req,4,mBeanMap);
-        assertEquals(2,history.size(),"History has 2 entries");
-        assertEquals(1, ((Map<?, ?>) history.get("test:type=read")).size(), "bean1 has 1 entry");
-        assertEquals(1, ((Map<?, ?>) history.get("test:type=write")).size(), "bean1 has 1 entry");
-        assertEquals(3, ((List<?>) ((Map<?, ?>) history.get("test:type=read")).get("attr1")).size(), "attr1 has 3 history entries");
-        assertEquals(3, ((List<?>) ((Map<?, ?>) history.get("test:type=write")).get("attr2")).size(), "attr2 has 3 history entries");
+        assertEquals(2,history.length(),"History has 2 entries");
+        assertEquals(1, ((JSONObject) history.get("test:type=read")).length(), "bean1 has 1 entry");
+        assertEquals(1, ((JSONObject) history.get("test:type=write")).length(), "bean1 has 1 entry");
+        assertEquals(3, ((JSONArray) ((JSONObject) history.get("test:type=read")).get("attr1")).length(), "attr1 has 3 history entries");
+        assertEquals(3, ((JSONArray) ((JSONObject) history.get("test:type=write")).get("attr2")).length(), "attr2 has 3 history entries");
     }
 
     private JSONArray updateNTimesAsListWithSleep(JolokiaReadRequest pReq, int pNr, long pSleep,Object ... pValue) {
@@ -272,7 +272,6 @@ public class HistoryStoreTest {
     private synchronized Object updateNTimes(JolokiaRequest pReq, int pNr,long pSleep, Object ... pValue) {
         JSONObject res = new JSONObject();
         if (pValue != null && pValue.length > 0) {
-            //noinspection unchecked
             res.put("value",pValue[0]);
         }
         for (int i=0;i<pNr;i++) {
@@ -285,7 +284,7 @@ public class HistoryStoreTest {
                 }
             }
         }
-        return res.get("history");
+        return res.opt("history");
     }
 
 

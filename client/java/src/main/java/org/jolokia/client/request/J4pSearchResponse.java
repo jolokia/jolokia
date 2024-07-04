@@ -18,11 +18,13 @@ package org.jolokia.client.request;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.*;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
-import org.json.simple.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  * Response for a {@link J4pSearchRequest}
@@ -63,6 +65,6 @@ public final class J4pSearchResponse extends J4pResponse<J4pSearchRequest> {
      * @return list of MBean names or an empty list
      */
     public List<String> getMBeanNames() {
-        return getValue();
+        return ((JSONArray) getValue()).toList().stream().map(el -> (String) el).collect(Collectors.toList());
     }
 }
