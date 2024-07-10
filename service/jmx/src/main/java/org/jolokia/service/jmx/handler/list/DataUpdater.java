@@ -21,7 +21,7 @@ import java.util.Map;
 
 import javax.management.MBeanInfo;
 
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /**
  * Interface for updating a {@link MBeanInfoData} for a certain aspect of an {@link MBeanInfo}

@@ -8,10 +8,10 @@ import javax.management.openmbean.*;
 
 import org.jolokia.service.serializer.util.CompositeTypeAndJson;
 import org.jolokia.service.serializer.util.TabularTypeAndJson;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.jolokia.json.JSONArray;
+import org.jolokia.json.JSONObject;
+import org.jolokia.json.parser.JSONParser;
+import org.jolokia.json.parser.ParseException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -162,7 +162,7 @@ public class OpenTypeDeserializerTest {
         converter.deserialize(taj.getType(), "{ \"praesident\":");
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*JSONAware.*")
+    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*JSONStructure.*")
     public void invalidJson2() throws OpenDataException {
         CompositeTypeAndJson taj = new CompositeTypeAndJson(
                 STRING,"verein","FCN"

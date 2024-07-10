@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jolokia.json;
+package org.jolokia.json.parser;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

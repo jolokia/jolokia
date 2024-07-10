@@ -21,8 +21,8 @@ import java.util.Map;
 
 import javax.management.openmbean.*;
 
-import org.json.simple.JSONAware;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONStructure;
+import org.jolokia.json.JSONObject;
 
 /**
  * Converter for {@link CompositeType} objects
@@ -51,7 +51,7 @@ class CompositeTypeConverter extends OpenTypeConverter<CompositeType> {
     @Override
     Object convertToObject(CompositeType pType, Object pFrom) {
         // break down the composite type to its field and recurse for converting each field
-        JSONAware value = toJSON(pFrom);
+        JSONStructure value = toJSON(pFrom);
         if (!(value instanceof JSONObject)) {
             throw new IllegalArgumentException(
                     "Conversion of " + value + " to " +

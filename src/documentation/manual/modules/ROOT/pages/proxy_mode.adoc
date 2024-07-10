@@ -98,8 +98,8 @@ JSR-160 export. And there are even cases (combinations of
 JDK and AppServer Version) which don't work at all properly
 (e.g. JDK 1.5 and JBoss 5).
 * For MBeans that have arguments of type `Map` or `List`
-it is required that `org.json.simple.JSONObject` and `org.json.simple.JSONArray`
-(contained in `json-simple.jar`) are available on the
+it is required that `org.jolokia.json.JSONObject` and `org.jolokia.json.JSONArray`
+(contained in `jolokia-json.jar`) are available on the
 classpath of the target JVM that receives the JSR-160 requests.
 * The proxy mode can theoretically be exploited for local code execution if not secured properly.
 So its is highly recommended to not make the agent available without any authentication to any

@@ -19,7 +19,7 @@ package org.jolokia.service.jmx.handler.list;
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanInfo;
 
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 import static org.jolokia.service.jmx.handler.list.DataKeys.*;
 /**

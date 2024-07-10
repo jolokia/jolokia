@@ -8,7 +8,7 @@ import javax.management.openmbean.OpenDataException;
 
 import org.jolokia.server.core.service.serializer.ValueFaultHandler;
 import org.jolokia.service.serializer.util.CompositeTypeAndJson;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 import org.testng.annotations.Test;
 
 import static javax.management.openmbean.SimpleType.*;

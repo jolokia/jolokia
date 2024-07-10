@@ -14,8 +14,8 @@ import org.jolokia.service.serializer.object.StringToObjectConverter;
 import org.jolokia.server.core.service.serializer.ValueFaultHandler;
 import org.jolokia.server.core.util.EscapeUtil;
 
-import org.json.simple.JSONAware;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONStructure;
+import org.jolokia.json.JSONObject;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -149,7 +149,7 @@ public class BeanExtractor implements Extractor {
     private Object exctractJsonifiedValue(ObjectToJsonConverter pConverter, Object pValue, Deque<String> pPathParts)
             throws AttributeNotFoundException {
         Class<?> pClazz = pValue.getClass();
-        if (pClazz.isPrimitive() || FINAL_CLASSES.contains(pClazz) || pValue instanceof JSONAware) {
+        if (pClazz.isPrimitive() || FINAL_CLASSES.contains(pClazz) || pValue instanceof JSONStructure) {
             // No further diving, use these directly
             if (pClazz.equals(Long.class) && "string".equals(pConverter.getSerializeLong())) {
                 // Long value can exceed max safe integer in JS, so convert it to

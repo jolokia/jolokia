@@ -10,7 +10,7 @@ import org.jolokia.server.core.service.api.JolokiaService;
 
 /**
  * Interface defining a Jolokia serializer which is also a plugable service. This interface
- * is still connected to <em>json-simple</em>, but this dependency might be removed in
+ * is still connected to particular JSON library, but this dependency might be removed in
  * the future.
  *
  * @author roland
@@ -24,7 +24,7 @@ public interface Serializer extends JolokiaService<Serializer> {
      * @param pValue the value to convert
      * @param pPathParts path parts to use for extraction
      * @param pOptions options used for parsing
-     * @return the converter object. This either a subclass of {@link org.json.simple.JSONAware} or a basic data type like String or Long.
+     * @return the converter object. This either a subclass of {@link org.json.simple.JSONStructure} or a basic data type like String or Long.
      * @throws AttributeNotFoundException if within an path an attribute could not be found
      */
     Object serialize(Object pValue, List<String> pPathParts, SerializeOptions pOptions)
@@ -57,7 +57,7 @@ public interface Serializer extends JolokiaService<Serializer> {
 
     /**
      * Handle conversion for OpenTypes. The value is expected to be in JSON (either
-     * an {@link org.json.simple.JSONAware} object or its string representation.
+     * an {@link org.json.simple.JSONStructure} object or its string representation.
      *
      * @param pOpenType target type
      * @param pValue value to convert from

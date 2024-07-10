@@ -32,7 +32,7 @@ import org.jolokia.server.core.service.request.RequestInterceptor;
 import org.jolokia.server.core.util.DebugStore;
 import org.jolokia.server.core.util.jmx.DefaultMBeanServerAccess;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
-import org.json.simple.parser.JSONParser;
+import org.jolokia.json.parser.JSONParser;
 
 /**
  * The service manager for handling all the service organisation stuff.

@@ -20,8 +20,8 @@ import java.lang.reflect.Array;
 
 import javax.management.openmbean.*;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONAware;
+import org.jolokia.json.JSONArray;
+import org.jolokia.json.JSONStructure;
 
 /**
  * Converter for {@link ArrayType}
@@ -49,7 +49,7 @@ class ArrayTypeConverter extends OpenTypeConverter<ArrayType> {
     /** {@inheritDoc} */
     @Override
     public Object convertToObject(ArrayType type, Object pFrom) {
-        JSONAware value = toJSON(pFrom);
+        JSONStructure value = toJSON(pFrom);
         // prepare each value in the array and then process the array of values
         if (!(value instanceof JSONArray)) {
             throw new IllegalArgumentException(

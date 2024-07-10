@@ -1,5 +1,5 @@
 package org.jolokia.server.core.util;/*
- * 
+ *
  * Copyright 2015 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,8 +15,8 @@ package org.jolokia.server.core.util;/*
  * limitations under the License.
  */
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONArray;
+import org.jolokia.json.JSONObject;
 
 /**
  * Utility for JSON handling

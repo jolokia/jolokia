@@ -26,7 +26,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.jolokia.client.J4pClient;
 import org.jolokia.client.exception.*;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;

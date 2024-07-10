@@ -1,5 +1,5 @@
 package org.jolokia.client.request;/*
- * 
+ *
  * Copyright 2014 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +16,7 @@ package org.jolokia.client.request;/*
  */
 
 import org.jolokia.client.exception.J4pRemoteException;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /**
  * An extractor can be used to add special behaviour to the extraction process before a {@link J4pResponse} is created.

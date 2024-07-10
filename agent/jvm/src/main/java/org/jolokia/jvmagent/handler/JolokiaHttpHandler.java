@@ -52,8 +52,7 @@ import org.jolokia.server.core.request.EmptyResponseException;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.util.IoUtil;
 import org.jolokia.server.core.util.MimeTypeUtil;
-import org.json.simple.JSONAware;
-import org.json.simple.JSONStreamAware;
+import org.jolokia.json.JSONStructure;
 
 /**
  * HttpHandler for handling a Jolokia request
@@ -147,7 +146,7 @@ public class JolokiaHttpHandler implements HttpHandler {
      */
     @SuppressWarnings({"PMD.AvoidCatchingThrowable", "PMD.AvoidInstanceofChecksInCatchClause"})
     public void doHandle(HttpExchange pExchange) throws IOException {
-        JSONAware json = null;
+        JSONStructure json = null;
         URI uri = pExchange.getRequestURI();
         ParsedUri parsedUri = new ParsedUri(uri, contextPath);
         try {
@@ -227,11 +226,11 @@ public class JolokiaHttpHandler implements HttpHandler {
         return Boolean.parseBoolean(jolokiaContext.getConfig(ConfigKey.ALLOW_DNS_REVERSE_LOOKUP)) ? address.getHostName() : null;
     }
 
-    private JSONAware executeGetRequest(ParsedUri parsedUri) throws EmptyResponseException {
+    private JSONStructure executeGetRequest(ParsedUri parsedUri) throws EmptyResponseException {
         return requestHandler.handleGetRequest(parsedUri.getUri().toString(),parsedUri.getPathInfo(), parsedUri.getParameterMap());
     }
 
-    private JSONAware executePostRequest(HttpExchange pExchange, ParsedUri pUri) throws IOException, EmptyResponseException {
+    private JSONStructure executePostRequest(HttpExchange pExchange, ParsedUri pUri) throws IOException, EmptyResponseException {
         String encoding = null;
         Headers headers = pExchange.getRequestHeaders();
         String cType =  headers.getFirst("Content-Type");
@@ -292,11 +291,10 @@ public class JolokiaHttpHandler implements HttpHandler {
         os.close();
     }
 
-    private void sendResponse(HttpExchange pExchange, ParsedUri pParsedUri, JSONAware pJson) throws IOException {
+    private void sendResponse(HttpExchange pExchange, ParsedUri pParsedUri, JSONStructure pJson) throws IOException {
         boolean streaming = Boolean.parseBoolean(jolokiaContext.getConfig(ConfigKey.STREAMING));
         if (streaming) {
-            JSONStreamAware jsonStream = (JSONStreamAware)pJson;
-            sendStreamingResponse(pExchange, pParsedUri, jsonStream);
+            sendStreamingResponse(pExchange, pParsedUri, pJson);
         } else {
             // Fallback, send as one object
             // TODO: Remove for 2.0
@@ -304,7 +302,7 @@ public class JolokiaHttpHandler implements HttpHandler {
         }
     }
 
-    private void sendStreamingResponse(HttpExchange pExchange, ParsedUri pParsedUri, JSONStreamAware pJson) throws IOException {
+    private void sendStreamingResponse(HttpExchange pExchange, ParsedUri pParsedUri, JSONStructure pJson) throws IOException {
         Headers headers = pExchange.getResponseHeaders();
         if (pJson != null) {
             headers.set("Content-Type", getMimeType(pParsedUri) + "; charset=utf-8");
@@ -319,7 +317,7 @@ public class JolokiaHttpHandler implements HttpHandler {
         }
     }
 
-    private void sendAllJSON(HttpExchange pExchange, ParsedUri pParsedUri, JSONAware pJson) throws IOException {
+    private void sendAllJSON(HttpExchange pExchange, ParsedUri pParsedUri, JSONStructure pJson) throws IOException {
         OutputStream out = null;
         try {
             Headers headers = pExchange.getResponseHeaders();

@@ -19,10 +19,10 @@ package org.jolokia.client.request;
 import java.io.File;
 import java.util.*;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.jolokia.json.JSONArray;
+import org.jolokia.json.JSONObject;
+import org.jolokia.json.parser.JSONParser;
+import org.jolokia.json.parser.ParseException;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -42,7 +42,7 @@ public class JsonSerializationTest {
 
 
     @Test
-    public void jsonAwareSerialization() {
+    public void JSONStructureSerialization() {
         JSONObject arg = new JSONObject();
         Object result = serialize(arg);
         assertSame(arg, result);

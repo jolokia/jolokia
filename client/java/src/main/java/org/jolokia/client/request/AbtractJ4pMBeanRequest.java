@@ -20,7 +20,7 @@ import java.util.*;
 
 import javax.management.ObjectName;
 
-import org.json.simple.*;
+import org.jolokia.json.*;
 
 /**
  * A request dealing with a single MBean.

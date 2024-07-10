@@ -21,7 +21,7 @@ import java.util.*;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.service.serializer.ValueFaultHandler;
 import org.jolokia.server.core.util.*;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /**
  * Abstract base class for a JMX request. This is the server side
@@ -97,7 +97,6 @@ public abstract class JolokiaRequest {
     }
 
     // For backwards compatibility, examine "target" as well
-    @SuppressWarnings("unchecked")
     private void updateForLegacyProxyConfiguration(Map<String, ?> pMap) {
         JSONObject targetOptions = (JSONObject) pMap.get("target");
         if (targetOptions != null) {
@@ -227,7 +226,6 @@ public abstract class JolokiaRequest {
      *
      * @return description of this base request
      */
-    @SuppressWarnings("unchecked")
     protected String getInfo() {
         StringBuilder ret = new StringBuilder();
         if (pathParts != null) {
@@ -235,7 +233,7 @@ public abstract class JolokiaRequest {
         }
         if (options != null) {
             ret.append(", options={");
-            for (Map.Entry<?, ?> entry : (Set<Map.Entry<?, ?>>) options.entrySet()) {
+            for (Map.Entry<?, ?> entry : options.entrySet()) {
                 ret.append(entry.getKey()).append("=").append(entry.getValue());
             }
             ret.append("}");
@@ -266,7 +264,6 @@ public abstract class JolokiaRequest {
      *
      * @return JSON object representing this base request object
      */
-    @SuppressWarnings("unchecked")
     public JSONObject toJSON() {
         JSONObject ret = new JSONObject();
         ret.put("type",type.getName());

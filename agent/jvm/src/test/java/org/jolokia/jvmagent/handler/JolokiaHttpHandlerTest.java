@@ -35,9 +35,9 @@ import org.jolokia.server.core.request.JolokiaRequestBuilder;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.serializer.Serializer;
 import org.jolokia.server.core.util.*;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.jolokia.json.JSONObject;
+import org.jolokia.json.parser.JSONParser;
+import org.jolokia.json.parser.ParseException;
 import org.testng.annotations.*;
 
 import static org.easymock.EasyMock.anyInt;

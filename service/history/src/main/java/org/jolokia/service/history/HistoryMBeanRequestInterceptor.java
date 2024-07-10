@@ -8,7 +8,7 @@ import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.request.JolokiaRequest;
 import org.jolokia.server.core.service.api.*;
 import org.jolokia.server.core.service.request.RequestInterceptor;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /**
  * @author roland

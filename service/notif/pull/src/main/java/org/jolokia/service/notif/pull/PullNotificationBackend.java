@@ -9,7 +9,7 @@ import org.jolokia.server.core.http.BackChannel;
 import org.jolokia.server.core.service.api.AbstractJolokiaService;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.notification.*;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /**
  * Pull based implementation for notifications

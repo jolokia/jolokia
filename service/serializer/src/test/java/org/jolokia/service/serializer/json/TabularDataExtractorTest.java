@@ -27,7 +27,7 @@ import org.jolokia.server.core.service.serializer.ValueFaultHandler;
 import org.jolokia.service.serializer.object.StringToObjectConverter;
 import org.jolokia.service.serializer.util.CompositeTypeAndJson;
 import org.jolokia.service.serializer.util.TabularTypeAndJson;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 import org.testng.annotations.*;
 
 import static javax.management.openmbean.SimpleType.*;

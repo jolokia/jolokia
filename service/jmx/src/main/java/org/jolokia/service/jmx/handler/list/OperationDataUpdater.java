@@ -19,8 +19,8 @@ package org.jolokia.service.jmx.handler.list;
 import javax.management.*;
 
 import org.jolokia.server.core.util.JsonUtil;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONArray;
+import org.jolokia.json.JSONObject;
 
 import static org.jolokia.service.jmx.handler.list.DataKeys.*;
 /**

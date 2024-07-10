@@ -20,7 +20,7 @@ import java.util.*;
 
 import javax.management.openmbean.*;
 
-import org.json.simple.*;
+import org.jolokia.json.*;
 
 /**
  * Converter for {@link TabularData}
@@ -77,7 +77,7 @@ class TabularDataConverter extends OpenTypeConverter<TabularType> {
     // =========================================================================================================
 
     private JSONObject getAsJsonObject(Object pFrom) {
-        JSONAware jsonVal = toJSON(pFrom);
+        JSONStructure jsonVal = toJSON(pFrom);
         if (!(jsonVal instanceof JSONObject)) {
             throw new IllegalArgumentException("Expected JSON type for a TabularData is JSONObject, not " + jsonVal.getClass());
         }
@@ -138,9 +138,7 @@ class TabularDataConverter extends OpenTypeConverter<TabularType> {
         // This means, we will convert a JSONObject to the required format
         TabularDataSupport tabularData = new TabularDataSupport(pType);
 
-        @SuppressWarnings("unchecked")
-        Map<String, String> jsonObj = (Map<String,String>) pValue;
-        for(Map.Entry<String, String> entry : jsonObj.entrySet()) {
+        for(Map.Entry<String, Object> entry : pValue.entrySet()) {
             Map<String, Object> map = new HashMap<>();
             map.put("key", getDispatcher().deserialize(rowType.getType("key"), entry.getKey()));
             map.put("value", getDispatcher().deserialize(rowType.getType("value"), entry.getValue()));
@@ -158,8 +156,8 @@ class TabularDataConverter extends OpenTypeConverter<TabularType> {
 
     // Convert complex representation containing "indexNames" and "values"
     private TabularData convertTabularDataFromFullRepresentation(JSONObject pValue, TabularType pType) {
-        JSONAware jsonVal;
-        jsonVal = (JSONAware) pValue.get("values");
+        JSONStructure jsonVal;
+        jsonVal = (JSONStructure) pValue.get("values");
         if (!(jsonVal instanceof JSONArray)) {
             throw new IllegalArgumentException("Values for tabular data of type " +
                                                pType + " must given as JSON array, not " + jsonVal.getClass());

@@ -12,7 +12,7 @@ import org.jolokia.server.core.request.NotChangedException;
 import org.jolokia.server.core.util.*;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 import org.jolokia.service.jmx.handler.list.MBeanInfoData;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /*
  * Copyright 2009-2013 Roland Huss

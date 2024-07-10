@@ -8,9 +8,9 @@ import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import org.jolokia.server.core.restrictor.DenyAllRestrictor;
 import org.jolokia.server.core.util.TestJolokiaContext;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.jolokia.json.JSONObject;
+import org.jolokia.json.parser.JSONParser;
+import org.jolokia.json.parser.ParseException;
 import org.testng.annotations.Test;
 
 import static org.easymock.EasyMock.expect;

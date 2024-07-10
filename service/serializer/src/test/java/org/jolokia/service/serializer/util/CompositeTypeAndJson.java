@@ -2,7 +2,7 @@ package org.jolokia.service.serializer.util;
 
 import javax.management.openmbean.*;
 
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /*
  * Copyright 2009-2011 Roland Huss

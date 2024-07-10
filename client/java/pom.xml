@@ -46,6 +46,11 @@
 
     <dependency>
       <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-json</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jolokia</groupId>
       <artifactId>jolokia-server-core</artifactId>
       <scope>test</scope>
     </dependency>
@@ -70,13 +75,6 @@
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-it-core</artifactId>
       <scope>test</scope>
-    </dependency>
-
-    <!-- JSON -->
-
-    <dependency>
-      <groupId>com.googlecode.json-simple</groupId>
-      <artifactId>json-simple</artifactId>
     </dependency>
 
     <!-- JakartaEE dependencies -->

@@ -19,7 +19,7 @@ package org.jolokia.service.jsr160;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /**
  * Configuration for proxy mode

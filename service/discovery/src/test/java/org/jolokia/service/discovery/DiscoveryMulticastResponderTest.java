@@ -9,7 +9,7 @@ import org.jolokia.server.core.service.api.*;
 import org.jolokia.server.core.service.impl.QuietLogHandler;
 import org.jolokia.server.core.util.NetworkUtil;
 import org.jolokia.server.core.util.TestJolokiaContext;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 import org.testng.Assert;
 import org.testng.SkipException;
 import org.testng.annotations.Test;

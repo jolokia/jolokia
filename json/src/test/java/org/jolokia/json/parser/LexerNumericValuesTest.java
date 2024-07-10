@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jolokia.json;
+package org.jolokia.json.parser;
 
 import java.io.IOException;
 import java.io.StringReader;

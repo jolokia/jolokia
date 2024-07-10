@@ -4,7 +4,7 @@ package org.jolokia.service.discovery;
 import java.nio.charset.StandardCharsets;
 
 import org.jolokia.server.core.service.api.AgentDetails;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /**
  * A Jolokia discover message which can be either a request

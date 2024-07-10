@@ -20,7 +20,7 @@ import java.util.*;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
-import org.json.simple.JSONArray;
+import org.jolokia.json.JSONArray;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;

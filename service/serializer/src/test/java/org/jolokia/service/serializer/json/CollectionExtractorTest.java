@@ -22,7 +22,7 @@ import java.util.*;
 import javax.management.AttributeNotFoundException;
 
 import org.jolokia.service.serializer.object.StringToObjectConverter;
-import org.json.simple.JSONArray;
+import org.jolokia.json.JSONArray;
 import org.testng.annotations.*;
 
 import static org.testng.Assert.*;

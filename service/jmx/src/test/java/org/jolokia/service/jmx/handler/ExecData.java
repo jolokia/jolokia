@@ -19,7 +19,7 @@ package org.jolokia.service.jmx.handler;
 import java.util.*;
 
 import org.jolokia.server.core.util.DateUtil;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /**
  * @author roland

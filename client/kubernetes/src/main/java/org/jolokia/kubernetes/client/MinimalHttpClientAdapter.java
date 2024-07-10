@@ -47,7 +47,7 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
 import org.jolokia.server.core.osgi.security.AuthorizationHeaderParser;
 import org.jolokia.server.core.util.Base64Util;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /**
  * This is a minimum implementation of the HttpClient interface based on what is used by J4PClient

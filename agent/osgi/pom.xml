@@ -46,6 +46,11 @@
 
     <dependency>
       <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-json</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jolokia</groupId>
       <artifactId>jolokia-server-core</artifactId>
     </dependency>
     <dependency>
@@ -80,13 +85,6 @@
     <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-service-notif-sse</artifactId>
-    </dependency>
-
-    <!-- JSON -->
-
-    <dependency>
-      <groupId>com.googlecode.json-simple</groupId>
-      <artifactId>json-simple</artifactId>
     </dependency>
 
     <!-- JakartaEE dependencies -->
@@ -148,6 +146,9 @@
               json-simple;inline=true
             </Embed-Dependency>
             <Export-Package>
+              <!-- jolokia-json -->
+              org.jolokia.json,
+              org.jolokia.json.parser,
               <!-- jolokia-server-core -->
               org.jolokia.server.core,
               org.jolokia.server.core.backend,
@@ -196,9 +197,7 @@
               org.jolokia.service.notif.pull.osgi,
               <!-- jolokia-service-notif-sse -->
               org.jolokia.service.notif.sse,
-              org.jolokia.service.notif.sse.osgi,
-              <!-- json-simple -->
-              org.json.simple
+              org.jolokia.service.notif.sse.osgi
             </Export-Package>
             <Import-Package>
               !java.*,
@@ -257,12 +256,12 @@
                   <artifactItems>
                     <artifactItem>
                       <groupId>org.jolokia</groupId>
-                      <artifactId>jolokia-server-core</artifactId>
+                      <artifactId>jolokia-json</artifactId>
                       <classifier>sources</classifier>
                     </artifactItem>
                     <artifactItem>
-                      <groupId>com.googlecode.json-simple</groupId>
-                      <artifactId>json-simple</artifactId>
+                      <groupId>org.jolokia</groupId>
+                      <artifactId>jolokia-server-core</artifactId>
                       <classifier>sources</classifier>
                     </artifactItem>
                   </artifactItems>

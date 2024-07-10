@@ -21,7 +21,7 @@ import java.util.*;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /**
  * Response for a {@link org.jolokia.client.request.J4pType#READ} request. Since a single

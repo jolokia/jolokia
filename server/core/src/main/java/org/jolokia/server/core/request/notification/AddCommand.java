@@ -21,9 +21,9 @@ import java.util.*;
 import javax.management.*;
 
 import org.jolokia.server.core.util.EscapeUtil;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.jolokia.json.JSONObject;
+import org.jolokia.json.parser.JSONParser;
+import org.jolokia.json.parser.ParseException;
 
 /**
  * Command for adding a notification listener for a client with optional

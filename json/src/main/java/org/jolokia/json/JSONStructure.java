@@ -15,22 +15,25 @@
  */
 package org.jolokia.json;
 
-public class ParseException extends RuntimeException {
+import java.io.Writer;
 
-    public ParseException() {
-        super();
-    }
+/**
+ * According to <a href="https://datatracker.ietf.org/doc/html/rfc8259#section-2">JSON Grammar</a>, there are two
+ * structural elements in JSON - objects and arrays. This interface represents both of them.
+ */
+public interface JSONStructure {
 
-    public ParseException(String message) {
-        super(message);
-    }
+    /**
+     * Serialize given JSON structure to string. Can be used for debugging or small JSON data, but streaming
+     * the JSON into {@link Writer} is preferred.
+     * @return
+     */
+    String toJSONString();
 
-    public ParseException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public ParseException(Throwable cause) {
-        super(cause);
-    }
+    /**
+     * Serialize this JSON structure to a {@link Writer}.
+     * @param writer
+     */
+    void writeJSONString(Writer writer);
 
 }

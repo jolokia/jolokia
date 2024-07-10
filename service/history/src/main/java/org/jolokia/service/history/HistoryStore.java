@@ -8,7 +8,7 @@ import javax.management.ObjectName;
 
 import org.jolokia.server.core.request.*;
 import org.jolokia.server.core.util.RequestType;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /*
  * Copyright 2009-2013 Roland Huss

@@ -22,7 +22,7 @@ import javax.management.MalformedObjectNameException;
 
 import org.jolokia.server.core.util.EscapeUtil;
 import org.jolokia.server.core.util.RequestType;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /**
  * A JMX request for <code>read</code> operations, i.e. for reading JMX attributes

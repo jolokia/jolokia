@@ -4,7 +4,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.jolokia.server.core.http.BackChannel;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /**
  * A Client holds all listener registration for a specific client. Also, it knows

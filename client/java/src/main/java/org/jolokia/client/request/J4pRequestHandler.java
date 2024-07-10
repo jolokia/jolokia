@@ -30,9 +30,9 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
-import org.json.simple.*;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.jolokia.json.*;
+import org.jolokia.json.parser.JSONParser;
+import org.jolokia.json.parser.ParseException;
 
 /**
  * Class doing the hard work of conversion between HTTP request/responses and
@@ -154,15 +154,15 @@ public class J4pRequestHandler {
      * @return JSON content of the answer
      */
     @SuppressWarnings("PMD.PreserveStackTrace")
-    public JSONAware extractJsonResponse(HttpResponse pHttpResponse) throws IOException, ParseException {
+    public JSONStructure extractJsonResponse(HttpResponse pHttpResponse) throws IOException, ParseException {
         HttpEntity entity = pHttpResponse.getEntity();
         try {
             JSONParser parser = new JSONParser();
             Header contentEncoding = entity.getContentEncoding();
             if (contentEncoding != null) {
-                return (JSONAware) parser.parse(new InputStreamReader(entity.getContent(), Charset.forName(contentEncoding.getValue())));
+                return (JSONStructure) parser.parse(new InputStreamReader(entity.getContent(), Charset.forName(contentEncoding.getValue())));
             } else {
-                return (JSONAware) parser.parse(new InputStreamReader(entity.getContent()));
+                return (JSONStructure) parser.parse(new InputStreamReader(entity.getContent()));
             }
         } finally {
             if (entity != null) {

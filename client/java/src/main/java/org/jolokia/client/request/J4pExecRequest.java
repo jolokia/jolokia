@@ -21,8 +21,8 @@ import java.util.*;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONArray;
+import org.jolokia.json.JSONObject;
 
 /**
  * A execute request for executing a JMX operation

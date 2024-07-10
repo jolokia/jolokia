@@ -9,7 +9,7 @@ import org.jolokia.server.core.service.serializer.ValueFaultHandler;
 import org.jolokia.service.serializer.json.Extractor;
 import org.jolokia.service.serializer.json.ObjectToJsonConverter;
 import org.jolokia.service.serializer.object.StringToObjectConverter;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /*
  * Copyright 2009-2013 Roland Huss

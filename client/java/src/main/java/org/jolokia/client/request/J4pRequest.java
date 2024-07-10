@@ -21,7 +21,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.json.simple.*;
+import org.jolokia.json.*;
 
 /**
  * Request object abstracting a request to a j4p agent.
@@ -108,10 +108,8 @@ public abstract class J4pRequest {
     // Get a JSON representation of this request
     JSONObject toJson() {
         JSONObject ret = new JSONObject();
-        //noinspection unchecked
         ret.put("type", type.name());
         if (targetConfig != null) {
-            //noinspection unchecked
             ret.put("target", targetConfig.toJson());
         }
         return ret;
@@ -172,7 +170,7 @@ public abstract class J4pRequest {
      *      If the argument is <code>null</code> null is returned.
      *    </li>
      *    <li>
-     *      If the argument is of type {@see org.json.simple.JSONAware}, the it is used directly for inclusion
+     *      If the argument is of type {@see org.json.simple.JSONStructure}, the it is used directly for inclusion
      *      in the POST request.
      *    </li>
      *    <li>
@@ -202,12 +200,13 @@ public abstract class J4pRequest {
     protected Object serializeArgumentToJson(Object pArg) {
         if (pArg == null) {
             return null;
-        } else if (pArg instanceof JSONAware) {
+        } else if (pArg instanceof JSONStructure) {
             return pArg;
         } else if (pArg.getClass().isArray()) {
             return serializeArray(pArg);
         } else if (pArg instanceof Map) {
-            return serializeMap((Map<?, ?>) pArg);
+            //noinspection unchecked
+            return serializeMap((Map<String, Object>) pArg);
         } else if (pArg instanceof Collection) {
             return serializeCollection((Collection<?>) pArg);
         } else {
@@ -242,16 +241,14 @@ public abstract class J4pRequest {
     private Object serializeCollection(Collection<?> pArg) {
         JSONArray array = new JSONArray();
         for (Object value : pArg) {
-            //noinspection unchecked
             array.add(serializeArgumentToJson(value));
         }
         return array;
     }
 
-    private Object serializeMap(Map<?, ?> pArg) {
+    private Object serializeMap(Map<String, Object> pArg) {
         JSONObject map = new JSONObject();
-        for (Map.Entry<?, ?> entry : pArg.entrySet()) {
-            //noinspection unchecked
+        for (Map.Entry<String, Object> entry : pArg.entrySet()) {
             map.put(entry.getKey(), serializeArgumentToJson(entry.getValue()));
         }
         return map;
@@ -260,7 +257,6 @@ public abstract class J4pRequest {
     private Object serializeArray(Object pArg) {
         JSONArray innerArray = new JSONArray();
         for (int i = 0; i < Array.getLength(pArg); i++ ) {
-            //noinspection unchecked
             innerArray.add(serializeArgumentToJson(Array.get(pArg, i)));
         }
         return innerArray;
@@ -283,8 +279,8 @@ public abstract class J4pRequest {
             return "[null]";
         } else if (pArg instanceof String && ((String) pArg).isEmpty()) {
             return "\"\"";
-        } else if (pArg instanceof JSONAware) {
-            return ((JSONAware) pArg).toJSONString();
+        } else if (pArg instanceof JSONStructure) {
+            return ((JSONStructure) pArg).toJSONString();
         } else {
             return pArg.toString();
         }

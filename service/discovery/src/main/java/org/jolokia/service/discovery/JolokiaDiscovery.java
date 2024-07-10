@@ -7,7 +7,7 @@ import javax.management.ObjectName;
 
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.service.api.*;
-import org.json.simple.JSONArray;
+import org.jolokia.json.JSONArray;
 
 import static org.jolokia.service.discovery.AbstractDiscoveryMessage.MessageType.QUERY;
 

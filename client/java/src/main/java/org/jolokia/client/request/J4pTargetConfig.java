@@ -16,7 +16,7 @@ package org.jolokia.client.request;
  * limitations under the License.
  */
 
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /**
  * Configuration for a JSR-160 proxy request for specifying the target server.

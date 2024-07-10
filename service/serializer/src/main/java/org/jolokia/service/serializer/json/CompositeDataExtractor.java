@@ -9,7 +9,7 @@ import javax.management.openmbean.InvalidKeyException;
 
 import org.jolokia.server.core.service.serializer.ValueFaultHandler;
 import org.jolokia.service.serializer.object.StringToObjectConverter;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /*
  * Copyright 2009-2013 Roland Huss

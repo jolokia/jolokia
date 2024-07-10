@@ -16,7 +16,7 @@ package org.jolokia.client.request;
  * limitations under the License.
  */
 
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /**
  * Response for a {@link J4pWriteRequest}. As value it returns the old value of the

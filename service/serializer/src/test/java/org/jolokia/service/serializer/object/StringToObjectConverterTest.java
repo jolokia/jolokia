@@ -13,8 +13,8 @@ import javax.management.ObjectName;
 
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.util.DateUtil;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONArray;
+import org.jolokia.json.JSONObject;
 import org.testng.Assert;
 import org.testng.annotations.*;
 

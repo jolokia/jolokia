@@ -19,7 +19,7 @@ package org.jolokia.client.request;
 import java.util.Map;
 import java.util.Set;
 
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /**
  * Response for J4pVersion request

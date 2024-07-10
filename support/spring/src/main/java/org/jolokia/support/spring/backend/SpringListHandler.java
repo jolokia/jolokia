@@ -13,8 +13,8 @@ import org.jolokia.server.core.util.ClassUtil;
 import org.jolokia.server.core.util.JsonUtil;
 import org.jolokia.server.core.util.RequestType;
 import org.jolokia.service.jmx.handler.list.DataKeys;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONArray;
+import org.jolokia.json.JSONObject;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -99,13 +99,13 @@ public class SpringListHandler extends SpringCommandHandler<JolokiaListRequest> 
 
     private JSONObject getSpringBeanInfo(BeanDefinition pBeanDef) {
         JSONObject ret = new JSONObject();
-        ret.put(DESCRIPTION,pBeanDef.getDescription());
+        ret.put(DESCRIPTION.getKey(),pBeanDef.getDescription());
         final String beanClassName = pBeanDef.getBeanClassName();
         if (beanClassName != null) {
             Class<?> beanClass = ClassUtil.classForName(beanClassName);
             if (beanClass != null) {
-                ret.put(ATTRIBUTES, getAttributes(pBeanDef, beanClass));
-                ret.put(OPERATIONS, getOperations(beanClass));
+                ret.put(ATTRIBUTES.getKey(), getAttributes(pBeanDef, beanClass));
+                ret.put(OPERATIONS.getKey(), getOperations(beanClass));
             }
         }
         return ret;
@@ -118,8 +118,8 @@ public class SpringListHandler extends SpringCommandHandler<JolokiaListRequest> 
             if (Modifier.isPublic(modifier) &&
                 (modifier & (Modifier.ABSTRACT | Modifier.STATIC)) == 0) {
                 JSONObject oMap = new JSONObject();
-                oMap.put(ARGS,extractArguments(method));
-                oMap.put(RETURN_TYPE,classToString(method.getReturnType()));
+                oMap.put(ARGS.getKey(),extractArguments(method));
+                oMap.put(RETURN_TYPE.getKey(),classToString(method.getReturnType()));
                 JsonUtil.addJSONObjectToJSONObject(ret,method.getName(),oMap);
             }
         }
@@ -131,7 +131,7 @@ public class SpringListHandler extends SpringCommandHandler<JolokiaListRequest> 
         int i = 0;
         for (Class<?> paramType : method.getParameterTypes()) {
             JSONObject params = new JSONObject();
-            params.put(TYPE,classToString(paramType));
+            params.put(TYPE.getKey(),classToString(paramType));
             // Maybe extract real name when running under Java 8 with reflection and Method.getParameters()
             // or by extracting debugging info (like Spring MVC does). For now we simply add dummy values;
             params.put(NAME_PREFIX,"arg" + i++);
@@ -149,7 +149,7 @@ public class SpringListHandler extends SpringCommandHandler<JolokiaListRequest> 
             Class<?> propType = propDesc.getPropertyType();
             addIfNotNull(aMap, TYPE, propType != null ? classToString(propType) : null);
             addIfNotNull(aMap, DESCRIPTION, propDesc.getShortDescription());
-            aMap.put(READ_WRITE, propDesc.getWriteMethod() != null);
+            aMap.put(READ_WRITE.getKey(), propDesc.getWriteMethod() != null);
             ret.put(propDesc.getName(),aMap);
         }
         return ret;
@@ -166,7 +166,7 @@ public class SpringListHandler extends SpringCommandHandler<JolokiaListRequest> 
 
     private void addIfNotNull(JSONObject pMap, DataKeys pKey, String pValue) {
         if (pValue != null) {
-            pMap.put(pKey,pValue);
+            pMap.put(pKey.getKey(),pValue);
         }
     }
 

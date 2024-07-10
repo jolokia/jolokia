@@ -13,7 +13,7 @@ import org.jolokia.server.core.service.api.*;
 import org.jolokia.server.core.service.request.RequestHandler;
 import org.jolokia.server.core.util.NetworkUtil;
 import org.jolokia.server.core.util.RequestType;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /*
  * Copyright 2009-2013 Roland Huss

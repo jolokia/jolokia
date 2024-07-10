@@ -41,9 +41,9 @@ import javax.management.modelmbean.RequiredModelMBean;
 import javax.management.openmbean.CompositeData;
 
 import org.jolokia.service.serializer.JolokiaSerializer;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.jolokia.json.JSONObject;
+import org.jolokia.json.parser.JSONParser;
+import org.jolokia.json.parser.ParseException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

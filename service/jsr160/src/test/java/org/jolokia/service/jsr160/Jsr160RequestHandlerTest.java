@@ -29,7 +29,7 @@ import org.jolokia.server.core.config.Configuration;
 import org.jolokia.server.core.config.StaticConfiguration;
 import org.jolokia.server.core.request.*;
 import org.jolokia.server.core.util.TestJolokiaContext;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 import org.testng.annotations.*;
 
 import static org.testng.Assert.*;

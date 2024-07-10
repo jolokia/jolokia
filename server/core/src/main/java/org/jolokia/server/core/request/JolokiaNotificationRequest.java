@@ -8,7 +8,7 @@ import javax.management.MalformedObjectNameException;
 import org.jolokia.server.core.request.notification.NotificationCommand;
 import org.jolokia.server.core.request.notification.NotificationCommandFactory;
 import org.jolokia.server.core.util.RequestType;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /**
  * A request dealing with notification requests.

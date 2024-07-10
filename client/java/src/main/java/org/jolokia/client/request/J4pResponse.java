@@ -18,7 +18,7 @@ package org.jolokia.client.request;
 
 import java.util.Date;
 
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /**
  * Representation of a j4p Response as sent by the

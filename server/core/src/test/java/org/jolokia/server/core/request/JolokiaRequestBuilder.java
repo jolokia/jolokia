@@ -26,7 +26,7 @@ import org.jolokia.server.core.request.notification.NotificationCommandFactory;
 import org.jolokia.server.core.request.notification.NotificationCommandType;
 import org.jolokia.server.core.util.EscapeUtil;
 import org.jolokia.server.core.util.RequestType;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /**
  * Helper class for unit testing

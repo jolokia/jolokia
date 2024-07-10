@@ -16,7 +16,7 @@
 
 package org.jolokia.server.core.request.notification;
 
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /**
  * Base command class holding the command type

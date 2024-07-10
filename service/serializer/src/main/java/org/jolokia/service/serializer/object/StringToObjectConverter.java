@@ -15,9 +15,9 @@ import javax.management.ObjectName;
 import org.jolokia.server.core.util.ClassUtil;
 import org.jolokia.server.core.util.DateUtil;
 import org.jolokia.server.core.util.EscapeUtil;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.ParseException;
+import org.jolokia.json.JSONArray;
+import org.jolokia.json.JSONObject;
+import org.jolokia.json.parser.ParseException;
 
 
 /*
@@ -333,7 +333,7 @@ public class StringToObjectConverter {
         /** {@inheritDoc} */
         public Object extract(String pValue) {
             try {
-                return new org.json.simple.parser.JSONParser().parse(pValue);
+                return new org.jolokia.json.parser.JSONParser().parse(pValue);
             } catch (ParseException e) {
                 throw new IllegalArgumentException("Cannot parse JSON " + pValue + ": " + e,e);
             }

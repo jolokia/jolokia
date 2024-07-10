@@ -19,7 +19,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.jolokia.client.exception.J4pRemoteException;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /**
  * A response extractor which does validation based on Jolokia status codes.

@@ -17,7 +17,7 @@ package org.jolokia.client.exception;
  */
 
 import org.jolokia.client.request.J4pRequest;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /**
  * Exception occurred on the remote side (i.e the server).

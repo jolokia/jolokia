@@ -31,8 +31,8 @@ import org.jolokia.service.serializer.JolokiaSerializer;
 import org.jolokia.server.core.request.JolokiaRequestBuilder;
 import org.jolokia.server.core.request.JolokiaWriteRequest;
 import org.jolokia.server.core.util.TestJolokiaContext;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
+import org.jolokia.json.JSONObject;
+import org.jolokia.json.parser.JSONParser;
 import org.testng.annotations.*;
 
 import static org.jolokia.server.core.util.RequestType.WRITE;

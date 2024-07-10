@@ -6,8 +6,8 @@ import java.util.Map;
 import javax.management.*;
 
 import org.jolokia.server.core.request.notification.AddCommand;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONArray;
+import org.jolokia.json.JSONObject;
 
 /**
  * A registration configuration for a specific listener. This includes a callback which is used

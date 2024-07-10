@@ -6,7 +6,7 @@ import java.util.Map;
 import javax.management.ObjectName;
 
 import org.jolokia.server.core.service.serializer.ValueFaultHandler;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
