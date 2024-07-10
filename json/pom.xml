@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2009-2024 Roland Huss
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~       http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>jolokia-json</artifactId>
+  <version>2.0.4-SNAPSHOT</version>
+
+  <name>jolokia-json</name>
+  <description>Jolokia :: JSON</description>
+
+  <parent>
+    <groupId>org.jolokia</groupId>
+    <artifactId>jolokia-parent</artifactId>
+    <version>2.0.4-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+
+  <url>https://jolokia.org/</url>
+
+  <!--
+    https://github.com/jolokia/jolokia/issues/686
+    This module is created to replace dated com.googlecode.json-simple/json-simple/1.1.1 library (2012)
+    json-simple is available from https://code.google.com/archive/p/json-simple/, but also from these forks
+     - https://github.com/fangyidong/json-simple (original migrated from code.google.com)
+     - https://github.com/cliftonlabs/json-simple (picked up by Davin Loegering after Fang Yidong)
+    cliftonlabs/json-simple includes the grammar and uses jflex-maven-plugin. Also moves from json.lex to jsonstrict.lex
+    Both project use a bit different grammars differing in number handling (double/long vs BigDecimal):
+     - https://github.com/fangyidong/json-simple/blob/master/doc/json.lex
+     - https://github.com/cliftonlabs/json-simple/blob/master/src/main/lex/jsonstrict.lex
+    camel-util-json is based on cliftonlabs/json-simple:
+     - https://github.com/apache/camel/tree/camel-4.7.0/tooling/camel-util-json/src/main/java/org/apache/camel/util/json
+  -->
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>${plugin.org.codehaus.mojo.build-helper-maven-plugin}</version>
+        <executions>
+          <execution>
+            <id>add-source</id>
+            <phase>package</phase>
+            <goals>
+              <goal>add-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>${project.build.directory}/generated-sources/jflex</source>
+              </sources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>de.jflex</groupId>
+        <artifactId>jflex-maven-plugin</artifactId>
+        <version>1.9.1</version>
+        <executions>
+          <execution>
+            <id>generate-parser</id>
+            <phase>process-resources</phase>
+            <goals>
+              <!-- https://jflex-de.github.io/jflex-web/jflex-maven-plugin/generate-mojo.html -->
+              <goal>generate</goal>
+            </goals>
+            <configuration>
+              <lexDefinitions>
+                <lexDefinition>src/main/jflex</lexDefinition>
+              </lexDefinitions>
+              <encodingName>UTF-8</encodingName>
+              <jlex>true</jlex>
+              <verbose>true</verbose>
+              <backup>false</backup>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

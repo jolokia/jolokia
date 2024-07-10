@@ -25,3 +25,6 @@ indent_size = 2
 
 [*.{md,adoc}]
 trim_trailing_whitespace = false
+
+[*.lex]
+indent_size = 2
