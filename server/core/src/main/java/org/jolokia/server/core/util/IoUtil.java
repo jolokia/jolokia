@@ -1,5 +1,6 @@
 package org.jolokia.server.core.util;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Writer;
 
@@ -28,6 +29,9 @@ public class IoUtil {
      */
     public static void streamResponseAndClose(Writer pWriter, JSONStructure pJson, String callback)
         throws IOException {
+        if (!(pWriter instanceof BufferedWriter)) {
+            pWriter = new BufferedWriter(pWriter);
+        }
         try {
             if (callback == null) {
                 pJson.writeJSONString(pWriter);
