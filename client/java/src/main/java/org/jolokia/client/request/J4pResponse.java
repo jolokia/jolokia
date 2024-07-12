@@ -41,8 +41,8 @@ public abstract class J4pResponse<T extends J4pRequest> {
     protected J4pResponse(T pRequest, JSONObject pJsonResponse) {
         request = pRequest;
         jsonResponse = pJsonResponse;
-        Long timestamp = (Long) jsonResponse.get("timestamp");
-        requestDate = timestamp != null ? new Date(timestamp * 1000) : new Date();
+        Number timestamp = (Number) jsonResponse.get("timestamp");
+        requestDate = timestamp != null ? new Date(timestamp.longValue() * 1000) : new Date();
     }
 
     /**

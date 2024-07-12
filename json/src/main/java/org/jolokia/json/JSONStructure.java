@@ -15,6 +15,7 @@
  */
 package org.jolokia.json;
 
+import java.io.IOException;
 import java.io.Writer;
 
 /**
@@ -34,6 +35,6 @@ public interface JSONStructure {
      * Serialize this JSON structure to a {@link Writer}.
      * @param writer
      */
-    void writeJSONString(Writer writer);
+    void writeJSONString(Writer writer) throws IOException;
 
 }

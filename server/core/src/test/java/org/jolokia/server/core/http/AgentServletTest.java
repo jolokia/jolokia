@@ -545,7 +545,6 @@ public class AgentServletTest {
                 },
                 getStandardResponseSetup());
         expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
-        expect(request.getParameter(ConfigKey.STREAMING.getKeyValue())).andReturn(null);
 
         replay(request, response);
 

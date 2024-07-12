@@ -33,17 +33,27 @@ public class Yytoken {
      * names: {@code true}, {@code false}, {@code null}.</p>
      */
     public enum Kind {
-        VALUE_INTEGER,
-        VALUE_DECIMAL,
-        VALUE_STRING,
-        VALUE_BOOLEAN,
-        VALUE_NULL,
-        SYMBOL_LEFT_BRACE,
-        SYMBOL_RIGHT_BRACE,
-        SYMBOL_LEFT_SQUARE,
-        SYMBOL_RIGHT_SQUARE,
-        SYMBOL_COMMA,
-        SYMBOL_COLON,
+        VALUE_INTEGER(true),
+        VALUE_DECIMAL(true),
+        VALUE_STRING(true),
+        VALUE_BOOLEAN(true),
+        VALUE_NULL(true),
+        SYMBOL_LEFT_BRACE(false),
+        SYMBOL_RIGHT_BRACE(false),
+        SYMBOL_LEFT_SQUARE(false),
+        SYMBOL_RIGHT_SQUARE(false),
+        SYMBOL_COMMA(false),
+        SYMBOL_COLON(false);
+
+        private final boolean valueToken;
+
+        Kind(boolean value) {
+            this.valueToken = value;
+        }
+
+        public boolean isValueToken() {
+            return valueToken;
+        }
     }
 
     private final Kind kind;

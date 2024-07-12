@@ -16,6 +16,7 @@ package org.jolokia.support.jmx;
  * limitations under the License.
  */
 
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
@@ -87,7 +88,7 @@ public class JsonDymamicMBeanImplTest {
     public void getAttribute() throws Exception {
         assertEquals(platformServer.getAttribute(testName, "Chili"), "jolokia");
         String user = (String) platformServer.getAttribute(testName,"User");
-        JSONObject userJ = (JSONObject) toJSON(user);
+        JSONObject userJ = toJSON(user, JSONObject.class);
         assertEquals(userJ.get("firstName"), "Hans");
         assertEquals(userJ.get("lastName"), "Kalb");
     }
@@ -127,8 +128,8 @@ public class JsonDymamicMBeanImplTest {
 
     }
 
-    private Object toJSON(String string) throws ParseException {
-        return new JSONParser().parse(string);
+    private <T> T toJSON(String string, Class<T> clazz) throws ParseException, IOException {
+        return new JSONParser().parse(string, clazz);
     }
 
     @Test
@@ -138,16 +139,16 @@ public class JsonDymamicMBeanImplTest {
 
         platformServer.setAttribute(testName,new Attribute("Numbers","8,15"));
         String nums = (String) platformServer.getAttribute(testName,"Numbers");
-        JSONArray numsJ = (JSONArray) toJSON(nums);
-        assertEquals(numsJ.get(0), 8L);
-        assertEquals(numsJ.get(1), 15L);
+        JSONArray numsJ = toJSON(nums, JSONArray.class);
+        assertEquals(numsJ.get(0), 8);
+        assertEquals(numsJ.get(1), 15);
         assertEquals(numsJ.size(), 2);
     }
 
     @Test
     public void exec() throws Exception {
         String res = (String) platformServer.invoke(testName,"lookup",new Object[] { "Bumbes", "Eins, Zwei" }, new String[] { "java.lang.String", "java.lang.String" });
-        JSONObject user = (JSONObject) toJSON(res);
+        JSONObject user = toJSON(res, JSONObject.class);
         assertEquals(user.get("firstName"), "Hans");
         assertEquals(user.get("lastName"), "Kalb");
 
@@ -171,10 +172,10 @@ public class JsonDymamicMBeanImplTest {
         Attribute num = (Attribute) ret.get(1);
         assertEquals(chili.getValue(), "aji");
 
-        JSONArray numsJ = (JSONArray) toJSON((String) num.getValue());
-        assertEquals(numsJ.get(0), 16L);
-        assertEquals(numsJ.get(1), 11L);
-        assertEquals(numsJ.get(2), 68L);
+        JSONArray numsJ = toJSON((String) num.getValue(), JSONArray.class);
+        assertEquals(numsJ.get(0), 16);
+        assertEquals(numsJ.get(1), 11);
+        assertEquals(numsJ.get(2), 68);
         assertEquals(numsJ.size(), 3);
 
         assertEquals(platformServer.getAttributes(testName, new String[0]).size(), 0);
@@ -189,10 +190,10 @@ public class JsonDymamicMBeanImplTest {
     }
 
     @Test
-    public void openMBean() throws AttributeNotFoundException, MBeanException, ReflectionException, InstanceNotFoundException, InvalidAttributeValueException, ParseException {
+    public void openMBean() throws AttributeNotFoundException, MBeanException, ReflectionException, InstanceNotFoundException, InvalidAttributeValueException, ParseException, IOException {
         platformServer.setAttribute(userManagerName,new Attribute("User","{\"firstName\": \"Bumbes\", \"lastName\": \"Schmidt\"}"));
         String user = (String) platformServer.getAttribute(userManagerName,"User");
-        JSONObject userJ = (JSONObject) toJSON(user);
+        JSONObject userJ = toJSON(user, JSONObject.class);
         assertEquals(userJ.get("firstName"), "Bumbes");
         assertEquals(userJ.get("lastName"), "Schmidt");
 
@@ -202,7 +203,7 @@ public class JsonDymamicMBeanImplTest {
                                       "[{\"firstName\": \"Mama\", \"lastName\": \"Schmidt\"}," +
                                        "{\"firstName\": \"Papa\", \"lastName\": \"Schmidt\"}]"},
                               new String[] { String.class.getName(), String.class.getName() });
-        userJ = (JSONObject) toJSON(user);
+        userJ = toJSON(user, JSONObject.class);
         assertEquals(userJ.get("firstName"), "Bumbes");
         assertEquals(userJ.get("lastName"), "Schmidt");
     }
@@ -216,6 +217,7 @@ public class JsonDymamicMBeanImplTest {
         return new ObjectName(name);
 
     }
+
     private JsonDynamicMBeanImpl register(ObjectName oName, Object bean) throws Exception {
         server.registerMBean(bean, oName);
 

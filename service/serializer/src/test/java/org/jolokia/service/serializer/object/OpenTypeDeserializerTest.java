@@ -1,5 +1,6 @@
 package org.jolokia.service.serializer.object;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
@@ -75,8 +76,8 @@ public class OpenTypeDeserializerTest {
 
 
     @Test
-    public void arrayType() throws OpenDataException, ParseException {
-        ArrayType type = new ArrayType(2,STRING);
+    public void arrayType() throws OpenDataException, ParseException, IOException {
+        ArrayType<String> type = new ArrayType<>(2,STRING);
         String json = "[ \"hello\", \"world\" ]";
         for (Object element : new Object[] { json, new JSONParser().parse(json) }) {
             Object[] data = (Object[]) converter.deserialize(type, element);
@@ -88,7 +89,7 @@ public class OpenTypeDeserializerTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*JSONArray.*")
     public void arrayTypeWithWrongJson() throws OpenDataException {
-        converter.deserialize(new ArrayType(2, STRING), "{ \"hello\": \"world\"}");
+        converter.deserialize(new ArrayType<>(2, STRING), "{ \"hello\": \"world\"}");
     }
 
     @Test
@@ -98,7 +99,7 @@ public class OpenTypeDeserializerTest {
 
         );
         CompositeData[] result =
-                (CompositeData[]) converter.deserialize(new ArrayType(2, taj.getType()), "[" + taj.getJsonAsString() + "]");
+                (CompositeData[]) converter.deserialize(new ArrayType<>(2, taj.getType()), "[" + taj.getJsonAsString() + "]");
         assertEquals(result[0].get("verein"), "FCN");
         assertEquals(result.length,1);
     }
@@ -118,7 +119,7 @@ public class OpenTypeDeserializerTest {
     }
 
     @Test
-    public void compositeType() throws OpenDataException, AttributeNotFoundException, ParseException {
+    public void compositeType() throws OpenDataException, ParseException {
         CompositeTypeAndJson taj = new CompositeTypeAndJson(
                 STRING,"verein","FCN",
                 INTEGER,"platz",6,
@@ -153,7 +154,7 @@ public class OpenTypeDeserializerTest {
         converter.deserialize(taj.getType(), "{ \"praesident\": \"hoeness\"}");
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*parse.*")
+    @Test(expectedExceptions = IllegalStateException.class,expectedExceptionsMessageRegExp = ".*Bad parser state, EOF at state PARSING_VALUE.*")
     public void invalidJson() throws OpenDataException {
         CompositeTypeAndJson taj = new CompositeTypeAndJson(
                 STRING,"verein","FCN"

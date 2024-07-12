@@ -58,8 +58,8 @@ public class ValidatingResponseExtractor implements J4pResponseExtractor {
         int status = 0;
         if (pJsonResp.containsKey("status")) {
             Object o = pJsonResp.get("status");
-            if (o instanceof Long) {
-                status = ((Long) o).intValue();
+            if (o instanceof Integer) {
+                status = (Integer) o;
             }
         }
 

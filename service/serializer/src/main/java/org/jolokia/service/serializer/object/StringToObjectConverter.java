@@ -1,5 +1,6 @@
 package org.jolokia.service.serializer.object;
 
+import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.math.BigDecimal;
@@ -334,7 +335,7 @@ public class StringToObjectConverter {
         public Object extract(String pValue) {
             try {
                 return new org.jolokia.json.parser.JSONParser().parse(pValue);
-            } catch (ParseException e) {
+            } catch (ParseException | IOException e) {
                 throw new IllegalArgumentException("Cannot parse JSON " + pValue + ": " + e,e);
             }
         }

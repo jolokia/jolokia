@@ -16,6 +16,7 @@ package org.jolokia.client.request;
  * limitations under the License.
  */
 
+import java.math.BigDecimal;
 import java.util.*;
 
 import javax.management.MalformedObjectNameException;
@@ -45,9 +46,9 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
             j4pClient.execute(request);
             request = new J4pExecRequest(cfg,itSetup.getOperationMBean(),"fetchNumber","inc");
             J4pExecResponse resp = j4pClient.execute(request);
-            assertEquals(0L,(long) resp.getValue());
+            assertEquals(0,(int) resp.getValue());
             resp = j4pClient.execute(request);
-            assertEquals(1L,(long) resp.getValue());
+            assertEquals(1,(int) resp.getValue());
         }
     }
 
@@ -153,7 +154,7 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
         Object[] args = new Object[] { 12,true,null, "Bla" };
         for (J4pExecRequest request : execRequests("objectArrayArg",new Object[] { args })) {
             J4pExecResponse resp = j4pClient.execute(request,"POST");
-            assertEquals(12L,(long) resp.getValue());
+            assertEquals(12,(int) resp.getValue());
         }
     }
 
@@ -212,11 +213,11 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
                 }
                 request = new J4pExecRequest(cfg,itSetup.getOperationMBean(),"intArguments",10,20);
                 resp = j4pClient.execute(request,type);
-                assertEquals(30L, (long) resp.getValue());
+                assertEquals(30, (int) resp.getValue());
 
                 request = new J4pExecRequest(cfg,itSetup.getOperationMBean(),"intArguments",10,null);
                 resp = j4pClient.execute(request,type);
-                assertEquals(-1L,(long) resp.getValue());
+                assertEquals(-1,(int) resp.getValue());
 
                 try {
                     request = new J4pExecRequest(cfg,itSetup.getOperationMBean(),"intArguments",null,null);
@@ -239,11 +240,11 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
                 }
                 request = new J4pExecRequest(cfg,itSetup.getOperationMBean(),"doubleArguments",1.5,1.5);
                 resp = j4pClient.execute(request,type);
-                assertEquals(3.0, resp.getValue());
+                assertEquals(new BigDecimal("3.0"), resp.getValue());
 
                 request = new J4pExecRequest(cfg,itSetup.getOperationMBean(),"doubleArguments",1.5,null);
                 resp = j4pClient.execute(request,type);
-                assertEquals(-1.0,resp.getValue());
+                assertEquals(new BigDecimal("-1.0"),resp.getValue());
 
                 try {
                     request = new J4pExecRequest(cfg,itSetup.getOperationMBean(),"doubleArguments",null,null);
@@ -282,7 +283,7 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
                 Map<?, ?> res = resp.getValue();
                 assertEquals(res.get("eins"),"fcn");
                 assertEquals(((List<?>) res.get("zwei")).get(1),"svw");
-                assertEquals(res.get("drei"),10L);
+                assertEquals(res.get("drei"),10);
                 assertEquals(res.get("vier"),true);
             }
 

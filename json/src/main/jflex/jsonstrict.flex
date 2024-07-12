@@ -25,6 +25,14 @@ import java.math.BigInteger;
 
 %{
   private final StringBuilder sb;
+
+  public int line() {
+    return this.yyline + 1;
+  }
+
+  public int column() {
+    return this.yycolumn + 1;
+  }
 %}
 
 %unicode

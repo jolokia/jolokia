@@ -15,7 +15,10 @@
  */
 package org.jolokia.json.parser;
 
-public class ParseException extends RuntimeException {
+public class ParseException extends Exception {
+
+    private int line;
+    private int column;
 
     public ParseException() {
         super();
@@ -31,6 +34,20 @@ public class ParseException extends RuntimeException {
 
     public ParseException(Throwable cause) {
         super(cause);
+    }
+
+    public ParseException at(int line, int column) {
+        this.line = line;
+        this.column = column;
+        return this;
+    }
+
+    public int getLine() {
+        return line;
+    }
+
+    public int getColumn() {
+        return column;
     }
 
 }

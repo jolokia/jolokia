@@ -102,20 +102,19 @@ public class StringToObjectConverterTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     public void jsonConversion() {
         JSONObject json = new JSONObject();
         json.put("name","roland");
         json.put("kind","jolokia");
 
-        Object object = converter.convertFromString(JSONObject.class.getName(),json.toString());
+        Object object = converter.convertFromString(JSONObject.class.getName(),json.toJSONString());
         assertEquals(json,object);
 
         JSONArray array = new JSONArray();
         array.add("roland");
         array.add("jolokia");
 
-        object = converter.convertFromString(JSONArray.class.getName(),array.toString());
+        object = converter.convertFromString(JSONArray.class.getName(),array.toJSONString());
         assertEquals(array,object);
 
         try {

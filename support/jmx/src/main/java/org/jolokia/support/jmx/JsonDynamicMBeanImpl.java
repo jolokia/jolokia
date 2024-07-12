@@ -21,6 +21,7 @@ import java.util.*;
 import javax.management.*;
 import javax.management.openmbean.*;
 
+import org.jolokia.json.JSONStructure;
 import org.jolokia.server.core.service.serializer.SerializeOptions;
 import org.jolokia.server.core.service.serializer.Serializer;
 
@@ -180,7 +181,7 @@ class JsonDynamicMBeanImpl implements DynamicMBean, MBeanRegistration {
     private Object toJson(Object pValue) {
         try {
             Object ret = serializer.serialize(pValue, null, serializeOptions);
-            return ret.toString();
+            return ret instanceof JSONStructure ? ((JSONStructure) ret).toJSONString() : ret.toString();
         } catch (AttributeNotFoundException exp) {
             // Cannot happen, since we dont use a path
             return "";

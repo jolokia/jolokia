@@ -138,9 +138,8 @@ public class WriteHandlerTest {
         String json = "{\"type\":\"write\",\"mbean\":\"jolokia:test=write\",\"attribute\":\"Bytes\"," +
                 "\"value\":[42,-42]}";
         JSONParser parser = new JSONParser();
-        JSONObject data = (JSONObject) parser.parse(json);
-        @SuppressWarnings("unchecked")
-        JolokiaWriteRequest req = (JolokiaWriteRequest) JolokiaRequestFactory.createPostRequest(data, new ProcessingParameters(Collections.emptyMap()));
+        JSONObject data = parser.parse(json, JSONObject.class);
+        JolokiaWriteRequest req = JolokiaRequestFactory.createPostRequest(data, new ProcessingParameters(Collections.emptyMap()));
         handler.doHandleSingleServerRequest(getMBeanServer(), req);
     }
 
@@ -149,9 +148,8 @@ public class WriteHandlerTest {
         String json = "{\"type\":\"write\",\"mbean\":\"jolokia:test=write\",\"attribute\":\"PrimitiveBytes\"," +
                 "\"value\":[42,-42]}";
         JSONParser parser = new JSONParser();
-        JSONObject data = (JSONObject) parser.parse(json);
-        @SuppressWarnings("unchecked")
-        JolokiaWriteRequest req = (JolokiaWriteRequest) JolokiaRequestFactory.createPostRequest(data, new ProcessingParameters(Collections.emptyMap()));
+        JSONObject data = parser.parse(json, JSONObject.class);
+        JolokiaWriteRequest req = JolokiaRequestFactory.createPostRequest(data, new ProcessingParameters(Collections.emptyMap()));
         handler.doHandleSingleServerRequest(getMBeanServer(), req);
     }
 }

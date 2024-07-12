@@ -105,7 +105,7 @@ public class BackendManager {
 
         if (debug) {
             jolokiaCtx.debug("Execution time: " + (System.currentTimeMillis() - time) + " ms");
-            jolokiaCtx.debug("Response: " + json);
+            jolokiaCtx.debug("Response: " + json.toJSONString());
         }
 
         return json;

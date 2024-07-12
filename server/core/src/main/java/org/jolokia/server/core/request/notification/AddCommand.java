@@ -16,6 +16,7 @@
 
 package org.jolokia.server.core.request.notification;
 
+import java.io.IOException;
 import java.util.*;
 
 import javax.management.*;
@@ -160,7 +161,6 @@ public class AddCommand extends ClientCommand {
         return config;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public JSONObject toJSON() {
         JSONObject ret = super.toJSON();
@@ -181,11 +181,10 @@ public class AddCommand extends ClientCommand {
     // ==============================================================================================
 
     // Parse a string as configuration object
-    @SuppressWarnings("unchecked")
     private Map<String, Object> parseConfig(String pElement) {
         try {
-            return (Map<String, Object>) new JSONParser().parse(pElement);
-        } catch (ParseException | ClassCastException e) {
+            return new JSONParser().parse(pElement, JSONObject.class);
+        } catch (ParseException | ClassCastException | IOException | IllegalArgumentException e) {
             throw new IllegalArgumentException("Cannot parse config '" + pElement + "' as JSON Object",e);
         }
     }

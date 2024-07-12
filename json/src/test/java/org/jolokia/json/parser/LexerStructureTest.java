@@ -29,7 +29,7 @@ import static org.testng.Assert.*;
 public class LexerStructureTest {
 
     @Test
-    public void basicTokenization() throws IOException {
+    public void basicTokenization() throws IOException, ParseException {
         Yylex lexer = new Yylex(new StringReader("{]"), 16);
         assertFalse(lexer.yyatEOF());
         Yytoken token = lexer.yylex();
@@ -44,7 +44,7 @@ public class LexerStructureTest {
     }
 
     @Test
-    public void illegalCharacters() throws IOException {
+    public void illegalCharacters() throws IOException, ParseException {
         Yylex lexer = new Yylex(new StringReader("\"x\"x"), 16);
         assertFalse(lexer.yyatEOF());
         Yytoken token = lexer.yylex();
@@ -60,7 +60,7 @@ public class LexerStructureTest {
     }
 
     @Test
-    public void literals() throws IOException {
+    public void literals() throws IOException, ParseException {
         Yylex lexer = new Yylex(new StringReader("nullfalsetrue-1 -2.0e-0\"hello\"{}[]:,"), 16);
         assertFalse(lexer.yyatEOF());
         Yytoken token = lexer.yylex();
@@ -104,6 +104,33 @@ public class LexerStructureTest {
         token = lexer.yylex();
         assertNotNull(token);
         assertEquals(token.getKind(), Yytoken.Kind.SYMBOL_COMMA);
+        token = lexer.yylex();
+        assertNull(token);
+        assertTrue(lexer.yyatEOF());
+    }
+
+    @Test
+    public void hugeToken() throws IOException, ParseException {
+        // the lexer uses ZZ_BUFFERSIZE = 16384 for lookahead buffer
+        String sb = '\"' +
+            // 64MiB
+            "0123456789".repeat(128 * 65_536) +
+            '\"';
+
+        Yylex lexer = new Yylex(new StringReader(sb), 16);
+        Yytoken token = lexer.yylex();
+        assertEquals(token.getKind(), Yytoken.Kind.VALUE_STRING);
+        assertEquals(token.getStringValue().length(), 256 * 256 * 1_280);
+    }
+
+    @Test
+    public void emptyStream() throws IOException, ParseException {
+        Yylex lexer = new Yylex(new StringReader(" "), 16);
+        assertFalse(lexer.yyatEOF());
+        // we can parse EOF state many times - always getting null token
+        Yytoken token = lexer.yylex();
+        assertNull(token);
+        assertTrue(lexer.yyatEOF());
         token = lexer.yylex();
         assertNull(token);
         assertTrue(lexer.yyatEOF());

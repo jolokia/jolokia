@@ -1,0 +1,7 @@
+= Jolokia own JSON library
+
+Changes:
+
+* JSONAware -> JSONStructure
+* toString() no longer calls toJSONString()
+

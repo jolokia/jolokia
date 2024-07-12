@@ -84,9 +84,6 @@ public class AgentServlet extends HttpServlet {
     // whether to allow reverse DNS lookup for checking the remote host
     private boolean allowDnsReverseLookup;
 
-    // whether to allow streaming mode for response
-    private boolean streamingEnabled;
-
     /**
      * No argument constructor, used e.g. by a servlet
      * descriptor when creating the servlet out of web.xml
@@ -141,7 +138,6 @@ public class AgentServlet extends HttpServlet {
         initAgentUrl();
 
         configMimeType = config.getConfig(ConfigKey.MIME_TYPE);
-        streamingEnabled = Boolean.parseBoolean(config.getConfig(ConfigKey.STREAMING));
     }
 
     @Override
@@ -476,14 +472,6 @@ public class AgentServlet extends HttpServlet {
             pResp.setHeader("Access-Control-Allow-Origin",origin);
             pResp.setHeader("Access-Control-Allow-Credentials","true");
         }
-    }
-
-    private boolean isStreamingEnabled(HttpServletRequest pReq) {
-        String streamingFromReq = pReq.getParameter(ConfigKey.STREAMING.getKeyValue());
-        if (streamingFromReq != null) {
-            return Boolean.parseBoolean(streamingFromReq);
-        }
-        return streamingEnabled;
     }
 
     private interface ServletRequestHandler {

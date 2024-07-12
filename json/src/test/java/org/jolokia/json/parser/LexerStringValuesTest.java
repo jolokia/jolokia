@@ -29,7 +29,7 @@ import static org.testng.Assert.*;
 public class LexerStringValuesTest {
 
     @Test
-    public void basicTokenization() throws IOException {
+    public void basicTokenization() throws IOException, ParseException {
         // https://www.jflex.de/manual.html#ScanningMethod
         Yylex lexer = new Yylex(new StringReader("\"Hello world!\"\"token2\" \"token3\""), 16);
         assertFalse(lexer.yyatEOF());
@@ -51,7 +51,7 @@ public class LexerStringValuesTest {
     }
 
     @Test
-    public void escapingStringCharactersWithoutUnicode() throws IOException {
+    public void escapingStringCharactersWithoutUnicode() throws IOException, ParseException {
         Yylex lexer = new Yylex(new StringReader("\"\\\" \\\\ \\/ \\b \\f \\n \\r \\t\""), 16);
         assertFalse(lexer.yyatEOF());
         Yytoken token = lexer.yylex();
@@ -80,7 +80,7 @@ public class LexerStringValuesTest {
     }
 
     @Test()
-    public void escapedBackslashAtTheEndOfString() throws IOException {
+    public void escapedBackslashAtTheEndOfString() throws IOException, ParseException {
         Yylex lexer = new Yylex(new StringReader("\"\\\\\""), 16);
         assertFalse(lexer.yyatEOF());
         Yytoken token = lexer.yylex();
@@ -95,7 +95,7 @@ public class LexerStringValuesTest {
     }
 
     @Test()
-    public void emptyString() throws IOException {
+    public void emptyString() throws IOException, ParseException {
         Yylex lexer = new Yylex(new StringReader("\"\""), 16);
         assertFalse(lexer.yyatEOF());
         Yytoken token = lexer.yylex();
@@ -148,7 +148,7 @@ public class LexerStringValuesTest {
     }
 
     @Test()
-    public void escapedUnicodeControlCharacter() throws IOException {
+    public void escapedUnicodeControlCharacter() throws IOException, ParseException {
         Yylex lexer = new Yylex(new StringReader("\"\\u001f\""), 16);
         assertFalse(lexer.yyatEOF());
         Yytoken token = lexer.yylex();

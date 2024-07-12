@@ -41,7 +41,7 @@ public class DiscoveryIncomingMessage extends AbstractDiscoveryMessage {
     private void initType(JSONObject pData) throws IOException {
         String typeS = (String) pData.remove(MESSAGE_TYPE);
         if (typeS == null) {
-            throw new IOException("No message type given in discovery message " + pData);
+            throw new IOException("No message type given in discovery message " + pData.toJSONString());
         }
         try {
             MessageType type = MessageType.valueOf(typeS.toUpperCase());

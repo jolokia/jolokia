@@ -46,6 +46,16 @@ public class LexerNumericValuesTest {
         System.out.println("MAX Integer bits: " + new BigInteger(Integer.toString(Integer.MAX_VALUE)).bitLength());
         System.out.println("MIN Integer-1 bits: " + new BigInteger(Integer.toString(Integer.MIN_VALUE)).subtract(BigInteger.ONE).bitLength());
         System.out.println("MAX Integer+1 bits: " + new BigInteger(Integer.toString(Integer.MAX_VALUE)).add(BigInteger.ONE).bitLength());
+
+        System.out.println("MIN Short bits: " + new BigInteger(Short.toString(Short.MIN_VALUE)).bitLength());
+        System.out.println("MAX Short bits: " + new BigInteger(Short.toString(Short.MAX_VALUE)).bitLength());
+        System.out.println("MIN Short-1 bits: " + new BigInteger(Short.toString(Short.MIN_VALUE)).subtract(BigInteger.ONE).bitLength());
+        System.out.println("MAX Short+1 bits: " + new BigInteger(Short.toString(Short.MAX_VALUE)).add(BigInteger.ONE).bitLength());
+
+        System.out.println("MIN Byte bits: " + new BigInteger(Byte.toString(Byte.MIN_VALUE)).bitLength());
+        System.out.println("MAX Byte bits: " + new BigInteger(Byte.toString(Byte.MAX_VALUE)).bitLength());
+        System.out.println("MIN Byte-1 bits: " + new BigInteger(Byte.toString(Byte.MIN_VALUE)).subtract(BigInteger.ONE).bitLength());
+        System.out.println("MAX Byte+1 bits: " + new BigInteger(Byte.toString(Byte.MAX_VALUE)).add(BigInteger.ONE).bitLength());
     }
 
     @Test
@@ -55,7 +65,7 @@ public class LexerNumericValuesTest {
     }
 
     @Test
-    public void basicTokenization() throws IOException {
+    public void basicTokenization() throws IOException, ParseException {
         Yylex lexer = new Yylex(new StringReader("42 24"), 16);
         assertFalse(lexer.yyatEOF());
         Yytoken token = lexer.yylex();
@@ -72,7 +82,7 @@ public class LexerNumericValuesTest {
     }
 
     @Test
-    public void variousDecimalsAndIntegers() throws IOException {
+    public void variousDecimalsAndIntegers() throws IOException, ParseException {
         Yylex lexer = new Yylex(new StringReader("0 -0 0.0 -0.0 1 1.3 -2.4 1.0 1.0e3 -0.4e-1"), 16);
         assertNextIntToken(lexer, 0);
         assertNextIntToken(lexer, 0);
@@ -88,7 +98,7 @@ public class LexerNumericValuesTest {
         assertTrue(lexer.yyatEOF());
     }
 
-    private void assertNextIntToken(Yylex lexer, int value) throws IOException {
+    private void assertNextIntToken(Yylex lexer, int value) throws IOException, ParseException {
         assertFalse(lexer.yyatEOF());
         Yytoken token = lexer.yylex();
         assertNotNull(token);
@@ -96,7 +106,7 @@ public class LexerNumericValuesTest {
         assertEquals(token.getIntegerValue().intValue(), value);
     }
 
-    private void assertNextDecimalToken(Yylex lexer, String value) throws IOException {
+    private void assertNextDecimalToken(Yylex lexer, String value) throws IOException, ParseException {
         assertFalse(lexer.yyatEOF());
         Yytoken token = lexer.yylex();
         assertNotNull(token);

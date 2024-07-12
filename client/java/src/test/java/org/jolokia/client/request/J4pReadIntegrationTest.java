@@ -16,6 +16,7 @@ package org.jolokia.client.request;
  * limitations under the License.
  */
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -149,7 +150,7 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
             assertTrue(allAttrs.contains("LongSeconds"));
             assertTrue(allAttrs.contains("SmallMinutes"));
 
-            Double val = resp.getValue(new ObjectName(itSetup.getAttributeMBean()),"SmallMinutes");
+            BigDecimal val = resp.getValue(new ObjectName(itSetup.getAttributeMBean()),"SmallMinutes");
             assertNotNull(val);
 
             try {
@@ -159,8 +160,8 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
                 assertTrue(exp.getMessage().contains("Aufsteiger"));
             }
 
-            Double longVal = resp.getValue("LongSeconds");
-            assertNotNull(longVal);
+            BigDecimal decimalVal = resp.getValue("LongSeconds");
+            assertNotNull(decimalVal);
 
             try {
                 resp.getValue("Pinola bleibt");
@@ -214,7 +215,7 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
             assertTrue(allAttrs.contains("Name"));
             assertTrue(allAttrs.contains("Bytes"));
 
-            Long val = resp.getValue(new ObjectName(itSetup.getAttributeMBean()),"MemoryUsed");
+            Integer val = resp.getValue(new ObjectName(itSetup.getAttributeMBean()),"MemoryUsed");
             assertNotNull(val);
 
             try {
@@ -224,7 +225,7 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
                 assertTrue(exp.getMessage().contains("Aufsteiger"));
             }
 
-            Long bytes = resp.getValue("Bytes");
+            Integer bytes = resp.getValue("Bytes");
             assertNotNull(bytes);
 
             try {
@@ -286,8 +287,8 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
             assertTrue(attrs.containsKey("LongSeconds"));
             assertTrue(attrs.containsKey("List"));
 
-            Double longVal = resp.getValue(new ObjectName(itSetup.getAttributeMBean()),"LongSeconds");
-            assertNotNull(longVal);
+            BigDecimal decimalVal = resp.getValue(new ObjectName(itSetup.getAttributeMBean()),"LongSeconds");
+            assertNotNull(decimalVal);
 
             try {
                 resp.getValue(new ObjectName(itSetup.getAttributeMBean()),"FCN");
@@ -303,13 +304,13 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
         for (J4pReadRequest request  : readRequests("jolokia.it:type=mxbean","ComplexTestData")) {
             J4pReadResponse response = j4pClient.execute(request);
             JSONObject value = response.getValue();
-            assertEquals(value.get("number"),1968L);
+            assertEquals(value.get("number"),1968);
             assertEquals(value.get("string"),"late");
 
             List<?> set = (List<?>) value.get("set");
             assertEquals(set.size(),2);
-            assertTrue(set.contains(12L));
-            assertTrue(set.contains(14L));
+            assertTrue(set.contains(12));
+            assertTrue(set.contains(14));
 
             Map<?, ?> map = (Map<?, ?>) value.get("map");
             assertEquals(map.size(),2);

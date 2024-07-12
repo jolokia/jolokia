@@ -1,5 +1,6 @@
 package org.jolokia.server.core.util;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -23,7 +24,6 @@ public class TestSerializer extends AbstractJolokiaService<Serializer> implement
         super(Serializer.class, 0);
     }
 
-    @SuppressWarnings("unchecked")
     public Object serialize(Object pValue, List<String> pPathParts, SerializeOptions pOptions) throws AttributeNotFoundException {
         if (pValue instanceof Map) {
             return pValue;
@@ -51,7 +51,7 @@ public class TestSerializer extends AbstractJolokiaService<Serializer> implement
                 return new CompositeDataSupport((CompositeType) pOpenType, (Map<String, ?>) val);
             }
             return null;
-        } catch (ParseException | OpenDataException e) {
+        } catch (ParseException | OpenDataException | IOException e) {
             throw new IllegalArgumentException(pOpenType + " " + pValue);
         }
     }

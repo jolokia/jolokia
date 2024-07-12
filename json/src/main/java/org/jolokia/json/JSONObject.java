@@ -15,6 +15,8 @@
  */
 package org.jolokia.json;
 
+import java.io.IOException;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.util.*;
 
@@ -25,12 +27,23 @@ public class JSONObject extends HashMap<String, Object> implements JSONStructure
 
     @Override
     public String toJSONString() {
-        return "";
+        StringWriter writer = new StringWriter();
+        try {
+            writeJSONString(writer);
+        } catch (IOException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+        return writer.toString();
     }
 
     @Override
-    public void writeJSONString(Writer writer) {
+    public void writeJSONString(Writer writer) throws IOException {
+        JSONWriter.serialize(this, writer);
+    }
 
+    @Override
+    public String toString() {
+        return super.toString();
     }
 
 }

@@ -21,6 +21,7 @@ import java.util.stream.*;
 
 import javax.management.*;
 
+import org.jolokia.json.JSONObject;
 import org.jolokia.server.core.backend.MBeanServerHandler;
 import org.jolokia.server.core.backend.MBeanServerHandlerMBean;
 import org.jolokia.server.core.config.ConfigKey;
@@ -392,12 +393,11 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
      *
      * @return the detector specific configuration
      */
-    @SuppressWarnings("unchecked")
     private Map<String,Object> getDetectorOptions() {
         String optionString = configuration.getConfig(ConfigKey.DETECTOR_OPTIONS);
         if (optionString != null) {
             try {
-                return (Map<String, Object>) new JSONParser().parse(optionString);
+                return new JSONParser().parse(optionString, JSONObject.class);
             } catch (Exception e) {
                 logHandler.error("Could not parse detetctor options '" + optionString + "' as JSON object: " + e, e);
             }

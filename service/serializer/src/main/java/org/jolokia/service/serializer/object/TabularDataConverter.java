@@ -117,12 +117,12 @@ class TabularDataConverter extends OpenTypeConverter<TabularType> {
             List<String> tabularIndexNames = pType.getIndexNames();
             if (indexNames.size() != tabularIndexNames.size()) {
                 throw new IllegalArgumentException("Given array with index names must have " + tabularIndexNames.size() + " entries " +
-                                                   "(given: " + indexNames + ", required: " + tabularIndexNames + ")");
+                                                   "(given: " + indexNames.toJSONString() + ", required: " + tabularIndexNames + ")");
             }
             for (Object index : indexNames) {
                 if (!tabularIndexNames.contains(index.toString())) {
                     throw new IllegalArgumentException("No index with name '" + index + "' known " +
-                                                       "(given: " + indexNames + ", required: " + tabularIndexNames + ")");
+                                                       "(given: " + indexNames.toJSONString() + ", required: " + tabularIndexNames + ")");
                 }
             }
             return true;
@@ -178,7 +178,7 @@ class TabularDataConverter extends OpenTypeConverter<TabularType> {
         for (Object value : pValue.values()) {
             if (!(value instanceof JSONObject)) {
                 throw new IllegalArgumentException(
-                        "Cannot convert " + pValue + " to type " +
+                        "Cannot convert " + pValue.toJSONString() + " to type " +
                         type + " because the object values provided (" + value.getClass() + ") is not of the expected type JSONObject at level " + pLevel);
             }
             JSONObject jsonValue = (JSONObject) value;

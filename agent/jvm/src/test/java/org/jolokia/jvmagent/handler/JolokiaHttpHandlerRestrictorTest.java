@@ -37,7 +37,7 @@ public class JolokiaHttpHandlerRestrictorTest {
         Headers header = new Headers();
         ByteArrayOutputStream out = JolokiaHttpHandlerTest.prepareResponse(exchange, header);
         newHandler.handle(exchange);
-        JSONObject resp = (JSONObject) new JSONParser().parse(out.toString());
+        JSONObject resp = new JSONParser().parse(out.toString(), JSONObject.class);
         assertTrue(resp.containsKey("error"));
         assertTrue(((String) resp.get("error")).contains(pParam));
     }

@@ -16,6 +16,7 @@ package org.jolokia.service.serializer.object;
  *  limitations under the License.
  */
 
+import java.io.IOException;
 import javax.management.openmbean.*;
 
 import org.jolokia.json.JSONStructure;
@@ -77,7 +78,7 @@ abstract class OpenTypeConverter<T extends OpenType> {
         } else {
             try {
                 return (JSONStructure) new JSONParser().parse(pValue.toString());
-            } catch (ParseException e) {
+            } catch (ParseException | IOException e) {
                 throw new IllegalArgumentException("Cannot parse JSON " + pValue + ": " + e,e);
             } catch (ClassCastException exp) {
                 throw new IllegalArgumentException("Given value " + pValue +
