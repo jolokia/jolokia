@@ -114,7 +114,6 @@ public class Client {
      *
      * @return JSON object for this configuration.
      */
-    @SuppressWarnings("unchecked")
     public JSONObject list() {
         JSONObject ret = new JSONObject();
         for (Map.Entry<String,ListenerRegistration> entry : listenerConfigMap.entrySet()) {

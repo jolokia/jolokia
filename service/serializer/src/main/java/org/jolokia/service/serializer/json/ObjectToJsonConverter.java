@@ -100,7 +100,7 @@ public final class ObjectToJsonConverter {
      * @param pValue the value to convert
      * @param pPathParts path parts to use for extraction
      * @param pOptions options used for parsing
-     * @return the converter object. This either a subclass of {@link org.json.simple.JSONStructure} or a basic data type like String or Long.
+     * @return the converter object. This either a subclass of {@link org.jolokia.json.JSONStructure} or a basic data type like String or Long.
      * @throws AttributeNotFoundException if within a path an attribute could not be found
      */
     public Object serialize(Object pValue, List<String> pPathParts, SerializeOptions pOptions)
@@ -148,8 +148,8 @@ public final class ObjectToJsonConverter {
      *
      * @param pValue value to extract from
      * @param pPathParts stack for diving into the object
-     * @param pJsonify whether a JSON representation {@link org.json.simple.JSONObject}
-     * @return extracted object either in native format or as {@link org.json.simple.JSONObject}
+     * @param pJsonify whether a JSON representation {@link org.jolokia.json.JSONObject}
+     * @return extracted object either in native format or as {@link org.jolokia.json.JSONObject}
      * @throws AttributeNotFoundException if an attribute is not found during traversal
      */
     public Object extractObject(Object pValue, Deque<String> pPathParts, boolean pJsonify)

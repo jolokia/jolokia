@@ -64,12 +64,9 @@ public class J4pTargetConfig {
      */
     public JSONObject toJson() {
         JSONObject ret = new JSONObject();
-        //noinspection unchecked
         ret.put("url",url);
         if (user != null) {
-            //noinspection unchecked
             ret.put("user",user);
-            //noinspection unchecked
             ret.put("password",password);
         }
         return ret;

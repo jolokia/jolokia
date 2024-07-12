@@ -108,9 +108,8 @@ public class ArrayExtractor implements Extractor {
         return true;
     }
 
-    @SuppressWarnings("unchecked")
     private List<Object> extractArray(ObjectToJsonConverter pConverter, Object pValue, Deque<String> pPath, boolean jsonify, int pLength) throws AttributeNotFoundException {
-        List<Object> ret = new JSONArray();
+        List<Object> ret = new JSONArray(pLength);
         for (int i = 0; i < pLength; i++) {
             Deque<String> path = new LinkedList<>(pPath);
             try {

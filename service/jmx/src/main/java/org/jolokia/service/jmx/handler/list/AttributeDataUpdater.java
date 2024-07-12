@@ -38,7 +38,6 @@ class AttributeDataUpdater extends DataUpdater {
 
     /** {@inheritDoc} */
     @Override
-    @SuppressWarnings("unchecked")
     protected JSONObject extractData(MBeanInfo pMBeanInfo, String attribute) {
         JSONObject attrMap = new JSONObject();
 

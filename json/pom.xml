@@ -37,14 +37,18 @@
     https://github.com/jolokia/jolokia/issues/686
     This module is created to replace dated com.googlecode.json-simple/json-simple/1.1.1 library (2012)
     json-simple is available from https://code.google.com/archive/p/json-simple/, but also from these forks
-     - https://github.com/fangyidong/json-simple (original migrated from code.google.com)
+     - https://github.com/fangyidong/json-simple (original code migrated from code.google.comt o GitHub)
      - https://github.com/cliftonlabs/json-simple (picked up by Davin Loegering after Fang Yidong)
     cliftonlabs/json-simple includes the grammar and uses jflex-maven-plugin. Also moves from json.lex to jsonstrict.lex
     Both project use a bit different grammars differing in number handling (double/long vs BigDecimal):
      - https://github.com/fangyidong/json-simple/blob/master/doc/json.lex
      - https://github.com/cliftonlabs/json-simple/blob/master/src/main/lex/jsonstrict.lex
-    camel-util-json is based on cliftonlabs/json-simple:
+    camel-util-json is based on cliftonlabs/json-simple but uses some older version generated with jflex 1.4.3 (2016)
      - https://github.com/apache/camel/tree/camel-4.7.0/tooling/camel-util-json/src/main/java/org/apache/camel/util/json
+    finally, we've decided to take the grammar, alter it a bit (disallow leading/trailing commas in arrays/objects),
+    use jflex-maven-plugin with latest version of jflex, generate the lexer during build process and build
+    our own JSON parser!
+    This worked great, as we can provide our own optimizations wherever needed.
   -->
 
   <build>

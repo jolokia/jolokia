@@ -91,7 +91,6 @@ public class JolokiaExecRequest extends JolokiaObjectNameRequest {
      * Return this request in a proper JSON representation
      * @return this object in a JSON representation
      */
-    @SuppressWarnings("unchecked")
     public JSONObject toJSON() {
         JSONObject ret = super.toJSON();
         if (arguments != null && !arguments.isEmpty()) {

@@ -151,17 +151,6 @@
               <createDependencyReducedPom>false</createDependencyReducedPom>
               <shadedClassifierName>javaagent</shadedClassifierName>
               <shadedArtifactAttached>true</shadedArtifactAttached>
-              <relocations>
-                <relocation>
-                  <shadedPattern>org.jolokia.shaded.</shadedPattern>
-                  <includes>
-                    <include>org.json.simple.**</include>
-                  </includes>
-                  <excludes>
-                    <exclude>org.jolokia.shaded.**</exclude>
-                  </excludes>
-                </relocation>
-              </relocations>
               <artifactSet>
                 <includes>
                   <include>org.jolokia:jolokia-json</include>

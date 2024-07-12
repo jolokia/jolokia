@@ -110,7 +110,6 @@ public class JolokiaWriteRequest extends JolokiaObjectNameRequest {
         return ret.toString();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public JSONObject toJSON() {
         JSONObject ret = super.toJSON();

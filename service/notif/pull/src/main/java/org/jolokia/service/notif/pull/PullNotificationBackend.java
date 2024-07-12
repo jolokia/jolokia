@@ -90,7 +90,6 @@ public class PullNotificationBackend extends AbstractJolokiaService<Notification
     }
 
     /** {@inheritDoc} */
-    @SuppressWarnings("unchecked")
     public Map<String, ?> getConfig() {
         JSONObject ret = new JSONObject();
         ret.put("store",objectName.toString());

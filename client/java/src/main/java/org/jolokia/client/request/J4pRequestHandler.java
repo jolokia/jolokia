@@ -133,12 +133,11 @@ public class J4pRequestHandler {
      */
     public <T extends J4pRequest> HttpUriRequest getHttpRequest(List<T> pRequests,Map<J4pQueryParameter,String> pProcessingOptions)
             throws UnsupportedEncodingException, URISyntaxException {
-        JSONArray bulkRequest = new JSONArray();
+        JSONArray bulkRequest = new JSONArray(pRequests.size());
         String queryParams = prepareQueryParameters(pProcessingOptions);
         HttpPost postReq = new HttpPost(createRequestURI(j4pServerUrl.getPath(),queryParams));
         for (T request : pRequests) {
             JSONObject requestContent = getJsonRequestContent(request);
-            //noinspection unchecked
             bulkRequest.add(requestContent);
         }
         postReq.setEntity(new StringEntity(bulkRequest.toJSONString(),"utf-8"));
@@ -184,7 +183,6 @@ public class J4pRequestHandler {
     private JSONObject getJsonRequestContent(J4pRequest pRequest) {
         JSONObject requestContent = pRequest.toJson();
         if (defaultTargetConfig != null && pRequest.getTargetConfig() == null) {
-            //noinspection unchecked
             requestContent.put("target", defaultTargetConfig.toJson());
         }
         return requestContent;

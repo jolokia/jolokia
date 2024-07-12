@@ -82,7 +82,6 @@ public class NotificationDispatcher {
      *
      * @return client id with backend configs.
      */
-    @SuppressWarnings("unchecked")
     private JSONObject register()
     {
         String id = listenerDelegate.register();

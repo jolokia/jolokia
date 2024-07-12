@@ -55,7 +55,6 @@ public class ListenerRegistration {
      * Return a JSON representation of this config (used for list)
      * @return JSON representation
      */
-    @SuppressWarnings("unchecked")
     public JSONObject toJson() {
         JSONObject ret = new JSONObject();
         ret.put("mbean", mbeanName.toString());
@@ -115,9 +114,8 @@ public class ListenerRegistration {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private JSONArray filterToJSON(NotificationFilterSupport pFilter) {
-        JSONArray ret = new JSONArray();
+        JSONArray ret = new JSONArray(pFilter.getEnabledTypes().size());
         ret.addAll(pFilter.getEnabledTypes());
         return ret;
     }

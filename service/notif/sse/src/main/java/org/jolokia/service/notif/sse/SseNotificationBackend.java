@@ -120,7 +120,6 @@ public class SseNotificationBackend extends AbstractJolokiaService<NotificationB
     }
 
     /** {@inheritDoc} */
-    @SuppressWarnings("unchecked")
     public Map<String, ?> getConfig() {
         JSONObject ret = new JSONObject();
         ret.put(BackChannel.CONTENT_TYPE, "text/event-stream");

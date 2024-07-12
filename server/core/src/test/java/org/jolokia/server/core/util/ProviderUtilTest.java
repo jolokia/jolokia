@@ -1,5 +1,6 @@
 package org.jolokia.server.core.util;
 
+import java.util.Objects;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
@@ -26,7 +27,7 @@ public class ProviderUtilTest {
             for (ProviderUtil.ProviderObjectNamePair pair : new ProviderUtil.ProviderObjectNamePair[]
                     {
                         ProviderUtil.extractProvider(data[i]),
-                        ProviderUtil.extractProvider(new ObjectName(data[i]))
+                        ProviderUtil.extractProvider(new ObjectName(Objects.requireNonNull(data[i])))
                     }) {
                 assertEquals(pair.getProvider(), data[i + 1], "Provider expected: " + data[i + 1]);
                 assertEquals(pair.getObjectName(), new ObjectName(data[i + 2]), "Objectname exepcted: " + data[i + 1]);
@@ -51,7 +52,7 @@ public class ProviderUtilTest {
                 "spring",":type=memory","false"
         };
         for (int i = 0; i < data.length; i += 3) {
-            assertEquals(ProviderUtil.matchesProvider(data[i], new ObjectName(data[i + 1])), Boolean.parseBoolean(data[i + 2]),
+            assertEquals(ProviderUtil.matchesProvider(data[i], new ObjectName(Objects.requireNonNull(data[i + 1]))), Boolean.parseBoolean(data[i + 2]),
                          data[i+1] + " matches provider " + data[i] + ": " + data[i+2]);
         }
     }

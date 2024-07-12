@@ -117,7 +117,6 @@ public class J4pConnectionPoolingIntegrationTest {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private String getJsonResponse(String message) {
         JSONObject result = new JSONObject();
         JSONArray value = new JSONArray();

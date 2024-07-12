@@ -55,7 +55,6 @@ public class JolokiaNotificationRequest extends JolokiaRequest {
     }
 
     /** {@inheritDoc} */
-    @SuppressWarnings("unchecked")
     public JSONObject toJSON() {
         JSONObject ret = super.toJSON();
         JSONObject commandJson = command.toJSON();

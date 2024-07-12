@@ -142,7 +142,6 @@ public class J4pListRequest extends J4pRequest {
                     path.append("/");
                 }
             }
-            //noinspection unchecked
             ret.put("path",path.toString());
         }
         return ret;

@@ -63,7 +63,6 @@ public class RemoveCommand extends ClientCommand {
         return handle;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public JSONObject toJSON() {
         JSONObject ret = super.toJSON();

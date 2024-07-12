@@ -52,7 +52,7 @@ public final class NotificationCommandFactory {
     }
 
     /**
-     * Create a command out of a map, possible out of a {@link org.json.simple.JSONObject}.
+     * Create a command out of a map, possible out of a {@link org.jolokia.json.JSONObject}.
      * The command name itself must be given under the key "command", the rest of the map
      * holds the specifics for this command.
      *

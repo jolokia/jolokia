@@ -109,7 +109,6 @@ public final class J4pVersionResponse extends J4pResponse<J4pVersionRequest> {
      * @return set of supported providers
      */
     public Set<String> getProviders() {
-        //noinspection unchecked
         return info.keySet();
     }
 

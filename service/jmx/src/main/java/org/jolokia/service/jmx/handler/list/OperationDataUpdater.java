@@ -39,14 +39,13 @@ class OperationDataUpdater extends DataUpdater {
 
     /** {@inheritDoc} */
     @Override
-    @SuppressWarnings("unchecked")
     protected JSONObject extractData(MBeanInfo pMBeanInfo, String pOperation) {
         JSONObject opMap = new JSONObject();
 
         for (MBeanOperationInfo opInfo : pMBeanInfo.getOperations()) {
             if (pOperation == null || opInfo.getName().equals(pOperation)) {
                 JSONObject map = new JSONObject();
-                JSONArray argList = new JSONArray();
+                JSONArray argList = new JSONArray(opInfo.getSignature().length);
                 for (MBeanParameterInfo paramInfo : opInfo.getSignature()) {
                     JSONObject args = new JSONObject();
                     args.put(DESCRIPTION.getKey(), paramInfo.getDescription());

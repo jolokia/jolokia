@@ -105,7 +105,6 @@ public class RawObjectNameTest {
         JSONObject json = backendManager.handleRequest(req);
         JSONStructure value = (JSONStructure) json.get("value");
         String memoryKey = null;
-        @SuppressWarnings({"unchecked", "rawtypes"})
         Set<?> keys = value instanceof JSONObject ?
                 ((JSONObject) value).keySet() :
                 new HashSet<>((JSONArray) value);

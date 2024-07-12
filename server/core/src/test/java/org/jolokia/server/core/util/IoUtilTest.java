@@ -15,7 +15,6 @@ import static org.testng.Assert.fail;
 
 
 public class IoUtilTest {
-    @SuppressWarnings("unchecked")
     @Test
     public void checkSmallWrite() throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -31,7 +30,6 @@ public class IoUtilTest {
         assertWriterClosed(writer);
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void checkBigWrite() throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -52,7 +50,6 @@ public class IoUtilTest {
         assertWriterClosed(writer);
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void checkWriteWithCallback() throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();

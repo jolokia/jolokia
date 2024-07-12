@@ -321,10 +321,8 @@ public class MBeanInfoData {
             String key = entry.getKey();
             Object value = entry.getValue();
             if (value instanceof JSONObject) {
-                //noinspection unchecked
                 ret.put(key, truncateJSONObject((JSONObject) value, pMaxDepth - 1));
             } else {
-                //noinspection unchecked
                 ret.put(key,value);
             }
         }

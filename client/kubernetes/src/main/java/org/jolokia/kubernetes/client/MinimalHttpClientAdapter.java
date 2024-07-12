@@ -157,24 +157,20 @@ public class MinimalHttpClientAdapter implements HttpClient {
 
         if (response.body() != null) {
             final BasicHttpEntity responseEntity = new BasicHttpEntity();
-            byte[] responseBytes = null;
+            byte[] responseBytes;
             if (responseCode >= 400) {
                 final JSONObject errorResponse = new JSONObject();
                 Throwable syntethicException = new ClientProtocolException("Failure calling Jolokia in kubernetes");
-                //noinspection unchecked
                 errorResponse.put("status", responseCode);
                 try {//the payload would be a kubernetes error response
                     syntethicException = new KubernetesClientException(convertResponseBody(response));
                 } catch (Exception ignored) {
                 }
-                //noinspection unchecked
                 errorResponse.put("error_type", syntethicException.getClass().getName());
-                //noinspection unchecked
                 errorResponse.put("error", syntethicException.getMessage());
                 final StringWriter stacktrace = new StringWriter();
                 syntethicException.printStackTrace(new PrintWriter(
                     stacktrace));
-                //noinspection unchecked
                 errorResponse.put("stacktrace", stacktrace.getBuffer().toString());
                 responseBytes = errorResponse.toJSONString().getBytes();
 

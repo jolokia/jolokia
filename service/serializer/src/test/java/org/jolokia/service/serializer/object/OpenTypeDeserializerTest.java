@@ -115,11 +115,11 @@ public class OpenTypeDeserializerTest {
         );
         JSONArray array = new JSONArray();
         array.add(taj.getJson());
-        converter.deserialize(new ArrayType(2, taj.getType()), array);
+        converter.deserialize(new ArrayType<>(2, taj.getType()), array);
     }
 
     @Test
-    public void compositeType() throws OpenDataException, ParseException {
+    public void compositeType() throws OpenDataException {
         CompositeTypeAndJson taj = new CompositeTypeAndJson(
                 STRING,"verein","FCN",
                 INTEGER,"platz",6,
@@ -129,7 +129,7 @@ public class OpenTypeDeserializerTest {
         for (Object input : new Object[] { taj.getJson(), taj.getJsonAsString() }) {
             CompositeData result = (CompositeData) converter.deserialize(taj.getType(), input);
             assertEquals(result.get("verein"),"FCN");
-            assertEquals(result.get("trainer"),null);
+            assertNull(result.get("trainer"));
             assertEquals(result.get("platz"),6);
             assertEquals(result.get("absteiger"),false);
             assertEquals(result.values().size(),4);
@@ -207,9 +207,9 @@ public class OpenTypeDeserializerTest {
                       "}";
         TabularData data = (TabularData) converter.deserialize(type, json);
         assertNotNull(data);
-        Set keySet = data.keySet();
+        Set<?> keySet = data.keySet();
         assertEquals(keySet.size(), 1);
-        List keys = (List) keySet.iterator().next();
+        List<?> keys = (List<?>) keySet.iterator().next();
         assertEquals(keys.size(),2);
         assertTrue(keys.contains("homestreet"));
         CompositeData cd = checkCompositeKey(keys);
@@ -219,7 +219,7 @@ public class OpenTypeDeserializerTest {
         assertEquals(row.get("oname"),new ObjectName("java.lang:type=Memory"));
     }
 
-    private CompositeData checkCompositeKey(List pKeys) {
+    private CompositeData checkCompositeKey(List<?> pKeys) {
         for (Object o : pKeys) {
             if (o instanceof CompositeData) {
                 CompositeData cd = (CompositeData) o;
@@ -410,7 +410,7 @@ public class OpenTypeDeserializerTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*No converter.*")
     public void unknownOpenType() throws OpenDataException {
-        converter.deserialize(new OpenType("java.util.Date", "guenther", "guenther") {
+        converter.deserialize(new OpenType<>("java.util.Date", "guenther", "guenther") {
             @Override
             public boolean isValue(Object obj) {
                 return false;

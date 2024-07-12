@@ -64,7 +64,6 @@ public class CompositeDataExtractor implements Extractor {
         for (String key : pData.getCompositeType().keySet()) {
             Deque<String> path = new LinkedList<>(pPath);
             try {
-                //noinspection unchecked
                 ret.put(key, pConverter.extractObject(pData.get(key), path, true));
             } catch (ValueFaultHandler.AttributeFilteredException exp) {
                 // Ignore this key;

@@ -45,10 +45,8 @@ abstract class AbstractDiscoveryMessage {
 
     public byte[] getData() {
         JSONObject respond = new JSONObject();
-        //noinspection unchecked
         respond.put(MESSAGE_TYPE, type.toString().toLowerCase());
         if (agentDetails != null) {
-            //noinspection unchecked
             respond.putAll(agentDetails.toJSONObject());
         }
         byte[] ret = getBytes(respond.toJSONString());

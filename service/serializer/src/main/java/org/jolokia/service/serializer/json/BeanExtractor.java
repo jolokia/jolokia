@@ -16,7 +16,6 @@ import org.jolokia.service.serializer.object.StringToObjectConverter;
 import org.jolokia.server.core.service.serializer.ValueFaultHandler;
 import org.jolokia.server.core.util.EscapeUtil;
 
-import org.jolokia.json.JSONStructure;
 import org.jolokia.json.JSONObject;
 
 /*
@@ -173,7 +172,6 @@ public class BeanExtractor implements Extractor {
     }
 
     private Object extractBeanValues(ObjectToJsonConverter pConverter, Object pValue, Deque<String> pPathParts, List<String> pAttributes) throws AttributeNotFoundException {
-        @SuppressWarnings("unchecked")
         Map<String, Object> ret = new JSONObject();
         for (String attribute : pAttributes) {
             Deque<String> path = new LinkedList<>(pPathParts);

@@ -32,8 +32,7 @@ public class ExecData implements ExecDataMBean {
         return DateUtil.fromISO8601(p1);
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    public Map withArgs(long p1, List p2, boolean p3) {
+    public Map<?, ?> withArgs(long p1, List<?> p2, boolean p3) {
         JSONObject ret = new JSONObject();
         ret.put("long", p1);
         ret.put("list", p2);

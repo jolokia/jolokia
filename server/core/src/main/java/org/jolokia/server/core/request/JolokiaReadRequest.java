@@ -111,7 +111,6 @@ public class JolokiaReadRequest extends JolokiaObjectNameRequest {
     }
 
     /** {@inheritDoc} */
-    @SuppressWarnings("unchecked")
     public JSONObject toJSON() {
         JSONObject ret = super.toJSON();
         if (attributeNames != null && !attributeNames.isEmpty()) {

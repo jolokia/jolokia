@@ -215,12 +215,12 @@ public class TabularDataExtractor implements Extractor {
                                                pTd.getTabularType().getRowType() + ")");
         }
         JSONObject ret = new JSONObject();
-        JSONArray indexNames = new JSONArray();
         TabularType type = pTd.getTabularType();
+        JSONArray indexNames = new JSONArray(type.getIndexNames().size());
         indexNames.addAll(type.getIndexNames());
         ret.put("indexNames",indexNames);
 
-        JSONArray values = new JSONArray();
+        JSONArray values = new JSONArray(pTd.values().size());
         // Here no special handling for wildcard pathes since pathes are not supported for this use case (yet)
         for (CompositeData cd : (Collection<CompositeData>) pTd.values()) {
             values.add(pConverter.extractObject(cd, pExtraArgs, true));

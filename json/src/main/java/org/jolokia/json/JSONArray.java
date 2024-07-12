@@ -26,7 +26,11 @@ import java.util.*;
 public class JSONArray extends ArrayList<Object> implements JSONStructure {
 
     public JSONArray() {
-        super(256);
+        super(10);
+    }
+
+    public JSONArray(int initialCapacity) {
+        super(initialCapacity);
     }
 
     public JSONArray(Collection<?> c) {

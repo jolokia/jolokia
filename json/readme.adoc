@@ -5,3 +5,6 @@ Changes:
 * JSONAware -> JSONStructure
 * toString() no longer calls toJSONString()
 
+Optimizations (planned):
+
+* empty maps / lists could use a singleton

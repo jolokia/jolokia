@@ -141,6 +141,13 @@ public class JSONWriter {
         }
     }
 
+    /**
+     * When writing string values we have to escape characters. This method writes escaped char array into
+     * the target {@link Writer} but optimizing the process by not writing it one char at a time.
+     * @param characters
+     * @param writer
+     * @throws IOException
+     */
     private static void escape(char[] characters, Writer writer) throws IOException {
         // https://datatracker.ietf.org/doc/html/rfc8259#section-7
         //     All Unicode characters may be placed within the
@@ -162,43 +169,47 @@ public class JSONWriter {
         // single "char" which java.lang.Character.isSurrogate() is passed directly, to be decoded by parser
         // when needed
 
+        StringBuilder buffer = new StringBuilder();
+
         for (char c : characters) {
             switch (c) {
                 case '"': // %x22
-                    writer.write("\\\"");
+                    buffer.append("\\\"");
                     break;
                 case '\\': // %x5C
-                    writer.write("\\\\");
+                    buffer.append("\\\\");
                     break;
                 // RFC 8259 says that "/" may be escaped and we unescape it when parsing `\/`. But we don't escape
                 // it during serialization
                 case '\b':
-                    writer.write("\\b");
+                    buffer.append("\\b");
                     break;
                 case '\f':
-                    writer.write("\\f");
+                    buffer.append("\\f");
                     break;
                 case '\n':
-                    writer.write("\\n");
+                    buffer.append("\\n");
                     break;
                 case '\r':
-                    writer.write("\\r");
+                    buffer.append("\\r");
                     break;
                 case '\t':
-                    writer.write("\\t");
+                    buffer.append("\\t");
                     break;
                 default:
                     if (c <= 0x1F) {
-                        writer.write("\\u00");
-                        writer.write(((c & 0xf0) >> 4) + '0');
-                        writer.write((c & 0x0f) + '0');
+                        buffer.append("\\u00");
+                        buffer.append((char)(((c & 0xf0) >> 4) + '0'));
+                        buffer.append((char)((c & 0x0f) + '0'));
                     } else {
                         // there's no escape
-                        writer.write(c);
+                        buffer.append(c);
                     }
                     break;
             }
         }
+
+        writer.write(buffer.toString());
     }
 
 }

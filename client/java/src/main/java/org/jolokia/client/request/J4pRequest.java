@@ -170,15 +170,15 @@ public abstract class J4pRequest {
      *      If the argument is <code>null</code> null is returned.
      *    </li>
      *    <li>
-     *      If the argument is of type {@see org.json.simple.JSONStructure}, the it is used directly for inclusion
+     *      If the argument is of type {@link org.jolokia.json.JSONStructure}, the it is used directly for inclusion
      *      in the POST request.
      *    </li>
      *    <li>
      *      If the argument is an array, this array's content is put into
-     *      an {@see org.json.simple.JSONArray}, where each array member is serialized recursively.
+     *      an {@link org.jolokia.json.JSONArray}, where each array member is serialized recursively.
      *    </li>
      *    <li>
-     *      If the argument is a map, it is transformed into a {@see org.json.simple.JSONObject} with the keys taken
+     *      If the argument is a map, it is transformed into a {@link org.jolokia.json.JSONObject} with the keys taken
      *      directly from the map and the values recursively serialized to their JSON representation.
      *      So it is only save fto use or a simple map with string keys.
      *    </li>
@@ -239,7 +239,7 @@ public abstract class J4pRequest {
     // =====================================================================================================
 
     private Object serializeCollection(Collection<?> pArg) {
-        JSONArray array = new JSONArray();
+        JSONArray array = new JSONArray(pArg.size());
         for (Object value : pArg) {
             array.add(serializeArgumentToJson(value));
         }
@@ -255,8 +255,9 @@ public abstract class J4pRequest {
     }
 
     private Object serializeArray(Object pArg) {
-        JSONArray innerArray = new JSONArray();
-        for (int i = 0; i < Array.getLength(pArg); i++ ) {
+        int length = Array.getLength(pArg);
+        JSONArray innerArray = new JSONArray(length);
+        for (int i = 0; i < length; i++ ) {
             innerArray.add(serializeArgumentToJson(Array.get(pArg, i)));
         }
         return innerArray;

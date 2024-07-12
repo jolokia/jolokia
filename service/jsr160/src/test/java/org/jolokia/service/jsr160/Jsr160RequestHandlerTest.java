@@ -19,6 +19,7 @@ package org.jolokia.service.jsr160;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.management.*;
 import javax.naming.CommunicationException;
@@ -124,7 +125,6 @@ public class Jsr160RequestHandlerTest {
         return preparePostReadRequestWithServiceUrl("service:jmx:test:///jndi/rmi://localhost:9999/jmxrmi", pUser, pAttribute);
     }
 
-    @SuppressWarnings("unchecked")
     private JolokiaReadRequest preparePostReadRequestWithServiceUrl(String pJmxServiceUrl, String pUser, String... pAttribute) {
         JSONObject params = new JSONObject();
         JSONObject target = new JSONObject();
@@ -140,7 +140,7 @@ public class Jsr160RequestHandlerTest {
         params.put("type","read");
         params.put("mbean","java.lang:type=Memory");
 
-        return (JolokiaReadRequest) JolokiaRequestFactory.createPostRequest(params, new TestProcessingParameters());
+        return JolokiaRequestFactory.createPostRequest(params, new TestProcessingParameters());
     }
 
     private Jsr160RequestHandler createDispatcherPointingToLocalMBeanServer(Configuration pConfig) {
@@ -247,7 +247,7 @@ public class Jsr160RequestHandlerTest {
     }
 
     private String getFilePathFor(String resource) {
-        return this.getClass().getResource(resource).getFile();
+        return Objects.requireNonNull(this.getClass().getResource(resource)).getFile();
     }
 
 

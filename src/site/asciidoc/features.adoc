@@ -44,9 +44,9 @@ transparently. xref:features/proxy.adoc[More ...]
 image:images/features/fast.png["Fast",role="right feature",link=features/fast.html]
 Jolokia before version 2.1.0 uses the super fast JSON serialization library
 https://code.google.com/archive/p/json-simple/[json-simple,role=externalLink,window=_blank]
-for parsing requests and creating responses. With version 2.1.0 we have Jolokia own JSON library
-that uses https://www.jflex.de/[JFlex,role=externalLink,window=_blank] to generate lexer and provide
-a base for customized JSON parser.
+for parsing requests and creating responses. +
+With version 2.1.0 we provide our own JSON library
+that uses a lexer genreated by https://www.jflex.de/[JFlex,role=externalLink,window=_blank].
 
 Although
 the binary protocols (JRMP or IIOP) used by the standard

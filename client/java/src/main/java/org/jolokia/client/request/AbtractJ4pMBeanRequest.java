@@ -58,7 +58,6 @@ public abstract class AbtractJ4pMBeanRequest extends J4pRequest {
     @Override
     JSONObject toJson() {
         JSONObject ret =  super.toJson();
-        //noinspection unchecked
         ret.put("mbean", objectName.getCanonicalName());
         return ret;
     }

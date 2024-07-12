@@ -29,17 +29,17 @@ public abstract class J4pClientBuilderFactory {
 
     protected J4pClientBuilderFactory() {}
 
-    /** See {@link J4pClientBuilder#url} */
+    /** See {@code J4pClientBuilder#url} */
     public static J4pClientBuilder url(String pUrl) {
         return new J4pClientBuilder().url(pUrl);
     }
 
-    /** See {@link J4pClientBuilder#user} */
+    /** See {@code J4pClientBuilder#user} */
     public static J4pClientBuilder user(String pUser) {
         return new J4pClientBuilder().user(pUser);
     }
 
-    /** See {@link J4pClientBuilder#password} */
+    /** See {@code J4pClientBuilder#password} */
     public static J4pClientBuilder password(String pPassword) {
         return new J4pClientBuilder().password(pPassword);
     }

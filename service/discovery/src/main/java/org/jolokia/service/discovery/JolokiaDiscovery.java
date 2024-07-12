@@ -74,9 +74,8 @@ public class JolokiaDiscovery extends AbstractJolokiaService<JolokiaService.Init
                         .agentId(ctx.getAgentDetails().getAgentId())
                         .build();
         List<DiscoveryIncomingMessage> discovered = MulticastUtil.sendQueryAndCollectAnswers(out, pTimeout, pMulticastGroup, pMulticastPort, ctx);
-        JSONArray ret = new JSONArray();
+        JSONArray ret = new JSONArray(discovered.size());
         for (DiscoveryIncomingMessage in : discovered) {
-            //noinspection unchecked
             ret.add(in.getAgentDetails().toJSONObject());
         }
         return ret;

@@ -259,7 +259,6 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
 
 
     @Test
-    @SuppressWarnings("unchecked")
     public void mapArg() throws MalformedObjectNameException, J4pException {
         J4pExecRequest request;
         J4pExecResponse resp;

@@ -286,7 +286,6 @@ public class NotificationCommandTest {
     }
 
 
-    @SuppressWarnings("unchecked")
     private JSONArray getFilterArrayList(String[] pFilter) {
         JSONArray ret = new JSONArray();
         Collections.addAll(ret, pFilter);

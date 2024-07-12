@@ -36,7 +36,6 @@ public class TabularTypeAndJson {
         for (int i = 0 ; i < rowVals.length; i += nrCols) {
             JSONObject row = new JSONObject();
             for (int j = 0; j < nrCols; j++) {
-                //noinspection unchecked
                 row.put(taj.getKey(j),rowVals[i+j]);
             }
             addRow(json, row, index);

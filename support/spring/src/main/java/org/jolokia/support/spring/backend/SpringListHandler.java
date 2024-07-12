@@ -36,7 +36,6 @@ import static org.jolokia.service.jmx.handler.list.DataKeys.TYPE;
  * @author roland
  * @since 17.12.13
  */
-@SuppressWarnings("unchecked")//due to use of JSONObject
 public class SpringListHandler extends SpringCommandHandler<JolokiaListRequest> {
 
     private static final String NAME_PREFIX = "name=";
@@ -127,7 +126,7 @@ public class SpringListHandler extends SpringCommandHandler<JolokiaListRequest> 
     }
 
     private JSONArray extractArguments(Method method) {
-        JSONArray ret = new JSONArray();
+        JSONArray ret = new JSONArray(method.getParameterTypes().length);
         int i = 0;
         for (Class<?> paramType : method.getParameterTypes()) {
             JSONObject params = new JSONObject();

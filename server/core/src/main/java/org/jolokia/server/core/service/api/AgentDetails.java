@@ -168,7 +168,6 @@ public class AgentDetails {
 
     // =======================================================================================
 
-    @SuppressWarnings("unchecked")
     private void add(JSONObject pResp, AgentDetailProperty pKey, Object pValue) {
         if (pValue != null) {
             pResp.put(pKey.toString().toLowerCase(),pValue);

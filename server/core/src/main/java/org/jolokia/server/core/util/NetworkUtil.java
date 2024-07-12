@@ -356,7 +356,7 @@ public final class NetworkUtil {
                         }
                     }
                 }
-                matcher.appendReplacement(ret, value != null ? value.trim() : null);
+                matcher.appendReplacement(ret, value != null ? value.trim() : "");
             }
             matcher.appendTail(ret);
         } catch (IOException e) {

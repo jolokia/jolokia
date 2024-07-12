@@ -92,8 +92,7 @@ public class CollectionExtractor implements Extractor {
     }
 
     private Object extractListAsJson(ObjectToJsonConverter pConverter, Collection<?> pCollection, Deque<String> pPathParts, int pLength) throws AttributeNotFoundException {
-        @SuppressWarnings("unchecked")
-        List<Object> ret = new JSONArray();
+        List<Object> ret = new JSONArray(pCollection.size());
         Iterator<?> it = pCollection.iterator();
         for (int i = 0;i < pLength; i++) {
             Object val = it.next();

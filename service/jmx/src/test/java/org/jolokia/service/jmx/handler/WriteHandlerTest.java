@@ -102,7 +102,7 @@ public class WriteHandlerTest {
         req = new JolokiaRequestBuilder(WRITE,oName).attribute("Map").value(null).build();
         @SuppressWarnings("unchecked")
         Map<String, ?> ret = (Map<String, ?>) handler.doHandleSingleServerRequest(getMBeanServer(), req);
-        assertTrue(ret instanceof Map);
+        assertNotNull(ret);
         assertEquals(ret.get("answer"), 42);
 
     }

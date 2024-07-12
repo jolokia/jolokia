@@ -68,7 +68,6 @@ public abstract class ClientCommand extends NotificationCommand {
         return client;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public JSONObject toJSON() {
         JSONObject ret = super.toJSON();

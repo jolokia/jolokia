@@ -140,17 +140,13 @@ public class J4pReadRequest extends AbtractJ4pMBeanRequest {
     JSONObject toJson() {
         JSONObject ret = super.toJson();
         if (hasSingleAttribute()) {
-            //noinspection unchecked
             ret.put("attribute",attributes.get(0));
         } else if (!hasAllAttributes()) {
-            JSONArray attrs = new JSONArray();
-            //noinspection unchecked
+            JSONArray attrs = new JSONArray(attributes.size());
             attrs.addAll(attributes);
-            //noinspection unchecked
             ret.put("attribute",attrs);
         }
         if (path != null) {
-            //noinspection unchecked
             ret.put("path",path);
         }
         return ret;

@@ -82,7 +82,6 @@ public abstract class SimplifierExtractor<T> implements Extractor {
             Deque<String> paths = new LinkedList<>(pPathParts);
             try {
                 Object value = entry.getValue().extract(pValue);
-                //noinspection unchecked
                 ret.put(entry.getKey(),pConverter.extractObject(value, paths, jsonify));
             } catch (AttributeExtractor.SkipAttributeException | ValueFaultHandler.AttributeFilteredException e) {
                 // Skip this one

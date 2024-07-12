@@ -83,7 +83,6 @@ public class ProxyTargetConfig {
      *
      * @return JSON object representing this proxy configuration
      */
-    @SuppressWarnings("unchecked")
     public JSONObject toJSON() {
         JSONObject ret = new JSONObject();
         ret.put("url", url);

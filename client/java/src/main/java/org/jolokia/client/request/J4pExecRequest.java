@@ -141,15 +141,12 @@ public class J4pExecRequest extends AbtractJ4pMBeanRequest {
     @Override
     JSONObject toJson() {
         JSONObject ret = super.toJson();
-        //noinspection unchecked
         ret.put("operation",operation);
         if (!arguments.isEmpty()) {
-            JSONArray args = new JSONArray();
+            JSONArray args = new JSONArray(arguments.size());
             for (Object arg : arguments) {
-                //noinspection unchecked
                 args.add(serializeArgumentToJson(arg));
             }
-            //noinspection unchecked
             ret.put("arguments",args);
         }
         return ret;

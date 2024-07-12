@@ -48,7 +48,6 @@ public abstract class NotificationCommand {
     }
 
     /** {@inheritDoc} */
-    @SuppressWarnings("unchecked")
     public JSONObject toJSON() {
         JSONObject ret = new JSONObject();
         ret.put("command",type.getType());

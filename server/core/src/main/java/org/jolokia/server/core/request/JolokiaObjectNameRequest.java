@@ -75,7 +75,6 @@ public abstract class JolokiaObjectNameRequest extends JolokiaRequest {
 
 
     /** {@inheritDoc} */
-    @SuppressWarnings("unchecked")
     @Override
     public JSONObject toJSON() {
         JSONObject ret = super.toJSON();

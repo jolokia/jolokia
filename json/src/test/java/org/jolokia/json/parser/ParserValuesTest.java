@@ -98,6 +98,7 @@ public class ParserValuesTest {
         Number value = (Number) new JSONParser().parse(new BigInteger(Integer.toString(Integer.MAX_VALUE)).subtract(BigInteger.TWO).toString());
         assertTrue(value instanceof Integer);
         assertEquals((int) value, 2147483645);
+        //noinspection RedundantCast
         assertEquals((long) (int) value, 2147483645L);
     }
 

@@ -56,9 +56,8 @@ class HistoryEntry implements Serializable {
      *
      * @return JSON array of values
      */
-    @SuppressWarnings("unchecked")
     public JSONArray jsonifyValues() {
-        JSONArray jValues = new JSONArray();
+        JSONArray jValues = new JSONArray(values.size());
         for (ValueEntry vEntry : values) {
             JSONObject o = new JSONObject();
             o.put("value",vEntry.getValue());

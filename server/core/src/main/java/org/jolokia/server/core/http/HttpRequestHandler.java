@@ -128,7 +128,7 @@ public class HttpRequestHandler {
         if (jsonRequest instanceof JSONArray) {
             List<JolokiaRequest> jolokiaRequests = JolokiaRequestFactory.createPostRequests((List<?>) jsonRequest, getProcessingParameter(pParameterMap));
 
-            JSONArray responseList = new JSONArray();
+            JSONArray responseList = new JSONArray(jolokiaRequests.size());
             for (JolokiaRequest jmxReq : jolokiaRequests) {
                 if (jolokiaCtx.isDebug()) {
                     jolokiaCtx.debug("Request: " + jmxReq.toString());
@@ -255,7 +255,6 @@ public class HttpRequestHandler {
      * @param pJmxReq request from where to get processing options
      * @return the json representation
      */
-    @SuppressWarnings("unchecked")
     public JSONObject getErrorJSON(int pErrorCode, Throwable pExp, JolokiaRequest pJmxReq) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("status",pErrorCode);
@@ -351,7 +350,6 @@ public class HttpRequestHandler {
     }
 
 
-    @SuppressWarnings("unchecked")
     private void addErrorInfo(JSONObject pErrorResp, Throwable pExp, JolokiaRequest pJmxReq) {
         if (Boolean.parseBoolean(jolokiaCtx.getConfig(ConfigKey.ALLOW_ERROR_DETAILS))) {
             String includeStackTrace = pJmxReq != null ?

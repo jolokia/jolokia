@@ -58,7 +58,6 @@ class CompositeTypeConverter extends OpenTypeConverter<CompositeType> {
                     pType + " failed because provided JSON type " + value.getClass() + " is not a JSONObject");
         }
 
-        @SuppressWarnings("unchecked")
         Map<String, Object> givenValues = (JSONObject) value;
         Map<String, Object> compositeValues = new HashMap<>();
 
