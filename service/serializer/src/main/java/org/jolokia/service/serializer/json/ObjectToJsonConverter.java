@@ -176,7 +176,7 @@ public final class ObjectToJsonConverter {
             }
             return callHandler(pValue, pathStack, pJsonify);
         } finally {
-            stackContext.pop();
+            stackContext.pop(pValue);
         }
     }
 
