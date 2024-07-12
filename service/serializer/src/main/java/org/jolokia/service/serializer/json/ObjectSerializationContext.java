@@ -41,8 +41,7 @@ class ObjectSerializationContext {
             Date.class
     ));
 
-    private final Set<Object>   objectsInCallStack = new HashSet<>();
-    private final Deque<Object> callStack          = new LinkedList<>();
+    private final Set<Integer>   objectsInCallStack = new HashSet<>();
     private final SerializeOptions options;
 
     private int objectCount = 0;
@@ -63,7 +62,7 @@ class ObjectSerializationContext {
      * @return true if the object has been already visited
      */
     boolean alreadyVisited(Object object) {
-        return objectsInCallStack.contains(object);
+        return objectsInCallStack.contains(System.identityHashCode(object));
     }
 
     /**
@@ -122,10 +121,8 @@ class ObjectSerializationContext {
      * @param object to push
      */
     void push(Object object) {
-        callStack.push(object);
-
         if (object != null && !SIMPLE_TYPES.contains(object.getClass())) {
-            objectsInCallStack.add(object);
+            objectsInCallStack.add(System.identityHashCode(object));
         }
         objectCount++;
     }
@@ -134,11 +131,9 @@ class ObjectSerializationContext {
      * Remove an object from top of the call stack
      * @return the object popped
      */
-    Object pop() {
-        Object ret = callStack.pop();
-        if (ret != null && !SIMPLE_TYPES.contains(ret.getClass())) {
-            objectsInCallStack.remove(ret);
+    void pop(Object value) {
+        if (value != null && !SIMPLE_TYPES.contains(value.getClass())) {
+            objectsInCallStack.remove(System.identityHashCode(value));
         }
-        return ret;
     }
 }
