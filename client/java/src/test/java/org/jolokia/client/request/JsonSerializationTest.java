@@ -17,12 +17,13 @@ package org.jolokia.client.request;
  */
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.jolokia.json.JSONArray;
+import org.jolokia.json.JSONObject;
+import org.jolokia.json.parser.JSONParser;
+import org.jolokia.json.parser.ParseException;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -42,7 +43,7 @@ public class JsonSerializationTest {
 
 
     @Test
-    public void jsonAwareSerialization() {
+    public void JSONStructureSerialization() {
         JSONObject arg = new JSONObject();
         Object result = serialize(arg);
         assertSame(arg, result);
@@ -80,7 +81,7 @@ public class JsonSerializationTest {
     }
 
     @Test
-    public void complexSerialization() throws ParseException {
+    public void complexSerialization() throws ParseException, IOException {
         Map<String, Object> arg = new HashMap<>();
         List<Object> inner = new ArrayList<>();
         inner.add(null);
@@ -104,7 +105,7 @@ public class JsonSerializationTest {
         assertEquals(arr.get(4), false);
         String json = res.toJSONString();
         assertNotNull(json);
-        JSONObject reparsed = (JSONObject) new JSONParser().parse(json);
+        JSONObject reparsed = new JSONParser().parse(json, JSONObject.class);
         assertNotNull(reparsed);
         assertEquals(((List<?>) reparsed.get("second")).get(1), "tmp");
     }

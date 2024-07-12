@@ -1,5 +1,5 @@
 package org.jolokia.server.core.util;/*
- * 
+ *
  * Copyright 2015 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,8 +15,8 @@ package org.jolokia.server.core.util;/*
  * limitations under the License.
  */
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONArray;
+import org.jolokia.json.JSONObject;
 
 /**
  * Utility for JSON handling
@@ -35,7 +35,6 @@ public class JsonUtil {
      * @param pKey the key under which to add
      * @param pValue the map value to add to this map.
      */
-    @SuppressWarnings("unchecked")
     public static void addJSONObjectToJSONObject(JSONObject pMap, String pKey, JSONObject pValue) {
         Object ops = pMap.get(pKey);
         if (ops != null) {
@@ -45,7 +44,7 @@ public class JsonUtil {
             } else {
                 // If it is a map, add a list with two elements
                 // (the old one and the new one)
-                JSONArray opList = new JSONArray();
+                JSONArray opList = new JSONArray(2);
                 opList.add(ops);
                 opList.add(pValue);
                 pMap.put(pKey, opList);

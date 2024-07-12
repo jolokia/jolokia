@@ -19,7 +19,7 @@ package org.jolokia.client.request;
 import java.util.Collections;
 import java.util.List;
 
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /**
  * Request for version and server information

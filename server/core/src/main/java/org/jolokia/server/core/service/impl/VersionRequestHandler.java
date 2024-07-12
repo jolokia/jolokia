@@ -13,7 +13,7 @@ import org.jolokia.server.core.service.api.*;
 import org.jolokia.server.core.service.request.RequestHandler;
 import org.jolokia.server.core.util.NetworkUtil;
 import org.jolokia.server.core.util.RequestType;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -56,7 +56,6 @@ public class VersionRequestHandler extends AbstractJolokiaService<RequestHandler
         context = pJolokiaContext;
     }
 
-    @SuppressWarnings("unchecked")
     public Object handleRequest(JolokiaRequest pJmxReq, Object pPreviousResult) throws JMException, IOException, NotChangedException {
         JSONObject ret = new JSONObject();
         ret.put("agent", Version.getAgentVersion());
@@ -91,7 +90,6 @@ public class VersionRequestHandler extends AbstractJolokiaService<RequestHandler
 
     // ========================================================================
 
-    @SuppressWarnings("unchecked")
     private JSONObject configToJSONObject() {
         JSONObject info = new JSONObject();
         Set<ConfigKey> keys = context.getConfigKeys();

@@ -9,7 +9,7 @@ import javax.management.AttributeNotFoundException;
 
 import org.jolokia.server.core.service.serializer.ValueFaultHandler;
 import org.jolokia.service.serializer.object.StringToObjectConverter;
-import org.json.simple.JSONArray;
+import org.jolokia.json.JSONArray;
 
 
 /*
@@ -126,8 +126,7 @@ public class ListExtractor implements Extractor {
     }
 
     private Object extractListAsJson(ObjectToJsonConverter pConverter, List<?> pList, Deque<String> pPath, int pLength) throws AttributeNotFoundException {
-        @SuppressWarnings("unchecked")
-        List<Object> ret = new JSONArray();
+        List<Object> ret = new JSONArray(pLength);
         for (int i = 0;i < pLength; i++) {
             Deque<String> path = new LinkedList<>(pPath);
             try {

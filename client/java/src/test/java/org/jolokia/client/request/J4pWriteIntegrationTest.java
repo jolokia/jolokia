@@ -16,6 +16,7 @@ package org.jolokia.client.request;
  * limitations under the License.
  */
 
+import java.math.BigDecimal;
 import java.util.*;
 
 import javax.management.MalformedObjectNameException;
@@ -23,8 +24,8 @@ import javax.management.ObjectName;
 
 import org.jolokia.client.exception.J4pException;
 import org.jolokia.client.exception.J4pRemoteException;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONArray;
+import org.jolokia.json.JSONObject;
 import org.testng.annotations.Test;
 
 import static org.testng.AssertJUnit.*;
@@ -42,17 +43,17 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
 
     @Test
     public void simple() throws MalformedObjectNameException, J4pException {
-        checkWrite("IntValue",null,42L);
+        checkWrite("IntValue",null,42);
     }
 
     @Test
     public void withPath() throws MalformedObjectNameException, J4pException {
-        checkWrite("ComplexNestedValue","Blub/1/numbers/0",13L);
+        checkWrite("ComplexNestedValue","Blub/1/numbers/0",13);
     }
 
     @Test
     public void withBeanPath() throws MalformedObjectNameException, J4pException {
-        checkWrite("Bean","value",41L);
+        checkWrite("Bean","value",41);
     }
 
     @Test
@@ -70,7 +71,7 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
         Map<String, Object> map = createTestMap();
         checkWrite(new String[]{"POST"}, "Map", null, map);
         checkWrite("Map","fcn","svw");
-        checkWrite("Map","zahl",20L);
+        checkWrite("Map","zahl",20);
 
         // Write an not yet known key
         J4pWriteRequest wReq = new J4pWriteRequest(IT_ATTRIBUTE_MBEAN,"Map","hofstadter","douglas");
@@ -88,7 +89,7 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
         map.put("zwei", "bvb");
         map.put("drei", true);
         map.put("vier", null);
-        map.put("fuenf", 12L);
+        map.put("fuenf", 12);
         return map;
     }
 
@@ -96,14 +97,14 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
     void list() throws MalformedObjectNameException, J4pException {
         List<Object> list = new ArrayList<>();
         list.add("fcn");
-        list.add(42L);
+        list.add(42);
         list.add(createTestMap());
         list.add(null);
-        list.add(23.2);
+        list.add(new BigDecimal("23.2"));
         checkWrite(new String[] { "POST" }, "List",null,list);
         checkWrite("List","0",null);
         checkWrite("List","0","");
-        checkWrite("List","2",42L);
+        checkWrite("List","2",42);
     }
 
 
@@ -147,16 +148,16 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
             JSONArray val = resp.getValue();
             assertEquals(val.size(), input.length);
             for (int i = 0; i < input.length; i++) {
-                assertEquals(val.get(i),(long) input[i]);
+                assertEquals(val.get(i), input[i]);
             }
         });
     }
 
     @Test
     public void mxMap() throws MalformedObjectNameException, J4pException {
-        final Map<String,Long> input = new HashMap<>();
-        input.put("roland",13L);
-        input.put("heino",19L);
+        final Map<String,Integer> input = new HashMap<>();
+        input.put("roland",13);
+        input.put("heino",19);
         checkMxWrite(new String[] {"POST"},"Map", null, input, resp -> {
             JSONObject val = resp.getValue();
             assertEquals(val.size(), input.size());

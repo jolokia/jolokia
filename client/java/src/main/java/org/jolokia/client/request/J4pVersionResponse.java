@@ -19,7 +19,7 @@ package org.jolokia.client.request;
 import java.util.Map;
 import java.util.Set;
 
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /**
  * Response for J4pVersion request
@@ -109,7 +109,6 @@ public final class J4pVersionResponse extends J4pResponse<J4pVersionRequest> {
      * @return set of supported providers
      */
     public Set<String> getProviders() {
-        //noinspection unchecked
         return info.keySet();
     }
 

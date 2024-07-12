@@ -2,7 +2,7 @@ package org.jolokia.service.serializer.util;
 
 import javax.management.openmbean.*;
 
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /*
  * Copyright 2009-2011 Roland Huss
@@ -36,7 +36,6 @@ public class TabularTypeAndJson {
         for (int i = 0 ; i < rowVals.length; i += nrCols) {
             JSONObject row = new JSONObject();
             for (int j = 0; j < nrCols; j++) {
-                //noinspection unchecked
                 row.put(taj.getKey(j),rowVals[i+j]);
             }
             addRow(json, row, index);
@@ -68,13 +67,12 @@ public class TabularTypeAndJson {
             JSONObject inner = (JSONObject) map.get(key);
             if (inner == null) {
                 inner = new JSONObject();
-                //noinspection unchecked
                 map.put(key,inner);
             }
             map = inner;
         }
-        //noinspection unchecked
-        map.put(pRow.get(pIndex[pIndex.length-1]),pRow);
+        Object key = pRow.get(pIndex[pIndex.length - 1]);
+        map.put(key == null ? null : key.toString(), pRow);
     }
 
 }

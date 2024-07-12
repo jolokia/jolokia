@@ -42,9 +42,13 @@ transparently. xref:features/proxy.adoc[More ...]
 == Fast
 
 image:images/features/fast.png["Fast",role="right feature",link=features/fast.html]
-Jolokia uses the super fast JSON serialization library
+Jolokia before version 2.1.0 uses the super fast JSON serialization library
 https://code.google.com/archive/p/json-simple/[json-simple,role=externalLink,window=_blank]
-for parsing requests and creating responses. Although
+for parsing requests and creating responses. +
+With version 2.1.0 we provide our own JSON library
+that uses a lexer genreated by https://www.jflex.de/[JFlex,role=externalLink,window=_blank].
+
+Although
 the binary protocols (JRMP or IIOP) used by the standard
 JSR-160 connectors are naturally much more compact than a
 textual representation like JSON and although they have

@@ -7,9 +7,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import org.jolokia.server.core.service.api.AgentDetails;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.jolokia.json.JSONObject;
+import org.jolokia.json.parser.JSONParser;
+import org.jolokia.json.parser.ParseException;
 
 /**
  * @author roland
@@ -41,7 +41,7 @@ public class DiscoveryIncomingMessage extends AbstractDiscoveryMessage {
     private void initType(JSONObject pData) throws IOException {
         String typeS = (String) pData.remove(MESSAGE_TYPE);
         if (typeS == null) {
-            throw new IOException("No message type given in discovery message " + pData);
+            throw new IOException("No message type given in discovery message " + pData.toJSONString());
         }
         try {
             MessageType type = MessageType.valueOf(typeS.toUpperCase());
@@ -67,10 +67,9 @@ public class DiscoveryIncomingMessage extends AbstractDiscoveryMessage {
 
     private Map<AgentDetails.AgentDetailProperty,Object> extractDetails(JSONObject pData) {
         Map<AgentDetails.AgentDetailProperty, Object> data = new HashMap<>();
-        //noinspection unchecked
-        for (Map.Entry<?, ?> entry : (Set<Map.Entry<?, ?>>) pData.entrySet()) {
+        for (Map.Entry<String, Object> entry : pData.entrySet()) {
             try {
-                data.put(AgentDetails.AgentDetailProperty.fromKey(entry.getKey().toString()), entry.getValue());
+                data.put(AgentDetails.AgentDetailProperty.fromKey(entry.getKey()), entry.getValue());
             } catch (IllegalArgumentException exp) {
                 // We simply ignore key which are unknown
             }

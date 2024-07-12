@@ -30,9 +30,9 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
-import org.json.simple.*;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.jolokia.json.*;
+import org.jolokia.json.parser.JSONParser;
+import org.jolokia.json.parser.ParseException;
 
 /**
  * Class doing the hard work of conversion between HTTP request/responses and
@@ -133,12 +133,11 @@ public class J4pRequestHandler {
      */
     public <T extends J4pRequest> HttpUriRequest getHttpRequest(List<T> pRequests,Map<J4pQueryParameter,String> pProcessingOptions)
             throws UnsupportedEncodingException, URISyntaxException {
-        JSONArray bulkRequest = new JSONArray();
+        JSONArray bulkRequest = new JSONArray(pRequests.size());
         String queryParams = prepareQueryParameters(pProcessingOptions);
         HttpPost postReq = new HttpPost(createRequestURI(j4pServerUrl.getPath(),queryParams));
         for (T request : pRequests) {
             JSONObject requestContent = getJsonRequestContent(request);
-            //noinspection unchecked
             bulkRequest.add(requestContent);
         }
         postReq.setEntity(new StringEntity(bulkRequest.toJSONString(),"utf-8"));
@@ -154,15 +153,15 @@ public class J4pRequestHandler {
      * @return JSON content of the answer
      */
     @SuppressWarnings("PMD.PreserveStackTrace")
-    public JSONAware extractJsonResponse(HttpResponse pHttpResponse) throws IOException, ParseException {
+    public JSONStructure extractJsonResponse(HttpResponse pHttpResponse) throws IOException, ParseException {
         HttpEntity entity = pHttpResponse.getEntity();
         try {
             JSONParser parser = new JSONParser();
             Header contentEncoding = entity.getContentEncoding();
             if (contentEncoding != null) {
-                return (JSONAware) parser.parse(new InputStreamReader(entity.getContent(), Charset.forName(contentEncoding.getValue())));
+                return (JSONStructure) parser.parse(new InputStreamReader(entity.getContent(), Charset.forName(contentEncoding.getValue())));
             } else {
-                return (JSONAware) parser.parse(new InputStreamReader(entity.getContent()));
+                return (JSONStructure) parser.parse(new InputStreamReader(entity.getContent()));
             }
         } finally {
             if (entity != null) {
@@ -184,7 +183,6 @@ public class J4pRequestHandler {
     private JSONObject getJsonRequestContent(J4pRequest pRequest) {
         JSONObject requestContent = pRequest.toJson();
         if (defaultTargetConfig != null && pRequest.getTargetConfig() == null) {
-            //noinspection unchecked
             requestContent.put("target", defaultTargetConfig.toJson());
         }
         return requestContent;

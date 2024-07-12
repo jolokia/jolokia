@@ -31,8 +31,8 @@ import org.jolokia.service.serializer.JolokiaSerializer;
 import org.jolokia.server.core.request.JolokiaRequestBuilder;
 import org.jolokia.server.core.request.JolokiaWriteRequest;
 import org.jolokia.server.core.util.TestJolokiaContext;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
+import org.jolokia.json.JSONObject;
+import org.jolokia.json.parser.JSONParser;
 import org.testng.annotations.*;
 
 import static org.jolokia.server.core.util.RequestType.WRITE;
@@ -102,7 +102,7 @@ public class WriteHandlerTest {
         req = new JolokiaRequestBuilder(WRITE,oName).attribute("Map").value(null).build();
         @SuppressWarnings("unchecked")
         Map<String, ?> ret = (Map<String, ?>) handler.doHandleSingleServerRequest(getMBeanServer(), req);
-        assertTrue(ret instanceof Map);
+        assertNotNull(ret);
         assertEquals(ret.get("answer"), 42);
 
     }
@@ -138,9 +138,8 @@ public class WriteHandlerTest {
         String json = "{\"type\":\"write\",\"mbean\":\"jolokia:test=write\",\"attribute\":\"Bytes\"," +
                 "\"value\":[42,-42]}";
         JSONParser parser = new JSONParser();
-        JSONObject data = (JSONObject) parser.parse(json);
-        @SuppressWarnings("unchecked")
-        JolokiaWriteRequest req = (JolokiaWriteRequest) JolokiaRequestFactory.createPostRequest(data, new ProcessingParameters(Collections.emptyMap()));
+        JSONObject data = parser.parse(json, JSONObject.class);
+        JolokiaWriteRequest req = JolokiaRequestFactory.createPostRequest(data, new ProcessingParameters(Collections.emptyMap()));
         handler.doHandleSingleServerRequest(getMBeanServer(), req);
     }
 
@@ -149,9 +148,8 @@ public class WriteHandlerTest {
         String json = "{\"type\":\"write\",\"mbean\":\"jolokia:test=write\",\"attribute\":\"PrimitiveBytes\"," +
                 "\"value\":[42,-42]}";
         JSONParser parser = new JSONParser();
-        JSONObject data = (JSONObject) parser.parse(json);
-        @SuppressWarnings("unchecked")
-        JolokiaWriteRequest req = (JolokiaWriteRequest) JolokiaRequestFactory.createPostRequest(data, new ProcessingParameters(Collections.emptyMap()));
+        JSONObject data = parser.parse(json, JSONObject.class);
+        JolokiaWriteRequest req = JolokiaRequestFactory.createPostRequest(data, new ProcessingParameters(Collections.emptyMap()));
         handler.doHandleSingleServerRequest(getMBeanServer(), req);
     }
 }

@@ -16,7 +16,7 @@ package org.jolokia.client.request;
  * limitations under the License.
  */
 
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /**
  * Configuration for a JSR-160 proxy request for specifying the target server.
@@ -64,12 +64,9 @@ public class J4pTargetConfig {
      */
     public JSONObject toJson() {
         JSONObject ret = new JSONObject();
-        //noinspection unchecked
         ret.put("url",url);
         if (user != null) {
-            //noinspection unchecked
             ret.put("user",user);
-            //noinspection unchecked
             ret.put("password",password);
         }
         return ret;

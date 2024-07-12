@@ -9,7 +9,7 @@ import org.jolokia.server.core.request.notification.*;
 import org.jolokia.server.core.service.notification.NotificationBackendManager;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 import org.jolokia.server.core.service.api.JolokiaContext;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /**
  * Dispatcher for notification commands. Commands are dispatcher  to
@@ -82,7 +82,6 @@ public class NotificationDispatcher {
      *
      * @return client id with backend configs.
      */
-    @SuppressWarnings("unchecked")
     private JSONObject register()
     {
         String id = listenerDelegate.register();

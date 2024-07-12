@@ -46,6 +46,11 @@
 
     <dependency>
       <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-json</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jolokia</groupId>
       <artifactId>jolokia-server-core</artifactId>
     </dependency>
     <dependency>
@@ -86,13 +91,6 @@
     <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-service-notif-sse</artifactId>
-    </dependency>
-
-    <!-- JSON -->
-
-    <dependency>
-      <groupId>com.googlecode.json-simple</groupId>
-      <artifactId>json-simple</artifactId>
     </dependency>
 
     <!-- JakartaEE dependencies -->
@@ -153,19 +151,9 @@
               <createDependencyReducedPom>false</createDependencyReducedPom>
               <shadedClassifierName>javaagent</shadedClassifierName>
               <shadedArtifactAttached>true</shadedArtifactAttached>
-              <relocations>
-                <relocation>
-                  <shadedPattern>org.jolokia.shaded.</shadedPattern>
-                  <includes>
-                    <include>org.json.simple.**</include>
-                  </includes>
-                  <excludes>
-                    <exclude>org.jolokia.shaded.**</exclude>
-                  </excludes>
-                </relocation>
-              </relocations>
               <artifactSet>
                 <includes>
+                  <include>org.jolokia:jolokia-json</include>
                   <include>org.jolokia:jolokia-server-core</include>
                   <include>org.jolokia:jolokia-server-detector</include>
                   <include>org.jolokia:jolokia-service-serializer</include>
@@ -175,12 +163,11 @@
                   <include>org.jolokia:jolokia-service-jsr160</include>
                   <include>org.jolokia:jolokia-service-notif-pull</include>
                   <include>org.jolokia:jolokia-service-notif-sse</include>
-                  <include>com.googlecode.json-simple:json-simple</include>
                 </includes>
               </artifactSet>
               <filters>
                 <filter>
-                  <artifact>com.googlecode.json-simple:json-simple</artifact>
+                  <artifact>org.jolokia:jolokia-json</artifact>
                   <excludes>
                     <exclude>META-INF/*.MF</exclude>
                   </excludes>

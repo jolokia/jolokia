@@ -25,8 +25,8 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ConnectTimeoutException;
 import org.jolokia.client.exception.*;
 import org.jolokia.client.request.*;
-import org.json.simple.*;
-import org.json.simple.parser.ParseException;
+import org.jolokia.json.*;
+import org.jolokia.json.parser.ParseException;
 
 
 /**
@@ -188,7 +188,7 @@ public class J4pClient extends J4pClientBuilderFactory {
 
         try {
             HttpResponse response = httpClient.execute(requestHandler.getHttpRequest(pRequest,pMethod,pProcessingOptions));
-            JSONAware jsonResponse = extractJsonResponse(pRequest,response);
+            JSONStructure jsonResponse = extractJsonResponse(pRequest,response);
             if (! (jsonResponse instanceof JSONObject)) {
                 throw new J4pException("Invalid JSON answer for a single request (expected a map but got a " + jsonResponse.getClass() + ")");
             }
@@ -248,7 +248,7 @@ public class J4pClient extends J4pClientBuilderFactory {
             throws J4pException {
         try {
             HttpResponse response = httpClient.execute(requestHandler.getHttpRequest(pRequests,pProcessingOptions));
-            JSONAware jsonResponse = extractJsonResponse(null, response);
+            JSONStructure jsonResponse = extractJsonResponse(null, response);
 
             verifyBulkJsonResponse(jsonResponse);
 
@@ -261,7 +261,7 @@ public class J4pClient extends J4pClientBuilderFactory {
     // =====================================================================================================
 
     @SuppressWarnings("PMD.PreserveStackTrace")
-    private <REQ extends J4pRequest> JSONAware extractJsonResponse(REQ pRequest, HttpResponse pResponse) throws J4pException {
+    private <REQ extends J4pRequest> JSONStructure extractJsonResponse(REQ pRequest, HttpResponse pResponse) throws J4pException {
         try {
             return requestHandler.extractJsonResponse(pResponse);
         } catch (IOException e) {
@@ -278,7 +278,7 @@ public class J4pClient extends J4pClientBuilderFactory {
     }
 
     // Extract J4pResponses from a returned bulk JSON answer
-    private <R extends J4pResponse<T>, T extends J4pRequest> List<R> extractResponses(JSONAware pJsonResponse,
+    private <R extends J4pResponse<T>, T extends J4pRequest> List<R> extractResponses(JSONStructure pJsonResponse,
                                                                                       List<T> pRequests,
                                                                                       J4pResponseExtractor pResponseExtractor) throws J4pException {
         JSONArray responseArray = (JSONArray) pJsonResponse;
@@ -337,12 +337,12 @@ public class J4pClient extends J4pClientBuilderFactory {
 
 
     // Verify the returned JSON answer.
-    private void verifyBulkJsonResponse(JSONAware pJsonResponse) throws J4pException {
+    private void verifyBulkJsonResponse(JSONStructure pJsonResponse) throws J4pException {
         if (!(pJsonResponse instanceof JSONArray)) {
             if (pJsonResponse instanceof JSONObject) {
                 JSONObject errorObject = (JSONObject) pJsonResponse;
 
-                if (!errorObject.containsKey("status") || (Long) errorObject.get("status") != 200) {
+                if (!errorObject.containsKey("status") || (Integer) errorObject.get("status") != 200) {
                     throw new J4pRemoteException(null, errorObject);
                 }
             }

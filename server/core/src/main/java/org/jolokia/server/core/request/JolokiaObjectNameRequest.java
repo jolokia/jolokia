@@ -25,7 +25,7 @@ import javax.management.ObjectName;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.util.ProviderUtil;
 import org.jolokia.server.core.util.RequestType;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /**
  * Abstract Jolokia request which takes an object name.
@@ -75,7 +75,6 @@ public abstract class JolokiaObjectNameRequest extends JolokiaRequest {
 
 
     /** {@inheritDoc} */
-    @SuppressWarnings("unchecked")
     @Override
     public JSONObject toJSON() {
         JSONObject ret = super.toJSON();

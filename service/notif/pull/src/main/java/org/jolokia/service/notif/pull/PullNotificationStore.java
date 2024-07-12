@@ -58,11 +58,7 @@ public class PullNotificationStore implements PullNotificationStoreMBean {
      */
     void add(NotificationSubscription pRegistration, Notification pNotification) {
         String key = pRegistration.getClient().getId();
-        ClientStore clientStore = store.get(key);
-        if (clientStore == null) {
-            clientStore = new ClientStore(maxEntries);
-            store.put(key,clientStore);
-        }
+        ClientStore clientStore = store.computeIfAbsent(key, k -> new ClientStore(maxEntries));
         clientStore.add(pRegistration,pNotification);
     }
 

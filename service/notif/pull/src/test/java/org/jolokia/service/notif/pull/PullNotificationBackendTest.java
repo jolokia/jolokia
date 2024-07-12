@@ -25,7 +25,7 @@ import javax.management.*;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.service.notification.*;
 import org.jolokia.server.core.util.TestJolokiaContext;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 import org.testng.Assert;
 import org.testng.annotations.*;
 

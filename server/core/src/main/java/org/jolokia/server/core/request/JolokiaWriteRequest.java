@@ -22,7 +22,7 @@ import javax.management.MalformedObjectNameException;
 
 import org.jolokia.server.core.util.EscapeUtil;
 import org.jolokia.server.core.util.RequestType;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /**
  * A JMX request for a <code>write</code> operation
@@ -110,7 +110,6 @@ public class JolokiaWriteRequest extends JolokiaObjectNameRequest {
         return ret.toString();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public JSONObject toJSON() {
         JSONObject ret = super.toJSON();

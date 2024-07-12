@@ -56,7 +56,7 @@ import org.jolokia.client.request.J4pVersionResponse;
 import org.jolokia.client.request.J4pWriteRequest;
 import org.jolokia.server.core.util.ClassUtil;
 import org.jolokia.service.serializer.JolokiaSerializer;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /**
  * I emulate a subset of the functionality of a native MBeanServerConnector but over a Jolokia

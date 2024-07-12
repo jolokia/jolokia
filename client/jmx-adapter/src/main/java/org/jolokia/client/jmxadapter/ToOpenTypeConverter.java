@@ -50,8 +50,8 @@ import javax.management.openmbean.TabularType;
 
 import org.jolokia.server.core.util.ClassUtil;
 import org.jolokia.service.serializer.JolokiaSerializer;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONArray;
+import org.jolokia.json.JSONObject;
 
 /**
  * Attempt to produce openmbean results to emulate a native JMX connection by reverse engineering
@@ -150,7 +150,6 @@ public class ToOpenTypeConverter {
             }
             return byteArray;
         }
-        //noinspection unchecked
         return rawValue.toArray(
             (Object[]) Array
                 .newInstance(ClassUtil.classForName(type.getElementOpenType().getClassName()),
@@ -213,9 +212,9 @@ public class ToOpenTypeConverter {
             if ("javax.management.openmbean.TabularData".equals(typeFromMBeanInfo)) {
                 //keys are typically String, if the structure is emtpy wrong type will problably not cause too much problem
                 OpenType<?> keyType = STRING, valueType = STRING;
-                @SuppressWarnings("unchecked") final Iterator<Map.Entry<?, ?>> iterator = structure.entrySet().iterator();
+                final Iterator<Map.Entry<String, Object>> iterator = structure.entrySet().iterator();
                 if (iterator.hasNext()) {
-                    final Map.Entry<?, ?> sample = iterator.next();
+                    final Map.Entry<String, Object> sample = iterator.next();
                     keyType = recursivelyBuildOpenType(name + ".key", sample.getKey(), null);
                     valueType = recursivelyBuildOpenType(name + ".value", sample.getValue(), null);
                 }
@@ -235,11 +234,9 @@ public class ToOpenTypeConverter {
             final String[] keys = new String[structure.size()];
             final OpenType<?>[] types = new OpenType[structure.size()];
             int index = 0;
-            for (Object element : structure.entrySet()) {
-                @SuppressWarnings("unchecked")
-                Map.Entry<String, Object> entry = (Entry<String, Object>) element;
-                keys[index] = entry.getKey();
-                types[index++] = recursivelyBuildOpenType(name + "." + entry.getKey(), entry.getValue(),
+            for (Entry<String, Object> element : structure.entrySet()) {
+                keys[index] = element.getKey();
+                types[index++] = recursivelyBuildOpenType(name + "." + element.getKey(), element.getValue(),
                     typeFromMBeanInfo);
             }
             if (types.length == 0) {

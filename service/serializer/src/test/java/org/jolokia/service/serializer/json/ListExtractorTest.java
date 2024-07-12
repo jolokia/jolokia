@@ -7,7 +7,7 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import org.jolokia.server.core.service.serializer.ValueFaultHandler;
-import org.json.simple.JSONArray;
+import org.jolokia.json.JSONArray;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;

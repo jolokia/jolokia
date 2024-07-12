@@ -5,7 +5,7 @@ import java.net.DatagramPacket;
 import java.util.Arrays;
 
 import org.jolokia.server.core.service.api.AgentDetails;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -55,7 +55,6 @@ public class DiscoveryMessageTest {
     @Test(expectedExceptions = IOException.class,expectedExceptionsMessageRegExp = ".*not.*parse.*")
     public void incomingWithLargerBuf() throws IOException {
         JSONObject data = new JSONObject();
-        //noinspection unchecked
         data.put("type", AbstractDiscoveryMessage.MessageType.QUERY.toString());
         String json = data.toJSONString();
         byte[] largeBuf = Arrays.copyOf(json.getBytes(),json.length() + 512);
@@ -66,8 +65,7 @@ public class DiscoveryMessageTest {
     public DatagramPacket createDatagramPacket(Object ... vals) {
         JSONObject data = new JSONObject();
         for (int i = 0; i < vals.length; i+=2) {
-            //noinspection unchecked
-            data.put(vals[i],vals[i+1]);
+            data.put(vals[i] == null ? null : vals[i].toString(), vals[i+1]);
         }
         String json = data.toJSONString();
         return new DatagramPacket(json.getBytes(),json.getBytes().length);

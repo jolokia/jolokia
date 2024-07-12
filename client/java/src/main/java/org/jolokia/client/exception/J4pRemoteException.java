@@ -17,7 +17,7 @@ package org.jolokia.client.exception;
  */
 
 import org.jolokia.client.request.J4pRequest;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /**
  * Exception occurred on the remote side (i.e the server).
@@ -65,8 +65,8 @@ public class J4pRemoteException extends J4pException {
     public J4pRemoteException(J4pRequest pJ4pRequest, JSONObject pJsonRespObject) {
         super(generateErrorMessage(pJ4pRequest, pJsonRespObject));
 	Object statusO = pJsonRespObject.get("status");
-        Long statusL = statusO instanceof Long ? (Long) statusO : null;
-        status = statusL != null ? statusL.intValue() : 500;
+        Integer statusL = statusO instanceof Integer ? (Integer) statusO : null;
+        status = statusL != null ? statusL : 500;
         request = pJ4pRequest;
 	response = pJsonRespObject;
         errorType = (String) pJsonRespObject.get("error_type");

@@ -21,8 +21,8 @@ import java.util.*;
 import javax.management.MalformedObjectNameException;
 
 import org.jolokia.server.core.request.*;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONArray;
+import org.jolokia.json.JSONObject;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -57,7 +57,6 @@ public class HistoryStoreTest {
         } catch (IllegalArgumentException ignored) {}
     }
 
-    @Test(groups = "java6")
     public void invalidHistoryKeyWithPattern() throws MalformedObjectNameException {
         JolokiaReadRequest req = new JolokiaRequestBuilder(READ,"test:type=*")
                 .attribute("bla")
@@ -234,7 +233,6 @@ public class HistoryStoreTest {
         assertTrue(store.getSize() > 100);
     }
 
-    @Test(groups = "java6")
     public void patternAttributeRead() throws Exception {
         JolokiaReadRequest req =
                 new JolokiaRequestBuilder(READ,"test:type=*")
@@ -272,7 +270,6 @@ public class HistoryStoreTest {
     private synchronized Object updateNTimes(JolokiaRequest pReq, int pNr,long pSleep, Object ... pValue) {
         JSONObject res = new JSONObject();
         if (pValue != null && pValue.length > 0) {
-            //noinspection unchecked
             res.put("value",pValue[0]);
         }
         for (int i=0;i<pNr;i++) {

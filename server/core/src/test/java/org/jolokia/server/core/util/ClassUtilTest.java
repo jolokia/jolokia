@@ -134,7 +134,7 @@ public class ClassUtilTest {
     }
     @Test
     public void testApplyNoArgs() {
-        String fs = System.getProperty("path.separator");
+        String fs = File.pathSeparator;
         String pathname = fs + "tmp";
         File testFile = new File(pathname);
         String path = (String) ClassUtil.applyMethod(testFile,"getPath");

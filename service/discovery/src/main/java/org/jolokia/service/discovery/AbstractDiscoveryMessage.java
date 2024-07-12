@@ -4,7 +4,7 @@ package org.jolokia.service.discovery;
 import java.nio.charset.StandardCharsets;
 
 import org.jolokia.server.core.service.api.AgentDetails;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /**
  * A Jolokia discover message which can be either a request
@@ -45,10 +45,8 @@ abstract class AbstractDiscoveryMessage {
 
     public byte[] getData() {
         JSONObject respond = new JSONObject();
-        //noinspection unchecked
         respond.put(MESSAGE_TYPE, type.toString().toLowerCase());
         if (agentDetails != null) {
-            //noinspection unchecked
             respond.putAll(agentDetails.toJSONObject());
         }
         byte[] ret = getBytes(respond.toJSONString());

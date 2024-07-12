@@ -4,6 +4,8 @@ import java.io.OutputStream;
 import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
@@ -14,8 +16,7 @@ import org.jolokia.service.serializer.object.StringToObjectConverter;
 import org.jolokia.server.core.service.serializer.ValueFaultHandler;
 import org.jolokia.server.core.util.EscapeUtil;
 
-import org.json.simple.JSONAware;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -149,7 +150,7 @@ public class BeanExtractor implements Extractor {
     private Object exctractJsonifiedValue(ObjectToJsonConverter pConverter, Object pValue, Deque<String> pPathParts)
             throws AttributeNotFoundException {
         Class<?> pClazz = pValue.getClass();
-        if (pClazz.isPrimitive() || FINAL_CLASSES.contains(pClazz) || pValue instanceof JSONAware) {
+        if (pClazz.isPrimitive() || FINAL_CLASSES.contains(pClazz) || pClazz == BigDecimal.class || pClazz == BigInteger.class) {
             // No further diving, use these directly
             if (pClazz.equals(Long.class) && "string".equals(pConverter.getSerializeLong())) {
                 // Long value can exceed max safe integer in JS, so convert it to
@@ -171,7 +172,6 @@ public class BeanExtractor implements Extractor {
     }
 
     private Object extractBeanValues(ObjectToJsonConverter pConverter, Object pValue, Deque<String> pPathParts, List<String> pAttributes) throws AttributeNotFoundException {
-        @SuppressWarnings("unchecked")
         Map<String, Object> ret = new JSONObject();
         for (String attribute : pAttributes) {
             Deque<String> path = new LinkedList<>(pPathParts);

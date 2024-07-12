@@ -23,8 +23,7 @@ import org.jolokia.server.core.util.ClassUtil;
 import org.jolokia.server.core.util.IoUtil;
 import org.jolokia.server.core.util.MimeTypeUtil;
 import org.jolokia.server.core.util.NetworkUtil;
-import org.json.simple.JSONAware;
-import org.json.simple.JSONStreamAware;
+import org.jolokia.json.JSONStructure;
 
 
 /*
@@ -85,9 +84,6 @@ public class AgentServlet extends HttpServlet {
     // whether to allow reverse DNS lookup for checking the remote host
     private boolean allowDnsReverseLookup;
 
-    // whether to allow streaming mode for response
-    private boolean streamingEnabled;
-
     /**
      * No argument constructor, used e.g. by a servlet
      * descriptor when creating the servlet out of web.xml
@@ -142,7 +138,6 @@ public class AgentServlet extends HttpServlet {
         initAgentUrl();
 
         configMimeType = config.getConfig(ConfigKey.MIME_TYPE);
-        streamingEnabled = Boolean.parseBoolean(config.getConfig(ConfigKey.STREAMING));
     }
 
     @Override
@@ -318,7 +313,7 @@ public class AgentServlet extends HttpServlet {
 
     @SuppressWarnings({ "PMD.AvoidCatchingThrowable", "PMD.AvoidInstanceofChecksInCatchClause" })
     private void handle(ServletRequestHandler pReqHandler, HttpServletRequest pReq, HttpServletResponse pResp) throws IOException {
-        JSONAware json = null;
+        JSONStructure json = null;
 
         try {
             // Check access policy
@@ -370,12 +365,12 @@ public class AgentServlet extends HttpServlet {
     }
 
 
-    private JSONAware handleSecurely(final ServletRequestHandler pReqHandler, final HttpServletRequest pReq, final HttpServletResponse pResp)
+    private JSONStructure handleSecurely(final ServletRequestHandler pReqHandler, final HttpServletRequest pReq, final HttpServletResponse pResp)
             throws IOException, PrivilegedActionException, EmptyResponseException {
         Subject subject = (Subject) pReq.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE);
         if (subject != null) {
             try {
-                return Subject.doAs(subject, (PrivilegedExceptionAction<JSONAware>) () -> pReqHandler.handleRequest(pReq, pResp));
+                return Subject.doAs(subject, (PrivilegedExceptionAction<JSONStructure>) () -> pReqHandler.handleRequest(pReq, pResp));
             } catch (PrivilegedActionException exp) {
                 // Unwrap an empty response exception
                 Throwable innerExp = exp.getCause();
@@ -479,14 +474,6 @@ public class AgentServlet extends HttpServlet {
         }
     }
 
-    private boolean isStreamingEnabled(HttpServletRequest pReq) {
-        String streamingFromReq = pReq.getParameter(ConfigKey.STREAMING.getKeyValue());
-        if (streamingFromReq != null) {
-            return Boolean.parseBoolean(streamingFromReq);
-        }
-        return streamingEnabled;
-    }
-
     private interface ServletRequestHandler {
         /**
          * Handle a request and return the answer as a JSON structure
@@ -495,7 +482,7 @@ public class AgentServlet extends HttpServlet {
          * @return the JSON representation for the answer
          * @throws IOException if handling of an input or output stream failed
          */
-        JSONAware handleRequest(HttpServletRequest pReq, HttpServletResponse pResp)
+        JSONStructure handleRequest(HttpServletRequest pReq, HttpServletResponse pResp)
                 throws IOException, EmptyResponseException;
     }
 
@@ -503,7 +490,7 @@ public class AgentServlet extends HttpServlet {
     private ServletRequestHandler newPostHttpRequestHandler() {
         return new ServletRequestHandler() {
             /** {@inheritDoc} */
-             public JSONAware handleRequest(HttpServletRequest pReq, HttpServletResponse pResp)
+             public JSONStructure handleRequest(HttpServletRequest pReq, HttpServletResponse pResp)
                      throws IOException, EmptyResponseException {
                  String encoding = pReq.getCharacterEncoding();
                  InputStream is = pReq.getInputStream();
@@ -516,7 +503,7 @@ public class AgentServlet extends HttpServlet {
     private ServletRequestHandler newGetHttpRequestHandler() {
         return new ServletRequestHandler() {
             /** {@inheritDoc} */
-            public JSONAware handleRequest(HttpServletRequest pReq, HttpServletResponse pResp) throws EmptyResponseException {
+            public JSONStructure handleRequest(HttpServletRequest pReq, HttpServletResponse pResp) throws EmptyResponseException {
                 return requestHandler.handleGetRequest(pReq.getRequestURI(),pReq.getPathInfo(), getParameterMap(pReq));
             }
         };
@@ -543,7 +530,7 @@ public class AgentServlet extends HttpServlet {
         }
     }
 
-    private void sendResponse(HttpServletResponse pResp, HttpServletRequest pReq, JSONAware pJson) throws IOException {
+    private void sendResponse(HttpServletResponse pResp, HttpServletRequest pReq, JSONStructure pJson) throws IOException {
         String callback = pReq.getParameter(ConfigKey.CALLBACK.getKeyValue());
 
         setContentType(pResp,
@@ -555,13 +542,7 @@ public class AgentServlet extends HttpServlet {
         if (pJson == null) {
             pResp.setContentLength(-1);
         } else {
-            if (isStreamingEnabled(pReq)) {
-                sendStreamingResponse(pResp, callback, (JSONStreamAware) pJson);
-            } else {
-                // Fallback, send as one object
-                // TODO: Remove for 2.0 where should support only streaming
-                sendAllJSON(pResp, callback, pJson);
-            }
+            sendStreamingResponse(pResp, callback, pJson);
         }
     }
 
@@ -571,27 +552,9 @@ public class AgentServlet extends HttpServlet {
             throw new IllegalArgumentException("Invalid callback name given, which must be a valid javascript function name");
         }
     }
-    private void sendStreamingResponse(HttpServletResponse pResp, String pCallback, JSONStreamAware pJson) throws IOException {
+    private void sendStreamingResponse(HttpServletResponse pResp, String pCallback, JSONStructure pJson) throws IOException {
         Writer writer = new OutputStreamWriter(pResp.getOutputStream(), StandardCharsets.UTF_8);
         IoUtil.streamResponseAndClose(writer, pJson, pCallback);
-    }
-
-    private void sendAllJSON(HttpServletResponse pResp, String callback, JSONAware pJson) throws IOException {
-        OutputStream out = null;
-        try {
-            String json = pJson.toJSONString();
-            String content = callback == null ? json : callback + "(" + json + ");";
-            byte[] response = content.getBytes(StandardCharsets.UTF_8);
-            pResp.setContentLength(response.length);
-            out = pResp.getOutputStream();
-            out.write(response);
-        } finally {
-            if (out != null) {
-                // Always close in order to finish the request.
-                // Otherwise, the thread blocks.
-                out.close();
-            }
-        }
     }
 
     private void setNoCacheHeaders(HttpServletResponse pResp) {

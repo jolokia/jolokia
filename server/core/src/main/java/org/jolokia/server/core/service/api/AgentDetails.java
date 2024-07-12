@@ -6,7 +6,7 @@ import org.jolokia.server.core.Version;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.config.Configuration;
 import org.jolokia.server.core.util.NetworkUtil;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 import static org.jolokia.server.core.service.api.AgentDetails.AgentDetailProperty.*;
 
@@ -168,7 +168,6 @@ public class AgentDetails {
 
     // =======================================================================================
 
-    @SuppressWarnings("unchecked")
     private void add(JSONObject pResp, AgentDetailProperty pKey, Object pValue) {
         if (pValue != null) {
             pResp.put(pKey.toString().toLowerCase(),pValue);

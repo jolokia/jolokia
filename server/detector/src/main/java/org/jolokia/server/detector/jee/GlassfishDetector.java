@@ -32,7 +32,7 @@ import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.request.RequestInterceptor;
 import org.jolokia.server.core.util.jmx.JmxUtil;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /**
  * Detector for Glassfish servers

@@ -27,7 +27,7 @@ import org.jolokia.server.core.service.serializer.ValueFaultHandler;
 import org.jolokia.service.serializer.object.StringToObjectConverter;
 import org.jolokia.service.serializer.util.CompositeTypeAndJson;
 import org.jolokia.service.serializer.util.TabularTypeAndJson;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 import org.testng.annotations.*;
 
 import static javax.management.openmbean.SimpleType.*;
@@ -257,19 +257,19 @@ public class TabularDataExtractorTest {
         // Here: Only ObjetNames should be picked
         JSONObject result = (JSONObject) extract(true, data, null, null,"domain");
         assertEquals(result.size(),2); // 10 & 20
-        JSONObject inner = (JSONObject) result.get(10L);
+        JSONObject inner = (JSONObject) result.get("10");
         assertEquals(inner.size(),1);
         assertEquals(inner.get("oName"),"test");
-        inner = (JSONObject) result.get(20L);
+        inner = (JSONObject) result.get("20");
         assertEquals(inner.size(),1);
         assertEquals(inner.get("oName"),"java.lang");
 
         // Path: */oName --> 1. Level: 10,20 -- 2. Level: { oName : { 10 vals}}
         result = (JSONObject) extract(true, data, null, "oName");
         assertEquals(result.size(),2);
-        inner = (JSONObject) result.get(10L);
+        inner = (JSONObject) result.get("10");
         assertEquals(inner.get("domain"),"test");
-        inner = (JSONObject) result.get(20L);
+        inner = (JSONObject) result.get("20");
         assertEquals(inner.get("domain"),"java.lang");
     }
 

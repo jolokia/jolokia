@@ -21,7 +21,7 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /**
  * Tree of MBean meta data. This map is a container for one or more MBeanInfo meta data which can be obtained
@@ -316,16 +316,13 @@ public class MBeanInfoData {
             return 1;
         }
         JSONObject ret = new JSONObject();
-        @SuppressWarnings("unchecked")
-        Set<Map.Entry> entries = pValue.entrySet();
-        for (Map.Entry entry : entries) {
+        Set<Map.Entry<String, Object>> entries = pValue.entrySet();
+        for (Map.Entry<String, Object> entry : entries) {
+            String key = entry.getKey();
             Object value = entry.getValue();
-            Object key = entry.getKey();
             if (value instanceof JSONObject) {
-                //noinspection unchecked
                 ret.put(key, truncateJSONObject((JSONObject) value, pMaxDepth - 1));
             } else {
-                //noinspection unchecked
                 ret.put(key,value);
             }
         }

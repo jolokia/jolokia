@@ -19,7 +19,7 @@ package org.jolokia.client.request;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /**
  * Request for a MBean search

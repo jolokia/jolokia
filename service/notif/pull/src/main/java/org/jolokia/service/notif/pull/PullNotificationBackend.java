@@ -9,7 +9,7 @@ import org.jolokia.server.core.http.BackChannel;
 import org.jolokia.server.core.service.api.AbstractJolokiaService;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.notification.*;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /**
  * Pull based implementation for notifications
@@ -90,7 +90,6 @@ public class PullNotificationBackend extends AbstractJolokiaService<Notification
     }
 
     /** {@inheritDoc} */
-    @SuppressWarnings("unchecked")
     public Map<String, ?> getConfig() {
         JSONObject ret = new JSONObject();
         ret.put("store",objectName.toString());

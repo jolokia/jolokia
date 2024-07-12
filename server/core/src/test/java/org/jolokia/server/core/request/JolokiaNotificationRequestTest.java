@@ -22,7 +22,7 @@ import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.request.notification.*;
 import org.jolokia.server.core.util.HttpMethod;
 import org.jolokia.server.core.util.RequestType;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;

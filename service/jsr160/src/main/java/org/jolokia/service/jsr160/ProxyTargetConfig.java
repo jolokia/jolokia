@@ -19,7 +19,7 @@ package org.jolokia.service.jsr160;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /**
  * Configuration for proxy mode
@@ -83,7 +83,6 @@ public class ProxyTargetConfig {
      *
      * @return JSON object representing this proxy configuration
      */
-    @SuppressWarnings("unchecked")
     public JSONObject toJSON() {
         JSONObject ret = new JSONObject();
         ret.put("url", url);

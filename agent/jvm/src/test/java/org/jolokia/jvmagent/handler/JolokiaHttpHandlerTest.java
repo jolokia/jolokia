@@ -35,9 +35,9 @@ import org.jolokia.server.core.request.JolokiaRequestBuilder;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.serializer.Serializer;
 import org.jolokia.server.core.util.*;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.jolokia.json.JSONObject;
+import org.jolokia.json.parser.JSONParser;
+import org.jolokia.json.parser.ParseException;
 import org.testng.annotations.*;
 
 import static org.easymock.EasyMock.anyInt;
@@ -162,7 +162,7 @@ public class JolokiaHttpHandlerTest {
 
         assertEquals(header.getFirst("content-type"),"text/plain; charset=utf-8");
         String result = out.toString(StandardCharsets.UTF_8);
-        JSONObject resp = (JSONObject) new JSONParser().parse(result);
+        JSONObject resp = new JSONParser().parse(result, JSONObject.class);
         assertTrue(resp.containsKey("error"));
         assertEquals(resp.get("error_type"), IllegalArgumentException.class.getName());
         assertTrue(((String) resp.get("error")).contains("callback"));
@@ -214,7 +214,7 @@ public class JolokiaHttpHandlerTest {
         ByteArrayOutputStream out = prepareResponse(exchange, header);
         handler.handle(exchange);
 
-        JSONObject resp = (JSONObject) new JSONParser().parse(out.toString());
+        JSONObject resp = new JSONParser().parse(out.toString(), JSONObject.class);
         assertTrue(resp.containsKey("error"));
         assertEquals(resp.get("error_type"), IllegalArgumentException.class.getName());
         assertTrue(((String) resp.get("error")).contains("PUT"));
@@ -275,7 +275,7 @@ public class JolokiaHttpHandlerTest {
         String result = out.toString(StandardCharsets.UTF_8);
 
         assertNull(header.getFirst("Content-Length"));
-        JSONObject resp = (JSONObject) new JSONParser().parse(result);
+        JSONObject resp = new JSONParser().parse(result, JSONObject.class);
         assertTrue(resp.containsKey("value"));
     }
 

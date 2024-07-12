@@ -21,7 +21,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.json.simple.*;
+import org.jolokia.json.*;
 
 /**
  * Request object abstracting a request to a j4p agent.
@@ -108,10 +108,8 @@ public abstract class J4pRequest {
     // Get a JSON representation of this request
     JSONObject toJson() {
         JSONObject ret = new JSONObject();
-        //noinspection unchecked
         ret.put("type", type.name());
         if (targetConfig != null) {
-            //noinspection unchecked
             ret.put("target", targetConfig.toJson());
         }
         return ret;
@@ -172,15 +170,15 @@ public abstract class J4pRequest {
      *      If the argument is <code>null</code> null is returned.
      *    </li>
      *    <li>
-     *      If the argument is of type {@see org.json.simple.JSONAware}, the it is used directly for inclusion
+     *      If the argument is of type {@link org.jolokia.json.JSONStructure}, the it is used directly for inclusion
      *      in the POST request.
      *    </li>
      *    <li>
      *      If the argument is an array, this array's content is put into
-     *      an {@see org.json.simple.JSONArray}, where each array member is serialized recursively.
+     *      an {@link org.jolokia.json.JSONArray}, where each array member is serialized recursively.
      *    </li>
      *    <li>
-     *      If the argument is a map, it is transformed into a {@see org.json.simple.JSONObject} with the keys taken
+     *      If the argument is a map, it is transformed into a {@link org.jolokia.json.JSONObject} with the keys taken
      *      directly from the map and the values recursively serialized to their JSON representation.
      *      So it is only save fto use or a simple map with string keys.
      *    </li>
@@ -202,12 +200,13 @@ public abstract class J4pRequest {
     protected Object serializeArgumentToJson(Object pArg) {
         if (pArg == null) {
             return null;
-        } else if (pArg instanceof JSONAware) {
+        } else if (pArg instanceof JSONStructure) {
             return pArg;
         } else if (pArg.getClass().isArray()) {
             return serializeArray(pArg);
         } else if (pArg instanceof Map) {
-            return serializeMap((Map<?, ?>) pArg);
+            //noinspection unchecked
+            return serializeMap((Map<String, Object>) pArg);
         } else if (pArg instanceof Collection) {
             return serializeCollection((Collection<?>) pArg);
         } else {
@@ -240,27 +239,25 @@ public abstract class J4pRequest {
     // =====================================================================================================
 
     private Object serializeCollection(Collection<?> pArg) {
-        JSONArray array = new JSONArray();
+        JSONArray array = new JSONArray(pArg.size());
         for (Object value : pArg) {
-            //noinspection unchecked
             array.add(serializeArgumentToJson(value));
         }
         return array;
     }
 
-    private Object serializeMap(Map<?, ?> pArg) {
+    private Object serializeMap(Map<String, Object> pArg) {
         JSONObject map = new JSONObject();
-        for (Map.Entry<?, ?> entry : pArg.entrySet()) {
-            //noinspection unchecked
+        for (Map.Entry<String, Object> entry : pArg.entrySet()) {
             map.put(entry.getKey(), serializeArgumentToJson(entry.getValue()));
         }
         return map;
     }
 
     private Object serializeArray(Object pArg) {
-        JSONArray innerArray = new JSONArray();
-        for (int i = 0; i < Array.getLength(pArg); i++ ) {
-            //noinspection unchecked
+        int length = Array.getLength(pArg);
+        JSONArray innerArray = new JSONArray(length);
+        for (int i = 0; i < length; i++ ) {
             innerArray.add(serializeArgumentToJson(Array.get(pArg, i)));
         }
         return innerArray;
@@ -283,8 +280,8 @@ public abstract class J4pRequest {
             return "[null]";
         } else if (pArg instanceof String && ((String) pArg).isEmpty()) {
             return "\"\"";
-        } else if (pArg instanceof JSONAware) {
-            return ((JSONAware) pArg).toJSONString();
+        } else if (pArg instanceof JSONStructure) {
+            return ((JSONStructure) pArg).toJSONString();
         } else {
             return pArg.toString();
         }

@@ -31,7 +31,7 @@ import org.jolokia.server.core.service.impl.StdoutLogHandler;
 import org.jolokia.server.core.service.request.RequestHandler;
 import org.jolokia.server.core.service.serializer.Serializer;
 import org.jolokia.server.core.util.*;
-import org.json.simple.*;
+import org.jolokia.json.*;
 import org.testng.annotations.Test;
 
 import static org.easymock.EasyMock.*;
@@ -276,7 +276,7 @@ public class HttpRequestHandlerTest {
         verifyDispatcher(1,pResponse);
     }
 
-    private void verifyDispatcher(int i, JSONAware response) {
+    private void verifyDispatcher(int i, JSONStructure response) {
         if (i == 1) {
             JSONObject val = (JSONObject) ((JSONObject) response).get("value");
             assertEquals(val.get("testString"),"hello");

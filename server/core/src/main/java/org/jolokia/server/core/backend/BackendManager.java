@@ -12,7 +12,7 @@ import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.request.RequestInterceptor;
 import org.jolokia.server.core.service.serializer.Serializer;
 import org.jolokia.server.core.service.serializer.SerializeOptions;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 import static org.jolokia.server.core.config.ConfigKey.*;
 
@@ -80,7 +80,6 @@ public class BackendManager {
      * @param pJmxReq request to perform
      * @return the already converted answer.
      */
-    @SuppressWarnings("unchecked")
     public JSONObject handleRequest(JolokiaRequest pJmxReq) throws JMException, IOException, EmptyResponseException {
         boolean debug = jolokiaCtx.isDebug();
 
@@ -105,7 +104,7 @@ public class BackendManager {
 
         if (debug) {
             jolokiaCtx.debug("Execution time: " + (System.currentTimeMillis() - time) + " ms");
-            jolokiaCtx.debug("Response: " + json);
+            jolokiaCtx.debug("Response: " + json.toJSONString());
         }
 
         return json;
@@ -160,7 +159,6 @@ public class BackendManager {
     }
 
     // call the an appropriate request dispatcher
-    @SuppressWarnings("unchecked")
     private JSONObject callRequestDispatcher(JolokiaRequest pJmxReq)
             throws JMException, IOException, NotChangedException, EmptyResponseException {
         Object result = requestDispatcher.dispatch(pJmxReq);

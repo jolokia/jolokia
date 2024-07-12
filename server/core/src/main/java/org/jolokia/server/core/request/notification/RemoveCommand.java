@@ -19,7 +19,7 @@ package org.jolokia.server.core.request.notification;
 import java.util.Deque;
 import java.util.Map;
 
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /**
  * Remove a listener by its handle
@@ -63,7 +63,6 @@ public class RemoveCommand extends ClientCommand {
         return handle;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public JSONObject toJSON() {
         JSONObject ret = super.toJSON();

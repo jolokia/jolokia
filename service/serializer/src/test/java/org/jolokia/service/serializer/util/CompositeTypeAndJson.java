@@ -2,7 +2,7 @@ package org.jolokia.service.serializer.util;
 
 import javax.management.openmbean.*;
 
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /*
  * Copyright 2009-2011 Roland Huss
@@ -51,7 +51,6 @@ public class CompositeTypeAndJson {
         json = new JSONObject();
         for (int i=0; i<keys.length;i++) {
             if (values[i] != null) {
-                //noinspection unchecked
                 json.put(keys[i],values[i]);
             }
         }
@@ -74,7 +73,6 @@ public class CompositeTypeAndJson {
     }
 
     public CompositeData getCompositeData() throws OpenDataException {
-        //noinspection unchecked
         return new CompositeDataSupport(type,json);
     }
 }

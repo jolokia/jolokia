@@ -3,7 +3,7 @@ package org.jolokia.server.core.util;
 import java.io.IOException;
 import java.io.Writer;
 
-import org.json.simple.JSONStreamAware;
+import org.jolokia.json.JSONStructure;
 
 /**
  * @author roland
@@ -26,7 +26,7 @@ public class IoUtil {
      * @param callback the name of the callback function if JSONP should be used or <code>null</code> if the answer should be streamed directly
      * @throws IOException if the streaming fails
      */
-    public static void streamResponseAndClose(Writer pWriter, JSONStreamAware pJson, String callback)
+    public static void streamResponseAndClose(Writer pWriter, JSONStructure pJson, String callback)
         throws IOException {
         try {
             if (callback == null) {

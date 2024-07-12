@@ -62,7 +62,7 @@ public class AgentDetailsTest {
         Map<String, String> env = System.getenv();
         Map.Entry<String, String> entry = env.entrySet().iterator().next();
         Configuration myConfig = new StaticConfiguration(ConfigKey.AGENT_ID, "${env:"+entry.getKey()+"}");
-        AgentDetails details = new AgentDetails(myConfig,null);
+        AgentDetails details = new AgentDetails(myConfig,new DefaultServerHandle("unknown", null, null));
         assertEquals(details.getAgentId(), entry.getValue());
     }
 }

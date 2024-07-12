@@ -21,7 +21,7 @@ import java.util.*;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /**
  * Response for a {@link org.jolokia.client.request.J4pType#READ} request. Since a single
@@ -60,8 +60,8 @@ public final class J4pReadResponse extends J4pResponse<J4pReadRequest> {
             // The result value contains the list of fetched object names
             JSONObject values = getValue();
             Set<ObjectName> ret = new HashSet<>();
-            for (Object name : values.keySet()) {
-                ret.add(new ObjectName((String) name));
+            for (String name : values.keySet()) {
+                ret.add(new ObjectName(name));
             }
             return ret;
         } else {
@@ -83,7 +83,6 @@ public final class J4pReadResponse extends J4pResponse<J4pReadRequest> {
         if (requestMBean.isPattern()) {
             // We need to got down one level in the returned values
             JSONObject attributes = getAttributesForObjectNameWithPatternRequest(pObjectName);
-            //noinspection unchecked
             return attributes.keySet();
         } else {
             if (pObjectName != null && !pObjectName.equals(requestMBean)) {
@@ -117,7 +116,6 @@ public final class J4pReadResponse extends J4pResponse<J4pReadRequest> {
             return request.getAttributes();
         } else {
             JSONObject attributes = getValue();
-            //noinspection unchecked
             return attributes.keySet();
         }
     }

@@ -16,11 +16,12 @@ package org.jolokia.service.serializer.object;
  *  limitations under the License.
  */
 
+import java.io.IOException;
 import javax.management.openmbean.*;
 
-import org.json.simple.JSONAware;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.jolokia.json.JSONStructure;
+import org.jolokia.json.parser.JSONParser;
+import org.jolokia.json.parser.ParseException;
 
 /**
  * Abstract base class for all open type converters
@@ -64,24 +65,24 @@ abstract class OpenTypeConverter<T extends OpenType> {
     abstract Object convertToObject(T pType, Object pFrom);
 
     /**
-     * Convert to JSON. The given object must be either a valid JSON string or of type {@link JSONAware}, in which
+     * Convert to JSON. The given object must be either a valid JSON string or of type {@link JSONStructure}, in which
      * case it is returned directly
      *
-     * @param pValue the value to parse (or to return directly if it is a {@link JSONAware}
+     * @param pValue the value to parse (or to return directly if it is a {@link JSONStructure}
      * @return the resulting value
      */
-    protected JSONAware toJSON(Object pValue) {
+    protected JSONStructure toJSON(Object pValue) {
         Class givenClass = pValue.getClass();
-        if (JSONAware.class.isAssignableFrom(givenClass)) {
-            return (JSONAware) pValue;
+        if (JSONStructure.class.isAssignableFrom(givenClass)) {
+            return (JSONStructure) pValue;
         } else {
             try {
-                return (JSONAware) new JSONParser().parse(pValue.toString());
-            } catch (ParseException e) {
+                return (JSONStructure) new JSONParser().parse(pValue.toString());
+            } catch (ParseException | IOException e) {
                 throw new IllegalArgumentException("Cannot parse JSON " + pValue + ": " + e,e);
             } catch (ClassCastException exp) {
                 throw new IllegalArgumentException("Given value " + pValue +
-                                                   " cannot be parsed to JSONAware object: " + exp,exp);
+                                                   " cannot be parsed to JSONStructure object: " + exp,exp);
             }
         }
     }

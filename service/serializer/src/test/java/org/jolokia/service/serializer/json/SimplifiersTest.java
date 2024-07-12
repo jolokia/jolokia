@@ -1,5 +1,6 @@
 package org.jolokia.service.serializer.json;
 
+import org.jolokia.json.JSONObject;
 import org.jolokia.server.core.service.serializer.SerializeOptions;
 import org.jolokia.server.core.service.serializer.ValueFaultHandler;
 import org.jolokia.service.serializer.json.simplifier.BigIntegerSimplifier;
@@ -52,7 +53,7 @@ public class SimplifiersTest {
     public void bigIntegerSimplifierJson() throws AttributeNotFoundException {
         BigInteger bigInt = new BigInteger("12345678901234567890");
         Object result = bigIntegerSimplifier.extractObject(converter, bigInt, new LinkedList<>(), true);
-        assertEquals(result.toString(), "{\"bigint\":\"12345678901234567890\"}");
+        assertEquals(((JSONObject) result).toJSONString(), "{\"bigint\":\"12345678901234567890\"}");
     }
 
     @Test
@@ -66,14 +67,14 @@ public class SimplifiersTest {
     public void fileSimplifier() throws AttributeNotFoundException {
         File file = new File("/etc/os-release");
         Object result = fileSimplifier.extractObject(converter, file, new LinkedList<>(), true);
-        assertTrue(result.toString().contains("{\"name\":\"os-release\""));
+        assertTrue(((JSONObject) result).toJSONString().contains("{\"name\":\"os-release\""));
     }
 
     @Test
     public void urlSimplifierJson() throws AttributeNotFoundException, MalformedURLException {
         URL url = new URL("https://www.jolokia.org");
         Object result = urlSimplifier.extractObject(converter, url, new LinkedList<>(), true);
-        assertEquals(result.toString(), "{\"url\":\"https:\\/\\/www.jolokia.org\"}");
+        assertEquals(((JSONObject) result).toJSONString(), "{\"url\":\"https://www.jolokia.org\"}");
     }
 
 

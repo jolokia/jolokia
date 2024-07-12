@@ -40,6 +40,11 @@
 
     <dependency>
       <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-json</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jolokia</groupId>
       <artifactId>jolokia-server-core</artifactId>
     </dependency>
     <dependency>
@@ -47,13 +52,6 @@
       <artifactId>jolokia-server-core</artifactId>
       <classifier>tests</classifier>
       <scope>test</scope>
-    </dependency>
-
-    <!-- JSON -->
-
-    <dependency>
-      <groupId>com.googlecode.json-simple</groupId>
-      <artifactId>json-simple</artifactId>
     </dependency>
 
     <!-- OSGi dependencies -->

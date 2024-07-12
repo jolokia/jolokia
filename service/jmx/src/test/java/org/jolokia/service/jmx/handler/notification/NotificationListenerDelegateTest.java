@@ -10,7 +10,7 @@ import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 import org.jolokia.server.core.util.jmx.SingleMBeanServerAccess;
 import org.jolokia.server.core.request.notification.AddCommand;
 import org.jolokia.test.util.CollectionTestUtil;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 

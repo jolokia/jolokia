@@ -19,8 +19,8 @@ package org.jolokia.service.jmx.handler.list;
 import javax.management.*;
 
 import org.jolokia.server.core.util.JsonUtil;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONArray;
+import org.jolokia.json.JSONObject;
 
 import static org.jolokia.service.jmx.handler.list.DataKeys.*;
 /**
@@ -39,14 +39,13 @@ class OperationDataUpdater extends DataUpdater {
 
     /** {@inheritDoc} */
     @Override
-    @SuppressWarnings("unchecked")
     protected JSONObject extractData(MBeanInfo pMBeanInfo, String pOperation) {
         JSONObject opMap = new JSONObject();
 
         for (MBeanOperationInfo opInfo : pMBeanInfo.getOperations()) {
             if (pOperation == null || opInfo.getName().equals(pOperation)) {
                 JSONObject map = new JSONObject();
-                JSONArray argList = new JSONArray();
+                JSONArray argList = new JSONArray(opInfo.getSignature().length);
                 for (MBeanParameterInfo paramInfo : opInfo.getSignature()) {
                     JSONObject args = new JSONObject();
                     args.put(DESCRIPTION.getKey(), paramInfo.getDescription());

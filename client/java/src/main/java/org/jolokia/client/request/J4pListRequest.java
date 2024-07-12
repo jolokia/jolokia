@@ -21,7 +21,7 @@ import java.util.List;
 
 import javax.management.ObjectName;
 
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /**
  * Request for list JMX information
@@ -142,7 +142,6 @@ public class J4pListRequest extends J4pRequest {
                     path.append("/");
                 }
             }
-            //noinspection unchecked
             ret.put("path",path.toString());
         }
         return ret;

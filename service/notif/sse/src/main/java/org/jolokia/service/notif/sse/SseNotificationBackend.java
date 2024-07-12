@@ -13,7 +13,7 @@ import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.notification.*;
 import org.jolokia.server.core.service.serializer.SerializeOptions;
 import org.jolokia.server.core.service.serializer.Serializer;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /**
  * Dummy implementation
@@ -120,7 +120,6 @@ public class SseNotificationBackend extends AbstractJolokiaService<NotificationB
     }
 
     /** {@inheritDoc} */
-    @SuppressWarnings("unchecked")
     public Map<String, ?> getConfig() {
         JSONObject ret = new JSONObject();
         ret.put(BackChannel.CONTENT_TYPE, "text/event-stream");

@@ -8,9 +8,9 @@ import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import org.jolokia.server.core.restrictor.DenyAllRestrictor;
 import org.jolokia.server.core.util.TestJolokiaContext;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.jolokia.json.JSONObject;
+import org.jolokia.json.parser.JSONParser;
+import org.jolokia.json.parser.ParseException;
 import org.testng.annotations.Test;
 
 import static org.easymock.EasyMock.expect;
@@ -37,7 +37,7 @@ public class JolokiaHttpHandlerRestrictorTest {
         Headers header = new Headers();
         ByteArrayOutputStream out = JolokiaHttpHandlerTest.prepareResponse(exchange, header);
         newHandler.handle(exchange);
-        JSONObject resp = (JSONObject) new JSONParser().parse(out.toString());
+        JSONObject resp = new JSONParser().parse(out.toString(), JSONObject.class);
         assertTrue(resp.containsKey("error"));
         assertTrue(((String) resp.get("error")).contains(pParam));
     }

@@ -7,7 +7,7 @@ import javax.management.ObjectName;
 
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.service.api.*;
-import org.json.simple.JSONArray;
+import org.jolokia.json.JSONArray;
 
 import static org.jolokia.service.discovery.AbstractDiscoveryMessage.MessageType.QUERY;
 
@@ -74,9 +74,8 @@ public class JolokiaDiscovery extends AbstractJolokiaService<JolokiaService.Init
                         .agentId(ctx.getAgentDetails().getAgentId())
                         .build();
         List<DiscoveryIncomingMessage> discovered = MulticastUtil.sendQueryAndCollectAnswers(out, pTimeout, pMulticastGroup, pMulticastPort, ctx);
-        JSONArray ret = new JSONArray();
+        JSONArray ret = new JSONArray(discovered.size());
         for (DiscoveryIncomingMessage in : discovered) {
-            //noinspection unchecked
             ret.add(in.getAgentDetails().toJSONObject());
         }
         return ret;

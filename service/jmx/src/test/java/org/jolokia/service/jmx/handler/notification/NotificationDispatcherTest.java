@@ -16,7 +16,7 @@ import org.jolokia.server.core.service.notification.*;
 import org.jolokia.server.core.util.TestJolokiaContext;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 import org.jolokia.server.core.util.jmx.SingleMBeanServerAccess;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 import org.testng.annotations.*;
 
 import static org.easymock.EasyMock.*;

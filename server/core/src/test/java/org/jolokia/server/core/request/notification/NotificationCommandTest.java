@@ -20,7 +20,7 @@ import java.util.*;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
-import org.json.simple.JSONArray;
+import org.jolokia.json.JSONArray;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
@@ -286,7 +286,6 @@ public class NotificationCommandTest {
     }
 
 
-    @SuppressWarnings("unchecked")
     private JSONArray getFilterArrayList(String[] pFilter) {
         JSONArray ret = new JSONArray();
         Collections.addAll(ret, pFilter);

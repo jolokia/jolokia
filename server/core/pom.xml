@@ -44,11 +44,9 @@
       <scope>test</scope>
     </dependency>
 
-    <!-- JSON -->
-
     <dependency>
-      <groupId>com.googlecode.json-simple</groupId>
-      <artifactId>json-simple</artifactId>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-json</artifactId>
     </dependency>
 
     <!-- JakartaEE dependencies -->

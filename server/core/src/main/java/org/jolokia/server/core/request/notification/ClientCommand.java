@@ -19,7 +19,7 @@ package org.jolokia.server.core.request.notification;
 import java.util.Deque;
 import java.util.Map;
 
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONObject;
 
 /**
  * A base command which should be subclassed by every command
@@ -68,7 +68,6 @@ public abstract class ClientCommand extends NotificationCommand {
         return client;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public JSONObject toJSON() {
         JSONObject ret = super.toJSON();

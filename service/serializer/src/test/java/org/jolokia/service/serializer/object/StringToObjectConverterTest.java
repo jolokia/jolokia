@@ -13,8 +13,8 @@ import javax.management.ObjectName;
 
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.util.DateUtil;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import org.jolokia.json.JSONArray;
+import org.jolokia.json.JSONObject;
 import org.testng.Assert;
 import org.testng.annotations.*;
 
@@ -102,20 +102,19 @@ public class StringToObjectConverterTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     public void jsonConversion() {
         JSONObject json = new JSONObject();
         json.put("name","roland");
         json.put("kind","jolokia");
 
-        Object object = converter.convertFromString(JSONObject.class.getName(),json.toString());
+        Object object = converter.convertFromString(JSONObject.class.getName(),json.toJSONString());
         assertEquals(json,object);
 
         JSONArray array = new JSONArray();
         array.add("roland");
         array.add("jolokia");
 
-        object = converter.convertFromString(JSONArray.class.getName(),array.toString());
+        object = converter.convertFromString(JSONArray.class.getName(),array.toJSONString());
         assertEquals(array,object);
 
         try {

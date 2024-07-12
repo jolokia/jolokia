@@ -31,6 +31,8 @@
   <modules>
     <module>bom</module>
 
+    <module>json</module>
+
     <module>tools/siteskin</module>
     <module>tools/test-util</module>
 
@@ -617,6 +619,12 @@
 
       <dependency>
         <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-json</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jolokia</groupId>
         <artifactId>jolokia-server-core</artifactId>
         <version>${project.version}</version>
       </dependency>
@@ -755,19 +763,6 @@
       </dependency>
 
       <!-- JSON -->
-
-      <dependency>
-        <groupId>com.googlecode.json-simple</groupId>
-        <artifactId>json-simple</artifactId>
-        <version>${version.com.googlecode.json-simple}</version>
-        <exclusions>
-          <!-- That's a bug in json-simple that junit is referenced without scope test -->
-          <exclusion>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-          </exclusion>
-        </exclusions>
-      </dependency>
 
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
@@ -1091,7 +1086,6 @@
 
     <!-- Versions of actual Maven dependencies for Jolokia core/service/client libraries -->
 
-    <version.com.googlecode.json-simple>1.1.1</version.com.googlecode.json-simple>
     <version.commons-codec>1.17.0</version.commons-codec>
     <version.io.fabric8.kubernetes-client>6.13.0</version.io.fabric8.kubernetes-client>
     <version.jakarta.servlet-api>5.0.0</version.jakarta.servlet-api>

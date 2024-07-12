@@ -20,7 +20,7 @@ import java.util.*;
 
 import javax.management.ObjectName;
 
-import org.json.simple.*;
+import org.jolokia.json.*;
 
 /**
  * A request dealing with a single MBean.
@@ -58,7 +58,6 @@ public abstract class AbtractJ4pMBeanRequest extends J4pRequest {
     @Override
     JSONObject toJson() {
         JSONObject ret =  super.toJson();
-        //noinspection unchecked
         ret.put("mbean", objectName.getCanonicalName());
         return ret;
     }
