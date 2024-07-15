@@ -36,7 +36,7 @@ public class JSONWriter {
         writer.write('{');
         int pos = map.size() - 1;
         for (Map.Entry<String, Object> el : map.entrySet()) {
-            serialize(el.getKey(), writer);
+            escape(writer, el.getKey().toCharArray());
             writer.write(':');
             serialize(el.getValue(), writer);
             if (pos-- > 0) {
@@ -111,19 +111,14 @@ public class JSONWriter {
             // includes BigDecimals and BigIntegers
             writer.write(value.toString());
         } else if (value instanceof Character) {
-            writer.write('\"');
-            escape(new char[] { (char) value }, writer);
-            writer.write('\"');
+            escape(writer, new char[] { (char) value });
         } else if (value instanceof String) {
-            writer.write('\"');
-            escape(((String) value).toCharArray(), writer);
-            writer.write('\"');
+            escape(writer, ((String) value).toCharArray());
         } else if (value instanceof Collection) {
             //noinspection unchecked
             serialize((Collection<Object>) value, writer);
         } else if (value instanceof JSONObject) {
-            //noinspection unchecked
-            serialize((Map<String, Object>) value, writer);
+            serialize((JSONObject) value, writer);
         } else if (value instanceof Map) {
             // not sure about the key types, so be extra careful
             //noinspection unchecked
@@ -143,12 +138,13 @@ public class JSONWriter {
 
     /**
      * When writing string values we have to escape characters. This method writes escaped char array into
-     * the target {@link Writer} but optimizing the process by not writing it one char at a time.
+     * the target {@link Writer} but optimizing the process by not writing it one char at a time. Also
+     * the char array is surrounded by quotes.
      * @param characters
      * @param writer
      * @throws IOException
      */
-    private static void escape(char[] characters, Writer writer) throws IOException {
+    private static void escape(Writer writer, char[] characters) throws IOException {
         // https://datatracker.ietf.org/doc/html/rfc8259#section-7
         //     All Unicode characters may be placed within the
         //     quotation marks, except for the characters that MUST be escaped:
@@ -171,6 +167,7 @@ public class JSONWriter {
 
         StringBuilder buffer = new StringBuilder();
 
+        buffer.append('"');
         for (char c : characters) {
             switch (c) {
                 case '"': // %x22
@@ -208,6 +205,7 @@ public class JSONWriter {
                     break;
             }
         }
+        buffer.append('"');
 
         writer.write(buffer.toString());
     }
