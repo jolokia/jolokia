@@ -73,6 +73,17 @@ public class SerializerTest {
     }
 
     @Test
+    public void serializeEmptyArrays() throws IOException {
+        StringWriter sw = new StringWriter();
+        JSONWriter.serialize(new String[] { }, sw);
+        assertEquals(sw.toString(), "[]");
+
+        sw = new StringWriter();
+        JSONWriter.serialize(new byte[] { }, sw);
+        assertEquals(sw.toString(), "[]");
+    }
+
+    @Test
     public void serializeCollection() throws IOException {
         StringWriter sw = new StringWriter();
         JSONArray array = new JSONArray();
