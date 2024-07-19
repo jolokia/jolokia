@@ -18,7 +18,10 @@ package org.jolokia.json;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.testng.annotations.Test;
@@ -118,6 +121,18 @@ public class SerializerTest {
         map.put(new File("/"), false);
         JSONWriter.serialize(map, sw);
         assertEquals(sw.toString(), "{\"42\":1,\"\":\"hello\",\"/\":false}");
+    }
+
+    @Test
+    public void serializeNestedArrays() throws IOException {
+        StringWriter sw = new StringWriter();
+        List<Object> list = new ArrayList<>();
+        list.add(1);
+        list.add(Arrays.asList(2, 3));
+        list.add(Arrays.asList(Arrays.asList(4, 5), new int[] { 6, 7 }));
+        list.add(8);
+        JSONWriter.serialize(list, sw);
+        assertEquals(sw.toString(), "[1,[2,3],[[4,5],[6,7]],8]");
     }
 
 }

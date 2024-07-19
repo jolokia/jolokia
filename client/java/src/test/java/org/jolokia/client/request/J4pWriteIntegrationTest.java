@@ -125,6 +125,19 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
     }
 
     @Test
+    public void array2D() throws MalformedObjectNameException, J4pException {
+        final int[][] input = new int[][] { { 1, 2 }, { 3, 4 } };
+        checkWrite(new String[] { "POST" }, "Array2D", null, input, resp -> {
+            JSONArray val = resp.getValue();
+            assertEquals(val.size(), input.length);
+            for (int i = 0; i < input.length; i++) {
+                assertEquals(((JSONArray) val.get(i)).get(0), input[i][0]);
+                assertEquals(((JSONArray) val.get(i)).get(1), input[i][1]);
+            }
+        });
+    }
+
+    @Test
     public void access() throws MalformedObjectNameException {
 
         for (J4pWriteRequest req : new J4pWriteRequest[] {

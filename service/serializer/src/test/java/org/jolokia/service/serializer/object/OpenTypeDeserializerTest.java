@@ -1,12 +1,15 @@
 package org.jolokia.service.serializer.object;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
 import javax.management.*;
 import javax.management.openmbean.*;
 
+import org.jolokia.server.core.service.serializer.SerializeOptions;
+import org.jolokia.service.serializer.json.ObjectToJsonConverter;
 import org.jolokia.service.serializer.util.CompositeTypeAndJson;
 import org.jolokia.service.serializer.util.TabularTypeAndJson;
 import org.jolokia.json.JSONArray;
@@ -43,6 +46,7 @@ import static org.testng.Assert.*;
 public class OpenTypeDeserializerTest {
 
     private OpenTypeDeserializer converter;
+    private ObjectToJsonConverter otjc;
 
 
     @BeforeClass
@@ -50,6 +54,7 @@ public class OpenTypeDeserializerTest {
 
         StringToObjectConverter stringToObjectConverter = new StringToObjectConverter();
         converter = new OpenTypeDeserializer(stringToObjectConverter);
+        otjc = new ObjectToJsonConverter(stringToObjectConverter);
     }
 
     @Test
@@ -77,7 +82,7 @@ public class OpenTypeDeserializerTest {
 
     @Test
     public void arrayType() throws OpenDataException, ParseException, IOException {
-        ArrayType<String> type = new ArrayType<>(2,STRING);
+        ArrayType<String> type = new ArrayType<>(1,STRING);
         String json = "[ \"hello\", \"world\" ]";
         for (Object element : new Object[] { json, new JSONParser().parse(json) }) {
             Object[] data = (Object[]) converter.deserialize(type, element);
@@ -85,6 +90,47 @@ public class OpenTypeDeserializerTest {
             assertEquals(data[0],"hello");
             assertEquals(data[1],"world");
         }
+    }
+
+    @Test
+    // https://github.com/jolokia/jolokia/issues/212
+    public void arrayType1D() throws Exception {
+        Integer[] oneDim = new Integer[]{1, 2};
+        // One dimension array, conversion works both ways
+        Object res = otjc.serialize(oneDim, null, SerializeOptions.DEFAULT);
+        OpenType<?> type = new ArrayType<>(SimpleType.INTEGER, false);
+        assertEquals(Arrays.deepToString(oneDim), Arrays.deepToString((Object[]) converter.deserialize(type, res)));
+    }
+
+    @Test
+    // https://github.com/jolokia/jolokia/issues/212
+    public void arrayType2D() throws Exception {
+        Integer[] oneDim = new Integer[]{1, 2};
+        Integer[][] twoDims = new Integer[][] { oneDim, { 3, 4 } };
+        // Two dimension array, conversion only works one way
+        Object res = otjc.serialize(twoDims, null, SerializeOptions.DEFAULT);
+        OpenType<?> type = new ArrayType<>(2, SimpleType.INTEGER);
+        assertEquals(Arrays.deepToString(((JSONArray) res).toArray()), Arrays.deepToString((Object[]) converter.deserialize(type, res)));
+    }
+
+    @Test
+    // https://github.com/jolokia/jolokia/issues/212
+    public void arrayType3D() throws Exception {
+        // 2 elements
+        int[] oneDim = new int[]{1, 2};
+        // 3 x 2 elements
+        int[][] twoDims = new int[][] { oneDim, { 3, 4 }, { 5, 6 } };
+        // 2 x (3 x 2 elements) elements
+        int[][][] threeDims = new int[][][] { twoDims, {{ 3, 4 }, { 5, 6 }, { 7, 8 } } };
+        // Two dimension array, conversion only works one way
+        Object res = otjc.serialize(threeDims, null, SerializeOptions.DEFAULT);
+        OpenType<?> type = ArrayType.getPrimitiveArrayType(int[][][].class);
+        int[][][] tab = (int[][][]) converter.deserialize(type, res);
+        assertEquals(tab.length, 2);
+        assertEquals(tab[0].length, 3);
+        assertEquals(tab[0][2].length, 2);
+        assertEquals(otjc.serialize(threeDims, null, SerializeOptions.DEFAULT),
+            otjc.serialize(tab, null, SerializeOptions.DEFAULT));
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*JSONArray.*")
@@ -99,13 +145,14 @@ public class OpenTypeDeserializerTest {
 
         );
         CompositeData[] result =
-                (CompositeData[]) converter.deserialize(new ArrayType<>(2, taj.getType()), "[" + taj.getJsonAsString() + "]");
+                (CompositeData[]) converter.deserialize(new ArrayType<>(1, taj.getType()), "[" + taj.getJsonAsString() + "]");
         assertEquals(result[0].get("verein"), "FCN");
         assertEquals(result.length,1);
     }
 
-    @Test(expectedExceptions = UnsupportedOperationException.class,expectedExceptionsMessageRegExp = ".*Unsupported.*")
-    public void arrayTypeWithWrongElementType() throws OpenDataException {
+    @Test
+    // https://github.com/jolokia/jolokia/issues/212 - we already support it
+    public void arrayTypeWithNowProperElementType() throws OpenDataException {
         TabularTypeAndJson taj = new TabularTypeAndJson(
                 new String[] { "verein" },
                 new CompositeTypeAndJson(
@@ -115,7 +162,7 @@ public class OpenTypeDeserializerTest {
         );
         JSONArray array = new JSONArray();
         array.add(taj.getJson());
-        converter.deserialize(new ArrayType<>(2, taj.getType()), array);
+        converter.deserialize(new ArrayType<>(1, taj.getType()), array);
     }
 
     @Test

@@ -246,7 +246,9 @@ public class StringToObjectConverter {
             } else {
                 if (valueType.isAssignableFrom(value.getClass())) {
                     // Can be set directly
-                    Array.set(ret,i++,value);
+                    Array.set(ret, i++, value);
+                } else if (valueType.isArray() && value instanceof JSONArray) {
+                    Array.set(ret,i++,convertListToArray(valueType, (JSONArray) value));
                 } else {
                     // Try to convert from string
                     Array.set(ret,i++,convertFromString(valueType.getCanonicalName(), value.toString()));
