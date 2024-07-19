@@ -52,6 +52,7 @@ public final class OptionsAndArgs {
             "historyMaxEntries", "debug!", "debugMaxEntries",
             "logHandlerClass", "logHandlerName", "maxDepth", "maxCollectionSize",
             "maxObjects", "serializeLong", "restrictorClass", "policyLocation", "mbeanQualifier",
+            "disableDetectors!", "enabledServices", "disabledServices",
             "canonicalNaming", "includeStackTrace", "serializeException",
             "discoveryEnabled", "discoveryAgentUrl", "agentId", "agentDescription",
             // Others:

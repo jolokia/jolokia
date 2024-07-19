@@ -123,6 +123,14 @@ public class HelpCommand extends AbstractBaseCommand {
 "    --maxObjects <nr>               Maximum number of objects to consider for serialization\n" +
 "    --serializeLong <number|string> How to serialize longs values\n" +
 "    --restrictorClass <class>       Classname of an custom restrictor which must be loadable from the classpath\n" +
+"    --disableDetectors              Whether to run detectors that locate environment-specific MBeanServer instances\n" +
+"    --enabledServices               A comma-separated list of fully-qualified class names.\n" +
+"                                    If this configuration option is specified and is not empty, only the\n" +
+"                                    services from this list will be actually used.\n" +
+"    --disabledServices              A comma-separated list of fully-qualified class names.\n" +
+"                                    If this configuration option is specified and is not empty, all detected\n" +
+"                                    services (from `/META-INF/jolokia/services(-default)`) will be filtered\n" +
+"                                    to not include the disabled services.\n" +
 "    --policyLocation <url>          Location of a Jolokia policy file\n" +
 "    --mbeanQualifier <qualifier>    Qualifier to use when registering Jolokia internal MBeans\n" +
 "    --canonicalNaming <t|f>         whether to use canonicalName for ObjectNames in 'list' or 'search' (default: true)\n" +

@@ -455,6 +455,14 @@ where <command> is one of
     --clientPrincipal <principal>   Allow only this principal in the client cert (https & sslClientAuth only)
                                     If supplied multiple times, any one of the clientPrincipals must match
     --extendedClientCheck <t|f>     Additional validation of client certs for the proper key usage (https & sslClientAuth only)
+    --disableDetectors              Whether to run detectors that locate environment-specific MBeanServer instances
+    --enabledServices               A comma-separated list of fully-qualified class names.
+                                    If this configuration option is specified and is not empty, only the
+                                    services from this list will be actually used.
+    --disabledServices              A comma-separated list of fully-qualified class names.
+                                    If this configuration option is specified and is not empty, all detected
+                                    services (from `/META-INF/jolokia/services(-default)`) will be filtered
+                                    to not include the disabled services.
     --discoveryEnabled <t|f>        Enable/Disable discovery multicast responses (default: false)
     --discoveryAgentUrl <url>       The URL to use for answering discovery requests. Will be autodetected if not given.
     --sslProtocol <protocol>        SSL / TLS protocol to enable, can be provided multiple times
