@@ -203,6 +203,12 @@ because numbers greater than the max safe integer don't retain their precision
 in JavaScript. +
 *Added since Jolokia 2.0.3*
 
+|`org.jolokia.includeRequest`
+|`true`
+|A flag (defaults to `true`) which controls whether the incoming
+request should be included in the response (under `request` key). +
+*Added since Jolokia 2.1.0*
+
 |`org.jolokia.historyMaxEntries`
 |`10`
 |Number of entries to keep in the history. This can be changed at

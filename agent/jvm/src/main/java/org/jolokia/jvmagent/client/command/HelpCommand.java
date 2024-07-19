@@ -136,6 +136,7 @@ public class HelpCommand extends AbstractBaseCommand {
 "    --canonicalNaming <t|f>         whether to use canonicalName for ObjectNames in 'list' or 'search' (default: true)\n" +
 "    --includeStackTrace <t|f>       whether to include StackTraces for error messages (default: false)\n" +
 "    --serializeException <t|f>      whether to add a serialized version of the exception in the Jolokia response (default: false)\n" +
+"    --includeRequest <t|f>          whether to include entire request in the response (default: true)\n" +
 "    --config <configfile>           Path to a property file from where to read the configuration\n" +
 "    --help                          This help documentation\n" +
 "    --version                       Version of this agent (it's " + Version.getAgentVersion() + " btw :)\n" +

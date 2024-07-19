@@ -53,7 +53,7 @@ public final class OptionsAndArgs {
             "logHandlerClass", "logHandlerName", "maxDepth", "maxCollectionSize",
             "maxObjects", "serializeLong", "restrictorClass", "policyLocation", "mbeanQualifier",
             "disableDetectors!", "enabledServices", "disabledServices",
-            "canonicalNaming", "includeStackTrace", "serializeException",
+            "canonicalNaming", "includeStackTrace", "serializeException", "includeRequest",
             "discoveryEnabled", "discoveryAgentUrl", "agentId", "agentDescription",
             // Others:
             "config", "help!"));

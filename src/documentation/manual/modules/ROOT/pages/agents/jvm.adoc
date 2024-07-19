@@ -368,6 +368,12 @@ in JavaScript. +
 *Added since Jolokia 2.0.3*
 |Default: `number`
 
+|`includeRequest`
+|A flag (defaults to `true`) which controls whether the incoming
+request should be included in the response (under `request` key). +
+*Added since Jolokia 2.1.0*
+|Default: `true`
+
 |`policyLocation`
 |Path to the XML policy file
 |
@@ -482,6 +488,7 @@ where <command> is one of
     --canonicalNaming <t|f>         whether to use canonicalName for ObjectNames in 'list' or 'search' (default: true)
     --includeStackTrace <t|f>       whether to include StackTraces for error messages (default: false)
     --serializeException <t|f>      whether to add a serialized version of the exception in the Jolokia response (default: false)
+    --includeRequest <t|f>          whether to include entire request in the response (default: true)
     --config <configfile>           Path to a property file from where to read the configuration
     --help                          This help documentation
     --version                       Version of this agent (it's {jolokia-version} btw :)

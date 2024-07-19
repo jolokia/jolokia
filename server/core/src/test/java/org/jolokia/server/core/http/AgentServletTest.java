@@ -18,6 +18,7 @@ package org.jolokia.server.core.http;
 
 import java.io.*;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.management.JMException;
@@ -374,6 +375,30 @@ public class AgentServletTest {
         servlet.doPost(request, response);
 
         assertTrue(responseWriter.toString().contains(Version.getAgentVersion()));
+        servlet.destroy();
+    }
+
+    @Test
+    public void responseWithoutRequest() throws ServletException, IOException {
+        prepareStandardInitialisation();
+
+        ByteArrayOutputStream responseWriter = initRequestResponseMocks();
+        expect(request.getCharacterEncoding()).andReturn("utf-8");
+        expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
+        expect(request.getParameter(ConfigKey.INCLUDE_REQUEST.getKeyValue())).andReturn("false").anyTimes();
+        expect(request.getAttribute("subject")).andReturn(null);
+
+        preparePostRequest(HttpTestUtil.VERSION_POST_REQUEST);
+        expect(request.getParameterMap()).andReturn(Map.of(
+            ConfigKey.MIME_TYPE.getKeyValue(), new String[] { "text/plain" },
+            ConfigKey.INCLUDE_REQUEST.getKeyValue(), new String[] { "false" })).anyTimes();
+
+        replay(request, response);
+        request.getParameterMap();
+
+        servlet.doPost(request, response);
+
+        assertFalse(responseWriter.toString().contains("\"type\":\"version\""));
         servlet.destroy();
     }
 
