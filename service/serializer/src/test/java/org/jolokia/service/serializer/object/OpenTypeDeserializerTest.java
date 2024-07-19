@@ -96,7 +96,6 @@ public class OpenTypeDeserializerTest {
     // https://github.com/jolokia/jolokia/issues/212
     public void arrayType1D() throws Exception {
         Integer[] oneDim = new Integer[]{1, 2};
-        // One dimension array, conversion works both ways
         Object res = otjc.serialize(oneDim, null, SerializeOptions.DEFAULT);
         OpenType<?> type = new ArrayType<>(SimpleType.INTEGER, false);
         assertEquals(Arrays.deepToString(oneDim), Arrays.deepToString((Object[]) converter.deserialize(type, res)));
@@ -107,7 +106,6 @@ public class OpenTypeDeserializerTest {
     public void arrayType2D() throws Exception {
         Integer[] oneDim = new Integer[]{1, 2};
         Integer[][] twoDims = new Integer[][] { oneDim, { 3, 4 } };
-        // Two dimension array, conversion only works one way
         Object res = otjc.serialize(twoDims, null, SerializeOptions.DEFAULT);
         OpenType<?> type = new ArrayType<>(2, SimpleType.INTEGER);
         assertEquals(Arrays.deepToString(((JSONArray) res).toArray()), Arrays.deepToString((Object[]) converter.deserialize(type, res)));
@@ -122,7 +120,6 @@ public class OpenTypeDeserializerTest {
         int[][] twoDims = new int[][] { oneDim, { 3, 4 }, { 5, 6 } };
         // 2 x (3 x 2 elements) elements
         int[][][] threeDims = new int[][][] { twoDims, {{ 3, 4 }, { 5, 6 }, { 7, 8 } } };
-        // Two dimension array, conversion only works one way
         Object res = otjc.serialize(threeDims, null, SerializeOptions.DEFAULT);
         OpenType<?> type = ArrayType.getPrimitiveArrayType(int[][][].class);
         int[][][] tab = (int[][][]) converter.deserialize(type, res);
@@ -130,6 +127,23 @@ public class OpenTypeDeserializerTest {
         assertEquals(tab[0].length, 3);
         assertEquals(tab[0][2].length, 2);
         assertEquals(otjc.serialize(threeDims, null, SerializeOptions.DEFAULT),
+            otjc.serialize(tab, null, SerializeOptions.DEFAULT));
+    }
+
+    @Test
+    public void arrayType4D() throws Exception {
+        // 2 elements
+        int[] oneDim = new int[]{1, 2};
+        // 3 x 2 elements
+        int[][] twoDims = new int[][] { oneDim, { 3, 4 }, { 5, 6 } };
+        // 2 x (3 x 2 elements) elements
+        int[][][] threeDims = new int[][][] { twoDims, {{ 3, 4 }, { 5, 6 }, { 7, 8 } } };
+        // 3 x (2 x (3 x 2 elements)) elements
+        int[][][][] fourDims = new int[][][][] { threeDims, threeDims, threeDims };
+        Object res = otjc.serialize(fourDims, null, SerializeOptions.DEFAULT);
+        OpenType<?> type = ArrayType.getPrimitiveArrayType(int[][][][].class);
+        int[][][][] tab = (int[][][][]) converter.deserialize(type, res);
+        assertEquals(otjc.serialize(fourDims, null, SerializeOptions.DEFAULT),
             otjc.serialize(tab, null, SerializeOptions.DEFAULT));
     }
 
