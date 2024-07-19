@@ -692,7 +692,7 @@ possible anymore, since for JSON, map keys must be simple
 types. In this case, a more generic serialization is used in
 which case an JSON object with two keys is returned:
 `indexNames` is an array with the
-`TabularData`'s indexes as names and
+``TabularData``'s indexes as names and
 `values` is the array containing the
 values as JSON object with the corresponding rows as values
 (including the indexes).
@@ -835,7 +835,8 @@ comma separated list.
 NOTE: The array support is somewhat limited since it makes a
 native split on commas. It does not yet take into account
 any quoting or escaping. For a much safer way to transport
-arrays to the agent, please consider using POST requests.
+arrays to the agent, please consider using POST requests. +
+For multi-dimensional arrays, `POST` method is mandatory.
 
 Certain _tag values_ are used to mark special
 values.  A `null` value has to be
@@ -887,10 +888,10 @@ they are serialized as follows:
 * ``SimpleType``s are extracted from their corresponding JSON type.
 * `ArrayType` is extracted from a
 `JSONArray` where the elements are
-serialized recursively with this algorithms. Only
+serialized recursively with this algorithms.
 ``ArrayType``s with element type
 `CompositeType` or
-`SimpleType` are supported.
+`SimpleType` are supported. Jolokia also supports multi-dimensional ``ArrayType``s.
 * `CompositeType` is extracted
 recursively from a `JSONObject`
 where there the string keys must fit to the

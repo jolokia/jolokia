@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import org.jolokia.json.JSONArray;
+import org.jolokia.json.JSONObject;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -71,6 +72,20 @@ public class ParserArraysTest {
         JSONArray array = new JSONParser().parse("[]", JSONArray.class);
         assertNotNull(array);
         assertEquals(array.size(), 0);
+    }
+
+    @Test
+    public void nestedArrays() throws ParseException, IOException {
+        JSONArray array = new JSONParser().parse("[[[[],[]]],[[],{},42]]", JSONArray.class);
+        assertNotNull(array);
+        assertEquals(array.size(), 2);
+        assertTrue(array.get(0) instanceof JSONArray);
+        assertTrue(array.get(1) instanceof JSONArray);
+        assertEquals(((JSONArray) array.get(0)).size(), 1);
+        assertEquals(((JSONArray) array.get(1)).size(), 3);
+        assertEquals(((JSONArray) ((JSONArray) array.get(0)).get(0)).size(), 2);
+        assertEquals(((JSONObject) ((JSONArray) array.get(1)).get(1)).size(), 0);
+        assertEquals(((Number) ((JSONArray) array.get(1)).get(2)).intValue(), 42);
     }
 
     @Test

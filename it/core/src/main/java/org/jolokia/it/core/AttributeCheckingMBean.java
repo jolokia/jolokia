@@ -108,4 +108,8 @@ public interface AttributeCheckingMBean {
 
     void setChili(Chili chili);
 
+    int[][] getArray2D();
+
+    void setArray2D(int[][] array2D);
+
 }

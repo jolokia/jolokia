@@ -52,6 +52,7 @@ public class AttributeChecking implements AttributeCheckingMBean,MBeanRegistrati
     private final String domain;
     private Date date = new Date();
     private Chili chili = Chili.AJI;
+    private int[][] array2D = { { 0, 0 }, { 0, 0 } };
 
 
     public AttributeChecking(String pDomain) {
@@ -265,6 +266,14 @@ public class AttributeChecking implements AttributeCheckingMBean,MBeanRegistrati
 
     public void setChili(Chili pChili) {
         chili = pChili;
+    }
+
+    public int[][] getArray2D() {
+        return array2D;
+    }
+
+    public void setArray2D(int[][] array2D) {
+        this.array2D = array2D;
     }
 
     public ObjectName preRegister(MBeanServer server, ObjectName name) throws Exception {
