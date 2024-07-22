@@ -123,6 +123,8 @@ off for class loading at the time this request was sent)
 }
 ----
 
+NOTE:: Since Jolokia 2.1.0 we can use `includeRequest` parameter to tell Jolokia to exclude `request` field from the response.
+
 The response is quite similar to the read operation except for
 the additional `value` element in the request
 (and of course, the different `type`).

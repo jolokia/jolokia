@@ -51,6 +51,8 @@ public class HttpRequestHandler {
     // Overall context
     private final JolokiaContext jolokiaCtx;
 
+    private final boolean includeRequestGlobal;
+
     /**
      * Request handler for parsing HTTP request and dispatching to the appropriate
      * request handler (with help of the backend manager)
@@ -60,6 +62,8 @@ public class HttpRequestHandler {
     public HttpRequestHandler(JolokiaContext pJolokiaCtx) {
         backendManager = new BackendManager(pJolokiaCtx);
         jolokiaCtx = pJolokiaCtx;
+        includeRequestGlobal = pJolokiaCtx.getConfig(ConfigKey.INCLUDE_REQUEST) == null
+            || Boolean.parseBoolean(pJolokiaCtx.getConfig(ConfigKey.INCLUDE_REQUEST));
     }
 
     /**
@@ -265,7 +269,11 @@ public class HttpRequestHandler {
            jolokiaCtx.error("Error " + pErrorCode,pExp);
         }
         if (pJmxReq != null) {
-            jsonObject.put("request",pJmxReq.toJSON());
+            String includeRequestLocal = pJmxReq.getParameter(ConfigKey.INCLUDE_REQUEST);
+            if ((includeRequestGlobal && !"false".equals(includeRequestLocal))
+                || (!includeRequestGlobal && "true".equals(includeRequestLocal))) {
+                jsonObject.put("request",pJmxReq.toJSON());
+            }
         }
         return jsonObject;
     }

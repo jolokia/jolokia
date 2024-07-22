@@ -78,6 +78,8 @@ xref:jolokia_protocol.adoc#responses[Responses] in detail. A typical response fo
 }
 ----
 
+NOTE:: Since Jolokia 2.1.0 we can use `includeRequest` parameter to tell Jolokia to exclude `request` field from the response.
+
 The `value` field in the response contains two important fields:
 
 * `id` is an identifier of registered client, which is used in other notification-related Jolokia operations

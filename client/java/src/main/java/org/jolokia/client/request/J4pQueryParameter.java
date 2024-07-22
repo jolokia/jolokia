@@ -79,7 +79,14 @@ public enum J4pQueryParameter {
      * the last time (given as epoch time in seconds since 1.1.1970) provided with
      * this parameterd
      */
-    IF_MODIFIED_SINCE("ifModifiedSince");
+    IF_MODIFIED_SINCE("ifModifiedSince"),
+
+    /**
+     * For security reasons (writing responses directly into some DB), it may be required to exclude
+     * the request from its response JSON. This parameter can control the inclusion of request.
+     */
+    INCLUDE_REQUEST("includeRequest");
+
     // =======================================================================
 
     // Query parameter

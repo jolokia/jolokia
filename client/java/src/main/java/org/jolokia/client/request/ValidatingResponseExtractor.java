@@ -52,7 +52,8 @@ public class ValidatingResponseExtractor implements J4pResponseExtractor {
     }
 
     public <RESP extends J4pResponse<REQ>, REQ extends J4pRequest> RESP extract(REQ pRequest,
-                                                                                JSONObject pJsonResp)
+                                                                                JSONObject pJsonResp,
+                                                                                boolean includeRequest)
             throws J4pRemoteException {
 
         int status = 0;
@@ -66,6 +67,13 @@ public class ValidatingResponseExtractor implements J4pResponseExtractor {
         if (!allowedCodes.contains(status)) {
             throw new J4pRemoteException(pRequest, pJsonResp);
         }
-        return status == 200 ? pRequest.createResponse(pJsonResp) : null;
+        if (status == 200) {
+            RESP response = pRequest.createResponse(pJsonResp);
+            if (!includeRequest) {
+                response.clearRequest();
+            }
+            return response;
+        }
+        return null;
     }
 }

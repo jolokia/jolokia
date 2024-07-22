@@ -88,6 +88,8 @@ The response value for a version request looks like:
 }
 ----
 
+NOTE:: Since Jolokia 2.1.0 we can use `includeRequest` parameter to tell Jolokia to exclude `request` field from the response.
+
 `protocol` in the response value contains the
 protocol version used, `agent` is the version of
 the Jolokia agent. See xref:jolokia_protocol.adoc#versions[Jolokia protocol versions] for the various

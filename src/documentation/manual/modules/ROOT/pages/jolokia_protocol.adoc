@@ -560,6 +560,12 @@ be used to change the default mime type.
 Only `text/plain` and `application/json` are allowed.
 For any other value Jolokia will fallback to `text/plain`.
 
+`includeRequest`:: A flag (defaults to `true`) which controls whether the incoming
+request should be included in the response (under `request` key). +
+When `false`, bulk responses have to be correlated with requests by matching
+the requests using index number - responses come in the same order as requests. +
+*Added since Jolokia 2.1.0*
+
 `canonicalNaming`:: Defaults to `true` to return the canonical format of property lists.
 If set to `false` then the default unsorted property list is returned.
 
@@ -1243,6 +1249,8 @@ version. Major version changes incorporate possibly backwards
 incompatible changes. This document describes the Jolokia
 protocol version *`7.3`*.
 
+*8.0 (since 2.1.0)*:: We can now disable `request` field in the response
+using `includeRequest` option.
 *7.3 (since 2.0.0)*:: Support for `notification` command and related
 JSON messages.
 *7.2 (since 1.2.2)*:: Paths can now be used with wildcards

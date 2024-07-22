@@ -85,6 +85,7 @@ const PROCESSING_PARAMS: string[] = [
   "serializeException",
   "canonicalNaming",
   "mimeType",
+  "includeRequest",
   "ifModifiedSince"
 ]
 

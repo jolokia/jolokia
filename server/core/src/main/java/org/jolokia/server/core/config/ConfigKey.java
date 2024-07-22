@@ -172,6 +172,12 @@ public enum ConfigKey {
     MIME_TYPE("mimeType", true, true, "text/plain"),
 
     /**
+     * Whether to include the incoming request in the {@code request} field of the response.
+     * Be carefull when corelating bulk requests/responses. Defaults to {@code true}.
+     */
+    INCLUDE_REQUEST("includeRequest", true, true),
+
+    /**
      * For LIST requests, this option can be used to return
      * the result only if they set of registered MBeans has
      * been changed since the timestamp given in this option.

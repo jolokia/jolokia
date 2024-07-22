@@ -169,6 +169,14 @@ in JavaScript. +
 *Added since Jolokia 2.0.3*
 |Default: `number`
 
+|`includeRequest`
+|A flag (defaults to `true`) which controls whether the incoming
+request should be included in the response (under `request` key). +
+This applies to bulk requests too, so correlation should be done by index
+of requests and responses (these are guaranteed to be matching). +
+*Added since Jolokia 2.1.0*
+|Default: `true`
+
 |`mbeanQualifier`
 |Qualifier to add to the ObjectName of Jolokia's own
 MBeans. This can become necessary if more than one agent is

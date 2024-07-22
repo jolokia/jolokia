@@ -192,7 +192,9 @@ public class J4pClient extends J4pClientBuilderFactory {
             if (! (jsonResponse instanceof JSONObject)) {
                 throw new J4pException("Invalid JSON answer for a single request (expected a map but got a " + jsonResponse.getClass() + ")");
             }
-            return pExtractor.extract(pRequest, (JSONObject) jsonResponse);
+            boolean excludeRequest = pProcessingOptions != null
+                    && "false".equals(pProcessingOptions.get(J4pQueryParameter.INCLUDE_REQUEST));
+            return pExtractor.extract(pRequest, (JSONObject) jsonResponse, !excludeRequest);
         }
         catch (IOException | URISyntaxException e) {
             throw mapException(e);
@@ -252,7 +254,7 @@ public class J4pClient extends J4pClientBuilderFactory {
 
             verifyBulkJsonResponse(jsonResponse);
 
-            return this.extractResponses(jsonResponse, pRequests, pResponseExtractor);
+            return this.extractResponses(jsonResponse, pRequests, pProcessingOptions, pResponseExtractor);
         } catch (IOException | URISyntaxException e) {
             throw mapException(e);
         }
@@ -280,6 +282,7 @@ public class J4pClient extends J4pClientBuilderFactory {
     // Extract J4pResponses from a returned bulk JSON answer
     private <R extends J4pResponse<T>, T extends J4pRequest> List<R> extractResponses(JSONStructure pJsonResponse,
                                                                                       List<T> pRequests,
+                                                                                      Map<J4pQueryParameter,String> pProcessingOptions,
                                                                                       J4pResponseExtractor pResponseExtractor) throws J4pException {
         JSONArray responseArray = (JSONArray) pJsonResponse;
         List<R> ret = new ArrayList<>(responseArray.size());
@@ -292,7 +295,9 @@ public class J4pClient extends J4pClientBuilderFactory {
                 throw new J4pException("Response for request Nr. " + i + " is invalid (expected a map but got " + jsonResp.getClass() + ")");
             }
             try {
-                ret.add(i,pResponseExtractor.extract(request, (JSONObject) jsonResp));
+                boolean excludeRequest = pProcessingOptions != null
+                        && "false".equals(pProcessingOptions.get(J4pQueryParameter.INCLUDE_REQUEST));
+                ret.add(i,pResponseExtractor.extract(request, (JSONObject) jsonResp, !excludeRequest));
             } catch (J4pRemoteException exp) {
                 remoteExceptions[i] = exp;
                 exceptionFound = true;

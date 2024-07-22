@@ -58,6 +58,11 @@ jolokiaRouter.post("/*", (req, res) => {
         })
       }
     })
+    if (req.query["includeRequest"] === "false") {
+      response.forEach(r => {
+        delete r["request"]
+      })
+    }
     res.status(200).json(response)
     return
   }

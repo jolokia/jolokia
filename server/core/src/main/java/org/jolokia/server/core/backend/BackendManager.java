@@ -51,6 +51,8 @@ public class BackendManager {
     // Hard limits for conversion
     private SerializeOptions.Builder convertOptionsBuilder;
 
+    private boolean includeRequestGlobal;
+
     /**
      * Construct a new backend manager with the given configuration and with the default
      * request dispatcher
@@ -95,7 +97,18 @@ public class BackendManager {
             // A handled indicates that its value hasn't changed. We return a status with
             //"304 Not Modified" similar to the HTTP status code (http://en.wikipedia.org/wiki/HTTP_status)
             json = new JSONObject();
-            json.put("request",pJmxReq.toJSON());
+
+            // g:true (default), r:null - true
+            // g:true (default), r:true (default) - true
+            // g:true (default), r:false - false
+            // g:false, r:null - false
+            // g:false, r:true (default) - true
+            // g:false, r:false - false
+            String includeRequestLocal = pJmxReq.getParameter(INCLUDE_REQUEST);
+            if ((includeRequestGlobal && !"false".equals(includeRequestLocal))
+                    || (!includeRequestGlobal && "true".equals(includeRequestLocal))) {
+                json.put("request", pJmxReq.toJSON());
+            }
             json.put("status",304);
             json.put("timestamp",System.currentTimeMillis() / 1000);
         }
@@ -149,6 +162,8 @@ public class BackendManager {
                     getNullSaveIntLimit(pCtx.getConfig(MAX_COLLECTION_SIZE)),
                     getNullSaveIntLimit(pCtx.getConfig(MAX_OBJECTS))
             );
+            includeRequestGlobal = pCtx.getConfig(INCLUDE_REQUEST) == null
+                || Boolean.parseBoolean(pCtx.getConfig(INCLUDE_REQUEST));
         } else {
             convertOptionsBuilder = new SerializeOptions.Builder();
         }
@@ -173,7 +188,11 @@ public class BackendManager {
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("value",jsonResult);
-        jsonObject.put("request",pJmxReq.toJSON());
+        String includeRequestLocal = pJmxReq.getParameter(INCLUDE_REQUEST);
+        if ((includeRequestGlobal && !"false".equals(includeRequestLocal))
+            || (!includeRequestGlobal && "true".equals(includeRequestLocal))) {
+            jsonObject.put("request",pJmxReq.toJSON());
+        }
         return jsonObject;
     }
 

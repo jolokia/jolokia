@@ -199,6 +199,8 @@ results in an answer
 }
 ----
 
+NOTE:: Since Jolokia 2.1.0 we can use `includeRequest` parameter to tell Jolokia to exclude `request` field from the response.
+
 ==== Restrict depth of the returned tree
 
 The optional parameter `maxDepth` can be used
