@@ -111,6 +111,8 @@ http://localhost:8888/jolokia/search/*:j2eeType=Servlet,*
 }
 ----
 
+NOTE:: Since Jolokia 2.1.0 we can use `includeRequest` parameter to tell Jolokia to exclude `request` field from the response.
+
 The returned MBean names are properly
 https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/ObjectName.html[quoted,role=externalLink,window=_blank]
 so that they can be directly used as

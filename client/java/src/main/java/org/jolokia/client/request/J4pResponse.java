@@ -33,13 +33,15 @@ public abstract class J4pResponse<T extends J4pRequest> {
     private final JSONObject jsonResponse;
 
     // request which lead to this response
-    private final T request;
+    private T request;
+    private final J4pType type;
 
     // timestamp of this response
     private final Date requestDate;
 
     protected J4pResponse(T pRequest, JSONObject pJsonResponse) {
         request = pRequest;
+        type = pRequest.getType();
         jsonResponse = pJsonResponse;
         Number timestamp = (Number) jsonResponse.get("timestamp");
         requestDate = timestamp != null ? new Date(timestamp.longValue() * 1000) : new Date();
@@ -54,12 +56,19 @@ public abstract class J4pResponse<T extends J4pRequest> {
     }
 
     /**
+     * For security reasons, we may want to clear the request from the response
+     */
+    public void clearRequest() {
+        this.request = null;
+    }
+
+    /**
      * Get the request/response type
      *
      * @return type
      */
     public J4pType getType() {
-        return request.getType();
+        return type;
     }
 
     /**
@@ -87,4 +96,5 @@ public abstract class J4pResponse<T extends J4pRequest> {
     public JSONObject asJSONObject() {
         return jsonResponse;
     }
+
 }

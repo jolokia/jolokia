@@ -88,6 +88,11 @@ export type ProcessingParameters = {
    */
   mimeType?: "text/plain" | "application/json"
   /**
+   * Whether to include request in its response. There's a global variant of this option
+   * but it may be overriden at request time.
+   */
+  includeRequest?: boolean
+  /**
    * If this parameter is given, its value is interpreted as epoch time (seconds
    * since 1.1.1970) and if the requested value did not change since this time,
    * an empty response (with no `value`) is returned and the response

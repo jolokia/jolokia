@@ -65,6 +65,33 @@ public class BulkRequestIntegrationTest extends AbstractJ4pIntegrationTest {
         JSONObject value = resp.getValue();
         JSONArray inner = (JSONArray) value.get("Blub");
         assertTrue(inner.get(1) instanceof String);
+
+        // requests can be found inside the response
+        assertEquals(((J4pReadResponse) resps.get(0)).getRequest().getType(), J4pType.READ);
+        assertEquals(((J4pVersionResponse) resps.get(1)).getRequest().getType(), J4pType.VERSION);
+    }
+
+    @Test
+    public void simpleBulkRequestWithRequestExcludedFromResponse() throws MalformedObjectNameException, J4pException {
+        J4pRequest req1 = new J4pReadRequest(itSetup.getAttributeMBean(), "ComplexNestedValue");
+        J4pVersionRequest req2 = new J4pVersionRequest();
+        Map<J4pQueryParameter, String> params = new HashMap<>();
+        params.put(J4pQueryParameter.MAX_DEPTH, "2");
+        params.put(J4pQueryParameter.INCLUDE_REQUEST, "false");
+        List<?> resps = j4pClient.execute(Arrays.asList(req1, req2), params);
+        assertEquals(resps.size(), 2);
+        J4pReadResponse resp = (J4pReadResponse) resps.get(0);
+        JSONObject value = resp.getValue();
+        JSONArray inner = (JSONArray) value.get("Blub");
+        assertTrue(inner.get(1) instanceof String);
+
+        // requests can be found inside the response
+        assertNull(((J4pReadResponse) resps.get(0)).getRequest());
+        assertNull(((J4pVersionResponse) resps.get(1)).getRequest());
+
+        // but we can correlate by order
+        assertEquals(req1.getType(), ((J4pResponse<?>) resps.get(0)).getType());
+        assertEquals(req2.getType(), ((J4pResponse<?>) resps.get(1)).getType());
     }
 
     @Test

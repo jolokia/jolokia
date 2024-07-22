@@ -207,6 +207,8 @@ in JavaScript. +
 |`true`
 |A flag (defaults to `true`) which controls whether the incoming
 request should be included in the response (under `request` key). +
+This applies to bulk requests too, so correlation should be done by index
+of requests and responses (these are guaranteed to be matching). +
 *Added since Jolokia 2.1.0*
 
 |`org.jolokia.historyMaxEntries`

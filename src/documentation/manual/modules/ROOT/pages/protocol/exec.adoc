@@ -135,4 +135,6 @@ looks like
 }
 ----
 
+NOTE:: Since Jolokia 2.1.0 we can use `includeRequest` parameter to tell Jolokia to exclude `request` field from the response.
+
 The return value get serialized as described in xref:jolokia_protocol.adoc#serialization-request[Request parameter serialization].

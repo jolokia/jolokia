@@ -561,7 +561,10 @@ Only `text/plain` and `application/json` are allowed.
 For any other value Jolokia will fallback to `text/plain`.
 
 `includeRequest`:: A flag (defaults to `true`) which controls whether the incoming
-request should be included in the response (under `request` key).
+request should be included in the response (under `request` key). +
+When `false`, bulk responses have to be correlated with requests by matching
+the requests using index number - responses come in the same order as requests. +
+*Added since Jolokia 2.1.0*
 
 `canonicalNaming`:: Defaults to `true` to return the canonical format of property lists.
 If set to `false` then the default unsorted property list is returned.

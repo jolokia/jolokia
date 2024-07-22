@@ -369,6 +369,45 @@ describe("Jolokia callback tests", () => {
     expect(f2Results[1]).toBe("Hello:3")
   })
 
+  test("Success callback as array with 5 responses without requests", async () => {
+    expect.assertions(17)
+
+    const f1Results: string[] = []
+    const f2Results: string[] = []
+
+    const f1 = (response: JolokiaSuccessResponse, index: number) => {
+      expect(Array.isArray(response)).toBe(false)
+      expect(response.request).toBeUndefined()
+      f1Results.push(response.value + ":" + index)
+    }
+    const f2 = (response: JolokiaSuccessResponse, index: number) => {
+      expect(Array.isArray(response)).toBe(false)
+      expect(response.request).toBeUndefined()
+      f2Results.push(response.value + ":" + index)
+    }
+    const jolokia = new Jolokia({ url: `http://localhost:${port}/jolokia`, includeRequest: false })
+
+    const requests: VersionRequest[] = []
+    for (let i = 0; i < 5; i++) {
+      requests.push({
+        // unknown type is returning "Hello" in test/app-jolokia.ts
+        type: "hello" as "version"
+      })
+    }
+    await jolokia.request(requests, {
+      method: "post",
+      success: [ f1, f2 ]
+    })
+
+    expect(f1Results.length).toBe(3)
+    expect(f2Results.length).toBe(2)
+    expect(f1Results[0]).toBe("Hello:0")
+    expect(f1Results[1]).toBe("Hello:2")
+    expect(f1Results[2]).toBe("Hello:4")
+    expect(f2Results[0]).toBe("Hello:1")
+    expect(f2Results[1]).toBe("Hello:3")
+  })
+
   test("Simple error callback", async () => {
     expect.assertions(5)
     const jolokia = new Jolokia({ url: `http://localhost:${port}/jolokia` })

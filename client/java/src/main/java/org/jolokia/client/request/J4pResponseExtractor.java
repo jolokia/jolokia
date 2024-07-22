@@ -32,10 +32,13 @@ public interface J4pResponseExtractor {
      *
      * @param request the original request
      * @param jsonResp the response as obtained from the agent
+     * @param includeRequest whether the response should include (in {@link J4pResponse#getRequest()})
+     *                       its request
      * @param <RESP> response typ
      * @param <REQ> request type
      * @return the created response
      * @throws J4pRemoteException if the response is in an error state this exception should be thrown.
      */
-    <RESP extends J4pResponse<REQ>, REQ extends J4pRequest> RESP extract(REQ request, JSONObject jsonResp) throws J4pRemoteException;
+    <RESP extends J4pResponse<REQ>, REQ extends J4pRequest> RESP extract(REQ request, JSONObject jsonResp,
+                                                                         boolean includeRequest) throws J4pRemoteException;
 }

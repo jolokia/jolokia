@@ -237,6 +237,9 @@ http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage
   "timestamp": 1702454822
 }
 ----
+
+NOTE:: Since Jolokia 2.1.0 we can use `includeRequest` parameter to tell Jolokia to exclude `request` field from the response.
+
 The `value` contains the response's
 value. For simple data types it is a scalar value, more complex
 types are serialized into a JSON object. See
