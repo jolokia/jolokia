@@ -6,6 +6,7 @@ import java.util.List;
 import javax.management.AttributeNotFoundException;
 import javax.management.openmbean.OpenType;
 
+import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.serializer.Serializer;
 import org.jolokia.service.serializer.json.ObjectToJsonConverter;
 import org.jolokia.server.core.service.serializer.SerializeOptions;
@@ -38,7 +39,7 @@ import org.jolokia.server.core.service.api.AbstractJolokiaService;
 public class JolokiaSerializer extends AbstractJolokiaService<Serializer> implements Serializer {
 
     // From object to json:
-    private final ObjectToJsonConverter toJsonConverter;
+    private ObjectToJsonConverter toJsonConverter;
 
     // From string/json to object:
     private final StringToObjectConverter toObjectConverter;
@@ -60,7 +61,14 @@ public class JolokiaSerializer extends AbstractJolokiaService<Serializer> implem
         super(Serializer.class,pOrder);
         toObjectConverter = new StringToObjectConverter();
         toOpenTypeConverter = new OpenTypeDeserializer(toObjectConverter);
-        toJsonConverter = new ObjectToJsonConverter(toObjectConverter);
+        // default version where context is not available
+        toJsonConverter = new ObjectToJsonConverter(toObjectConverter, null);
+    }
+
+    @Override
+    public void init(JolokiaContext pJolokiaContext) {
+        super.init(pJolokiaContext);
+        toJsonConverter = new ObjectToJsonConverter(toObjectConverter, pJolokiaContext);
     }
 
     /** {@inheritDoc} */

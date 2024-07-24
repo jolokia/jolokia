@@ -6,6 +6,8 @@ import java.util.*;
 
 import javax.management.AttributeNotFoundException;
 
+import org.jolokia.server.core.config.ConfigKey;
+import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.service.serializer.object.StringToObjectConverter;
 import org.jolokia.server.core.service.serializer.SerializeOptions;
 import org.jolokia.server.core.service.serializer.ValueFaultHandler;
@@ -57,12 +59,16 @@ public final class ObjectToJsonConverter {
     private static final String SIMPLIFIERS_DEFAULT_DEF = "META-INF/jolokia/simplifiers-default";
     private static final String SIMPLIFIERS_DEF         = "META-INF/jolokia/simplifiers";
 
+    public ObjectToJsonConverter(StringToObjectConverter pStringToObjectConverter) {
+        this(pStringToObjectConverter, null);
+    }
+
     /**
      * New object-to-json converter
      *
      * @param pStringToObjectConverter used when setting values
      */
-    public ObjectToJsonConverter(StringToObjectConverter pStringToObjectConverter) {
+    public ObjectToJsonConverter(StringToObjectConverter pStringToObjectConverter, JolokiaContext context) {
 
         handlers = new ArrayList<>();
 
@@ -83,7 +89,13 @@ public final class ObjectToJsonConverter {
         handlers.add(new EnumExtractor());
 
         // Special date handling
-        handlers.add(new DateExtractor());
+        String dateFormat = context == null
+            ? ConfigKey.DATE_FORMAT.getDefaultValue() : context.getConfig(ConfigKey.DATE_FORMAT);
+        TimeZone dateFormatZone = context == null
+            ? TimeZone.getDefault() : TimeZone.getTimeZone(context.getConfig(ConfigKey.DATE_FORMAT_ZONE));
+        handlers.add(new DateExtractor(dateFormat, dateFormatZone));
+        handlers.add(new CalendarExtractor(dateFormat, dateFormatZone));
+        handlers.add(new TemporalExtractor(dateFormat, dateFormatZone));
 
         // Must be last in handlers, used default algorithm
         handlers.add(new BeanExtractor());

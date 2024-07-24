@@ -897,7 +897,7 @@
         used with a path "time" the epoch milliseconds are
         returned. Setting of date values and using dates as arguments
         for JMX operations is now also supported, the value can be
-        given either in epoch milliseconds or as an ISO-86-1 formatted
+        given either in epoch milliseconds or as an ISO-8601 formatted
         string. With a path "time" a given date value can be even
         updated for a write operation.
       </action>
