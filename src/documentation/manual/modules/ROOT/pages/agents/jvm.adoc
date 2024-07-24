@@ -376,6 +376,22 @@ of requests and responses (these are guaranteed to be matching). +
 *Added since Jolokia 2.1.0*
 |Default: `true`
 
+|`dateFormat`
+a|A format specifier to use for formatting dates, calendars and instances of `java.time.Temporal`.
+Additionally we can use:
+
+* `unix` to serialize dates as Unix epoch time in seconds
+* `time`, `millis`, `long` to serialize dates as Unix epoch time in milliseconds
+* `nanos` to serialize dates as Unix epoch time in nanoseconds
+
+*Added since Jolokia 2.1.0*
+|Default: `yyyy-MM-dd'T'HH:mm:ssXXX` (ISO 8601 format)
+
+|`dateFormatTimeZone`
+|A time zone specifier used for date formatters, like `UTC` +
+*Added since Jolokia 2.1.0*
+|Default: local time zone
+
 |`policyLocation`
 |Path to the XML policy file
 |
@@ -491,6 +507,8 @@ where <command> is one of
     --includeStackTrace <t|f>       whether to include StackTraces for error messages (default: false)
     --serializeException <t|f>      whether to add a serialized version of the exception in the Jolokia response (default: false)
     --includeRequest <t|f>          whether to include entire request in the response (default: true)
+    --dateFormat <format>           DateFormat to use for serializing dates/times/calendars/temporals (default: yyyy-MM-dd'T'HH:mm:ssXXX)
+    --dateFormatTimeZone <tz>       TimeZone to use for formatting dates/times/calendars/temporals (default: local time zone)
     --config <configfile>           Path to a property file from where to read the configuration
     --help                          This help documentation
     --version                       Version of this agent (it's {jolokia-version} btw :)

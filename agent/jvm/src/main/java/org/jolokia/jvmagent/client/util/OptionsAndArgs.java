@@ -54,6 +54,7 @@ public final class OptionsAndArgs {
             "maxObjects", "serializeLong", "restrictorClass", "policyLocation", "mbeanQualifier",
             "disableDetectors!", "enabledServices", "disabledServices",
             "canonicalNaming", "includeStackTrace", "serializeException", "includeRequest",
+            "dateFormat", "dateFormatTimeZone",
             "discoveryEnabled", "discoveryAgentUrl", "agentId", "agentDescription",
             // Others:
             "config", "help!"));

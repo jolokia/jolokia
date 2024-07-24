@@ -177,6 +177,22 @@ of requests and responses (these are guaranteed to be matching). +
 *Added since Jolokia 2.1.0*
 |Default: `true`
 
+|`dateFormat`
+a|A format specifier to use for formatting dates, calendars and instances of `java.time.Temporal`.
+Additionally we can use:
+
+* `unix` to serialize dates as Unix epoch time in seconds
+* `time`, `millis`, `long` to serialize dates as Unix epoch time in milliseconds
+* `nanos` to serialize dates as Unix epoch time in nanoseconds
+
+*Added since Jolokia 2.1.0*
+|Default: `yyyy-MM-dd'T'HH:mm:ssXXX` (ISO 8601 format)
+
+|`dateFormatTimeZone`
+|A time zone specifier used for date formatters, like `UTC` +
+*Added since Jolokia 2.1.0*
+|Default: local time zone
+
 |`mbeanQualifier`
 |Qualifier to add to the ObjectName of Jolokia's own
 MBeans. This can become necessary if more than one agent is

@@ -36,6 +36,10 @@
       <action dev="grgrzybek" type="fix" issue="212">
         Supporting multi-dimensional arrays (finally!).
       </action>
+      <action dev="grgrzybek" type="fix" issue="181">
+        Supporting java.util.Calendars and java.time.Temporal implementations. Also provide configuration
+        options for date/time format and its time zone.
+      </action>
     </release>
     <release version="2.0.3" description="Release 2.0.3" date="2024-06-06">
       <action dev="tadayosi" type="fix" issue="676">
