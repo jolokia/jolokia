@@ -189,7 +189,7 @@ public class ItSetup {
         ObjectName registeredName = pName != null ?
                 pServer.registerMBean(pObject, new ObjectName(pName)).getObjectName() :
                 pServer.registerMBean(pObject,null).getObjectName();
-        System.out.println("Registered " + registeredName);
+//        System.out.println("Registered " + registeredName);
         return registeredName;
     }
 
@@ -202,7 +202,7 @@ public class ItSetup {
         @SuppressWarnings("unchecked")
         final StandardMBean mxBean = new StandardMBean(pObject, pManagementInterface, true /* MXBean */);
         pServer.registerMBean(mxBean, objectName);
-        System.out.println("Registered MXBean " + objectName);
+//        System.out.println("Registered MXBean " + objectName);
         return objectName;
     }
 

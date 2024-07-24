@@ -17,6 +17,8 @@ package org.jolokia.client.request;
  */
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import javax.management.MalformedObjectNameException;
@@ -26,6 +28,7 @@ import org.jolokia.client.exception.J4pException;
 import org.jolokia.client.exception.J4pRemoteException;
 import org.jolokia.json.JSONArray;
 import org.jolokia.json.JSONObject;
+import org.jolokia.server.core.config.ConfigKey;
 import org.testng.annotations.Test;
 
 import static org.testng.AssertJUnit.*;
@@ -134,6 +137,16 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
                 assertEquals(((JSONArray) val.get(i)).get(0), input[i][0]);
                 assertEquals(((JSONArray) val.get(i)).get(1), input[i][1]);
             }
+        });
+    }
+
+    @Test
+    public void instant() throws MalformedObjectNameException, J4pException {
+        Instant input = Instant.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(ConfigKey.DATE_FORMAT.getDefaultValue()).withZone(TimeZone.getDefault().toZoneId());
+        checkWrite(new String[] { "POST" }, "Instant", null, input, resp -> {
+            String val = resp.getValue();
+            assertEquals(val, formatter.format(input));
         });
     }
 

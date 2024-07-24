@@ -1,6 +1,7 @@
 package org.jolokia.it.core;
 
 import java.io.File;
+import java.time.Instant;
 import java.util.*;
 
 import javax.management.ObjectName;
@@ -111,5 +112,9 @@ public interface AttributeCheckingMBean {
     int[][] getArray2D();
 
     void setArray2D(int[][] array2D);
+
+    Instant getInstant();
+
+    void setInstant(Instant instant);
 
 }
