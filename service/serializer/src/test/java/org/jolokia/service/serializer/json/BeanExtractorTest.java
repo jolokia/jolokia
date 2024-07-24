@@ -181,7 +181,7 @@ public class BeanExtractorTest extends AbstractExtractorTest {
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         sdf.setTimeZone(TimeZone.getTimeZone("CET"));
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSXXX");
 
         // CET Date
         this.getInner().setInnerDate(sdf.parse("2024-07-22 14:22:42.999"));
@@ -193,7 +193,7 @@ public class BeanExtractorTest extends AbstractExtractorTest {
 
         List<Temporal> temporals = new ArrayList<>();
         // zone-less LocalDateTime
-        LocalDateTime ldt = dtf.parse("2024-07-22 14:22:42.999", LocalDateTime::from);
+        LocalDateTime ldt = dtf.parse("2024-07-22 14:22:42.999+02:00", LocalDateTime::from);
         temporals.add(ldt);
         // zone-less Instant
         temporals.add(ldt.toInstant(ZoneOffset.ofHours(-5)));

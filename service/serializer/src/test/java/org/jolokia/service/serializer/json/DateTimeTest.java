@@ -139,8 +139,8 @@ public class DateTimeTest {
         OffsetDateTime odtWeirdButWorks = ldt11.atOffset(ZoneOffset.ofHours(1));
 
         // no zone specified on df1, so default should be used
-        assertEquals(df1.format(odt), dfDefault.format(odt));
-        assertEquals(df1.format(zdt), dfDefault.format(zdt));
+        assertEquals(df1.withZone(ZoneId.systemDefault()).format(odt), dfDefault.format(odt));
+        assertEquals(df1.withZone(ZoneId.systemDefault()).format(zdt), dfDefault.format(zdt));
         // UTC specified on the formatter, so should be "Z" (with "xxx" it'd be "+0000")
         // but also it's 2 hours earlier in Greenwich
         assertEquals(df2.format(odt), "2024-07-21 22:00:00.000 (Z)");

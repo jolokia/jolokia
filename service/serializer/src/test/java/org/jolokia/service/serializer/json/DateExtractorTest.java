@@ -17,7 +17,11 @@ package org.jolokia.service.serializer.json;
  */
 
 import java.lang.reflect.InvocationTargetException;
+import java.sql.Time;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Deque;
 import java.util.LinkedList;
@@ -96,7 +100,8 @@ public class DateExtractorTest {
         Date date = new Date(1231231231231L);
         Deque<String> stack = new LinkedList<>();
         Object result = extractor.extractObject(null,date,stack,true);
-        assertEquals(result, "20090106094031231");
+        assertEquals(result, DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS").withZone(ZoneId.systemDefault())
+            .format(Instant.ofEpochMilli(1231231231231L)));
         stack.add("time");
         result = extractor.extractObject(null,date,stack,true);
         assertEquals(result,date.getTime());

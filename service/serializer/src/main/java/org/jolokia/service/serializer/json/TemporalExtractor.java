@@ -121,7 +121,7 @@ public class TemporalExtractor implements Extractor {
         int nanos = temporal.isSupported(ChronoField.NANO_OF_SECOND) ? temporal.get(ChronoField.NANO_OF_SECOND) : 0;
         ZoneOffset offset = temporal.isSupported(ChronoField.OFFSET_SECONDS)
             ? ZoneOffset.ofTotalSeconds(temporal.get(ChronoField.OFFSET_SECONDS))
-            : ZoneId.systemDefault().getRules().getOffset(Instant.now());
+            : formatter.getZone().getRules().getOffset(Instant.now());
         OffsetDateTime odt = OffsetDateTime.of(year, month, day, hour, minute, seconds, nanos, offset);
 
         return formatter.format(odt);

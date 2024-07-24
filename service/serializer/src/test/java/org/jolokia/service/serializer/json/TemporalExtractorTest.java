@@ -150,7 +150,8 @@ public class TemporalExtractorTest {
         // local dates (no time, no time-zone)
 
         result = new TemporalExtractor("yyyy-MM-dd", TimeZone.getTimeZone("UTC")).extractObject(null, LocalDate.of(2024, 7, 23), stack, true);
-        if (ZoneId.systemDefault().getRules().getOffset(Instant.now()).getTotalSeconds() > 0) {
+        // we need to use adjustment of the zone from the formatter used by the extractor
+        if (ZoneId.of("UTC").getRules().getOffset(Instant.now()).getTotalSeconds() > 0) {
             // we're east of Greenwich, so the formatted date is actually a day before
             // this is expected, as midnight is assumed for time-less Temporals and local zone is used, while
             // formatter's zone is UTC
@@ -165,7 +166,7 @@ public class TemporalExtractorTest {
         assertEquals(result, dtf.withZone(ZoneId.of("UTC")).format(OffsetDateTime.of(
             LocalDate.of(2024, 7, 23),
             LocalTime.of(0, 0, 0, 0),
-            ZoneId.systemDefault().getRules().getOffset(Instant.now())
+            ZoneId.of("UTC").getRules().getOffset(Instant.now())
         )));
     }
 
