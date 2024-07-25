@@ -17,16 +17,12 @@ package org.jolokia.service.serializer.json;
  */
 
 import java.lang.reflect.InvocationTargetException;
-import java.sql.Time;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.TimeZone;
-
 import javax.management.AttributeNotFoundException;
 
 import org.jolokia.server.core.config.ConfigKey;
@@ -43,19 +39,17 @@ import static org.testng.Assert.assertTrue;
  * @author roland
  * @since 18.04.11
  */
-public class DateExtractorTest {
+public class CalendarExtractorTest {
 
-    private DateExtractor extractor;
-    private ObjectToJsonConverter converter;
-
+    private Extractor extractor;
 
     @BeforeMethod
     public void setup() {
-        extractor = new DateExtractor(ConfigKey.DATE_FORMAT.getDefaultValue(),
+        extractor = new CalendarExtractor(ConfigKey.DATE_FORMAT.getDefaultValue(),
             TimeZone.getTimeZone(ConfigKey.DATE_FORMAT_ZONE.getDefaultValue()));
 
         // Needed for subclassing final object
-        converter = new ObjectToJsonConverter(null);
+        ObjectToJsonConverter converter = new ObjectToJsonConverter(null);
         converter.setupContext(
             new SerializeOptions.Builder()
                 .faultHandler(ValueFaultHandler.THROWING_VALUE_FAULT_HANDLER)
@@ -64,7 +58,7 @@ public class DateExtractorTest {
 
     @Test
     public void type() {
-        assertEquals(extractor.getType(),Date.class);
+        assertEquals(extractor.getType(), Calendar.class);
     }
 
     @Test
@@ -74,69 +68,74 @@ public class DateExtractorTest {
 
     @Test
     public void directExtract() throws AttributeNotFoundException {
-        Date date = new Date();
+        Calendar c = Calendar.getInstance();
         Deque<String> stack = new LinkedList<>();
-        Object result = extractor.extractObject(null,date,stack,false);
-        assertEquals(result,date);
+        Object result = extractor.extractObject(null, c, stack, false);
+        assertEquals(result, c);
         stack.add("time");
-        result = extractor.extractObject(null,date,stack,false);
-        assertEquals(result,date);
-    }
-
-    @Test
-    public void simpleJsonExtract() throws AttributeNotFoundException {
-        Date date = new Date();
-        Deque<String> stack = new LinkedList<>();
-        Object result = extractor.extractObject(null,date,stack,true);
-        assertEquals(result, DateUtil.toISO8601(date));
-        stack.add("time");
-        result = extractor.extractObject(null,date,stack,true);
-        assertEquals(result,date.getTime());
+        result = extractor.extractObject(null, c, stack, false);
+        assertEquals(result, c);
     }
 
     @Test
     public void customFormatExtract() throws AttributeNotFoundException {
-        extractor = new DateExtractor("yyyyMMddHHmmssSSS", TimeZone.getDefault());
-        Date date = new Date(1231231231231L);
+        Calendar cal = Calendar.getInstance();
+
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        df.setTimeZone(TimeZone.getTimeZone("UTC"));
+        Extractor extractor = new CalendarExtractor("yyyy-MM-dd HH:mm:ss (XXX)", TimeZone.getTimeZone("Europe/Warsaw"));
+        Extractor extractor2 = new CalendarExtractor("yyyy-MM-dd HH:mm:ss (XXX)", TimeZone.getTimeZone("US/Eastern"));
+        // we want this calendar instance to represent afternoon at US East Coast
+        cal.setTimeZone(TimeZone.getTimeZone("US/Eastern"));
+        cal.set(2024, Calendar.JULY, 23, 15, 26, 28);
+
         Deque<String> stack = new LinkedList<>();
-        Object result = extractor.extractObject(null,date,stack,true);
-        assertEquals(result, DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS").withZone(ZoneId.systemDefault())
-            .format(Instant.ofEpochMilli(1231231231231L)));
+
+        // so it should be already past 9PM in Central Europe (6 hours span)
+        assertEquals(extractor.extractObject(null, cal, stack, true), "2024-07-23 21:26:28 (+02:00)");
+        assertEquals(extractor2.extractObject(null, cal, stack, true), "2024-07-23 15:26:28 (-04:00)");
+
+        // in early November, Europe turns off DST, but US/Eastern stays at UTC-4
+        cal = Calendar.getInstance();
+        cal.setTimeZone(TimeZone.getTimeZone("US/Eastern"));
+        cal.set(2024, Calendar.NOVEMBER, 2, 15, 26, 28);
+        assertEquals(extractor.extractObject(null, cal, stack, true), "2024-11-02 20:26:28 (+01:00)");
+        assertEquals(extractor2.extractObject(null, cal, stack, true), "2024-11-02 15:26:28 (-04:00)");
+
+        // in late November, EST moves to UTC-5
+        cal = Calendar.getInstance();
+        cal.set(2024, Calendar.NOVEMBER, 23, 15, 26, 28);
+        cal.setTimeZone(TimeZone.getTimeZone("US/Eastern"));
+        assertEquals(extractor.extractObject(null, cal, stack, true), "2024-11-23 21:26:28 (+01:00)");
+        assertEquals(extractor2.extractObject(null, cal, stack, true), "2024-11-23 15:26:28 (-05:00)");
+
         stack.add("time");
-        result = extractor.extractObject(null,date,stack,true);
-        assertEquals(result,date.getTime());
-    }
-
-    // Disabled until Mockin fixed (seems that the mock is still active in future, unrelated tests
-    @Test(enabled = false, expectedExceptions = AttributeNotFoundException.class)
-    public void simpleJsonExtractWithWrongPath() throws AttributeNotFoundException {
-        Date date = new Date();
-        Deque<String> stack = new LinkedList<>();
-        stack.add("blablub");
-
-        extractor.extractObject(converter, date, stack, true);
+        assertEquals(extractor.extractObject(null, cal, stack, true), cal.getTime().getTime());
     }
 
     @Test
     public void timeSet() throws InvocationTargetException, IllegalAccessException {
         Date date = new Date();
+        Calendar cal = Calendar.getInstance();
         long currentTime = date.getTime();
-        Object oldVal = extractor.setObjectValue(null,date,"time",0L);
-        assertEquals(oldVal,currentTime);
-        assertEquals(date.getTime(),0L);
+        Object oldVal = extractor.setObjectValue(null, cal, "time", 0L);
+        assertEquals(oldVal, currentTime);
+        assertEquals(cal.getTime().getTime(), 0L);
 
-        oldVal = extractor.setObjectValue(null,date,"time","1000");
-        assertEquals(oldVal,0L);
-        assertEquals(date.getTime(),1000L);
+        oldVal = extractor.setObjectValue(null, cal, "time", "1000");
+        assertEquals(oldVal, 0L);
+        assertEquals(cal.getTime().getTime(), 1000L);
     }
 
     @Test
     public void iso8601Set() throws InvocationTargetException, IllegalAccessException {
         Date date = new Date();
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
         String current = DateUtil.toISO8601(date);
-        Object oldVal = extractor.setObjectValue(null,date,"iso8601",DateUtil.toISO8601(new Date(0)));
-        assertEquals(oldVal,current);
-        assertEquals(date.getTime(),0L);
+        Object oldVal = extractor.setObjectValue(null, cal, "iso8601", DateUtil.toISO8601(new Date(0)));
+        assertEquals(oldVal, current);
+        assertEquals(cal.getTime().getTime(), 0L);
     }
 
     @Test
@@ -165,8 +164,9 @@ public class DateExtractorTest {
         }
     }
 
-    @Test(expectedExceptions = { UnsupportedOperationException.class })
+    @Test(expectedExceptions = {UnsupportedOperationException.class})
     public void invalidSet() throws InvocationTargetException, IllegalAccessException {
-        Object oldVal = extractor.setObjectValue(null,new Date(),"blubbla",0L);
+        extractor.setObjectValue(null, Calendar.getInstance(), "blubbla", 0L);
     }
+
 }

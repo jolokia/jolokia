@@ -1,20 +1,5 @@
-package org.jolokia.service.serializer.json;
-
-import java.lang.reflect.InvocationTargetException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Deque;
-import java.util.TimeZone;
-
-import javax.management.AttributeNotFoundException;
-
-import org.jolokia.server.core.config.ConfigKey;
-import org.jolokia.service.serializer.object.StringToObjectConverter;
-import org.jolokia.server.core.util.DateUtil;
-
 /*
- * Copyright 2009-2013 Roland Huss
+ * Copyright 2009-2024 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,23 +13,32 @@ import org.jolokia.server.core.util.DateUtil;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.service.serializer.json;
 
+import java.lang.reflect.InvocationTargetException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Deque;
+import java.util.TimeZone;
+import javax.management.AttributeNotFoundException;
+
+import org.jolokia.server.core.config.ConfigKey;
+import org.jolokia.server.core.util.DateUtil;
+import org.jolokia.service.serializer.object.StringToObjectConverter;
 
 /**
- * Extractor for sophisticated date handling which support virtual
- * path handling (i.e for converting to epoch time or an ISO-8601 format)
- *
- * @author roland
- * @since 17.04.11
+ * Extractor for {@link Calendar} instances.
  */
-public class DateExtractor implements Extractor {
+public class CalendarExtractor implements Extractor {
 
     protected SimpleDateFormat dateFormat;
     protected boolean useUnixTimestamp = false;
     protected boolean useUnixMillis = false;
     protected boolean useUnixNanos = false;
 
-    public DateExtractor(String dateFormat, TimeZone timeZone) {
+    public CalendarExtractor(String dateFormat, TimeZone timeZone) {
         if ("time".equals(dateFormat) || "long".equals(dateFormat) || "millis".equals(dateFormat)) {
             useUnixMillis = true;
         } else if ("unix".equals(dateFormat)) {
@@ -62,85 +56,80 @@ public class DateExtractor implements Extractor {
         }
     }
 
-    /** {@inheritDoc} */
+    @Override
     public Class<?> getType() {
-        return Date.class;
+        return Calendar.class;
     }
 
-    /** {@inheritDoc} */
+    @Override
     public Object extractObject(ObjectToJsonConverter pConverter, Object pValue, Deque<String> pPathParts, boolean jsonify) throws AttributeNotFoundException {
-        if (!jsonify) {
+        if (!jsonify || pValue == null) {
             return pValue;
         }
-        Date date = (Date) pValue;
+
+        Calendar cal = (Calendar) pValue;
         if (useUnixTimestamp) {
-            return date.getTime() / 1000;
+            return cal.getTimeInMillis() / 1000;
         }
         if (useUnixMillis) {
-            return date.getTime();
+            return cal.getTimeInMillis();
         }
         if (useUnixNanos) {
-            return date.getTime() * 1_000_000;
+            return cal.getTimeInMillis() * 1_000_000;
         }
 
         String pathPart = pPathParts.isEmpty() ? null : pPathParts.pop();
         if (pathPart != null) {
             if (!"time".equals(pathPart)) {
                 return pConverter.getValueFaultHandler().handleException(
-                        new AttributeNotFoundException("A date accepts only a single inner path element " +
-                                                       "of value 'time' (and not '" + pathPart + "')"));
+                    new AttributeNotFoundException("A calendar accepts only a single inner path element " +
+                        "of value 'time' (and not '" + pathPart + "')"));
             }
-            return date.getTime();
-        } else {
-            return dateFormat.format(date);
+            return cal.getTime().getTime();
         }
+
+        // the calendar has its timezone and the formatter has one, but it's adjusted internally
+        return dateFormat.format(cal.getTime());
     }
 
-    // Set the the date. The value must be either a <code>long</code> in which case the
-    // it is converted directly to a date or a string formatted according to configured
-    // date format.
-    // This method is called for changing an existing date object, i.e. when it is called with a path to
-    // date. Contrast this to the case, where the date is set directly (without a path). For this,
-    // the StringToObjectConverter is responsible (along with its date parser)
-    /** {@inheritDoc} */
-    public Object setObjectValue(StringToObjectConverter pConverter, Object pInner, String pAttribute, Object pValue)
-            throws IllegalAccessException, InvocationTargetException {
-        Date date = (Date) pInner;
+    @Override
+    public Object setObjectValue(StringToObjectConverter pConverter, Object pInner, String pAttribute, Object pValue) throws IllegalAccessException, InvocationTargetException, IllegalArgumentException {
+        Calendar cal = (Calendar) pInner;
         if ("time".equals(pAttribute)) {
             long time;
-            long oldValue = date.getTime();
+            long oldValue = cal.getTime().getTime();
             if (pValue instanceof String) {
                 time = Long.parseLong((String) pValue);
             } else {
                 time = (Long) pValue;
             }
-            date.setTime(time);
+            cal.setTime(new Date(time));
             return oldValue;
         } else if ("iso8601".equals(pAttribute)) {
             Date newDate = DateUtil.fromISO8601(pValue.toString());
-            String oldValue = DateUtil.toISO8601(date);
-            date.setTime(newDate.getTime());
+            String oldValue = DateUtil.toISO8601(cal.getTime());
+            cal.setTime(newDate);
             return oldValue;
         } else if ("format".equals(pAttribute)) {
             // we assume that the value is set within java.util.Date object as unix time
             // after parsing the value according to configured date format
             try {
                 Date newDate = dateFormat.parse(pValue.toString());
-                String oldValue = dateFormat.format(date);
-                date.setTime(newDate.getTime());
+                String oldValue = dateFormat.format(cal);
+                cal.setTime(newDate);
                 return oldValue;
             } catch (ParseException e) {
                 throw new IllegalArgumentException(e.getMessage(), e);
             }
         }
-        throw new UnsupportedOperationException("Setting of date values is not yet supported directly. " +
+        throw new UnsupportedOperationException("Setting of calendar values is not yet supported directly. " +
             "Use a path/attribute 'time', 'iso8601' or 'format' " +
-            "to set the epoch seconds on a date");
+            "to set the epoch seconds on a date of the calendar");
     }
 
-    // For now, we only return dates;
-    /** {@inheritDoc} */
+    @Override
     public boolean canSetValue() {
         return true;
     }
+
 }

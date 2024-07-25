@@ -17,6 +17,8 @@ package org.jolokia.client.request;
  */
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import javax.management.MalformedObjectNameException;
@@ -26,6 +28,7 @@ import org.jolokia.client.exception.J4pException;
 import org.jolokia.client.exception.J4pRemoteException;
 import org.jolokia.json.JSONArray;
 import org.jolokia.json.JSONObject;
+import org.jolokia.server.core.config.ConfigKey;
 import org.testng.annotations.Test;
 
 import static org.testng.AssertJUnit.*;
@@ -138,16 +141,26 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
     }
 
     @Test
+    public void instant() throws MalformedObjectNameException, J4pException {
+        Instant input = Instant.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(ConfigKey.DATE_FORMAT.getDefaultValue()).withZone(TimeZone.getDefault().toZoneId());
+        checkWrite(new String[] { "POST" }, "Instant", null, input, resp -> {
+            String val = resp.getValue();
+            assertEquals(val, formatter.format(input));
+        });
+    }
+
+    @Test
     public void access() throws MalformedObjectNameException {
 
         for (J4pWriteRequest req : new J4pWriteRequest[] {
-                new J4pWriteRequest("jolokia.it:type=attribute","List","bla"),
-                new J4pWriteRequest(getTargetProxyConfig(),"jolokia.it:type=attribute","List","bla")
+                new J4pWriteRequest(IT_ATTRIBUTE_MBEAN,"List","bla"),
+                new J4pWriteRequest(getTargetProxyConfig(),IT_ATTRIBUTE_MBEAN,"List","bla")
         }) {
             req.setPath("0");
             assertEquals(req.getPath(),"0");
             assertEquals(req.getAttribute(),"List");
-            assertEquals(req.getObjectName(),new ObjectName("jolokia.it:type=attribute"));
+            assertEquals(req.getObjectName(),new ObjectName(IT_ATTRIBUTE_MBEAN));
             assertEquals(req.getValue(),"bla");
             assertEquals(req.getType(),J4pType.WRITE);
         }
@@ -237,7 +250,7 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
     }
 
     private void reset(J4pTargetConfig cfg) throws MalformedObjectNameException, J4pException {
-        j4pClient.execute(new J4pExecRequest(cfg,"jolokia.it:type=attribute", "reset"));
+        j4pClient.execute(new J4pExecRequest(cfg,IT_ATTRIBUTE_MBEAN, "reset"));
     }
 
     private interface ResponseAssertion {

@@ -7,6 +7,10 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -49,6 +53,8 @@ public class StringToObjectConverter {
     private static final Map<String,Parser> PARSER_MAP = new HashMap<>();
     @SuppressWarnings("rawtypes")
     private static final Map<String,Class> TYPE_SIGNATURE_MAP = new HashMap<>();
+
+    private final TemporalParser temporalParser = new TemporalParser();
 
     static {
         PARSER_MAP.put(Byte.class.getName(),new ByteParser());
@@ -192,6 +198,11 @@ public class StringToObjectConverter {
         Parser parser = PARSER_MAP.get(pType);
         if (parser != null) {
             return parser.extract(value);
+        }
+
+        if (pType.startsWith("java.time.")) {
+            // we'll try to parse as some Temporal
+            return temporalParser.extract(value, pType);
         }
 
         Object cValue = convertByConstructor(pType, pValue);
@@ -365,4 +376,32 @@ public class StringToObjectConverter {
             }
         }
     }
+
+    private static class TemporalParser {
+
+        public Object extract(String pValue, String temporalImpl) {
+            // client should send a unix nano time
+            try {
+                Class<?> clz = Class.forName(temporalImpl);
+                long unixNano = Long.parseLong(pValue);
+                // we assume that an instant is always in UTC
+                Instant instant = Instant.ofEpochSecond(unixNano / 1_000_000_000, unixNano % 1_000_000_000);
+                if (clz == Instant.class) {
+                    return instant;
+                }
+                if (clz == OffsetDateTime.class) {
+                    return OffsetDateTime.ofInstant(instant, ZoneId.of("UTC"));
+                }
+                if (clz == ZonedDateTime.class) {
+                    return ZonedDateTime.ofInstant(instant, ZoneId.of("UTC"));
+                }
+                throw new IllegalArgumentException("Cannot handle Temporal of class \"" + temporalImpl + "\" for value " + pValue);
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("Cannot parse Temporal " + pValue + ": " + e, e);
+            } catch (ClassNotFoundException e) {
+                throw new IllegalArgumentException("Can't find Temporal class \"" + temporalImpl + "\"");
+            }
+        }
+    }
+
 }

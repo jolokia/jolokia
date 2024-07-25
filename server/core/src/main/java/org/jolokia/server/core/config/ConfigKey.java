@@ -18,6 +18,7 @@ package org.jolokia.server.core.config;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 
 /**
  * Enumeration defining the various configuration constant names which
@@ -382,7 +383,27 @@ public enum ConfigKey {
      * Comma-separated list of fully qualified class names for services that should be disabled even if
      * they are detected from {@code /META-INF/jolokia/services(-default)}.
      */
-    DISABLED_SERVICES("disabledServices", true, false);
+    DISABLED_SERVICES("disabledServices", true, false),
+
+    /**
+     * Format for {@link java.text.SimpleDateFormat} used for {@link java.util.Date} serialization
+     * and deserialization. Defaults to <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO-9601 extended format</a>
+     * (with {@code -} separators for year/month/day and {@code :} separator for hour/minute/second.
+     * Date and Time are separated by {@code T}.
+     * The option should be a valid parameter for {@link java.text.SimpleDateFormat} constructor
+     * and {@link java.time.format.DateTimeFormatter#ofPattern}, but
+     * we accept few special values:<ul>
+     *     <li>{@code time}, {@code long}, {@code unix} and {@code millis} - Unix epoch time (milliseconds since 1970-01-01)</li>
+     *     <li>{@code nanos} - Unix epoch time in nanoseconds (since 1970-01-01)</li>
+     * </ul>
+     */
+    DATE_FORMAT("dateFormat", true, false, "yyyy-MM-dd'T'HH:mm:ssXXX"),
+
+    /**
+     * When formatting dates using {@link java.text.SimpleDateFormat} uses default (local) timeZone, but
+     * we may specify another zone (for example {@code TimeZone#getTimeZone("UTC")}).
+     */
+    DATE_FORMAT_ZONE("dateFormatTimeZone", true, false, TimeZone.getDefault().toZoneId().getId());
 
     /**
      * JAAS Subject to attach to an HTTP request as attribute if JAAS based authentication is in use.

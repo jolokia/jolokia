@@ -211,6 +211,22 @@ This applies to bulk requests too, so correlation should be done by index
 of requests and responses (these are guaranteed to be matching). +
 *Added since Jolokia 2.1.0*
 
+|`org.jolokia.dateFormat`
+|Default: `yyyy-MM-dd'T'HH:mm:ssXXX` (ISO 8601 format)
+a|A format specifier to use for formatting dates, calendars and instances of `java.time.Temporal`.
+Additionally we can use:
+
+* `unix` to serialize dates as Unix epoch time in seconds
+* `time`, `millis`, `long` to serialize dates as Unix epoch time in milliseconds
+* `nanos` to serialize dates as Unix epoch time in nanoseconds
+
+*Added since Jolokia 2.1.0*
+
+|`org.jolokia.dateFormatTimeZone`
+|Default: local time zone
+|A time zone specifier used for date formatters, like `UTC` +
+*Added since Jolokia 2.1.0*
+
 |`org.jolokia.historyMaxEntries`
 |`10`
 |Number of entries to keep in the history. This can be changed at

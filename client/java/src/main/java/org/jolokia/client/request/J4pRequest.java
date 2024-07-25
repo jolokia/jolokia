@@ -17,6 +17,8 @@ package org.jolokia.client.request;
  */
 
 import java.lang.reflect.Array;
+import java.time.temporal.ChronoField;
+import java.time.temporal.Temporal;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -157,6 +159,18 @@ public abstract class J4pRequest {
                     args[i++] = e;
                 }
                 return getArrayForArgument(args);
+            } else if (Temporal.class.isAssignableFrom(pArg.getClass())) {
+                // special handling for the temporals that can easily be converted to unix time (in nanos)
+                Temporal t = (Temporal) pArg;
+                if (t.isSupported(ChronoField.INSTANT_SECONDS)) {
+                    long instant = t.getLong(ChronoField.INSTANT_SECONDS) * 1_000_000_000L
+                        + t.getLong(ChronoField.NANO_OF_SECOND);
+                    return Long.toString(instant);
+                } else {
+                    // for now we can't nicely convert it and we don't know what's the pattern used
+                    // at server side
+                    return t.toString();
+                }
             }
         }
         return nullEscape(pArg);
@@ -209,6 +223,17 @@ public abstract class J4pRequest {
             return serializeMap((Map<String, Object>) pArg);
         } else if (pArg instanceof Collection) {
             return serializeCollection((Collection<?>) pArg);
+        } else if (pArg instanceof Temporal) {
+            // special handling for the temporals that can easily be converted to unix time (in nanos)
+            Temporal t = (Temporal) pArg;
+            if (t.isSupported(ChronoField.INSTANT_SECONDS)) {
+                return t.getLong(ChronoField.INSTANT_SECONDS) * 1_000_000_000L
+                    + t.getLong(ChronoField.NANO_OF_SECOND);
+            } else {
+                // for now we can't nicely convert it and we don't know what's the pattern used
+                // at server side
+                return t.toString();
+            }
         } else {
             return pArg instanceof Number || pArg instanceof Boolean ? pArg : pArg.toString();
         }

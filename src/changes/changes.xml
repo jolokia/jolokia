@@ -36,6 +36,10 @@
       <action dev="grgrzybek" type="fix" issue="212">
         Supporting multi-dimensional arrays (finally!).
       </action>
+      <action dev="grgrzybek" type="fix" issue="181">
+        Supporting java.util.Calendars and java.time.Temporal implementations. Also provide configuration
+        options for date/time format and its time zone.
+      </action>
     </release>
     <release version="2.0.3" description="Release 2.0.3" date="2024-06-06">
       <action dev="tadayosi" type="fix" issue="676">
@@ -897,7 +901,7 @@
         used with a path "time" the epoch milliseconds are
         returned. Setting of date values and using dates as arguments
         for JMX operations is now also supported, the value can be
-        given either in epoch milliseconds or as an ISO-86-1 formatted
+        given either in epoch milliseconds or as an ISO-8601 formatted
         string. With a path "time" a given date value can be even
         updated for a write operation.
       </action>

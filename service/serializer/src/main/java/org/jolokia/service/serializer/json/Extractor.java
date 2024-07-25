@@ -70,9 +70,10 @@ public interface Extractor {
      * @return the old value
      * @throws IllegalAccessException if the attribute to set to is not accessible
      * @throws InvocationTargetException reflection error
+     * @throws IllegalArgumentException if the attribute can't be converted to desired value
      */
     Object setObjectValue(StringToObjectConverter pConverter,Object pInner, String pAttribute, Object pValue)
-            throws IllegalAccessException, InvocationTargetException;
+            throws IllegalAccessException, InvocationTargetException, IllegalArgumentException;
 
     /**
      * Whether this extractor is able to set a value.

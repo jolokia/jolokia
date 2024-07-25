@@ -656,10 +656,12 @@ converted into a JSON object with the single key
 * `java.net.URL` becomes a JSON
 object with the key `url` containing
 the URL as String.
-* `java.util.Date` is represented in
+* `java.util.Date` is represented by default in
 an ISO-8601 format. When used with a path
 `time` the milliseconds since 1.1.1970
-00:00 UTC are returned.
+00:00 UTC are returned. +
+Since **Jolokia 2.1.0** the format for date/time serialization is configurable
+and we also support `java.util.Calendar` and `java.time.Temporal` implementations.
 * `org.w3c.dom.Element` is translated
 into a JSON object with the properties
 `name`, `value` and
@@ -827,6 +829,7 @@ in `write` and
 * char
 * Boolean / boolean
 * Date
+* java.time.Instant, java.time.OffsetDateTime, java.time.ZonedDateTime (since **2.1.0**)
 * URL
 * Enums (whose type is accessible to the agent, see below)
 * Any type, that is accessible to the agent, and
@@ -837,6 +840,11 @@ of those types. Dates can be set either by an long value
 (epoch milliseconds) or with a string value (ISO-8601
 format). Arrays of the given types are serialized as a
 comma separated list.
+When setting `java.time` values, we handle serialization of these `Temporal` instances
+which support `ChronoField.INSTANT_SECONDS`, so full information (date, time, zone and nanoseconds) can
+be sent to the server.
+When deserializing `java.time` values, we use configurable DateTime format (both for `java.util.Date`) and
+for new (since JDK 8) `java.time` classes.
 
 NOTE: The array support is somewhat limited since it makes a
 native split on commas. It does not yet take into account

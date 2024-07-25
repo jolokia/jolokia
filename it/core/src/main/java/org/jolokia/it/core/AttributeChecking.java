@@ -3,6 +3,11 @@ package org.jolokia.it.core;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
 import java.util.*;
 
 import javax.management.*;
@@ -53,6 +58,11 @@ public class AttributeChecking implements AttributeCheckingMBean,MBeanRegistrati
     private Date date = new Date();
     private Chili chili = Chili.AJI;
     private int[][] array2D = { { 0, 0 }, { 0, 0 } };
+    private Instant instant = LocalDateTime.of(
+        LocalDate.of(2024, 7, 24),
+        LocalTime.of(10, 11, 41, 554433221)
+
+    ).toInstant(ZoneOffset.ofHours(0));
 
 
     public AttributeChecking(String pDomain) {
@@ -274,6 +284,14 @@ public class AttributeChecking implements AttributeCheckingMBean,MBeanRegistrati
 
     public void setArray2D(int[][] array2D) {
         this.array2D = array2D;
+    }
+
+    public Instant getInstant() {
+        return instant;
+    }
+
+    public void setInstant(Instant instant) {
+        this.instant = instant;
     }
 
     public ObjectName preRegister(MBeanServer server, ObjectName name) throws Exception {
