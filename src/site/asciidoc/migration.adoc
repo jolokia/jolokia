@@ -99,6 +99,12 @@ Using `org.jolokia:jolokia-agent-jvm` dependency is a safe bet, as all required 
 
 There's also a second _flavor_ of `org.jolokia:jolokia-agent-jvm` with `javaagent` classifier (which is downloaded as `jolokia-agent-jvm-{jolokia-version}-javaagent.jar` file) that shouldn't be used as _normal_ Maven dependency. Instead this version enbeds its dependencies. This version of JVM Agent is to be used specifically outside of Maven project - in container images or standalone applications using `-javaagent:/path/to/agent.jar` JVM argument.
 
+=== Added modules
+
+Jolokia 2.1.0 has one important change - it finally drops one of its first dependencies, which was `com.googlecode.json-simple:json-simple` JSON parser library. Instead it uses the https://www.jflex.de/[JFlex lexer toolkit] and JSON grammar and provides own `org.jolokia:jolokia-json` JSON parser/serializer library. In brief tests (and with few related optimizations) it gets 2x performance boost comparing to previous library.
+
+The API change is minimal - because what is generated based on the JSON grammar is only a _lexer_, Jolokia has full freedom to provide own parser/serializer. From user perspective it should be enought to rename code references from `org.json.simple` to `org.jolokia.json`. Other classes that were previously used by Jolokia and provided by https://code.google.com/archive/p/json-simple/[json-simple,role=externalLink,window=_blank] library have the same names (except the package name).
+
 === Removed modules
 
 * `jolokia-roo:jolokia-roo` for https://spring.io/projects/spring-roo[Spring Roo,role=externalLink,window=_blank] is no longer available. Spring Roo was kind of experiment before highly successful https://spring.io/projects/spring-boot[Spring Boot,role=externalLink,window=_blank].

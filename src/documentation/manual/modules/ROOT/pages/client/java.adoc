@@ -96,7 +96,7 @@ some additional support libraries:
 * https://repo1.maven.org/maven2/org/apache/httpcomponents/httpclient/4.5.14/httpclient-4.5.14.jar[httpclient-4.5.14.jar,role=externalLink,window=_blank]
 * https://repo1.maven.org/maven2/org/apache/httpcomponents/httpcore/4.4.16/httpcore-4.4.16.jar[httpcore-4.4.16.jar,role=externalLink,window=_blank]
 * https://repo1.maven.org/maven2/commons-logging/commons-logging/1.2/commons-logging-1.2.jar[commons-logging-1.2.jar,role=externalLink,window=_blank]
-* https://repo1.maven.org/maven2/commons-codec/commons-codec/1.16.0/commons-codec-1.16.0.jar[commons-codec-1.16.0.jar,role=externalLink,window=_blank]
+* https://repo1.maven.org/maven2/commons-codec/commons-codec/1.17.0/commons-codec-1.17.0.jar[commons-codec-1.17.0.jar,role=externalLink,window=_blank]
 
 For Maven users, the following dependency is sufficient (it will include
 the other two as transitive dependencies):
