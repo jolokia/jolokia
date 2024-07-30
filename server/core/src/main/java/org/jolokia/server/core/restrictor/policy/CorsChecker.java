@@ -39,8 +39,8 @@ public class CorsChecker extends AbstractChecker<String> {
      * CORS sections look like
      * <pre>
      *     &lt;cors&gt;
-     *       &lt;allow-origin&gt;http://jolokia.org&lt;allow-origin&gt;
-     *       &lt;allow-origin&gt;*://*.jmx4perl.org&gt;
+     *       &lt;allow-origin&gt;http://jolokia.org&lt;/allow-origin&gt;
+     *       &lt;allow-origin&gt;*://*.jmx4perl.org&lt;/allow-origin&gt;
      *
      *       &lt;strict-checking/&gt;
      *     &lt;/cors&gt;

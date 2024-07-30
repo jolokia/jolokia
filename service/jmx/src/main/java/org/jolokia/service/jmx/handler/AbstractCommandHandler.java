@@ -102,6 +102,16 @@ public abstract class AbstractCommandHandler<R extends JolokiaRequest> implement
     }
 
     /**
+     * Checks whether an {@link ObjectName} should be removed (filtered out) from results of {@code list} or
+     * {@code search} operations.
+     * @param name
+     * @return
+     */
+    protected boolean isObjectNameHidden(ObjectName name) {
+        return context.isObjectNameHidden(name);
+    }
+
+    /**
      * Abstract method to be subclassed by a concrete handler for performing the
      * request.
      *

@@ -16,6 +16,16 @@
   ~ limitations under the License.
   -->
 
-<!-- No restrictions at all -->
 <restrict xmlns="http://www.jolokia.org/jolokia-restrictor/schema/config">
+
+  <filter>
+    <mbean>domain1</mbean>
+    <mbean>domain2:*</mbean>
+    <mbean>domain3*</mbean>
+    <mbean>*domain4</mbean>
+    <mbean>domain*5</mbean>
+    <mbean>domain6:type=address</mbean>
+    <mbean>domain7:address=*,destination=Void</mbean>
+  </filter>
+
 </restrict>

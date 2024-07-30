@@ -177,6 +177,20 @@ public class DelegatingRestrictor implements Restrictor {
 
     // =======================================================================================================
 
+    private static final RestrictorCheck DISABLED_NAME_CHECK = new RestrictorCheck() {
+        /** {@inheritDoc} */
+        public boolean check(Restrictor restrictor, Object... args) {
+            return restrictor.isObjectNameHidden((ObjectName) args[0]);
+        }
+    };
+
+    /** {@inheritDoc} */
+    public boolean isObjectNameHidden(ObjectName name) {
+        return checkRestrictorService(DISABLED_NAME_CHECK, name);
+    }
+
+    // =======================================================================================================
+
     /**
      * Internal interface for restrictor delegation
      */

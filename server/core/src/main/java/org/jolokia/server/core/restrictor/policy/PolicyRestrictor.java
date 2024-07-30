@@ -55,6 +55,9 @@ public class PolicyRestrictor implements Restrictor {
     // Check for MBean access
     private MBeanAccessChecker mbeanAccessChecker;
 
+    // Check for ObjectName hiding (from search/list results)
+    private MBeanNameFilter mbeanNameFilter;
+
     /**
      * Construct a policy restrictor from an input stream
      *
@@ -72,6 +75,7 @@ public class PolicyRestrictor implements Restrictor {
             networkChecker = new NetworkChecker(doc);
             mbeanAccessChecker = new MBeanAccessChecker(doc);
             corsChecker = new CorsChecker(doc);
+            mbeanNameFilter = new MBeanNameFilter(doc);
         } catch (SAXException | IOException | ParserConfigurationException | MalformedObjectNameException e) {
             exp = e;
         }
@@ -139,6 +143,11 @@ public class PolicyRestrictor implements Restrictor {
     /** {@inheritDoc} */
     public boolean isOperationAllowed(ObjectName pName, String pOperation) {
         return check(RequestType.EXEC,pName, pOperation);
+    }
+
+    /** {@inheritDoc} */
+    public boolean isObjectNameHidden(ObjectName name) {
+        return mbeanNameFilter.isObjectNameHidden(name);
     }
 
     /** {@inheritDoc} */

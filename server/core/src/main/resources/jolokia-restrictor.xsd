@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2009-2024 Roland Huss
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:tns="http://www.jolokia.org/jolokia-restrictor/schema/config"
+           targetNamespace="http://www.jolokia.org/jolokia-restrictor/schema/config"
+           elementFormDefault="qualified">
+
+  <xs:element name="restrict">
+    <xs:annotation>
+      <xs:documentation>
+        Root element for Jolokia restrictor's XML configuration.
+        It contains various subelements which are individual "checkers" represented
+        by org.jolokia.server.core.restrictor.policy.AbstractChecker in code.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType mixed="true">
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="remote" type="tns:RemoteCheckerType" />
+        <xs:element name="commands" type="tns:CommandsCheckerType" />
+        <xs:element name="allow" type="tns:MBeanCheckerType" />
+        <xs:element name="deny" type="tns:MBeanCheckerType" />
+        <xs:element name="http" type="tns:HttpCheckerType" />
+        <xs:element name="cors" type="tns:CorsCheckerType" />
+        <xs:element name="filter" type="tns:DisabledMBeansType" />
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:complexType name="RemoteCheckerType">
+    <xs:annotation>
+      <xs:documentation>
+        Restriction of allowed hosts/ip addresses
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="host" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="CommandsCheckerType">
+    <xs:annotation>
+      <xs:documentation>
+        A definition of allowed command(s)
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="command" type="tns:RequestType" minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:simpleType name="RequestType">
+    <xs:annotation>
+      <xs:documentation>A type of supported Jolokia operation</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="read" />
+      <xs:enumeration value="list" />
+      <xs:enumeration value="write" />
+      <xs:enumeration value="exec" />
+      <xs:enumeration value="version" />
+      <xs:enumeration value="search" />
+      <xs:enumeration value="notification" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="HttpCheckerType">
+    <xs:annotation>
+      <xs:documentation>
+        Restriction of allowed HTTP methods
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="method" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="CorsCheckerType">
+    <xs:annotation>
+      <xs:documentation>
+        Restriction of allowed origins (sent via "Origin" HTTP header)
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="allow-origin" type="xs:string" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>
+            Allowed value of Origin header
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="strict-checking" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+            Whether to allow null/missing "Origin" header
+          </xs:documentation>
+        </xs:annotation>
+        <xs:complexType />
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="MBeanCheckerType" mixed="true">
+    <xs:annotation>
+      <xs:documentation>
+        Restriction of allowed/forbidden MBeans
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="mbean" type="tns:MBeanType" minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="MBeanType" mixed="true">
+    <xs:annotation>
+      <xs:documentation>
+        Definition of single restriction MBean (allowed or forbidden)
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="name" type="xs:string" />
+      <xs:element name="attribute" type="tns:MBeanAttributeType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="operation" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="MBeanAttributeType">
+    <xs:simpleContent>
+      <xs:restriction base="xs:string">
+        <xs:attribute name="mode" type="tns:MBeanAttributeMode" />
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:simpleType name="MBeanAttributeMode">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="read" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="DisabledMBeansType">
+    <xs:annotation>
+      <xs:documentation>
+        Definition of MBean names/patterns that should be removed from "list" and "search" results.
+        When such MBean is not denied with "deny", it may be still possible to access its
+        attributes and invoke its operations.
+        The pattern is a combination of domain and mbean attributes and may use "*" as pattern.
+        Examples are: 1) "java.lang:*" - filters out all MBeans from "java.lang" domain,
+        2) "java.nio:type=BufferPool" - filters out all MBeans from "java.nio" domain which have "type"
+        attribute equal to "BufferPool".
+        This is not exactly the same filter patter as its used with MBeanServer.queryNames().
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="mbean" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+  </xs:complexType>
+
+</xs:schema>

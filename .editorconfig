@@ -11,6 +11,9 @@ trim_trailing_whitespace = true
 [*.xml]
 indent_size = 2
 
+[*.xsd]
+indent_size = 2
+
 [*.{yml,yaml}]
 indent_size = 2
 
@@ -26,5 +29,5 @@ indent_size = 2
 [*.{md,adoc}]
 trim_trailing_whitespace = false
 
-[*.lex]
+[*.flex]
 indent_size = 2

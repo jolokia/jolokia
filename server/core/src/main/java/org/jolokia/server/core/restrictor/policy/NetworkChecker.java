@@ -48,7 +48,7 @@ public class NetworkChecker extends AbstractChecker<String[]> {
     private final Set<String> allowedHostsSet;
     private Set<String> allowedSubnetsSet;
 
-    // Simple patterns, could be mor specific
+    // Simple patterns, could be more specific
     private static final Pattern IP_PATTERN = Pattern.compile("^[\\d.]+$");
     private static final Pattern SUBNET_PATTERN = Pattern.compile("^[\\d.]+/[\\d.]+$");
 

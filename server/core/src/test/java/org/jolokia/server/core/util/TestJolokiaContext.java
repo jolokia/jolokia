@@ -180,6 +180,10 @@ public class TestJolokiaContext implements JolokiaContext {
         return restrictor.isOriginAllowed(pOrigin,pIsStrictCheck);
     }
 
+    public boolean isObjectNameHidden(ObjectName name) {
+        return restrictor.isObjectNameHidden(name);
+    }
+
     public boolean isServiceEnabled(String serviceClassName) {
         return true;
     }

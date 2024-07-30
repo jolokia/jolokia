@@ -95,4 +95,13 @@ public interface Restrictor {
      * @return true if this cross browser request allowed, false otherwise
      */
     boolean isOriginAllowed(String pOrigin, boolean pOnlyWhenStrictCheckingIsEnabled);
+
+    /**
+     * Checks whether given {@link ObjectName} should be filtered out from {@code search} and {@code list}
+     * operations. Hidden name is still accessible unless explicitly forbidden by e.g.,
+     * {@link #isOperationAllowed}
+     * @param name {@link ObjectName} to hide from {@code search} and {@code list} operations
+     * @return {@code true} if the name should not be included in {@code search} or {@code list} result
+     */
+    boolean isObjectNameHidden(ObjectName name);
 }

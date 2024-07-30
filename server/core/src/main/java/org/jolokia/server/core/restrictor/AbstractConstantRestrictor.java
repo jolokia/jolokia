@@ -77,4 +77,9 @@ public abstract class AbstractConstantRestrictor implements Restrictor {
     public boolean isOriginAllowed(String pOrigin, boolean pOnlyWhenStrictCheckingIsEnabled) {
         return isAllowed;
     }
+
+    /** {@inheritDoc} */
+    public boolean isObjectNameHidden(ObjectName name) {
+        return !isAllowed;
+    }
 }

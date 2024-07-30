@@ -16,7 +16,7 @@
   ~ limitations under the License.
   -->
 
-<restrict>
+<restrict xmlns="http://www.jolokia.org/jolokia-restrictor/schema/config">
     <http>
       <method>get</method>
       <method>POsT</method>

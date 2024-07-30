@@ -53,4 +53,9 @@ public class TestRestrictorWithConfig implements Restrictor {
     public boolean isOriginAllowed(String pOrigin, boolean pOnlyWhenStrictCheckingIsEnabled) {
         return res;
     }
+
+    @Override
+    public boolean isObjectNameHidden(ObjectName name) {
+        return res;
+    }
 }

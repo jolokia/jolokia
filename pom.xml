@@ -1369,7 +1369,9 @@
               </execution>
               <execution>
                 <!--
-                  We need https://jolokia.org/jolokia-config.xsd
+                  We need:
+                   - https://jolokia.org/jolokia-config.xsd
+                   - https://jolokia.org/jolokia-restrictor.xsd
                 -->
                 <id>copy-xsd</id>
                 <phase>pre-site</phase>
@@ -1384,6 +1386,12 @@
                       <directory>support/spring/src/main/resources/org/jolokia/support/spring</directory>
                       <includes>
                         <include>jolokia-config.xsd</include>
+                      </includes>
+                    </resource>
+                    <resource>
+                      <directory>server/core/src/main/resources</directory>
+                      <includes>
+                        <include>jolokia-restrictor.xsd</include>
                       </includes>
                     </resource>
                   </resources>

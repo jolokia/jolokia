@@ -38,4 +38,8 @@ public class TestRestrictor implements Restrictor {
     public boolean isOriginAllowed(String pOrigin, boolean pOnlyWhenStrictCheckingIsEnabled) {
         return false;
     }
+
+    public boolean isObjectNameHidden(ObjectName name) {
+        return false;
+    }
 }

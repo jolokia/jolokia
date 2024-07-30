@@ -16,8 +16,8 @@
   ~ limitations under the License.
   -->
 
-<restrict>
+<restrict xmlns="http://www.jolokia.org/jolokia-restrictor/schema/config">
     <http>
-        <blubber>bla</blubber>        
+        <blubber>bla</blubber>
     </http>
 </restrict>

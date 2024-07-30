@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- No restrictions at all -->
-<restrict>
+<restrict xmlns="http://www.jolokia.org/jolokia-restrictor/schema/config">
     <remote>
         <host>localhost</host>
     </remote>

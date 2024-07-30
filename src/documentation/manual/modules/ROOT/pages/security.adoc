@@ -197,6 +197,41 @@ additional measures like using the
 https://tools.ietf.org/html/draft-west-first-party-cookies-07[same-site,role=externalLink,window=_blank] flag
 on the session cookie.
 
+=== Disable listing/searching of selected MBeans
+
+Using `<filter>` element we can filter out results of `list` and `search` operations (even if search parameters include such MBean names). It's not preventing users to access given MBeans unless specific `<deny>` element is present, but it may
+be used to make `list`/`search` results shorter.
+
+Here's the example:
+
+[,xml]
+----
+<filter>
+  <mbean>java.lang:type=MemoryPool</mbean>
+  <mbean>org.apache.logging.log4j2:*</mbean>
+</filter>
+----
+
+The pattern format is not exactly the same as the patter used for `javax.management.MBeanServerConnection.queryNames()`. Here's a summary of rules:
+
+* ``*`` is a glob matching any number of characters except `:`, `=` or `,` (that's specific to the format of `ObjectName`)
+* when there's no `:` in MBean pattern, entire pattern is treated as domain and all MBeans within matching domain are filtered out
+* `domain:*` is the same as `domain` pattern and simply means _all MBeans within a domain_
+* `domain:type=SomeType` filters out MBeans within `domain` with `type` attribute equal to `SomeType`. For the purpose of `MBeanServer.queryNames()` the pattern would be `domain:type=SomeType,*`
+* `pass:[domain:address=*]` filters out MBeans within `domain` with any value of `address` attribute
+* `domain:address=Admin*` filters out MBeans within `domain` with value of `address` attribute starting with `Admin`
+
+Jolokia uses the above patterns individually for each `ObjectName` and uses these methods:
+
+* `javax.management.ObjectName.getDomain()` to access the domain
+* `javax.management.ObjectName.getKeyPropertyList()` and `javax.management.ObjectName.getKeyProperty()` to filter by attributes
+
+For performance purposes there are some restrictions for using `*` within a pattern:
+
+* attribute keys can't use ``*``
+* there can be only one `pass:[*]` within attribute value or domain name (``Admin*``, ``\*Admin``, ``Adm*in`` are correct, but ``*Admi*n*`` is not)
+* `domain:*` is simply treated as `domain` and matches (filters out) all MBeans within a domain
+
 === Example for a security policy
 
 The following complete example applies various access
@@ -247,6 +282,11 @@ contains the DB password as clear text.
       <operation>*</operation>
     </mbean>
   </deny>
+
+  <filter>
+    <mbean>java.lang:type=MemoryPool</mbean>
+    <mbean>org.apache.logging.log4j2:*</mbean>
+  </filter>
 
 </restrict>
 ----

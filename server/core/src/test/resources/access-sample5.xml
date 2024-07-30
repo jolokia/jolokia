@@ -16,7 +16,7 @@
   ~ limitations under the License.
   -->
 
-<restrict>
+<restrict xmlns="http://www.jolokia.org/jolokia-restrictor/schema/config">
 
   <commands></commands>
 

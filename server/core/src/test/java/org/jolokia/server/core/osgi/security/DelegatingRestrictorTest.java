@@ -77,7 +77,7 @@ public class DelegatingRestrictorTest {
 
     @Test
     public void withRestrictor() throws InvalidSyntaxException, MalformedObjectNameException {
-        setupRestrictor(new InnerRestrictor(true,false,true,false,true,false,true));
+        setupRestrictor(new InnerRestrictor(true,false,true,false,true,false,true,false));
         assertTrue(restrictor.isHttpMethodAllowed(HttpMethod.GET));
         assertFalse(restrictor.isTypeAllowed(RequestType.EXEC));
         assertTrue(restrictor.isAttributeReadAllowed(new ObjectName("java.lang:type=Memory"), "HeapMemoryUsage"));
@@ -85,6 +85,7 @@ public class DelegatingRestrictorTest {
         assertTrue(restrictor.isOperationAllowed(new ObjectName("java.lang:type=Memory"), "gc"));
         assertFalse(restrictor.isRemoteAccessAllowed("localhost", "127.0.0.1"));
         assertTrue(restrictor.isOriginAllowed("http://bla.com", false));
+        assertFalse(restrictor.isObjectNameHidden(new ObjectName("java.lang:type=Memory")));
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*Impossible.*")
@@ -96,9 +97,9 @@ public class DelegatingRestrictorTest {
 
     private static class InnerRestrictor implements Restrictor {
 
-        boolean httpMethod,type,read,write,operation,remote,cors;
+        boolean httpMethod,type,read,write,operation,remote,cors,isHidden;
 
-        private InnerRestrictor(boolean pHttpMethod, boolean pType, boolean pRead, boolean pWrite, boolean pOperation, boolean pRemote,boolean pCors) {
+        private InnerRestrictor(boolean pHttpMethod, boolean pType, boolean pRead, boolean pWrite, boolean pOperation, boolean pRemote, boolean pCors, boolean pIsHidden) {
             httpMethod = pHttpMethod;
             type = pType;
             read = pRead;
@@ -106,6 +107,7 @@ public class DelegatingRestrictorTest {
             operation = pOperation;
             remote = pRemote;
             cors = pCors;
+            isHidden = pIsHidden;
         }
 
 
@@ -135,6 +137,10 @@ public class DelegatingRestrictorTest {
 
         public boolean isOriginAllowed(String pOrigin, boolean pOnlyWhenStrictCheckingIsEnabled) {
             return cors;
+        }
+
+        public boolean isObjectNameHidden(ObjectName name) {
+            return isHidden;
         }
     }
 }

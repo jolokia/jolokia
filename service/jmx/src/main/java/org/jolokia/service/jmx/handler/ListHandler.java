@@ -9,6 +9,7 @@ import javax.management.*;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.request.JolokiaListRequest;
 import org.jolokia.server.core.request.NotChangedException;
+import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.util.*;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 import org.jolokia.service.jmx.handler.list.MBeanInfoData;
@@ -86,7 +87,7 @@ public class ListHandler extends AbstractCommandHandler<JolokiaListRequest> {
                 }
             }
 
-            ListMBeanEachAction action = new ListMBeanEachAction(maxDepth, pathStack, useCanonicalName, pProvider);
+            ListMBeanEachAction action = new ListMBeanEachAction(maxDepth, pathStack, useCanonicalName, pProvider, context);
             return executeListAction(pServerManager, (Map<?, ?>) pPreviousResult, oName, action);
         } catch (MalformedObjectNameException e) {
             throw new IllegalArgumentException("Invalid path within the MBean part given. (Path: " + pRequest.getPath() + ")",e);
@@ -142,16 +143,19 @@ public class ListHandler extends AbstractCommandHandler<JolokiaListRequest> {
 
         // Meta data which will get collected
         private final MBeanInfoData infoData;
+        private final JolokiaContext context;
 
         /**
          * Handler used during iterations whe collecting MBean Meta data
          *
-         * @param pMaxDepth max depth for the list tree to return
-         * @param pPathStack optional stack for picking out a certain path from the list tree
+         * @param pMaxDepth         max depth for the list tree to return
+         * @param pPathStack        optional stack for picking out a certain path from the list tree
          * @param pUseCanonicalName whether to use a canonical naming for the MBean property lists or the original
-         * @param pProvider provider to prepend to any domain (if not null)
+         * @param pProvider         provider to prepend to any domain (if not null)
+         * @param pContext          {@link JolokiaContext} for filtering MBeans
          */
-        public ListMBeanEachAction(int pMaxDepth, Deque<String> pPathStack, boolean pUseCanonicalName, String pProvider) {
+        public ListMBeanEachAction(int pMaxDepth, Deque<String> pPathStack, boolean pUseCanonicalName, String pProvider, JolokiaContext pContext) {
+            context = pContext;
             infoData = new MBeanInfoData(pMaxDepth,pPathStack,pUseCanonicalName,pProvider);
         }
 
@@ -187,6 +191,9 @@ public class ListHandler extends AbstractCommandHandler<JolokiaListRequest> {
         }
 
         private void lookupMBeanInfo(MBeanServerConnection pConn, ObjectName pName) throws InstanceNotFoundException, ReflectionException, IOException {
+            if (context.isObjectNameHidden(pName)) {
+                return;
+            }
             if (!infoData.handleFirstOrSecondLevel(pName)) {
                 try {
                     MBeanInfo mBeanInfo = pConn.getMBeanInfo(pName);

@@ -57,6 +57,9 @@ public class SearchHandler extends AbstractCommandHandler<JolokiaSearchRequest> 
         @SuppressWarnings("unchecked")
         Collection<String> ret = pPreviousResult != null ? (Collection<String>) pPreviousResult : new ArrayList<>();
         for (ObjectName name : names) {
+            if (isObjectNameHidden(name)) {
+                continue;
+            }
             String oName = request.getOrderedObjectName(name);
             ret.add(pProvider != null ? pProvider + "@" + oName : oName);
         }

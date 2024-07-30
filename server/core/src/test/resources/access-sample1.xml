@@ -25,7 +25,7 @@
   attributes and operations in detail.
 -->
 
-<restrict>
+<restrict xmlns="http://www.jolokia.org/jolokia-restrictor/schema/config">
 
   <!-- Hosts allowed -->
   <remote>
@@ -41,11 +41,24 @@
       <method>post</method>
   </http>
 
+  <cors>
+    <allow-origin>http://bla.com</allow-origin>
+    <allow-origin>http://blub.com</allow-origin>
+    <allow-origin>http://www.jolokia.org</allow-origin>
+    <allow-origin>*://*.consol.de</allow-origin>
+    <strict-checking/>
+  </cors>
+
   <commands>
     <command>list</command>
     <command>version</command>
     <command>search</command>
   </commands>
+
+  <filter>
+    <mbean>org.apache.logging.log4j2:*</mbean>
+    <mbean>java.lang:type=MemoryPool</mbean>
+  </filter>
 
   <allow>
 

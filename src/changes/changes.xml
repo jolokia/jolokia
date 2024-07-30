@@ -30,6 +30,10 @@
       <action dev="grgrzybek" type="fix" issue="686">
         Replace json-simple with different JSON library. New org.jolokia:jolokia-json module.
       </action>
+      <action dev="grgrzybek" type="fix" issue="261">
+        Add "filter" element to jolokia-access.xml file to filter out results of "list" and "search"
+        operations.
+      </action>
       <action dev="grgrzybek" type="fix" issue="250">
         New "includeRequest" option to allow removing the request from JSON response.
       </action>

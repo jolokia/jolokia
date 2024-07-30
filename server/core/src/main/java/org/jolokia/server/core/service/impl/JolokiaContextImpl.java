@@ -166,6 +166,11 @@ public class JolokiaContextImpl implements JolokiaContext {
     }
 
     /** {@inheritDoc} */
+    public boolean isObjectNameHidden(ObjectName name) {
+        return getRestrictor().isObjectNameHidden(name);
+    }
+
+    /** {@inheritDoc} */
     private Configuration getConfiguration() {
         return serviceManager.getConfiguration();
     }
