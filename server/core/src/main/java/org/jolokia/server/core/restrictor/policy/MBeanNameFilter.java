@@ -39,8 +39,8 @@ public class MBeanNameFilter extends AbstractChecker<ObjectName> {
      * filter sections look like
      * <pre>
      *     &lt;filter&gt;
-     *       &lt;mbean&gt;http://jolokia.org&lt;/mbean&gt;
-     *       &lt;mbean&gt;*://*.jmx4perl.org&lt;/mbean&gt;
+     *       &lt;mbean&gt;java.nio:type=BufferPool&lt;/mbean&gt;
+     *       &lt;mbean&gt;org.apache.logging.log4j2:*&lt;/mbean&gt;
      *     &lt;/filter&gt;
      * </pre>
      *
