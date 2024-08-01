@@ -62,7 +62,7 @@ import org.jolokia.json.JSONObject;
  *         },
  *         ...
  *       },
- *       "not" : {
+ *       "notif" : {
  *         <notification type> : {
  *           "name" : <name>,
  *           "desc" : <desc>,

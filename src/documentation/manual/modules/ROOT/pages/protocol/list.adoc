@@ -85,7 +85,7 @@ The `value` has the following format:
           "desc": "<textual description of attribute>",
           "rw": "true|false"
         },
-        ....
+        ...
       },
       "op": {
         "<operation name>": {
@@ -95,22 +95,25 @@ The `value` has the following format:
               "name": "<argument name>",
               "desc": "<textual description of argument>"
             },
-            .....
+            ...
           ],
           "ret": "<return type>",
           "desc": "<textual description of operation>"
         },
-        .....
+        ...
       },
-      "not": {
-        "name": "<name>",
-        "desc": "<desc>",
-        "types": [ "<type1>", "<type2>" ]
+      "notif": {
+        "<notification type>": {
+            "name": "<name>",
+            "desc": "<desc>",
+            "types": [ "<type1>", "<type2>", ... ]
+        },
+        ...
       }
     },
-    ....
+    ...
   },
-  ....
+  ...
 }
 ----
 
@@ -211,3 +214,18 @@ return value to a map with the JMX domains as keys, a
 the domain names (first level) and the MBean's properties
 (second level). The final values of the maps don't have any
 meaning and are dummy values.
+
+==== Extension points
+
+When returning `list()` results, Jolokia translates each MBean's `javax.management.MBeanInfo` information into a JSON fragment. Standard fields of this fragment are:
+
+* `class`
+* `desc`
+* `attr`
+* `op`
+* `notif`
+
+These fields are added by default, built-in implementations of `org.jolokia.service.jmx.handler.list.DataUpdater`.
+
+Since Jolokia 2.1.0 we can now discover (using `/META-INF/jolokia/services`) additional services of `org.jolokia.service.jmx.handler.list.DataUpdater` class which can be used to construct (or override) additional fields of MBean's JSON information. +
+Potential use-case may be information related to RBAC (Role-based Access Control).
