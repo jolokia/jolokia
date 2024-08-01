@@ -1035,7 +1035,7 @@
     <plugin.maven-compiler-plugin>3.13.0</plugin.maven-compiler-plugin>
     <plugin.maven-dependency-plugin>3.7.1</plugin.maven-dependency-plugin>
     <plugin.maven-deploy-plugin>3.1.2</plugin.maven-deploy-plugin>
-    <plugin.maven-failsafe-plugin>3.3.0</plugin.maven-failsafe-plugin>
+    <plugin.maven-failsafe-plugin>3.3.1</plugin.maven-failsafe-plugin>
     <plugin.maven-gpg-plugin>3.2.4</plugin.maven-gpg-plugin>
     <plugin.maven-install-plugin>3.1.2</plugin.maven-install-plugin>
     <plugin.maven-jar-plugin>3.4.2</plugin.maven-jar-plugin>
