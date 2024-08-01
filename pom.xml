@@ -1088,7 +1088,7 @@
 
     <version.commons-codec>1.17.0</version.commons-codec>
     <version.io.fabric8.kubernetes-client>6.13.0</version.io.fabric8.kubernetes-client>
-    <version.jakarta.servlet-api>5.0.0</version.jakarta.servlet-api>
+    <version.jakarta.servlet-api>6.1.0</version.jakarta.servlet-api>
     <version.org.apache.httpcomponents.httpclient>4.5.14</version.org.apache.httpcomponents.httpclient>
     <version.org.apache.httpcomponents.httpcore>4.4.16</version.org.apache.httpcomponents.httpcore>
     <!-- we support wide range of OSGI Core API, so please keep 6.0.0 -->
