@@ -24,66 +24,62 @@ import javax.management.*;
 import org.jolokia.json.JSONObject;
 
 /**
- * Tree of MBean meta data. This map is a container for one or more MBeanInfo meta data which can be obtained
+ * Tree of MBean meta data. This map is a container for one or more {@link MBeanInfo} meta data which can be obtained
  * via a <code>list</code> request. The full structure in its JSON representation looks like below. The amount
  * of data included can be fine tuned in two ways:
  * <ul>
  *     <li>With a <code>maxDepth</code> parameter given at construction time, the size of the map can be restricted
  *     (from top down)</li>
- *     <li>A given path select onkly a partial information from the tree</li>
+ *     <li>A given path selects only a partial information from the tree</li>
  * </ul>
- * Both limiting factors are taken care of when adding the information so that this map doesnt get unnecessarily
+ * Both limiting factors are taken care of when adding the information so that this map doesn't get unnecessarily
  * to large.
  *
- * <pre>
+ * <pre>{@code
  * {
- *  &lt;domain&gt; :
- *  {
- *    &lt;prop list&gt; :
- *    {
- *     "attr" :
- *     {
- *       &lt;attr name&gt; :
- *       {
- *         "type" : &lt;attribute type&gt;,
- *         "desc" : &lt;textual description of attribute&gt;,
- *         "rw"   : true/false
+ *   <domain> : {
+ *     <prop list> : {
+ *       "attr" : {
+ *         <attr name> : {
+ *           "type" : <attribute type>,
+ *           "desc" : <textual description of attribute>,
+ *           "rw"   : true/false
+ *         },
+ *         ...
  *       },
- *       ....
+ *       "op" : {
+ *         <operation name> : {
+ *           "args" : [
+ *             {
+ *               "type" : <argument type>,
+ *               "name" : <argument name>,
+ *               "desc" : <textual description of argument>
+ *             },
+ *             ...
+ *           ],
+ *           "ret"  : <return type>,
+ *           "desc" : <textual description of operation>
+ *         },
+ *         ...
+ *       },
+ *       "not" : {
+ *         <notification type> : {
+ *           "name" : <name>,
+ *           "desc" : <desc>,
+ *           "types" : [ <type1>, <type2>, ... ]
+ *         },
+ *         ...
+ *       }
  *     },
- *     "op" :
- *     {
- *        &lt;operation name&gt; :
- *        {
- *          "args" : [
- *                     {
- *                      "type" : &lt;argument type&gt;
- *                      "name" : &lt;argument name&gt;
- *                      "desc" : &lt;textual description of argument&gt;
- *                     },
- *                     .....
- *                    ],
- *          "ret"  : &lt;return type&gt;,
- *          "desc" : &lt;textual description of operation&gt;
- *        },
- *        .....
- *     },
- *     "not" :
- *     {
- *        "name" : &lt;name&gt;,
- *        "desc" : &lt;desc&gt;,
- *        "types" : [ &lt;type1&gt;, &lt;type2&gt; ]
- *     }
- *    },
- *    ....
- *  },
- *   ....
+ *     ...
+ *   },
+ *   ...
  * }
- * </pre>
+ * }</pre>
+ *
  * @author roland
  * @since 13.09.11
  */
-@SuppressWarnings("rawtypes")
 public class MBeanInfoData {
 
     // max depth for map to return
@@ -92,11 +88,12 @@ public class MBeanInfoData {
     // stack for an inner path
     private final Deque<String> pathStack;
 
-    // Map holding information
-    private final Map infoMap = new JSONObject();
+    // Map holding information. Without narrowing the list (using maxDepth), this should be:
+    // domain -> mbean (by key property listing) -> JSONified mbeanInfo
+    private final Map<String, Object> infoMap = new JSONObject();
 
-    // Initialise updaters
-    private static final Map<String,DataUpdater> UPDATERS = new HashMap<>();
+    // static updaters for basic mapping of javax.management.MBeanInfo
+    private static final Map<String, DataUpdater> UPDATERS = new HashMap<>();
 
     // How to order keys in Object Names
     private final boolean useCanonicalName;
@@ -113,7 +110,8 @@ public class MBeanInfoData {
         }
     }
 
-    // Provider to prepend (if not null)
+    // Provider to prepend (if not null). Only org.jolokia.service.jsr160.Jsr160RequestHandler declares "proxy"
+    // (literally) provider.
     private final String pProvider;
 
     /**
@@ -149,14 +147,12 @@ public class MBeanInfoData {
         if (maxDepth == 1 && pathStack.isEmpty()) {
             // Only add domain names with a dummy value if max depth is restricted to 1
             // But only when used without path
-            //noinspection unchecked
             infoMap.put(addProviderIfNeeded(pName.getDomain()), 1);
             return true;
         } else if (maxDepth == 2 && pathStack.isEmpty()) {
             // Add domain an object name into the map, final value is a dummy value
-            Map mBeansMap = getOrCreateJSONObject(infoMap, addProviderIfNeeded(pName.getDomain()));
-            //noinspection unchecked
-            mBeansMap.put(getKeyPropertyString(pName),1);
+            Map<String, Object> domain = getOrCreateJSONObject(infoMap, addProviderIfNeeded(pName.getDomain()));
+            domain.put(getKeyPropertyString(pName),1);
             return true;
         }
         return false;
@@ -168,29 +164,34 @@ public class MBeanInfoData {
 
     /**
      * Add information about an MBean as obtained from an {@link MBeanInfo} descriptor. The information added
-     * can be restricted by a given path (which has already be prepared as a stack). Also, a max depth as given in the
+     * can be restricted by a given path (which has already been prepared as a stack). Also, a max depth as given in the
      * constructor restricts the size of the map from the top.
      *
-     * @param mBeanInfo the MBean info
-     * @param pName the object name of the MBean
+     * @param mBeanInfo      the MBean info
+     * @param pName          the object name of the MBean
+     * @param customUpdaters additional set of discovered updaters to enhance the constructed MBeanInfo (JSON data)
      */
-    public void addMBeanInfo(MBeanInfo mBeanInfo, ObjectName pName)
+    public void addMBeanInfo(MBeanInfo mBeanInfo, ObjectName pName, Set<DataUpdater> customUpdaters)
             throws InstanceNotFoundException, IntrospectionException, IOException {
 
-        Map mBeansMap = getOrCreateJSONObject(infoMap, addProviderIfNeeded(pName.getDomain()));
-        Map mBeanMap = getOrCreateJSONObject(mBeansMap, getKeyPropertyString(pName));
+        String domainName = addProviderIfNeeded(pName.getDomain());
+        String mbeanKeyListing = getKeyPropertyString(pName);
+
+        Map<String, Object> domain = getOrCreateJSONObject(infoMap, domainName);
+        Map<String, Object> mbean = getOrCreateJSONObject(domain, mbeanKeyListing);
+
         // Trim down stack to get rid of domain/property list
         Deque<String> stack = truncatePathStack(2);
         if (stack.isEmpty()) {
-            addFullMBeanInfo(mBeanMap, mBeanInfo);
+            addFullMBeanInfo(mbean, mBeanInfo, customUpdaters);
         } else {
-            addPartialMBeanInfo(mBeanMap, mBeanInfo, stack);
+            addPartialMBeanInfo(mbean, mBeanInfo, stack);
         }
         // Trim if required
-        if (mBeanMap.isEmpty()) {
-            mBeansMap.remove(getKeyPropertyString(pName));
-            if (mBeansMap.isEmpty()) {
-                infoMap.remove(addProviderIfNeeded(pName.getDomain()));
+        if (mbean.isEmpty()) {
+            domain.remove(mbeanKeyListing);
+            if (domain.isEmpty()) {
+                infoMap.remove(domainName);
             }
         }
     }
@@ -256,10 +257,9 @@ public class MBeanInfoData {
 
     // Add an exception to the info map
     private void addException(ObjectName pName, Exception pExp) {
-        Map mBeansMap = getOrCreateJSONObject(infoMap, addProviderIfNeeded(pName.getDomain()));
-        Map mBeanMap = getOrCreateJSONObject(mBeansMap, getKeyPropertyString(pName));
-        //noinspection unchecked
-        mBeanMap.put(DataKeys.ERROR.getKey(), pExp.toString());
+        Map<String, Object> domain = getOrCreateJSONObject(infoMap, addProviderIfNeeded(pName.getDomain()));
+        Map<String, Object> mbean = getOrCreateJSONObject(domain, getKeyPropertyString(pName));
+        mbean.put(DataKeys.ERROR.getKey(), pExp.toString());
     }
 
     /**
@@ -285,13 +285,28 @@ public class MBeanInfoData {
 
     // =====================================================================================================
 
-    private void addFullMBeanInfo(Map pMBeanMap, MBeanInfo pMBeanInfo) {
+    /**
+     * Populates JSON MBean information based on {@link MBeanInfo} using all available {@link DataUpdater updaters}.
+     *
+     * @param pMBeanMap
+     * @param pMBeanInfo
+     * @param customUpdaters
+     */
+    private void addFullMBeanInfo(Map<String, Object> pMBeanMap, MBeanInfo pMBeanInfo, Set<DataUpdater> customUpdaters) {
         for (DataUpdater updater : UPDATERS.values()) {
-            updater.update(pMBeanMap,pMBeanInfo,null);
+            updater.update(pMBeanMap, pMBeanInfo, null);
+        }
+        for (DataUpdater customUpdater : customUpdaters) {
+            customUpdater.update(pMBeanMap, pMBeanInfo, null);
         }
     }
 
-    private void addPartialMBeanInfo(Map pMBeanMap, MBeanInfo pMBeanInfo, Deque<String> pPathStack) {
+    /**
+     * Populates JSON MBean information based on {@link MBeanInfo} using selected {@link DataUpdater updater}.
+     * @param pMBeanMap
+     * @param pMBeanInfo
+     */
+    private void addPartialMBeanInfo(Map<String, Object> pMBeanMap, MBeanInfo pMBeanInfo, Deque<String> pPathStack) {
         String what = pPathStack.isEmpty() ? null : pPathStack.pop();
         DataUpdater updater = UPDATERS.get(what);
         if (updater != null) {
@@ -301,11 +316,17 @@ public class MBeanInfoData {
         }
     }
 
-    private Map getOrCreateJSONObject(Map pMap, String pKey) {
-        Map nMap = (Map) pMap.get(pKey);
+    /**
+     * Ensure that {@code pMap} contains a nested map under {@code pKey} key and returns such nested
+     * {@link JSONObject}.
+     * @param pMap
+     * @param pKey
+     * @return
+     */
+    private Map<String, Object> getOrCreateJSONObject(Map<String, Object> pMap, String pKey) {
+        JSONObject nMap = (JSONObject) pMap.get(pKey);
         if (nMap == null) {
             nMap = new JSONObject();
-            //noinspection unchecked
             pMap.put(pKey, nMap);
         }
         return nMap;
@@ -347,10 +368,10 @@ public class MBeanInfoData {
     // Navigate to sub map or leaf value
     private Object navigatePath() {
         int size = pathStack.size();
-        Map innerMap = infoMap;
+        Map<String, Object> innerMap = infoMap;
 
         while (size > 0) {
-            Collection vals = innerMap.values();
+            Collection<Object> vals = innerMap.values();
             if (vals.isEmpty()) {
                 return innerMap;
             } else if (vals.size() != 1) {

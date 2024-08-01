@@ -31,9 +31,13 @@ import static org.jolokia.service.jmx.handler.list.DataKeys.DESCRIPTION;
  */
 class DescriptionDataUpdater extends DataUpdater {
 
+    protected DescriptionDataUpdater() {
+        super(100);
+    }
+
     /** {@inheritDoc} */
     @Override
-    String getKey() {
+    public String getKey() {
         return DESCRIPTION.getKey();
     }
 
@@ -44,10 +48,8 @@ class DescriptionDataUpdater extends DataUpdater {
      * {@inheritDoc}
      */
     @Override
-     @SuppressWarnings("rawtypes")
-    void update(Map pMap, MBeanInfo pMBeanInfo, Deque<String> pPathStack) {
+    public void update(Map<String, Object> pMap, MBeanInfo pMBeanInfo, Deque<String> pPathStack) {
         verifyThatPathIsEmpty(pPathStack);
-        //noinspection unchecked
         pMap.put(getKey(), pMBeanInfo.getDescription());
     }
 }

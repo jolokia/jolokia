@@ -31,15 +31,19 @@ import static org.jolokia.service.jmx.handler.list.DataKeys.*;
  */
 class OperationDataUpdater extends DataUpdater {
 
+    protected OperationDataUpdater() {
+        super(100);
+    }
+
     /** {@inheritDoc} */
     @Override
-    String getKey() {
+    public String getKey() {
         return OPERATIONS.getKey();
     }
 
     /** {@inheritDoc} */
     @Override
-    protected JSONObject extractData(MBeanInfo pMBeanInfo, String pOperation) {
+    public JSONObject extractData(MBeanInfo pMBeanInfo, String pOperation) {
         JSONObject opMap = new JSONObject();
 
         for (MBeanOperationInfo opInfo : pMBeanInfo.getOperations()) {

@@ -22,6 +22,8 @@ import java.util.Map;
 import javax.management.MBeanInfo;
 
 import org.jolokia.json.JSONObject;
+import org.jolokia.server.core.service.api.AbstractJolokiaService;
+import org.jolokia.server.core.service.api.JolokiaService;
 
 /**
  * Interface for updating a {@link MBeanInfoData} for a certain aspect of an {@link MBeanInfo}
@@ -29,14 +31,18 @@ import org.jolokia.json.JSONObject;
  * @author roland
  * @since 13.09.11
  */
-abstract class DataUpdater {
+public abstract class DataUpdater extends AbstractJolokiaService<DataUpdater> implements JolokiaService<DataUpdater> {
+
+    protected DataUpdater(int pOrderId) {
+        super(DataUpdater.class, pOrderId);
+    }
 
     /**
      * Get the key under which the extracted data should be added.
      *
      * @return key
      */
-    abstract String getKey();
+    public abstract String getKey();
 
     /**
      * Update the given map object with the data extracted from the given
@@ -46,8 +52,7 @@ abstract class DataUpdater {
      * @param pMBeanInfo info to extract from
      * @param pPathStack stack for further constraining the result
      */
-    @SuppressWarnings("rawtypes")
-    void update(Map pMap, MBeanInfo pMBeanInfo, Deque<String> pPathStack) {
+    public void update(Map<String, Object> pMap, MBeanInfo pMBeanInfo, Deque<String> pPathStack) {
 
         boolean isPathEmpty = pPathStack == null || pPathStack.isEmpty();
         String filter = pPathStack != null && !pPathStack.isEmpty() ? pPathStack.pop() : null;
@@ -56,7 +61,6 @@ abstract class DataUpdater {
         JSONObject attrMap = extractData(pMBeanInfo,filter);
 
         if (!attrMap.isEmpty()) {
-            //noinspection unchecked
             pMap.put(getKey(), attrMap);
         } else if (!isPathEmpty) {
             throw new IllegalArgumentException("Path given but extracted value is empty");
@@ -71,7 +75,7 @@ abstract class DataUpdater {
      * @param pFilter any additional filter to apply
      * @return the extracted data as an JSON object
      */
-    protected JSONObject extractData(MBeanInfo pMBeanInfo,String pFilter) {
+    public JSONObject extractData(MBeanInfo pMBeanInfo,String pFilter) {
         return new JSONObject();
     }
 
