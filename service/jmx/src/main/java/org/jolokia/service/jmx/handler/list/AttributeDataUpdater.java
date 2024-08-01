@@ -18,6 +18,7 @@ package org.jolokia.service.jmx.handler.list;
 
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanInfo;
+import javax.management.ObjectName;
 
 import org.jolokia.json.JSONObject;
 
@@ -42,7 +43,7 @@ class AttributeDataUpdater extends DataUpdater {
 
     /** {@inheritDoc} */
     @Override
-    public JSONObject extractData(MBeanInfo pMBeanInfo, String attribute) {
+    public JSONObject extractData(ObjectName pObjectName, MBeanInfo pMBeanInfo, String attribute) {
         JSONObject attrMap = new JSONObject();
 
         for (MBeanAttributeInfo attrInfo : pMBeanInfo.getAttributes()) {

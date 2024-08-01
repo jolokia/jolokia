@@ -717,7 +717,7 @@ export type ResponseCallback = (response: JolokiaSuccessResponse, index: number)
 export type TextResponseCallback = (response: string) => void
 
 /**
- * An array of callbacks, each accepting JSON response (successfull) with response index. Only JSON type is handled.
+ * An array of callbacks, each accepting JSON response (successful) with response index. Only JSON type is handled.
  */
 export type ResponseCallbacks = ((response: JolokiaSuccessResponse, index: number) => void)[]
 

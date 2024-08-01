@@ -24,6 +24,7 @@ import java.util.function.ToIntFunction;
 import javax.management.*;
 
 import org.easymock.EasyMock;
+import org.jolokia.json.JSONObject;
 import org.jolokia.server.core.request.*;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.service.api.JolokiaService;
@@ -126,6 +127,20 @@ public class ListHandlerTest extends BaseHandlerTest {
         JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST).pathParts("java.lang", "type=Memory").build();
         Map<String, ?> res = execute(handler, request);
         checkKeys(res, DESCRIPTION, OPERATIONS, ATTRIBUTES, CLASSNAME, NOTIFICATIONS);
+
+        res = execute(handlerWithRealm,request);
+        checkKeys(res);
+    }
+
+    @Test
+    public void keyListing() throws Exception {
+        JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST)
+            .option(ConfigKey.LIST_KEYS, "true")
+            .pathParts("java.lang", "type=Memory").build();
+        Map<String, ?> res = execute(handler, request);
+        checkKeys(res, KEYS);
+        JSONObject keys = (JSONObject) res.get("keys");
+        assertEquals(keys.get("type"), "Memory");
 
         res = execute(handlerWithRealm,request);
         checkKeys(res);

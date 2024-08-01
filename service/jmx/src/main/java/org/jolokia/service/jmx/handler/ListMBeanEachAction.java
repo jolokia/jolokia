@@ -52,12 +52,14 @@ class ListMBeanEachAction implements MBeanServerAccess.MBeanEachCallback, MBeanS
      * @param pMaxDepth         max depth for the list tree to return
      * @param pPathStack        optional stack for picking out a certain path from the list tree
      * @param pUseCanonicalName whether to use a canonical naming for the MBean property lists or the original
+     * @param pListKeys         whether to dissect {@link ObjectName#getKeyPropertyList()} into MBean information
      * @param pProvider         provider to prepend to any domain (if not null)
      * @param pContext          {@link JolokiaContext} for filtering MBeans
      */
-    public ListMBeanEachAction(int pMaxDepth, Deque<String> pPathStack, boolean pUseCanonicalName, String pProvider, JolokiaContext pContext) {
+    public ListMBeanEachAction(int pMaxDepth, Deque<String> pPathStack, boolean pUseCanonicalName,
+                               boolean pListKeys, String pProvider, JolokiaContext pContext) {
         context = pContext;
-        infoData = new MBeanInfoData(pMaxDepth, pPathStack, pUseCanonicalName, pProvider);
+        infoData = new MBeanInfoData(pMaxDepth, pPathStack, pUseCanonicalName, pListKeys, pProvider);
         customUpdaters = context.getServices(DataUpdater.class);
     }
 
@@ -98,6 +100,7 @@ class ListMBeanEachAction implements MBeanServerAccess.MBeanEachCallback, MBeanS
         }
         if (!infoData.handleFirstOrSecondLevel(pName)) {
             try {
+
                 MBeanInfo mBeanInfo = pConn.getMBeanInfo(pName);
                 infoData.addMBeanInfo(mBeanInfo, pName, customUpdaters);
             } catch (IOException exp) {

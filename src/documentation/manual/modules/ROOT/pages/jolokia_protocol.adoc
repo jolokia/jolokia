@@ -566,6 +566,11 @@ When `false`, bulk responses have to be correlated with requests by matching
 the requests using index number - responses come in the same order as requests. +
 *Added since Jolokia 2.1.0*
 
+`listKeys`:: A flag (defaults to `false`) to specify whether the response object for `list()` operation should contain `keys` field
+that lists all the keys obtained from each `javax.management.ObjectName` of the response.
+This may save you time parsing the name yourself. +
+*Added since Jolokia 2.1.0*
+
 `canonicalNaming`:: Defaults to `true` to return the canonical format of property lists.
 If set to `false` then the default unsorted property list is returned.
 

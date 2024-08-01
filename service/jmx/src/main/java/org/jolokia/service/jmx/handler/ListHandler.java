@@ -71,6 +71,7 @@ public class ListHandler extends AbstractCommandHandler<JolokiaListRequest> {
         Deque<String> originalPathStack = EscapeUtil.reversePath(pRequest.getPathParts());
         int maxDepth = pRequest.getParameterAsInt(ConfigKey.MAX_DEPTH);
         boolean useCanonicalName = pRequest.getParameterAsBool(ConfigKey.CANONICAL_NAMING);
+        boolean listKeys = pRequest.getParameterAsBool(ConfigKey.LIST_KEYS);
 
         ObjectName oName = null;
         try {
@@ -85,7 +86,7 @@ public class ListHandler extends AbstractCommandHandler<JolokiaListRequest> {
                 }
             }
 
-            ListMBeanEachAction action = new ListMBeanEachAction(maxDepth, pathStack, useCanonicalName, pProvider, context);
+            ListMBeanEachAction action = new ListMBeanEachAction(maxDepth, pathStack, useCanonicalName, listKeys, pProvider, context);
             return executeListAction(pServerManager, (Map<?, ?>) pPreviousResult, oName, action);
         } catch (MalformedObjectNameException e) {
             throw new IllegalArgumentException("Invalid path within the MBean part given. (Path: " + pRequest.getPath() + ")",e);

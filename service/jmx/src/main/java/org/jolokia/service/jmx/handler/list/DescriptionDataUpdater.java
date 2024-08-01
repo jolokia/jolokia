@@ -20,6 +20,7 @@ import java.util.Deque;
 import java.util.Map;
 
 import javax.management.MBeanInfo;
+import javax.management.ObjectName;
 
 import static org.jolokia.service.jmx.handler.list.DataKeys.DESCRIPTION;
 
@@ -48,7 +49,7 @@ class DescriptionDataUpdater extends DataUpdater {
      * {@inheritDoc}
      */
     @Override
-    public void update(Map<String, Object> pMap, MBeanInfo pMBeanInfo, Deque<String> pPathStack) {
+    public void update(Map<String, Object> pMap, ObjectName pObjectName, MBeanInfo pMBeanInfo, Deque<String> pPathStack) {
         verifyThatPathIsEmpty(pPathStack);
         pMap.put(getKey(), pMBeanInfo.getDescription());
     }

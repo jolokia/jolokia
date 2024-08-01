@@ -20,6 +20,7 @@ import java.util.Deque;
 import java.util.Map;
 
 import javax.management.MBeanInfo;
+import javax.management.ObjectName;
 
 import org.jolokia.json.JSONObject;
 import org.jolokia.server.core.service.api.AbstractJolokiaService;
@@ -49,16 +50,17 @@ public abstract class DataUpdater extends AbstractJolokiaService<DataUpdater> im
      * MBeanInfo
      *
      * @param pMap map to update
+     * @param pObjectName {@link ObjectName} of the {@link MBeanInfo} to extract from
      * @param pMBeanInfo info to extract from
      * @param pPathStack stack for further constraining the result
      */
-    public void update(Map<String, Object> pMap, MBeanInfo pMBeanInfo, Deque<String> pPathStack) {
+    public void update(Map<String, Object> pMap, ObjectName pObjectName, MBeanInfo pMBeanInfo, Deque<String> pPathStack) {
 
         boolean isPathEmpty = pPathStack == null || pPathStack.isEmpty();
         String filter = pPathStack != null && !pPathStack.isEmpty() ? pPathStack.pop() : null;
         verifyThatPathIsEmpty(pPathStack);
 
-        JSONObject attrMap = extractData(pMBeanInfo,filter);
+        JSONObject attrMap = extractData(pObjectName, pMBeanInfo,filter);
 
         if (!attrMap.isEmpty()) {
             pMap.put(getKey(), attrMap);
@@ -71,11 +73,12 @@ public abstract class DataUpdater extends AbstractJolokiaService<DataUpdater> im
      * Do the real work by extracting the data from the MBeanInfo. This method should be overridden,
      * in its default implementation it returns an empty map
      *
+     * @param pObjectName {@link ObjectName} of the {@link MBeanInfo} to extract from
      * @param pMBeanInfo the info object to examine
      * @param pFilter any additional filter to apply
      * @return the extracted data as an JSON object
      */
-    public JSONObject extractData(MBeanInfo pMBeanInfo,String pFilter) {
+    public JSONObject extractData(ObjectName pObjectName, MBeanInfo pMBeanInfo,String pFilter) {
         return new JSONObject();
     }
 

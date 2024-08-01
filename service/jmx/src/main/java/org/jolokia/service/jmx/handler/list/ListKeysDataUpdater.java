@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Aurélien Pupier
+ * Copyright 2009-2024 Roland Huss
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -15,36 +15,31 @@
  */
 package org.jolokia.service.jmx.handler.list;
 
-import java.util.Deque;
-import java.util.Map;
-
 import javax.management.MBeanInfo;
 import javax.management.ObjectName;
 
-import static org.jolokia.service.jmx.handler.list.DataKeys.CLASSNAME;
+import org.jolokia.json.JSONObject;
 
-class ClassNameDataUpdater extends DataUpdater {
+import static org.jolokia.service.jmx.handler.list.DataKeys.KEYS;
 
-    public ClassNameDataUpdater() {
+class ListKeysDataUpdater extends DataUpdater {
+
+    protected ListKeysDataUpdater() {
         super(100);
     }
 
-	/** {@inheritDoc} */
+    /** {@inheritDoc} */
     @Override
     public String getKey() {
-        return CLASSNAME.getKey();
+        return KEYS.getKey();
     }
 
-    /**
-     * The update method is overridden here directly since the usual extraction method
-     * is not needed
-     *
-     * {@inheritDoc}
-     * */
-     @Override
-     public void update(Map<String, Object> pMap, ObjectName pObjectName, MBeanInfo pMBeanInfo, Deque<String> pPathStack) {
-         verifyThatPathIsEmpty(pPathStack);
-         pMap.put(getKey(), pMBeanInfo.getClassName());
-     }
+    /** {@inheritDoc} */
+    @Override
+    public JSONObject extractData(ObjectName pObjectName, MBeanInfo pMBeanInfo, String attribute) {
+        JSONObject map = new JSONObject();
+        pObjectName.getKeyPropertyList().forEach(map::put);
 
+        return map;
+    }
 }

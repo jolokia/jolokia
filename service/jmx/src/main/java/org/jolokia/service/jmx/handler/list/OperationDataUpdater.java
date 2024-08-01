@@ -43,7 +43,7 @@ class OperationDataUpdater extends DataUpdater {
 
     /** {@inheritDoc} */
     @Override
-    public JSONObject extractData(MBeanInfo pMBeanInfo, String pOperation) {
+    public JSONObject extractData(ObjectName pObjectName, MBeanInfo pMBeanInfo, String pOperation) {
         JSONObject opMap = new JSONObject();
 
         for (MBeanOperationInfo opInfo : pMBeanInfo.getOperations()) {

@@ -94,9 +94,13 @@ public class MBeanInfoData {
 
     // static updaters for basic mapping of javax.management.MBeanInfo
     private static final Map<String, DataUpdater> UPDATERS = new HashMap<>();
+    private static final DataUpdater LIST_KEYS_UPDATER = new ListKeysDataUpdater();
 
     // How to order keys in Object Names
     private final boolean useCanonicalName;
+
+    // whether to use
+    private final boolean listKeys;
 
     static {
         for (DataUpdater updater : new DataUpdater[] {
@@ -104,7 +108,7 @@ public class MBeanInfoData {
                 new ClassNameDataUpdater(),
                 new AttributeDataUpdater(),
                 new OperationDataUpdater(),
-                new NotificationDataUpdater()
+                new NotificationDataUpdater(),
         }) {
             UPDATERS.put(updater.getKey(),updater);
         }
@@ -119,14 +123,16 @@ public class MBeanInfoData {
      * up. The tree will be truncated if it gets larger than this value. A <em>path</em> (in form of a stack)
      * can be given, in which only a sub information is (sub-tree or leaf value) is stored
      *
-     * @param pMaxDepth max depth
-     * @param pPathStack the stack for restricting the information to add. The given stack will be cloned
-     *                   and is left untouched.
+     * @param pMaxDepth         max depth
+     * @param pPathStack        the stack for restricting the information to add. The given stack will be cloned
+     *                          and is left untouched.
      * @param pUseCanonicalName whether to use canonical name in listings
+     * @param pListKeys
      */
-    public MBeanInfoData(int pMaxDepth, Deque<String> pPathStack, boolean pUseCanonicalName, String pProvider) {
+    public MBeanInfoData(int pMaxDepth, Deque<String> pPathStack, boolean pUseCanonicalName, boolean pListKeys, String pProvider) {
         maxDepth = pMaxDepth;
         useCanonicalName = pUseCanonicalName;
+        listKeys = pListKeys;
         pathStack = pPathStack != null ? new LinkedList<>(pPathStack) : new LinkedList<>();
         this.pProvider = pProvider;
     }
@@ -183,9 +189,9 @@ public class MBeanInfoData {
         // Trim down stack to get rid of domain/property list
         Deque<String> stack = truncatePathStack(2);
         if (stack.isEmpty()) {
-            addFullMBeanInfo(mbean, mBeanInfo, customUpdaters);
+            addFullMBeanInfo(mbean, pName, mBeanInfo, pName, customUpdaters);
         } else {
-            addPartialMBeanInfo(mbean, mBeanInfo, stack);
+            addPartialMBeanInfo(mbean, pName, mBeanInfo, pName, stack);
         }
         // Trim if required
         if (mbean.isEmpty()) {
@@ -288,29 +294,40 @@ public class MBeanInfoData {
     /**
      * Populates JSON MBean information based on {@link MBeanInfo} using all available {@link DataUpdater updaters}.
      *
+     * @param pObjectName
      * @param pMBeanMap
      * @param pMBeanInfo
+     * @param pName
      * @param customUpdaters
      */
-    private void addFullMBeanInfo(Map<String, Object> pMBeanMap, MBeanInfo pMBeanInfo, Set<DataUpdater> customUpdaters) {
+    private void addFullMBeanInfo(Map<String, Object> pMBeanMap, ObjectName pObjectName, MBeanInfo pMBeanInfo, ObjectName pName, Set<DataUpdater> customUpdaters) {
         for (DataUpdater updater : UPDATERS.values()) {
-            updater.update(pMBeanMap, pMBeanInfo, null);
+            updater.update(pMBeanMap, pObjectName, pMBeanInfo, null);
+        }
+        if (listKeys) {
+            LIST_KEYS_UPDATER.update(pMBeanMap, pObjectName, pMBeanInfo, null);
         }
         for (DataUpdater customUpdater : customUpdaters) {
-            customUpdater.update(pMBeanMap, pMBeanInfo, null);
+            customUpdater.update(pMBeanMap, pObjectName, pMBeanInfo, null);
         }
     }
 
     /**
      * Populates JSON MBean information based on {@link MBeanInfo} using selected {@link DataUpdater updater}.
+     *
+     * @param pObjectName
      * @param pMBeanMap
      * @param pMBeanInfo
+     * @param pName
      */
-    private void addPartialMBeanInfo(Map<String, Object> pMBeanMap, MBeanInfo pMBeanInfo, Deque<String> pPathStack) {
+    private void addPartialMBeanInfo(Map<String, Object> pMBeanMap, ObjectName pObjectName, MBeanInfo pMBeanInfo, ObjectName pName, Deque<String> pPathStack) {
         String what = pPathStack.isEmpty() ? null : pPathStack.pop();
         DataUpdater updater = UPDATERS.get(what);
+        if (updater == null && "keys".equals(what)) {
+            updater = LIST_KEYS_UPDATER;
+        }
         if (updater != null) {
-            updater.update(pMBeanMap, pMBeanInfo, pPathStack);
+            updater.update(pMBeanMap, pObjectName, pMBeanInfo, pPathStack);
         } else {
             throw new IllegalArgumentException("Illegal path element " + what);
         }

@@ -18,6 +18,7 @@ package org.jolokia.service.jmx;
 import java.util.Deque;
 import java.util.Map;
 import javax.management.MBeanInfo;
+import javax.management.ObjectName;
 
 import org.jolokia.service.jmx.handler.list.DataUpdater;
 
@@ -33,7 +34,7 @@ public class CustomImportantUpdater extends DataUpdater {
     }
 
     @Override
-    public void update(Map<String, Object> pMap, MBeanInfo pMBeanInfo, Deque<String> pPathStack) {
+    public void update(Map<String, Object> pMap, ObjectName pObjectName, MBeanInfo pMBeanInfo, Deque<String> pPathStack) {
         pMap.put(getKey(), "very very special");
     }
 
