@@ -26,6 +26,7 @@ import javax.management.MBeanRegistrationException;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
 import javax.management.NotificationListener;
+import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 
 import org.easymock.EasyMock;
@@ -112,10 +113,10 @@ public class TestDetector implements ServerDetector {
             try {
                 expect(server.registerMBean(EasyMock.anyObject(), EasyMock.anyObject()))
                         .andStubThrow(exps[nr % exps.length]);
-                expect(server.queryNames(EasyMock.anyObject(), isNull())).andStubAnswer(
+                expect(server.queryMBeans(EasyMock.anyObject(), isNull())).andStubAnswer(
                         () -> {
                             Object[] args = EasyMock.getCurrentArguments();
-                            return new HashSet<>(Collections.singletonList((ObjectName) args[0]));
+                            return new HashSet<>(Collections.singletonList(new ObjectInstance((ObjectName) args[0], null)));
                         });
                 expect(server.isRegistered(EasyMock.anyObject())).andStubReturn(true);
                 server.addNotificationListener(anyObject(), (NotificationListener) anyObject(),

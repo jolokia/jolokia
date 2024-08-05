@@ -22,6 +22,7 @@ import java.util.*;
 import javax.management.*;
 
 import org.jolokia.json.JSONObject;
+import org.jolokia.service.jmx.api.CacheKeyProvider;
 
 /**
  * Tree of MBean meta data. This map is a container for one or more {@link MBeanInfo} meta data which can be obtained
@@ -90,6 +91,8 @@ public class MBeanInfoData {
 
     // Map holding information. Without narrowing the list (using maxDepth), this should be:
     // domain -> mbean (by key property listing) -> JSONified mbeanInfo
+    // for opitmized list() variant, the map is a but more comples and the above mapping is under "domains" key,
+    // while "cache" key contains full, JSONified MBeanInfo
     private final Map<String, Object> infoMap = new JSONObject();
 
     // static updaters for basic mapping of javax.management.MBeanInfo
@@ -99,8 +102,11 @@ public class MBeanInfoData {
     // How to order keys in Object Names
     private final boolean useCanonicalName;
 
-    // whether to use
+    // whether to add a map of keys from Object name to MBeanInfo data of the MBean
     private final boolean listKeys;
+
+    // whether to use optimized list() response (with cache/domain)
+    private final boolean listCache;
 
     static {
         for (DataUpdater updater : new DataUpdater[] {
@@ -121,18 +127,20 @@ public class MBeanInfoData {
     /**
      * Constructor taking a max depth. The <em>max depth</em> specifies how deep the info tree should be build
      * up. The tree will be truncated if it gets larger than this value. A <em>path</em> (in form of a stack)
-     * can be given, in which only a sub information is (sub-tree or leaf value) is stored
+     * can be given, in which only a sub information (sub-tree or leaf value) is stored
      *
      * @param pMaxDepth         max depth
      * @param pPathStack        the stack for restricting the information to add. The given stack will be cloned
      *                          and is left untouched.
      * @param pUseCanonicalName whether to use canonical name in listings
      * @param pListKeys
+     * @param pListCache
      */
-    public MBeanInfoData(int pMaxDepth, Deque<String> pPathStack, boolean pUseCanonicalName, boolean pListKeys, String pProvider) {
+    public MBeanInfoData(int pMaxDepth, Deque<String> pPathStack, boolean pUseCanonicalName, boolean pListKeys, boolean pListCache, String pProvider) {
         maxDepth = pMaxDepth;
         useCanonicalName = pUseCanonicalName;
         listKeys = pListKeys;
+        listCache = pListCache;
         pathStack = pPathStack != null ? new LinkedList<>(pPathStack) : new LinkedList<>();
         this.pProvider = pProvider;
     }
@@ -164,6 +172,12 @@ public class MBeanInfoData {
         return false;
     }
 
+    /**
+     * Turn {@link ObjectName} into a String depending on {@link org.jolokia.server.core.config.ConfigKey#CANONICAL_NAMING}
+     * property setting.
+     * @param pName
+     * @return
+     */
     private String getKeyPropertyString(ObjectName pName) {
         return useCanonicalName ? pName.getCanonicalKeyPropertyListString() : pName.getKeyPropertyListString();
     }
@@ -173,28 +187,69 @@ public class MBeanInfoData {
      * can be restricted by a given path (which has already been prepared as a stack). Also, a max depth as given in the
      * constructor restricts the size of the map from the top.
      *
-     * @param mBeanInfo      the MBean info
-     * @param pName          the object name of the MBean
-     * @param customUpdaters additional set of discovered updaters to enhance the constructed MBeanInfo (JSON data)
+     * @param pConn             {@link MBeanServerConnection} to get MBeanInfo from (or from cache if possible)
+     * @param pInstance         the object instance of the MBean
+     * @param customUpdaters    additional set of discovered updaters to enhance the constructed MBeanInfo (JSON data)
+     * @param cacheKeyProviders set of services that help to construct the cache of MBeanInfo
      */
-    public void addMBeanInfo(MBeanInfo mBeanInfo, ObjectName pName, Set<DataUpdater> customUpdaters)
-            throws InstanceNotFoundException, IntrospectionException, IOException {
+    public void addMBeanInfo(MBeanServerConnection pConn, ObjectInstance pInstance, Set<DataUpdater> customUpdaters,
+                             Set<CacheKeyProvider> cacheKeyProviders)
+            throws InstanceNotFoundException, IntrospectionException, ReflectionException, IOException {
 
-        String domainName = addProviderIfNeeded(pName.getDomain());
-        String mbeanKeyListing = getKeyPropertyString(pName);
-
-        Map<String, Object> domain = getOrCreateJSONObject(infoMap, domainName);
-        Map<String, Object> mbean = getOrCreateJSONObject(domain, mbeanKeyListing);
+        ObjectName objectName = pInstance.getObjectName();
+        MBeanInfo mBeanInfo = pConn.getMBeanInfo(objectName);
+        String domainName = addProviderIfNeeded(objectName.getDomain());
+        String mbeanKeyListing = getKeyPropertyString(objectName);
 
         // Trim down stack to get rid of domain/property list
         Deque<String> stack = truncatePathStack(2);
-        if (stack.isEmpty()) {
-            addFullMBeanInfo(mbean, pName, mBeanInfo, pName, customUpdaters);
+
+        Map<String, Object> cache = null;
+        Map<String, Object> domains;
+        Map<String, Object> domain;
+        Map<String, Object> mbean = null;
+        if (listCache && stack.isEmpty()) {
+            cache = getOrCreateJSONObject(infoMap, "cache");
+            domains = getOrCreateJSONObject(infoMap, "domains");
+            domain = getOrCreateJSONObject(domains, domainName);
         } else {
-            addPartialMBeanInfo(mbean, pName, mBeanInfo, pName, stack);
+            domain = getOrCreateJSONObject(infoMap, domainName);
+            mbean = getOrCreateJSONObject(domain, mbeanKeyListing);
+        }
+
+        if (stack.isEmpty()) {
+            if (!listCache) {
+                // normal JSONification of MBeanInfo
+                addFullMBeanInfo(mbean, objectName, mBeanInfo, objectName, customUpdaters);
+            } else {
+                // cached MBeanInfo
+                String key = null;
+                for (CacheKeyProvider provider : cacheKeyProviders) {
+                    key = provider.determineKey(pInstance);
+                    if (key != null) {
+                        break;
+                    }
+                }
+                if (key != null && cache != null) {
+                    // an MBean may share its JSONified MBeanInfo with other MBeans
+                    // object name points to a key
+                    domain.put(mbeanKeyListing, key);
+                    // while key points to shared JSONified MBeanInfo
+                    mbean = getOrCreateJSONObject(cache, key);
+                    if (mbean.isEmpty()) {
+                        addFullMBeanInfo(mbean, objectName, mBeanInfo, objectName, customUpdaters);
+                    }
+                } else {
+                    // back to normal behavior
+                    mbean = getOrCreateJSONObject(domain, mbeanKeyListing);
+                    addFullMBeanInfo(mbean, objectName, mBeanInfo, objectName, customUpdaters);
+                }
+            }
+        } else {
+            addPartialMBeanInfo(mbean, objectName, mBeanInfo, objectName, stack);
         }
         // Trim if required
-        if (mbean.isEmpty()) {
+        if (mbean != null && mbean.isEmpty()) {
             domain.remove(mbeanKeyListing);
             if (domain.isEmpty()) {
                 infoMap.remove(domainName);

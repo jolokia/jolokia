@@ -22,13 +22,14 @@ import java.util.Set;
 import java.util.SortedSet;
 import javax.management.InstanceNotFoundException;
 import javax.management.IntrospectionException;
-import javax.management.MBeanInfo;
 import javax.management.MBeanServerConnection;
+import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
+import org.jolokia.service.jmx.api.CacheKeyProvider;
 import org.jolokia.service.jmx.handler.list.DataUpdater;
 import org.jolokia.service.jmx.handler.list.MBeanInfoData;
 
@@ -45,6 +46,7 @@ class ListMBeanEachAction implements MBeanServerAccess.MBeanEachCallback, MBeanS
     private final JolokiaContext context;
 
     private final SortedSet<DataUpdater> customUpdaters;
+    private final SortedSet<CacheKeyProvider> cacheKeyProviders;
 
     /**
      * Handler used during iterations whe collecting MBean Meta data
@@ -53,28 +55,31 @@ class ListMBeanEachAction implements MBeanServerAccess.MBeanEachCallback, MBeanS
      * @param pPathStack        optional stack for picking out a certain path from the list tree
      * @param pUseCanonicalName whether to use a canonical naming for the MBean property lists or the original
      * @param pListKeys         whether to dissect {@link ObjectName#getKeyPropertyList()} into MBean information
+     * @param pListCache        whether optimized {@code list()} operation is performed
      * @param pProvider         provider to prepend to any domain (if not null)
      * @param pContext          {@link JolokiaContext} for filtering MBeans
      */
     public ListMBeanEachAction(int pMaxDepth, Deque<String> pPathStack, boolean pUseCanonicalName,
-                               boolean pListKeys, String pProvider, JolokiaContext pContext) {
+                               boolean pListKeys, boolean pListCache, String pProvider, JolokiaContext pContext) {
         context = pContext;
-        infoData = new MBeanInfoData(pMaxDepth, pPathStack, pUseCanonicalName, pListKeys, pProvider);
+        // TOCHECK: MBeanInfoData can be filled with pre-cached, long-lived MBeans
+        infoData = new MBeanInfoData(pMaxDepth, pPathStack, pUseCanonicalName, pListKeys, pListCache, pProvider);
         customUpdaters = context.getServices(DataUpdater.class);
+        cacheKeyProviders = context.getServices(CacheKeyProvider.class);
     }
 
     /**
      * Add the given MBean to the collected Meta-Data for an iteration
      *
      * @param pConn connection from where to obtain the meta data
-     * @param pName object name of the bean
+     * @param pInstance object instance of the bean
      * @throws ReflectionException
      * @throws InstanceNotFoundException
      * @throws IOException
      */
-    public void callback(MBeanServerConnection pConn, ObjectName pName)
+    public void callback(MBeanServerConnection pConn, ObjectInstance pInstance)
         throws ReflectionException, InstanceNotFoundException, IOException {
-        lookupMBeanInfo(pConn, pName);
+        lookupMBeanInfo(pConn, pInstance);
     }
 
     /**
@@ -90,27 +95,26 @@ class ListMBeanEachAction implements MBeanServerAccess.MBeanEachCallback, MBeanS
      */
     public Void execute(MBeanServerConnection pConn, ObjectName pName, Object... extraArgs)
         throws ReflectionException, InstanceNotFoundException, IOException {
-        lookupMBeanInfo(pConn, pName);
+        lookupMBeanInfo(pConn, new ObjectInstance(pName, null));
         return null;
     }
 
-    private void lookupMBeanInfo(MBeanServerConnection pConn, ObjectName pName) throws InstanceNotFoundException, ReflectionException, IOException {
-        if (context.isObjectNameHidden(pName)) {
+    private void lookupMBeanInfo(MBeanServerConnection pConn, ObjectInstance pInstance) throws InstanceNotFoundException, ReflectionException, IOException {
+        ObjectName objectName = pInstance.getObjectName();
+        if (context.isObjectNameHidden(objectName)) {
             return;
         }
-        if (!infoData.handleFirstOrSecondLevel(pName)) {
+        if (!infoData.handleFirstOrSecondLevel(objectName)) {
             try {
-
-                MBeanInfo mBeanInfo = pConn.getMBeanInfo(pName);
-                infoData.addMBeanInfo(mBeanInfo, pName, customUpdaters);
+                infoData.addMBeanInfo(pConn, pInstance, customUpdaters, cacheKeyProviders);
             } catch (IOException exp) {
-                infoData.handleException(pName, exp);
+                infoData.handleException(objectName, exp);
             } catch (InstanceNotFoundException exp) {
-                infoData.handleException(pName, exp);
+                infoData.handleException(objectName, exp);
             } catch (IllegalStateException exp) {
-                infoData.handleException(pName, exp);
+                infoData.handleException(objectName, exp);
             } catch (IntrospectionException exp) {
-                throw new IllegalArgumentException("Cannot extra MBeanInfo for " + pName + ": " + exp, exp);
+                throw new IllegalArgumentException("Cannot extra MBeanInfo for " + objectName + ": " + exp, exp);
             }
         }
     }

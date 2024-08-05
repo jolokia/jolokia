@@ -1,0 +1,325 @@
+////
+  Copyright 2009-2023 Roland Huss
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+= Extending Jolokia
+
+In Jolokia 1.x, the necessary functions were provided by _services_ directly instantiated by these _agent implementations_:
+
+* `org.jolokia.http.AgentServlet` (WAR)
+* `org.jolokia.osgi.servlet.JolokiaServlet` (OSGi)
+* `org.jolokia.jvmagent.JolokiaServer` (JVM)
+
+Only implementations of detectors and simplifiers were detected respectively from:
+
+* `META-INF/detectors[-default]` (implementations of `org.jolokia.detector.ServerDetector`)
+* `META-INF/simplifiers[-default]` (implementations of `org.jolokia.converter.json.Extractor`)
+
+In Jolokia 2 there's another resource checked - `services[-default]` and additionaly the declaration files were moved to more specific location:
+
+* `META-INF/jolokia/detectors[-default]` (implementations of `org.jolokia.server.core.detector.ServerDetector`)
+* `META-INF/jolokia/simplifiers[-default]` (implementations of `org.jolokia.service.serializer.json.Extractor`)
+* `META-INF/jolokia/services[-default]` (implementations of `org.jolokia.server.core.service.api.JolokiaService`)
+
+For example, what was a dedicated `org.jolokia.history.HistoryStore` in Jolokia 1, used directly by `org.jolokia.backend.BackendManager` is now used by `org.jolokia.service.history.HistoryMBeanRequestInterceptor` _Jolokia service_ declared in `META-INF/jolokia/services-default` resource in `org.jolokia:jolokia-service-history` module.
+
+== A note about _Service Loader_ approach
+
+`META-INF/jolokia/services` is a bit similar approach to Java standard `java.util.ServiceLoader` API, where services are _declared_ in `META-INF/services/interface-name`.
+
+The most important aspect is that the instantiation of such services is performed by JDK itself (or Jolokia itself) and if 3rd party applications use more sophisticated _service registries_ (like CDI or Spring DI), then we can't avoid static fields...
+
+So if a Jolokia service extension needs to use other dependencies, it's up to the application to provide necessary integration. Static fields is the easies (but not super-clean) option.
+
+== Extension points in Jolokia 2
+
+Jolokia, when starting, uses `java.lang.ClassLoader.getResources` call to find various locations of the above service declaration resources. This allows 3rd party libraries to simply add a classpath library containing relevant resource and declare class names to be instantiated and used by Jolokia.
+
+The format of the extension file `META-INF/jolokia/services[-default]` is:
+
+[source]
+----
+# comment
+[!]fully.qualified.class.name[,order]
+----
+
+if line is not a comment, it is treated as _service entry_. There are two types of entries:
+
+* _remove entry_ - if a line starts with `!` (exclamation mark), we can declare a fully qualified name of a service declared in another (most probably Jolokia's own) service file, so we can _disable_ usage and instantiation of given service. For example we can remove history service with `!org.jolokia.service.history.HistoryMBeanRequestInterceptor` even if `org.jolokia:jolokia-service-history` is available on classpath
+* _service entry_ - if a line doesn't start with `!`, a class is instantiated using one of two possible constructors:
+** empty constructor
+** a constructor accepting integer value which is treated as "order" of the service. The value to pass is read after the comma in _service entry_.
+
+Service order is used to prioritize the services of the same interface - the lower the number, the higher the priority (preference). Default order is `100`.
+
+In the following sections we describe various services that may be declared by 3rd party libraries.
+
+=== MBeanInfo cache
+
+Jolokia is first and foremost a _JMX protocol adaptor_ (see xref:architecture.adoc[]). This means that whatever is registered in local (or remote) MBeanServer, is accessible using "JSON over HTTP".
+
+While this is a straightforward statement, the reality may be harsh sometimes. For example in https://activemq.apache.org/components/artemis/[Apache ActiveMQ Artemis,role=externalLink,window=_blank] broker, if you create, say, 10,000 queues, JVM ends up with additional 20,000 MBeans registered - a pair if these MBeans for single queue:
+
+* `address="queue-name",broker="0.0.0.0",component=addresses`
+* `address="queue-name",broker="0.0.0.0",component=addresses,queue="queue-name",routing-type="anycast",subcomponent=queues`
+
+The first Mbean is for `org.apache.activemq.artemis.core.management.impl.AddressControlImpl` and second one is for `org.apache.activemq.artemis.core.management.impl.QueueControlImpl`. What's more, the JSON map for `javax.management.MBeanInfo` of these MBeans is huge (over hundred attributes and operations for each pair). Multiplying it by 10K, Jolokia has to return 234MB of JSON data.
+
+To address this problem, Jolokia 2.1.0 introduces an _optimized list operation_, where instead of simple (but big) structure of:
+
+----
+domain:
+  mbean:
+    op:
+    attr:
+    notif:
+    class:
+    desc:
+  ...
+...
+----
+
+we provide a _smarter_ (a bit more complex, but much smaller) structure:
+
+----
+"domains":
+  domain:
+    mbean: cache-key
+    ...
+  ...
+"cache":
+  cache-key:
+    op:
+    attr:
+    notif:
+    class:
+    desc:
+  ...
+----
+
+Basically instead of duplicating the same JSONified `javax.management.MBeanInfo` over and over again for the same MBeans (2x10,000 times for 10,000 Artemis queues), we do some optimization here:
+
+1. Jolokia calls `javax.management.MBeanServerConnection.queryMBeans()` normally, getting a set of `javax.management.ObjectInstance` objects.
+2. Each `ObjectInstance` carries an `ObjectName` and `className`.
+3. Without any optimization, `ObjectName` is used in `javax.management.MBeanServerConnection.getMBeanInfo()` call and result is the serialized using `org.jolokia.service.jmx.handler.list.DataUpdater` services.
+4. However, both `ObjectName` and ``ObjectInstance``'s class can be use to obtain a _key_ (or a _hint_) which determines that some MBeans may _share_ its `javax.management.MBeanInfo` with other MBeans.
+5. When a non-null key for an MBean is obtained, its MBeanInfo is cached under `"cache"` field and related MBean under `"domains"` field simply points to cached JSON data of `javax.management.MBeanInfo`.
+
+In order to use such variant of `list()` operation, a new processing request parameter has to be specified. This is done using `listCache=true` paramater (defaults to `false` for compatibility reasons).
+
+When optimization is enabled, Jolokia uses `org.jolokia.service.jmx.api.CacheKeyProvider` services. if `determineKey(ObjectInstance)` method returns non-null key, it is used to share common JSON MBean information with other MBeans that produce the same cache key.
+
+Jolokia itself provides optimization only for few fundamental MBeans:
+
+* `pass:[java.lang:type=MemoryPool,name=*]` (class is `sun.management.MemoryPoolImpl`) - there are 8 instances by default in standard JVM (without any sophisticated memory settings)
+* `pass:[java.lang:type=MemoryManager,name=*]` (class is `sun.management.MemoryManagerImpl`) - there are 2 instances by default in standard JVM
+* `pass:[java.nio:type=BufferPool,name=*]` (class is `sun.management.ManagementFactoryHelper$1`) - there are 3 instances by default in standard JVM
+
+With these 3 optimizations, instead of this response:
+
+[,json]
+----
+"value": {
+  "java.lang": {
+    "name=G1 Survivor Space,type=MemoryPool": {
+      "op": {
+        "resetPeakUsage": {
+          "args": [],
+          "ret": "void",
+          "desc": "resetPeakUsage"
+        }
+      },
+      "attr": {
+        "Usage": {
+          "rw": false,
+          "type": "javax.management.openmbean.CompositeData",
+          "desc": "Usage"
+        },
+        ...
+    "name=Metaspace,type=MemoryPool": {
+      "op": {
+        "resetPeakUsage": {
+          "args": [],
+          "ret": "void",
+          "desc": "resetPeakUsage"
+        }
+      },
+      "attr": {
+        "Usage": {
+          "rw": false,
+          "type": "javax.management.openmbean.CompositeData",
+          "desc": "Usage"
+        },
+        ...
+    "name=G1 Eden Space,type=MemoryPool": {
+      "op": {
+        "resetPeakUsage": {
+          "args": [],
+          "ret": "void",
+          "desc": "resetPeakUsage"
+        }
+      },
+      ...
+----
+
+We get this:
+
+[,json]
+----
+"value": {
+  "cache": {
+    "java.lang:MemoryPool": {
+      "op": {
+        "resetPeakUsage": {
+          "args": [],
+          "ret": "void",
+          "desc": "resetPeakUsage"
+        }
+      },
+      "attr": {
+        "Usage": {
+          "rw": false,
+          "type": "javax.management.openmbean.CompositeData",
+          "desc": "Usage"
+        },
+        ...
+    "java.nio:BufferPool": {
+      "attr": {
+        "TotalCapacity": {
+          "rw": false,
+          "type": "long",
+          "desc": "TotalCapacity"
+        },
+        ...
+      }
+    }
+  }
+  "domains": {
+    "java.lang": {
+      "name=G1 Survivor Space,type=MemoryPool": "java.lang:MemoryPool",
+      "name=Metaspace,type=MemoryPool": "java.lang:MemoryPool",
+      "name=G1 Eden Space,type=MemoryPool": "java.lang:MemoryPool",
+      "name=CodeCacheManager,type=MemoryManager": "java.lang:MemoryManager",
+      "name=CodeHeap 'non-nmethods',type=MemoryPool": "java.lang:MemoryPool",
+      "name=G1 Old Gen,type=MemoryPool": "java.lang:MemoryPool",
+      "name=Compressed Class Space,type=MemoryPool": "java.lang:MemoryPool",
+      "name=CodeHeap 'non-profiled nmethods',type=MemoryPool": "java.lang:MemoryPool",
+      "name=CodeHeap 'profiled nmethods',type=MemoryPool": "java.lang:MemoryPool",
+      "name=Metaspace Manager,type=MemoryManager": "java.lang:MemoryManager",
+      ...
+    },
+    "java.nio": {
+      "name=direct,type=BufferPool": "java.nio:BufferPool",
+      "name=mapped,type=BufferPool": "java.nio:BufferPool",
+      "name=mapped - 'non-volatile memory',type=BufferPool": "java.nio:BufferPool"
+    },
+    ...
+----
+
+NOTE:: The MBeans for which we don't determine any _cache key_ are included under `"domains"/<domain>/<key-list-of-MBean>` normally.
+
+We can imagine Artemis adding a cache key provider for `org.apache.activemq.artemis` domain and MBeans with `component=addresses` key. There's a lot of optimization to be _declared_ in https://camel.apache.org/[Apache Camel,role=externalLink,window=_blank] too.
+
+See https://github.com/jolokia/jolokia/discussions/705[jolokia/jolokia#705,role=externalLink,window=_blank] for the rationale behind new Jolokia protocol version.
+
+=== Data updaters
+
+Previous section described services that may affect the structure of _entire_ `list()` response. This section is about services that affect single MBeanInfo of any MBean.
+
+`org.jolokia.service.jmx.handler.list.DataUpdater` is an interface used by `list()` operation. Normally when invoking xref:jolokia_protocol.adoc#list[list] operation, we get a JSON tree with a structure like this:
+
+[,json]
+----
+{
+  "<domain of ObjectName>": {
+    "<prop list from ObjectName>": {
+      "attr": ...,
+      "op": ...,
+      "notif": ...,
+      "class": ...,
+      "desc": ...
+    },
+    ...
+  },
+  ...
+}
+----
+
+Such JSON contains information obtained from `javax.management.MBeanInfo` objects and describes what is known about the registered MBean from the perspective of `javax.management.MBeanServer`.
+
+Built-in implementations of `org.jolokia.service.jmx.handler.list.DataUpdater` interface simply add these fields (`attr`, `op`, ...) to the JSON data.
+
+However there may be scenarios where for each MBean we need some additional data - for example the security roles assigned to given MBean (to implement a form of Role-Based Access Control (RBAC)). Jolokia isn't aware of the way an application implements security mechanisms, but should allow for any extension of the basic MBean data.
+
+We can provide an extension module, add it on the CLASSPATH and declare additional _data updaters_ in `META-INF/jolokia/services`. `org.jolokia.service.jmx.handler.list.DataUpdater` is already an implementation of `org.jolokia.server.core.service.api.JolokiaService` and it's an abstract class we can extend. For example:
+
+[source,java]
+----
+package com.example;
+
+public class MyUpdater extends org.jolokia.service.jmx.handler.list.DataUpdater {
+
+    public MyUpdater() {
+        super(100);
+    }
+
+    @Override
+    public String getKey() {
+        return "my";
+    }
+
+    @Override
+    public JSONObject extractData(ObjectName pObjectName, MBeanInfo pMBeanInfo, String pFilter) {
+        JSONObject json = new JSONObject();
+        json.put("now", System.currentTimeMillis());
+        return json;
+    }
+
+}
+----
+
+This _updater_ adds `my` field to the JSON info for an MBean with current timestamp, but we can imagine any other kind of _updater_. It is declared using the below line in `META-INF/jolokia/services` resource:
+
+----
+com.example.MyUpdater
+----
+
+NOTE:: It is recommended for advanced 3rd party extensions to implement both _cache key provider_ and _data updater_. We can imagine for Artemis broker that some queues are more restricted than others, so their serialized MBean info may contain different custom data then other queues, so they should produce different _cache key_.
+
+==== `ListKeysDataUpdater`
+
+Since 2.1.0, Jolokia provides optional implementation of `org.jolokia.service.jmx.handler.list.DataUpdater` service which can be enabled using `listKeys` processing parameter. When it is set (at request time) to `true`, in addition to standard `attr`, `op`, `notif`, `class` and `desc` fields of serialized MBeanInfo, we get another field `keys`. +
+It contains a map of keys obtained from the `ObjectName` itself using `javax.management.ObjectName.getKeyPropertyList()` method.
+
+With this parameter we can get the below response:
+
+[,json]
+----
+{
+  "request": {
+    "type": "list"
+  },
+  "value": {
+    "java.lang": {
+      "name=CodeHeap 'non-nmethods',type=MemoryPool": {
+        "keys": {
+          "name": "CodeHeap 'non-nmethods'",
+          "type": "MemoryPool"
+        },
+        "op": ...,
+        "attr": ...
+        ...
+----
+
+This may be used to save time parsing object key-list like `name=CodeHeap 'non-nmethods',type=MemoryPool`.

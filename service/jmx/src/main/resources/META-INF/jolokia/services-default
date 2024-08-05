@@ -1,3 +1,7 @@
 # ============================================
 # Request Handlers
 org.jolokia.service.jmx.LocalRequestHandler,1000
+
+# ============================================
+# Cache Key providers
+org.jolokia.service.jmx.handler.list.JDKManagementCacheKeyProvider,100

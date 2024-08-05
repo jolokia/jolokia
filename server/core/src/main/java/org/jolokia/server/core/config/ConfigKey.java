@@ -409,7 +409,13 @@ public enum ConfigKey {
      * When formatting dates using {@link java.text.SimpleDateFormat} uses default (local) timeZone, but
      * we may specify another zone (for example {@code TimeZone#getTimeZone("UTC")}).
      */
-    DATE_FORMAT_ZONE("dateFormatTimeZone", true, false, TimeZone.getDefault().toZoneId().getId());
+    DATE_FORMAT_ZONE("dateFormatTimeZone", true, false, TimeZone.getDefault().toZoneId().getId()),
+
+    /**
+     * Processing parameter used to enable <em>smart list response</em> where JSON data for each {@link javax.management.MBeanInfo}
+     * is cached instead of being duplicated for each (potentially the same) MBean of similar class.
+     */
+    LIST_CACHE("listCache", false, true, Constants.FALSE);
 
     /**
      * JAAS Subject to attach to an HTTP request as attribute if JAAS based authentication is in use.

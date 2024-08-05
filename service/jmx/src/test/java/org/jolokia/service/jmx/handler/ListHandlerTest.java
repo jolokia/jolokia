@@ -33,6 +33,7 @@ import org.jolokia.server.core.util.jmx.DefaultMBeanServerAccess;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 import org.jolokia.server.core.util.RequestType;
 import org.jolokia.server.core.util.TestJolokiaContext;
+import org.jolokia.service.jmx.api.CacheKeyProvider;
 import org.jolokia.service.jmx.handler.list.DataKeys;
 import org.jolokia.service.jmx.handler.list.DataUpdater;
 import org.testng.annotations.*;
@@ -57,7 +58,7 @@ public class ListHandlerTest extends BaseHandlerTest {
         TestJolokiaContext ctx = new TestJolokiaContext();
         Set<JolokiaService<?>> discovered = new ClasspathServiceCreator("services").getServices();
         for (JolokiaService<?> service : discovered) {
-            if (!(service instanceof DataUpdater)) {
+            if (!(service instanceof DataUpdater || service instanceof CacheKeyProvider)) {
                 continue;
             }
             @SuppressWarnings("unchecked")
@@ -144,6 +145,24 @@ public class ListHandlerTest extends BaseHandlerTest {
 
         res = execute(handlerWithRealm,request);
         checkKeys(res);
+    }
+
+    @Test
+    public void listCache() throws Exception {
+        JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST)
+            .option(ConfigKey.LIST_CACHE, "true").build();
+        Map<String, ?> res = execute(handler, request);
+        assertEquals(res.size(), 2);
+        assertNotNull(res.get("domains"));
+        assertNotNull(res.get("cache"));
+
+        JSONObject bufferPoolInfo = (JSONObject) ((JSONObject) res.get("cache")).get("java.nio:BufferPool");
+        assertNotNull(bufferPoolInfo);
+
+        String key = (String) ((JSONObject) ((JSONObject) res.get("domains")).get("java.nio")).get("name=direct,type=BufferPool");
+        if (key != null) {
+            assertEquals(key, "java.nio:BufferPool");
+        }
     }
 
     @Test

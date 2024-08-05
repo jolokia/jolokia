@@ -264,6 +264,11 @@ that lists all the keys obtained from each `javax.management.ObjectName` of the 
 This may save you time parsing the name yourself. +
 *Added since Jolokia 2.1.0*
 
+|`listCache`
+|A flag (defaults to `false`) to enable _optimized list response_. +
+With this flag enabled, `list()` operation returns a bit different structure (that's why we've upgraded protocol version to `8.0`) where some MBeans may _point to_ cached, shared MBeanInfo JSON fragment. This heavily decreases the size of `list()` response. +
+*Added since Jolokia 2.1.0*
+
 |`serializeException`
 |If true then in case of an error, the exception itself is returned in
 it JSON representation under the key `error_value`

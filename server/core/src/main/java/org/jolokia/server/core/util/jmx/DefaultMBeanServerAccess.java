@@ -81,11 +81,12 @@ public class DefaultMBeanServerAccess implements MBeanServerAccess, Notification
             Set<ObjectName> visited = new HashSet<>();
             for (MBeanServerConnection server : getMBeanServers()) {
                 // Query for a full name is the same as a direct lookup
-                for (ObjectName nameObject : server.queryNames(pObjectName, null)) {
-                    // Don't add if already visited previously
-                    if (!visited.contains(nameObject)) {
-                        pCallback.callback(server, nameObject);
-                        visited.add(nameObject);
+                for (ObjectInstance instance : server.queryMBeans(pObjectName, null)) {
+                    // Don't add if already visited previously - while single server has unique MBeans,
+                    // we may get the same MBean from different MBeanServer
+                    if (!visited.contains(instance.getObjectName())) {
+                        pCallback.callback(server, instance);
+                        visited.add(instance.getObjectName());
                     }
                 }
             }
