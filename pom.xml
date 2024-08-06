@@ -1019,7 +1019,7 @@
     <!-- A version used in documentation -->
     <currentStableVersion>2.0.3</currentStableVersion>
     <!-- Jolokia protocol version -->
-    <protocolVersion>7.3</protocolVersion>
+    <protocolVersion>8.0</protocolVersion>
 
     <!--
       Versions are specified in one place, so updates can be discovered with single command:
