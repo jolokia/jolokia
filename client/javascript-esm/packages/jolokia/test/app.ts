@@ -34,7 +34,7 @@ app.use("/jolokia-timeout", (_req, res) => {
       request: { type: "version" },
       value: {
         agent: "2.1.0",
-        protocol: "7.3"
+        protocol: "8.0"
       }
     })
   }, 800)

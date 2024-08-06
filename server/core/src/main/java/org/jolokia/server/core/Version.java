@@ -44,8 +44,8 @@ public final class Version {
             protocol = props.getProperty("protocol.version");
         } catch (IOException e) {
             // should never happen, unless this code is repackaged in different project
-            version = "2.0.0";
-            protocol = "7.2";
+            version = "2.1.0";
+            protocol = "8.0";
         }
         VERSION = version;
         PROTOCOL = protocol;

@@ -77,7 +77,7 @@ jolokiaRouter.post("/*", (req, res) => {
         request: body,
         value: {
           agent: "2.1.0",
-          protocol: "7.3"
+          protocol: "8.0"
         }
       })
       break

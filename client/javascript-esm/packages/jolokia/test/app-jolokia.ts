@@ -29,7 +29,7 @@ jolokiaRouter.get("/version", (_req, res) => {
     request: { type: "version" },
     value: {
       agent: "2.1.0",
-      protocol: "7.3"
+      protocol: "8.0"
     }
   })
 })
@@ -47,7 +47,7 @@ jolokiaRouter.post("/*", (req, res) => {
           request: v,
           value: {
             agent: "2.1.0",
-            protocol: "7.3"
+            protocol: "8.0"
           }
         })
       } else {
@@ -78,7 +78,7 @@ jolokiaRouter.post("/*", (req, res) => {
         request: { type: "version" },
         value: {
           agent: "2.1.0",
-          protocol: "7.3"
+          protocol: "8.0"
         }
       })
       break

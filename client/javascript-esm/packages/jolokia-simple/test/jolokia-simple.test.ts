@@ -97,7 +97,7 @@ describe("Jolokia simple API", () => {
   test("Simple version check", async () => {
     const jolokia = new Jolokia({ url: `http://localhost:${port}/jolokia-simple` }) as IJolokiaSimple
     const v = await jolokia.version()
-    expect((v as VersionResponseValue).protocol).toBe("7.3")
+    expect((v as VersionResponseValue).protocol).toBe("8.0")
   })
 
   test("Simple list", async () => {
