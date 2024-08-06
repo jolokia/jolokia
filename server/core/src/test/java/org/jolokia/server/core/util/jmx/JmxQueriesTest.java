@@ -30,6 +30,7 @@ import javax.management.MBeanServerNotification;
 import javax.management.MalformedObjectNameException;
 import javax.management.Notification;
 import javax.management.NotificationListener;
+import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 
@@ -133,7 +134,9 @@ public class JmxQueriesTest {
         Thread.sleep(1000);
         for (int i = 0; i < 100; i++) {
             Set<ObjectName> names = server.queryNames(pattern, null);
+            Set<ObjectInstance> instances = server.queryMBeans(pattern, null);
 //            System.out.println("found " + names.size());
+//            System.out.println("found " + instances.size());
         }
 
         System.out.println();

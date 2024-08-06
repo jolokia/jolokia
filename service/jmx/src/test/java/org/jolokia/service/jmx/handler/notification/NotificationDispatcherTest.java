@@ -116,7 +116,7 @@ public class NotificationDispatcherTest {
     }
 
     private void setupConnectionForAdd() throws IOException, InstanceNotFoundException, NoSuchFieldException, IllegalAccessException, ListenerNotFoundException {
-        expect(connection.queryNames(TEST_NAME, null)).andStubReturn(Collections.singleton(TEST_NAME));
+        expect(connection.queryMBeans(TEST_NAME, null)).andStubReturn(Collections.singleton(new ObjectInstance(TEST_NAME, null)));
         connection.addNotificationListener(EasyMock.eq(TEST_NAME), EasyMock.eq(getNotificationListener()), EasyMock.isNull(), EasyMock.isA(ListenerRegistration.class));
         connection.removeNotificationListener(EasyMock.eq(TEST_NAME), EasyMock.eq(getNotificationListener()), EasyMock.isNull(), EasyMock.isA(ListenerRegistration.class));
         replay(connection);

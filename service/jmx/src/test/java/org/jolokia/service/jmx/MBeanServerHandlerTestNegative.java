@@ -57,7 +57,7 @@ public class MBeanServerHandlerTestNegative {
             });
             MBeanServerAccess servers = new DefaultMBeanServerAccess(connections);
             final List<Boolean> results = new ArrayList<>();
-            servers.each(oName, (pConn, pName) -> results.add(pConn.isRegistered(pName)));
+            servers.each(oName, (pConn, pInstance) -> results.add(pConn.isRegistered(pInstance.getObjectName())));
             assertTrue(results.contains(Boolean.TRUE),"MBean not registered");
         } finally {
             TestDetector.setThrowAddException(false);

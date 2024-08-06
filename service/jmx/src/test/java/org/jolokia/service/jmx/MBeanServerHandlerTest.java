@@ -78,10 +78,10 @@ public class MBeanServerHandlerTest {
     private void checkMBeans(ObjectName oName) throws MBeanException, IOException, ReflectionException {
         MBeanServerAccess servers = new DefaultMBeanServerAccess();
         final List<Boolean> result = new ArrayList<>();
-        servers.each(oName, (pConn, pName) -> {
+        servers.each(oName, (pConn, pInstance) -> {
             // Throws an InstanceNotFoundException
-            pConn.getObjectInstance(pName);
-            result.add(pConn.isRegistered(pName));
+            pConn.getObjectInstance(pInstance.getObjectName());
+            result.add(pConn.isRegistered(pInstance.getObjectName()));
         });
         assertTrue(result.contains(Boolean.TRUE), "MBean not registered");
     }

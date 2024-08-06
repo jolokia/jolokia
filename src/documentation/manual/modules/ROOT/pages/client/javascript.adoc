@@ -258,6 +258,17 @@ When `false`, bulk responses have to be correlated with requests by matching
 the requests using index number - responses come in the same order as requests. +
 *Added since Jolokia 2.1.0*
 
+|`listKeys`
+|Whether the response object for `list()` operation should contain `keys` field
+that lists all the keys obtained from each `javax.management.ObjectName` of the response.
+This may save you time parsing the name yourself. +
+*Added since Jolokia 2.1.0*
+
+|`listCache`
+|A flag (defaults to `false`) to enable _optimized list response_. +
+With this flag enabled, `list()` operation returns a bit different structure (that's why we've upgraded protocol version to `8.0`) where some MBeans may _point to_ cached, shared MBeanInfo JSON fragment. This heavily decreases the size of `list()` response. +
+*Added since Jolokia 2.1.0*
+
 |`serializeException`
 |If true then in case of an error, the exception itself is returned in
 it JSON representation under the key `error_value`
@@ -265,7 +276,7 @@ in the response object.
 
 |`includeStackTrace`
 |By default, a stacktrace is returned with every error (key: `stacktrace`)
-This can be omitted by setting the value of this option to false.
+This can be omitted by setting the value of this option to `false`.
 
 |`ifModifiedSince`
 |The `LIST` operations provides an

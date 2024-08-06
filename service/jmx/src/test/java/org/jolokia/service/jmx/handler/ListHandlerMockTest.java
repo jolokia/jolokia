@@ -65,14 +65,14 @@ public class ListHandlerMockTest extends BaseHandlerTest {
         JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST).build();
 
         MBeanServerConnection connection = createMock(MBeanServerConnection.class);
-        Set<ObjectName> nameSet = new HashSet<>();
+        Set<ObjectInstance> nameSet = new HashSet<>();
         for (String name : new String[] { "java.lang:type=Memory", "java.lang:type=Runtime" }) {
             ObjectName oName = new ObjectName(name);
-            nameSet.add(oName);
+            nameSet.add(new ObjectInstance(oName, null));
             expect(connection.getMBeanInfo(oName)).andReturn(getRealMBeanInfo(oName));
 
         }
-        expect(connection.queryNames(null,null)).andReturn(nameSet);
+        expect(connection.queryMBeans(null,null)).andReturn(nameSet);
         replay(connection);
 
         @SuppressWarnings("unchecked")
@@ -124,17 +124,17 @@ public class ListHandlerMockTest extends BaseHandlerTest {
 
     private MBeanServerConnection prepareForIOException(boolean registerCheck) throws MalformedObjectNameException, InstanceNotFoundException, IntrospectionException, ReflectionException, IOException {
         MBeanServerConnection server = createMock(MBeanServerConnection.class);
-        Set<ObjectName> nameSet = new HashSet<>();
+        Set<ObjectInstance> nameSet = new HashSet<>();
         ObjectName oName = new ObjectName("java.lang:type=Memory");
-        nameSet.add(oName);
+        nameSet.add(new ObjectInstance(oName, null));
         expect(server.getMBeanInfo(oName)).andReturn(getRealMBeanInfo(oName));
         oName = new ObjectName("java.lang:type=Runtime");
         if (registerCheck) {
             expect(server.isRegistered(oName)).andReturn(true);
         }
-        nameSet.add(oName);
+        nameSet.add(new ObjectInstance(oName, null));
         expect(server.getMBeanInfo(oName)).andThrow(new IOException());
-        expect(server.queryNames(null, null)).andReturn(nameSet);
+        expect(server.queryMBeans(null, null)).andReturn(nameSet);
         replay(server);
         return server;
     }

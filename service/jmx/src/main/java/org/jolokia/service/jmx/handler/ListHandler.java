@@ -9,10 +9,8 @@ import javax.management.*;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.request.JolokiaListRequest;
 import org.jolokia.server.core.request.NotChangedException;
-import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.util.*;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
-import org.jolokia.service.jmx.handler.list.MBeanInfoData;
 import org.jolokia.json.JSONObject;
 
 /*
@@ -73,6 +71,8 @@ public class ListHandler extends AbstractCommandHandler<JolokiaListRequest> {
         Deque<String> originalPathStack = EscapeUtil.reversePath(pRequest.getPathParts());
         int maxDepth = pRequest.getParameterAsInt(ConfigKey.MAX_DEPTH);
         boolean useCanonicalName = pRequest.getParameterAsBool(ConfigKey.CANONICAL_NAMING);
+        boolean listKeys = pRequest.getParameterAsBool(ConfigKey.LIST_KEYS);
+        boolean listCache = pRequest.getParameterAsBool(ConfigKey.LIST_CACHE);
 
         ObjectName oName = null;
         try {
@@ -87,7 +87,7 @@ public class ListHandler extends AbstractCommandHandler<JolokiaListRequest> {
                 }
             }
 
-            ListMBeanEachAction action = new ListMBeanEachAction(maxDepth, pathStack, useCanonicalName, pProvider, context);
+            ListMBeanEachAction action = new ListMBeanEachAction(maxDepth, pathStack, useCanonicalName, listKeys, listCache, pProvider, context);
             return executeListAction(pServerManager, (Map<?, ?>) pPreviousResult, oName, action);
         } catch (MalformedObjectNameException e) {
             throw new IllegalArgumentException("Invalid path within the MBean part given. (Path: " + pRequest.getPath() + ")",e);
@@ -138,101 +138,4 @@ public class ListHandler extends AbstractCommandHandler<JolokiaListRequest> {
         return mbean;
     }
 
-    // Class for handling list queries
-    private static class ListMBeanEachAction implements MBeanServerAccess.MBeanEachCallback, MBeanServerAccess.MBeanAction<Void> {
-
-        // Meta data which will get collected
-        private final MBeanInfoData infoData;
-        private final JolokiaContext context;
-
-        /**
-         * Handler used during iterations whe collecting MBean Meta data
-         *
-         * @param pMaxDepth         max depth for the list tree to return
-         * @param pPathStack        optional stack for picking out a certain path from the list tree
-         * @param pUseCanonicalName whether to use a canonical naming for the MBean property lists or the original
-         * @param pProvider         provider to prepend to any domain (if not null)
-         * @param pContext          {@link JolokiaContext} for filtering MBeans
-         */
-        public ListMBeanEachAction(int pMaxDepth, Deque<String> pPathStack, boolean pUseCanonicalName, String pProvider, JolokiaContext pContext) {
-            context = pContext;
-            infoData = new MBeanInfoData(pMaxDepth,pPathStack,pUseCanonicalName,pProvider);
-        }
-
-        /**
-         * Add the given MBean to the collected Meta-Data for an iteration
-         *
-         * @param pConn connection from where to obtain the meta data
-         * @param pName object name of the bean
-         * @throws ReflectionException
-         * @throws InstanceNotFoundException
-         * @throws IOException
-         */
-        public void callback(MBeanServerConnection pConn, ObjectName pName)
-                throws ReflectionException, InstanceNotFoundException, IOException {
-            lookupMBeanInfo(pConn, pName);
-        }
-
-        /**
-         * Add the MBeanInfo for a single MBean
-         *
-         * @param pConn MBeanServer on which the action should be performed
-         * @param pName an objectname interpreted specifically by the action
-         * @param extraArgs any extra args given as context from the outside
-         * @return
-         * @throws ReflectionException
-         * @throws InstanceNotFoundException
-         * @throws IOException
-         */
-        public Void execute(MBeanServerConnection pConn, ObjectName pName, Object... extraArgs)
-                throws ReflectionException, InstanceNotFoundException, IOException {
-            lookupMBeanInfo(pConn, pName);
-            return null;
-        }
-
-        private void lookupMBeanInfo(MBeanServerConnection pConn, ObjectName pName) throws InstanceNotFoundException, ReflectionException, IOException {
-            if (context.isObjectNameHidden(pName)) {
-                return;
-            }
-            if (!infoData.handleFirstOrSecondLevel(pName)) {
-                try {
-                    MBeanInfo mBeanInfo = pConn.getMBeanInfo(pName);
-                    infoData.addMBeanInfo(mBeanInfo, pName);
-                } catch (IOException exp) {
-                    infoData.handleException(pName, exp);
-                } catch (InstanceNotFoundException exp) {
-                    infoData.handleException(pName, exp);
-                } catch (IllegalStateException exp) {
-                    infoData.handleException(pName, exp);
-                } catch (IntrospectionException exp) {
-                    throw new IllegalArgumentException("Cannot extra MBeanInfo for " + pName + ": " + exp,exp);
-                }
-            }
-        }
-
-
-        /**
-         * Get the overall result and add it to given value. The values from
-         * the map of this handlers are copied top level in a given base map
-         * (if any was given).
-         *
-         * @return the meta data suitable for JSON serialization
-         * @param pBaseMap the base map to merge in the result
-         */
-        @SuppressWarnings({"rawtypes", "unchecked"})
-        public Object getResult(Map pBaseMap) {
-
-            Object result = infoData.applyPath();
-            if (pBaseMap != null && result instanceof Map) {
-                // Its not a final value, so we merge it in at the top level
-                Map resultMap = (Map) result;
-                for (Map.Entry entry : (Set<Map.Entry>) resultMap.entrySet()) {
-                    pBaseMap.put(entry.getKey(),entry.getValue());
-                }
-                return pBaseMap;
-            } else {
-                return result;
-            }
-        }
-    }
 }

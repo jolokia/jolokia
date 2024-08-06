@@ -1,5 +1,6 @@
 * xref:index.adoc[]
 * xref:architecture.adoc[]
+* xref:extensions.adoc[]
 * xref:agents.adoc[]
 * xref:security.adoc[]
 * xref:proxy_mode.adoc[]

@@ -1,0 +1,2 @@
+org.jolokia.service.jmx.CustomUpdater,10
+org.jolokia.service.jmx.CustomImportantUpdater,50

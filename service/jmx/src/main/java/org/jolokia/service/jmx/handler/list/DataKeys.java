@@ -33,6 +33,7 @@ public enum DataKeys {
     RETURN_TYPE("ret"),
     OPERATIONS("op"),
     ATTRIBUTES("attr"),
+    KEYS("keys"),
     NOTIFICATIONS("notif"),
     TYPE("type"),
     READ_WRITE("rw");

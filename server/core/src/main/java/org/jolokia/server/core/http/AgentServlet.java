@@ -126,7 +126,7 @@ public class AgentServlet extends HttpServlet {
             JolokiaServiceManagerFactory.createJolokiaServiceManager(config, logHandler, restrictor, getServerDetectorLookup());
         initServices(pServletConfig, serviceManager);
 
-        // Start it up ....
+        // Start it up, all static (non-OSGi) services should be available/discovered already ....
         jolokiaContext = serviceManager.start();
         requestHandler = new HttpRequestHandler(jolokiaContext);
         allowDnsReverseLookup = Boolean.parseBoolean(config.getConfig(ConfigKey.ALLOW_DNS_REVERSE_LOOKUP));

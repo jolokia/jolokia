@@ -174,9 +174,15 @@ public enum ConfigKey {
 
     /**
      * Whether to include the incoming request in the {@code request} field of the response.
-     * Be carefull when corelating bulk requests/responses. Defaults to {@code true}.
+     * Be careful when corelating bulk requests/responses. Defaults to {@code true}.
      */
     INCLUDE_REQUEST("includeRequest", true, true),
+
+    /**
+     * A request parameter for {@code list} operation, which tells Jolokia to return a map of keys obtained from
+     * {@link javax.management.ObjectName#getKeyPropertyList()} under {@code keys} field of the data for an MBean.
+     */
+    LIST_KEYS("listKeys", false, true, Constants.FALSE),
 
     /**
      * For LIST requests, this option can be used to return
@@ -403,7 +409,13 @@ public enum ConfigKey {
      * When formatting dates using {@link java.text.SimpleDateFormat} uses default (local) timeZone, but
      * we may specify another zone (for example {@code TimeZone#getTimeZone("UTC")}).
      */
-    DATE_FORMAT_ZONE("dateFormatTimeZone", true, false, TimeZone.getDefault().toZoneId().getId());
+    DATE_FORMAT_ZONE("dateFormatTimeZone", true, false, TimeZone.getDefault().toZoneId().getId()),
+
+    /**
+     * Processing parameter used to enable <em>smart list response</em> where JSON data for each {@link javax.management.MBeanInfo}
+     * is cached instead of being duplicated for each (potentially the same) MBean of similar class.
+     */
+    LIST_CACHE("listCache", false, true, Constants.FALSE);
 
     /**
      * JAAS Subject to attach to an HTTP request as attribute if JAAS based authentication is in use.

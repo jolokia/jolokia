@@ -60,7 +60,7 @@ public class NotificationListenerDelegateTest {
 
         NotificationListenerDelegate delegate = new NotificationListenerDelegate(backendManager);
 
-        expect(connection.queryNames(TEST_NAME, null)).andStubReturn(Collections.singleton(TEST_NAME));
+        expect(connection.queryMBeans(TEST_NAME, null)).andStubReturn(Collections.singleton(new ObjectInstance(TEST_NAME, null)));
         connection.addNotificationListener(eq(TEST_NAME), eq(delegate), eqNotificationFilter("type.jmx"), isA(ListenerRegistration.class));
         connection.removeNotificationListener(eq(TEST_NAME), eq(delegate), eqNotificationFilter("type.jmx"), isA(ListenerRegistration.class));
         expect(backend.subscribe(anyObject())).andStubReturn(null);
@@ -94,7 +94,7 @@ public class NotificationListenerDelegateTest {
     public void testExceptionDuringAdd() throws Exception {
         Object handback = new Object();
         NotificationListenerDelegate delegate = getNotificationListenerDelegate();
-        expect(connection.queryNames(TEST_NAME, null)).andStubReturn(Collections.singleton(TEST_NAME));
+        expect(connection.queryMBeans(TEST_NAME, null)).andStubReturn(Collections.singleton(new ObjectInstance(TEST_NAME, null)));
         connection.addNotificationListener(eq(TEST_NAME), eq(delegate), eqNotificationFilter("type.jmx"), isA(ListenerRegistration.class));
         expectLastCall().andThrow(new InstanceNotFoundException());
         replay(connection);

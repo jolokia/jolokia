@@ -147,9 +147,9 @@ class NotificationListenerDelegate implements NotificationListener {
             try {
                 pExecutor.each(listenerRegistration.getMBeanName(),new MBeanServerAccess.MBeanEachCallback() {
                     /** {@inheritDoc} */
-                    public void callback(MBeanServerConnection pConn, ObjectName pName)
+                    public void callback(MBeanServerConnection pConn, ObjectInstance pName)
                             throws InstanceNotFoundException, IOException {
-                        pConn.addNotificationListener(pName,NotificationListenerDelegate.this,
+                        pConn.addNotificationListener(pName.getObjectName(),NotificationListenerDelegate.this,
                                                       listenerRegistration.getFilter(),listenerRegistration);
                         added[0] = true;
                     }
@@ -181,9 +181,9 @@ class NotificationListenerDelegate implements NotificationListener {
         final ListenerRegistration registration = client.get(pHandle);
         pExecutor.each(registration.getMBeanName(), new MBeanServerAccess.MBeanEachCallback() {
             /** {@inheritDoc} */
-            public void callback(MBeanServerConnection pConn, ObjectName pName) throws InstanceNotFoundException, IOException {
+            public void callback(MBeanServerConnection pConn, ObjectInstance pName) throws InstanceNotFoundException, IOException {
                 try {
-                    pConn.removeNotificationListener(pName, NotificationListenerDelegate.this, registration.getFilter(), registration);
+                    pConn.removeNotificationListener(pName.getObjectName(), NotificationListenerDelegate.this, registration.getFilter(), registration);
                 } catch (ListenerNotFoundException e) {
                     // We tried it. If not there, thats ok, too.
                 }

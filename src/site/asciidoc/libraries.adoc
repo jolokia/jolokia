@@ -91,13 +91,26 @@ Maven artifacts are also renamed. We follow a convention where artifact ID (whic
 * `jolokia-jvm` to `jolokia-agent-jvm`
 * `jolokia-jsr160` to `jolokia-service-jsr160`
 
-We have now 5 groups of modules:
+We have now 6 groups of modules:
 
-* https://github.com/jolokia/jolokia/tree/2.0/server[server modules,role=externalLink,window=_blank]
-* https://github.com/jolokia/jolokia/tree/2.0/service[service modules,role=externalLink,window=_blank]
-* https://github.com/jolokia/jolokia/tree/2.0/agent[agent modules,role=externalLink,window=_blank]
-* https://github.com/jolokia/jolokia/tree/2.0/client[client modules,role=externalLink,window=_blank]
-* https://github.com/jolokia/jolokia/tree/2.0/support[support modules,role=externalLink,window=_blank]
+* https://github.com/jolokia/jolokia/tree/main/json[server modules,role=externalLink,window=_blank]
+* https://github.com/jolokia/jolokia/tree/main/server[server modules,role=externalLink,window=_blank]
+* https://github.com/jolokia/jolokia/tree/main/service[service modules,role=externalLink,window=_blank]
+* https://github.com/jolokia/jolokia/tree/main/agent[agent modules,role=externalLink,window=_blank]
+* https://github.com/jolokia/jolokia/tree/main/client[client modules,role=externalLink,window=_blank]
+* https://github.com/jolokia/jolokia/tree/main/support[support modules,role=externalLink,window=_blank]
+
+.JSON module
+
+Single module which implements JSON parser/serializer, which replaces long-time used https://code.google.com/archive/p/json-simple/[json-simple,role=externalLink,window=_blank] library.
+
+[%autowidth.stretch,role=bodyTable]
+|===
+|Artifact ID|Description
+
+|`jolokia-json`
+|More flexible (from Jolokia perspective) and faster implementation of https://code.google.com/archive/p/json-simple/[json-simple,role=externalLink,window=_blank].
+|===
 
 .Server modules
 

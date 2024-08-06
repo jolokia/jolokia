@@ -64,9 +64,9 @@ public class DefaultMBeanServerAccessTest {
 
     @Test
     public void eachNull() throws MBeanException, IOException, ReflectionException {
-        executor.each(null, (pConn, pName) -> {
+        executor.each(null, (pConn, pInstance) -> {
             if (pConn != ManagementFactory.getPlatformMBeanServer()) {
-                checkHiddenMBeans(pConn, pName);
+                checkHiddenMBeans(pConn, pInstance.getObjectName());
             }
         });
     }
@@ -75,10 +75,10 @@ public class DefaultMBeanServerAccessTest {
     @Test
     public void eachObjectName() throws MalformedObjectNameException, MBeanException, IOException, ReflectionException {
         for (final ObjectName name : new ObjectName[] { new ObjectName("test:type=one"), new ObjectName("test:type=two") }) {
-            executor.each(name, (pConn, pName) -> {
+            executor.each(name, (pConn, pInstance) -> {
                 if (pConn != ManagementFactory.getPlatformMBeanServer()) {
-                    assertEquals(pName,name);
-                    checkHiddenMBeans(pConn,pName);
+                    assertEquals(pInstance.getObjectName(),name);
+                    checkHiddenMBeans(pConn,pInstance.getObjectName());
                 }
             });
         }

@@ -26,8 +26,8 @@ public class SingleMBeanServerAccess implements MBeanServerAccess {
 
     public void each(ObjectName pObjectName, MBeanEachCallback pCallback) throws IOException, ReflectionException, MBeanException {
         try {
-            for (ObjectName nameObject : connection.queryNames(pObjectName, null)) {
-                pCallback.callback(connection, nameObject);
+            for (ObjectInstance instance : connection.queryMBeans(pObjectName, null)) {
+                pCallback.callback(connection, instance);
              }
          } catch (InstanceNotFoundException exp) {
              // Something which is not plausible and should not happen (remember, we do a query before)

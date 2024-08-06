@@ -19,17 +19,23 @@ package org.jolokia.service.jmx.handler;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.util.*;
+import java.util.function.ToIntFunction;
 
 import javax.management.*;
 
 import org.easymock.EasyMock;
+import org.jolokia.json.JSONObject;
 import org.jolokia.server.core.request.*;
 import org.jolokia.server.core.config.ConfigKey;
+import org.jolokia.server.core.service.api.JolokiaService;
+import org.jolokia.server.core.service.impl.ClasspathServiceCreator;
 import org.jolokia.server.core.util.jmx.DefaultMBeanServerAccess;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 import org.jolokia.server.core.util.RequestType;
 import org.jolokia.server.core.util.TestJolokiaContext;
+import org.jolokia.service.jmx.api.CacheKeyProvider;
 import org.jolokia.service.jmx.handler.list.DataKeys;
+import org.jolokia.service.jmx.handler.list.DataUpdater;
 import org.testng.annotations.*;
 
 import static org.easymock.EasyMock.*;
@@ -50,6 +56,22 @@ public class ListHandlerTest extends BaseHandlerTest {
     @BeforeMethod
     public void createHandler() {
         TestJolokiaContext ctx = new TestJolokiaContext();
+        Set<JolokiaService<?>> discovered = new ClasspathServiceCreator("services").getServices();
+        for (JolokiaService<?> service : discovered) {
+            if (!(service instanceof DataUpdater || service instanceof CacheKeyProvider)) {
+                continue;
+            }
+            @SuppressWarnings("unchecked")
+            TreeSet<JolokiaService<?>> set = (TreeSet<JolokiaService<?>>) ctx.getServices().computeIfAbsent(service.getType(),
+                t -> new TreeSet<>(Comparator.comparingInt(new ToIntFunction<JolokiaService<?>>() {
+                    @Override
+                    public int applyAsInt(JolokiaService<?> value) {
+                        return value.getOrder();
+                    }
+                })));
+            set.add(service);
+        }
+
         handler = new ListHandler();
         handler.init(ctx, null);
         handlerWithRealm = new ListHandler();
@@ -111,11 +133,54 @@ public class ListHandlerTest extends BaseHandlerTest {
         checkKeys(res);
     }
 
+    @Test
+    public void keyListing() throws Exception {
+        JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST)
+            .option(ConfigKey.LIST_KEYS, "true")
+            .pathParts("java.lang", "type=Memory").build();
+        Map<String, ?> res = execute(handler, request);
+        checkKeys(res, KEYS);
+        JSONObject keys = (JSONObject) res.get("keys");
+        assertEquals(keys.get("type"), "Memory");
+
+        res = execute(handlerWithRealm,request);
+        checkKeys(res);
+    }
+
+    @Test
+    public void listCache() throws Exception {
+        JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST)
+            .option(ConfigKey.LIST_CACHE, "true").build();
+        Map<String, ?> res = execute(handler, request);
+        assertEquals(res.size(), 2);
+        assertNotNull(res.get("domains"));
+        assertNotNull(res.get("cache"));
+
+        JSONObject bufferPoolInfo = (JSONObject) ((JSONObject) res.get("cache")).get("java.nio:BufferPool");
+        assertNotNull(bufferPoolInfo);
+
+        String key = (String) ((JSONObject) ((JSONObject) res.get("domains")).get("java.nio")).get("name=direct,type=BufferPool");
+        if (key != null) {
+            assertEquals(key, "java.nio:BufferPool");
+        }
+    }
+
+    @Test
+    public void discoveredDataUpdater() throws Exception {
+        JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST).pathParts("java.lang", "type=Memory").build();
+        Map<String, ?> res = execute(handler, request);
+        checkKeys(res, DESCRIPTION, OPERATIONS, ATTRIBUTES, CLASSNAME, NOTIFICATIONS);
+        assertEquals(res.get("isSpecial"), "very very special");
+
+        res = execute(handlerWithRealm,request);
+        checkKeys(res);
+    }
+
     private void checkKeys(Map<?, ?> pRes, DataKeys ... pKeys) {
         for (DataKeys k : pKeys) {
             assertTrue(pRes.containsKey(k.getKey()));
         }
-        assertEquals(pRes.size(), pKeys.length);
+        assertTrue(pRes.size() >= pKeys.length);
     }
 
     @Test
@@ -185,7 +250,7 @@ public class ListHandlerTest extends BaseHandlerTest {
         JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST).pathParts("java.lang","type=Memory")
                 .option(ConfigKey.MAX_DEPTH, "3").build();
         Map<String, ?> res =  execute(handler, request);
-        assertEquals(res.size(), 5);
+        assertEquals(res.size(), 6);
         @SuppressWarnings("unchecked")
         Map<String, ?> ops = (Map<String, ?>) res.get(OPERATIONS.getKey());
         assertTrue(ops.containsKey("gc"));
@@ -237,7 +302,7 @@ public class ListHandlerTest extends BaseHandlerTest {
         JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST).pathParts("java.lang", "type=Runtime").build();
         Map<String, ?> res = execute(handler, request);
         assertFalse(res.containsKey(OPERATIONS.getKey()));
-        assertEquals(res.size(),3);
+        assertEquals(res.size(),4);
     }
 
     @Test(expectedExceptions = { IllegalArgumentException.class })
