@@ -1067,7 +1067,10 @@
 
     <version.org.apache.bcel>6.9.0</version.org.apache.bcel>
     <version.org.apache.maven.wagon>2.7</version.org.apache.maven.wagon>
-    <version.nodejs>v18.17.1</version.nodejs>
+    <!-- https://nodejs.org/en/about/previous-releases#looking-for-latest-release-of-a-version-branch -->
+    <version.nodejs>v20.9.0</version.nodejs>
+    <version.npm>10.8.1</version.npm>
+    <version.yarn>v1.22.22</version.yarn>
 
     <!-- Versions of test-related dependencies -->
 
