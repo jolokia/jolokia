@@ -17,6 +17,7 @@ package org.jolokia.it.core;
  */
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -134,6 +135,10 @@ public class OperationChecking implements OperationCheckingMBean,MBeanRegistrati
         return 3;
     }
 
+    public Date withDates(Date date) {
+        return date;
+    }
+
     public ObjectName preRegister(MBeanServer server, ObjectName name) throws Exception {
         return new ObjectName(domain + ":type=operation");
 
@@ -161,5 +166,9 @@ public class OperationChecking implements OperationCheckingMBean,MBeanRegistrati
 
     public TimeUnit findTimeUnit(TimeUnit unit) {
         return unit;
+    }
+
+    public Integer getInteger(int returnedValue) {
+        return returnedValue;
     }
 }

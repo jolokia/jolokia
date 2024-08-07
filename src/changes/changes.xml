@@ -33,6 +33,9 @@
       <action dev="grgrzybek" type="fix" issue="564">
         Additional JSON optimization mode (protocol version 8.0) with listCache=true parameter.
       </action>
+      <action dev="grgrzybek" type="fix" issue="333">
+        Support for java.util.Date parameters and return values.
+      </action>
       <action dev="grgrzybek" type="fix" issue="261">
         Add "filter" element to jolokia-access.xml file to filter out results of "list" and "search"
         operations.

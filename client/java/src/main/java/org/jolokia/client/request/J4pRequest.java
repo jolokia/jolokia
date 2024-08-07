@@ -159,6 +159,10 @@ public abstract class J4pRequest {
                     args[i++] = e;
                 }
                 return getArrayForArgument(args);
+            } else if (Date.class == pArg.getClass()) {
+                // pass Date as long (there's no TZ information here just like in java.time.Instant)
+                Date d = (Date) pArg;
+                return Long.toString(d.getTime());
             } else if (Temporal.class.isAssignableFrom(pArg.getClass())) {
                 // special handling for the temporals that can easily be converted to unix time (in nanos)
                 Temporal t = (Temporal) pArg;
@@ -223,6 +227,10 @@ public abstract class J4pRequest {
             return serializeMap((Map<String, Object>) pArg);
         } else if (pArg instanceof Collection) {
             return serializeCollection((Collection<?>) pArg);
+        } else if (Date.class == pArg.getClass()) {
+            // pass Date as long (there's no TZ information here just like in java.time.Instant)
+            Date d = (Date) pArg;
+            return Long.toString(d.getTime());
         } else if (pArg instanceof Temporal) {
             // special handling for the temporals that can easily be converted to unix time (in nanos)
             Temporal t = (Temporal) pArg;

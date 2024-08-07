@@ -291,4 +291,21 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
             assertNull(resp.getValue());
         }
     }
+
+    @Test
+    public void dateArgs() throws MalformedObjectNameException, J4pException {
+        J4pExecRequest request;
+        J4pExecResponse resp;
+        for (J4pTargetConfig cfg : new J4pTargetConfig[] { null, getTargetProxyConfig()}) {
+            for (String type : new String[] { "GET", "POST" }) {
+                if (type.equals("GET") && cfg != null) {
+                    continue;
+                }
+                request = new J4pExecRequest(cfg,itSetup.getOperationMBean(),"withDates",new Date());
+                resp = j4pClient.execute(request,type);
+                assertNotNull(resp);
+            }
+        }
+    }
+
 }

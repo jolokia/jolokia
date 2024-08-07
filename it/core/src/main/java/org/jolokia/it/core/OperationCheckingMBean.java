@@ -17,6 +17,7 @@ package org.jolokia.it.core;
  */
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -73,4 +74,8 @@ public interface OperationCheckingMBean {
     BigDecimal addBigDecimal(int first, BigDecimal second);
 
     TabularData update(String name,TabularData data);
+
+    Integer getInteger(int returnedValue);
+
+    Date withDates(Date date);
 }
