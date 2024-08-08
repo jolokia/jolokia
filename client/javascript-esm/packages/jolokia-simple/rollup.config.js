@@ -24,7 +24,7 @@ const defaultSimpleOutput = {
   indent: false,
   extend: true,
   format: "umd",
-  sourcemap: true,
+  sourcemap: false,
   globals: {
     "jolokia.js": "Jolokia"
   }

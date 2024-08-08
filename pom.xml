@@ -742,6 +742,11 @@
       </dependency>
       <dependency>
         <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-client-javascript-esm</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
         <artifactId>jolokia-client-jmx-adapter</artifactId>
         <version>${project.version}</version>
       </dependency>

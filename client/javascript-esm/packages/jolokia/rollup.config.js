@@ -24,7 +24,7 @@ const defaultOutput = {
   indent: false,
   extend: true,
   format: "umd",
-  sourcemap: true
+  sourcemap: false
 }
 
 const configJolokia = {

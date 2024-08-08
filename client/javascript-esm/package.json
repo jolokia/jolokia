@@ -19,6 +19,7 @@
   ],
   "scripts": {
     "build": "yarn build:jolokia && yarn build:jolokia-simple",
+    "watch": "yarn workspaces foreach -Rpi --from '{jolokia.js,@jolokia.js/simple}' run rollup -c -w",
     "test": "yarn test:jolokia && yarn test:jolokia-simple",
     "build:jolokia": "yarn workspace jolokia.js build:jolokia",
     "build:jolokia-simple": "yarn workspace @jolokia.js/simple build:jolokia-simple",

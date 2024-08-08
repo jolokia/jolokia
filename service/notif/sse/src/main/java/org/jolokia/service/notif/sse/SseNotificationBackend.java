@@ -7,6 +7,7 @@ import java.util.*;
 import javax.management.AttributeNotFoundException;
 import javax.management.Notification;
 
+import org.jolokia.json.JSONStructure;
 import org.jolokia.server.core.http.BackChannel;
 import org.jolokia.server.core.service.api.AbstractJolokiaService;
 import org.jolokia.server.core.service.api.JolokiaContext;
@@ -75,10 +76,12 @@ public class SseNotificationBackend extends AbstractJolokiaService<NotificationB
                                                    handback, 0);
                     try {
                         long id = notification.getSequenceNumber();
-                        String data =
-                                serializer.serialize(result, null /* no path */, SerializeOptions.DEFAULT)
-                                          .toString();
-                        sendMessage(backChannel,id,data);
+                        JSONStructure json =
+                            (JSONStructure) serializer.serialize(result, null /* no path */, SerializeOptions.DEFAULT);
+                        StringWriter sw = new StringWriter();
+                        json.writeJSONString(sw);
+
+                        sendMessage(backChannel,id,sw.toString());
                     } catch (IOException e) {
                         // TODO: Collect in a buffer, ordered by sequence number
                     } catch (AttributeNotFoundException e) {

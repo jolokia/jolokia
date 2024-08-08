@@ -170,7 +170,7 @@ public enum ConfigKey {
      * <code>application/json</code>, too. A request parameter overrides a global
      * configuration.
      */
-    MIME_TYPE("mimeType", true, true, "text/plain"),
+    MIME_TYPE("mimeType", true, true, "application/json"),
 
     /**
      * Whether to include the incoming request in the {@code request} field of the response.

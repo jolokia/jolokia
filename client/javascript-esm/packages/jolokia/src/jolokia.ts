@@ -71,7 +71,7 @@ const CLIENT_VERSION = "2.1.0"
 const DEFAULT_FETCH_PARAMS: RequestInit = {
   cache: "no-store",
   credentials: "same-origin",
-  redirect: "error",
+  redirect: "error"
 }
 
 // Processing parameters which are added to the URL as query parameters if given as options
@@ -473,6 +473,9 @@ Object.defineProperty(Jolokia.prototype, "CLIENT_VERSION", {
 Jolokia.escape = Jolokia.prototype.escape = function (part: string): string {
   return encodeURIComponent(part.replace(/!/g, "!!").replace(/\//g, "!/"))
 }
+Jolokia.escapePost = Jolokia.prototype.escape = function (part: string): string {
+  return part.replace(/!/g, "!!").replace(/\//g, "!/")
+}
 
 Jolokia.isError = Jolokia.prototype.isError = function (resp: JolokiaResponse): boolean {
   return resp == null || resp.status !== 200
@@ -494,7 +497,7 @@ Jolokia.isError = Jolokia.prototype.isError = function (resp: JolokiaResponse): 
  */
 function prepareRequest(request: JolokiaRequest | JolokiaRequest[], agentOptions: JolokiaConfiguration, params?: RequestOptions):
     RequestArguments {
-  const opts: RequestOptions = Object.assign({}, agentOptions, params)
+  const opts: RequestOptions = Object.assign({}, agentOptions, { dataType: 'json' }, params)
   assertNotNull(opts.url, "No URL given")
 
   // options object passed to fetch() (2nd argument)
@@ -559,6 +562,10 @@ function prepareRequest(request: JolokiaRequest | JolokiaRequest[], agentOptions
     successCb = constructCallbackDispatcher(opts.success)
     errorCb = constructCallbackDispatcher(opts.error)
   }
+  if ("error" in opts && !opts.success) {
+    errorCb = constructCallbackDispatcher(opts.error)
+    successCb = constructCallbackDispatcher("ignore")
+  }
 
   return { url, fetchOptions, dataType: opts.dataType, resolve: opts.resolve, successCb, errorCb }
 }
@@ -572,10 +579,16 @@ async function performRequest(args: RequestArguments):
   const { url, fetchOptions, dataType, resolve, successCb, errorCb } = args
 
   if (successCb && errorCb) {
-    // callback mode - we'll handle the promise and caller with get a promise resolving to `undefined` after
+    // callback mode - we'll handle the promise and caller will get a promise resolving to `undefined` after
     // the callbacks are notified
     return fetch(url, fetchOptions)
       .then(async (response: Response): Promise<undefined> => {
+        if (response.status >= 400) {
+          // Jolokia sends its errors with HTTP 200, so any HTTP code >= 400 is actually an error.
+          // with xhr and JQuery we were using ajaxError param, but this time we have to use Promise's exceptions
+          // user can Promise.catch() the exception which will be actual Response object (the beauty of JavaScript)
+          throw response
+        }
         const ct = response.headers.get("content-type")
         if (dataType === "text" || !ct || !(ct.startsWith("text/json") || ct.startsWith("application/json"))) {
           // text response - no parsing, single call
@@ -604,6 +617,9 @@ async function performRequest(args: RequestArguments):
       // Jolokia response handling at caller's side (no access to response headers, status, etc.)
       return fetch(url, fetchOptions)
         .then(async (response: Response): Promise<string | (JolokiaSuccessResponse | JolokiaErrorResponse)[]> => {
+          if (response.status >= 400) {
+            throw response
+          }
           const ct = response.headers.get("content-type")
           if (dataType === "text" || !ct || !(ct.startsWith("text/json") || ct.startsWith("application/json"))) {
             return response.text()
@@ -1026,7 +1042,7 @@ const GET_URL_EXTRACTORS: { [key in RequestType]: (r: GenericRequest) => GetPath
    * @returns URL configuration object for Jolokia `read` GET request
    */
   "read": function (request: ReadRequest) {
-    const path: string = valueToString(Array.isArray(request.path) ? request.path.map(Jolokia.escape).join("/") : request.path)
+    const path = Array.isArray(request.path) ? request.path.map(Jolokia.escape).join("/") : request.path
     if (request.attribute == null) {
       // Path gets ignored for multiple attribute fetch
       return { parts: [ request.mbean, "*" ], path }
@@ -1042,7 +1058,7 @@ const GET_URL_EXTRACTORS: { [key in RequestType]: (r: GenericRequest) => GetPath
    * @returns URL configuration object for Jolokia `write` GET request
    */
   "write": function (request: WriteRequest) {
-    const path: string = valueToString(Array.isArray(request.path) ? request.path.map(Jolokia.escape).join("/") : request.path)
+    const path = Array.isArray(request.path) ? request.path.map(Jolokia.escape).join("/") : request.path
     return { parts: [ request.mbean, request.attribute as string, valueToString(request.value) ], path }
   },
 

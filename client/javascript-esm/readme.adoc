@@ -1,6 +1,13 @@
 = New Jolokia JavaScript library using ES modules
 
-Changes comparing to existing jolokia.js:
+This client provides the following two libraries:
+
+* `jolokia.js`: Base library containing the `Jolokia` object definition which carries the `request()`
+* `jolokia-simple.js`: Library containing the Jolokia simple API and which builds up on `jolokia.js`. It must be included after `jolokia.js` since it adds methods to the `Jolokia` object definition.
+
+These libraries can be used directly by using `<script>` element in HTML page, but we also support _modern_ (it's hard to define "modern" in JavaScript world...) JavaScript and Jolokia JS libraries can be used as ESM modules with bundlers like https://webpack.js.org/[Webpack] or https://rollupjs.org/[Rollup].
+
+== Changes comparing to existing jolokia.js
 
 * no dependency on https://jquery.com/[JQuery], https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API[Fetch API] is used for requests. Switching away from `xhr`, we're dropping _synchronous AJAX_ (`xhr` has an option to perform requests in synchronous manner, but it blocks the event loop and is deprecated in modern browsers for long time already).
 ** `credentials` and `headers` properties (from `fetch()` options) are exposed in `Jolokia()` and `Jolokia.request()` calls (with restrictions, because some values/headers may be configured by Jolokia itself)
@@ -16,14 +23,13 @@ Changes comparing to existing jolokia.js:
 *** Fetch API https://developer.mozilla.org/en-US/docs/Web/API/Response[Response object], when user specifies
 `resolve="response"` in request options. User may further resolve it to json, text, blob, ...
 * Code base is using TypeScript which is processed by https://rollupjs.org/[Rollup.js]
-* Because of the way var-args and optional arguments are handled, jolokia-simple.js's `execute` method takes request options before operation arguments
 
 == Developer notes
 
 The goal of client/javascript-esm directory is to provide a _Jolokia monorepo_ based on:
 
 * yarn workspaces to organize interdependent modules
-* https://rollupjs.org/[Rollup.js] as a bundler to provide UMD files for browsers and ES modules for browsers and other bundlers (like Webpack).
+* https://rollupjs.org/[Rollup.js] as a bundler to provide UMD files for browsers and ES modules for browsers and other bundlers (like https://webpack.js.org/[Webpack]).
 * Typescript as main langage for source an tests
 * https://jestjs.io/[Jest] tests written in Typescript
 
@@ -33,7 +39,7 @@ should allow to work with multiple packages (`jolokia.js`, `@jolokia.js/d3`, ...
 We can't use https://www.typescriptlang.org/docs/handbook/project-references.html[Typescript project references],
 because these can't be used with `noEmit: true`.
 
-The trick is (though there may be better ones, or this one may be proved bad) with `exports` field of `package.json`:
+The trick is (though there may be better ones, or this one may be proved wrong) to use `exports` field of `package.json`:
 
 [,json]
 ----

@@ -90,11 +90,11 @@ interface IJolokiaSimple extends IJolokia {
    * @param operation name of operation to execute. Can contain a signature in case overloaded
    *                  operations are to be called (comma separated fully qualified argument types
    *                  append to the operation name within parentheses)
-   * @param opts options for `IJolokia.request()`
-   * @param params one or more argument required for executing the operation.
+   * @param params one or more argument required for executing the operation. If last parameter is an object,
+   *               it is treated as BaseRequestOptions used for request
    * @return the return value of the JMX operation.
    */
-  execute(mbean: string, operation: string, opts?: BaseRequestOptions, ...params: unknown[]): Promise<ExecResponseValue>
+  execute(mbean: string, operation: string, ...params: unknown[]): Promise<ExecResponseValue>
 
   /**
    * Search for MBean based on a pattern and return a reference to the list of found

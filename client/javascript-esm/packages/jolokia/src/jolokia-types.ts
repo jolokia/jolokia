@@ -968,6 +968,14 @@ interface IJolokia extends JolokiaStatic {
   escape(part: string): string
 
   /**
+   * Escape URL part (segment) according to
+   * {@link https://jolokia.org/reference/html/manual/jolokia_protocol.html#_escaping_rules_in_get_requests Jolokia escaping rules}
+   * @param part a path used with POST requests
+   * @returns URL segment with Jolokia escaping rules applied
+   */
+  escapePost(part: string): string
+
+  /**
    * Utility method which checks whether a response is an error or a success (from Jolokia, not HTTP perspective)
    * @param resp response to check
    * @return true if response is an error, false otherwise

@@ -168,6 +168,15 @@ describe("Jolokia HTTP tests", () => {
   //   expect(ex.name).toBe("TimeoutError")
   // })
 
+  test("Test 404", async () => {
+    const jolokia = new Jolokia({ url: `http://localhost:${port}/bla` })
+    const response = await jolokia.request({ type: "version" })
+      .catch(error => error)
+    expect(response).toBeInstanceOf(Response)
+    const r = response as Response
+    expect(r.status).toBe(404)
+  })
+
   test("Test with read timeout", async () => {
     let jolokia = new Jolokia({ url: `http://localhost:${port}/jolokia-timeout`, timeout: 500 })
     let response = await jolokia.request({ type: "version" })

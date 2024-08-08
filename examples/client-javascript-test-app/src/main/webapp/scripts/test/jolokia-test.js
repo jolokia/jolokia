@@ -21,8 +21,7 @@ $(document).ready(function () {
     // Single requests
     const configs = [
         ["GET-Requests", { method: "GET" }],
-        ["POST-Requests", { method: "POST" }],
-        ["GET-Requests with jsonp", { jsonp: true }]
+        ["POST-Requests", { method: "POST" }]
     ];
     $.each(configs, function (idx, c) {
         singleRequestTest(c[0], c[1]);
@@ -149,13 +148,13 @@ $(document).ready(function () {
                     {
                         success: function (response) {
                         },
-                        ajaxError: function (xhr, textStatus) {
-                            assert.equal(textStatus, "error", "Ajax Error");
-                            assert.equal(xhr.status, 404, "Not found HTTP code")
-                            done();
-                        }
                     })
-            );
+            ).catch(e => {
+                // e is https://developer.mozilla.org/en-US/docs/Web/API/Response
+                assert.equal(e.statusText, "Not Found", "Fetch exception");
+                assert.equal(e.status, 404, "Not found HTTP code")
+                done();
+            });
         });
     }
 
@@ -242,57 +241,61 @@ $(document).ready(function () {
 
     function syncTests() {
         QUnit.module("Sync Tests");
-        QUnit.test("Simple Memory Read Request", assert => {
-            let resp = j4p.request({ type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage" });
+        QUnit.test("Simple Memory Read Request", async assert => {
+            const done = assert.async();
+            const responses = await j4p.request({ type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage" });
+            const resp = responses[0]
             assert.equal(resp.request.type, "read", "Type must be read");
             assert.ok(resp.value != null, "Value must be set: " + JSON.stringify(resp.value));
             assert.ok(resp.value.used != null, "Composite data returned: ");
+            done()
+
         });
-        QUnit.test("Simple request with Jolokia Error", assert => {
-            let resp = j4p.request({ type: "READ", mbean: "bla" });
-            assert.equal(resp["error_type"], "java.lang.IllegalArgumentException", "Illegal Argument");
+        QUnit.test("Simple request with Jolokia Error", async assert => {
+            const done = assert.async();
+            let resp = await j4p.request({ type: "READ", mbean: "bla" });
+            assert.equal(resp[0]["error_type"], "java.lang.IllegalArgumentException", "Illegal Argument");
+            done()
         });
-        QUnit.test("Simple request with HTTP Error", assert => {
-            let resp = new Jolokia("/bla").request(
+        QUnit.test("Simple request with HTTP Error", async assert => {
+            const done = assert.async();
+            let resp = await new Jolokia("/bla").request(
                 { type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage" },
                 {
                     ajaxError: function (xhr) {
                         assert.equal(xhr.status, 404);
                     }
                 }
-            );
+            ).catch(_r => null);
             assert.ok(resp == null, "No response should be returned");
+            done()
         });
-        QUnit.test("No JSONP with sync requests", assert => {
-            assert.throws(function () {
-                j4p.request(
-                    { type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage" },
-                    { jsonp: true }
-                );
-            }, "Must throw an ERROR");
-        });
-        QUnit.test("GET Write test with newlines", assert => {
+        QUnit.test("GET Write test with newlines", async assert => {
+            const done = assert.async();
             let value = "Max\nMorlock";
-            let resp = j4p.request({
+            let resp = await j4p.request({
                 type: "WRITE",
                 mbean: "jolokia.it:type=attribute",
                 attribute: "Name",
                 value: value
             }, { method: "GET" });
-            assert.equal(resp.status, 200);
-            resp = j4p.request({ type: "READ", mbean: "jolokia.it:type=attribute", attribute: "Name" });
-            assert.equal(resp.value, value);
+            assert.equal(resp[0].status, 200);
+            resp = await j4p.request({ type: "READ", mbean: "jolokia.it:type=attribute", attribute: "Name" });
+            assert.equal(resp[0].value, value);
+            done()
         });
-        QUnit.test("GET Exec test with newlines", assert => {
+        QUnit.test("GET Exec test with newlines", async assert => {
+            const done = assert.async();
             let args = [["Max\nMorlock", "dummy"], "extra"];
-            let resp = j4p.request({
+            let resp = await j4p.request({
                 type: "EXEC",
                 mbean: "jolokia.it:type=operation",
                 operation: "arrayArguments",
                 arguments: args
             }, { method: "GET" });
-            assert.equal(resp.status, 200);
-            assert.equal(resp.value, "Max\nMorlock");
+            assert.equal(resp[0].status, 200);
+            assert.equal(resp[0].value, "Max\nMorlock");
+            done()
         });
     }
 
@@ -302,49 +305,28 @@ $(document).ready(function () {
     function httpMethodDetectionTests() {
         QUnit.module("HTTP method detection");
         QUnit.test("Sanity HTTP Method detection checks", assert => {
-            assert.throws(function () {
-                j4p.request(
-                    [
-                        { type: "version" },
-                        { type: "list" }
-                    ],
-                    { method: "get" }
-                );
-            }, "No GET for bulk requests");
-            assert.throws(function () {
-                j4p.request(
-                    {
-                        type: "read",
-                        mbean: "java.lang:type=Memory",
-                        attribute: ["HeapMemoryUsage", "NonHeapMemoryUsage"]
-                    },
-                    { method: "get" }
-                );
-            }, "No GET for read with array arguments");
-            assert.throws(function () {
-                j4p.request(
+            assert.rejects(j4p.request(
+                [
                     { type: "version" },
-                    { method: "post", jsonp: true }
-                );
-            }, "No POST for JSONP");
-            assert.throws(function () {
-                j4p.request(
-                    [
-                        { type: "version" },
-                        { type: "list" }
-                    ],
-                    { jsonp: true }
-                );
-            }, "No JSONP with bulk requests");
-            assert.throws(function () {
-                j4p.request(
-                    {
-                        type: "read", mbean: "java.lang:type=Memory", attribute: "NonHeapMemoryUsage",
-                        target: { url: "service:jmx:hsp://njw810/default/jboss?shared=true" }
-                    },
-                    { method: "get" }
-                );
-            }, "No 'target' config with GET requests");
+                    { type: "list" }
+                ],
+                { method: "get" }
+            ), "No GET for bulk requests");
+            assert.rejects(j4p.request(
+                {
+                    type: "read",
+                    mbean: "java.lang:type=Memory",
+                    attribute: ["HeapMemoryUsage", "NonHeapMemoryUsage"]
+                },
+                { method: "get" }
+            ), "No GET for read with array arguments");
+            assert.rejects(j4p.request(
+                {
+                    type: "read", mbean: "java.lang:type=Memory", attribute: "NonHeapMemoryUsage",
+                    target: { url: "service:jmx:hsp://njw810/default/jboss?shared=true" }
+                },
+                { method: "get" }
+            ), "No 'target' config with GET requests");
         });
     }
 
