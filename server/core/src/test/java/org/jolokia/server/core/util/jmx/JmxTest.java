@@ -90,9 +90,9 @@ public class JmxTest {
         MBeanServer server = ManagementFactory.getPlatformMBeanServer();
 
         Set<ObjectName> names = server.queryNames(null, null);
-        for (ObjectName name : names) {
-            System.out.printf(" - %s: %s%n", name, server.getMBeanInfo(name).getClassName());
-        }
+//        for (ObjectName name : names) {
+//            System.out.printf(" - %s: %s%n", name, server.getMBeanInfo(name).getClassName());
+//        }
 
         try {
             server.registerMBean(new JustAClass("Hello"), ObjectName.getInstance("jolokia:type=Bad"));

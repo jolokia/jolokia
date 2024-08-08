@@ -183,7 +183,7 @@ public class AgentServletTest {
             String url = "http://10.9.11.1:9876/jolokia";
             ByteArrayOutputStream sw = initRequestResponseMocks(
                     getDiscoveryRequestSetup(url),
-                    getStandardResponseSetup());
+                    getTextPlainResponseSetup());
             replay(request, response);
 
             servlet.doGet(request, response);
@@ -411,7 +411,7 @@ public class AgentServletTest {
                 () -> {
                     response.setCharacterEncoding("utf-8");
                     expectLastCall().andThrow(new NoSuchMethodError());
-                    response.setContentType("text/plain; charset=utf-8");
+                    response.setContentType("application/json; charset=utf-8");
                     response.setStatus(200);
                 });
         expect(request.getPathInfo()).andReturn(HttpTestUtil.VERSION_GET_REQUEST);
@@ -568,7 +568,7 @@ public class AgentServletTest {
                     expect(request.getHeader("Origin")).andReturn(null);
                     expect(request.getRemoteAddr()).andThrow(new IllegalStateException());
                 },
-                getStandardResponseSetup());
+                getTextPlainResponseSetup());
         expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
 
         replay(request, response);
@@ -598,7 +598,9 @@ public class AgentServletTest {
 
         servlet.init(config);
 
-        ByteArrayOutputStream sw = initRequestResponseMocks();
+        ByteArrayOutputStream sw = initRequestResponseMocks(
+            getStandardRequestSetup(),
+            getStandardResponseSetup());
         expect(request.getPathInfo()).andReturn(HttpTestUtil.VERSION_GET_REQUEST);
         expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn(null);
         expect(request.getAttribute("subject")).andReturn(null);
@@ -665,7 +667,7 @@ public class AgentServletTest {
     private ByteArrayOutputStream initRequestResponseMocks() throws IOException {
         return initRequestResponseMocks(
                 getStandardRequestSetup(),
-                getStandardResponseSetup());
+                getTextPlainResponseSetup());
     }
 
     private ByteArrayOutputStream initRequestResponseMocks(Runnable requestSetup,Runnable responseSetup) throws IOException {
@@ -725,6 +727,15 @@ public class AgentServletTest {
     }
 
     private Runnable getStandardResponseSetup() {
+        return () -> {
+            response.setCharacterEncoding("utf-8");
+            // The default content type
+            response.setContentType("application/json");
+            response.setStatus(200);
+        };
+    }
+
+    private Runnable getTextPlainResponseSetup() {
         return () -> {
             response.setCharacterEncoding("utf-8");
             // The default content type
