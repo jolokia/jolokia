@@ -243,8 +243,7 @@ $(document).ready(function () {
         QUnit.module("Sync Tests");
         QUnit.test("Simple Memory Read Request", async assert => {
             const done = assert.async();
-            const responses = await j4p.request({ type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage" });
-            const resp = responses[0]
+            const resp = await j4p.request({ type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage" });
             assert.equal(resp.request.type, "read", "Type must be read");
             assert.ok(resp.value != null, "Value must be set: " + JSON.stringify(resp.value));
             assert.ok(resp.value.used != null, "Composite data returned: ");
@@ -254,7 +253,7 @@ $(document).ready(function () {
         QUnit.test("Simple request with Jolokia Error", async assert => {
             const done = assert.async();
             let resp = await j4p.request({ type: "READ", mbean: "bla" });
-            assert.equal(resp[0]["error_type"], "java.lang.IllegalArgumentException", "Illegal Argument");
+            assert.equal(resp["error_type"], "java.lang.IllegalArgumentException", "Illegal Argument");
             done()
         });
         QUnit.test("Simple request with HTTP Error", async assert => {
@@ -279,9 +278,9 @@ $(document).ready(function () {
                 attribute: "Name",
                 value: value
             }, { method: "GET" });
-            assert.equal(resp[0].status, 200);
+            assert.equal(resp.status, 200);
             resp = await j4p.request({ type: "READ", mbean: "jolokia.it:type=attribute", attribute: "Name" });
-            assert.equal(resp[0].value, value);
+            assert.equal(resp.value, value);
             done()
         });
         QUnit.test("GET Exec test with newlines", async assert => {
@@ -293,8 +292,8 @@ $(document).ready(function () {
                 operation: "arrayArguments",
                 arguments: args
             }, { method: "GET" });
-            assert.equal(resp[0].status, 200);
-            assert.equal(resp[0].value, "Max\nMorlock");
+            assert.equal(resp.status, 200);
+            assert.equal(resp.value, "Max\nMorlock");
             done()
         });
     }

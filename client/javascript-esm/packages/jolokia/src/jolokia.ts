@@ -128,7 +128,7 @@ const Jolokia = function (this: IJolokia, config: JolokiaConfiguration | string)
   // Public API (instance methods that may use function-scoped state)
 
   this.request = async function (request: JolokiaRequest | JolokiaRequest[], params?: RequestOptions):
-    Promise<string | (JolokiaSuccessResponse | JolokiaErrorResponse)[] | Response | undefined> {
+    Promise<string | JolokiaSuccessResponse | JolokiaErrorResponse | (JolokiaSuccessResponse | JolokiaErrorResponse)[] | Response | undefined> {
 
     // calculation of arguments. jobs will have this function called once to skip it for consecutive calls
     const args = prepareRequest(request, agentOptions, params)
@@ -250,7 +250,7 @@ const Jolokia = function (this: IJolokia, config: JolokiaConfiguration | string)
       config: opts.config,
       handback: opts.handback
     }, { method: "post" }).then((responses): NotificationHandle => {
-        const resp = (responses as (JolokiaSuccessResponse | JolokiaErrorResponse)[])[0]
+        const resp = responses as JolokiaSuccessResponse | JolokiaErrorResponse
         if (Jolokia.isError(resp)) {
           throw new Error("Cannot not add notification subscription for " + opts.mbean +
             " (client: " + client.id + "): " + (resp as JolokiaErrorResponse).error)
@@ -273,7 +273,7 @@ const Jolokia = function (this: IJolokia, config: JolokiaConfiguration | string)
       client: client.id,
       handle: handle.id
     }, { method: "post" }).then((responses) => {
-      const resp = (responses as (JolokiaSuccessResponse | JolokiaErrorResponse)[])[0]
+      const resp = responses as JolokiaSuccessResponse | JolokiaErrorResponse
       return !Jolokia.isError(resp)
     })
   }
@@ -290,7 +290,7 @@ const Jolokia = function (this: IJolokia, config: JolokiaConfiguration | string)
       command: "unregister",
       client: client.id
     }, { method: "post" }).then((responses) => {
-      const resp = (responses as (JolokiaSuccessResponse | JolokiaErrorResponse)[])[0]
+      const resp = responses as JolokiaSuccessResponse | JolokiaErrorResponse
       return !Jolokia.isError(resp)
     })
   }
@@ -318,7 +318,7 @@ const Jolokia = function (this: IJolokia, config: JolokiaConfiguration | string)
         type: "notification",
         command: "register"
       }, { method: "post" }).then(responses => {
-        const resp = (responses as (JolokiaSuccessResponse | JolokiaErrorResponse)[])[0]
+        const resp = (responses as JolokiaSuccessResponse | JolokiaErrorResponse)
         if (Jolokia.isError(resp)) {
           throw new Error("Can not register client for notifications: "
             + (resp as JolokiaErrorResponse).error
@@ -575,7 +575,7 @@ function prepareRequest(request: JolokiaRequest | JolokiaRequest[], agentOptions
  * @param args arguments used to control `fetch()` call
  */
 async function performRequest(args: RequestArguments):
-  Promise<string | (JolokiaSuccessResponse | JolokiaErrorResponse)[] | Response | undefined> {
+  Promise<string | JolokiaSuccessResponse | JolokiaErrorResponse | (JolokiaSuccessResponse | JolokiaErrorResponse)[] | Response | undefined> {
   const { url, fetchOptions, dataType, resolve, successCb, errorCb } = args
 
   if (successCb && errorCb) {
@@ -616,16 +616,18 @@ async function performRequest(args: RequestArguments):
     } else {
       // Jolokia response handling at caller's side (no access to response headers, status, etc.)
       return fetch(url, fetchOptions)
-        .then(async (response: Response): Promise<string | (JolokiaSuccessResponse | JolokiaErrorResponse)[]> => {
+        .then(async (response: Response): Promise<string | JolokiaSuccessResponse | JolokiaErrorResponse | (JolokiaSuccessResponse | JolokiaErrorResponse)[] | Response> => {
           if (response.status >= 400) {
             throw response
+          }
+          if (response.status != 200) {
+            return response
           }
           const ct = response.headers.get("content-type")
           if (dataType === "text" || !ct || !(ct.startsWith("text/json") || ct.startsWith("application/json"))) {
             return response.text()
           }
-          const json = await response.json()
-          return Array.isArray(json) ? json : [ json ]
+          return await response.json()
         })
     }
   }

@@ -23,5 +23,6 @@ bindings bundled with Jolokia. Information about Jmx4Perl can be found
 https://metacpan.org/dist/jmx4perl[elsewhere,role=externalLink,window=_blank,window=_blank].
 
 include::client/javascript.adoc[]
+include::client/javascript-old.adoc[]
 include::client/java.adoc[]
 include::client/mbeanserverconnection.adoc[]
