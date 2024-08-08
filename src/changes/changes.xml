@@ -30,6 +30,13 @@
       <action dev="grgrzybek" type="fix" issue="686">
         Replace json-simple with different JSON library. New org.jolokia:jolokia-json module.
       </action>
+      <action dev="grgrzybek" type="fix" issue="580">
+        Dropped dependency on JQuery - Jolokia uses Fetch API now.
+      </action>
+      <action dev="grgrzybek" type="fix" issue="576">
+        New Jolokia JavaScript library based on ES modules, TypeScript and Rollup.js. With no impact
+        on compatibility!
+      </action>
       <action dev="grgrzybek" type="fix" issue="564">
         Additional JSON optimization mode (protocol version 8.0) with listCache=true parameter.
       </action>

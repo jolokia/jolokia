@@ -15,6 +15,67 @@
 ////
 == News
 
+=== Jolokia 2.1.0 released
+
+[.news-date]
+2024-08-??
+
+We're happy to announce a new minor release of Jolokia! Minor releases introduce new features and may require a little adjustments to client code. But no worries - client code needs some adjustments _only_ for new Jolokia JavaScript library!
+
+==== New JavaScript libraries
+
+After many (9!) years since the introduction of https://hacks.mozilla.org/2015/08/es6-in-depth-modules/[ES6 modules] into JavaScript language, we've finally moved JavaScript code from manually created UMD-structured JavaScript files (see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/function#using_an_immediately_invoked_function_expression_iife[IIFE], https://github.com/umdjs/umd[UMD], https://github.com/myshov/history-of-javascript/tree/master/4_evolution_of_js_modularity[The Evolution of JavaScript Modularity]).
+
+Because nowadays (already for many years actually) JavaScript "scripts" are consumed using packages, Jolokia provides now new Maven module (`org.jolokia:jolokia-client-javascript-esm`) that contains _modern_ JS packages:
+
+* `jolokia.js` - this package, while already present in https://www.npmjs.com/package/jolokia.js now contains different _targets_ - proper ES module and ready to use (in browser) files produced by https://rollupjs.org/[Rollup JS bundler].
+* `@jolokia.js/simple` - this package replaces `jolokia-simple.js` file which was part of initial NPM package.
+
+What's more, new JavaScript library is developed using https://www.typescriptlang.org/[TypeScript] language without affecting end user experience. We have now full definition of types used by Jolokia which already proved to be very useful in finding miscellaneaous problems hidden in type-less JavaScript code.
+
+==== Fetch API
+
+Since Jolokia was created, https://api.jquery.com/jQuery.ajax/[JQuery Ajax] was used to perform HTTP calls from JavaScript code. +
+Now instead of relying on external dependency, we use https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API[Fetch API] which is now standard in all modern, secure browsers. We don't support unsecure browsers nowadays ;) +
+This makes Jolokia JavaScript library independent of _any_ external dependency. It also makes the code aware of async/await programming model and https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises[Promises API]. See dedicated chapter in link:reference/html/manual/clients.html#client-javascript[reference documentation].
+
+==== New JSON parser
+
+Since https://github.com/jolokia/jolokia/commit/4d7a089e97576836945983ecfbbc92ae818b50ac[first available GitHub commit], Jolokia was using `com.googlecode.json-simple:json-simple` JSON parser/serializer library. This library has quite interesting history (moving from https://code.google.com/archive/p/json-simple/[code.google.com] to GitHub, forking, ...) and does its job very well, but we've decided to make a bold move and remove this dependency.
+
+Without adding new external JSON dependency...
+
+Here's what we did - we used https://github.com/fangyidong/json-simple/blob/tag_release_1_1_1/doc/json.lex[JSON grammar used by `json-simple`], checked the https://github.com/cliftonlabs/json-simple/blob/json-simple-4.0.1/src/main/lex/jsonstrict.lex[changes made in forked version] and used https://www.jflex.de/[JFlex] to generate Jolokia own lexer. +
+Having a working lexer we've built our own flexible parser/serializer to fullful _all_ Jolokia needs. And yes, we've made it ~2x faster (in non-exhaustive tests involving https://activemq.apache.org/components/artemis/[Artemis broker] running with 10,000 queues).
+
+New Jolokia module is `org.jolokia:jolokia-json` and it fully replaces `com.googlecode.json-simple:json-simple` library. Class names are the same, the _only_ change is package name (switch from `org.json.simple` to `org.jolokia.json`).
+
+==== New Jolokia protocol version
+
+Going with the flow, after moving from JavaScript to TypeScript and after getting our own JSON parser, we've introduced a new Jolokia protocol version - `8.0`. There's more information in link:reference/html/manual/jolokia_protocol.html#optimized-response-list[relevant documentation section], but here's a summary of the changes.
+
+* with new `listKeys` processing/request parameter, `list()` operation returns additional `"keys"` field for MBean's MBeanInfo - it contains a map of the keys obtained from ObjectName
+* with new `includeRequest` processing/request parameter we can tell Jolokia to _not_ return incoming request under `"request"` field of the response (defaults to `false`)
+* with new `listCache` processing/request parameter, `list()` operation may be _optimized_. The details are in documentation, but it's enough to say that it allows to cache common JSON-ified MBeanInfo to not duplicate it in `list()` response for, say, 50,000 Artemis queue MBeans. Getting 2MB instead of 0.5GB of JSON is always a good thing™.
+
+==== New extension points
+
+To make `list()` operation more flexible (based on experience from https://hawt.io/[Hawtio console])), Jolokia now provides _extension points_ for `list()`. While it is still based on `javax.management.MBeanServerConnection.queryMBeans()` call, we don't necessarily blindly serialize each MBean's `javax.management.MBeanInfo`.
+
+* with `org.jolokia.service.jmx.api.CacheKeyProvider` Jolokia service we can ask 3rd party libraries whether given MBean can be translated into a _cache key_. If many MBeans can be translated to single _cache key_ we can optimize the `list()` response by caching common MBeanInfo - imagine 20K queues again...
+* with `org.jolokia.service.jmx.handler.list.DataUpdater` Jolokia service, we can get additional information inside JSON-ified `javax.management.MBeanInfo` - 3rd party extensions may add RBAC information or any other data into the MBeanInfo
+
+==== Old issues resolved
+
+It's worth noting that we've also fixed issues dating back to 2015...
+
+* we now support custom date format for dates (and new `java.time` classes)
+* we now support multi-dimensional arrays
+* we now support `java.util.Date` operation parameters
+* we can declare (in `jolokia-access.xml`) that some MBans simply should not be returned in `search` and `list` operations.
+
+Please refer to https://jolokia.org/changes-report.html#a2.1.0[changelog] for detailed information about the release.
+
 === Jolokia 2.0.3 released
 
 [.news-date]
