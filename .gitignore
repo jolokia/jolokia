@@ -19,4 +19,5 @@ test-output
 src/documentation/build/
 .node/
 dependency-reduced-pom.xml
-.yarn/
+.yarn/cache/
+client/javascript-esm/.yarn/
