@@ -13,24 +13,21 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 ////
-[#client-javascript]
+[#client-javascript-old]
 == JavaScript Client Library (before ES modules)
 
-NOTE:: Since Jolokia 2.1.0 we recommend using new (based on ES modules) version of Jolokia JavaScript libraries provided in these npm packages:
+NOTE:: Since Jolokia 2.1.0 we recommend to use new (based on ES modules) version of Jolokia JavaScript libraries provided in these npm packages:
 +
-* `jolokia.js` - the _main_ package
-* `@jolokia.js/simple` - previously available in `jolokia-simple.js` file.
+* `jolokia.js`
+* `@jolokia.js/simple`
 
-More packages may be introduced later under `@jolokia.js` organization.
-
-Notable difference from previous version (pre 2.1.0) are:
-
-* The code is developed now using TypeScript language and processed using https://rollupjs.org/[Rollup JS] into ESM version (`jolokia.mjs` to be used with `import` statement) and UMD version (`jolokia.js` - to be used with browsers when not loading the script as `type="module"`)
-* There's no dependency on https://jquery.com/[JQuery] anymore
-* For HTTP requests, we use https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API[Fetch API].
-* There's no support for ancient https://en.wikipedia.org/wiki/JSONP[JSONP]. https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS[CORS] it the way to handle cross-origin requests.
-* Because Fetch API is used, there's no direct support for _synchronous requests_ - this can be achieved simply using `async` and `await`
-* There's no `ajaxError` option to handle HTTP/connection errors. `Jolokia.request` returns now a `Promise` object and we can handle _global errors_ using `Promise.catch()`
+The Jolokia JavaScript library provides a JavaScript API to the
+to the Jolokia agent. It comes with two layers, a
+basic one which allows for sending Jolokia requests to the agent
+synchronously or asynchronously and one with a simplified API
+which is less powerful but easier to use. This library supports
+bulk requests, HTTP GET and POST requests and JSONP for querying
+agents which are located on a different server.
 
 All methods of this library are available via the
 `Jolokia` client object, which needs to be
@@ -39,53 +36,46 @@ created and the used heap memory is requested synchronously via
 the simple API. The agent is deployed within the same webarchive
 which also serves this script.
 
-Here's a sample code fragment that uses global `Jolokia` class which is used to create a `jolokia`
-instance used to invoke simple (from `@jolokia.js/simple` package) `getAttribute()` operation:
-
 [,javascript]
 ----
-const jolokia = new Jolokia("/jolokia")
-const value = jolokia.getAttribute("java.lang:type=Memory", "HeapMemoryUsage", "used")
-console.log("Heap Memory used: " + value)
+let j4p = new Jolokia("/jolokia");
+let value = j4p.getAttribute("java.lang:type=Memory", "HeapMemoryUsage", "used");
+console.log("Heap Memory used: " + value);
 ----
 
-[#js-installation]
+[#js-installation-old]
 === Installation
 
-The Jolokia JavaScript library is distributed in the form of npm packages which should be used as standard JavaScript libraries. It's out of scope of this documentation to describe all possible bundler setups which may be used, let's simply focus on two _flavors_ of these libraries.
+The Jolokia JavaScript library is distributed in two parts, in
+compressed and uncompressed forms:
 
-`package.json` for `jolokia.js` package contains this module-related section:
+`jolokia.js` and `jolokia-min.js`:: Base library containing the Jolokia object definition
+which carries the `request()`
+`jolokia-simple.js` and `jolokia-simple-min.js`:: Library containing the Jolokia simple API and which builds
+up on `jolokia.js` It must be included
+after `jolokia.js` since it adds methods
+to the `Jolokia` object definition.
 
-[,json]
-----
-"exports": {
-  ".": {
-    "types": "./dist/dts/jolokia.d.ts",
-    "import": "./dist/jolokia.mjs",
-    "default": "./src/jolokia.ts"
-  }
-}
-----
+All four files can be obtained from the
+link:/download.html[download page].
+For production environments the compressed version
+is highly recommended since the extensive API documentation
+included in the original version is stripped off here. For Maven
+users there is an even better way to integrate them, described in
+<<js-maven-old>>.
 
-The recommended way to use this package is with JavaScript ES modules:
+`jolokia.js` uses
+https://www.jquery.com[jQuery,role=externalLink,window=_blank], which must be
+included as well. Since Jolokia 2 is compliant with ES5, using https://github.com/douglascrockford/JSON-js[json2.js,role=externalLink,window=_blank] is no longer required.
 
-[,javascript]
-----
-import Jolokia from "jolokia.js"
+As sample HTML head for including all necessary parts looks like:
 
-const jolokia = new Jolokia("/jolokia")
-...
-----
-
-However if there's a need to use Jolokia JavaScript libraries directly, it's always possible
-to download relevant files (normal an minified) from link:/download.html[download page].
-Then we can refer to the scripts from HTML page:
-
-[,html,subs="attributes,verbatim"]
+[,html]
 ----
 <head>
-  <script src="jolokia-{jolokia-version}.min.js"></script>
-  <script src="jolokia-simple-{jolokia-version}.min.js"></script>
+  <script src="jquery-3.7.1.js"></script>
+  <script src="jolokia-min.js"></script>
+  <script src="jolokia-simple-min.js"></script>
 </head>
 ----
 
@@ -96,7 +86,7 @@ takes a plain object, which provides default parameters which
 are used in the `request()` if no
 overriding are given there.
 
-[#js-request]
+[#js-request-old]
 === Usage
 
 All functions of this library are available as methods of the
@@ -105,14 +95,14 @@ instantiated as usual and it takes a set of default options, which
 can be overwritten by subsequent requests. On the most basic
 layer is a single `request()` method,
 which takes two arguments: A request object and an optional
-options object. For example, a request for obtaining
+options object. For example, a synchronous request for obtaining
 the agent's version for a agent running on the same server which
 delivered the JavaScript looks like:
 
 [,javascript]
 ----
-let jolokia = new Jolokia({ url: "/jolokia" });
-let response = await jolokia.request({ "type": "version" }, { "method": "post" });
+let j4p = new Jolokia({ "url": "/jolokia" });
+let response = j4p.request({ "type": "version" }, { "method": "post" });
 console.log("Agent Version: " + response.value.agent);
 ----
 
@@ -122,7 +112,7 @@ example above the construction of the
 `Jolokia` could have been performed with a
 single string argument (`new Jolokia("/jolokia")`).
 
-[#js-request-format]
+[#js-request-format-old]
 ==== Requests
 
 Jolokia requests and responses are represented as JSON
@@ -131,64 +121,39 @@ and returned by the agent as defined in
 xref:jolokia_protocol.adoc[] for POST requests. All request types are
 supported.
 
-The `request()` method expects as its first
+The `request()` expects as its first
 argument either a single request object or, for bulk requests,
-an array of request objects.
-
-When Jolokia JavaScript library was using JQuery Ajax, there were two types of operations supported:
-
-* synchronous - when `options` object didn't contain `success` callback
-* asynchronous - when user specified `success` callback in `options` object
-
-Depending on this for synchronous
+an array of request objects. Depending on this for synchronous
 operations either a single response JSON object is returned or
 an array of responses (in the order of the initial request
 array). For asynchronous request one or more callbacks are
 called for each response separately. See
-<<js-request-sync-async>> for details.
-
-With new Fetch API, there are more types of operations:
-
-* callback based for compatibility purposes - you have to pass `success` (and `error` if needed) callbacks through `options` object
-* _recommended_ JSON method when there's no `success` callback passed and `request()` returns a Promise object:
-** for HTTP status 200, it is resolved with the response value, which may be successfull or error Jolokia responses containing JSON data with response or error details obtained from `Response.json()`
-** for HTTP status >= 400, it throws an exception which is Fetch `Response` object - user can attach `.catch()` to the promise and analyze the https://developer.mozilla.org/en-US/docs/Web/API/Response[Response]
-** for HTTP status != 200 and not >= 400, the promise is resolved with the https://developer.mozilla.org/en-US/docs/Web/API/Response[Response] (for example to analyze the redirect status)
-* Text method when there's no `success` callback, `dataType: "text"` is passed and `request()` returns a Promise object:
-** for HTTP status 200, it is resolved with the response value for HTTP 200 responses, which is plain text response obtained from `Response.text()`.
-** for HTTP status != 200 it's the same as in _recommended_ JSON method
-* _low level_ Response method, when `resolve: "response"` is passed with `options`, the returned promise is resolved with entire https://developer.mozilla.org/en-US/docs/Web/API/Response[Response] object and user is free to call `Response.json()`, `Response.text()`, `Response.blob()` or any method from https://developer.mozilla.org/en-US/docs/Web/API/Response[Response API].
-
-Remember - when no `success` callback is passed, the returned Promise has to be configured for resolution:
-
-* by attaching `.then()` to get the value
-* by attaching `.catch()` to catch the exceptions
-* by using `await jolokia.request()` to get the response or catch the exception (after surrounding with `try..catch`).
+<<js-request-sync-async-old>> for details.
 
 The following example shows a single and bulk request call to
 the Jolokia agent:
 
 [,javascript]
 ----
-let jolokia = new Jolokia({ "url": "/jolokia" });
+let j4p = new Jolokia({ "url": "/jolokia" });
 let req1 = { "type": "read", "mbean": "java.lang:type=Memory", "attribute": "HeapMemoryUsage" };
 let req2 = { "type": "list" };
-let response = await jolokia.request(req1);
-let responses = await jolokia.request([ req1, req2 ]);
+let response = j4p.request(req1);
+let responses = j4p.request([ req1, req2 ]);
 ----
 
-[#js-request-options]
+[#js-request-options-old]
 ==== Request options
 
-Each request can be configured with a set of optional parameters
+Each request can be influenced by a set of optional options
 provided either as default during construction of the
 `Jolokia` object or as optional last
 parameter for the request object. Also a request can carry a
 `config` attribute, which can be used for all
 processing parameters (xref:jolokia_protocol.adoc#processing-parameters[Processing parameters]).
-The known options are summarized in <<js-request-options-table>>
+The known options are summarized in <<js-request-options-table-old>>
 
-[#js-request-options-table]
+[#js-request-options-table-old]
 .Request options
 [cols="20,~"]
 |===
@@ -210,32 +175,48 @@ dynamically. If a method is selected which doesn't fit to the
 request, an error is raised.
 
 |`dataType`
-|The type of data specified to Jolokia request. The default value is `json`,
+|The type of data specified to the Ajax request. The default value is `json`,
 and the response is parsed as JSON to an object. If the value is `text`,
 the response is returned as plain text without parsing. The client is then
 responsible for parsing the response. This can be useful when a custom JSON
-parsing is necessary. The value is returned as Promise's resolution value. +
+parsing is necessary. +
 Jolokia Simple API (jolokia-simple.js) doesn't support `text` as dataType. +
 *Added since jolokia.js 2.0.2*
+
+|`jsonp`
+|Whether the request should be sent via JSONP (a technique
+for allowing cross domain request circumventing the infamous
+"same-origin-policy"). This can be used only with HTTP "get"
+requests.
 
 |`success`
 |Callback function which is called for a successful
 request. The callback receives the response as single
 argument. If no `success` callback is given, then
-the request returns a Promise.
+the request is performed synchronously and gives back the
+response as return value. The value can be an array of
+functions which is used for bulk requests to dispatch
+multiple responses to multiple callbacks. See
+<<js-request-sync-async-old>> for details.
 
 |`error`
 |Callback in case a Jolokia error occurs. A Jolokia error is
 one, in which the HTTP request succeeded with a status code
-of 200, but the response object contains a Jolokia (not HTTP) status other than
+of 200, but the response object contains a status other than
 OK (200) which happens if the request JMX operation
 fails. This callback receives the full Jolokia response
 object (with a key `error` set). If no error
-callback is given, but `success` is available, the error response is printed to the JavaScript
+callback is given, but an asynchronous operation is
+performed, the error response is printed to the JavaScript
 console by default.
 
-|`credentials`
-|This option is passed directly to `fetch()` call. See https://developer.mozilla.org/en-US/docs/Web/API/RequestInit#headers[headers option].
+|`ajaxError`
+|Global error callback called when the Ajax request itself
+failed. It obtains the same arguments as the error callback
+given for `jQuery.ajax()`, i.e. the
+`XmlHttpResponse`, a text status and an
+error thrown. Refer to the jQuery documentation for more
+information about this error handler.
 
 |`username`
 |A username used for HTTP authentication
@@ -244,10 +225,7 @@ console by default.
 |A password used for HTTP authentication
 
 |`timeout`
-|Timeout for the HTTP request used with https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal/timeout_static[Abort Signal]
-
-|`headers`
-| This option is passed directly to `fetch()` call. 
+|Timeout for the HTTP request
 
 |`maxDepth`
 |Maximum traversal depth for serialization of complex return values
@@ -314,26 +292,22 @@ the LIST operation returns an empty response
 (i.e. `value` is null) and a
 `status` code of 304 (Not Modified) if
 the MBeans haven't changed. If you use the request
-scheduler (<<js-request-options-table>>)
+scheduler (<<js-request-options-table-old>>)
 then this feature can be used to get the callbacks called
 only if a value is returned. For the normal request, the
 error callback is called which must check the status itself.
 |===
 
-[#js-request-sync-async]
+[#js-request-sync-async-old]
 ==== Operational modes
 
-Requests can be handled either with Promises or callbacks.
-If a `success` callback is given in the
-request options, the `fetch()` promise is handled by Jolokia.
-The callback gets these arguments:
-
-* a Jolokia JSON
-response object (see xref:jolokia_protocol.adoc#request-response[Requests and Responses])
-* an integer index indicating for which response this callback is being
-called.
-
-For bulk requests, this index corresponds to the array
+Requests can be send either synchronously or asynchronously via
+Ajax. If a `success` callback is given in the
+request options, the request is performed asynchronously via an
+Ajax HTTP request. The callback gets these arguments: a Jolokia JSON
+response object (see xref:jolokia_protocol.adoc#request-response[Requests and Responses]) and an
+integer index indicating for which response this callback is being
+called. For bulk requests, this index corresponds to the array
 index of the request which lead to this response. The value of
 this option can be an array of callback functions which are
 called in a round robin fashion when multiple responses are
@@ -345,16 +319,16 @@ callback is given, the error is printed on the console by
 default. As for success callbacks, error callbacks receive the
 Jolokia error response as a JSON object.
 
-The following example shows callback-based requests for a single
+The following example shows asynchronous requests for a single
 Jolokia request as well as for bulk request with multiple
 callbacks.
 
 [,javascript]
 ----
-let jolokia = new Jolokia("/jolokia");
+let j4p = new Jolokia("/jolokia");
 
 // Single request with a single success callback
-jolokia.request(
+j4p.request(
   {
     "type": "read",
     "mbean": "java.lang:type=Memory",
@@ -363,17 +337,17 @@ jolokia.request(
   {
     "success": function(response) {
       if (response.value.used / response.value.max > 0.9) {
-        console.info("90% of heap memory exceeded");
+        alert("90% of heap memory exceeded");
       }
     },
     "error": function(response) {
-      console.info("Jolokia request failed: " + response.error);
+      alert("Jolokia request failed: " + response.error);
     }
   }
 );
 
 // Bulk request with multiple callbacks
-jolokia.request(
+j4p.request(
   [
     {
       "type": "read",
@@ -403,24 +377,24 @@ jolokia.request(
 ----
 
 Both callbacks, `success` and
-`error`, are only called when HTTP response code is `200`.
-In case of an error on the HTTP level It is the responsibility of user
-to _attach_ `.catch()` to the returned Promise object. The passed function is called with the
-https://developer.mozilla.org/en-US/docs/Web/API/Response[`Response`] object, so we can get more information. For example:
+`error`, are only called when the Ajax
+request succeeds. In case of an error on the HTTP level, the
+callback `ajaxError` is called with the
+`XMLHttpRequest`, a
+`textStatus` and an optional exception
+object. It has the same signature as the underlying
+`error` callback of the
+`jQuery.ajax()` call. (See the
+https://api.jquery.com/jQuery.ajax/[jQuery documentation,role=externalLink,window=_blank]
+for details).
 
-[,javascript]
-----
-const response = await jolokia.request({ type: "version" })
-  .catch(r => {
-      if (r.status <= 400) {
-        // handle non-critical error
-        console.warn(r.statusText)
-      } else {
-        // handle codes like 404 or 500
-        console.warn("Critical error", r.statusText)
-      }
-  })
-----
+The Jolokia agent also supports
+https://en.wikipedia.org/wiki/JSONP[JSONP,role=externalLink,window=_blank] requests
+for cases where the Jolokia agent is served on a different server or port
+than the JavaScript client. By default, such access is forbidden by the so called
+__same-origin-policy__. To switch on JSONP, the
+option `jsonp` should be set to
+`"true"`.
 
 As explained in xref:jolokia_protocol.adoc#request-response[Requests and Responses] the Jolokia
 agent supports two HTTP methods, `GET` and
@@ -444,56 +418,39 @@ an array of string values) can only be used with
 `POST`.
 * The JMX proxy mode (see xref:proxy_mode.adoc[]) can only be used
 with `POST`.
+* JSONP can only be used with `GET` and only
+in asynchronous mode (i.e. a `success`
+callback must be given). This is a limitation of the JSONP
+technique itself.
 
-=== Using Promises
+The restrictions above imply, that JSONP can only be used for
+single, simple requests and not for JMX proxy calls.
 
-Without callbacks we can leverage full potential of promises.
-
-The example we've shown to describe `success` and `error` callbacks can be written using promises:
-
-[,javascript]
-----
-let jolokia = new Jolokia("/jolokia");
-
-// Single request with a single success callback
-let response = await jolokia.request({
-    "type": "read",
-    "mbean": "java.lang:type=Memory",
-    "attribute": "HeapMemoryUsage"
-  }).catch(r => {
-      console.info("Jolokia request failed: " + r.statusText);
-  })
-if (response && response.value.used / response.value.max > 0.9) {
-    console.info("90% of heap memory exceeded")
-}
-----
-
-[#js-simple]
+[#js-simple-old]
 === Simple API
 
 Building upon the basic
 `Jolokia.request()` method, a simplified
 access API is available. It is contained in
-`jolokia-simple.js` (from `@jolokia.js/simple` npm package) which must be included after
+`jolokia-simple.js` which must be included after
 `jolokia.js`. This API provides dedicated
 method for the various request types and supports all options as
-described in <<js-request-options-table>>. There
+described in <<js-request-options-table-old>>. There
 is one notable difference for asynchronous callbacks and
 synchronous return values though: In case of a successful call,
 the callback is fed with the response's
 `value` object, not the full response
-(i.e. `response.value`). Similar when Promise is returned, it is resolved with
-the value itself. In case of an error,
+(i.e. `response.value`). Similar, for synchronous
+operations the value itself is returned. In case of an error,
 either an `error` callback is called with the
-full response object or a `Respose` can be handled with `.catch()` block.
-
-Remember - to deal with values directly, `await` has to be used on the Promise returned from simple API.
+full response object or an `Error` is
+thrown for synchronous operations.
 
 `getAttribute(mbean, attribute, path, opts)`:: This method returns the value of an JMX attribute
 `attribute` of an MBean `mbean`. A path
 can be optionally given, and the optional request options are
 given as last argument(s). The return value for synchronous
-operations are the attribute's value, for callback
+operations are the attribute's value, for asynchronous
 operations (i.e. `opts.success != null`) it is
 `null`. See xref:protocol/read.adoc[Reading attributes (read)] for
 details.
@@ -503,7 +460,7 @@ to synchronously fetch the current heap memory usage:
 +
 [,javascript]
 ----
-let memoryUsed = await jolokia.getAttribute("java.lang:type=Memory", "HeapMemoryUsage", "used");
+let memoryUsed = j4p.getAttribute("java.lang:type=Memory", "HeapMemoryUsage", "used");
 ----
 
 `setAttribute(mbean, attribute, value, path, opts)`:: For setting an JMX attribute, this method takes the MBean's
@@ -519,7 +476,7 @@ To enable verbose mode in the memory-handling beans, use
 +
 [,javascript]
 ----
-let gsLoggingWasOn = await jolokia.setAttribute("java.lang:type=Memory", "Verbose", true);
+let gsLoggingWasOn = j4p.setAttribute("java.lang:type=Memory", "Verbose", true);
 ----
 
 `execute(mbean, operation, arg1, arg2, ..., opts)`:: With this method, a JMX operation can be executed on the
@@ -534,7 +491,7 @@ as a JSON object and logs it into the console:
 +
 [,javascript]
 ----
-jolokia.execute("java.lang:type=Threading", "dumpAllThreads(boolean,boolean)", true, true, {
+j4p.execute("java.lang:type=Threading", "dumpAllThreads(boolean,boolean)", true, true, {
   "success": function(value) {
     console.log(JSON.stringify(value));
   }
@@ -551,7 +508,7 @@ available in all domains:
 +
 [,javascript]
 ----
-let servletNames = await jolokia.search("*:j2eeType=Servlet,*");
+let servletNames = j4p.search("*:j2eeType=Servlet,*");
 ----
 
 `list(path, opts)`:: For getting meta information about registered MBeans,
@@ -567,7 +524,7 @@ attributes of the
 +
 [,javascript]
 ----
-let attributesMeta = await jolokia.list("java.lang/type=OperatingSystem/attr");
+let attributesMeta = j4p.list("java.lang/type=OperatingSystem/attr");
 ----
 
 `version(opts)`:: The `version` method returns the
@@ -582,13 +539,13 @@ A sample return value for an Apache Tomcat server looks like:
 ----
 {
   "agent": "{jolokia-version}",
-  "protocol": "8.0",
+  "protocol": "7.2",
   "details": {
-    "agent_version": "2.1.0-SNAPSHOT",
+    "agent_version": "2.0.0-SNAPSHOT",
     "agent_id": "192.168.0.221-72527-6baa8838-servlet",
     "server_product": "tomcat",
     "server_vendor": "Apache",
-    "server_version": "10.1.28",
+    "server_version": "10.1.16",
     "secured": true,
     "url": "http://192.168.0.221:8080/jolokia"
   },
@@ -603,7 +560,7 @@ A sample return value for an Apache Tomcat server looks like:
 }
 ----
 
-[#js-poller]
+[#js-poller-old]
 === Request scheduler
 
 A `Jolokia` object can be also used for
@@ -618,8 +575,8 @@ every 10 seconds and prints out the used memory on the console:
 
 [,javascript]
 ----
-let jolokia = new Jolokia("/jolokia")
-handle = jolokia.register(function(resp) {
+let j4p = new Jolokia("/jolokia")
+handle = j4p.register(function(resp) {
   console.log("HeapMemory used: " + resp.value);
 },
 {
@@ -628,10 +585,10 @@ handle = jolokia.register(function(resp) {
   "attribute": "HeapMemoryUsage", "path": "used"
 });
 
-jolokia.start(10000);
+j4p.start(10000);
 ----
 
-`handle = jolokia.register(callback, request, request,....)`:: This method registers one or more request for being
+`handle = j4p.register(callback, request, request,....)`:: This method registers one or more request for being
 periodically fetched. `callback` can be either a
 function or an object.
 +
@@ -683,7 +640,7 @@ as arguments:
 +
 [,javascript]
 ----
-handle = jolokia.register(function(resp1, resp2) {
+handle = j4p.register(function(resp1, resp2) {
   console.log("HeapMemory used: " + resp1.value);
   console.log("ThreadCount: " + resp2.value);
 },
@@ -707,7 +664,7 @@ order):
 +
 [,javascript]
 ----
-jolokia.register(
+j4p.register(
   {
     "success": function(resp) {
       console.log("MBean: " + resp.mbean + ", attr: " + resp.attribute + ", value: " + resp.value);
@@ -742,14 +699,14 @@ jolokia.register(
 );
 ----
 
-`jolokia.unregister(handle)`:: Unregister one or more requests registered with
+`j4p.unregister(handle)`:: Unregister one or more requests registered with
 `handle` so that they are no longer polled
 with the scheduler.
 
-`jolokia.jobs()`:: Return an array of handles for all registered jobs. This array can be freely manipulated, its a copy of
+`j4p.jobs()`:: Return an array of handles for all registered jobs. This array can be freely manipulated, its a copy of
 the handle list.
 
-`jolokia.start(period)`:: Startup the scheduler for requeting the agent every
+`j4p.start(period)`:: Startup the scheduler for requeting the agent every
 `period` milliseconds. If the scheduler is
 already running, it adapts its scheduling period according
 to the given argument. If no `period` is given,
@@ -757,10 +714,241 @@ the period provided during construction time (with the
 option `fetchInterval`) is used. The default
 value is 30 seconds.
 
-`jolokia.stop()`:: Stop the scheduler. If the scheduler is not running,
+`j4p.stop()`:: Stop the scheduler. If the scheduler is not running,
 nothing happens. The scheduler can be restarted after it
 has been stopped.
 
-`jolokia.isRunning()`:: Checks whether the scheduler is running. Returns
+`j4p.isRunning()`:: Checks whether the scheduler is running. Returns
 `true` if this is the case, `false`
 otherwise.
+
+// [#js-cubism-old]
+// === Jolokia as a Cubism Source
+//
+// https://square.github.com/cubism/[Cubism] is a JavaScript library for
+// plotting time-series data and is based on
+// https://d3js.org/[d3.js]. Jolokia comes with a plugin for Cubism and
+// can act as a data source. The usage is quite simple: After
+// creating a Jolokia Cubism source, one or more JSON request can
+// be registered, which are queried periodically. No matter how
+// many requests are registered, only a single HTTP request is sent
+// to the server after each period. Cubism is then responsible for
+// plotting the data.
+//
+// <<fig-jolokia-cubism-example-old>>  shows a sample for a memory plot. More examples can
+// be found on this link:../../client/javascript-cubism.html[page].
+//
+// [#fig-jolokia-cubism-example-old]
+// .Horizon Chart for Heap-Memory Usage
+// image::jolokia-cubism-memory-horizon.png[]
+//
+// `jolokia-cubism.js` can be downloaded from
+// the link:/download.html[downlad page] and also
+// comes with a minified version. As dependencies it requires
+// link:/download.html[jolokia.js],
+// https://www.jquery.com[JQuery],
+// https://square.github.com/cubism/[Cubism] and
+// https://d3js.org/[d3.js]. `jolokia-cubism.js`
+// registers itself as an
+// https://requirejs.org/docs/whyamd.html[AMD] module
+// if running within an AMD environment.
+//
+// In order to use Jolokia with Cubism, you first need to create a
+// Cubism https://github.com/square/cubism/wiki/Context[context]. Next use
+// `context.jolokia()` for creating a connection to the
+// Jolokia agent.
+//
+// [,javascript]
+// ----
+// let context = cubism.context();
+//
+// // Create a source for Jolokia metrics pointing to the agent
+// // at 'http://jolokia.org/jolokia'
+// let jolokia = context.jolokia("http://jolokia.org/jolokia");
+// ----
+//
+// The method `context.jolokia()` can take various
+// kind of arguments:
+//
+// * A single string as in the example above is used as the
+// agent's URL. Additionally, options as key-value pairs can be
+// given as an additional argument. The possible keys are
+// described in <<js-request-options-table-old>>. If
+// the URL is omitted, but only an option object is provided,
+// then this object must also contain a key `url`
+// for specifying the agent URL.
+// * Alternatively, an already instantiated Jolokia object can be
+// provided as single argument, which then is used for all
+// communications to the server.
+//
+// From this source object, a
+// https://github.com/square/cubism/wiki/Metric[metric]
+// object can be easily created. This metric object embraces one
+// or more Jolokia requests which are send to the server
+// periodically. The response(s) are then used for calculating a
+// single numerical value which gets plotted. For example:
+//
+// [,javascript]
+// ----
+// // Read periodically the Heap-Memory use and take 'HeapMemory Usage' as name/label.
+// let metricMem = jolokia.metric({
+//   "type": "read",
+//   "mbean": "java.lang:type=Memory",
+//   "attribute": "HeapMemoryUsage",
+//   "path": "used"
+// },
+// "HeapMemory Usage");
+//
+// // Example for a callback function for evaluating responses
+// // dynamically. In this case, the first
+// // argument is a function, which gets feed with all response objects
+// // (one in this case). The requests objects are given next, and an
+// // options object as last argument.
+// let metricReq = jolokia.metric(
+//   function (resp) {
+//       let attrs = resp.value;
+//       let sum = 0;
+//     for (let key in attrs) {
+//       sum += attrs[key].requestCount;
+//     }
+//     return sum;
+//   },
+//   {
+//     "type": "read",
+//     "mbean": "Catalina:j2eeType=Servlet,*",
+//     "attribute": "requestCount"
+//   },
+//   {
+//     "name": "All",
+//     "delta": 101000
+//   }
+// );
+// ----
+//
+// `metric()` is a factory method which can be
+// called in various ways.
+//
+// * If the first argument is a Jolokia request object (i.e. not
+// a function), this request is used for sending requests
+// periodically.
+// * If the first argument is a function, this function is used
+// for calculating the numeric value to be plotted. The rest of
+// the arguments can be one or more request objects, which are
+// registered and their responses are put as arguments to the
+// given callback function.
+// * The last argument, if an object but not a Jolokia request
+// (i.e. there is no `type` key), is
+// taken as an option object which is described below.
+// * Finally, if the last argument is a pure string, then this
+// string is used as name for the chart.
+//
+// An object which can be given as last argument is used for fine
+// tuning the metrics:
+// `name`:: Name used in charts. The name can also be given
+// alternatively as a string directly as last argument (but
+// then without any other options)
+// `delta`:: Delta value in milliseconds for creating delta (velocity)
+// charts. This is done by taking the value measured
+// that many milliseconds ago and substract them from each other.
+// `keepDelay`:: How many milliseconds before the oldest shown value should be
+// kept in memory, which e.g. is necessary for delta
+// charts. When `delta` is given, this
+// value is implicitly set.
+//
+// One or more metric objects can now be converted to charts and
+// added to a website with `d3.js`. This is done
+// in the usual cubism way as described here. In our example, in
+// order to append charts to a `div` with id
+// `chart` the following code can be used:
+//
+// [,javascript]
+// ----
+// // Use d3 to attach the metrics with a specific graph type
+// // ('horizon' in this case) to the document
+// d3.select("#charts").call(function(div) {
+//   div.append("div")
+//     .data([ metricMem, metricReq ])
+//     .call(context.horizon())
+// });
+// ----
+//
+// For a complete API documentation please refer to the
+// https://github.com/square/cubism/wiki/API-Reference[Cubism API].
+
+[#js-maven-old]
+=== Maven integration
+
+For Maven users' convenience, the Jolokia JavaScript package is
+also available as a JavaScript artifact. It can be easily
+included with help of the
+`javascript-maven-plugin`.
+
+The following example shows a sample configuration which could
+be used within a `pom.xml`:
+
+[,xml,subs="attributes,verbatim"]
+----
+<project>
+  ...
+  <dependencies>
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-client-javascript</artifactId>
+      <type>javascript</type>
+      <version>{jolokia-version}</version>
+    </dependency>
+    ....
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.devspan.mojo.javascript</groupId>
+        <artifactId>javascript-maven-plugin</artifactId>
+        <version>{javascript-maven-plugin-version}</version>
+        <extensions>true</extensions>
+        <configuration>
+          <useArtifactId>false</useArtifactId>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>war-package</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      ...
+    </plugins>
+    ...
+  </build>
+  ...
+</project>
+----
+
+Then, in your webapp project, `jolokia.js`,
+`jolokia-simple.js` and
+`json2.js` can be found in the
+`scripts/lib` directory (relative to the
+top level of you WAR). In order to include it in your HTML
+files use something like this:
+
+[,html]
+----
+<head>
+  <script src="jquery-3.7.1.js"></script>
+  <script src="scripts/lib/jolokia.js"></script>
+  <script src="scripts/lib/jolokia-simple.js"></script>
+</head>
+----
+
+`jquery.js` has to be included on its own,
+though and is not included within the dependency. If the
+compressed version of `jolokia.js` should
+be used, add a
+`classifier="compressed"` to the
+`jolokia-client-javascript` dependency, and
+include `scripts/lib/jolokia-min.js`
+
+A full working example can be found in the Jolokia sources at
+`examples/client-javascript-test-app/pom.xml`.

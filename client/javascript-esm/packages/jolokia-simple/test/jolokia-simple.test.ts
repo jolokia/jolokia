@@ -82,7 +82,7 @@ describe("Jolokia simple API", () => {
 
   test("Simple execution", async () => {
     const jolokia = new Jolokia({ url: `http://localhost:${port}/jolokia-simple` }) as IJolokiaSimple
-    const v = await jolokia.execute("org.jolokia:name=Shrub", "cat", {}, "red", "hot", "chili", "peppers")
+    const v = await jolokia.execute("org.jolokia:name=Shrub", "cat", "red", "hot", "chili", "peppers")
     expect(v).toBe("red hot chili peppers")
   })
 

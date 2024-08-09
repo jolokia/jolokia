@@ -54,6 +54,13 @@ app.use("/jolokia-not-json", (_req, res) => {
   res.send("<!doctype html><html lang='en'></html>")
 })
 
+// a bad Jolokia endpoint
+app.use("/bla", (_req, res) => {
+  res.status(404)
+  res.set("Content-Type", "text/html")
+  res.send("<!doctype html><html lang='en'></html>")
+})
+
 // a Jolokia endpoint that returns values depending on some incoming HTTP headers
 app.use("/jolokia-introspection", (req, res) => {
   const rcv = req.get("J-Return-Code")

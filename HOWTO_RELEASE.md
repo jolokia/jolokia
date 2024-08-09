@@ -68,13 +68,13 @@ $ mvn clean package -DskipTests jetty:run-war -f examples/client-javascript-test
 [INFO] Scanning for projects...
 [INFO] 
 [INFO] -------< org.jolokia:jolokia-example-client-javascript-test-app >-------
-[INFO] Building jolokia-example-client-javascript-test-app 2.0.0-SNAPSHOT
+[INFO] Building jolokia-example-client-javascript-test-app 2.1.0-SNAPSHOT
 [INFO]   from pom.xml
 [INFO] --------------------------------[ war ]---------------------------------
 ...
-[INFO] Started o.e.j.m.p.MavenWebAppContext@11cc9e1e{JSON JMX Agent,/,file:///data/sources/github.com/jolokia/jolokia/examples/client-javascript-test-app/target/jolokia-example-client-javascript-test-app-2.0.0-SNAPSHOT/,AVAILABLE}{/data/sources/github.com/jolokia/jolokia/examples/client-javascript-test-app/target/jolokia-example-client-javascript-test-app-2.0.0-SNAPSHOT.war}
-[INFO] Started ServerConnector@714b6999{HTTP/1.1, (http/1.1)}{0.0.0.0:8080}
-[INFO] Started Server@59e0d521{STARTING}[11.0.16,sto=0] @5879ms
+[INFO] Started o.e.j.m.p.MavenWebAppContext@1826475{JSON JMX Agent,/,file:///data/sources/github.com/jolokia/jolokia/examples/client-javascript-test-app/target/jolokia-example-client-javascript-test-app-2.1.0-SNAPSHOT/,AVAILABLE}{/data/sources/github.com/jolokia/jolokia/examples/client-javascript-test-app/target/jolokia-example-client-javascript-test-app-2.1.0-SNAPSHOT.war}
+[INFO] Started ServerConnector@79e15c4a{HTTP/1.1, (http/1.1)}{0.0.0.0:8080}
+[INFO] Started Server@5f9ccd0c{STARTING}[11.0.22,sto=0] @4430ms
 [INFO] Scan interval ms = 10
 ```
 
@@ -84,7 +84,7 @@ JavaScript tests are run by browsing to one of:
 * http://localhost:8080/jolokia-poller-test.html - tests for polling part of `jolokia.js`
 * http://localhost:8080/jolokia-all-test.html - all tests combined.
 
-JavaScript tests are run with the help of [QUnit][3]. To make the work smoother without a need to rebuild `client/javascript`
+JavaScript tests are run with the help of [QUnit][3]. To make the work smoother without a need to rebuild `client/javascript-esm`
 and `examples/client-javascript-test-app`, there's one handy `makeLinks.sh` shell script (for Linux) that replaces the target
 files with symbolic links to original locations.
 
@@ -95,9 +95,9 @@ $ cd examples/client-javascript-test-app/
 $ ./makeLinks.sh 
 + cd target/
 ++ find . -type d -name 'jolokia-example-client-javascript-test-app-*'
-+ WARUNPACKED=./jolokia-example-client-javascript-test-app-2.0.0-SNAPSHOT
-+ '[' -d ./jolokia-example-client-javascript-test-app-2.0.0-SNAPSHOT ']'
-+ cd ./jolokia-example-client-javascript-test-app-2.0.0-SNAPSHOT
++ WARUNPACKED=./jolokia-example-client-javascript-test-app-2.1.0-SNAPSHOT
++ '[' -d ./jolokia-example-client-javascript-test-app-2.1.0-SNAPSHOT ']'
++ cd ./jolokia-example-client-javascript-test-app-2.1.0-SNAPSHOT
 + rm jolokia-all-test.html
 + rm jolokia-chat.html
 + rm jolokia-poller-test.html
@@ -110,10 +110,44 @@ $ ./makeLinks.sh
 + ln -s ../../src/main/webapp/jolokia-simple-test.html .
 + ln -s ../../src/main/webapp/jolokia-test.html .
 + ln -s ../../src/main/webapp/demo/plot.html demo
-...
++ cd scripts/lib
++ rm jolokia.js
++ rm jolokia-simple.js
+++ jq -r .version ../../../../../../client/javascript-esm/packages/jolokia/package.json
++ JS_VERSION=2.1.0
++ ln -s ../../../../../../client/javascript-esm/packages/jolokia/dist/jolokia-2.1.0.js jolokia.js
++ ln -s ../../../../../../client/javascript-esm/packages/jolokia-simple/dist/jolokia-simple-2.1.0.js jolokia-simple.js
++ cd ../test
++ rm jolokia-poller-test.js
++ rm jolokia-simple-test.js
++ rm jolokia-test.js
++ ln -s ../../../../src/main/webapp/scripts/test/jolokia-poller-test.js .
++ ln -s ../../../../src/main/webapp/scripts/test/jolokia-simple-test.js .
++ ln -s ../../../../src/main/webapp/scripts/test/jolokia-test.js .
 ```
 
-With the symbolic links created, just change the test files or `jolokia.js` in your IDE of choice and re-run the tests.
+When Jolokia only used single location for JavaScript libraries developed _directly_ (`client/javascript/src/main/javascript/jolokia.js`), the above script and symbolic links were enough to make the work smoother.
+
+New Jolokia JavaScript library is based on TypeScript and bundled into various targets using [Rollup.js][8] so we also need to start _watched build_. It is single additional step:
+
+```shell
+$ cd client/javascript-esm/
+ 
+$ yarn watch
+[jolokia.js]: Process started
+[@jolokia.js/simple]: Process started
+...
+[@jolokia.js/simple]: rollup v4.18.0
+[jolokia.js]: rollup v4.18.0
+[@jolokia.js/simple]: bundles src/jolokia-simple.ts → dist/jolokia-simple-2.1.0.js, dist/jolokia-simple-2.1.0.min.js, dist/jolokia-simple.mjs...
+[jolokia.js]: bundles src/jolokia.ts → dist/jolokia-2.1.0.js, dist/jolokia-2.1.0.min.js, dist/jolokia.mjs...
+[@jolokia.js/simple]: (!) [plugin typescript] @rollup/plugin-typescript: Rollup 'sourcemap' option must be set to generate source maps.
+[@jolokia.js/simple]: created dist/jolokia-simple-2.1.0.js, dist/jolokia-simple-2.1.0.min.js, dist/jolokia-simple.mjs in 2.2s
+[jolokia.js]: (!) [plugin typescript] @rollup/plugin-typescript: Rollup 'sourcemap' option must be set to generate source maps.
+[jolokia.js]: created dist/jolokia-2.1.0.js, dist/jolokia-2.1.0.min.js, dist/jolokia.mjs in 2.4s
+```
+
+With the symbolic links created, just change the test files or `jolokia.ts` in your IDE of choice and re-run the tests (by refreshing browser page or using QUnit UI).
 
 ## Manage version numbers
 
@@ -320,3 +354,4 @@ git push origin HEAD
 [5]: https://www.npmjs.com
 [6]: https://central.sonatype.org/publish/
 [7]: https://github.com/eirslett/frontend-maven-plugin
+[8]: https://rollupjs.org/

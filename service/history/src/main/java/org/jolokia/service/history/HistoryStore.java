@@ -339,16 +339,18 @@ public class HistoryStore {
     private JSONObject addMultipleAttributeValues(JolokiaRequest pJmxReq, Map<String, Object> pAttributesMap,
                                                   String pBeanName, long pTimestamp) {
         JSONObject ret = new JSONObject();
-        for (Map.Entry<String,Object> attrEntry : pAttributesMap.entrySet()) {
-            String attrName = attrEntry.getKey();
-            Object value = attrEntry.getValue();
-            String path = pJmxReq.getPath();
-            HistoryKey key = createHistoryKey(pJmxReq, pBeanName, attrName, path);
-            addAttributeFromSingleValue(ret,
-                                        key,
-                                        attrName,
-                                        value,
-                                        pTimestamp);
+        if (pAttributesMap != null) {
+            for (Map.Entry<String,Object> attrEntry : pAttributesMap.entrySet()) {
+                String attrName = attrEntry.getKey();
+                Object value = attrEntry.getValue();
+                String path = pJmxReq.getPath();
+                HistoryKey key = createHistoryKey(pJmxReq, pBeanName, attrName, path);
+                addAttributeFromSingleValue(ret,
+                                            key,
+                                            attrName,
+                                            value,
+                                            pTimestamp);
+            }
         }
         return ret;
     }

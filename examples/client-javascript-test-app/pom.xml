@@ -83,9 +83,7 @@
 
     <dependency>
       <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-client-javascript</artifactId>
-      <!-- This type is required by com.devspan.mojo.javascript:javascript-maven-plugin -->
-      <type>javascript</type>
+      <artifactId>jolokia-client-javascript-esm</artifactId>
     </dependency>
 
     <!-- JakartaEE dependencies -->
@@ -101,18 +99,39 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>com.devspan.mojo.javascript</groupId>
-        <artifactId>javascript-maven-plugin</artifactId>
-        <extensions>true</extensions>
-        <configuration>
-          <useArtifactId>false</useArtifactId>
-        </configuration>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
         <executions>
           <execution>
-            <phase>compile</phase>
+            <phase>process-resources</phase>
             <goals>
-              <goal>war-package</goal>
+              <goal>unpack-dependencies</goal>
             </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/${project.artifactId}-${project.version}/scripts/lib</outputDirectory>
+              <includes>*.js,*.map</includes>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>strip-version-from-js-files</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <move todir="${project.build.directory}/${project.artifactId}-${project.version}/scripts/lib">
+                  <fileset dir="${project.build.directory}/${project.artifactId}-${project.version}/scripts/lib" />
+                  <mapper type="regexp" from="^(.*)-[\d\.]+(.min)?\.js$" to="\1\2.js" />
+                </move>
+              </target>
+            </configuration>
           </execution>
         </executions>
       </plugin>

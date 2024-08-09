@@ -19,6 +19,7 @@
   ],
   "scripts": {
     "build": "yarn build:jolokia && yarn build:jolokia-simple",
+    "watch": "yarn workspaces foreach -Rpi --from '{jolokia.js,@jolokia.js/simple}' run rollup -c -w",
     "test": "yarn test:jolokia && yarn test:jolokia-simple",
     "build:jolokia": "yarn workspace jolokia.js build:jolokia",
     "build:jolokia-simple": "yarn workspace @jolokia.js/simple build:jolokia-simple",
@@ -44,5 +45,5 @@
     "typescript": "^5.4.5",
     "typescript-eslint": "^7.13.0"
   },
-  "packageManager": "yarn@4.2.2+sha256.1aa43a5304405be7a7cb9cb5de7b97de9c4e8ddd3273e4dad00d6ae3eb39f0ef"
+  "packageManager": "yarn@4.4.0+sha256.5f228cb28f2edb97d8c3b667fb7b2fdcf06c46798e25ea889dad9e0b4bc2e2c1"
 }

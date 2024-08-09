@@ -168,6 +168,15 @@ describe("Jolokia HTTP tests", () => {
   //   expect(ex.name).toBe("TimeoutError")
   // })
 
+  test("Test 404", async () => {
+    const jolokia = new Jolokia({ url: `http://localhost:${port}/bla` })
+    const response = await jolokia.request({ type: "version" })
+      .catch(error => error)
+    expect(response).toBeInstanceOf(Response)
+    const r = response as Response
+    expect(r.status).toBe(404)
+  })
+
   test("Test with read timeout", async () => {
     let jolokia = new Jolokia({ url: `http://localhost:${port}/jolokia-timeout`, timeout: 500 })
     let response = await jolokia.request({ type: "version" })
@@ -178,8 +187,7 @@ describe("Jolokia HTTP tests", () => {
 
     jolokia = new Jolokia({ url: `http://localhost:${port}/jolokia-timeout`, timeout: 2000 })
     response = await jolokia.request({ type: "version" })
-    expect(response).toBeInstanceOf(Array<Response>)
-    expect(response[0].value.agent).toBe("2.1.0")
+    expect(response.value.agent).toBe("2.1.0")
   })
 
   test("Jolokia version with bad JSON response", async () => {
@@ -215,11 +223,8 @@ describe("Jolokia HTTP tests", () => {
         "J-Return-Code": "500"
       }
     })
-      .then(v => {
-        expect(v).toBe("Error: 500")
-      })
-      .catch(e => {
-        console.info(e)
+      .catch(r => {
+        expect(r.status).toBe(500)
       })
   })
 
@@ -255,17 +260,15 @@ describe("Jolokia Fetch API tests", () => {
 
   test("Jolokia GET version with \"json\" type", async () => {
     const jolokia = new Jolokia({ url: `http://localhost:${port}/jolokia` })
-    const response = await jolokia.request({ type: "version" }, { dataType: "json" }) as JolokiaResponse[]
+    const response = await jolokia.request({ type: "version" }, { dataType: "json" }) as JolokiaResponse
     expect(typeof response).toBe("object")
-    expect(response).toBeInstanceOf(Array<Response>)
-    expect(response.length).toBe(1)
-    expect(((response[0] as JolokiaSuccessResponse).value as { [ key: string ]: unknown })["agent"]).toBe("2.1.0")
+    expect(((response as JolokiaSuccessResponse).value as { [ key: string ]: unknown })["agent"]).toBe("2.1.0")
   })
 
   test("Jolokia POST version with \"json\" type", async () => {
     const jolokia = new Jolokia({ url: `http://localhost:${port}/jolokia` })
-    const response = await jolokia.request({ type: "version" }, { method: "post", dataType: "json" }) as JolokiaResponse[]
-    expect(((response[0] as JolokiaSuccessResponse).value as { [ key: string ]: unknown })["agent"]).toBe("2.1.0")
+    const response = await jolokia.request({ type: "version" }, { method: "post", dataType: "json" }) as JolokiaResponse
+    expect(((response as JolokiaSuccessResponse).value as { [ key: string ]: unknown })["agent"]).toBe("2.1.0")
   })
 
   test("Jolokia version with \"text\" type", async () => {

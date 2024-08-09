@@ -38,18 +38,17 @@ ln -s ../../src/main/webapp/jolokia-simple-test.html .
 ln -s ../../src/main/webapp/jolokia-test.html .
 ln -s ../../src/main/webapp/demo/plot.html demo
 
-cd scripts/lib || { echo "Can't CD into scripts/lib" && exit; }
+cd scripts/lib || { echo "Can't 'cd' into scripts/lib" && exit; }
 rm jolokia.js
-rm jolokia-cubism.js
 rm jolokia-simple.js
-ln -s ../../../../../../client/javascript/src/main/javascript/jolokia.js .
-ln -s ../../../../../../client/javascript/src/main/javascript/jolokia-cubism.js .
-ln -s ../../../../../../client/javascript/src/main/javascript/jolokia-simple.js .
+JS_VERSION=$(jq -r .version ../../../../../../client/javascript-esm/packages/jolokia/package.json)
+ln -s ../../../../../../client/javascript-esm/packages/jolokia/dist/jolokia-${JS_VERSION}.js jolokia.js
+ln -s ../../../../../../client/javascript-esm/packages/jolokia-simple/dist/jolokia-simple-${JS_VERSION}.js jolokia-simple.js
 
-cd ../test || { echo "Can't CD into ../test" && exit; }
+cd ../test || { echo "Can't 'cd' into ../test" && exit; }
 rm jolokia-poller-test.js
 rm jolokia-simple-test.js
 rm jolokia-test.js
-ln -s ../../../../src/main/javascript/test/jolokia-poller-test.js .
-ln -s ../../../../src/main/javascript/test/jolokia-simple-test.js .
-ln -s ../../../../src/main/javascript/test/jolokia-test.js .
+ln -s ../../../../src/main/webapp/scripts/test/jolokia-poller-test.js .
+ln -s ../../../../src/main/webapp/scripts/test/jolokia-simple-test.js .
+ln -s ../../../../src/main/webapp/scripts/test/jolokia-test.js .

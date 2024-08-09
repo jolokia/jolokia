@@ -160,7 +160,7 @@ public class JolokiaHttpHandlerTest {
         ByteArrayOutputStream out = prepareResponse(exchange, header);
         handler.handle(exchange);
 
-        assertEquals(header.getFirst("content-type"),"text/plain; charset=utf-8");
+        assertEquals(header.getFirst("content-type"),"application/json; charset=utf-8");
         String result = out.toString(StandardCharsets.UTF_8);
         JSONObject resp = new JSONParser().parse(result, JSONObject.class);
         assertTrue(resp.containsKey("error"));
@@ -233,7 +233,7 @@ public class JolokiaHttpHandlerTest {
 
         handler.handle(exchange);
 
-        assertEquals(header.getFirst("content-type"), "text/plain; charset=utf-8");
+        assertEquals(header.getFirst("content-type"), "application/json; charset=utf-8");
         assertEquals(header.getFirst("Access-Control-Allow-Origin"),"http://localhost:8080/");
     }
 

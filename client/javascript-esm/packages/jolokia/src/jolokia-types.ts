@@ -859,14 +859,14 @@ interface IJolokia extends JolokiaStatic {
    *        These are not options passed diretly (unchnaged) to `fetch()` call
    * @returns the response promise object resolving to desired value:<ul>
    *          <li>a string response (when `dataType=text`)</li>
-   *          <li>an array of Jolokia responses (when `dataType=json`, default)</li>
+   *          <li>an array of Jolokia responses or single JSON response (when `dataType=json`, default)</li>
    *          <li>a Fetch API Response object, when `resolve=response` is specified in {@link RequestOptions}</li>
    *          <li>When callbacks are specified in {@link RequestOptions}, the returned promise
    *          resolves to undefined, but user can attach `.catch()` for Fetch API error handling. The response is
    *          delivered via the callbacks</li></ul>
    */
   request(request: JolokiaRequest | JolokiaRequest[], params?: RequestOptions):
-    Promise<string | (JolokiaSuccessResponse | JolokiaErrorResponse)[] | Response | undefined>
+    Promise<string | JolokiaSuccessResponse | JolokiaErrorResponse | (JolokiaSuccessResponse | JolokiaErrorResponse)[] | Response | undefined>
 
   /**
    * Register one or more requests for periodically polling the agent along with a callback to call on receipt
@@ -966,6 +966,14 @@ interface IJolokia extends JolokiaStatic {
    * @returns URL segment with Jolokia escaping rules applied
    */
   escape(part: string): string
+
+  /**
+   * Escape URL part (segment) according to
+   * {@link https://jolokia.org/reference/html/manual/jolokia_protocol.html#_escaping_rules_in_get_requests Jolokia escaping rules}
+   * @param part a path used with POST requests
+   * @returns URL segment with Jolokia escaping rules applied
+   */
+  escapePost(part: string): string
 
   /**
    * Utility method which checks whether a response is an error or a success (from Jolokia, not HTTP perspective)

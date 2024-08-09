@@ -571,7 +571,7 @@ that lists all the keys obtained from each `javax.management.ObjectName` of the 
 This may save you time parsing the name yourself. +
 *Added since Jolokia 2.1.0*
 
-`listKeys`:: A flag (defaults to `false`) to enable _optimized list response_. +
+`listCache`:: A flag (defaults to `false`) to enable _optimized list response_. +
 With this flag enabled, `list()` operation returns a bit different structure (that's why we've upgraded protocol version to `8.0`) where some MBeans may _point to_ cached, shared MBeanInfo JSON fragment. This heavily decreases the size of `list()` response.
 *Added since Jolokia 2.1.0*
 
@@ -1268,7 +1268,7 @@ protocol version *`8.0`*.
 
 *8.0 (since 2.1.0)*:: We can now disable `request` field in the response
 using `includeRequest` option. There's new `listCache` parameter that
-enables _optimized list response_.
+enables _optimized list response_. There's also a `listKeys` parameter that adds `"keys"` field to MBeanInfo for an MBean - it contains keys obtained from Mbean's ObjectName.
 *7.3 (since 2.0.0)*:: Support for `notification` command and related
 JSON messages.
 *7.2 (since 1.2.2)*:: Paths can now be used with wildcards
