@@ -53,7 +53,7 @@ The new Jolokia module is `org.jolokia:jolokia-json` and it fully replaces `com.
 Going with the flow, after moving from JavaScript to TypeScript and getting our own JSON parser, we've introduced a new Jolokia protocol version, `8.0`. There's more information in the link:reference/html/manual/jolokia_protocol.html#optimized-response-list[relevant documentation section], but here's a summary of the changes:
 
 * With the new `listKeys` processing/request parameter, `list()` operation returns an additional `"keys"` field for MBean's MBeanInfo - it contains a map of the keys obtained from ObjectName
-* With the new `includeRequest` processing/request parameter, we can tell Jolokia not to return incoming requests under the `"request"` field of the response (defaults to `false`)
+* With the new `includeRequest` processing/request parameter, we can tell Jolokia not to return incoming requests under the `"request"` field of the response (defaults to `true`)
 * The `list()` operation may be optimized with the new `listCache` processing/request parameter. It allows caching the common JSON-ified MBeanInfo to avoid duplicating it in the `list()` response for, say, 50,000 Artemis queue MBeans. Getting 2MB instead of 0.5GB of JSON is always a good thing. More details can be found in the documentation.
 
 ==== New extension points
