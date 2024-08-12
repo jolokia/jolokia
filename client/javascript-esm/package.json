@@ -32,18 +32,20 @@
     "@types/d3": "^7.4.3",
     "@types/eslint__js": "^8.42.3",
     "@types/express": "^4.17.21",
+    "@types/node": "^22.2.0",
     "@types/supertest": "^6.0.2",
     "eslint": "^9.4.0",
     "eslint-plugin-jsdoc": "^48.2.7",
     "eslint-plugin-workspaces": "^0.10.1",
     "express": "^4.19.2",
     "globals": "^15.4.0",
+    "jest": "^29.7.0",
     "supertest": "^7.0.0",
     "ts-jest": "^29.1.4",
     "ts-node": "^10.9.2",
     "tslib": "^2.6.3",
-    "typescript": "^5.4.5",
-    "typescript-eslint": "^7.13.0"
+    "typescript": "^5.5.4",
+    "typescript-eslint": "^8.0.1"
   },
   "packageManager": "yarn@4.4.0+sha256.5f228cb28f2edb97d8c3b667fb7b2fdcf06c46798e25ea889dad9e0b4bc2e2c1"
 }

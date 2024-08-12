@@ -203,23 +203,13 @@ change should be related to particular [GitHub issue][4].
 This can be done just before the release (recommended), but if there are only JavaScript code changes and we want to
 deploy new Jolokia JavaScript client package to [NPM Registry][5], it's enough to:
 
-* run `npm version <new version>` command
+* run `yarn version <new version>` command (see [yarn version](https://yarnpkg.com/cli/version) and [yarn release workflow](https://yarnpkg.com/features/release-workflow)) in all workspaces
 * commit and push the changes
-* continue with NPM release procedure
+* continue with NPM/Yarn release procedure
 
-`npm version` updates version in `package.json`, but additionally (see `man npm version`) runs commands from
-`scripts/version` field of `package.json`:
+Before using workspaces, `npm version` also run script under `"versions'`. We used a script that updated one JavaScript file. I can't do it (yet) with `yarn` though...
 
-```json
-{
-  "scripts": {
-    "version": "node --no-warnings ./scripts/update-version.mjs"
-  }
-}
-```
-
-We'll get `client/javascript/src/main/javascript/jolokia.js` and `client/javascript/src/main/javascript/jolokia-cubism.js`
-updated as well.
+That's why we have to change `CLIENT_VERSION` field in `client/javascript-esm/packages/jolokia/src/jolokia.ts` manually.
 
 ## Update the changelog
 

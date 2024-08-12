@@ -62,7 +62,7 @@ type RequestArguments = {
   errorCb?: ResponseCallback | TextResponseCallback | ErrorCallback
 }
 
-const CLIENT_VERSION = "2.1.0"
+const CLIENT_VERSION = "2.1.2"
 
 /**
  * Default parameters for GET and POST requests
