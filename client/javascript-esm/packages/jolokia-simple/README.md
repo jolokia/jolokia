@@ -1,6 +1,6 @@
 # Jolokia JavaScript Simple Client library (ES Module)
 
-<a href="https://jolokia.org"><img src="./src/site/resources/images/jolokia_logo.png" /></a>
+<a href="https://jolokia.org"><img src="../../src/site/resources/images/jolokia_logo.png" /></a>
 
 The Jolokia JavaScript Simple library provides a JavaScript Simple API to the to the [Jolokia agent](https://jolokia.org/). Refer to [Reference Manual](https://jolokia.org/reference/html/manual/clients.html#client-javascript) for more details on how to use the library.
 
