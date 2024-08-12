@@ -18,7 +18,7 @@
 === Jolokia 2.1.0 released
 
 [.news-date]
-2024-08-??
+2024-08-12
 
 We're happy to announce a new minor release of Jolokia! Minor releases introduce new features and may require a few adjustments to client code. But no worries - the client code needs some adjustments _only_ for the new Jolokia JavaScript library!
 
