@@ -43,6 +43,9 @@
     <a class="nav-link" href="architecture.html">Architecture</a>
   </li>
   <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="extensions.html">Extending Jolokia</a>
+  </li>
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="agents.html">Agents</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -222,8 +225,8 @@ JDK and AppServer Version) which don&#8217;t work at all properly
 </li>
 <li>
 <p>For MBeans that have arguments of type <code>Map</code> or <code>List</code>
-it is required that <code>org.json.simple.JSONObject</code> and <code>org.json.simple.JSONArray</code>
-(contained in <code>json-simple.jar</code>) are available on the
+it is required that <code>org.jolokia.json.JSONObject</code> and <code>org.jolokia.json.JSONArray</code>
+(contained in <code>jolokia-json.jar</code>) are available on the
 classpath of the target JVM that receives the JSR-160 requests.</p>
 </li>
 <li>

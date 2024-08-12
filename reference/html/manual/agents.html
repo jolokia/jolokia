@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Agents :: Jolokia</title>
     <link rel="canonical" href="https://jolokia.org/manual/agents.html">
-    <link rel="prev" href="architecture.html">
+    <link rel="prev" href="extensions.html">
     <link rel="next" href="security.html">
     <meta name="generator" content="Antora 3.1.4">
     <link rel="stylesheet" href="../_/css/site.css">
@@ -41,6 +41,9 @@
   </li>
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="architecture.html">Architecture</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="extensions.html">Extending Jolokia</a>
   </li>
   <li class="nav-item is-current-page" data-depth="1">
     <a class="nav-link" href="agents.html">Agents</a>
@@ -367,6 +370,45 @@ in JavaScript.<br>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>number</code></p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>includeRequest</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A flag (defaults to <code>true</code>) which controls whether the incoming
+request should be included in the response (under <code>request</code> key).<br>
+This applies to bulk requests too, so correlation should be done by index
+of requests and responses (these are guaranteed to be matching).<br>
+<strong>Added since Jolokia 2.1.0</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>true</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>dateFormat</code></p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>A format specifier to use for formatting dates, calendars and instances of <code>java.time.Temporal</code>.
+Additionally we can use:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>unix</code> to serialize dates as Unix epoch time in seconds</p>
+</li>
+<li>
+<p><code>time</code>, <code>millis</code>, <code>long</code> to serialize dates as Unix epoch time in milliseconds</p>
+</li>
+<li>
+<p><code>nanos</code> to serialize dates as Unix epoch time in nanoseconds</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><strong>Added since Jolokia 2.1.0</strong></p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>yyyy-MM-dd&#8217;T&#8217;HH:mm:ssXXX</code> (ISO 8601 format)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>dateFormatTimeZone</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A time zone specifier used for date formatters, like <code>UTC</code><br>
+<strong>Added since Jolokia 2.1.0</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Default: local time zone</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>mbeanQualifier</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Qualifier to add to the ObjectName of Jolokia&#8217;s own
 MBeans. This can become necessary if more than one agent is
@@ -433,6 +475,21 @@ a startup option to avoid exposure of error details regardless of other options.
 detection of an application server. See below for an
 explanation.</p></td>
 <td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>enabledServices</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A comma-separated list of fully-qualified class names. If this configuration option is specified and is not empty, only the services from this list will be actually used.</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>disabledServices</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A comma-separated list of fully-qualified class names. If this configuration option is specified and is not empty, all detected services (from <code>/META-INF/jolokia/services(-default)</code>) will be filtered to not include the disabled services.</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>disableDetectors</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A flag that disables usage of <code>org.jolokia.server.core.detector.ServerDetector</code> services alltogether. Can be used when running Jolokia as an agent for standalone Java applicatin (µservices).</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>discoveryEnabled</code></p></td>
@@ -617,7 +674,7 @@ dependency on this jar artifact:</p>
     &lt;dependency&gt;
       &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
       &lt;artifactId&gt;jolokia-server-core&lt;/artifactId&gt;
-      &lt;version&gt;2.0.3&lt;/version&gt;
+      &lt;version&gt;2.1.0&lt;/version&gt;
     &lt;/dependency&gt;
   &lt;/dependencies&gt;
   &lt;!-- .... --&gt;
@@ -898,6 +955,45 @@ in JavaScript.<br>
 <strong>Added since Jolokia 2.0.3</strong></p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.jolokia.includeRequest</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>true</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A flag (defaults to <code>true</code>) which controls whether the incoming
+request should be included in the response (under <code>request</code> key).<br>
+This applies to bulk requests too, so correlation should be done by index
+of requests and responses (these are guaranteed to be matching).<br>
+<strong>Added since Jolokia 2.1.0</strong></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.jolokia.dateFormat</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>yyyy-MM-dd&#8217;T&#8217;HH:mm:ssXXX</code> (ISO 8601 format)</p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>A format specifier to use for formatting dates, calendars and instances of <code>java.time.Temporal</code>.
+Additionally we can use:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>unix</code> to serialize dates as Unix epoch time in seconds</p>
+</li>
+<li>
+<p><code>time</code>, <code>millis</code>, <code>long</code> to serialize dates as Unix epoch time in milliseconds</p>
+</li>
+<li>
+<p><code>nanos</code> to serialize dates as Unix epoch time in nanoseconds</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><strong>Added since Jolokia 2.1.0</strong></p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.jolokia.dateFormatTimeZone</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Default: local time zone</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A time zone specifier used for date formatters, like <code>UTC</code><br>
+<strong>Added since Jolokia 2.1.0</strong></p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.jolokia.historyMaxEntries</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>10</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Number of entries to keep in the history. This can be changed at
@@ -959,6 +1055,21 @@ overridden by a query parameter of the same name.</p></td>
 options used by detectors for post-initialization steps. See the description of
 <code>detectorOptions</code> in
 <a href="agents/war.html#agent-war-init-params" class="xref page">Servlet init parameters</a> for details.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.jolokia.enabledServices</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A comma-separated list of fully-qualified class names. If this configuration option is specified and is not empty, only the services from this list will be actually used.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.jolokia.disabledServices</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A comma-separated list of fully-qualified class names. If this configuration option is specified and is not empty, all detected services (from <code>/META-INF/jolokia/services(-default)</code>) will be filtered to not include the disabled services.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.jolokia.disableDetectors</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A flag that disables usage of <code>org.jolokia.server.core.detector.ServerDetector</code> services alltogether.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.jolokia.discoveryEnabled</code></p></td>
@@ -1093,7 +1204,7 @@ maven project can be found in the Jolokia source at
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>karaf@root()&gt; install -s mvn:org.jolokia/jolokia-example-osgi-restrictor/2.0.3
+<pre>karaf@root()&gt; install -s mvn:org.jolokia/jolokia-example-osgi-restrictor/2.1.0
 Register sample restrictor service
 Bundle ID: 68
 
@@ -1193,7 +1304,7 @@ performance. See below for details.</p>
 <p><code>agent.jar</code> is the filename of the Jolokia
 JVM agent. The agent can be downloaded like the others from the <a href="https://jolokia.org/download.html" class="externalLink" target="_blank" rel="noopener">download page</a>.
 When downloading from a Maven repository you need to check for the classifier <code>javaagent</code> (i.e. the
-jar to download looks like <code>jolokia-agent-jvm-2.0.3-javaagent.jar</code>, not <code>jolokia-agent-jvm-2.0.3.jar</code>).
+jar to download looks like <code>jolokia-agent-jvm-2.1.0-javaagent.jar</code>, not <code>jolokia-agent-jvm-2.1.0.jar</code>).
 Options can be appended as a comma separated
 list. The available options are the same as described in
 <a href="agents/war.html#agent-war-init-params" class="xref page">Servlet init parameters</a> plus the one described in
@@ -1485,6 +1596,21 @@ of course :)</p></td>
 <td class="tableblock halign-left valign-top"></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>enabledServices</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A comma-separated list of fully-qualified class names. If this configuration option is specified and is not empty, only the services from this list will be actually used.</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>disabledServices</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A comma-separated list of fully-qualified class names. If this configuration option is specified and is not empty, all detected services (from <code>/META-INF/jolokia/services(-default)</code>) will be filtered to not include the disabled services.</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>disableDetectors</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A flag that disables usage of <code>org.jolokia.server.core.detector.ServerDetector</code> services alltogether. Can be used when running Jolokia as an agent for standalone Java applicatin (µservices).</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>discoveryEnabled</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">If set to <code>false</code> then this agent will
 not listen for multicast request (multicast-group 239.192.48.84,
@@ -1572,6 +1698,45 @@ in JavaScript.<br>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>number</code></p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>includeRequest</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A flag (defaults to <code>true</code>) which controls whether the incoming
+request should be included in the response (under <code>request</code> key).<br>
+This applies to bulk requests too, so correlation should be done by index
+of requests and responses (these are guaranteed to be matching).<br>
+<strong>Added since Jolokia 2.1.0</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>true</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>dateFormat</code></p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>A format specifier to use for formatting dates, calendars and instances of <code>java.time.Temporal</code>.
+Additionally we can use:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>unix</code> to serialize dates as Unix epoch time in seconds</p>
+</li>
+<li>
+<p><code>time</code>, <code>millis</code>, <code>long</code> to serialize dates as Unix epoch time in milliseconds</p>
+</li>
+<li>
+<p><code>nanos</code> to serialize dates as Unix epoch time in nanoseconds</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><strong>Added since Jolokia 2.1.0</strong></p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>yyyy-MM-dd&#8217;T&#8217;HH:mm:ssXXX</code> (ISO 8601 format)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>dateFormatTimeZone</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A time zone specifier used for date formatters, like <code>UTC</code><br>
+<strong>Added since Jolokia 2.1.0</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Default: local time zone</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>policyLocation</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Path to the XML policy file</p></td>
 <td class="tableblock halign-left valign-top"></td>
@@ -1616,12 +1781,12 @@ application which can be reached via the
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>$ java -jar jolokia-agent-jvm-2.0.3-javaagent.jar --help
+<pre>$ java -jar jolokia-agent-jvm-2.1.0-javaagent.jar --help
 
 Jolokia Agent Launcher
 ======================
 
-Usage: java -jar jolokia-agent-jvm-2.0.3-javaagent.jar [options] &lt;command&gt; &lt;pid/regexp&gt;
+Usage: java -jar jolokia-agent-jvm-2.1.0-javaagent.jar [options] &lt;command&gt; &lt;pid/regexp&gt;
 
 where &lt;command&gt; is one of
     start     -- Start a Jolokia agent for the process specified
@@ -1674,6 +1839,14 @@ where &lt;command&gt; is one of
     --clientPrincipal &lt;principal&gt;   Allow only this principal in the client cert (https &amp; sslClientAuth only)
                                     If supplied multiple times, any one of the clientPrincipals must match
     --extendedClientCheck &lt;t|f&gt;     Additional validation of client certs for the proper key usage (https &amp; sslClientAuth only)
+    --disableDetectors              Whether to run detectors that locate environment-specific MBeanServer instances
+    --enabledServices               A comma-separated list of fully-qualified class names.
+                                    If this configuration option is specified and is not empty, only the
+                                    services from this list will be actually used.
+    --disabledServices              A comma-separated list of fully-qualified class names.
+                                    If this configuration option is specified and is not empty, all detected
+                                    services (from `/META-INF/jolokia/services(-default)`) will be filtered
+                                    to not include the disabled services.
     --discoveryEnabled &lt;t|f&gt;        Enable/Disable discovery multicast responses (default: false)
     --discoveryAgentUrl &lt;url&gt;       The URL to use for answering discovery requests. Will be autodetected if not given.
     --sslProtocol &lt;protocol&gt;        SSL / TLS protocol to enable, can be provided multiple times
@@ -1693,9 +1866,12 @@ where &lt;command&gt; is one of
     --canonicalNaming &lt;t|f&gt;         whether to use canonicalName for ObjectNames in 'list' or 'search' (default: true)
     --includeStackTrace &lt;t|f&gt;       whether to include StackTraces for error messages (default: false)
     --serializeException &lt;t|f&gt;      whether to add a serialized version of the exception in the Jolokia response (default: false)
+    --includeRequest &lt;t|f&gt;          whether to include entire request in the response (default: true)
+    --dateFormat &lt;format&gt;           DateFormat to use for serializing dates/times/calendars/temporals (default: yyyy-MM-dd'T'HH:mm:ssXXX)
+    --dateFormatTimeZone &lt;tz&gt;       TimeZone to use for formatting dates/times/calendars/temporals (default: local time zone)
     --config &lt;configfile&gt;           Path to a property file from where to read the configuration
     --help                          This help documentation
-    --version                       Version of this agent (it's 2.0.3 btw :)
+    --version                       Version of this agent (it's 2.1.0 btw :)
 
 &lt;pid/regexp&gt; can be either a numeric process id or a regular expression. A regular expression is matched
 against the processes' names (ignoring case) and must be specific enough to select exactly one process.
@@ -1805,7 +1981,7 @@ shot scripts are possible <sup class="footnote" id="_footnote_rest-comment">[<a 
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#!/bin/sh
 
-url=`java -jar jolokia-agent-jvm-2.0.3-javaagent.jar start $1 | tail -1`
+url=`java -jar jolokia-agent-jvm-2.1.0-javaagent.jar start $1 | tail -1`
 
 memory_url="${url}read/java.lang:type=Memory/HeapMemoryUsage"
 used=`curl -s "${memory_url}/used" | jq .value`
@@ -1813,7 +1989,7 @@ max=`curl -s "${memory_url}/max" | jq .value`
 usage=$((${used}*100/${max}))
 echo "Memory Usage: $usage %"
 
-java -jar jolokia-agent-jvm-2.0.3-javaagent.jar --quiet stop $1</code></pre>
+java -jar jolokia-agent-jvm-2.1.0-javaagent.jar --quiet stop $1</code></pre>
 </div>
 </div>
 </div>
@@ -1835,7 +2011,7 @@ java -jar jolokia-agent-jvm-2.0.3-javaagent.jar --quiet stop $1</code></pre>
 </div>
 </div>
 <nav class="pagination">
-  <span class="prev"><a href="architecture.html">Architecture</a></span>
+  <span class="prev"><a href="extensions.html">Extending Jolokia</a></span>
   <span class="next"><a href="security.html">Security</a></span>
 </nav>
 </article>

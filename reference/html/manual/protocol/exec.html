@@ -41,6 +41,9 @@
     <a class="nav-link" href="../architecture.html">Architecture</a>
   </li>
   <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../extensions.html">Extending Jolokia</a>
+  </li>
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="../agents.html">Agents</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -260,6 +263,14 @@ void. A typical response for an URL like (mind that double quote (<code>"</code>
   "timestamp": 1702456520
 }</code></pre>
 </div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">NOTE</dt>
+<dd>
+<p>Since Jolokia 2.1.0 we can use <code>includeRequest</code> parameter to tell Jolokia to exclude <code>request</code> field from the response.</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
 <p>The return value get serialized as described in <a href="../jolokia_protocol.html#serialization-request" class="xref page">Request parameter serialization</a>.</p>

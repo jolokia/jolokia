@@ -41,6 +41,9 @@
     <a class="nav-link" href="../architecture.html">Architecture</a>
   </li>
   <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../extensions.html">Extending Jolokia</a>
+  </li>
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="../agents.html">Agents</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -189,7 +192,7 @@ complete response.</p>
           "desc": "&lt;textual description of attribute&gt;",
           "rw": "true|false"
         },
-        ....
+        ...
       },
       "op": {
         "&lt;operation name&gt;": {
@@ -199,22 +202,25 @@ complete response.</p>
               "name": "&lt;argument name&gt;",
               "desc": "&lt;textual description of argument&gt;"
             },
-            .....
+            ...
           ],
           "ret": "&lt;return type&gt;",
           "desc": "&lt;textual description of operation&gt;"
         },
-        .....
+        ...
       },
-      "not": {
-        "name": "&lt;name&gt;",
-        "desc": "&lt;desc&gt;",
-        "types": [ "&lt;type1&gt;", "&lt;type2&gt;" ]
+      "notif": {
+        "&lt;notification type&gt;": {
+            "name": "&lt;name&gt;",
+            "desc": "&lt;desc&gt;",
+            "types": [ "&lt;type1&gt;", "&lt;type2&gt;", ... ]
+        },
+        ...
       }
     },
-    ....
+    ...
   },
-  ....
+  ...
 }</code></pre>
 </div>
 </div>
@@ -307,6 +313,14 @@ bean only. For example, a request</p>
 }</code></pre>
 </div>
 </div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">NOTE</dt>
+<dd>
+<p>Since Jolokia 2.1.0 we can use <code>includeRequest</code> parameter to tell Jolokia to exclude <code>request</code> field from the response.</p>
+</dd>
+</dl>
+</div>
 </div>
 <div class="sect3">
 <h4 id="_restrict_depth_of_the_returned_tree"><a class="anchor" href="#_restrict_depth_of_the_returned_tree"></a>Restrict depth of the returned tree</h4>
@@ -319,6 +333,119 @@ return value to a map with the JMX domains as keys, a
 the domain names (first level) and the MBean&#8217;s properties
 (second level). The final values of the maps don&#8217;t have any
 meaning and are dummy values.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_extension_points"><a class="anchor" href="#_extension_points"></a>Extension points</h4>
+<div class="paragraph">
+<p>When returning <code>list()</code> results, Jolokia translates each MBean&#8217;s <code>javax.management.MBeanInfo</code> information into a JSON fragment. Standard fields of this fragment are:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>class</code></p>
+</li>
+<li>
+<p><code>desc</code></p>
+</li>
+<li>
+<p><code>attr</code></p>
+</li>
+<li>
+<p><code>op</code></p>
+</li>
+<li>
+<p><code>notif</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>These fields are added by default, built-in implementations of <code>org.jolokia.service.jmx.handler.list.DataUpdater</code>.</p>
+</div>
+<div class="paragraph">
+<p>Since Jolokia 2.1.0 we can now discover (using <code>/META-INF/jolokia/services</code>) additional services of <code>org.jolokia.service.jmx.handler.list.DataUpdater</code> class which can be used to construct (or override) additional fields of MBean&#8217;s JSON information.<br>
+Potential use-case may be information related to RBAC (Role-based Access Control).</p>
+</div>
+<div class="paragraph">
+<p>One additional built-in <em>data updater</em> is <code>org.jolokia.service.jmx.handler.list.ListKeysDataUpdater</code> which can be enabled using <code>listKeys=true</code> processing parameter. We can use it to get additional <code>"keys"</code> MBeanInfo containing keys obtained from MBean&#8217;s ObjectName. For example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "request": {
+    "path": "java.lang",
+    "type": "list"
+  },
+  "value": {
+    "name=G1 Survivor Space,type=MemoryPool": {
+      "op": {
+        "resetPeakUsage": {
+          "args": [],
+          "ret": "void",
+          "desc": "resetPeakUsage"
+        }
+      },
+      "keys": {
+        "name": "G1 Survivor Space",
+        "type": "MemoryPool"
+      },
+...</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="optimized-response-list"><a class="anchor" href="#optimized-response-list"></a>Optimized List response</h4>
+<div class="paragraph">
+<p>Since Jolokia 2.1.0 we provide now <code>listCache</code> request processing parameter. When this parameter is set to <code>true</code> (it&#8217;s <code>false</code> for backward compatibility), <code>list()</code> response has different format - instead of a structure like:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>domain:
+  mbean:
+    op:
+    attr:
+    notif:
+    class:
+    desc:
+  ...
+...</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>we now have:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>"domains":
+  domain:
+    mbean: cache-key
+    ...
+  ...
+"cache":
+  cache-key:
+    op:
+    attr:
+    notif:
+    class:
+    desc:
+  ...</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Effectively:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>domain → mbean tree is moved 1 level down under <code>"domains"</code> field of <code>list()</code> response</p>
+</li>
+<li>
+<p>mbean <em>may</em> contain known <code>op</code>, <code>attr</code>, &#8230;&#8203; fields, but may also be just a <em>cache key</em> pointing to <code>op</code>, <code>attr</code>, &#8230;&#8203; data stored under this <em>key</em> under <code>"cache"</code> field of <code>list()</code> response</p>
+</li>
+<li>
+<p>the <em>cache keys</em> are generated by <code>org.jolokia.service.jmx.api.CacheKeyProvider</code> services/extensions</p>
+</li>
+</ul>
 </div>
 </div>
 </div>

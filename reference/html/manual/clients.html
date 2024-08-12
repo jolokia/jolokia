@@ -43,6 +43,9 @@
     <a class="nav-link" href="architecture.html">Architecture</a>
   </li>
   <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="extensions.html">Extending Jolokia</a>
+  </li>
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="agents.html">Agents</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -123,6 +126,953 @@ bindings bundled with Jolokia. Information about Jmx4Perl can be found
 <h2 id="client-javascript"><a class="anchor" href="#client-javascript"></a>JavaScript Client Library</h2>
 <div class="sectionbody">
 <div class="paragraph">
+<p>Notable difference from previous version (pre 2.1.0) are:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>The code is developed now using TypeScript language and processed using <a href="https://rollupjs.org/">Rollup JS</a> into ESM version (<code>jolokia.mjs</code> to be used with <code>import</code> statement) and UMD version (<code>jolokia.js</code> - to be used with browsers when not loading the script as <code>type="module"</code>)</p>
+</li>
+<li>
+<p>There&#8217;s no dependency on <a href="https://jquery.com/">JQuery</a> anymore</p>
+</li>
+<li>
+<p>For HTTP requests, we use <a href="https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API">Fetch API</a>.</p>
+</li>
+<li>
+<p>There&#8217;s no support for ancient <a href="https://en.wikipedia.org/wiki/JSONP">JSONP</a>. <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS">CORS</a> it the way to handle cross-origin requests.</p>
+</li>
+<li>
+<p>Because Fetch API is used, there&#8217;s no direct support for <em>synchronous requests</em> - this can be achieved simply using <code>async</code> and <code>await</code></p>
+</li>
+<li>
+<p>There&#8217;s no <code>ajaxError</code> option to handle HTTP/connection errors. <code>Jolokia.request</code> returns now a <code>Promise</code> object and we can handle <em>global errors</em> using <code>Promise.catch()</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>All methods of this library are available via the
+<code>Jolokia</code> client object, which needs to be
+instantiated up-front. In the following example a client object is
+created and the used heap memory is requested synchronously via
+the simple API. The agent is deployed within the same webarchive
+which also serves this script.</p>
+</div>
+<div class="paragraph">
+<p>Here&#8217;s a sample code fragment that uses global <code>Jolokia</code> class which is used to create a <code>jolokia</code>
+instance used to invoke simple (from <code>@jolokia.js/simple</code> package) <code>getAttribute()</code> operation:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">const jolokia = new Jolokia("/jolokia")
+const value = jolokia.getAttribute("java.lang:type=Memory", "HeapMemoryUsage", "used")
+console.log("Heap Memory used: " + value)</code></pre>
+</div>
+</div>
+<div class="sect2">
+<h3 id="js-installation"><a class="anchor" href="#js-installation"></a>Installation</h3>
+<div class="paragraph">
+<p>The Jolokia JavaScript library is distributed in the form of npm packages which should be used as standard JavaScript libraries. It&#8217;s out of scope of this documentation to describe all possible bundler setups which may be used, let&#8217;s simply focus on two <em>flavors</em> of these libraries.</p>
+</div>
+<div class="paragraph">
+<p><code>package.json</code> for <code>jolokia.js</code> package contains this module-related section:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">"exports": {
+  ".": {
+    "types": "./dist/dts/jolokia.d.ts",
+    "import": "./dist/jolokia.mjs",
+    "default": "./src/jolokia.ts"
+  }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The recommended way to use this package is with JavaScript ES modules:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">import Jolokia from "jolokia.js"
+
+const jolokia = new Jolokia("/jolokia")
+...</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>However if there&#8217;s a need to use Jolokia JavaScript libraries directly, it&#8217;s always possible
+to download relevant files (normal an minified) from <a href="/download.html">download page</a>.
+Then we can refer to the scripts from HTML page:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;head&gt;
+  &lt;script src="jolokia-2.1.0.min.js"&gt;&lt;/script&gt;
+  &lt;script src="jolokia-simple-2.1.0.min.js"&gt;&lt;/script&gt;
+&lt;/head&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>A Jolokia client is always created as an instance of
+<code>Jolokia</code>. Requests to the agent are sent
+by calling methods on this object. The constructing function
+takes a plain object, which provides default parameters which
+are used in the <code>request()</code> if no
+overriding are given there.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="js-request"><a class="anchor" href="#js-request"></a>Usage</h3>
+<div class="paragraph">
+<p>All functions of this library are available as methods of the
+<code>Jolokia</code> object. The <code>options</code> argument needs to be
+instantiated as usual and it takes a set of default options, which
+can be overwritten by subsequent requests. On the most basic
+layer is a single <code>request()</code> method,
+which takes two arguments: A request object and an optional
+options object. For example, a request for obtaining
+the agent&#8217;s version for a agent running on the same server which
+delivered the JavaScript looks like:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">let jolokia = new Jolokia({ url: "/jolokia" });
+let response = await jolokia.request({ "type": "version" }, { "method": "post" });
+console.log("Agent Version: " + response.value.agent);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If the constructor is used with a single string argument, this
+value is considered to be the agent&#8217;s access URL. I.e. in the
+example above the construction of the
+<code>Jolokia</code> could have been performed with a
+single string argument (<code>new Jolokia("/jolokia")</code>).</p>
+</div>
+<div class="sect3">
+<h4 id="js-request-format"><a class="anchor" href="#js-request-format"></a>Requests</h4>
+<div class="paragraph">
+<p>Jolokia requests and responses are represented as JSON
+objects. They have exactly the same format, which is expected
+and returned by the agent as defined in
+<a href="jolokia_protocol.html" class="xref page">Jolokia Protocol</a> for POST requests. All request types are
+supported.</p>
+</div>
+<div class="paragraph">
+<p>The <code>request()</code> method expects as its first
+argument either a single request object or, for bulk requests,
+an array of request objects.</p>
+</div>
+<div class="paragraph">
+<p>When Jolokia JavaScript library was using JQuery Ajax, there were two types of operations supported:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>synchronous - when <code>options</code> object didn&#8217;t contain <code>success</code> callback</p>
+</li>
+<li>
+<p>asynchronous - when user specified <code>success</code> callback in <code>options</code> object</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Depending on this for synchronous
+operations either a single response JSON object is returned or
+an array of responses (in the order of the initial request
+array). For asynchronous request one or more callbacks are
+called for each response separately. See
+<a href="#js-request-sync-async">Operational modes</a> for details.</p>
+</div>
+<div class="paragraph">
+<p>With new Fetch API, there are more types of operations:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>callback based for compatibility purposes - you have to pass <code>success</code> (and <code>error</code> if needed) callbacks through <code>options</code> object</p>
+</li>
+<li>
+<p><em>recommended</em> JSON method when there&#8217;s no <code>success</code> callback passed and <code>request()</code> returns a Promise object:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>for HTTP status 200, it is resolved with the response value, which may be successfull or error Jolokia responses containing JSON data with response or error details obtained from <code>Response.json()</code></p>
+</li>
+<li>
+<p>for HTTP status &gt;= 400, it throws an exception which is Fetch <code>Response</code> object - user can attach <code>.catch()</code> to the promise and analyze the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Response">Response</a></p>
+</li>
+<li>
+<p>for HTTP status != 200 and not &gt;= 400, the promise is resolved with the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Response">Response</a> (for example to analyze the redirect status)</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Text method when there&#8217;s no <code>success</code> callback, <code>dataType: "text"</code> is passed and <code>request()</code> returns a Promise object:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>for HTTP status 200, it is resolved with the response value for HTTP 200 responses, which is plain text response obtained from <code>Response.text()</code>.</p>
+</li>
+<li>
+<p>for HTTP status != 200 it&#8217;s the same as in <em>recommended</em> JSON method</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p><em>low level</em> Response method, when <code>resolve: "response"</code> is passed with <code>options</code>, the returned promise is resolved with entire <a href="https://developer.mozilla.org/en-US/docs/Web/API/Response">Response</a> object and user is free to call <code>Response.json()</code>, <code>Response.text()</code>, <code>Response.blob()</code> or any method from <a href="https://developer.mozilla.org/en-US/docs/Web/API/Response">Response API</a>.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Remember - when no <code>success</code> callback is passed, the returned Promise has to be configured for resolution:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>by attaching <code>.then()</code> to get the value</p>
+</li>
+<li>
+<p>by attaching <code>.catch()</code> to catch the exceptions</p>
+</li>
+<li>
+<p>by using <code>await jolokia.request()</code> to get the response or catch the exception (after surrounding with <code>try..catch</code>).</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The following example shows a single and bulk request call to
+the Jolokia agent:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">let jolokia = new Jolokia({ "url": "/jolokia" });
+let req1 = { "type": "read", "mbean": "java.lang:type=Memory", "attribute": "HeapMemoryUsage" };
+let req2 = { "type": "list" };
+let response = await jolokia.request(req1);
+let responses = await jolokia.request([ req1, req2 ]);</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="js-request-options"><a class="anchor" href="#js-request-options"></a>Request options</h4>
+<div class="paragraph">
+<p>Each request can be configured with a set of optional parameters
+provided either as default during construction of the
+<code>Jolokia</code> object or as optional last
+parameter for the request object. Also a request can carry a
+<code>config</code> attribute, which can be used for all
+processing parameters (<a href="jolokia_protocol.html#processing-parameters" class="xref page">Processing parameters</a>).
+The known options are summarized in <a href="#js-request-options-table">Table 1, &#8220;Request options&#8221;</a></p>
+</div>
+<table id="js-request-options-table" class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. Request options</caption>
+<colgroup>
+<col style="width: 20%;">
+<col>
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Key</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>url</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Agent URL (mandatory)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>method</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Either "post" or "get" depending on the desired HTTP method
+(case does not matter).  Please note, that bulk requests are
+not possible with "get". On the other hand, JSONP requests
+are not possible with "post" (which obviously implies that
+bulk request cannot be used with JSONP requests). Also, when
+using a <code>read</code> type request for multiple
+attributes, this also can only be sent as "post"
+requests. If not given, a HTTP method is determined
+dynamically. If a method is selected which doesn&#8217;t fit to the
+request, an error is raised.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>dataType</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The type of data specified to Jolokia request. The default value is <code>json</code>,
+and the response is parsed as JSON to an object. If the value is <code>text</code>,
+the response is returned as plain text without parsing. The client is then
+responsible for parsing the response. This can be useful when a custom JSON
+parsing is necessary. The value is returned as Promise&#8217;s resolution value.<br>
+Jolokia Simple API (jolokia-simple.js) doesn&#8217;t support <code>text</code> as dataType.<br>
+<strong>Added since jolokia.js 2.0.2</strong></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>success</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Callback function which is called for a successful
+request. The callback receives the response as single
+argument. If no <code>success</code> callback is given, then
+the request returns a Promise.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>error</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Callback in case a Jolokia error occurs. A Jolokia error is
+one, in which the HTTP request succeeded with a status code
+of 200, but the response object contains a Jolokia (not HTTP) status other than
+OK (200) which happens if the request JMX operation
+fails. This callback receives the full Jolokia response
+object (with a key <code>error</code> set). If no error
+callback is given, but <code>success</code> is available, the error response is printed to the JavaScript
+console by default.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>credentials</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">This option is passed directly to <code>fetch()</code> call. See <a href="https://developer.mozilla.org/en-US/docs/Web/API/RequestInit#headers">headers option</a>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>username</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A username used for HTTP authentication</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>password</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A password used for HTTP authentication</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>timeout</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Timeout for the HTTP request used with <a href="https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal/timeout_static">Abort Signal</a></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>headers</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">This option is passed directly to <code>fetch()</code> call.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>maxDepth</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Maximum traversal depth for serialization of complex return values</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>maxCollectionSize</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Maximum size of collections returned during serialization.
+If larger, the collection is returned truncated.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>maxObjects</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Maximum number of objects contained in the response.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>serializeLong</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">How to serialize long values in the JSON response: <code>number</code> or <code>string</code>.
+The default <code>number</code> simply serializes longs as numbers in JSON.
+If set to <code>string</code>, longs are serialized as strings.
+It can be useful when a JavaScript client consumes the JSON response,
+because numbers greater than the max safe integer don&#8217;t retain their precision
+in JavaScript.<br>
+<strong>Added since Jolokia 2.0.3</strong></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>ignoreErrors</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">If set to "true", errors during JMX operations and JSON
+serialization are ignored. Otherwise if a single
+deserialization fails, the whole request returns with an
+error. This works only for certain operations like pattern
+reads.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>canonicalNaming</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Defaults to true for canonical (sorted) property lists on object names; if set to "false" then they are turned in their unsorted format.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>includeRequest</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether the response object should contain related request object.<br>
+This option may be configured globally and overriden at request time.
+When <code>false</code>, bulk responses have to be correlated with requests by matching
+the requests using index number - responses come in the same order as requests.<br>
+<strong>Added since Jolokia 2.1.0</strong></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>listKeys</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether the response object for <code>list()</code> operation should contain <code>keys</code> field
+that lists all the keys obtained from each <code>javax.management.ObjectName</code> of the response.
+This may save you time parsing the name yourself.<br>
+<strong>Added since Jolokia 2.1.0</strong></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>listCache</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A flag (defaults to <code>false</code>) to enable <em>optimized list response</em>.<br>
+With this flag enabled, <code>list()</code> operation returns a bit different structure (that&#8217;s why we&#8217;ve upgraded protocol version to <code>8.0</code>) where some MBeans may <em>point to</em> cached, shared MBeanInfo JSON fragment. This heavily decreases the size of <code>list()</code> response.<br>
+<strong>Added since Jolokia 2.1.0</strong></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>serializeException</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">If true then in case of an error, the exception itself is returned in
+it JSON representation under the key <code>error_value</code>
+in the response object.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>includeStackTrace</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">By default, a stacktrace is returned with every error (key: <code>stacktrace</code>)
+This can be omitted by setting the value of this option to <code>false</code>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>ifModifiedSince</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The <code>LIST</code> operations provides an
+optimization in that it remembers, when the set of
+registered MBeans has been changes last. If a timestamp
+(in epoch seconds) is provided with this parameter, then
+the LIST operation returns an empty response
+(i.e. <code>value</code> is null) and a
+<code>status</code> code of 304 (Not Modified) if
+the MBeans haven&#8217;t changed. If you use the request
+scheduler (<a href="#js-request-options-table">Table 1, &#8220;Request options&#8221;</a>)
+then this feature can be used to get the callbacks called
+only if a value is returned. For the normal request, the
+error callback is called which must check the status itself.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="js-request-sync-async"><a class="anchor" href="#js-request-sync-async"></a>Operational modes</h4>
+<div class="paragraph">
+<p>Requests can be handled either with Promises or callbacks.
+If a <code>success</code> callback is given in the
+request options, the <code>fetch()</code> promise is handled by Jolokia.
+The callback gets these arguments:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>a Jolokia JSON
+response object (see <a href="jolokia_protocol.html#request-response" class="xref page">Requests and Responses</a>)</p>
+</li>
+<li>
+<p>an integer index indicating for which response this callback is being
+called.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>For bulk requests, this index corresponds to the array
+index of the request which lead to this response. The value of
+this option can be an array of callback functions which are
+called in a round robin fashion when multiple responses are
+received in case of bulk requests. These callbacks are called
+only when the returned Jolokia response has a status code of
+<code>200</code>, otherwise the callback(s) given with
+the <code>error</code> option are consulted. If no error
+callback is given, the error is printed on the console by
+default. As for success callbacks, error callbacks receive the
+Jolokia error response as a JSON object.</p>
+</div>
+<div class="paragraph">
+<p>The following example shows callback-based requests for a single
+Jolokia request as well as for bulk request with multiple
+callbacks.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">let jolokia = new Jolokia("/jolokia");
+
+// Single request with a single success callback
+jolokia.request(
+  {
+    "type": "read",
+    "mbean": "java.lang:type=Memory",
+    "attribute": "HeapMemoryUsage"
+  },
+  {
+    "success": function(response) {
+      if (response.value.used / response.value.max &gt; 0.9) {
+        console.info("90% of heap memory exceeded");
+      }
+    },
+    "error": function(response) {
+      console.info("Jolokia request failed: " + response.error);
+    }
+  }
+);
+
+// Bulk request with multiple callbacks
+jolokia.request(
+  [
+    {
+      "type": "read",
+      "mbean": "java.lang:type=Threading",
+      "attribute": "ThreadCount"
+    },
+    {
+      "type": "read",
+      "mbean": "java.lang:type=Runtime",
+      "attribute": [ "VmName", "VmVendor" ]
+    }
+  ],
+  {
+    "success": [
+      function(response) {
+        console.log("Number of threads: " + response.value);
+      },
+      function(response) {
+        console.log("JVM: " + response.value.VmName + " -- " + response.value.VmVendor);
+      }
+    ],
+    "error": function(response) {
+      alert("Jolokia request failed: " + response.error);
+    }
+  }
+);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Both callbacks, <code>success</code> and
+<code>error</code>, are only called when HTTP response code is <code>200</code>.
+In case of an error on the HTTP level It is the responsibility of user
+to <em>attach</em> <code>.catch()</code> to the returned Promise object. The passed function is called with the
+<a href="https://developer.mozilla.org/en-US/docs/Web/API/Response"><code>Response</code></a> object, so we can get more information. For example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">const response = await jolokia.request({ type: "version" })
+  .catch(r =&gt; {
+      if (r.status &lt;= 400) {
+        // handle non-critical error
+        console.warn(r.statusText)
+      } else {
+        // handle codes like 404 or 500
+        console.warn("Critical error", r.statusText)
+      }
+  })</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As explained in <a href="jolokia_protocol.html#request-response" class="xref page">Requests and Responses</a> the Jolokia
+agent supports two HTTP methods, <code>GET</code> and
+<code>POST</code>. <code>POST</code> is more
+powerful since it supports more features. e.g. bulk requests and
+JMX proxy requests are only possible with POST. By default, the
+Jolokia JavaScript library selects an HTTP method automatically,
+which is <code>GET</code> for simple cases and <code>POST</code>
+for more sophisticated requests. The HTTP method can be
+overridden by setting the option <code>method</code> to
+<code>"get"</code> or <code>"post"</code>.</p>
+</div>
+<div class="paragraph">
+<p>There are some limitations in choosing the HTTP method depending
+on the request and other options given:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Bulk requests (i.e. an array of multiple requests) can only be
+used with <code>POST</code>.</p>
+</li>
+<li>
+<p><code>READ</code> requests for multiple attributes
+(i.e. the <code>attribute</code> request parameter is
+an array of string values) can only be used with
+<code>POST</code>.</p>
+</li>
+<li>
+<p>The JMX proxy mode (see <a href="proxy_mode.html" class="xref page">Proxy Mode</a>) can only be used
+with <code>POST</code>.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_using_promises"><a class="anchor" href="#_using_promises"></a>Using Promises</h3>
+<div class="paragraph">
+<p>Without callbacks we can leverage full potential of promises.</p>
+</div>
+<div class="paragraph">
+<p>The example we&#8217;ve shown to describe <code>success</code> and <code>error</code> callbacks can be written using promises:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">let jolokia = new Jolokia("/jolokia");
+
+// Single request with a single success callback
+let response = await jolokia.request({
+    "type": "read",
+    "mbean": "java.lang:type=Memory",
+    "attribute": "HeapMemoryUsage"
+  }).catch(r =&gt; {
+      console.info("Jolokia request failed: " + r.statusText);
+  })
+if (response &amp;&amp; response.value.used / response.value.max &gt; 0.9) {
+    console.info("90% of heap memory exceeded")
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="js-simple"><a class="anchor" href="#js-simple"></a>Simple API</h3>
+<div class="paragraph">
+<p>Building upon the basic
+<code>Jolokia.request()</code> method, a simplified
+access API is available. It is contained in
+<code>jolokia-simple.js</code> (from <code>@jolokia.js/simple</code> npm package) which must be included after
+<code>jolokia.js</code>. This API provides dedicated
+method for the various request types and supports all options as
+described in <a href="#js-request-options-table">Table 1, &#8220;Request options&#8221;</a>. There
+is one notable difference for asynchronous callbacks and
+synchronous return values though: In case of a successful call,
+the callback is fed with the response&#8217;s
+<code>value</code> object, not the full response
+(i.e. <code>response.value</code>). Similar when Promise is returned, it is resolved with
+the value itself. In case of an error,
+either an <code>error</code> callback is called with the
+full response object or a <code>Respose</code> can be handled with <code>.catch()</code> block.</p>
+</div>
+<div class="paragraph">
+<p>Remember - to deal with values directly, <code>await</code> has to be used on the Promise returned from simple API.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>getAttribute(mbean, attribute, path, opts)</code></dt>
+<dd>
+<p>This method returns the value of an JMX attribute
+<code>attribute</code> of an MBean <code>mbean</code>. A path
+can be optionally given, and the optional request options are
+given as last argument(s). The return value for synchronous
+operations are the attribute&#8217;s value, for callback
+operations (i.e. <code>opts.success != null</code>) it is
+<code>null</code>. See <a href="protocol/read.html" class="xref page">Reading attributes (read)</a> for
+details.</p>
+<div class="paragraph">
+<p>For example, the following method call can be used
+to synchronously fetch the current heap memory usage:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">let memoryUsed = await jolokia.getAttribute("java.lang:type=Memory", "HeapMemoryUsage", "used");</code></pre>
+</div>
+</div>
+</dd>
+<dt class="hdlist1"><code>setAttribute(mbean, attribute, value, path, opts)</code></dt>
+<dd>
+<p>For setting an JMX attribute, this method takes the MBean&#8217;s
+name <code>mbean</code>, the attribute
+<code>attribute</code> and the value to set as
+<code>value</code>. The optional <code>path</code> is the
+<em>inner path</em> of the attribute on which
+to set the value (see <a href="protocol/write.html" class="xref page">Writing attributes (write)</a> for
+details). The old value of the attribute is returned or
+given to a <code>success</code> callback.</p>
+<div class="paragraph">
+<p>To enable verbose mode in the memory-handling beans, use</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">let gsLoggingWasOn = await jolokia.setAttribute("java.lang:type=Memory", "Verbose", true);</code></pre>
+</div>
+</div>
+</dd>
+<dt class="hdlist1"><code>execute(mbean, operation, arg1, arg2, &#8230;&#8203;, opts)</code></dt>
+<dd>
+<p>With this method, a JMX operation can be executed on the
+MBean <code>mbean</code>. Beside the operation&#8217;s name
+<code>operation</code>, one or more arguments can be given
+depending on the signature of the JMX operation. The
+return value is the return value of the operation. See
+<a href="protocol/exec.html" class="xref page">Executing JMX operations (exec)</a> for details.</p>
+<div class="paragraph">
+<p>The following exampled asynchronously fetches a thread dump
+as a JSON object and logs it into the console:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">jolokia.execute("java.lang:type=Threading", "dumpAllThreads(boolean,boolean)", true, true, {
+  "success": function(value) {
+    console.log(JSON.stringify(value));
+  }
+});</code></pre>
+</div>
+</div>
+</dd>
+<dt class="hdlist1"><code>search(mBeanPattern, opts)</code></dt>
+<dd>
+<p>Searches for one or more MBeans whose object names fit the
+pattern <code>mBeanPattern</code>. The return value is a list
+of strings with the matching MBean names or <code>null</code>
+if none is found. See <a href="protocol/search.html" class="xref page">Searching MBeans (search)</a> for details.</p>
+<div class="paragraph">
+<p>The following example looks up all application servers
+available in all domains:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">let servletNames = await jolokia.search("*:j2eeType=Servlet,*");</code></pre>
+</div>
+</div>
+</dd>
+<dt class="hdlist1"><code>list(path, opts)</code></dt>
+<dd>
+<p>For getting meta information about registered MBeans,
+the <code>list</code> command can be used. The
+optional <code>path</code> points into this meta
+information for retrieving partial information. The format
+of the return value is described in detail in
+<a href="protocol/list.html" class="xref page">Listing MBeans (list)</a>.</p>
+<div class="paragraph">
+<p>This example fetches only the meta information for the
+attributes of the
+<code>java.lang:type=OperatingSystem</code> MBean:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">let attributesMeta = await jolokia.list("java.lang/type=OperatingSystem/attr");</code></pre>
+</div>
+</div>
+</dd>
+<dt class="hdlist1"><code>version(opts)</code></dt>
+<dd>
+<p>The <code>version</code> method returns the
+agent&#8217;s version, the protocol version, and possibly some
+additional server-specific information. See
+<a href="protocol/version.html" class="xref page">Getting the agent version (version)</a> for more information about this
+method.</p>
+<div class="paragraph">
+<p>A sample return value for an Apache Tomcat server looks like:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "agent": "2.1.0",
+  "protocol": "8.0",
+  "details": {
+    "agent_version": "2.1.0-SNAPSHOT",
+    "agent_id": "192.168.0.221-72527-6baa8838-servlet",
+    "server_product": "tomcat",
+    "server_vendor": "Apache",
+    "server_version": "10.1.28",
+    "secured": true,
+    "url": "http://192.168.0.221:8080/jolokia"
+  },
+  "id": "192.168.0.221-72527-6baa8838-servlet",
+  "config": {
+    ...
+  },
+  "info": {
+    "proxy": {},
+    "jmx": {}
+  }
+}</code></pre>
+</div>
+</div>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="js-poller"><a class="anchor" href="#js-poller"></a>Request scheduler</h3>
+<div class="paragraph">
+<p>A <code>Jolokia</code> object can be also used for
+periodically sending requests to the agent. Therefore requests
+can be registered to the client object, and a poller can be
+started and stopped. All registered requests are send at once
+with a single bulk request so this is a quite efficient method for
+periodically polling multiple values.</p>
+</div>
+<div class="paragraph">
+<p>Here is a simple example, which queries the heap memory usage
+every 10 seconds and prints out the used memory on the console:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">let jolokia = new Jolokia("/jolokia")
+handle = jolokia.register(function(resp) {
+  console.log("HeapMemory used: " + resp.value);
+},
+{
+  "type": "read",
+  "mbean": "java.lang:type=Memory",
+  "attribute": "HeapMemoryUsage", "path": "used"
+});
+
+jolokia.start(10000);</code></pre>
+</div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>handle = jolokia.register(callback, request, request,&#8230;&#8203;.)</code></dt>
+<dd>
+<p>This method registers one or more request for being
+periodically fetched. <code>callback</code> can be either a
+function or an object.</p>
+<div class="paragraph">
+<p>If a function is given or an object with an attribute
+<code>callback</code> holding a function, then this
+function is called with all responses received as
+argument, regardless whether the individual response
+indicates a success or error state.</p>
+</div>
+<div class="paragraph">
+<p>If the first argument is an object with two callback
+attributes <code>success</code> and <code>error</code>,
+these functions are called for <em>each</em> response
+separately, depending whether the response indicates
+success or an error state. If multiple requests have been
+registered along with this callback object, the callback
+is called multiple times, one for each request in the same
+order as the request are given.  As second argument, the
+handle which is returned by this method is given and as
+third argument the index within the list of requests.</p>
+</div>
+<div class="paragraph">
+<p>If the first argument is an object, an additional
+<code>config</code> attribute with processing
+parameters can be given which is used as default for the
+registered requests. Requests with a
+<code>config</code> section take precedence.</p>
+</div>
+<div class="paragraph">
+<p>Furthermore, if a <code>onlyIfModified:
+true</code> exists in the callback object, then the
+<code>success</code> and <code>error</code>
+callbacks are called only if the result changed on the
+server side. Currently, this is supported for the
+<code>list</code> operation only in which case the
+callback is only called when MBean has been registered or
+deregistered since the last call of the scheduler. If a
+single <code>callback</code> function is used
+which gets all responses for a job at once, then this
+function is called only with the responses, which carry a
+value. If none of the registered requests produced a
+response with value (i.e. the server decided that there
+was no update for any request), then a call to the callback function is
+skipped completely.</p>
+</div>
+<div class="paragraph">
+<p><code>register()</code> returns a handle which can be used
+later for unregistering these requests.</p>
+</div>
+<div class="paragraph">
+<p>In the following example two requests are registered along
+with a single callback function, which takes two responses
+as arguments:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">handle = jolokia.register(function(resp1, resp2) {
+  console.log("HeapMemory used: " + resp1.value);
+  console.log("ThreadCount: " + resp2.value);
+},
+{
+  "type": "read",
+  "mbean": "java.lang:type=Memory",
+  "attribute": "HeapMemoryUsage",
+  "path": "used"
+},
+{
+  "type": "read",
+  "mbean": "java.lang:type=Threading",
+  "attribute": "ThreadCount"
+});</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In the next example, a dedicated <code>success</code>
+and <code>error</code> callback are provided, which are
+called individually for each request (in the given
+order):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">jolokia.register(
+  {
+    "success": function(resp) {
+      console.log("MBean: " + resp.mbean + ", attr: " + resp.attribute + ", value: " + resp.value);
+    },
+    "error": function(resp) {
+      console.log("Error: " + resp.error_text);
+    },
+    config: {
+      "serializeException": true
+    },
+    "onlyIfModified": true
+  },
+  {
+    "type": "list",
+    "config": {
+      "maxDepth": 2
+    }
+  },
+  {
+    "type": "read",
+    "mbean": "java.lang:type=Threading",
+    "attribute": "ThreadCount",
+    "config": {
+      "ignoreErrors": true
+    }
+  },
+  {
+    "type": "read",
+    "mbean": "bla.blu:type=foo",
+    "attribute": "blubber"
+  }
+);</code></pre>
+</div>
+</div>
+</dd>
+<dt class="hdlist1"><code>jolokia.unregister(handle)</code></dt>
+<dd>
+<p>Unregister one or more requests registered with
+<code>handle</code> so that they are no longer polled
+with the scheduler.</p>
+</dd>
+<dt class="hdlist1"><code>jolokia.jobs()</code></dt>
+<dd>
+<p>Return an array of handles for all registered jobs. This array can be freely manipulated, its a copy of
+the handle list.</p>
+</dd>
+<dt class="hdlist1"><code>jolokia.start(period)</code></dt>
+<dd>
+<p>Startup the scheduler for requeting the agent every
+<code>period</code> milliseconds. If the scheduler is
+already running, it adapts its scheduling period according
+to the given argument. If no <code>period</code> is given,
+the period provided during construction time (with the
+option <code>fetchInterval</code>) is used. The default
+value is 30 seconds.</p>
+</dd>
+<dt class="hdlist1"><code>jolokia.stop()</code></dt>
+<dd>
+<p>Stop the scheduler. If the scheduler is not running,
+nothing happens. The scheduler can be restarted after it
+has been stopped.</p>
+</dd>
+<dt class="hdlist1"><code>jolokia.isRunning()</code></dt>
+<dd>
+<p>Checks whether the scheduler is running. Returns
+<code>true</code> if this is the case, <code>false</code>
+otherwise.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="client-javascript-old"><a class="anchor" href="#client-javascript-old"></a>JavaScript Client Library (before ES modules)</h2>
+<div class="sectionbody">
+<div class="dlist">
+<dl>
+<dt class="hdlist1">NOTE</dt>
+<dd>
+<p>Since Jolokia 2.1.0 we recommend to use new (based on ES modules) version of Jolokia JavaScript libraries provided in these npm packages:</p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>jolokia.js</code></p>
+</li>
+<li>
+<p><code>@jolokia.js/simple</code></p>
+</li>
+</ul>
+</div>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
 <p>The Jolokia JavaScript library provides a JavaScript API to the
 to the Jolokia agent. It comes with two layers, a
 basic one which allows for sending Jolokia requests to the agent
@@ -147,7 +1097,7 @@ console.log("Heap Memory used: " + value);</code></pre>
 </div>
 </div>
 <div class="sect2">
-<h3 id="js-installation"><a class="anchor" href="#js-installation"></a>Installation</h3>
+<h3 id="js-installation-old"><a class="anchor" href="#js-installation-old"></a>Installation</h3>
 <div class="paragraph">
 <p>The Jolokia JavaScript library is distributed in two parts, in
 compressed and uncompressed forms:</p>
@@ -175,7 +1125,7 @@ For production environments the compressed version
 is highly recommended since the extensive API documentation
 included in the original version is stripped off here. For Maven
 users there is an even better way to integrate them, described in
-<a href="#js-maven">Maven integration</a>.</p>
+<a href="#js-maven-old">Maven integration</a>.</p>
 </div>
 <div class="paragraph">
 <p><code>jolokia.js</code> uses
@@ -204,7 +1154,7 @@ overriding are given there.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="js-request"><a class="anchor" href="#js-request"></a>Usage</h3>
+<h3 id="js-request-old"><a class="anchor" href="#js-request-old"></a>Usage</h3>
 <div class="paragraph">
 <p>All functions of this library are available as methods of the
 <code>Jolokia</code> object. The <code>options</code> argument needs to be
@@ -231,7 +1181,7 @@ example above the construction of the
 single string argument (<code>new Jolokia("/jolokia")</code>).</p>
 </div>
 <div class="sect3">
-<h4 id="js-request-format"><a class="anchor" href="#js-request-format"></a>Requests</h4>
+<h4 id="js-request-format-old"><a class="anchor" href="#js-request-format-old"></a>Requests</h4>
 <div class="paragraph">
 <p>Jolokia requests and responses are represented as JSON
 objects. They have exactly the same format, which is expected
@@ -247,7 +1197,7 @@ operations either a single response JSON object is returned or
 an array of responses (in the order of the initial request
 array). For asynchronous request one or more callbacks are
 called for each response separately. See
-<a href="#js-request-sync-async">Operational modes</a> for details.</p>
+<a href="#js-request-sync-async-old">Operational modes</a> for details.</p>
 </div>
 <div class="paragraph">
 <p>The following example shows a single and bulk request call to
@@ -264,7 +1214,7 @@ let responses = j4p.request([ req1, req2 ]);</code></pre>
 </div>
 </div>
 <div class="sect3">
-<h4 id="js-request-options"><a class="anchor" href="#js-request-options"></a>Request options</h4>
+<h4 id="js-request-options-old"><a class="anchor" href="#js-request-options-old"></a>Request options</h4>
 <div class="paragraph">
 <p>Each request can be influenced by a set of optional options
 provided either as default during construction of the
@@ -272,10 +1222,10 @@ provided either as default during construction of the
 parameter for the request object. Also a request can carry a
 <code>config</code> attribute, which can be used for all
 processing parameters (<a href="jolokia_protocol.html#processing-parameters" class="xref page">Processing parameters</a>).
-The known options are summarized in <a href="#js-request-options-table">Table 1, &#8220;Request options&#8221;</a></p>
+The known options are summarized in <a href="#js-request-options-table-old">Table 2, &#8220;Request options&#8221;</a></p>
 </div>
-<table id="js-request-options-table" class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 1. Request options</caption>
+<table id="js-request-options-table-old" class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 2. Request options</caption>
 <colgroup>
 <col style="width: 20%;">
 <col>
@@ -330,7 +1280,7 @@ the request is performed synchronously and gives back the
 response as return value. The value can be an array of
 functions which is used for bulk requests to dispatch
 multiple responses to multiple callbacks. See
-<a href="#js-request-sync-async">Operational modes</a> for details.</p></td>
+<a href="#js-request-sync-async-old">Operational modes</a> for details.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>error</code></p></td>
@@ -401,6 +1351,27 @@ reads.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Defaults to true for canonical (sorted) property lists on object names; if set to "false" then they are turned in their unsorted format.</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>includeRequest</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether the response object should contain related request object.<br>
+This option may be configured globally and overriden at request time.
+When <code>false</code>, bulk responses have to be correlated with requests by matching
+the requests using index number - responses come in the same order as requests.<br>
+<strong>Added since Jolokia 2.1.0</strong></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>listKeys</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether the response object for <code>list()</code> operation should contain <code>keys</code> field
+that lists all the keys obtained from each <code>javax.management.ObjectName</code> of the response.
+This may save you time parsing the name yourself.<br>
+<strong>Added since Jolokia 2.1.0</strong></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>listCache</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A flag (defaults to <code>false</code>) to enable <em>optimized list response</em>.<br>
+With this flag enabled, <code>list()</code> operation returns a bit different structure (that&#8217;s why we&#8217;ve upgraded protocol version to <code>8.0</code>) where some MBeans may <em>point to</em> cached, shared MBeanInfo JSON fragment. This heavily decreases the size of <code>list()</code> response.<br>
+<strong>Added since Jolokia 2.1.0</strong></p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>serializeException</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">If true then in case of an error, the exception itself is returned in
 it JSON representation under the key <code>error_value</code>
@@ -409,7 +1380,7 @@ in the response object.</p></td>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>includeStackTrace</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">By default, a stacktrace is returned with every error (key: <code>stacktrace</code>)
-This can be omitted by setting the value of this option to false.</p></td>
+This can be omitted by setting the value of this option to <code>false</code>.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>ifModifiedSince</code></p></td>
@@ -421,7 +1392,7 @@ the LIST operation returns an empty response
 (i.e. <code>value</code> is null) and a
 <code>status</code> code of 304 (Not Modified) if
 the MBeans haven&#8217;t changed. If you use the request
-scheduler (<a href="#js-request-options-table">Table 1, &#8220;Request options&#8221;</a>)
+scheduler (<a href="#js-request-options-table-old">Table 2, &#8220;Request options&#8221;</a>)
 then this feature can be used to get the callbacks called
 only if a value is returned. For the normal request, the
 error callback is called which must check the status itself.</p></td>
@@ -430,7 +1401,7 @@ error callback is called which must check the status itself.</p></td>
 </table>
 </div>
 <div class="sect3">
-<h4 id="js-request-sync-async"><a class="anchor" href="#js-request-sync-async"></a>Operational modes</h4>
+<h4 id="js-request-sync-async-old"><a class="anchor" href="#js-request-sync-async-old"></a>Operational modes</h4>
 <div class="paragraph">
 <p>Requests can be send either synchronously or asynchronously via
 Ajax. If a <code>success</code> callback is given in the
@@ -523,10 +1494,10 @@ for details).</p>
 </div>
 <div class="paragraph">
 <p>The Jolokia agent also supports
-<a href="https://en.wikipedia.org/wiki/JSONP" class="externalLink" target="<em>blank">JSONP</a> requests
+<a href="https://en.wikipedia.org/wiki/JSONP" class="externalLink" target="_blank" rel="noopener">JSONP</a> requests
 for cases where the Jolokia agent is served on a different server or port
 than the JavaScript client. By default, such access is forbidden by the so called
-_same-origin-policy</em>. To switch on JSONP, the
+<em>same-origin-policy</em>. To switch on JSONP, the
 option <code>jsonp</code> should be set to
 <code>"true"</code>.</p>
 </div>
@@ -577,7 +1548,7 @@ single, simple requests and not for JMX proxy calls.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="js-simple"><a class="anchor" href="#js-simple"></a>Simple API</h3>
+<h3 id="js-simple-old"><a class="anchor" href="#js-simple-old"></a>Simple API</h3>
 <div class="paragraph">
 <p>Building upon the basic
 <code>Jolokia.request()</code> method, a simplified
@@ -585,7 +1556,7 @@ access API is available. It is contained in
 <code>jolokia-simple.js</code> which must be included after
 <code>jolokia.js</code>. This API provides dedicated
 method for the various request types and supports all options as
-described in <a href="#js-request-options-table">Table 1, &#8220;Request options&#8221;</a>. There
+described in <a href="#js-request-options-table-old">Table 2, &#8220;Request options&#8221;</a>. There
 is one notable difference for asynchronous callbacks and
 synchronous return values though: In case of a successful call,
 the callback is fed with the response&#8217;s
@@ -707,7 +1678,7 @@ method.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "agent": "2.0.3",
+  "agent": "2.1.0",
   "protocol": "7.2",
   "details": {
     "agent_version": "2.0.0-SNAPSHOT",
@@ -734,7 +1705,7 @@ method.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="js-poller"><a class="anchor" href="#js-poller"></a>Request scheduler</h3>
+<h3 id="js-poller-old"><a class="anchor" href="#js-poller-old"></a>Request scheduler</h3>
 <div class="paragraph">
 <p>A <code>Jolokia</code> object can be also used for
 periodically sending requests to the agent. Therefore requests
@@ -921,7 +1892,7 @@ otherwise.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="js-maven"><a class="anchor" href="#js-maven"></a>Maven integration</h3>
+<h3 id="js-maven-old"><a class="anchor" href="#js-maven-old"></a>Maven integration</h3>
 <div class="paragraph">
 <p>For Maven users' convenience, the Jolokia JavaScript package is
 also available as a JavaScript artifact. It can be easily
@@ -941,7 +1912,7 @@ be used within a <code>pom.xml</code>:</p>
       &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
       &lt;artifactId&gt;jolokia-client-javascript&lt;/artifactId&gt;
       &lt;type&gt;javascript&lt;/type&gt;
-      &lt;version&gt;2.0.3&lt;/version&gt;
+      &lt;version&gt;2.1.0&lt;/version&gt;
     &lt;/dependency&gt;
     ....
   &lt;/dependencies&gt;
@@ -1110,13 +2081,10 @@ some additional support libraries:</p>
 <p><a href="https://repo1.maven.org/maven2/org/apache/httpcomponents/httpcore/4.4.16/httpcore-4.4.16.jar" class="externalLink" target="_blank" rel="noopener">httpcore-4.4.16.jar</a></p>
 </li>
 <li>
-<p><a href="https://repo1.maven.org/maven2/com/googlecode/json-simple/json-simple/1.1.1/json-simple-1.1.1.jar" class="externalLink" target="_blank" rel="noopener">json-simple-1.1.1.jar</a></p>
-</li>
-<li>
 <p><a href="https://repo1.maven.org/maven2/commons-logging/commons-logging/1.2/commons-logging-1.2.jar" class="externalLink" target="_blank" rel="noopener">commons-logging-1.2.jar</a></p>
 </li>
 <li>
-<p><a href="https://repo1.maven.org/maven2/commons-codec/commons-codec/1.16.0/commons-codec-1.16.0.jar" class="externalLink" target="_blank" rel="noopener">commons-codec-1.16.0.jar</a></p>
+<p><a href="https://repo1.maven.org/maven2/commons-codec/commons-codec/1.17.0/commons-codec-1.17.0.jar" class="externalLink" target="_blank" rel="noopener">commons-codec-1.17.0.jar</a></p>
 </li>
 </ul>
 </div>
@@ -1129,7 +2097,7 @@ the other two as transitive dependencies):</p>
 <pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
     &lt;artifactId&gt;jolokia-client-java&lt;/artifactId&gt;
-    &lt;version&gt;2.0.3&lt;/version&gt;
+    &lt;version&gt;2.1.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -1161,7 +2129,7 @@ parameters for the HTTP communication can easily be set:</p>
 defaults:</p>
 </div>
 <table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 2. J4pClient parameters</caption>
+<caption class="title">Table 3. J4pClient parameters</caption>
 <colgroup>
 <col style="width: 15%;">
 <col>
@@ -1370,10 +2338,10 @@ untyped list must be used.</p>
 <p>Each request can be tuned by giving a map of processing options
 along with their values to the <code>execute</code>
 method. The possible options are shown in table
-<a href="#client-java-queryopts">Table 3, &#8220;J4pClient query parameters&#8221;</a>.</p>
+<a href="#client-java-queryopts">Table 4, &#8220;J4pClient query parameters&#8221;</a>.</p>
 </div>
 <table id="client-java-queryopts" class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 3. J4pClient query parameters</caption>
+<caption class="title">Table 4. J4pClient query parameters</caption>
 <colgroup>
 <col style="width: 20%;">
 <col>
@@ -1433,6 +2401,14 @@ they are created. The allowed values are either
 order (== alphabetical sorted) is used or
 <code>false</code> for getting the keys as
 registered. Default is <code>true</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>INCLUDE_REQUEST</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether the response object should contain related request object.<br>
+This option may be configured globally and overriden at request time.
+When <code>false</code>, bulk responses have to be correlated with requests by matching
+the requests using index number - responses come in the same order as requests.<br>
+<strong>Added since Jolokia 2.1.0</strong></p></td>
 </tr>
 </tbody>
 </table>
@@ -1643,7 +2619,7 @@ Java Visual VM a Jolokia plugin can be downloaded from <a href="https://skarsaun
 <div class="ulist">
 <ul>
 <li>
-<p>Jolokia&#8217;s <code>remote-jmx-adapter-2.0.3-javaagent.jar</code>
+<p>Jolokia&#8217;s <code>remote-jmx-adapter-2.1.0-javaagent.jar</code>
 must be on the classpath. See the <a href="/download.html">Download page</a> for the latest versions of this adapter jar.</p>
 </li>
 <li>
@@ -1689,12 +2665,12 @@ public class ConnectWithJolokiaDemo {
 <div class="ulist">
 <ul>
 <li>
-<p>Jolokia&#8217;s <code>remote-jmx-adapter-2.0.3-javaagent.jar</code>
+<p>Jolokia&#8217;s <code>remote-jmx-adapter-2.1.0-javaagent.jar</code>
 must be on the classpath. See the <a href="/download.html">Download page</a> for the latest versions of this adapter jar.</p>
 </li>
 <li>
 <p>In addition, the Jolokia Kubernetes extension
-<code>jolokia-kubernetes-2.0.3-javaagent.jar</code>
+<code>jolokia-kubernetes-2.1.0-javaagent.jar</code>
 must be on the classpath. This can be also downloaded from the
 <a href="/download.html">Download page</a>.</p>
 </li>
@@ -1737,9 +2713,9 @@ You need to add the Jolokia connector client libraries when launching <code>jcon
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>java -cp jolokia-agent-jvm-2.0.3-javaagent.jar:\
-jolokia-client-jmx-adapter-2.0.3-standalone.jar:\
-jolokia-client-kubernetes-2.0.3-standalone.jar \
+<pre>java -cp jolokia-agent-jvm-2.1.0-javaagent.jar:\
+jolokia-client-jmx-adapter-2.1.0-standalone.jar:\
+jolokia-client-kubernetes-2.1.0-standalone.jar \
 -Djconsole.showOutputViewer sun.tools.jconsole.JConsole</pre>
 </div>
 </div>

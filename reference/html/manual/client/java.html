@@ -41,6 +41,9 @@
     <a class="nav-link" href="../architecture.html">Architecture</a>
   </li>
   <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../extensions.html">Extending Jolokia</a>
+  </li>
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="../agents.html">Agents</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -206,13 +209,10 @@ some additional support libraries:</p>
 <p><a href="https://repo1.maven.org/maven2/org/apache/httpcomponents/httpcore/4.4.16/httpcore-4.4.16.jar" class="externalLink" target="_blank" rel="noopener">httpcore-4.4.16.jar</a></p>
 </li>
 <li>
-<p><a href="https://repo1.maven.org/maven2/com/googlecode/json-simple/json-simple/1.1.1/json-simple-1.1.1.jar" class="externalLink" target="_blank" rel="noopener">json-simple-1.1.1.jar</a></p>
-</li>
-<li>
 <p><a href="https://repo1.maven.org/maven2/commons-logging/commons-logging/1.2/commons-logging-1.2.jar" class="externalLink" target="_blank" rel="noopener">commons-logging-1.2.jar</a></p>
 </li>
 <li>
-<p><a href="https://repo1.maven.org/maven2/commons-codec/commons-codec/1.16.0/commons-codec-1.16.0.jar" class="externalLink" target="_blank" rel="noopener">commons-codec-1.16.0.jar</a></p>
+<p><a href="https://repo1.maven.org/maven2/commons-codec/commons-codec/1.17.0/commons-codec-1.17.0.jar" class="externalLink" target="_blank" rel="noopener">commons-codec-1.17.0.jar</a></p>
 </li>
 </ul>
 </div>
@@ -225,7 +225,7 @@ the other two as transitive dependencies):</p>
 <pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
     &lt;artifactId&gt;jolokia-client-java&lt;/artifactId&gt;
-    &lt;version&gt;2.0.3&lt;/version&gt;
+    &lt;version&gt;2.1.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -529,6 +529,14 @@ they are created. The allowed values are either
 order (== alphabetical sorted) is used or
 <code>false</code> for getting the keys as
 registered. Default is <code>true</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>INCLUDE_REQUEST</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether the response object should contain related request object.<br>
+This option may be configured globally and overriden at request time.
+When <code>false</code>, bulk responses have to be correlated with requests by matching
+the requests using index number - responses come in the same order as requests.<br>
+<strong>Added since Jolokia 2.1.0</strong></p></td>
 </tr>
 </tbody>
 </table>

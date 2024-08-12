@@ -43,6 +43,9 @@
     <a class="nav-link" href="architecture.html">Architecture</a>
   </li>
   <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="extensions.html">Extending Jolokia</a>
+  </li>
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="agents.html">Agents</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -972,6 +975,14 @@ attribute read operation for a GET request with URL like:</p>
 }</code></pre>
 </div>
 </div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">NOTE</dt>
+<dd>
+<p>Since Jolokia 2.1.0 we can use <code>includeRequest</code> parameter to tell Jolokia to exclude <code>request</code> field from the response.</p>
+</dd>
+</dl>
+</div>
 <div class="paragraph">
 <p>The <code>value</code> contains the response&#8217;s
 value. For simple data types it is a scalar value, more complex
@@ -1198,6 +1209,14 @@ off for class loading at the time this request was sent)</p>
 }</code></pre>
 </div>
 </div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">NOTE</dt>
+<dd>
+<p>Since Jolokia 2.1.0 we can use <code>includeRequest</code> parameter to tell Jolokia to exclude <code>request</code> field from the response.</p>
+</dd>
+</dl>
+</div>
 <div class="paragraph">
 <p>The response is quite similar to the read operation except for
 the additional <code>value</code> element in the request
@@ -1365,6 +1384,14 @@ void. A typical response for an URL like (mind that double quote (<code>"</code>
 }</code></pre>
 </div>
 </div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">NOTE</dt>
+<dd>
+<p>Since Jolokia 2.1.0 we can use <code>includeRequest</code> parameter to tell Jolokia to exclude <code>request</code> field from the response.</p>
+</dd>
+</dl>
+</div>
 <div class="paragraph">
 <p>The return value get serialized as described in <a href="#serialization-request">Request parameter serialization</a>.</p>
 </div>
@@ -1489,6 +1516,14 @@ list if there was no match.</p>
 }</code></pre>
 </div>
 </div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">NOTE</dt>
+<dd>
+<p>Since Jolokia 2.1.0 we can use <code>includeRequest</code> parameter to tell Jolokia to exclude <code>request</code> field from the response.</p>
+</dd>
+</dl>
+</div>
 <div class="paragraph">
 <p>The returned MBean names are properly
 <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/ObjectName.html" class="externalLink" target="_blank" rel="noopener">quoted</a>
@@ -1585,7 +1620,7 @@ complete response.</p>
           "desc": "&lt;textual description of attribute&gt;",
           "rw": "true|false"
         },
-        ....
+        ...
       },
       "op": {
         "&lt;operation name&gt;": {
@@ -1595,22 +1630,25 @@ complete response.</p>
               "name": "&lt;argument name&gt;",
               "desc": "&lt;textual description of argument&gt;"
             },
-            .....
+            ...
           ],
           "ret": "&lt;return type&gt;",
           "desc": "&lt;textual description of operation&gt;"
         },
-        .....
+        ...
       },
-      "not": {
-        "name": "&lt;name&gt;",
-        "desc": "&lt;desc&gt;",
-        "types": [ "&lt;type1&gt;", "&lt;type2&gt;" ]
+      "notif": {
+        "&lt;notification type&gt;": {
+            "name": "&lt;name&gt;",
+            "desc": "&lt;desc&gt;",
+            "types": [ "&lt;type1&gt;", "&lt;type2&gt;", ... ]
+        },
+        ...
       }
     },
-    ....
+    ...
   },
-  ....
+  ...
 }</code></pre>
 </div>
 </div>
@@ -1703,6 +1741,14 @@ bean only. For example, a request</p>
 }</code></pre>
 </div>
 </div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">NOTE</dt>
+<dd>
+<p>Since Jolokia 2.1.0 we can use <code>includeRequest</code> parameter to tell Jolokia to exclude <code>request</code> field from the response.</p>
+</dd>
+</dl>
+</div>
 </div>
 <div class="sect3">
 <h4 id="_restrict_depth_of_the_returned_tree"><a class="anchor" href="#_restrict_depth_of_the_returned_tree"></a>Restrict depth of the returned tree</h4>
@@ -1715,6 +1761,119 @@ return value to a map with the JMX domains as keys, a
 the domain names (first level) and the MBean&#8217;s properties
 (second level). The final values of the maps don&#8217;t have any
 meaning and are dummy values.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_extension_points"><a class="anchor" href="#_extension_points"></a>Extension points</h4>
+<div class="paragraph">
+<p>When returning <code>list()</code> results, Jolokia translates each MBean&#8217;s <code>javax.management.MBeanInfo</code> information into a JSON fragment. Standard fields of this fragment are:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>class</code></p>
+</li>
+<li>
+<p><code>desc</code></p>
+</li>
+<li>
+<p><code>attr</code></p>
+</li>
+<li>
+<p><code>op</code></p>
+</li>
+<li>
+<p><code>notif</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>These fields are added by default, built-in implementations of <code>org.jolokia.service.jmx.handler.list.DataUpdater</code>.</p>
+</div>
+<div class="paragraph">
+<p>Since Jolokia 2.1.0 we can now discover (using <code>/META-INF/jolokia/services</code>) additional services of <code>org.jolokia.service.jmx.handler.list.DataUpdater</code> class which can be used to construct (or override) additional fields of MBean&#8217;s JSON information.<br>
+Potential use-case may be information related to RBAC (Role-based Access Control).</p>
+</div>
+<div class="paragraph">
+<p>One additional built-in <em>data updater</em> is <code>org.jolokia.service.jmx.handler.list.ListKeysDataUpdater</code> which can be enabled using <code>listKeys=true</code> processing parameter. We can use it to get additional <code>"keys"</code> MBeanInfo containing keys obtained from MBean&#8217;s ObjectName. For example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "request": {
+    "path": "java.lang",
+    "type": "list"
+  },
+  "value": {
+    "name=G1 Survivor Space,type=MemoryPool": {
+      "op": {
+        "resetPeakUsage": {
+          "args": [],
+          "ret": "void",
+          "desc": "resetPeakUsage"
+        }
+      },
+      "keys": {
+        "name": "G1 Survivor Space",
+        "type": "MemoryPool"
+      },
+...</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="optimized-response-list"><a class="anchor" href="#optimized-response-list"></a>Optimized List response</h4>
+<div class="paragraph">
+<p>Since Jolokia 2.1.0 we provide now <code>listCache</code> request processing parameter. When this parameter is set to <code>true</code> (it&#8217;s <code>false</code> for backward compatibility), <code>list()</code> response has different format - instead of a structure like:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>domain:
+  mbean:
+    op:
+    attr:
+    notif:
+    class:
+    desc:
+  ...
+...</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>we now have:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>"domains":
+  domain:
+    mbean: cache-key
+    ...
+  ...
+"cache":
+  cache-key:
+    op:
+    attr:
+    notif:
+    class:
+    desc:
+  ...</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Effectively:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>domain → mbean tree is moved 1 level down under <code>"domains"</code> field of <code>list()</code> response</p>
+</li>
+<li>
+<p>mbean <em>may</em> contain known <code>op</code>, <code>attr</code>, &#8230;&#8203; fields, but may also be just a <em>cache key</em> pointing to <code>op</code>, <code>attr</code>, &#8230;&#8203; data stored under this <em>key</em> under <code>"cache"</code> field of <code>list()</code> response</p>
+</li>
+<li>
+<p>the <em>cache keys</em> are generated by <code>org.jolokia.service.jmx.api.CacheKeyProvider</code> services/extensions</p>
+</li>
+</ul>
 </div>
 </div>
 </div>
@@ -1798,6 +1957,14 @@ While reading/writing attributes, executing operations or listing/searching MBea
   "timestamp": 1702464211
 }</code></pre>
 </div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">NOTE</dt>
+<dd>
+<p>Since Jolokia 2.1.0 we can use <code>includeRequest</code> parameter to tell Jolokia to exclude <code>request</code> field from the response.</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
 <p>The <code>value</code> field in the response contains two important fields:</p>
@@ -2572,10 +2739,10 @@ provided as path info.</p>
     "type": "version"
   },
   "value": {
-    "agent": "2.0.3",
+    "agent": "2.1.0",
     "protocol": "7.2",
     "details": {
-      "agent_version": "2.0.3",
+      "agent_version": "2.1.0",
       "agent_id": "192.168.0.221-21185-5ce94d31-servlet",
       "server_product": "tomcat",
       "server_vendor": "Apache",
@@ -2607,6 +2774,14 @@ provided as path info.</p>
   "timestamp": 1702482830
 }</code></pre>
 </div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">NOTE</dt>
+<dd>
+<p>Since Jolokia 2.1.0 we can use <code>includeRequest</code> parameter to tell Jolokia to exclude <code>request</code> field from the response.</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
 <p><code>protocol</code> in the response value contains the
@@ -2716,6 +2891,27 @@ useful for some tools to change it to
 be used to change the default mime type.
 Only <code>text/plain</code> and <code>application/json</code> are allowed.
 For any other value Jolokia will fallback to <code>text/plain</code>.</p>
+</dd>
+<dt class="hdlist1"><code>includeRequest</code></dt>
+<dd>
+<p>A flag (defaults to <code>true</code>) which controls whether the incoming
+request should be included in the response (under <code>request</code> key).<br>
+When <code>false</code>, bulk responses have to be correlated with requests by matching
+the requests using index number - responses come in the same order as requests.<br>
+<strong>Added since Jolokia 2.1.0</strong></p>
+</dd>
+<dt class="hdlist1"><code>listKeys</code></dt>
+<dd>
+<p>A flag (defaults to <code>false</code>) to specify whether the response object for <code>list()</code> operation should contain <code>keys</code> field
+that lists all the keys obtained from each <code>javax.management.ObjectName</code> of the response.
+This may save you time parsing the name yourself.<br>
+<strong>Added since Jolokia 2.1.0</strong></p>
+</dd>
+<dt class="hdlist1"><code>listCache</code></dt>
+<dd>
+<p>A flag (defaults to <code>false</code>) to enable <em>optimized list response</em>.<br>
+With this flag enabled, <code>list()</code> operation returns a bit different structure (that&#8217;s why we&#8217;ve upgraded protocol version to <code>8.0</code>) where some MBeans may <em>point to</em> cached, shared MBeanInfo JSON fragment. This heavily decreases the size of <code>list()</code> response.
+<strong>Added since Jolokia 2.1.0</strong></p>
 </dd>
 <dt class="hdlist1"><code>canonicalNaming</code></dt>
 <dd>
@@ -2837,10 +3033,12 @@ object with the key <code>url</code> containing
 the URL as String.</p>
 </li>
 <li>
-<p><code>java.util.Date</code> is represented in
+<p><code>java.util.Date</code> is represented by default in
 an ISO-8601 format. When used with a path
 <code>time</code> the milliseconds since 1.1.1970
-00:00 UTC are returned.</p>
+00:00 UTC are returned.<br>
+Since <strong>Jolokia 2.1.0</strong> the format for date/time serialization is configurable
+and we also support <code>java.util.Calendar</code> and <code>java.time.Temporal</code> implementations.</p>
 </li>
 <li>
 <p><code>org.w3c.dom.Element</code> is translated
@@ -2887,8 +3085,8 @@ possible anymore, since for JSON, map keys must be simple
 types. In this case, a more generic serialization is used in
 which case an JSON object with two keys is returned:
 <code>indexNames</code> is an array with the
-<code>TabularData&#8217;s indexes as names and
-`values</code> is the array containing the
+<code>TabularData</code>'s indexes as names and
+<code>values</code> is the array containing the
 values as JSON object with the corresponding rows as values
 (including the indexes).</p>
 </div>
@@ -3053,6 +3251,9 @@ in <code>write</code> and
 <p>Date</p>
 </li>
 <li>
+<p>java.time.Instant, java.time.OffsetDateTime, java.time.ZonedDateTime (since <strong>2.1.0</strong>)</p>
+</li>
+<li>
 <p>URL</p>
 </li>
 <li>
@@ -3069,7 +3270,12 @@ has a public constructor with one String parameter</p>
 of those types. Dates can be set either by an long value
 (epoch milliseconds) or with a string value (ISO-8601
 format). Arrays of the given types are serialized as a
-comma separated list.</p>
+comma separated list.
+When setting <code>java.time</code> values, we handle serialization of these <code>Temporal</code> instances
+which support <code>ChronoField.INSTANT_SECONDS</code>, so full information (date, time, zone and nanoseconds) can
+be sent to the server.
+When deserializing <code>java.time</code> values, we use configurable DateTime format (both for <code>java.util.Date</code>) and
+for new (since JDK 8) <code>java.time</code> classes.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -3081,7 +3287,8 @@ comma separated list.</p>
 The array support is somewhat limited since it makes a
 native split on commas. It does not yet take into account
 any quoting or escaping. For a much safer way to transport
-arrays to the agent, please consider using POST requests.
+arrays to the agent, please consider using POST requests.<br>
+For multi-dimensional arrays, <code>POST</code> method is mandatory.
 </td>
 </tr>
 </table>
@@ -3146,10 +3353,10 @@ they are serialized as follows:</p>
 <li>
 <p><code>ArrayType</code> is extracted from a
 <code>JSONArray</code> where the elements are
-serialized recursively with this algorithms. Only
+serialized recursively with this algorithms.
 <code>ArrayType</code>s with element type
 <code>CompositeType</code> or
-<code>SimpleType</code> are supported.</p>
+<code>SimpleType</code> are supported. Jolokia also supports multi-dimensional <code>ArrayType</code>s.</p>
 </li>
 <li>
 <p><code>CompositeType</code> is extracted
@@ -3435,7 +3642,7 @@ the following format</p>
 <div class="content">
 <pre>$ nc -u localhost 24884
 {"type":"query"}
-{"agent_version":"2.0.3","agent_id":"192.168.0.221-67980-7e985ce9-servlet",
+{"agent_version":"2.1.0","agent_id":"192.168.0.221-67980-7e985ce9-servlet",
 "server_product":"tomcat","type":"response","server_vendor":"Apache",
 "server_version":"10.1.16","secured":true,"url":"http:\/\/192.168.0.221:8080\/jolokia"}</pre>
 </div>
@@ -3446,7 +3653,7 @@ the following format</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "agent_version": "2.0.3",
+  "agent_version": "2.1.0",
   "agent_id": "192.168.0.221-67980-7e985ce9-servlet",
   "server_product": "tomcat",
   "type": "response",
@@ -3553,10 +3760,16 @@ and minor version. Changes in the minor version are backward
 compatible to other protocol with the same major
 version. Major version changes incorporate possibly backwards
 incompatible changes. This document describes the Jolokia
-protocol version <strong><code>7.3</code></strong>.</p>
+protocol version <strong><code>8.0</code></strong>.</p>
 </div>
 <div class="dlist">
 <dl>
+<dt class="hdlist1"><strong>8.0 (since 2.1.0)</strong></dt>
+<dd>
+<p>We can now disable <code>request</code> field in the response
+using <code>includeRequest</code> option. There&#8217;s new <code>listCache</code> parameter that
+enables <em>optimized list response</em>. There&#8217;s also a <code>listKeys</code> parameter that adds <code>"keys"</code> field to MBeanInfo for an MBean - it contains keys obtained from Mbean&#8217;s ObjectName.</p>
+</dd>
 <dt class="hdlist1"><strong>7.3 (since 2.0.0)</strong></dt>
 <dd>
 <p>Support for <code>notification</code> command and related

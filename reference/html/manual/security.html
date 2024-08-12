@@ -43,6 +43,9 @@
     <a class="nav-link" href="architecture.html">Architecture</a>
   </li>
   <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="extensions.html">Extending Jolokia</a>
+  </li>
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="agents.html">Agents</a>
   </li>
   <li class="nav-item is-current-page" data-depth="1">
@@ -334,6 +337,78 @@ on the session cookie.</p>
 </div>
 </div>
 <div class="sect2">
+<h3 id="_disable_listingsearching_of_selected_mbeans"><a class="anchor" href="#_disable_listingsearching_of_selected_mbeans"></a>Disable listing/searching of selected MBeans</h3>
+<div class="paragraph">
+<p>Using <code>&lt;filter&gt;</code> element we can filter out results of <code>list</code> and <code>search</code> operations (even if search parameters include such MBean names). It&#8217;s not preventing users to access given MBeans unless specific <code>&lt;deny&gt;</code> element is present, but it may
+be used to make <code>list</code>/<code>search</code> results shorter.</p>
+</div>
+<div class="paragraph">
+<p>Here&#8217;s the example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;filter&gt;
+  &lt;mbean&gt;java.lang:type=MemoryPool&lt;/mbean&gt;
+  &lt;mbean&gt;org.apache.logging.log4j2:*&lt;/mbean&gt;
+&lt;/filter&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The pattern format is not exactly the same as the patter used for <code>javax.management.MBeanServerConnection.queryNames()</code>. Here&#8217;s a summary of rules:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>*</code> is a glob matching any number of characters except <code>:</code>, <code>=</code> or <code>,</code> (that&#8217;s specific to the format of <code>ObjectName</code>)</p>
+</li>
+<li>
+<p>when there&#8217;s no <code>:</code> in MBean pattern, entire pattern is treated as domain and all MBeans within matching domain are filtered out</p>
+</li>
+<li>
+<p><code>domain:*</code> is the same as <code>domain</code> pattern and simply means <em>all MBeans within a domain</em></p>
+</li>
+<li>
+<p><code>domain:type=SomeType</code> filters out MBeans within <code>domain</code> with <code>type</code> attribute equal to <code>SomeType</code>. For the purpose of <code>MBeanServer.queryNames()</code> the pattern would be <code>domain:type=SomeType,*</code></p>
+</li>
+<li>
+<p><code>domain:address=*</code> filters out MBeans within <code>domain</code> with any value of <code>address</code> attribute</p>
+</li>
+<li>
+<p><code>domain:address=Admin*</code> filters out MBeans within <code>domain</code> with value of <code>address</code> attribute starting with <code>Admin</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Jolokia uses the above patterns individually for each <code>ObjectName</code> and uses these methods:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>javax.management.ObjectName.getDomain()</code> to access the domain</p>
+</li>
+<li>
+<p><code>javax.management.ObjectName.getKeyPropertyList()</code> and <code>javax.management.ObjectName.getKeyProperty()</code> to filter by attributes</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>For performance purposes there are some restrictions for using <code>*</code> within a pattern:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>attribute keys can&#8217;t use <code>*</code></p>
+</li>
+<li>
+<p>there can be only one <code>*</code> within attribute value or domain name (<code>Admin*</code>, <code>*Admin</code>, <code>Adm*in</code> are correct, but <code>*Admi*n*</code> is not)</p>
+</li>
+<li>
+<p><code>domain:*</code> is simply treated as <code>domain</code> and matches (filters out) all MBeans within a domain</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
 <h3 id="_example_for_a_security_policy"><a class="anchor" href="#_example_for_a_security_policy"></a>Example for a security policy</h3>
 <div class="paragraph">
 <p>The following complete example applies various access
@@ -399,6 +474,11 @@ contains the DB password as clear text.</p>
       &lt;operation&gt;*&lt;/operation&gt;
     &lt;/mbean&gt;
   &lt;/deny&gt;
+
+  &lt;filter&gt;
+    &lt;mbean&gt;java.lang:type=MemoryPool&lt;/mbean&gt;
+    &lt;mbean&gt;org.apache.logging.log4j2:*&lt;/mbean&gt;
+  &lt;/filter&gt;
 
 &lt;/restrict&gt;</code></pre>
 </div>

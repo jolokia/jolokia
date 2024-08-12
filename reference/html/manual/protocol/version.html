@@ -41,6 +41,9 @@
     <a class="nav-link" href="../architecture.html">Architecture</a>
   </li>
   <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../extensions.html">Extending Jolokia</a>
+  </li>
+  <li class="nav-item" data-depth="1">
     <a class="nav-link" href="../agents.html">Agents</a>
   </li>
   <li class="nav-item" data-depth="1">
@@ -143,10 +146,10 @@ provided as path info.</p>
     "type": "version"
   },
   "value": {
-    "agent": "2.0.3",
+    "agent": "2.1.0",
     "protocol": "7.2",
     "details": {
-      "agent_version": "2.0.3",
+      "agent_version": "2.1.0",
       "agent_id": "192.168.0.221-21185-5ce94d31-servlet",
       "server_product": "tomcat",
       "server_vendor": "Apache",
@@ -178,6 +181,14 @@ provided as path info.</p>
   "timestamp": 1702482830
 }</code></pre>
 </div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">NOTE</dt>
+<dd>
+<p>Since Jolokia 2.1.0 we can use <code>includeRequest</code> parameter to tell Jolokia to exclude <code>request</code> field from the response.</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
 <p><code>protocol</code> in the response value contains the

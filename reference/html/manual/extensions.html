@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Extending Jolokia :: Jolokia</title>
+    <link rel="canonical" href="https://jolokia.org/manual/extensions.html">
+    <link rel="prev" href="architecture.html">
+    <link rel="next" href="agents.html">
+    <meta name="generator" content="Antora 3.1.4">
+    <link rel="stylesheet" href="../_/css/site.css">
+    <link rel="stylesheet" href="../_/css/jolokia.css">
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://jolokia.org">Jolokia</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="manual" data-version="">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="index.html">Jolokia Manual</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="index.html">Introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="architecture.html">Architecture</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="1">
+    <a class="nav-link" href="extensions.html">Extending Jolokia</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="agents.html">Agents</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="security.html">Security</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="proxy_mode.html">Proxy Mode</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="jolokia_protocol.html">Jolokia Protocol</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="jolokia_mbeans.html">Jolokia MBeans</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="clients.html">Clients</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="jolokia_jmx.html">JMX Support</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="spring.html">Spring Support</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Jolokia Manual</span>
+    <span class="version">default</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="index.html">Jolokia Manual</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="index.html">default</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="index.html">Jolokia Manual</a></li>
+    <li><a href="extensions.html">Extending Jolokia</a></li>
+  </ul>
+</nav>
+<div class="edit-this-page"><a href="https://github.com/jolokia/jolokia/tree/main/src/documentation/manual/modules/ROOT/pages/extensions.adoc">Help improving this page</a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Extending Jolokia</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>In Jolokia 1.x, the necessary functions were provided by <em>services</em> directly instantiated by these <em>agent implementations</em>:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>org.jolokia.http.AgentServlet</code> (WAR)</p>
+</li>
+<li>
+<p><code>org.jolokia.osgi.servlet.JolokiaServlet</code> (OSGi)</p>
+</li>
+<li>
+<p><code>org.jolokia.jvmagent.JolokiaServer</code> (JVM)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Only implementations of detectors and simplifiers were detected respectively from:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>META-INF/detectors[-default]</code> (implementations of <code>org.jolokia.detector.ServerDetector</code>)</p>
+</li>
+<li>
+<p><code>META-INF/simplifiers[-default]</code> (implementations of <code>org.jolokia.converter.json.Extractor</code>)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>In Jolokia 2 there&#8217;s another resource checked - <code>services[-default]</code> and additionaly the declaration files were moved to more specific location:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>META-INF/jolokia/detectors[-default]</code> (implementations of <code>org.jolokia.server.core.detector.ServerDetector</code>)</p>
+</li>
+<li>
+<p><code>META-INF/jolokia/simplifiers[-default]</code> (implementations of <code>org.jolokia.service.serializer.json.Extractor</code>)</p>
+</li>
+<li>
+<p><code>META-INF/jolokia/services[-default]</code> (implementations of <code>org.jolokia.server.core.service.api.JolokiaService</code>)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>For example, what was a dedicated <code>org.jolokia.history.HistoryStore</code> in Jolokia 1, used directly by <code>org.jolokia.backend.BackendManager</code> is now used by <code>org.jolokia.service.history.HistoryMBeanRequestInterceptor</code> <em>Jolokia service</em> declared in <code>META-INF/jolokia/services-default</code> resource in <code>org.jolokia:jolokia-service-history</code> module.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_a_note_about_service_loader_approach"><a class="anchor" href="#_a_note_about_service_loader_approach"></a>A note about <em>Service Loader</em> approach</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><code>META-INF/jolokia/services</code> is a bit similar approach to Java standard <code>java.util.ServiceLoader</code> API, where services are <em>declared</em> in <code>META-INF/services/interface-name</code>.</p>
+</div>
+<div class="paragraph">
+<p>The most important aspect is that the instantiation of such services is performed by JDK itself (or Jolokia itself) and if 3rd party applications use more sophisticated <em>service registries</em> (like CDI or Spring DI), then we can&#8217;t avoid static fields&#8230;&#8203;</p>
+</div>
+<div class="paragraph">
+<p>So if a Jolokia service extension needs to use other dependencies, it&#8217;s up to the application to provide necessary integration. Static fields is the easies (but not super-clean) option.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_extension_points_in_jolokia_2"><a class="anchor" href="#_extension_points_in_jolokia_2"></a>Extension points in Jolokia 2</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Jolokia, when starting, uses <code>java.lang.ClassLoader.getResources</code> call to find various locations of the above service declaration resources. This allows 3rd party libraries to simply add a classpath library containing relevant resource and declare class names to be instantiated and used by Jolokia.</p>
+</div>
+<div class="paragraph">
+<p>The format of the extension file <code>META-INF/jolokia/services[-default]</code> is:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-none hljs"># comment
+[!]fully.qualified.class.name[,order]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>if line is not a comment, it is treated as <em>service entry</em>. There are two types of entries:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><em>remove entry</em> - if a line starts with <code>!</code> (exclamation mark), we can declare a fully qualified name of a service declared in another (most probably Jolokia&#8217;s own) service file, so we can <em>disable</em> usage and instantiation of given service. For example we can remove history service with <code>!org.jolokia.service.history.HistoryMBeanRequestInterceptor</code> even if <code>org.jolokia:jolokia-service-history</code> is available on classpath</p>
+</li>
+<li>
+<p><em>service entry</em> - if a line doesn&#8217;t start with <code>!</code>, a class is instantiated using one of two possible constructors:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>empty constructor</p>
+</li>
+<li>
+<p>a constructor accepting integer value which is treated as "order" of the service. The value to pass is read after the comma in <em>service entry</em>.</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Service order is used to prioritize the services of the same interface - the lower the number, the higher the priority (preference). Default order is <code>100</code>.</p>
+</div>
+<div class="paragraph">
+<p>In the following sections we describe various services that may be declared by 3rd party libraries.</p>
+</div>
+<div class="sect2">
+<h3 id="_mbeaninfo_cache"><a class="anchor" href="#_mbeaninfo_cache"></a>MBeanInfo cache</h3>
+<div class="paragraph">
+<p>Jolokia is first and foremost a <em>JMX protocol adaptor</em> (see <a href="architecture.html" class="xref page">Architecture</a>). This means that whatever is registered in local (or remote) MBeanServer, is accessible using "JSON over HTTP".</p>
+</div>
+<div class="paragraph">
+<p>While this is a straightforward statement, the reality may be harsh sometimes. For example in <a href="https://activemq.apache.org/components/artemis/" class="externalLink" target="_blank" rel="noopener">Apache ActiveMQ Artemis</a> broker, if you create, say, 10,000 queues, JVM ends up with additional 20,000 MBeans registered - a pair if these MBeans for single queue:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>address="queue-name",broker="0.0.0.0",component=addresses</code></p>
+</li>
+<li>
+<p><code>address="queue-name",broker="0.0.0.0",component=addresses,queue="queue-name",routing-type="anycast",subcomponent=queues</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The first Mbean is for <code>org.apache.activemq.artemis.core.management.impl.AddressControlImpl</code> and second one is for <code>org.apache.activemq.artemis.core.management.impl.QueueControlImpl</code>. What&#8217;s more, the JSON map for <code>javax.management.MBeanInfo</code> of these MBeans is huge (over hundred attributes and operations for each pair). Multiplying it by 10K, Jolokia has to return 234MB of JSON data.</p>
+</div>
+<div class="paragraph">
+<p>To address this problem, Jolokia 2.1.0 introduces an <em>optimized list operation</em>, where instead of simple (but big) structure of:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>domain:
+  mbean:
+    op:
+    attr:
+    notif:
+    class:
+    desc:
+  ...
+...</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>we provide a <em>smarter</em> (a bit more complex, but much smaller) structure:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>"domains":
+  domain:
+    mbean: cache-key
+    ...
+  ...
+"cache":
+  cache-key:
+    op:
+    attr:
+    notif:
+    class:
+    desc:
+  ...</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Basically instead of duplicating the same JSONified <code>javax.management.MBeanInfo</code> over and over again for the same MBeans (2x10,000 times for 10,000 Artemis queues), we do some optimization here:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Jolokia calls <code>javax.management.MBeanServerConnection.queryMBeans()</code> normally, getting a set of <code>javax.management.ObjectInstance</code> objects.</p>
+</li>
+<li>
+<p>Each <code>ObjectInstance</code> carries an <code>ObjectName</code> and <code>className</code>.</p>
+</li>
+<li>
+<p>Without any optimization, <code>ObjectName</code> is used in <code>javax.management.MBeanServerConnection.getMBeanInfo()</code> call and result is the serialized using <code>org.jolokia.service.jmx.handler.list.DataUpdater</code> services.</p>
+</li>
+<li>
+<p>However, both <code>ObjectName</code> and <code>ObjectInstance</code>'s class can be use to obtain a <em>key</em> (or a <em>hint</em>) which determines that some MBeans may <em>share</em> its <code>javax.management.MBeanInfo</code> with other MBeans.</p>
+</li>
+<li>
+<p>When a non-null key for an MBean is obtained, its MBeanInfo is cached under <code>"cache"</code> field and related MBean under <code>"domains"</code> field simply points to cached JSON data of <code>javax.management.MBeanInfo</code>.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>In order to use such variant of <code>list()</code> operation, a new processing request parameter has to be specified. This is done using <code>listCache=true</code> paramater (defaults to <code>false</code> for compatibility reasons).</p>
+</div>
+<div class="paragraph">
+<p>When optimization is enabled, Jolokia uses <code>org.jolokia.service.jmx.api.CacheKeyProvider</code> services. if <code>determineKey(ObjectInstance)</code> method returns non-null key, it is used to share common JSON MBean information with other MBeans that produce the same cache key.</p>
+</div>
+<div class="paragraph">
+<p>Jolokia itself provides optimization only for few fundamental MBeans:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>java.lang:type=MemoryPool,name=*</code> (class is <code>sun.management.MemoryPoolImpl</code>) - there are 8 instances by default in standard JVM (without any sophisticated memory settings)</p>
+</li>
+<li>
+<p><code>java.lang:type=MemoryManager,name=*</code> (class is <code>sun.management.MemoryManagerImpl</code>) - there are 2 instances by default in standard JVM</p>
+</li>
+<li>
+<p><code>java.nio:type=BufferPool,name=*</code> (class is <code>sun.management.ManagementFactoryHelper$1</code>) - there are 3 instances by default in standard JVM</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>With these 3 optimizations, instead of this response:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">"value": {
+  "java.lang": {
+    "name=G1 Survivor Space,type=MemoryPool": {
+      "op": {
+        "resetPeakUsage": {
+          "args": [],
+          "ret": "void",
+          "desc": "resetPeakUsage"
+        }
+      },
+      "attr": {
+        "Usage": {
+          "rw": false,
+          "type": "javax.management.openmbean.CompositeData",
+          "desc": "Usage"
+        },
+        ...
+    "name=Metaspace,type=MemoryPool": {
+      "op": {
+        "resetPeakUsage": {
+          "args": [],
+          "ret": "void",
+          "desc": "resetPeakUsage"
+        }
+      },
+      "attr": {
+        "Usage": {
+          "rw": false,
+          "type": "javax.management.openmbean.CompositeData",
+          "desc": "Usage"
+        },
+        ...
+    "name=G1 Eden Space,type=MemoryPool": {
+      "op": {
+        "resetPeakUsage": {
+          "args": [],
+          "ret": "void",
+          "desc": "resetPeakUsage"
+        }
+      },
+      ...</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We get this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">"value": {
+  "cache": {
+    "java.lang:MemoryPool": {
+      "op": {
+        "resetPeakUsage": {
+          "args": [],
+          "ret": "void",
+          "desc": "resetPeakUsage"
+        }
+      },
+      "attr": {
+        "Usage": {
+          "rw": false,
+          "type": "javax.management.openmbean.CompositeData",
+          "desc": "Usage"
+        },
+        ...
+    "java.nio:BufferPool": {
+      "attr": {
+        "TotalCapacity": {
+          "rw": false,
+          "type": "long",
+          "desc": "TotalCapacity"
+        },
+        ...
+      }
+    }
+  }
+  "domains": {
+    "java.lang": {
+      "name=G1 Survivor Space,type=MemoryPool": "java.lang:MemoryPool",
+      "name=Metaspace,type=MemoryPool": "java.lang:MemoryPool",
+      "name=G1 Eden Space,type=MemoryPool": "java.lang:MemoryPool",
+      "name=CodeCacheManager,type=MemoryManager": "java.lang:MemoryManager",
+      "name=CodeHeap 'non-nmethods',type=MemoryPool": "java.lang:MemoryPool",
+      "name=G1 Old Gen,type=MemoryPool": "java.lang:MemoryPool",
+      "name=Compressed Class Space,type=MemoryPool": "java.lang:MemoryPool",
+      "name=CodeHeap 'non-profiled nmethods',type=MemoryPool": "java.lang:MemoryPool",
+      "name=CodeHeap 'profiled nmethods',type=MemoryPool": "java.lang:MemoryPool",
+      "name=Metaspace Manager,type=MemoryManager": "java.lang:MemoryManager",
+      ...
+    },
+    "java.nio": {
+      "name=direct,type=BufferPool": "java.nio:BufferPool",
+      "name=mapped,type=BufferPool": "java.nio:BufferPool",
+      "name=mapped - 'non-volatile memory',type=BufferPool": "java.nio:BufferPool"
+    },
+    ...</code></pre>
+</div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">NOTE</dt>
+<dd>
+<p>The MBeans for which we don&#8217;t determine any <em>cache key</em> are included under <code>"domains"/&lt;domain&gt;/&lt;key-list-of-MBean&gt;</code> normally.</p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>We can imagine Artemis adding a cache key provider for <code>org.apache.activemq.artemis</code> domain and MBeans with <code>component=addresses</code> key. There&#8217;s a lot of optimization to be <em>declared</em> in <a href="https://camel.apache.org/" class="externalLink" target="_blank" rel="noopener">Apache Camel</a> too.</p>
+</div>
+<div class="paragraph">
+<p>See <a href="https://github.com/jolokia/jolokia/discussions/705" class="externalLink" target="_blank" rel="noopener">jolokia/jolokia#705</a> for the rationale behind new Jolokia protocol version.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_data_updaters"><a class="anchor" href="#_data_updaters"></a>Data updaters</h3>
+<div class="paragraph">
+<p>Previous section described services that may affect the structure of <em>entire</em> <code>list()</code> response. This section is about services that affect single MBeanInfo of any MBean.</p>
+</div>
+<div class="paragraph">
+<p><code>org.jolokia.service.jmx.handler.list.DataUpdater</code> is an interface used by <code>list()</code> operation. Normally when invoking <a href="jolokia_protocol.html#list" class="xref page">list</a> operation, we get a JSON tree with a structure like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "&lt;domain of ObjectName&gt;": {
+    "&lt;prop list from ObjectName&gt;": {
+      "attr": ...,
+      "op": ...,
+      "notif": ...,
+      "class": ...,
+      "desc": ...
+    },
+    ...
+  },
+  ...
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Such JSON contains information obtained from <code>javax.management.MBeanInfo</code> objects and describes what is known about the registered MBean from the perspective of <code>javax.management.MBeanServer</code>.</p>
+</div>
+<div class="paragraph">
+<p>Built-in implementations of <code>org.jolokia.service.jmx.handler.list.DataUpdater</code> interface simply add these fields (<code>attr</code>, <code>op</code>, &#8230;&#8203;) to the JSON data.</p>
+</div>
+<div class="paragraph">
+<p>However there may be scenarios where for each MBean we need some additional data - for example the security roles assigned to given MBean (to implement a form of Role-Based Access Control (RBAC)). Jolokia isn&#8217;t aware of the way an application implements security mechanisms, but should allow for any extension of the basic MBean data.</p>
+</div>
+<div class="paragraph">
+<p>We can provide an extension module, add it on the CLASSPATH and declare additional <em>data updaters</em> in <code>META-INF/jolokia/services</code>. <code>org.jolokia.service.jmx.handler.list.DataUpdater</code> is already an implementation of <code>org.jolokia.server.core.service.api.JolokiaService</code> and it&#8217;s an abstract class we can extend. For example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package com.example;
+
+public class MyUpdater extends org.jolokia.service.jmx.handler.list.DataUpdater {
+
+    public MyUpdater() {
+        super(100);
+    }
+
+    @Override
+    public String getKey() {
+        return "my";
+    }
+
+    @Override
+    public JSONObject extractData(ObjectName pObjectName, MBeanInfo pMBeanInfo, String pFilter) {
+        JSONObject json = new JSONObject();
+        json.put("now", System.currentTimeMillis());
+        return json;
+    }
+
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This <em>updater</em> adds <code>my</code> field to the JSON info for an MBean with current timestamp, but we can imagine any other kind of <em>updater</em>. It is declared using the below line in <code>META-INF/jolokia/services</code> resource:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>com.example.MyUpdater</pre>
+</div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">NOTE</dt>
+<dd>
+<p>It is recommended for advanced 3rd party extensions to implement both <em>cache key provider</em> and <em>data updater</em>. We can imagine for Artemis broker that some queues are more restricted than others, so their serialized MBean info may contain different custom data then other queues, so they should produce different <em>cache key</em>.</p>
+</dd>
+</dl>
+</div>
+<div class="sect3">
+<h4 id="_listkeysdataupdater"><a class="anchor" href="#_listkeysdataupdater"></a><code>ListKeysDataUpdater</code></h4>
+<div class="paragraph">
+<p>Since 2.1.0, Jolokia provides optional implementation of <code>org.jolokia.service.jmx.handler.list.DataUpdater</code> service which can be enabled using <code>listKeys</code> processing parameter. When it is set (at request time) to <code>true</code>, in addition to standard <code>attr</code>, <code>op</code>, <code>notif</code>, <code>class</code> and <code>desc</code> fields of serialized MBeanInfo, we get another field <code>keys</code>.<br>
+It contains a map of keys obtained from the <code>ObjectName</code> itself using <code>javax.management.ObjectName.getKeyPropertyList()</code> method.</p>
+</div>
+<div class="paragraph">
+<p>With this parameter we can get the below response:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "request": {
+    "type": "list"
+  },
+  "value": {
+    "java.lang": {
+      "name=CodeHeap 'non-nmethods',type=MemoryPool": {
+        "keys": {
+          "name": "CodeHeap 'non-nmethods'",
+          "type": "MemoryPool"
+        },
+        "op": ...,
+        "attr": ...
+        ...</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This may be used to save time parsing object key-list like <code>name=CodeHeap 'non-nmethods',type=MemoryPool</code>.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="architecture.html">Architecture</a></span>
+  <span class="next"><a href="agents.html">Agents</a></span>
+</nav>
+</article>
+  </div>
+<footer class="footer">
+  This page was built using the Antora default UI. The source code for this UI is licensed under the terms of the MPL-2.0 license. | Copyright © 2010 -
+  2023 Roland Huß
+</footer>
+<script id="site-script" src="../_/js/site.js" data-ui-root-path="../_"></script>
+<script async src="../_/js/vendor/highlight.js"></script>
+</main>
+</div>
+  </body>
+</html>
