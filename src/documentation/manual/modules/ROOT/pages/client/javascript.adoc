@@ -14,14 +14,7 @@
   limitations under the License.
 ////
 [#client-javascript]
-== JavaScript Client Library (before ES modules)
-
-NOTE:: Since Jolokia 2.1.0 we recommend using new (based on ES modules) version of Jolokia JavaScript libraries provided in these npm packages:
-+
-* `jolokia.js` - the _main_ package
-* `@jolokia.js/simple` - previously available in `jolokia-simple.js` file.
-
-More packages may be introduced later under `@jolokia.js` organization.
+== JavaScript Client Library
 
 Notable difference from previous version (pre 2.1.0) are:
 
