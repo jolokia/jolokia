@@ -299,8 +299,8 @@ Before performing the following commands, make sure you've logged in to the [NPM
 Jolokia JavaScript libraries are stored as [yarn workspaces](https://yarnpkg.com/features/workspaces) and use [cross-references](https://yarnpkg.com/features/workspaces#cross-references) with `workspace:^` syntax. Publishing via `npm publish` is not enough - we need `package.json` to contain actual cross-project references, so `yarn npm publish` is required.
 
 ```console
-yarn npm login --publish
 cd client/javascript-esm
+yarn npm login --publish
 yarn install
 cd packages/jolokia
 yarn npm publish
