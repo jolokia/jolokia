@@ -20,6 +20,7 @@ import {
   IJolokia,
   ListResponseValue,
   ReadResponseValue,
+  RequestOptions,
   SearchResponseValue,
   VersionResponseValue,
   WriteResponseValue
@@ -43,33 +44,12 @@ interface IJolokiaSimple extends IJolokia {
   /**
    * Reetrieves selected attributes of given `mbean`
    * @param mbean MBean to get attributes from (for example `java.lang:type=Memory`)
-   * @param attribute attribute(s) to check (for example `NonHeapMemoryUsage`)
-   * @param opts options for `IJolokia.request()`
+   * @param params attribute to get and possibly additional path parameters to further navigate into MBean's attribute
+   *               (for example `committed`). If last parameter is an object, it is treated as BaseRequestOptions
+   *               used for request
    * @returns attribute value (single or multiple, depending on the request)
    */
-  getAttribute(mbean: string, attribute: string | string[], opts?: BaseRequestOptions): Promise<ReadResponseValue>
-
-  /**
-   * Reetrieves selected attributes of given `mbean` with additional `path` parameter
-   * @param mbean MBean to get attributes from (for example `java.lang:type=Memory`)
-   * @param attribute attribute(s) to check (for example `NonHeapMemoryUsage`)
-   * @param path path within attribute to further navigate into MBean's attribute (for example `committed`)
-   *             ignored when multiple attributes are returned
-   * @param opts options for `IJolokia.request()`
-   * @returns attribute value (single or multiple, depending on the request)
-   */
-  getAttribute(mbean: string, attribute: string | string[], path: string | string[], opts?: BaseRequestOptions): Promise<ReadResponseValue>
-
-  /**
-   * Sets an attribute on an MBean.
-   *
-   * @param mbean objectname of MBean to set
-   * @param attribute the attribute to set
-   * @param value the value to set
-   * @param opts options for `IJolokia.request()`
-   * @return the previous value
-   */
-  setAttribute(mbean: string, attribute: string, value: unknown, opts?: BaseRequestOptions): Promise<WriteResponseValue>
+  getAttribute(mbean: string, ...params: (string | string[] | RequestOptions)[]): Promise<ReadResponseValue>
 
   /**
    * Sets an attribute on an MBean with additional `path` for nested value access
@@ -77,11 +57,11 @@ interface IJolokiaSimple extends IJolokia {
    * @param mbean objectname of MBean to set
    * @param attribute the attribute to set
    * @param value the value to set
-   * @param path an optional _inner path_ which, when given, is used to determine an inner object to set the value on
-   * @param opts options for `IJolokia.request()`
+   * @param params an optional _inner path_ which, when given, is used to determine an inner object to set the value on.
+   *               If last parameter is an object, it is treated as BaseRequestOptions used for request
    * @return the previous value
    */
-  setAttribute(mbean: string, attribute: string, value: unknown, path: string | string[], opts?: BaseRequestOptions): Promise<WriteResponseValue>
+  setAttribute(mbean: string, attribute: string, value: unknown, ...params: (string | string[] | RequestOptions)[]): Promise<WriteResponseValue>
 
   /**
    * Executes a JMX operation and returns the result value
