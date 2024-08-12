@@ -224,16 +224,16 @@ The important part of the release is to sign the artifacts with your GPG key. GP
 command and the output should contains something like:
 
 ```console
-$ gpg -k
+$ gpg -k --keyid-format long
 /home/ggrzybek/.gnupg/pubring.kbx
 ---------------------------------
 ...
-pub   rsa4096 2020-09-02 [SC]
+pub   rsa4096/DB593BFCBBDC099E 2020-09-02 [SC]
       4C8BD038EE847AB3A6A586EEDB593BFCBBDC099E
 ...
 ```
 
-Last 8 bytes of the public key fingerprint is the key ID. Here it's `DB593BFCBBDC099E`. This value should be set/used
+With `--keyid-format long`, key ID is shown after the algorithm. Here it's `DB593BFCBBDC099E`. This value should be set/used
 in `-Dgpg.keyname` parameter for `maven-gpg-plugin`. Adding `-Dgpg.useagent=true` will open OS specific dialog to
 provide key password (it is `true` by default).
 
@@ -248,9 +248,9 @@ values in the console.
 git clone git@github.com:jolokia/jolokia.git
 cd jolokia
 mvn -Dmaven.repo.local=/tmp/repo \
-    -DdevelopmentVersion=2.0.4-SNAPSHOT \
-    -DreleaseVersion=2.0.3 \
-    -Dtag=v2.0.3 \
+    -DdevelopmentVersion=2.1.1-SNAPSHOT \
+    -DreleaseVersion=2.1.0 \
+    -Dtag=v2.1.0 \
     -Dgpg.keyname=roland@jolokia.org \
     -Pdist release:prepare
 mvn -Dmaven.repo.local=/tmp/repo \
