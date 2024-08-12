@@ -301,12 +301,21 @@ cd ../..
 
 ### Release JavaScript client NPM package
 
-Before performing the following commands, make sure you've logged in to the [NPM registry](https://www.npmjs.com/) with an account that has publish privilege to [jolokia.js](https://www.npmjs.com/package/jolokia.js) NPM package. 
+Before performing the following commands, make sure you've logged in to the [NPM registry](https://www.npmjs.com/) with an account that has publish privilege to:
+
+* [jolokia.js](https://www.npmjs.com/package/jolokia.js) NPM package
+* [@jolokia.js/simple](https://www.npmjs.com/package/@jolokia.js/simple) NPM package
+
+Jolokia JavaScript libraries are stored as [yarn workspaces](https://yarnpkg.com/features/workspaces) and use [cross-references](https://yarnpkg.com/features/workspaces#cross-references) with `workspace:^` syntax. Publishing via `npm publish` is not enough - we need `package.json` to contain actual cross-project references, so `yarn npm publish` is required.
 
 ```console
-cd client/javascript
-npm install
-npm publish
+yarn npm login --publish
+cd client/javascript-esm
+yarn install
+cd packages/jolokia
+yarn npm publish
+cd packages/jolokia-simple
+yarn npm publish
 ```
 
 ## Adapt metadata
