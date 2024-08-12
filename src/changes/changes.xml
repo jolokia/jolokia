@@ -23,7 +23,7 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
-    <release version="2.1.0" description="Release 2.1.0" date="2024-?">
+    <release version="2.1.0" description="Release 2.1.0" date="2024-08-12">
       <action dev="grgrzybek" type="fix" issue="698">
         Detected classpath services and server detectors can be enabled/disabled in configuration.
       </action>
