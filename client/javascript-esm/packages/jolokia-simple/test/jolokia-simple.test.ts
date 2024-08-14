@@ -20,7 +20,7 @@ import http from "node:http"
 import Jolokia from "../src/jolokia-simple.js"
 import app from "../../jolokia/test/app.js"
 import { IJolokiaSimple } from "../src/jolokia-simple-types.js"
-import { ListResponseValue, VersionResponseValue } from "jolokia.js"
+import { ListResponseValue, RequestOptions, VersionResponseValue } from "jolokia.js"
 
 const port = 3000
 let server: http.Server
@@ -68,6 +68,21 @@ describe("Jolokia simple API", () => {
     expect(v).toBe("15699@everfree.forest")
   })
 
+  // Simple API allows both promises and callback style of invocations
+  test("Simple read value with callback", async () => {
+    const jolokia = new Jolokia({ url: `http://localhost:${port}/jolokia-simple` }) as IJolokiaSimple
+    let value: Record<string, unknown> = {}
+    const empty = await jolokia.getAttribute("java.lang:type=Runtime", {
+      success: (v: Record<string, unknown>, _index: number) => {
+        value = v
+      }
+    } as RequestOptions)
+    expect(empty).toBeNull()
+    expect(typeof value).toBe("object")
+    expect(typeof value["Name"]).toBe("string")
+    expect(value["Name"]).toBe("15699@everfree.forest")
+  })
+
   test("Simple write value", async () => {
     const jolokia = new Jolokia({ url: `http://localhost:${port}/jolokia-simple` }) as IJolokiaSimple
     let v = await jolokia.setAttribute("org.jolokia:name=Shrub", "Value", 42)
@@ -103,7 +118,7 @@ describe("Jolokia simple API", () => {
   test("Simple list", async () => {
     const jolokia = new Jolokia({ url: `http://localhost:${port}/jolokia-simple` }) as IJolokiaSimple
     const v = await jolokia.list()
-    expect(Object.keys(v as ListResponseValue)[0]).toBe("JMImplementation")
+    expect(Object.keys((v as ListResponseValue)!)[0]).toBe("JMImplementation")
   })
 
 })

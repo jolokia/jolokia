@@ -20,6 +20,7 @@ import Jolokia, {
   ExecResponseValue,
   IJolokia,
   JolokiaErrorResponse,
+  JolokiaResponseValue,
   JolokiaSuccessResponse,
   ListRequest,
   ListResponseValue,
@@ -46,24 +47,24 @@ Jolokia.prototype.getAttribute = async function (this: IJolokia, mbean: string, 
   const request: ReadRequest = { type: "read", mbean: mbean }
   let options: RequestOptions = {}
 
-  if (params.length === 3 && typeof params[2] === "object") {
-    // attribute: string | string[], path: string | string[], opts: AttributeRequestOptions
+  if (params.length === 3 && !Array.isArray(params[2]) && typeof params[2] === "object") {
+    // attribute: string | string[], path: string | string[], opts: RequestOptions
     request.attribute = params[0] as string | string[]
     addPath(request, params[1] as string | string[])
     options = params[2] as RequestOptions
   } else if (params.length === 2) {
-    // attribute: string | string[], opts: AttributeRequestOptions
+    // attribute: string | string[], opts: RequestOptions, or
     // attribute: string | string[], path: string | string
     request.attribute = params[0] as string | string[]
-    if (typeof params[1] === "object") {
+    if (!Array.isArray(params[1]) && typeof params[1] === "object") {
       options = params[1] as RequestOptions
     } else {
       addPath(request, params[1] as string | string[])
     }
   } else if (params.length == 1) {
-    // opts: AttributeRequestOptions
+    // opts: RequestOptions, or
     // attribute: string | string[]
-    if (typeof params[0] === "object") {
+    if (!Array.isArray(params[0]) && typeof params[0] === "object") {
       options = params[0] as RequestOptions
     } else {
       request.attribute = params[0] as string | string[]
@@ -73,6 +74,11 @@ Jolokia.prototype.getAttribute = async function (this: IJolokia, mbean: string, 
   options.method = "post"
   createValueCallback(options)
 
+  if ("success" in options || "error" in options) {
+    // result delivered using callback
+    await this.request(request, options)
+    return null
+  }
   return await this.request(request, options)
     .then((response): ReadResponseValue => {
       if (response) {
@@ -94,11 +100,11 @@ Jolokia.prototype.setAttribute = async function (this: IJolokia, mbean: string, 
   const request: WriteRequest = { type: "write", mbean, attribute, value }
   let options: RequestOptions = {}
 
-  if (params.length === 2 && typeof params[1] === "object") {
+  if (params.length === 2 && !Array.isArray(params[1]) && typeof params[1] === "object") {
     addPath(request, params[0] as string | string[])
     options = params[1] as RequestOptions
   } else if (params.length === 1) {
-    if (typeof params[0] === "object") {
+    if (!Array.isArray(params[0]) && typeof params[0] === "object") {
       options = params[0] as RequestOptions
     } else {
       addPath(request, params[0] as string | string[])
@@ -108,6 +114,11 @@ Jolokia.prototype.setAttribute = async function (this: IJolokia, mbean: string, 
   options.method = "post"
   createValueCallback(options)
 
+  if ("success" in options || "error" in options) {
+    // result delivered using callback
+    await this.request(request, options)
+    return null
+  }
   return await this.request(request, options)
     .then((response): WriteResponseValue => {
       if (response) {
@@ -126,15 +137,22 @@ Jolokia.prototype.setAttribute = async function (this: IJolokia, mbean: string, 
 Jolokia.prototype.execute = async function (this: IJolokia, mbean: string, operation: string, /*opts?: RequestOptions, */...params: unknown[]):
     Promise<ExecResponseValue> {
 
-  const parameters = params.length > 0 && params[params.length - 1] && typeof params[params.length - 1] === "object"
+  const parameters = params.length > 0 && params[params.length - 1] && !Array.isArray(params[params.length - 1])
+    && typeof params[params.length - 1] === "object"
     ? params.slice(0, -1) : params
   const request: ExecRequest = { type: "exec", mbean, operation, arguments: parameters }
-  const options: RequestOptions = params.length > 0 && params[params.length - 1] && typeof params[params.length - 1] === "object"
+  const options: RequestOptions = params.length > 0 && params[params.length - 1] && !Array.isArray(params[params.length - 1])
+    && typeof params[params.length - 1] === "object"
     ? params[params.length - 1] as RequestOptions : {}
 
   options.method = "post"
   createValueCallback(options)
 
+  if ("success" in options || "error" in options) {
+    // result delivered using callback
+    await this.request(request, options)
+    return null
+  }
   return await this.request(request, options)
     .then((response): ExecResponseValue => {
       if (response) {
@@ -159,6 +177,11 @@ Jolokia.prototype.search = async function (this: IJolokia, mbeanPattern: string,
   options.method = "post"
   createValueCallback(options)
 
+  if ("success" in options || "error" in options) {
+    // result delivered using callback
+    await this.request(request, options)
+    return []
+  }
   return await this.request(request, options)
     .then((response): SearchResponseValue => {
       if (response) {
@@ -183,6 +206,11 @@ Jolokia.prototype.version = async function (this: IJolokia, opts?: RequestOption
   options.method = "post"
   createValueCallback(options)
 
+  if ("success" in options || "error" in options) {
+    // result delivered using callback
+    await this.request(request, options)
+    return null
+  }
   return await this.request(request, options)
     .then((response): VersionResponseValue | null => {
       if (response) {
@@ -204,11 +232,11 @@ Jolokia.prototype.list = async function(this: IJolokia, ...params: (string[] | s
   const request: ListRequest = { type: "list" }
   let options: RequestOptions = {}
 
-  if (params.length === 2 && typeof params[1] === "object") {
+  if (params.length === 2 && !Array.isArray(params[1]) && typeof params[1] === "object") {
     addPath(request, params[0] as string | string[])
     options = params[1] as RequestOptions
   } else if (params.length === 1) {
-    if (!Array.isArray(params[0]) && typeof params[0] === "object") {
+    if (!Array.isArray(params[0]) && !Array.isArray(params[0]) && typeof params[0] === "object") {
       options = params[0] as RequestOptions
     } else {
       addPath(request, params[0] as string | string[])
@@ -218,6 +246,11 @@ Jolokia.prototype.list = async function(this: IJolokia, ...params: (string[] | s
   options.method = "post"
   createValueCallback(options)
 
+  if ("success" in options || "error" in options) {
+    // result delivered using callback
+    await this.request(request, options)
+    return null
+  }
   return await this.request(request, options)
     .then((response): ListResponseValue => {
       if (response) {
@@ -252,12 +285,13 @@ function addPath(request: BaseRequest & Pick<ReadRequest, "path">, path: string 
 }
 
 /**
- * For Jolokia simple, passed callbacks don't expect full response (array), but only its `value` field.
+ * For Jolokia simple, passed callbacks don't expect full response (array), but only its `value` field. If there's
+ * no callback, we don't create anything and promises will be used
  * @param options
  */
 function createValueCallback(options: RequestOptions): void {
   if (options.success && typeof options.success === "function") {
-    const passedSuccessCb = options.success as (value: unknown, index: number) => void
+    const passedSuccessCb = options.success as (value: JolokiaResponseValue, index: number) => void
     options.success = (response: JolokiaSuccessResponse, index: number) => {
       passedSuccessCb(response.value, index)
     }

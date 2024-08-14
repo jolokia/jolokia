@@ -421,7 +421,7 @@ export type JolokiaErrorResponse = JolokiaResponse & {
 //     distinct responses (or no responses at all). "read" type just returns attribute values (or all attributes)
 //     for given MBean, so it's hard to craft single response value type
 
-type JolokiaResponseValue =
+export type JolokiaResponseValue =
   | VersionResponseValue
   | ReadResponseValue
   | ExecResponseValue
@@ -516,7 +516,7 @@ export type AgentInfo = {
 // ------ List response
 //        these responses depend on the `path` attribute, so may be any subtree of full tree of all JMX domains
 //        also with maxDepth processing parameter you can trim the leaves of the returned tree. when a map is trimmed
-//        by Jolokia, it is replaced by string value indicating count of the map entries, so we can (with maxDepth=1)
+//        by Jolokia, it is replaced by string value "1" (kind of marker), so we can (with maxDepth=1)
 //        get something like this:
 //          "value": {
 //            "JMImplementation": "1",
@@ -524,16 +524,14 @@ export type AgentInfo = {
 //            "jdk.management.jfr": "1",
 //            "java.lang": "1",
 //            "com.sun.management": "1",
-//            "org.apache.logging.log4j2": "1",
-//            "grgr": "1",
 //            "java.nio": "1",
 //            "jolokia": "1"
 //          }
 
 /**
- * All possible `list` response valies depending on the `path` parameters.
+ * All possible (and worth mentioning) `list` response valies depending on the `path` parameters.
  */
-export type ListResponseValue = JmxDomains | JmxDomain | MBeanInfo | MBeanInfoError
+export type ListResponseValue = JmxDomains | JmxDomain | MBeanInfo | MBeanInfoError | null
 
 /**
  * Full JMX tree of domains, mbeans, attributes/operations/notifications with details
