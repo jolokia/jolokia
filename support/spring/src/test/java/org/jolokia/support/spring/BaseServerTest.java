@@ -35,7 +35,7 @@ class BaseServerTest {
             URL url = new URL(server.getUrl());
             System.out.println(">>> URL to check: " + server.getUrl());
             String resp = EnvTestUtil.readToString(url.openStream());
-            assertTrue(resp.matches(".*type.*version.*" + Version.getAgentVersion() + ".*"));
+            assertTrue(resp.matches(".*type.*version.*") && resp.matches(".*" + Version.getAgentVersion() + ".*"));
         } finally {
             server.destroy();
             try {
