@@ -18,6 +18,7 @@ import {
   BaseRequestOptions,
   ErrorCallback,
   ExecResponseValue,
+  FetchErrorCallback,
   IJolokia,
   JolokiaConfiguration,
   JolokiaResponseValue,
@@ -177,7 +178,11 @@ export type SimpleRequestOptions = BaseRequestOptions & {
    * A callback (which may be called with error JSON response)
    * to be used by {@link IJolokia#request} method for error response
    */
-  error?: ErrorCallback
+  error?: "ignore" | ErrorCallback
+  /**
+   * Fetch API error callback configured for single `request()` call
+   */
+  fetchError?: "ignore" | FetchErrorCallback
 }
 
 export type { IJolokiaSimple, JolokiaSimpleStatic }

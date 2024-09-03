@@ -169,6 +169,11 @@ export type JolokiaConfiguration = BaseRequestOptions & {
    * Interval for poll-fetching (in ms) that can be changed during {@link IJolokia#start}
    */
   fetchInterval?: number
+  /**
+   * Fetch API error callback configured for all `request()` calls of this instance. Can be used both for promise
+   * and callback modes
+   */
+  fetchError?: "ignore" | FetchErrorCallback
 }
 
 /**
@@ -195,6 +200,10 @@ export type RequestOptions = BaseRequestOptions & {
    * to be used by {@link IJolokia#request} method for error response
    */
   error?: "ignore" | ErrorCallback | ErrorCallbacks
+  /**
+   * Fetch API error callback configured for single `request()` call. Can be used both in callback and in promise modes.
+   */
+  fetchError?: "ignore" | FetchErrorCallback
 }
 
 // --- Types related to Jolokia requests
@@ -728,6 +737,23 @@ export type ErrorCallback = (response: JolokiaErrorResponse, index: number) => v
  * An array of callbacks, each accepting JSON response (error) with response index.
  */
 export type ErrorCallbacks = ((response: JolokiaErrorResponse, index: number) => void)[]
+
+/**
+ * A callback used in `fetch().catch()` when `success` and `error` callbacks are passed (callback-mode). In promise
+ * mode, user has to attach `.catch()` to the returned promise explicitly (or face an exception).
+ * See <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/fetch#exceptions">Fetch Exceptions</a>.
+ *
+ * This callback can be used only in _callback mode_, where `success` (and possibly `error`) callbacks are passed
+ * and user is not interested in returned Promise. There are two kinds of _errors_ when using `fetch()`:
+ * * HTTP != 200 errors (jquery uses `status >= 200 && status < 300 || status === 304`)
+ * * networking/configuration errors (for example when bad header is set or `get` is used with non-empty body
+ *
+ * networking errors are thrown by `fetch()`, but HTTP errors are passed in returned async `Response` object.
+ *
+ * From Jolokia perspective this callback is used in `Jolokia.request()`, not in lower-level `fetch()`, so we handle
+ * both errors in the same way.
+ */
+export type FetchErrorCallback = (response: Response | null, error: DOMException | TypeError | string | null) => void
 
 /**
  * A response callback used for registered jobs called periodically. In addition to standard {@link ResponseCallback},

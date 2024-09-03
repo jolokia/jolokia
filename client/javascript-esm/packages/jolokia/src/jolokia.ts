@@ -19,6 +19,7 @@ import {
   ErrorCallback,
   ErrorCallbacks,
   ExecRequest,
+  FetchErrorCallback,
   GenericCallback,
   GenericRequest,
   IJolokia,
@@ -62,6 +63,7 @@ type RequestArguments = {
   resolve?: "default" | "response"
   successCb?: ResponseCallback | TextResponseCallback | ErrorCallback
   errorCb?: ResponseCallback | TextResponseCallback | ErrorCallback
+  fetchErrorCb?: FetchErrorCallback
 }
 
 const CLIENT_VERSION = "2.1.2"
@@ -559,18 +561,35 @@ function prepareRequest(request: JolokiaRequest | JolokiaRequest[], agentOptions
 
   let successCb = undefined
   let errorCb = undefined
+  let fetchErrorCb: FetchErrorCallback | undefined = undefined
 
   if ("success" in opts) {
-    // we won't be returning anything useful (return Promise<undefined>)
+    // we won't be returning anything useful (return Promise<undefined>) and the response will be
+    // delivered via the callback
     successCb = constructCallbackDispatcher(opts.success)
     errorCb = constructCallbackDispatcher(opts.error)
   }
   if ("error" in opts && !opts.success) {
-    errorCb = constructCallbackDispatcher(opts.error)
+    // response is ignored, only error callback is used. This also turns off meaningfull Promise return value
     successCb = constructCallbackDispatcher("ignore")
+    errorCb = constructCallbackDispatcher(opts.error)
   }
 
-  return { url, fetchOptions, dataType: opts.dataType, resolve: opts.resolve, successCb, errorCb }
+  // in both callback and promise mode we can have a global "fetch error handler"
+  if (!("fetchError" in opts)) {
+    // in promise mode however we don't provide a default handler
+    if (successCb && errorCb) {
+      fetchErrorCb = (_response: Response | null, reason: DOMException | TypeError | string | null) => {
+        console.warn(reason)
+      }
+    }
+  } else if (opts.fetchError === "ignore") {
+    fetchErrorCb = (_response: Response | null, _reason: DOMException | TypeError | string | null) => { }
+  } else {
+    fetchErrorCb = opts.fetchError
+  }
+
+  return { url, fetchOptions, dataType: opts.dataType, resolve: opts.resolve, successCb, errorCb, fetchErrorCb }
 }
 
 /**
@@ -579,18 +598,22 @@ function prepareRequest(request: JolokiaRequest | JolokiaRequest[], agentOptions
  */
 async function performRequest(args: RequestArguments):
   Promise<string | JolokiaSuccessResponse | JolokiaErrorResponse | (JolokiaSuccessResponse | JolokiaErrorResponse)[] | Response | undefined> {
-  const { url, fetchOptions, dataType, resolve, successCb, errorCb } = args
+  const { url, fetchOptions, dataType, resolve, successCb, errorCb, fetchErrorCb } = args
 
   if (successCb && errorCb) {
-    // callback mode - we'll handle the promise and caller will get a promise resolving to `undefined` after
-    // the callbacks are notified
+    // callback mode
+    // we'll handle the promise and caller will get a promise resolving to `undefined` after
+    // the callbacks are notified.
+    // (even if user didn't pass `error` callback, it was configured by `prepareRequest()`)
+    // user doesn't have to attach any .then() or .catch() like in promise mode and the returned promise
+    // can be ignored
     return fetch(url, fetchOptions)
       .then(async (response: Response): Promise<undefined> => {
-        if (response.status >= 400) {
-          // Jolokia sends its errors with HTTP 200, so any HTTP code >= 400 is actually an error.
-          // with xhr and JQuery we were using ajaxError param, but this time we have to use Promise's exceptions
-          // user can Promise.catch() the exception which will be actual Response object (the beauty of JavaScript)
-          throw response
+        if (response.status != 200) {
+          // Jolokia sends its errors with HTTP 200, so any other HTTP code (even redirect - 30x) is actually an error.
+          // with xhr and JQuery we were using ajaxError param, here we use fetchError callback
+          fetchErrorCb?.(response, response.statusText)
+          return undefined
         }
         const ct = response.headers.get("content-type")
         if (dataType === "text" || !ct || !(ct.startsWith("text/json") || ct.startsWith("application/json"))) {
@@ -611,14 +634,21 @@ async function performRequest(args: RequestArguments):
           }
         }
       })
+      .catch(reason => {
+        // this is a fetch() error (more serious than HTTP != 200) - we have no `Response` object to pass, just
+        // an exception/reason
+        fetchErrorCb?.(null, reason)
+        return undefined
+      })
   } else {
+    // promise mode
     // return a promise to be handled by the caller - whatever the caller wants
     if (resolve === "response") {
-      // low level Response handling at caller's side
+      // low level Response handling - entirely at caller's side
       return fetch(url, fetchOptions)
     } else {
-      // Jolokia response handling at caller's side (no access to response headers, status, etc.)
-      return fetch(url, fetchOptions)
+      // Jolokia response handling at caller's side (no access to response headers, status, etc. for HTTP 200)
+      const promise = fetch(url, fetchOptions)
         .then(async (response: Response): Promise<string | JolokiaSuccessResponse | JolokiaErrorResponse | (JolokiaSuccessResponse | JolokiaErrorResponse)[] | Response> => {
           if (response.status >= 400) {
             throw response
@@ -632,6 +662,15 @@ async function performRequest(args: RequestArguments):
           }
           return await response.json()
         })
+      if (fetchErrorCb) {
+        // we handle serious fetch() exception for user's convenience
+        return promise.catch(error => {
+          fetchErrorCb(null, error)
+          return undefined
+        })
+      } else {
+        return promise
+      }
     }
   }
 }

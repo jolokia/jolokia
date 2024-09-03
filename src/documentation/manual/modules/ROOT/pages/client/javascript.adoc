@@ -23,7 +23,11 @@ Notable difference from previous version (pre 2.1.0) are:
 * For HTTP requests, we use https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API[Fetch API].
 * There's no support for ancient https://en.wikipedia.org/wiki/JSONP[JSONP]. https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS[CORS] it the way to handle cross-origin requests.
 * Because Fetch API is used, there's no direct support for _synchronous requests_ - this can be achieved simply using `async` and `await`
-* There's no `ajaxError` option to handle HTTP/connection errors. `Jolokia.request` returns now a `Promise` object and we can handle _global errors_ using `Promise.catch()`
+* There's no `ajaxError` option to handle HTTP/connection errors. `Jolokia.request` in Promise mode returns now a `Promise` object and we can handle _global errors_ using `Promise.catch()` handler where the passed object is a https://developer.mozilla.org/en-US/docs/Web/API/Response[Response] object.
+* In callback mode we can still pass `success` and `error` callbacks (to handle successfull and failed Jolokia responses - all delivered with HTTP 200 status code) and additionally we can pass `fetchError` configuration option when creating new `Jolokia` object - this callback will be called with https://developer.mozilla.org/en-US/docs/Web/API/Response[Response] object to check for HTTP errors, etc. (when HTTP status is not `200`).
+* Additionally https://developer.mozilla.org/en-US/docs/Web/API/Window/fetch#exceptions[`fetch()` call] may throw an exception (`DOMException` or `TypeError`) when networking error occurs or `fetch()` is configured in wrong way (for example with bad headers). Mind that it was a bit different with jQuery Ajax, where both HTTP error responses (like `404`) and networking errors where handled with single callback being called with `xhr` instance. After switching to `fetch()` API, these errors in promise mode have to be handled in different way:
+** networking and configuration errors can be handled by attaching a `.catch()` handler to `Jololokia.request()` returned promise. The error will be a `DOMException` or `TypeError`
+** HTTP error responses (where status is different than `200`) can be handled by attaching a `.catch()` handler, where the passed object will be a https://developer.mozilla.org/en-US/docs/Web/API/Response[Response].
 
 All methods of this library are available via the
 `Jolokia` client object, which needs to be
@@ -38,7 +42,7 @@ instance used to invoke simple (from `@jolokia.js/simple` package) `getAttribute
 [,javascript]
 ----
 const jolokia = new Jolokia("/jolokia")
-const value = jolokia.getAttribute("java.lang:type=Memory", "HeapMemoryUsage", "used")
+const value = await jolokia.getAttribute("java.lang:type=Memory", "HeapMemoryUsage", "used")
 console.log("Heap Memory used: " + value)
 ----
 
@@ -142,32 +146,47 @@ called for each response separately. See
 
 With new Fetch API, there are more types of operations:
 
-* callback based for compatibility purposes - you have to pass `success` (and `error` if needed) callbacks through `options` object
-* _recommended_ JSON method when there's no `success` callback passed and `request()` returns a Promise object:
+* _callback mode_ for compatibility purposes - you have to pass `success` and (optional) `error` callbacks through `options` object
+* _recommended_ JSON method in _promise mode_ when there's no `success` callback passed and `request()` returns a Promise object:
 ** for HTTP status 200, it is resolved with the response value, which may be successfull or error Jolokia responses containing JSON data with response or error details obtained from `Response.json()`
-** for HTTP status >= 400, it throws an exception which is Fetch `Response` object - user can attach `.catch()` to the promise and analyze the https://developer.mozilla.org/en-US/docs/Web/API/Response[Response]
-** for HTTP status != 200 and not >= 400, the promise is resolved with the https://developer.mozilla.org/en-US/docs/Web/API/Response[Response] (for example to analyze the redirect status)
-* Text method when there's no `success` callback, `dataType: "text"` is passed and `request()` returns a Promise object:
-** for HTTP status 200, it is resolved with the response value for HTTP 200 responses, which is plain text response obtained from `Response.text()`.
+** for HTTP status != 200, it throws an exception which is a Fetch `Response` object - user can attach `.catch()` to the promise and analyze the https://developer.mozilla.org/en-US/docs/Web/API/Response[Response] object for headers, status code, etc.
+* _special_ Text method in _promise mode_ when there's no `success` callback, `dataType: "text"` is passed and `request()` returns a Promise object:
+** for HTTP status 200, it is resolved with the response value, which is plain text response obtained from `Response.text()`.
 ** for HTTP status != 200 it's the same as in _recommended_ JSON method
-* _low level_ Response method, when `resolve: "response"` is passed with `options`, the returned promise is resolved with entire https://developer.mozilla.org/en-US/docs/Web/API/Response[Response] object and user is free to call `Response.json()`, `Response.text()`, `Response.blob()` or any method from https://developer.mozilla.org/en-US/docs/Web/API/Response[Response API].
+* _low level_ Response method in _promise mode_, when `resolve: "response"` is passed with `options` and `request()` returns a Promise object:
+** for any HTTP status code, the returned promise is resolved with entire https://developer.mozilla.org/en-US/docs/Web/API/Response[Response] object and user is free to call `Response.json()`, `Response.text()`, `Response.blob()` or any method from https://developer.mozilla.org/en-US/docs/Web/API/Response[Response API].
 
 Remember - when no `success` callback is passed, the returned Promise has to be configured for resolution:
 
-* by attaching `.then()` to get the value
-* by attaching `.catch()` to catch the exceptions
-* by using `await jolokia.request()` to get the response or catch the exception (after surrounding with `try..catch`).
+* by attaching `.then()` to get the value (both successful and error Jolokia responses - all within successful HTTP response (status == `200`))
+* by attaching `.catch()` to catch the exceptions:
+** a https://developer.mozilla.org/en-US/docs/Web/API/Response[Response] object when there is some HTTP response
+** a `DOMException` or `TypeError` when there's a networking or configuration error (see https://developer.mozilla.org/en-US/docs/Web/API/Window/fetch#exceptions[fetch exceptions])
+* by using `await jolokia.request()` to get the response
+* by surrounding with `try..catch` when there's no `.catch()` used
+
+For convenience, in both _callback_ and _promise_ modes, we can pass `fetchError` callback method in the options (in `request()` call or initially when creating `Jolokia` instance). Before Jolokia 2.1.0 similar option was `ajaxError` passed directly to `$.ajax()` call in jQuery. This callback has the following signature:
+
+[,javascript]
+----
+function(response, error)
+----
+
+and the parameters are:
+
+* `response` is a https://developer.mozilla.org/en-US/docs/Web/API/Response[Response] object when available
+* `error` is an exception object thrown by `fetch()` call (see https://developer.mozilla.org/en-US/docs/Web/API/Window/fetch#exceptions[fetch exceptions])
 
 The following example shows a single and bulk request call to
 the Jolokia agent:
 
 [,javascript]
 ----
-let jolokia = new Jolokia({ "url": "/jolokia" });
-let req1 = { "type": "read", "mbean": "java.lang:type=Memory", "attribute": "HeapMemoryUsage" };
-let req2 = { "type": "list" };
-let response = await jolokia.request(req1);
-let responses = await jolokia.request([ req1, req2 ]);
+let jolokia = new Jolokia({ "url": "/jolokia" })
+let req1 = { "type": "read", "mbean": "java.lang:type=Memory", "attribute": "HeapMemoryUsage" }
+let req2 = { "type": "list" }
+let response = await jolokia.request(req1)
+let responses = await jolokia.request([ req1, req2 ])
 ----
 
 [#js-request-options]
@@ -226,6 +245,11 @@ fails. This callback receives the full Jolokia response
 object (with a key `error` set). If no error
 callback is given, but `success` is available, the error response is printed to the JavaScript
 console by default.
+
+|`fetchError`
+|A callback invoked when `fetch()` returns a `Response` object with HTTP status different than 200 or simply https://developer.mozilla.org/en-US/docs/Web/API/Window/fetch#exceptions[throws an exception].
+
+This callback can be specified both in _callback_ and _promise_ mode - both at `request()` time and `Jolokia` instantiation time.
 
 |`credentials`
 |This option is passed directly to `fetch()` call. See https://developer.mozilla.org/en-US/docs/Web/API/RequestInit#headers[headers option].
@@ -470,15 +494,21 @@ access API is available. It is contained in
 `jolokia-simple.js` (from `@jolokia.js/simple` npm package) which must be included after
 `jolokia.js`. This API provides dedicated
 method for the various request types and supports all options as
-described in <<js-request-options-table>>. There
-is one notable difference for asynchronous callbacks and
+described in <<js-request-options-table>>.
+
+There is one notable difference for asynchronous callbacks and
 synchronous return values though: In case of a successful call,
 the callback is fed with the response's
 `value` object, not the full response
-(i.e. `response.value`). Similar when Promise is returned, it is resolved with
-the value itself. In case of an error,
-either an `error` callback is called with the
-full response object or a `Respose` can be handled with `.catch()` block.
+(i.e. `response.value` instead of `response`).
+Similar when a `Promise` is returned, it is resolved with
+the value itself from the response and not entire response.
+
+There are also differences in error handling between _simple_ and _normal_ API:
+
+* for callback mode, the Jolokia error message is passed in the same way
+* for promise mode, if HTTP return code is 200, but it is a Jolokia error, instead of returning
+the error JSON message, its `error` field is thrown as an exception. HTTP error codes different that 200 are handled in the same way (by throwing or returning Fetch Response object)
 
 Remember - to deal with values directly, `await` has to be used on the Promise returned from simple API.
 

@@ -215,7 +215,7 @@ describe("Jolokia HTTP tests", () => {
     expect(response).toContain("!doctype")
   })
 
-  test("HTTP 500 with successful Jolokia response", async () => {
+  test("HTTP 500 in .catch()", async () => {
     expect.assertions(1)
     const jolokia = new Jolokia({url: `http://localhost:${port}/jolokia-introspection`})
     return jolokia.request({type: "version"}, {
@@ -228,7 +228,7 @@ describe("Jolokia HTTP tests", () => {
       })
   })
 
-  test("HTTP 500 and Fetch response", async () => {
+  test("HTTP 500 in .then() when handling low-level fetch Response object", async () => {
     expect.assertions(2)
     const jolokia = new Jolokia({url: `http://localhost:${port}/jolokia-introspection`})
     return jolokia.request({type: "version"}, {
@@ -252,6 +252,43 @@ describe("Jolokia HTTP tests", () => {
         expect(ex.name).toBe("TypeError")
         expect(ex.cause.code).toBe("ECONNREFUSED")
       })
+  })
+
+  test("Fetch error bad headers", async () => {
+    expect.assertions(2)
+    const jolokia = new Jolokia({url: `http://127.240.240.240:8080/jolokia`, headers: {
+      "x y z": " a b c"
+    }})
+    return jolokia.request({type: "version"})
+      .catch(ex => {
+        expect(ex.name).toBe("TypeError")
+        expect(ex.message).not.toBeNull()
+      })
+  })
+
+  test("Fetch error with callbacks", async () => {
+    expect.assertions(3)
+    const jolokia = new Jolokia({url: `http://127.240.240.240:8080/jolokia`,
+      fetchError: (_response: Response | null, reason: DOMException | TypeError | string | null) => {
+        expect((reason as TypeError).name).toBe("TypeError")
+        expect("code" in ((reason as TypeError).cause as Record<string, unknown>)).toBeTruthy()
+        expect(((reason as TypeError).cause as Record<string, unknown>)["code"]).toBe("ECONNREFUSED")
+      }
+    })
+    return jolokia.request({type: "version"}, {
+      success: "ignore"
+    })
+  })
+
+  test("Fetch error with global error callback only", async () => {
+    expect.assertions(2)
+    const jolokia = new Jolokia({url: `http://127.240.240.240:8080/jolokia`,
+      fetchError: (_response: Response | null, reason: DOMException | TypeError | string | null) => {
+        expect((reason as TypeError).name).toBe("TypeError")
+        expect("code" in ((reason as TypeError).cause as Record<string, unknown>)).toBeTruthy()
+      }
+    })
+    return jolokia.request({type: "version"})
   })
 
 })

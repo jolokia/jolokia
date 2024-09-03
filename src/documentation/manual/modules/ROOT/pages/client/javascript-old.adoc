@@ -32,7 +32,7 @@ agents which are located on a different server.
 All methods of this library are available via the
 `Jolokia` client object, which needs to be
 instantiated up-front. In the following example a client object is
-created and the used heap memory is requested synchronously via
+created and then _used heap memory_ is requested synchronously via
 the simple API. The agent is deployed within the same webarchive
 which also serves this script.
 

@@ -13,10 +13,11 @@ These libraries can be used directly by using `<script>` element in HTML page, b
 ** `credentials` and `headers` properties (from `fetch()` options) are exposed in `Jolokia()` and `Jolokia.request()` calls (with restrictions, because some values/headers may be configured by Jolokia itself)
 * no https://en.wikipedia.org/wiki/JSONP[JSONP] support
 * `jolokia.request` call based on https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises[Promises]
-** previously, user was passing `success` and `error` options for `jolokia.request()` call and _both_ were used in successful `xhr` call (no transport error for example) - `error` was called for logical errors (when JSON returned from Jolokia contained `error` value and/or status was not `200`)
+** previously, user was passing `success` and `error` options for `jolokia.request()` call and _both_ were used in successful `xhr` call (no transport error for example) - `error` was called for logical errors (when JSON returned from Jolokia contained `error` value and/or Jolokia status was not `200`, but HTTP response code was still `200`)
 ** both `success` and `error` callbacks passed to `jolokia.request()` were used in single callback passed with https://api.jquery.com/jQuery.ajax/#jQuery-ajax-settings[`ajaxSettings.success`]
-** no support for global `ajaxError`. This callback was passed as https://api.jquery.com/jQuery.ajax/#jQuery-ajax-settings[`ajaxSettings.error`]
-** now, with https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API[Fetch API], `request()` returns a promise that resolves to whatever is needed:
+** for compatibility reasons we still support this _callback mode_.
+** no support for global `ajaxError`. This callback was passed as https://api.jquery.com/jQuery.ajax/#jQuery-ajax-settings[`ajaxSettings.error`]. We can now use `fetchError` callback instead.
+** now the recommended way is to use https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API[Fetch API] where `request()` returns a promise that resolves to whatever is needed:
 *** a text response, when `dataType=text`
 *** a JSON response (array) by default (when `dataType=json`)
 *** `undefined`, when callbacks are specified as it is with existing jolokia.js
@@ -34,7 +35,7 @@ The goal of client/javascript-esm directory is to provide a _Jolokia monorepo_ b
 * https://jestjs.io/[Jest] tests written in Typescript
 
 The challenge is to have as clean configuration (ESLint, Rollup, tsconfig.json, jest.config.ts) as possible and IDE
-should allow to work with multiple packages (`jolokia.js`, `@jolokia.js/d3`, ...) without a need to build anything.
+should allow to work with multiple packages (`jolokia.js`, `@jolokia.js/simple`, ...) without a need to build anything.
 
 We can't use https://www.typescriptlang.org/docs/handbook/project-references.html[Typescript project references],
 because these can't be used with `noEmit: true`.
