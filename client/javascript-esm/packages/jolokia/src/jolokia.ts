@@ -29,8 +29,10 @@ import {
   JolokiaErrorResponse,
   JolokiaRequest,
   JolokiaResponse,
+  JolokiaStatic,
   JolokiaSuccessResponse,
-  ListRequest, NotificationAddResponseValue,
+  ListRequest,
+  NotificationAddResponseValue,
   NotificationHandle,
   NotificationMode,
   NotificationOptions,
@@ -98,7 +100,7 @@ const PROCESSING_PARAMS: string[] = [
 const Jolokia = function (this: IJolokia, config: JolokiaConfiguration | string): IJolokia | undefined {
   if (!new.target) {
     // when invoked as function, return properly created object with bound "this" reference
-    return new (Jolokia as IJolokia)(config)
+    return new (Jolokia as JolokiaStatic)(config) as IJolokia
   }
 
   // ++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -473,6 +475,7 @@ Object.defineProperty(Jolokia.prototype, "CLIENT_VERSION", {
 Jolokia.escape = Jolokia.prototype.escape = function (part: string): string {
   return encodeURIComponent(part.replace(/!/g, "!!").replace(/\//g, "!/"))
 }
+
 Jolokia.escapePost = Jolokia.prototype.escape = function (part: string): string {
   return part.replace(/!/g, "!!").replace(/\//g, "!/")
 }
@@ -1206,4 +1209,4 @@ function extractNotificationMode(client: NotificationClient, opts: NotificationO
 }
 
 export * from "./jolokia-types.js"
-export default Jolokia as IJolokia
+export default Jolokia as JolokiaStatic

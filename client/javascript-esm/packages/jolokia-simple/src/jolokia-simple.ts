@@ -35,7 +35,9 @@ import Jolokia, {
   WriteResponseValue
 } from "jolokia.js"
 
-import { IJolokiaSimple } from "./jolokia-simple-types.js"
+import {
+  JolokiaSimpleStatic
+} from "./jolokia-simple-types.js"
 
 // ++++++++++++++++++++++++++++++++++++++++++++++++++
 // Public API defined in Jolokia.prototype. Most of the methods come from "jolokia.js", here we extend
@@ -180,6 +182,7 @@ Jolokia.prototype.search = async function (this: IJolokia, mbeanPattern: string,
   if ("success" in options || "error" in options) {
     // result delivered using callback
     await this.request(request, options)
+    // we need to return something, but it should be ignored
     return []
   }
   return await this.request(request, options)
@@ -299,4 +302,4 @@ function createValueCallback(options: RequestOptions): void {
 }
 
 export * from "./jolokia-simple-types.js"
-export default Jolokia as IJolokiaSimple
+export default Jolokia as JolokiaSimpleStatic

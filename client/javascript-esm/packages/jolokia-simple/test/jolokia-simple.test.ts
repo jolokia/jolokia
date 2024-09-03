@@ -17,10 +17,19 @@
 import { afterAll, beforeAll, describe, expect, test } from "@jest/globals"
 
 import http from "node:http"
-import Jolokia from "../src/jolokia-simple.js"
+
+import {
+  ListResponseValue,
+  VersionResponseValue
+} from "jolokia.js"
+import Jolokia, {
+  SimpleRequestOptions
+} from "../src/jolokia-simple.js"
+import {
+  IJolokiaSimple
+} from "../src/jolokia-simple-types.js"
+
 import app from "../../jolokia/test/app.js"
-import { IJolokiaSimple } from "../src/jolokia-simple-types.js"
-import { ListResponseValue, RequestOptions, VersionResponseValue } from "jolokia.js"
 
 const port = 3000
 let server: http.Server
@@ -73,10 +82,10 @@ describe("Jolokia simple API", () => {
     const jolokia = new Jolokia({ url: `http://localhost:${port}/jolokia-simple` }) as IJolokiaSimple
     let value: Record<string, unknown> = {}
     const empty = await jolokia.getAttribute("java.lang:type=Runtime", {
-      success: (v: Record<string, unknown>, _index: number) => {
+      success: (v: Record<string, unknown>) => {
         value = v
       }
-    } as RequestOptions)
+    } as SimpleRequestOptions)
     expect(empty).toBeNull()
     expect(typeof value).toBe("object")
     expect(typeof value["Name"]).toBe("string")

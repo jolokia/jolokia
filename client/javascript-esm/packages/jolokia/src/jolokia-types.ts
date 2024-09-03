@@ -182,7 +182,7 @@ export type RequestOptions = BaseRequestOptions & {
    * A hint about the value we want the returned promise to resolve to. `default` (or when not specified) means
    * a promise resolving to an array of Jolokia (good and error) responses is returned. Also, when `dataType=text`
    * this promise resolves to a string value for the response.
-   * When specifying `response`, we're returning a Fetch API response directly, so user may do whatever is needed.
+   * When specifying `response`, we're returning a Fetch API Response object directly, so user may do whatever is needed.
    */
   resolve?: "default" | "response"
   /**
@@ -832,16 +832,47 @@ export type NotificationHandle = {
 
 // --- Jolokia interfaces - public API
 
+/**
+ * IJolokia creation interface - either using `new` or using function call syntax.
+ */
 interface JolokiaStatic {
-  (config: JolokiaConfiguration | string): undefined
+  /** Creating {@link IJolokia} using function call syntax */
+  (config: JolokiaConfiguration | string): IJolokia
 
+  /** Creating {@link IJolokia} using object creation syntax with `new` */
   new(config: JolokiaConfiguration | string): IJolokia
+
+  // --- Utility functions available statically (static methods) and in Jolokia.prototype (instance methods)
+  //     (that's why these need to be duplicated in JolokiaStatic and in IJolokia interfaces)
+
+  /**
+   * Escape URL part (segment) according to
+   * {@link https://jolokia.org/reference/html/manual/jolokia_protocol.html#_escaping_rules_in_get_requests Jolokia escaping rules}
+   * @param part An URL segment for Jolokia GET URL
+   * @returns URL segment with Jolokia escaping rules applied
+   */
+  escape(part: string): string
+
+  /**
+   * Escape URL part (segment) according to
+   * {@link https://jolokia.org/reference/html/manual/jolokia_protocol.html#_escaping_rules_in_get_requests Jolokia escaping rules}
+   * @param part a path used with POST requests
+   * @returns URL segment with Jolokia escaping rules applied
+   */
+  escapePost(part: string): string
+
+  /**
+   * Utility method which checks whether a response is an error or a success (from Jolokia, not HTTP perspective)
+   * @param resp response to check
+   * @return true if response is an error, false otherwise
+   */
+  isError(resp: JolokiaResponse): boolean
 }
 
 /**
  * Main Jolokia client interface for communication with remote Jolokia agent.
  */
-interface IJolokia extends JolokiaStatic {
+interface IJolokia {
 
   /** Version of Jolokia JavaScript client library */
   readonly CLIENT_VERSION: string
@@ -955,7 +986,8 @@ interface IJolokia extends JolokiaStatic {
    */
   unregisterNotificationClient(): Promise<boolean>
 
-  // --- Utility functions available statically and in Jolokia.prototype (instance methods)
+  // --- Utility functions available statically (static methods) and in Jolokia.prototype (instance methods)
+  //     (that's why these need to be duplicated in JolokiaStatic and in IJolokia interfaces)
 
   /**
    * Escape URL part (segment) according to

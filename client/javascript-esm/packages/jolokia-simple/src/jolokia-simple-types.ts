@@ -15,17 +15,32 @@
  */
 
 import {
+  BaseRequestOptions,
+  ErrorCallback,
   ExecResponseValue,
   IJolokia,
+  JolokiaConfiguration,
+  JolokiaResponseValue,
+  JolokiaStatic,
   ListResponseValue,
   ReadResponseValue,
-  RequestOptions,
   SearchResponseValue,
   VersionResponseValue,
   WriteResponseValue
 } from "jolokia.js"
 
-// --- Jolokia interfaces - public API
+// --- Jolokia  Simple interfaces - public API
+
+/**
+ * IJolokiaSimple creation interface - either using `new` or using function call syntax.
+ */
+interface JolokiaSimpleStatic extends JolokiaStatic {
+  /** Creating {@link IJolokiaSimple} using function call syntax */
+  (config: JolokiaConfiguration | string): IJolokiaSimple
+
+  /** Creating {@link IJolokiaSimple} using object creation syntax with `new` */
+  new(config: JolokiaConfiguration | string): IJolokiaSimple
+}
 
 /**
  * Jolokia client interface API extension with "simple" methods for selected Jolokia operations. These methods
@@ -37,11 +52,11 @@ interface IJolokiaSimple extends IJolokia {
    * Reetrieves selected attributes of given `mbean`
    * @param mbean MBean to get attributes from (for example `java.lang:type=Memory`)
    * @param params attribute to get and possibly additional path parameters to further navigate into MBean's attribute
-   *               (for example `committed`). If last parameter is an object, it is treated as RequestOptions
+   *               (for example `committed`). If last parameter is an object, it is treated as SimpleRequestOptions
    *               used for request
    * @returns attribute value (single or multiple, depending on the request)
    */
-  getAttribute(mbean: string, ...params: (string | string[] | RequestOptions)[]): Promise<ReadResponseValue>
+  getAttribute(mbean: string, ...params: (string | string[] | SimpleRequestOptions)[]): Promise<ReadResponseValue>
 
   /**
    * Sets an attribute on an MBean with additional `path` for nested value access
@@ -50,10 +65,10 @@ interface IJolokiaSimple extends IJolokia {
    * @param attribute the attribute to set
    * @param value the value to set
    * @param params an optional _inner path_ which, when given, is used to determine an inner object to set the value on.
-   *               If last parameter is an object, it is treated as RequestOptions used for request
+   *               If last parameter is an object, it is treated as SimpleRequestOptions used for request
    * @return the previous value
    */
-  setAttribute(mbean: string, attribute: string, value: unknown, ...params: (string | string[] | RequestOptions)[]): Promise<WriteResponseValue>
+  setAttribute(mbean: string, attribute: string, value: unknown, ...params: (string | string[] | SimpleRequestOptions)[]): Promise<WriteResponseValue>
 
   /**
    * Executes a JMX operation and returns the result value
@@ -63,10 +78,10 @@ interface IJolokiaSimple extends IJolokia {
    *                  operations are to be called (comma separated fully qualified argument types
    *                  append to the operation name within parentheses)
    * @param params one or more argument required for executing the operation. If last parameter is an object,
-   *               it is treated as RequestOptions used for request
+   *               it is treated as SimpleRequestOptions used for request
    * @return the return value of the JMX operation.
    */
-  execute(mbean: string, operation: string, ...params: unknown[]): Promise<ExecResponseValue>
+  execute(mbean: string, operation: string, ...params: (unknown | SimpleRequestOptions)[]): Promise<ExecResponseValue>
 
   /**
    * Search for MBean based on a pattern and return a reference to the list of found
@@ -80,7 +95,7 @@ interface IJolokiaSimple extends IJolokia {
    * @param opts opts options for `IJolokia.request()`
    * @return an array with ObjectNames as string
    */
-  search(mbeanPattern: string, opts?: RequestOptions): Promise<SearchResponseValue>
+  search(mbeanPattern: string, opts?: SimpleRequestOptions): Promise<SearchResponseValue>
 
   /**
    * This method return the version of the agent and the Jolokia protocol
@@ -89,7 +104,7 @@ interface IJolokiaSimple extends IJolokia {
    *
    * @param opts
    */
-  version(opts?: RequestOptions): Promise<VersionResponseValue>
+  version(opts?: SimpleRequestOptions): Promise<VersionResponseValue>
 
   /**
    * Get all MBeans as registered at the specified server. A `path` can be
@@ -139,8 +154,30 @@ interface IJolokiaSimple extends IJolokia {
    * @param path optional path for diving into the list
    * @param opts optional opts passed to Jolokia.request()
    */
-  list(path?: string, opts?: RequestOptions): Promise<ListResponseValue>
-
+  list(path?: string, opts?: SimpleRequestOptions): Promise<ListResponseValue>
 }
 
-export type { IJolokiaSimple }
+/**
+ * Simple version (where the value is passed instead of full response) of single response callback receiving
+ * JSON response (no index is passed)
+ */
+export type SimpleResponseCallback = (response: JolokiaResponseValue) => void
+
+/**
+ * "Simple" version of full {@link RequestOptions} type, where callback receives only the value instead of full
+ * response and doesn't receive response index.
+ */
+export type SimpleRequestOptions = BaseRequestOptions & {
+  /**
+   * A callback to be used by {@link IJolokia#request} method expecting "simple" value instead of full response. Also
+   * no response index is passed.
+   */
+  success?: SimpleResponseCallback
+  /**
+   * A callback (which may be called with error JSON response)
+   * to be used by {@link IJolokia#request} method for error response
+   */
+  error?: ErrorCallback
+}
+
+export type { IJolokiaSimple, JolokiaSimpleStatic }
