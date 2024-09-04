@@ -424,7 +424,10 @@ public class JmxBridgeTest {
                 } catch (InvocationTargetException e) {
                     if (!(e
                         .getCause() instanceof UnsupportedOperationException)) {//some MBeans have unsupported methods, ignore
-                        //try to call the same on on platform mbean server and see if we get the same error there
+                        // try to call the same on on platform mbean server and see if we get the same error there
+                        // this issue occurs for some JDK internal MBeans. For example
+                        // com.sun.management.internal.GcInfoCompositeData.getBaseGcInfoCompositeType constructs
+                        // the composite type arbitrarily and Jolokia uses generic algorithm
                         final Object nativeProxy = ManagementFactory
                             .newPlatformMXBeanProxy(ManagementFactory.getPlatformMBeanServer(),
                                 objectName.getCanonicalName(), klass);
@@ -438,8 +441,6 @@ public class JmxBridgeTest {
                 }
             }
         }
-
-
     }
 
     @Test
