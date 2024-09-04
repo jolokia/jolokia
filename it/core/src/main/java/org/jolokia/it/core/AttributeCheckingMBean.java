@@ -80,6 +80,8 @@ public interface AttributeCheckingMBean {
 
     void setMap(Map map);
 
+    Map getNonStringKeyMap();
+
     Set getSet();
 
     void setSet(Set set);

@@ -3,6 +3,8 @@ package org.jolokia.it.core;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -219,6 +221,14 @@ public class AttributeChecking implements AttributeCheckingMBean,MBeanRegistrati
 
     public void setMap(Map pMap) {
         map = pMap;
+    }
+
+    public Map getNonStringKeyMap() {
+        try {
+            return Map.of(InetAddress.getLocalHost(), 0.9F);
+        } catch (UnknownHostException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
     }
 
     public Set getSet() {

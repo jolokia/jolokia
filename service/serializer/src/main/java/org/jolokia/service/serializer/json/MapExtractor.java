@@ -2,6 +2,7 @@ package org.jolokia.service.serializer.json;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
@@ -58,8 +59,10 @@ public class MapExtractor implements Extractor {
      */
     public Object extractObject(ObjectToJsonConverter pConverter, Object pValue,
                                 Deque<String> pPathParts,boolean jsonify) throws AttributeNotFoundException {
-        @SuppressWarnings("unchecked")
-        Map<String,Object> map = (Map<String,Object>) pValue;
+        // the map is not necessarily using string keys
+        // see https://github.com/jolokia/jolokia/issues/732
+        Map<String, Object> map = new HashMap<>();
+        ((Map<?, ?>) pValue).forEach((k, v) -> map.put(k.toString(), v));
         int length = pConverter.getCollectionLength(map.size());
         String pathParth = pPathParts.isEmpty() ? null : pPathParts.pop();
         if (pathParth != null) {

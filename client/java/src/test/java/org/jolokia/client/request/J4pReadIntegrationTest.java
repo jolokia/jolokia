@@ -382,4 +382,12 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
         }
     }
 
+    @Test
+    public void nonStringKeyInAMap() throws J4pException, MalformedObjectNameException {
+        J4pReadRequest request = new J4pReadRequest(itSetup.getAttributeMBean(), "NonStringKeyMap");
+        J4pReadResponse response = j4pClient.execute(request, "POST", Collections.emptyMap());
+        JSONObject value = response.getValue();
+        assertEquals(value.values().iterator().next(), new BigDecimal("0.9"));
+    }
+
 }
