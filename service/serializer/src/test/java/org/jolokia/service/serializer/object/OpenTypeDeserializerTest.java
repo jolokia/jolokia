@@ -1,6 +1,7 @@
 package org.jolokia.service.serializer.object;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -108,7 +109,17 @@ public class OpenTypeDeserializerTest {
         Integer[][] twoDims = new Integer[][] { oneDim, { 3, 4 } };
         Object res = otjc.serialize(twoDims, null, SerializeOptions.DEFAULT);
         OpenType<?> type = new ArrayType<>(2, SimpleType.INTEGER);
-        assertEquals(Arrays.deepToString(((JSONArray) res).toArray()), Arrays.deepToString((Object[]) converter.deserialize(type, res)));
+        Object[] actual = ((JSONArray) res).toArray();
+        Object[] expected = (Object[]) converter.deserialize(type, res);
+        assertEquals(actual.length, expected.length);
+        for (int idx = 0; idx < actual.length; idx++) {
+            JSONArray actual2 = (JSONArray) actual[idx];
+            Object[] expected2 = (Object[]) expected[idx];
+            assertEquals(actual2.size(), expected2.length);
+            for (int idx2 = 0; idx2 < actual2.size(); idx2++) {
+                assertEquals(actual2.get(idx2), Array.get(expected[idx], idx2));
+            }
+        }
     }
 
     @Test

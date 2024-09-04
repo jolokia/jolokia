@@ -43,7 +43,7 @@ public class JSONObject extends HashMap<String, Object> implements JSONStructure
 
     @Override
     public String toString() {
-        return super.toString();
+        return toJSONString();
     }
 
 }

@@ -55,7 +55,7 @@ public class JSONArray extends ArrayList<Object> implements JSONStructure {
 
     @Override
     public String toString() {
-        return super.toString();
+        return toJSONString();
     }
 
 }
