@@ -182,7 +182,7 @@ export type SimpleRequestOptions = BaseRequestOptions & {
   /**
    * Fetch API error callback configured for single `request()` call
    */
-  fetchError?: "ignore" | FetchErrorCallback
+  ajaxError?: "ignore" | FetchErrorCallback
 }
 
 export type { IJolokiaSimple, JolokiaSimpleStatic }

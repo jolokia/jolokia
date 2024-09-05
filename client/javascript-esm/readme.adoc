@@ -16,7 +16,7 @@ These libraries can be used directly by using `<script>` element in HTML page, b
 ** previously, user was passing `success` and `error` options for `jolokia.request()` call and _both_ were used in successful `xhr` call (no transport error for example) - `error` was called for logical errors (when JSON returned from Jolokia contained `error` value and/or Jolokia status was not `200`, but HTTP response code was still `200`)
 ** both `success` and `error` callbacks passed to `jolokia.request()` were used in single callback passed with https://api.jquery.com/jQuery.ajax/#jQuery-ajax-settings[`ajaxSettings.success`]
 ** for compatibility reasons we still support this _callback mode_.
-** no support for global `ajaxError`. This callback was passed as https://api.jquery.com/jQuery.ajax/#jQuery-ajax-settings[`ajaxSettings.error`]. We can now use `fetchError` callback instead.
+** changed support for global `ajaxError`. This callback was passed as https://api.jquery.com/jQuery.ajax/#jQuery-ajax-settings[`ajaxSettings.error`]. The name didn't change (for compatibility reasons), but it's now used to handle connection/http errors with `fetch()` API calls.
 ** now the recommended way is to use https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API[Fetch API] where `request()` returns a promise that resolves to whatever is needed:
 *** a text response, when `dataType=text`
 *** a JSON response (array) by default (when `dataType=json`)

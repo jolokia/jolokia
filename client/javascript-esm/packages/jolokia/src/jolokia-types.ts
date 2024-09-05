@@ -173,7 +173,7 @@ export type JolokiaConfiguration = BaseRequestOptions & {
    * Fetch API error callback configured for all `request()` calls of this instance. Can be used both for promise
    * and callback modes
    */
-  fetchError?: "ignore" | FetchErrorCallback
+  ajaxError?: "ignore" | FetchErrorCallback
 }
 
 /**
@@ -203,7 +203,7 @@ export type RequestOptions = BaseRequestOptions & {
   /**
    * Fetch API error callback configured for single `request()` call. Can be used both in callback and in promise modes.
    */
-  fetchError?: "ignore" | FetchErrorCallback
+  ajaxError?: "ignore" | FetchErrorCallback
 }
 
 // --- Types related to Jolokia requests
