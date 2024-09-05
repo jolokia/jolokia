@@ -51,7 +51,7 @@ import {
   TextResponseCallback,
   VersionRequest,
   WriteRequest,
-} from "./jolokia-types.js"
+} from "./jolokia-types.ts"
 
 /**
  * Private type for pre-calculated {@link IJolokia#request} arguments
@@ -1247,5 +1247,5 @@ function extractNotificationMode(client: NotificationClient, opts: NotificationO
   return mode
 }
 
-export * from "./jolokia-types.js"
+export * from "./jolokia-types.ts"
 export default Jolokia as JolokiaStatic

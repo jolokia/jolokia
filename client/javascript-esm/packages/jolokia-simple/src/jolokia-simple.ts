@@ -37,7 +37,7 @@ import Jolokia, {
 
 import {
   JolokiaSimpleStatic
-} from "./jolokia-simple-types.js"
+} from "./jolokia-simple-types.ts"
 
 // ++++++++++++++++++++++++++++++++++++++++++++++++++
 // Public API defined in Jolokia.prototype. Most of the methods come from "jolokia.js", here we extend
@@ -301,5 +301,5 @@ function createValueCallback(options: RequestOptions): void {
   }
 }
 
-export * from "./jolokia-simple-types.js"
+export * from "./jolokia-simple-types.ts"
 export default Jolokia as JolokiaSimpleStatic

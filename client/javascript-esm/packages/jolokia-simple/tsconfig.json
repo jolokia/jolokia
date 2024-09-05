@@ -18,6 +18,7 @@
   "compilerOptions": {
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
+    "allowImportingTsExtensions": true,
     "declaration": true,
     "esModuleInterop": true,
     "lib": [ "DOM" ],

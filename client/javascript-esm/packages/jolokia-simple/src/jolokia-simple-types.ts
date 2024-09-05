@@ -146,16 +146,15 @@ interface IJolokiaSimple extends IJolokia {
    *
    *     <domain>/<property list>/("attr"|"op"|"notif")/...
    *
-   * (e.g. `java.lang/type=Memory/op/gc). A path can be
+   * (e.g. `java.lang/type=Memory/op/gc`). A path can be
    * provided partially, in which case the remaining map/array is returned. The path given must
    * be already properly escaped (i.e. slashes must be escaped like `!/` and exclamation
    * marks like `!!`.
    * See also the Jolokia Reference Manual for a more detailed discussion of inner paths and escaping.
    *
-   * @param path optional path for diving into the list
-   * @param opts optional opts passed to Jolokia.request()
+   * @param params optional path and parameters to be passed to `Jolokia.request()` (params is the last object argument)
    */
-  list(path?: string, opts?: SimpleRequestOptions): Promise<ListResponseValue>
+  list(...params: (string[] | string | SimpleRequestOptions)[]): Promise<ListResponseValue>
 }
 
 /**
