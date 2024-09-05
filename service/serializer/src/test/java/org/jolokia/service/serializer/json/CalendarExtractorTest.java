@@ -117,7 +117,7 @@ public class CalendarExtractorTest {
     public void timeSet() throws InvocationTargetException, IllegalAccessException {
         Date date = new Date();
         Calendar cal = Calendar.getInstance();
-        long currentTime = date.getTime();
+        long currentTime = cal.getTime().getTime();
         Object oldVal = extractor.setObjectValue(null, cal, "time", 0L);
         assertEquals(oldVal, currentTime);
         assertEquals(cal.getTime().getTime(), 0L);
