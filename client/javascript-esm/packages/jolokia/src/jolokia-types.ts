@@ -538,23 +538,48 @@ export type AgentInfo = {
 //          }
 
 /**
- * All possible (and worth mentioning) `list` response valies depending on the `path` parameters.
+ * All possible (and worth mentioning) `list` response values depending on the `path` parameters.
  */
-export type ListResponseValue = JmxDomains | JmxDomain | MBeanInfo | MBeanInfoError | null
+export type ListResponseValue =
+  | OptimizedJmxDomains
+  | JmxDomains
+  | JmxDomain
+  | MBeanInfo
+  | MBeanInfoError
+  | null
 
 /**
- * Full JMX tree of domains, mbeans, attributes/operations/notifications with details
+ * Full JMX tree of domains in new optimized structure. Without optimizations we have top-level {@link JmxDomains}
+ * type which in optimized mode is moved under `domains` key and single key of {@link JmxDomain} may be a string key
+ * to select cached {@link MBeanInfo} under `cache` key.
+ */
+export type OptimizedJmxDomains = {
+  /** a record of cache-key -> cached-MBeanInfo object which may be referred to from some jmx domain objects */
+  cache: Record<string, MBeanInfo>
+  /** a map of domain -> MBean -> MBeanInfo, where MBeanInfo may be just a key to cached value from `cache` */
+  domains: JmxDomains
+}
+
+/**
+ * Full JMX tree of domains, mbeans, attributes/operations/notifications with details. The key is domain name.
  */
 export type JmxDomains = Record<string, JmxDomain>
 
 /**
- * Single JMX domain with details about
+ * Single JMX domain with details about. The key is a list of key-value properties of MBean ObjectName, so
+ * together with parent domain it give full ObjectName.
+ *
+ * This string value is dual-purpose:
+ * * With small enough `maxDepth`, we may end up just with "1" as the info (the way Jolokia trims the depth
+ *   of responses) - that'w why it may be a string.
+ * * With `listCache=true`, some domains instead of full MBeanInfo value may point to the cached value using
+ *   string _key_
  */
-export type JmxDomain = Record<string, MBeanInfo | MBeanInfoError> | string
+export type JmxDomain = Record<string, MBeanInfo | MBeanInfoError | string>
 
 /**
- * Information about single MBean. With small enough `maxDepth`, we may end up just with mbean count within domain
- * (that'w why it may be string)
+ * Information about single MBean. Thanks to `org.jolokia.service.jmx.handler.list.DataUpdater` services, the
+ * list of fields for MBeanInfo is extensible (for example RBAC information can be added).
  */
 export type MBeanInfo = {
   /** MBean description */
@@ -567,7 +592,7 @@ export type MBeanInfo = {
   op?: Record<string, MBeanOperation | MBeanOperation[]>
   /** Map of notification definitions */
   notif?: Record<string, MBeanNotification>
-} | string
+}
 
 /**
  * Information about single MBean in case there's a problem getting such information

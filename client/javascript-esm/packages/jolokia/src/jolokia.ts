@@ -483,7 +483,7 @@ Jolokia.escapePost = Jolokia.prototype.escape = function (part: string): string 
 }
 
 Jolokia.isError = Jolokia.prototype.isError = function (resp: JolokiaResponse): boolean {
-  return resp == null || resp.status !== 200
+  return resp == null || resp.status != 200
 }
 
 // ++++++++++++++++++++++++++++++++++++++++++++++++++
