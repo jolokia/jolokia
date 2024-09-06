@@ -191,6 +191,10 @@ public class TestJolokiaContext implements JolokiaContext {
         return restrictor.isObjectNameHidden(name);
     }
 
+    public boolean ignoreScheme() {
+        return restrictor.ignoreScheme();
+    }
+
     public boolean isServiceEnabled(String serviceClassName) {
         return true;
     }

@@ -31,6 +31,7 @@ import org.w3c.dom.*;
 public class CorsChecker extends AbstractChecker<String> {
 
     private boolean strictChecking = false;
+    private boolean ignoreScheme = false;
 
     private List<Pattern> patterns;
 
@@ -43,6 +44,7 @@ public class CorsChecker extends AbstractChecker<String> {
      *       &lt;allow-origin&gt;*://*.jmx4perl.org&lt;/allow-origin&gt;
      *
      *       &lt;strict-checking/&gt;
+     *       &lt;ignore-scheme/&gt;
      *     &lt;/cors&gt;
      * </pre>
      *
@@ -60,13 +62,15 @@ public class CorsChecker extends AbstractChecker<String> {
                     if (node.getNodeType() != Node.ELEMENT_NODE) {
                         continue;
                     }
-                    assertNodeName(node,"allow-origin","strict-checking");
+                    assertNodeName(node,"allow-origin", "strict-checking", "ignore-scheme");
                     if (node.getNodeName().equals("allow-origin")) {
                         String p = node.getTextContent().trim().toLowerCase();
                         p = Pattern.quote(p).replace("*", "\\E.*\\Q");
                         patterns.add(Pattern.compile("^" + p + "$"));
                     } else if (node.getNodeName().equals("strict-checking")) {
                         strictChecking = true;
+                    } else if (node.getNodeName().equals("ignore-scheme")) {
+                        ignoreScheme = true;
                     }
                 }
             }
@@ -102,5 +106,9 @@ public class CorsChecker extends AbstractChecker<String> {
             }
         }
         return false;
+    }
+
+    public boolean ignoreScheme() {
+        return ignoreScheme;
     }
 }

@@ -297,7 +297,7 @@ public class HttpRequestHandler {
         }
 
         // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Origin
-        if ("http".equals(pRequestScheme) && pOrigin != null && !"null".equals(pOrigin)) {
+        if (!jolokiaCtx.ignoreScheme() && "http".equals(pRequestScheme) && pOrigin != null && !"null".equals(pOrigin)) {
             try {
                 String originScheme = new URL(pOrigin).getProtocol();
                 // Requests with HTTPS origin should not be responded over HTTP,

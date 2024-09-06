@@ -244,6 +244,8 @@ public class PolicyBasedRestrictorTest {
         assertTrue(restrictor.isOriginAllowed("http://bla.com", true));
         assertTrue(restrictor.isOriginAllowed("http://www.jolokia.org", true));
         assertTrue(restrictor.isOriginAllowed("https://www.consol.de", true));
+
+        assertFalse(restrictor.ignoreScheme());
     }
 
     @Test
@@ -255,6 +257,14 @@ public class PolicyBasedRestrictorTest {
         assertTrue(restrictor.isOriginAllowed("http://bla.com", false));
         assertTrue(restrictor.isOriginAllowed("http://www.jolokia.org", false));
         assertTrue(restrictor.isOriginAllowed("http://www.consol.de", false));
+    }
+
+    @Test
+    public void corsWildIgnoreScheme() {
+        InputStream is = getClass().getResourceAsStream("/allow-origin5.xml");
+        PolicyRestrictor restrictor = new PolicyRestrictor(is);
+
+        assertTrue(restrictor.ignoreScheme());
     }
 
     @Test

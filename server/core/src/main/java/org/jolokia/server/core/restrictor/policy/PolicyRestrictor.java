@@ -151,6 +151,11 @@ public class PolicyRestrictor implements Restrictor {
     }
 
     /** {@inheritDoc} */
+    public boolean ignoreScheme() {
+        return corsChecker.ignoreScheme();
+    }
+
+    /** {@inheritDoc} */
     private boolean check(RequestType pType, ObjectName pName, String pValue) {
         return mbeanAccessChecker.check(new MBeanAccessChecker.Arg(isTypeAllowed(pType), pType, pName, pValue));
     }

@@ -171,6 +171,11 @@ public class JolokiaContextImpl implements JolokiaContext {
     }
 
     /** {@inheritDoc} */
+    public boolean ignoreScheme() {
+        return getRestrictor().ignoreScheme();
+    }
+
+    /** {@inheritDoc} */
     private Configuration getConfiguration() {
         return serviceManager.getConfiguration();
     }

@@ -180,6 +180,9 @@ wildcard specification with `*`.
 
   <!-- Check for the proper origin on the server side, too -->
   <strict-checking/>
+
+  <!-- Use if Origin header can use https while the protocol is http (e.g., with TLS proxy) -->
+  <ignore-scheme/>
 </cors>
 ----
 
@@ -196,6 +199,8 @@ spoofing,role=externalLink,window=_blank]. User facing application which uses Jo
 additional measures like using the
 https://tools.ietf.org/html/draft-west-first-party-cookies-07[same-site,role=externalLink,window=_blank] flag
 on the session cookie.
+
+If the option `<ignore-scheme/>` is specified (it defaults to `false` when not used), `Origin` header using `https` scheme is not restricted to be used with `https` protocol only. This option may be required when Jolokia resides behind TLS proxy.
 
 === Disable listing/searching of selected MBeans
 

@@ -104,4 +104,13 @@ public interface Restrictor {
      * @return {@code true} if the name should not be included in {@code search} or {@code list} result
      */
     boolean isObjectNameHidden(ObjectName name);
+
+    /**
+     * Checks whether to disable restriction of {@code https} origin headers to secure protocol only. This may
+     * be needed when running Jolokia behind TLS proxy.
+     * @return
+     */
+    default boolean ignoreScheme() {
+        return false;
+    }
 }

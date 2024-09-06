@@ -52,6 +52,7 @@ public class HttpRequestHandlerTest {
         Restrictor restrictor = createMock(Restrictor.class);
         expect(restrictor.isRemoteAccessAllowed("localhost", "127.0.0.1")).andReturn(true);
         expect(restrictor.isOriginAllowed(isNull(), eq(true))).andReturn(true);
+        expect(restrictor.ignoreScheme()).andReturn(false);
         replay(restrictor);
         init(restrictor);
         handler.checkAccess("http", "localhost", "127.0.0.1", null);
@@ -63,6 +64,7 @@ public class HttpRequestHandlerTest {
         Restrictor restrictor = createMock(Restrictor.class);
         expect(restrictor.isRemoteAccessAllowed("localhost", "127.0.0.1")).andReturn(true);
         expect(restrictor.isOriginAllowed("http://www.jolokia.org", true)).andReturn(true);
+        expect(restrictor.ignoreScheme()).andReturn(false);
         replay(restrictor);
         init(restrictor);
         handler.checkAccess("https", "localhost", "127.0.0.1", "http://www.jolokia.org");
@@ -96,12 +98,24 @@ public class HttpRequestHandlerTest {
         Restrictor restrictor = createMock(Restrictor.class);
         expect(restrictor.isRemoteAccessAllowed("localhost", "127.0.0.1")).andReturn(true);
         expect(restrictor.isOriginAllowed("https://www.jolokia.org", true)).andReturn(true);
+        expect(restrictor.ignoreScheme()).andReturn(false);
         replay(restrictor);
         init(restrictor);
 
         handler.checkAccess("http", "localhost", "127.0.0.1", "https://www.jolokia.org");
     }
 
+    @Test
+    public void accessAllowedHttpsOriginOverHttp() throws Exception {
+        Restrictor restrictor = createMock(Restrictor.class);
+        expect(restrictor.isRemoteAccessAllowed("localhost", "127.0.0.1")).andReturn(true);
+        expect(restrictor.isOriginAllowed("https://www.jolokia.org", true)).andReturn(true);
+        expect(restrictor.ignoreScheme()).andReturn(true);
+        replay(restrictor);
+        init(restrictor);
+
+        handler.checkAccess("http", "localhost", "127.0.0.1", "https://www.jolokia.org");
+    }
 
     @Test
     public void get() throws Exception {
