@@ -269,7 +269,7 @@ describe("Jolokia HTTP tests", () => {
   test("Fetch error with callbacks", async () => {
     expect.assertions(3)
     const jolokia = new Jolokia({url: `http://127.240.240.240:8080/jolokia`,
-      ajaxError: (_response: Response | null, reason: DOMException | TypeError | string | null) => {
+      fetchError: (_response: Response | null, reason: DOMException | TypeError | string | null) => {
         expect((reason as TypeError).name).toBe("TypeError")
         expect("code" in ((reason as TypeError).cause as Record<string, unknown>)).toBeTruthy()
         expect(((reason as TypeError).cause as Record<string, unknown>)["code"]).toBe("ECONNREFUSED")
@@ -283,7 +283,7 @@ describe("Jolokia HTTP tests", () => {
   test("Fetch error with global error callback only", async () => {
     expect.assertions(2)
     const jolokia = new Jolokia({url: `http://127.240.240.240:8080/jolokia`,
-      ajaxError: (_response: Response | null, reason: DOMException | TypeError | string | null) => {
+      fetchError: (_response: Response | null, reason: DOMException | TypeError | string | null) => {
         expect((reason as TypeError).name).toBe("TypeError")
         expect("code" in ((reason as TypeError).cause as Record<string, unknown>)).toBeTruthy()
       }

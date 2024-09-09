@@ -261,7 +261,7 @@ $(document).ready(function () {
             let resp = await new Jolokia("/bla").request(
                 { type: "READ", mbean: "java.lang:type=Memory", attribute: "HeapMemoryUsage" },
                 {
-                    ajaxError: function (xhr) {
+                    fetchError: function (xhr) {
                         assert.equal(xhr.status, 404);
                     }
                 }

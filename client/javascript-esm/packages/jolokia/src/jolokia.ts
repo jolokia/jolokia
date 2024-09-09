@@ -576,17 +576,17 @@ function prepareRequest(request: JolokiaRequest | JolokiaRequest[], agentOptions
   }
 
   // in both callback and promise mode we can have a global "fetch error handler"
-  if (!("ajaxError" in opts)) {
+  if (!("fetchError" in opts)) {
     // in promise mode however we don't provide a default handler
     if (successCb && errorCb) {
       fetchErrorCb = (_response: Response | null, reason: DOMException | TypeError | string | null) => {
         console.warn(reason)
       }
     }
-  } else if (opts.ajaxError === "ignore") {
+  } else if (opts.fetchError === "ignore") {
     fetchErrorCb = (_response: Response | null, _reason: DOMException | TypeError | string | null) => { }
   } else {
-    fetchErrorCb = opts.ajaxError
+    fetchErrorCb = opts.fetchError
   }
 
   return { url, fetchOptions, dataType: opts.dataType, resolve: opts.resolve, successCb, errorCb, fetchErrorCb }
@@ -611,7 +611,7 @@ async function performRequest(args: RequestArguments):
       .then(async (response: Response): Promise<undefined> => {
         if (response.status != 200) {
           // Jolokia sends its errors with HTTP 200, so any other HTTP code (even redirect - 30x) is actually an error.
-          // with xhr and JQuery we were using ajaxError param, here we use ajaxError callback
+          // with xhr and JQuery we were using ajaxError param, here we use fetchError callback
           fetchErrorCb?.(response, response.statusText)
           return undefined
         }
