@@ -404,7 +404,7 @@ export type JolokiaSuccessResponse = JolokiaResponse & {
   /** Original request for this response */
   request: JolokiaRequest
   /** Value returned for the request. Can be null for WriteRequest, but still the value should be available */
-  value: string | number | JolokiaResponseValue | null
+  value: string | number | boolean | JolokiaResponseValue | null
   /** History of previous responses for given reques (if History interceptor is available) */
   history?: JolokiaResponse
 }
@@ -444,21 +444,21 @@ export type JolokiaResponseValue =
 /**
  * Generic response value for `read` request
  */
-export type ReadResponseValue = string | number | null | Record<string, unknown>
+export type ReadResponseValue = string | number | boolean | null | Record<string, unknown>
 
 // ------ Write response
 
 /**
  * Generic response value for `write` request
  */
-export type WriteResponseValue = string | number | null | Record<string, unknown>
+export type WriteResponseValue = string | number | boolean | null | Record<string, unknown>
 
 // ------ Exec response
 
 /**
  * Generic response value for `write` request
  */
-export type ExecResponseValue = string | number | null | Record<string, unknown>
+export type ExecResponseValue = string | number | boolean | null | Record<string, unknown>
 
 // ------ Search response
 
