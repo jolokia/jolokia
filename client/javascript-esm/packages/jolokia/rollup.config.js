@@ -33,11 +33,11 @@ const configJolokia = {
   output: [
     {
       ...defaultOutput,
-      file: `dist/jolokia-${pkg.version}.js`,
+      file: `dist/jolokia.js`,
     },
     {
       ...defaultOutput,
-      file: `dist/jolokia-${pkg.version}.min.js`,
+      file: `dist/jolokia.min.js`,
       plugins: [ terser() ]
     },
     {

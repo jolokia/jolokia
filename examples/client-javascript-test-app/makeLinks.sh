@@ -36,14 +36,14 @@ ln -s ../../src/main/webapp/jolokia-chat.html .
 ln -s ../../src/main/webapp/jolokia-poller-test.html .
 ln -s ../../src/main/webapp/jolokia-simple-test.html .
 ln -s ../../src/main/webapp/jolokia-test.html .
-ln -s ../../src/main/webapp/demo/plot.html demo
+ln -s ../../../src/main/webapp/demo/plot.html demo
 
 cd scripts/lib || { echo "Can't 'cd' into scripts/lib" && exit; }
 rm jolokia.js
 rm jolokia-simple.js
 JS_VERSION=$(jq -r .version ../../../../../../client/javascript-esm/packages/jolokia/package.json)
-ln -s ../../../../../../client/javascript-esm/packages/jolokia/dist/jolokia-${JS_VERSION}.js jolokia.js
-ln -s ../../../../../../client/javascript-esm/packages/jolokia-simple/dist/jolokia-simple-${JS_VERSION}.js jolokia-simple.js
+ln -s ../../../../../../client/javascript-esm/packages/jolokia/dist/jolokia.js jolokia.js
+ln -s ../../../../../../client/javascript-esm/packages/jolokia-simple/dist/jolokia-simple.js jolokia-simple.js
 
 cd ../test || { echo "Can't 'cd' into ../test" && exit; }
 rm jolokia-poller-test.js

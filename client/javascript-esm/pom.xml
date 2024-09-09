@@ -79,15 +79,15 @@
                 <resource>
                   <directory>packages/jolokia/dist</directory>
                   <includes>
-                    <include>jolokia-*.js</include>
-                    <include>jolokia-*.map</include>
+                    <include>jolokia.js</include>
+                    <include>jolokia.min.js</include>
                   </includes>
                 </resource>
                 <resource>
                   <directory>packages/jolokia-simple/dist</directory>
                   <includes>
-                    <include>jolokia-simple-*.js</include>
-                    <include>jolokia-simple-*.map</include>
+                    <include>jolokia-simple.js</include>
+                    <include>jolokia-simple.min.js</include>
                   </includes>
                 </resource>
               </resources>

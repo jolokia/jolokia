@@ -20,7 +20,7 @@
     ".": {
       "types": "./dist/dts/jolokia.d.ts",
       "import": "./dist/jolokia.mjs",
-      "default": "./src/jolokia.ts"
+      "default": "./dist/jolokia.js"
     }
   },
   "scripts": {

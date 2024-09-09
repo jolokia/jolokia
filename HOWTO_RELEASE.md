@@ -114,9 +114,9 @@ $ ./makeLinks.sh
 + rm jolokia.js
 + rm jolokia-simple.js
 ++ jq -r .version ../../../../../../client/javascript-esm/packages/jolokia/package.json
-+ JS_VERSION=2.1.0
-+ ln -s ../../../../../../client/javascript-esm/packages/jolokia/dist/jolokia-2.1.0.js jolokia.js
-+ ln -s ../../../../../../client/javascript-esm/packages/jolokia-simple/dist/jolokia-simple-2.1.0.js jolokia-simple.js
++ JS_VERSION=2.1.2
++ ln -s ../../../../../../client/javascript-esm/packages/jolokia/dist/jolokia.js jolokia.js
++ ln -s ../../../../../../client/javascript-esm/packages/jolokia-simple/dist/jolokia-simple.js jolokia-simple.js
 + cd ../test
 + rm jolokia-poller-test.js
 + rm jolokia-simple-test.js
@@ -137,14 +137,14 @@ $ yarn watch
 [jolokia.js]: Process started
 [@jolokia.js/simple]: Process started
 ...
-[@jolokia.js/simple]: rollup v4.18.0
-[jolokia.js]: rollup v4.18.0
-[@jolokia.js/simple]: bundles src/jolokia-simple.ts → dist/jolokia-simple-2.1.0.js, dist/jolokia-simple-2.1.0.min.js, dist/jolokia-simple.mjs...
-[jolokia.js]: bundles src/jolokia.ts → dist/jolokia-2.1.0.js, dist/jolokia-2.1.0.min.js, dist/jolokia.mjs...
-[@jolokia.js/simple]: (!) [plugin typescript] @rollup/plugin-typescript: Rollup 'sourcemap' option must be set to generate source maps.
-[@jolokia.js/simple]: created dist/jolokia-simple-2.1.0.js, dist/jolokia-simple-2.1.0.min.js, dist/jolokia-simple.mjs in 2.2s
+[jolokia.js]: rollup v4.20.0
+[jolokia.js]: bundles src/jolokia.ts → dist/jolokia.js, dist/jolokia.min.js, dist/jolokia.mjs...
 [jolokia.js]: (!) [plugin typescript] @rollup/plugin-typescript: Rollup 'sourcemap' option must be set to generate source maps.
-[jolokia.js]: created dist/jolokia-2.1.0.js, dist/jolokia-2.1.0.min.js, dist/jolokia.mjs in 2.4s
+[jolokia.js]: created dist/jolokia.js, dist/jolokia.min.js, dist/jolokia.mjs in 2.7s
+[@jolokia.js/simple]: rollup v4.20.0
+[@jolokia.js/simple]: bundles src/jolokia-simple.ts → dist/jolokia-simple.js, dist/jolokia-simple.min.js, dist/jolokia-simple.mjs...
+[@jolokia.js/simple]: (!) [plugin typescript] @rollup/plugin-typescript: Rollup 'sourcemap' option must be set to generate source maps.
+[@jolokia.js/simple]: created dist/jolokia-simple.js, dist/jolokia-simple.min.js, dist/jolokia-simple.mjs in 2.4s
 ```
 
 With the symbolic links created, just change the test files or `jolokia.ts` in your IDE of choice and re-run the tests (by refreshing browser page or using QUnit UI).
