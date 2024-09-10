@@ -51,7 +51,7 @@ import {
   TextResponseCallback,
   VersionRequest,
   WriteRequest,
-} from "./jolokia-types.ts"
+} from "./jolokia-types.js"
 
 /**
  * Private type for pre-calculated {@link IJolokia#request} arguments
@@ -66,7 +66,7 @@ type RequestArguments = {
   fetchErrorCb?: FetchErrorCallback
 }
 
-const CLIENT_VERSION = "2.1.5"
+const CLIENT_VERSION = "2.1.6"
 
 /**
  * Default parameters for GET and POST requests
@@ -658,7 +658,7 @@ async function performRequest(args: RequestArguments):
           }
           const ct = response.headers.get("content-type")
           if (dataType === "text" || !ct || !(ct.startsWith("text/json") || ct.startsWith("application/json"))) {
-            return response.text()
+            return await response.text()
           }
           return await response.json()
         })
@@ -1247,5 +1247,5 @@ function extractNotificationMode(client: NotificationClient, opts: NotificationO
   return mode
 }
 
-export * from "./jolokia-types.ts"
+export * from "./jolokia-types.js"
 export default Jolokia as JolokiaStatic

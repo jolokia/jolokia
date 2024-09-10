@@ -108,6 +108,7 @@
               <goal>unpack-dependencies</goal>
             </goals>
             <configuration>
+              <includeArtifactIds>jolokia-client-javascript-esm</includeArtifactIds>
               <outputDirectory>${project.build.directory}/${project.artifactId}-${project.version}/scripts/lib</outputDirectory>
               <includes>*.js,*.map</includes>
             </configuration>

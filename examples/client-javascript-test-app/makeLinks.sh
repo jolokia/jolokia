@@ -42,8 +42,8 @@ cd scripts/lib || { echo "Can't 'cd' into scripts/lib" && exit; }
 rm jolokia.js
 rm jolokia-simple.js
 JS_VERSION=$(jq -r .version ../../../../../../client/javascript-esm/packages/jolokia/package.json)
-ln -s ../../../../../../client/javascript-esm/packages/jolokia/dist/jolokia.js jolokia.js
-ln -s ../../../../../../client/javascript-esm/packages/jolokia-simple/dist/jolokia-simple.js jolokia-simple.js
+ln -s ../../../../../../client/javascript-esm/packages/jolokia/dist/jolokia.cjs jolokia.js
+ln -s ../../../../../../client/javascript-esm/packages/jolokia-simple/dist/jolokia-simple.cjs jolokia-simple.js
 
 cd ../test || { echo "Can't 'cd' into ../test" && exit; }
 rm jolokia-poller-test.js

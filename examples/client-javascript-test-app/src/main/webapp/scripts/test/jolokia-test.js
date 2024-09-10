@@ -143,12 +143,7 @@ $(document).ready(function () {
                 }
             }
             new Jolokia({ url: "bla" }).request(
-                { type: "version" },
-                $.extend(extraParams,
-                    {
-                        success: function (response) {
-                        },
-                    })
+                { type: "version" }
             ).catch(e => {
                 // e is https://developer.mozilla.org/en-US/docs/Web/API/Response
                 assert.equal(e.statusText, "Not Found", "Fetch exception");

@@ -18,7 +18,7 @@
   "compilerOptions": {
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
-    "allowImportingTsExtensions": true,
+    "allowImportingTsExtensions": false,
     "declaration": true,
     "esModuleInterop": true,
     "lib": [ "DOM", "ES2022" ],

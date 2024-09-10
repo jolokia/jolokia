@@ -240,7 +240,7 @@ $(document).ready(function () {
                 done();
             }
         });
-        assert.deepEqual(value, {});
+        assert.equal(value, undefined);
     });
 
     QUnit.test("list (async)", async assert => {
@@ -252,7 +252,7 @@ $(document).ready(function () {
                 done();
             }
         });
-        assert.deepEqual(value, {});
+        assert.equal(value, undefined);
     });
 
     function log(response) {

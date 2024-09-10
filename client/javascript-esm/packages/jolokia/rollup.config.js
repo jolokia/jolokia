@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import pkg from "./package.json" assert { type: "json" }
 import { nodeResolve } from "@rollup/plugin-node-resolve"
 import typescript from "@rollup/plugin-typescript"
 import terser from "@rollup/plugin-terser"
@@ -33,11 +32,11 @@ const configJolokia = {
   output: [
     {
       ...defaultOutput,
-      file: `dist/jolokia.js`,
+      file: `dist/jolokia.cjs`,
     },
     {
       ...defaultOutput,
-      file: `dist/jolokia.min.js`,
+      file: `dist/jolokia.min.cjs`,
       plugins: [ terser() ]
     },
     {

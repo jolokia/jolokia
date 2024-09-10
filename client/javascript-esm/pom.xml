@@ -79,18 +79,39 @@
                 <resource>
                   <directory>packages/jolokia/dist</directory>
                   <includes>
-                    <include>jolokia.js</include>
-                    <include>jolokia.min.js</include>
+                    <include>jolokia.cjs</include>
+                    <include>jolokia.min.cjs</include>
                   </includes>
                 </resource>
                 <resource>
                   <directory>packages/jolokia-simple/dist</directory>
                   <includes>
-                    <include>jolokia-simple.js</include>
-                    <include>jolokia-simple.min.js</include>
+                    <include>jolokia-simple.cjs</include>
+                    <include>jolokia-simple.min.cjs</include>
                   </includes>
                 </resource>
               </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>prepare-javascript-distribution</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <move todir="${project.build.outputDirectory}">
+                  <fileset dir="${project.build.outputDirectory}" />
+                  <mapper type="regexp" from="^(.*)\.cjs$" to="\1.js" />
+                </move>
+              </target>
             </configuration>
           </execution>
         </executions>
