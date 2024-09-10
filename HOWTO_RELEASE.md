@@ -114,7 +114,7 @@ $ ./makeLinks.sh
 + rm jolokia.js
 + rm jolokia-simple.js
 ++ jq -r .version ../../../../../../client/javascript-esm/packages/jolokia/package.json
-+ JS_VERSION=2.1.4
++ JS_VERSION=2.1.5
 + ln -s ../../../../../../client/javascript-esm/packages/jolokia/dist/jolokia.js jolokia.js
 + ln -s ../../../../../../client/javascript-esm/packages/jolokia-simple/dist/jolokia-simple.js jolokia-simple.js
 + cd ../test

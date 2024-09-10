@@ -303,4 +303,6 @@ function createValueCallback(options: SimpleRequestOptions): void {
 }
 
 export * from "./jolokia-simple-types.ts"
-export default Jolokia as JolokiaSimpleStatic
+
+const SimpleJolokia = Jolokia
+export default SimpleJolokia as JolokiaSimpleStatic

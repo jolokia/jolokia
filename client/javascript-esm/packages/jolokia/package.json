@@ -1,6 +1,6 @@
 {
   "name": "jolokia.js",
-  "version": "2.1.4",
+  "version": "2.1.5",
   "description": "Jolokia JavaScript ES main module",
   "type": "module",
   "repository": {
@@ -20,7 +20,7 @@
     ".": {
       "types": "./dist/dts/jolokia.d.ts",
       "import": "./dist/jolokia.mjs",
-      "default": "./dist/jolokia.mjs"
+      "default": "./dist/jolokia.js"
     }
   },
   "scripts": {
