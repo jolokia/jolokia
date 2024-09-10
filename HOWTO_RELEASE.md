@@ -114,7 +114,7 @@ $ ./makeLinks.sh
 + rm jolokia.js
 + rm jolokia-simple.js
 ++ jq -r .version ../../../../../../client/javascript-esm/packages/jolokia/package.json
-+ JS_VERSION=2.1.3
++ JS_VERSION=2.1.4
 + ln -s ../../../../../../client/javascript-esm/packages/jolokia/dist/jolokia.js jolokia.js
 + ln -s ../../../../../../client/javascript-esm/packages/jolokia-simple/dist/jolokia-simple.js jolokia-simple.js
 + cd ../test
@@ -304,7 +304,7 @@ yarn npm login --publish
 yarn install
 cd packages/jolokia
 yarn npm publish
-cd packages/jolokia-simple
+cd ../jolokia-simple
 yarn npm publish
 ```
 
