@@ -773,22 +773,28 @@ function createJolokiaInvocation(jobs: Job[], agentOptions: JolokiaConfiguration
       }
     }
 
-    // POST body is created on each request
-    requestArguments.fetchOptions.body = JSON.stringify(requests)
+    if (requests.length > 0) {
+      // POST body is created on each request
+      requestArguments.fetchOptions.body = JSON.stringify(requests)
 
-    // callbacks are configured on each request
-    requestArguments.successCb = function (response: JolokiaSuccessResponse, index: number) {
-      successCbs[index](response, index)
-    }
-    requestArguments.errorCb = function (response: JolokiaErrorResponse, index: number) {
-      errorCbs[index](response, index)
-    }
+      // callbacks are configured on each request
+      requestArguments.successCb = function (response: JolokiaSuccessResponse, index: number) {
+        successCbs[index](response, index)
+      }
+      requestArguments.errorCb = function (response: JolokiaErrorResponse, index: number) {
+        errorCbs[index](response, index)
+      }
+      requestArguments.fetchErrorCb = function (response: Response | null, error: DOMException | TypeError | string | null) {
+        if (response) {
+          console.error("Problem executing registered jobs: ", response.status, response.statusText)
+        } else {
+          console.error("Problem executing registered jobs: ", error)
+        }
+      }
 
-    // we can now call remote Jolokia agent
-    performRequest(requestArguments)
-      .catch(e => {
-        console.error("Problem executing registered jobs: ", e.name, e.stack)
-      })
+      // we can now call remote Jolokia agent
+      performRequest(requestArguments)
+    }
   }
 }
 
