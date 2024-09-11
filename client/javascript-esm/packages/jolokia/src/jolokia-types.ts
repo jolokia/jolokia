@@ -917,7 +917,7 @@ interface JolokiaStatic {
    * @param resp response to check
    * @return true if response is an error, false otherwise
    */
-  isError(resp: JolokiaResponse): boolean
+  isError(resp: JolokiaResponse): resp is JolokiaErrorResponse
 }
 
 /**
@@ -1061,7 +1061,7 @@ interface IJolokia {
    * @param resp response to check
    * @return true if response is an error, false otherwise
    */
-  isError(resp: JolokiaResponse): boolean
+  isError(resp: JolokiaResponse): resp is JolokiaErrorResponse
 }
 
 export type { IJolokia, JolokiaStatic }

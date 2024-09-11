@@ -83,13 +83,14 @@ Jolokia.prototype.getAttribute = async function (this: IJolokia, mbean: string, 
     return null
   }
   return await this.request(request, options)
-    .then((response): ReadResponseValue => {
+    .then((r): ReadResponseValue => {
+      const response = r as JolokiaSuccessResponse | JolokiaErrorResponse
       if (response) {
         // JolokiaSuccessResponse or JolokiaErrorResponse
-        if (Jolokia.isError(response as JolokiaSuccessResponse | JolokiaErrorResponse)) {
-          throw (response as JolokiaErrorResponse).error
+        if (Jolokia.isError(response)) {
+          throw response.error
         } else {
-          return (response as JolokiaSuccessResponse).value as ReadResponseValue
+          return response.value as ReadResponseValue
         }
       } else {
         return null
@@ -123,13 +124,14 @@ Jolokia.prototype.setAttribute = async function (this: IJolokia, mbean: string, 
     return null
   }
   return await this.request(request, options)
-    .then((response): WriteResponseValue => {
+    .then((r): WriteResponseValue => {
+      const response = r as JolokiaSuccessResponse | JolokiaErrorResponse
       if (response) {
         // JolokiaSuccessResponse or JolokiaErrorResponse
-        if (Jolokia.isError(response as JolokiaSuccessResponse | JolokiaErrorResponse)) {
-          throw (response as JolokiaErrorResponse).error
+        if (Jolokia.isError(response)) {
+          throw response.error
         } else {
-          return (response as JolokiaSuccessResponse).value as WriteResponseValue
+          return response.value as WriteResponseValue
         }
       } else {
         return null
@@ -157,13 +159,14 @@ Jolokia.prototype.execute = async function (this: IJolokia, mbean: string, opera
     return null
   }
   return await this.request(request, options)
-    .then((response): ExecResponseValue => {
+    .then((r): ExecResponseValue => {
+      const response = r as JolokiaSuccessResponse | JolokiaErrorResponse
       if (response) {
         // JolokiaSuccessResponse or JolokiaErrorResponse
-        if (Jolokia.isError(response as JolokiaSuccessResponse | JolokiaErrorResponse)) {
-          throw (response as JolokiaErrorResponse).error
+        if (Jolokia.isError(response)) {
+          throw response.error
         } else {
-          return (response as JolokiaSuccessResponse).value as ExecResponseValue
+          return response.value as ExecResponseValue
         }
       } else {
         return null
@@ -187,13 +190,14 @@ Jolokia.prototype.search = async function (this: IJolokia, mbeanPattern: string,
     return []
   }
   return await this.request(request, options)
-    .then((response): SearchResponseValue => {
+    .then((r): SearchResponseValue => {
+      const response = r as JolokiaSuccessResponse | JolokiaErrorResponse
       if (response) {
         // JolokiaSuccessResponse or JolokiaErrorResponse
-        if (Jolokia.isError(response as JolokiaSuccessResponse | JolokiaErrorResponse)) {
-          throw (response as JolokiaErrorResponse).error
+        if (Jolokia.isError(response)) {
+          throw response.error
         } else {
-          return !(response as JolokiaSuccessResponse).value ? [] : (response as JolokiaSuccessResponse).value as SearchResponseValue
+          return !response.value ? [] : response.value as SearchResponseValue
         }
       } else {
         return []
@@ -216,13 +220,14 @@ Jolokia.prototype.version = async function (this: IJolokia, opts?: SimpleRequest
     return null
   }
   return await this.request(request, options)
-    .then((response): VersionResponseValue | null => {
+    .then((r): VersionResponseValue | null => {
+      const response = r as JolokiaSuccessResponse | JolokiaErrorResponse
       if (response) {
         // JolokiaSuccessResponse or JolokiaErrorResponse
-        if (Jolokia.isError(response as JolokiaSuccessResponse | JolokiaErrorResponse)) {
-          throw (response as JolokiaErrorResponse).error
+        if (Jolokia.isError(response)) {
+          throw response.error
         } else {
-          return (response as JolokiaSuccessResponse).value as VersionResponseValue
+          return response.value as VersionResponseValue
         }
       } else {
         return null
@@ -256,13 +261,14 @@ Jolokia.prototype.list = async function(this: IJolokia, ...params: (string[] | s
     return null
   }
   return await this.request(request, options)
-    .then((response): ListResponseValue => {
+    .then((r): ListResponseValue => {
+      const response = r as JolokiaSuccessResponse | JolokiaErrorResponse
       if (response) {
         // JolokiaSuccessResponse or JolokiaErrorResponse
-        if (Jolokia.isError(response as JolokiaSuccessResponse | JolokiaErrorResponse)) {
-          throw (response as JolokiaErrorResponse).error
+        if (Jolokia.isError(response)) {
+          throw response.error
         } else {
-          return (response as JolokiaSuccessResponse).value as ListResponseValue
+          return response.value as ListResponseValue
         }
       } else {
         return {}

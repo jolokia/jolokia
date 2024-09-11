@@ -1,6 +1,6 @@
 {
   "name": "@jolokia.js/d3",
-  "version": "2.1.6",
+  "version": "2.1.7",
   "description": "Jolokia JavaScript ES D3 integration module",
   "type": "module",
   "repository": {

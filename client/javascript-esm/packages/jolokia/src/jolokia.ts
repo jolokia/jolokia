@@ -66,7 +66,7 @@ type RequestArguments = {
   fetchErrorCb?: FetchErrorCallback
 }
 
-const CLIENT_VERSION = "2.1.6"
+const CLIENT_VERSION = "2.1.7"
 
 /**
  * Default parameters for GET and POST requests
@@ -257,10 +257,10 @@ const Jolokia = function (this: IJolokia, config: JolokiaConfiguration | string)
         const resp = responses as JolokiaSuccessResponse | JolokiaErrorResponse
         if (Jolokia.isError(resp)) {
           throw new Error("Cannot not add notification subscription for " + opts.mbean +
-            " (client: " + client.id + "): " + (resp as JolokiaErrorResponse).error)
+            " (client: " + client.id + "): " + resp.error)
         }
         const handle: NotificationHandle = {
-          id: (resp as JolokiaSuccessResponse).value as NotificationAddResponseValue,
+          id: resp.value as NotificationAddResponseValue,
           mode: mode
         }
         notificationHandlerFunc("add", mode)(this, handle, opts)
@@ -325,10 +325,10 @@ const Jolokia = function (this: IJolokia, config: JolokiaConfiguration | string)
         const resp = (responses as JolokiaSuccessResponse | JolokiaErrorResponse)
         if (Jolokia.isError(resp)) {
           throw new Error("Can not register client for notifications: "
-            + (resp as JolokiaErrorResponse).error
-            + "\nTrace:\n" + (resp as JolokiaErrorResponse).stacktrace)
+            + resp.error
+            + "\nTrace:\n" + resp.stacktrace)
         } else {
-          client = (resp as JolokiaSuccessResponse).value as NotificationClient
+          client = resp.value as NotificationClient
         }
         return true
       })
@@ -371,7 +371,7 @@ const Jolokia = function (this: IJolokia, config: JolokiaConfiguration | string)
         const job: Job = {
           callback: function (...resp) {
             if (resp.length > 0 && !Jolokia.isError(resp[0])) {
-              const notifs = (resp[0] as JolokiaSuccessResponse).value as NotificationPullValue
+              const notifs = resp[0].value as NotificationPullValue
               if (notifs && notifs.notifications && notifs.notifications.length > 0) {
                 opts?.callback?.(notifs)
               }
@@ -482,7 +482,7 @@ Jolokia.escapePost = Jolokia.prototype.escape = function (part: string): string 
   return part.replace(/!/g, "!!").replace(/\//g, "!/")
 }
 
-Jolokia.isError = Jolokia.prototype.isError = function (resp: JolokiaResponse): boolean {
+Jolokia.isError = Jolokia.prototype.isError = function (resp: JolokiaResponse): resp is JolokiaErrorResponse {
   return resp == null || resp.status != 200
 }
 
@@ -627,9 +627,9 @@ async function performRequest(args: RequestArguments):
           for (let n = 0; n < responses.length; n++) {
             const resp = responses[n]
             if (Jolokia.isError(resp)) {
-              (errorCb as ErrorCallback)(resp as JolokiaErrorResponse, n)
+              (errorCb as ErrorCallback)(resp, n)
             } else {
-              (successCb as ResponseCallback)(resp as JolokiaSuccessResponse, n)
+              (successCb as ResponseCallback)(resp, n)
             }
           }
         }
