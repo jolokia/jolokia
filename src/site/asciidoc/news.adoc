@@ -15,6 +15,16 @@
 ////
 == News
 
+=== Jolokia 2.1.1 released
+
+[.news-date]
+2024-09-12
+
+Jolokia 2.1.1 is released with adjustments to TypeScript type definitions and few improvements to new JavaScript ESM client.
+With this release, current version of `jolokia.js` npm package is 2.1.7.
+
+Refer to https://jolokia.org/changes-report.html#a2.1.1[changelog] for detailed information about the release.
+
 === Jolokia 2.1.0 released
 
 [.news-date]

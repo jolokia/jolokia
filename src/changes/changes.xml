@@ -23,37 +23,45 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
+    <release version="2.1.1" description="Release 2.1.1" date="2024-09-12">
+      <action dev="grgrzybek" type="add" issue="738">
+        Added "fetchError" JavaScript configuration to handle global errors in callback mode
+      </action>
+      <action dev="grgrzybek" type="add" issue="731">
+        Added "ignore-scheme" option for restrictor
+      </action>
+    </release>
     <release version="2.1.0" description="Release 2.1.0" date="2024-08-12">
-      <action dev="grgrzybek" type="fix" issue="698">
+      <action dev="grgrzybek" type="add" issue="698">
         Detected classpath services and server detectors can be enabled/disabled in configuration.
       </action>
-      <action dev="grgrzybek" type="fix" issue="686">
+      <action dev="grgrzybek" type="add" issue="686">
         Replace json-simple with different JSON library. New org.jolokia:jolokia-json module.
       </action>
-      <action dev="grgrzybek" type="fix" issue="580">
+      <action dev="grgrzybek" type="add" issue="580">
         Dropped dependency on JQuery - Jolokia uses Fetch API now.
       </action>
-      <action dev="grgrzybek" type="fix" issue="576">
+      <action dev="grgrzybek" type="add" issue="576">
         New Jolokia JavaScript library based on ES modules, TypeScript and Rollup.js. With no impact
         on compatibility!
       </action>
-      <action dev="grgrzybek" type="fix" issue="564">
+      <action dev="grgrzybek" type="add" issue="564">
         Additional JSON optimization mode (protocol version 8.0) with listCache=true parameter.
       </action>
-      <action dev="grgrzybek" type="fix" issue="333">
+      <action dev="grgrzybek" type="add" issue="333">
         Support for java.util.Date parameters and return values.
       </action>
-      <action dev="grgrzybek" type="fix" issue="261">
+      <action dev="grgrzybek" type="add" issue="261">
         Add "filter" element to jolokia-access.xml file to filter out results of "list" and "search"
         operations.
       </action>
-      <action dev="grgrzybek" type="fix" issue="250">
+      <action dev="grgrzybek" type="add" issue="250">
         New "includeRequest" option to allow removing the request from JSON response.
       </action>
-      <action dev="grgrzybek" type="fix" issue="212">
+      <action dev="grgrzybek" type="add" issue="212">
         Supporting multi-dimensional arrays (finally!).
       </action>
-      <action dev="grgrzybek" type="fix" issue="181">
+      <action dev="grgrzybek" type="add" issue="181">
         Supporting java.util.Calendars and java.time.Temporal implementations. Also provide configuration
         options for date/time format and its time zone.
       </action>
