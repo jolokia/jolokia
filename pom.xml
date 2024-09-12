@@ -392,7 +392,7 @@
   <scm>
     <connection>scm:git:git://github.com/jolokia/jolokia.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/jolokia/jolokia.git</developerConnection>
-    <tag>2.0</tag>
+    <tag>main</tag>
     <url>git://github.com/jolokia/jolokia.git</url>
   </scm>
 
