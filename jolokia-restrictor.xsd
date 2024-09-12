@@ -105,7 +105,16 @@
       <xs:element name="strict-checking" minOccurs="0">
         <xs:annotation>
           <xs:documentation>
-            Whether to allow null/missing "Origin" header
+            Whether to allow null/missing "Origin" header in all HTTP requests
+          </xs:documentation>
+        </xs:annotation>
+        <xs:complexType />
+      </xs:element>
+      <xs:element name="ignore-scheme" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+            Whether to allow https origins when using http protocol. This may be required in proxy scenarios,
+            where Jolokia agent resides behind TLS proxy.
           </xs:documentation>
         </xs:annotation>
         <xs:complexType />

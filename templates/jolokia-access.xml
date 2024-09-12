@@ -79,24 +79,26 @@
     <command>notification</command>
   </commands>
 
-  <!-- 
+  <!--
   Restrict access only via the specified methods
-  
+
   Example which allows only POST requests:
   <http>
     <method>post</method>
-  </http>   
+  </http>
   -->
 
-  <!-- 
-  Cross origin protection (CORS). 
+  <!--
+  Cross origin protection (CORS).
 
-  You can configure which cross origins are given allowance by the browser. 
-  With strict-checking, the Origin: header can be also be checked on the server side, 
+  You can configure which cross origins are given allowance by the browser.
+  With strict-checking, the Origin: header can be also be checked on the server side,
   which results in an error if it doesn't match any specified pattern.
-  --> 
-  
-  <!-- 
+  With ignore-scheme, we allow Origin headers using https scheme when the protocol
+  is actually "http" - this may be required in TLS-proxy scenario.
+  -->
+
+  <!--
       Example which allows access from www.jolokia.org and the domain jmx4perl.org for CORS
       but does also server side check to prevent CSRF attacks:
 
@@ -105,6 +107,7 @@
       <allow-origin>*://*.jmx4perl.org</allow-origin>
 
       <strict-checking/>
+      <ignore-scheme />
   </cors>
   -->
 

@@ -138,7 +138,7 @@ agents which are located on a different server.</p>
 <p>All methods of this library are available via the
 <code>Jolokia</code> client object, which needs to be
 instantiated up-front. In the following example a client object is
-created and the used heap memory is requested synchronously via
+created and then <em>used heap memory</em> is requested synchronously via
 the simple API. The agent is deployed within the same webarchive
 which also serves this script.</p>
 </div>
@@ -731,7 +731,7 @@ method.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "agent": "2.1.0",
+  "agent": "2.1.1",
   "protocol": "7.2",
   "details": {
     "agent_version": "2.0.0-SNAPSHOT",
@@ -965,7 +965,7 @@ be used within a <code>pom.xml</code>:</p>
       &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
       &lt;artifactId&gt;jolokia-client-javascript&lt;/artifactId&gt;
       &lt;type&gt;javascript&lt;/type&gt;
-      &lt;version&gt;2.1.0&lt;/version&gt;
+      &lt;version&gt;2.1.1&lt;/version&gt;
     &lt;/dependency&gt;
     ....
   &lt;/dependencies&gt;

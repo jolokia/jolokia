@@ -317,6 +317,9 @@ wildcard specification with <code>*</code>.</p>
 
   &lt;!-- Check for the proper origin on the server side, too --&gt;
   &lt;strict-checking/&gt;
+
+  &lt;!-- Use if Origin header can use https while the protocol is http (e.g., with TLS proxy) --&gt;
+  &lt;ignore-scheme/&gt;
 &lt;/cors&gt;</code></pre>
 </div>
 </div>
@@ -334,6 +337,9 @@ or <a href="https://www.brokenbrowser.com/referer-spoofing-defeating-xss-filter/
 additional measures like using the
 <a href="https://tools.ietf.org/html/draft-west-first-party-cookies-07" class="externalLink" target="_blank" rel="noopener">same-site</a> flag
 on the session cookie.</p>
+</div>
+<div class="paragraph">
+<p>If the option <code>&lt;ignore-scheme/&gt;</code> is specified (it defaults to <code>false</code> when not used), <code>Origin</code> header using <code>https</code> scheme is not restricted to be used with <code>https</code> protocol only. This option may be required when Jolokia resides behind TLS proxy.</p>
 </div>
 </div>
 <div class="sect2">

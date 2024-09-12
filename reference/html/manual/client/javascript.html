@@ -128,7 +128,26 @@
 <p>Because Fetch API is used, there&#8217;s no direct support for <em>synchronous requests</em> - this can be achieved simply using <code>async</code> and <code>await</code></p>
 </li>
 <li>
-<p>There&#8217;s no <code>ajaxError</code> option to handle HTTP/connection errors. <code>Jolokia.request</code> returns now a <code>Promise</code> object and we can handle <em>global errors</em> using <code>Promise.catch()</code></p>
+<p>There was an <code>ajaxError</code> option to handle HTTP/connection errors, but it was used to configure jQuery&#8217;s <code>$.ajax</code> call. Now <code>Jolokia.request</code> in Promise mode returns a <code>Promise</code> object and we can handle <em>global errors</em> using <code>Promise.catch()</code> handler where the passed object is a <a href="https://developer.mozilla.org/en-US/docs/Web/API/Response">Response</a> object.</p>
+</li>
+<li>
+<p>In callback mode we can still pass <code>success</code> and <code>error</code> callbacks (to handle successfull and failed Jolokia responses - all delivered with HTTP 200 status code) and additionally we can pass <code>fetchError</code> (name was changed from <code>ajaxError</code>, because signature has changed as well) configuration option when creating new <code>Jolokia</code> object - this callback will be called with <a href="https://developer.mozilla.org/en-US/docs/Web/API/Response">Response</a> object to check for HTTP errors, etc. (when HTTP status is not <code>200</code>) and/or with an error thrown by <code>fetch()</code> API call.</p>
+</li>
+<li>
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/fetch#exceptions"><code>fetch()</code> call</a> may throw an exception (<code>DOMException</code> or <code>TypeError</code>) when networking error occurs or <code>fetch()</code> is configured in wrong way (for example with bad headers). Mind that it was a bit different with jQuery Ajax, where both HTTP error responses (like <code>404</code>) and networking errors where handled with single callback being called with <code>xhr</code> instance. After switching to <code>fetch()</code> API, these errors in promise mode have to be handled in different way:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>networking and configuration errors can be handled by attaching a <code>.catch()</code> handler to <code>Jololokia.request()</code> returned promise. The error will be a <code>DOMException</code> or <code>TypeError</code></p>
+</li>
+<li>
+<p>HTTP error responses (where status is different than <code>200</code>) can be handled by attaching a <code>.catch()</code> handler, where the passed object will be a <a href="https://developer.mozilla.org/en-US/docs/Web/API/Response">Response</a>.</p>
+</li>
+<li>
+<p>In callback mode, both the exception and failed <code>Response</code> objects can be passed to a callback configured with <code>fetchError</code> option.</p>
+</li>
+</ul>
+</div>
 </li>
 </ul>
 </div>
@@ -147,7 +166,7 @@ instance used to invoke simple (from <code>@jolokia.js/simple</code> package) <c
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">const jolokia = new Jolokia("/jolokia")
-const value = jolokia.getAttribute("java.lang:type=Memory", "HeapMemoryUsage", "used")
+const value = await jolokia.getAttribute("java.lang:type=Memory", "HeapMemoryUsage", "used")
 console.log("Heap Memory used: " + value)</code></pre>
 </div>
 </div>
@@ -189,8 +208,8 @@ Then we can refer to the scripts from HTML page:</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;head&gt;
-  &lt;script src="jolokia-2.1.0.min.js"&gt;&lt;/script&gt;
-  &lt;script src="jolokia-simple-2.1.0.min.js"&gt;&lt;/script&gt;
+  &lt;script src="jolokia-2.1.1.min.js"&gt;&lt;/script&gt;
+  &lt;script src="jolokia-simple-2.1.1.min.js"&gt;&lt;/script&gt;
 &lt;/head&gt;</code></pre>
 </div>
 </div>
@@ -271,30 +290,27 @@ called for each response separately. See
 <div class="ulist">
 <ul>
 <li>
-<p>callback based for compatibility purposes - you have to pass <code>success</code> (and <code>error</code> if needed) callbacks through <code>options</code> object</p>
+<p><em>callback mode</em> for compatibility purposes - you have to pass <code>success</code> and (optional) <code>error</code> callbacks through <code>options</code> object</p>
 </li>
 <li>
-<p><em>recommended</em> JSON method when there&#8217;s no <code>success</code> callback passed and <code>request()</code> returns a Promise object:</p>
+<p><em>recommended</em> JSON method in <em>promise mode</em> when there&#8217;s no <code>success</code> callback passed and <code>request()</code> returns a Promise object:</p>
 <div class="ulist">
 <ul>
 <li>
 <p>for HTTP status 200, it is resolved with the response value, which may be successfull or error Jolokia responses containing JSON data with response or error details obtained from <code>Response.json()</code></p>
 </li>
 <li>
-<p>for HTTP status &gt;= 400, it throws an exception which is Fetch <code>Response</code> object - user can attach <code>.catch()</code> to the promise and analyze the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Response">Response</a></p>
-</li>
-<li>
-<p>for HTTP status != 200 and not &gt;= 400, the promise is resolved with the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Response">Response</a> (for example to analyze the redirect status)</p>
+<p>for HTTP status != 200, it throws an exception which is a Fetch <code>Response</code> object - user can attach <code>.catch()</code> to the promise and analyze the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Response">Response</a> object for headers, status code, etc.</p>
 </li>
 </ul>
 </div>
 </li>
 <li>
-<p>Text method when there&#8217;s no <code>success</code> callback, <code>dataType: "text"</code> is passed and <code>request()</code> returns a Promise object:</p>
+<p><em>special</em> Text method in <em>promise mode</em> when there&#8217;s no <code>success</code> callback, <code>dataType: "text"</code> is passed and <code>request()</code> returns a Promise object:</p>
 <div class="ulist">
 <ul>
 <li>
-<p>for HTTP status 200, it is resolved with the response value for HTTP 200 responses, which is plain text response obtained from <code>Response.text()</code>.</p>
+<p>for HTTP status 200, it is resolved with the response value, which is plain text response obtained from <code>Response.text()</code>.</p>
 </li>
 <li>
 <p>for HTTP status != 200 it&#8217;s the same as in <em>recommended</em> JSON method</p>
@@ -303,7 +319,14 @@ called for each response separately. See
 </div>
 </li>
 <li>
-<p><em>low level</em> Response method, when <code>resolve: "response"</code> is passed with <code>options</code>, the returned promise is resolved with entire <a href="https://developer.mozilla.org/en-US/docs/Web/API/Response">Response</a> object and user is free to call <code>Response.json()</code>, <code>Response.text()</code>, <code>Response.blob()</code> or any method from <a href="https://developer.mozilla.org/en-US/docs/Web/API/Response">Response API</a>.</p>
+<p><em>low level</em> Response method in <em>promise mode</em>, when <code>resolve: "response"</code> is passed with <code>options</code> and <code>request()</code> returns a Promise object:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>for any HTTP status code, the returned promise is resolved with entire <a href="https://developer.mozilla.org/en-US/docs/Web/API/Response">Response</a> object and user is free to call <code>Response.json()</code>, <code>Response.text()</code>, <code>Response.blob()</code> or any method from <a href="https://developer.mozilla.org/en-US/docs/Web/API/Response">Response API</a>.</p>
+</li>
+</ul>
+</div>
 </li>
 </ul>
 </div>
@@ -313,13 +336,47 @@ called for each response separately. See
 <div class="ulist">
 <ul>
 <li>
-<p>by attaching <code>.then()</code> to get the value</p>
+<p>by attaching <code>.then()</code> to get the value (both successful and error Jolokia responses - all within successful HTTP response (status == <code>200</code>))</p>
 </li>
 <li>
-<p>by attaching <code>.catch()</code> to catch the exceptions</p>
+<p>by attaching <code>.catch()</code> to catch the exceptions:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>a <a href="https://developer.mozilla.org/en-US/docs/Web/API/Response">Response</a> object when there is some HTTP response</p>
 </li>
 <li>
-<p>by using <code>await jolokia.request()</code> to get the response or catch the exception (after surrounding with <code>try..catch</code>).</p>
+<p>a <code>DOMException</code> or <code>TypeError</code> when there&#8217;s a networking or configuration error (see <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/fetch#exceptions">fetch exceptions</a>)</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>by using <code>await jolokia.request()</code> to get the response</p>
+</li>
+<li>
+<p>by surrounding with <code>try..catch</code> when there&#8217;s no <code>.catch()</code> used</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>For convenience, in both <em>callback</em> and <em>promise</em> modes, we can pass <code>fetchError</code> callback method in the options (in <code>request()</code> call or initially when creating <code>Jolokia</code> instance). Before Jolokia 2.1.0 this option was passed directly to <code>$.ajax()</code> call in jQuery. This callback has the following signature:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">function(response, error)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and the parameters are:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>response</code> is a <a href="https://developer.mozilla.org/en-US/docs/Web/API/Response">Response</a> object when available</p>
+</li>
+<li>
+<p><code>error</code> is an exception object thrown by <code>fetch()</code> call (see <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/fetch#exceptions">fetch exceptions</a>)</p>
 </li>
 </ul>
 </div>
@@ -329,11 +386,11 @@ the Jolokia agent:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">let jolokia = new Jolokia({ "url": "/jolokia" });
-let req1 = { "type": "read", "mbean": "java.lang:type=Memory", "attribute": "HeapMemoryUsage" };
-let req2 = { "type": "list" };
-let response = await jolokia.request(req1);
-let responses = await jolokia.request([ req1, req2 ]);</code></pre>
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">let jolokia = new Jolokia({ "url": "/jolokia" })
+let req1 = { "type": "read", "mbean": "java.lang:type=Memory", "attribute": "HeapMemoryUsage" }
+let req2 = { "type": "list" }
+let response = await jolokia.request(req1)
+let responses = await jolokia.request([ req1, req2 ])</code></pre>
 </div>
 </div>
 </div>
@@ -405,6 +462,11 @@ fails. This callback receives the full Jolokia response
 object (with a key <code>error</code> set). If no error
 callback is given, but <code>success</code> is available, the error response is printed to the JavaScript
 console by default.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>fetchError</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A callback invoked when <code>fetch()</code> returns a <code>Response</code> object with HTTP status different than 200 or simply <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/fetch#exceptions">throws an exception</a>.</p>
+<p class="tableblock">This callback can be specified both in <em>callback</em> and <em>promise</em> mode - both at <code>request()</code> time and <code>Jolokia</code> instantiation time.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>credentials</code></p></td>
@@ -694,15 +756,30 @@ access API is available. It is contained in
 <code>jolokia-simple.js</code> (from <code>@jolokia.js/simple</code> npm package) which must be included after
 <code>jolokia.js</code>. This API provides dedicated
 method for the various request types and supports all options as
-described in <a href="#js-request-options-table">Table 1, &#8220;Request options&#8221;</a>. There
-is one notable difference for asynchronous callbacks and
+described in <a href="#js-request-options-table">Table 1, &#8220;Request options&#8221;</a>.</p>
+</div>
+<div class="paragraph">
+<p>There is one notable difference for asynchronous callbacks and
 synchronous return values though: In case of a successful call,
 the callback is fed with the response&#8217;s
 <code>value</code> object, not the full response
-(i.e. <code>response.value</code>). Similar when Promise is returned, it is resolved with
-the value itself. In case of an error,
-either an <code>error</code> callback is called with the
-full response object or a <code>Respose</code> can be handled with <code>.catch()</code> block.</p>
+(i.e. <code>response.value</code> instead of <code>response</code>).
+Similar when a <code>Promise</code> is returned, it is resolved with
+the value itself from the response and not entire response.</p>
+</div>
+<div class="paragraph">
+<p>There are also differences in error handling between <em>simple</em> and <em>normal</em> API:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>for callback mode, the Jolokia error message is passed in the same way</p>
+</li>
+<li>
+<p>for promise mode, if HTTP return code is 200, but it is a Jolokia error, instead of returning
+the error JSON message, its <code>error</code> field is thrown as an exception. HTTP error codes different that 200 are handled in the same way (by throwing or returning Fetch Response object)</p>
+</li>
+</ul>
 </div>
 <div class="paragraph">
 <p>Remember - to deal with values directly, <code>await</code> has to be used on the Promise returned from simple API.</p>
@@ -818,7 +895,7 @@ method.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "agent": "2.1.0",
+  "agent": "2.1.1",
   "protocol": "8.0",
   "details": {
     "agent_version": "2.1.0-SNAPSHOT",
