@@ -122,18 +122,11 @@
       <outputDirectory>reference/html</outputDirectory>
     </fileSet>
     <fileSet>
-      <directory>../client/javascript/target/compressed</directory>
+      <directory>../client/javascript-esm/target/classes</directory>
       <includes>
-        <include>**/*.js</include>
+        <include>*.js</include>
       </includes>
-      <outputDirectory>clients/javascript</outputDirectory>
-    </fileSet>
-    <fileSet>
-      <directory>../client/javascript/target/scripts</directory>
-      <includes>
-        <include>**/*.js</include>
-      </includes>
-      <outputDirectory>clients/javascript</outputDirectory>
+      <outputDirectory>clients/javascript-esm</outputDirectory>
     </fileSet>
   </fileSets>
 </assembly>
