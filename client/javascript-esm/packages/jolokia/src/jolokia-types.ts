@@ -765,13 +765,16 @@ export type ErrorCallbacks = ((response: JolokiaErrorResponse, index: number) =>
 
 /**
  * A callback used in `fetch().catch()` when `success` and `error` callbacks are passed (callback-mode). In promise
- * mode, user has to attach `.catch()` to the returned promise explicitly (or face an exception).
+ * mode, user may attach `.catch()` to the returned promise explicitly (or face an exception).
  * See <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/fetch#exceptions">Fetch Exceptions</a>.
  *
- * This callback can be used only in _callback mode_, where `success` (and possibly `error`) callbacks are passed
+ * This callback _should_ be used in _callback mode_, where `success` (and possibly `error`) callbacks are passed
  * and user is not interested in returned Promise. There are two kinds of _errors_ when using `fetch()`:
  * * HTTP != 200 errors (jquery uses `status >= 200 && status < 300 || status === 304`)
- * * networking/configuration errors (for example when bad header is set or `get` is used with non-empty body
+ * * networking/configuration errors (for example when bad header is set or `get` is used with non-empty body)
+ *
+ * This callback _may_ be used in _promise mode_ as well, so the returned promise has a `.catch()` block attached
+ * invoking the passed callback.
  *
  * networking errors are thrown by `fetch()`, but HTTP errors are passed in returned async `Response` object.
  *

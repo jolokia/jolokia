@@ -650,11 +650,9 @@ async function performRequest(args: RequestArguments):
       // Jolokia response handling at caller's side (no access to response headers, status, etc. for HTTP 200)
       const promise = fetch(url, fetchOptions)
         .then(async (response: Response): Promise<string | JolokiaSuccessResponse | JolokiaErrorResponse | (JolokiaSuccessResponse | JolokiaErrorResponse)[] | Response> => {
-          if (response.status >= 400) {
-            throw response
-          }
           if (response.status != 200) {
-            return response
+            // all non-200 responses are thrown as exception to be handled in .catch()
+            throw response
           }
           const ct = response.headers.get("content-type")
           if (dataType === "text" || !ct || !(ct.startsWith("text/json") || ct.startsWith("application/json"))) {
@@ -665,7 +663,11 @@ async function performRequest(args: RequestArguments):
       if (fetchErrorCb) {
         // we handle serious fetch() exception for user's convenience
         return promise.catch(error => {
-          fetchErrorCb(null, error)
+          if (error instanceof Response) {
+            fetchErrorCb(error, null)
+          } else {
+            fetchErrorCb(null, error)
+          }
           return undefined
         })
       } else {
