@@ -26,6 +26,7 @@ import javax.management.*;
 
 import org.jolokia.server.core.service.impl.ClasspathServerDetectorLookup;
 import org.jolokia.server.core.service.impl.MBeanRegistry;
+import org.jolokia.server.core.service.impl.StdoutLogHandler;
 import org.jolokia.server.core.util.jmx.DefaultMBeanServerAccess;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 import org.testng.annotations.Test;
@@ -49,7 +50,7 @@ public class MBeanServerHandlerTestNegative {
         try {
             ObjectName oName = new ObjectName("Bla:type=blub");
             final Set<MBeanServerConnection> connections = new HashSet<>();
-            new ClasspathServerDetectorLookup().lookup().forEach(d -> {
+            new ClasspathServerDetectorLookup().lookup(new StdoutLogHandler()).forEach(d -> {
                 Set<MBeanServerConnection> servers = d.getMBeanServers();
                 if (servers != null) {
                     connections.addAll(servers);

@@ -59,6 +59,8 @@ public final class ObjectToJsonConverter {
     private static final String SIMPLIFIERS_DEFAULT_DEF = "META-INF/jolokia/simplifiers-default";
     private static final String SIMPLIFIERS_DEF         = "META-INF/jolokia/simplifiers";
 
+    private final JolokiaContext context;
+
     public ObjectToJsonConverter(StringToObjectConverter pStringToObjectConverter) {
         this(pStringToObjectConverter, null);
     }
@@ -103,6 +105,8 @@ public final class ObjectToJsonConverter {
         arrayExtractor = new ArrayExtractor();
 
         stringToObjectConverter = pStringToObjectConverter;
+
+        this.context = context;
     }
 
 
@@ -364,7 +368,11 @@ public final class ObjectToJsonConverter {
     // Simplifiers are added either explicitely or by reflection from a subpackage
     private void addSimplifiers(List<Extractor> pHandlers) {
         // Add all
-        pHandlers.addAll(LocalServiceFactory.createServices(this.getClass().getClassLoader(),
-                                                            SIMPLIFIERS_DEFAULT_DEF, SIMPLIFIERS_DEF));
+        List<Extractor> services = LocalServiceFactory.createServices(this.getClass().getClassLoader(),
+            SIMPLIFIERS_DEFAULT_DEF, SIMPLIFIERS_DEF);
+
+        if (LocalServiceFactory.validateServices(services, context)) {
+            pHandlers.addAll(services);
+        }
     }
 }

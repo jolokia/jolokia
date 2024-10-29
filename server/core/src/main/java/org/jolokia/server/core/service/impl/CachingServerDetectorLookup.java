@@ -19,6 +19,7 @@ import java.util.SortedSet;
 
 import org.jolokia.server.core.detector.ServerDetector;
 import org.jolokia.server.core.detector.ServerDetectorLookup;
+import org.jolokia.server.core.service.api.LogHandler;
 
 public class CachingServerDetectorLookup implements ServerDetectorLookup {
 
@@ -30,9 +31,9 @@ public class CachingServerDetectorLookup implements ServerDetectorLookup {
     }
 
     @Override
-    public SortedSet<ServerDetector> lookup() {
+    public SortedSet<ServerDetector> lookup(LogHandler logHandler) {
         if (this.serverDetectors == null) {
-            this.serverDetectors = delegate.lookup();
+            this.serverDetectors = delegate.lookup(logHandler);
         }
 
         return this.serverDetectors;

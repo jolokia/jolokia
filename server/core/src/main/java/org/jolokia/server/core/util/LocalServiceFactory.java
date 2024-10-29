@@ -23,6 +23,10 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+import org.jolokia.server.core.service.api.JolokiaService;
+import org.jolokia.server.core.service.api.LogHandler;
+import org.jolokia.server.core.service.impl.QuietLogHandler;
+
 /**
  * A simple factory for creating services with no-arg constructors from a textual
  * descriptor. This descriptor, which must be a resource loadable by this class'
@@ -99,7 +103,7 @@ public final class LocalServiceFactory {
      * @return a ordered list of created services.
      */
     public static <T> List<T> createServices(String ... pDescriptorPaths) {
-        return createServices(LocalServiceFactory.class.getClassLoader(),pDescriptorPaths);
+        return createServices(LocalServiceFactory.class.getClassLoader(), pDescriptorPaths);
     }
 
     // ==================================================================================
@@ -188,6 +192,62 @@ public final class LocalServiceFactory {
                 // Best effort
             }
         }
+    }
+
+    public static <T> boolean validateServices(Collection<T> services, LogHandler logHandler) {
+        if (logHandler == null) {
+            logHandler = new QuietLogHandler();
+        }
+
+        Set<Class<?>> jolokiaInterfaces = new LinkedHashSet<>();
+        // there should be the only JolokiaService.class
+        if (ClassLoader.getSystemClassLoader() != null) {
+            try {
+                jolokiaInterfaces.add(ClassLoader.getSystemClassLoader().loadClass(JolokiaService.class.getName()));
+            } catch (ClassNotFoundException e) {
+                jolokiaInterfaces.add(JolokiaService.class);
+            }
+        } else {
+            jolokiaInterfaces.add(JolokiaService.class);
+        }
+        Class<?> theJolokiaServiceClass = jolokiaInterfaces.iterator().next();
+        for (Object service : services) {
+            if (collectJolokiaServiceInterfaces(service, jolokiaInterfaces, theJolokiaServiceClass) > 0) {
+                logHandler.error("Service " + service.getClass().getName() + " loaded from " + service.getClass().getClassLoader() + " uses incompatible JolokiaService interface", null);
+            }
+        }
+
+        if (jolokiaInterfaces.size() > 1) {
+            logHandler.error("Jolokia service discovery error - JolokiaService interface is available from multiple class loaders:", null);
+            for (Class<?> c : jolokiaInterfaces) {
+                logHandler.error(" - " + c.getClassLoader().toString(), null);
+            }
+            logHandler.error("Are there multiple Jolokia agents available?", null);
+            return false;
+        }
+
+        return true;
+    }
+
+    private static int collectJolokiaServiceInterfaces(Object service, Set<Class<?>> jolokiaInterfaces, Class<?> expected) {
+        Class<?> c = service == null ? null : service.getClass() == Class.class ? (Class<?>) service : service.getClass();
+        int count = 0;
+        while (c != null && c != Object.class) {
+            for (Class<?> iface : c.getInterfaces()) {
+                if (iface.getName().equals(JolokiaService.class.getName())) {
+                    if (jolokiaInterfaces.add(iface) || iface != expected) {
+                        count++;
+                    }
+                }
+                if (collectJolokiaServiceInterfaces(iface, jolokiaInterfaces, expected) > 0) {
+                    count++;
+                }
+            }
+
+            c = c.getSuperclass();
+        }
+
+        return count;
     }
 
     // =============================================================================

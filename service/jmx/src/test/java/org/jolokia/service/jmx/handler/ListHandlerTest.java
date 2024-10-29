@@ -29,6 +29,7 @@ import org.jolokia.server.core.request.*;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.service.api.JolokiaService;
 import org.jolokia.server.core.service.impl.ClasspathServiceCreator;
+import org.jolokia.server.core.service.impl.StdoutLogHandler;
 import org.jolokia.server.core.util.jmx.DefaultMBeanServerAccess;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 import org.jolokia.server.core.util.RequestType;
@@ -56,7 +57,7 @@ public class ListHandlerTest extends BaseHandlerTest {
     @BeforeMethod
     public void createHandler() {
         TestJolokiaContext ctx = new TestJolokiaContext();
-        Set<JolokiaService<?>> discovered = new ClasspathServiceCreator(getClass().getClassLoader(), "services").getServices();
+        Set<JolokiaService<?>> discovered = new ClasspathServiceCreator(getClass().getClassLoader(), "services").getServices(new StdoutLogHandler());
         for (JolokiaService<?> service : discovered) {
             if (!(service instanceof DataUpdater || service instanceof CacheKeyProvider)) {
                 continue;

@@ -1,9 +1,14 @@
 package org.jolokia.server.core.service.impl;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
+import org.jolokia.server.core.detector.ServerDetector;
+import org.jolokia.server.core.detector.ServerDetectorLookup;
+import org.jolokia.server.core.service.api.LogHandler;
 import org.jolokia.server.core.util.LocalServiceFactory;
-import org.jolokia.server.core.detector.*;
 
 /**
  * Classpath scanner for detectors
@@ -14,12 +19,16 @@ import org.jolokia.server.core.detector.*;
 public class ClasspathServerDetectorLookup implements ServerDetectorLookup {
 
     /** {@inheritDoc} */
-    public SortedSet<ServerDetector> lookup() {
-        SortedSet<ServerDetector> detectors = new TreeSet<>(
-                LocalServiceFactory.createServices("META-INF/jolokia/detectors-default",
-                                                   "META-INF/jolokia/detectors"));
-        detectors.add(ServerDetector.FALLBACK);
-        return detectors;
+    public SortedSet<ServerDetector> lookup(LogHandler logHandler) {
+        List<ServerDetector> services = LocalServiceFactory.createServices("META-INF/jolokia/detectors-default",
+            "META-INF/jolokia/detectors");
+
+        services.add(ServerDetector.FALLBACK);
+        if (!LocalServiceFactory.validateServices(services, logHandler)) {
+            return new TreeSet<>(Collections.singleton(ServerDetector.FALLBACK));
+        }
+
+        return new TreeSet<>(services);
     }
 
 }

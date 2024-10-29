@@ -2,6 +2,8 @@ package org.jolokia.server.core.detector;
 
 import java.util.SortedSet;
 
+import org.jolokia.server.core.service.api.LogHandler;
+
 /**
  * Interface for a lookup mechanism to find server detector
  * @author roland
@@ -15,5 +17,17 @@ public interface ServerDetectorLookup {
      *
      * @return set of server detectors
      */
-    SortedSet<ServerDetector> lookup();
+    default SortedSet<ServerDetector> lookup() {
+        return lookup(null);
+    }
+
+    /**
+     * Lookup all server detector available and return a list
+     * of all found detectors
+     *
+     * @param logHandler
+     * @return set of server detectors
+     */
+    SortedSet<ServerDetector> lookup(LogHandler logHandler);
+
 }

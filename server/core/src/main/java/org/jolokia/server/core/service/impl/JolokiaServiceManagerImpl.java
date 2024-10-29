@@ -186,7 +186,7 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
 
     /** {@inheritDoc} */
     public void addServices(JolokiaServiceCreator pServiceCreator) {
-        for (JolokiaService<?> service : pServiceCreator.getServices()) {
+        for (JolokiaService<?> service : pServiceCreator.getServices(logHandler)) {
             addService(service);
         }
     }
@@ -199,7 +199,7 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
                 public ServerHandle run() {
                     SortedSet<ServerDetector> detectors = new TreeSet<>();
                     if (!Boolean.parseBoolean(configuration.getConfig(ConfigKey.DISABLE_DETECTORS))) {
-                        detectors = detectorLookup.lookup();
+                        detectors = detectorLookup.lookup(logHandler);
                     }
                     mbeanServerAccess = createMBeanServerAccess(detectors);
                     return detect(getDetectorOptions(), detectors, mbeanServerAccess);

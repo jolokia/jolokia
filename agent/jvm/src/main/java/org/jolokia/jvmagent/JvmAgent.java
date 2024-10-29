@@ -25,6 +25,7 @@ import org.jolokia.server.core.detector.ServerDetector;
 import org.jolokia.server.core.detector.ServerDetectorLookup;
 import org.jolokia.server.core.service.impl.CachingServerDetectorLookup;
 import org.jolokia.server.core.service.impl.ClasspathServerDetectorLookup;
+import org.jolokia.server.core.service.impl.StdoutLogHandler;
 
 
 /**
@@ -131,7 +132,7 @@ public final class JvmAgent {
      * @see ServerDetector#jvmAgentStartup(Instrumentation)
      */
     private static ClassLoader awaitServerInitialization(final Instrumentation instrumentation, ServerDetectorLookup lookup) {
-        Set<ServerDetector> detectors = lookup.lookup();
+        Set<ServerDetector> detectors = lookup.lookup(new StdoutLogHandler());
 
         // if some detector (only one!) gives us a ClassLoader, we can use it instead of getClass().getClassLoader()
         // to perform Jolokia Service Manager initialization

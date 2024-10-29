@@ -1,10 +1,12 @@
 package org.jolokia.server.core.service.impl;
 
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
 import org.jolokia.server.core.service.api.JolokiaService;
 import org.jolokia.server.core.service.api.JolokiaServiceCreator;
+import org.jolokia.server.core.service.api.LogHandler;
 import org.jolokia.server.core.util.LocalServiceFactory;
 
 /**
@@ -30,9 +32,14 @@ public class ClasspathServiceCreator implements JolokiaServiceCreator {
     }
 
     /** {@inheritDoc} */
-    public Set<JolokiaService<?>> getServices() {
-        return new TreeSet<>(
-                LocalServiceFactory.createServices(loader, "META-INF/jolokia/" + base + "-default",
-                                                   "META-INF/jolokia/" + base));
+    public Set<JolokiaService<?>> getServices(LogHandler logHandler) {
+        List<JolokiaService<?>> services = LocalServiceFactory.createServices(loader, "META-INF/jolokia/" + base + "-default",
+            "META-INF/jolokia/" + base);
+
+        if (LocalServiceFactory.validateServices(services, logHandler)) {
+            return new TreeSet<>(services);
+        }
+
+        return new TreeSet<>();
     }
 }

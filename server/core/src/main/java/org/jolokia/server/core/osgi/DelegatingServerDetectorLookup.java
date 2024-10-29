@@ -5,6 +5,7 @@ import java.util.*;
 
 import org.jolokia.server.core.detector.ServerDetector;
 import org.jolokia.server.core.detector.ServerDetectorLookup;
+import org.jolokia.server.core.service.api.LogHandler;
 import org.osgi.framework.*;
 
 /**
@@ -24,7 +25,7 @@ public class DelegatingServerDetectorLookup implements ServerDetectorLookup, Ser
     }
 
     /** {@inheritDoc} */
-    public SortedSet<ServerDetector> lookup() {
+    public SortedSet<ServerDetector> lookup(LogHandler logHandler) {
         SortedSet<ServerDetector> ret = new TreeSet<>();
         if (context != null) {
             try {
@@ -33,7 +34,7 @@ public class DelegatingServerDetectorLookup implements ServerDetectorLookup, Ser
                     for (ServiceReference<?>  ref : refs) {
                         ServerDetectorLookup detectorLookup = (ServerDetectorLookup) context.getService(ref);
                         try {
-                            ret.addAll(detectorLookup.lookup());
+                            ret.addAll(detectorLookup.lookup(logHandler));
                         } finally {
                             context.ungetService(ref);
                         }
