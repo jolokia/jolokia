@@ -102,10 +102,6 @@ public final class JvmAgent {
                     ClassLoader loader = awaitServerInitialization(instrumentation, lookup);
                     pConfig.setClassLoader(loader);
 
-                    // only now init the authenticator, because it may refer to a class not accessible
-                    // from boot/app classloader
-                    pConfig.initAuthenticator();
-
                     server = new JolokiaServer(pConfig, lookup);
                     synchronized (this) {
                         server.start(pLazy);

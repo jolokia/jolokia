@@ -368,6 +368,10 @@ public class JolokiaServer {
      * @throws IOException if something fails during the initialisation
      */
     private HttpServer createHttpServer(JolokiaServerConfig pConfig) throws IOException {
+        // only now init the authenticator, because it may refer to a class not accessible
+        // from boot/app classloader
+        pConfig.initAuthenticator();
+
         int port = pConfig.getPort();
         InetAddress address = pConfig.getAddress();
         InetSocketAddress socketAddress = new InetSocketAddress(address,port);

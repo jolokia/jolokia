@@ -117,6 +117,7 @@ public class JvmAgentConfigTest {
     public void readConfig() throws IOException {
         String path = copyResourceToTemp("/agent-test.properties");
         JvmAgentConfig config = new JvmAgentConfig("config=" + path);
+        config.initAuthenticator();
         assertEquals(config.getProtocol(), "https");
         Authenticator authenticator = config.getAuthenticator();
         assertNotNull(authenticator);
@@ -129,6 +130,7 @@ public class JvmAgentConfigTest {
     public void readConfigWithCustomAuthenticator() throws IOException {
         String path = copyResourceToTemp("/agent-custom-authenticator-test.properties");
         JvmAgentConfig config = new JvmAgentConfig("config=" + path);
+        config.initAuthenticator();
         assertEquals(config.getProtocol(), "http");
         Authenticator authenticator = config.getAuthenticator();
         assertNotNull(authenticator);

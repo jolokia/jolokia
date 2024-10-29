@@ -33,6 +33,7 @@ import org.easymock.EasyMock;
 import org.jolokia.server.core.detector.ServerDetector;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.api.ServerHandle;
+import org.jolokia.server.core.service.container.ContainerLocator;
 import org.jolokia.server.core.service.request.RequestInterceptor;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 
@@ -132,7 +133,13 @@ public class TestDetector implements ServerDetector {
         return null;
     }
 
-    public void jvmAgentStartup(Instrumentation instrumentation) {}
+    public ClassLoader jvmAgentStartup(Instrumentation instrumentation) {
+        return getClass().getClassLoader();
+    }
+
+    public ContainerLocator getContainerLocator() {
+        return null;
+    }
 
     public static void setThrowAddException(boolean b) {
         throwAddException = b;

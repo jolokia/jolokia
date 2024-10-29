@@ -56,7 +56,7 @@ public class ListHandlerTest extends BaseHandlerTest {
     @BeforeMethod
     public void createHandler() {
         TestJolokiaContext ctx = new TestJolokiaContext();
-        Set<JolokiaService<?>> discovered = new ClasspathServiceCreator("services").getServices();
+        Set<JolokiaService<?>> discovered = new ClasspathServiceCreator(getClass().getClassLoader(), "services").getServices();
         for (JolokiaService<?> service : discovered) {
             if (!(service instanceof DataUpdater || service instanceof CacheKeyProvider)) {
                 continue;
