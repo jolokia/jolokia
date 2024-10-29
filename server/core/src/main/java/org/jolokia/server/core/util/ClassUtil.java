@@ -298,10 +298,11 @@ public final class ClassUtil {
      * Get all resources from the classpath which are specified by the given path.
      *
      * @param pResource resource specification to use for lookup
+     * @param pClassLoaders
      * @return the list or URLs to loookup
      */
-    public static Set<String> getResources(String pResource) throws IOException {
-        List<ClassLoader> clls = findClassLoaders();
+    public static Set<String> getResources(String pResource, ClassLoader... pClassLoaders) throws IOException {
+        List<ClassLoader> clls = findClassLoaders(pClassLoaders);
         if (!clls.isEmpty()) {
             Set<String> ret = new HashSet<>();
             for (ClassLoader cll : clls) {

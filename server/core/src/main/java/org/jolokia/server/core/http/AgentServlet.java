@@ -151,7 +151,8 @@ public class AgentServlet extends HttpServlet {
      * @param pServiceManager service manager to which to add services
      */
     protected void initServices(ServletConfig pServletConfig, JolokiaServiceManager pServiceManager) {
-        pServiceManager.addServices(new ClasspathServiceCreator("services"));
+        // agent servlet simply uses own (webapp's) classloader
+        pServiceManager.addServices(new ClasspathServiceCreator(AgentServlet.class.getClassLoader(), "services"));
     }
 
 

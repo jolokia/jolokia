@@ -21,6 +21,7 @@ import java.lang.reflect.Proxy;
 import javax.management.*;
 
 import org.jolokia.server.core.service.serializer.Serializer;
+import org.jolokia.server.core.util.jmx.MBeanServers;
 
 /**
  * A wrapper class for holding the Jolokia JSR-160 private MBeanServer
@@ -38,11 +39,12 @@ public class JolokiaMBeanServerHolder implements JolokiaMBeanServerHolderMBean {
 
     static {
         try {
-            MBEAN_SERVER_HOLDER_OBJECTNAME = new ObjectName(OBJECT_NAME);
+            MBEAN_SERVER_HOLDER_OBJECTNAME = new ObjectName(MBeanServers.JOLOKIA_MBEAN_SERVER_NAME);
         } catch (MalformedObjectNameException e) {
-            throw new IllegalArgumentException("Invalid object name " +  OBJECT_NAME,e);
+            throw new IllegalArgumentException("Invalid object name " +  MBeanServers.JOLOKIA_MBEAN_SERVER_NAME, e);
         }
     }
+
     /**
      * Create a new holder
      */

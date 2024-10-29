@@ -45,9 +45,15 @@ class JolokiaMBeanServerHandler implements InvocationHandler {
      * Create a private MBean server
      */
     public JolokiaMBeanServerHandler(Serializer pSerializer) {
+        // uses javax.management.MBeanServerBuilder
         mBeanServer = MBeanServerFactory.newMBeanServer();
-        delegatedMBeans = new HashSet<>();
+
+        // PlatformMBeanServer is a singleton, but still created using
+        // javax.management.MBeanServerFactory.newMBeanServer(java), which involves
+        // javax.management.MBeanServerBuilder which may be overriden using -Djavax. management. builder. initial
         delegateServer = ManagementFactory.getPlatformMBeanServer();
+
+        delegatedMBeans = new HashSet<>();
         serializer = pSerializer;
     }
 

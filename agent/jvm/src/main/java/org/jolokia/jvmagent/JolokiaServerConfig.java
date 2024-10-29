@@ -72,6 +72,8 @@ public class JolokiaServerConfig {
     private String[] sslProtocols;
     private String[] sslCipherSuites;
 
+    private ClassLoader classLoader;
+
     /**
      * Constructor which prepares the server configuration from a map
      * of given config options (key: option name, value: option value).
@@ -369,10 +371,14 @@ public class JolokiaServerConfig {
         initThreadNamePrefix(agentConfig);
         initThreadNr(agentConfig);
         initHttpsRelatedSettings(agentConfig);
-        initAuthenticator();
+        // authenticator may use custom "authClass" with a class that's not available very early,
+        // so we have to delay this initialization phase. initAuthenticator() has to be called later
+        // after we may have got runtime-specific class loader (after
+        // org.jolokia.jvmagent.JvmAgent.awaitServerInitialization())
+//        initAuthenticator();
     }
 
-    private void initAuthenticator() {
+    protected void initAuthenticator() {
         initCustomAuthenticator();
         if (authenticator == null) {
             initAuthenticatorFromAuthMode();
@@ -429,7 +435,8 @@ public class JolokiaServerConfig {
 
     private Class<?> getAuthenticatorClass(String pAuthenticatorClass) {
         try {
-            Class<?> authClass = Class.forName(pAuthenticatorClass);
+            Class<?> authClass = classLoader == null
+                ? Class.forName(pAuthenticatorClass) : Class.forName(pAuthenticatorClass, true, classLoader);
             if (!Authenticator.class.isAssignableFrom(authClass)) {
                 throw new IllegalArgumentException("Provided authenticator class [" + pAuthenticatorClass +
                                                    "] is not a subclass of Authenticator");
@@ -654,4 +661,19 @@ public class JolokiaServerConfig {
     public boolean getExtendedClientCheck() {
         return extendedClientCheck;
     }
+
+    /**
+     * JVM Jolokia agent may set different class loader to use for loading services (from {@code /META-INF/jolokia/services}
+     * using this method. The classloader may be provided/detected by one of the
+     * {@link org.jolokia.server.core.detector.ServerDetector}s.
+     * @param loader
+     */
+    public void setClassLoader(ClassLoader loader) {
+        this.classLoader = loader;
+    }
+
+    public ClassLoader getClassLoader() {
+        return classLoader;
+    }
+
 }

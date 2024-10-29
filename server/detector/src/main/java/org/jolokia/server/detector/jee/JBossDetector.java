@@ -70,8 +70,10 @@ public class JBossDetector extends AbstractServerDetector {
      * loaded by the JVM.
      */
     @Override
-    public void jvmAgentStartup(Instrumentation instrumentation) {
+    public ClassLoader jvmAgentStartup(Instrumentation instrumentation) {
         jvmAgentStartup(instrumentation, this.getClass().getClassLoader());
+
+        return null;
     }
 
     void jvmAgentStartup(Instrumentation instrumentation, ClassLoader classLoader) {
@@ -103,31 +105,36 @@ public class JBossDetector extends AbstractServerDetector {
     public static final int LOGGING_DETECT_TIMEOUT = 5 * 60 * 1000;
     public static final int LOGGING_DETECT_INTERVAL = 200;
 
+    @Override
+    protected int getDetectionTimeout() {
+        return LOGGING_DETECT_TIMEOUT;
+    }
+
+    @Override
+    protected int getDetectionInterval() {
+        return LOGGING_DETECT_INTERVAL;
+    }
+
     private void awaitServerInitializationForJBossModulesBasedContainer(Instrumentation instrumentation) {
-        int count = 0;
-        while (count * LOGGING_DETECT_INTERVAL < LOGGING_DETECT_TIMEOUT) {
-            String loggingManagerClassName = System.getProperty("java.util.logging.manager");
-            if (loggingManagerClassName != null) {
-                if (isClassLoaded(loggingManagerClassName, instrumentation)) {
-                    // Assuming that the logging manager (most likely org.jboss.logmanager.LogManager)
-                    // is loaded by the static initializer of java.util.logging.LogManager (and not by
-                    // other code), we know now that either the java.util.logging.LogManager singleton
-                    // is or will be initialized.
-                    // Here is the trigger for loading the class:
-                    // https://github.com/jboss-modules/jboss-modules/blob/1.5.1.Final/src/main/java/org/jboss/modules/Main.java#L482
-                    // Therefore the steps 3-6 of the proposal for option 2 don't need to be performed,
-                    // see https://github.com/rhuss/jolokia/issues/258 for details.
-                    return;
+        activeWait(instrumentation,
+            () -> {
+                String loggingManagerClassName = System.getProperty("java.util.logging.manager");
+                if (loggingManagerClassName != null) {
+                    if (isClassLoaded(loggingManagerClassName, instrumentation)) {
+                        // Assuming that the logging manager (most likely org.jboss.logmanager.LogManager)
+                        // is loaded by the static initializer of java.util.logging.LogManager (and not by
+                        // other code), we know now that either the java.util.logging.LogManager singleton
+                        // is or will be initialized.
+                        // Here is the trigger for loading the class:
+                        // https://github.com/jboss-modules/jboss-modules/blob/1.5.1.Final/src/main/java/org/jboss/modules/Main.java#L482
+                        // Therefore the steps 3-6 of the proposal for option 2 don't need to be performed,
+                        // see https://github.com/rhuss/jolokia/issues/258 for details.
+                        return true;
+                    }
                 }
-            }
-            try {
-                Thread.sleep(LOGGING_DETECT_INTERVAL);
-                count++;
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        throw new IllegalStateException(String.format("Detected JBoss Module loader, but property java.util.logging.manager is not set after %d seconds", LOGGING_DETECT_TIMEOUT / 1000));
+                return false;
+            },
+            "Detected JBoss Module loader, but property java.util.logging.manager is not set after %d seconds");
     }
 
     private ServerHandle checkFromJSR77(MBeanServerAccess pMBeanServerAccess) {

@@ -27,11 +27,6 @@ import javax.management.MBeanServer;
 public interface JolokiaMBeanServerHolderMBean {
 
     /**
-     * Name of MBean used for registration
-     */
-    String OBJECT_NAME = "jolokia:type=MBeanServer";
-
-    /**
      * Attribute name for getting the server
      */
     String JOLOKIA_MBEAN_SERVER_ATTRIBUTE = "JolokiaMBeanServer";

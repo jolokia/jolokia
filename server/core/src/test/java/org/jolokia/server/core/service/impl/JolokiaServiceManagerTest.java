@@ -26,6 +26,7 @@ import org.jolokia.server.core.service.api.JolokiaService;
 import org.jolokia.server.core.service.api.JolokiaServiceManager;
 import org.jolokia.server.core.service.request.RequestHandler;
 import org.jolokia.server.core.util.DebugStore;
+import org.jolokia.server.core.util.LocalServiceFactory;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -64,7 +65,7 @@ public class JolokiaServiceManagerTest {
 
         JolokiaServiceManager manager = JolokiaServiceManagerFactory
             .createJolokiaServiceManager(config, null, null, null);
-        manager.addServices(new ClasspathServiceCreator("testServices"));
+        manager.addServices(new ClasspathServiceCreator(LocalServiceFactory.class.getClassLoader(), "testServices"));
         JolokiaContext context;
         try {
             context = manager.start();
@@ -87,7 +88,7 @@ public class JolokiaServiceManagerTest {
 
         JolokiaServiceManager manager = JolokiaServiceManagerFactory
             .createJolokiaServiceManager(config, null, null, null);
-        manager.addServices(new ClasspathServiceCreator("testServices"));
+        manager.addServices(new ClasspathServiceCreator(LocalServiceFactory.class.getClassLoader(), "testServices"));
         JolokiaContext context;
         try {
             context = manager.start();
@@ -111,7 +112,7 @@ public class JolokiaServiceManagerTest {
 
         JolokiaServiceManager manager = JolokiaServiceManagerFactory
             .createJolokiaServiceManager(config, null, null, null);
-        manager.addServices(new ClasspathServiceCreator("testServices"));
+        manager.addServices(new ClasspathServiceCreator(LocalServiceFactory.class.getClassLoader(), "testServices"));
         JolokiaContext context;
         try {
             context = manager.start();
@@ -136,7 +137,7 @@ public class JolokiaServiceManagerTest {
 
         JolokiaServiceManager manager = JolokiaServiceManagerFactory
             .createJolokiaServiceManager(config, null, null, null);
-        manager.addServices(new ClasspathServiceCreator("testServices"));
+        manager.addServices(new ClasspathServiceCreator(LocalServiceFactory.class.getClassLoader(), "testServices"));
         JolokiaContext context;
         try {
             context = manager.start();

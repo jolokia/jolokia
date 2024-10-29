@@ -25,7 +25,12 @@ public class MBeanServers implements NotificationListener {
     // Private Jolokia MBeanServer
     private MBeanServerConnection jolokiaMBeanServer;
 
-    private static final ObjectName JOLOKIA_MBEAN_SERVER_ONAME = JmxUtil.newObjectName("jolokia:type=MBeanServer");
+    /**
+     * Name of MBean used for registration of Jolokia own {@link MBeanServer}
+     */
+    public static final String JOLOKIA_MBEAN_SERVER_NAME = "jolokia:type=MBeanServer";
+
+    private static final ObjectName JOLOKIA_MBEAN_SERVER_ONAME = JmxUtil.newObjectName(JOLOKIA_MBEAN_SERVER_NAME);
 
     /**
      * Constructor building up the list of available MBeanServers

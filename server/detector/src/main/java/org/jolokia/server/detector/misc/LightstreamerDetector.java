@@ -39,10 +39,12 @@ public class LightstreamerDetector extends AbstractServerDetector {
     }
 
     @Override
-    public void jvmAgentStartup(Instrumentation instrumentation) {
+    public ClassLoader jvmAgentStartup(Instrumentation instrumentation) {
         if (isLightStreamer(instrumentation)) {
             awaitLightstreamerMBeans(instrumentation);
         }
+
+        return null;
     }
 
     protected boolean isLightStreamer(Instrumentation instrumentation) {
@@ -60,26 +62,25 @@ public class LightstreamerDetector extends AbstractServerDetector {
     private static final int LIGHTSTREAMER_DETECT_FINAL_DELAY = 500;
     private static final String LIGHTSTREAMER_MBEAN_CLASS = "com.lightstreamer.jmx.ServerMBean";
 
-    private void awaitLightstreamerMBeans(Instrumentation instrumentation) {
-        int count = 0;
-        while (count * LIGHTSTREAMER_DETECT_INTERVAL < LIGHTSTREAMER_DETECT_TIMEOUT) {
-            boolean serverMBean = isClassLoaded(LIGHTSTREAMER_MBEAN_CLASS, instrumentation);
-            if (serverMBean) {
-                try {
-                    Thread.sleep(LIGHTSTREAMER_DETECT_FINAL_DELAY);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-                return;
-            }
-
-            try {
-                Thread.sleep(LIGHTSTREAMER_DETECT_INTERVAL);
-                count++;
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        throw new IllegalStateException(String.format("Detected Lightstreamer, but JMX MBeans were not loaded after %d seconds", LIGHTSTREAMER_DETECT_TIMEOUT / 1000));
+    @Override
+    protected int getDetectionTimeout() {
+        return LIGHTSTREAMER_DETECT_TIMEOUT;
     }
+
+    @Override
+    protected int getDetectionInterval() {
+        return LIGHTSTREAMER_DETECT_INTERVAL;
+    }
+
+    @Override
+    protected int getDetectionFinalDelay() {
+        return LIGHTSTREAMER_DETECT_FINAL_DELAY;
+    }
+
+    private void awaitLightstreamerMBeans(Instrumentation instrumentation) {
+        activeWait(instrumentation,
+            () -> isClassLoaded(LIGHTSTREAMER_MBEAN_CLASS, instrumentation),
+            "Detected Lightstreamer, but JMX MBeans were not loaded after %d seconds");
+    }
+
 }

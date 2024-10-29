@@ -8,6 +8,7 @@ import javax.management.MBeanServerConnection;
 
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.api.ServerHandle;
+import org.jolokia.server.core.service.container.ContainerLocator;
 import org.jolokia.server.core.service.request.RequestInterceptor;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 
@@ -61,7 +62,14 @@ class FallbackServerDetector implements ServerDetector {
     }
 
     /** {@inheritDoc} */
-    public void jvmAgentStartup(Instrumentation instrumentation) { }
+    public ClassLoader jvmAgentStartup(Instrumentation instrumentation) {
+        return null;
+    }
+
+    /** {@inheritDoc} */
+    public ContainerLocator getContainerLocator() {
+        return null;
+    }
 
     /** {@inheritDoc} */
     public int compareTo(ServerDetector pDetector) {

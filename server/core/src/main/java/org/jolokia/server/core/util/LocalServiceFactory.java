@@ -107,7 +107,8 @@ public final class LocalServiceFactory {
     private static <T> void readServiceDefinitions(ClassLoader pClassLoader,
                                                    Map <ServiceEntry, T> pExtractorMap, String pDefPath) {
         try {
-            for (String url : ClassUtil.getResources(pDefPath)) {
+            ClassLoader[] loaders = pClassLoader == null ? new ClassLoader[0] : new ClassLoader[]{pClassLoader};
+            for (String url : ClassUtil.getResources(pDefPath, loaders)) {
                 readServiceDefinitionFromUrl(pClassLoader, pExtractorMap, url);
             }
         } catch (IOException e) {

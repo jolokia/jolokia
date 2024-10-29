@@ -31,6 +31,7 @@ import org.jolokia.jvmagent.handler.JolokiaHttpHandler;
 import org.jolokia.jvmagent.security.KeyStoreUtil;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.config.Configuration;
+import org.jolokia.server.core.detector.ServerDetectorLookup;
 import org.jolokia.server.core.restrictor.RestrictorFactory;
 import org.jolokia.server.core.service.JolokiaServiceManagerFactory;
 import org.jolokia.server.core.service.api.*;
@@ -81,7 +82,19 @@ public class JolokiaServer {
      * @throws IOException if initialization fails
      */
     public JolokiaServer(JolokiaServerConfig pConfig) throws IOException {
-        init(pConfig, null);
+        init(pConfig, null, null);
+    }
+
+    /**
+     * Create the Jolokia server which in turn creates an HttpServer for serving Jolokia requests. This
+     * uses a loghandler which prints out to stdout and allows to pass existing {@link ServerDetectorLookup}
+     *
+     * @param pConfig configuration for this server
+     * @param pLookup existing server detector lookup to use
+     * @throws IOException if initialization fails
+     */
+    public JolokiaServer(JolokiaServerConfig pConfig, ServerDetectorLookup pLookup) throws IOException {
+        init(pConfig, null, pLookup);
     }
 
     /**
@@ -92,7 +105,7 @@ public class JolokiaServer {
      * @throws IOException if initialization fails
      */
     public JolokiaServer(JolokiaServerConfig pConfig, LogHandler pLogHandler) throws IOException {
-        init(pConfig, pLogHandler);
+        init(pConfig, pLogHandler, null);
     }
 
     /**
@@ -104,7 +117,7 @@ public class JolokiaServer {
      * @param pLogHandler log handler to use
      */
     public JolokiaServer(HttpServer pServer,JolokiaServerConfig pConfig, LogHandler pLogHandler) {
-        init(pServer, pConfig, pLogHandler);
+        init(pServer, pConfig, pLogHandler, null);
     }
 
     /**
@@ -192,7 +205,22 @@ public class JolokiaServer {
      */
     protected final void init(JolokiaServerConfig pConfig,LogHandler pLogHandler) throws IOException {
         // We manage it on our own
-        init(createHttpServer(pConfig), pConfig, pLogHandler);
+        init(createHttpServer(pConfig), pConfig, pLogHandler, null);
+        useOwnServer = true;
+    }
+
+    /**
+     * Initialize this JolokiaServer and use an own created HttpServer. Existing {@link ServerDetectorLookup}
+     * can be passed
+     *
+     * @param pConfig configuartion to use
+     * @param pLogHandler log handler to use
+     * @param pLookup existing server detector lookup to use
+     * @throws IOException if the creation of the HttpServer fails
+     */
+    protected final void init(JolokiaServerConfig pConfig,LogHandler pLogHandler, ServerDetectorLookup pLookup) throws IOException {
+        // We manage it on our own
+        init(createHttpServer(pConfig), pConfig, pLogHandler, pLookup);
         useOwnServer = true;
     }
 
@@ -214,8 +242,9 @@ public class JolokiaServer {
      * @param pServer server to use
      * @param pConfig configuration
      * @param pLogHandler log handler to use.
+     * @param pLookup preconfigured {@link ServerDetectorLookup} to use
      */
-    private void init(HttpServer pServer, JolokiaServerConfig pConfig, LogHandler pLogHandler)  {
+    private void init(HttpServer pServer, JolokiaServerConfig pConfig, LogHandler pLogHandler, ServerDetectorLookup pLookup)  {
         config = pConfig;
         httpServer = pServer;
 
@@ -230,8 +259,15 @@ public class JolokiaServer {
                 JolokiaServiceManagerFactory.createJolokiaServiceManager(
                         jolokiaCfg,
                         log,
-                        RestrictorFactory.createRestrictor(jolokiaCfg, log));
-        serviceManager.addServices(new ClasspathServiceCreator("services"));
+                        RestrictorFactory.createRestrictor(jolokiaCfg, log),
+                        pLookup);
+
+        // loader used to load services - may be configured by one of the detectors
+        ClassLoader loader = config.getClassLoader();
+        if (loader == null) {
+            loader = LocalServiceFactory.class.getClassLoader();
+        }
+        serviceManager.addServices(new ClasspathServiceCreator(loader, "services"));
 
         // Get own URL for later reference
         serverAddress = pServer.getAddress();

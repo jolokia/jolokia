@@ -31,6 +31,7 @@ import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.config.Configuration;
 import org.jolokia.server.core.detector.*;
 import org.jolokia.server.core.service.api.*;
+import org.jolokia.server.core.service.container.ContainerLocator;
 import org.jolokia.server.core.service.request.RequestHandler;
 import org.jolokia.server.core.service.request.RequestInterceptor;
 import org.jolokia.server.core.util.DebugStore;
@@ -368,6 +369,7 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
                 ServerHandle info = detector.detect(pMBeanServerAccess);
                 if (info != null) {
                     addInterceptor(detector,pMBeanServerAccess);
+                    addRuntimeLocator(detector);
                     return info;
                 }
             } catch (Exception exp) {
@@ -385,6 +387,14 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
         RequestInterceptor interceptor = detector.getRequestInterceptor(pServerAccess);
         if (interceptor  != null) {
             addService(interceptor);
+        }
+    }
+
+    // Add a runtime locator service using the _main_ detector
+    private void addRuntimeLocator(ServerDetector detector) {
+        ContainerLocator locator = detector.getContainerLocator();
+        if (locator != null) {
+            addService(locator);
         }
     }
 

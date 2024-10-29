@@ -22,6 +22,8 @@ import java.util.Set;
 
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.detector.ServerDetector;
+import org.jolokia.server.core.detector.ServerDetectorLookup;
+import org.jolokia.server.core.service.impl.CachingServerDetectorLookup;
 import org.jolokia.server.core.service.impl.ClasspathServerDetectorLookup;
 
 
@@ -96,10 +98,16 @@ public final class JvmAgent {
             public void run() {
                 try {
                     // block until the server supporting early detection is initialized
-                    awaitServerInitialization(instrumentation);
+                    ServerDetectorLookup lookup = new CachingServerDetectorLookup(new ClasspathServerDetectorLookup());
+                    ClassLoader loader = awaitServerInitialization(instrumentation, lookup);
+                    pConfig.setClassLoader(loader);
 
-                    server = new JolokiaServer(pConfig);
-                    synchronized (server) {
+                    // only now init the authenticator, because it may refer to a class not accessible
+                    // from boot/app classloader
+                    pConfig.initAuthenticator();
+
+                    server = new JolokiaServer(pConfig, lookup);
+                    synchronized (this) {
                         server.start(pLazy);
                         setStateMarker();
                     }
@@ -126,17 +134,35 @@ public final class JvmAgent {
      * @param instrumentation instrumentation used for accessing services
      * @see ServerDetector#jvmAgentStartup(Instrumentation)
      */
-    private static void awaitServerInitialization(final Instrumentation instrumentation) {
-        Set<ServerDetector> detectors = new ClasspathServerDetectorLookup().lookup();
+    private static ClassLoader awaitServerInitialization(final Instrumentation instrumentation, ServerDetectorLookup lookup) {
+        Set<ServerDetector> detectors = lookup.lookup();
+
+        // if some detector (only one!) gives us a ClassLoader, we can use it instead of getClass().getClassLoader()
+        // to perform Jolokia Service Manager initialization
+        ServerDetector activeDetector = null;
+        ClassLoader highOrderClassLoader = null;
         for (ServerDetector detector : detectors) {
-            detector.jvmAgentStartup(instrumentation);
+            ClassLoader cl = detector.jvmAgentStartup(instrumentation);
+            if (cl != null) {
+                if (highOrderClassLoader != null) {
+                    System.err.printf("Invalid ServerDetector configuration. Detector \"%s\" already provided" +
+                        " a classloader and different detector (\"%s\") overrides it.",
+                        activeDetector, detector);
+                    throw new RuntimeException("Invalid ServerDetector configuration");
+                } else {
+                    highOrderClassLoader = cl;
+                    activeDetector = detector;
+                }
+            }
         }
+
+        return highOrderClassLoader;
     }
 
     private static void stopAgent() {
         try {
             if (server != null) {
-                synchronized (server) {
+                synchronized (JvmAgent.class) {
                     server.stop();
                     clearStateMarker();
                 }

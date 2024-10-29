@@ -140,6 +140,7 @@
               org.jolokia.server.core.restrictor,
               org.jolokia.server.core.restrictor.policy,
               org.jolokia.server.core.service.api,
+              org.jolokia.server.core.service.container,
               org.jolokia.server.core.service.notification,
               org.jolokia.server.core.service.request,
               org.jolokia.server.core.service.serializer,

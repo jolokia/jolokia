@@ -3,6 +3,7 @@ package org.jolokia.support.jmx;
 import javax.management.*;
 
 import org.easymock.EasyMock;
+import org.jolokia.server.core.util.jmx.MBeanServers;
 import org.jolokia.service.serializer.JolokiaSerializer;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -19,7 +20,7 @@ public class JolokiaMBeanServerHolderTest {
     public void registerMBean2() throws NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanException, MalformedObjectNameException, AttributeNotFoundException, ReflectionException, InstanceNotFoundException {
         MBeanServer server = EasyMock.createMock(MBeanServer.class);
         MBeanServer ret = MBeanServerFactory.newMBeanServer();
-        ObjectName oName = new ObjectName(JolokiaMBeanServerHolderMBean.OBJECT_NAME);
+        ObjectName oName = new ObjectName(MBeanServers.JOLOKIA_MBEAN_SERVER_NAME);
         EasyMock.expect(server.registerMBean(anyObject(), eq(oName))).andThrow(new InstanceAlreadyExistsException());
         EasyMock.expect(server.getAttribute(eq(oName), eq(JolokiaMBeanServerHolderMBean.JOLOKIA_MBEAN_SERVER_ATTRIBUTE))).andReturn(ret);
         EasyMock.replay(server);
@@ -31,7 +32,7 @@ public class JolokiaMBeanServerHolderTest {
     @Test(expectedExceptions = IllegalStateException.class)
     void registerMBeanFailed() throws NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanException, MalformedObjectNameException {
         MBeanServer server = EasyMock.createMock(MBeanServer.class);
-        ObjectName oName = new ObjectName(JolokiaMBeanServerHolderMBean.OBJECT_NAME);
+        ObjectName oName = new ObjectName(MBeanServers.JOLOKIA_MBEAN_SERVER_NAME);
         EasyMock.expect(server.registerMBean(anyObject(), eq(oName))).andThrow(new MBeanRegistrationException(new Exception()));
         EasyMock.replay(server);
 
@@ -41,7 +42,7 @@ public class JolokiaMBeanServerHolderTest {
     @Test(expectedExceptions = IllegalStateException.class)
     public void registerMBeanFailed2() throws NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanException, MalformedObjectNameException, AttributeNotFoundException, ReflectionException, InstanceNotFoundException {
         MBeanServer server = EasyMock.createMock(MBeanServer.class);
-        ObjectName oName = new ObjectName(JolokiaMBeanServerHolderMBean.OBJECT_NAME);
+        ObjectName oName = new ObjectName(MBeanServers.JOLOKIA_MBEAN_SERVER_NAME);
         EasyMock.expect(server.registerMBean(anyObject(), eq(oName))).andThrow(new InstanceAlreadyExistsException());
         EasyMock.expect(server.getAttribute(eq(oName), eq(JolokiaMBeanServerHolderMBean.JOLOKIA_MBEAN_SERVER_ATTRIBUTE))).andThrow(new AttributeNotFoundException());
         EasyMock.replay(server);

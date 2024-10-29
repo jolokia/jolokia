@@ -19,11 +19,13 @@ package org.jolokia.server.detector.jee;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
 import java.util.*;
+import java.util.function.Supplier;
 
 import javax.management.*;
 
 import org.jolokia.server.core.detector.ServerDetector;
 import org.jolokia.server.core.service.api.JolokiaContext;
+import org.jolokia.server.core.service.container.ContainerLocator;
 import org.jolokia.server.core.service.request.RequestInterceptor;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 
@@ -243,10 +245,14 @@ public abstract class AbstractServerDetector implements ServerDetector {
     /**
      * By default do nothing during JVM agent startup
      */
-    public void jvmAgentStartup(Instrumentation instrumentation) {
+    public ClassLoader jvmAgentStartup(Instrumentation instrumentation) {
+        return null;
     }
 
-
+    @Override
+    public ContainerLocator getContainerLocator() {
+        return null;
+    }
 
     /**
      * Tests if the given class name has been loaded by the JVM. Don't use this method
@@ -268,6 +274,88 @@ public abstract class AbstractServerDetector implements ServerDetector {
             }
         }
         return false;
+    }
+
+    /**
+     * Just like {@link #isClassLoaded} but returns the loaded class instead of a boolean
+     * @param className
+     * @param instrumentation
+     * @return
+     */
+    protected Class<?> getClassLoaded(String className, Instrumentation instrumentation) {
+        if (instrumentation == null || className == null) {
+            throw new IllegalArgumentException("instrumentation and className must not be null");
+        }
+        Class<?>[] classes = instrumentation.getAllLoadedClasses();
+        for (Class<?> c : classes) {
+            if (className.equals(c.getName())) {
+                return c;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * If a detector requires an active-wait loop, this is the total timeout (in ms). If {@code -1}, it means the waiting is
+     * disabled. But given detector has to actively invoke waiting code.
+     *
+     * @return
+     */
+    protected int getDetectionTimeout() {
+        return -1;
+    }
+
+    /**
+     * A wait (in ms) between active-loop waiting cycles.
+     *
+     * @return
+     */
+    protected int getDetectionInterval() {
+        return -1;
+    }
+
+    /**
+     * A final delay between ending the active-wait loop.
+     *
+     * @return
+     */
+    protected int getDetectionFinalDelay() {
+        return 0;
+    }
+
+    /**
+     * A helper for dedicated detectors that implements active-waiting loop
+     * @param instrumentation
+     * @param checker
+     * @param failedMessageFormat a message format with a placeholder for total timeout used to format exception
+     *                            message for failed active-wait loop.
+     */
+    protected void activeWait(Instrumentation instrumentation, Supplier<Boolean> checker, String failedMessageFormat) {
+        int interval = getDetectionInterval();
+        int timeout = getDetectionTimeout();
+        int finalDelay = getDetectionFinalDelay();
+        int count = 0;
+        while (count * interval < timeout) {
+            boolean success = checker.get();
+            if (success) {
+                if (finalDelay > 0) {
+                    try {
+                        Thread.sleep(finalDelay);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                return;
+            }
+
+            try {
+                Thread.sleep(interval);
+                count++;
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        throw new IllegalStateException(String.format(failedMessageFormat, timeout / 1000));
     }
 
 }
