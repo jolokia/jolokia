@@ -18,8 +18,12 @@ package org.jolokia.service.serializer.json;
 import java.lang.reflect.InvocationTargetException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.time.OffsetTime;
+import java.time.YearMonth;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -119,9 +123,23 @@ public class TemporalExtractor implements Extractor {
         int minute = temporal.isSupported(ChronoField.MINUTE_OF_HOUR) ? temporal.get(ChronoField.MINUTE_OF_HOUR) : 0;
         int seconds = temporal.isSupported(ChronoField.SECOND_OF_MINUTE) ? temporal.get(ChronoField.SECOND_OF_MINUTE) : 0;
         int nanos = temporal.isSupported(ChronoField.NANO_OF_SECOND) ? temporal.get(ChronoField.NANO_OF_SECOND) : 0;
-        ZoneOffset offset = temporal.isSupported(ChronoField.OFFSET_SECONDS)
-            ? ZoneOffset.ofTotalSeconds(temporal.get(ChronoField.OFFSET_SECONDS))
-            : formatter.getZone().getRules().getOffset(Instant.now());
+        ZoneOffset offset = null;
+        if (temporal.isSupported(ChronoField.OFFSET_SECONDS)) {
+            offset = ZoneOffset.ofTotalSeconds(temporal.get(ChronoField.OFFSET_SECONDS));
+        } else if (temporal instanceof LocalDateTime) {
+            offset = formatter.getZone().getRules().getOffset((LocalDateTime) temporal);
+        } else if (temporal instanceof LocalDate) {
+            offset = formatter.getZone().getRules().getOffset(LocalDateTime.of((LocalDate) temporal, LocalTime.of(0, 0, 0)));
+        } else if (temporal instanceof YearMonth) {
+            int y = ((YearMonth) temporal).getYear();
+            int m = ((YearMonth) temporal).getMonthValue();
+            offset = formatter.getZone().getRules().getOffset(LocalDateTime.of(LocalDate.of(y, m, 1), LocalTime.of(0, 0, 0)));
+        } else if (temporal instanceof OffsetTime) {
+            offset = ((OffsetTime) temporal).getOffset();
+        } else {
+            offset = formatter.getZone().getRules().getOffset(Instant.now());
+        }
+
         OffsetDateTime odt = OffsetDateTime.of(year, month, day, hour, minute, seconds, nanos, offset);
 
         return formatter.format(odt);

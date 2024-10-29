@@ -22,12 +22,14 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
 import java.time.Year;
 import java.time.YearMonth;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -238,19 +240,25 @@ public class BeanExtractorTest extends AbstractExtractorTest {
         // 3. LocalDate - no time, so 00:00:00, zone from the formatter
         assertEquals(array.get(2), "2024--07--22 | 00:00:00.000 \"+02:00\"");
         // 4. LocalTime - no date, so today, zone from the formatter
+        //    but the zone depends on current day...
+        ZoneOffset offset = TimeZone.getDefault().toZoneId().getRules().getOffset(Instant.now());
+        String zonePart = DateTimeFormatter.ofPattern("XXX").format(offset);
         assertEquals(array.get(3), DateTimeFormatter.ofPattern("yyyy--MM--dd").format(LocalDate.now())
-            + " | 14:22:42.999 \"+02:00\"");
+            + " | 14:22:42.999 \"" + zonePart + "\"");
         // 5. Year - no month, day, time, zone from the formatter
         assertEquals(array.get(4), "2024--"
             + DateTimeFormatter.ofPattern("MM--dd").format(LocalDate.now())
-            + " | 00:00:00.000 \"+02:00\"");
+            + " | 00:00:00.000 \"" + zonePart + "\"");
         // 6. YearMonth - no day, time, zone from the formatter
         assertEquals(array.get(5), "2024--07--"
             + DateTimeFormatter.ofPattern("dd").format(LocalDate.now())
             + " | 00:00:00.000 \"+02:00\"");
         // 7. OffsetTime with EST, formatted as CET (7 hours span)
+
+        int t1 = ZoneOffset.ofHours(-5).getTotalSeconds();
+        int t2 = ZonedDateTime.of(LocalDateTime.now(), ZoneOffset.systemDefault()).getOffset().getTotalSeconds();
         assertEquals(array.get(6), DateTimeFormatter.ofPattern("yyyy--MM--dd").format(LocalDate.now())
-            + " | 21:22:42.999 \"+02:00\"");
+            + " | " + String.format("%02d", 14 + (t2 - t1) / 3600) + ":22:42.999 \"" + zonePart + "\"");
         // 8. OffsetDateTime with EST, formatted as CET (7 hours span)
         assertEquals(array.get(7), "2024--07--22 | 21:22:42.999 \"+02:00\"");
         // 9. ZonedDateTime with EST, formatted as CET (7 hours span)
