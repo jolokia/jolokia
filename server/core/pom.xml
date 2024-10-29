@@ -127,6 +127,7 @@
 
             <Export-Package>
               org.jolokia.server.core,
+              org.jolokia.server.core.auth,
               org.jolokia.server.core.backend,
               org.jolokia.server.core.config,
               org.jolokia.server.core.detector,

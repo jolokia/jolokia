@@ -1,9 +1,13 @@
 package org.jolokia.service.history;
 
 import java.lang.management.ManagementFactory;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 
 import javax.management.*;
+import javax.security.auth.Subject;
 
+import org.jolokia.server.core.auth.JolokiaAgentPrincipal;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.request.JolokiaRequest;
 import org.jolokia.server.core.service.api.*;
@@ -59,19 +63,28 @@ public class HistoryMBeanRequestInterceptor extends AbstractJolokiaService<Reque
      */
     public void intercept(JolokiaRequest pJmxReq, JSONObject pJson) {
         MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
-        try {
-            if (historyObjectName != null) {
-                mBeanServer.invoke(historyObjectName,
-                                   "updateAndAdd",
-                                   new Object[] { pJmxReq, pJson},
-                                   new String[] { JolokiaRequest.class.getName(), JSONObject.class.getName() });
+        if (historyObjectName != null) {
+            try {
+                Subject.doAs(JolokiaAgentPrincipal.asSubject(), new PrivilegedExceptionAction<>() {
+                    @Override
+                    public Object run() {
+                        try {
+                            mBeanServer.invoke(historyObjectName,
+                                "updateAndAdd",
+                                new Object[] { pJmxReq, pJson },
+                                new String[] { JolokiaRequest.class.getName(), JSONObject.class.getName() });
+                        } catch (InstanceNotFoundException e) {
+                            // Ignore, no history MBean is enabled, so no update
+                        } catch (MBeanException e) {
+                            throw new IllegalStateException("Internal: Cannot update History store",e);
+                        } catch (ReflectionException e) {
+                            throw new IllegalStateException("Internal: Cannot call History MBean via reflection",e);
+                        }
+                        return null;
+                    }
+                });
+            } catch (PrivilegedActionException ignored) {
             }
-        } catch (InstanceNotFoundException e) {
-            // Ignore, no history MBean is enabled, so no update
-        } catch (MBeanException e) {
-            throw new IllegalStateException("Internal: Cannot update History store",e);
-        } catch (ReflectionException e) {
-            throw new IllegalStateException("Internal: Cannot call History MBean via reflection",e);
         }
     }
 

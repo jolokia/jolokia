@@ -16,12 +16,15 @@
 
 package org.jolokia.server.core.service.impl;
 
+import java.security.PrivilegedAction;
 import java.util.*;
 import java.util.stream.*;
 
 import javax.management.*;
+import javax.security.auth.Subject;
 
 import org.jolokia.json.JSONObject;
+import org.jolokia.server.core.auth.JolokiaAgentPrincipal;
 import org.jolokia.server.core.backend.MBeanServerHandler;
 import org.jolokia.server.core.backend.MBeanServerHandlerMBean;
 import org.jolokia.server.core.config.ConfigKey;
@@ -190,12 +193,17 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
     /** {@inheritDoc} */
     public synchronized JolokiaContext start() {
         if (!isInitialized) {
-            SortedSet<ServerDetector> detectors = new TreeSet<>();
-            if (!Boolean.parseBoolean(configuration.getConfig(ConfigKey.DISABLE_DETECTORS))) {
-                detectors = detectorLookup.lookup();
-            }
-            mbeanServerAccess = createMBeanServerAccess(detectors);
-            ServerHandle handle = detect(getDetectorOptions(),detectors,mbeanServerAccess);
+            ServerHandle handle = Subject.doAs(JolokiaAgentPrincipal.asSubject(), new PrivilegedAction<>() {
+                @Override
+                public ServerHandle run() {
+                    SortedSet<ServerDetector> detectors = new TreeSet<>();
+                    if (!Boolean.parseBoolean(configuration.getConfig(ConfigKey.DISABLE_DETECTORS))) {
+                        detectors = detectorLookup.lookup();
+                    }
+                    mbeanServerAccess = createMBeanServerAccess(detectors);
+                    return detect(getDetectorOptions(), detectors, mbeanServerAccess);
+                }
+            });
             agentDetails = new AgentDetails(configuration,handle);
 
             // Create context and remember
@@ -250,6 +258,16 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
 
     /** {@inheritDoc} */
     public synchronized void stop() {
+        Subject.doAs(JolokiaAgentPrincipal.asSubject(), new PrivilegedAction<>() {
+            @Override
+            public Object run() {
+                stopInternal();
+                return null;
+            }
+        });
+    }
+
+    private synchronized void stopInternal() {
         if (isInitialized) {
             try {
                 mbeanRegistry.destroy();
