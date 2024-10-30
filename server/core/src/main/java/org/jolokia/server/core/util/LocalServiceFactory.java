@@ -222,7 +222,7 @@ public final class LocalServiceFactory {
             for (Class<?> c : jolokiaInterfaces) {
                 logHandler.error(" - " + c.getClassLoader().toString(), null);
             }
-            logHandler.error("Are there multiple Jolokia agents available?", null);
+            logHandler.error("Possible reason: Multiple Jolokia agents are installed while only a single agent per runtime is supported.", null);
             return false;
         }
 
