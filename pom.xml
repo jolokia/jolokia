@@ -1066,7 +1066,7 @@
     <plugin.org.asciidoctor.asciidoctor-maven-plugin>3.0.0</plugin.org.asciidoctor.asciidoctor-maven-plugin>
     <plugin.org.codehaus.mojo.build-helper-maven-plugin>3.6.0</plugin.org.codehaus.mojo.build-helper-maven-plugin>
     <plugin.org.jacoco.jacoco-maven-plugin>0.7.6.201602180812</plugin.org.jacoco.jacoco-maven-plugin>
-    <plugin.org.vafer.jdeb>1.10</plugin.org.vafer.jdeb>
+    <plugin.org.vafer.jdeb>1.11</plugin.org.vafer.jdeb>
 
     <!-- Versions of build-related dependencies -->
 
