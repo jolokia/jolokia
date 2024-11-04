@@ -32,6 +32,7 @@ import javax.management.ObjectName;
 import org.easymock.EasyMock;
 import org.jolokia.server.core.detector.ServerDetector;
 import org.jolokia.server.core.service.api.JolokiaContext;
+import org.jolokia.server.core.service.api.LogHandler;
 import org.jolokia.server.core.service.api.ServerHandle;
 import org.jolokia.server.core.service.container.ContainerLocator;
 import org.jolokia.server.core.service.request.RequestInterceptor;
@@ -137,7 +138,7 @@ public class TestDetector implements ServerDetector {
         return getClass().getClassLoader();
     }
 
-    public ContainerLocator getContainerLocator() {
+    public ContainerLocator getContainerLocator(LogHandler logHandler) {
         return null;
     }
 

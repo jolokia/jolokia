@@ -23,6 +23,7 @@ import java.util.Set;
 import javax.management.MBeanServerConnection;
 
 import org.jolokia.server.core.service.api.JolokiaService;
+import org.jolokia.server.core.service.api.LogHandler;
 import org.jolokia.server.core.service.api.ServerHandle;
 import org.jolokia.server.core.service.container.ContainerLocator;
 import org.jolokia.server.core.service.request.RequestInterceptor;
@@ -35,10 +36,11 @@ import org.jolokia.server.core.util.jmx.MBeanServerAccess;
  * and some optional information. For the early detection of a server by the JVM agent,
  * {@link #jvmAgentStartup(Instrumentation)} can be used. Using these methods is useful in case
  * the server is using its own class loaders to load components used by Jolokia (e.g jmx, Java logging
- * which is indirectly required by the sun.net.httpserver).</p>
+ * which is indirectly required by sun.net.httpserver).</p>
  *
  * <p>A detector is used in two stages - first during agent startup (possibly waiting for runtime initialization)
- * and then later when Jolokia Service Manager starts to detect {@link ServerHandle}.</p>
+ * and then later when Jolokia Service Manager starts to detect {@link ServerHandle} and possibly
+ * {@link RequestInterceptor} and {@link ContainerLocator}.</p>
  *
  * @author roland
  * @since 05.11.10
@@ -119,10 +121,11 @@ public interface ServerDetector extends JolokiaService<ServerDetector>, Comparab
      * can then register such locator as Jolokia service to be used by other services (possibly discovered using
      * {@code /META-INF/jolokia/services} discovery mechanism), which may not have other way to access the container.
      *
+     * @param logHandler
      * @return optional {@link ContainerLocator} Jolokia service to give nice access (through Jolokia service registry
      * to a container/runtime using Jolokia agent).
      */
-    ContainerLocator getContainerLocator();
+    ContainerLocator getContainerLocator(LogHandler logHandler);
 
     // ==================================================================================
 

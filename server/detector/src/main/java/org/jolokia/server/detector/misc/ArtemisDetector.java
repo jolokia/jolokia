@@ -30,6 +30,7 @@ import javax.management.MBeanServer;
 
 import org.jolokia.server.core.detector.DefaultServerHandle;
 import org.jolokia.server.core.service.api.AbstractJolokiaService;
+import org.jolokia.server.core.service.api.LogHandler;
 import org.jolokia.server.core.service.api.ServerHandle;
 import org.jolokia.server.core.service.container.ContainerLocator;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
@@ -40,6 +41,10 @@ import org.jolokia.server.detector.jee.AbstractServerDetector;
  * server - as WAR or JVM agent.
  */
 public class ArtemisDetector extends AbstractServerDetector {
+
+    private static final String jmxBuilderClass = "org.apache.activemq.artemis.core.server.management.ArtemisRbacMBeanServerBuilder";
+    private static final String jmxHandlerClass = "org.apache.activemq.artemis.core.server.management.ArtemisRbacInvocationHandler";
+    private static final String artemisBrokerClass = "org.apache.activemq.artemis.core.server.impl.ActiveMQServerImpl";
 
     private static final int ARTEMIS_DETECT_TIMEOUT = 2 * 60 * 1000;
     private static final int ARTEMIS_DETECT_INTERVAL = 200;
@@ -64,6 +69,8 @@ public class ArtemisDetector extends AbstractServerDetector {
      * {@code org.apache.activemq.artemis.core.management.impl.ActiveMQServerControlImpl}).
      */
     private Object artemisInstance = null;
+
+    private volatile boolean jvmAgentInitialization = false;
 
     public ArtemisDetector(int pOrder) {
         super("Artemis", pOrder);
@@ -120,11 +127,8 @@ public class ArtemisDetector extends AbstractServerDetector {
         // -Djavax.management.builder.initial
         // https://activemq.apache.org/components/artemis/documentation/latest/management.html#jmx-authorization-in-broker-xml
         // com.sun.jmx.defaults.JmxProperties.JMX_INITIAL_BUILDER
-        final String jmxBuilderClass = "org.apache.activemq.artemis.core.server.management.ArtemisRbacMBeanServerBuilder";
-        final String jmxHandlerClass = "org.apache.activemq.artemis.core.server.management.ArtemisRbacInvocationHandler";
         boolean artemisBuilderUsed = jmxBuilderClass.equals(System.getProperty("javax.management.builder.initial"));
 
-        String artemisBrokerClass = "org.apache.activemq.artemis.core.server.impl.ActiveMQServerImpl";
         AtomicBoolean brokerClassLoaded = new AtomicBoolean(false);
         // if Artemis sets own builder, we assume it'll get a reference to the broker
         AtomicBoolean brokerAvailable = new AtomicBoolean(false);
@@ -187,15 +191,53 @@ public class ArtemisDetector extends AbstractServerDetector {
             },
             "Detected Artemis environment, but broker instance is not discovered after %d seconds");
 
+        jvmAgentInitialization = true;
+
         return classloader.get();
     }
 
     @Override
-    public ContainerLocator getContainerLocator() {
-        if (artemisInstance == null) {
-            return null;
+    public ContainerLocator getContainerLocator(LogHandler logHandler) {
+        if (jvmAgentInitialization) {
+            // this detector was invoked during JVM Agent initialization
+            return artemisInstance == null ? null : new ArtemisLocator();
         }
-        return new ArtemisLocator();
+
+        // container locator may be called also when starting a WAR / Spring Boot agent where
+        // we don't have access to java.lang.instrument.Instrumentation
+
+        try {
+            MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+            if (!Proxy.isProxyClass(server.getClass())) {
+                // we can't grab an instance of the broker. It doesn't prevent DataUpdaters and CacheKeyProviders
+                // specific to Artemis to be used, but they simply won't use broker configuration
+                return null;
+            } else {
+                InvocationHandler handler = Proxy.getInvocationHandler(server);
+                if (!jmxHandlerClass.equals(handler.getClass().getName())) {
+                    // MBeanServer is a proxy, but using unsupported InvocationHandler
+                    return null;
+                } else {
+                    Field serverField;
+                    try {
+                        serverField = handler.getClass().getDeclaredField("activeMQServer");
+                        serverField.setAccessible(true);
+                        Object brokerInstance = serverField.get(handler);
+                        if (brokerInstance != null) {
+                            // we finally have what we need
+                            ArtemisDetector.this.artemisInstance = brokerInstance;
+                            logHandler.info("Jolokia: Detected Artemis broker instance "
+                                + brokerInstance.getClass().getName());
+                            return new ArtemisLocator();
+                        }
+                    } catch (NoSuchFieldException | SecurityException ignored) {
+                    }
+                }
+            }
+        } catch (Exception ignored) {
+        }
+
+        return null;
     }
 
     private class ArtemisLocator extends AbstractJolokiaService<ContainerLocator> implements ContainerLocator {

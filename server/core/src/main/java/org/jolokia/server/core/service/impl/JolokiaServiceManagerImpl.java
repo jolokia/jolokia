@@ -392,7 +392,7 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
 
     // Add a runtime locator service using the _main_ detector
     private void addRuntimeLocator(ServerDetector detector) {
-        ContainerLocator locator = detector.getContainerLocator();
+        ContainerLocator locator = detector.getContainerLocator(logHandler);
         if (locator != null) {
             addService(locator);
         }

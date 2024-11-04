@@ -25,6 +25,7 @@ import javax.management.*;
 
 import org.jolokia.server.core.detector.ServerDetector;
 import org.jolokia.server.core.service.api.JolokiaContext;
+import org.jolokia.server.core.service.api.LogHandler;
 import org.jolokia.server.core.service.container.ContainerLocator;
 import org.jolokia.server.core.service.request.RequestInterceptor;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
@@ -250,7 +251,7 @@ public abstract class AbstractServerDetector implements ServerDetector {
     }
 
     @Override
-    public ContainerLocator getContainerLocator() {
+    public ContainerLocator getContainerLocator(LogHandler logHandler) {
         return null;
     }
 
