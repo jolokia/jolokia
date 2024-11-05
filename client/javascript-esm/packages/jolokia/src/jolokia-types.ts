@@ -101,6 +101,12 @@ export type ProcessingParameters = {
    * from a previous response's `timestamp`.
    */
   ifModifiedSince?: number
+  /**
+   * Whether to provide optimized list response, where instead of domains and mbeans, we return a cache and domains,
+   * where domains' mbeans may refer to cached MBeanInfo instead of a copy (important when we have multiple
+   * mbeans with the same MBeanInfo)
+   */
+  listCache?: boolean
 }
 
 /**

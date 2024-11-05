@@ -90,7 +90,8 @@ const PROCESSING_PARAMS: string[] = [
   "canonicalNaming",
   "mimeType",
   "includeRequest",
-  "ifModifiedSince"
+  "ifModifiedSince",
+  "listCache"
 ]
 
 /**
