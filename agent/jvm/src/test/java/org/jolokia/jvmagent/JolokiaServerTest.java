@@ -612,7 +612,7 @@ public class JolokiaServerTest {
             }
             uc.connect();
             String resp = EnvTestUtil.readToString(uc.getInputStream());
-            assertTrue(resp.matches(".*type.*version.*" + Version.getAgentVersion() + ".*"));
+            assertTrue(resp.matches(".*type.*version.*") && resp.matches(".*" + Version.getAgentVersion() + ".*"));
         } finally {
             server.stop();
             try {
