@@ -23,12 +23,18 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
-    <release version="2.1.1" description="Release 2.1.1" date="2024-09-12">
-      <action dev="grgrzybek" type="add" issue="738">
-        Added "fetchError" JavaScript configuration to handle global errors in callback mode
+    <release version="2.1.2" description="Release 2.1.2" date="2024-11-13">
+      <action dev="grgrzybek" type="add" issue="755">
+        Create Apache Artemis server detector
       </action>
-      <action dev="grgrzybek" type="add" issue="731">
-        Added "ignore-scheme" option for restrictor
+      <action dev="grgrzybek" type="add" issue="754">
+        Make extension loading more dynamic - waiting for runtime-specific classloader
+      </action>
+      <action dev="grgrzybek" type="add" issue="753">
+        Perform Jolokia initialization in privileged action
+      </action>
+      <action dev="grgrzybek" type="add" issue="752">
+        Provide better error messages when Jolokia is available from two CLASSPATH entries
       </action>
     </release>
     <release version="2.1.0" description="Release 2.1.0" date="2024-08-12">
