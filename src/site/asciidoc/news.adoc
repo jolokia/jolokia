@@ -22,7 +22,7 @@
 
 Jolokia 2.1.2 is released and it is ready for more generic integration with other runtimes, especially with https://activemq.apache.org/components/artemis/[Apache Artemis,role=externalLink,window=_blank].
 
-Long existing `ServerDetector` abstraction was enhanced to let Jolokia know about actual ClassLoader used withing given runtime. For example, https://tomcat.apache.org/[Apache Tomcat] starts with just few JARs on system CLASSPATH and later the _actual_ ClassLoader is constructed using JARs from `${catalina.home}/lib`. Now Jolokia running as JVM agent has proper access to classes from this broader ClassLoader.
+Long existing `ServerDetector` abstraction was enhanced to let Jolokia know about actual ClassLoader used within given runtime. For example, https://tomcat.apache.org/[Apache Tomcat] starts with just few JARs on system CLASSPATH and later the _actual_ ClassLoader is constructed using JARs from `${catalina.home}/lib`. Now Jolokia running as JVM agent has proper access to classes from this broader ClassLoader.
 
 Additionally we've provided a little diagnostic check to detect (usually incorrect) setup when Jolokia is running twice in single JVM (for example as WAR and JVM agent).
 
