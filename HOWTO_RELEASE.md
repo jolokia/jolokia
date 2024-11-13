@@ -249,8 +249,8 @@ git clone git@github.com:jolokia/jolokia.git
 cd jolokia
 mvn -Dmaven.repo.local=/tmp/repo \
     -DdevelopmentVersion=2.1.2-SNAPSHOT \
-    -DreleaseVersion=2.1.1 \
-    -Dtag=v2.1.1 \
+    -DreleaseVersion=2.1.2 \
+    -Dtag=v2.1.2 \
     -Dgpg.keyname=roland@jolokia.org \
     -Pdist release:prepare
 mvn -Dmaven.repo.local=/tmp/repo \
