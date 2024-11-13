@@ -1,6 +1,6 @@
 {
   "name": "@jolokia.js/simple",
-  "version": "2.1.7",
+  "version": "2.1.8",
   "description": "Jolokia JavaScript ES Simple module",
   "type": "module",
   "repository": {

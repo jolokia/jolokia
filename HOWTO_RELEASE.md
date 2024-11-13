@@ -207,7 +207,7 @@ deploy new Jolokia JavaScript client package to [NPM Registry][5], it's enough t
 * commit and push the changes
 * continue with NPM/Yarn release procedure
 
-Before using workspaces, `npm version` also run script under `"versions'`. We used a script that updated one JavaScript file. I can't do it (yet) with `yarn` though...
+Before using workspaces, `npm version` also run `package.json` script under `"versions"` key. We used a script that updated one JavaScript file. I can't do it (yet) with `yarn` though...
 
 That's why we have to change `CLIENT_VERSION` field in `client/javascript-esm/packages/jolokia/src/jolokia.ts` manually.
 
