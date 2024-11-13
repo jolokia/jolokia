@@ -19,7 +19,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>jolokia-client-javascript</artifactId>
-  <version>2.1.2</version>
+  <version>2.1.2-SNAPSHOT</version>
   <packaging>javascript</packaging>
 
   <name>jolokia-client-javascript</name>
@@ -28,7 +28,7 @@
   <parent>
     <groupId>org.jolokia</groupId>
     <artifactId>jolokia-parent</artifactId>
-    <version>2.1.2</version>
+    <version>2.1.2-SNAPSHOT</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
