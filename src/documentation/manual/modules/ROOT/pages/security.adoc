@@ -207,6 +207,8 @@ If the option `<ignore-scheme/>` is specified (it defaults to `false` when not u
 Using `<filter>` element we can filter out results of `list` and `search` operations (even if search parameters include such MBean names). It's not preventing users to access given MBeans unless specific `<deny>` element is present, but it may
 be used to make `list`/`search` results shorter.
 
+NOTE:: This configuration option is available since Jolokia 2.1.0
+
 Here's the example:
 
 [,xml]
