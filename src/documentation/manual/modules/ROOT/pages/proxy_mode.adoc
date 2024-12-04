@@ -66,7 +66,7 @@ possible in favor of direct access over the Jolokia protocol.
 All client libraries (jmx4perl, Java and JavaScript) support the
 usage of proxy mode in its API.
 
-[#proxy-limitations
+[#proxy-limitations]
 == Limitations of proxy mode
 
 The proxy mode has some limitations compared to the direct
