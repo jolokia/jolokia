@@ -32,6 +32,7 @@
     <div class="panels">
 <div class="nav-panel-menu is-active" data-panel="menu">
   <nav class="nav-menu">
+    <button class="nav-menu-toggle" aria-label="Toggle expand/collapse all" style="display: none"></button>
     <h3 class="title"><a href="index.html">Jolokia Manual</a></h3>
 <ul class="nav-list">
   <li class="nav-item" data-depth="0">
@@ -77,16 +78,11 @@
 <div class="nav-panel-explore" data-panel="explore">
   <div class="context">
     <span class="title">Jolokia Manual</span>
-    <span class="version">default</span>
+    <span class="version"></span>
   </div>
   <ul class="components">
     <li class="component is-current">
-      <a class="title" href="index.html">Jolokia Manual</a>
-      <ul class="versions">
-        <li class="version is-current is-latest">
-          <a href="index.html">default</a>
-        </li>
-      </ul>
+      <div class="title"><a href="index.html">Jolokia Manual</a></div>
     </li>
   </ul>
 </div>
@@ -111,6 +107,8 @@
 </aside>
 <article class="doc">
 <h1 class="page">Proxy Mode</h1>
+<div id="preamble">
+<div class="sectionbody">
 <div class="paragraph">
 <p>Using Jolokia in proxy mode enables for agentless operation
 on the target server. A dedicated agent deployment proxies by
@@ -180,10 +178,11 @@ possible in favor of direct access over the Jolokia protocol.</p>
 <p>All client libraries (jmx4perl, Java and JavaScript) support the
 usage of proxy mode in its API.</p>
 </div>
-<div class="paragraph">
-<p>[#proxy-limitations
-== Limitations of proxy mode</p>
 </div>
+</div>
+<div class="sect1">
+<h2 id="proxy-limitations"><a class="anchor" href="#proxy-limitations"></a>Limitations of proxy mode</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>The proxy mode has some limitations compared to the direct
 agent mode, so it is recommended to use a
@@ -235,6 +234,8 @@ So its is highly recommended to not make the agent available without any authent
 non trusted environment. Also the new whitelist feature prevents redirecting to arbitrary JMX Service URLs.</p>
 </li>
 </ul>
+</div>
+</div>
 </div>
 <nav class="pagination">
   <span class="prev"><a href="security.html">Security</a></span>

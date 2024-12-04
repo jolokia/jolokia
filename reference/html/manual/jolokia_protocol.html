@@ -32,6 +32,7 @@
     <div class="panels">
 <div class="nav-panel-menu is-active" data-panel="menu">
   <nav class="nav-menu">
+    <button class="nav-menu-toggle" aria-label="Toggle expand/collapse all" style="display: none"></button>
     <h3 class="title"><a href="index.html">Jolokia Manual</a></h3>
 <ul class="nav-list">
   <li class="nav-item" data-depth="0">
@@ -77,16 +78,11 @@
 <div class="nav-panel-explore" data-panel="explore">
   <div class="context">
     <span class="title">Jolokia Manual</span>
-    <span class="version">default</span>
+    <span class="version"></span>
   </div>
   <ul class="components">
     <li class="component is-current">
-      <a class="title" href="index.html">Jolokia Manual</a>
-      <ul class="versions">
-        <li class="version is-current is-latest">
-          <a href="index.html">default</a>
-        </li>
-      </ul>
+      <div class="title"><a href="index.html">Jolokia Manual</a></div>
     </li>
   </ul>
 </div>
@@ -2739,10 +2735,10 @@ provided as path info.</p>
     "type": "version"
   },
   "value": {
-    "agent": "2.1.1",
+    "agent": "2.1.2",
     "protocol": "7.2",
     "details": {
-      "agent_version": "2.1.1",
+      "agent_version": "2.1.2",
       "agent_id": "192.168.0.221-21185-5ce94d31-servlet",
       "server_product": "tomcat",
       "server_vendor": "Apache",
@@ -3642,7 +3638,7 @@ the following format</p>
 <div class="content">
 <pre>$ nc -u localhost 24884
 {"type":"query"}
-{"agent_version":"2.1.1","agent_id":"192.168.0.221-67980-7e985ce9-servlet",
+{"agent_version":"2.1.2","agent_id":"192.168.0.221-67980-7e985ce9-servlet",
 "server_product":"tomcat","type":"response","server_vendor":"Apache",
 "server_version":"10.1.16","secured":true,"url":"http:\/\/192.168.0.221:8080\/jolokia"}</pre>
 </div>
@@ -3653,7 +3649,7 @@ the following format</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "agent_version": "2.1.1",
+  "agent_version": "2.1.2",
   "agent_id": "192.168.0.221-67980-7e985ce9-servlet",
   "server_product": "tomcat",
   "type": "response",

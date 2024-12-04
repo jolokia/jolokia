@@ -32,6 +32,7 @@
     <div class="panels">
 <div class="nav-panel-menu is-active" data-panel="menu">
   <nav class="nav-menu">
+    <button class="nav-menu-toggle" aria-label="Toggle expand/collapse all" style="display: none"></button>
     <h3 class="title"><a href="index.html">Jolokia Manual</a></h3>
 <ul class="nav-list">
   <li class="nav-item" data-depth="0">
@@ -77,16 +78,11 @@
 <div class="nav-panel-explore" data-panel="explore">
   <div class="context">
     <span class="title">Jolokia Manual</span>
-    <span class="version">default</span>
+    <span class="version"></span>
   </div>
   <ul class="components">
     <li class="component is-current">
-      <a class="title" href="index.html">Jolokia Manual</a>
-      <ul class="versions">
-        <li class="version is-current is-latest">
-          <a href="index.html">default</a>
-        </li>
-      </ul>
+      <div class="title"><a href="index.html">Jolokia Manual</a></div>
     </li>
   </ul>
 </div>
@@ -347,6 +343,14 @@ on the session cookie.</p>
 <div class="paragraph">
 <p>Using <code>&lt;filter&gt;</code> element we can filter out results of <code>list</code> and <code>search</code> operations (even if search parameters include such MBean names). It&#8217;s not preventing users to access given MBeans unless specific <code>&lt;deny&gt;</code> element is present, but it may
 be used to make <code>list</code>/<code>search</code> results shorter.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">NOTE</dt>
+<dd>
+<p>This configuration option is available since Jolokia 2.1.0</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
 <p>Here&#8217;s the example:</p>

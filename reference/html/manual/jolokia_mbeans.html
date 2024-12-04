@@ -32,6 +32,7 @@
     <div class="panels">
 <div class="nav-panel-menu is-active" data-panel="menu">
   <nav class="nav-menu">
+    <button class="nav-menu-toggle" aria-label="Toggle expand/collapse all" style="display: none"></button>
     <h3 class="title"><a href="index.html">Jolokia Manual</a></h3>
 <ul class="nav-list">
   <li class="nav-item" data-depth="0">
@@ -77,16 +78,11 @@
 <div class="nav-panel-explore" data-panel="explore">
   <div class="context">
     <span class="title">Jolokia Manual</span>
-    <span class="version">default</span>
+    <span class="version"></span>
   </div>
   <ul class="components">
     <li class="component is-current">
-      <a class="title" href="index.html">Jolokia Manual</a>
-      <ul class="versions">
-        <li class="version is-current is-latest">
-          <a href="index.html">default</a>
-        </li>
-      </ul>
+      <div class="title"><a href="index.html">Jolokia Manual</a></div>
     </li>
   </ul>
 </div>
@@ -302,7 +298,7 @@ JSON array which contains JSON objects, one for each agent discovered.</p>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">[
   {
-    "agent_version": "2.1.1",
+    "agent_version": "2.1.2",
     "agent_id": "192.168.0.221-72527-6baa8838-servlet",
     "server_product": "tomcat",
     "server_vendor": "Apache",
@@ -311,7 +307,7 @@ JSON array which contains JSON objects, one for each agent discovered.</p>
     "url": "http://192.168.0.221:8080/jolokia"
   },
   {
-    "agent_version": "2.1.1",
+    "agent_version": "2.1.2",
     "agent_id": "192.168.0.221-89505-1328eb8a-osgi",
     "server_product": "felix",
     "server_vendor": "Apache",

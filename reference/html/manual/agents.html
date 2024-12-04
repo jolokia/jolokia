@@ -32,6 +32,7 @@
     <div class="panels">
 <div class="nav-panel-menu is-active" data-panel="menu">
   <nav class="nav-menu">
+    <button class="nav-menu-toggle" aria-label="Toggle expand/collapse all" style="display: none"></button>
     <h3 class="title"><a href="index.html">Jolokia Manual</a></h3>
 <ul class="nav-list">
   <li class="nav-item" data-depth="0">
@@ -77,16 +78,11 @@
 <div class="nav-panel-explore" data-panel="explore">
   <div class="context">
     <span class="title">Jolokia Manual</span>
-    <span class="version">default</span>
+    <span class="version"></span>
   </div>
   <ul class="components">
     <li class="component is-current">
-      <a class="title" href="index.html">Jolokia Manual</a>
-      <ul class="versions">
-        <li class="version is-current is-latest">
-          <a href="index.html">default</a>
-        </li>
-      </ul>
+      <div class="title"><a href="index.html">Jolokia Manual</a></div>
     </li>
   </ul>
 </div>
@@ -674,7 +670,7 @@ dependency on this jar artifact:</p>
     &lt;dependency&gt;
       &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
       &lt;artifactId&gt;jolokia-server-core&lt;/artifactId&gt;
-      &lt;version&gt;2.1.1&lt;/version&gt;
+      &lt;version&gt;2.1.2&lt;/version&gt;
     &lt;/dependency&gt;
   &lt;/dependencies&gt;
   &lt;!-- .... --&gt;
@@ -1204,7 +1200,7 @@ maven project can be found in the Jolokia source at
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>karaf@root()&gt; install -s mvn:org.jolokia/jolokia-example-osgi-restrictor/2.1.1
+<pre>karaf@root()&gt; install -s mvn:org.jolokia/jolokia-example-osgi-restrictor/2.1.2
 Register sample restrictor service
 Bundle ID: 68
 
@@ -1304,7 +1300,7 @@ performance. See below for details.</p>
 <p><code>agent.jar</code> is the filename of the Jolokia
 JVM agent. The agent can be downloaded like the others from the <a href="https://jolokia.org/download.html" class="externalLink" target="_blank" rel="noopener">download page</a>.
 When downloading from a Maven repository you need to check for the classifier <code>javaagent</code> (i.e. the
-jar to download looks like <code>jolokia-agent-jvm-2.1.1-javaagent.jar</code>, not <code>jolokia-agent-jvm-2.1.1.jar</code>).
+jar to download looks like <code>jolokia-agent-jvm-2.1.2-javaagent.jar</code>, not <code>jolokia-agent-jvm-2.1.2.jar</code>).
 Options can be appended as a comma separated
 list. The available options are the same as described in
 <a href="agents/war.html#agent-war-init-params" class="xref page">Servlet init parameters</a> plus the one described in
@@ -1781,12 +1777,12 @@ application which can be reached via the
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>$ java -jar jolokia-agent-jvm-2.1.1-javaagent.jar --help
+<pre>$ java -jar jolokia-agent-jvm-2.1.2-javaagent.jar --help
 
 Jolokia Agent Launcher
 ======================
 
-Usage: java -jar jolokia-agent-jvm-2.1.1-javaagent.jar [options] &lt;command&gt; &lt;pid/regexp&gt;
+Usage: java -jar jolokia-agent-jvm-2.1.2-javaagent.jar [options] &lt;command&gt; &lt;pid/regexp&gt;
 
 where &lt;command&gt; is one of
     start     -- Start a Jolokia agent for the process specified
@@ -1871,7 +1867,7 @@ where &lt;command&gt; is one of
     --dateFormatTimeZone &lt;tz&gt;       TimeZone to use for formatting dates/times/calendars/temporals (default: local time zone)
     --config &lt;configfile&gt;           Path to a property file from where to read the configuration
     --help                          This help documentation
-    --version                       Version of this agent (it's 2.1.1 btw :)
+    --version                       Version of this agent (it's 2.1.2 btw :)
 
 &lt;pid/regexp&gt; can be either a numeric process id or a regular expression. A regular expression is matched
 against the processes' names (ignoring case) and must be specific enough to select exactly one process.
@@ -1981,7 +1977,7 @@ shot scripts are possible <sup class="footnote" id="_footnote_rest-comment">[<a 
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#!/bin/sh
 
-url=`java -jar jolokia-agent-jvm-2.1.1-javaagent.jar start $1 | tail -1`
+url=`java -jar jolokia-agent-jvm-2.1.2-javaagent.jar start $1 | tail -1`
 
 memory_url="${url}read/java.lang:type=Memory/HeapMemoryUsage"
 used=`curl -s "${memory_url}/used" | jq .value`
@@ -1989,7 +1985,7 @@ max=`curl -s "${memory_url}/max" | jq .value`
 usage=$((${used}*100/${max}))
 echo "Memory Usage: $usage %"
 
-java -jar jolokia-agent-jvm-2.1.1-javaagent.jar --quiet stop $1</code></pre>
+java -jar jolokia-agent-jvm-2.1.2-javaagent.jar --quiet stop $1</code></pre>
 </div>
 </div>
 </div>
