@@ -1121,15 +1121,15 @@ been processed by the agent. Due to limitations of the Servlet
 API the agent servlet has no clue about its own URL until this
 first request, which contains the request URL. Of course, the
 URL obtained that way can be bogus as well, since the agent
-might hide behind a proxy, too. So, if in doubt you should
-configure the agent URL from outside to allow external clients
-to be discovered. The configuration options for enabling
+may operate behind a proxy, too. So if in doubt, you should
+configure the agent URL manually to allow external clients
+to connect to the agent. The configuration options for enabling
 multicast requests are described in the
 xref:agents/jvm.adoc#agent-jvm-config[JVM agent configuration options] and
 xref:agents/war.adoc#agent-war-init-params[Servlet init parameters] agent configuration
 sections.
 
-A agent which is enabled for multicast discovery will only
+An agent which is enabled for multicast discovery will only
 respond to a multicast request if the
 xref:security.adoc#security-policy[Policy based security] allows
 connections from the source IP. Otherwise a multicast request

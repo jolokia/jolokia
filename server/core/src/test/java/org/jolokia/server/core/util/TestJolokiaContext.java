@@ -18,14 +18,12 @@ package org.jolokia.server.core.util;
 
 import java.lang.management.ManagementFactory;
 import java.util.*;
-import java.util.function.ToIntFunction;
 
 import javax.management.*;
 
 import org.jolokia.server.core.config.*;
 import org.jolokia.server.core.restrictor.AllowAllRestrictor;
 import org.jolokia.server.core.service.api.*;
-import org.jolokia.server.core.service.impl.ClasspathServiceCreator;
 import org.jolokia.server.core.service.impl.StdoutLogHandler;
 import org.jolokia.server.core.service.serializer.Serializer;
 import org.jolokia.server.core.util.jmx.*;
@@ -37,7 +35,7 @@ import org.jolokia.server.core.util.jmx.*;
 public class TestJolokiaContext implements JolokiaContext {
 
     // Switch on for more debuggin
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
 
     Map<Class<?>, SortedSet<?>> services;
     LogHandler logHandler;

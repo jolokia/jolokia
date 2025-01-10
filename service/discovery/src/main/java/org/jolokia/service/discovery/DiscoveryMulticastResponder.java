@@ -1,9 +1,6 @@
 package org.jolokia.service.discovery;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.service.api.*;
@@ -20,14 +17,13 @@ public class DiscoveryMulticastResponder extends AbstractJolokiaService<JolokiaS
 
     // Listener threads responsible for creating the response as soon as a discovery request
     // arrives.
-    private final List<MulticastSocketListenerThread> listenerThreads;
+    private MulticastSocketListenerThread listenerThread;
 
     /**
      * Create the responder which can be started and stopped
      */
     public DiscoveryMulticastResponder() {
         super(Init.class, 0 /* no order required */);
-        listenerThreads = new ArrayList<>();
     }
 
     /**
@@ -35,25 +31,25 @@ public class DiscoveryMulticastResponder extends AbstractJolokiaService<JolokiaS
      */
     @Override
     public void init(JolokiaContext pContext) {
-        if (discoveryEnabled(pContext) && listenerThreads.isEmpty()) {
-            List<InetAddress> addresses = NetworkUtil.getMulticastAddresses();
-            if (addresses.isEmpty()) {
-                pContext.info("No suitable address found for listening on multicast discovery requests");
+        if (discoveryEnabled(pContext) && listenerThread == null) {
+            // The listener uses _single_ (see jolokia/jolokia#620) UDP responder thread.
+            // We don't need to listen on many sockets - just one _any_ (0.0.0.0 or ::) socket
+            // MulticastSocket constructor with port only calls java.net.InetAddress.anyLocalAddress
+
+            if (!NetworkUtil.isMulticastSupported()) {
+                pContext.info("Multicast is not supported");
                 return;
             }
-            for (InetAddress addr : addresses) {
-                try {
-                    MulticastSocketListenerThread thread = new MulticastSocketListenerThread("JolokiaDiscoveryListenerThread-" + addr.getHostAddress(), addr, pContext);
-                    thread.start();
-                    listenerThreads.add(thread);
-                    // One thread might be enough ?
-                    //break;
-                } catch (IOException e) {
-                    pContext.error("Cannot start multicast discovery listener thread on " + addr + ": " + e, e);
-                }
-            }
-            if (listenerThreads.isEmpty()) {
-                pContext.info("Cannot start a single multicast discovery listener");
+
+            String multicastBindAddress = pContext.getConfig(ConfigKey.MULTICAST_BIND_ADDRESS, true);
+
+            try {
+                pContext.debug("Creating MulticastSocketListenerThread for address " + multicastBindAddress);
+                MulticastSocketListenerThread thread = new MulticastSocketListenerThread(multicastBindAddress, pContext);
+                thread.start();
+                listenerThread = thread;
+            } catch (IOException e) {
+                pContext.error("Cannot start multicast discovery listener thread on " + multicastBindAddress + ": " + e, e);
             }
         }
     }
@@ -63,15 +59,13 @@ public class DiscoveryMulticastResponder extends AbstractJolokiaService<JolokiaS
      */
     @Override
     public synchronized void destroy() {
-        if (!listenerThreads.isEmpty()) {
-            for (MulticastSocketListenerThread thread : listenerThreads) {
-                thread.shutdown();
-            }
+        if (listenerThread != null) {
+            listenerThread.shutdown();
+            listenerThread = null;
         }
-        listenerThreads.clear();
     }
 
-    // Check whether discovery is enabled throught the config
+    // Check whether discovery is enabled through the config
     private boolean discoveryEnabled(JolokiaContext pJolokiaContext) {
         return (pJolokiaContext.getConfig(ConfigKey.DISCOVERY_ENABLED) != null &&
                 Boolean.parseBoolean(pJolokiaContext.getConfig(ConfigKey.DISCOVERY_ENABLED))) ||

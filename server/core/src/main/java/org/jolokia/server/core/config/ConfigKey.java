@@ -219,25 +219,41 @@ public enum ConfigKey {
     DISCOVERY_AGENT_URL("discoveryAgentUrl",true,false),
 
     /**
-     * <p>IPv4 Address for Jolokia's Multicast group.</p>
+     * <p>IP address for Jolokia's Multicast group. For IPv4 (since always in Jolokia) we have 239.192.48.84.
+     * For IPv6 we can choose an address from ffx8::/16 (IPv6 equivalent of 239.192.0.0/14). See
+     * <a href="https://en.wikipedia.org/wiki/Multicast_address#IPv6">Multicast/IPv6</a>.</p>
      *
      * <p>To make UDP multicasting work on Linux, make sure firewall is properly configured. On Fedora
      * with default <code>FedoraServer</code> zone, use:
      * <pre>
-     *     $ firewall-cmd --zone=FedoraServer --add-rich-rule='inet firewalld destination 239.192.48.84 accept'
+     *     $ firewall-cmd --zone=FedoraServer --add-rich-rule='rule family=ipv4 destination address="239.192.48.84" accept'
+     *     $ firewall-cmd --zone=FedoraServer --add-rich-rule='rule family=ipv6 destination address="ff08::48:84" accept'
      * </pre>
      * or directly using {@code nft} (chain name may vary):
      * <pre>
      *     $ nft add rule inet firewalld filter_IN_FedoraServer_allow ip daddr 239.192.48.84 accept
+     *     $ nft add rule inet firewalld filter_IN_FedoraServer_allow ip6 daddr ff08::48:84 accept
      * </pre>
      * </p>
      */
-    MULTICAST_GROUP("multicastGroup",true,false,"239.192.48.84"),
+    MULTICAST_GROUP("multicastGroup", true, false, "239.192.48.84"),
+
+    /**
+     * <p>Address of {@link java.net.MulticastSocket} to bind when listening for UDP mulitcast discovery requests.</p>
+     *
+     * <p>On IPv6 enabled hosts (or when {@code -Djava.net.preferIPv4Stack} is not {@code true}), even {@code 0.0.0.0}
+     * means that the UDP {@link java.net.MulticastSocket} is bound to {@code 0:0:0:0:0:0:0:0} IPv6 address and in
+     * Java this socket doesn't have IPV6_ONLY option, so it's accepting traffic with IPv4 and IPv6 protocols.</p>
+     *
+     * <p>Setting it to real IP address of some physical or virtual interface effectively narrows the sources of
+     * incoming discovery requests.</p>
+     */
+    MULTICAST_BIND_ADDRESS("multicastBindAddress", true, false, "0.0.0.0"),
 
     /**
      * Multicast port where to listen for queries.
      */
-    MULTICAST_PORT("multicastPort",true,false,"24884"),
+    MULTICAST_PORT("multicastPort", true, false, "24884"),
 
     // ================================================================================
     // Configuration relevant for OSGI container
