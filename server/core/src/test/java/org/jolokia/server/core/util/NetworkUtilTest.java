@@ -18,12 +18,12 @@ public class NetworkUtilTest {
         try {
             System.out.println(NetworkUtil.dumpLocalNetworkInfo());
         } catch (Exception exp) {
-            exp.printStackTrace();
+            System.out.println(exp.getMessage());
         }
     }
 
     @Test
-    public void findLocalAddress() throws SocketException {
+    public void findLocalIP4Address() throws SocketException {
         Enumeration<NetworkInterface> ifs = NetworkInterface.getNetworkInterfaces();
         System.out.println("IFs");
         boolean found = false;
@@ -32,12 +32,26 @@ public class NetworkUtilTest {
             System.out.println(intf + " is loopback: " + intf.isLoopback());
             found = found || (!intf.isLoopback() && intf.supportsMulticast() && intf.isUp());
         }
-        InetAddress addr = NetworkUtil.findLocalAddressViaNetworkInterface();
+        InetAddress addr = NetworkUtil.findLocalAddressViaNetworkInterface(Inet4Address.class);
         System.out.println("Address found via NIF: " + addr);
         assertEquals(addr != null, found);
         if (addr != null) {
             assertTrue(addr instanceof Inet4Address);
         }
+    }
+
+    @Test
+    public void ip6Support() {
+        boolean preferIP4Stack = Boolean.getBoolean("java.net.preferIPv4Stack");
+        boolean preferIP6Addresses = Boolean.getBoolean("java.net.preferIPv6Addresses");
+        assertEquals(NetworkUtil.isIPv6Supported(), !preferIP4Stack);
+    }
+
+    @Test
+    public void findLocalIP6Address() throws SocketException {
+        InetAddress addr = NetworkUtil.findLocalAddressViaNetworkInterface(Inet6Address.class);
+        System.out.println("Address found via NIF: " + addr);
+        assertTrue(addr instanceof Inet6Address);
     }
 
     @Test

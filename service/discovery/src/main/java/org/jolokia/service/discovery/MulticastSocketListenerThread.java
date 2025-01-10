@@ -23,31 +23,32 @@ class MulticastSocketListenerThread extends Thread {
     // Jolokia services
     private final JolokiaContext context;
 
-    // Address to listen to
-    private final InetAddress address;
+    // Address to bind the MulticastSocket to. Defaults to _any_ address (0.0.0.0 or [::])
+    private final InetAddress bindAddress;
 
     // Lifecycle flag
     private boolean running;
 
     // Socket used for listening
     private MulticastSocket socket;
+    private String socketName;
 
     /**
      * Constructor, used internally.
      *
-     * @param pName name to use for the thread
      * @param pHostAddress host address for creating a socket to listen to
      * @param pContext context for accessing Jolokia Services
      */
-    MulticastSocketListenerThread(String pName, InetAddress pHostAddress, JolokiaContext pContext) throws IOException {
-        super(pName);
-        address = pHostAddress != null ? pHostAddress : NetworkUtil.getLocalAddressWithMulticast();
+    MulticastSocketListenerThread(String pHostAddress, JolokiaContext pContext) throws IOException {
+        super();
+        bindAddress = pHostAddress != null ? InetAddress.getByName(pHostAddress) : NetworkUtil.getAnyAddress();
         context = pContext;
-        // For debugging, uncomment:
-        //logHandler = new LogHandler.StdoutLogHandler(true);
 
-        socket = MulticastUtil.newMulticastSocket(address, pContext);
-        pContext.debug(address + "<-- Listening for queries");
+        socket = MulticastUtil.newMulticastSocket(bindAddress, pContext);
+        socketName = socket.getLocalSocketAddress().toString();
+
+        pContext.debug(socketName + " <-- Listening for queries");
+        setName("JolokiaDiscoveryListenerThread-" + socket.getLocalAddress().getHostAddress() + ":" + socket.getLocalPort());
         setDaemon(true);
     }
 
@@ -57,7 +58,7 @@ class MulticastSocketListenerThread extends Thread {
         try {
             while (isRunning()) {
                 refreshSocket();
-                context.debug(address + "<-- Waiting");
+                context.debug(socketName + " <-- Waiting");
                 DiscoveryIncomingMessage msg = receiveMessage();
                 if (shouldMessageBeProcessed(msg)) {
                     handleQuery(msg);
@@ -65,12 +66,12 @@ class MulticastSocketListenerThread extends Thread {
             }
         }
         catch (IllegalStateException e) {
-            context.error(address + "<-- Cannot reopen socket, exiting listener thread: " + e.getCause(), e.getCause());
+            context.error(socketName + " <-- Cannot reopen socket, exiting listener thread: " + e.getCause(), e.getCause());
         } finally {
             if (socket != null) {
                 socket.close();
             }
-            context.debug(address + "<-- Stop listening");
+            context.debug(socketName + " <-- Stop listening");
         }
     }
 
@@ -114,9 +115,10 @@ class MulticastSocketListenerThread extends Thread {
 
     private void refreshSocket() {
         if (socket.isClosed()) {
-            context.info(address + "<-- Socket closed, reopening it");
+            context.info(socketName + " <-- Socket closed, reopening it");
             try {
-                socket = MulticastUtil.newMulticastSocket(address, context);
+                socket = MulticastUtil.newMulticastSocket(bindAddress, context);
+                socketName = socket.getLocalSocketAddress().toString();
             } catch (IOException exp) {
                 context.error("Cannot reopen socket. Exiting multicast listener thread ...",exp);
                 throw new SocketVerificationFailedException(exp);
@@ -130,7 +132,7 @@ class MulticastSocketListenerThread extends Thread {
                         .respondTo(pMsg)
                         .agentDetails(context.getAgentDetails())
                         .build();
-        context.debug(address + "<-- Discovery request from " + pMsg.getSourceAddress() + ":" + pMsg.getSourcePort());
+        context.debug(socketName + " <-- Discovery request from " + pMsg.getSourceAddress() + ":" + pMsg.getSourcePort());
         send(answer);
     }
 
@@ -143,11 +145,10 @@ class MulticastSocketListenerThread extends Thread {
             try {
                 socket.send(packet);
             } catch (IOException exp) {
-                context.info(address + "<-- Can not send discovery response to " + packet.getAddress());
+                context.info(socketName + " <-- Can not send discovery response to " + packet.getAddress());
             }
         }
     }
-
 
     // Exception thrown when verification fails
     private static class SocketVerificationFailedException extends RuntimeException {

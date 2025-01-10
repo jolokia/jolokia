@@ -2,10 +2,20 @@ package org.jolokia.server.core.util;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.*;
-import java.util.*;
+import java.net.Inet4Address;
+import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.NetworkInterface;
+import java.net.Socket;
+import java.net.SocketAddress;
+import java.net.SocketException;
+import java.net.URL;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,21 +27,6 @@ import java.util.regex.Pattern;
  */
 public final class NetworkUtil {
 
-    // Only available for Java 6
-    private static Method isUp;
-    private static Method supportsMulticast;
-
-    static {
-        // Check for JDK method  d which are available only for JDK6
-        try {
-            isUp = NetworkInterface.class.getMethod("isUp", (Class<?>[]) null);
-            supportsMulticast = NetworkInterface.class.getMethod("supportsMulticast", (Class<?>[]) null);
-        } catch (NoSuchMethodException e) {
-            isUp = null;
-            supportsMulticast = null;
-        }
-    }
-
     // Utility class
     private NetworkUtil() {
     }
@@ -42,46 +37,73 @@ public final class NetworkUtil {
     }
 
     /**
-     * Get a local, IP4 Address, preferable a non-loopback address which is bound to an interface.
+     * Get {@link InetAddress} representing <em>any</em> address ({@code 0.0.0.0} on IPv4 or {@code [::]} on IPv6).
+     *
+     * @return
+     */
+    public static InetAddress getAnyAddress() {
+        try {
+            return isIPv6Supported() ? Inet6Address.getByName("::") : InetAddress.getByAddress(new byte[]{0, 0, 0, 0});
+        } catch (UnknownHostException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Get a local, IP4 Address, preferable a non-loopback address which is bound to a physical interface.
      *
      * @return
      * @throws UnknownHostException
      * @throws SocketException
      */
     public static InetAddress getLocalAddress() throws UnknownHostException, SocketException {
+        return getLocalAddress(Inet4Address.class);
+    }
+
+    /**
+     * <p>Get a local, preferable a non-loopback address which is bound to a physical interface.
+     * Type of the address is specified by {@code type} parameter.</p>
+     * <p>But if no real IP address can be found, loopback address of relevant type is returned ({@code 127.0.0.1} or
+     * {@code ::1}). In this case it's rather not Multicast enabled.</p>
+     *
+     * @param type A type of address to use (IPv4 or IPv6)
+     * @return
+     * @throws UnknownHostException
+     * @throws SocketException
+     */
+    public static InetAddress getLocalAddress(Class<? extends InetAddress> type) throws UnknownHostException, SocketException {
+        // getLocalHost tries to resolve local hostname as returned by gethostname (unistd.h)
         InetAddress addr = InetAddress.getLocalHost();
         NetworkInterface nif = NetworkInterface.getByInetAddress(addr);
-        if (addr.isLoopbackAddress() || addr instanceof Inet6Address || nif == null) {
-            // Find local address that isn't a loopback address
-            InetAddress lookedUpAddr = findLocalAddressViaNetworkInterface();
+        if (addr.isLoopbackAddress() || addr.getClass() != type || nif == null) {
+            // Find local address that isn't a loopback address and is of desired class
+            InetAddress lookedUpAddr = findLocalAddressViaNetworkInterface(type);
             // If a local, multicast enabled address can be found, use it. Otherwise
             // we are using the local address, which might not be what you want
-            addr = lookedUpAddr != null ? lookedUpAddr : InetAddress.getByName("127.0.0.1");
+            if (lookedUpAddr != null) {
+                addr = lookedUpAddr;
+            } else {
+                if (type == null || type == Inet4Address.class) {
+                    addr = InetAddress.getByName("127.0.0.1");
+                } else {
+                    addr = InetAddress.getByName("::1");
+                }
+            }
         }
         return addr;
     }
 
     /**
-     * Get a local address which supports multicast. A loopback adress is returned, but only if not
-     * another is available
+     * Get a local address which supports multicast. Loopback address is never returned, an exception is thrown
+     * instead.
      *
-     * @return a multicast enabled address of null if none could be found
-     * @throws UnknownHostException
+     * @param type A type of address to use (IPv4 or IPv6)
+     * @return a multicast enabled address if available
+     * @throws UnknownHostException if we can't find non-loopback, multicast-enabled address.
      * @throws SocketException
      */
-    public static InetAddress getLocalAddressWithMulticast() throws UnknownHostException, SocketException {
-        InetAddress addr = InetAddress.getLocalHost();
-        NetworkInterface nif = NetworkInterface.getByInetAddress(addr);
-        if (addr.isLoopbackAddress() || addr instanceof Inet6Address || !isMulticastSupported(nif)) {
-            // Find local address that isn't a loopback address
-            InetAddress lookedUpAddr = findLocalAddressViaNetworkInterface();
-            // If a local, multicast enabled address can be found, use it. Otherwise
-            // we are using the local address, which might not be what you want
-            if (lookedUpAddr != null) {
-                return lookedUpAddr;
-            }
-            addr = InetAddress.getByName("127.0.0.1");
-        }
+    public static InetAddress getLocalAddressWithMulticast(Class<? extends InetAddress> type) throws UnknownHostException, SocketException {
+        InetAddress addr = getLocalAddress(type);
         if (isMulticastSupported(addr)) {
             return addr;
         } else {
@@ -89,8 +111,16 @@ public final class NetworkUtil {
         }
     }
 
-    // returns null if none has been found
-    public static InetAddress findLocalAddressViaNetworkInterface() {
+    /**
+     * Get an address of desired type (IPv4 or IPv6) using available network interfaces.
+     * The returned address is not loopback, is active (<em>up</em>) and supports (UDP) multicast. Preferably the
+     * address is associated with physical network interface (with hardware address) instead of a virtual one
+     * (bridge, VPN, ...).
+     *
+     * @return
+     * @throws SocketException
+     */
+    public static InetAddress findLocalAddressViaNetworkInterface(Class<? extends InetAddress> type) throws SocketException {
         Enumeration<NetworkInterface> networkInterfaces;
         try {
             networkInterfaces = NetworkInterface.getNetworkInterfaces();
@@ -98,18 +128,49 @@ public final class NetworkUtil {
             return null;
         }
 
+        InetAddress fallback = null;
+        InetAddress fallbackHardware = null;
         while (networkInterfaces.hasMoreElements()) {
             NetworkInterface nif = networkInterfaces.nextElement();
             for (Enumeration<InetAddress> addrEnum = nif.getInetAddresses(); addrEnum.hasMoreElements(); ) {
                 InetAddress interfaceAddress = addrEnum.nextElement();
-                if (useInetAddress(nif, interfaceAddress)) {
-                    return interfaceAddress;
+                if (useInetAddress(nif, interfaceAddress, type)) {
+                    // always prefer "proper" address, which is non-site and non-link and also which is related
+                    // to an interface with hardware address (so we prefer ethernet card over VPN interface
+                    // for example)
+                    // site is:
+                    //  - ip4: 10.0.0.0/8, 172.16.0.0/12 or 192.168.0.0/16
+                    //  - ip6: fec0::
+                    // link is:
+                    //  - ip4: 169.254.0.0/16
+                    //  - ip6: fe80::
+                    if (nif.getHardwareAddress() != null) {
+                        // we use real interface
+                        if (fallbackHardware == null) {
+                            fallbackHardware = interfaceAddress;
+                        } else {
+                            if ((fallbackHardware.isLinkLocalAddress() || fallbackHardware.isSiteLocalAddress())
+                            && !(interfaceAddress.isLinkLocalAddress() || interfaceAddress.isSiteLocalAddress())) {
+                                fallbackHardware = interfaceAddress;
+                            }
+                        }
+                    } else {
+                        // we use virtual (e.g., VPN, bridge) interface
+                        if (fallback == null) {
+                            fallback = interfaceAddress;
+                        } else {
+                            if ((fallback.isLinkLocalAddress() || fallback.isSiteLocalAddress())
+                                && !(interfaceAddress.isLinkLocalAddress() || interfaceAddress.isSiteLocalAddress())) {
+                                fallback = interfaceAddress;
+                            }
+                        }
+                    }
                 }
             }
         }
-        return null;
-    }
 
+        return fallbackHardware != null ? fallbackHardware : fallback;
+    }
 
     /**
      * Check, whether multicast is supported at all by at least one interface
@@ -121,13 +182,44 @@ public final class NetworkUtil {
     }
 
     /**
+     * Not very clever way to check if IPv6 is supported.
+     * @return
+     */
+    public static boolean isIPv6Supported() {
+        // among others, Java (native code) checks /proc/net/if_inet6 file and
+        // JVM_FindLibraryEntry(RTLD_DEFAULT, "inet_pton") API availability
+        boolean preferIP4Stack = Boolean.getBoolean("java.net.preferIPv4Stack");
+        if (preferIP4Stack) {
+            // even if technically it may be supported
+            return false;
+        }
+
+        boolean preferIP6Addresses = Boolean.getBoolean("java.net.preferIPv6Addresses");
+        if (preferIP6Addresses) {
+            // we should get IPv6 ::1 address here
+            // because on IPv4 we'd use java.net.InetAddress.impl == java.net.Inet4AddressImpl
+            InetAddress lo = InetAddress.getLoopbackAddress();
+            return lo instanceof Inet6Address;
+        } else {
+            // even on IPv6 we'll get 127.0.0.1 here, so we have to check if any interface has IPv6 address assigned
+            try {
+                // this is fine also when IPv6 is actually supported, but java.net.preferIPv4Stack=true
+                NetworkInterface nif = NetworkInterface.getByInetAddress(InetAddress.getByName("::1"));
+                return nif != null;
+            } catch (SocketException | UnknownHostException e) {
+                return false;
+            }
+        }
+    }
+
+    /**
      * Check whether the given interface supports multicast and is up
      *
      * @param pNif check whether the given interface supports multicast
      * @return true if multicast is supported and the interface is up
      */
-    public static boolean isMulticastSupported(NetworkInterface pNif) {
-        return pNif != null && checkMethod(pNif, isUp) && checkMethod(pNif, supportsMulticast);
+    public static boolean isMulticastSupported(NetworkInterface pNif) throws SocketException {
+        return pNif != null && pNif.isUp() && pNif.supportsMulticast();
     }
 
     /**
@@ -142,7 +234,8 @@ public final class NetworkUtil {
     }
 
     /**
-     * Get all local addresses on which a multicast can be send
+     * Get all local addresses on which a multicast can be send - whether IPv4 or IPv6. We loos the information
+     * about address-interface association (to be checked with {@link NetworkInterface#getByInetAddress}).
      *
      * @return list of all multi cast capable addresses
      */
@@ -153,14 +246,10 @@ public final class NetworkUtil {
             List<InetAddress> ret = new ArrayList<>();
             while (nifs.hasMoreElements()) {
                 NetworkInterface nif = nifs.nextElement();
-                if (checkMethod(nif, supportsMulticast) && checkMethod(nif,isUp)) {
+                if (nif.supportsMulticast() && nif.isUp()) {
                     Enumeration<InetAddress> addresses = nif.getInetAddresses();
                     while (addresses.hasMoreElements()) {
-                        InetAddress addr = addresses.nextElement();
-                        // TODO: IpV6 support
-                        if (!(addr instanceof Inet6Address)) {
-                        ret.add(addr);
-                        }
+                        ret.add(addresses.nextElement());
                     }
                 }
             }
@@ -187,7 +276,7 @@ public final class NetworkUtil {
      * A replaced host uses the  IP address instead of a (possibly non resolvable) name.
      *
      * @param pRequestURL url to examine and to update
-     * @return the 'sane' URL (or the original one if no san
+     * @return the 'sane' URL (or the original one if no sane address can be found)
      */
     public static String sanitizeLocalUrl(String pRequestURL) {
         try {
@@ -214,25 +303,21 @@ public final class NetworkUtil {
     // =======================================================================================================
 
     // Only use the given interface on the given network interface if it is up and supports multicast
-    private static boolean useInetAddress(NetworkInterface networkInterface, InetAddress interfaceAddress) {
-        return checkMethod(networkInterface, isUp) &&
-               checkMethod(networkInterface, supportsMulticast) &&
-               // TODO: IpV6 support
-               !(interfaceAddress instanceof Inet6Address) &&
-               !interfaceAddress.isLoopbackAddress();
-    }
 
-    // Call a method and return the result as boolean. In case of problems, return false.
-    private static Boolean checkMethod(NetworkInterface iface, Method toCheck) {
-        if (toCheck != null) {
-            try {
-                return (Boolean) toCheck.invoke(iface, (Object[]) null);
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                return false;
-            }
-        }
-        // Cannot check, hence we assume that is true
-        return true;
+    /**
+     * Checks whether given address is of supported type, is active (up), is not loopback address and whether
+     * it's supporting UDP multicast.
+     * @param networkInterface
+     * @param interfaceAddress
+     * @param type
+     * @return
+     * @throws SocketException
+     */
+    private static boolean useInetAddress(NetworkInterface networkInterface, InetAddress interfaceAddress,
+                                          Class<? extends InetAddress> type) throws SocketException {
+        return networkInterface.isUp() && networkInterface.supportsMulticast() &&
+            interfaceAddress.getClass() == type &&
+            !interfaceAddress.isLoopbackAddress();
     }
 
     // Check for an non-loopback, local adress listening on the given port
@@ -240,12 +325,12 @@ public final class NetworkUtil {
         InetAddress address = InetAddress.getByName(pHost);
         if (address.isLoopbackAddress()) {
             // First check local address
-            InetAddress localAddress = getLocalAddress();
+            InetAddress localAddress = getLocalAddress(address.getClass());
             if (!localAddress.isLoopbackAddress() && isPortOpen(localAddress, pPort)) {
                 return localAddress;
             }
 
-            // Then try all addresses attache to all interfaces
+            // Then try all addresses attached to all interfaces
             localAddress = getLocalAddressFromNetworkInterfacesListeningOnPort(pPort);
             if (localAddress != null) {
                 return localAddress;
@@ -262,7 +347,7 @@ public final class NetworkUtil {
                 NetworkInterface nif = networkInterfaces.nextElement();
                 for (Enumeration<InetAddress> addrEnum = nif.getInetAddresses(); addrEnum.hasMoreElements(); ) {
                     InetAddress interfaceAddress = addrEnum.nextElement();
-                    if (!interfaceAddress.isLoopbackAddress() && checkMethod(nif, isUp) && isPortOpen(interfaceAddress, pPort)) {
+                    if (!interfaceAddress.isLoopbackAddress() && nif.isUp() && isPortOpen(interfaceAddress, pPort)) {
                         return interfaceAddress;
                     }
                 }
