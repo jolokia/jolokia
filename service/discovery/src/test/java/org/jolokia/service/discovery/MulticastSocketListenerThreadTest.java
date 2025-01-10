@@ -92,7 +92,7 @@ public class MulticastSocketListenerThreadTest {
         checkForMulticastSupport();
 
         String id = UUID.randomUUID().toString();
-        MulticastSocketListenerThread listenerThread = startSocketListener(id, "::", "ff08::48:84");
+        MulticastSocketListenerThread listenerThread = startSocketListener(id, "[::]", "ff08::48:84");
 
         try {
             DiscoveryOutgoingMessage out =

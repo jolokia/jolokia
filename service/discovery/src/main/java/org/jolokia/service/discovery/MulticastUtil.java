@@ -116,8 +116,6 @@ public final class MulticastUtil {
                                                                                       String pMulticastGroup,
                                                                                       int pMulticastPort,
                                                                                       LogHandler pLogHandler) throws UnknownHostException {
-        // Note for Ipv6 support: If there are two local addresses, one with IpV6 and one with IpV4 then two discovery request
-        // should be sent, on each interface respectively. Currently, only IpV4 is supported.
         List<NetworkInterfaceAndAddress> addresses = getMulticastAddresses();
         ExecutorService executor = Executors.newFixedThreadPool(addresses.size());
         final List<Future<List<DiscoveryIncomingMessage>>> futures = new ArrayList<>(addresses.size());
