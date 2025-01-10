@@ -234,22 +234,22 @@ public final class NetworkUtil {
     }
 
     /**
-     * Get all local addresses on which a multicast can be send - whether IPv4 or IPv6. We loos the information
-     * about address-interface association (to be checked with {@link NetworkInterface#getByInetAddress}).
+     * Get all local addresses on which a multicast can be send - whether IPv4 or IPv6. Each {@link InetAddress}
+     * is associated with relevant {@link NetworkInterface}.
      *
      * @return list of all multi cast capable addresses
      */
-    public static List<InetAddress> getMulticastAddresses() {
+    public static List<NetworkInterfaceAndAddress> getMulticastAddresses() {
         Enumeration<NetworkInterface> nifs;
         try {
             nifs = NetworkInterface.getNetworkInterfaces();
-            List<InetAddress> ret = new ArrayList<>();
+            List<NetworkInterfaceAndAddress> ret = new ArrayList<>();
             while (nifs.hasMoreElements()) {
                 NetworkInterface nif = nifs.nextElement();
                 if (nif.supportsMulticast() && nif.isUp()) {
                     Enumeration<InetAddress> addresses = nif.getInetAddresses();
                     while (addresses.hasMoreElements()) {
-                        ret.add(addresses.nextElement());
+                        ret.add(new NetworkInterfaceAndAddress(nif, addresses.nextElement()));
                     }
                 }
             }

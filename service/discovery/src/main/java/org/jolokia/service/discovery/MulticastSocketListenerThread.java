@@ -7,6 +7,7 @@ package org.jolokia.service.discovery;
 import java.io.IOException;
 import java.net.*;
 
+import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.util.NetworkUtil;
 
@@ -44,10 +45,14 @@ class MulticastSocketListenerThread extends Thread {
         bindAddress = pHostAddress != null ? InetAddress.getByName(pHostAddress) : NetworkUtil.getAnyAddress();
         context = pContext;
 
-        socket = MulticastUtil.newMulticastSocket(bindAddress, pContext);
-        socketName = socket.getLocalSocketAddress().toString();
+        if (!bindAddress.isAnyLocalAddress()) {
+            throw new IllegalArgumentException("MulticastSocketListenerThread can't bind UDP socket to " + pHostAddress + ". 0.0.0.0 or [::] has to be used.");
+        }
 
-        pContext.debug(socketName + " <-- Listening for queries");
+        socket = MulticastUtil.newMulticastSocket(bindAddress, pContext);
+        socketName = MulticastUtil.getReadableSocketName(socket);
+
+        pContext.debug(socketName + " |-- Listening for queries");
         setName("JolokiaDiscoveryListenerThread-" + socket.getLocalAddress().getHostAddress() + ":" + socket.getLocalPort());
         setDaemon(true);
     }
@@ -58,7 +63,6 @@ class MulticastSocketListenerThread extends Thread {
         try {
             while (isRunning()) {
                 refreshSocket();
-                context.debug(socketName + " <-- Waiting");
                 DiscoveryIncomingMessage msg = receiveMessage();
                 if (shouldMessageBeProcessed(msg)) {
                     handleQuery(msg);
@@ -66,12 +70,12 @@ class MulticastSocketListenerThread extends Thread {
             }
         }
         catch (IllegalStateException e) {
-            context.error(socketName + " <-- Cannot reopen socket, exiting listener thread: " + e.getCause(), e.getCause());
+            context.error(socketName + " --- Can not reopen socket, exiting listener thread: " + e.getMessage(), e.getCause());
         } finally {
             if (socket != null) {
                 socket.close();
             }
-            context.debug(socketName + " <-- Stop listening");
+            context.debug(socketName + " --- Stop listening");
         }
     }
 
@@ -89,8 +93,8 @@ class MulticastSocketListenerThread extends Thread {
         socket.close();
     }
 
-    // ====================================================================================
 
+    // ====================================================================================
     private boolean shouldMessageBeProcessed(DiscoveryIncomingMessage pMsg) {
         return pMsg != null &&
               context.isRemoteAccessAllowed(pMsg.getSourceAddress().getHostAddress())
@@ -106,8 +110,8 @@ class MulticastSocketListenerThread extends Thread {
             return new DiscoveryIncomingMessage(packet);
         }  catch (IOException e) {
             if (!socket.isClosed()) {
-                context.info("Error while handling discovery request" + (packet.getAddress() != null ? " from " + packet.getAddress() : "") +
-                                ". Ignoring this request. --> " + e);
+                context.info(socketName + " <-- " + MulticastUtil.getReadableSocketName(packet.getAddress(), packet.getPort())
+                    + " - Error while handling discovery request, ignoring: " + e.getMessage());
             }
             return null;
         }
@@ -115,12 +119,14 @@ class MulticastSocketListenerThread extends Thread {
 
     private void refreshSocket() {
         if (socket.isClosed()) {
-            context.info(socketName + " <-- Socket closed, reopening it");
+            context.info(socketName + " --- Socket closed, reopening it, listening for queries");
             try {
                 socket = MulticastUtil.newMulticastSocket(bindAddress, context);
-                socketName = socket.getLocalSocketAddress().toString();
+                socketName = MulticastUtil.getReadableSocketName(socket);
             } catch (IOException exp) {
-                context.error("Cannot reopen socket. Exiting multicast listener thread ...",exp);
+                int multicastPort = Integer.parseInt(context.getConfig(ConfigKey.MULTICAST_PORT, true));
+                String name = MulticastUtil.getReadableSocketName(bindAddress, multicastPort);
+                context.error(name + " --- Can not reopen socket. Exiting multicast listener thread...", exp);
                 throw new SocketVerificationFailedException(exp);
             }
         }
@@ -132,20 +138,21 @@ class MulticastSocketListenerThread extends Thread {
                         .respondTo(pMsg)
                         .agentDetails(context.getAgentDetails())
                         .build();
-        context.debug(socketName + " <-- Discovery request from " + pMsg.getSourceAddress() + ":" + pMsg.getSourcePort());
+        context.debug(socketName + " <-- " + MulticastUtil.getReadableSocketName(pMsg.getSourceAddress(), pMsg.getSourcePort()) + " - Received discovery request from external client");
         send(answer);
     }
 
     private void send(DiscoveryOutgoingMessage pAnswer) {
         byte[] message = pAnswer.getData();
         final DatagramPacket packet =
-                new DatagramPacket(message, message.length,
-                                   pAnswer.getTargetAddress(),pAnswer.getTargetPort());
+                new DatagramPacket(message, message.length, pAnswer.getTargetAddress(), pAnswer.getTargetPort());
         if (!socket.isClosed()) {
             try {
                 socket.send(packet);
             } catch (IOException exp) {
-                context.info(socketName + " <-- Can not send discovery response to " + packet.getAddress());
+                context.info(socketName + " --> "
+                    + MulticastUtil.getReadableSocketName(packet.getAddress(), packet.getPort())
+                    + " - Can not send discovery response: " + exp.getMessage());
             }
         }
     }
