@@ -10,6 +10,7 @@ import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.service.api.AgentDetails;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.impl.StdoutLogHandler;
+import org.jolokia.server.core.util.NetworkInterfaceAndAddress;
 import org.jolokia.server.core.util.NetworkUtil;
 import org.jolokia.server.core.util.TestJolokiaContext;
 import org.jolokia.json.JSONObject;
@@ -90,6 +91,20 @@ public class MulticastSocketListenerThreadTest {
     @Test
     public void simpleIPv6() throws IOException, InterruptedException {
         checkForMulticastSupport();
+
+        // is there any non link-local IPv6 address?
+        List<NetworkInterfaceAndAddress> pairs = NetworkUtil.getMulticastAddresses();
+        boolean found = false;
+        for (NetworkInterfaceAndAddress pair : pairs) {
+            if (pair.address instanceof Inet6Address) {
+                if (!pair.address.isLinkLocalAddress() && !pair.address.isAnyLocalAddress()) {
+                    found = true;
+                }
+            }
+        }
+        if (!found) {
+            return;
+        }
 
         String id = UUID.randomUUID().toString();
         MulticastSocketListenerThread listenerThread = startSocketListener(id, "[::]", "ff08::48:84");
