@@ -1,0 +1,21 @@
+{
+	"request": {
+		"method": "POST",
+		"urlPathPattern": "/api/v1/namespaces/ns1/pods/pod-abcdef.*/proxy/jolokia.*",
+		"headers": {
+				  "Authorization": {
+				    "equalTo": "Bearer foobar",
+					"X-jolokia-authorization": "Basic YWRtaW46c2VjcmV0"
+				  }
+				},
+		"bodyPatterns": [
+			{
+				"equalToJson": "{\"path\":\"java.lang/type=Memory\",\"type\":\"LIST\"}"
+			}
+		]
+	},
+	"response": {
+		"status": 200,
+		"bodyFileName": "memory-list.json"
+	}
+}

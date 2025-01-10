@@ -927,6 +927,11 @@
           </exclusion>
         </exclusions>
       </dependency>
+      <dependency>
+        <groupId>org.wiremock</groupId>
+        <artifactId>wiremock-standalone</artifactId>
+        <version>${version.org.wiremock}</version>
+      </dependency>
 
       <dependency>
         <groupId>org.awaitility</groupId>

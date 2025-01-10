@@ -1,0 +1,15 @@
+{
+	"request": {
+		"method": "GET",
+		"url": "/api/v1/namespaces/ns1/pods/pod-abcdef",
+		"headers": {
+		  "Authorization": {
+		    "equalTo": "Bearer foobar"
+		  }
+		}
+	},
+	"response": {
+		"status": 200,
+		"bodyFileName": "pod.json"
+	}
+}

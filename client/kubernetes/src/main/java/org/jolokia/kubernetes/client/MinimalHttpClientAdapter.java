@@ -1,9 +1,5 @@
 package org.jolokia.kubernetes.client;
 
-import io.fabric8.kubernetes.api.model.Status;
-import io.fabric8.kubernetes.api.model.StatusBuilder;
-import io.fabric8.kubernetes.client.KubernetesClientException;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -12,21 +8,11 @@ import java.io.StringWriter;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.StringTokenizer;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+
 import javax.management.remote.JMXConnector;
 
-import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.kubernetes.client.dsl.internal.OperationSupport;
-import io.fabric8.kubernetes.client.okhttp.OkHttpClientImpl;
-import io.fabric8.kubernetes.client.utils.KubernetesSerialization;
-import okhttp3.HttpUrl;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Protocol;
-import okhttp3.Request.Builder;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-import okhttp3.ResponseBody;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
@@ -48,6 +34,14 @@ import org.apache.http.protocol.HttpContext;
 import org.jolokia.server.core.osgi.security.AuthorizationHeaderParser;
 import org.jolokia.server.core.util.Base64Util;
 import org.jolokia.json.JSONObject;
+
+import io.fabric8.kubernetes.api.model.Status;
+import io.fabric8.kubernetes.api.model.StatusBuilder;
+import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClientException;
+import io.fabric8.kubernetes.client.dsl.internal.OperationSupport;
+import io.fabric8.kubernetes.client.utils.KubernetesSerialization;
+import okhttp3.HttpUrl;
 
 /**
  * This is a minimum implementation of the HttpClient interface based on what is used by J4PClient
@@ -93,19 +87,16 @@ public class MinimalHttpClientAdapter implements HttpClient {
     }
 
     @Override
-    public HttpResponse execute(HttpUriRequest httpUriRequest)
-        throws IOException {
+    public HttpResponse execute(HttpUriRequest httpUriRequest) throws IOException {
         try {
-            final Response response = performRequest(client, urlPath,
-                extractBody(httpUriRequest), httpUriRequest.getURI().getQuery(),
-                allHeaders(httpUriRequest)
-            );
+            final io.fabric8.kubernetes.client.http.HttpResponse<byte[]> response = performRequest(client, urlPath,
+                extractBody(httpUriRequest), httpUriRequest.getURI().getQuery(), allHeaders(httpUriRequest));
             return convertResponse(response);
-        } catch (KubernetesClientException e) {
+        } catch (KubernetesClientException | ExecutionException | InterruptedException e) {
             throw new ClientProtocolException(e);
         }
 
-    }
+	}
 
     private Map<String, String> allHeaders(HttpUriRequest httpUriRequest) {
         Map<String, String> headers = new HashMap<>();
@@ -118,21 +109,30 @@ public class MinimalHttpClientAdapter implements HttpClient {
 
     }
 
+	public static io.fabric8.kubernetes.client.http.HttpResponse<byte[]> performRequest(KubernetesClient client,
+			String path, byte[] body, String query, Map<String, String> headers)
+			throws IOException, InterruptedException, ExecutionException {
 
-    public static Response performRequest(KubernetesClient client, String path, byte[] body,
-                                          String query, Map<String, String> headers) throws IOException {
-        final Builder requestBuilder = new Builder()
-            .post(RequestBody.create(MediaType.parse("application/json"), body)).url(
-                buildHttpUri(client, path, query));
-        for (Map.Entry<String, String> header : headers.entrySet()) {
-            requestBuilder.addHeader(header.getKey(), header.getValue());
-        }
-        io.fabric8.kubernetes.client.http.HttpClient k8sHttpClient = client.getHttpClient();
-        OkHttpClient okHttpClient = ((OkHttpClientImpl) k8sHttpClient).getOkHttpClient();
-        return okHttpClient.newCall(
-            requestBuilder.build()
-        ).execute();
-    }
+		final io.fabric8.kubernetes.client.http.HttpRequest.Builder requestBuilder = client.getHttpClient()
+				.newHttpRequestBuilder();
+		requestBuilder.method("POST", "application/json", new String(body)).url(buildHttpUri(client, path, query));
+		for (Map.Entry<String, String> header : headers.entrySet()) {
+			requestBuilder.header(header.getKey(), header.getValue());
+		}
+
+		io.fabric8.kubernetes.client.http.HttpRequest request = requestBuilder.build();
+		CompletableFuture<io.fabric8.kubernetes.client.http.HttpResponse<byte[]>> futureResponse = client
+				.getHttpClient().sendAsync(request, byte[].class).thenApply(response -> {
+					try {
+						return response;
+					} catch (KubernetesClientException e) {
+						throw e;
+					} catch (Exception e) {
+						throw OperationSupport.requestException(request, e);
+					}
+				});
+		return futureResponse.get();
+	}
 
     private static URL buildHttpUri(KubernetesClient client, String resourcePath,
                                     String query) {
@@ -146,14 +146,16 @@ public class MinimalHttpClientAdapter implements HttpClient {
         return builder.build().url();
     }
 
-    protected HttpResponse convertResponse(Response response) throws IOException {
-        final int responseCode = response.code();
-        final BasicHttpResponse convertedResponse = new BasicHttpResponse(
-            new BasicStatusLine(convertProtocol(response.protocol()), responseCode,
-                response.message()));
-        for (String header : response.headers().names()) {
-            convertedResponse.setHeader(header, response.header(header));
-        }
+	protected HttpResponse convertResponse(io.fabric8.kubernetes.client.http.HttpResponse<byte[]> response) {
+		final int responseCode = response.code();
+		//NB: We have no reliable information about http protocol, so this may be misleading
+		//however the Kubernetes Java client does not seem to use the version in the response for anything
+		final ProtocolVersion hackHardcodedHttpVersion = new ProtocolVersion("http", 1, 1);
+		final BasicHttpResponse convertedResponse = new BasicHttpResponse(
+				new BasicStatusLine(hackHardcodedHttpVersion, responseCode, response.message()));
+		for (String header : response.headers().keySet()) {
+			convertedResponse.setHeader(header, response.header(header));
+		}
 
         if (response.body() != null) {
             final BasicHttpEntity responseEntity = new BasicHttpEntity();
@@ -175,7 +177,7 @@ public class MinimalHttpClientAdapter implements HttpClient {
                 responseBytes = errorResponse.toJSONString().getBytes();
 
             } else {
-                responseBytes = response.body().bytes();
+                responseBytes = response.body();
             }
             responseEntity.setContentLength(responseBytes.length);
             responseEntity.setContent(new ByteArrayInputStream(responseBytes));
@@ -187,26 +189,23 @@ public class MinimalHttpClientAdapter implements HttpClient {
         return convertedResponse;
     }
 
-    private Status convertResponseBody(Response response) {
+    private Status convertResponseBody(io.fabric8.kubernetes.client.http.HttpResponse<byte[]> response) {
         // see io.fabric8.kubernetes.client.dsl.internal.OperationSupport.createStatus()
 
         String statusMessage = "";
-        ResponseBody body = response != null ? response.body() : null;
+        byte[] body = response != null ? response.body() : null;
         int statusCode = response != null ? response.code() : 0;
-        try {
-            if (body != null) {
-                statusMessage = body.string();
-            } else if (response != null) {
-                statusMessage = response.message();
-            }
-            Status status = serialization.unmarshal(statusMessage, Status.class);
-            if (status.getCode() == null) {
-                status = new StatusBuilder(status).withCode(statusCode).build();
-            }
-            return status;
-        } catch (IOException e) {
-            return OperationSupport.createStatus(statusCode, statusMessage);
+
+        if (body != null) {
+            statusMessage = new String(body);
+        } else if (response != null) {
+            statusMessage = response.message();
         }
+        Status status = serialization.unmarshal(statusMessage, Status.class);
+        if (status.getCode() == null) {
+            status = new StatusBuilder(status).withCode(statusCode).build();
+        }
+        return status;
     }
 
     protected byte[] extractBody(HttpRequest httpUriRequest) throws IOException {
@@ -218,13 +217,6 @@ public class MinimalHttpClientAdapter implements HttpClient {
         } else {
             return null;
         }
-    }
-
-
-    private ProtocolVersion convertProtocol(Protocol protocol) {
-        final StringTokenizer parser = new StringTokenizer(protocol.name(), "_", false);
-        return new ProtocolVersion(parser.nextToken(), Integer.parseInt(parser.nextToken()),
-            parser.hasMoreTokens() ? Integer.parseInt(parser.nextToken()) : 0);
     }
 
     @Override
