@@ -236,7 +236,6 @@
 
   <profiles>
     <profile>
-      <!-- TODO: check -->
       <!-- Distribution profile adaption for get also the embedded classes into the sources jar-->
       <id>dist</id>
       <build>

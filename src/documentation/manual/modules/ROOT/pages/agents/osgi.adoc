@@ -322,11 +322,7 @@ by the autodetected local host name/address. Also with `$\{env:ENV_VAR}` and
 
 |`org.jolokia.multicastGroup`
 |`239.192.48.84`
-|The multicast group IPv4 address. This group IP can be also given as an environment variable `JOLOKIA_MULTICAST_GROUP` or a system property `jolokia.multicastGroup`
-
-|`org.jolokia.multicastBindAddress`
-|The IP address of interface to bind UDP multicast socket to. By default `0.0.0.0` is used and on IPv6 systems it means that the socket is accepting the traffic using both (IPv4 and IPv6) protocols.
-|`0.0.0.0`
+|The multicast group IPv4 address. This group IP can be also given as an environment variable `JOLOKIA_MULTICAST_GROUP` or a system property `jolokia.multicastGroup`. The default is IPv4 address but IPv6 can also be used, for example `[ff08::48:84]`.
 
 |`org.jolokia.multicastPort`
 |`24884`

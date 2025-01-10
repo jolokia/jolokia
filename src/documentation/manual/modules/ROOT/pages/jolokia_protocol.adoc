@@ -1200,8 +1200,6 @@ type `response`.  Query requests contain
 only the type as property. Responses are sent back to the
 address and port of the sender of the query request.
 
-Please note, that IPv6 is currently not supported yet but likely
-in the future.
 
 [#discovery-response]
 .Response properties
