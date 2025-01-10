@@ -1,6 +1,7 @@
 package org.jolokia.service.discovery;
 
 import java.io.IOException;
+import java.net.Inet6Address;
 import java.util.List;
 import java.util.UUID;
 
@@ -126,6 +127,15 @@ public class MulticastSocketListenerThreadTest {
         } finally {
             listenerThread.shutdown();
         }
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void simpleIPv6NonAny() throws IOException, InterruptedException {
+        checkForMulticastSupport();
+
+        String id = UUID.randomUUID().toString();
+        MulticastSocketListenerThread listenerThread = startSocketListener(id,
+            NetworkUtil.getLocalAddress(Inet6Address.class).getHostAddress(), "ff08::48:84");
     }
 
     private void checkForMulticastSupport() {
