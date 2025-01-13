@@ -52,6 +52,31 @@ public class NetworkUtilTest {
         InetAddress addr = NetworkUtil.findLocalAddressViaNetworkInterface(Inet6Address.class);
         System.out.println("Address found via NIF: " + addr);
         assertTrue(addr instanceof Inet6Address);
+
+        assertFalse(addr.getHostAddress().startsWith("["));
+    }
+
+    @Test
+    public void ip6URLs() throws SocketException, URISyntaxException, UnknownHostException {
+        InetAddress addr = NetworkUtil.findLocalAddressViaNetworkInterface(Inet6Address.class);
+
+        URI uri;
+        assertNotNull(addr);
+        // host address can contain a suffix like "%eth0" (scope)
+        uri = new URI("http://[" + addr.getHostAddress() + "]:8080/");
+        assertNotNull(uri.getHost());
+        assertTrue(uri.getHost().startsWith("["));
+        assertTrue(uri.getHost().endsWith("]"));
+        assertEquals(uri.getPort(), 8080);
+
+        if (addr instanceof Inet6Address && ((Inet6Address) addr).getScopedInterface() != null) {
+            assertTrue(addr.getHostAddress().endsWith("%" + ((Inet6Address) addr).getScopedInterface().getName()));
+        } else {
+            assertFalse(addr.getHostAddress().contains("%"));
+        }
+
+        // this should show us how to deal with IPv6 addresses and URIs
+        assertEquals(InetAddress.getByName(uri.getHost()), addr);
     }
 
     @Test

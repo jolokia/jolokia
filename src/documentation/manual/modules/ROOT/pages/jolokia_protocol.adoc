@@ -1164,15 +1164,12 @@ the following format
 }
 ----
 
-We can use a tool like https://nmap.org/ncat/[netcat,role=externalLink,window=_blank] to check the discovery:
+We can use a tool like https://nmap.org/ncat/[netcat,role=externalLink,window=_blank] or https://linux.die.net/man/1/socat[socat,role=externalLink,window=_blank] to check the discovery:
 
 [shell,subs="attributes,verbatim"]
 ----
-$ nc -u localhost 24884
-{"type":"query"}
-{"agent_version":"{jolokia-version}","agent_id":"192.168.0.221-67980-7e985ce9-servlet",
-"server_product":"tomcat","type":"response","server_vendor":"Apache",
-"server_version":"10.1.16","secured":true,"url":"http:\/\/192.168.0.221:8080\/jolokia"}
+$ echo '{"type":"query"}' | socat STDIO UDP4-DATAGRAM:239.192.48.84:24884
+{"agent_version":"{jolokia-version}","agent_id":"jolokia-7778","type":"response","secured":false,"url":"http://192.168.0.165:7778/jolokia/"}{"agent_version":"{jolokia-version}","agent_id":"jolokia-7779","type":"response","secured":false,"url":"http://192.168.0.165:7778/jolokia/"}
 ----
 
 Any agent enabled for discovery will respond to requester on the same socket with an answer which looks like
@@ -1234,6 +1231,8 @@ URL is used. If autodetected it is taken from the first HTTP
 request processed by the servlet. Hence no URL is available
 until this first request was processed. This property might
 be empty.
+When standard `-Djava.net.preferIPv6Addresses` option is set to `true`, the
+returned URL should use IPv6 host address.
 |`\http://192.168.0.221:8080/jolokia`
 
 |`secured`

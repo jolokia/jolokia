@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.GeneralSecurityException;
@@ -33,6 +34,7 @@ import javax.net.ssl.SSLParameters;
 import org.jolokia.jvmagent.security.*;
 import org.jolokia.server.core.config.*;
 import org.jolokia.server.core.util.JolokiaCipher;
+import org.jolokia.server.core.util.NetworkUtil;
 
 /**
  * Configuration required for the JolokiaServer
@@ -599,10 +601,17 @@ public class JolokiaServerConfig {
     private void initAddress(Map<String, String> agentConfig) {
         String host = agentConfig.get("host");
         try {
-            if ("*".equals(host) || "0.0.0.0".equals(host)) {
-                address = null; // null is the wildcard
+            if (!NetworkUtil.isIPv6Supported()) {
+                if ("[::]".equals(host) || "::".equals(host)) {
+                    throw new IllegalArgumentException("Can not use bind address \"" + host + "\" as wildcard IPv6 address. IPv6 is disabled/unsupported.");
+                } else if (!"*".equals(host) && InetAddress.getByName(host) instanceof Inet6Address) {
+                    throw new IllegalArgumentException("Can not use bind address \"" + host + "\" IPv6 address. IPv6 is disabled/unsupported.");
+                }
+            }
+            if ("*".equals(host) || "0.0.0.0".equals(host) || "[::]".equals(host) || "::".equals(host)) {
+                address = NetworkUtil.getAnyAddress();
             } else if (host != null) {
-                address = InetAddress.getByName(host); // some specific host
+                address = InetAddress.getByName(host); // some specific host - either IPv4 or IPv6
             } else {
                 address = InetAddress.getByName(null); // secure alternative -- if no host, use *loopback*
             }

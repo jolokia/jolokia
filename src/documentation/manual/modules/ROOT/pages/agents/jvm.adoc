@@ -91,9 +91,14 @@ present a human readable label for this agent.
 |`Intranet Timebooking Server`
 
 |`host`
-|Hostaddress to which the HTTP server should bind to. If "*" or "0.0.0.0" is
-given, the servers binds to every network interface.
-|`localhost`
+a|Hostaddress to which the HTTP server should bind to. If "*" or "0.0.0.0" or "[::]" is
+given, the servers binds to every network interface (the _any_ address is used for all these 3 values).
+There are few use cases here:
+
+* `-Djava.net.preferIPv4Stack=true` - using `[::]` or `::` causes exception. When using `*` or `0.0.0.0`, the socket is bound to `0.0.0.0` _any IPv4 address_.
+* otherwise, each format of _any address_ binds Jolokia socket to wildcard address accepting both IPv6 and IPv4 traffic (because Java doesn't support `IPV6_ONLY` sockets)
+* when using specific IPv6 address (like `2001:0000:130F:0000:0000:09C0:876A:130B`) it can be specified with or without wrapping it in `[]` brackets.
+|localhost address, which can be `127.0.0.1` (IPv4) or `::1` (`::ffff:127.0.0.1`) (IPv6) depending on network configuration.
 
 |`port`
 |Port the HTTP server should listen to. If set to 0, then an arbitrary free port
