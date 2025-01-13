@@ -339,25 +339,46 @@ public class JolokiaServer {
         int port;
         if (serverAddress != null) {
             realAddress = serverAddress.getAddress();
-            if (realAddress.isAnyLocalAddress()) {
-                try {
-                    realAddress = NetworkUtil.getLocalAddress();
-                } catch (IOException e) {
-                    try {
-                        realAddress = InetAddress.getLocalHost();
-                    } catch (UnknownHostException e1) {
-                        // Ok, ok. We take the original one
-                        realAddress = serverAddress.getAddress();
-                    }
-                }
-            }
             port = serverAddress.getPort();
         } else {
             realAddress = pConfig.getAddress();
             port = pConfig.getPort();
         }
-        return String.format("%s://%s:%d%s",
-                             pConfig.getProtocol(),realAddress.getHostAddress(),port, pContextPath);
+        if (realAddress.isAnyLocalAddress()) {
+            // we can't just say that Agent's URL is http://0.0.0.0:8778/jolokia for example...
+            try {
+                // let's be explicit here - for backward compatibilty we'll announce Agent URL using IPv4 by default
+                boolean preferIPv6Addresses = Boolean.getBoolean("java.net.preferIPv6Addresses");
+                if (realAddress instanceof Inet6Address && preferIPv6Addresses) {
+                    realAddress = NetworkUtil.getLocalAddress(Inet6Address.class);
+                } else {
+                    realAddress = NetworkUtil.getLocalAddress(Inet4Address.class);
+                }
+            } catch (IOException e) {
+                // we have to expect the unexpected
+                try {
+                    realAddress = InetAddress.getLocalHost();
+                } catch (UnknownHostException e1) {
+                    // Ok, ok. We take the original one
+                    realAddress = serverAddress.getAddress();
+                }
+            }
+        }
+        String hostAddress = realAddress.getHostAddress();
+        if (realAddress instanceof Inet6Address) {
+            if (((Inet6Address) realAddress).getScopedInterface() != null
+                || ((Inet6Address) realAddress).getScopeId() > 0) {
+                int percent = hostAddress.indexOf('%');
+                if (percent != -1) {
+                    hostAddress = hostAddress.substring(0, percent);
+                }
+            }
+            return String.format("%s://[%s]:%d%s",
+                                 pConfig.getProtocol(), hostAddress, port, pContextPath);
+        } else {
+            return String.format("%s://%s:%d%s",
+                                 pConfig.getProtocol(), hostAddress, port, pContextPath);
+        }
     }
 
     /**
