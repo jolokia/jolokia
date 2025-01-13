@@ -22,6 +22,10 @@
     <allow-origin>http://bla.com</allow-origin>
     <allow-origin>http://blub.com</allow-origin>
     <allow-origin>*://*.consol.de</allow-origin>
+    <allow-origin>http://[::ffff:7f00:1]</allow-origin>
+    <!-- "optimized" IPv6 addresses are not supported -->
+<!--    <allow-origin>http://[2001:db8:1::1]</allow-origin>-->
+    <allow-origin>http://[2001:db8:1:0:0:0:0:1]:*</allow-origin>
     <strict-checking/>
   </cors>
 </restrict>

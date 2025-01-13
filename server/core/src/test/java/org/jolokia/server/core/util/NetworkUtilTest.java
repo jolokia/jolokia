@@ -77,6 +77,9 @@ public class NetworkUtilTest {
 
         // this should show us how to deal with IPv6 addresses and URIs
         assertEquals(InetAddress.getByName(uri.getHost()), addr);
+
+        // special notation for IPv4 compatible addresses
+        assertEquals(InetAddress.getByName("::ffff:127.0.0.1"), InetAddress.getByName("::ffff:7f00:1"));
     }
 
     @Test

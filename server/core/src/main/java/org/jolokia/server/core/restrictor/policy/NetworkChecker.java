@@ -16,6 +16,9 @@ package org.jolokia.server.core.restrictor.policy;
  *  limitations under the License.
  */
 
+import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -46,11 +49,14 @@ import org.w3c.dom.*;
 public class NetworkChecker extends AbstractChecker<String[]> {
 
     private final Set<String> allowedHostsSet;
+    private final Set<Inet6Address> allowedIP6HostsSet;
     private Set<String> allowedSubnetsSet;
 
     // Simple patterns, could be more specific
     private static final Pattern IP_PATTERN = Pattern.compile("^[\\d.]+$");
-    private static final Pattern SUBNET_PATTERN = Pattern.compile("^[\\d.]+/[\\d.]+$");
+    private static final Pattern IP6_PATTERN = Pattern.compile("^[\\da-fA-F:]+$");
+    private static final Pattern SUBNET_IP4_PATTERN = Pattern.compile("^[\\d.]+/[\\d.]+$");
+    private static final Pattern SUBNET_IP6_PATTERN = Pattern.compile("^[\\da-fA-F:]+/[\\d.]+$");
 
     /**
      * Construct this checker from a given document
@@ -62,10 +68,12 @@ public class NetworkChecker extends AbstractChecker<String[]> {
         if (nodes.getLength() == 0) {
             // No restrictions found
             allowedHostsSet = null;
+            allowedIP6HostsSet = null;
             return;
         }
 
         allowedHostsSet = new HashSet<>();
+        allowedIP6HostsSet = new HashSet<>();
         for (int i = 0;i<nodes.getLength();i++) {
             Node node = nodes.item(i);
             NodeList childs = node.getChildNodes();
@@ -76,13 +84,26 @@ public class NetworkChecker extends AbstractChecker<String[]> {
                 }
                 assertNodeName(hostNode,"host");
                 String host = hostNode.getTextContent().trim().toLowerCase();
-                if (SUBNET_PATTERN.matcher(host).matches()) {
+                if (host.startsWith("[") && host.endsWith("]")) {
+                    // trim IPv6 bracket notation
+                    host = host.substring(1, host.length() - 1);
+                }
+                if (SUBNET_IP4_PATTERN.matcher(host).matches() || SUBNET_IP6_PATTERN.matcher(host).matches()) {
                     if (allowedSubnetsSet == null) {
                         allowedSubnetsSet = new HashSet<>();
                     }
                     allowedSubnetsSet.add(host);
                 } else {
-                    allowedHostsSet.add(host);
+                    if (host.contains(":")) {
+                        // assume it may be IPv6 address, so we have to be able to match ffff::1 and ffff:0:0:0:0:0:0:1
+                        try {
+                            allowedIP6HostsSet.add((Inet6Address) Inet6Address.getByName(host));
+                        } catch (UnknownHostException e) {
+                            throw new IllegalArgumentException("Invalid IPv6 address \"" + host + "\"", e);
+                        }
+                    } else {
+                        allowedHostsSet.add(host);
+                    }
                 }
             }
         }
@@ -103,10 +124,20 @@ public class NetworkChecker extends AbstractChecker<String[]> {
             if (allowedHostsSet.contains(addr)) {
                 return true;
             }
-            if (allowedSubnetsSet != null && IP_PATTERN.matcher(addr).matches()) {
-                for (String subnet : allowedSubnetsSet) {
-                    if (IpChecker.matches(subnet, addr)) {
-                        return true;
+            try {
+                InetAddress ip6 = Inet6Address.getByName(addr);
+                if (ip6 instanceof Inet6Address && allowedIP6HostsSet.contains(ip6)) {
+                    return true;
+                }
+            } catch (UnknownHostException e) {
+                return false;
+            }
+            if (allowedSubnetsSet != null) {
+                if (IP_PATTERN.matcher(addr).matches() || IP6_PATTERN.matcher(addr).matches()) {
+                    for (String subnet : allowedSubnetsSet) {
+                        if (IpChecker.matches(subnet, addr)) {
+                            return true;
+                        }
                     }
                 }
             }

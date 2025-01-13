@@ -169,6 +169,10 @@ contain the origin URL provided by browsers with the
 `Origin:` header literally or a
 wildcard specification with `*`.
 
+Since Jolokia 2.1.3 we also support IPv6 origins. These have to be specified with bracket notation like `[::ffff:7f00:1]`.
+
+NOTE:: Mind that you can use `http://[::ffff:127.0.0.1]/jolokia/` URI which uses https://en.wikipedia.org/wiki/IPv6_address#Special_addresses[IPv4-mapped IPv6 address], but browser will send `Origin: http://[::ffff:7f00:1]` header anyway, so this is how the origin should be defined as.
+
 [,xml]
 ----
 <cors>
@@ -177,6 +181,7 @@ wildcard specification with `*`.
 
   <!-- ... and all servers from jmx4perl.org with any protocol -->
   <allow-origin>*://*.jmx4perl.org</allow-origin>
+  <allow-origin>*://[::ffff:7f00:1]</allow-origin>
 
   <!-- Check for the proper origin on the server side, too -->
   <strict-checking/>

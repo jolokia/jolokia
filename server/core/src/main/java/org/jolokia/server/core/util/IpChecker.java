@@ -17,6 +17,9 @@ package org.jolokia.server.core.util;
  */
 
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 /**
  * Checks whether a certain ip adresse is either equal another
  * address or falls within a subnet
@@ -27,18 +30,25 @@ package org.jolokia.server.core.util;
 
 public final class IpChecker {
 
+    private static int[] masks = new int[] {0x00, 0x80, 0xc0, 0xe0, 0xf0, 0xf8, 0xfc, 0xfe};
+
     private IpChecker() { }
 
     /**
      * Check whether a given IP Adress falls within a subnet or is equal to
      *
      * @param pExpected either a simple IP adress (without "/") or a net specification
-     *        including a netmask (e.g "/24" or "/255.255.255.0")
+     *        including a CIDR specification (e.g "/24" or "/255.255.255.0" (only for IPv4))
      * @param pToCheck the ip address to check
      * @return true if either the address to check is the same as the address expected
      *         of falls within the subnet if a netmask is given
      */
     public static boolean matches(String pExpected, String pToCheck) {
+        boolean ipv6 = (pToCheck.startsWith("[") && pToCheck.endsWith("]")) || pToCheck.contains(":");
+        if (ipv6 || pExpected.contains(":")) {
+            return pExpected.contains(":") && matchesIPv6(pExpected, pToCheck);
+        }
+
         String[] parts = pExpected.split("/",2);
         if (parts.length == 1) {
             // No Net part given, check for equality ...
@@ -64,9 +74,53 @@ public final class IpChecker {
         } else {
             throw new IllegalArgumentException("Invalid IP adress specification " + pExpected);
         }
-	}
+    }
 
-	private static int[] transformCidrToNetmask(String pCidrString) {
+    /**
+     * Checks whether IPv6 address matches expected address or CIDR specification in {@code address/net-prefix} format.
+     * @param pExpected
+     * @param pToCheck
+     * @return
+     */
+    public static boolean matchesIPv6(String pExpected, String pToCheck) {
+        String[] parts = pExpected.split("/",2);
+        if (parts.length == 1) {
+            try {
+                InetAddress expected = InetAddress.getByName(pExpected);
+                InetAddress checked = InetAddress.getByName(pToCheck);
+                return expected.equals(checked);
+            } catch (UnknownHostException e) {
+                throw new IllegalArgumentException("Invalid IP adress specification " + pExpected);
+            }
+        } else {
+            int prefix = Integer.parseInt(parts[1]);
+            if (prefix < 0 || prefix > 128) {
+                throw new IllegalArgumentException("Invalid IP adress specification " + pExpected);
+            }
+            try {
+                InetAddress expected = InetAddress.getByName(parts[0]);
+                InetAddress checked = InetAddress.getByName(pToCheck);
+                byte[] e = expected.getAddress();
+                byte[] c = checked.getAddress();
+                int div = prefix / 8;
+                for (int i = 0; i < div; i++) {
+                    if (e[i] != c[i]) {
+                        return false;
+                    }
+                }
+                int rem = prefix % 8;
+                if (rem != 0) {
+                    // e.g. 13 means that first byte must be equal and 2nd byte's first 5 bits must match
+                    return (e[div] & masks[rem]) == (c[div] & masks[rem]);
+                }
+                return true;
+            } catch (UnknownHostException e) {
+                throw new IllegalArgumentException("Invalid IP adress specification " + pExpected);
+            }
+        }
+    }
+
+    private static int[] transformCidrToNetmask(String pCidrString) {
         try {
             int pCidr = Integer.parseInt(pCidrString);
             if (pCidr < 0 || pCidr > 32) {

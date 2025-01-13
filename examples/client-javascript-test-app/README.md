@@ -5,7 +5,7 @@ This is a test application for [Jolokia's JavaScript client library](../../clien
 To run the tests:
 
 ```console
-mvn clean package jetty:run
+mvn clean package jetty:run-war
 ```
 
 Then browse to <http://localhost:8080/jolokia-all-test.html>
