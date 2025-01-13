@@ -63,7 +63,19 @@ public class PolicyBasedRestrictorTest {
                 { "11.1.18.32", "false" },
                 { "192.168.15.3", "true" },
                 { "192.168.15.8", "true" },
-                { "192.168.16.3", "false" }
+                { "192.168.16.3", "false" },
+            //    <host>2001:db8:1::1</host>
+            //    <host>2001:db8:2::/48</host>
+                { "2001:db8:1::1", "true" },
+                { "2001:db8:1::2", "false" },
+                { "2001:db8:1:0::1", "true" },
+                { "2001:db8:1:0::2", "false" },
+                { "2001:db8:1:0:0::1", "true" },
+                { "2001:db8:1:1:0::1", "false" },
+                { "2001:db8:1:0:0:0::1", "true" },
+                { "2001:db8:1:0:0:0:0:1", "true" },
+                { "2001:db8:2::1", "true" },
+                { "2001:db8:2::2", "true" },
         };
 
         for (String[] check : ips) {
@@ -85,7 +97,6 @@ public class PolicyBasedRestrictorTest {
 
         // No hosts set.
         assertTrue(restrictor.isRemoteAccessAllowed("10.0.1.125"));
-
     }
 
     @Test
@@ -100,7 +111,6 @@ public class PolicyBasedRestrictorTest {
         assertTrue(restrictor.isHttpMethodAllowed(HttpMethod.GET));
         assertTrue(restrictor.isHttpMethodAllowed(HttpMethod.POST));
     }
-
 
     @Test
     public void deny() throws MalformedObjectNameException {
@@ -186,9 +196,7 @@ public class PolicyBasedRestrictorTest {
         } catch (SecurityException exp) {
             assertTrue(exp.getMessage().contains("name"));
         }
-
     }
-
 
     @Test
     public void httpMethod() {
@@ -231,6 +239,26 @@ public class PolicyBasedRestrictorTest {
             assertTrue(restrictor.isOriginAllowed("http://bla.com", strict));
             assertFalse(restrictor.isOriginAllowed("http://www.jolokia.org", strict));
             assertTrue(restrictor.isOriginAllowed("https://www.consol.de", strict));
+        }
+    }
+
+    @Test
+    public void corsIPv6() {
+        InputStream is = getClass().getResourceAsStream("/allow-origin4.xml");
+        PolicyRestrictor restrictor = new PolicyRestrictor(is);
+
+        // <allow-origin>http://[::ffff:7f00:1]</allow-origin> == http://[::ffff:127.0.0.1]
+        // <allow-origin>http://[::ffff:129.0.0.1]</allow-origin>
+        // <allow-origin>http://[2001:db8:1::1]</allow-origin>
+        for (boolean strict : new boolean[] {true, false}) {
+            assertTrue(restrictor.isOriginAllowed("http://[::ffff:7f00:1]", strict));
+            assertFalse(restrictor.isOriginAllowed("http://[2001:db8:1::1]", strict));
+            assertFalse(restrictor.isOriginAllowed("http://[2001:db8:1:0::1]", strict));
+            assertFalse(restrictor.isOriginAllowed("http://[2001:db8:1:0:0::1]", strict));
+            assertFalse(restrictor.isOriginAllowed("http://[2001:db8:1:0:0:0::1]", strict));
+            assertTrue(restrictor.isOriginAllowed("http://[2001:db8:1:0:0:0:0:1]:80", strict));
+            assertFalse(restrictor.isOriginAllowed("http://[2001:db8:1:1::1]", strict));
+            assertTrue(restrictor.isOriginAllowed("http://[2001:db8:1:0:0:0:0:1]:8080", strict));
         }
     }
 
@@ -287,6 +315,5 @@ public class PolicyBasedRestrictorTest {
         assertTrue(restrictor.isOriginAllowed("http://www.jolokia.org", false));
         assertTrue(restrictor.isOriginAllowed("https://www.consol.de", false));
     }
-
 
 }
