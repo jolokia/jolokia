@@ -45,7 +45,7 @@ import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.message.BasicStatusLine;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
-import org.jolokia.server.core.osgi.security.AuthorizationHeaderParser;
+import org.jolokia.server.core.http.security.AuthorizationHeaderParser;
 import org.jolokia.server.core.util.Base64Util;
 import org.jolokia.json.JSONObject;
 

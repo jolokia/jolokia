@@ -1,6 +1,7 @@
 package org.jolokia.server.core.osgi.security;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.jolokia.server.core.http.security.AuthorizationHeaderParser;
 
 /**
 * @author roland

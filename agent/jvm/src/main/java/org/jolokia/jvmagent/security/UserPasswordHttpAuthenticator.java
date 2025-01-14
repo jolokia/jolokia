@@ -3,7 +3,7 @@ package org.jolokia.jvmagent.security;
 import com.sun.net.httpserver.BasicAuthenticator;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpPrincipal;
-import org.jolokia.server.core.osgi.security.AuthorizationHeaderParser;
+import org.jolokia.server.core.http.security.AuthorizationHeaderParser;
 
 /**
  * Simple authenticator using user and password for basic authentication.

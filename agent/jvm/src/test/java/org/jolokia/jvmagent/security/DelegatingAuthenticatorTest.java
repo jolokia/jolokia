@@ -1,5 +1,5 @@
 package org.jolokia.jvmagent.security;/*
- * 
+ *
  * Copyright 2014 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,7 +28,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.jolokia.server.core.osgi.security.AuthorizationHeaderParser;
+import org.jolokia.server.core.http.security.AuthorizationHeaderParser;
 import org.jolokia.test.util.EnvTestUtil;
 import org.testng.annotations.*;
 

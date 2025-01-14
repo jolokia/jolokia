@@ -140,6 +140,7 @@
               org.jolokia.server.core.config,
               org.jolokia.server.core.detector,
               org.jolokia.server.core.http,
+              org.jolokia.server.core.http.security,
               org.jolokia.server.core.osgi,
               org.jolokia.server.core.osgi.security,
               org.jolokia.server.core.osgi.util,

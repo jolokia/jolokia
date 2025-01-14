@@ -1,4 +1,4 @@
-package org.jolokia.server.core.osgi.security;
+package org.jolokia.server.core.http.security;
 
 /*
  * Copyright 2009-2013 Roland Huss

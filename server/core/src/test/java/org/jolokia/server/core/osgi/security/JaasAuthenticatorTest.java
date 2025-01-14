@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import org.easymock.EasyMock;
 import org.jolokia.server.core.config.ConfigKey;
+import org.jolokia.server.core.http.security.AuthorizationHeaderParser;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 

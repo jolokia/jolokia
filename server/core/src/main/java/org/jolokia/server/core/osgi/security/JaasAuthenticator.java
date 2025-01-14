@@ -5,6 +5,7 @@ import javax.security.auth.login.*;
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.jolokia.server.core.config.ConfigKey;
+import org.jolokia.server.core.http.security.AuthorizationHeaderParser;
 import org.jolokia.server.core.util.UserPasswordCallbackHandler;
 
 /**
