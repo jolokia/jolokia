@@ -43,6 +43,7 @@ public final class OptionsAndArgs {
             "quiet!", "verbose!", "version!", "executor", "threadNamePrefix", "threadNr",
             "backlog", "hide!", "protocol", "authMode", "authClass",
             "authUrl", "authPrincipalSpec", "authIgnoreCerts!",
+            "startTimeout",
             //https options:
             "keystore", "keystorePassword", "useSslClientAuthentication!",
             "secureSocketProtocol", "keyStoreType", "keyManagerAlgorithm", "trustManagerAlgorithm",
@@ -212,6 +213,22 @@ public final class OptionsAndArgs {
     public String getPort() {
         String port = options.get("port");
         return port != null ? port : "8778";
+    }
+
+    /**
+     * Get start timeout in milliseconds (defaults to 500ms).
+     * @return
+     */
+    public int getStartTimeout() {
+        String timeout = options.get("startTimeout");
+        if (timeout == null) {
+            return 500;
+        }
+        try {
+            return Integer.parseInt(timeout);
+        } catch (NumberFormatException e) {
+            return 500;
+        }
     }
 
     /**

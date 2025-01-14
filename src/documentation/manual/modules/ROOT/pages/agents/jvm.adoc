@@ -457,6 +457,7 @@ where <command> is one of
     --authUrl <url>                 URL used for a dispatcher authentication (authMode == delegate)
     --authPrincipalSpec <spec>      Extractor specification for getting the principal (authMode == delegate)
     --authIgnoreCerts               Whether to ignore CERTS when doing a dispatching authentication (authMode == delegate)
+    --startTimeout                  Timeout waiting for agent to start (default: 500ms)
     --user <user>                   User used for Basic-Authentication
     --password <password>           Password used for Basic-Authentication
     --quiet                         No output. "status" will exit with code 0 if the agent is running, 1 otherwise

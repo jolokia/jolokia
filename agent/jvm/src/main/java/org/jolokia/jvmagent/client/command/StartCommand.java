@@ -38,34 +38,47 @@ public class StartCommand extends AbstractBaseCommand {
     @Override
     @SuppressWarnings("PMD.SystemPrintln")
     int execute(OptionsAndArgs pOpts, Object pVm, VirtualMachineHandlerOperations pHandler) {
-        String agentUrl;
-        agentUrl = checkAgentUrl(pVm, pHandler);
         boolean quiet = pOpts.isQuiet();
-        if (agentUrl == null) {
-            loadAgent(pVm, pHandler, pOpts);
-            agentUrl = checkAgentUrl(pVm, pHandler);
-            if (agentUrl == null) {
-                // Wait a bit and try again
-                agentUrl = checkAgentUrl(pVm, pHandler, 500);
-                if (agentUrl == null) {
-                    System.err.println("Couldn't start agent for " + getProcessDescription(pHandler, pOpts));
-                    System.err.println("Possible reason could be that port '" + pOpts.getPort() + "' is already occupied.");
-                    System.err.println("Please check the standard output of the target process for a detailed error message.");
-                    return 1;
-                }
-            }
-            if (!quiet) {
-                System.out.println("Started Jolokia for " + getProcessDescription(pHandler, pOpts));
-                System.out.println(agentUrl);
-            }
-            return 0;
-        } else {
+        int interval = 200;
+        int timeout = pOpts.getStartTimeout();
+
+        String agentUrl = checkAgentUrl(pVm, pHandler);
+        if (agentUrl != null) {
             if (!quiet) {
                 System.out.println("Jolokia is already attached to " + getProcessDescription(pHandler, pOpts));
                 System.out.println(agentUrl);
             }
             return 1;
         }
+
+        // only now, once, attempt to load the agent
+        loadAgent(pVm, pHandler, pOpts);
+
+        int count = 0;
+        while (count * interval < timeout) {
+            try {
+                Thread.sleep(interval);
+                count++;
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
+            agentUrl = checkAgentUrl(pVm, pHandler);
+            if (agentUrl == null) {
+                // Wait a bit and try again
+                continue;
+            }
+            if (!quiet) {
+                System.out.println("Started Jolokia for " + getProcessDescription(pHandler, pOpts));
+                System.out.println(agentUrl);
+            }
+            return 0;
+        }
+
+        System.err.println("Couldn't start agent for " + getProcessDescription(pHandler, pOpts));
+        System.err.println("Possible reason could be that port '" + pOpts.getPort() + "' is already occupied.");
+        System.err.println("Please check the standard output of the target process for a detailed error message.");
+        return 1;
     }
 
 }

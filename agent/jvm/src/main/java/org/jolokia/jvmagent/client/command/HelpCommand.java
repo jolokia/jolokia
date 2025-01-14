@@ -81,6 +81,7 @@ public class HelpCommand extends AbstractBaseCommand {
 "    --authUrl <url>                 URL used for a dispatcher authentication (authMode == delegate)\n" +
 "    --authPrincipalSpec <spec>      Extractor specification for getting the principal (authMode == delegate)\n" +
 "    --authIgnoreCerts               Whether to ignore CERTS when doing a dispatching authentication (authMode == delegate)\n" +
+"    --startTimeout                  Timeout waiting for agent to start (default: 500ms)\n" +
 "    --user <user>                   User used for Basic-Authentication\n" +
 "    --password <password>           Password used for Basic-Authentication\n" +
 "    --quiet                         No output. \"status\" will exit with code 0 if the agent is running, 1 otherwise\n" +
