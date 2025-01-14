@@ -1,8 +1,9 @@
 {
   "name": "@jolokia.js/d3",
-  "version": "2.1.8",
+  "version": "2.1.9",
   "description": "Jolokia JavaScript ES D3 integration module",
   "type": "module",
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jolokia/jolokia.git",
