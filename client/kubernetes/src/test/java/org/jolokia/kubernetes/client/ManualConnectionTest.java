@@ -16,18 +16,18 @@ import org.testng.annotations.Test;
  */
 public class ManualConnectionTest {
 
-	@Test(groups = "manual")
-	@Ignore
-	public void testConnect() throws IOException {
-		final JMXServiceURL jmxServiceURL = new JMXServiceURL(
-				"service:jmx:kubernetes:///jfr/petclinic-.+-.+:8778/jolokia/");
+  @Test(groups = "manual")
+  @Ignore
+  public void testConnect() throws IOException {
+    final JMXServiceURL jmxServiceURL = new JMXServiceURL(
+        "service:jmx:kubernetes:///jfr/petclinic-.+-.+:8778/jolokia/");
 
-		try (final JMXConnector connector = JMXConnectorFactory.connect(jmxServiceURL,
-				Collections.singletonMap(JMXConnector.CREDENTIALS, new String[] { "user", "password" }))) {
-			connector.getConnectionId();
-			connector.connect();
-			connector.getMBeanServerConnection().getMBeanCount();
-		}
-	}
+    try (final JMXConnector connector = JMXConnectorFactory.connect(jmxServiceURL,
+        Collections.singletonMap(JMXConnector.CREDENTIALS, new String[] { "user", "password" }))) {
+      connector.getConnectionId();
+      connector.connect();
+      connector.getMBeanServerConnection().getMBeanCount();
+    }
+  }
 
 }

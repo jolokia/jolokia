@@ -1,20 +1,20 @@
 {
-	"request": {
-		"method": "POST",
-		"urlPath": "/api/v1/namespaces/ns1/pods/pod-abcdef/proxy/jolokia",
-		"headers": {
-		  "Authorization": {
-		    "equalTo": "Bearer foobar"
-		  }
-		},
-		"bodyPatterns": [
-			{
-				"equalToJson": "{\"operation\":\"gc()\",\"mbean\":\"java.lang:type=Memory\",\"type\":\"EXEC\"}"
-			}
-		]
-	},
-	"response": {
-		"status": 200,
-		"bodyFileName": "jolokia-exec.json"
-	}
+  "request": {
+    "method": "POST",
+    "urlPath": "/api/v1/namespaces/ns1/pods/pod-abcdef/proxy/jolokia",
+    "headers": {
+      "Authorization": {
+        "equalTo": "Bearer foobar"
+      }
+    },
+    "bodyPatterns": [
+      {
+        "equalToJson": "{\"operation\":\"gc()\",\"mbean\":\"java.lang:type=Memory\",\"type\":\"EXEC\"}"
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "jolokia-exec.json"
+  }
 }

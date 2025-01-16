@@ -76,7 +76,7 @@ public class KubernetesJmxConnector extends JolokiaJmxConnector {
    * Manually reset any cached config. To be uses in case you have changed your kubeconfig
    */
   public static void resetKubernetesConfig() {
-	  apiClients.clear();
+    apiClients.clear();
   }
 
   /**

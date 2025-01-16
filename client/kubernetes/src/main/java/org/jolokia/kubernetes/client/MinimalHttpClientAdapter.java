@@ -96,7 +96,7 @@ public class MinimalHttpClientAdapter implements HttpClient {
             throw new ClientProtocolException(e);
         }
 
-	}
+  }
 
     private Map<String, String> allHeaders(HttpUriRequest httpUriRequest) {
         Map<String, String> headers = new HashMap<>();
@@ -109,30 +109,30 @@ public class MinimalHttpClientAdapter implements HttpClient {
 
     }
 
-	public static io.fabric8.kubernetes.client.http.HttpResponse<byte[]> performRequest(KubernetesClient client,
-			String path, byte[] body, String query, Map<String, String> headers)
-			throws IOException, InterruptedException, ExecutionException {
+  public static io.fabric8.kubernetes.client.http.HttpResponse<byte[]> performRequest(KubernetesClient client,
+      String path, byte[] body, String query, Map<String, String> headers)
+      throws IOException, InterruptedException, ExecutionException {
 
-		final io.fabric8.kubernetes.client.http.HttpRequest.Builder requestBuilder = client.getHttpClient()
-				.newHttpRequestBuilder();
-		requestBuilder.method("POST", "application/json", new String(body)).url(buildHttpUri(client, path, query));
-		for (Map.Entry<String, String> header : headers.entrySet()) {
-			requestBuilder.header(header.getKey(), header.getValue());
-		}
+    final io.fabric8.kubernetes.client.http.HttpRequest.Builder requestBuilder = client.getHttpClient()
+        .newHttpRequestBuilder();
+    requestBuilder.method("POST", "application/json", new String(body)).url(buildHttpUri(client, path, query));
+    for (Map.Entry<String, String> header : headers.entrySet()) {
+      requestBuilder.header(header.getKey(), header.getValue());
+    }
 
-		io.fabric8.kubernetes.client.http.HttpRequest request = requestBuilder.build();
-		CompletableFuture<io.fabric8.kubernetes.client.http.HttpResponse<byte[]>> futureResponse = client
-				.getHttpClient().sendAsync(request, byte[].class).thenApply(response -> {
-					try {
-						return response;
-					} catch (KubernetesClientException e) {
-						throw e;
-					} catch (Exception e) {
-						throw OperationSupport.requestException(request, e);
-					}
-				});
-		return futureResponse.get();
-	}
+    io.fabric8.kubernetes.client.http.HttpRequest request = requestBuilder.build();
+    CompletableFuture<io.fabric8.kubernetes.client.http.HttpResponse<byte[]>> futureResponse = client
+        .getHttpClient().sendAsync(request, byte[].class).thenApply(response -> {
+          try {
+            return response;
+          } catch (KubernetesClientException e) {
+            throw e;
+          } catch (Exception e) {
+            throw OperationSupport.requestException(request, e);
+          }
+        });
+    return futureResponse.get();
+  }
 
     private static URL buildHttpUri(KubernetesClient client, String resourcePath,
                                     String query) {
@@ -146,16 +146,16 @@ public class MinimalHttpClientAdapter implements HttpClient {
         return builder.build().url();
     }
 
-	protected HttpResponse convertResponse(io.fabric8.kubernetes.client.http.HttpResponse<byte[]> response) {
-		final int responseCode = response.code();
-		//NB: We have no reliable information about http protocol, so this may be misleading
-		//however the Kubernetes Java client does not seem to use the version in the response for anything
-		final ProtocolVersion hackHardcodedHttpVersion = new ProtocolVersion("http", 1, 1);
-		final BasicHttpResponse convertedResponse = new BasicHttpResponse(
-				new BasicStatusLine(hackHardcodedHttpVersion, responseCode, response.message()));
-		for (String header : response.headers().keySet()) {
-			convertedResponse.setHeader(header, response.header(header));
-		}
+  protected HttpResponse convertResponse(io.fabric8.kubernetes.client.http.HttpResponse<byte[]> response) {
+    final int responseCode = response.code();
+    //NB: We have no reliable information about http protocol, so this may be misleading
+    //however the Kubernetes Java client does not seem to use the version in the response for anything
+    final ProtocolVersion hackHardcodedHttpVersion = new ProtocolVersion("http", 1, 1);
+    final BasicHttpResponse convertedResponse = new BasicHttpResponse(
+        new BasicStatusLine(hackHardcodedHttpVersion, responseCode, response.message()));
+    for (String header : response.headers().keySet()) {
+      convertedResponse.setHeader(header, response.header(header));
+    }
 
         if (response.body() != null) {
             final BasicHttpEntity responseEntity = new BasicHttpEntity();
