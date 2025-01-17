@@ -1,0 +1,15 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/api/v1/namespaces/ns1/pods",
+    "headers": {
+      "Authorization": {
+        "equalTo": "Bearer foobar"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "pods.json"
+  }
+}

@@ -1,25 +1,28 @@
 package org.jolokia.kubernetes.client;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.management.remote.JMXConnector;
+import javax.management.remote.JMXServiceURL;
+
+import org.jolokia.client.J4pClient;
+import org.jolokia.client.jmxadapter.JolokiaJmxConnector;
+import org.jolokia.client.jmxadapter.RemoteJmxAdapter;
+
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import javax.management.remote.JMXConnector;
-import javax.management.remote.JMXServiceURL;
-
-import okhttp3.Response;
-import org.jolokia.client.J4pClient;
-import org.jolokia.client.jmxadapter.JolokiaJmxConnector;
-import org.jolokia.client.jmxadapter.RemoteJmxAdapter;
+import io.fabric8.kubernetes.client.http.HttpResponse;
 
 public class KubernetesJmxConnector extends JolokiaJmxConnector {
 
@@ -73,7 +76,7 @@ public class KubernetesJmxConnector extends JolokiaJmxConnector {
    * Manually reset any cached config. To be uses in case you have changed your kubeconfig
    */
   public static void resetKubernetesConfig() {
-	  apiClients.clear();
+    apiClients.clear();
   }
 
   /**
@@ -156,17 +159,14 @@ public class KubernetesJmxConnector extends JolokiaJmxConnector {
       HashMap<String, String> headers) {
     try {
       final String proxyPath = url.toString();
-      Response response = MinimalHttpClientAdapter
-          .performRequest(client, proxyPath, "{\"type\":\"version\"}".getBytes(), null
-              , headers);
-      if (response.body() != null) {
-        response.body().close();
-      }
+            HttpResponse<byte[]> response = MinimalHttpClientAdapter.performRequest(client,
+                proxyPath,
+                "{\"type\":\"version\"}".getBytes(), null, headers);
       if (response.isSuccessful()) {
         return new J4pClient(
             proxyPath, new MinimalHttpClientAdapter(client, proxyPath, env));
       }
-    } catch (IOException ignore) {
+    } catch (IOException | InterruptedException | ExecutionException ignore) {
     }
     return null;
   }
