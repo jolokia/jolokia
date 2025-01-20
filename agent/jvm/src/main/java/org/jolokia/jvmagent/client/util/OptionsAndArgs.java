@@ -48,6 +48,7 @@ public final class OptionsAndArgs {
             "keystore", "keystorePassword", "useSslClientAuthentication!",
             "secureSocketProtocol", "keyStoreType", "keyManagerAlgorithm", "trustManagerAlgorithm",
             "caCert", "serverCert", "serverKey", "serverKeyAlgorithm", "clientPrincipal", "extractClientCheck",
+            "useCertificateReload",
             "sslProtocol", "sslCipherSuite",
             // Jolokia options:
             "historyMaxEntries", "debug!", "debugMaxEntries",

@@ -68,6 +68,7 @@ public class JolokiaServerConfig {
     private String caCert;
     private String serverCert;
     private String serverKey;
+    private boolean useCertificateReload;
     private String serverKeyAlgorithm;
     private List<String> clientPrincipals;
     private boolean extendedClientCheck;
@@ -160,6 +161,14 @@ public class JolokiaServerConfig {
      */
     public boolean useHttps() {
         return protocol.equalsIgnoreCase("https");
+    }
+
+    /**
+     * Whether to start {@link java.nio.file.WatchService} to monitor certificate files.
+     * @return
+     */
+    public boolean useCertificateReload() {
+        return useCertificateReload;
     }
 
     /**
@@ -378,6 +387,9 @@ public class JolokiaServerConfig {
         // after we may have got runtime-specific class loader (after
         // org.jolokia.jvmagent.JvmAgent.awaitServerInitialization())
 //        initAuthenticator();
+
+        useCertificateReload = !agentConfig.containsKey("useCertificateReload")
+            || Boolean.parseBoolean(agentConfig.get("useCertificateReload"));
     }
 
     protected void initAuthenticator() {

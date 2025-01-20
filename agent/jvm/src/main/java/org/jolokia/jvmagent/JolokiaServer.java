@@ -21,6 +21,10 @@ import java.net.*;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.*;
 
 import javax.net.ssl.*;
@@ -73,6 +77,8 @@ public class JolokiaServer {
 
     // HttpContext created when we start it up
     private HttpContext httpContext;
+
+    private final List<File> filesToWatch = new ArrayList<>();
 
     /**
      * Create the Jolokia server which in turn creates an HttpServer for serving Jolokia requests. This
@@ -426,8 +432,8 @@ public class JolokiaServer {
             HttpsServer server = HttpsServer.create(pSocketAddress, pConfig.getBacklog());
             SSLContext sslContext = SSLContext.getInstance(pConfig.getSecureSocketProtocol());
 
-            // initialise the keystore
-            KeyStore ks = getKeyStore(pConfig);
+            // initialise the keystore and remember files used (for WatchService)
+            KeyStore ks = getKeyStore(pConfig, this.filesToWatch);
 
             // set up the key manager factory
             KeyManagerFactory kmf = getKeyManagerFactory(pConfig);
@@ -462,7 +468,7 @@ public class JolokiaServer {
         return KeyManagerFactory.getInstance(algo != null ? algo : KeyManagerFactory.getDefaultAlgorithm());
     }
 
-    private KeyStore getKeyStore(JolokiaServerConfig pConfig) throws KeyStoreException, IOException,
+    private KeyStore getKeyStore(JolokiaServerConfig pConfig, List<File> filesToWatch) throws KeyStoreException, IOException,
                                                                      NoSuchAlgorithmException, CertificateException,
                                                                      InvalidKeySpecException, InvalidKeyException,
                                                                      NoSuchProviderException, SignatureException {
@@ -472,11 +478,13 @@ public class JolokiaServer {
         if (keystoreFile != null) {
             // Load everything from a keystore which must include CA (if useClientSslAuthentication is used) and
             // server cert/key
-            loadKeyStoreFromFile(keystore, keystoreFile, password);
+            File file = loadKeyStoreFromFile(keystore, keystoreFile, password);
+            filesToWatch.add(file);
         } else {
             // Load keys from PEM files
             keystore.load(null);
-            updateKeyStoreFromPEM(keystore,pConfig);
+            File[] caCerKey = updateKeyStoreFromPEM(keystore,pConfig);
+            Arrays.stream(caCerKey).filter(Objects::nonNull).forEach(filesToWatch::add);
 
             // If no server cert is configured, then use a self-signed server certificate
             if (pConfig.getServerCert() == null) {
@@ -486,12 +494,21 @@ public class JolokiaServer {
         return keystore;
     }
 
-    private void updateKeyStoreFromPEM(KeyStore keystore, JolokiaServerConfig pConfig)
+    /**
+     * Updates empty {@link KeyStore} with CA certificate and Server certificate + key
+     *
+     * @param keystore
+     * @param pConfig
+     * @return [ caFile, certFile, keyFile ]
+     */
+    private File[] updateKeyStoreFromPEM(KeyStore keystore, JolokiaServerConfig pConfig)
             throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, InvalidKeySpecException {
 
+        File[] result = new File[3];
         if (pConfig.getCaCert() != null) {
             File caCert = getAndValidateFile(pConfig.getCaCert(),"CA cert");
             KeyStoreUtil.updateWithCaPem(keystore, caCert);
+            result[0] = caCert;
         } else if (pConfig.useSslClientAuthentication()) {
             throw new IllegalArgumentException("Cannot use client cert authentication if no CA is given with 'caCert'");
         }
@@ -506,7 +523,11 @@ public class JolokiaServer {
             File serverKey = getAndValidateFile(pConfig.getServerKey(),"server key");
             KeyStoreUtil.updateWithServerPems(keystore, serverCert, serverKey,
                                               pConfig.getServerKeyAlgorithm(), pConfig.getKeystorePassword());
+            result[1] = serverCert;
+            result[2] = serverKey;
         }
+
+        return result;
     }
 
     private File getAndValidateFile(String pFile, String pWhat) throws IOException {
@@ -520,11 +541,21 @@ public class JolokiaServer {
         return ret;
     }
 
-    private void loadKeyStoreFromFile(KeyStore pKeyStore, String pFile, char[] pPassword)
+    private File loadKeyStoreFromFile(KeyStore pKeyStore, String pFile, char[] pPassword)
             throws IOException, NoSuchAlgorithmException, CertificateException {
-        try (FileInputStream fis = new FileInputStream(getAndValidateFile(pFile, "keystore"))) {
+        File keystoreFile = getAndValidateFile(pFile, "keystore");
+        try (FileInputStream fis = new FileInputStream(keystoreFile)) {
             pKeyStore.load(fis, pPassword);
         }
+        return keystoreFile;
+    }
+
+    public void clearWatchedFiles() {
+        this.filesToWatch.clear();
+    }
+
+    public List<File> getWatchedFiles() {
+        return filesToWatch;
     }
 
     // A handler class which does the initialization lazily on the first request

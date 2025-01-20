@@ -16,8 +16,17 @@ package org.jolokia.jvmagent;
  * limitations under the License.
  */
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
+import java.nio.file.ClosedWatchServiceException;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.nio.file.WatchEvent;
+import java.nio.file.WatchKey;
+import java.nio.file.WatchService;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.jolokia.server.core.config.ConfigKey;
@@ -26,6 +35,8 @@ import org.jolokia.server.core.detector.ServerDetectorLookup;
 import org.jolokia.server.core.service.impl.CachingServerDetectorLookup;
 import org.jolokia.server.core.service.impl.ClasspathServerDetectorLookup;
 import org.jolokia.server.core.service.impl.StdoutLogHandler;
+
+import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 
 
 /**
@@ -62,6 +73,14 @@ public final class JvmAgent {
 
     private static JolokiaServer server;
 
+    private static WatchService watchService;
+
+    // info to preserve on server restart without restarting entire JVM
+    private static Instrumentation instrumentation;
+    private static JvmAgentConfig config;
+    private static boolean lazy;
+    private static JolokiaWatcher jolokiaWatchThread;
+
     // System property used for communicating the agent's state
     public static final String JOLOKIA_AGENT_URL = "jolokia.agent";
 
@@ -89,11 +108,15 @@ public final class JvmAgent {
         if (!config.isModeStop()) {
             startAgent(config,false, instrumentation);
         } else {
-            stopAgent();
+            stopAgent(true);
         }
     }
 
     private static void startAgent(final JvmAgentConfig pConfig, final boolean pLazy, final Instrumentation instrumentation)  {
+        JvmAgent.instrumentation = instrumentation;
+        JvmAgent.config = pConfig;
+        JvmAgent.lazy = pLazy;
+
         // start the JolokiaServer in a new daemon thread
         Thread jolokiaStartThread = new Thread("JolokiaStart") {
             public void run() {
@@ -107,6 +130,7 @@ public final class JvmAgent {
                     synchronized (this) {
                         server.start(pLazy);
                         setStateMarker();
+                        configureWatcher(server, pConfig);
                     }
 
                     System.out.println("Jolokia: Agent started with URL " + server.getUrl());
@@ -156,12 +180,14 @@ public final class JvmAgent {
         return highOrderClassLoader;
     }
 
-    private static void stopAgent() {
+    private static void stopAgent(boolean waitForWatcher) {
         try {
             if (server != null) {
                 synchronized (JvmAgent.class) {
                     server.stop();
                     clearStateMarker();
+                    stopWatcher(waitForWatcher);
+                    server = null;
                 }
             }
         } catch (RuntimeException exp) {
@@ -178,5 +204,106 @@ public final class JvmAgent {
     private static void clearStateMarker() {
         System.clearProperty(JOLOKIA_AGENT_URL);
         System.out.println("Jolokia: Agent stopped");
+    }
+
+    /**
+     * If needed, configure a certificate/key watcher for HTTPS server
+     */
+    private static void configureWatcher(JolokiaServer server, JvmAgentConfig pConfig) {
+        if (pConfig.useHttps() && pConfig.useCertificateReload()) {
+            try {
+                watchService = FileSystems.getDefault().newWatchService();
+                List<File> files = server.getWatchedFiles();
+                Set<Path> dirs = new HashSet<>();
+                for (File file : files) {
+                    dirs.add(file.getParentFile().toPath());
+                }
+                for (Path dir : dirs) {
+                    dir.register(watchService, ENTRY_MODIFY);
+                    System.out.println("Jolokia: Registered " + dir + " directory watcher for certificate changes");
+                }
+                JolokiaWatcher jolokiaWatchThread = new JolokiaWatcher(watchService, files);
+                jolokiaWatchThread.setDaemon(true);
+                jolokiaWatchThread.start();
+                JvmAgent.jolokiaWatchThread = jolokiaWatchThread;
+            } catch (IOException e) {
+                System.err.println("Jolokia: FileSystem watch service unavailable: " + e.getMessage());
+            }
+        }
+    }
+
+    private static void stopWatcher(boolean waitForWatcher) {
+        if (watchService != null) {
+            try {
+                jolokiaWatchThread.setRunning(false);
+                if (waitForWatcher) {
+                    try {
+                        jolokiaWatchThread.join();
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
+                watchService.close();
+                watchService = null;
+                jolokiaWatchThread = null;
+                server.clearWatchedFiles();
+            } catch (IOException e) {
+                System.err.println("Jolokia: Problem stopping FileSystem watch service: " + e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * A thread to watch for certificate changes.
+     */
+    private static class JolokiaWatcher extends Thread {
+        private final WatchService watchService;
+        private final List<File> files;
+        private volatile boolean running = true;
+
+        public JolokiaWatcher(WatchService watchService, List<File> files) {
+            super("JolokiaCertificateWatcher");
+            this.watchService = watchService;
+            this.files = files;
+        }
+
+        public void run() {
+            while (running) {
+                try {
+                    WatchKey key = watchService.take();
+                    boolean change = false;
+                    for (WatchEvent<?> event: key. pollEvents()) {
+                        Path file = (Path) event.context();
+                        if (event.kind() != ENTRY_MODIFY) {
+                            continue;
+                        }
+                        for (File f : files) {
+                            if (f.getName().equals(file.getFileName().toString())) {
+                                change = true;
+                                break;
+                            }
+                        }
+                        if (change) {
+                            break;
+                        }
+                    }
+
+                    key. reset();
+                    if (change) {
+                        System.out.println("Jolokia: Certificate(s) updated, restarting Jolokia agent");
+                        stopAgent(false);
+                        startAgent(JvmAgent.config, JvmAgent.lazy, JvmAgent.instrumentation);
+                    }
+                } catch (InterruptedException e) {
+                    System.out.println("Jolokia: JolokiaCertificateWatcher stopped");
+                } catch (ClosedWatchServiceException ignored) {
+                    System.out.println("Jolokia: JolokiaCertificateWatcher ended");
+                }
+            }
+        }
+
+        public void setRunning(boolean running) {
+            this.running = running;
+        }
     }
 }
