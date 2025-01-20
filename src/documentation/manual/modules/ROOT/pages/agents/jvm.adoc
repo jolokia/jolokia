@@ -246,6 +246,10 @@ used when no `keyStore` is used. For decrypting the key the password given with
 `keystorePassword` is used (https only).
 |
 
+|`useCertificateReload`
+|Interval between detecting changes in certificate files. If set to a number greater than zero (it defaults to `-1`), Then every _N seconds_, Jolokia will check if the certificate files have changed. If a change is detected, entire HTTP server is restarted to use new certificate files. No JVM restart is performed.
+|`-1`
+
 |`serverKeyAlgorithm`
 |Encryption algorithm to use for decrypting the key given with `serverKey`
 (https only)

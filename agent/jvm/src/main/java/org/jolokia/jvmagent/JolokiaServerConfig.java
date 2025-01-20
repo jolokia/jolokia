@@ -68,7 +68,7 @@ public class JolokiaServerConfig {
     private String caCert;
     private String serverCert;
     private String serverKey;
-    private boolean useCertificateReload;
+    private int useCertificateReload = -1;
     private String serverKeyAlgorithm;
     private List<String> clientPrincipals;
     private boolean extendedClientCheck;
@@ -164,10 +164,11 @@ public class JolokiaServerConfig {
     }
 
     /**
-     * Whether to start {@link java.nio.file.WatchService} to monitor certificate files.
+     * Whether to start {@link java.nio.file.WatchService} to monitor certificate files. Value higher than 0
+     * is the interval for checking the CRC of watched files. If CRC changes, the server is restarted.
      * @return
      */
-    public boolean useCertificateReload() {
+    public int useCertificateReload() {
         return useCertificateReload;
     }
 
@@ -388,8 +389,15 @@ public class JolokiaServerConfig {
         // org.jolokia.jvmagent.JvmAgent.awaitServerInitialization())
 //        initAuthenticator();
 
-        useCertificateReload = !agentConfig.containsKey("useCertificateReload")
-            || Boolean.parseBoolean(agentConfig.get("useCertificateReload"));
+        if (!agentConfig.containsKey("useCertificateReload")) {
+            useCertificateReload = -1;
+        } else {
+            try {
+                useCertificateReload = Integer.parseInt(agentConfig.get("useCertificateReload"));
+            } catch (NumberFormatException ignored) {
+                useCertificateReload = -1;
+            }
+        }
     }
 
     protected void initAuthenticator() {

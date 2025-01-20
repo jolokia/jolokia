@@ -105,7 +105,7 @@ public class HelpCommand extends AbstractBaseCommand {
 "    --caCert <path>                 Path to a PEM encoded CA cert file (https & sslClientAuth only)\n" +
 "    --serverCert <path>             Path to a PEM encoded server cert file (https only)\n" +
 "    --serverKey <path>              Path to a PEM encoded server key file (https only)\n"  +
-"    --useCertificateReload <t|f>    Whether to watch for certificate/ca/key change to restart the server (https only, defaults to true)\n" +
+"    --useCertificateReload <s>      Seconds for certificate/ca/key poller interval (https only, defaults to -1 - no reload)\n" +
 "    --serverKeyAlgorithm <algo>     Algorithm to use for decrypting the server key (https only, default: RSA)\n" +
 "    --clientPrincipal <principal>   Allow only this principal in the client cert (https & sslClientAuth only)\n" +
 "                                    If supplied multiple times, any one of the clientPrincipals must match\n" +

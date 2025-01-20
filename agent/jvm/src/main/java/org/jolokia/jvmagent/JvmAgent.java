@@ -17,17 +17,16 @@ package org.jolokia.jvmagent;
  */
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
-import java.nio.file.ClosedWatchServiceException;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
-import java.nio.file.WatchEvent;
-import java.nio.file.WatchKey;
-import java.nio.file.WatchService;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.zip.CRC32;
 
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.detector.ServerDetector;
@@ -35,8 +34,6 @@ import org.jolokia.server.core.detector.ServerDetectorLookup;
 import org.jolokia.server.core.service.impl.CachingServerDetectorLookup;
 import org.jolokia.server.core.service.impl.ClasspathServerDetectorLookup;
 import org.jolokia.server.core.service.impl.StdoutLogHandler;
-
-import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 
 
 /**
@@ -73,13 +70,14 @@ public final class JvmAgent {
 
     private static JolokiaServer server;
 
-    private static WatchService watchService;
-
     // info to preserve on server restart without restarting entire JVM
     private static Instrumentation instrumentation;
     private static JvmAgentConfig config;
     private static boolean lazy;
     private static JolokiaWatcher jolokiaWatchThread;
+
+    // CRCs of watched files
+    private static final Map<String, Long> crcs = new HashMap<>();
 
     // System property used for communicating the agent's state
     public static final String JOLOKIA_AGENT_URL = "jolokia.agent";
@@ -210,21 +208,19 @@ public final class JvmAgent {
      * If needed, configure a certificate/key watcher for HTTPS server
      */
     private static void configureWatcher(JolokiaServer server, JvmAgentConfig pConfig) {
-        if (pConfig.useHttps() && pConfig.useCertificateReload()) {
+        if (pConfig.useHttps() && pConfig.useCertificateReload() > 0) {
             try {
-                watchService = FileSystems.getDefault().newWatchService();
                 List<File> files = server.getWatchedFiles();
-                Set<Path> dirs = new HashSet<>();
+                crcs.clear();
                 for (File file : files) {
-                    dirs.add(file.getParentFile().toPath());
+                    crcs.put(file.getCanonicalPath(), calculateCrc(file.getPath()));
                 }
-                for (Path dir : dirs) {
-                    dir.register(watchService, ENTRY_MODIFY);
-                    System.out.println("Jolokia: Registered " + dir + " directory watcher for certificate changes");
-                }
-                JolokiaWatcher jolokiaWatchThread = new JolokiaWatcher(watchService, files);
+                JolokiaWatcher jolokiaWatchThread = new JolokiaWatcher(crcs, pConfig.useCertificateReload());
                 jolokiaWatchThread.setDaemon(true);
                 jolokiaWatchThread.start();
+                System.out.println("Jolokia: Registered watcher for certificate changes (poller: "
+                    + pConfig.useCertificateReload() + "s, files: "
+                    + files.stream().map(File::getName).collect(Collectors.joining(", ")) + ")");
                 JvmAgent.jolokiaWatchThread = jolokiaWatchThread;
             } catch (IOException e) {
                 System.err.println("Jolokia: FileSystem watch service unavailable: " + e.getMessage());
@@ -232,24 +228,33 @@ public final class JvmAgent {
         }
     }
 
-    private static void stopWatcher(boolean waitForWatcher) {
-        if (watchService != null) {
-            try {
-                jolokiaWatchThread.setRunning(false);
-                if (waitForWatcher) {
-                    try {
-                        jolokiaWatchThread.join();
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    }
-                }
-                watchService.close();
-                watchService = null;
-                jolokiaWatchThread = null;
-                server.clearWatchedFiles();
-            } catch (IOException e) {
-                System.err.println("Jolokia: Problem stopping FileSystem watch service: " + e.getMessage());
+    private static long calculateCrc(String file) {
+        try (FileInputStream fis = new FileInputStream(file)) {
+            byte[] buffer = new byte[8192];
+            int read;
+            CRC32 crc = new CRC32();
+            while ((read = fis.read(buffer)) > 0) {
+                crc.update(buffer, 0, read);
             }
+            return crc.getValue();
+        } catch (IOException e) {
+            return -1;
+        }
+    }
+
+    private static void stopWatcher(boolean waitForWatcher) {
+        if (jolokiaWatchThread != null) {
+            jolokiaWatchThread.setRunning(false);
+            if (waitForWatcher) {
+                try {
+                    jolokiaWatchThread.join();
+                    System.out.println("Jolokia: Stopped certificate watcher");
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+            jolokiaWatchThread = null;
+            server.clearWatchedFiles();
         }
     }
 
@@ -257,47 +262,40 @@ public final class JvmAgent {
      * A thread to watch for certificate changes.
      */
     private static class JolokiaWatcher extends Thread {
-        private final WatchService watchService;
-        private final List<File> files;
+        private final Map<String, Long> crcs;
+        private final int interval;
         private volatile boolean running = true;
 
-        public JolokiaWatcher(WatchService watchService, List<File> files) {
+        public JolokiaWatcher(Map<String, Long> crcs, int interval) {
             super("JolokiaCertificateWatcher");
-            this.watchService = watchService;
-            this.files = files;
+            this.crcs = crcs;
+            this.interval = interval;
         }
 
         public void run() {
             while (running) {
                 try {
-                    WatchKey key = watchService.take();
+                    //noinspection BusyWait
+                    Thread.sleep(interval);
                     boolean change = false;
-                    for (WatchEvent<?> event: key. pollEvents()) {
-                        Path file = (Path) event.context();
-                        if (event.kind() != ENTRY_MODIFY) {
-                            continue;
-                        }
-                        for (File f : files) {
-                            if (f.getName().equals(file.getFileName().toString())) {
-                                change = true;
-                                break;
-                            }
-                        }
-                        if (change) {
+                    List<String> files = new ArrayList<>(crcs.keySet());
+                    for (String f : files) {
+                        if (calculateCrc(f) != crcs.get(f)) {
+                            change = true;
                             break;
                         }
                     }
 
-                    key. reset();
                     if (change) {
+                        // additional wait for certificates to be written completely (...)
+                        //noinspection BusyWait
+                        Thread.sleep(interval);
                         System.out.println("Jolokia: Certificate(s) updated, restarting Jolokia agent");
                         stopAgent(false);
                         startAgent(JvmAgent.config, JvmAgent.lazy, JvmAgent.instrumentation);
                     }
                 } catch (InterruptedException e) {
                     System.out.println("Jolokia: JolokiaCertificateWatcher stopped");
-                } catch (ClosedWatchServiceException ignored) {
-                    System.out.println("Jolokia: JolokiaCertificateWatcher ended");
                 }
             }
         }
