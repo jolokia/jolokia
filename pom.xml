@@ -100,6 +100,22 @@
           <excludeSubProjects>false</excludeSubProjects>
         </configuration>
       </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>versions-maven-plugin</artifactId>
+        <configuration>
+          <verbose>true</verbose>
+          <ruleSet>
+            <ignoreVersions>
+              <ignoreVersion>
+                <type>regex</type>
+                <version>.+-(alpha|beta|M).+</version>
+              </ignoreVersion>
+            </ignoreVersions>
+          </ruleSet>
+        </configuration>
+      </plugin>
     </plugins>
 
 
@@ -331,6 +347,12 @@
           <groupId>com.github.eirslett</groupId>
           <artifactId>frontend-maven-plugin</artifactId>
           <version>${plugin.com.github.eirslett.frontend-maven-plugin}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>versions-maven-plugin</artifactId>
+          <version>${plugin.org.codehaus.mojo.versions-maven-plugin}</version>
         </plugin>
 
       </plugins>
@@ -1033,7 +1055,7 @@
 
     <!--
       Versions are specified in one place, so updates can be discovered with single command:
-      $ mvn org.codehaus.mojo:versions-maven-plugin:2.16.2:display-property-updates -DallowMajorUpdates=false -N
+      $ mvn org.codehaus.mojo:versions-maven-plugin:2.18.0:display-property-updates -DallowMajorUpdates=false -N
     -->
 
     <!-- Versions of Maven plugins (org.apache.maven.plugins) -->
@@ -1070,6 +1092,7 @@
     <plugin.org.apache.rat.apache-rat-plugin>0.16.1</plugin.org.apache.rat.apache-rat-plugin>
     <plugin.org.asciidoctor.asciidoctor-maven-plugin>3.1.1</plugin.org.asciidoctor.asciidoctor-maven-plugin>
     <plugin.org.codehaus.mojo.build-helper-maven-plugin>3.6.0</plugin.org.codehaus.mojo.build-helper-maven-plugin>
+    <plugin.org.codehaus.mojo.versions-maven-plugin>2.18.0</plugin.org.codehaus.mojo.versions-maven-plugin>
     <plugin.org.jacoco.jacoco-maven-plugin>0.7.6.201602180812</plugin.org.jacoco.jacoco-maven-plugin>
     <plugin.org.vafer.jdeb>1.10</plugin.org.vafer.jdeb>
 
