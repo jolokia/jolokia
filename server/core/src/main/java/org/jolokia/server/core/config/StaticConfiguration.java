@@ -111,13 +111,38 @@ public class StaticConfiguration implements Configuration {
      * @param pConfig config map from where to take the configuration
      */
     public StaticConfiguration(Map<String, String> pConfig) {
+        this(pConfig, null);
+    }
+
+    /**
+     * Initialise this configuration from a string-string map. Only the known keys are taken
+     * from the given map and the placeholder values are resolved and stored within this {@link Configuration},
+     * but if user passes a map in {@code pResolved} argument, it'll be populated with values from {@code pConfig}
+     * but resolved - also the ones which do not have corresponding {@link ConfigKey}.
+     *
+     * @param pConfig config map from where to take the configuration
+     * @param pResolved map to collect resolved properties
+     */
+    public StaticConfiguration(Map<String, String> pConfig, Map<String, String> pResolved) {
         initialize();
         for (ConfigKey c : ConfigKey.values()) {
             String value = pConfig.get(c.getKeyValue());
             if (value != null) {
-                configMap.put(c, resolve(value));
+                String resolved = resolve(value);
+                if (pResolved != null) {
+                    pResolved.put(c.getKeyValue(), resolved);
+                }
+                configMap.put(c, resolved);
                 keys.add(c);
             }
+        }
+        // now resolve all remaining values if needed
+        if (pResolved != null) {
+            pConfig.forEach((k, v) -> {
+                if (!pResolved.containsKey(k)) {
+                    pResolved.put(k, resolve(v));
+                }
+            });
         }
     }
 
@@ -271,4 +296,5 @@ public class StaticConfiguration implements Configuration {
     public boolean containsKey(ConfigKey pKey) {
         return keys.contains(pKey);
     }
+
 }

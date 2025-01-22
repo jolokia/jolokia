@@ -58,7 +58,8 @@ public class JvmAgentConfig extends JolokiaServerConfig {
         if (pConfig.containsKey("config")) {
             defaultConfig.putAll(readConfig(pConfig.get("config")));
         }
-        init(pConfig,defaultConfig, SystemPropertyMode.OVERRIDE);
+        // config read from "config=/file" option can be overriden by other options specified for agent
+        init(pConfig, defaultConfig, SystemPropertyMode.OVERRIDE);
 
         // Special mode used by the client in order to indicate whether to stop/start the server.
         initMode(pConfig);

@@ -101,8 +101,24 @@ public class JvmAgentConfigTest {
     }
 
     @Test
+    public void systemProperties() {
+        System.setProperty("context", "/bla/");
+        JvmAgentConfig config = new JvmAgentConfig("agentContext=${sys:context}");
+        assertEquals(config.getContextPath(), "/bla/");
+    }
+
+    @Test
+    public void implicitSystemProperties() {
+        System.setProperty("jolokia.agentContext", "/bla/");
+        JvmAgentConfig config = new JvmAgentConfig("");
+        assertEquals(config.getContextPath(), "/bla/");
+        System.clearProperty("jolokia.agentContext");
+    }
+
+    @Test
     public void jolokiaConfig() {
-        JvmAgentConfig config = new JvmAgentConfig("maxDepth=42");
+        System.setProperty("md", "42");
+        JvmAgentConfig config = new JvmAgentConfig("maxDepth=${prop:md}");
 
         Configuration jolokiaConfig = config.getJolokiaConfig();
         assertEquals(jolokiaConfig.getConfig(ConfigKey.MAX_DEPTH),"42");
@@ -115,6 +131,7 @@ public class JvmAgentConfigTest {
 
     @Test
     public void readConfig() throws IOException {
+        System.setProperty("ou", "JVM");
         String path = copyResourceToTemp("/agent-test.properties");
         JvmAgentConfig config = new JvmAgentConfig("config=" + path);
         config.initAuthenticator();

@@ -553,6 +553,30 @@ public enum ConfigKey {
         return "JOLOKIA_" + buf;
     }
 
+    public static ConfigKey fromEnvVariable(String key) {
+        if (!key.startsWith("JOLOKIA_")) {
+            return null;
+        }
+        String k = fromEnvVariableFormat(key);
+        return k == null ? null : getGlobalConfigKey(k);
+    }
+
+    public static String fromEnvVariableFormat(String key) {
+        if (!key.startsWith("JOLOKIA_")) {
+            return null;
+        }
+        key = key.substring("JOLOKIA_".length());
+        String[] parts = key.split("_");
+        StringBuilder buf = new StringBuilder();
+        buf.append(parts[0].toLowerCase());
+        for (int i = 1; i < parts.length; i++) {
+            if (!parts[i].isEmpty()) {
+                buf.append(Character.toUpperCase(parts[i].charAt(0)))
+                    .append(parts[i].substring(1).toLowerCase());
+            }
+        }
+        return buf.toString();
+    }
 
     // Constants used for boolean values
     private static class Constants {

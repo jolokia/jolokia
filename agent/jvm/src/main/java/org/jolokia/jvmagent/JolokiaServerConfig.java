@@ -122,9 +122,11 @@ public class JolokiaServerConfig {
         prepareDetectorOptions(finalCfg);
         addJolokiaId(finalCfg);
 
-        jolokiaConfig = new StaticConfiguration(finalCfg);
+        Map<String, String> resolvedConfig = new HashMap<>();
+        jolokiaConfig = new StaticConfiguration(finalCfg, resolvedConfig);
         jolokiaConfig.setSystemPropertyMode(systemPropertyMode);
-        initConfigAndValidate(finalCfg);
+
+        initConfigAndValidate(resolvedConfig);
     }
 
     // Add a unique jolokia id for this agent
