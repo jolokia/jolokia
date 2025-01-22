@@ -15,9 +15,9 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Map;
 
 /**
  * Utility class for network related stuff
@@ -170,6 +170,95 @@ public final class NetworkUtil {
         }
 
         return fallbackHardware != null ? fallbackHardware : fallback;
+    }
+
+    /**
+     * Gets a mapping of {@link NetworkInterface#getName() interface name} to best-match pair of IP4/IP6 addresses
+     * for given interface. We prefer global addresses over site/link local ones.
+     *
+     * @return
+     */
+    public static Map<String, InetAddresses> getBestMatchAddresses() {
+        Enumeration<NetworkInterface> networkInterfaces;
+        try {
+            networkInterfaces = NetworkInterface.getNetworkInterfaces();
+        } catch (SocketException e) {
+            return Collections.emptyMap();
+        }
+        Map<String, InetAddresses> result = new HashMap<>();
+        while (networkInterfaces.hasMoreElements()) {
+            NetworkInterface nif = networkInterfaces.nextElement();
+            try {
+                if (!nif.isUp()) {
+                    continue;
+                }
+                Inet4Address fallback4 = null;
+                Inet6Address fallback6 = null;
+                for (Enumeration<InetAddress> addrEnum = nif.getInetAddresses(); addrEnum.hasMoreElements(); ) {
+                    InetAddress ia = addrEnum.nextElement();
+                    if (ia instanceof Inet4Address) {
+                        if (fallback4 == null) {
+                            fallback4 = (Inet4Address) ia;
+                        } else {
+                            if ((fallback4.isLinkLocalAddress() || fallback4.isSiteLocalAddress())
+                                && !(ia.isLinkLocalAddress() || ia.isSiteLocalAddress())) {
+                                fallback4 = (Inet4Address) ia;
+                            }
+                        }
+                    } else if (ia instanceof Inet6Address) {
+                        if (fallback6 == null) {
+                            fallback6 = (Inet6Address) ia;
+                        } else {
+                            if ((fallback6.isLinkLocalAddress() || fallback6.isSiteLocalAddress())
+                                && !(ia.isLinkLocalAddress() || ia.isSiteLocalAddress())) {
+                                fallback6 = (Inet6Address) ia;
+                            }
+                        }
+                    }
+                }
+                result.put(nif.getName(), new InetAddresses(fallback4, fallback6));
+            } catch (SocketException ignored) {
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Returns the <em>best match</em> {@link NetworkInterface} - like the physical ethernet card instead of {@code lo}
+     * interface or VPN tunnel interface.
+     *
+     * @return
+     */
+    public static NetworkInterface getBestMatchNetworkInterface() {
+        Enumeration<NetworkInterface> networkInterfaces;
+        try {
+            networkInterfaces = NetworkInterface.getNetworkInterfaces();
+        } catch (SocketException e) {
+            return null;
+        }
+
+        NetworkInterface best = null;
+        while (networkInterfaces.hasMoreElements()) {
+            NetworkInterface nif = networkInterfaces.nextElement();
+            if (best == null) {
+                best = nif;
+                continue;
+            }
+            try {
+                if (!best.isUp() && nif.isUp()) {
+                    best = nif;
+                    continue;
+                }
+                if (best.getHardwareAddress() == null && nif.getHardwareAddress() != null) {
+                    best = nif;
+                }
+            } catch (SocketException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return best;
     }
 
     /**
@@ -401,64 +490,6 @@ public final class NetworkUtil {
             }
         }
         return buffer.toString();
-    }
-
-    private static final Pattern EXPRESSION_EXTRACTOR = Pattern.compile("\\$\\{?\\s*([\\w:-_.]+)\\s*}?");
-
-    /**
-     * Replace expression ${host} and ${ip} with the localhost name or IP in the given string.
-     * In addition the notation ${env:ENV_VAR} and ${prop:sysprop} can be used to refer to environment
-     * and system properties respectively.
-     *
-     * @param pValue value to examine
-     * @return the value with the variables replaced.
-     * @throws IllegalArgumentException when the expression is unknown or an error occurs when extracting the host name
-     */
-    public static String replaceExpression(String pValue) {
-        if (pValue == null) {
-            return null;
-        }
-        Matcher matcher = EXPRESSION_EXTRACTOR.matcher(pValue);
-        StringBuilder ret = new StringBuilder();
-        try {
-            while (matcher.find()) {
-                String var = matcher.group(1);
-                String value;
-                if (var.equalsIgnoreCase("host")) {
-                    value = getLocalAddress().getHostName();
-                } else if (var.equalsIgnoreCase("ip")) {
-                    value = getLocalAddress().getHostAddress();
-                } else {
-                    String key = extractKey(var,"env");
-                    if (key != null)  {
-                        value = System.getenv(key);
-                    } else {
-                        key = extractKey(var,"prop");
-                        if (key != null) {
-                            value = System.getProperty(key);
-                        } else {
-                            throw new IllegalArgumentException("Unknown expression " + var + " in " + pValue);
-                        }
-                    }
-                }
-                matcher.appendReplacement(ret, value != null ? value.trim() : "");
-            }
-            matcher.appendTail(ret);
-        } catch (IOException e) {
-            throw new IllegalArgumentException("Cannot lookup host" + e, e);
-        }
-        return ret.toString();
-    }
-
-    private static String extractKey(String pVar, String pPrefix) {
-        if (pVar.toLowerCase().startsWith(pPrefix + ":")) {
-            String ret = pVar.substring(pPrefix.length() + 1);
-            if (ret.isEmpty()) {
-                throw new IllegalArgumentException("Expression with " + pPrefix + ": must not contain spaces");
-            }
-            return ret;
-        }
-        return null;
     }
 
     // ==============================================================================================================================================

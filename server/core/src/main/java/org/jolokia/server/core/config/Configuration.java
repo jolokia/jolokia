@@ -27,25 +27,22 @@ import java.util.Set;
 public interface Configuration {
 
     /**
-     * Get a configuration value if set as configuration or the default
-     * value if not
+     * Get a configuration value by {@link ConfigKey}. The order of lookup is:<ol>
+     *     <li>environment variables prefixed with {@code JOLOKIA_} - not resolved</li>
+     *     <li>system properties prefixed with {@code jolokia.} - not resolved</li>
+     *     <li>servlet config parameters for Servlet Agent - resolved</li>
+     *     <li>servlet context parameters for Servlet Agent - resolved</li>
+     *     <li>options from JVM Agent command line - resolved</li>
+     *     <li>options from {@code config} file for JVM Agent - resolved</li>
+     *     <li>options from {@code /default-jolokia-agent.properties} for JVM Agent - not resolved</li>
+     *     <li>default values from {@link ConfigKey#getDefaultValue()} - not resolved</li>
+     * </ol>
      *
      * @param pKey the configuration key to lookup
      * @return the configuration value or the default value if no configuration
      *         was given.
      */
     String getConfig(ConfigKey pKey);
-
-    /**
-     * Get a configuration value if set as configuration or the default
-     * value if not
-     *
-     * @param pKey the configuration key to lookup
-     * @param checkSysOrEnv whether system property or environment variable should be checked first
-     * @return the configuration value or the default value if no configuration
-     *         was given.
-     */
-    String getConfig(ConfigKey pKey, boolean checkSysOrEnv);
 
     /**
      * Get all keys stored in this configuration

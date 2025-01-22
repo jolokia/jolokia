@@ -107,7 +107,7 @@ public class AgentServlet extends HttpServlet {
      * Initialize the backend systems by creating a {@link JolokiaServiceManager}
      *
      * A subclass can tune this step by overriding
-     * {@link #createLogHandler}, {@link #createRestrictor} and {@link #createConfig}
+     * {@link #createLogHandler}, {@link #createRestrictor} and {@link #createWebConfig}
      *
      * @param pServletConfig servlet configuration
      */
@@ -117,7 +117,7 @@ public class AgentServlet extends HttpServlet {
 
         // Create configuration, log handler and restrictor early in the lifecycle
         // and explicitly
-        Configuration config = createConfig(pServletConfig);
+        Configuration config = createWebConfig();
         LogHandler logHandler = createLogHandler(pServletConfig, config);
         Restrictor restrictor = createRestrictor(config, logHandler);
 
@@ -172,38 +172,18 @@ public class AgentServlet extends HttpServlet {
      * This method can be subclassed in order to provide an own mechanism for
      * providing a configuration.
      *
-     * @param pServletConfig servlet configuration
      * @return generated configuration
      */
-    protected Configuration createConfig(ServletConfig pServletConfig) {
+    protected Configuration createWebConfig() {
         StaticConfiguration config = new StaticConfiguration(
                 Collections.singletonMap(ConfigKey.AGENT_ID.getKeyValue(),
                                          NetworkUtil.getAgentId(this.hashCode(), "servlet")));
-        // From ServletConfig ....
-        config.update(new ServletConfigFacade(pServletConfig));
-        // ... and ServletContext
+        // from ServletConfig - for Jolokia servlet (<servlet>/<init-param> in web.xml)
+        config.update(new ServletConfigFacade(getServletConfig()));
+        // from ServletContext - for entire web application (<context-param> in web.xml)
         config.update(new ServletContextFacade(getServletContext()));
-        // Add any environment parameters found
-        config.update(configFromEnvironment());
 
         return config;
-    }
-
-    private Configuration configFromEnvironment() {
-        Map<String,String> envConfig = new HashMap<>();
-        for (ConfigKey key : new ConfigKey[] {
-                // Todo: Might be even more generic as part of the key
-                ConfigKey.DISCOVERY_AGENT_URL,
-                ConfigKey.DISCOVERY_ENABLED }) {
-            String value = System.getProperty(key.asSystemProperty());
-            if (value == null) {
-                value = System.getenv(key.asEnvVariable());
-            }
-            if (value != null) {
-                envConfig.put(key.getKeyValue(), value);
-            }
-        }
-        return new StaticConfiguration(envConfig);
     }
 
     /**
@@ -239,8 +219,7 @@ public class AgentServlet extends HttpServlet {
     // ==============================================================================================
 
     private void initAgentUrl() {
-        String url = NetworkUtil.replaceExpression(
-                jolokiaContext.getConfig(ConfigKey.DISCOVERY_AGENT_URL, true));
+        String url = jolokiaContext.getConfig(ConfigKey.DISCOVERY_AGENT_URL);
         if (url == null) {
             initAgentUrlFromRequest = true;
         } else {

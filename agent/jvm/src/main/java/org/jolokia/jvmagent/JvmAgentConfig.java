@@ -20,6 +20,7 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.jolokia.server.core.config.SystemPropertyMode;
 import org.jolokia.server.core.util.EscapeUtil;
 
 /**
@@ -57,7 +58,7 @@ public class JvmAgentConfig extends JolokiaServerConfig {
         if (pConfig.containsKey("config")) {
             defaultConfig.putAll(readConfig(pConfig.get("config")));
         }
-        init(pConfig,defaultConfig);
+        init(pConfig,defaultConfig, SystemPropertyMode.OVERRIDE);
 
         // Special mode used by the client in order to indicate whether to stop/start the server.
         initMode(pConfig);

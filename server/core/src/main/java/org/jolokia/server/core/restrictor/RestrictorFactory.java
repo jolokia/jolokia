@@ -59,7 +59,7 @@ public final class RestrictorFactory {
             return customRestrictor;
         }
 
-        String policyLocation = NetworkUtil.replaceExpression(pConfig.getConfig(ConfigKey.POLICY_LOCATION));
+        String policyLocation = pConfig.getConfig(ConfigKey.POLICY_LOCATION);
         try {
             Restrictor ret = lookupPolicyRestrictor(policyLocation);
             if (ret != null) {

@@ -60,8 +60,8 @@ public class JolokiaDiscovery extends AbstractJolokiaService<JolokiaService.Init
     /** {@inheritDoc} */
     @SuppressWarnings("rawtypes")
     public List lookupAgentsWithTimeout(int pTimeout) throws IOException {
-        String group = getJolokiaContext().getConfig(ConfigKey.MULTICAST_GROUP, true);
-        String port = getJolokiaContext().getConfig(ConfigKey.MULTICAST_PORT, true);
+        String group = getJolokiaContext().getConfig(ConfigKey.MULTICAST_GROUP);
+        String port = getJolokiaContext().getConfig(ConfigKey.MULTICAST_PORT);
         return lookupAgentsWithTimeoutAndMulticastAddress(1000, group, Integer.parseInt(port));
     }
 

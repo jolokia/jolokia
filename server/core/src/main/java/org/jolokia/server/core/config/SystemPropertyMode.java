@@ -1,5 +1,3 @@
-package org.jolokia.support.spring;
-
 /*
  * Copyright 2009-2013 Roland Huss
  *
@@ -16,25 +14,31 @@ package org.jolokia.support.spring;
  * limitations under the License.
  */
 
+package org.jolokia.server.core.config;
+
 /**
- * Enumeration for how to handle system properties when configuring a {@link SpringJolokiaAgent}.
+ * Enumeration for how to handle system properties.
  *
  * @author roland
  * @since 01.01.13
  */
 public enum SystemPropertyMode {
+
     /** Never check system properties. */
     NEVER("never"),
 
     /**
      * Check system properties if not resolvable in the specified properties.
-     * This is the default.
      */
     FALLBACK("fallback"),
 
     /**
      * Check system properties first, before trying the specified properties.
      * This allows system properties to override any other property source.
+     * This is the default. System properties prefixed with {@code jolokia.} and env variables
+     * prefixed with {@code JOLOKIA_} by default are preferred. This is natural way of configuring applications
+     * which provide their own configuration - we want to be able to override the configuration without
+     * modifying the application itself.
      */
     OVERRIDE("override");
 

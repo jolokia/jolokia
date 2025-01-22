@@ -60,17 +60,6 @@ public interface JolokiaContext extends LogHandler, Restrictor {
     String getConfig(ConfigKey pKey);
 
     /**
-     * Get a configuration value if set as configuration or the default
-     * value if not
-     *
-     * @param pKey the configuration key to lookup
-     * @param checkSysOrEnv whether system property / environment variable should be checked first
-     * @return the configuration value or the default value if no configuration
-     *         was given.
-     */
-    String getConfig(ConfigKey pKey, boolean checkSysOrEnv);
-
-    /**
      * Get all keys stored in this configuration
      */
     Set<ConfigKey> getConfigKeys();

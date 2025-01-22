@@ -16,7 +16,7 @@ package org.jolokia.support.spring.config;
  * limitations under the License.
  */
 
-import org.jolokia.support.spring.SystemPropertyMode;
+import org.jolokia.server.core.config.SystemPropertyMode;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

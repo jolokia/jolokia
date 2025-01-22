@@ -124,7 +124,7 @@ class MulticastSocketListenerThread extends Thread {
                 socket = MulticastUtil.newMulticastSocket(bindAddress, context);
                 socketName = MulticastUtil.getReadableSocketName(socket);
             } catch (IOException exp) {
-                int multicastPort = Integer.parseInt(context.getConfig(ConfigKey.MULTICAST_PORT, true));
+                int multicastPort = Integer.parseInt(context.getConfig(ConfigKey.MULTICAST_PORT));
                 String name = MulticastUtil.getReadableSocketName(bindAddress, multicastPort);
                 context.error(name + " --- Can not reopen socket. Exiting multicast listener thread...", exp);
                 throw new SocketVerificationFailedException(exp);

@@ -15,27 +15,17 @@
  */
 package org.jolokia.server.core.restrictor;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import org.jolokia.server.core.restrictor.policy.PolicyRestrictor;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
 
 public class MBeanFilterTest {
-
-    private static PolicyRestrictor restrictor;
-
-    @BeforeClass
-    public static void init() throws IOException {
-        InputStream is = MBeanFilterTest.class.getResourceAsStream("/filter-1.xml");
-        restrictor = new PolicyRestrictor(is);
-    }
 
     @Test
     public void patternSplitting() {
@@ -61,6 +51,9 @@ public class MBeanFilterTest {
 
     @Test
     public void filteringMBeanNames() throws Exception {
+        InputStream is = MBeanFilterTest.class.getResourceAsStream("/filter-1.xml");
+        PolicyRestrictor restrictor = new PolicyRestrictor(is);
+
         assertFalse(restrictor.isObjectNameHidden(new ObjectName("domain0:type=any")));
         assertTrue(restrictor.isObjectNameHidden(new ObjectName("domain1:type=any")));
         assertTrue(restrictor.isObjectNameHidden(new ObjectName("domain2:type=any")));

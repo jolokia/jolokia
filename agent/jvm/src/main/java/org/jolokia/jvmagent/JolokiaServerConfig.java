@@ -47,7 +47,7 @@ public class JolokiaServerConfig {
 
     // Jolokia configuration is used for general jolokia config, the untyped configuration
     // is used for this agent only
-    private Configuration jolokiaConfig;
+    private StaticConfiguration jolokiaConfig;
 
     private String        protocol;
     private int           port;
@@ -82,19 +82,24 @@ public class JolokiaServerConfig {
      * of given config options (key: option name, value: option value).
      * Also, default values are used for any
      * parameter not provided ({@link #getDefaultConfig()}).
-     *
+     * <p>
      * The given configuration consist of two parts: Any global options
      * as defined in {@link ConfigKey} are used for setting up the agent.
      * All other options are taken for preparing the HTTP server under
      * which the agent is served. The known properties are described in
      * the reference manual.
-     *
+     * <p>
      * All other options are ignored.
      *
-     * @param pConfig the configuration options to use.
+     * @param pConfig            the configuration options to use.
+     * @param systemPropertyMode
      */
+    public JolokiaServerConfig(Map<String, String> pConfig, SystemPropertyMode systemPropertyMode) {
+        init(pConfig,getDefaultConfig(), systemPropertyMode);
+    }
+
     public JolokiaServerConfig(Map<String, String> pConfig) {
-        init(pConfig,getDefaultConfig());
+        this(pConfig, SystemPropertyMode.OVERRIDE);
     }
 
     /**
@@ -106,10 +111,11 @@ public class JolokiaServerConfig {
     /**
      * Initialization
      *
-     * @param pConfig original config
-     * @param pDefaultConfig default config used as background
+     * @param pConfig            original config
+     * @param pDefaultConfig     default config used as background
+     * @param systemPropertyMode
      */
-    protected final void init(Map<String, String> pConfig,Map<String,String> pDefaultConfig) {
+    protected final void init(Map<String, String> pConfig, Map<String,String> pDefaultConfig, SystemPropertyMode systemPropertyMode) {
         Map<String, String> finalCfg = new HashMap<>(pDefaultConfig);
         finalCfg.putAll(pConfig);
 
@@ -117,6 +123,7 @@ public class JolokiaServerConfig {
         addJolokiaId(finalCfg);
 
         jolokiaConfig = new StaticConfiguration(finalCfg);
+        jolokiaConfig.setSystemPropertyMode(systemPropertyMode);
         initConfigAndValidate(finalCfg);
     }
 

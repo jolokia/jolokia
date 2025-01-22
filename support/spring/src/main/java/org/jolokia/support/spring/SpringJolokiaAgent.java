@@ -21,6 +21,7 @@ import java.util.*;
 
 import org.jolokia.jvmagent.JolokiaServer;
 import org.jolokia.jvmagent.JolokiaServerConfig;
+import org.jolokia.server.core.config.SystemPropertyMode;
 import org.jolokia.support.spring.backend.SpringRequestHandler;
 import org.jolokia.server.core.service.api.JolokiaService;
 import org.jolokia.server.core.service.api.LogHandler;
@@ -83,7 +84,7 @@ public class SpringJolokiaAgent extends JolokiaServer implements ApplicationCont
         boolean autoStart = Boolean.parseBoolean(config.remove("autoStart"));
 
         LogHandler logHandler = logHandlerHolder != null ? logHandlerHolder.getLogHandler() : null;
-        init(new JolokiaServerConfig(config), logHandler);
+        init(new JolokiaServerConfig(config, systemPropertyMode), logHandler);
 
         if (exposeApplicationContext && context != null) {
             addService(new SpringRequestHandler(context, 100));

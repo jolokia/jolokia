@@ -41,7 +41,7 @@ public class DiscoveryMulticastResponder extends AbstractJolokiaService<JolokiaS
                 return;
             }
 
-            String multicastBindAddress = pContext.getConfig(ConfigKey.MULTICAST_BIND_ADDRESS, true);
+            String multicastBindAddress = pContext.getConfig(ConfigKey.MULTICAST_BIND_ADDRESS);
 
             try {
                 pContext.debug("Creating MulticastSocketListenerThread for address " + multicastBindAddress);

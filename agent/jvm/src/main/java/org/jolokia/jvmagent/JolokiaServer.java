@@ -300,8 +300,7 @@ public class JolokiaServer {
     // Update the Agent URL from the configuration or own URL
     private void updateAgentUrl(JolokiaContext pJolokiaContext) {
         // URL as configured takes precedence
-        String configUrl = NetworkUtil.replaceExpression(
-                config.getJolokiaConfig().getConfig(ConfigKey.DISCOVERY_AGENT_URL));
+        String configUrl = config.getJolokiaConfig().getConfig(ConfigKey.DISCOVERY_AGENT_URL);
         pJolokiaContext.getAgentDetails().updateAgentParameters(configUrl != null ? configUrl : url,
                                                                config.getAuthenticator() != null);
     }

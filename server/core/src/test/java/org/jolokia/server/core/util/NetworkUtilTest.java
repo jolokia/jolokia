@@ -3,6 +3,7 @@ package org.jolokia.server.core.util;
 import java.net.*;
 import java.util.Enumeration;
 
+import org.jolokia.server.core.config.StaticConfiguration;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -20,6 +21,13 @@ public class NetworkUtilTest {
         } catch (Exception exp) {
             System.out.println(exp.getMessage());
         }
+    }
+
+    @Test
+    public void dumpBestMatch() {
+        NetworkUtil.getBestMatchAddresses().forEach((name, addresses) ->
+            System.out.printf("%s: IP4 = %s, IP6 = %s%n", name, addresses.getIa4().getHostAddress(),
+            addresses.getIa6().getHostAddress()));
     }
 
     @Test
@@ -89,42 +97,27 @@ public class NetworkUtilTest {
         System.getProperties().setProperty("test.prop", "testy");
         System.getProperties().setProperty("test2:prop", "testx");
         String[] testData = {
-                "$host",host,
+                "${host}",host,
                 "bla ${host} blub","bla " + host + " blub",
-                "$ip$host",ip + host,
+                "${ip}${host}",ip + host,
                 "${ ip     }",ip,
                 "|${prop:test.prop}|","|testy|",
                 "${prop:test2:prop}","testx"
         };
+        StaticConfiguration config = new StaticConfiguration();
         for (int i = 0; i < testData.length; i+=2) {
-            assertEquals(NetworkUtil.replaceExpression(testData[i]),testData[i+1],"Checking " + testData[i]);
+            assertEquals(config.resolve(testData[i]),testData[i+1],"Checking " + testData[i]);
         }
     }
 
     @Test
     public void replaceExpressionWithEnv() {
         if (!System.getProperty("os.name").startsWith("Windows")) {
-            String path = NetworkUtil.replaceExpression("Hello ${EnV:PATH} World");
+            StaticConfiguration config = new StaticConfiguration();
+            String path = config.resolve("Hello ${env:PATH} World");
             assertTrue(path.contains("bin"));
             assertTrue(path.startsWith("Hello"));
             assertTrue(path.endsWith("World"));
-        }
-    }
-
-    @Test
-    public void invalidExpression() {
-        String[] testData = {
-                "$unknown",
-                "$hostunknown",
-                "${prop: with space}"
-        };
-        for (String t : testData) {
-            try {
-                NetworkUtil.replaceExpression(t);
-                fail(t+ " has been parsed");
-            } catch (IllegalArgumentException exp) {
-                // Ok.
-            }
         }
     }
 }

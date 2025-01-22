@@ -35,8 +35,8 @@ public final class MulticastUtil {
      * @throws IOException
      */
     static MulticastSocket newMulticastSocket(InetAddress pAddress, JolokiaContext pContext) throws IOException {
-        String multicastGroup = pContext.getConfig(ConfigKey.MULTICAST_GROUP, true);
-        int multicastPort = Integer.parseInt(pContext.getConfig(ConfigKey.MULTICAST_PORT, true));
+        String multicastGroup = pContext.getConfig(ConfigKey.MULTICAST_GROUP);
+        int multicastPort = Integer.parseInt(pContext.getConfig(ConfigKey.MULTICAST_PORT));
 
         InetSocketAddress mcSocketAddress = new InetSocketAddress(multicastGroup, multicastPort);
 
