@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.function.Function;
 
 import org.jolokia.server.core.util.InetAddresses;
 import org.jolokia.server.core.util.NetworkUtil;
@@ -38,11 +39,11 @@ import org.jolokia.server.core.util.StringUtil;
  *     <li>{@link ConfigKey#getDefaultValue()}</li>
  *     <li>Properties from {@code /default-jolokia-agent.properties} (JVM Agent only)</li>
  *     <li>Properties from file specified for {@code config} option (JVM Agent only)</li>
+ *     <li>Environment variables prefixed with {@code JOLOKIA_}</li>
+ *     <li>System properties prefixed with {@code jolokia.}</li>
  *     <li>Remaining options from JVM Agent invocation ({@code premain()} / {@code agentmain()} method) (JVM Agent only)</li>
  *     <li>Servlet config parameters (Servlet Agent only)</li>
  *     <li>Servlet context parameters (Servlet Agent only)</li>
- *     <li>System properties prefixed with {@code jolokia.}</li>
- *     <li>Environment variables prefixed with {@code JOLOKIA_}</li>
  * </ol></p>
  *
  * <p>Specific agent has to call {@link #update} method in proper order. No need to <em>update</em> this configuration
@@ -77,9 +78,9 @@ public class StaticConfiguration implements Configuration {
     // Jolokia properties found directly in System.getProperties() - only ones prefixed with "jolokia."
     private Map<ConfigKey, String> systemProperties;
     // system properties to be used by StringUtil for resolution - include host/ip properties
-    private Properties properties;
+    private final Properties properties;
 
-    private SystemPropertyMode systemPropertyMode = SystemPropertyMode.OVERRIDE;
+    private final SystemPropertyMode systemPropertyMode;
 
     // The global configuration provided in constructor - override'able with update()
     private final Map<ConfigKey, String> configMap = new HashMap<>();
@@ -96,12 +97,20 @@ public class StaticConfiguration implements Configuration {
      * @param keyAndValues an array with even number of elements and ConfigKey and String alternating.
      */
     public StaticConfiguration(Object... keyAndValues) {
-        initialize();
+        this.systemPropertyMode = SystemPropertyMode.FALLBACK;
+        this.properties = new Properties();
+        this.properties.putAll(System.getProperties());
+
+        initializeFromNetwork();
+
         int idx = 0;
         for (int i = idx; i < keyAndValues.length; i += 2) {
             configMap.put((ConfigKey) keyAndValues[i], resolve((String) keyAndValues[i + 1]));
             keys.add((ConfigKey) keyAndValues[i]);
         }
+
+        // now initialize from sys/env to override defaults
+        initializeFromEnvironment(null);
     }
 
     /**
@@ -111,7 +120,7 @@ public class StaticConfiguration implements Configuration {
      * @param pConfig config map from where to take the configuration
      */
     public StaticConfiguration(Map<String, String> pConfig) {
-        this(pConfig, null);
+        this(pConfig, null, SystemPropertyMode.FALLBACK);
     }
 
     /**
@@ -120,22 +129,25 @@ public class StaticConfiguration implements Configuration {
      * but if user passes a map in {@code pResolved} argument, it'll be populated with values from {@code pConfig}
      * but resolved - also the ones which do not have corresponding {@link ConfigKey}.
      *
-     * @param pConfig config map from where to take the configuration
+     * @param pConfig config map from where to take the initial configuration - override'able with sys/env
+     *                properties and following {@link #update} methods
      * @param pResolved map to collect resolved properties
+     * @param pSystemPropertyMode
      */
-    public StaticConfiguration(Map<String, String> pConfig, Map<String, String> pResolved) {
-        initialize();
-        for (ConfigKey c : ConfigKey.values()) {
-            String value = pConfig.get(c.getKeyValue());
-            if (value != null) {
-                String resolved = resolve(value);
-                if (pResolved != null) {
-                    pResolved.put(c.getKeyValue(), resolved);
-                }
-                configMap.put(c, resolved);
-                keys.add(c);
-            }
+    public StaticConfiguration(Map<String, String> pConfig, Map<String, String> pResolved, SystemPropertyMode pSystemPropertyMode) {
+        this.systemPropertyMode = pSystemPropertyMode;
+        this.properties = new Properties();
+        this.properties.putAll(System.getProperties());
+
+        initializeFromNetwork();
+
+        update(new MapConfigExtractor(pConfig), pResolved);
+
+        // now initialize from sys/env to override defaults
+        if (systemPropertyMode != SystemPropertyMode.NEVER) {
+            initializeFromEnvironment(pResolved);
         }
+
         // now resolve all remaining values if needed
         if (pResolved != null) {
             pConfig.forEach((k, v) -> {
@@ -146,39 +158,7 @@ public class StaticConfiguration implements Configuration {
         }
     }
 
-    public void setSystemPropertyMode(SystemPropertyMode systemPropertyMode) {
-        this.systemPropertyMode = systemPropertyMode;
-    }
-
-    /**
-     * Check if there are any Jolokia properties specified using environment variables and/or system properties.
-     * Values are <em>not</em> placeholder-resolved.
-     */
-    private void initialize() {
-        this.environmentVariables = new HashMap<>();
-        Map<String, String> env = new HashMap<>(env());
-        this.systemProperties = new HashMap<>();
-        Map<String, String> sys = new HashMap<>();
-        this.properties = new Properties();
-        this.properties.putAll(System.getProperties());
-        Properties p = sys();
-        for (String key : p.stringPropertyNames()) {
-            sys.put(key, p.getProperty(key));
-        }
-
-        for (ConfigKey c : ConfigKey.values()) {
-            String envKey = c.asEnvVariable();
-            if (env.containsKey(envKey)) {
-                this.environmentVariables.put(c, env.get(envKey));
-                keys.add(c);
-            }
-            String sysKey = c.asSystemProperty();
-            if (sys.containsKey(sysKey)) {
-                this.systemProperties.put(c, sys.get(sysKey));
-                keys.add(c);
-            }
-        }
-
+    private void initializeFromNetwork() {
         // check network config and populate the map with keys: ip, ip6, host, host6 and versions with :<interface-id>
         NetworkInterface nif = NetworkUtil.getBestMatchNetworkInterface();
         Map<String, InetAddresses> config = NetworkUtil.getBestMatchAddresses();
@@ -207,6 +187,47 @@ public class StaticConfiguration implements Configuration {
     }
 
     /**
+     * Check if there are any Jolokia properties specified using environment variables and/or system properties.
+     * Values are placeholder-resolved.
+     */
+    private void initializeFromEnvironment(Map<String, String> pResolved) {
+        // properties from env which have corresponding ConfigKey
+        this.environmentVariables = new HashMap<>();
+        // copy of current environment
+        Map<String, String> env = new HashMap<>(env());
+        // sys properties which have corresponding ConfigKey
+        this.systemProperties = new HashMap<>();
+        // copy of current sys properties
+        Map<String, String> sys = new HashMap<>();
+
+        Properties p = sys();
+        for (String key : p.stringPropertyNames()) {
+            sys.put(key, p.getProperty(key));
+        }
+
+        for (ConfigKey c : ConfigKey.values()) {
+            String envKey = c.asEnvVariable();
+            if (env.containsKey(envKey)) {
+                this.environmentVariables.put(c, env.get(envKey));
+                keys.add(c);
+            }
+            String sysKey = c.asSystemProperty();
+            if (sys.containsKey(sysKey)) {
+                this.systemProperties.put(c, sys.get(sysKey));
+                keys.add(c);
+            }
+        }
+
+        // here, during initialization time, we also override existing options (from default or
+        // embedded config files) with sys/env. If user calls update() later, new properties
+        // will override initial state
+        update(new MapConfigExtractor(env, (k) -> k.startsWith("JOLOKIA_")), pResolved,
+            ConfigKey::fromEnvVariableFormat);
+        update(new MapConfigExtractor(sys, (k) -> k.startsWith("jolokia.")), pResolved,
+            (key) -> key.substring("jolokia.".length()));
+    }
+
+    /**
      * Resolves any placeholder in the form of supported {@code ${xxx}} syntax - using env variables, sys properties
      * or host/host6/ip/ip6 values.
      * @param value
@@ -231,25 +252,42 @@ public class StaticConfiguration implements Configuration {
      * @param pExtractor an extractor for retrieving the configuration from some external object
      */
     public void update(ConfigExtractor pExtractor) {
-        Enumeration<String> e = pExtractor.getNames();
-        while (e.hasMoreElements()) {
-            String keyS = e.nextElement();
-            ConfigKey key = ConfigKey.getGlobalConfigKey(keyS);
-            if (key != null) {
-                configMap.put(key, resolve(pExtractor.getParameter(keyS)));
-                keys.add(key);
-            }
-        }
+        update(pExtractor, null);
     }
 
     /**
-     * Update from another configuration object whose values take precedence. The placeholder values are resolved.
+     * Update the configuration hold by this object overriding existing values (but not the sys/env variables
+     * used during initialization). The placeholder values are resolved.
      *
-     * @param pConfig update configuration from the given config
+     * @param pExtractor an extractor for retrieving the configuration from some external object
+     * @param pResolved map to collect resolved properties
      */
-    public void update(Configuration pConfig) {
-        for (ConfigKey key : pConfig.getConfigKeys()) {
-            configMap.put(key, resolve(pConfig.getConfig(key)));
+    public void update(ConfigExtractor pExtractor, Map<String, String> pResolved) {
+        update(pExtractor, pResolved, Function.identity());
+    }
+
+    /**
+     * Update the configuration hold by this object overriding existing values (but not the sys/env variables
+     * used during initialization). The placeholder values are resolved.
+     *
+     * @param pExtractor an extractor for retrieving the configuration from some external object
+     * @param pResolved map to collect resolved properties
+     * @param newKey key mapper to translate key to match selected {@link ConfigExtractor}
+     */
+    private void update(ConfigExtractor pExtractor, Map<String, String> pResolved, Function<String, String> newKey) {
+        Enumeration<String> e = pExtractor.getNames();
+        while (e.hasMoreElements()) {
+            String originalKey = e.nextElement();
+            String changedKey = newKey.apply(originalKey);
+            ConfigKey key = ConfigKey.getGlobalConfigKey(changedKey);
+            String resolved = resolve(pExtractor.getParameter(originalKey));
+            if (pResolved != null) {
+                pResolved.put(changedKey, resolved);
+            }
+            if (key != null) {
+                configMap.put(key, resolved);
+                keys.add(key);
+            }
         }
     }
 
@@ -261,11 +299,11 @@ public class StaticConfiguration implements Configuration {
     private String getConfig(ConfigKey pKey, boolean checkSysOrEnv) {
         String v;
         if (systemPropertyMode == SystemPropertyMode.OVERRIDE) {
-            v = environmentVariables.get(pKey);
+            v = systemProperties.get(pKey);
             if (v != null) {
                 return v;
             }
-            v = systemProperties.get(pKey);
+            v = environmentVariables.get(pKey);
             if (v != null) {
                 return v;
             }
@@ -275,11 +313,11 @@ public class StaticConfiguration implements Configuration {
             return v;
         }
         if (systemPropertyMode == SystemPropertyMode.FALLBACK) {
-            v = environmentVariables.get(pKey);
+            v = systemProperties.get(pKey);
             if (v != null) {
                 return v;
             }
-            v = systemProperties.get(pKey);
+            v = environmentVariables.get(pKey);
             if (v != null) {
                 return v;
             }

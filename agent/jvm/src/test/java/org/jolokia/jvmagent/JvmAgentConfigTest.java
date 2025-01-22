@@ -116,6 +116,14 @@ public class JvmAgentConfigTest {
     }
 
     @Test
+    public void systemPropertiesPriority() {
+        System.setProperty("jolokia.agentContext", "/bla/");
+        JvmAgentConfig config = new JvmAgentConfig("agentContext=/meh/");
+        assertEquals(config.getContextPath(), "/meh/");
+        System.clearProperty("jolokia.agentContext");
+    }
+
+    @Test
     public void jolokiaConfig() {
         System.setProperty("md", "42");
         JvmAgentConfig config = new JvmAgentConfig("maxDepth=${prop:md}");
@@ -132,6 +140,7 @@ public class JvmAgentConfigTest {
     @Test
     public void readConfig() throws IOException {
         System.setProperty("ou", "JVM");
+        System.setProperty("jolokia.keystorePassword", "from-sys");
         String path = copyResourceToTemp("/agent-test.properties");
         JvmAgentConfig config = new JvmAgentConfig("config=" + path);
         config.initAuthenticator();
@@ -141,6 +150,16 @@ public class JvmAgentConfigTest {
         assertEquals(config.getClientPrincipals().get(0),"O=jolokia.org,OU=JVM");
         assertTrue(authenticator instanceof UserPasswordHttpAuthenticator);
         assertTrue(((UserPasswordHttpAuthenticator) authenticator).checkCredentials("roland","s!cr!t"));
+        assertEquals(new String(config.getKeystorePassword()),"from-sys", "should be overriden when only in file");
+    }
+
+    @Test
+    public void readConfigAndOptions() throws IOException {
+        System.setProperty("jolokia.keystorePassword", "from-sys");
+        String path = copyResourceToTemp("/agent-test.properties");
+        JvmAgentConfig config = new JvmAgentConfig("config=" + path + ",keystorePassword=from-option");
+        config.initAuthenticator();
+        assertEquals(new String(config.getKeystorePassword()),"from-option", "option overrides system property");
     }
 
     @Test

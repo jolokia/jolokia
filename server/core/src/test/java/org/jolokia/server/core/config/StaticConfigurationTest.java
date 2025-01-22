@@ -110,7 +110,7 @@ public class StaticConfigurationTest {
         };
 
         assertEquals(config.getConfigKeys().size(), 3);
-        assertEquals(config.getConfig(ConfigKey.DEBUG), "true");
+        assertEquals(config.getConfig(ConfigKey.DEBUG), "false", "sys overrides env");
         assertEquals(config.getConfig(ConfigKey.LOGHANDLER_CLASS), "java.lang.Object");
         assertEquals(config.getConfig(ConfigKey.USER), "Howard");
     }
@@ -137,11 +137,10 @@ public class StaticConfigurationTest {
             }
         };
 
-        // no resolution of sys/env values (except shell resolution beyond JVM control)
-        assertEquals(config.getConfig(ConfigKey.DEBUG), "${sys:debug}");
-        assertEquals(config.getConfig(ConfigKey.LOGHANDLER_CLASS), "java.${env:LOG_HANDLER_CLASS}");
-        assertEquals(config.getConfig(ConfigKey.AUTH_IGNORE_CERTS), "${prop:debug}");
-        assertEquals(config.getConfig(ConfigKey.DETECTOR_OPTIONS), "${sys:jolokia.debug}");
+        assertEquals(config.getConfig(ConfigKey.DEBUG), "true");
+        assertEquals(config.getConfig(ConfigKey.LOGHANDLER_CLASS), "java.lang.Object");
+        assertEquals(config.getConfig(ConfigKey.AUTH_IGNORE_CERTS), "true");
+        assertEquals(config.getConfig(ConfigKey.DETECTOR_OPTIONS), "${sys:debug}", "only one resolution");
     }
 
     @Test
@@ -169,7 +168,6 @@ public class StaticConfigurationTest {
         props.setProperty(ConfigKey.AUTH_IGNORE_CERTS.getKeyValue(), "${prop:debug}");
         config.update(new PropertiesConfigExtractor(props));
 
-        // no resolution of sys/env values (except shell resolution beyond JVM control)
         assertEquals(config.getConfig(ConfigKey.DEBUG), "true");
         assertEquals(config.getConfig(ConfigKey.LOGHANDLER_CLASS), "java.lang.Object");
         assertEquals(config.getConfig(ConfigKey.AUTH_IGNORE_CERTS), "true");

@@ -29,16 +29,15 @@ public enum SystemPropertyMode {
 
     /**
      * Check system properties if not resolvable in the specified properties.
+     * This is the default. System properties prefixed with {@code jolokia.} and env variables
+     * prefixed with {@code JOLOKIA_} are used when not specifed using other means (like JVM Agent
+     * invocation options).
      */
     FALLBACK("fallback"),
 
     /**
      * Check system properties first, before trying the specified properties.
      * This allows system properties to override any other property source.
-     * This is the default. System properties prefixed with {@code jolokia.} and env variables
-     * prefixed with {@code JOLOKIA_} by default are preferred. This is natural way of configuring applications
-     * which provide their own configuration - we want to be able to override the configuration without
-     * modifying the application itself.
      */
     OVERRIDE("override");
 

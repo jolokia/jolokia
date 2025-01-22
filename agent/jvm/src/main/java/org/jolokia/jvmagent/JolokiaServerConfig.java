@@ -99,7 +99,7 @@ public class JolokiaServerConfig {
     }
 
     public JolokiaServerConfig(Map<String, String> pConfig) {
-        this(pConfig, SystemPropertyMode.OVERRIDE);
+        this(pConfig, SystemPropertyMode.FALLBACK);
     }
 
     /**
@@ -116,15 +116,16 @@ public class JolokiaServerConfig {
      * @param systemPropertyMode
      */
     protected final void init(Map<String, String> pConfig, Map<String,String> pDefaultConfig, SystemPropertyMode systemPropertyMode) {
-        Map<String, String> finalCfg = new HashMap<>(pDefaultConfig);
-        finalCfg.putAll(pConfig);
-
-        prepareDetectorOptions(finalCfg);
-        addJolokiaId(finalCfg);
-
         Map<String, String> resolvedConfig = new HashMap<>();
-        jolokiaConfig = new StaticConfiguration(finalCfg, resolvedConfig);
-        jolokiaConfig.setSystemPropertyMode(systemPropertyMode);
+
+        jolokiaConfig = new StaticConfiguration(pDefaultConfig, resolvedConfig, systemPropertyMode);
+
+        // pDefaultConfig could've been overriden by system properties/env variables, but pConfig
+        // will now possible override these too
+        jolokiaConfig.update(new MapConfigExtractor(pConfig), resolvedConfig);
+
+        prepareDetectorOptions(resolvedConfig);
+        addJolokiaId(resolvedConfig);
 
         initConfigAndValidate(resolvedConfig);
     }
@@ -134,6 +135,7 @@ public class JolokiaServerConfig {
         if (!pFinalCfg.containsKey(ConfigKey.AGENT_ID.getKeyValue())) {
             String id = Integer.toHexString(hashCode()) + "-jvm";
             pFinalCfg.put(ConfigKey.AGENT_ID.getKeyValue(), id);
+            jolokiaConfig.update(new MapConfigExtractor(Map.of(ConfigKey.AGENT_ID.getKeyValue(), id)));
         }
     }
 
@@ -672,6 +674,7 @@ public class JolokiaServerConfig {
         }
         if (detectorOpts.length() > 1) {
             detectorOpts.append("}");
+            jolokiaConfig.update(new MapConfigExtractor(Map.of(ConfigKey.DETECTOR_OPTIONS.getKeyValue(), detectorOpts.toString())));
             pConfig.put(ConfigKey.DETECTOR_OPTIONS.getKeyValue(),detectorOpts.toString());
         }
     }
