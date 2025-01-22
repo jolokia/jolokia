@@ -2,6 +2,7 @@ package org.jolokia.server.core.util;
 
 import java.net.*;
 import java.util.Enumeration;
+import java.util.Map;
 
 import org.jolokia.server.core.config.StaticConfiguration;
 import org.testng.annotations.Test;
@@ -91,9 +92,12 @@ public class NetworkUtilTest {
     }
 
     @Test
-    public void replaceExpression() throws SocketException, UnknownHostException {
-        String host = NetworkUtil.getLocalAddress().getHostName();
-        String ip = NetworkUtil.getLocalAddress().getHostAddress();
+    public void replaceExpression() {
+        NetworkInterface nic = NetworkUtil.getBestMatchNetworkInterface();
+        Map<String, InetAddresses> map = NetworkUtil.getBestMatchAddresses();
+        assertNotNull(nic);
+        String host = map.get(nic.getName()).getIa4().getHostName();
+        String ip = map.get(nic.getName()).getIa4().getHostAddress();
         System.getProperties().setProperty("test.prop", "testy");
         System.getProperties().setProperty("test2:prop", "testx");
         String[] testData = {

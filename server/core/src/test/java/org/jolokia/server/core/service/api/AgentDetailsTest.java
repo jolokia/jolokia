@@ -15,6 +15,7 @@ package org.jolokia.server.core.service.api;/*
  * limitations under the License.
  */
 
+import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Map;
@@ -23,10 +24,12 @@ import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.config.Configuration;
 import org.jolokia.server.core.config.StaticConfiguration;
 import org.jolokia.server.core.detector.DefaultServerHandle;
+import org.jolokia.server.core.util.InetAddresses;
 import org.jolokia.server.core.util.NetworkUtil;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 /**
  * @author roland
@@ -35,10 +38,15 @@ import static org.testng.Assert.assertEquals;
 public class AgentDetailsTest {
 
     @Test
-    public void agentIdHost() throws SocketException, UnknownHostException {
+    public void agentIdHost() {
         Configuration myConfig = new StaticConfiguration(ConfigKey.AGENT_ID, "${host}");
         AgentDetails details = new AgentDetails(myConfig,new DefaultServerHandle(null,null,null));
-        assertEquals(details.getAgentId(), NetworkUtil.getLocalAddress().getHostName());
+        NetworkInterface nic = NetworkUtil.getBestMatchNetworkInterface();
+        Map<String, InetAddresses> map = NetworkUtil.getBestMatchAddresses();
+        assertNotNull(nic);
+        String host = map.get(nic.getName()).getIa4().getHostName();
+        String ip = map.get(nic.getName()).getIa4().getHostAddress();
+        assertEquals(details.getAgentId(), host);
     }
 
     @Test
