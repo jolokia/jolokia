@@ -15,6 +15,40 @@
 ////
 == News
 
+=== Jolokia 2.2.0 released
+
+[.news-date]
+2025-01-23
+
+We're happy to release Jolokia 2.2.0! This is new minor release, as the scope of changes is a bit too wide for just 2.1.3 release.
+
+In this release we've reviewed support for IPv6 in every place where IP addresses are used - UDP Multicast based discovery, policy restrictor for source IP addresses and URL usage. Jolokia now works properly with UDP/IP6 discovery using an option like `multicastGroup=ff08::48:84,multicastPort=24884` (the default is still `239.192.48.84`).
+
+Spring Boot depencency of `jolokia-support-spring` module has been changed to 3.4.1, but that's only declared dependency. Jolokia works well with all Spring Boot 3 versions.
+
+One of the requested features was restarting Jolokia HTTP server when a change in configured TLS certificates was detected - this is especially important in Kubernetes/OpenShift deployments where the environment may use aggressive certificate refresh policy. Now there's no need to restart entire pod when `useCertificateReload` is set to a given number of seconds. It defaults to `-1` to keep backward compatibility.
+
+And the biggest change is improved configuration management. All options can use property placeholders like:
+
+* `${sys:configurationOption}` (or `${prop:configurationOption}`) to reference system properties
+* `${env:VARIABLE_NAME}` to reference environment variables
+* `${ip}`, `${ip6}`, `${host}`, `${ip:<interface>}` (e.g., `${ip:eth0}`) to reference networking configuration
+
+Also, similarly to https://docs.spring.io/spring-boot/reference/features/external-config.html[Spring Boot configuration], Jolokia looks up configuration options in differente sources/locations (in order of increasing priority - later sources override previous ones):
+
+1. defaults from the code
+2. defaults from `default-jolokia-agent.properties` resource of JVM Agent
+3. options from file specified by `config` option of JVM Agent
+4. environment variables with `JOLOKIA_` prefix
+5. system properties with `jolokia.` prefix
+6. servlet config parameters
+7. servlet context parameters
+8. remaining options of JVM Agent (command line)
+
+With this release, current version of `jolokia.js` npm package is 2.2.0 - even if it doesn't bring any changes.
+
+Refer to https://jolokia.org/changes-report.html#a2.2.0[changelog] for detailed information about the release.
+
 === Jolokia 2.1.2 released
 
 [.news-date]
@@ -37,8 +71,6 @@ Refer to https://jolokia.org/changes-report.html#a2.1.2[changelog] for detailed 
 
 Jolokia 2.1.1 is released with adjustments to TypeScript type definitions and few improvements to new JavaScript ESM client.
 With this release, current version of `jolokia.js` npm package is 2.1.7.
-
-Refer to https://jolokia.org/changes-report.html#a2.1.1[changelog] for detailed information about the release.
 
 === Jolokia 2.1.0 released
 
