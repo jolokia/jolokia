@@ -44,18 +44,21 @@ This can be fixed with proper firewall configuration. Here's an example of `nft`
 FedoraServer
 
 # nft add rule inet firewalld filter_IN_FedoraServer_allow ip daddr 239.192.48.84 accept
+# nft add rule inet firewalld filter_IN_FedoraServer_allow ip6 daddr ff08::48:84 accept
 
 # nft -a list chain inet firewalld filter_IN_FedoraServer_allow
 table inet firewalld {
-	chain filter_IN_FedoraServer_allow { # handle 206
+	chain filter_IN_FedoraServer_allow { # handle 153
 		...
-		ip daddr 239.192.48.84 accept # handle 501
+		ip daddr 239.192.48.84 accept # handle 342
+		ip6 daddr ff08::48:84 accept # handle 343
 	}
 }
 
 (run the tests)
 
-# nft delete rule inet firewalld filter_IN_FedoraServer_allow handle 501
+# nft delete rule inet firewalld filter_IN_FedoraServer_allow handle 342
+# nft delete rule inet firewalld filter_IN_FedoraServer_allow handle 343
 ```
 
 There are however additional tests that should be run a bit outside of standard `mvn clean install`.
@@ -137,14 +140,14 @@ $ yarn watch
 [jolokia.js]: Process started
 [@jolokia.js/simple]: Process started
 ...
-[jolokia.js]: rollup v4.20.0
-[jolokia.js]: bundles src/jolokia.ts → dist/jolokia.js, dist/jolokia.min.js, dist/jolokia.mjs...
-[jolokia.js]: (!) [plugin typescript] @rollup/plugin-typescript: Rollup 'sourcemap' option must be set to generate source maps.
-[jolokia.js]: created dist/jolokia.js, dist/jolokia.min.js, dist/jolokia.mjs in 2.7s
-[@jolokia.js/simple]: rollup v4.20.0
-[@jolokia.js/simple]: bundles src/jolokia-simple.ts → dist/jolokia-simple.js, dist/jolokia-simple.min.js, dist/jolokia-simple.mjs...
+[jolokia.js]: rollup v4.22.4
+[jolokia.js]: bundles src/jolokia.ts → dist/jolokia.cjs, dist/jolokia.min.cjs, dist/jolokia.mjs...
+[@jolokia.js/simple]: rollup v4.22.4
+[@jolokia.js/simple]: bundles src/jolokia-simple.ts → dist/jolokia-simple.cjs, dist/jolokia-simple.min.cjs, dist/jolokia-simple.mjs...
 [@jolokia.js/simple]: (!) [plugin typescript] @rollup/plugin-typescript: Rollup 'sourcemap' option must be set to generate source maps.
-[@jolokia.js/simple]: created dist/jolokia-simple.js, dist/jolokia-simple.min.js, dist/jolokia-simple.mjs in 2.4s
+[@jolokia.js/simple]: created dist/jolokia-simple.cjs, dist/jolokia-simple.min.cjs, dist/jolokia-simple.mjs in 1.1s
+[jolokia.js]: (!) [plugin typescript] @rollup/plugin-typescript: Rollup 'sourcemap' option must be set to generate source maps.
+[jolokia.js]: created dist/jolokia.cjs, dist/jolokia.min.cjs, dist/jolokia.mjs in 1.2s
 ```
 
 With the symbolic links created, just change the test files or `jolokia.ts` in your IDE of choice and re-run the tests (by refreshing browser page or using QUnit UI).
