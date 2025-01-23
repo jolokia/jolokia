@@ -251,10 +251,9 @@ values in the console.
 git clone git@github.com:jolokia/jolokia.git
 cd jolokia
 mvn -Dmaven.repo.local=/tmp/repo \
-    -DdevelopmentVersion=2.2.1-SNAPSHOT \
-    -DreleaseVersion=2.2.0 \
-    -Dtag=v2.2.0 \
-    -Dgpg.keyname=roland@jolokia.org \
+    -DdevelopmentVersion=2.2.2-SNAPSHOT \
+    -DreleaseVersion=2.2.1 \
+    -Dtag=v2.2.1 \
     -Pdist release:prepare
 mvn -Dmaven.repo.local=/tmp/repo \
     -Pdist release:perform
