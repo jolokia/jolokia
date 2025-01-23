@@ -343,13 +343,6 @@ completely denied. If a classpath lookup fails then access
 is globally granted and a warning is given on standard
 output.
 
-The parameter specified with `policyLocation` can contain placeholders:
-
-* `$ip`: IP - Address
-* `$host`: Host - Address
-* `${prop:foo}`: System property _foo_
-* `${env:FOO}`: Environment variable _FOO_
-
 [#security-restrictor]
 == Jolokia Restrictors
 

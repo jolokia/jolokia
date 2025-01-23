@@ -258,7 +258,7 @@ reads.
 
 |`includeRequest`
 |Whether the response object should contain related request object. +
-This option may be configured globally and overriden at request time.
+This option may be configured globally and overridden at request time.
 When `false`, bulk responses have to be correlated with requests by matching
 the requests using index number - responses come in the same order as requests. +
 *Added since Jolokia 2.1.0*

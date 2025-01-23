@@ -63,6 +63,31 @@ it is useful for servers like Hadoop or Teracotta, which do
 not provide convenient hooks for an HTTP-exporting agent on
 their own.
 
+== Configuration
+
+A note about configuration options - all agents read options from various sources:
+
+* WAR Agent may use servlet parameters and servlet context parameters
+* OSGi Agent may use Config Admin PIDs
+* JVM Agent may use command line options available from argument of `premain()` method
+
+Since Jolokia 2.2.0 we've unified configuration usage a bit - previously only `agentId` and `discoveryAgentUrl` could reference environment variables and system properties and `policyLocation` and `agentId` could use properties like `${host}` to be dynamically resolved to current host name.
+
+Now all properties may use placeholders in the form of:
+
+* `${sys:configurationOption}` (or `${prop:configurationOption}`) to reference system properties
+* `${env:VARIABLE_NAME}` to reference environment variables
+* `${ip}`, `${ip6}`, `${host}`, `${ip:<interface>}` (e.g., `${ip:eth0}`) to reference networking configuration
+
+Additionally if Jolokia detects:
+
+* environment variables with `JOLOKIA_` prefix
+* system properties with `jolokia.` prefix
+
+these configuration options may be used as well if not overridden by explicit JVM Agent option or Servlet Config parameter.
+
+For example, environment variable `JOLOKIA_AUTH_CLASS` may be checked if there's no `authClass` option specified in other property source.
+
 include::agents/war.adoc[]
 include::agents/osgi.adoc[]
 include::agents/jvm.adoc[]

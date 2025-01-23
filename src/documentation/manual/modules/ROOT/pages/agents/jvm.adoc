@@ -81,8 +81,7 @@ will be `protocol://host:port/agentContext`. The default context is
 calculated. If provided it should be ensured that this id is
 unique among all agent reachable via multicast requests used
 by the discovery mechanism. It is recommended not to set
-this value. Within the `agentId` specification you
-can use the same placeholders as in `discoveryAgentUrl`.
+this value.
 |`my-unique-agent-id`
 
 |`agentDescription`
@@ -317,10 +316,7 @@ given, `discoveryEnabled` is set
 implicitly to true. This URL can also be provided by an
 environment variable
 `JOLOKIA_DISCOVERY_AGENT_URL` or the system
-property `jolokia.discoveryUrl`. Within the value you can use the
-placeholders `$\{host}` and `$\{ip}` which gets replaced
-by the autodetected local host name/address. Also with `$\{env:ENV_VAR}` and
-`$\{sys:property}` environment and system properties can be referenced, respectively.
+property `jolokia.discoveryUrl`.
 |`http://10.9.11.87:8778/jolokia`
 
 |`multicastGroup`
