@@ -264,11 +264,6 @@ mvn -Dmaven.repo.local=/tmp/repo \
 
 * Create a new release ("Draft a release" - Button)
 * Upload `tar.gz` and `zip` files from `target/checkout/assembly/target`
-* Upload all JavaScript files in `target/checkout/client/javascript-esm/target/classes`:
-    * `jolokia.js`
-    * `jolokia.min.js`
-    * `jolokia-simple.js`
-    * `jolokia-simple.min.js`
 * Upload JVM debian package from
     * `agent/jvm/target/*.deb`
 
