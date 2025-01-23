@@ -51,7 +51,7 @@ public class SpringReadHandler extends SpringCommandHandler<JolokiaReadRequest> 
             // Next: Direct field access
             Field field = ReflectionUtils.findField(clazz,attribute);
             if (field != null) {
-                boolean isAccessible = field.isAccessible();
+                boolean isAccessible = field.canAccess(bean);
                 field.setAccessible(true);
                 try {
                     return ReflectionUtils.getField(field,bean);
