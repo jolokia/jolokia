@@ -28,7 +28,7 @@ public class NetworkUtilTest {
     public void dumpBestMatch() {
         NetworkUtil.getBestMatchAddresses().forEach((name, addresses) ->
             System.out.printf("%s: IP4 = %s, IP6 = %s%n", name, addresses.getIa4().getHostAddress(),
-            addresses.getIa6().getHostAddress()));
+            addresses.getIa6() == null ? "<null>" : addresses.getIa6().getHostAddress()));
     }
 
     @Test
@@ -58,15 +58,20 @@ public class NetworkUtilTest {
 
     @Test
     public void findLocalIP6Address() throws SocketException {
-        InetAddress addr = NetworkUtil.findLocalAddressViaNetworkInterface(Inet6Address.class);
-        System.out.println("Address found via NIF: " + addr);
-        assertTrue(addr instanceof Inet6Address);
+        if (NetworkUtil.isIPv6Supported()) {
+            InetAddress addr = NetworkUtil.findLocalAddressViaNetworkInterface(Inet6Address.class);
+            System.out.println("Address found via NIF: " + addr);
+            assertTrue(addr instanceof Inet6Address);
 
-        assertFalse(addr.getHostAddress().startsWith("["));
+            assertFalse(addr.getHostAddress().startsWith("["));
+        }
     }
 
     @Test
     public void ip6URLs() throws SocketException, URISyntaxException, UnknownHostException {
+        if (!NetworkUtil.isIPv6Supported()) {
+            return;
+        }
         InetAddress addr = NetworkUtil.findLocalAddressViaNetworkInterface(Inet6Address.class);
 
         URI uri;

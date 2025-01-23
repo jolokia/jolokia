@@ -164,24 +164,30 @@ public class StaticConfiguration implements Configuration {
         Map<String, InetAddresses> config = NetworkUtil.getBestMatchAddresses();
 
         config.forEach((name, addresses) -> {
-            String ip6Address = addresses.getIa6().getHostAddress();
-            if (addresses.getIa6().getScopedInterface() != null || addresses.getIa6().getScopeId() > 0) {
-                int percent = ip6Address.indexOf('%');
-                if (percent != -1) {
-                    ip6Address = ip6Address.substring(0, percent);
+            if (NetworkUtil.isIPv6Supported() && addresses.getIa6() != null) {
+                String ip6Address = addresses.getIa6().getHostAddress();
+                if (addresses.getIa6().getScopedInterface() != null || addresses.getIa6().getScopeId() > 0) {
+                    int percent = ip6Address.indexOf('%');
+                    if (percent != -1) {
+                        ip6Address = ip6Address.substring(0, percent);
+                    }
                 }
+                if (nif != null && name.equals(nif.getName())) {
+                    networkConfig.put("ip6", ip6Address);
+                    networkConfig.put("host6", addresses.getIa6().getHostName());
+                }
+                networkConfig.put("ip6:" + name, ip6Address);
+                networkConfig.put("host6:" + name, addresses.getIa6().getHostName());
             }
 
-            if (nif != null && name.equals(nif.getName())) {
-                networkConfig.put("ip", addresses.getIa4().getHostAddress());
-                networkConfig.put("ip6", ip6Address);
-                networkConfig.put("host", addresses.getIa4().getHostName());
-                networkConfig.put("host6", addresses.getIa6().getHostName());
+            if (addresses.getIa4() != null) {
+                if (nif != null && name.equals(nif.getName())) {
+                    networkConfig.put("ip", addresses.getIa4().getHostAddress());
+                    networkConfig.put("host", addresses.getIa4().getHostName());
+                }
+                networkConfig.put("ip:" + name, addresses.getIa4().getHostAddress());
+                networkConfig.put("host:" + name, addresses.getIa4().getHostName());
             }
-            networkConfig.put("ip:" + name, addresses.getIa4().getHostAddress());
-            networkConfig.put("ip6:" + name, ip6Address);
-            networkConfig.put("host:" + name, addresses.getIa4().getHostName());
-            networkConfig.put("host6:" + name, addresses.getIa6().getHostName());
         });
         this.properties.putAll(networkConfig);
     }

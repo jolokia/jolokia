@@ -20,6 +20,9 @@ public class MulticastUtilTest {
 
     @Test
     public void createSocketNoAddress() throws IOException {
+        if (!NetworkUtil.isIPv6Supported()) {
+            return;
+        }
         InetAddress address = NetworkUtil.getLocalAddress(Inet6Address.class);
         JolokiaContext ctx =
             new TestJolokiaContext.Builder()

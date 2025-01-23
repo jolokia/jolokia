@@ -189,7 +189,9 @@ public class StaticConfigurationTest {
             + map.get(nif.getName()).getIa4().getHostAddress()
             + "/"
             + map.get(nif.getName()).getIa4().getHostName());
-        assertEquals(config.getConfig(ConfigKey.REALM), "world-of-0:0:0:0:0:0:0:1");
+        if (NetworkUtil.isIPv6Supported()) {
+            assertEquals(config.getConfig(ConfigKey.REALM), "world-of-0:0:0:0:0:0:0:1");
+        }
     }
 
 }

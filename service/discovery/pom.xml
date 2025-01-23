@@ -83,6 +83,54 @@
           </instructions>
         </configuration>
       </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <systemPropertyVariables>
+            <project.version>${project.version}</project.version>
+          </systemPropertyVariables>
+        </configuration>
+        <executions>
+          <execution>
+            <id>default-test</id>
+            <goals>
+              <goal>test</goal>
+            </goals>
+            <phase>test</phase>
+            <configuration>
+              <argLine>
+                -Djava.net.preferIPv4Stack=false
+              </argLine>
+            </configuration>
+          </execution>
+          <execution>
+            <id>default-test-ip4-only</id>
+            <goals>
+              <goal>test</goal>
+            </goals>
+            <phase>test</phase>
+            <configuration>
+              <argLine>
+                -Djava.net.preferIPv4Stack=true
+              </argLine>
+            </configuration>
+          </execution>
+          <execution>
+            <id>default-test-ip6-preferred</id>
+            <goals>
+              <goal>test</goal>
+            </goals>
+            <phase>test</phase>
+            <configuration>
+              <argLine>
+                -Djava.net.preferIPv6Addresses=true
+              </argLine>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 
