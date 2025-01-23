@@ -43,13 +43,16 @@ https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing[CIDR format,role=ex
 (e.g. `10.0.0.0/16` for all clients coming from the 10.0
 network). The following allows access from localhost and all
 clients whose IP addresses start with "10.0". For all other
-IP addresses access is denied.
+IP addresses access is denied. IPv6 addresses are also supported.
 
 [,xml]
 ----
 <remote>
   <host>localhost</host>
   <host>10.0.0.0/16</host>
+  <host>[::1]</host>
+  <host>2001:db8:1::1</host>
+  <host>2001:db8:2::/48</host>
 </remote>
 ----
 

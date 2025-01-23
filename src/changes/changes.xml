@@ -23,6 +23,29 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
+    <release version="2.2.0" description="Release 2.2.0" date="2025-01-23">
+      <action dev="grgrzybek" type="add" issue="786">
+        Upgrade to Spring Boot 3.4 and Spring Framework 6.2.
+      </action>
+      <action dev="grgrzybek" type="add" issue="785">
+        Use SLF4J2 only.
+      </action>
+      <action dev="grgrzybek" type="fix" issue="783">
+        Make request type handling consistent (lower/upper case).
+      </action>
+      <action dev="grgrzybek" type="fix" issue="779">
+        Fixing X-Jolokia-Authorization support.
+      </action>
+      <action dev="grgrzybek" type="add" issue="751">
+        Review property placeholder support and property sources for all configuration options.
+      </action>
+      <action dev="grgrzybek" type="add" issue="710">
+        Reloading certificates and restarting HTTP server instead of entire JVM.
+      </action>
+      <action dev="grgrzybek" type="add" issue="620">
+        Support IPv6 (CORS, UDP Multicast, binding, remote host checking).
+      </action>
+    </release>
     <release version="2.1.2" description="Release 2.1.2" date="2024-11-13">
       <action dev="grgrzybek" type="add" issue="755">
         Create Apache Artemis server detector
