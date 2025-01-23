@@ -24,7 +24,7 @@ We're happy to release Jolokia 2.2.0! This is new minor release, as the scope of
 
 In this release we've reviewed support for IPv6 in every place where IP addresses are used - UDP Multicast based discovery, policy restrictor for source IP addresses and URL usage. Jolokia now works properly with UDP/IP6 discovery using an option like `multicastGroup=ff08::48:84,multicastPort=24884` (the default is still `239.192.48.84`).
 
-Spring Boot depencency of `jolokia-support-spring` module has been changed to 3.4.1, but that's only declared dependency. Jolokia works well with all Spring Boot 3 versions.
+Spring Boot dependency of `jolokia-support-spring` module has been changed to 3.4.1, but that's only declared dependency. Jolokia works well with all Spring Boot 3 versions.
 
 One of the requested features was restarting Jolokia HTTP server when a change in configured TLS certificates was detected - this is especially important in Kubernetes/OpenShift deployments where the environment may use aggressive certificate refresh policy. Now there's no need to restart entire pod when `useCertificateReload` is set to a given number of seconds. It defaults to `-1` to keep backward compatibility.
 
@@ -34,7 +34,7 @@ And the biggest change is improved configuration management. All options can use
 * `${env:VARIABLE_NAME}` to reference environment variables
 * `${ip}`, `${ip6}`, `${host}`, `${ip:<interface>}` (e.g., `${ip:eth0}`) to reference networking configuration
 
-Also, similarly to https://docs.spring.io/spring-boot/reference/features/external-config.html[Spring Boot configuration], Jolokia looks up configuration options in differente sources/locations (in order of increasing priority - later sources override previous ones):
+Also, similarly to https://docs.spring.io/spring-boot/reference/features/external-config.html[Spring Boot configuration], Jolokia looks up configuration options in different sources/locations (in order of increasing priority - later sources override previous ones):
 
 1. defaults from the code
 2. defaults from `default-jolokia-agent.properties` resource of JVM Agent
