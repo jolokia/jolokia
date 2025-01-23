@@ -28,19 +28,21 @@
 <restrict>
 
   <!-- List of remote hosts which are allowed to access this agent. The name can be
-       given as IP or FQDN. If any of the given hosts matches, access will be allowed
+       given as IPv4, IPv6 or FQDN. If any of the given hosts matches, access will be allowed
       (respecting further restrictions, though). If <remote> ... </remote> is given
       without any host no access is allowed at all (probably not what you want).
 
       You can also specify a subnetmask behind a numeric IP adress in which case any
       host within the specified subnet is allowed to access the agent. The netmask can
-      be given either in CIDR format (e.g "/16") or as a full netmask (e.g. "/255.255.0.0")
+      be given either in CIDR format (e.g "/16") or as a full netmask (e.g. "/255.255.0.0" - for IPv4 only)
   -->
   <!--
   <remote>
     <host>127.0.0.1</host>
     <host>localhost</host>
     <host>10.0.0.0/16</host>
+    <host>[::1]</host>
+    <host>2001:db8:2::/48</host>
   </remote>
   -->
 

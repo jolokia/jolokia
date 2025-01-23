@@ -159,6 +159,65 @@ their own.</p>
 </div>
 </div>
 <div class="sect1">
+<h2 id="_configuration"><a class="anchor" href="#_configuration"></a>Configuration</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>A note about configuration options - all agents read options from various sources:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>WAR Agent may use servlet parameters and servlet context parameters</p>
+</li>
+<li>
+<p>OSGi Agent may use Config Admin PIDs</p>
+</li>
+<li>
+<p>JVM Agent may use command line options available from argument of <code>premain()</code> method</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Since Jolokia 2.2.0 we&#8217;ve unified configuration usage a bit - previously only <code>agentId</code> and <code>discoveryAgentUrl</code> could reference environment variables and system properties and <code>policyLocation</code> and <code>agentId</code> could use properties like <code>${host}</code> to be dynamically resolved to current host name.</p>
+</div>
+<div class="paragraph">
+<p>Now all properties may use placeholders in the form of:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>${sys:configurationOption}</code> (or <code>${prop:configurationOption}</code>) to reference system properties</p>
+</li>
+<li>
+<p><code>${env:VARIABLE_NAME}</code> to reference environment variables</p>
+</li>
+<li>
+<p><code>${ip}</code>, <code>${ip6}</code>, <code>${host}</code>, <code>${ip:&lt;interface&gt;}</code> (e.g., <code>${ip:eth0}</code>) to reference networking configuration</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Additionally if Jolokia detects:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>environment variables with <code>JOLOKIA_</code> prefix</p>
+</li>
+<li>
+<p>system properties with <code>jolokia.</code> prefix</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>these configuration options may be used as well if not overridden by explicit JVM Agent option or Servlet Config parameter.</p>
+</div>
+<div class="paragraph">
+<p>For example, environment variable <code>JOLOKIA_AUTH_CLASS</code> may be checked if there&#8217;s no <code>authClass</code> option specified in other property source.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="agents-war"><a class="anchor" href="#agents-war"></a>Jakarta EE Agent (WAR)</h2>
 <div class="sectionbody">
 <div class="sect2">
@@ -507,15 +566,12 @@ given, <code>discoveryEnabled</code> is set
 implicitly to <code>true</code>. This URL can also be provided by an
 environment variable
 <code>JOLOKIA_DISCOVERY_AGENT_URL</code> or the system
-property <code>jolokia.discoveryAgentUrl</code>. Within the value you can use the
-placeholders <code>${host}</code> and <code>${ip}</code> which gets replaced
-by the autodetected local host name/address. Also with <code>${env:ENV_VAR}</code> and
-<code>${sys:property}</code> environment and system properties can be referenced, respectively.</p></td>
+property <code>jolokia.discoveryAgentUrl</code>.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>http://10.9.11.87:8080/jolokia</code></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>multicastGroup</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">The multicast group IPv4 address. This group IP can be also given as an environment variable <code>JOLOKIA_MULTICAST_GROUP</code> or a system property <code>jolokia.multicastGroup</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The multicast group IPv4 address. This group IP can be also given as an environment variable <code>JOLOKIA_MULTICAST_GROUP</code> or a system property <code>jolokia.multicastGroup</code>. The default is IPv4 address but IPv6 can also be used, for example <code>[ff08::48:84]</code>.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>239.192.48.84</code></p></td>
 </tr>
 <tr>
@@ -529,8 +585,7 @@ by the autodetected local host name/address. Also with <code>${env:ENV_VAR}</cod
 calculated. If provided it should be ensured that this id is
 unique among all agent reachable via multicast requests used
 by the discovery mechanism. It is recommended not to set
-this value. Within the <code>agentId</code> specification you
-can use the same placeholders as in <code>discoveryAgentUrl</code>.</p></td>
+this value.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>my-unique-agent-id</code></p></td>
 </tr>
 <tr>
@@ -670,7 +725,7 @@ dependency on this jar artifact:</p>
     &lt;dependency&gt;
       &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
       &lt;artifactId&gt;jolokia-server-core&lt;/artifactId&gt;
-      &lt;version&gt;2.1.2&lt;/version&gt;
+      &lt;version&gt;2.2.0&lt;/version&gt;
     &lt;/dependency&gt;
   &lt;/dependencies&gt;
   &lt;!-- .... --&gt;
@@ -894,8 +949,7 @@ a Jolokia servlet when used in a Jakarta EE WAR artifact.</p>
 calculated. If provided it should be ensured that this id is
 unique among all agent reachable via multicast requests used
 by the discovery mechanism. It is recommended not to set
-this value. Within the <code>agentId</code> specification you
-can use the same placeholders as in <code>discoveryAgentUrl</code>.</p></td>
+this value.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.jolokia.agentDescription</code></p></td>
@@ -1089,15 +1143,12 @@ given, <code>discoveryEnabled</code> is set
 implicitly to true. This URL can also be provided by an
 environment variable
 <code>JOLOKIA_DISCOVERY_AGENT_URL</code> or the system
-property <code>jolokia.discoveryUrl</code>. Within the value you can use the
-placeholders <code>${host}</code> and <code>${ip}</code> which gets replaced
-by the autodetected local host name/address. Also with <code>$\{env:ENV_VAR}</code> and
-<code>$\{sys:property}</code> environment and system properties can be referenced, respectively.</p></td>
+property <code>jolokia.discoveryUrl</code>.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.jolokia.multicastGroup</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>239.192.48.84</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">The multicast group IPv4 address. This group IP can be also given as an environment variable <code>JOLOKIA_MULTICAST_GROUP</code> or a system property <code>jolokia.multicastGroup</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The multicast group IPv4 address. This group IP can be also given as an environment variable <code>JOLOKIA_MULTICAST_GROUP</code> or a system property <code>jolokia.multicastGroup</code>. The default is IPv4 address but IPv6 can also be used, for example <code>[ff08::48:84]</code>.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.jolokia.multicastPort</code></p></td>
@@ -1200,7 +1251,7 @@ maven project can be found in the Jolokia source at
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>karaf@root()&gt; install -s mvn:org.jolokia/jolokia-example-osgi-restrictor/2.1.2
+<pre>karaf@root()&gt; install -s mvn:org.jolokia/jolokia-example-osgi-restrictor/2.2.0
 Register sample restrictor service
 Bundle ID: 68
 
@@ -1300,7 +1351,7 @@ performance. See below for details.</p>
 <p><code>agent.jar</code> is the filename of the Jolokia
 JVM agent. The agent can be downloaded like the others from the <a href="https://jolokia.org/download.html" class="externalLink" target="_blank" rel="noopener">download page</a>.
 When downloading from a Maven repository you need to check for the classifier <code>javaagent</code> (i.e. the
-jar to download looks like <code>jolokia-agent-jvm-2.1.2-javaagent.jar</code>, not <code>jolokia-agent-jvm-2.1.2.jar</code>).
+jar to download looks like <code>jolokia-agent-jvm-2.2.0-javaagent.jar</code>, not <code>jolokia-agent-jvm-2.2.0.jar</code>).
 Options can be appended as a comma separated
 list. The available options are the same as described in
 <a href="agents/war.html#agent-war-init-params" class="xref page">Servlet init parameters</a> plus the one described in
@@ -1336,8 +1387,7 @@ will be <code>protocol://host:port/agentContext</code>. The default context is
 calculated. If provided it should be ensured that this id is
 unique among all agent reachable via multicast requests used
 by the discovery mechanism. It is recommended not to set
-this value. Within the <code>agentId</code> specification you
-can use the same placeholders as in <code>discoveryAgentUrl</code>.</p></td>
+this value.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>my-unique-agent-id</code></p></td>
 </tr>
 <tr>
@@ -1348,9 +1398,25 @@ present a human readable label for this agent.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>host</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Hostaddress to which the HTTP server should bind to. If "*" or "0.0.0.0" is
-given, the servers binds to every network interface.</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>localhost</code></p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>Hostaddress to which the HTTP server should bind to. If "*" or "0.0.0.0" or "[::]" is
+given, the servers binds to every network interface (the <em>any</em> address is used for all these 3 values).
+There are few use cases here:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>-Djava.net.preferIPv4Stack=true</code> - using <code>[::]</code> or <code>::</code> causes exception. When using <code>*</code> or <code>0.0.0.0</code>, the socket is bound to <code>0.0.0.0</code> <em>any IPv4 address</em>.</p>
+</li>
+<li>
+<p>otherwise, each format of <em>any address</em> binds Jolokia socket to wildcard address accepting both IPv6 and IPv4 traffic (because Java doesn&#8217;t support <code>IPV6_ONLY</code> sockets)</p>
+</li>
+<li>
+<p>when using specific IPv6 address (like <code>2001:0000:130F:0000:0000:09C0:876A:130B</code>) it can be specified with or without wrapping it in <code>[]</code> brackets.</p>
+</li>
+</ul>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">localhost address, which can be <code>127.0.0.1</code> (IPv4) or <code>::1</code> (<code>::ffff:127.0.0.1</code>) (IPv6) depending on network configuration.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>port</code></p></td>
@@ -1549,6 +1615,11 @@ used when no <code>keyStore</code> is used. For decrypting the key the password 
 <td class="tableblock halign-left valign-top"></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>useCertificateReload</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Interval between detecting changes in certificate files. If set to a number greater than zero (it defaults to <code>-1</code>), Then every <em>N seconds</em>, Jolokia will check if the certificate files have changed. If a change is detected, entire HTTP server is restarted to use new certificate files. No JVM restart is performed.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>-1</code></p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>serverKeyAlgorithm</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Encryption algorithm to use for decrypting the key given with <code>serverKey</code>
 (https only)</p></td>
@@ -1611,7 +1682,7 @@ of course :)</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">If set to <code>false</code> then this agent will
 not listen for multicast request (multicast-group 239.192.48.84,
 port 24884 by default, but can configured individually).
-By default this option is enabled. This option can also be switched on with an
+By default this option is disabled. This option can also be switched on with an
 environment variable
 <code>JOLOKIA_DISCOVERY_ENABLED</code> or the system
 property <code>jolokia.discoveryEnabled</code> set to
@@ -1625,15 +1696,12 @@ given, <code>discoveryEnabled</code> is set
 implicitly to true. This URL can also be provided by an
 environment variable
 <code>JOLOKIA_DISCOVERY_AGENT_URL</code> or the system
-property <code>jolokia.discoveryUrl</code>. Within the value you can use the
-placeholders <code>${host}</code> and <code>${ip}</code> which gets replaced
-by the autodetected local host name/address. Also with <code>$\{env:ENV_VAR}</code> and
-<code>$\{sys:property}</code> environment and system properties can be referenced, respectively.</p></td>
+property <code>jolokia.discoveryUrl</code>.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code><a href="http://10.9.11.87:8778/jolokia" class="bare">http://10.9.11.87:8778/jolokia</a></code></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>multicastGroup</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">The multicast group IPv4 address. This group IP can be also given as an environment variable <code>JOLOKIA_MULTICAST_GROUP</code> or a system property <code>jolokia.multicastGroup</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The multicast group IP address. This group IP can be also given as an environment variable <code>JOLOKIA_MULTICAST_GROUP</code> or a system property <code>jolokia.multicastGroup</code>. The default is IPv4 address but IPv6 can also be used, for example <code>[ff08::48:84]</code>.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>239.192.48.84</code></p></td>
 </tr>
 <tr>
@@ -1777,12 +1845,12 @@ application which can be reached via the
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>$ java -jar jolokia-agent-jvm-2.1.2-javaagent.jar --help
+<pre>$ java -jar jolokia-agent-jvm-2.2.0-javaagent.jar --help
 
 Jolokia Agent Launcher
 ======================
 
-Usage: java -jar jolokia-agent-jvm-2.1.2-javaagent.jar [options] &lt;command&gt; &lt;pid/regexp&gt;
+Usage: java -jar jolokia-agent-jvm-2.2.0-javaagent.jar [options] &lt;command&gt; &lt;pid/regexp&gt;
 
 where &lt;command&gt; is one of
     start     -- Start a Jolokia agent for the process specified
@@ -1808,6 +1876,7 @@ where &lt;command&gt; is one of
     --authUrl &lt;url&gt;                 URL used for a dispatcher authentication (authMode == delegate)
     --authPrincipalSpec &lt;spec&gt;      Extractor specification for getting the principal (authMode == delegate)
     --authIgnoreCerts               Whether to ignore CERTS when doing a dispatching authentication (authMode == delegate)
+    --startTimeout                  Timeout waiting for agent to start (default: 500ms)
     --user &lt;user&gt;                   User used for Basic-Authentication
     --password &lt;password&gt;           Password used for Basic-Authentication
     --quiet                         No output. "status" will exit with code 0 if the agent is running, 1 otherwise
@@ -1867,7 +1936,7 @@ where &lt;command&gt; is one of
     --dateFormatTimeZone &lt;tz&gt;       TimeZone to use for formatting dates/times/calendars/temporals (default: local time zone)
     --config &lt;configfile&gt;           Path to a property file from where to read the configuration
     --help                          This help documentation
-    --version                       Version of this agent (it's 2.1.2 btw :)
+    --version                       Version of this agent (it's 2.2.0 btw :)
 
 &lt;pid/regexp&gt; can be either a numeric process id or a regular expression. A regular expression is matched
 against the processes' names (ignoring case) and must be specific enough to select exactly one process.
@@ -1977,7 +2046,7 @@ shot scripts are possible <sup class="footnote" id="_footnote_rest-comment">[<a 
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#!/bin/sh
 
-url=`java -jar jolokia-agent-jvm-2.1.2-javaagent.jar start $1 | tail -1`
+url=`java -jar jolokia-agent-jvm-2.2.0-javaagent.jar start $1 | tail -1`
 
 memory_url="${url}read/java.lang:type=Memory/HeapMemoryUsage"
 used=`curl -s "${memory_url}/used" | jq .value`
@@ -1985,7 +2054,7 @@ max=`curl -s "${memory_url}/max" | jq .value`
 usage=$((${used}*100/${max}))
 echo "Memory Usage: $usage %"
 
-java -jar jolokia-agent-jvm-2.1.2-javaagent.jar --quiet stop $1</code></pre>
+java -jar jolokia-agent-jvm-2.2.0-javaagent.jar --quiet stop $1</code></pre>
 </div>
 </div>
 </div>

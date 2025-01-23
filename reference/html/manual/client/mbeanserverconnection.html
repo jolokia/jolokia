@@ -128,7 +128,7 @@ Java Visual VM a Jolokia plugin can be downloaded from <a href="https://skarsaun
 <div class="ulist">
 <ul>
 <li>
-<p>Jolokia&#8217;s <code>remote-jmx-adapter-2.1.2-javaagent.jar</code>
+<p>Jolokia&#8217;s <code>remote-jmx-adapter-2.2.0-javaagent.jar</code>
 must be on the classpath. See the <a href="/download.html">Download page</a> for the latest versions of this adapter jar.</p>
 </li>
 <li>
@@ -152,7 +152,7 @@ public class ConnectWithJolokiaDemo {
     // https will be used if port number fits the pattern *443
     // or if options contains "jmx.remote.x.check.stub"-&gt;"true"
     JMXConnector connector = JMXConnectorFactory.connect(
-        new JMXServiceURL("service:jmx:jolokia://localhost:8778/jolokia"),
+        new JMXServiceURL("service:jmx:jolokia://localhost:8778/jolokia/"),
         options);
     connector.connect();
     System.out.println("Memory used: " +
@@ -161,6 +161,18 @@ public class ConnectWithJolokiaDemo {
   }
 }</code></pre>
 </div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+When running Jolokia as JVM agent, using <code>-javaagent</code> JVM option, be careful to append trailing slash to the URL, like <code>service:jmx:jolokia://localhost:8778/jolokia/</code>. Without it, built-in JDK HTTP server won&#8217;t pass the request to Jolokia HTTP handler.
+</td>
+</tr>
+</table>
 </div>
 </div>
 <div class="sect2">
@@ -174,12 +186,12 @@ public class ConnectWithJolokiaDemo {
 <div class="ulist">
 <ul>
 <li>
-<p>Jolokia&#8217;s <code>remote-jmx-adapter-2.1.2-javaagent.jar</code>
+<p>Jolokia&#8217;s <code>remote-jmx-adapter-2.2.0-javaagent.jar</code>
 must be on the classpath. See the <a href="/download.html">Download page</a> for the latest versions of this adapter jar.</p>
 </li>
 <li>
 <p>In addition, the Jolokia Kubernetes extension
-<code>jolokia-kubernetes-2.1.2-javaagent.jar</code>
+<code>jolokia-kubernetes-2.2.0-javaagent.jar</code>
 must be on the classpath. This can be also downloaded from the
 <a href="/download.html">Download page</a>.</p>
 </li>
@@ -222,9 +234,9 @@ You need to add the Jolokia connector client libraries when launching <code>jcon
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>java -cp jolokia-agent-jvm-2.1.2-javaagent.jar:\
-jolokia-client-jmx-adapter-2.1.2-standalone.jar:\
-jolokia-client-kubernetes-2.1.2-standalone.jar \
+<pre>java -cp jolokia-agent-jvm-2.2.0-javaagent.jar:\
+jolokia-client-jmx-adapter-2.2.0-standalone.jar:\
+jolokia-client-kubernetes-2.2.0-standalone.jar \
 -Djconsole.showOutputViewer sun.tools.jconsole.JConsole</pre>
 </div>
 </div>

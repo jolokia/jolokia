@@ -222,8 +222,8 @@ Then we can refer to the scripts from HTML page:</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;head&gt;
-  &lt;script src="jolokia-2.1.2.min.js"&gt;&lt;/script&gt;
-  &lt;script src="jolokia-simple-2.1.2.min.js"&gt;&lt;/script&gt;
+  &lt;script src="jolokia-2.2.0.min.js"&gt;&lt;/script&gt;
+  &lt;script src="jolokia-simple-2.2.0.min.js"&gt;&lt;/script&gt;
 &lt;/head&gt;</code></pre>
 </div>
 </div>
@@ -540,7 +540,7 @@ reads.</p></td>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>includeRequest</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Whether the response object should contain related request object.<br>
-This option may be configured globally and overriden at request time.
+This option may be configured globally and overridden at request time.
 When <code>false</code>, bulk responses have to be correlated with requests by matching
 the requests using index number - responses come in the same order as requests.<br>
 <strong>Added since Jolokia 2.1.0</strong></p></td>
@@ -909,7 +909,7 @@ method.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "agent": "2.1.2",
+  "agent": "2.2.0",
   "protocol": "8.0",
   "details": {
     "agent_version": "2.1.0-SNAPSHOT",
@@ -1426,7 +1426,7 @@ reads.</p></td>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>includeRequest</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Whether the response object should contain related request object.<br>
-This option may be configured globally and overriden at request time.
+This option may be configured globally and overridden at request time.
 When <code>false</code>, bulk responses have to be correlated with requests by matching
 the requests using index number - responses come in the same order as requests.<br>
 <strong>Added since Jolokia 2.1.0</strong></p></td>
@@ -1751,7 +1751,7 @@ method.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "agent": "2.1.2",
+  "agent": "2.2.0",
   "protocol": "7.2",
   "details": {
     "agent_version": "2.0.0-SNAPSHOT",
@@ -1985,7 +1985,7 @@ be used within a <code>pom.xml</code>:</p>
       &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
       &lt;artifactId&gt;jolokia-client-javascript&lt;/artifactId&gt;
       &lt;type&gt;javascript&lt;/type&gt;
-      &lt;version&gt;2.1.2&lt;/version&gt;
+      &lt;version&gt;2.2.0&lt;/version&gt;
     &lt;/dependency&gt;
     ....
   &lt;/dependencies&gt;
@@ -2170,7 +2170,7 @@ the other two as transitive dependencies):</p>
 <pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
     &lt;artifactId&gt;jolokia-client-java&lt;/artifactId&gt;
-    &lt;version&gt;2.1.2&lt;/version&gt;
+    &lt;version&gt;2.2.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -2478,7 +2478,7 @@ registered. Default is <code>true</code></p></td>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>INCLUDE_REQUEST</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Whether the response object should contain related request object.<br>
-This option may be configured globally and overriden at request time.
+This option may be configured globally and overridden at request time.
 When <code>false</code>, bulk responses have to be correlated with requests by matching
 the requests using index number - responses come in the same order as requests.<br>
 <strong>Added since Jolokia 2.1.0</strong></p></td>
@@ -2692,7 +2692,7 @@ Java Visual VM a Jolokia plugin can be downloaded from <a href="https://skarsaun
 <div class="ulist">
 <ul>
 <li>
-<p>Jolokia&#8217;s <code>remote-jmx-adapter-2.1.2-javaagent.jar</code>
+<p>Jolokia&#8217;s <code>remote-jmx-adapter-2.2.0-javaagent.jar</code>
 must be on the classpath. See the <a href="/download.html">Download page</a> for the latest versions of this adapter jar.</p>
 </li>
 <li>
@@ -2716,7 +2716,7 @@ public class ConnectWithJolokiaDemo {
     // https will be used if port number fits the pattern *443
     // or if options contains "jmx.remote.x.check.stub"-&gt;"true"
     JMXConnector connector = JMXConnectorFactory.connect(
-        new JMXServiceURL("service:jmx:jolokia://localhost:8778/jolokia"),
+        new JMXServiceURL("service:jmx:jolokia://localhost:8778/jolokia/"),
         options);
     connector.connect();
     System.out.println("Memory used: " +
@@ -2725,6 +2725,18 @@ public class ConnectWithJolokiaDemo {
   }
 }</code></pre>
 </div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+When running Jolokia as JVM agent, using <code>-javaagent</code> JVM option, be careful to append trailing slash to the URL, like <code>service:jmx:jolokia://localhost:8778/jolokia/</code>. Without it, built-in JDK HTTP server won&#8217;t pass the request to Jolokia HTTP handler.
+</td>
+</tr>
+</table>
 </div>
 </div>
 <div class="sect2">
@@ -2738,12 +2750,12 @@ public class ConnectWithJolokiaDemo {
 <div class="ulist">
 <ul>
 <li>
-<p>Jolokia&#8217;s <code>remote-jmx-adapter-2.1.2-javaagent.jar</code>
+<p>Jolokia&#8217;s <code>remote-jmx-adapter-2.2.0-javaagent.jar</code>
 must be on the classpath. See the <a href="/download.html">Download page</a> for the latest versions of this adapter jar.</p>
 </li>
 <li>
 <p>In addition, the Jolokia Kubernetes extension
-<code>jolokia-kubernetes-2.1.2-javaagent.jar</code>
+<code>jolokia-kubernetes-2.2.0-javaagent.jar</code>
 must be on the classpath. This can be also downloaded from the
 <a href="/download.html">Download page</a>.</p>
 </li>
@@ -2786,9 +2798,9 @@ You need to add the Jolokia connector client libraries when launching <code>jcon
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>java -cp jolokia-agent-jvm-2.1.2-javaagent.jar:\
-jolokia-client-jmx-adapter-2.1.2-standalone.jar:\
-jolokia-client-kubernetes-2.1.2-standalone.jar \
+<pre>java -cp jolokia-agent-jvm-2.2.0-javaagent.jar:\
+jolokia-client-jmx-adapter-2.2.0-standalone.jar:\
+jolokia-client-kubernetes-2.2.0-standalone.jar \
 -Djconsole.showOutputViewer sun.tools.jconsole.JConsole</pre>
 </div>
 </div>

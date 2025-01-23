@@ -449,15 +449,12 @@ given, <code>discoveryEnabled</code> is set
 implicitly to <code>true</code>. This URL can also be provided by an
 environment variable
 <code>JOLOKIA_DISCOVERY_AGENT_URL</code> or the system
-property <code>jolokia.discoveryAgentUrl</code>. Within the value you can use the
-placeholders <code>${host}</code> and <code>${ip}</code> which gets replaced
-by the autodetected local host name/address. Also with <code>${env:ENV_VAR}</code> and
-<code>${sys:property}</code> environment and system properties can be referenced, respectively.</p></td>
+property <code>jolokia.discoveryAgentUrl</code>.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>http://10.9.11.87:8080/jolokia</code></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>multicastGroup</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">The multicast group IPv4 address. This group IP can be also given as an environment variable <code>JOLOKIA_MULTICAST_GROUP</code> or a system property <code>jolokia.multicastGroup</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The multicast group IPv4 address. This group IP can be also given as an environment variable <code>JOLOKIA_MULTICAST_GROUP</code> or a system property <code>jolokia.multicastGroup</code>. The default is IPv4 address but IPv6 can also be used, for example <code>[ff08::48:84]</code>.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>239.192.48.84</code></p></td>
 </tr>
 <tr>
@@ -471,8 +468,7 @@ by the autodetected local host name/address. Also with <code>${env:ENV_VAR}</cod
 calculated. If provided it should be ensured that this id is
 unique among all agent reachable via multicast requests used
 by the discovery mechanism. It is recommended not to set
-this value. Within the <code>agentId</code> specification you
-can use the same placeholders as in <code>discoveryAgentUrl</code>.</p></td>
+this value.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>my-unique-agent-id</code></p></td>
 </tr>
 <tr>
@@ -612,7 +608,7 @@ dependency on this jar artifact:</p>
     &lt;dependency&gt;
       &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
       &lt;artifactId&gt;jolokia-server-core&lt;/artifactId&gt;
-      &lt;version&gt;2.1.2&lt;/version&gt;
+      &lt;version&gt;2.2.0&lt;/version&gt;
     &lt;/dependency&gt;
   &lt;/dependencies&gt;
   &lt;!-- .... --&gt;

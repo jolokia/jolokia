@@ -296,8 +296,7 @@ a Jolokia servlet when used in a Jakarta EE WAR artifact.</p>
 calculated. If provided it should be ensured that this id is
 unique among all agent reachable via multicast requests used
 by the discovery mechanism. It is recommended not to set
-this value. Within the <code>agentId</code> specification you
-can use the same placeholders as in <code>discoveryAgentUrl</code>.</p></td>
+this value.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.jolokia.agentDescription</code></p></td>
@@ -491,15 +490,12 @@ given, <code>discoveryEnabled</code> is set
 implicitly to true. This URL can also be provided by an
 environment variable
 <code>JOLOKIA_DISCOVERY_AGENT_URL</code> or the system
-property <code>jolokia.discoveryUrl</code>. Within the value you can use the
-placeholders <code>${host}</code> and <code>${ip}</code> which gets replaced
-by the autodetected local host name/address. Also with <code>$\{env:ENV_VAR}</code> and
-<code>$\{sys:property}</code> environment and system properties can be referenced, respectively.</p></td>
+property <code>jolokia.discoveryUrl</code>.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.jolokia.multicastGroup</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>239.192.48.84</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">The multicast group IPv4 address. This group IP can be also given as an environment variable <code>JOLOKIA_MULTICAST_GROUP</code> or a system property <code>jolokia.multicastGroup</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The multicast group IPv4 address. This group IP can be also given as an environment variable <code>JOLOKIA_MULTICAST_GROUP</code> or a system property <code>jolokia.multicastGroup</code>. The default is IPv4 address but IPv6 can also be used, for example <code>[ff08::48:84]</code>.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.jolokia.multicastPort</code></p></td>
@@ -602,7 +598,7 @@ maven project can be found in the Jolokia source at
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>karaf@root()&gt; install -s mvn:org.jolokia/jolokia-example-osgi-restrictor/2.1.2
+<pre>karaf@root()&gt; install -s mvn:org.jolokia/jolokia-example-osgi-restrictor/2.2.0
 Register sample restrictor service
 Bundle ID: 68
 

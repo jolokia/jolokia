@@ -141,13 +141,16 @@ a host name, or a netmask given in
 (e.g. <code>10.0.0.0/16</code> for all clients coming from the 10.0
 network). The following allows access from localhost and all
 clients whose IP addresses start with "10.0". For all other
-IP addresses access is denied.</p>
+IP addresses access is denied. IPv6 addresses are also supported.</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;remote&gt;
   &lt;host&gt;localhost&lt;/host&gt;
   &lt;host&gt;10.0.0.0/16&lt;/host&gt;
+  &lt;host&gt;[::1]&lt;/host&gt;
+  &lt;host&gt;2001:db8:1::1&lt;/host&gt;
+  &lt;host&gt;2001:db8:2::/48&lt;/host&gt;
 &lt;/remote&gt;</code></pre>
 </div>
 </div>
@@ -302,6 +305,17 @@ contain the origin URL provided by browsers with the
 <code>Origin:</code> header literally or a
 wildcard specification with <code>*</code>.</p>
 </div>
+<div class="paragraph">
+<p>Since Jolokia 2.1.3 we also support IPv6 origins. These have to be specified with bracket notation like <code>[::ffff:7f00:1]</code>.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">NOTE</dt>
+<dd>
+<p>Mind that you can use <code>http://[::ffff:127.0.0.1]/jolokia/</code> URI which uses <a href="https://en.wikipedia.org/wiki/IPv6_address#Special_addresses">IPv4-mapped IPv6 address</a>, but browser will send <code>Origin: http://[::ffff:7f00:1]</code> header anyway, so this is how the origin should be defined as.</p>
+</dd>
+</dl>
+</div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;cors&gt;
@@ -310,6 +324,7 @@ wildcard specification with <code>*</code>.</p>
 
   &lt;!-- ... and all servers from jmx4perl.org with any protocol --&gt;
   &lt;allow-origin&gt;*://*.jmx4perl.org&lt;/allow-origin&gt;
+  &lt;allow-origin&gt;*://[::ffff:7f00:1]&lt;/allow-origin&gt;
 
   &lt;!-- Check for the proper origin on the server side, too --&gt;
   &lt;strict-checking/&gt;
@@ -533,25 +548,6 @@ target policy file could not be found then access is
 completely denied. If a classpath lookup fails then access
 is globally granted and a warning is given on standard
 output.</p>
-</div>
-<div class="paragraph">
-<p>The parameter specified with <code>policyLocation</code> can contain placeholders:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p><code>$ip</code>: IP - Address</p>
-</li>
-<li>
-<p><code>$host</code>: Host - Address</p>
-</li>
-<li>
-<p><code>${prop:foo}</code>: System property <em>foo</em></p>
-</li>
-<li>
-<p><code>${env:FOO}</code>: Environment variable <em>FOO</em></p>
-</li>
-</ul>
 </div>
 </div>
 </div>

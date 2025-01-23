@@ -2735,10 +2735,10 @@ provided as path info.</p>
     "type": "version"
   },
   "value": {
-    "agent": "2.1.2",
+    "agent": "2.2.0",
     "protocol": "7.2",
     "details": {
-      "agent_version": "2.1.2",
+      "agent_version": "2.2.0",
       "agent_id": "192.168.0.221-21185-5ce94d31-servlet",
       "server_product": "tomcat",
       "server_vendor": "Apache",
@@ -3585,16 +3585,16 @@ been processed by the agent. Due to limitations of the Servlet
 API the agent servlet has no clue about its own URL until this
 first request, which contains the request URL. Of course, the
 URL obtained that way can be bogus as well, since the agent
-might hide behind a proxy, too. So, if in doubt you should
-configure the agent URL from outside to allow external clients
-to be discovered. The configuration options for enabling
+may operate behind a proxy, too. So if in doubt, you should
+configure the agent URL manually to allow external clients
+to connect to the agent. The configuration options for enabling
 multicast requests are described in the
 <a href="agents/jvm.html#agent-jvm-config" class="xref page">JVM agent configuration options</a> and
 <a href="agents/war.html#agent-war-init-params" class="xref page">Servlet init parameters</a> agent configuration
 sections.</p>
 </div>
 <div class="paragraph">
-<p>A agent which is enabled for multicast discovery will only
+<p>An agent which is enabled for multicast discovery will only
 respond to a multicast request if the
 <a href="security.html#security-policy" class="xref page">Policy based security</a> allows
 connections from the source IP. Otherwise a multicast request
@@ -3632,15 +3632,12 @@ the following format</p>
 </div>
 </div>
 <div class="paragraph">
-<p>We can use a tool like <a href="https://nmap.org/ncat/" class="externalLink" target="_blank" rel="noopener">netcat</a> to check the discovery:</p>
+<p>We can use a tool like <a href="https://nmap.org/ncat/" class="externalLink" target="_blank" rel="noopener">netcat</a> or <a href="https://linux.die.net/man/1/socat" class="externalLink" target="_blank" rel="noopener">socat</a> to check the discovery:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>$ nc -u localhost 24884
-{"type":"query"}
-{"agent_version":"2.1.2","agent_id":"192.168.0.221-67980-7e985ce9-servlet",
-"server_product":"tomcat","type":"response","server_vendor":"Apache",
-"server_version":"10.1.16","secured":true,"url":"http:\/\/192.168.0.221:8080\/jolokia"}</pre>
+<pre>$ echo '{"type":"query"}' | socat STDIO UDP4-DATAGRAM:239.192.48.84:24884
+{"agent_version":"2.2.0","agent_id":"jolokia-7778","type":"response","secured":false,"url":"http://192.168.0.165:7778/jolokia/"}{"agent_version":"2.2.0","agent_id":"jolokia-7779","type":"response","secured":false,"url":"http://192.168.0.165:7778/jolokia/"}</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -3649,7 +3646,7 @@ the following format</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "agent_version": "2.1.2",
+  "agent_version": "2.2.0",
   "agent_id": "192.168.0.221-67980-7e985ce9-servlet",
   "server_product": "tomcat",
   "type": "response",
@@ -3669,10 +3666,6 @@ interested client and each agent responds with a response of
 type <code>response</code>.  Query requests contain
 only the type as property. Responses are sent back to the
 address and port of the sender of the query request.</p>
-</div>
-<div class="paragraph">
-<p>Please note, that IPv6 is currently not supported yet but likely
-in the future.</p>
 </div>
 <table id="discovery-response" class="tableblock frame-all grid-all stretch">
 <caption class="title">Table 20. Response properties</caption>
@@ -3719,7 +3712,9 @@ depends. If configured via an initialisation parameter this
 URL is used. If autodetected it is taken from the first HTTP
 request processed by the servlet. Hence no URL is available
 until this first request was processed. This property might
-be empty.</p></td>
+be empty.
+When standard <code>-Djava.net.preferIPv6Addresses</code> option is set to <code>true</code>, the
+returned URL should use IPv6 host address.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>http://192.168.0.221:8080/jolokia</code></p></td>
 </tr>
 <tr>
