@@ -15,12 +15,12 @@
 ////
 == News
 
-=== Jolokia 2.2.0 released
+=== Jolokia 2.2.1 released
 
 [.news-date]
 2025-01-23
 
-We're happy to release Jolokia 2.2.0! This is new minor release, as the scope of changes is a bit too wide for just 2.1.3 release.
+We're happy to release Jolokia 2.2.1! This is new minor release, as the scope of changes is a bit too wide for just 2.1.3 release.
 
 In this release we've reviewed support for IPv6 in every place where IP addresses are used - UDP Multicast based discovery, policy restrictor for source IP addresses and URL usage. Jolokia now works properly with UDP/IP6 discovery using an option like `multicastGroup=ff08::48:84,multicastPort=24884` (the default is still `239.192.48.84`).
 
@@ -45,9 +45,11 @@ Also, similarly to https://docs.spring.io/spring-boot/reference/features/externa
 7. servlet context parameters
 8. remaining options of JVM Agent (command line)
 
-With this release, current version of `jolokia.js` npm package is 2.2.0 - even if it doesn't bring any changes.
+With this release, current version of `jolokia.js` npm package is 2.2.1 - even if it doesn't bring any changes.
 
-Refer to https://jolokia.org/changes-report.html#a2.2.0[changelog] for detailed information about the release.
+What happened to version 2.2.0? Just after release https://github.com/dornimaug[Klaus Dorninger] found a problem with IPv4 only deployments (thanks for quick check!). So we needed 2.2.1...
+
+Refer to https://jolokia.org/changes-report.html#a2.2.1[changelog] for detailed information about the release.
 
 === Jolokia 2.1.2 released
 

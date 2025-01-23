@@ -23,7 +23,7 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
-    <release version="2.2.0" description="Release 2.2.0" date="2025-01-23">
+    <release version="2.2.1" description="Release 2.2.1" date="2025-01-23">
       <action dev="grgrzybek" type="add" issue="786">
         Upgrade to Spring Boot 3.4 and Spring Framework 6.2.
       </action>
