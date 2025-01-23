@@ -52,6 +52,13 @@ $ java ... -javaagent:jolokia-agent-jvm-{jolokia-version}-javaagent.jar=config=/
 Options are used in the given precedence, the former overwriting
 the later values.
 
+Additionally if options are not specified, Jolokia uses several _property sources_:
+
+* default values stored in code
+* values stored in `default-jolokia-agent.properties` resource file in JVM Agent JAR
+* environment variables prefixed with `JOLOKIA_`. So for example `agentId` option can be specified using `JOLOKIA_AGENT_ID` environment variable
+* system properties prefixed with `jolokia.` So for example `host` option can be specified using `-Djolokia.host` option for `java` invocation.
+
 For attaching the agent dynamically to a running Java process, the following
 command can be used to get a quick help
 

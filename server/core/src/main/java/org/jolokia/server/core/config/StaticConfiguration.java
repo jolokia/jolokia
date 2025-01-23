@@ -41,9 +41,9 @@ import org.jolokia.server.core.util.StringUtil;
  *     <li>Properties from file specified for {@code config} option (JVM Agent only)</li>
  *     <li>Environment variables prefixed with {@code JOLOKIA_}</li>
  *     <li>System properties prefixed with {@code jolokia.}</li>
- *     <li>Remaining options from JVM Agent invocation ({@code premain()} / {@code agentmain()} method) (JVM Agent only)</li>
  *     <li>Servlet config parameters (Servlet Agent only)</li>
  *     <li>Servlet context parameters (Servlet Agent only)</li>
+ *     <li>Remaining options from JVM Agent invocation ({@code premain()} / {@code agentmain()} method) (JVM Agent only)</li>
  * </ol></p>
  *
  * <p>Specific agent has to call {@link #update} method in proper order. No need to <em>update</em> this configuration
