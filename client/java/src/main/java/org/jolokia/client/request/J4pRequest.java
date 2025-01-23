@@ -110,7 +110,7 @@ public abstract class J4pRequest {
     // Get a JSON representation of this request
     JSONObject toJson() {
         JSONObject ret = new JSONObject();
-        ret.put("type", type.name());
+        ret.put("type", type.getValue());
         if (targetConfig != null) {
             ret.put("target", targetConfig.toJson());
         }
