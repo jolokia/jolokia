@@ -10,7 +10,7 @@
     },
     "bodyPatterns": [
       {
-        "equalToJson": "{\"type\":\"VERSION\"}"
+        "equalToJson": "{\"type\":\"version\"}"
       }
     ]
   },

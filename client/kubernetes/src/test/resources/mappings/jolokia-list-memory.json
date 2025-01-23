@@ -10,7 +10,7 @@
         },
     "bodyPatterns": [
       {
-        "equalToJson": "{\"path\":\"java.lang/type=Memory\",\"type\":\"LIST\"}"
+        "equalToJson": "{\"path\":\"java.lang/type=Memory\",\"type\":\"list\"}"
       }
     ]
   },

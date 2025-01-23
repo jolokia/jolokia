@@ -9,7 +9,7 @@
     },
     "bodyPatterns": [
       {
-        "equalToJson": "{\"operation\":\"gc()\",\"mbean\":\"java.lang:type=Memory\",\"type\":\"EXEC\"}"
+        "equalToJson": "{\"operation\":\"gc()\",\"mbean\":\"java.lang:type=Memory\",\"type\":\"exec\"}"
       }
     ]
   },

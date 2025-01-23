@@ -10,7 +10,7 @@
     },
     "bodyPatterns": [
       {
-        "equalToJson": "{\"attribute\":\"Verbose\",\"mbean\":\"java.lang:type=Memory\",\"type\":\"READ\"}"
+        "equalToJson": "{\"attribute\":\"Verbose\",\"mbean\":\"java.lang:type=Memory\",\"type\":\"read\"}"
       }
     ]
   },
