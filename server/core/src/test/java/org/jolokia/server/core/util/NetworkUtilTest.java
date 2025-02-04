@@ -4,6 +4,7 @@ import java.net.*;
 import java.util.Enumeration;
 import java.util.Map;
 
+import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.config.StaticConfiguration;
 import org.testng.annotations.Test;
 
@@ -115,7 +116,7 @@ public class NetworkUtilTest {
                 "|${prop:test.prop}|","|testy|",
                 "${prop:test2:prop}","testx"
         };
-        StaticConfiguration config = new StaticConfiguration();
+        StaticConfiguration config = new StaticConfiguration(ConfigKey.ALLOW_DNS_REVERSE_LOOKUP, "true");
         for (int i = 0; i < testData.length; i+=2) {
             assertEquals(config.resolve(testData[i]),testData[i+1],"Checking " + testData[i]);
         }

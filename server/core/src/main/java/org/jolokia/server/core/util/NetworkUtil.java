@@ -16,8 +16,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Utility class for network related stuff
@@ -28,7 +30,7 @@ import java.util.Map;
 public final class NetworkUtil {
 
     private static final boolean MAC = System.getProperty("os.name").toLowerCase().contains("mac");
-    private static final List<String> MAC_SKIP_NIFS = List.of("awdl0", "llw0");
+    private static final List<String> MAC_SKIP_NIFS = List.of("awdl", "llw", "utun");
 
     // Utility class
     private NetworkUtil() {
@@ -235,6 +237,7 @@ public final class NetworkUtil {
      * @return the best match network interface
      */
     public static NetworkInterface getBestMatchNetworkInterface() {
+        boolean preferIP6Addresses = Boolean.getBoolean("java.net.preferIPv6Addresses");
         Enumeration<NetworkInterface> networkInterfaces;
         try {
             networkInterfaces = NetworkInterface.getNetworkInterfaces();
@@ -243,6 +246,7 @@ public final class NetworkUtil {
         }
 
         NetworkInterface best = null;
+        Set<InetAddress> bestAddresses = new HashSet<>();
         while (networkInterfaces.hasMoreElements()) {
             NetworkInterface nif = networkInterfaces.nextElement();
             if (best == null) {
@@ -252,12 +256,28 @@ public final class NetworkUtil {
             try {
                 if (!best.isUp() && nif.isUp()) {
                     best = nif;
+                    best.getInterfaceAddresses().forEach(addr -> bestAddresses.add(addr.getAddress()));
                     continue;
                 }
-                // TODO: Hack for Mac network interfaces. We should find a better way to determine the best interface
-                if ((best.getHardwareAddress() == null || MAC && MAC_SKIP_NIFS.contains(best.getName()))
+                NetworkInterface finalBest = best;
+                boolean hardareBetter = false;
+                if ((best.getHardwareAddress() == null
+                    || MAC && MAC_SKIP_NIFS.stream().anyMatch(prefix -> finalBest.getName().startsWith(prefix)))
                     && nif.getHardwareAddress() != null) {
+                    hardareBetter = true;
+                }
+                boolean addressesBetter = false;
+                Set<InetAddress> addresses = new HashSet<>();
+                nif.getInterfaceAddresses().forEach(addr -> addresses.add(addr.getAddress()));
+                addressesBetter |= bestAddresses.size() < addresses.size();
+                if (!preferIP6Addresses) {
+                    addressesBetter |= bestAddresses.stream().noneMatch(a -> a instanceof Inet4Address)
+                        && addresses.stream().anyMatch(a -> a instanceof Inet4Address);
+                }
+                if (hardareBetter || addressesBetter) {
                     best = nif;
+                    bestAddresses.clear();
+                    bestAddresses.addAll(addresses);
                 }
             } catch (SocketException e) {
                 throw new RuntimeException(e);
@@ -491,7 +511,7 @@ public final class NetworkUtil {
             buffer.append("  - ").append(getNetworkInterfaceInfo(nif)).append("\n");
             String name = nif.getName();
             // Hack: Speed up network info dump on Mac
-            boolean skip = MAC && (MAC_SKIP_NIFS.contains(name) || name.startsWith("utun"));
+            boolean skip = MAC && (MAC_SKIP_NIFS.stream().anyMatch(name::startsWith));
             Enumeration<InetAddress> addresses = nif.getInetAddresses();
             while (addresses.hasMoreElements()) {
                 addr = addresses.nextElement();

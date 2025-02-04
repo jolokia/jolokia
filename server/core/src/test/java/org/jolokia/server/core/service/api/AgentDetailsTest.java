@@ -39,8 +39,8 @@ import static org.testng.Assert.assertNotNull;
 public class AgentDetailsTest {
 
     @Test
-    public void agentIdHost() {
-        Configuration myConfig = new StaticConfiguration(ConfigKey.AGENT_ID, "${host}");
+    public void agentIdHostWithReverseDNS() {
+        Configuration myConfig = new StaticConfiguration(ConfigKey.AGENT_ID, "${host}", ConfigKey.ALLOW_DNS_REVERSE_LOOKUP, "true");
         AgentDetails details = new AgentDetails(myConfig,new DefaultServerHandle(null,null,null));
         NetworkInterface nic = NetworkUtil.getBestMatchNetworkInterface();
         Map<String, InetAddresses> map = NetworkUtil.getBestMatchAddresses();
@@ -48,6 +48,17 @@ public class AgentDetailsTest {
         String host = map.get(nic.getName()).getIa4().map(Inet4Address::getHostName).orElse(null);
         String ip = map.get(nic.getName()).getIa4().map(Inet4Address::getHostAddress).orElse(null);
         assertEquals(details.getAgentId(), host);
+    }
+
+    @Test
+    public void agentIdHostWithoutReverseDNS() {
+        Configuration myConfig = new StaticConfiguration(ConfigKey.AGENT_ID, "${host}");
+        AgentDetails details = new AgentDetails(myConfig,new DefaultServerHandle(null,null,null));
+        NetworkInterface nic = NetworkUtil.getBestMatchNetworkInterface();
+        Map<String, InetAddresses> map = NetworkUtil.getBestMatchAddresses();
+        assertNotNull(nic);
+        String ip = map.get(nic.getName()).getIa4().map(Inet4Address::getHostAddress).orElse(null);
+        assertEquals(details.getAgentId(), ip);
     }
 
     @Test
