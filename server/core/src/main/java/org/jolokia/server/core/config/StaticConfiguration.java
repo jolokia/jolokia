@@ -32,7 +32,7 @@ import org.jolokia.server.core.util.StringUtil;
 
 /**
  * <p>Class encapsulating Agent's global configuration (processing parameters are accessed using
- * {@link org.jolokia.server.core.request.ProcessingParameters}.</p>
+ * {@link org.jolokia.server.core.request.ProcessingParameters}).</p>
  *
  * <p>There are various <em>sources</em> of configuration values and here's the order (later ones override earlier
  * sources):<ol>
@@ -87,7 +87,6 @@ public class StaticConfiguration implements Configuration {
 
     private final Set<ConfigKey> keys = new HashSet<>();
 
-    private InetAddresses defaultAddresses;
     private final Map<String, String> networkConfig = new HashMap<>();
 
     /**
@@ -132,7 +131,7 @@ public class StaticConfiguration implements Configuration {
      * @param pConfig config map from where to take the initial configuration - override'able with sys/env
      *                properties and following {@link #update} methods
      * @param pResolved map to collect resolved properties
-     * @param pSystemPropertyMode
+     * @param pSystemPropertyMode how to handle system properties
      */
     public StaticConfiguration(Map<String, String> pConfig, Map<String, String> pResolved, SystemPropertyMode pSystemPropertyMode) {
         this.systemPropertyMode = pSystemPropertyMode;
@@ -236,8 +235,8 @@ public class StaticConfiguration implements Configuration {
     /**
      * Resolves any placeholder in the form of supported {@code ${xxx}} syntax - using env variables, sys properties
      * or host/host6/ip/ip6 values.
-     * @param value
-     * @return
+     * @param value value to resolve
+     * @return resolved value
      */
     public String resolve(String value) {
         return StringUtil.resolvePlaceholders(value, sys(), env());
@@ -299,10 +298,6 @@ public class StaticConfiguration implements Configuration {
 
     /** {@inheritDoc} */
     public String getConfig(ConfigKey pKey) {
-        return getConfig(pKey, true);
-    }
-
-    private String getConfig(ConfigKey pKey, boolean checkSysOrEnv) {
         String v;
         if (systemPropertyMode == SystemPropertyMode.OVERRIDE) {
             v = systemProperties.get(pKey);
