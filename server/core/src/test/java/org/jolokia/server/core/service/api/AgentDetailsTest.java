@@ -15,6 +15,7 @@ package org.jolokia.server.core.service.api;/*
  * limitations under the License.
  */
 
+import java.net.Inet4Address;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
@@ -44,8 +45,8 @@ public class AgentDetailsTest {
         NetworkInterface nic = NetworkUtil.getBestMatchNetworkInterface();
         Map<String, InetAddresses> map = NetworkUtil.getBestMatchAddresses();
         assertNotNull(nic);
-        String host = map.get(nic.getName()).getIa4().getHostName();
-        String ip = map.get(nic.getName()).getIa4().getHostAddress();
+        String host = map.get(nic.getName()).getIa4().map(Inet4Address::getHostName).orElse(null);
+        String ip = map.get(nic.getName()).getIa4().map(Inet4Address::getHostAddress).orElse(null);
         assertEquals(details.getAgentId(), host);
     }
 

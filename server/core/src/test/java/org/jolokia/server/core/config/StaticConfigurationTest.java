@@ -15,6 +15,7 @@
  */
 package org.jolokia.server.core.config;
 
+import java.net.Inet4Address;
 import java.net.NetworkInterface;
 import java.util.Map;
 import java.util.Properties;
@@ -179,16 +180,17 @@ public class StaticConfigurationTest {
         StaticConfiguration config = new StaticConfiguration();
         Properties props = new Properties();
         props.setProperty(ConfigKey.AGENT_ID.getKeyValue(), "jolokia-${ip}/${host}");
-        props.setProperty(ConfigKey.REALM.getKeyValue(), "world-of-${ip6:lo}");
+        String world = System.getProperty("os.name").startsWith("Mac") ? "world-of-${ip6:lo0}" : "world-of-${ip6:lo}";
+        props.setProperty(ConfigKey.REALM.getKeyValue(), world);
         config.update(new PropertiesConfigExtractor(props));
 
         NetworkInterface nif = NetworkUtil.getBestMatchNetworkInterface();
         assertNotNull(nif);
         Map<String, InetAddresses> map = NetworkUtil.getBestMatchAddresses();
         assertEquals(config.getConfig(ConfigKey.AGENT_ID), "jolokia-"
-            + map.get(nif.getName()).getIa4().getHostAddress()
+            + map.get(nif.getName()).getIa4().map(Inet4Address::getHostAddress).orElse(null)
             + "/"
-            + map.get(nif.getName()).getIa4().getHostName());
+            + map.get(nif.getName()).getIa4().map(Inet4Address::getHostName).orElse(null));
         if (NetworkUtil.isIPv6Supported()) {
             assertEquals(config.getConfig(ConfigKey.REALM), "world-of-0:0:0:0:0:0:0:1");
         }

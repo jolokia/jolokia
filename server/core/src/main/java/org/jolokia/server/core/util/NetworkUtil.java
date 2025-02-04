@@ -27,6 +27,9 @@ import java.util.Map;
  */
 public final class NetworkUtil {
 
+    private static final boolean MAC = System.getProperty("os.name").toLowerCase().contains("mac");
+    private static final List<String> MAC_SKIP_NIFS = List.of("awdl0", "llw0");
+
     // Utility class
     private NetworkUtil() {
     }
@@ -251,7 +254,9 @@ public final class NetworkUtil {
                     best = nif;
                     continue;
                 }
-                if (best.getHardwareAddress() == null && nif.getHardwareAddress() != null) {
+                // TODO: Hack for Mac network interfaces. We should find a better way to determine the best interface
+                if ((best.getHardwareAddress() == null || MAC && MAC_SKIP_NIFS.contains(best.getName()))
+                    && nif.getHardwareAddress() != null) {
                     best = nif;
                 }
             } catch (SocketException e) {
@@ -478,16 +483,19 @@ public final class NetworkUtil {
     public static String dumpLocalNetworkInfo() throws UnknownHostException, SocketException {
         StringBuilder buffer = new StringBuilder();
         InetAddress addr = InetAddress.getLocalHost();
-        buffer.append("Localhost: ").append(getAddrInfo(addr)).append("\n");
+        buffer.append("Localhost: ").append(getAddrInfo(addr, false)).append("\n");
         Enumeration<NetworkInterface> nifs = NetworkInterface.getNetworkInterfaces();
         buffer.append("Network interfaces:\n");
         while (nifs.hasMoreElements()) {
             NetworkInterface nif = nifs.nextElement();
             buffer.append("  - ").append(getNetworkInterfaceInfo(nif)).append("\n");
+            String name = nif.getName();
+            // Hack: Speed up network info dump on Mac
+            boolean skip = MAC && (MAC_SKIP_NIFS.contains(name) || name.startsWith("utun"));
             Enumeration<InetAddress> addresses = nif.getInetAddresses();
             while (addresses.hasMoreElements()) {
                 addr = addresses.nextElement();
-                buffer.append("    ").append(getAddrInfo(addr)).append("\n");
+                buffer.append("    ").append(getAddrInfo(addr, skip)).append("\n");
             }
         }
         return buffer.toString();
@@ -496,8 +504,9 @@ public final class NetworkUtil {
     // ==============================================================================================================================================
     // Dump methods
 
-    private static String getAddrInfo(InetAddress pAddr) throws SocketException {
-        String ret = pAddr.getHostName() != null ? pAddr.getHostName() + " (" + pAddr.getHostAddress() + ")" : pAddr.getHostAddress();
+    private static String getAddrInfo(InetAddress pAddr, boolean skipHostname) throws SocketException {
+        String hostname = skipHostname ? null : pAddr.getHostName();
+        String ret = hostname != null ? hostname + " (" + pAddr.getHostAddress() + ")" : pAddr.getHostAddress();
         ret += " [site-local: " + pAddr.isSiteLocalAddress() + ", link-local: " + pAddr.isLinkLocalAddress() + ", lb: " + pAddr.isLoopbackAddress() + "]";
         NetworkInterface nif = NetworkInterface.getByInetAddress(pAddr);
         ret += " -- nif: " + getNetworkInterfaceInfo(nif);

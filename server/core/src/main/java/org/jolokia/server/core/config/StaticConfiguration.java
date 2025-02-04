@@ -16,6 +16,8 @@
 
 package org.jolokia.server.core.config;
 
+import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.Enumeration;
@@ -89,6 +91,9 @@ public class StaticConfiguration implements Configuration {
 
     private final Map<String, String> networkConfig = new HashMap<>();
 
+    // Whether to allow reverse DNS lookup for resolving host names
+    private boolean allowDnsReverseLookup;
+
     /**
      * Convenience constructor for setting up base configuration with key values pairs. This constructor
      * is especially suited for unit tests. The placeholder values are resolved.
@@ -99,6 +104,13 @@ public class StaticConfiguration implements Configuration {
         this.systemPropertyMode = SystemPropertyMode.FALLBACK;
         this.properties = new Properties();
         this.properties.putAll(System.getProperties());
+        this.allowDnsReverseLookup = false;
+        for (int i = 0; i < keyAndValues.length; i += 2) {
+            if (ConfigKey.ALLOW_DNS_REVERSE_LOOKUP.equals(keyAndValues[i])) {
+                this.allowDnsReverseLookup = Boolean.parseBoolean((String) keyAndValues[i + 1]);
+                break;
+            }
+        }
 
         initializeFromNetwork();
 
@@ -137,6 +149,7 @@ public class StaticConfiguration implements Configuration {
         this.systemPropertyMode = pSystemPropertyMode;
         this.properties = new Properties();
         this.properties.putAll(System.getProperties());
+        this.allowDnsReverseLookup = Boolean.parseBoolean(pConfig.getOrDefault(ConfigKey.ALLOW_DNS_REVERSE_LOOKUP.getKeyValue(), "false"));
 
         initializeFromNetwork();
 
@@ -159,33 +172,41 @@ public class StaticConfiguration implements Configuration {
 
     private void initializeFromNetwork() {
         // check network config and populate the map with keys: ip, ip6, host, host6 and versions with :<interface-id>
-        NetworkInterface nif = NetworkUtil.getBestMatchNetworkInterface();
+        NetworkInterface best = NetworkUtil.getBestMatchNetworkInterface();
         Map<String, InetAddresses> config = NetworkUtil.getBestMatchAddresses();
 
         config.forEach((name, addresses) -> {
-            if (NetworkUtil.isIPv6Supported() && addresses.getIa6() != null) {
-                String ip6Address = addresses.getIa6().getHostAddress();
-                if (addresses.getIa6().getScopedInterface() != null || addresses.getIa6().getScopeId() > 0) {
+            if (NetworkUtil.isIPv6Supported() && addresses.getIa6().isPresent()) {
+                Inet6Address ia6 = addresses.getIa6().get();
+                String ip6Address = ia6.getHostAddress();
+                if (ia6.getScopedInterface() != null || ia6.getScopeId() > 0) {
                     int percent = ip6Address.indexOf('%');
                     if (percent != -1) {
                         ip6Address = ip6Address.substring(0, percent);
                     }
                 }
-                if (nif != null && name.equals(nif.getName())) {
+                if (best != null && name.equals(best.getName())) {
                     networkConfig.put("ip6", ip6Address);
-                    networkConfig.put("host6", addresses.getIa6().getHostName());
+                    // Best nif's host name is resolved anyway
+                    networkConfig.put("host6", ia6.getHostName());
                 }
                 networkConfig.put("ip6:" + name, ip6Address);
-                networkConfig.put("host6:" + name, addresses.getIa6().getHostName());
+                if (this.allowDnsReverseLookup) {
+                    networkConfig.put("host6:" + name, ia6.getHostName());
+                }
             }
 
-            if (addresses.getIa4() != null) {
-                if (nif != null && name.equals(nif.getName())) {
-                    networkConfig.put("ip", addresses.getIa4().getHostAddress());
-                    networkConfig.put("host", addresses.getIa4().getHostName());
+            if (addresses.getIa4().isPresent()) {
+                Inet4Address ia4 = addresses.getIa4().get();
+                if (best != null && name.equals(best.getName())) {
+                    networkConfig.put("ip", ia4.getHostAddress());
+                    // Best nif's host name is resolved anyway
+                    networkConfig.put("host", ia4.getHostName());
                 }
-                networkConfig.put("ip:" + name, addresses.getIa4().getHostAddress());
-                networkConfig.put("host:" + name, addresses.getIa4().getHostName());
+                networkConfig.put("ip:" + name, ia4.getHostAddress());
+                if (this.allowDnsReverseLookup) {
+                    networkConfig.put("host:" + name, ia4.getHostName());
+                }
             }
         });
         this.properties.putAll(networkConfig);
