@@ -27,8 +27,10 @@ public class NetworkUtilTest {
     @Test
     public void dumpBestMatch() {
         NetworkUtil.getBestMatchAddresses().forEach((name, addresses) ->
-            System.out.printf("%s: IP4 = %s, IP6 = %s%n", name, addresses.getIa4().getHostAddress(),
-            addresses.getIa6() == null ? "<null>" : addresses.getIa6().getHostAddress()));
+            System.out.printf("%s: IP4 = %s, IP6 = %s%n",
+                name,
+                addresses.getIa4().map(Inet4Address::getHostAddress).orElse("<null>"),
+                addresses.getIa6().map(Inet6Address::getHostAddress).orElse("<null>")));
     }
 
     @Test
@@ -101,8 +103,8 @@ public class NetworkUtilTest {
         NetworkInterface nic = NetworkUtil.getBestMatchNetworkInterface();
         Map<String, InetAddresses> map = NetworkUtil.getBestMatchAddresses();
         assertNotNull(nic);
-        String host = map.get(nic.getName()).getIa4().getHostName();
-        String ip = map.get(nic.getName()).getIa4().getHostAddress();
+        String host = map.get(nic.getName()).getIa4().map(Inet4Address::getHostName).orElse(null);
+        String ip = map.get(nic.getName()).getIa4().map(Inet4Address::getHostAddress).orElse(null);
         System.getProperties().setProperty("test.prop", "testy");
         System.getProperties().setProperty("test2:prop", "testx");
         String[] testData = {

@@ -17,9 +17,10 @@ package org.jolokia.server.core.util;
 
 import java.net.Inet4Address;
 import java.net.Inet6Address;
+import java.util.Optional;
 
 /**
- * Pair of IP4/IP6 addresses (may be null) associated with single available network interface
+ * Pair of IP4/IP6 addresses (which may be null) associated with single available network interface
  */
 public class InetAddresses {
 
@@ -31,12 +32,12 @@ public class InetAddresses {
         this.ia6 = ia6;
     }
 
-    public Inet4Address getIa4() {
-        return ia4;
+    public Optional<Inet4Address> getIa4() {
+        return Optional.ofNullable(ia4);
     }
 
-    public Inet6Address getIa6() {
-        return ia6;
+    public Optional<Inet6Address> getIa6() {
+        return Optional.ofNullable(ia6);
     }
 
 }
