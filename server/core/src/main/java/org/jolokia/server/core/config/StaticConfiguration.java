@@ -187,26 +187,20 @@ public class StaticConfiguration implements Configuration {
                 }
                 if (best != null && name.equals(best.getName())) {
                     networkConfig.put("ip6", ip6Address);
-                    // Best nif's host name is resolved anyway
-                    networkConfig.put("host6", ia6.getHostName());
+                    networkConfig.put("host6", this.allowDnsReverseLookup ? ia6.getHostName() : ip6Address);
                 }
                 networkConfig.put("ip6:" + name, ip6Address);
-                if (this.allowDnsReverseLookup) {
-                    networkConfig.put("host6:" + name, ia6.getHostName());
-                }
+                networkConfig.put("host6:" + name, this.allowDnsReverseLookup ? ia6.getHostName() : ip6Address);
             }
 
             if (addresses.getIa4().isPresent()) {
                 Inet4Address ia4 = addresses.getIa4().get();
                 if (best != null && name.equals(best.getName())) {
                     networkConfig.put("ip", ia4.getHostAddress());
-                    // Best nif's host name is resolved anyway
-                    networkConfig.put("host", ia4.getHostName());
+                    networkConfig.put("host", this.allowDnsReverseLookup ? ia4.getHostName() : ia4.getHostAddress());
                 }
                 networkConfig.put("ip:" + name, ia4.getHostAddress());
-                if (this.allowDnsReverseLookup) {
-                    networkConfig.put("host:" + name, ia4.getHostName());
-                }
+                networkConfig.put("host:" + name, this.allowDnsReverseLookup ? ia4.getHostName() : ia4.getHostAddress());
             }
         });
         this.properties.putAll(networkConfig);

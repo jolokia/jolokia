@@ -177,7 +177,7 @@ public class StaticConfigurationTest {
 
     @Test
     public void hostsAndIPs() {
-        StaticConfiguration config = new StaticConfiguration();
+        StaticConfiguration config = new StaticConfiguration(ConfigKey.ALLOW_DNS_REVERSE_LOOKUP, "true");
         Properties props = new Properties();
         props.setProperty(ConfigKey.AGENT_ID.getKeyValue(), "jolokia-${ip}/${host}");
         String world = System.getProperty("os.name").startsWith("Mac") ? "world-of-${ip6:lo0}" : "world-of-${ip6:lo}";
