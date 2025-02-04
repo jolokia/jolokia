@@ -39,7 +39,7 @@ public final class NetworkUtil {
     /**
      * Get {@link InetAddress} representing <em>any</em> address ({@code 0.0.0.0} on IPv4 or {@code [::]} on IPv6).
      *
-     * @return
+     * @return an address representing <em>any</em> address
      */
     public static InetAddress getAnyAddress() {
         try {
@@ -52,9 +52,9 @@ public final class NetworkUtil {
     /**
      * Get a local, IP4 Address, preferable a non-loopback address which is bound to a physical interface.
      *
-     * @return
-     * @throws UnknownHostException
-     * @throws SocketException
+     * @return a local, non-loopback, IP4 address
+     * @throws UnknownHostException unknown host
+     * @throws SocketException socket exception
      */
     public static InetAddress getLocalAddress() throws UnknownHostException, SocketException {
         return getLocalAddress(Inet4Address.class);
@@ -67,9 +67,9 @@ public final class NetworkUtil {
      * {@code ::1}). In this case it's rather not Multicast enabled.</p>
      *
      * @param type A type of address to use (IPv4 or IPv6)
-     * @return
-     * @throws UnknownHostException
-     * @throws SocketException
+     * @return a local, non-loopback address of desired type
+     * @throws UnknownHostException unknown host
+     * @throws SocketException socket exception
      */
     public static InetAddress getLocalAddress(Class<? extends InetAddress> type) throws UnknownHostException, SocketException {
         // getLocalHost tries to resolve local hostname as returned by gethostname (unistd.h)
@@ -78,7 +78,7 @@ public final class NetworkUtil {
         if (addr.isLoopbackAddress() || addr.getClass() != type || nif == null) {
             // Find local address that isn't a loopback address and is of desired class
             InetAddress lookedUpAddr = findLocalAddressViaNetworkInterface(type);
-            // If a local, multicast enabled address can be found, use it. Otherwise
+            // If a local, multicast enabled address can be found, use it. Otherwise,
             // we are using the local address, which might not be what you want
             if (lookedUpAddr != null) {
                 addr = lookedUpAddr;
@@ -100,8 +100,9 @@ public final class NetworkUtil {
      * @param type A type of address to use (IPv4 or IPv6)
      * @return a multicast enabled address if available
      * @throws UnknownHostException if we can't find non-loopback, multicast-enabled address.
-     * @throws SocketException
+     * @throws SocketException socket exception
      */
+    @SuppressWarnings("unused")
     public static InetAddress getLocalAddressWithMulticast(Class<? extends InetAddress> type) throws UnknownHostException, SocketException {
         InetAddress addr = getLocalAddress(type);
         if (isMulticastSupported(addr)) {
@@ -117,8 +118,8 @@ public final class NetworkUtil {
      * address is associated with physical network interface (with hardware address) instead of a virtual one
      * (bridge, VPN, ...).
      *
-     * @return
-     * @throws SocketException
+     * @return a local, non-loopback, multicast enabled address of desired type
+     * @throws SocketException socket exception
      */
     public static InetAddress findLocalAddressViaNetworkInterface(Class<? extends InetAddress> type) throws SocketException {
         Enumeration<NetworkInterface> networkInterfaces;
@@ -174,9 +175,9 @@ public final class NetworkUtil {
 
     /**
      * Gets a mapping of {@link NetworkInterface#getName() interface name} to best-match pair of IP4/IP6 addresses
-     * for given interface. We prefer global addresses over site/link local ones.
+     * for given interface. We prefer global addresses to site/link local ones.
      *
-     * @return
+     * @return mapping of interface name to best-match pair of IP4/IP6 addresses
      */
     public static Map<String, InetAddresses> getBestMatchAddresses() {
         Enumeration<NetworkInterface> networkInterfaces;
@@ -228,7 +229,7 @@ public final class NetworkUtil {
      * Returns the <em>best match</em> {@link NetworkInterface} - like the physical ethernet card instead of {@code lo}
      * interface or VPN tunnel interface.
      *
-     * @return
+     * @return the best match network interface
      */
     public static NetworkInterface getBestMatchNetworkInterface() {
         Enumeration<NetworkInterface> networkInterfaces;
@@ -272,7 +273,7 @@ public final class NetworkUtil {
 
     /**
      * Not very clever way to check if IPv6 is supported.
-     * @return
+     * @return true if IPv6 is supported
      */
     public static boolean isIPv6Supported() {
         // among others, Java (native code) checks /proc/net/if_inet6 file and
@@ -316,14 +317,14 @@ public final class NetworkUtil {
      *
      * @param pAddr address to check
      * @return true if the underlying networkinterface is up and supports multicast
-     * @throws SocketException
+     * @throws SocketException socket exception
      */
     public static boolean isMulticastSupported(InetAddress pAddr) throws SocketException {
         return isMulticastSupported(NetworkInterface.getByInetAddress(pAddr));
     }
 
     /**
-     * Get all local addresses on which a multicast can be send - whether IPv4 or IPv6. Each {@link InetAddress}
+     * Get all local addresses on which a multicast can be sent - whether IPv4 or IPv6. Each {@link InetAddress}
      * is associated with relevant {@link NetworkInterface}.
      *
      * @return list of all multi cast capable addresses
@@ -362,7 +363,7 @@ public final class NetworkUtil {
      * Examine the given URL and replace the host with a non-loopback host if possible. It is checked,
      * whether the port is open as well.
      * <p>
-     * A replaced host uses the  IP address instead of a (possibly non resolvable) name.
+     * A replaced host uses the  IP address instead of a (possibly non-resolvable) name.
      *
      * @param pRequestURL url to examine and to update
      * @return the 'sane' URL (or the original one if no sane address can be found)
@@ -396,11 +397,11 @@ public final class NetworkUtil {
     /**
      * Checks whether given address is of supported type, is active (up), is not loopback address and whether
      * it's supporting UDP multicast.
-     * @param networkInterface
-     * @param interfaceAddress
-     * @param type
-     * @return
-     * @throws SocketException
+     * @param networkInterface network interface
+     * @param interfaceAddress interface address
+     * @param type type of address
+     * @return true if the address is usable
+     * @throws SocketException socket exception
      */
     private static boolean useInetAddress(NetworkInterface networkInterface, InetAddress interfaceAddress,
                                           Class<? extends InetAddress> type) throws SocketException {
@@ -409,7 +410,7 @@ public final class NetworkUtil {
             !interfaceAddress.isLoopbackAddress();
     }
 
-    // Check for an non-loopback, local adress listening on the given port
+    // Check for a non-loopback, local adress listening on the given port
     private static InetAddress findLocalAddressListeningOnPort(String pHost, int pPort) throws UnknownHostException, SocketException {
         InetAddress address = InetAddress.getByName(pHost);
         if (address.isLoopbackAddress()) {
@@ -459,7 +460,7 @@ public final class NetworkUtil {
         }
     }
 
-    // Hack for finding the process id. Used in creating an unique agent id.
+    // Hack for finding the process id. Used in creating a unique agent id.
     private static String getProcessId() {
         // something like '<pid>@<hostname>', at least in SUN / Oracle JVMs
         final String jvmName = ManagementFactory.getRuntimeMXBean().getName();
@@ -471,8 +472,8 @@ public final class NetworkUtil {
      * Get the local network info as a string
      *
      * @return return a description of the current network setup of the local host.
-     * @throws UnknownHostException
-     * @throws SocketException
+     * @throws UnknownHostException unknown host
+     * @throws SocketException socket exception
      */
     public static String dumpLocalNetworkInfo() throws UnknownHostException, SocketException {
         StringBuilder buffer = new StringBuilder();
