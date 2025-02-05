@@ -140,8 +140,8 @@ public class JsonDymamicMBeanImplTest {
         platformServer.setAttribute(testName,new Attribute("Numbers","8,15"));
         String nums = (String) platformServer.getAttribute(testName,"Numbers");
         JSONArray numsJ = toJSON(nums, JSONArray.class);
-        assertEquals(numsJ.get(0), 8);
-        assertEquals(numsJ.get(1), 15);
+        assertEquals(numsJ.get(0), 8L);
+        assertEquals(numsJ.get(1), 15L);
         assertEquals(numsJ.size(), 2);
     }
 
@@ -173,9 +173,9 @@ public class JsonDymamicMBeanImplTest {
         assertEquals(chili.getValue(), "aji");
 
         JSONArray numsJ = toJSON((String) num.getValue(), JSONArray.class);
-        assertEquals(numsJ.get(0), 16);
-        assertEquals(numsJ.get(1), 11);
-        assertEquals(numsJ.get(2), 68);
+        assertEquals(numsJ.get(0), 16L);
+        assertEquals(numsJ.get(1), 11L);
+        assertEquals(numsJ.get(2), 68L);
         assertEquals(numsJ.size(), 3);
 
         assertEquals(platformServer.getAttributes(testName, new String[0]).size(), 0);

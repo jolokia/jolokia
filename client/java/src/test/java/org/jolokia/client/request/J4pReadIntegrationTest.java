@@ -215,7 +215,7 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
             assertTrue(allAttrs.contains("Name"));
             assertTrue(allAttrs.contains("Bytes"));
 
-            Integer val = resp.getValue(new ObjectName(itSetup.getAttributeMBean()),"MemoryUsed");
+            Long val = resp.getValue(new ObjectName(itSetup.getAttributeMBean()),"MemoryUsed");
             assertNotNull(val);
 
             try {
@@ -225,7 +225,7 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
                 assertTrue(exp.getMessage().contains("Aufsteiger"));
             }
 
-            Integer bytes = resp.getValue("Bytes");
+            Long bytes = resp.getValue("Bytes");
             assertNotNull(bytes);
 
             try {
@@ -304,13 +304,13 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
         for (J4pReadRequest request  : readRequests("jolokia.it:type=mxbean","ComplexTestData")) {
             J4pReadResponse response = j4pClient.execute(request);
             JSONObject value = response.getValue();
-            assertEquals(value.get("number"),1968);
+            assertEquals(value.get("number"),1968L);
             assertEquals(value.get("string"),"late");
 
             List<?> set = (List<?>) value.get("set");
             assertEquals(set.size(),2);
-            assertTrue(set.contains(12));
-            assertTrue(set.contains(14));
+            assertTrue(set.contains(12L));
+            assertTrue(set.contains(14L));
 
             Map<?, ?> map = (Map<?, ?>) value.get("map");
             assertEquals(map.size(),2);

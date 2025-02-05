@@ -347,7 +347,7 @@ public class J4pClient extends J4pClientBuilderFactory {
             if (pJsonResponse instanceof JSONObject) {
                 JSONObject errorObject = (JSONObject) pJsonResponse;
 
-                if (!errorObject.containsKey("status") || (Integer) errorObject.get("status") != 200) {
+                if (!errorObject.containsKey("status") || (Long) errorObject.get("status") != 200) {
                     throw new J4pRemoteException(null, errorObject);
                 }
             }

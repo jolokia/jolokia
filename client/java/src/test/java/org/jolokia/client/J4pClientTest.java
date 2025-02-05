@@ -81,7 +81,7 @@ public class J4pClientTest {
 
         J4pClient j4p = new J4pClient(TEST_URL,client);
         J4pReadResponse resp = j4p.execute(TEST_REQUEST);
-        assertEquals(((Map<?, ?>) resp.getValue()).get("max"), 530186240);
+        assertEquals(((Map<?, ?>) resp.getValue()).get("max"), 530186240L);
     }
 
     @Test(expectedExceptions = J4pException.class,expectedExceptionsMessageRegExp = ".*JSONArray.*")

@@ -105,7 +105,7 @@ public class ParserArraysTest {
         assertEquals(array.get(1), new BigDecimal("1.4"));
         assertEquals(array.get(2).toString(), "9223372036854775808");
         assertEquals(array.get(3), 9223372036854775806L);
-        assertEquals(array.get(4), 42);
+        assertEquals(array.get(4), 42L);
         assertTrue((Boolean) array.get(5));
         assertNull(array.get(6));
     }

@@ -46,9 +46,9 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
             j4pClient.execute(request);
             request = new J4pExecRequest(cfg,itSetup.getOperationMBean(),"fetchNumber","inc");
             J4pExecResponse resp = j4pClient.execute(request);
-            assertEquals(0,(int) resp.getValue());
+            assertEquals(0, (long) resp.getValue());
             resp = j4pClient.execute(request);
-            assertEquals(1,(int) resp.getValue());
+            assertEquals(1, (long) resp.getValue());
         }
     }
 
@@ -70,7 +70,7 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
                 j4pClient.execute(request);
                 fail();
             } catch (J4pRemoteException exp) {
-                assertEquals(400,exp.getStatus());
+                assertEquals(400L,exp.getStatus());
                 assertTrue(exp.getMessage().contains("IllegalArgumentException"));
                 assertTrue(exp.getRemoteStackTrace().contains("IllegalArgumentException"));
             }
@@ -154,7 +154,7 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
         Object[] args = new Object[] { 12,true,null, "Bla" };
         for (J4pExecRequest request : execRequests("objectArrayArg",new Object[] { args })) {
             J4pExecResponse resp = j4pClient.execute(request,"POST");
-            assertEquals(12,(int) resp.getValue());
+            assertEquals(12, (long) resp.getValue());
         }
     }
 
@@ -213,11 +213,11 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
                 }
                 request = new J4pExecRequest(cfg,itSetup.getOperationMBean(),"intArguments",10,20);
                 resp = j4pClient.execute(request,type);
-                assertEquals(30, (int) resp.getValue());
+                assertEquals(30, (long) resp.getValue());
 
                 request = new J4pExecRequest(cfg,itSetup.getOperationMBean(),"intArguments",10,null);
                 resp = j4pClient.execute(request,type);
-                assertEquals(-1,(int) resp.getValue());
+                assertEquals(-1, (long) resp.getValue());
 
                 try {
                     request = new J4pExecRequest(cfg,itSetup.getOperationMBean(),"intArguments",null,null);
@@ -282,7 +282,7 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
                 Map<?, ?> res = resp.getValue();
                 assertEquals(res.get("eins"),"fcn");
                 assertEquals(((List<?>) res.get("zwei")).get(1),"svw");
-                assertEquals(res.get("drei"),10);
+                assertEquals(res.get("drei"),10L);
                 assertEquals(res.get("vier"),true);
             }
 
