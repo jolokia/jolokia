@@ -15,6 +15,15 @@
 ////
 == News
 
+=== Jolokia 2.2.2 released
+
+[.news-date]
+2025-02-05
+
+New micro release of Jolokia 2.2.2 fixes slow startup time on Mac OS system and restores previous Java client behavior related to numeric value conversion to Java.
+
+Refer to https://jolokia.org/changes-report.html#a2.2.2[changelog] and https://github.com/jolokia/jolokia/releases/tag/v2.2.2[GitHub release notes] for more details.
+
 === Jolokia 2.2.1 released
 
 [.news-date]

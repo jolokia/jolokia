@@ -23,6 +23,14 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
+    <release version="2.2.2" description="Release 2.2.2" date="2025-02-05">
+      <action dev="grgrzybek" type="fix" issue="796">
+        Fix slow startup time on MacOS.
+      </action>
+      <action dev="grgrzybek" type="fix" issue="789">
+        In Java client, all numeric values are returned as Long (like before Jolokia 2.1.0).
+      </action>
+    </release>
     <release version="2.2.1" description="Release 2.2.1" date="2025-01-23">
       <action dev="grgrzybek" type="add" issue="786">
         Upgrade to Spring Boot 3.4 and Spring Framework 6.2.

@@ -1,6 +1,6 @@
 {
   "name": "@jolokia.js/d3",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "Jolokia JavaScript ES D3 integration module",
   "type": "module",
   "license": "Apache-2.0",
