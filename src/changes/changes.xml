@@ -24,7 +24,7 @@
   </properties>
   <body>
     <release version="2.2.2" description="Release 2.2.2" date="2025-02-05">
-      <action dev="grgrzybek" type="fix" issue="796">
+      <action dev="tadayosi" type="fix" issue="796">
         Fix slow startup time on MacOS.
       </action>
       <action dev="grgrzybek" type="fix" issue="789">
