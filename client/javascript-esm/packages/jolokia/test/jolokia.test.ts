@@ -246,7 +246,7 @@ describe("Jolokia HTTP tests", () => {
 
   test("Fetch error", async () => {
     expect.assertions(2)
-    const jolokia = new Jolokia({url: `http://127.240.240.240:8080/jolokia`})
+    const jolokia = new Jolokia({url: `http://localhost:9999/jolokia`})
     return jolokia.request({type: "version"})
       .catch(ex => {
         expect(ex.name).toBe("TypeError")
@@ -256,7 +256,7 @@ describe("Jolokia HTTP tests", () => {
 
   test("Fetch error bad headers", async () => {
     expect.assertions(2)
-    const jolokia = new Jolokia({url: `http://127.240.240.240:8080/jolokia`, headers: {
+    const jolokia = new Jolokia({url: `http://localhost:9999/jolokia`, headers: {
       "x y z": " a b c"
     }})
     return jolokia.request({type: "version"})
@@ -268,7 +268,7 @@ describe("Jolokia HTTP tests", () => {
 
   test("Fetch error with callbacks", async () => {
     expect.assertions(3)
-    const jolokia = new Jolokia({url: `http://127.240.240.240:8080/jolokia`,
+    const jolokia = new Jolokia({url: `http://localhost:9999/jolokia`,
       fetchError: (_response: Response | null, reason: DOMException | TypeError | string | null) => {
         expect((reason as TypeError).name).toBe("TypeError")
         expect("code" in ((reason as TypeError).cause as Record<string, unknown>)).toBeTruthy()
@@ -282,7 +282,7 @@ describe("Jolokia HTTP tests", () => {
 
   test("Fetch error with global error callback only", async () => {
     expect.assertions(2)
-    const jolokia = new Jolokia({url: `http://127.240.240.240:8080/jolokia`,
+    const jolokia = new Jolokia({url: `http://localhost:9999/jolokia`,
       fetchError: (_response: Response | null, reason: DOMException | TypeError | string | null) => {
         expect((reason as TypeError).name).toBe("TypeError")
         expect("code" in ((reason as TypeError).cause as Record<string, unknown>)).toBeTruthy()

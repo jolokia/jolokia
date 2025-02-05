@@ -163,7 +163,7 @@
             </goals>
             <phase>test</phase>
             <configuration>
-              <arguments>eslint --stats</arguments>
+              <arguments>eslint --stats packages/</arguments>
             </configuration>
           </execution>
           <execution>
