@@ -120,7 +120,7 @@ public class ParserObjectsTest {
         assertEquals(object.get("keyBigDecimal"), new BigDecimal("1.4"));
         assertEquals(object.get("keyBigInteger").toString(), "9223372036854775808");
         assertEquals(object.get("keyLong"), 9223372036854775806L);
-        assertEquals(object.get("keyInteger"), 42);
+        assertEquals(object.get("keyInteger"), 42L);
         assertTrue((Boolean) object.get("keyBoolean"));
         assertTrue(object.containsKey("keyNull"));
         assertNull(object.get("keyNull"));

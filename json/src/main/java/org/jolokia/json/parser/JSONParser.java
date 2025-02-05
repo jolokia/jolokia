@@ -410,9 +410,9 @@ public class JSONParser {
 //        if (v.bitLength() <= 15) {
 //            return v.shortValue();
 //        }
-        if (v.bitLength() <= 31) {
-            return v.intValue();
-        }
+//        if (v.bitLength() <= 31) {
+//            return v.intValue();
+//        }
         if (v.bitLength() <= 63) {
             return v.longValue();
         }

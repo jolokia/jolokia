@@ -73,7 +73,7 @@ public class JolokiaMBeanServerHandlerTest {
             String chiliS = (String) pServer.getAttribute(oName,"Chili");
             JSONObject chiliJ = new JSONParser().parse(chiliS, JSONObject.class);
             assertEquals(chiliJ.get("name"), "Bhut Jolokia");
-            assertEquals(chiliJ.get("scoville"), 1000000);
+            assertEquals(chiliJ.get("scoville"), 1000000L);
 
             server.unregisterMBean(oName);
             Assert.assertFalse(pServer.isRegistered(oName));

@@ -62,6 +62,9 @@ public class ValidatingResponseExtractor implements J4pResponseExtractor {
             if (o instanceof Integer) {
                 status = (Integer) o;
             }
+            if (o instanceof Long) {
+                status = ((Long) o).intValue();
+            }
         }
 
         if (!allowedCodes.contains(status)) {
