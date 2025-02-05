@@ -2,10 +2,13 @@ package org.jolokia.server.core.util;
 
 import java.net.*;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Map;
 
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.config.StaticConfiguration;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -15,6 +18,19 @@ import static org.testng.Assert.*;
  * @since 07.02.14
  */
 public class NetworkUtilTest {
+
+    @BeforeClass
+    public void setup() {
+        // To speed up the tests on Mac
+        if (System.getProperty("os.name").startsWith("Mac")) {
+            NetworkUtil.MAC_SKIP_NIFS.addAll(List.of("awdl", "llw", "utun"));
+        }
+    }
+
+    @AfterClass
+    public void tearDown() {
+        NetworkUtil.MAC_SKIP_NIFS.clear();
+    }
 
     @Test
     public void dump() {
@@ -116,9 +132,13 @@ public class NetworkUtilTest {
                 "|${prop:test.prop}|","|testy|",
                 "${prop:test2:prop}","testx"
         };
+        // Skip the following test on Mac as it can be extremely slow
+        if (System.getProperty("os.name").startsWith("Mac")) {
+            return;
+        }
         StaticConfiguration config = new StaticConfiguration(ConfigKey.ALLOW_DNS_REVERSE_LOOKUP, "true");
-        for (int i = 0; i < testData.length; i+=2) {
-            assertEquals(config.resolve(testData[i]),testData[i+1],"Checking " + testData[i]);
+        for (int i = 0; i < testData.length; i += 2) {
+            assertEquals(config.resolve(testData[i]), testData[i + 1], "Checking " + testData[i]);
         }
     }
 

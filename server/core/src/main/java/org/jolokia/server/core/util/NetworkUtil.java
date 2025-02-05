@@ -30,7 +30,7 @@ import java.util.Set;
 public final class NetworkUtil {
 
     private static final boolean MAC = System.getProperty("os.name").toLowerCase().contains("mac");
-    private static final List<String> MAC_SKIP_NIFS = List.of("awdl", "llw", "utun");
+    static final List<String> MAC_SKIP_NIFS = new ArrayList<>();
 
     // Utility class
     private NetworkUtil() {
@@ -260,12 +260,9 @@ public final class NetworkUtil {
                     continue;
                 }
                 NetworkInterface finalBest = best;
-                boolean hardareBetter = false;
-                if ((best.getHardwareAddress() == null
+                boolean hardwareBetter = (best.getHardwareAddress() == null
                     || MAC && MAC_SKIP_NIFS.stream().anyMatch(prefix -> finalBest.getName().startsWith(prefix)))
-                    && nif.getHardwareAddress() != null) {
-                    hardareBetter = true;
-                }
+                    && nif.getHardwareAddress() != null;
                 boolean addressesBetter = false;
                 Set<InetAddress> addresses = new HashSet<>();
                 nif.getInterfaceAddresses().forEach(addr -> addresses.add(addr.getAddress()));
@@ -274,7 +271,7 @@ public final class NetworkUtil {
                     addressesBetter |= bestAddresses.stream().noneMatch(a -> a instanceof Inet4Address)
                         && addresses.stream().anyMatch(a -> a instanceof Inet4Address);
                 }
-                if (hardareBetter || addressesBetter) {
+                if (hardwareBetter || addressesBetter) {
                     best = nif;
                     bestAddresses.clear();
                     bestAddresses.addAll(addresses);
