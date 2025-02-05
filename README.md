@@ -2,8 +2,6 @@
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.jolokia/jolokia-parent/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/org.jolokia/jolokia-parent/)
 [![Build Status](https://github.com/jolokia/jolokia/actions/workflows/ci.yaml/badge.svg?branch=2.0)](https://github.com/jolokia/jolokia/actions/workflows/ci.yaml)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=org.jolokia%3Ajolokia&metric=coverage)](https://sonarcloud.io/summary/new_code?id=org.jolokia%3Ajolokia)
-[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=org.jolokia%3Ajolokia&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=org.jolokia%3Ajolokia)
 
 Jolokia is a fresh way to access JMX MBeans remotely. It is
 different from JSR-160 connectors in that it is an agent-based
