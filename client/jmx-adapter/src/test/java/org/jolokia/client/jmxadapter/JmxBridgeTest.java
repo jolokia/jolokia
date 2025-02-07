@@ -1,5 +1,7 @@
 package org.jolokia.client.jmxadapter;
 
+import static org.awaitility.Awaitility.await;
+
 import java.io.IOException;
 import java.lang.management.ClassLoadingMXBean;
 import java.lang.management.CompilationMXBean;
@@ -10,6 +12,8 @@ import java.lang.management.RuntimeMXBean;
 import java.lang.management.ThreadMXBean;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.rmi.UnmarshalException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -38,6 +42,7 @@ import javax.management.Query;
 import javax.management.QueryExp;
 import javax.management.ReflectionException;
 import javax.management.RuntimeMBeanException;
+import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
@@ -46,7 +51,6 @@ import javax.management.remote.JMXConnectionNotification;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
-
 import org.jolokia.client.J4pClient;
 import org.jolokia.client.J4pClientBuilder;
 import org.jolokia.client.request.J4pVersionRequest;
@@ -60,8 +64,6 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-
-import static org.awaitility.Awaitility.await;
 
 /**
  * I test the Jolokia Jmx adapter by comparing results with a traditional MBeanConnection To test in
@@ -209,6 +211,20 @@ public class JmxBridgeTest {
             {null, QUERY},
             {RUNTIME, QUERY}
         };
+    }
+
+    @DataProvider
+    public static Object[][] unsafeAttributesForDirectComparison()
+        throws MalformedObjectNameException {
+        final Object[][] data = new Object[ATTRIBUTES_NOT_SAFE_FOR_DIRECT_COMPARISON.size()][2];
+
+        int i=0;
+        for(final String nameAndAttribute : ATTRIBUTES_NOT_SAFE_FOR_DIRECT_COMPARISON) {
+            final int separator=nameAndAttribute.lastIndexOf('.');
+            data[i][0]=new ObjectName(nameAndAttribute.substring(0, separator));
+            data[i++][1]=nameAndAttribute.substring(separator+1);
+        }
+        return data;
     }
 
     /**
@@ -404,6 +420,71 @@ public class JmxBridgeTest {
 
     private MBeanServerConnection getNativeConnection() {
         return this.alternativeConnection;
+    }
+
+    @Test(dataProvider = "unsafeAttributesForDirectComparison" )
+    public void testTypesOfUnsafeAttributes(final ObjectName objectName, final String attributeName)
+        throws ReflectionException, MBeanException, IOException {
+        try {
+            final Object nativeObject = getNativeConnection().getAttribute(objectName,
+                attributeName);
+            final Object jolokiaObject = adapter.getAttribute(objectName, attributeName);
+            recursiveCompareTypes(nativeObject, jolokiaObject, objectName.toString() + "." + attributeName);
+        } catch(InstanceNotFoundException | AttributeNotFoundException | UnmarshalException ignore) {
+            //May not be present in a certain JVM
+        }
+    }
+
+    private void recursiveCompareTypes(final Object nativeObject, final Object jolokiaObject,
+        String path) {
+        if(nativeObject == null && jolokiaObject == null) {
+            return;
+        }
+
+        if(jolokiaObject == null && nativeObject instanceof Double) {
+            //These attributes are suspect, https://github.com/jolokia/jolokia/issues/800
+            if(Arrays.asList("java.lang:type=OperatingSystem.SystemCpuLoad", "java.lang:type=OperatingSystem.CpuLoad").contains(path)) {
+                return;
+            }
+        }
+        if(nativeObject instanceof CompositeDataSupport) {
+            for(final String key : ((CompositeDataSupport) nativeObject).getCompositeType().keySet()) {
+                recursiveCompareTypes(((CompositeDataSupport) nativeObject).get(key), ((CompositeDataSupport)jolokiaObject).get(key),
+                    path + "." + key);
+            }
+            return;
+        }
+
+        if(nativeObject instanceof TabularDataSupport) {
+            final TabularDataSupport nativeTabular = (TabularDataSupport) nativeObject;
+            if(jolokiaObject instanceof TabularDataSupport) {
+                final Object[] nativeValues = nativeTabular.values()
+                    .toArray();
+                final Object[] jolokiaValues = ((TabularDataSupport) jolokiaObject).values()
+                    .toArray();
+                Assert.assertEquals(jolokiaValues.length, nativeValues.length,
+                    "Table contains the same amount of rows: " + path);
+                for (int i = 0; i < nativeValues.length; i++) {
+                    recursiveCompareTypes(nativeValues[i], jolokiaValues[i],
+                        path + ".[" + i++ + "]");
+                }
+            } else if(jolokiaObject instanceof CompositeDataSupport && path.contains("type=GarbageCollector.LastGcInfo")) {
+                //This one is strange, the native object is sometimes tabular data and sometimes composite data (?!)
+                //for these garbage collection objects
+                //still, attempt to recursively compare types in the case where native is tabular and we return composite
+                final CompositeDataSupport compositeJolokiaObject = (CompositeDataSupport) jolokiaObject;
+                Assert.assertEquals(compositeJolokiaObject.values().size(), nativeTabular.size(), "Table contains the same amount of items: " + path);
+                for(Map.Entry<Object,Object> entry : nativeTabular.entrySet()) {
+                    //The key is a "list of keyes"
+                    @SuppressWarnings("unchecked") String key=((List<String>)entry.getKey()).get(0);
+                    //Need to unwrap the composite value from the table column/cell
+                    final Object actualNativeValue = ((CompositeDataSupport)entry.getValue()).values().toArray()[1];
+                    recursiveCompareTypes(compositeJolokiaObject.get(key), actualNativeValue, path + "." + key);
+                }
+            }
+            return;
+        }
+        Assert.assertEquals(jolokiaObject.getClass(), nativeObject.getClass(), "Mismatch in returned type for attribute path : " + path);
     }
 
     @Test(dataProvider = "platformMBeans")
