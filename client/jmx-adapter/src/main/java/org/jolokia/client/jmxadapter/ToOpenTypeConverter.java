@@ -373,6 +373,7 @@ public class ToOpenTypeConverter {
         //may be null on Java 10
         cacheType(STRING, "jdk.management.jfr:type=FlightRecorder.EventTypes.item.description");
         cacheType(STRING, "jdk.management.jfr:type=FlightRecorder.getRecordingOptions.destination");
+        cacheType(INTEGER, "java.lang:name=G1 Old Generation,type=GarbageCollector.LastGcInfo.GcThreadCount", "java.lang:name=G1 Concurrent GC,type=GarbageCollector.LastGcInfo.GcThreadCount", "java.lang:name=G1 Young Generation,type=GarbageCollector.LastGcInfo.GcThreadCount");
         return TYPE_SPECIFICATIONS.get(name);
     }
 
