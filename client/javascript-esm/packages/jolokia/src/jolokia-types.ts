@@ -589,7 +589,7 @@ export type JmxDomain = Record<string, MBeanInfo | MBeanInfoError | string>
  */
 export type MBeanInfo = {
   /** MBean description */
-  desc: string
+  desc?: string
   /** Fully qualified Java class name of the MBean */
   class?: string
   /** Map of attribute definitions */
