@@ -1091,6 +1091,7 @@
     <plugin.org.apache.felix.maven-bundle-plugin>5.1.9</plugin.org.apache.felix.maven-bundle-plugin>
     <plugin.org.apache.felix.maven-scr-plugin>1.26.4</plugin.org.apache.felix.maven-scr-plugin>
     <plugin.org.apache.rat.apache-rat-plugin>0.16.1</plugin.org.apache.rat.apache-rat-plugin>
+    <!-- Please stay at 3.1.0. With 3.1.1 we have "[INFO] Issues found in: null" -->
     <plugin.org.asciidoctor.asciidoctor-maven-plugin>3.1.0</plugin.org.asciidoctor.asciidoctor-maven-plugin>
     <plugin.org.codehaus.mojo.build-helper-maven-plugin>3.6.0</plugin.org.codehaus.mojo.build-helper-maven-plugin>
     <plugin.org.codehaus.mojo.versions-maven-plugin>2.18.0</plugin.org.codehaus.mojo.versions-maven-plugin>
@@ -1112,8 +1113,8 @@
     <version.org.awaitility>4.2.2</version.org.awaitility>
     <version.org.easymock>5.5.0</version.org.easymock>
     <version.org.eclipse.jetty>11.0.24</version.org.eclipse.jetty>
-    <version.org.testng>7.10.2</version.org.testng>
-    <version.org.wiremock>3.10.0</version.org.wiremock>
+    <version.org.testng>7.11.0</version.org.testng>
+    <version.org.wiremock>3.12.0</version.org.wiremock>
 
     <!-- Versions of optional and example-related dependencies -->
 
@@ -1122,8 +1123,8 @@
 
     <!-- Versions of actual Maven dependencies for Jolokia core/service/client libraries -->
 
-    <version.commons-codec>1.17.2</version.commons-codec>
-    <version.io.fabric8.kubernetes-client>6.13.4</version.io.fabric8.kubernetes-client>
+    <version.commons-codec>1.18.0</version.commons-codec>
+    <version.io.fabric8.kubernetes-client>6.13.5</version.io.fabric8.kubernetes-client>
     <version.jakarta.servlet-api>5.0.0</version.jakarta.servlet-api>
     <version.org.apache.httpcomponents.httpclient>4.5.14</version.org.apache.httpcomponents.httpclient>
     <version.org.apache.httpcomponents.httpcore>4.4.16</version.org.apache.httpcomponents.httpcore>
