@@ -7,27 +7,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jolokia.json.JSONArray;
+import org.jolokia.json.JSONObject;
 import org.jolokia.server.core.request.JolokiaListRequest;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.util.ClassUtil;
 import org.jolokia.server.core.util.JsonUtil;
 import org.jolokia.server.core.util.RequestType;
 import org.jolokia.service.jmx.handler.list.DataKeys;
-import org.jolokia.json.JSONArray;
-import org.jolokia.json.JSONObject;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 
-import static org.jolokia.service.jmx.handler.list.DataKeys.ARGS;
-import static org.jolokia.service.jmx.handler.list.DataKeys.ATTRIBUTES;
-import static org.jolokia.service.jmx.handler.list.DataKeys.DESCRIPTION;
-import static org.jolokia.service.jmx.handler.list.DataKeys.OPERATIONS;
-import static org.jolokia.service.jmx.handler.list.DataKeys.READ_WRITE;
-import static org.jolokia.service.jmx.handler.list.DataKeys.RETURN_TYPE;
-import static org.jolokia.service.jmx.handler.list.DataKeys.TYPE;
+import static org.jolokia.service.jmx.handler.list.DataKeys.*;
 
 /**
  * A handler for dealing with "list" requests. Currently only one application context

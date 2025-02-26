@@ -15,7 +15,6 @@
  */
 package org.jolokia.support.spring.actuator;
 
-import jakarta.servlet.Servlet;
 import org.jolokia.server.core.http.AgentServlet;
 import org.springframework.boot.actuate.autoconfigure.endpoint.condition.ConditionalOnAvailableEndpoint;
 import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;

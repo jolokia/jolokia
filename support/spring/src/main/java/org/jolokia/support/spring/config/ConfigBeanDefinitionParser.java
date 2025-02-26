@@ -16,7 +16,11 @@ package org.jolokia.support.spring.config;
  * limitations under the License.
  */
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import org.jolokia.support.spring.SpringJolokiaConfigHolder;
 import org.springframework.beans.factory.config.TypedStringValue;
@@ -25,7 +29,9 @@ import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.StringUtils;
-import org.w3c.dom.*;
+import org.w3c.dom.Attr;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 
 /**
  * Definition parser for "config"

@@ -2,8 +2,9 @@ package org.jolokia.support.spring.backend;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-
-import javax.management.*;
+import javax.management.AttributeNotFoundException;
+import javax.management.InstanceNotFoundException;
+import javax.management.ObjectName;
 
 import org.jolokia.server.core.request.JolokiaReadRequest;
 import org.jolokia.server.core.service.api.JolokiaContext;

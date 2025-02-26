@@ -17,14 +17,18 @@ package org.jolokia.support.spring;
  */
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.jolokia.jvmagent.JolokiaServer;
 import org.jolokia.jvmagent.JolokiaServerConfig;
 import org.jolokia.server.core.config.SystemPropertyMode;
-import org.jolokia.support.spring.backend.SpringRequestHandler;
 import org.jolokia.server.core.service.api.JolokiaService;
 import org.jolokia.server.core.service.api.LogHandler;
+import org.jolokia.support.spring.backend.SpringRequestHandler;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
