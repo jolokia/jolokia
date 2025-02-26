@@ -14,8 +14,8 @@
 # limitations under the License.
 #
 
-# autoconfiguration of beans that go to "main" context
+# autoconfiguration of beans that go to "management" context
 
-# autoconfiguration that registers a @Bean with @WebEndpoint, so we can see Jolokia endpoint under
-# /actuator page listing all endpoints like "/health"
-org.jolokia.support.spring.actuator.JolokiaWebEndpointAutoConfiguration
+# autoconfiguration that registers a @Bean which is org.springframework.boot.web.servlet.ServletContextInitializer
+# that registers actual Jolokia servlet into management web context
+org.jolokia.support.spring.actuator.JolokiaServletAutoConfiguration
