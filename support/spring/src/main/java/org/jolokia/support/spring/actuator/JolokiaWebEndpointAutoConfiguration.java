@@ -16,24 +16,24 @@
 package org.jolokia.support.spring.actuator;
 
 import org.jolokia.server.core.http.AgentServlet;
-import org.springframework.boot.actuate.autoconfigure.endpoint.condition.ConditionalOnAvailableEndpoint;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication.Type;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
+/**
+ * This autoconfiguration ensures that we can see {@code /jolokia} link under {@link /actuator} page.
+ * We don't declare any {@link Bean} that registers servlet or controller.
+ */
 @AutoConfiguration
 @ConditionalOnWebApplication(type = Type.SERVLET)
 @ConditionalOnClass(AgentServlet.class)
-@ConditionalOnAvailableEndpoint(endpoint = JolokiaEndpoint.class)
-@EnableConfigurationProperties(JolokiaProperties.class)
-public class JolokiaEndpointAutoConfiguration {
+public class JolokiaWebEndpointAutoConfiguration {
 
     @Bean
-    public JolokiaEndpoint jolokiaEndpoint(JolokiaProperties properties) {
-        return new JolokiaEndpoint(properties.getConfig());
+    public JolokiaWebEndpoint jolokiaManagementEndpoint() {
+        return new JolokiaWebEndpoint();
     }
 
 }
