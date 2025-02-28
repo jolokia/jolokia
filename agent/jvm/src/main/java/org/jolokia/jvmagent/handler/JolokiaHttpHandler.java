@@ -48,6 +48,7 @@ import org.jolokia.jvmagent.ParsedUri;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.http.BackChannelHolder;
 import org.jolokia.server.core.http.HttpRequestHandler;
+import org.jolokia.server.core.request.BadRequestException;
 import org.jolokia.server.core.request.EmptyResponseException;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.util.IoUtil;
@@ -109,8 +110,10 @@ public class JolokiaHttpHandler implements HttpHandler {
             }  else {
                 doHandle(pHttpExchange);
             }
+        } catch (BadRequestException exp) {
+            sendBadRequestError(pHttpExchange, exp);
         } catch (SecurityException exp) {
-            sendForbidden(pHttpExchange,exp);
+            sendForbidden(pHttpExchange, exp);
         }
     }
 
@@ -122,6 +125,9 @@ public class JolokiaHttpHandler implements HttpHandler {
                 return null;
             });
         } catch (PrivilegedActionException e) {
+            if (e.getCause() instanceof BadRequestException) {
+                throw (BadRequestException) e.getCause();
+            }
             throw new SecurityException("Security exception: " + e.getCause(),e.getCause());
         }
     }
@@ -180,6 +186,8 @@ public class JolokiaHttpHandler implements HttpHandler {
             if (jolokiaContext.isDebug()) {
                 jolokiaContext.debug("Response: " + json);
             }
+        } catch (BadRequestException exp) {
+            throw exp;
         } catch (EmptyResponseException exp) {
             // No response needed, will answer later ...
             return;
@@ -280,6 +288,18 @@ public class JolokiaHttpHandler implements HttpHandler {
         headers.set("Expires",formatHeaderDate(cal.getTime()));
     }
 
+    private void sendBadRequestError(HttpExchange pExchange, BadRequestException badRequestException) throws IOException {
+        String response = "400 (Bad Request)\n";
+        if (badRequestException != null && badRequestException.getMessage() != null) {
+            response += "\n" + badRequestException.getMessage() + "\n";
+        }
+        pExchange.getResponseHeaders().add("Content-Type", "text/plain");
+        pExchange.sendResponseHeaders(400, response.length());
+        OutputStream os = pExchange.getResponseBody();
+        os.write(response.getBytes());
+        os.close();
+    }
+
     private void sendForbidden(HttpExchange pExchange, SecurityException securityException) throws IOException {
         String response = "403 (Forbidden)\n";
         if (securityException != null && securityException.getMessage() != null) {
@@ -292,17 +312,6 @@ public class JolokiaHttpHandler implements HttpHandler {
     }
 
     private void sendResponse(HttpExchange pExchange, ParsedUri pParsedUri, JSONStructure pJson) throws IOException {
-        boolean streaming = Boolean.parseBoolean(jolokiaContext.getConfig(ConfigKey.STREAMING));
-        if (streaming) {
-            sendStreamingResponse(pExchange, pParsedUri, pJson);
-        } else {
-            // Fallback, send as one object
-            // TODO: Remove for 2.0
-            sendAllJSON(pExchange, pParsedUri, pJson);
-        }
-    }
-
-    private void sendStreamingResponse(HttpExchange pExchange, ParsedUri pParsedUri, JSONStructure pJson) throws IOException {
         Headers headers = pExchange.getResponseHeaders();
         if (pJson != null) {
             headers.set("Content-Type", getMimeType(pParsedUri) + "; charset=utf-8");

@@ -23,7 +23,8 @@ import java.util.*;
 
 /**
  * Enhanced URI class in order to provide means to get to the query string
- * and the request parameters
+ * and the request parameters. The parameters are still <em>raw</em> and not validated (for example
+ * parameters that represent numbers are still kept as strings).
  *
  * @author roland
  * @since Mar 21, 2010

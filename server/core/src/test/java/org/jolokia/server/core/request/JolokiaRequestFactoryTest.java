@@ -84,6 +84,32 @@ public class JolokiaRequestFactoryTest {
     }
 
     @Test
+    public void requestParameterList() {
+        // as of 2025-02-28 we have these request parameters:
+        //  - callback
+        //  - canonicalNaming
+        //  - ifModifiedSince
+        //  - ignoreErrors
+        //  - includeRequest
+        //  - includeStackTrace
+        //  - listCache
+        //  - listKeys
+        //  - maxCollectionSize
+        //  - maxDepth
+        //  - maxObjects
+        //  - mimeType
+        //  - p
+        //  - serializeException
+        //  - serializeLong
+
+        for (ConfigKey ck : ConfigKey.values()) {
+            if (ck.isRequestConfig()) {
+                System.out.println(ck);
+            }
+        }
+    }
+
+    @Test
     public void simplePostWithMergedMaps() {
         Map<String, Object> config = new HashMap<>();
         config.put("maxDepth","10");

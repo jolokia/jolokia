@@ -14,6 +14,7 @@ import jakarta.servlet.http.*;
 
 import org.jolokia.server.core.config.*;
 import org.jolokia.server.core.detector.ServerDetectorLookup;
+import org.jolokia.server.core.request.BadRequestException;
 import org.jolokia.server.core.request.EmptyResponseException;
 import org.jolokia.server.core.restrictor.RestrictorFactory;
 import org.jolokia.server.core.service.JolokiaServiceManagerFactory;
@@ -356,6 +357,8 @@ public class AgentServlet extends HttpServlet {
                 Throwable innerExp = exp.getCause();
                 if (innerExp instanceof EmptyResponseException) {
                     throw (EmptyResponseException) innerExp;
+                } else if (innerExp instanceof BadRequestException) {
+                    throw (BadRequestException) innerExp;
                 } else {
                     throw exp;
                 }
@@ -483,7 +486,8 @@ public class AgentServlet extends HttpServlet {
     private ServletRequestHandler newGetHttpRequestHandler() {
         return new ServletRequestHandler() {
             /** {@inheritDoc} */
-            public JSONStructure handleRequest(HttpServletRequest pReq, HttpServletResponse pResp) throws EmptyResponseException {
+            public JSONStructure handleRequest(HttpServletRequest pReq, HttpServletResponse pResp)
+                    throws EmptyResponseException {
                 return requestHandler.handleGetRequest(pReq.getRequestURI(),pReq.getPathInfo(), getParameterMap(pReq));
             }
         };

@@ -23,6 +23,7 @@ import java.util.*;
 import javax.management.*;
 
 import org.easymock.*;
+import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.request.*;
 import org.jolokia.server.core.restrictor.AllowAllRestrictor;
 import org.jolokia.server.core.service.api.Restrictor;
@@ -174,16 +175,18 @@ public class HttpRequestHandlerTest {
         assertNull(ret.get("Access-Control-Allow-Origin"));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
-    public void invalidJson() throws IOException, EmptyResponseException {
+    @Test(expectedExceptions = BadRequestException.class)
+    public void invalidJson() throws Exception {
         //replay(backend);
+        init();
         InputStream is = HttpTestUtil.createServletInputStream("{ bla;");
         handler.handlePostRequest("/jolokia", is, "utf-8", null);
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
-    public void invalidJson2() throws IOException, EmptyResponseException {
+    @Test(expectedExceptions = BadRequestException.class)
+    public void invalidJson2() throws Exception {
         //replay(backend);
+        init();
         InputStream is = HttpTestUtil.createServletInputStream("12");
         handler.handlePostRequest("/jolokia", is, "utf-8", null);
     }
@@ -202,7 +205,6 @@ public class HttpRequestHandlerTest {
                 new RuntimeMBeanException(new NullPointerException()), 500, 500,
                 new JMException(), 500, 500
         };
-
 
         for (int i = 0; i < exceptions.length; i += 3) {
             Exception e = (Exception) exceptions[i];
@@ -225,8 +227,56 @@ public class HttpRequestHandlerTest {
         }
     }
 
-    // ======================================================================================================
+    @Test
+    public void parameterValidation() throws Exception {
+        init();
+        Map<String, String[]> input = new HashMap<>();
+        input.put(ConfigKey.MAX_DEPTH.getKeyValue(), new String[] { "7" });
+        input.put(ConfigKey.LIST_KEYS.getKeyValue(), new String[] { "on" });
+        input.put(ConfigKey.INCLUDE_STACKTRACE.getKeyValue(), new String[] { "runtime" });
+        ProcessingParameters parameters = handler.getProcessingParameter(input);
 
+        assertEquals(parameters.get(ConfigKey.MAX_DEPTH), "7");
+        assertEquals(parameters.get(ConfigKey.LIST_KEYS), "on");
+        assertEquals(parameters.get(ConfigKey.INCLUDE_STACKTRACE), "runtime");
+    }
+
+    @Test
+    public void failedParameterValidation() throws Exception {
+        init();
+        {
+            Map<String, String[]> input = new HashMap<>();
+            input.put(ConfigKey.MAX_DEPTH.getKeyValue(), new String[]{"7a"});
+            try {
+                handler.getProcessingParameter(input);
+                fail();
+            } catch (BadRequestException e) {
+                assertTrue(e.getMessage().contains(ConfigKey.MAX_DEPTH.getKeyValue()));
+            }
+        }
+        {
+            Map<String, String[]> input = new HashMap<>();
+            input.put(ConfigKey.LIST_KEYS.getKeyValue(), new String[]{"asd"});
+            try {
+                handler.getProcessingParameter(input);
+                fail();
+            } catch (BadRequestException e) {
+                assertTrue(e.getMessage().contains(ConfigKey.LIST_KEYS.getKeyValue()));
+            }
+        }
+        {
+            Map<String, String[]> input = new HashMap<>();
+            input.put(ConfigKey.INCLUDE_STACKTRACE.getKeyValue(), new String[]{"!!!"});
+            try {
+                handler.getProcessingParameter(input);
+                fail();
+            } catch (BadRequestException e) {
+                assertTrue(e.getMessage().contains(ConfigKey.INCLUDE_STACKTRACE.getKeyValue()));
+            }
+        }
+    }
+
+    // ======================================================================================================
 
     private void init() throws Exception {
         init(new AllowAllRestrictor(),new StdoutLogHandler(false));
@@ -260,9 +310,6 @@ public class HttpRequestHandlerTest {
                 .build();
         handler = new HttpRequestHandler(ctx);
     }
-
-
-
 
     private void prepareDispatcher() throws Exception {
         prepareDispatcher(1,JolokiaReadRequest.class);
@@ -305,7 +352,6 @@ public class HttpRequestHandlerTest {
         }
         verify(requestHandler);
     }
-
 
     private JolokiaRequest eqReadRequest(final String pMBean, final String pAttribute) {
         EasyMock.reportMatcher(new IArgumentMatcher() {
