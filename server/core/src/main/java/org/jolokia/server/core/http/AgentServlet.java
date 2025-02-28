@@ -314,6 +314,17 @@ public class AgentServlet extends HttpServlet {
 
             // Dispatch for the proper HTTP request method
             json = handleSecurely(pReqHandler, pReq, pResp);
+        } catch (BadRequestException exp) {
+            String response = "400 (Bad Request)\n";
+            if (exp.getMessage() != null) {
+                response += "\n" + exp.getMessage() + "\n";
+            }
+            pResp.addHeader("Content-Type", "text/plain");
+            pResp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            OutputStream os = pResp.getOutputStream();
+            os.write(response.getBytes());
+            os.close();
+            return;
         } catch (EmptyResponseException exp) {
             // Nothing needs to be done
             return;
