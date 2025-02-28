@@ -307,7 +307,14 @@ in same order as the requests in the initial bulk request.
 [#responses]
 === Responses
 
-Responses are always encoded in UTF-8 JSON, regardless whether the
+All responses are delivered as HTTP responses, but there's clear distinction about HTTP and Jolokia error responses.
+Generally we have 3 kinds of responses:
+
+* suucessful response, which always is delivered with `HTTP 200` (or in special case with `HTTP 30x`) code and contains JSON object (whether the request was single request or bulk request).
+* error response delivered with `HTTP 200` code - this kind of error is related to problems at JMX level, when everything that's needed to perform JMX operation is successfully extracted from HTTP request. For these responses, JMX error may be delivered in JSON response or part of the JSON response where bulk request was sent
+* error response delivered with `HTTP 4xx/5xx` codes - this happens when client sends invalid JSON (and Jolokia can't even determine what should be done) or mismatched request parameters (for example `maxDepth=fourty-two`).
+
+Jolokia responses are always encoded in UTF-8 JSON, regardless whether the
 request was a GET or POST request.  In general, two kinds of
 responses can be classified: In the normal case, an HTTP
 Response with response code `200` is returned, containing the
@@ -319,7 +326,7 @@ https://en.wikipedia.org/wiki/List_of_HTTP_status_codes[this page,role=externalL
 for more information about HTTP error codes..). If the processing option
 `ifModifiedSince` is given and the requested
 value as been not changed since then, a response code of 304 is returned.
-This option is currently only supported by the `LIST` request, for
+This option is currently only supported by the `list` request, for
 other request types the value is always fetched.
 
 In the non-error case a JSON response looks mostly the same
@@ -397,7 +404,7 @@ some errors.
 I.e. the `status` has a code in the range
 `400 .. 499` or `500 .. 599`
 https://en.wikipedia.org/wiki/List_of_HTTP_status_codes[as it is specified for HTTP return codes,role=externalLink,window=_blank].
-The `error` member contains an error
+The `error` JSON field contains an error
 description. This is typically the message of an exception
 occurred on the agent sidefootnote:mbeanexception-wrapping[If the server exception
 is a subtype of `MBeanException`, the wrapped
