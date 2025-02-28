@@ -1069,7 +1069,7 @@
     <plugin.maven-deploy-plugin>3.1.4</plugin.maven-deploy-plugin>
     <plugin.maven-failsafe-plugin>3.5.2</plugin.maven-failsafe-plugin>
     <plugin.maven-gpg-plugin>3.2.7</plugin.maven-gpg-plugin>
-    <plugin.maven-install-plugin>3.1.3</plugin.maven-install-plugin>
+    <plugin.maven-install-plugin>3.1.4</plugin.maven-install-plugin>
     <plugin.maven-jar-plugin>3.4.2</plugin.maven-jar-plugin>
     <plugin.maven-javadoc-plugin>3.11.2</plugin.maven-javadoc-plugin>
     <!-- don't use 3.x (non-boxed org.apache.maven.reporting.AbstractMavenReportRenderer#verbatimLink()) -->
