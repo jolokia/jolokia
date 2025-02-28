@@ -18,6 +18,7 @@ package org.jolokia.server.core.config;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 
 /**
@@ -67,23 +68,23 @@ public enum ConfigKey {
     /**
      * Maximum traversal depth for serialization of complex objects.
      */
-    MAX_DEPTH("maxDepth",true, true),
+    MAX_DEPTH("maxDepth", true, true, null, Integer.class),
 
     /**
      * Maximum size of collections returned during serialization.
      * If larger, the collection is truncated
      */
-    MAX_COLLECTION_SIZE("maxCollectionSize",true, true),
+    MAX_COLLECTION_SIZE("maxCollectionSize", true, true, null, Integer.class),
 
     /**
      * Maximum number of objects returned by serialization
      */
-    MAX_OBJECTS("maxObjects",true, true),
+    MAX_OBJECTS("maxObjects", true, true, null, Integer.class),
 
     /**
      * How to serialize long values: "number" or "string"
      */
-    SERIALIZE_LONG("serializeLong", true, true),
+    SERIALIZE_LONG("serializeLong", true, true, null, String.class),
 
     /**
      * Custom restrictor to be used instead of default one
@@ -107,7 +108,7 @@ public enum ConfigKey {
      * for ignoring errors during JMX operations and JSON serialization.
      * This works only for certain operations like pattern reads.
      */
-    IGNORE_ERRORS("ignoreErrors", false, true),
+    IGNORE_ERRORS("ignoreErrors", false, true, null, String.class),
 
     /**
      * Whether to include a stack trace in the response when an error occurs.
@@ -115,14 +116,14 @@ public enum ConfigKey {
      * should be included or "runtime" if only {@link RuntimeException}s should
      * be included. Default is "false"
      */
-    INCLUDE_STACKTRACE("includeStackTrace", true, true, Constants.FALSE),
+    INCLUDE_STACKTRACE("includeStackTrace", true, true, Constants.FALSE, String.class),
 
     /**
      * Whether to include a JSON serialized version of the exception. If set
      * to "true", the exception is added under the key "error_value" in
      * the response. Default is false.
      */
-    SERIALIZE_EXCEPTION("serializeException", true, true, Constants.FALSE),
+    SERIALIZE_EXCEPTION("serializeException", true, true, Constants.FALSE, Boolean.class),
 
     /**
      * Whether expose extended error information like stacktraces or serialized exception
@@ -137,7 +138,7 @@ public enum ConfigKey {
      * The allowed values are either "true" in which case the canonical key order (== alphabetical
      * sorted) is used or "false" for getting the keys as registered. Default is "true"
      */
-    CANONICAL_NAMING("canonicalNaming", true, true, Constants.TRUE),
+    CANONICAL_NAMING("canonicalNaming", true, true, Constants.TRUE, Boolean.class),
 
     /**
      * Whether to use streaming json responses. Default is "true"
@@ -154,7 +155,7 @@ public enum ConfigKey {
      * The generated answer will be of type text/javascript and it will
      * contain a JavaScript function to be called.
      */
-    CALLBACK("callback", false, true),
+    CALLBACK("callback", false, true, null, String.class),
 
     /**
      * Mime Type to use for the response value. By default, this is
@@ -162,19 +163,19 @@ public enum ConfigKey {
      * <code>application/json</code>, too. A request parameter overrides a global
      * configuration.
      */
-    MIME_TYPE("mimeType", true, true, "application/json"),
+    MIME_TYPE("mimeType", true, true, "application/json", String.class),
 
     /**
      * Whether to include the incoming request in the {@code request} field of the response.
      * Be careful when corelating bulk requests/responses. Defaults to {@code true}.
      */
-    INCLUDE_REQUEST("includeRequest", true, true),
+    INCLUDE_REQUEST("includeRequest", true, true, null, Boolean.class),
 
     /**
      * A request parameter for {@code list} operation, which tells Jolokia to return a map of keys obtained from
      * {@link javax.management.ObjectName#getKeyPropertyList()} under {@code keys} field of the data for an MBean.
      */
-    LIST_KEYS("listKeys", false, true, Constants.FALSE),
+    LIST_KEYS("listKeys", false, true, Constants.FALSE, Boolean.class),
 
     /**
      * For LIST requests, this option can be used to return
@@ -183,13 +184,13 @@ public enum ConfigKey {
      * The timestamp has to be given in seconds since 1.1.1970
      * (epoch time).
      */
-    IF_MODIFIED_SINCE("ifModifiedSince",false,true),
+    IF_MODIFIED_SINCE("ifModifiedSince", false, true, null, Integer.class),
 
     /**
      * Query parameter used for providing a path in order to avoid escaping
      * issues. This can be used as an alternative for path notations
      */
-    PATH_QUERY_PARAM("p",false,true),
+    PATH_QUERY_PARAM("p", false, true, null, String.class),
 
     /**
      * Whether to enable listening and responding to discovery multicast requests
@@ -416,7 +417,7 @@ public enum ConfigKey {
      * Processing parameter used to enable <em>smart list response</em> where JSON data for each {@link javax.management.MBeanInfo}
      * is cached instead of being duplicated for each (potentially the same) MBean of similar class.
      */
-    LIST_CACHE("listCache", false, true, Constants.FALSE);
+    LIST_CACHE("listCache", false, true, Constants.FALSE, Boolean.class);
 
     /**
      * JAAS Subject to attach to an HTTP request as attribute if JAAS based authentication is in use.
@@ -428,10 +429,14 @@ public enum ConfigKey {
     private final String  defaultValue;
     private final boolean globalConfig;
     private final boolean requestConfig;
+    private final Class<?> type;
 
     private static final Map<String, ConfigKey> keyByName;
     private static final Map<String, ConfigKey> globalKeyByName;
     private static final Map<String, ConfigKey> requestKeyByName;
+
+    public static final Set<String> enabledValues = Set.of("true", "on", "yes", "y", "1");
+    public static final Set<String> disabledValues = Set.of("false", "off", "no", "n", "0");
 
     // Build up internal reverse map
     static {
@@ -455,10 +460,15 @@ public enum ConfigKey {
     }
 
     ConfigKey(String pValue, boolean pIsGlobalConfig, boolean pIsRequestConfig, String pDefault) {
+        this(pValue, pIsGlobalConfig, pIsRequestConfig, pDefault, null);
+    }
+
+    ConfigKey(String pValue, boolean pIsGlobalConfig, boolean pIsRequestConfig, String pDefault, Class<?> pType) {
         key = pValue;
         defaultValue = pDefault;
         globalConfig = pIsGlobalConfig;
         requestConfig = pIsRequestConfig;
+        type = pType;
     }
 
     /** {@inheritDoc} */
@@ -519,6 +529,14 @@ public enum ConfigKey {
      */
     public boolean isRequestConfig() {
         return requestConfig;
+    }
+
+    /**
+     * Some keys may declare constraints on their type.
+     * @return
+     */
+    public Class<?> getType() {
+        return type;
     }
 
     /**

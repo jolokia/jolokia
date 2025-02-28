@@ -70,7 +70,7 @@ public abstract class JolokiaRequest {
      * @param pExclusive whether the request is an 'exclusive' request or not.
      */
     protected JolokiaRequest(RequestType pType, List<String> pPathParts, ProcessingParameters pProcessingParams, boolean pExclusive) {
-        this(pType, HttpMethod.GET, pPathParts, pProcessingParams,pExclusive);
+        this(pType, HttpMethod.GET, pPathParts, pProcessingParams, pExclusive);
     }
 
     /**
@@ -81,7 +81,7 @@ public abstract class JolokiaRequest {
      *        JSON request)
      * @param pExclusive  whether the request is an 'exclusive' request or not handled by a single handler only
      */
-    protected JolokiaRequest(Map<String, ?> pMap, ProcessingParameters pProcessingParams,boolean pExclusive) {
+    protected JolokiaRequest(Map<String, ?> pMap, ProcessingParameters pProcessingParams, boolean pExclusive) {
         this(RequestType.getTypeByName((String) pMap.get("type")),
              HttpMethod.POST,
              EscapeUtil.parsePath((String) pMap.get("path")),
@@ -278,11 +278,17 @@ public abstract class JolokiaRequest {
     }
 
     // Init parameters and value fault handler
-    private void initParameters(ProcessingParameters pParams) {
+    private void initParameters(ProcessingParameters pParams) throws BadRequestException {
         processingConfig = pParams;
         String ignoreErrors = processingConfig.get(ConfigKey.IGNORE_ERRORS);
-        if (ignoreErrors != null && ignoreErrors.matches("^(true|yes|on|1)$")) {
-            valueFaultHandler = ValueFaultHandler.IGNORING_VALUE_FAULT_HANDLER;
+        if (ignoreErrors != null) {
+            if (ConfigKey.enabledValues.contains(ignoreErrors.toLowerCase())) {
+                valueFaultHandler = ValueFaultHandler.IGNORING_VALUE_FAULT_HANDLER;
+            } else if (ConfigKey.disabledValues.contains(ignoreErrors.toLowerCase())) {
+                valueFaultHandler = ValueFaultHandler.THROWING_VALUE_FAULT_HANDLER;
+            } else {
+                throw new BadRequestException("Invalid value of " + ConfigKey.IGNORE_ERRORS.getKeyValue() + " parameter");
+            }
         } else {
             valueFaultHandler = ValueFaultHandler.THROWING_VALUE_FAULT_HANDLER;
         }

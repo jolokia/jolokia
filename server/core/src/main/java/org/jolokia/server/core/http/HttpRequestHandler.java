@@ -73,7 +73,8 @@ public class HttpRequestHandler {
      * @param pPathInfo path of the request
      * @param pParameterMap parameters of the GET request  @return the response
      */
-    public JSONStructure handleGetRequest(String pUri, String pPathInfo, Map<String, String[]> pParameterMap) throws EmptyResponseException {
+    public JSONStructure handleGetRequest(String pUri, String pPathInfo, Map<String, String[]> pParameterMap)
+        throws EmptyResponseException {
         String pathInfo = extractPathInfo(pUri, pPathInfo);
 
         JolokiaRequest jmxReq =
@@ -88,21 +89,16 @@ public class HttpRequestHandler {
     }
 
     /**
-     * Alternative query parameter for providing path info.
-     */
-    @SuppressWarnings("unused")
-    public static final String PATH_QUERY_PARAM = "p";
-
-    /**
      * Get processing parameters from a string-string map
      *
      * @param pParameterMap params to extra. A parameter {@link ConfigKey#PATH_QUERY_PARAM} is used as extra path info
      * @return the processing parameters
      */
-    private ProcessingParameters getProcessingParameter(Map<String, String[]> pParameterMap) {
+    ProcessingParameters getProcessingParameter(Map<String, String[]> pParameterMap) throws BadRequestException {
         Map<ConfigKey,String> config = new HashMap<>();
         if (pParameterMap != null) {
             extractRequestParameters(config, pParameterMap);
+            validateRequestParameters(config);
             extractDefaultRequestParameters(config);
         }
         return new ProcessingParameters(config);
@@ -122,15 +118,16 @@ public class HttpRequestHandler {
      * @throws IOException if reading from the input stream fails
      */
     @SuppressWarnings("unchecked")
-    public JSONStructure handlePostRequest(String pUri, InputStream pInputStream, String pEncoding, Map<String, String[]>  pParameterMap)
+    public JSONStructure handlePostRequest(String pUri, InputStream pInputStream, String pEncoding, Map<String, String[]> pParameterMap)
             throws IOException, EmptyResponseException {
         if (jolokiaCtx.isDebug()) {
             jolokiaCtx.debug("URI: " + pUri);
         }
 
+        ProcessingParameters parameters = getProcessingParameter(pParameterMap);
         Object jsonRequest = extractJsonRequest(pInputStream,pEncoding);
         if (jsonRequest instanceof JSONArray) {
-            List<JolokiaRequest> jolokiaRequests = JolokiaRequestFactory.createPostRequests((List<?>) jsonRequest, getProcessingParameter(pParameterMap));
+            List<JolokiaRequest> jolokiaRequests = JolokiaRequestFactory.createPostRequests((List<?>) jsonRequest, parameters);
 
             JSONArray responseList = new JSONArray(jolokiaRequests.size());
             for (JolokiaRequest jmxReq : jolokiaRequests) {
@@ -143,10 +140,10 @@ public class HttpRequestHandler {
             }
             return responseList;
         } else if (jsonRequest instanceof JSONObject) {
-            JolokiaRequest jmxReq = JolokiaRequestFactory.createPostRequest((Map<String, ?>) jsonRequest, getProcessingParameter(pParameterMap));
+            JolokiaRequest jmxReq = JolokiaRequestFactory.createPostRequest((Map<String, ?>) jsonRequest, parameters);
             return executeRequest(jmxReq);
         } else {
-            throw new IllegalArgumentException("Invalid JSON Request " + jsonRequest);
+            throw new BadRequestException("Invalid JSON Request. Expected Object or Array");
         }
     }
 
@@ -177,9 +174,8 @@ public class HttpRequestHandler {
         return ret;
     }
 
-
     private Object extractJsonRequest(InputStream pInputStream, String pEncoding) throws IOException {
-        InputStreamReader reader = null;
+        InputStreamReader reader;
         try {
             reader =
                     pEncoding != null ?
@@ -188,7 +184,8 @@ public class HttpRequestHandler {
             JSONParser parser = new JSONParser();
             return parser.parse(reader);
         } catch (ParseException exp) {
-            throw new IllegalArgumentException("Invalid JSON request " + reader,exp);
+            // JSON parsing error means we can't even know if it's bulk request or not, so HTTP 400
+            throw new BadRequestException("Invalid JSON request", exp);
         }
     }
 
@@ -222,7 +219,6 @@ public class HttpRequestHandler {
         }
     }
 
-
     /**
      * Utility method for handling single runtime exceptions and errors. This method is called
      * in addition to and after {@link #executeRequest(JolokiaRequest)} to catch additional errors.
@@ -240,15 +236,14 @@ public class HttpRequestHandler {
      */
     public JSONObject handleThrowable(Throwable pThrowable) {
         if (pThrowable instanceof IllegalArgumentException) {
-            return getErrorJSON(400,pThrowable, null);
+            return getErrorJSON(400, pThrowable, null);
         } else if (pThrowable instanceof SecurityException) {
             // Wipe out stacktrace
-            return getErrorJSON(403,new Exception(pThrowable.getMessage()), null);
+            return getErrorJSON(403, new Exception(pThrowable.getMessage()), null);
         } else {
-            return getErrorJSON(500,pThrowable, null);
+            return getErrorJSON(500, pThrowable, null);
         }
     }
-
 
     /**
      * Get the JSON representation for an exception.
@@ -277,8 +272,6 @@ public class HttpRequestHandler {
         }
         return jsonObject;
     }
-
-
 
     /**
      * Check whether the given host and/or address is allowed to access this agent.
@@ -332,7 +325,11 @@ public class HttpRequestHandler {
         return null;
     }
 
-    // Extract configuration parameters from the given HTTP request parameters
+    /**
+     * Extract configuration parameters from the given HTTP request parameters
+     * @param pConfig
+     * @param pParameterMap
+     */
     private void extractRequestParameters(Map<ConfigKey, String> pConfig, Map<String, String[]> pParameterMap) {
         for (Map.Entry<String,String[]> entry : pParameterMap.entrySet()) {
             String[] values = entry.getValue();
@@ -341,6 +338,62 @@ public class HttpRequestHandler {
                 if (cKey != null) {
                     Object value = values[0];
                     pConfig.put(cKey, value != null ? value.toString() : null);
+                }
+            }
+        }
+    }
+
+    /**
+     * Validation of parameters. Should be called for provided parameter values. Not necessary for built-in/default
+     * values.
+     * @param config
+     */
+    private void validateRequestParameters(Map<ConfigKey, String> config) throws BadRequestException {
+        // parameters that may be passed with HTTP request:
+        //  + callback
+        //  + canonicalNaming
+        //  + ifModifiedSince
+        //  + ignoreErrors (validated in org.jolokia.server.core.request.JolokiaRequest.initParameters())
+        //  + includeRequest
+        //  + includeStackTrace (to be validated in org.jolokia.server.core.http.HttpRequestHandler.addErrorInfo())
+        //  + listCache
+        //  + listKeys
+        //  + maxCollectionSize
+        //  + maxDepth
+        //  + maxObjects
+        //  + mimeType
+        //  + p
+        //  + serializeException
+        //  + serializeLong
+        for (Map.Entry<ConfigKey, String> e : config.entrySet()) {
+            ConfigKey key = e.getKey();
+            String value = e.getValue();
+            Class<?> type = key.getType();
+
+            if (type == null) {
+                continue;
+            }
+
+            if (type == Boolean.class) {
+                String v = value.trim().toLowerCase();
+                if (!(ConfigKey.enabledValues.contains(v) || ConfigKey.disabledValues.contains(v))) {
+                    throw new BadRequestException("Invalid value of " + key.getKeyValue() + " parameter");
+                }
+            } else if (type == Integer.class) {
+                String v = value.trim();
+                try {
+                    Integer.parseInt(v);
+                } catch (NumberFormatException ex) {
+                    throw new BadRequestException("Invalid value of " + key.getKeyValue() + " parameter");
+                }
+            } else if (type == String.class) {
+                // validate selected keys
+                if (key == ConfigKey.INCLUDE_STACKTRACE) {
+                    String v = value.trim().toLowerCase();
+                    if (!(ConfigKey.enabledValues.contains(v) || ConfigKey.disabledValues.contains(v)
+                            || v.equals("runtime"))) {
+                        throw new BadRequestException("Invalid value of " + ConfigKey.INCLUDE_STACKTRACE.getKeyValue() + " parameter");
+                    }
                 }
             }
         }
@@ -356,7 +409,6 @@ public class HttpRequestHandler {
             }
         }
     }
-
 
     private void addErrorInfo(JSONObject pErrorResp, Throwable pExp, JolokiaRequest pJmxReq) {
         if (Boolean.parseBoolean(jolokiaCtx.getConfig(ConfigKey.ALLOW_ERROR_DETAILS))) {
