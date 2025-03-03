@@ -23,6 +23,14 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
+    <release version="2.2.3" description="Release 2.2.3" date="2025-03-03">
+      <action dev="grgrzybek" type="fix" issue="804">
+        Review HTTP/Jolokia response codes in case of errors.
+      </action>
+      <action dev="grgrzybek" type="fix" issue="740">
+        Removing deprecated Spring Boot registration code.
+      </action>
+    </release>
     <release version="2.2.2" description="Release 2.2.2" date="2025-02-05">
       <action dev="tadayosi" type="fix" issue="796">
         Fix slow startup time on MacOS.

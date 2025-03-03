@@ -15,6 +15,19 @@
 ////
 == News
 
+=== Jolokia 2.2.3 released
+
+[.news-date]
+2025-03-03
+
+We're happy to announce Jolokia micro release 2.2.3.
+
+We've switched from https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-3.3-Release-Notes#deprecations-in-spring-boot-330[deprecated Spring Boot API for registering endpoints] to `@WebEndpoint` API, so we're ready for newer Spring Boot versions (this deprecated API is going to be removed in Spring Boot 3.5).
+
+Part of maintenance and review work, we've clarified usage of HTTP response codes. As https://jolokia.org/reference/html/manual/jolokia_protocol.html#responses[the reference documentation states], Jolokia responses have two kinds of return codes - HTTP response status and Jolokia response status. With Jolokia 2.2.3 we treat _all_ non-JMX errors as _global_ errors, which result in HTTP status different than 200. The important aspect of this change is that both JSON parsing error and request parameter (from URI) handling errors end with HTTP 400 status ("Bad Request").
+
+Refer to https://jolokia.org/changes-report.html#a2.2.3[changelog] and https://github.com/jolokia/jolokia/releases/tag/v2.2.3[GitHub release notes] for more details.
+
 === Jolokia 2.2.2 released
 
 [.news-date]
