@@ -19,7 +19,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>jolokia-tools-siteskin</artifactId>
-  <version>2.2.3-SNAPSHOT</version>
+  <version>2.2.3</version>
   <packaging>jar</packaging>
 
   <name>jolokia-tools-siteskin</name>
@@ -28,7 +28,7 @@
   <parent>
     <groupId>org.jolokia</groupId>
     <artifactId>jolokia-parent</artifactId>
-    <version>2.2.3-SNAPSHOT</version>
+    <version>2.2.3</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
