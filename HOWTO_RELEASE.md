@@ -340,6 +340,7 @@ branch of Jolokia and pushed the changes:
 ```console
 git checkout gh-pages
 # copy changed site
+grep -lr 2.2.4-SNAPSHOT | xargs sed -i 's/2.2.4-SNAPSHOT/2.2.3/g'
 git add .
 git commit -m '[site] Generate new Jolokia site'
 git push origin HEAD
