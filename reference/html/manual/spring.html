@@ -112,7 +112,7 @@
 <p>A lot has changed since Jolokia initial release. While Spring Framework was already popular back then, in the meantime we&#8217;ve observed a general shift away from XML into Java and annotation-based configuration.</p>
 </div>
 <div class="paragraph">
-<p>W also can&#8217;t forget about popularity of <a href="https://spring.io/projects/spring-boot" class="externalLink" target="_blank" rel="noopener">Spring Boot</a>.</p>
+<p>We also can&#8217;t forget about popularity of <a href="https://spring.io/projects/spring-boot" class="externalLink" target="_blank" rel="noopener">Spring Boot</a>.</p>
 </div>
 </div>
 </div>
@@ -123,7 +123,7 @@
 <p>Jolokia support was added to Spring Boot <a href="https://github.com/spring-projects/spring-boot/commit/2d058570ca9834b24b43e3d6387ef5aa5264d0e4" class="externalLink" target="_blank" rel="noopener">in version 0.5.0</a>. It was <a href="https://github.com/spring-projects/spring-boot/commit/86334403ed547ade2cff7376ac327a773d0dafc7" class="externalLink" target="_blank" rel="noopener">Jolokia 1.1.5</a>.</p>
 </div>
 <div class="paragraph">
-<p>Jolokia support is based on the concept of <a href="https://docs.spring.io/spring-boot/docs/2.7.18/reference/html/actuator.html#actuator.jmx.jolokia" class="externalLink" target="_blank" rel="noopener"><em>actuator</em></a> and when Spring Boot detects Jolokia libraries on the CLASSPATH, special <code>/actuator/jolokia</code> endpoint becomes available.</p>
+<p>Jolokia integration with Spring Boot is based on the concept of <a href="https://docs.spring.io/spring-boot/docs/2.7.18/reference/html/actuator.html#actuator.jmx.jolokia" class="externalLink" target="_blank" rel="noopener"><em>actuator</em></a> and when Spring Boot detects Jolokia libraries on the CLASSPATH, special <code>/actuator/jolokia</code> endpoint becomes available.</p>
 </div>
 <div class="paragraph">
 <p>Spring Boot uses auto-configuration to detect potential <code>@Configuration</code> classes and this mechanism is described in <a href="https://docs.spring.io/spring-boot/docs/2.7.18/reference/htmlsingle/#features.developing-auto-configuration.locating-auto-configuration-candidates" class="externalLink" target="_blank" rel="noopener">Locating Auto-configuration Candidates</a> chapter of Spring Boot documentation.</p>
@@ -138,7 +138,7 @@
 <p>To get fuller picture, <a href="https://github.com/spring-projects/spring-boot/issues/37568" class="externalLink" target="_blank" rel="noopener">an attempt to restore Spring Boot 3 support for Jolokia 2 was closed</a>, with <a href="https://github.com/jolokia/jolokia/issues/568#issuecomment-1786634151" class="externalLink" target="_blank" rel="noopener">good explanation</a>.</p>
 </div>
 <div class="paragraph">
-<p>The following paragraphs describe support for Spring Framework and Spring Boot in Jolokia (so the opposite of the above).</p>
+<p>The following paragraphs describe support for Spring Framework and Spring Boot in Jolokia (so the opposite of the above, where it was Spring that provided support for Jolokia).</p>
 </div>
 </div>
 </div>
@@ -153,7 +153,7 @@
 <pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
   &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
   &lt;artifactId&gt;jolokia-support-spring&lt;/artifactId&gt;
-  &lt;version&gt;2.2.2&lt;/version&gt;
+  &lt;version&gt;2.2.3&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -197,7 +197,7 @@ uses JDK&#8217;s own HTTP Server which comes with OpenJDK/Oracle JVMs (Version 1
 <div class="content">
 <div class="title">IDE support</div>
 <div class="paragraph">
-<p>With a decent IDE like IntelliJ IDEA you get completion support
+<p>With a decent IDE like IntelliJ IDEA or Eclipse, you get completion support
 on the configuration attributes so it can be easily determined
 which configuration options are available. Even better, there is also
 some documentation for each attribute (e.g. by using "Quick
@@ -207,7 +207,7 @@ documentation" with CTRL-Q in IDEA).</p>
 </div>
 <div class="paragraph">
 <p>Just in case you don&#8217;t want to use the Jolokia Spring namespace you can also
-use plain beans to configure a JVM agent. The following examples shows the example above with
+use plain beans to configure a JVM agent. The following examples show the same scenario as above with
 only base Spring bean configurations (including an Spring EL expression):</p>
 </div>
 <div class="listingblock">
@@ -409,7 +409,7 @@ except when annotated with <code>@JsonMBean</code>.</p>
 <p><a href="https://spring.io/projects/spring-boot" class="externalLink" target="_blank" rel="noopener">Spring Boot</a> is using all functionality from Spring Framework and adds a lot of convenient programming and architecture patterns (idioms) for developers.</p>
 </div>
 <div class="paragraph">
-<p>With pure Spring Framework, we had to declare <code>org.jolokia.support.spring.SpringJolokiaAgent</code> directly or using <code>&lt;jolokia:agent&gt;</code> custom element. We could also use <code>@Configuration</code> and <code>@Bean</code> annotations. However Spring Boot provides several other methods to provide Jolokia functionality to your Spring application.</p>
+<p>With pure Spring Framework, we had to declare <code>org.jolokia.support.spring.SpringJolokiaAgent</code> directly or using <code>&lt;jolokia:agent&gt;</code> custom element. We could also use <code>@Configuration</code> and <code>@Bean</code> annotations. However Spring Boot provides several other methods for bringing Jolokia functionality into your Spring application.</p>
 </div>
 <div class="sect2">
 <h3 id="_registering_agent_servlet_as_spring_bean"><a class="anchor" href="#_registering_agent_servlet_as_spring_bean"></a>Registering Agent servlet as Spring bean</h3>
@@ -469,7 +469,7 @@ public class AppConfig {
 <p><a href="https://docs.spring.io/spring-boot/docs/3.2.0/reference/htmlsingle/#actuator.endpoints" class="externalLink" target="_blank" rel="noopener">Spring Boot actuator endpoints</a> allow to access various controls in your application.</p>
 </div>
 <div class="paragraph">
-<p>While Spring Boot 3 removed auto-configuration of Jolokia 1 actuator endpoint (because of JakartaEE 9+ incompatibility with Jolokia 1 servlet), Jolokia 2 now provides own auto-configuration in <code>org.jolokia:jolokia-support-spring</code>.</p>
+<p>While Spring Boot 3 removed auto-configuration of Jolokia 1 actuator endpoint (because of JakartaEE 9+ incompatibility with Jolokia 1 Servlet API), Jolokia 2 now provides own auto-configuration in <code>org.jolokia:jolokia-support-spring</code>.</p>
 </div>
 <div class="paragraph">
 <p>With just few dependencies:</p>
@@ -479,7 +479,7 @@ public class AppConfig {
 <pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
   &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
   &lt;artifactId&gt;jolokia-support-spring&lt;/artifactId&gt;
-  &lt;version&gt;2.2.2&lt;/version&gt;
+  &lt;version&gt;2.2.3&lt;/version&gt;
 &lt;/dependency&gt;
 
 &lt;dependency&gt;
@@ -534,10 +534,10 @@ Because <a href="https://docs.spring.io/spring-boot/docs/3.2.0/reference/htmlsin
     "type": "version"
   },
   "value": {
-    "agent": "2.2.2",
+    "agent": "2.2.3",
     "protocol": "7.2",
     "details": {
-      "agent_version": "2.2.2",
+      "agent_version": "2.2.3",
       "agent_id": "192.168.0.221-91398-4ee6c0f5-servlet",
       "agent_description": "Jolokia Spring Boot Actuator agent",
       "secured": false,

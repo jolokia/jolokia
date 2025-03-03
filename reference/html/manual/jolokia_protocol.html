@@ -494,7 +494,24 @@ in same order as the requests in the initial bulk request.</p>
 <div class="sect2">
 <h3 id="responses"><a class="anchor" href="#responses"></a>Responses</h3>
 <div class="paragraph">
-<p>Responses are always encoded in UTF-8 JSON, regardless whether the
+<p>All responses are delivered as HTTP responses, but there&#8217;s clear distinction about HTTP and Jolokia error responses.
+Generally we have 3 kinds of responses:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>suucessful response, which always is delivered with <code>HTTP 200</code> (or in special case with <code>HTTP 30x</code>) code and contains JSON object (whether the request was single request or bulk request).</p>
+</li>
+<li>
+<p>error response delivered with <code>HTTP 200</code> code - this kind of error is related to problems at JMX level, when everything that&#8217;s needed to perform JMX operation is successfully extracted from HTTP request. For these responses, JMX error may be delivered in JSON response or part of the JSON response where bulk request was sent</p>
+</li>
+<li>
+<p>error response delivered with <code>HTTP 4xx/5xx</code> codes - this happens when client sends invalid JSON (and Jolokia can&#8217;t even determine what should be done) or mismatched request parameters (for example <code>maxDepth=fourty-two</code>).</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Jolokia responses are always encoded in UTF-8 JSON, regardless whether the
 request was a GET or POST request.  In general, two kinds of
 responses can be classified: In the normal case, an HTTP
 Response with response code <code>200</code> is returned, containing the
@@ -506,7 +523,7 @@ occurred (e.g. <code>404</code> means "not found"). (See
 for more information about HTTP error codes..). If the processing option
 <code>ifModifiedSince</code> is given and the requested
 value as been not changed since then, a response code of 304 is returned.
-This option is currently only supported by the <code>LIST</code> request, for
+This option is currently only supported by the <code>list</code> request, for
 other request types the value is always fetched.</p>
 </div>
 <div class="paragraph">
@@ -590,7 +607,7 @@ some errors.</p>
 <p>I.e. the <code>status</code> has a code in the range
 <code>400 .. 499</code> or <code>500 .. 599</code>
 <a href="https://en.wikipedia.org/wiki/List_of_HTTP_status_codes" class="externalLink" target="_blank" rel="noopener">as it is specified for HTTP return codes</a>.
-The <code>error</code> member contains an error
+The <code>error</code> JSON field contains an error
 description. This is typically the message of an exception
 occurred on the agent side<sup class="footnote" id="_footnote_mbeanexception-wrapping">[<a id="_footnoteref_4" class="footnote" href="#_footnotedef_4" title="View footnote.">4</a>]</sup>. Finally, <code>error_type</code> contains the Java class name
 of the exception occurred.
@@ -2735,10 +2752,10 @@ provided as path info.</p>
     "type": "version"
   },
   "value": {
-    "agent": "2.2.2",
+    "agent": "2.2.3",
     "protocol": "7.2",
     "details": {
-      "agent_version": "2.2.2",
+      "agent_version": "2.2.3",
       "agent_id": "192.168.0.221-21185-5ce94d31-servlet",
       "server_product": "tomcat",
       "server_vendor": "Apache",
@@ -3637,7 +3654,7 @@ the following format</p>
 <div class="listingblock">
 <div class="content">
 <pre>$ echo '{"type":"query"}' | socat STDIO UDP4-DATAGRAM:239.192.48.84:24884
-{"agent_version":"2.2.2","agent_id":"jolokia-7778","type":"response","secured":false,"url":"http://192.168.0.165:7778/jolokia/"}{"agent_version":"2.2.2","agent_id":"jolokia-7779","type":"response","secured":false,"url":"http://192.168.0.165:7778/jolokia/"}</pre>
+{"agent_version":"2.2.3","agent_id":"jolokia-7778","type":"response","secured":false,"url":"http://192.168.0.165:7778/jolokia/"}{"agent_version":"2.2.3","agent_id":"jolokia-7779","type":"response","secured":false,"url":"http://192.168.0.165:7778/jolokia/"}</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -3646,7 +3663,7 @@ the following format</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "agent_version": "2.2.2",
+  "agent_version": "2.2.3",
   "agent_id": "192.168.0.221-67980-7e985ce9-servlet",
   "server_product": "tomcat",
   "type": "response",
