@@ -16,15 +16,21 @@
 package org.jolokia.support.spring.actuator;
 
 import org.jolokia.server.core.http.AgentServlet;
+import org.springframework.boot.actuate.autoconfigure.endpoint.condition.ConditionalOnAvailableEndpoint;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication.Type;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Condition;
 
 /**
- * This autoconfiguration ensures that we can see {@code /jolokia} link under {@link /actuator} page.
- * We don't declare any {@link Bean} that registers servlet or controller.
+ * <p>This autoconfiguration ensures that we can see {@code /jolokia} link under {@code /actuator} page.
+ * We don't declare any {@link Bean} that registers a servlet or a controller.</p>
+ *
+ * <p>Note: Adding {@link ConditionalOnAvailableEndpoint} on the bean method that produces the endpoint in
+ * the first place is completely fine - related {@link Condition} will check proper exposure config amd
+ * Spring will not even create {@link JolokiaWebEndpoint} in the first place.</p>
  */
 @AutoConfiguration
 @ConditionalOnWebApplication(type = Type.SERVLET)
@@ -32,6 +38,7 @@ import org.springframework.context.annotation.Bean;
 public class JolokiaWebEndpointAutoConfiguration {
 
     @Bean
+    @ConditionalOnAvailableEndpoint
     public JolokiaWebEndpoint jolokiaManagementEndpoint() {
         return new JolokiaWebEndpoint();
     }
