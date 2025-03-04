@@ -487,6 +487,16 @@ Jolokia.isError = Jolokia.prototype.isError = function (resp: JolokiaResponse): 
   return resp == null || resp.status != 200
 }
 
+Jolokia.isResponseSuccess = function(resp: unknown): resp is JolokiaSuccessResponse {
+  if (!resp || typeof resp !== 'object') return false
+  return 'status' in resp && 'timestamp' in resp && 'value' in resp
+}
+
+Jolokia.isResponseError = function(resp: unknown): resp is JolokiaErrorResponse {
+  if (!resp || typeof resp !== 'object') return false
+  return 'error_type' in resp && 'error' in resp
+}
+
 // ++++++++++++++++++++++++++++++++++++++++++++++++++
 // Private/internal functions that don't have access to Jolokia() scope variables
 // (unless these are passed explicitly)

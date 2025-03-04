@@ -927,6 +927,20 @@ interface JolokiaStatic {
    * @return true if response is an error, false otherwise
    */
   isError(resp: JolokiaResponse): resp is JolokiaErrorResponse
+
+  /**
+   * Utility method which checks whether a response is success response (HTTP perspective)
+   * @param resp response to check
+   * @return true if response is a success
+   */
+  isResponseSuccess(resp: unknown): resp is JolokiaSuccessResponse
+
+  /**
+   * Utility method which checks whether a response is an error response (HTTP perspective)
+   * @param resp response to check
+   * @return true if response is a success
+   */
+  isResponseError(resp: unknown): resp is JolokiaErrorResponse
 }
 
 /**
