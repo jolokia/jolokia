@@ -17,6 +17,7 @@ package org.jolokia.support.spring.actuator;
 
 import org.jolokia.server.core.http.AgentServlet;
 import org.springframework.boot.actuate.autoconfigure.endpoint.condition.ConditionalOnAvailableEndpoint;
+import org.springframework.boot.actuate.autoconfigure.endpoint.expose.EndpointExposure;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -38,7 +39,7 @@ import org.springframework.context.annotation.Condition;
 public class JolokiaWebEndpointAutoConfiguration {
 
     @Bean
-    @ConditionalOnAvailableEndpoint
+    @ConditionalOnAvailableEndpoint(exposure = EndpointExposure.WEB)
     public JolokiaWebEndpoint jolokiaManagementEndpoint() {
         return new JolokiaWebEndpoint();
     }
