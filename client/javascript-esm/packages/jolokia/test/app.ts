@@ -32,6 +32,7 @@ app.use("/jolokia-timeout", (_req, res) => {
   setTimeout(() => {
     res.status(200).json({
       request: { type: "version" },
+      timestamp: Date.now(),
       value: {
         agent: "2.1.0",
         protocol: "8.0"
