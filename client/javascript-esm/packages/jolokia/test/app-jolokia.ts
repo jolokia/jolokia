@@ -15,6 +15,7 @@
  */
 
 import express from "express"
+import { domains } from "./jolokia-list-domains.js"
 
 const jolokiaRouter = express.Router()
 
@@ -26,6 +27,7 @@ jolokiaRouter.all("*", (_req, res, next) => {
 jolokiaRouter.get("/version", (_req, res) => {
   res.status(200).json({
     status: 200,
+    timestamp: Date.now(),
     request: { type: "version" },
     value: {
       agent: "2.1.0",
@@ -44,6 +46,7 @@ jolokiaRouter.post("/*", (req, res) => {
       if (v.type === "version") {
         response.push({
           status: 200,
+          timestamp: Date.now(),
           request: v,
           value: {
             agent: "2.1.0",
@@ -53,6 +56,7 @@ jolokiaRouter.post("/*", (req, res) => {
       } else {
         response.push({
           status: 200,
+          timestamp: Date.now(),
           request: v,
           value: "Hello"
         })
@@ -75,6 +79,7 @@ jolokiaRouter.post("/*", (req, res) => {
     case "version": {
       res.status(200).json({
         status: 200,
+        timestamp: Date.now(),
         request: { type: "version" },
         value: {
           agent: "2.1.0",
@@ -83,9 +88,19 @@ jolokiaRouter.post("/*", (req, res) => {
       })
       break
     }
+    case "list": {
+      res.status(200).json({
+        status: 200,
+        timestamp: Date.now(),
+        request: { type: "version" },
+        value: domains
+      })
+      break
+    }
     default: {
       res.status(200).json({
         status: 500,
+        timestamp: Date.now(),
         request: body,
         error_type: "java.lang.UnsupportedOperationException",
         error: "java.lang.UnsupportedOperationException : No type with name '" + body.type + "' exists"
