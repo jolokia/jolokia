@@ -15,6 +15,15 @@
 ////
 == News
 
+=== Jolokia 2.2.4 released
+
+[.news-date]
+2025-03-05
+
+Few days after release 2.2.3, we're releasing version 2.2.4 with single change related to Spring Boot Jolokia actuator. It is no longer _active_ in _JMX exposure_. While Jolokia is all about JMX, it is about adapting JMX protocol with JSON/HTTP. We're clarifying usage of `@ConditionalOnAvailableEndpoint` annotation.
+
+Refer to https://jolokia.org/changes-report.html#a2.2.4[changelog] and https://github.com/jolokia/jolokia/releases/tag/v2.2.4[GitHub release notes] for more details.
+
 === Jolokia 2.2.3 released
 
 [.news-date]

@@ -31,7 +31,7 @@
   "dependencies": {
     "d3": "^7.9.0",
     "d3-selection": "3",
-    "jolokia.js": "workspace:^"
+    "jolokia.js": "2.2.3"
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",

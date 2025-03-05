@@ -29,7 +29,7 @@
     "test:jolokia-simple": "yarn node --experimental-vm-modules $(yarn bin jest)"
   },
   "dependencies": {
-    "jolokia.js": "workspace:^"
+    "jolokia.js": "2.2.3"
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",

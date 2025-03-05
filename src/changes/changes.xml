@@ -23,6 +23,11 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
+    <release version="2.2.4" description="Release 2.2.4" date="2025-03-05">
+      <action dev="grgrzybek" type="fix" issue="808">
+        (Spring Boot) Use Jolokia actuator only as web exposure
+      </action>
+    </release>
     <release version="2.2.3" description="Release 2.2.3" date="2025-03-03">
       <action dev="grgrzybek" type="fix" issue="804">
         Review HTTP/Jolokia response codes in case of errors.
