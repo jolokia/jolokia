@@ -276,6 +276,11 @@ Jolokia.prototype.list = async function(this: IJolokia, ...params: (string[] | s
     })
 }
 
+Jolokia.prototype.isVersionResponse = function (resp: unknown): resp is VersionResponseValue {
+  if (!resp || typeof resp !== 'object') return false
+  return 'protocol' in resp && 'agent' in resp
+}
+
 // ++++++++++++++++++++++++++++++++++++++++++++++++++
 // Private/internal functions
 

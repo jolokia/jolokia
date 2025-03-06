@@ -130,4 +130,15 @@ describe("Jolokia simple API", () => {
     expect(Object.keys((v as ListResponseValue)!)[0]).toBe("JMImplementation")
   })
 
+  test("Simple Version Response", async () => {
+    const jolokia = new Jolokia({ url: `http://localhost:${port}/jolokia-simple` }) as IJolokiaSimple
+    const v = await jolokia.version()
+    expect(jolokia.isVersionResponse(v)).toBe(true)
+  })
+
+  test("Simple Not a Version Response", async () => {
+    const jolokia = new Jolokia({ url: `http://localhost:${port}/jolokia-simple` }) as IJolokiaSimple
+    const v = await jolokia.list()
+    expect(jolokia.isVersionResponse(v)).toBe(false)
+  })
 })

@@ -19,6 +19,7 @@ import request from "supertest"
 
 import http from "node:http"
 import Jolokia, {
+  IJolokia,
   JolokiaResponse,
   JolokiaSuccessResponse,
   NotificationPullValue,
@@ -59,7 +60,7 @@ describe("Jolokia basic tests", () => {
     // properties from the prototype
     const expected: { [k: string]: string } = {}
     for (const k in j) {
-      expected[k] = typeof j[k as keyof typeof Jolokia]
+      expected[k] = typeof j[k as keyof IJolokia]
     }
 
     expect(Object.keys(expected).length).toBe(13)
@@ -150,6 +151,26 @@ describe("Jolokia HTTP tests", () => {
         .then((response) => {
           expect(response.body.value.agent).toBe("2.1.0")
         })
+  })
+
+  test("Test Success Response", async () => {
+    return request(server)
+      .get("/jolokia/version")
+      .expect(200)
+      .then((response) => {
+        expect(Jolokia.isResponseSuccess(response.body)).toBe(true)
+        expect(Jolokia.isResponseError(response.body)).toBe(false)
+      })
+  })
+
+  test("Test Error Response", async () => {
+    return request(server)
+      .post("/jolokia/hello")
+      .expect(200)
+      .then((response) => {
+        expect(Jolokia.isResponseSuccess(response.body)).toBe(false)
+        expect(Jolokia.isResponseError(response.body)).toBe(true)
+    })
   })
 
   // test("Test with connect timeout", async () => {
