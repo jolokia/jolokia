@@ -29,6 +29,8 @@ We've also found problems with Spring Boot options:
 * management.endpoints.web.base-path - Actuator prefix
 * management.endpoints.web.path-mapping - for additional customization of Endpoint -> URI path mapping
 
+Now, whatever combination of these options is used, Jolokia will register correct actuator endpoint and use correct Agent URL in `version` response.
+
 Refer to https://jolokia.org/changes-report.html#a2.2.6[changelog] and https://github.com/jolokia/jolokia/releases/tag/v2.2.6[GitHub release notes] for more details.
 
 === Jolokia 2.2.4 released
