@@ -793,7 +793,7 @@ __metadata:
     d3: "npm:^7.9.0"
     d3-selection: "npm:3"
     jest: "npm:^29.7.0"
-    jolokia.js: "npm:2.2.3"
+    jolokia.js: "npm:2.2.4"
     rollup: "npm:^4.22.4"
   languageName: unknown
   linkType: soft
@@ -806,7 +806,7 @@ __metadata:
     "@rollup/plugin-node-resolve": "npm:^15.2.3"
     "@rollup/plugin-terser": "npm:^0.4.4"
     jest: "npm:^29.7.0"
-    jolokia.js: "npm:2.2.3"
+    jolokia.js: "npm:2.2.4"
     rollup: "npm:^4.22.4"
   languageName: unknown
   linkType: soft
@@ -4639,7 +4639,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jolokia.js@npm:2.2.3, jolokia.js@workspace:packages/jolokia":
+"jolokia.js@npm:2.2.4, jolokia.js@workspace:packages/jolokia":
   version: 0.0.0-use.local
   resolution: "jolokia.js@workspace:packages/jolokia"
   dependencies:
