@@ -15,14 +15,21 @@
 ////
 == News
 
-=== Jolokia 2.2.5 released
+=== Jolokia 2.2.5 and 2.2.6 released
 
 [.news-date]
 2025-03-10
 
-We're announcing new micro release of Jolokia 2.2.5, where `org.jolokia:jolokia-support-spring` module no longer depends on `org.springframework.boot:spring-boot-starter-logging`. Thanks Benjamin Graf for spotting this issue!
+We're announcing new micro release of Jolokia 2.2.6, where `org.jolokia:jolokia-support-spring` module no longer depends on `org.springframework.boot:spring-boot-starter-logging`. Thanks Benjamin Graf for spotting this issue!
+We've also found problems with Spring Boot options:
 
-Refer to https://jolokia.org/changes-report.html#a2.2.5[changelog] and https://github.com/jolokia/jolokia/releases/tag/v2.2.5[GitHub release notes] for more details.
+* server.servlet.context-path - context path for _main_ Spring context
+* management.server.base-path - context path for _management_ Spring context (when it's separate from _main_ one)
+* spring.mvc.servlet.path - dispatcher servlet prefix for _main_ context
+* management.endpoints.web.base-path - Actuator prefix
+* management.endpoints.web.path-mapping - for additional customization of Endpoint -> URI path mapping
+
+Refer to https://jolokia.org/changes-report.html#a2.2.6[changelog] and https://github.com/jolokia/jolokia/releases/tag/v2.2.6[GitHub release notes] for more details.
 
 === Jolokia 2.2.4 released
 
