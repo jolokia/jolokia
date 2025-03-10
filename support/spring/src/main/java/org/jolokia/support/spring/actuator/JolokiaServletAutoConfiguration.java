@@ -20,6 +20,7 @@ import org.springframework.boot.actuate.autoconfigure.endpoint.condition.Conditi
 import org.springframework.boot.actuate.autoconfigure.endpoint.expose.EndpointExposure;
 import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
 import org.springframework.boot.actuate.autoconfigure.web.ManagementContextConfiguration;
+import org.springframework.boot.actuate.autoconfigure.web.ManagementContextType;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication.Type;
@@ -30,8 +31,9 @@ import org.springframework.context.annotation.Bean;
 /**
  * This autoconfiguration is for "management context" and provides a {@link AgentServlet Jolokia Servlet} registration
  * {@link Bean} that simply calls {@link jakarta.servlet.ServletContext#addServlet}.
+ * This is generic configuration whether or not the <em>management context</em> is separate from <em>main context</em>.
  */
-@ManagementContextConfiguration
+@ManagementContextConfiguration(value = ManagementContextType.ANY)
 @ConditionalOnWebApplication(type = Type.SERVLET)
 @ConditionalOnClass(AgentServlet.class)
 @ConditionalOnAvailableEndpoint(endpoint = JolokiaWebEndpoint.class, exposure = EndpointExposure.WEB)
