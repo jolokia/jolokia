@@ -15,6 +15,15 @@
 ////
 == News
 
+=== Jolokia 2.2.5 released
+
+[.news-date]
+2025-03-10
+
+We're announcing new micro release of Jolokia 2.2.5, where `org.jolokia:jolokia-support-spring` module no longer depends on `org.springframework.boot:spring-boot-starter-logging`. Thanks Benjamin Graf for spotting this issue!
+
+Refer to https://jolokia.org/changes-report.html#a2.2.5[changelog] and https://github.com/jolokia/jolokia/releases/tag/v2.2.5[GitHub release notes] for more details.
+
 === Jolokia 2.2.4 released
 
 [.news-date]

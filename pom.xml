@@ -1049,7 +1049,7 @@
     <sonar.projectKey>org.jolokia:jolokia-2.0</sonar.projectKey>
 
     <!-- A version used in documentation -->
-    <currentStableVersion>2.2.4</currentStableVersion>
+    <currentStableVersion>2.2.5</currentStableVersion>
     <!-- Jolokia protocol version -->
     <protocolVersion>8.0</protocolVersion>
 
