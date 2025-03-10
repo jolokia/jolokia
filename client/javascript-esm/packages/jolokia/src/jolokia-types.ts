@@ -407,8 +407,8 @@ export type JolokiaResponse = {
  * (specific to given request type) are contained in `value` field.
  */
 export type JolokiaSuccessResponse = JolokiaResponse & {
-  /** Original request for this response */
-  request: JolokiaRequest
+  /** Original request for this response. May be missing if `includeRequest` is `false`. */
+  request?: JolokiaRequest
   /** Value returned for the request. Can be null for WriteRequest, but still the value should be available */
   value: string | number | boolean | JolokiaResponseValue | null
   /** History of previous responses for given reques (if History interceptor is available) */
