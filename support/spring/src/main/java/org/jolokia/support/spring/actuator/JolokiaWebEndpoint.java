@@ -15,8 +15,13 @@
  */
 package org.jolokia.support.spring.actuator;
 
+import java.util.Map;
+
+import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
+import org.springframework.boot.actuate.autoconfigure.web.server.ManagementServerProperties;
 import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
 import org.springframework.boot.actuate.endpoint.web.annotation.WebEndpoint;
+import org.springframework.boot.autoconfigure.web.servlet.DispatcherServletPath;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -26,15 +31,44 @@ import org.springframework.web.servlet.ModelAndView;
 @WebEndpoint(id = "jolokia")
 public class JolokiaWebEndpoint {
 
+    private final ManagementServerProperties managementServerProperties;
+    private final WebEndpointProperties webEndpointProperties;
+    private final DispatcherServletPath dispatcherServletPath;
+
+    public JolokiaWebEndpoint(ManagementServerProperties managementServerProperties, WebEndpointProperties webEndpointProperties, DispatcherServletPath dispatcherServletPath) {
+        this.managementServerProperties = managementServerProperties;
+        this.webEndpointProperties = webEndpointProperties;
+        this.dispatcherServletPath = dispatcherServletPath;
+    }
+
     /**
      * This operation is not invoked, because actual {@link JolokiaServletRegistration Jolokia servlet registration}
-     * is overriding {@code /actuator/jolokia/*} mapping - taking into account actuator base/context path
-     * configuration
+     * is overriding {@code /actuator/jolokia/*} mapping (taking into account actuator base/context path
+     * configuration). Only when Jolokia's servlet is not registered, this method will be used to redirect to
+     * non-existing {@link /version} URL.
      * @return
      */
     @ReadOperation
     public ModelAndView jolokia() {
-        return new ModelAndView("redirect:/actuator/jolokia/version");
+        // org.springframework.web.servlet.view.RedirectView which is used for "redirect:" is by default
+        // context-relative, so we don't have to check what is:
+        //  - server.servlet.context-path when there's one context
+        //  - management.server.base-path when server.port is different than management.server.port
+
+        // spring.mvc.servlet.path for "main" context and "/" for "management" context
+        // but we don't have to guess which one to use - we access it through proper DispatcherServletPath
+        String prefix = dispatcherServletPath.getPrefix();
+
+        // management.endpoints.web.base-path - defaults to /actuator
+        String endpointsBasePath = webEndpointProperties.getBasePath();
+
+        String jolokiaPath = "jolokia";
+        Map<String, String> mapping = webEndpointProperties.getPathMapping();
+        if (mapping.containsKey(jolokiaPath)) {
+            jolokiaPath = mapping.get(jolokiaPath);
+        }
+
+        return new ModelAndView("redirect:" + prefix + endpointsBasePath + "/" + jolokiaPath + "/version");
     }
 
 }

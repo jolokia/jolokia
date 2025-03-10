@@ -49,6 +49,8 @@ public class JolokiaSpringBootApplicationTest {
         // https://docs.spring.io/spring-boot/appendix/application-properties/index.html#application-properties.actuator.management.server.port
         int managementPort = Integer.parseInt(props.getProperty("management.server.port", Integer.toString(serverPort)));
 
+        String jolokiaPath = props.getProperty("management.endpoints.web.path-mapping.jolokia", "jolokia");
+
         URL jolokiaVersion = null;
 
         if (serverPort == managementPort) {
@@ -57,10 +59,20 @@ public class JolokiaSpringBootApplicationTest {
             //  - we can configure main (only) web context base path with server.servlet.context-path
             //  - we can configure actuator base path (under server.servlet.context-path) with management.endpoints.web.base-path
             //    (defaults to "/actuator")
-            //  - Jolokia actuator will be available at http://localhost:<server.port>/<server.servlet.context-path><management.server.base-path>
-            String contextPath = props.getProperty("server.servlet.context-path", "/");
+            //  - Jolokia actuator will be available at http://localhost:<server.port>/<server.servlet.context-path><spring.mvc.servlet.path><management.server.base-path>
+            String contextPath = props.getProperty("server.servlet.context-path", "");
+            if ("/".equals(contextPath)) {
+                contextPath = "";
+            }
+            String servletPath = props.getProperty("spring.mvc.servlet.path", "");
+            if ("/".equals(servletPath)) {
+                servletPath = "";
+            }
             String actuatorPath = props.getProperty("management.endpoints.web.base-path", "/actuator");
-            jolokiaVersion = new URL("http://localhost:" + serverPort + contextPath + actuatorPath + "/jolokia");
+            if ("/".equals(actuatorPath)) {
+                actuatorPath = "";
+            }
+            jolokiaVersion = new URL("http://localhost:" + serverPort + contextPath + servletPath + actuatorPath + "/" + jolokiaPath);
         } else {
             // there are two org.springframework.boot.web.servlet.context.ServletWebServerApplicationContexts
             //  - we can configure management web context base path with management.server.base-path
@@ -68,9 +80,15 @@ public class JolokiaSpringBootApplicationTest {
             //  - we can configure actuator base path (under management.server.base-path) with management.endpoints.web.base-path
             //    (defaults to "/actuator")
             //  - Jolokia actuator will be available at http://localhost:<management.server.port>/<management.server.base-path><management.server.base-path>
-            String contextPath = props.getProperty("management.server.base-path", "/");
+            String contextPath = props.getProperty("management.server.base-path", "");
+            if ("/".equals(contextPath)) {
+                contextPath = "";
+            }
             String actuatorPath = props.getProperty("management.endpoints.web.base-path", "/actuator");
-            jolokiaVersion = new URL("http://localhost:" + managementPort + contextPath + actuatorPath + "/jolokia");
+            if ("/".equals(actuatorPath)) {
+                actuatorPath = "";
+            }
+            jolokiaVersion = new URL("http://localhost:" + managementPort + contextPath + actuatorPath + "/" + jolokiaPath);
         }
 
         System.out.println("Connecting to " + jolokiaVersion.toExternalForm());

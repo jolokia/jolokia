@@ -48,10 +48,24 @@ public class JolokiaServletRegistration implements ServletContextInitializer {
         // but it's enough to have @ConditionalOnAvailableEndpoint(JolokiaWebEndpoint.class) on this @Bean's
         // containing @ManagementContextConfiguration
 
-        String basePath = dispatcherServletPath.getRelativePath(webEndpointProperties.getBasePath());
+        // we don't have to check the context path (which is configured differently for main and management contexts)
+        // because servlet registration is done within single ServletContext
+        // org.springframework.boot.autoconfigure.web.servlet.DispatcherServletPath.getPrefix() trims trailing "/"
+        String prefix = dispatcherServletPath.getPrefix();
+
+        // management.endpoints.web.base-path - defaults to /actuator and never ends with "/"
+        // even if you set it to "/"
+        String endpointsBasePath = webEndpointProperties.getBasePath();
+
+        String jolokiaPath = "jolokia";
+        Map<String, String> mapping = webEndpointProperties.getPathMapping();
+        if (mapping.containsKey(jolokiaPath)) {
+            jolokiaPath = mapping.get(jolokiaPath);
+        }
+
         ServletRegistration.Dynamic reg = servletContext.addServlet("jolokia", AgentServlet.class);
         reg.setInitParameters(initParameters);
-        reg.addMapping(basePath + "/jolokia/*");
+        reg.addMapping(prefix + endpointsBasePath + "/" + jolokiaPath + "/*");
     }
 
 }

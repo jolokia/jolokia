@@ -452,11 +452,16 @@ public class AgentServlet extends HttpServlet {
 
     // Check the proper servlet path
     private String extractServletPath(HttpServletRequest pReq) {
+        // for root mapping, the context path is ""
+        // for non-root, it's "/context"
+        // servlet path is always within context and when servlet is mapped with "/*", the servlet path is "" (empty)
+        String uri = pReq.getRequestURI();
         int len = pReq.getContextPath().length();
-        if (len == 0) {
-            len = pReq.getServletPath().length();
+        String servletPath = pReq.getServletPath();
+        if (servletPath != null) {
+            len += servletPath.length();
         }
-        return pReq.getRequestURI().substring(0,len);
+        return uri.substring(0, len);
     }
 
     // Set an appropriate CORS header if requested and if allowed

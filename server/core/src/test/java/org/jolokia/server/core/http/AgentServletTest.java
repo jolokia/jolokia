@@ -763,7 +763,8 @@ public class AgentServletTest {
     private void setupAgentDetailsInitExpectations() {
         expect(request.getRequestURI()).andReturn("/jolokia/");
         expect(request.getRequestURL()).andReturn(new StringBuffer("http://localhost/jolokia"));
-        expect(request.getContextPath()).andReturn("/jolokia/");
+        expect(request.getContextPath()).andReturn("/jolokia");
+        expect(request.getServletPath()).andReturn("");
         expect(request.getAuthType()).andReturn(null);
     }
 
@@ -785,6 +786,7 @@ public class AgentServletTest {
             expect(request.getRequestURL()).andReturn(buf);
             expect(request.getRequestURI()).andReturn("/jolokia" + HttpTestUtil.VERSION_GET_REQUEST);
             expect(request.getContextPath()).andReturn("/jolokia");
+            expect(request.getServletPath()).andReturn("");
             expect(request.getAuthType()).andReturn("BASIC");
             expect(request.getAttribute("subject")).andReturn(null);
             expect(request.getParameter(ConfigKey.STREAMING.getKeyValue())).andReturn(null);
