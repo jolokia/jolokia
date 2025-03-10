@@ -185,15 +185,38 @@
 <h2 id="news">News</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="jolokia_2_2_5_released">Jolokia 2.2.5 released</h3>
+<h3 id="jolokia_2_2_5_and_2_2_6_released">Jolokia 2.2.5 and 2.2.6 released</h3>
 <div class="paragraph news-date">
 <p>2025-03-10</p>
 </div>
 <div class="paragraph">
-<p>We&#8217;re announcing new micro release of Jolokia 2.2.5, where <code>org.jolokia:jolokia-support-spring</code> module no longer depends on <code>org.springframework.boot:spring-boot-starter-logging</code>. Thanks Benjamin Graf for spotting this issue!</p>
+<p>We&#8217;re announcing new micro release of Jolokia 2.2.6, where <code>org.jolokia:jolokia-support-spring</code> module no longer depends on <code>org.springframework.boot:spring-boot-starter-logging</code>. Thanks Benjamin Graf for spotting this issue!
+We&#8217;ve also found problems with Spring Boot options:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>server.servlet.context-path - context path for <em>main</em> Spring context</p>
+</li>
+<li>
+<p>management.server.base-path - context path for <em>management</em> Spring context (when it&#8217;s separate from <em>main</em> one)</p>
+</li>
+<li>
+<p>spring.mvc.servlet.path - dispatcher servlet prefix for <em>main</em> context</p>
+</li>
+<li>
+<p>management.endpoints.web.base-path - Actuator prefix</p>
+</li>
+<li>
+<p>management.endpoints.web.path-mapping - for additional customization of Endpoint &#8594; URI path mapping</p>
+</li>
+</ul>
 </div>
 <div class="paragraph">
-<p>Refer to <a href="https://jolokia.org/changes-report.html#a2.2.5">changelog</a> and <a href="https://github.com/jolokia/jolokia/releases/tag/v2.2.5">GitHub release notes</a> for more details.</p>
+<p>Now, whatever combination of these options is used, Jolokia will register correct actuator endpoint and use correct Agent URL in <code>version</code> response.</p>
+</div>
+<div class="paragraph">
+<p>Refer to <a href="https://jolokia.org/changes-report.html#a2.2.6">changelog</a> and <a href="https://github.com/jolokia/jolokia/releases/tag/v2.2.6">GitHub release notes</a> for more details.</p>
 </div>
 </div>
 <div class="sect2">
@@ -584,7 +607,7 @@ option again. Stay tuned!</p>
           All Rights Reserved.      
                 
                  <span id="publishDate">Last Published: 2025-03-10</span>
-              &nbsp;| <span id="projectVersion">Version: 2.2.5</span>
+              &nbsp;| <span id="projectVersion">Version: 2.2.6</span>
             </footer>
 </div>
 </body>
