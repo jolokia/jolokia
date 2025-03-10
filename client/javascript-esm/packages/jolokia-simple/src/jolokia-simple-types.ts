@@ -48,7 +48,6 @@ interface JolokiaSimpleStatic extends JolokiaStatic {
    * @return true if response is a success
    */
   isVersionResponse(resp: unknown): resp is VersionResponseValue
-
 }
 
 /**
@@ -163,13 +162,6 @@ interface IJolokiaSimple extends IJolokia {
    * @param params optional path and parameters to be passed to `Jolokia.request()` (params is the last object argument)
    */
   list(...params: (string[] | string | SimpleRequestOptions)[]): Promise<ListResponseValue>
-
-  /**
-   * Utility method which checks whether a response is a version response
-   * @param resp response to check
-   * @return true if response is a success
-   */
-  isVersionResponse(resp: unknown): resp is VersionResponseValue
 }
 
 /**

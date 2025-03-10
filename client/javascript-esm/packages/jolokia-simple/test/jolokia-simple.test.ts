@@ -133,12 +133,12 @@ describe("Jolokia simple API", () => {
   test("Simple Version Response", async () => {
     const jolokia = new Jolokia({ url: `http://localhost:${port}/jolokia-simple` }) as IJolokiaSimple
     const v = await jolokia.version()
-    expect(jolokia.isVersionResponse(v)).toBe(true)
+    expect(Jolokia.isVersionResponse(v)).toBe(true)
   })
 
   test("Simple Not a Version Response", async () => {
     const jolokia = new Jolokia({ url: `http://localhost:${port}/jolokia-simple` }) as IJolokiaSimple
     const v = await jolokia.list()
-    expect(jolokia.isVersionResponse(v)).toBe(false)
+    expect(Jolokia.isVersionResponse(v)).toBe(false)
   })
 })
