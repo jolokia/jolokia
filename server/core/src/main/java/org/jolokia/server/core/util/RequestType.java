@@ -19,6 +19,8 @@ package org.jolokia.server.core.util;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.jolokia.server.core.request.BadRequestException;
+
 /**
  * Enumeration for encapsulating the request mode.
  */
@@ -63,7 +65,7 @@ public enum RequestType {
         }
         RequestType type = typesByNameMap.get(pName.toLowerCase());
         if (type == null) {
-            throw new UnsupportedOperationException("No type with name '" + pName + "' exists");
+            throw new BadRequestException("No type with name '" + pName + "' exists");
         }
         return type;
     }

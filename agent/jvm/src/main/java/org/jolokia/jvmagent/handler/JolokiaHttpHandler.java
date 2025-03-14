@@ -293,7 +293,7 @@ public class JolokiaHttpHandler implements HttpHandler {
         if (badRequestException != null && badRequestException.getMessage() != null) {
             response += "\n" + badRequestException.getMessage() + "\n";
         }
-        pExchange.getResponseHeaders().add("Content-Type", "text/plain");
+        pExchange.getResponseHeaders().add("Content-Type", "text/plain; charset=utf-8");
         pExchange.sendResponseHeaders(400, response.length());
         OutputStream os = pExchange.getResponseBody();
         os.write(response.getBytes());

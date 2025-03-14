@@ -18,6 +18,7 @@ import org.jolokia.server.core.request.*;
 import org.jolokia.json.*;
 import org.jolokia.json.parser.JSONParser;
 import org.jolokia.json.parser.ParseException;
+import org.jolokia.server.core.util.MimeTypeUtil;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -355,7 +356,7 @@ public class HttpRequestHandler {
         //  + ifModifiedSince
         //  + ignoreErrors (validated in org.jolokia.server.core.request.JolokiaRequest.initParameters())
         //  + includeRequest
-        //  + includeStackTrace (to be validated in org.jolokia.server.core.http.HttpRequestHandler.addErrorInfo())
+        //  + includeStackTrace
         //  + listCache
         //  + listKeys
         //  + maxCollectionSize
@@ -393,6 +394,23 @@ public class HttpRequestHandler {
                     if (!(ConfigKey.enabledValues.contains(v) || ConfigKey.disabledValues.contains(v)
                             || v.equals("runtime"))) {
                         throw new BadRequestException("Invalid value of " + ConfigKey.INCLUDE_STACKTRACE.getKeyValue() + " parameter");
+                    }
+                } else if (key == ConfigKey.SERIALIZE_LONG) {
+                    String v = value.trim().toLowerCase();
+                    if (!("number".equals(v) || "string".equals(v))) {
+                        throw new BadRequestException("Invalid value of " + ConfigKey.SERIALIZE_LONG.getKeyValue() + " parameter");
+                    }
+                } else if (key == ConfigKey.MIME_TYPE) {
+                    String v = value.trim().toLowerCase();
+                    boolean ok = false;
+                    for (String accepted : MimeTypeUtil.ACCEPTED_MIME_TYPES) {
+                        if (accepted.equals(v)) {
+                            ok = true;
+                            break;
+                        }
+                    }
+                    if (!ok) {
+                        throw new BadRequestException("Invalid value of " + ConfigKey.MIME_TYPE.getKeyValue() + " parameter");
                     }
                 }
             }

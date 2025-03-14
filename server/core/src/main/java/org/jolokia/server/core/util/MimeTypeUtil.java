@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
  */
 public class MimeTypeUtil {
 
+    public static final String[] ACCEPTED_MIME_TYPES = { "application/json", "text/plain" };
 
     /**
      * Extract the response mime type. This value is calculated for different situations:
@@ -48,10 +49,10 @@ public class MimeTypeUtil {
     }
 
     private static String sanitize(String mimeType) {
-        for (String accepted : new String[]{
-            "application/json",
-            "text/plain"
-        }) {
+        // https://www.rfc-editor.org/rfc/rfc8259.html#section-11
+        // https://www.iana.org/assignments/media-types/application/json
+        // NOT "text/json"
+        for (String accepted : ACCEPTED_MIME_TYPES) {
             if (accepted.equalsIgnoreCase(mimeType)) {
                 return accepted;
             }

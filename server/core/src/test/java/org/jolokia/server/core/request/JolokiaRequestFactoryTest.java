@@ -180,7 +180,7 @@ public class JolokiaRequestFactoryTest {
         JolokiaRequestFactory.createGetRequest("read/bla::blub", procParams);
     }
 
-    @Test(expectedExceptions = {UnsupportedOperationException.class})
+    @Test(expectedExceptions = {BadRequestException.class})
     public void unsupportedType() {
         JolokiaRequestFactory.createGetRequest("regnotif", procParams);
     }
