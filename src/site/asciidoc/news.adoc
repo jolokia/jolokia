@@ -15,6 +15,19 @@
 ////
 == News
 
+=== Jolokia 2.2.7 released
+
+[.news-date]
+2025-03-24
+
+New micro release of Jolokia 2.2.7 comes with `lazy=true` option for JVM agent. Up until now, JVM agent started, but
+was initialized only on first HTTP request. This prevented immediate UDP discovery of the agent. Now this option
+defaults to `false`, but we can set it back to `true`.
+
+Additionally we run https://www.zaproxy.org/[Zed Attack Proxy scanner] on https://hawt.io/[Hawtio] web application and we could prevent some alerts reported by this tool.
+
+Refer to https://jolokia.org/changes-report.html#a2.2.7[changelog] and https://github.com/jolokia/jolokia/releases/tag/v2.2.7[GitHub release notes] for more details.
+
 === Jolokia 2.2.5 and 2.2.6 released
 
 [.news-date]

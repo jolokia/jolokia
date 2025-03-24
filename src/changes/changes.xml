@@ -23,7 +23,15 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
-    <release version="2.2.6" description="Release 2.2.5" date="2025-03-10">
+    <release version="2.2.7" description="Release 2.2.7" date="2025-03-24">
+      <action dev="grgrzybek" type="fix" issue="814">
+        Add option to start the JVM agent in lazy manner
+      </action>
+      <action dev="grgrzybek" type="fix" issue="813">
+        Additional validation of input data after using Zed Attack Proxy scanner
+      </action>
+    </release>
+    <release version="2.2.6" description="Release 2.2.6" date="2025-03-10">
       <action dev="grgrzybek" type="fix" issue="812">
         (Spring Boot) Fixing configuration of management context paths
       </action>
