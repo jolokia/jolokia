@@ -65,7 +65,7 @@ import org.jolokia.server.core.service.impl.StdoutLogHandler;
  * @author roland
  * @since Mar 3, 2010
  */
-@SuppressWarnings("PMD.SystemPrintln" )
+@SuppressWarnings("PMD.SystemPrintln")
 public final class JvmAgent {
 
     private static JolokiaServer server;
@@ -92,7 +92,8 @@ public final class JvmAgent {
      * @param agentArgs arguments as given on the command line
      */
     public static void premain(String agentArgs, Instrumentation inst) {
-        startAgent(new JvmAgentConfig(agentArgs),true /* lazy */, inst);
+        JvmAgentConfig config = new JvmAgentConfig(agentArgs);
+        startAgent(config, config.isLazy(), inst);
     }
 
     /**
@@ -104,7 +105,7 @@ public final class JvmAgent {
     public static void agentmain(String agentArgs, Instrumentation instrumentation) {
         JvmAgentConfig config = new JvmAgentConfig(agentArgs);
         if (!config.isModeStop()) {
-            startAgent(config,false, instrumentation);
+            startAgent(config, config.isLazy(), instrumentation);
         } else {
             stopAgent(true);
         }

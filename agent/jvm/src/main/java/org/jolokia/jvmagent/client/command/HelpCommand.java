@@ -115,6 +115,7 @@ public class HelpCommand extends AbstractBaseCommand {
 "    --sslProtocol <protocol>        SSL / TLS protocol to enable, can be provided multiple times\n" +
 "    --sslCipherSuite <suite>        SSL / TLS cipher suite to enable, can be provided multiple times\n" +
 "    --debug                         Switch on agent debugging\n" +
+"    --lazy                          Agent will start in lazy fashion. It'll be initialized on first HTTP request\n" +
 "    --logHandlerClass <class>       Implementation of org.jolokia.server.core.service.api.LogHandler for logging\n" +
 "                                    Available classes: org.jolokia.server.core.service.impl.QuietLogHandler\n" +
 "                                                       org.jolokia.server.core.service.impl.JulLogHandler\n" +

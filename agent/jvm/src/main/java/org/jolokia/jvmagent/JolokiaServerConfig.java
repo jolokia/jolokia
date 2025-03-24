@@ -74,6 +74,7 @@ public class JolokiaServerConfig {
     private boolean extendedClientCheck;
     private String[] sslProtocols;
     private String[] sslCipherSuites;
+    private boolean lazy;
 
     private ClassLoader classLoader;
 
@@ -200,6 +201,14 @@ public class JolokiaServerConfig {
      */
     public int getPort() {
         return port;
+    }
+
+    /**
+     * Check whether to initialize Jolokia lazily (on first request) or immediately
+     * @return
+     */
+    public boolean isLazy() {
+        return lazy;
     }
 
     /**
@@ -385,6 +394,7 @@ public class JolokiaServerConfig {
 
     // Initialise and validate early in order to fail fast in case of an configuration error
     protected void initConfigAndValidate(Map<String,String> agentConfig) {
+        lazy = Boolean.parseBoolean(agentConfig.getOrDefault("lazy", "false"));
         initContext();
         initProtocol(agentConfig);
         initAddress(agentConfig);

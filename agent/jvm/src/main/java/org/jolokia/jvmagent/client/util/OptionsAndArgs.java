@@ -51,7 +51,7 @@ public final class OptionsAndArgs {
             "useCertificateReload",
             "sslProtocol", "sslCipherSuite",
             // Jolokia options:
-            "historyMaxEntries", "debug!", "debugMaxEntries",
+            "historyMaxEntries", "debug!", "lazy!", "debugMaxEntries",
             "logHandlerClass", "logHandlerName", "maxDepth", "maxCollectionSize",
             "maxObjects", "serializeLong", "restrictorClass", "policyLocation", "mbeanQualifier",
             "disableDetectors!", "enabledServices", "disabledServices",
