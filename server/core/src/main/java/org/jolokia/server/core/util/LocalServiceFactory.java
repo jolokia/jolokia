@@ -53,6 +53,8 @@ import org.jolokia.server.core.service.impl.QuietLogHandler;
  */
 public final class LocalServiceFactory {
 
+    private static boolean warningGiven = false;
+
     private LocalServiceFactory() {}
 
     /**
@@ -199,17 +201,32 @@ public final class LocalServiceFactory {
             logHandler = new QuietLogHandler();
         }
 
-        Set<Class<?>> jolokiaInterfaces = new LinkedHashSet<>();
-        // there should be the only JolokiaService.class
+        // Let's issue a warning if JolokiaService class is also available from system classloader
         if (ClassLoader.getSystemClassLoader() != null) {
             try {
-                jolokiaInterfaces.add(ClassLoader.getSystemClassLoader().loadClass(JolokiaService.class.getName()));
-            } catch (ClassNotFoundException e) {
-                jolokiaInterfaces.add(JolokiaService.class);
+                Class<?> c = ClassLoader.getSystemClassLoader().loadClass(JolokiaService.class.getName());
+                if (c != JolokiaService.class && !warningGiven) {
+                    logHandler.error("org.jolokia.server.core.service.api.JolokiaService interface is available from multiple class loaders:", null);
+                    ClassLoader cl1 = JolokiaService.class.getClassLoader();
+                    ClassLoader cl2 = c.getClassLoader();
+                    logHandler.error(" - " + (cl1 == null ? "Bootstrap ClassLoader" : cl1.toString()), null);
+                    logHandler.error(" - " + (cl2 == null ? "Bootstrap ClassLoader" : cl2.toString()), null);
+                    logHandler.error("Possible reason: Multiple Jolokia agents are installed while only a single agent per runtime is supported.", null);
+                    logHandler.error("Possible effect: Jolokia service discovery may not work correctly.", null);
+                    if (!(logHandler instanceof QuietLogHandler)) {
+                        warningGiven = true;
+                    }
+                }
+            } catch (ClassNotFoundException ignored) {
             }
-        } else {
-            jolokiaInterfaces.add(JolokiaService.class);
         }
+
+        // however let's issue an error and not return any services if the services use wrong
+        // JolokiaService interface
+        Set<Class<?>> jolokiaInterfaces = new LinkedHashSet<>();
+        // this interface should be loaded by our org.jolokia.server.core.util.LocalServiceFactory's classloader
+        jolokiaInterfaces.add(JolokiaService.class);
+
         Class<?> theJolokiaServiceClass = jolokiaInterfaces.iterator().next();
         for (Object service : services) {
             if (collectJolokiaServiceInterfaces(service, jolokiaInterfaces, theJolokiaServiceClass) > 0) {
@@ -217,16 +234,7 @@ public final class LocalServiceFactory {
             }
         }
 
-        if (jolokiaInterfaces.size() > 1) {
-            logHandler.error("Jolokia service discovery error - JolokiaService interface is available from multiple class loaders:", null);
-            for (Class<?> c : jolokiaInterfaces) {
-                logHandler.error(" - " + c.getClassLoader().toString(), null);
-            }
-            logHandler.error("Possible reason: Multiple Jolokia agents are installed while only a single agent per runtime is supported.", null);
-            return false;
-        }
-
-        return true;
+        return jolokiaInterfaces.size() == 1;
     }
 
     private static int collectJolokiaServiceInterfaces(Object service, Set<Class<?>> jolokiaInterfaces, Class<?> expected) {
