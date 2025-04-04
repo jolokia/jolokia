@@ -23,6 +23,11 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
+    <release version="2.2.8" description="Release 2.2.8" date="2025-04-04">
+      <action dev="grgrzybek" type="fix" issue="819">
+        Relax deployment validation when Jolokia is available from multiple classloaders.
+      </action>
+    </release>
     <release version="2.2.7" description="Release 2.2.7" date="2025-03-24">
       <action dev="grgrzybek" type="fix" issue="814">
         Add option to start the JVM agent in lazy manner

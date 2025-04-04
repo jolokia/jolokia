@@ -15,6 +15,15 @@
 ////
 == News
 
+=== Jolokia 2.2.8 released
+
+[.news-date]
+2025-04-04
+
+New Jolokia release focuses on deployment with https://camel.apache.org/manual/camel-jbang.html#_using_jolokia_and_hawtio[Camel JBang]. We've fixed a deployment scenario where Jolokia was available from multiple classloaders (main one and Hawtio WAR). Jolokia 2.2.8 should work correctly with upcoming Hawtio 4.4 and Camel JBang.
+
+Refer to https://jolokia.org/changes-report.html#a2.2.8[changelog] and https://github.com/jolokia/jolokia/releases/tag/v2.2.8[GitHub release notes] for more details.
+
 === Jolokia 2.2.7 released
 
 [.news-date]
