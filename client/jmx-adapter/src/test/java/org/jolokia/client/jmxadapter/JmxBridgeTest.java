@@ -856,9 +856,10 @@ public class JmxBridgeTest {
     @Test
     public void testConnector() throws IOException {
         JMXServiceURL serviceURL = new JMXServiceURL("jolokia", "localhost", agentPort, "/jolokia/");
+        final Map<String, Object> environment = Collections.emptyMap();
         JMXConnector connector = new JolokiaJmxConnectionProvider().newJMXConnector(
             serviceURL,
-            Collections.emptyMap());
+            environment);
         final List<JMXConnectionNotification> receivedNotifications = new LinkedList<>();
         final Object handback = "foobar";
         connector.addConnectionNotificationListener((notification, hb) -> {
@@ -866,6 +867,7 @@ public class JmxBridgeTest {
             receivedNotifications.add((JMXConnectionNotification) notification);
         }, null, handback);
         connector.connect();
+        Assert.assertEquals(((JolokiaJmxConnector)connector).getJolokiaProtocol(environment), "http");
         Assert.assertEquals(receivedNotifications.get(0).getSource(), connector);
         Assert.assertEquals(receivedNotifications.get(0).getType(), JMXConnectionNotification.OPENED);
         receivedNotifications.clear();
@@ -875,7 +877,7 @@ public class JmxBridgeTest {
         connector.close();
         Assert.assertEquals(receivedNotifications.get(0).getSource(), connector);
         Assert.assertEquals(receivedNotifications.get(0).getType(), JMXConnectionNotification.CLOSED);
-        connector.connect(Collections.emptyMap());
+        connector.connect(environment);
         Assert.assertEquals(
             connector.getMBeanServerConnection(),
             this.adapter);
