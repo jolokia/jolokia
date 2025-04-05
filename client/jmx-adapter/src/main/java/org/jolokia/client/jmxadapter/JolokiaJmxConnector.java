@@ -54,11 +54,7 @@ public class JolokiaJmxConnector implements JMXConnector {
       throw new MalformedURLException(String.format("Invalid URL %s : Only protocol \"jolokia\" is supported (not %s)",  this.serviceUrl, this.serviceUrl.getProtocol()));
     }
     Map<String, Object> mergedEnv = mergedEnvironment(env);
-    String internalProtocol = "http";
-    if (String.valueOf(this.serviceUrl.getPort()).endsWith("443") || "true"
-        .equals(mergedEnv.get("jmx.remote.x.check.stub"))) {
-      internalProtocol = "https";
-    }
+    final String internalProtocol = getJolokiaProtocol(mergedEnv);
     final J4pClientBuilder clientBuilder = new J4pClientBuilder().url(
         internalProtocol + "://" + this.serviceUrl.getHost() + ":" + this.serviceUrl.getPort()
             + prefixWithSlashIfNone(this.serviceUrl.getURLPath()));
@@ -69,6 +65,15 @@ public class JolokiaJmxConnector implements JMXConnector {
     }
     this.adapter = instantiateAdapter(clientBuilder, mergedEnv);
     postCreateAdapter();
+  }
+
+  public String getJolokiaProtocol(Map<String, Object> env) {
+    String protocol = "http";
+    if (String.valueOf(this.serviceUrl.getPort()).endsWith("443") || "true"
+        .equals(env.get("jmx.remote.x.check.stub"))) {
+      protocol = "https";
+    }
+    return protocol;
   }
 
   protected void postCreateAdapter() {
@@ -94,7 +99,7 @@ public class JolokiaJmxConnector implements JMXConnector {
   }
 
   protected RemoteJmxAdapter instantiateAdapter(J4pClientBuilder clientBuilder,
-      Map<String, Object> mergedEnv) throws IOException {
+      Map<String, Object> ignoredMergedEnv) throws IOException {
     return new RemoteJmxAdapter(clientBuilder.build());
   }
 
@@ -103,7 +108,6 @@ public class JolokiaJmxConnector implements JMXConnector {
     return this.adapter;
   }
 
-  @Override
   public MBeanServerConnection getMBeanServerConnection(Subject delegationSubject) {
     throw new UnsupportedOperationException(
         "Jolokia currently do not support connections using a subject, if you have a use case, raise an issue in Jolokias github repo");
