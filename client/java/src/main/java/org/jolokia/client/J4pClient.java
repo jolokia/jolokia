@@ -113,7 +113,7 @@ public class J4pClient extends J4pClientBuilderFactory {
      */
     public <RESP extends J4pResponse<REQ>, REQ extends J4pRequest> RESP execute(REQ pRequest)
             throws J4pException {
-        // type spec is required to keep OpenJDK 1.6 happy (other JVM dont have a problem
+        // type spec is required to keep OpenJDK 1.6 happy (other JVM don't have a problem
         // with infering the type is missing here)
         return this.execute(pRequest,null,null);
     }
@@ -209,7 +209,7 @@ public class J4pClient extends J4pClientBuilderFactory {
      * @param <RESP> response type
      * @param <REQ> request type
      * @return list of responses, one response for each request
-     * @throws J4pException when an communication error occurs
+     * @throws J4pException when a communication error occurs
      */
     public <RESP extends J4pResponse<REQ>, REQ extends J4pRequest> List<RESP> execute(List<REQ> pRequests)
             throws J4pException {
@@ -225,7 +225,7 @@ public class J4pClient extends J4pClientBuilderFactory {
      * @param <RESP> response type
      * @param <REQ> request type
      * @return list of responses, one response for each request
-     * @throws J4pException when an communication error occurs
+     * @throws J4pException when a communication error occurs
      */
     public <RESP extends J4pResponse<REQ>, REQ extends J4pRequest> List<RESP> execute(List<REQ> pRequests,Map<J4pQueryParameter,String> pProcessingOptions)
             throws J4pException {
@@ -242,7 +242,7 @@ public class J4pClient extends J4pClientBuilderFactory {
      * @param <RESP> response type
      * @param <REQ> request type
      * @return list of responses, one response for each request
-     * @throws J4pException when an communication error occurs
+     * @throws J4pException when a communication error occurs
      */
     public <RESP extends J4pResponse<REQ>, REQ extends J4pRequest> List<RESP> execute(List<REQ> pRequests,
                                                                                       Map<J4pQueryParameter,String> pProcessingOptions,
@@ -363,7 +363,7 @@ public class J4pClient extends J4pClientBuilderFactory {
      * @param <R> response typex
      * @param <T> request type
      * @return list of responses, one response for each request
-     * @throws J4pException when an communication error occurs
+     * @throws J4pException when a communication error occurs
      */
     @SafeVarargs
     public final <R extends J4pResponse<T>,T extends J4pRequest> List<R> execute(T... pRequests) throws J4pException {
