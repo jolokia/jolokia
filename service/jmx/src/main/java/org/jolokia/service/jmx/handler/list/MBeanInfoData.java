@@ -25,13 +25,13 @@ import org.jolokia.json.JSONObject;
 import org.jolokia.service.jmx.api.CacheKeyProvider;
 
 /**
- * Tree of MBean meta data. This map is a container for one or more {@link MBeanInfo} meta data which can be obtained
+ * Tree of MBean metadata. This map is a container for one or more {@link MBeanInfo} metadata which can be obtained
  * via a <code>list</code> request. The full structure in its JSON representation looks like below. The amount
- * of data included can be fine tuned in two ways:
+ * of data included can be fine-tuned in two ways:
  * <ul>
  *     <li>With a <code>maxDepth</code> parameter given at construction time, the size of the map can be restricted
  *     (from top down)</li>
- *     <li>A given path selects only a partial information from the tree</li>
+ *     <li>A given path selects only partial information from the tree</li>
  * </ul>
  * Both limiting factors are taken care of when adding the information so that this map doesn't get unnecessarily
  * to large.
@@ -91,7 +91,7 @@ public class MBeanInfoData {
 
     // Map holding information. Without narrowing the list (using maxDepth), this should be:
     // domain -> mbean (by key property listing) -> JSONified mbeanInfo
-    // for opitmized list() variant, the map is a but more comples and the above mapping is under "domains" key,
+    // for opitmized list() variant, the map is a bit more complex and the above mapping is under "domains" key,
     // while "cache" key contains full, JSONified MBeanInfo
     private final Map<String, Object> infoMap = new JSONObject();
 
@@ -127,7 +127,7 @@ public class MBeanInfoData {
     /**
      * Constructor taking a max depth. The <em>max depth</em> specifies how deep the info tree should be build
      * up. The tree will be truncated if it gets larger than this value. A <em>path</em> (in form of a stack)
-     * can be given, in which only a sub information (sub-tree or leaf value) is stored
+     * can be given, in which only a sub information (subtree or leaf value) is stored
      *
      * @param pMaxDepth         max depth
      * @param pPathStack        the stack for restricting the information to add. The given stack will be cloned
@@ -147,9 +147,9 @@ public class MBeanInfoData {
 
     /**
      * The first two levels of this map (tree) consist of the MBean's domain name and name properties, which are
-     * independent of an MBean's meta data. If the max depth given at construction time is less or equals than 2 (and
+     * independent of an MBean's metadata. If the max depth given at construction time is less or equals than 2 (and
      * no inner path into the map is given), then a client of this map does not need to query the MBeanServer for
-     * MBeanInfo meta data.
+     * MBeanInfo metadata.
      * <p></p>
      * This method checks this condition and returns true if this is the case. As side effect it will update this
      * map with the name part extracted from the given object name
@@ -275,7 +275,7 @@ public class MBeanInfoData {
         if (pathStack.isEmpty()) {
             addException(pName, pExp);
         } else {
-            // Happens for a deeper request, i.e with a path pointing directly into an MBean,
+            // Happens for a deeper request, i.e. with a path pointing directly into an MBean,
             // Hence we throw immediately an error here since there will be only this exception
             // and no extra info
             throw new IOException("IOException for MBean " + pName + " (" + pExp.getMessage() + ")",pExp);
@@ -324,7 +324,7 @@ public class MBeanInfoData {
     }
 
     /**
-     * Extract either a sub tree or a leaf value. If a path is used, then adding MBeanInfos has added them
+     * Extract either a subtree or a leaf value. If a path is used, then adding MBeanInfos has added them
      * as if no path were given (i.e. in it original place in the tree) but leaves out other information
      * not included by the path. This method then moves up the part pointed to by the path to the top of the
      * tree hierarchy. It also takes into account the maximum depth of the tree and truncates below
