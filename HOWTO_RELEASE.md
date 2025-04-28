@@ -251,9 +251,9 @@ values in the console.
 git clone git@github.com:jolokia/jolokia.git
 cd jolokia
 mvn -Dmaven.repo.local=/tmp/repo \
-    -DdevelopmentVersion=2.2.9-SNAPSHOT \
-    -DreleaseVersion=2.2.8 \
-    -Dtag=v2.2.8 \
+    -DdevelopmentVersion=2.2.10-SNAPSHOT \
+    -DreleaseVersion=2.2.9 \
+    -Dtag=v2.2.9 \
     -Pdist release:prepare
 mvn -Dmaven.repo.local=/tmp/repo \
     -Pdist release:perform
@@ -340,7 +340,7 @@ branch of Jolokia and pushed the changes:
 ```console
 git checkout gh-pages
 # copy changed site
-grep -lr 2.2.9-SNAPSHOT | xargs sed -i 's/2.2.9-SNAPSHOT/2.2.8/g'
+grep -lr 2.2.10-SNAPSHOT | xargs sed -i 's/2.2.10-SNAPSHOT/2.2.9/g'
 git add .
 git commit -m '[site] Generate new Jolokia site'
 git push origin HEAD
@@ -353,7 +353,7 @@ git push origin HEAD
 3. Set `<currentStableVersion>` to new released version in `pom.xml`
 4. If NPM packages are released, Set new JS version in `package.json` files and in `client/javascript-esm/packages/jolokia/src/jolokia.ts` for `CLIENT_VERSION` field
 5. Update `src/changes/changes.xml` and `src/site/asciidoc/news.adoc`
-6. `mvn -Dmaven.repo.local=/tmp/repo -DdevelopmentVersion=2.2.9-SNAPSHOT -DreleaseVersion=2.2.8 -Dtag=v2.2.8 -Pdist release:prepare`
+6. `mvn -Dmaven.repo.local=/tmp/repo -DdevelopmentVersion=2.2.10-SNAPSHOT -DreleaseVersion=2.2.9 -Dtag=v2.2.9 -Pdist release:prepare`
 7. `mvn -Dmaven.repo.local=/tmp/repo -Pdist release:perform`
 8. Create release at https://github.com/jolokia/jolokia/releases (`target/checkout/assembly/target`: `.tar.gz`, `.zip`, `.asc` and `agent/jvm/target`: `.deb`, `.asc`)
 9. Handle the release at https://oss.sonatype.org/#stagingRepositories
@@ -373,7 +373,7 @@ yarn npm publish
 git checkout gh-pages
 # copy changed site
 # change SNAPSHOT version - should be done better...
-grep -lr 2.2.9-SNAPSHOT | xargs sed -i 's/2.2.9-SNAPSHOT/2.2.8/g'
+grep -lr 2.2.10-SNAPSHOT | xargs sed -i 's/2.2.10-SNAPSHOT/2.2.9/g'
 git add .
 git commit -m '[site] Generate new Jolokia site'
 git push origin HEAD

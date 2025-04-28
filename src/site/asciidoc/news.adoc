@@ -15,6 +15,25 @@
 ////
 == News
 
+=== Jolokia 2.2.9 released
+
+[.news-date]
+2025-04-28
+
+We'd like to announce a new micro release of Jolokia, where `org.jolokia.server.core.service.api.Restrictor` instances can be registered using Spring (Boot) `@Bean` definitions. With simple declaration of:
+
+[,java]
+----
+@Bean
+public Restrictor customRestrictor() {
+    return new CustomReestrictor(...);
+}
+----
+
+Jolokia servlet registered as Spring actuator endpoint will use your custom restrictor.
+
+Refer to https://jolokia.org/changes-report.html#a2.2.9[changelog] and https://github.com/jolokia/jolokia/releases/tag/v2.2.9[GitHub release notes] for more details.
+
 === Jolokia 2.2.8 released
 
 [.news-date]
