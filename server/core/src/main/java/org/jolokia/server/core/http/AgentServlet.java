@@ -70,6 +70,10 @@ public class AgentServlet extends HttpServlet {
     // Restrictor to use as given in the constructor
     private final Restrictor initRestrictor;
 
+    // named Restrictors to choose from in environments, where restrictors can be configured in
+    // some registry (Spring DI, CDI, OSGI maybe, ...)
+    private final Map<String, Restrictor> initRestrictors = new LinkedHashMap<>();
+
     // If discovery multicast is enabled and URL should be initialized by request
     private boolean initAgentUrlFromRequest = false;
 
@@ -146,6 +150,10 @@ public class AgentServlet extends HttpServlet {
         serviceManager.stop();
     }
 
+    public Map<String, Restrictor> getInitRestrictors() {
+        return initRestrictors;
+    }
+
     /**
      * Initialize services and register service factories
      * @param pServletConfig servlet configuration
@@ -212,9 +220,20 @@ public class AgentServlet extends HttpServlet {
      * @return the restrictor to use
      */
     protected Restrictor createRestrictor(Configuration pConfig, LogHandler pLogHandler) {
-        return initRestrictor != null ?
-                initRestrictor :
-                RestrictorFactory.createRestrictor(pConfig, pLogHandler);
+        if (initRestrictor != null) {
+            return initRestrictor;
+        }
+        if (!initRestrictors.isEmpty()) {
+            Map.Entry<String, Restrictor> e = initRestrictors.entrySet().iterator().next();
+            if (initRestrictors.size() > 1) {
+                pLogHandler.info("Multiple restrictors configured, will use \"" + e.getKey() + "\".");
+            } else {
+                pLogHandler.info("Using registered restrictor \"" + e.getKey() + "\".");
+            }
+            return e.getValue();
+        }
+        // fallback to static (traditional) creation of the restrictor from properties configuration
+        return RestrictorFactory.createRestrictor(pConfig, pLogHandler);
     }
 
     // ==============================================================================================

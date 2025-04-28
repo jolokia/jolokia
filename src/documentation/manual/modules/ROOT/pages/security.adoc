@@ -402,3 +402,16 @@ exported and can be referenced from other
 bundles. Additionally, the OSGi agent can also pick up a
 restrictor as an OSGi service. See
 xref:agents.adoc#agents-osgi[OSGi Agents] for details.
+
+In Spring Boot, we can simply have a `@Bean` annotated method that returns an instance
+of `org.jolokia.server.core.service.api.Restrictor` and it'll be used in Spring Boot Actuator
+Jolokia endpoint:
+
+[,java]
+----
+@Bean
+public Restrictor customRestrictor() {
+    return new CustomReestrictor(...);
+}
+----
+

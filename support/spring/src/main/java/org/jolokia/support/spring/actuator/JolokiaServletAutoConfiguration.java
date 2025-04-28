@@ -16,6 +16,7 @@
 package org.jolokia.support.spring.actuator;
 
 import org.jolokia.server.core.http.AgentServlet;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.autoconfigure.endpoint.condition.ConditionalOnAvailableEndpoint;
 import org.springframework.boot.actuate.autoconfigure.endpoint.expose.EndpointExposure;
 import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
@@ -26,6 +27,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication.Type;
 import org.springframework.boot.autoconfigure.web.servlet.DispatcherServletPath;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 
 /**
@@ -40,10 +42,14 @@ import org.springframework.context.annotation.Bean;
 @EnableConfigurationProperties(JolokiaProperties.class)
 public class JolokiaServletAutoConfiguration {
 
+    @Autowired
+    private ApplicationContext applicationContext;
+
     @Bean
     public JolokiaServletRegistration jolokiaServletRegistration(JolokiaProperties properties,
                                                       WebEndpointProperties webEndpointProperties, DispatcherServletPath dispatcherServletPath) {
-        return new JolokiaServletRegistration(properties.getConfig(), webEndpointProperties, dispatcherServletPath);
+        return new JolokiaServletRegistration(properties.getConfig(), webEndpointProperties, dispatcherServletPath,
+            applicationContext);
     }
 
 }

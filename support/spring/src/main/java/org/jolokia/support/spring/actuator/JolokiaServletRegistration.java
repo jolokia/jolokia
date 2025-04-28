@@ -20,9 +20,12 @@ import java.util.Map;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletRegistration;
 import org.jolokia.server.core.http.AgentServlet;
+import org.jolokia.server.core.service.api.Restrictor;
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
 import org.springframework.boot.autoconfigure.web.servlet.DispatcherServletPath;
 import org.springframework.boot.web.servlet.ServletContextInitializer;
+import org.springframework.context.ApplicationContext;
 
 /**
  * {@link ServletContextInitializer} (which runs in {@link jakarta.servlet.ServletContainerInitializer}) that
@@ -33,12 +36,14 @@ public class JolokiaServletRegistration implements ServletContextInitializer {
     private final Map<String, String> initParameters;
     private final DispatcherServletPath dispatcherServletPath;
     private final WebEndpointProperties webEndpointProperties;
+    private final ApplicationContext applicationContext;
 
     public JolokiaServletRegistration(Map<String, String> initParameters,
-                                      WebEndpointProperties webEndpointProperties, DispatcherServletPath dispatcherServletPath) {
+                                      WebEndpointProperties webEndpointProperties, DispatcherServletPath dispatcherServletPath, ApplicationContext applicationContext) {
         this.initParameters = initParameters;
         this.dispatcherServletPath = dispatcherServletPath;
         this.webEndpointProperties = webEndpointProperties;
+        this.applicationContext = applicationContext;
     }
 
     @Override
@@ -63,7 +68,14 @@ public class JolokiaServletRegistration implements ServletContextInitializer {
             jolokiaPath = mapping.get(jolokiaPath);
         }
 
-        ServletRegistration.Dynamic reg = servletContext.addServlet("jolokia", AgentServlet.class);
+        // https://github.com/jolokia/jolokia/issues/823
+        // restrictors can be taken from ApplicationContext (including its parent(s)) and Agent servlet will
+        // decide which one to use (it'll have access to LogHandler, so we're not logging anything here)
+        Map<String, Restrictor> restrictors = BeanFactoryUtils.beansOfTypeIncludingAncestors(applicationContext, Restrictor.class);
+        AgentServlet servlet = new AgentServlet();
+        servlet.getInitRestrictors().putAll(restrictors);
+
+        ServletRegistration.Dynamic reg = servletContext.addServlet("jolokia", servlet);
         reg.setInitParameters(initParameters);
         reg.addMapping(prefix + endpointsBasePath + "/" + jolokiaPath + "/*");
     }

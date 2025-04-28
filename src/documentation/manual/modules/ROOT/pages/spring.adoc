@@ -334,6 +334,16 @@ management.endpoint.jolokia.config.agentDescription = Jolokia Spring Boot Actuat
 management.endpoints.web.exposure.include = health, jolokia
 ----
 
+Since Jolokia 2.2.9, we can also have a `@Bean` that declares `org.jolokia.server.core.service.api.Restrictor` to be used by Jolokia Agent servlet:
+
+[,java]
+----
+@Bean
+public Restrictor customRestrictor() {
+    return new CustomReestrictor(...);
+}
+----
+
 Having all this, Spring Boot with actuator enabled will discover Jolokia own auto-configuration.
 Because https://docs.spring.io/spring-boot/docs/3.2.0/reference/htmlsingle/#actuator.endpoints.exposing[Jolokia is properly exposed,role=externalLink,window=_blank], we may now access Jolokia Agent using `\http://localhost:8181/actuator/jolokia` URL:
 
