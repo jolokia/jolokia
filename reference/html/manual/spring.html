@@ -153,7 +153,7 @@
 <pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
   &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
   &lt;artifactId&gt;jolokia-support-spring&lt;/artifactId&gt;
-  &lt;version&gt;2.2.8&lt;/version&gt;
+  &lt;version&gt;2.2.9&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -479,7 +479,7 @@ public class AppConfig {
 <pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
   &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
   &lt;artifactId&gt;jolokia-support-spring&lt;/artifactId&gt;
-  &lt;version&gt;2.2.8&lt;/version&gt;
+  &lt;version&gt;2.2.9&lt;/version&gt;
 &lt;/dependency&gt;
 
 &lt;dependency&gt;
@@ -523,6 +523,17 @@ management.endpoints.web.exposure.include = health, jolokia</pre>
 </div>
 </div>
 <div class="paragraph">
+<p>Since Jolokia 2.2.9, we can also have a <code>@Bean</code> that declares <code>org.jolokia.server.core.service.api.Restrictor</code> to be used by Jolokia Agent servlet:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Bean
+public Restrictor customRestrictor() {
+    return new CustomReestrictor(...);
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
 <p>Having all this, Spring Boot with actuator enabled will discover Jolokia own auto-configuration.
 Because <a href="https://docs.spring.io/spring-boot/docs/3.2.0/reference/htmlsingle/#actuator.endpoints.exposing" class="externalLink" target="_blank" rel="noopener">Jolokia is properly exposed</a>, we may now access Jolokia Agent using <code>http://localhost:8181/actuator/jolokia</code> URL:</p>
 </div>
@@ -534,10 +545,10 @@ Because <a href="https://docs.spring.io/spring-boot/docs/3.2.0/reference/htmlsin
     "type": "version"
   },
   "value": {
-    "agent": "2.2.8",
+    "agent": "2.2.9",
     "protocol": "7.2",
     "details": {
-      "agent_version": "2.2.8",
+      "agent_version": "2.2.9",
       "agent_id": "192.168.0.221-91398-4ee6c0f5-servlet",
       "agent_description": "Jolokia Spring Boot Actuator agent",
       "secured": false,

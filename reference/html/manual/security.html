@@ -617,6 +617,19 @@ bundles. Additionally, the OSGi agent can also pick up a
 restrictor as an OSGi service. See
 <a href="agents.html#agents-osgi" class="xref page">OSGi Agents</a> for details.</p>
 </div>
+<div class="paragraph">
+<p>In Spring Boot, we can simply have a <code>@Bean</code> annotated method that returns an instance
+of <code>org.jolokia.server.core.service.api.Restrictor</code> and it&#8217;ll be used in Spring Boot Actuator
+Jolokia endpoint:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Bean
+public Restrictor customRestrictor() {
+    return new CustomReestrictor(...);
+}</code></pre>
+</div>
+</div>
 </div>
 </div>
 <nav class="pagination">
