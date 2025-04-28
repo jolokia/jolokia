@@ -19,7 +19,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>jolokia-support-jmx</artifactId>
-  <version>2.2.9-SNAPSHOT</version>
+  <version>2.2.9</version>
   <packaging>bundle</packaging>
 
   <name>jolokia-support-jmx</name>
@@ -28,7 +28,7 @@
   <parent>
     <groupId>org.jolokia</groupId>
     <artifactId>jolokia-parent</artifactId>
-    <version>2.2.9-SNAPSHOT</version>
+    <version>2.2.9</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
