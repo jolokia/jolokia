@@ -48,7 +48,7 @@
   },
   "devDependencies": {
     "cubism": "^1.6.0",
-    "es-check": "^8.0.1",
+    "es-check": "^9.1.1",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
     "replace": "^1.2.2"
