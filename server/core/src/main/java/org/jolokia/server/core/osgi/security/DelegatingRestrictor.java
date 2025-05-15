@@ -7,6 +7,12 @@ import org.jolokia.server.core.util.HttpMethod;
 import org.jolokia.server.core.util.RequestType;
 import org.osgi.framework.*;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
 /*
  * Copyright 2009-2013 Roland Huss
  *
@@ -51,25 +57,60 @@ public class DelegatingRestrictor implements Restrictor {
      */
     private boolean checkRestrictorService(RestrictorCheck pCheck, Object ... args) {
         try {
-            ServiceReference<?>[] serviceRefs = bundleContext.getServiceReferences(Restrictor.class.getName(),null);
-            if (serviceRefs != null) {
-                boolean ret = true;
-                boolean found = false;
-                for (ServiceReference<?> serviceRef : serviceRefs) {
-                    Restrictor restrictor = (Restrictor) bundleContext.getService(serviceRef);
-                    if (restrictor != null) {
-                        ret = ret && pCheck.check(restrictor,args);
-                        found = true;
-                    }
-                }
-                return found && ret;
-            } else {
-                return false;
+            List<Restrictor> restrictors = getRegisteredRestrictorsFromBundleContext();
+            boolean ret = true;
+            boolean found = false;
+            for(Restrictor restrictor : restrictors) {
+                ret = ret && pCheck.check(restrictor, args);
+                found = true;
             }
+            return found && ret;
         } catch (InvalidSyntaxException e) {
             // Will not happen, since we dont use a filter here
             throw new IllegalArgumentException("Impossible exception (we don't use a filter for fetching the services)",e);
         }
+    }
+
+    /**
+     * Invoke a function which delegate to one or more restrictor services if available. If
+     * more than one Restrictor is there the
+     *
+     * @param invoker a function object for performing the actual invocation
+     * @param args arguments passed through to the  check
+     * @return true if all checks return true
+     */
+    private Object invokeRestrictedAttributeValueRestrictorService(RestrictorInvoker invoker, Object ... args) {
+        try {
+            List<Restrictor> restrictors = getRegisteredRestrictorsFromBundleContext();
+            Object invokedValue = restrictors.isEmpty()  ? null : invoker.invoke(restrictors.get(0), args);
+            /**
+             * restricted value from the first implementation will be passed to the other Restrictors
+             */
+            for (int i = 1; i < restrictors.size(); i++) {
+                invokedValue = invoker.invoke(restrictors.get(i), args);
+                args[2] = invokedValue;
+            }
+            return invokedValue;
+        } catch (InvalidSyntaxException e) {
+            // Will not happen, since we dont use a filter here
+            throw new IllegalArgumentException("Impossible exception (we don't use a filter for fetching the services)",e);
+        }
+    }
+
+    /**
+     * return the list of registered restrictors
+     * @return list of registered restrictors
+     * @throws InvalidSyntaxException throws syntax error
+     */
+    private List<Restrictor> getRegisteredRestrictorsFromBundleContext() throws InvalidSyntaxException {
+        ServiceReference[] serviceReferences = bundleContext.getServiceReferences(Restrictor.class.getName(), null);
+        if(serviceReferences == null) {
+            return Collections.emptyList();
+        }
+        return Arrays.stream(bundleContext.getServiceReferences(Restrictor.class.getName(), null))
+                .map(serviceRef -> (Restrictor) bundleContext.getService(serviceRef))
+                .filter(Objects::nonNull)
+            .collect(Collectors.toList());
     }
 
     // ====================================================================
@@ -191,6 +232,18 @@ public class DelegatingRestrictor implements Restrictor {
 
     // =======================================================================================================
 
+    private static final RestrictorInvoker RESTRICTED_ATTRIBUTE_VALUE = new RestrictorInvoker() {
+        /** {@inheritDoc} */
+        public Object invoke(Restrictor restrictor, Object... args) {
+            return restrictor.restrictedAttributeValue((ObjectName) args[0], (String) args[1], args[2]);
+        }
+    };
+
+    /** {@inheritDoc} */
+    public Object restrictedAttributeValue(ObjectName pName, String pAttribute, Object object) {
+        return invokeRestrictedAttributeValueRestrictorService(RESTRICTED_ATTRIBUTE_VALUE, pName, pAttribute, object);
+    }
+
     /**
      * Internal interface for restrictor delegation
      */
@@ -201,6 +254,19 @@ public class DelegatingRestrictor implements Restrictor {
          * @param args context dependent arguments
          * @return result of the check
          */
-        boolean check(Restrictor restrictor,Object ... args);
+        boolean check(Restrictor restrictor, Object ... args);
+    }
+
+    /**
+     * Internal interface for restrictor delegation for function invocation
+     */
+    private interface RestrictorInvoker {
+        /**
+         * Run check specifically for the restrictor to delegate to
+         * @param restrictor the restrictor on which the check should be run
+         * @param args context dependent arguments
+         * @return result of the check
+         */
+        Object invoke(Restrictor restrictor, Object ... args);
     }
 }
