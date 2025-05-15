@@ -93,7 +93,8 @@ public class ReadHandler extends AbstractCommandHandler<JolokiaReadRequest> {
     public Object doHandleSingleServerRequest(MBeanServerConnection pServer, JolokiaReadRequest pRequest)
             throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
         checkRestriction(pRequest.getObjectName(), pRequest.getAttributeName());
-        return pServer.getAttribute(pRequest.getObjectName(), pRequest.getAttributeName());
+        return getRestrictedAttributeValue(pRequest.getObjectName(), pRequest.getAttributeName(),
+            pServer.getAttribute(pRequest.getObjectName(), pRequest.getAttributeName()));
     }
 
     /** {@inheritDoc} */
@@ -180,7 +181,7 @@ public class ReadHandler extends AbstractCommandHandler<JolokiaReadRequest> {
         for (String attribute : attributes) {
             try {
                 checkRestriction(pMBeanName, attribute);
-                ret.put(attribute,getAttribute(pServerManager, pMBeanName, attribute));
+                ret.put(attribute, getAttribute(pServerManager, pMBeanName, attribute));
             } catch (MBeanException e) {
                 // The fault handler might to decide to rethrow the
                 // exception in which case nothing is put extra into ret.
@@ -230,7 +231,8 @@ public class ReadHandler extends AbstractCommandHandler<JolokiaReadRequest> {
     // Try multiple servers for fetching an attribute
     private Object getAttribute(MBeanServerAccess pServerManager, ObjectName pMBeanName, String attribute)
             throws MBeanException, ReflectionException, IOException, AttributeNotFoundException, InstanceNotFoundException {
-        return pServerManager.call(pMBeanName, MBEAN_ATTRIBUTE_READ_HANDLER, attribute);
+        return getRestrictedAttributeValue(pMBeanName, attribute,
+            pServerManager.call(pMBeanName, MBEAN_ATTRIBUTE_READ_HANDLER, attribute));
     }
 
     // Return a set of attributes as a map with the attribute name as key and their values as values
@@ -251,6 +253,10 @@ public class ReadHandler extends AbstractCommandHandler<JolokiaReadRequest> {
             throw new SecurityException("Reading attribute " + attribute +
                     " is forbidden for MBean " + mBeanName.getCanonicalName());
         }
+    }
+
+    private Object getRestrictedAttributeValue(ObjectName mBeanName, String attribute, Object value) {
+        return context.restrictedAttributeValue(mBeanName,attribute, value);
     }
 
     /**

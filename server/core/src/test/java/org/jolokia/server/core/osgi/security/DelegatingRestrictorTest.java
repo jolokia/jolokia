@@ -86,6 +86,8 @@ public class DelegatingRestrictorTest {
         assertFalse(restrictor.isRemoteAccessAllowed("localhost", "127.0.0.1"));
         assertTrue(restrictor.isOriginAllowed("http://bla.com", false));
         assertFalse(restrictor.isObjectNameHidden(new ObjectName("java.lang:type=Memory")));
+        assertEquals(restrictor.restrictedAttributeValue(new ObjectName("java.lang:type=Memory"),
+            "HeapMemoryUsage", "70%"), "*****");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*Impossible.*")
@@ -141,6 +143,13 @@ public class DelegatingRestrictorTest {
 
         public boolean isObjectNameHidden(ObjectName name) {
             return isHidden;
+        }
+
+        public Object restrictedAttributeValue(ObjectName pName, String pAttribute, Object object) {
+            if("HeapMemoryUsage".equals(pAttribute)) {
+                return "*****";
+            }
+            return object;
         }
     }
 }

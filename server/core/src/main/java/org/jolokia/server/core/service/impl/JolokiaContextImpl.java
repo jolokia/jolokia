@@ -171,6 +171,11 @@ public class JolokiaContextImpl implements JolokiaContext {
     }
 
     /** {@inheritDoc} */
+    public Object restrictedAttributeValue(ObjectName pName, String pAttribute, Object object) {
+        return getRestrictor().restrictedAttributeValue(pName, pAttribute, object);
+    }
+
+    /** {@inheritDoc} */
     private Configuration getConfiguration() {
         return serviceManager.getConfiguration();
     }

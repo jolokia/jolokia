@@ -113,4 +113,16 @@ public interface Restrictor {
     default boolean ignoreScheme() {
         return false;
     }
+
+    /**
+     * Providing a way to verify/secure the attribute value before its exposed
+     *
+     * @param pName mbean object name
+     * @param pAttribute attribute name
+     * @param object attribute value
+     * @return restricted attribute value
+     */
+    default Object restrictedAttributeValue(ObjectName pName, String pAttribute, Object object) {
+        return object;
+    }
 }
