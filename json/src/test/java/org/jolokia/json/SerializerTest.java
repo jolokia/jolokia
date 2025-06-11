@@ -120,7 +120,11 @@ public class SerializerTest {
         map.put(null, "hello");
         map.put(new File("/"), false);
         JSONWriter.serialize(map, sw);
-        assertEquals(sw.toString(), "{\"42\":1,\"\":\"hello\",\"/\":false}");
+        if (System.getProperty("os.name").toLowerCase().startsWith("win")) {
+        	assertEquals(sw.toString(), "{\"42\":1,\"\":\"hello\",\"\\\\\":false}");
+        } else {
+        	assertEquals(sw.toString(), "{\"42\":1,\"\":\"hello\",\"/\":false}");
+        }
     }
 
     @Test
