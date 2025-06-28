@@ -36,11 +36,11 @@ For example, what was a dedicated `org.jolokia.history.HistoryStore` in Jolokia 
 
 == A note about _Service Loader_ approach
 
-`META-INF/jolokia/services` is a bit similar approach to Java standard `java.util.ServiceLoader` API, where services are _declared_ in `META-INF/services/interface-name`.
+`META-INF/jolokia/services` is a little similar approach to Java standard `java.util.ServiceLoader` API, where services are _declared_ in `META-INF/services/interface-name`.
 
 The most important aspect is that the instantiation of such services is performed by JDK itself (or Jolokia itself) and if 3rd party applications use more sophisticated _service registries_ (like CDI or Spring DI), then we can't avoid static fields...
 
-So if a Jolokia service extension needs to use other dependencies, it's up to the application to provide necessary integration. Static fields is the easies (but not super-clean) option.
+So if a Jolokia service extension needs to use other dependencies, it's up to the application to provide necessary integration. Static fields is the easiest (but not super-clean) option.
 
 == Extension points in Jolokia 2
 
@@ -56,7 +56,7 @@ The format of the extension file `META-INF/jolokia/services[-default]` is:
 
 if line is not a comment, it is treated as _service entry_. There are two types of entries:
 
-* _remove entry_ - if a line starts with `!` (exclamation mark), we can declare a fully qualified name of a service declared in another (most probably Jolokia's own) service file, so we can _disable_ usage and instantiation of given service. For example we can remove history service with `!org.jolokia.service.history.HistoryMBeanRequestInterceptor` even if `org.jolokia:jolokia-service-history` is available on classpath
+* _remove entry_ - if a line starts with `!` (exclamation mark), we can declare a fully qualified name of a service declared in another (most probably Jolokia's own) service file, so we can _disable_ usage and instantiation of given service. For example, we can remove history service with `!org.jolokia.service.history.HistoryMBeanRequestInterceptor` even if `org.jolokia:jolokia-service-history` is available on classpath
 * _service entry_ - if a line doesn't start with `!`, a class is instantiated using one of two possible constructors:
 ** empty constructor
 ** a constructor accepting integer value which is treated as "order" of the service. The value to pass is read after the comma in _service entry_.
@@ -113,7 +113,7 @@ Basically instead of duplicating the same JSONified `javax.management.MBeanInfo`
 1. Jolokia calls `javax.management.MBeanServerConnection.queryMBeans()` normally, getting a set of `javax.management.ObjectInstance` objects.
 2. Each `ObjectInstance` carries an `ObjectName` and `className`.
 3. Without any optimization, `ObjectName` is used in `javax.management.MBeanServerConnection.getMBeanInfo()` call and result is the serialized using `org.jolokia.service.jmx.handler.list.DataUpdater` services.
-4. However, both `ObjectName` and ``ObjectInstance``'s class can be use to obtain a _key_ (or a _hint_) which determines that some MBeans may _share_ its `javax.management.MBeanInfo` with other MBeans.
+4. However, both `ObjectName` and ``ObjectInstance``'s class can be used to obtain a _key_ (or a _hint_) which determines that some MBeans may _share_ its `javax.management.MBeanInfo` with other MBeans.
 5. When a non-null key for an MBean is obtained, its MBeanInfo is cached under `"cache"` field and related MBean under `"domains"` field simply points to cached JSON data of `javax.management.MBeanInfo`.
 
 In order to use such variant of `list()` operation, a new processing request parameter has to be specified. This is done using `listCache=true` paramater (defaults to `false` for compatibility reasons).
@@ -260,7 +260,7 @@ Such JSON contains information obtained from `javax.management.MBeanInfo` object
 
 Built-in implementations of `org.jolokia.service.jmx.handler.list.DataUpdater` interface simply add these fields (`attr`, `op`, ...) to the JSON data.
 
-However there may be scenarios where for each MBean we need some additional data - for example the security roles assigned to given MBean (to implement a form of Role-Based Access Control (RBAC)). Jolokia isn't aware of the way an application implements security mechanisms, but should allow for any extension of the basic MBean data.
+However, there may be scenarios where for each MBean we need some additional data - for example the security roles assigned to given MBean (to implement a form of Role-Based Access Control (RBAC)). Jolokia isn't aware of the way an application implements security mechanisms, but should allow for any extension of the basic MBean data.
 
 We can provide an extension module, add it on the CLASSPATH and declare additional _data updaters_ in `META-INF/jolokia/services`. `org.jolokia.service.jmx.handler.list.DataUpdater` is already an implementation of `org.jolokia.server.core.service.api.JolokiaService` and it's an abstract class we can extend. For example:
 
