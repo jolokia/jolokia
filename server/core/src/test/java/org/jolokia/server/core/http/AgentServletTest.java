@@ -502,7 +502,6 @@ public class AgentServletTest {
 
     private void setNoCacheHeaders(HttpServletResponse pResp) {
         pResp.setHeader("Cache-Control", "no-cache");
-        pResp.setHeader("Pragma","no-cache");
         pResp.setDateHeader(eq("Date"),anyLong());
         pResp.setDateHeader(eq("Expires"),anyLong());
     }

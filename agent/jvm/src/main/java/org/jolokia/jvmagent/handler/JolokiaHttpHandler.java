@@ -273,7 +273,6 @@ public class JolokiaHttpHandler implements HttpHandler {
 
         // Avoid caching at all costs
         headers.set("Cache-Control", "no-cache");
-        headers.set("Pragma","no-cache");
 
         // Check for a date header and set it accordingly to the recommendations of
         // RFC-2616. See also {@link AgentServlet#setNoCacheHeaders()}

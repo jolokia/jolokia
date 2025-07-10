@@ -190,7 +190,6 @@ public class JolokiaHttpHandlerTest {
         assertTrue(result.contains("\"used\""));
 
         assertEquals(header.getFirst("Cache-Control"),"no-cache");
-        assertEquals(header.getFirst("Pragma"),"no-cache");
         SimpleDateFormat rfc1123Format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
         rfc1123Format.setTimeZone(TimeZone.getTimeZone("GMT"));
 
