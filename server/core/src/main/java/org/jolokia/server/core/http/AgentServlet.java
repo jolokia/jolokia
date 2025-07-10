@@ -578,7 +578,6 @@ public class AgentServlet extends HttpServlet {
 
     private void setNoCacheHeaders(HttpServletResponse pResp) {
         pResp.setHeader("Cache-Control", "no-cache");
-        pResp.setHeader("Pragma","no-cache");
         // Check for a date header and set it accordingly to the recommendations of
         // RFC-2616 (http://tools.ietf.org/html/rfc2616#section-14.21)
         //
