@@ -23,12 +23,12 @@ const app = express()
 app.use(express.json({ type: "*/json" }))
 
 // main Jolokia endpoint which simulates full hawtio/hawtio server
-app.use("/jolokia", jolokiaRouter)
-app.use("/jolokia-notifications", jolokiaNotificationsRouter)
-app.use("/jolokia-simple", jolokiaSimpleRouter)
+app.use(/\/jolokia/, jolokiaRouter)
+app.use(/\/jolokia-notifications/, jolokiaNotificationsRouter)
+app.use(/\/jolokia-simple/, jolokiaSimpleRouter)
 
 // a Jolokia endpoint which can be used to test read timeouts
-app.use("/jolokia-timeout", (_req, res) => {
+app.use(/\/jolokia-timeout/, (_req, res) => {
   setTimeout(() => {
     res.status(200).json({
       request: { type: "version" },

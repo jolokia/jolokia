@@ -21,15 +21,16 @@
     "allowImportingTsExtensions": false,
     "declaration": true,
     "esModuleInterop": true,
-    "lib": [ "DOM" ],
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "lib": [ "DOM", "ES2022" ],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "noEmit": true,
     "strict": true,
-    "sourceMap": true,
+    "sourceMap": false,
     // https://www.typescriptlang.org/docs/handbook/modules/reference.html#implied-and-enforced-options
     "target": "ESNext",
-    "declarationDir": "dts"
+    "declarationDir": "dist/dts",
+    "types": [ "node" ]
   },
   "include": [ "src", "test" ],
   "$schema": "https://json.schemastore.org/tsconfig"

@@ -18,12 +18,12 @@ import express from "express"
 
 const jolokiaRouter = express.Router()
 
-jolokiaRouter.all("*", (_req, res, next) => {
+jolokiaRouter.all(/.*/, (_req, res, next) => {
   res.set("Content-Type", "application/json")
   next()
 })
 
-jolokiaRouter.get("/version", (_req, res) => {
+jolokiaRouter.get(/\/version/, (_req, res) => {
   res.status(200).json({
     status: 200,
     timestamp: Date.now(),
@@ -35,7 +35,7 @@ jolokiaRouter.get("/version", (_req, res) => {
   })
 })
 
-jolokiaRouter.post("/*", (req, res) => {
+jolokiaRouter.post(/\/*/, (req, res) => {
   let body = req.body
 
   if (Array.isArray(body)) {

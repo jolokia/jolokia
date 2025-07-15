@@ -20,7 +20,7 @@ const jolokiaRouter = express.Router()
 
 let valueToWrite: unknown = null
 
-jolokiaRouter.post("/*", (req, res) => {
+jolokiaRouter.post(/\/*/, (req, res) => {
   let body = req.body
 
   if (!body || !body.type) {

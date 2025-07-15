@@ -24,7 +24,7 @@ import {
 
 const jolokiaRouter = express.Router()
 
-jolokiaRouter.all("*", (_req, res, next) => {
+jolokiaRouter.all(/\*/, (_req, res, next) => {
   res.set("Content-Type", "application/json")
   next()
 })
@@ -35,7 +35,7 @@ const clients: Record<string, Record<string, unknown>> = {}
 
 const notification_1000_3000: JMXNotification[] = []
 
-jolokiaRouter.post("/*", (req, res) => {
+jolokiaRouter.post(/\/*/, (req, res) => {
   let body = req.body
 
   if (Array.isArray(body)) {
