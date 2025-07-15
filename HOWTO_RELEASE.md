@@ -61,6 +61,12 @@ table inet firewalld {
 # nft delete rule inet firewalld filter_IN_FedoraServer_allow handle 343
 ```
 
+If the above commands do not work (as on Fedora 42, where `nftables` ownership changed to `firewall-cmd`), you can use:
+```console
+# firewall-cmd --zone=FedoraServer --add-rich-rule='rule family="ipv4" destination address="239.192.48.84" accept'
+# firewall-cmd --zone=FedoraServer --add-rich-rule='rule family="ipv6" destination address="ff08::48:84" accept'
+```
+
 There are however additional tests that should be run a bit outside of standard `mvn clean install`.
 
 Instead of complex configuration that would be required for frameworks like [Selenium][1], Javascript tests are run

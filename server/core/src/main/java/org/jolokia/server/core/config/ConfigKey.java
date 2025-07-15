@@ -212,13 +212,13 @@ public enum ConfigKey {
      * <p>To make UDP multicasting work on Linux, make sure firewall is properly configured. On Fedora
      * with default <code>FedoraServer</code> zone, use:
      * <pre>
-     *     $ firewall-cmd --zone=FedoraServer --add-rich-rule='rule family=ipv4 destination address="239.192.48.84" accept'
-     *     $ firewall-cmd --zone=FedoraServer --add-rich-rule='rule family=ipv6 destination address="ff08::48:84" accept'
+     *     # firewall-cmd --zone=FedoraServer --add-rich-rule='rule family="ipv4" destination address="239.192.48.84" accept'
+     *     # firewall-cmd --zone=FedoraServer --add-rich-rule='rule family="ipv6" destination address="ff08::48:84" accept'
      * </pre>
-     * or directly using {@code nft} (chain name may vary):
+     * or directly using {@code nft} (chain name may vary and it doesn't work on Fedora 42 anymore):
      * <pre>
-     *     $ nft add rule inet firewalld filter_IN_FedoraServer_allow ip daddr 239.192.48.84 accept
-     *     $ nft add rule inet firewalld filter_IN_FedoraServer_allow ip6 daddr ff08::48:84 accept
+     *     # nft add rule inet firewalld filter_IN_FedoraServer_allow ip daddr 239.192.48.84 accept
+     *     # nft add rule inet firewalld filter_IN_FedoraServer_allow ip6 daddr ff08::48:84 accept
      * </pre>
      * </p>
      */
