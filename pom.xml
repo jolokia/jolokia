@@ -1068,7 +1068,7 @@
     <plugin.maven-dependency-plugin>3.8.1</plugin.maven-dependency-plugin>
     <plugin.maven-deploy-plugin>3.1.4</plugin.maven-deploy-plugin>
     <plugin.maven-failsafe-plugin>3.5.3</plugin.maven-failsafe-plugin>
-    <plugin.maven-gpg-plugin>3.2.7</plugin.maven-gpg-plugin>
+    <plugin.maven-gpg-plugin>3.2.8</plugin.maven-gpg-plugin>
     <plugin.maven-install-plugin>3.1.4</plugin.maven-install-plugin>
     <plugin.maven-jar-plugin>3.4.2</plugin.maven-jar-plugin>
     <plugin.maven-javadoc-plugin>3.11.2</plugin.maven-javadoc-plugin>
@@ -1091,9 +1091,9 @@
     <plugin.org.apache.felix.maven-bundle-plugin>5.1.9</plugin.org.apache.felix.maven-bundle-plugin>
     <plugin.org.apache.felix.maven-scr-plugin>1.26.4</plugin.org.apache.felix.maven-scr-plugin>
     <plugin.org.apache.rat.apache-rat-plugin>0.16.1</plugin.org.apache.rat.apache-rat-plugin>
-    <!-- Please stay at 3.1.0. With 3.1.1 we have "[INFO] Issues found in: null" -->
+    <!-- Please stay at 3.1.0. With 3.2.0 we have "[INFO] Issues found in: null" -->
     <plugin.org.asciidoctor.asciidoctor-maven-plugin>3.1.0</plugin.org.asciidoctor.asciidoctor-maven-plugin>
-    <plugin.org.codehaus.mojo.build-helper-maven-plugin>3.6.0</plugin.org.codehaus.mojo.build-helper-maven-plugin>
+    <plugin.org.codehaus.mojo.build-helper-maven-plugin>3.6.1</plugin.org.codehaus.mojo.build-helper-maven-plugin>
     <plugin.org.codehaus.mojo.versions-maven-plugin>2.18.0</plugin.org.codehaus.mojo.versions-maven-plugin>
     <plugin.org.jacoco.jacoco-maven-plugin>0.7.6.201602180812</plugin.org.jacoco.jacoco-maven-plugin>
     <plugin.org.vafer.jdeb>1.13</plugin.org.vafer.jdeb>
@@ -1114,11 +1114,11 @@
     <version.org.easymock>5.6.0</version.org.easymock>
     <version.org.eclipse.jetty>11.0.25</version.org.eclipse.jetty>
     <version.org.testng>7.11.0</version.org.testng>
-    <version.org.wiremock>3.13.0</version.org.wiremock>
+    <version.org.wiremock>3.13.1</version.org.wiremock>
 
     <!-- Versions of optional and example-related dependencies -->
 
-    <version.org.apache.logging.log4j>2.24.3</version.org.apache.logging.log4j>
+    <version.org.apache.logging.log4j>2.25.1</version.org.apache.logging.log4j>
     <version.org.slf4j>2.0.17</version.org.slf4j>
 
     <!-- Versions of actual Maven dependencies for Jolokia core/service/client libraries -->
