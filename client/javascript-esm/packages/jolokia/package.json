@@ -29,10 +29,10 @@
     "test:jolokia": "jest"
   },
   "devDependencies": {
-    "@jest/globals": "^30.0.4",
+    "@jest/globals": "^30.0.5",
     "@rollup/plugin-node-resolve": "^16.0.1",
     "@rollup/plugin-terser": "^0.4.4",
-    "jest": "^30.0.4",
+    "jest": "^30.0.5",
     "rollup": "^4.45.1"
   },
   "publishConfig": {
