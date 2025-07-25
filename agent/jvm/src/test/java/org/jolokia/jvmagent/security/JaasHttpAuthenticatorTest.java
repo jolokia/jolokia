@@ -28,7 +28,7 @@ public class JaasHttpAuthenticatorTest extends BaseAuthenticatorTest {
 
     @BeforeMethod
     public void setUp() {
-        auth = new JaasHttpAuthenticator("jolokia");
+        auth = new JaasHttpAuthenticator("jolokia", null);
     }
 
     @AfterMethod
@@ -68,7 +68,7 @@ public class JaasHttpAuthenticatorTest extends BaseAuthenticatorTest {
         final Subject subject = new Subject();
         HttpExchange ex = createHttpExchange(respHeader, subject, "Authorization", "Basic cm9sYW5kOnMhY3IhdA==");
 
-        JaasHttpAuthenticator successAuth = new JaasHttpAuthenticator("jolokia") {
+        JaasHttpAuthenticator successAuth = new JaasHttpAuthenticator("jolokia", null) {
             @Override
             protected LoginContext createLoginContext(String realm, CallbackHandler handler) throws LoginException {
                 LoginContext mockLogin = EasyMock.mock(MockableLoginContext.class);

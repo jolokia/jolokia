@@ -21,13 +21,20 @@ public class JaasHttpAuthenticator extends BasicAuthenticator {
     // Used for communicating back the subject obtained.
     private final ThreadLocal<Subject> subjectThreadLocal = new ThreadLocal<>();
 
-    public JaasHttpAuthenticator(String pRealm) {
+    private final ClassLoader classLoader;
+
+    public JaasHttpAuthenticator(String pRealm, ClassLoader classLoader) {
         super(pRealm);
+        this.classLoader = classLoader;
     }
 
     @Override
     public Result authenticate(HttpExchange pHttpExchange) {
+        ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
         try {
+            if (this.classLoader != null) {
+                Thread.currentThread().setContextClassLoader(this.classLoader);
+            }
             Result result = super.authenticate(pHttpExchange);
             if (result instanceof Success) {
                 Subject subject = subjectThreadLocal.get();
@@ -38,6 +45,9 @@ public class JaasHttpAuthenticator extends BasicAuthenticator {
             return result;
         } finally {
             subjectThreadLocal.remove();
+            if (oldClassLoader != null) {
+                Thread.currentThread().setContextClassLoader(oldClassLoader);
+            }
         }
     }
 

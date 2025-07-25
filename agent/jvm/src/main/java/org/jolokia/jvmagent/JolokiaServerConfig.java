@@ -512,7 +512,7 @@ public class JolokiaServerConfig {
                 authenticators.add(new UserPasswordHttpAuthenticator(realm,user,password));
             }
         } else if ("jaas".equalsIgnoreCase(authMode)) {
-            authenticators.add(new JaasHttpAuthenticator(realm));
+            authenticators.add(new JaasHttpAuthenticator(realm, classLoader));
         } else if ("delegate".equalsIgnoreCase(authMode)) {
             authenticators.add(new DelegatingAuthenticator(realm,
                                                         jolokiaConfig.getConfig(ConfigKey.AUTH_URL),
