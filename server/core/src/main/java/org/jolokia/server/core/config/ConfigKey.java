@@ -421,7 +421,7 @@ public enum ConfigKey {
 
     /**
      * JAAS Subject to attach to an HTTP request as attribute if JAAS based authentication is in use.
-     * This constant can only be used programtically
+     * This constant can only be used programmatically
      */
     public static final String JAAS_SUBJECT_REQUEST_ATTRIBUTE = "org.jolokia.jaasSubject";
 

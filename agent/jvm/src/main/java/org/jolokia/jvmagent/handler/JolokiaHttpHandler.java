@@ -117,7 +117,7 @@ public class JolokiaHttpHandler implements HttpHandler {
         }
     }
 
-    // run as priviledged action
+    // run as privileged action
     private void doHandleAs(Subject subject, final HttpExchange pHttpExchange) {
         try {
             Subject.doAs(subject, (PrivilegedExceptionAction<Void>) () -> {
