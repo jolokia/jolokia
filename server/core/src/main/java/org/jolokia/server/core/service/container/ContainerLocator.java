@@ -24,17 +24,18 @@ import org.jolokia.server.core.service.api.JolokiaService;
  * to controll how Jolokia works.</p>
  *
  * <p>Original use case is Artemis server detector which finds an instance of Artemis broker to be used
- * by list optimizers that that RBAC information into account.</p>
+ * by list optimizers that augment MBeanInfo with RBAC information.</p>
  */
 public interface ContainerLocator extends JolokiaService<ContainerLocator> {
 
     /**
-     * Returns an instance of a <em>runtime</em> or <em>container</em> which is using this Jolokia
-     * instance.
-     * @param clazz A class guard to ensure that the runtime is of proper class
+     * Returns an instance of a <em>runtime</em> or <em>container</em> specific class to be used by
+     * a dedicated Jolokia service.
+     *
+     * @param clazz A class guard to ensure that the returned instance is of proper class
      * @return
      * @param <T>
      */
-    <T> T container(Class<T> clazz);
+    <T> T locate(Class<T> clazz);
 
 }

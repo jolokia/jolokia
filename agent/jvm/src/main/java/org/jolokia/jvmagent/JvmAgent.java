@@ -167,7 +167,7 @@ public final class JvmAgent {
                 if (highOrderClassLoader != null) {
                     System.err.printf("Invalid ServerDetector configuration. Detector \"%s\" already provided" +
                         " a classloader and different detector (\"%s\") overrides it.",
-                        activeDetector, detector);
+                        activeDetector.getName(), detector.getName());
                     throw new RuntimeException("Invalid ServerDetector configuration");
                 } else {
                     highOrderClassLoader = cl;
