@@ -130,7 +130,7 @@ Second one is to use https://docs.oracle.com/en/java/javase/11/docs/api/jdk.atta
 ----
 $ java -jar jolokia-agent-jvm-{jolokia-version}-javaagent.jar start --port 7778 34870
 Started Jolokia for PID 34870
-http://127.0.0.1:7778/jolokia/
+http://127.0.0.1:7778/jolokia
 ----
 
 NOTE: Dynamic loading of agents will be removed at some point. See https://openjdk.org/jeps/451[JEP 451,role=externalLink,window=_blank] for details.

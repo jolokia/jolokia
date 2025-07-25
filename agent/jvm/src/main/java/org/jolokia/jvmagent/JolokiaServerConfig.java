@@ -546,9 +546,6 @@ public class JolokiaServerConfig {
         if (context == null) {
             context = ConfigKey.AGENT_CONTEXT.getDefaultValue();
         }
-        if (!context.endsWith("/")) {
-            context += "/";
-        }
     }
 
     private void initHttpsRelatedSettings(Map<String, String> agentConfig) {

@@ -86,7 +86,7 @@ public class JvmAgentConfigTest {
         assertEquals(config.getPort(), 8778);
         assertNull(config.getAuthenticator());
         assertEquals(config.getBacklog(), 10);
-        assertEquals(config.getContextPath(), "/jolokia/");
+        assertEquals(config.getContextPath(), "/jolokia");
         assertEquals(config.getExecutor(), "single");
         assertEquals(config.getThreadNr(), 5);
         assertFalse(config.useSslClientAuthentication());
@@ -97,7 +97,7 @@ public class JvmAgentConfigTest {
     @Test
     public void context() {
         JvmAgentConfig config = new JvmAgentConfig("agentContext=/bla");
-        assertEquals(config.getContextPath(), "/bla/");
+        assertEquals(config.getContextPath(), "/bla");
     }
 
     @Test

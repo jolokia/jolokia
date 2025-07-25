@@ -52,7 +52,7 @@ public class JolokiaServerIntegrationTest extends BaseServerTest {
         ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("/spring-jolokia-plain-beans.xml");
         SpringJolokiaAgent server = (SpringJolokiaAgent) ctx.getBean("jolokia");
         JolokiaServerConfig cfg = server.getServerConfig();
-        assertEquals(cfg.getContextPath(),"/jolokia/");
+        assertEquals(cfg.getContextPath(),"/jolokia");
         checkServerAndStop(server);
     }
 }

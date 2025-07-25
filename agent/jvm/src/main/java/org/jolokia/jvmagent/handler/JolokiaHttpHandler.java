@@ -86,9 +86,6 @@ public class JolokiaHttpHandler implements HttpHandler {
         jolokiaContext = pJolokiaContext;
 
         contextPath = jolokiaContext.getConfig(ConfigKey.AGENT_CONTEXT);
-        if (!contextPath.endsWith("/")) {
-            contextPath += "/";
-        }
 
         requestHandler = new HttpRequestHandler(jolokiaContext);
     }

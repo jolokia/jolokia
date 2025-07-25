@@ -47,13 +47,13 @@ public class SpringJolokiaServerTest extends BaseServerTest {
     public void systemProperties() throws Exception {
         checkSystemPropertyMode("fallback","/jol/","/j4p/","/j4p/");
         checkSystemPropertyMode("fallback","/jol/",null,"/jol/");
-        checkSystemPropertyMode("fallback",null,null,"/jolokia/");
+        checkSystemPropertyMode("fallback",null,null,"/jolokia");
 
         checkSystemPropertyMode("override","/jol/","/j4p/","/jol/");
         checkSystemPropertyMode("override","/jol/",null,"/jol/");
-        checkSystemPropertyMode("override",null,null,"/jolokia/");
+        checkSystemPropertyMode("override",null,null,"/jolokia");
 
-        checkSystemPropertyMode(null,"/jol/",null,"/jolokia/");
+        checkSystemPropertyMode(null,"/jol/",null,"/jolokia");
     }
 
     private void checkSystemPropertyMode(String mode,String propContext,String configContext,String expectContext) throws Exception {
