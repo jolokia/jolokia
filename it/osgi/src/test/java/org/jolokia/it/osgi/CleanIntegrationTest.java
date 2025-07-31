@@ -38,31 +38,33 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
 @RunWith(PaxExam.class)
 public class CleanIntegrationTest extends AbstractOsgiTestBase {
 
-	public static final Logger LOG = LoggerFactory.getLogger(CleanIntegrationTest.class);
+    public static final Logger LOG = LoggerFactory.getLogger(CleanIntegrationTest.class);
 
-	@Configuration
-	public Option[] configure() {
-		return combine(baseConfigure(), jolokiaCore());
-	}
+    @Configuration
+    public Option[] configure() {
+        Option[] options = combine(baseConfigure(), defaultLoggingConfig("WARN"));
+        options = combine(options, servletApi5());
+        return combine(options, jolokiaCore());
+    }
 
-	@Test
-	public void justRun() {
-		Set<Bundle> bundles = new TreeSet<>((b1, b2) -> (int) (b1.getBundleId() - b2.getBundleId()));
-		bundles.addAll(Arrays.asList(context.getBundles()));
-		for (Bundle b : bundles) {
-			String info = String.format("#%02d: %s/%s (%s)",
-					b.getBundleId(), b.getSymbolicName(), b.getVersion(), b.getLocation());
-			LOG.info(info);
-		}
+    @Test
+    public void justRun() {
+        Set<Bundle> bundles = new TreeSet<>((b1, b2) -> (int) (b1.getBundleId() - b2.getBundleId()));
+        bundles.addAll(Arrays.asList(context.getBundles()));
+        for (Bundle b : bundles) {
+            String info = String.format("#%02d: %s/%s (%s)",
+                b.getBundleId(), b.getSymbolicName(), b.getVersion(), b.getLocation());
+            LOG.info(info);
+        }
 
-        for (String bundle : new String[] {
+        for (String bundle : new String[]{
             "org.jolokia.json",
             "org.jolokia.server.core",
             "org.jolokia.service.serializer",
-            "org.jolokia.service.jmx" }) {
+            "org.jolokia.service.jmx"}) {
             Bundle b = bundle(bundle);
             assertThat(b.getState(), equalTo(Bundle.ACTIVE));
         }
-	}
+    }
 
 }

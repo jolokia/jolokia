@@ -831,6 +831,16 @@
       <!-- JakartaEE dependencies -->
 
       <dependency>
+        <groupId>jakarta.annotation</groupId>
+        <artifactId>jakarta.annotation-api</artifactId>
+        <version>${version.jakarta.annotation-api}</version>
+      </dependency>
+      <dependency>
+        <groupId>jakarta.authentication</groupId>
+        <artifactId>jakarta.authentication-api</artifactId>
+        <version>${version.jakarta.authentication-api}</version>
+      </dependency>
+      <dependency>
         <groupId>jakarta.servlet</groupId>
         <artifactId>jakarta.servlet-api</artifactId>
         <version>${version.jakarta.servlet-api}</version>
@@ -994,6 +1004,11 @@
         <artifactId>org.apache.felix.framework</artifactId>
         <version>${version.org.apache.felix.framework}</version>
       </dependency>
+      <dependency>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>org.apache.felix.configadmin</artifactId>
+        <version>${version.org.apache.felix.configadmin}</version>
+      </dependency>
 
       <dependency>
         <groupId>org.ops4j.pax.logging</groupId>
@@ -1155,7 +1170,11 @@
     <!-- Versions of test-related dependencies -->
 
     <version.com.fasterxml.jackson.core>2.19.2</version.com.fasterxml.jackson.core>
+    <version.jakarta.annotation-api>3.0.0</version.jakarta.annotation-api>
+    <version.jakarta.authentication-api>3.1.0</version.jakarta.authentication-api>
+    <version.org.apache.felix.configadmin>1.9.26</version.org.apache.felix.configadmin>
     <version.org.apache.felix.framework>7.0.5</version.org.apache.felix.framework>
+    <version.org.apache.felix.http.jetty12>1.0.36</version.org.apache.felix.http.jetty12>
     <version.org.awaitility>4.3.0</version.org.awaitility>
     <version.org.easymock>5.6.0</version.org.easymock>
     <version.org.eclipse.jetty>11.0.25</version.org.eclipse.jetty>
@@ -1164,6 +1183,7 @@
     <version.org.apache.servicemix.bundles.javax-inject>1_3</version.org.apache.servicemix.bundles.javax-inject>
     <version.org.ops4j.pax.exam>4.14.0</version.org.ops4j.pax.exam>
     <version.org.ops4j.pax.logging>2.3.0</version.org.ops4j.pax.logging>
+    <version.org.ops4j.pax.web>11.0.1</version.org.ops4j.pax.web>
 
     <!-- Versions of optional and example-related dependencies -->
 
@@ -1175,6 +1195,7 @@
     <version.commons-codec>1.19.0</version.commons-codec>
     <version.io.fabric8.kubernetes-client>7.3.1</version.io.fabric8.kubernetes-client>
     <version.jakarta.servlet-api>5.0.0</version.jakarta.servlet-api>
+    <version.jakarta.servlet-api6>6.1.0</version.jakarta.servlet-api6>
     <version.org.apache.httpcomponents.httpclient>4.5.14</version.org.apache.httpcomponents.httpclient>
     <version.org.apache.httpcomponents.httpcore>4.4.16</version.org.apache.httpcomponents.httpcore>
     <!-- we support wide range of OSGI Core API - in Import-Package we use [1.8,2.0) (R6), but we need newer version for tests -->

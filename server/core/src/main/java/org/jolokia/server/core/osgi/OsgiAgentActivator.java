@@ -7,6 +7,7 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
+import jakarta.servlet.Servlet;
 import jakarta.servlet.http.HttpServlet;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.osgi.security.*;
@@ -67,7 +68,7 @@ public class OsgiAgentActivator implements BundleActivator {
     private Restrictor restrictor = null;
 
     private ServiceRegistration<ServletContextHelper> contextRegistration = null;
-    private ServiceRegistration<HttpServlet> servletRegistration = null;
+    private ServiceRegistration<?> servletRegistration = null;
 
     /** {@inheritDoc} */
     @SuppressWarnings("deprecation")
@@ -310,7 +311,10 @@ public class OsgiAgentActivator implements BundleActivator {
             String key = e.nextElement();
             properties.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_INIT_PARAM_PREFIX + key, config.get(key));
         }
-        servletRegistration = pBundleContext.registerService(HttpServlet.class, servlet, properties);
+        servletRegistration = pBundleContext.registerService(new String[] {
+            Servlet.class.getName(),
+            HttpServlet.class.getName()
+        }, servlet, properties);
     }
 
 }

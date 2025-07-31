@@ -21,6 +21,7 @@ import java.lang.reflect.Proxy;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
+import jakarta.servlet.Servlet;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -44,6 +45,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static org.easymock.EasyMock.anyObject;
+import static org.easymock.EasyMock.aryEq;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.createNiceMock;
 import static org.easymock.EasyMock.eq;
@@ -71,7 +73,8 @@ public class OsgiAgentActivatorTest {
     private OsgiAgentActivator activator;
 
     private ServiceRegistration<ServletContextHelper> contextRegistration;
-    private ServiceRegistration<HttpServlet> servletRegistration;
+    @SuppressWarnings("rawtypes")
+    private ServiceRegistration servletRegistration;
 
     private ServiceListener configAdminServiceListener;
 
@@ -293,6 +296,7 @@ public class OsgiAgentActivatorTest {
         reset(context);
     }
 
+    @SuppressWarnings("unchecked")
     private void prepareStart(boolean doWhiteboardServlet, boolean doRestrictor, Dictionary<String, Object> configAdminProps) throws InvalidSyntaxException, IOException {
         expect(context.getProperty("org.jolokia.registerWhiteboardServlet")).andReturn("" + doWhiteboardServlet);
         if (doWhiteboardServlet) {
@@ -300,7 +304,7 @@ public class OsgiAgentActivatorTest {
             servletRegistration = createMock(ServiceRegistration.class);
             expect(context.registerService(eq(ServletContextHelper.class), EasyMock.<ServletContextHelper>anyObject(), anyObject()))
                     .andReturn(contextRegistration);
-            expect(context.registerService(eq(HttpServlet.class), EasyMock.<HttpServlet>anyObject(), anyObject()))
+            expect(context.registerService(aryEq(new String[] { Servlet.class.getName(), HttpServlet.class.getName() }), EasyMock.<HttpServlet>anyObject(), anyObject()))
                     .andReturn(servletRegistration);
             expect(context.getProperty("org.osgi.framework.version")).andReturn("4.5.0");
         }

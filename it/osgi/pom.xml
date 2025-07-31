@@ -56,9 +56,24 @@
       <artifactId>jolokia-service-serializer</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-agent-osgi</artifactId>
+      <scope>test</scope>
+    </dependency>
 
     <!-- JakartaEE dependencies -->
 
+    <dependency>
+      <groupId>jakarta.annotation</groupId>
+      <artifactId>jakarta.annotation-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.authentication</groupId>
+      <artifactId>jakarta.authentication-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
     <dependency>
       <groupId>jakarta.servlet</groupId>
       <artifactId>jakarta.servlet-api</artifactId>
@@ -109,15 +124,9 @@
       <artifactId>org.apache.felix.framework</artifactId>
       <scope>test</scope>
     </dependency>
-
     <dependency>
-      <groupId>org.ops4j.pax.logging</groupId>
-      <artifactId>pax-logging-api</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.ops4j.pax.logging</groupId>
-      <artifactId>pax-logging-log4j2</artifactId>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.configadmin</artifactId>
       <scope>test</scope>
     </dependency>
 
@@ -173,9 +182,15 @@
               org.ops4j.pax.exam.CoreOptions.mavenBundle(), but for which we don't want to add
               maven dependencies (otherwise required if using MavenArtifactProvisionOption.versionAsInProject())
             -->
-<!--            <version.xbean>${dependency.org.apache.xbean}</version.xbean>-->
+            <version.jolokia>${project.version}</version.jolokia>
+            <version.pax-logging>${version.org.ops4j.pax.logging}</version.pax-logging>
+            <version.pax-web>${version.org.ops4j.pax.web}</version.pax-web>
+            <version.configadmin>${version.org.apache.felix.configadmin}</version.configadmin>
+            <version.felix-http12>${version.org.apache.felix.http.jetty12}</version.felix-http12>
+            <version.servlet-api>${version.jakarta.servlet-api}</version.servlet-api>
+            <version.servlet-api6>${version.jakarta.servlet-api6}</version.servlet-api6>
           </systemPropertyVariables>
-          <redirectTestOutputToFile>false</redirectTestOutputToFile>
+          <redirectTestOutputToFile>true</redirectTestOutputToFile>
           <runOrder>alphabetical</runOrder>
           <!--
             be careful to not load pax-logging-log4j1 and pax-logging-api through system class loader.

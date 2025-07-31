@@ -56,81 +56,79 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
 @ExamReactorStrategy(PerClass.class)
 public abstract class AbstractOsgiTestBase {
 
-	public static final Logger LOG = LoggerFactory.getLogger("org.ops4j.pax.web.itest");
-	public static final String PROBE_SYMBOLIC_NAME = "PaxExam-Probe";
+    public static final Logger LOG = LoggerFactory.getLogger("org.ops4j.pax.web.itest");
+    public static final String PROBE_SYMBOLIC_NAME = "PaxExam-Probe";
 
-	// location of where pax-logging-api will have output file written according to
-	// "org.ops4j.pax.logging.useFileLogFallback" system/context property
-	// filename will match test class name with ".log" extension
-	protected static final File LOG_DIR = new File("target/logs-default");
+    // location of where pax-logging-api will have output file written according to
+    // "org.ops4j.pax.logging.useFileLogFallback" system/context property
+    // filename will match test class name with ".log" extension
+    protected static final File LOG_DIR = new File("target/logs-default");
 
-	@Rule
-	public TestName testName = new TestName();
+    @Rule
+    public TestName testName = new TestName();
 
-	@Inject
-	protected BundleContext context;
+    @Inject
+    protected BundleContext context;
 
-	@Before
-	public void beforeEach() {
-		LOG.info("========== Running {}.{}() ==========", getClass().getName(), testName.getMethodName());
-	}
+    @Before
+    public void beforeEach() {
+        LOG.info("========== Running {}.{}() ==========", getClass().getName(), testName.getMethodName());
+    }
 
-	@After
-	public void afterEach() {
-		LOG.info("========== Finished {}.{}() ==========", getClass().getName(), testName.getMethodName());
-	}
+    @After
+    public void afterEach() {
+        LOG.info("========== Finished {}.{}() ==========", getClass().getName(), testName.getMethodName());
+    }
 
-	protected Option[] baseConfigure() {
-		LOG_DIR.mkdirs();
+    protected Option[] baseConfigure() {
+        LOG_DIR.mkdirs();
 
-        Option[] options = new Option[] {
-				// basic options
-				bootDelegationPackages("sun.*", "com.sun.*"),
-				systemPackages("sun.misc", "com.sun.xml.bind.annotation;version=2.3"),
+        Option[] options = new Option[]{
+                // basic options
+                bootDelegationPackages("sun.*", "com.sun.*"),
+                systemPackages("sun.misc", "com.sun.xml.bind.annotation;version=2.3"),
 
-				frameworkStartLevel(START_LEVEL_TEST_BUNDLE),
+                frameworkStartLevel(START_LEVEL_TEST_BUNDLE),
 
-				workingDirectory("target/paxexam"),
-				// needed for PerClass strategy and I had problems running more test classes without cleaning
-				// caches (timeout waiting for ProbeInvoker with particular UUID)
-				cleanCaches(true),
-				systemTimeout(60 * 60 * 1000),
+                workingDirectory("target/paxexam"),
+                // needed for PerClass strategy and I had problems running more test classes without cleaning
+                // caches (timeout waiting for ProbeInvoker with particular UUID)
+                cleanCaches(true),
+                systemTimeout(60 * 60 * 1000),
 
-				// set to "4" to see Felix wiring information
-				frameworkProperty("felix.log.level").value("0"),
+                // set to "4" to see Felix wiring information
+                frameworkProperty("felix.log.level").value("0"),
 
-				// added implicitly by pax-exam, if pax.exam.system=test
-				// these resources are provided inside org.ops4j.pax.exam:pax-exam-link-mvn jar
-				// for example, "link:classpath:META-INF/links/org.ops4j.base.link" = "mvn:org.ops4j.base/ops4j-base/1.5.0"
-				url("link:classpath:META-INF/links/org.ops4j.base.link").startLevel(START_LEVEL_SYSTEM_BUNDLES),
-				url("link:classpath:META-INF/links/org.ops4j.pax.swissbox.core.link").startLevel(START_LEVEL_SYSTEM_BUNDLES),
-				url("link:classpath:META-INF/links/org.ops4j.pax.swissbox.extender.link").startLevel(START_LEVEL_SYSTEM_BUNDLES),
-				url("link:classpath:META-INF/links/org.ops4j.pax.swissbox.framework.link").startLevel(START_LEVEL_SYSTEM_BUNDLES),
-				url("link:classpath:META-INF/links/org.ops4j.pax.swissbox.lifecycle.link").startLevel(START_LEVEL_SYSTEM_BUNDLES),
-				url("link:classpath:META-INF/links/org.ops4j.pax.swissbox.tracker.link").startLevel(START_LEVEL_SYSTEM_BUNDLES),
-				url("link:classpath:META-INF/links/org.ops4j.pax.exam.link").startLevel(START_LEVEL_SYSTEM_BUNDLES),
-				url("link:classpath:META-INF/links/org.ops4j.pax.exam.inject.link").startLevel(START_LEVEL_SYSTEM_BUNDLES),
-				url("link:classpath:META-INF/links/org.ops4j.pax.extender.service.link").startLevel(START_LEVEL_SYSTEM_BUNDLES),
+                // added implicitly by pax-exam, if pax.exam.system=test
+                // these resources are provided inside org.ops4j.pax.exam:pax-exam-link-mvn jar
+                // for example, "link:classpath:META-INF/links/org.ops4j.base.link" = "mvn:org.ops4j.base/ops4j-base/1.5.0"
+                url("link:classpath:META-INF/links/org.ops4j.base.link").startLevel(START_LEVEL_SYSTEM_BUNDLES),
+                url("link:classpath:META-INF/links/org.ops4j.pax.swissbox.core.link").startLevel(START_LEVEL_SYSTEM_BUNDLES),
+                url("link:classpath:META-INF/links/org.ops4j.pax.swissbox.extender.link").startLevel(START_LEVEL_SYSTEM_BUNDLES),
+                url("link:classpath:META-INF/links/org.ops4j.pax.swissbox.framework.link").startLevel(START_LEVEL_SYSTEM_BUNDLES),
+                url("link:classpath:META-INF/links/org.ops4j.pax.swissbox.lifecycle.link").startLevel(START_LEVEL_SYSTEM_BUNDLES),
+                url("link:classpath:META-INF/links/org.ops4j.pax.swissbox.tracker.link").startLevel(START_LEVEL_SYSTEM_BUNDLES),
+                url("link:classpath:META-INF/links/org.ops4j.pax.exam.link").startLevel(START_LEVEL_SYSTEM_BUNDLES),
+                url("link:classpath:META-INF/links/org.ops4j.pax.exam.inject.link").startLevel(START_LEVEL_SYSTEM_BUNDLES),
+                url("link:classpath:META-INF/links/org.ops4j.pax.extender.service.link").startLevel(START_LEVEL_SYSTEM_BUNDLES),
 
-				// this bundle provides correct osgi.contract;osgi.contract=JavaInject
-				linkBundle("org.apache.servicemix.bundles.javax-inject").startLevel(START_LEVEL_SYSTEM_BUNDLES),
+                // this bundle provides correct osgi.contract;osgi.contract=JavaInject
+                linkBundle("org.apache.servicemix.bundles.javax-inject").startLevel(START_LEVEL_SYSTEM_BUNDLES),
 
-				junitBundles(),
+                junitBundles(),
 
-				mavenBundle("org.ops4j.pax.logging", "pax-logging-api")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.ops4j.pax.logging", "pax-logging-log4j2")
-						.versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1)
-		};
+                mavenBundle("org.ops4j.pax.logging", "pax-logging-api")
+                        .version(System.getProperty("version.pax-logging")).startLevel(START_LEVEL_TEST_BUNDLE - 1),
+        };
 
-        options = combine(options, defaultLoggingConfig());
         options = combine(options, systemProperty("org.ops4j.pax.logging.property.file").value("src/test/resources/log4j2-osgi.properties"));
 
         return options;
-	}
+    }
 
     /**
      * Configuring symbolic name in test probe we can easily locate related log entries in the output.
+     *
      * @param builder
      * @return
      */
@@ -140,68 +138,115 @@ public abstract class AbstractOsgiTestBase {
         return builder;
     }
 
-	/**
-	 * Reasonable defaults for default logging level (actually a threshold), framework logger level and usage
-	 * of file-based default/fallback logger.
-	 * @return
-	 */
-	protected Option[] defaultLoggingConfig() {
-		String fileName;
-		try {
-			fileName = new File(LOG_DIR, getClass().getSimpleName() + ".log").getCanonicalPath();
-		} catch (IOException e) {
-			LOG.error(e.getMessage(), e);
-			throw new RuntimeException(e.getMessage(), e);
-		}
+    /**
+     * Reasonable defaults for default logging level (actually a threshold), framework logger level and usage
+     * of file-based default/fallback logger.
+     *
+     * @param level
+     * @return
+     */
+    protected Option[] defaultLoggingConfig(String level) {
+        String fileName;
+        try {
+            fileName = new File(LOG_DIR, getClass().getSimpleName() + ".log").getCanonicalPath();
+        } catch (IOException e) {
+            LOG.error(e.getMessage(), e);
+            throw new RuntimeException(e.getMessage(), e);
+        }
 
-		return new Option[] {
-				// every log with level higher or equal to DEBUG (i.e., not TRACE) will be logged
-				frameworkProperty("org.ops4j.pax.logging.DefaultServiceLog.level").value("DEBUG"),
-				// threshold for R7 Compendium 101.8 logging statements (from framework/bundle/service events)
-				frameworkProperty("org.ops4j.pax.logging.service.frameworkEventsLogLevel").value("ERROR"),
-				// default log will be written to file
-				frameworkProperty("org.ops4j.pax.logging.useFileLogFallback").value(fileName)
-		};
-	}
+        return new Option[]{
+                // every log with level higher or equal to DEBUG (i.e., not TRACE) will be logged
+                frameworkProperty("org.ops4j.pax.logging.DefaultServiceLog.level").value(level),
+                // threshold for R7 Compendium 101.8 logging statements (from framework/bundle/service events)
+                frameworkProperty("org.ops4j.pax.logging.service.frameworkEventsLogLevel").value("ERROR"),
+                // default log will be written to file
+                frameworkProperty("org.ops4j.pax.logging.useFileLogFallback").value(fileName)
+        };
+    }
 
-	// --- methods that add logical sets of bundles (or just single bundles) to pax-exam-container-native
+    protected Option[] log4jLogService() {
+        return new Option[]{
+                mavenBundle("org.ops4j.pax.logging", "pax-logging-log4j2")
+                        .version(System.getProperty("version.pax-logging")).startLevel(START_LEVEL_TEST_BUNDLE - 1)
+        };
+    }
 
-	/**
-	 * Installation of 4 fundamental Jolokia bundles + Servlet API.
-	 * @return
-	 */
-	protected Option[] jolokiaCore() {
-		return new Option[] {
-                mavenBundle("jakarta.servlet", "jakarta.servlet-api").versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+    // --- methods that add logical sets of bundles (or just single bundles) to pax-exam-container-native
+
+    protected Option[] servletApi5() {
+        return new Option[]{
+                mavenBundle("jakarta.servlet", "jakarta.servlet-api").versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1)
+        };
+    }
+
+    protected Option[] jolokiaCore() {
+        return new Option[]{
                 mavenBundle("org.osgi", "org.osgi.service.servlet").versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.jolokia", "jolokia-json").versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.jolokia", "jolokia-server-core").versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.jolokia", "jolokia-service-jmx").versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
-				mavenBundle("org.jolokia", "jolokia-service-serializer").versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1)
-		};
-	}
+                mavenBundle("org.jolokia", "jolokia-json").versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+                mavenBundle("org.jolokia", "jolokia-server-core").versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+                mavenBundle("org.jolokia", "jolokia-service-jmx").versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+                mavenBundle("org.jolokia", "jolokia-service-serializer").versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1)
+        };
+    }
 
-	// --- helper methods to be used in all the tests
+    protected Option[] jolokiaOsgi() {
+        return new Option[]{
+                mavenBundle("org.osgi", "org.osgi.service.servlet").versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+                mavenBundle("org.jolokia", "jolokia-agent-osgi").versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+        };
+    }
 
-	/**
-	 * Get a bundle by symbolic name.
-	 * @param symbolicName
-	 * @return
-	 */
-	protected Bundle bundle(String symbolicName) {
-		return Arrays.stream(context.getBundles())
-				.filter(b -> symbolicName.equals(b.getSymbolicName())).findFirst().orElse(null);
-	}
+    protected Option[] paxWebWhiteboard() {
+        return new Option[]{
+                mavenBundle("jakarta.servlet", "jakarta.servlet-api").version(System.getProperty("version.servlet-api6")).startLevel(START_LEVEL_TEST_BUNDLE - 1),
+                mavenBundle("jakarta.annotation", "jakarta.annotation-api").versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+                mavenBundle("jakarta.authentication", "jakarta.authentication-api").versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+                mavenBundle("org.ops4j.pax.web", "pax-web-api").version(System.getProperty("version.pax-web")).startLevel(START_LEVEL_TEST_BUNDLE - 1).start(),
+                mavenBundle("org.ops4j.pax.web", "pax-web-spi").version(System.getProperty("version.pax-web")).startLevel(START_LEVEL_TEST_BUNDLE - 1).start(),
+                mavenBundle("org.ops4j.pax.web", "pax-web-compatibility-servlet").version(System.getProperty("version.pax-web")).startLevel(START_LEVEL_TEST_BUNDLE - 2).noStart(),
+                mavenBundle("org.ops4j.pax.web", "pax-web-runtime").version(System.getProperty("version.pax-web")).startLevel(START_LEVEL_TEST_BUNDLE - 1),
+                mavenBundle("org.ops4j.pax.web", "pax-web-extender-whiteboard").version(System.getProperty("version.pax-web")).startLevel(START_LEVEL_TEST_BUNDLE - 1),
+                mavenBundle("org.ops4j.pax.web", "pax-web-tomcat-common").version(System.getProperty("version.pax-web")).startLevel(START_LEVEL_TEST_BUNDLE - 1),
+                mavenBundle("org.ops4j.pax.web", "pax-web-tomcat").version(System.getProperty("version.pax-web")).startLevel(START_LEVEL_TEST_BUNDLE - 1),
+        };
+    }
 
-	// --- helper methods to be used in all the tests
+    protected Option[] felixHttp() {
+        return new Option[]{
+                // yes - old API is also required
+                mavenBundle("org.apache.felix", "org.apache.felix.http.servlet-api").version("6.1.0").startLevel(START_LEVEL_TEST_BUNDLE - 1),
+//                mavenBundle("org.apache.felix", "org.apache.felix.http.jetty").version(System.getProperty("version.felix-http")).startLevel(START_LEVEL_TEST_BUNDLE - 1),
+                mavenBundle("org.apache.felix", "org.apache.felix.http.jetty12").version(System.getProperty("version.felix-http12")).startLevel(START_LEVEL_TEST_BUNDLE - 1),
+        };
+    }
 
-	protected int javaMajorVersion() {
-		String v = System.getProperty("java.specification.version");
-		if (v.contains(".")) {
-			// before Java 9
-			v = v.split("\\.")[1];
-		}
-		return Integer.parseInt(v);
-	}
+    protected Option[] configAdmin() {
+        return new Option[]{
+                mavenBundle("org.apache.felix", "org.apache.felix.configadmin").version(System.getProperty("version.configadmin")).startLevel(START_LEVEL_TEST_BUNDLE - 1)};
+    }
+
+    // --- helper methods to be used in all the tests
+
+    /**
+     * Get a bundle by symbolic name.
+     *
+     * @param symbolicName
+     * @return
+     */
+    protected Bundle bundle(String symbolicName) {
+        return Arrays.stream(context.getBundles())
+                .filter(b -> symbolicName.equals(b.getSymbolicName())).findFirst().orElse(null);
+    }
+
+    // --- helper methods to be used in all the tests
+
+    protected int javaMajorVersion() {
+        String v = System.getProperty("java.specification.version");
+        if (v.contains(".")) {
+            // before Java 9
+            v = v.split("\\.")[1];
+        }
+        return Integer.parseInt(v);
+    }
 
 }
