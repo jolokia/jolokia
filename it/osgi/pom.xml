@@ -21,7 +21,7 @@
   <artifactId>jolokia-it-osgi</artifactId>
   <version>2.2.10-SNAPSHOT</version>
 
-  <name>jolokia-it-core</name>
+  <name>jolokia-it-osgi</name>
   <description>Jolokia :: IT :: OSGi Tests</description>
 
   <parent>
