@@ -154,7 +154,7 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName>org.jolokia</Bundle-SymbolicName>
+            <Bundle-SymbolicName>org.jolokia.client.java</Bundle-SymbolicName>
             <Bundle-Description>Jolokia client library</Bundle-Description>
             <Import-Package>
               <!-- JDK -->

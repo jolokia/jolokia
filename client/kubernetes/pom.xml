@@ -101,6 +101,8 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
+            <Bundle-SymbolicName>org.jolokia.client.kubernetes</Bundle-SymbolicName>
+            <Bundle-Description>Jolokia JMX adapter</Bundle-Description>
             <Import-Package>
               <!-- JDK -->
               javax.management.remote,
@@ -136,8 +138,6 @@
             <Export-Package>
               org.jolokia.kubernetes.client
             </Export-Package>
-            <Bundle-SymbolicName>org.jolokia</Bundle-SymbolicName>
-            <Bundle-Description>Jolokia JMX adapter</Bundle-Description>
           </instructions>
         </configuration>
       </plugin>

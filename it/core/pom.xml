@@ -61,7 +61,7 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName>org.jolokia.it</Bundle-SymbolicName>
+            <Bundle-SymbolicName>org.jolokia.it.core</Bundle-SymbolicName>
             <Bundle-Version>${project.version}</Bundle-Version>
             <Bundle-Activator>org.jolokia.it.core.ItActivator</Bundle-Activator>
             <Bundle-Name>Jolokia Integration Test Bundle</Bundle-Name>

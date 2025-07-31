@@ -103,7 +103,7 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName>org.jolokia</Bundle-SymbolicName>
+            <Bundle-SymbolicName>org.jolokia.client.jmx-adapter</Bundle-SymbolicName>
             <Bundle-Description>Jolokia JMX adapter</Bundle-Description>
             <Import-Package>
               <!-- JDK -->
