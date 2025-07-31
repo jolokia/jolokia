@@ -54,8 +54,6 @@ public abstract class SimplifierExtractor<T> implements Extractor {
     protected SimplifierExtractor(Class<T> pType) {
         extractorMap = new HashMap<>();
         type = pType;
-        // Old method, here only for backwards compatibility. Please initialize in the constructor instead
-        init(extractorMap);
     }
 
     /** {@inheritDoc} */
@@ -171,12 +169,4 @@ public abstract class SimplifierExtractor<T> implements Extractor {
         Object extract(T value) throws SkipAttributeException;
     }
 
-
-    /**
-     * Add extractors to map
-     *
-     * @deprecated Initialize in the constructor instead.
-     * @param pExtractorMap the map to add the extractors used within this simplifier
-     */
-     void init(Map<String, AttributeExtractor<T>> pExtractorMap) {}
 }
