@@ -54,7 +54,6 @@
 
     <module>it/core</module>
     <module>it/war</module>
-    <module>it/osgi</module>
 
     <module>client/java</module>
     <module>client/javascript</module>
@@ -1237,6 +1236,7 @@
         <module>examples/spring</module>
         <module>examples/spring-boot</module>
         <module>examples/spring-boot-actuator</module>
+        <module>it/osgi</module>
       </modules>
     </profile>
 
