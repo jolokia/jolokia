@@ -194,12 +194,6 @@
         </plugin>
 
         <plugin>
-          <groupId>org.apache.felix</groupId>
-          <artifactId>maven-scr-plugin</artifactId>
-          <version>${plugin.org.apache.felix.maven-scr-plugin}</version>
-        </plugin>
-
-        <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-jar-plugin</artifactId>
           <version>${plugin.maven-jar-plugin}</version>
@@ -1088,8 +1082,7 @@
     <plugin.com.devspan.mojo.javascript-maven-plugin>0.9.3</plugin.com.devspan.mojo.javascript-maven-plugin>
     <plugin.com.github.eirslett.frontend-maven-plugin>1.15.1</plugin.com.github.eirslett.frontend-maven-plugin>
     <plugin.com.github.site-maven-plugin>0.12</plugin.com.github.site-maven-plugin>
-    <plugin.org.apache.felix.maven-bundle-plugin>5.1.9</plugin.org.apache.felix.maven-bundle-plugin>
-    <plugin.org.apache.felix.maven-scr-plugin>1.26.4</plugin.org.apache.felix.maven-scr-plugin>
+    <plugin.org.apache.felix.maven-bundle-plugin>6.0.0</plugin.org.apache.felix.maven-bundle-plugin>
     <plugin.org.apache.rat.apache-rat-plugin>0.16.1</plugin.org.apache.rat.apache-rat-plugin>
     <!-- Please stay at 3.1.0. With 3.2.0 we have "[INFO] Issues found in: null" -->
     <plugin.org.asciidoctor.asciidoctor-maven-plugin>3.1.0</plugin.org.asciidoctor.asciidoctor-maven-plugin>

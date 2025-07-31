@@ -78,21 +78,31 @@
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
         <extensions>true</extensions>
-
         <configuration>
           <instructions>
             <Bundle-SymbolicName>org.jolokia.support.jmx</Bundle-SymbolicName>
             <Bundle-Description>Jolokia JMX Addons</Bundle-Description>
             <Bundle-Activator>org.jolokia.support.jmx.osgi.JmxSupportActivator</Bundle-Activator>
-
-            <Export-Package>
-              org.jolokia.support.jmx
-            </Export-Package>
-            <!-- Don't declare an import on sth not exported -->
             <Import-Package>
-              !org.jolokia.service.serializer,
-              *
+              <!-- JDK -->
+              javax.management,
+              javax.management.modelmbean,
+              javax.management.openmbean,
+              <!-- jolokia-json -->
+              org.jolokia.json;version="[2.2,3)",
+              <!-- jolokia-server-core -->
+              org.jolokia.server.core.service.api;version="[2.2,3)",
+              org.jolokia.server.core.service.serializer;version="[2.2,3)",
+              <!-- jolokia-service-serializer -->
+              org.jolokia.service.serializer;version="[2.2,3)",
+              <!-- OSGi Core -->
+              org.osgi.framework;version="[1.8,2)",
+              org.osgi.util.tracker;version="[1.5,2)"
             </Import-Package>
+            <Export-Package>
+              org.jolokia.support.jmx,
+              org.jolokia.support.jmx.osgi
+            </Export-Package>
           </instructions>
         </configuration>
       </plugin>

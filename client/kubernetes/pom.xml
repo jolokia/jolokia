@@ -99,19 +99,42 @@
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
         <extensions>true</extensions>
-        <executions>
-          <execution>
-            <id>bundle-manifest</id>
-            <phase>process-classes</phase>
-            <goals>
-              <goal>manifest</goal>
-            </goals>
-          </execution>
-        </executions>
         <configuration>
           <instructions>
+            <Import-Package>
+              <!-- JDK -->
+              javax.management.remote,
+              <!-- jolokia-json -->
+              org.jolokia.json;version="[2.2,3)",
+              <!-- jolokia-client-java -->
+              org.jolokia.client;version="[2.2,3)",
+              <!-- jolokia-client-jmx-adapter -->
+              org.jolokia.client.jmxadapter;version="[2.2,3)",
+              <!-- jolokia-server-core -->
+              org.jolokia.server.core.util;version="[2.2,3)",
+              <!-- fabric8:kubernetes-model-core -->
+              io.fabric8.kubernetes.api.model,
+              <!-- fabric8:kubernetes-client-api, fabric8:kubernetes-client-api (even if 7.3 is not OSGi aware...) -->
+              io.fabric8.kubernetes.client,
+              io.fabric8.kubernetes.client.dsl,
+              io.fabric8.kubernetes.client.dsl.internal,
+              io.fabric8.kubernetes.client.http,
+              io.fabric8.kubernetes.client.utils,
+              <!-- okhttp (even if it's not OSGi and brings Kotlin runtime...) -->
+              okhttp3,
+              <!-- httpcore -->
+              org.apache.http;version="[4.4,5)",
+              org.apache.http.entity;version="[4.4,5)",
+              org.apache.http.message;version="[4.4,5)",
+              org.apache.http.params;version="[4.4,5)",
+              org.apache.http.protocol;version="[4.4,5)",
+              <!-- httpclient -->
+              org.apache.http.client;version="[4.5,5)",
+              org.apache.http.client.methods;version="[4.5,5)",
+              org.apache.http.conn;version="[4.5,5)"
+            </Import-Package>
             <Export-Package>
-              org.jolokia.kubernetes.client.*
+              org.jolokia.kubernetes.client
             </Export-Package>
             <Bundle-SymbolicName>org.jolokia</Bundle-SymbolicName>
             <Bundle-Description>Jolokia JMX adapter</Bundle-Description>

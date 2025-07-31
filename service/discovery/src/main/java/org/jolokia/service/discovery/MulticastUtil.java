@@ -9,7 +9,6 @@ import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.service.api.AgentDetails;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.api.LogHandler;
-import org.jolokia.server.core.service.impl.QuietLogHandler;
 import org.jolokia.server.core.util.NetworkInterfaceAndAddress;
 import org.jolokia.server.core.util.NetworkUtil;
 
@@ -70,7 +69,24 @@ public final class MulticastUtil {
      * @throws IOException if something fails during the discovery request
      */
     public static List<DiscoveryIncomingMessage> sendQueryAndCollectAnswers(DiscoveryOutgoingMessage pOutMsg, int pTimeout, String pMulticastGroup, int pMulticastPort) throws IOException {
-        return sendQueryAndCollectAnswers(pOutMsg, pTimeout, pMulticastGroup, pMulticastPort, new QuietLogHandler());
+        return sendQueryAndCollectAnswers(pOutMsg, pTimeout, pMulticastGroup, pMulticastPort, new LogHandler() {
+            @Override
+            public void debug(String message) {
+            }
+
+            @Override
+            public void info(String message) {
+            }
+
+            @Override
+            public void error(String message, Throwable t) {
+            }
+
+            @Override
+            public boolean isDebug() {
+                return false;
+            }
+        });
     }
 
     /**

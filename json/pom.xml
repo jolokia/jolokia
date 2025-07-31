@@ -20,6 +20,7 @@
 
   <artifactId>jolokia-json</artifactId>
   <version>2.2.10-SNAPSHOT</version>
+  <packaging>bundle</packaging>
 
   <name>jolokia-json</name>
   <description>Jolokia :: JSON</description>
@@ -37,7 +38,7 @@
     https://github.com/jolokia/jolokia/issues/686
     This module is created to replace dated com.googlecode.json-simple/json-simple/1.1.1 library (2012)
     json-simple is available from https://code.google.com/archive/p/json-simple/, but also from these forks
-     - https://github.com/fangyidong/json-simple (original code migrated from code.google.comt o GitHub)
+     - https://github.com/fangyidong/json-simple (original code migrated from code.google.com to GitHub)
      - https://github.com/cliftonlabs/json-simple (picked up by Davin Loegering after Fang Yidong)
     cliftonlabs/json-simple includes the grammar and uses jflex-maven-plugin. Also moves from json.lex to jsonstrict.lex
     Both project use a bit different grammars differing in number handling (double/long vs BigDecimal):
@@ -95,6 +96,23 @@
             </configuration>
           </execution>
         </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Bundle-SymbolicName>org.jolokia.json</Bundle-SymbolicName>
+            <Bundle-Description>Jolokia JSON Parser</Bundle-Description>
+            <Import-Package />
+            <Export-Package>
+              org.jolokia.json,
+              org.jolokia.json.parser
+            </Export-Package>
+          </instructions>
+        </configuration>
       </plugin>
     </plugins>
   </build>

@@ -70,13 +70,31 @@
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
         <extensions>true</extensions>
-
         <configuration>
           <instructions>
             <Bundle-Activator>org.jolokia.service.history.osgi.HistoryServiceActivator</Bundle-Activator>
             <Bundle-SymbolicName>org.jolokia.service.history</Bundle-SymbolicName>
             <Bundle-Description>Jolokia History MBean</Bundle-Description>
-            <Export-Package />
+            <Import-Package>
+              <!-- JDK -->
+              javax.management,
+              javax.security.auth,
+              <!-- jolokia-json -->
+              org.jolokia.json;version="[2.2,3)",
+              <!-- jolokia-server-core -->
+              org.jolokia.server.core.auth;version="[2.2,3)",
+              org.jolokia.server.core.config;version="[2.2,3)",
+              org.jolokia.server.core.request;version="[2.2,3)",
+              org.jolokia.server.core.service.api;version="[2.2,3)",
+              org.jolokia.server.core.service.request;version="[2.2,3)",
+              org.jolokia.server.core.util;version="[2.2,3)",
+              <!-- OSGi Core -->
+              org.osgi.framework;version="[1.8,2)"
+            </Import-Package>
+            <Export-Package>
+              org.jolokia.service.history,
+              org.jolokia.service.history.osgi
+            </Export-Package>
           </instructions>
         </configuration>
       </plugin>

@@ -59,16 +59,25 @@
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
         <extensions>true</extensions>
-
         <configuration>
           <instructions>
             <Bundle-SymbolicName>org.jolokia.agent.osgi.restrictor.sample</Bundle-SymbolicName>
             <Bundle-Description>Jolokia restrictor service (sample)</Bundle-Description>
-
             <Bundle-Version>${project.version}</Bundle-Version>
             <Bundle-Activator>org.jolokia.osgi.restrictor.RestrictorSampleActivator</Bundle-Activator>
             <Bundle-Name>Jolokia restrictor service (sample)</Bundle-Name>
-            <Import-Package>*</Import-Package>
+            <Import-Package>
+              <!-- JDK -->
+              javax.management,
+              <!-- jolokia-server-core -->
+              org.jolokia.server.core.restrictor;version="[2.2,3)",
+              org.jolokia.server.core.service.api;version="[2.2,3)",
+              <!-- OSGi Core -->
+              org.osgi.framework;version="[1.8,2)"
+            </Import-Package>
+            <Export-Package>
+              org.jolokia.osgi.restrictor
+            </Export-Package>
           </instructions>
         </configuration>
       </plugin>

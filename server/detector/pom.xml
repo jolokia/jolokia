@@ -65,12 +65,34 @@
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
         <extensions>true</extensions>
-
         <configuration>
           <instructions>
             <Bundle-Activator>org.jolokia.server.detector.osgi.DetectorActivator</Bundle-Activator>
             <Bundle-SymbolicName>org.jolokia.server.detector</Bundle-SymbolicName>
             <Bundle-Description>Jolokia server detectors</Bundle-Description>
+            <Import-Package>
+              <!-- JDK -->
+              javax.management,
+              javax.naming,
+              <!-- jolokia-json -->
+              org.jolokia.json;version="[2.2,3)",
+              <!-- jolokia-server-core -->
+              org.jolokia.server.core.detector;version="[2.2,3)",
+              org.jolokia.server.core.request;version="[2.2,3)",
+              org.jolokia.server.core.service.api;version="[2.2,3)",
+              org.jolokia.server.core.service.container;version="[2.2,3)",
+              org.jolokia.server.core.service.request;version="[2.2,3)",
+              org.jolokia.server.core.util;version="[2.2,3)",
+              org.jolokia.server.core.util.jmx;version="[2.2,3)",
+              <!-- OSGi Core -->
+              org.osgi.framework;version="[1.8,2)",
+              <!-- Other -->
+              com.ibm.websphere.management;resolution:=optional,
+              org.eclipse.jetty.server;resolution:=optional,
+              org.jboss.mx.util;resolution:=optional,
+              org.mortbay.jetty;resolution:=optional
+            </Import-Package>
+            <!-- don't export anything - these are internal packages -->
             <Export-Package />
           </instructions>
         </configuration>

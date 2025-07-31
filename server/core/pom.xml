@@ -164,13 +164,41 @@
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
         <extensions>true</extensions>
-
         <configuration>
           <instructions>
             <Bundle-SymbolicName>org.jolokia.server.core</Bundle-SymbolicName>
             <Bundle-Description>Jolokia API and core classes</Bundle-Description>
             <Bundle-Activator>org.jolokia.server.core.osgi.OsgiAgentActivator</Bundle-Activator>
-
+            <Import-Package>
+              <!-- JDK -->
+              javax.crypto,
+              javax.crypto.spec,
+              javax.management,
+              javax.management.openmbean,
+              javax.management.relation,
+              javax.security.auth,
+              javax.security.auth.callback,
+              javax.security.auth.login,
+              javax.xml.datatype,
+              javax.xml.parsers,
+              org.w3c.dom,
+              org.xml.sax,
+              <!-- Jakarta EE -->
+              jakarta.servlet;version="[5.0,7.0)",
+              jakarta.servlet.http;version="[5.0,7.0)",
+              <!-- jolokia-json -->
+              org.jolokia.json;version="[2.2,3)",
+              org.jolokia.json.parser;version="[2.2,3)",
+              <!-- OSGi Core -->
+              org.osgi.framework;version="[1.8,2)",
+              org.osgi.util.tracker;version="[1.5,2)",
+              <!-- OSGi ConfigAdmin -->
+              org.osgi.service.cm;version="[1.6,2)";resolution:=optional,
+              <!-- OSGi Log Service -->
+              org.osgi.service.log;version="[1.3,2)";resolution:=optional,
+              <!-- OSGi Servlet Whiteboard -->
+              org.osgi.service.servlet.context;version="[2.0,3)"
+            </Import-Package>
             <Export-Package>
               org.jolokia.server.core,
               org.jolokia.server.core.auth,

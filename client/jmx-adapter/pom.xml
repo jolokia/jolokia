@@ -101,22 +101,30 @@
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
         <extensions>true</extensions>
-        <executions>
-          <execution>
-            <id>bundle-manifest</id>
-            <phase>process-classes</phase>
-            <goals>
-              <goal>manifest</goal>
-            </goals>
-          </execution>
-        </executions>
         <configuration>
           <instructions>
-            <Export-Package>
-              org.jolokia.client.*
-            </Export-Package>
             <Bundle-SymbolicName>org.jolokia</Bundle-SymbolicName>
             <Bundle-Description>Jolokia JMX adapter</Bundle-Description>
+            <Import-Package>
+              <!-- JDK -->
+              javax.management,
+              javax.management.openmbean,
+              javax.management.remote,
+              javax.security.auth,
+              <!-- jolokia-json -->
+              org.jolokia.json;version="[2.2,3)",
+              <!-- jolokia-client-java -->
+              org.jolokia.client;version="[2.2,3)",
+              org.jolokia.client.exception;version="[2.2,3)",
+              org.jolokia.client.request;version="[2.2,3)",
+              <!-- jolokia-server-core -->
+              org.jolokia.server.core.util;version="[2.2,3)",
+              <!-- jolokia-service-serializer -->
+              org.jolokia.service.serializer;version="[2.2,3)"
+            </Import-Package>
+            <Export-Package>
+              org.jolokia.client.jmxadapter
+            </Export-Package>
           </instructions>
         </configuration>
       </plugin>
