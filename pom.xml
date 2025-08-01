@@ -116,6 +116,19 @@
           </ruleSet>
         </configuration>
       </plugin>
+
+      <plugin>
+        <groupId>org.sonatype.central</groupId>
+        <artifactId>central-publishing-maven-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <!-- you need <server> with such <id> in ~/.m2/repository -->
+          <publishingServerId>ossrh-central</publishingServerId>
+          <deploymentName>jolokia-${project.version}</deploymentName>
+          <waitUntil>uploaded</waitUntil>
+        </configuration>
+      </plugin>
+
     </plugins>
 
 
@@ -352,7 +365,13 @@
         <plugin>
           <groupId>org.apache.servicemix.tooling</groupId>
           <artifactId>depends-maven-plugin</artifactId>
-          <version>${plugins.org.apache.servicemix.tooling}</version>
+          <version>${plugin.org.apache.servicemix.tooling}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.sonatype.central</groupId>
+          <artifactId>central-publishing-maven-plugin</artifactId>
+          <version>${plugin.sonatype.central-publishing-maven-plugin}</version>
         </plugin>
 
       </plugins>
@@ -1155,7 +1174,8 @@
     <plugin.org.codehaus.mojo.versions-maven-plugin>2.18.0</plugin.org.codehaus.mojo.versions-maven-plugin>
     <plugin.org.jacoco.jacoco-maven-plugin>0.7.6.201602180812</plugin.org.jacoco.jacoco-maven-plugin>
     <plugin.org.vafer.jdeb>1.14</plugin.org.vafer.jdeb>
-    <plugins.org.apache.servicemix.tooling>1.5.0</plugins.org.apache.servicemix.tooling>
+    <plugin.org.apache.servicemix.tooling>1.5.0</plugin.org.apache.servicemix.tooling>
+    <plugin.sonatype.central-publishing-maven-plugin>0.8.0</plugin.sonatype.central-publishing-maven-plugin>
 
     <!-- Versions of build-related dependencies -->
 
@@ -1210,19 +1230,6 @@
     <version.org.springframework>6.2.9</version.org.springframework>
     <version.org.springframework.boot>3.5.4</version.org.springframework.boot>
   </properties>
-
-  <distributionManagement>
-    <snapshotRepository>
-      <id>sonatype-nexus-snapshots</id>
-      <name>Sonatype Nexus Snapshots</name>
-      <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-    </snapshotRepository>
-    <repository>
-      <id>sonatype-nexus-staging</id>
-      <name>Nexus Release Repository</name>
-      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-    </repository>
-  </distributionManagement>
 
   <profiles>
 
