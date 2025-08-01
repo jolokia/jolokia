@@ -1301,6 +1301,10 @@
         <module>assembly</module>
       </modules>
 
+      <properties>
+        <skipOsgiTests>true</skipOsgiTests>
+      </properties>
+
       <build>
         <plugins>
           <plugin>

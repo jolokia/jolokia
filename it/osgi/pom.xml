@@ -148,7 +148,6 @@
       <scope>test</scope>
     </dependency>
 
-
   </dependencies>
 
   <build>
@@ -201,6 +200,7 @@
           <forkCount>1</forkCount>
           <reuseForks>false</reuseForks>
           <trimStackTrace>false</trimStackTrace>
+          <skip>${skipOsgiTests}</skip>
         </configuration>
         <dependencies>
           <dependency>
