@@ -1154,7 +1154,7 @@
     <plugin.org.codehaus.mojo.build-helper-maven-plugin>3.6.1</plugin.org.codehaus.mojo.build-helper-maven-plugin>
     <plugin.org.codehaus.mojo.versions-maven-plugin>2.18.0</plugin.org.codehaus.mojo.versions-maven-plugin>
     <plugin.org.jacoco.jacoco-maven-plugin>0.7.6.201602180812</plugin.org.jacoco.jacoco-maven-plugin>
-    <plugin.org.vafer.jdeb>1.13</plugin.org.vafer.jdeb>
+    <plugin.org.vafer.jdeb>1.14</plugin.org.vafer.jdeb>
     <plugins.org.apache.servicemix.tooling>1.5.0</plugins.org.apache.servicemix.tooling>
 
     <!-- Versions of build-related dependencies -->
