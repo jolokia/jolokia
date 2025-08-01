@@ -39,6 +39,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.cm.ManagedService;
 import org.osgi.service.log.LogService;
 import org.osgi.service.servlet.context.ServletContextHelper;
 import org.testng.annotations.BeforeMethod;
@@ -72,6 +73,7 @@ public class OsgiAgentActivatorTest {
     private BundleContext context;
     private OsgiAgentActivator activator;
 
+    private ServiceRegistration<ManagedService> msRegistration;
     private ServiceRegistration<ServletContextHelper> contextRegistration;
     @SuppressWarnings("rawtypes")
     private ServiceRegistration servletRegistration;
@@ -298,10 +300,13 @@ public class OsgiAgentActivatorTest {
 
     @SuppressWarnings("unchecked")
     private void prepareStart(boolean doWhiteboardServlet, boolean doRestrictor, Dictionary<String, Object> configAdminProps) throws InvalidSyntaxException, IOException {
-        expect(context.getProperty("org.jolokia.registerWhiteboardServlet")).andReturn("" + doWhiteboardServlet);
+        expect(context.getProperty("org.jolokia.registerWhiteboardServlet")).andReturn("" + doWhiteboardServlet).anyTimes();
         if (doWhiteboardServlet) {
+            msRegistration = createMock(ServiceRegistration.class);
             contextRegistration = createMock(ServiceRegistration.class);
             servletRegistration = createMock(ServiceRegistration.class);
+            expect(context.registerService(eq(ManagedService.class), EasyMock.<ManagedService>anyObject(), anyObject()))
+                    .andReturn(msRegistration);
             expect(context.registerService(eq(ServletContextHelper.class), EasyMock.<ServletContextHelper>anyObject(), anyObject()))
                     .andReturn(contextRegistration);
             expect(context.registerService(aryEq(new String[] { Servlet.class.getName(), HttpServlet.class.getName() }), EasyMock.<HttpServlet>anyObject(), anyObject()))

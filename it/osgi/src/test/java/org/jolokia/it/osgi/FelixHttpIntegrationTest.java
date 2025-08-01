@@ -32,7 +32,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
 @RunWith(PaxExam.class)
@@ -50,13 +49,16 @@ public class FelixHttpIntegrationTest extends AbstractOsgiTestBase {
 
     @Test
     public void waitForJolokiaServlet() throws Exception {
+        // felix-http doesn't register objectClass=jakarta.servlet.ServletContext like Pax Web, because
+        // this is a requirement for OSGi CMPN 128 (Web Applications), not 140 (Whiteboard)
 //        ServiceTracker<?, ?> tracker = new ServiceTracker<>(context,
 //            context.createFilter("(&(objectClass=jakarta.servlet.ServletContext)(osgi.web.contextpath=/jolokia))"), null);
 //        tracker.open();
 //        ServletContext jolokiaContext = (ServletContext) tracker.waitForService(5000);
 //        assertNotNull(jolokiaContext);
-        // no idea why felix-http doesn't register objectClass=jakarta.servlet.ServletContext...
-        Thread.sleep(1000);
+
+        // no need to sleep - felix-http is synchronous
+//        Thread.sleep(1000);
 
         HttpRequest request = HttpRequest.newBuilder().uri(new URI("http://localhost:8080/jolokia/version")).GET().build();
         HttpClient client = HttpClient.newHttpClient();

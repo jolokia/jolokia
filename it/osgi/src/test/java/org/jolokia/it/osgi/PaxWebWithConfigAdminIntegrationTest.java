@@ -68,13 +68,13 @@ public class PaxWebWithConfigAdminIntegrationTest extends AbstractOsgiTestBase {
         assertNotNull(jolokiaContext);
 
         // now with configadmin update
-        org.osgi.service.cm.Configuration configuration = configAdmin.getConfiguration("org.jolokia.osgi");
+        org.osgi.service.cm.Configuration configuration = configAdmin.getConfiguration("org.jolokia.osgi", null);
         configuration.update(new Hashtable<>(Map.of("org.jolokia.agentContext", "/j")));
 
-        // Jolokia doesn't (yet) support org.osgi.service.cm.ManagedService updates
-        Bundle jolokiaBundle = bundle("org.jolokia.server.core");
-        jolokiaBundle.stop();
-        jolokiaBundle.start();
+        // With #619 fixed, Jolokia supports org.osgi.service.cm.ManagedService updates, so no need to restart
+//        Bundle jolokiaBundle = bundle("org.jolokia.server.core");
+//        jolokiaBundle.stop();
+//        jolokiaBundle.start();
 
         tracker = new ServiceTracker<>(context,
             context.createFilter("(&(objectClass=jakarta.servlet.ServletContext)(osgi.web.contextpath=/j))"), null);

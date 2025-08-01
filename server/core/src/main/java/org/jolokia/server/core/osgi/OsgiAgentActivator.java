@@ -16,9 +16,11 @@ import org.jolokia.server.core.util.NetworkUtil;
 import org.osgi.framework.*;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.cm.ManagedService;
 import org.osgi.service.servlet.context.ServletContextHelper;
 import org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants;
 import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 import static org.jolokia.server.core.config.ConfigKey.*;
 
@@ -45,13 +47,15 @@ import static org.jolokia.server.core.config.ConfigKey.*;
  * @author roland
  * @since Dec 27, 2009
  */
-public class OsgiAgentActivator implements BundleActivator {
+public class OsgiAgentActivator implements BundleActivator, ServiceTrackerCustomizer<ConfigurationAdmin, ConfigurationAdmin> {
 
     // Context associated with this activator
     private BundleContext bundleContext;
 
     // Tracker for ConfigAdmin Service
     private ServiceTracker<ConfigurationAdmin, ConfigurationAdmin> configAdminTracker;
+    // Registration of org.osgi.service.cm.ManagedService if ConfigAdmin is available
+    private ServiceRegistration<ManagedService> managedServiceRegistration = null;
 
     // Prefix used for configuration values
     private static final String CONFIG_PREFIX = "org.jolokia";
@@ -67,6 +71,7 @@ public class OsgiAgentActivator implements BundleActivator {
     // services
     private Restrictor restrictor = null;
 
+
     private ServiceRegistration<ServletContextHelper> contextRegistration = null;
     private ServiceRegistration<?> servletRegistration = null;
 
@@ -76,9 +81,7 @@ public class OsgiAgentActivator implements BundleActivator {
         bundleContext = pBundleContext;
 
         //Track ConfigurationAdmin service
-        configAdminTracker = new ServiceTracker<>(pBundleContext,
-                                                "org.osgi.service.cm.ConfigurationAdmin",
-                                                null);
+        configAdminTracker = new ServiceTracker<>(pBundleContext, "org.osgi.service.cm.ConfigurationAdmin", this);
         configAdminTracker.open();
 
         if (Boolean.parseBoolean(getConfiguration(USE_RESTRICTOR_SERVICE))) {
@@ -97,21 +100,12 @@ public class OsgiAgentActivator implements BundleActivator {
     public void stop(BundleContext pBundleContext) {
         assert pBundleContext.equals(bundleContext);
 
-        if (servletRegistration != null) {
-            servletRegistration.unregister();
-            contextRegistration.unregister();
-        }
+        unregisterWhiteboardServlet();
 
         //Shut this down last to make sure nobody calls for a property after this is shutdown
         if (configAdminTracker != null) {
             configAdminTracker.close();
             configAdminTracker = null;
-        }
-
-        if (jolokiaContextHelper instanceof ServiceAuthenticationServletContextHelper) {
-            final ServiceAuthenticationServletContextHelper context =
-                    (ServiceAuthenticationServletContextHelper) jolokiaContextHelper;
-            context.close();
         }
 
         restrictor = null;
@@ -149,6 +143,31 @@ public class OsgiAgentActivator implements BundleActivator {
         return getConfiguration(AGENT_CONTEXT);
     }
 
+    @Override
+    @SuppressWarnings("deprecation")
+    public ConfigurationAdmin addingService(ServiceReference<ConfigurationAdmin> reference) {
+        // configadmin is available, so we can register managed service - but only if we
+        // ever register a Whiteboard servlet
+        if (Boolean.parseBoolean(getConfiguration(REGISTER_WHITEBOARD_SERVLET, LISTEN_FOR_HTTP_SERVICE))) {
+            Hashtable<String, Object> props = new Hashtable<>();
+            props.put(Constants.SERVICE_PID, "org.jolokia.osgi");
+            managedServiceRegistration = bundleContext.registerService(ManagedService.class, new JolokiaManagedService(), props);
+        }
+
+        return bundleContext.getService(reference);
+    }
+
+    @Override
+    public void modifiedService(ServiceReference<ConfigurationAdmin> reference, ConfigurationAdmin service) {
+    }
+
+    @Override
+    public void removedService(ServiceReference<ConfigurationAdmin> reference, ConfigurationAdmin service) {
+        if (managedServiceRegistration != null) {
+            managedServiceRegistration.unregister();
+        }
+    }
+
     // ==================================================================================
 
     // Customizer for registering servlet at a HttpService
@@ -170,7 +189,6 @@ public class OsgiAgentActivator implements BundleActivator {
     }
 
     private String getConfiguration(ConfigKey pKey) {
-        // TODO: Use fragments if available.
         String value = getConfigurationFromConfigAdmin(pKey);
         if (value == null) {
             value = bundleContext.getProperty(CONFIG_PREFIX + "." + pKey.getKeyValue());
@@ -315,6 +333,35 @@ public class OsgiAgentActivator implements BundleActivator {
             Servlet.class.getName(),
             HttpServlet.class.getName()
         }, servlet, properties);
+    }
+
+    private void unregisterWhiteboardServlet() {
+        if (servletRegistration != null) {
+            servletRegistration.unregister();
+        }
+        if (contextRegistration != null) {
+            contextRegistration.unregister();
+        }
+
+        if (jolokiaContextHelper instanceof ServiceAuthenticationServletContextHelper) {
+            final ServiceAuthenticationServletContextHelper context =
+                (ServiceAuthenticationServletContextHelper) jolokiaContextHelper;
+            context.close();
+        }
+        jolokiaContextHelper = null;
+    }
+
+    private class JolokiaManagedService implements ManagedService {
+
+        @Override
+        public void updated(Dictionary<String, ?> properties) {
+            // configuration is updated - we don't pass new dictionary, because servlet registration will
+            // refer to configuration admin directly anyway (at least in first implementation)
+            unregisterWhiteboardServlet();
+
+            registerWhiteboardServlet(bundleContext);
+        }
+
     }
 
 }
