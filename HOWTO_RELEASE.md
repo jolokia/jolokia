@@ -362,7 +362,7 @@ git push origin HEAD
 6. `mvn -Dmaven.repo.local=/tmp/repo -DdevelopmentVersion=2.3.1-SNAPSHOT -DreleaseVersion=2.3.0 -Dtag=v2.3.0 -Pdist release:prepare`
 7. `mvn -Dmaven.repo.local=/tmp/repo -Pdist release:perform`
 8. Create release at https://github.com/jolokia/jolokia/releases (`target/checkout/assembly/target`: `.tar.gz`, `.zip`, `.asc` and `agent/jvm/target`: `.deb`, `.asc`)
-9. Handle the release at https://oss.sonatype.org/#stagingRepositories
+9. Handle the release at https://central.sonatype.com/publishing/deployments
 10. If NPM packages are released:
 ```console
 cd client/javascript-esm
