@@ -8,6 +8,7 @@ import org.jolokia.server.detector.osgi.DetectorActivator;
 import org.jolokia.service.discovery.osgi.DiscoveryServiceActivator;
 import org.jolokia.service.history.osgi.HistoryServiceActivator;
 import org.jolokia.service.jmx.osgi.JmxServiceActivator;
+import org.jolokia.service.jsr160.osgi.Jsr160ProxyActivator;
 import org.jolokia.service.notif.pull.osgi.PullNotificationServiceActivator;
 import org.jolokia.service.notif.sse.osgi.SseNotificationServiceActivator;
 import org.jolokia.service.serializer.osgi.SerializerServiceActivator;
@@ -24,15 +25,25 @@ public class JolokiaBundleActivator implements BundleActivator {
 
     public JolokiaBundleActivator() {
         activators = Arrays.asList(
-                new OsgiAgentActivator(),
-                new DetectorActivator(),
-                new JmxServiceActivator(),
-                new SerializerServiceActivator(),
-                new DiscoveryServiceActivator(),
-                new HistoryServiceActivator(),
-                new PullNotificationServiceActivator(),
-                new SseNotificationServiceActivator()
-                );
+            // jolokia-server-core
+            new OsgiAgentActivator(),
+            // jolokia-server-detector
+            new DetectorActivator(),
+            // jolokia-service-discovery
+            new DiscoveryServiceActivator(),
+            // jolokia-service-history
+            new HistoryServiceActivator(),
+            // jolokia-service-jmx
+            new JmxServiceActivator(),
+            // jolokia-service-jsr160
+            new Jsr160ProxyActivator(),
+            // jolokia-service-notif-pull
+            new PullNotificationServiceActivator(),
+            // jolokia-service-notif-sse
+            new SseNotificationServiceActivator(),
+            // jolokia-service-serializer
+            new SerializerServiceActivator()
+        );
     }
 
     public void start(BundleContext pContext) {

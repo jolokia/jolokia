@@ -131,18 +131,6 @@
             <Bundle-SymbolicName>org.jolokia.agent.osgi</Bundle-SymbolicName>
             <Bundle-Description>Jolokia OSGi Agent Bundle</Bundle-Description>
             <Bundle-Activator>org.jolokia.agent.osgi.JolokiaBundleActivator</Bundle-Activator>
-            <Embed-Dependency>
-              jolokia-json;inline=true,
-              jolokia-server-core;inline=true,
-              jolokia-server-detector;inline=true,
-              jolokia-service-discovery;inline=true,
-              jolokia-service-history;inline=true,
-              jolokia-service-jmx;inline=true,
-              jolokia-service-jsr160;inline=true,
-              jolokia-service-notif-pull;inline=true,
-              jolokia-service-notif-sse;inline=true,
-              jolokia-service-serializer;inline=true
-            </Embed-Dependency>
             <Import-Package>
               <!-- JDK -->
               javax.crypto,
@@ -200,13 +188,11 @@
               org.jolokia.server.core.service,
               org.jolokia.server.core.service.api,
               org.jolokia.server.core.service.container,
-              !org.jolokia.server.core.service.impl,
               org.jolokia.server.core.service.notification,
               org.jolokia.server.core.service.request,
               org.jolokia.server.core.service.serializer,
               org.jolokia.server.core.util,
               org.jolokia.server.core.util.jmx,
-              <!-- jolokia-server-detector - nothing to export, it's internal -->
               <!-- jolokia-service-discovery -->
               org.jolokia.service.discovery,
               org.jolokia.service.discovery.osgi,
@@ -236,6 +222,32 @@
               org.jolokia.service.serializer.object,
               org.jolokia.service.serializer.osgi
             </Export-Package>
+            <Private-Package>
+              <!-- jolokia-server-core -->
+              org.jolokia.server.core.service.impl,
+              <!-- jolokia-server-detector -->
+              org.jolokia.server.detector.jee,
+              org.jolokia.server.detector.misc,
+              org.jolokia.server.detector.osgi,
+              <!-- jolokia-agent-osgi -->
+              org.jolokia.agent.osgi
+            </Private-Package>
+            <Include-Resource>
+              {maven-resources}, {maven-dependencies},
+            </Include-Resource>
+            <Embed-Dependency>
+              jolokia-json;inline=true,
+              jolokia-server-core;inline=true,
+              jolokia-server-detector;inline=true,
+              jolokia-service-discovery;inline=true|!META-INF/jolokia/services-default,
+              jolokia-service-history;inline=true|!META-INF/jolokia/services-default,
+              jolokia-service-jmx;inline=true|!META-INF/jolokia/*,
+              jolokia-service-jsr160;inline=true|!META-INF/jolokia/services-default,
+              jolokia-service-notif-pull;inline=true|!META-INF/jolokia/services-default,
+              jolokia-service-notif-sse;inline=true|!META-INF/jolokia/services-default,
+              jolokia-service-serializer;inline=true|!META-INF/jolokia/services-default
+            </Embed-Dependency>
+            <_removeheaders>Embed-Dependency,Include-Resource,Private-Package</_removeheaders>
           </instructions>
         </configuration>
       </plugin>
@@ -285,6 +297,46 @@
                     <artifactItem>
                       <groupId>org.jolokia</groupId>
                       <artifactId>jolokia-server-core</artifactId>
+                      <classifier>sources</classifier>
+                    </artifactItem>
+                    <artifactItem>
+                      <groupId>org.jolokia</groupId>
+                      <artifactId>jolokia-server-detector</artifactId>
+                      <classifier>sources</classifier>
+                    </artifactItem>
+                    <artifactItem>
+                      <groupId>org.jolokia</groupId>
+                      <artifactId>jolokia-service-discovery</artifactId>
+                      <classifier>sources</classifier>
+                    </artifactItem>
+                    <artifactItem>
+                      <groupId>org.jolokia</groupId>
+                      <artifactId>jolokia-service-history</artifactId>
+                      <classifier>sources</classifier>
+                    </artifactItem>
+                    <artifactItem>
+                      <groupId>org.jolokia</groupId>
+                      <artifactId>jolokia-service-jmx</artifactId>
+                      <classifier>sources</classifier>
+                    </artifactItem>
+                    <artifactItem>
+                      <groupId>org.jolokia</groupId>
+                      <artifactId>jolokia-service-jsr160</artifactId>
+                      <classifier>sources</classifier>
+                    </artifactItem>
+                    <artifactItem>
+                      <groupId>org.jolokia</groupId>
+                      <artifactId>jolokia-service-notif-pull</artifactId>
+                      <classifier>sources</classifier>
+                    </artifactItem>
+                    <artifactItem>
+                      <groupId>org.jolokia</groupId>
+                      <artifactId>jolokia-service-notif-sse</artifactId>
+                      <classifier>sources</classifier>
+                    </artifactItem>
+                    <artifactItem>
+                      <groupId>org.jolokia</groupId>
+                      <artifactId>jolokia-service-serializer</artifactId>
                       <classifier>sources</classifier>
                     </artifactItem>
                   </artifactItems>
