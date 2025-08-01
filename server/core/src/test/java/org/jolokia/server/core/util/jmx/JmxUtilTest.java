@@ -33,7 +33,7 @@ public class JmxUtilTest implements NotificationListener {
         MBeanServer server = ManagementFactory.getPlatformMBeanServer();
         counter = 0;
         JmxUtil.addMBeanRegistrationListener(server,this,null);
-        ObjectName name = JmxUtil.newObjectName("test:name=demo");
+        ObjectName name = JmxUtil.newObjectName("test:name=demo1");
         server.registerMBean(new Bla(),name);
         assertEquals(counter, 1);
         server.unregisterMBean(name);
@@ -49,7 +49,7 @@ public class JmxUtilTest implements NotificationListener {
     @Test
     public void addNotificationListenerTestWithFilter() throws MBeanRegistrationException, InstanceNotFoundException, InstanceAlreadyExistsException, NotCompliantMBeanException {
         MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-        ObjectName name1 = JmxUtil.newObjectName("test:name=demo");
+        ObjectName name1 = JmxUtil.newObjectName("test:name=demo2");
         ObjectName nameFilter = JmxUtil.newObjectName("test:name=registered");
 
         JmxUtil.addMBeanRegistrationListener(server,this,nameFilter);
