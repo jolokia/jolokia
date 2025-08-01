@@ -23,6 +23,32 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
+    <release version="2.3.0" description="Release 2.3.0" date="2025-08-01">
+      <action dev="tadayosi" type="fix" issue="856">
+        Provide a generic invm request handler for agents
+      </action>
+      <action dev="grgrzybek" type="fix" issue="619">
+        Implement OSGi Configuration Admin ManagedService
+      </action>
+      <action dev="grgrzybek" type="fix" issue="858">
+        Running Jolokia 2 OSGi agent with Felix (felix.http-jetty)
+      </action>
+      <action dev="grgrzybek" type="fix" issue="859">
+        Review OSGi headers in Jolokia modules
+      </action>
+      <action dev="grgrzybek" type="fix" issue="834">
+        With JVM agent, /jolokia/ works, but /jolokia ends with 404
+      </action>
+      <action dev="grgrzybek" type="fix" issue="860">
+        /META-INF/jolokia files are incorrect in jolokia-agent-osgi
+      </action>
+      <action dev="grgrzybek" type="fix" issue="857">
+        JaasHttpAuthenticator should use configurable class loader for login modules
+      </action>
+      <action dev="GChuf" type="fix" issue="852">
+        Remove deprecated Pragma header
+      </action>
+    </release>
     <release version="2.2.9" description="Release 2.2.9" date="2025-04-28">
       <action dev="grgrzybek" type="fix" issue="823">
         Discover custom Restrictor services from Spring application context

@@ -15,6 +15,28 @@
 ////
 == News
 
+=== Jolokia 2.3.0 released
+
+[.news-date]
+2025-08-01
+
+New minor Jolokia version is released with both new and old technologies.
+
+Jolokia 2.1.0 introduced two _extension points_:
+
+* `org.jolokia.service.jmx.api.CacheKeyProvider` for runtime-specific optimization of `list()` response
+* `org.jolokia.service.jmx.handler.list.DataUpdater` for runtime-specific decoration of MBean information (for example RBAC data)
+
+Jolokia 2.3.0 improves internal support for detecting https://activemq.apache.org/components/artemis/[Apache Artemis] runtime, so experimental (not yet released) extensions work with two supported RBAC mechanisms in Apache Artemis.
+
+Jolokia is also experimenting in the field of AI and https://modelcontextprotocol.io/overview[Model Context Protocol]. https://github.com/tadayosi[Tadayoshi Sato] is working on https://github.com/jolokia/jolokia-mcp-server/[Jolokia MCP Server] and exposing MBeans for LLM usage. +
+While Jolokia MCP Server is not yet fully released, Jolokia itself provides now some improvements, like in-VM access to Jolokia server.
+
+We've also reviewed some old technologies. OSGi is back! Because Pax Web 11 was recently released with full support of Servlet API 5+ and https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.servlet.html[OSGi CMPN Whiteboard Specification for Jakarta™ Servlet] Jolokia 2.3.0 now officially works with new Whiteboard implementations (both https://github.com/ops4j/org.ops4j.pax.web[Pax Web] and https://github.com/apache/felix-dev/tree/master/http[Felix HTTP]). +
+We've also improved OSGi Configuration Admin support, so not Jolokia can be updated dynamically when `org.jolokia.osgi` PID changes.
+
+Refer to https://jolokia.org/changes-report.html#a2.3.0[changelog] and https://github.com/jolokia/jolokia/releases/tag/v2.3.0[GitHub release notes] for more details.
+
 === Jolokia 2.2.9 released
 
 [.news-date]
