@@ -163,13 +163,13 @@
 <h2 id="_a_note_about_service_loader_approach"><a class="anchor" href="#_a_note_about_service_loader_approach"></a>A note about <em>Service Loader</em> approach</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><code>META-INF/jolokia/services</code> is a bit similar approach to Java standard <code>java.util.ServiceLoader</code> API, where services are <em>declared</em> in <code>META-INF/services/interface-name</code>.</p>
+<p><code>META-INF/jolokia/services</code> is a little similar approach to Java standard <code>java.util.ServiceLoader</code> API, where services are <em>declared</em> in <code>META-INF/services/interface-name</code>.</p>
 </div>
 <div class="paragraph">
 <p>The most important aspect is that the instantiation of such services is performed by JDK itself (or Jolokia itself) and if 3rd party applications use more sophisticated <em>service registries</em> (like CDI or Spring DI), then we can&#8217;t avoid static fields&#8230;&#8203;</p>
 </div>
 <div class="paragraph">
-<p>So if a Jolokia service extension needs to use other dependencies, it&#8217;s up to the application to provide necessary integration. Static fields is the easies (but not super-clean) option.</p>
+<p>So if a Jolokia service extension needs to use other dependencies, it&#8217;s up to the application to provide necessary integration. Static fields is the easiest (but not super-clean) option.</p>
 </div>
 </div>
 </div>
@@ -194,7 +194,7 @@
 <div class="ulist">
 <ul>
 <li>
-<p><em>remove entry</em> - if a line starts with <code>!</code> (exclamation mark), we can declare a fully qualified name of a service declared in another (most probably Jolokia&#8217;s own) service file, so we can <em>disable</em> usage and instantiation of given service. For example we can remove history service with <code>!org.jolokia.service.history.HistoryMBeanRequestInterceptor</code> even if <code>org.jolokia:jolokia-service-history</code> is available on classpath</p>
+<p><em>remove entry</em> - if a line starts with <code>!</code> (exclamation mark), we can declare a fully qualified name of a service declared in another (most probably Jolokia&#8217;s own) service file, so we can <em>disable</em> usage and instantiation of given service. For example, we can remove history service with <code>!org.jolokia.service.history.HistoryMBeanRequestInterceptor</code> even if <code>org.jolokia:jolokia-service-history</code> is available on classpath</p>
 </li>
 <li>
 <p><em>service entry</em> - if a line doesn&#8217;t start with <code>!</code>, a class is instantiated using one of two possible constructors:</p>
@@ -289,7 +289,7 @@
 <p>Without any optimization, <code>ObjectName</code> is used in <code>javax.management.MBeanServerConnection.getMBeanInfo()</code> call and result is the serialized using <code>org.jolokia.service.jmx.handler.list.DataUpdater</code> services.</p>
 </li>
 <li>
-<p>However, both <code>ObjectName</code> and <code>ObjectInstance</code>'s class can be use to obtain a <em>key</em> (or a <em>hint</em>) which determines that some MBeans may <em>share</em> its <code>javax.management.MBeanInfo</code> with other MBeans.</p>
+<p>However, both <code>ObjectName</code> and <code>ObjectInstance</code>'s class can be used to obtain a <em>key</em> (or a <em>hint</em>) which determines that some MBeans may <em>share</em> its <code>javax.management.MBeanInfo</code> with other MBeans.</p>
 </li>
 <li>
 <p>When a non-null key for an MBean is obtained, its MBeanInfo is cached under <code>"cache"</code> field and related MBean under <code>"domains"</code> field simply points to cached JSON data of <code>javax.management.MBeanInfo</code>.</p>
@@ -468,7 +468,7 @@
 <p>Built-in implementations of <code>org.jolokia.service.jmx.handler.list.DataUpdater</code> interface simply add these fields (<code>attr</code>, <code>op</code>, &#8230;&#8203;) to the JSON data.</p>
 </div>
 <div class="paragraph">
-<p>However there may be scenarios where for each MBean we need some additional data - for example the security roles assigned to given MBean (to implement a form of Role-Based Access Control (RBAC)). Jolokia isn&#8217;t aware of the way an application implements security mechanisms, but should allow for any extension of the basic MBean data.</p>
+<p>However, there may be scenarios where for each MBean we need some additional data - for example the security roles assigned to given MBean (to implement a form of Role-Based Access Control (RBAC)). Jolokia isn&#8217;t aware of the way an application implements security mechanisms, but should allow for any extension of the basic MBean data.</p>
 </div>
 <div class="paragraph">
 <p>We can provide an extension module, add it on the CLASSPATH and declare additional <em>data updaters</em> in <code>META-INF/jolokia/services</code>. <code>org.jolokia.service.jmx.handler.list.DataUpdater</code> is already an implementation of <code>org.jolokia.server.core.service.api.JolokiaService</code> and it&#8217;s an abstract class we can extend. For example:</p>
