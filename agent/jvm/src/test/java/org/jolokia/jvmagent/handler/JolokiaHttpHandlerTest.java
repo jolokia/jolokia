@@ -31,6 +31,7 @@ import org.jolokia.server.core.backend.BackendManager;
 import org.jolokia.server.core.backend.RequestDispatcher;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.http.HttpRequestHandler;
+import org.jolokia.server.core.request.BaseRequestHandler;
 import org.jolokia.server.core.request.JolokiaRequestBuilder;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.serializer.Serializer;
@@ -77,7 +78,7 @@ public class JolokiaHttpHandlerTest {
         Field field = pHandler.getClass().getDeclaredField("requestHandler");
         field.setAccessible(true);
         HttpRequestHandler rHandler = (HttpRequestHandler) field.get(pHandler);
-        field = HttpRequestHandler.class.getDeclaredField("backendManager");
+        field = BaseRequestHandler.class.getDeclaredField("backendManager");
         field.setAccessible(true);
         BackendManager bManager = (BackendManager) field.get(rHandler);
         field = BackendManager.class.getDeclaredField("requestDispatcher");

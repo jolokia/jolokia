@@ -193,6 +193,7 @@
               org.jolokia.server.core.service.serializer,
               org.jolokia.server.core.util,
               org.jolokia.server.core.util.jmx,
+              org.jolokia.server.core.vm,
               <!-- jolokia-service-discovery -->
               org.jolokia.service.discovery,
               org.jolokia.service.discovery.osgi,
