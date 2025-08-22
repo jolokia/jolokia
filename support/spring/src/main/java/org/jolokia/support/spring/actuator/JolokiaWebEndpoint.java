@@ -21,7 +21,7 @@ import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointPr
 import org.springframework.boot.actuate.autoconfigure.web.server.ManagementServerProperties;
 import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
 import org.springframework.boot.actuate.endpoint.web.annotation.WebEndpoint;
-import org.springframework.boot.autoconfigure.web.servlet.DispatcherServletPath;
+import org.springframework.boot.webmvc.autoconfigure.DispatcherServletPath;
 import org.springframework.web.servlet.ModelAndView;
 
 /**

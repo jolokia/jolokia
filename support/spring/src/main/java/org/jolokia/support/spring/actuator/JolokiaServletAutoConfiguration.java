@@ -25,7 +25,7 @@ import org.springframework.boot.actuate.autoconfigure.web.ManagementContextType;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication.Type;
-import org.springframework.boot.autoconfigure.web.servlet.DispatcherServletPath;
+import org.springframework.boot.webmvc.autoconfigure.DispatcherServletPath;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;

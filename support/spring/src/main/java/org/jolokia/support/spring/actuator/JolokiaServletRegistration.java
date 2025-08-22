@@ -23,7 +23,7 @@ import org.jolokia.server.core.http.AgentServlet;
 import org.jolokia.server.core.service.api.Restrictor;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
-import org.springframework.boot.autoconfigure.web.servlet.DispatcherServletPath;
+import org.springframework.boot.webmvc.autoconfigure.DispatcherServletPath;
 import org.springframework.boot.web.servlet.ServletContextInitializer;
 import org.springframework.context.ApplicationContext;
 
