@@ -315,9 +315,7 @@ public class JolokiaServerTest {
              are prefixed with SSL_ on J9 (compared to TLS_ on OpenJDK/Oracle). */
             protocolCandidates = new String[]{"TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.3"};
         } else {
-            protocolCandidates = new String[]{"TLSv1.2"};
-            // Readd 1.3 when everywhere available:
-            // protocolCandidates = new String[]{"TLSv1.2", "TLSv1.3"};
+            protocolCandidates = new String[]{"TLSv1.2", "TLSv1.3"};
         }
         for (String protocol : protocolCandidates) {
             // Make sure at least one connection for this protocol succeeds (if expected to)

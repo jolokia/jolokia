@@ -1,5 +1,7 @@
 basicConstraints        = CA:FALSE
 nsCertType              = server
-keyUsage                = digitalSignature, keyEncipherment
-extendedKeyUsage        = serverAuth, nsSGC, msSGC
-
+keyUsage                = nonRepudiation, digitalSignature, keyEncipherment
+extendedKeyUsage        = serverAuth
+subjectKeyIdentifier    = hash
+authorityKeyIdentifier  = keyid,issuer
+subjectAltName          = DNS:localhost,IP:127.0.0.1,IP:::1

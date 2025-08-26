@@ -56,10 +56,10 @@ import static org.testng.Assert.fail;
 public class KeyStoreUtilTest {
 
     public static final String CA_CERT_SUBJECT_DN_CN = "CN=ca.test.jolokia.org";
-    public static final String SERVER_CERT_SUBJECT_DN = "CN=Server Cert signed and with extended key usage server, C=DE, ST=Franconia, L=Pegnitz, OU=Test, O=jolokia.org";
+    public static final String SERVER_CERT_SUBJECT_DN = "C=DE, ST=Franconia, L=Pegnitz, OU=Test, O=jolokia.org, CN=Server Cert signed and with extended key usage server";
 
-    public static final String CA_ALIAS = "cn=ca.test.jolokia.org,c=de,st=bavaria,l=pegnitz,1.2.840.113549.1.9.1=#1612726f6c616e64406a6f6c6f6b69612e6f7267,ou=dev,o=jolokia|9531696871831421790";
-    public static final String SERVER_ALIAS = "cn=server cert signed and with extended key usage server,c=de,st=franconia,l=pegnitz,ou=test,o=jolokia.org";
+    public static final String CA_ALIAS = "1.2.840.113549.1.9.1=#1612726f6c616e64406a6f6c6f6b69612e6f7267,C=DE,ST=Bavaria,L=Pegnitz,OU=Dev,O=Jolokia,CN=ca.test.jolokia.org|52247990346977554835626411219862801398774599212";
+    public static final String SERVER_ALIAS = "c=de,st=franconia,l=pegnitz,ou=test,o=jolokia.org,cn=server cert signed and with extended key usage server";
 
     @Test
     public void testTrustStore() throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException {
@@ -88,7 +88,7 @@ public class KeyStoreUtilTest {
         List<String> aliases = asList(keystore.aliases());
         assertEquals(aliases.size(), 3);
         Map<String, String> expectedAliases = new HashMap<>();
-        expectedAliases.put("cn=ca.test.jolokia.org,c=de,st=bavaria,l=pegnitz,1.2.840.113549.1.9.1=#1612726f6c616e64406a6f6c6f6b69612e6f7267,ou=dev,o=jolokia|9531696871831421790", "ca.test.jolokia.org");
+        expectedAliases.put("1.2.840.113549.1.9.1=#1612726f6c616e64406a6f6c6f6b69612e6f7267,c=de,st=bavaria,l=pegnitz,ou=dev,o=jolokia,cn=ca.test.jolokia.org|52247990346977554835626411219862801398774599212", "ca.test.jolokia.org");
         expectedAliases.put("cn=another.test.jolokia.org,ou=jolokia,o=jolokia,l=pegnitz,st=bavaria,c=us|167767600", "another.test.jolokia.org");
         expectedAliases.put("cn=another.test.jolokia.org,ou=jolokia,o=jolokia,l=pegnitz,st=bavaria,c=us|42", "another.test.jolokia.org");
 
@@ -144,7 +144,7 @@ public class KeyStoreUtilTest {
         assertEquals(chain.length, 3);
 
         String[] expectedSubjectDNs = new String[]{
-            SERVER_CERT_SUBJECT_DN,
+            "CN=Server Cert signed and with extended key usage server, C=DE, ST=Franconia, L=Pegnitz, OU=Test, O=jolokia.org",
             "CN=Intermediate CA, OU=Test, O=jolokia.org, L=Mountain View, ST=California, C=US",
             "CN=Root CA, OU=Test, O=jolokia.org, L=Mountain View, ST=California, C=US"
         };
