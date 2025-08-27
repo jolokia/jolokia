@@ -166,7 +166,7 @@ public class AgentServlet extends HttpServlet {
 
 
     /**
-     * Hook for allowing a custome detector lookup
+     * Hook for allowing a custom detector lookup
      *
      * @return detector lookup class to use in addition to the standard classpath scanning or null if this is not
      * needed
@@ -214,8 +214,8 @@ public class AgentServlet extends HttpServlet {
     }
     /**
      * Create a restrictor to use. By default, this method returns the restrictor given in the
-     * constructor or does a lookup for a policy fule,
-     * but thie can be overridden in order to fine tune the creation.
+     * constructor or does a lookup for a policy rule,
+     * but this can be overridden in order to fine tune the creation.
      *
      * @return the restrictor to use
      */
@@ -531,14 +531,14 @@ public class AgentServlet extends HttpServlet {
     // =======================================================================
 
     // Get parameter map either directly from a Servlet 2.4 compliant implementation
-    // or by looking it up explictely (thanks to codewax for the patch)
+    // or by looking it up explicitly (thanks to codewax for the patch)
     private Map<String, String[]> getParameterMap(HttpServletRequest pReq){
         try {
             // Servlet 2.4 API
             return pReq.getParameterMap();
         } catch (UnsupportedOperationException exp) {
             // Thrown by 'pseudo' 2.4 Servlet API implementations which fake a 2.4 API
-            // As a service for the parameter map is build up explicitely
+            // As a service for the parameter map is build up explicitly
             Map<String, String[]> ret = new HashMap<>();
             Enumeration<String> params = pReq.getParameterNames();
             while (params.hasMoreElements()) {

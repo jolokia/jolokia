@@ -45,7 +45,7 @@ public class JolokiaWebEndpoint {
      * This operation is not invoked, because actual {@link JolokiaServletRegistration Jolokia servlet registration}
      * is overriding {@code /actuator/jolokia/*} mapping (taking into account actuator base/context path
      * configuration). Only when Jolokia's servlet is not registered, this method will be used to redirect to
-     * non-existing {@link /version} URL.
+     * non-existing {@code /version} URL.
      * @return
      */
     @ReadOperation
