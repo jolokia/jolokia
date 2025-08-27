@@ -39,13 +39,13 @@ public class BasicAuthenticationHttpContextTest {
     protected HttpServletRequest request;
     protected HttpServletResponse response;
 
-    BasicAuthenticationHttpContext context;
+    BasicAuthenticationServletContextHelper context;
 
     @BeforeMethod
     public void setup() {
         request = createMock(HttpServletRequest.class);
         response = createMock(HttpServletResponse.class);
-        context = new BasicAuthenticationHttpContext(ConfigKey.REALM.getDefaultValue(),
+        context = new BasicAuthenticationServletContextHelper(ConfigKey.REALM.getDefaultValue(),
                                                      new BasicAuthenticator("roland","s!cr!t"));
     }
 

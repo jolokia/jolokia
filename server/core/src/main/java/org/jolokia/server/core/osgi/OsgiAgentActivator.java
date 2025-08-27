@@ -124,7 +124,7 @@ public class OsgiAgentActivator implements BundleActivator, ServiceTrackerCustom
             final String authMode = getConfiguration(AUTH_MODE);
             if (user != null || "jaas".equalsIgnoreCase(authMode)) {
                  jolokiaContextHelper =
-                    new BasicAuthenticationHttpContext(getConfiguration(REALM),
+                    new BasicAuthenticationServletContextHelper(getConfiguration(REALM),
                                                        createAuthenticator(authMode));
             } else if (ServiceAuthenticationServletContextHelper.shouldBeUsed(authMode)) {
                 jolokiaContextHelper = new ServiceAuthenticationServletContextHelper(bundleContext, authMode);

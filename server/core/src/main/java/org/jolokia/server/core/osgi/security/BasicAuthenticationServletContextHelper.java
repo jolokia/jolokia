@@ -27,7 +27,7 @@ import jakarta.servlet.http.HttpServletResponse;
  * @author roland
  * @since Jan 7, 2010
  */
-public class BasicAuthenticationHttpContext extends DefaultServletContextHelper {
+public class BasicAuthenticationServletContextHelper extends DefaultServletContextHelper {
 
     private final String realm;
     private final Authenticator authenticator;
@@ -37,7 +37,7 @@ public class BasicAuthenticationHttpContext extends DefaultServletContextHelper 
      *
      * @param pRealm realm to authenticate against
      */
-    public BasicAuthenticationHttpContext(String pRealm, Authenticator pAuthenticator) {
+    public BasicAuthenticationServletContextHelper(String pRealm, Authenticator pAuthenticator) {
         realm = pRealm;
         authenticator = pAuthenticator;
     }
