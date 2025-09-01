@@ -18,6 +18,9 @@ package org.jolokia.jvmagent.security.asn1;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class DERObjectIdentifier implements DERObject {
 
@@ -33,10 +36,14 @@ public class DERObjectIdentifier implements DERObject {
 
     public static final String OID_rsaEncryption = "1.2.840.113549.1.1.1";
     public static final String OID_sha1WithRSAEncryption = "1.2.840.113549.1.1.5";
+    public static final String OID_sha512WithRSAEncryption = "1.2.840.113549.1.1.13";
+    public static final String OID_SHA3_512withRSA = "2.16.840.1.101.3.4.3.16";
 
     private final int[] values;
+    private final String value;
 
     public DERObjectIdentifier(String value) {
+        this.value = value;
         String[] vt = value.split("\\.");
         values = new int[vt.length];
         int p = 0;
@@ -110,6 +117,54 @@ public class DERObjectIdentifier implements DERObject {
     @Override
     public boolean isPrimitive() {
         return true;
+    }
+
+    public int[] getValues() {
+        return values;
+    }
+
+    public String asOid() {
+        return value;
+    }
+
+    public static DERObject parse(byte[] encoded, int length, int offset) {
+        if (length > 127) {
+            // it means we expect length octet to be 0x01 - 0x7f
+            throw new IllegalArgumentException("Can't decode ObjectIdentifier with content octets exceeding 127 bytes");
+        }
+
+        // v1 can be 0, 1 or 2
+        int v = encoded[offset] & 0xff;
+        if (length == 1 && (v & 0x80) == 0) {
+            // two components in single octet - easy way
+            int v1 = v < 120 ? v / 40 : 2;
+            int v2 = v - (v1 * 40);
+            return new DERObjectIdentifier(String.format("%d.%d", v1, v2));
+        }
+
+        List<Integer> values = new ArrayList<>();
+        int pos = offset;
+        int current = 0;
+        while (pos < offset + length) {
+            v = encoded[pos] & 0xff;
+            current <<= 7;
+            current |= v & 0x7f;
+            if ((v & 0x80) == 0) {
+                // last octet of the oid component
+                if (!values.isEmpty()) {
+                    values.add(current);
+                } else {
+                    // we need to add two oid components for the first subidentifier
+                    int v1 = current < 120 ? current / 40 : 2;
+                    int v2 = current - (v1 * 40);
+                    values.add(v1);
+                    values.add(v2);
+                }
+                current = 0;
+            }
+            pos++;
+        }
+        return new DERObjectIdentifier(values.stream().map(i -> Integer.toString(i)).collect(Collectors.joining(".")));
     }
 
 }

@@ -50,4 +50,24 @@ public class DERBitString implements DERObject {
         return true;
     }
 
+    public byte[] getValue() {
+        return value;
+    }
+
+    public static DERObject parse(byte[] encoded, int length, int offset) {
+        if (encoded[offset] != 0) {
+            throw new IllegalArgumentException("Can't parse BITSTRING with non-zero unused bits in the last octet");
+        }
+
+        if (length == 1) {
+            return new DERBitString(new byte[0]);
+        }
+
+        offset++;
+        byte[] result = new byte[length - 1];
+        System.arraycopy(encoded, offset, result, 0, length - 1);
+
+        return new DERBitString(result);
+    }
+
 }

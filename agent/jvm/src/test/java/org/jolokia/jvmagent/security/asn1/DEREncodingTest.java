@@ -19,15 +19,44 @@ package org.jolokia.jvmagent.security.asn1;
 import org.testng.annotations.Test;
 
 import java.io.StringWriter;
+import java.math.BigInteger;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 public class DEREncodingTest {
+
+    @Test
+    public void encodeLength() {
+        assertEquals(HexUtil.encode(DERUtils.encodeLength(0x7F)), "7F");
+        assertEquals(HexUtil.encode(DERUtils.encodeLength(0x80)), "8180");
+        assertEquals(HexUtil.encode(DERUtils.encodeLength(0xFF)), "81FF");
+        assertEquals(HexUtil.encode(DERUtils.encodeLength(0x100)), "820100");
+        assertEquals(HexUtil.encode(DERUtils.encodeLength(Integer.MAX_VALUE)), "847FFFFFFF");
+        try {
+            DERUtils.encodeLength(0x80000000);
+            fail("Should fail for negative length");
+        } catch (IllegalArgumentException ignored) {
+        }
+    }
+
+    @Test
+    public void decodeLength() {
+        assertEquals(DERUtils.decodeLength(HexUtil.decode("7F"))[0], 0x7F);
+        assertEquals(DERUtils.decodeLength(HexUtil.decode("8180"))[0], 0x80);
+        assertEquals(DERUtils.decodeLength(HexUtil.decode("81FF"))[0], 0xFF);
+        assertEquals(DERUtils.decodeLength(HexUtil.decode("820100"))[0], 0x100);
+        assertEquals(DERUtils.decodeLength(HexUtil.decode("83010203"))[0], 0x010203);
+        assertEquals(DERUtils.decodeLength(HexUtil.decode("847FFFFFFF"))[0], Integer.MAX_VALUE);
+        try {
+            DERUtils.decodeLength(HexUtil.decode("850100000000"));
+            fail("Should fail for too big length");
+        } catch (IllegalArgumentException ignored) {
+        }
+    }
 
     @Test
     public void encodeInteger() {
@@ -65,6 +94,28 @@ public class DEREncodingTest {
         assertEquals(HexUtil.encode(new DERInteger(-8388609).getEncoded()), "0204FF7FFFFF");
         assertEquals(HexUtil.encode(new DERInteger(-16777216).getEncoded()), "0204FF000000");
         assertEquals(HexUtil.encode(new DERInteger(Integer.MIN_VALUE).getEncoded()), "020480000000");
+
+        assertEquals(HexUtil.encode(new DERInteger(BigInteger.ZERO).getEncoded()), "020100");
+        assertEquals(HexUtil.encode(new DERInteger(BigInteger.ONE).getEncoded()), "020101");
+        assertEquals(new BigInteger("80", 16).intValue(), 128);
+        assertEquals(new BigInteger("-80", 16).intValue(), -128);
+        assertEquals(HexUtil.encode(new DERInteger(new BigInteger("-80", 16)).getEncoded()), "020180");
+        assertEquals(HexUtil.encode(new DERInteger(new BigInteger("80", 16)).getEncoded()), "02020080");
+        assertEquals(HexUtil.encode(new DERInteger(new BigInteger("7FFF", 16)).getEncoded()), "02027FFF");
+        assertEquals(HexUtil.encode(new DERInteger(new BigInteger("FF7FFF", 16)).getEncoded()), "020400FF7FFF");
+        assertEquals(HexUtil.encode(new DERInteger(new BigInteger("-FF7FFF", 16)).getEncoded()), "0204FF008001");
+        assertEquals(HexUtil.encode(new DERInteger(new BigInteger("FF000000", 16)).getEncoded()), "020500FF000000");
+        assertEquals(HexUtil.encode(new DERInteger(new BigInteger("-FF000000", 16)).getEncoded()), "0205FF01000000");
+        assertEquals(HexUtil.encode(new DERInteger(new BigInteger("0102030405060708090a", 16)).getEncoded()), "020A0102030405060708090A");
+    }
+
+    @Test
+    public void decodeInteger() {
+        assertEquals(((DERInteger) DERUtils.parse(HexUtil.decode("02017F"))).asInt(), 127);
+        assertEquals(((DERInteger) DERUtils.parse(HexUtil.decode("0201FF"))).asInt(), -1);
+        assertEquals(((DERInteger) DERUtils.parse(HexUtil.decode("020180"))).asInt(), -128);
+        assertEquals(((DERInteger) DERUtils.parse(HexUtil.decode("02020080"))).asInt(), 128);
+        assertEquals(((DERInteger) DERUtils.parse(HexUtil.decode("0205FF01000000"))).asBigInteger(), new BigInteger("-FF000000", 16));
     }
 
     @Test
@@ -102,8 +153,26 @@ public class DEREncodingTest {
     }
 
     @Test
+    public void encodeBoolean() {
+        assertEquals(HexUtil.encode(new DERBoolean(true).getEncoded()), "0101FF");
+        assertEquals(HexUtil.encode(new DERBoolean(false).getEncoded()), "010100");
+    }
+
+    @Test
+    public void decodeBoolean() {
+        assertTrue(((DERBoolean) DERUtils.parse(HexUtil.decode("0101FF"))).getValue());
+        assertTrue(((DERBoolean) DERUtils.parse(HexUtil.decode("010142"))).getValue());
+        assertFalse(((DERBoolean) DERUtils.parse(HexUtil.decode("010100"))).getValue());
+    }
+
+    @Test
     public void encodeNull() {
         assertEquals(HexUtil.encode(new DERNull().getEncoded()), "0500");
+    }
+
+    @Test
+    public void decodeNull() {
+        assertTrue(DERUtils.parse(HexUtil.decode("0500")) instanceof DERNull);
     }
 
     @Test
@@ -111,10 +180,27 @@ public class DEREncodingTest {
         assertEquals(HexUtil.encode(new DERObjectIdentifier("1").getEncoded()), "060128");
         assertEquals(HexUtil.encode(new DERObjectIdentifier("1.0").getEncoded()), "060128");
         assertEquals(HexUtil.encode(new DERObjectIdentifier("1.1").getEncoded()), "060129");
+        assertEquals(HexUtil.encode(new DERObjectIdentifier("2.56").getEncoded()), "06028108");
+        assertEquals(HexUtil.encode(new DERObjectIdentifier("2.999.3").getEncoded()), "0603883703");
         assertEquals(HexUtil.encode(new DERObjectIdentifier("2.5.4.8").getEncoded()), "0603550408");
         assertEquals(HexUtil.encode(new DERObjectIdentifier("1.2.3.4.5.6").getEncoded()), "06052A03040506");
         assertEquals(HexUtil.encode(new DERObjectIdentifier(DERObjectIdentifier.OID_rsaEncryption).getEncoded()), "06092A864886F70D010101");
         assertEquals(HexUtil.encode(new DERObjectIdentifier(DERObjectIdentifier.OID_sha1WithRSAEncryption).getEncoded()), "06092A864886F70D010105");
+    }
+
+    @Test
+    public void decodeOid() {
+        assertEquals(((DERObjectIdentifier) DERUtils.parse(HexUtil.decode("060128"))).asOid(), "1.0");
+        assertEquals(((DERObjectIdentifier) DERUtils.parse(HexUtil.decode("060129"))).asOid(), "1.1");
+        assertEquals(((DERObjectIdentifier) DERUtils.parse(HexUtil.decode("06017F"))).asOid(), "2.47");
+
+        assertEquals(((DERObjectIdentifier) DERUtils.parse(HexUtil.decode("06028108"))).asOid(), "2.56");
+        assertEquals(((DERObjectIdentifier) DERUtils.parse(HexUtil.decode("0603883703"))).asOid(), "2.999.3");
+        assertEquals(((DERObjectIdentifier) DERUtils.parse(HexUtil.decode("0603550408"))).asOid(), "2.5.4.8");
+        assertEquals(((DERObjectIdentifier) DERUtils.parse(HexUtil.decode("06052A03040506"))).asOid(), "1.2.3.4.5.6");
+
+        assertEquals(((DERObjectIdentifier) DERUtils.parse(HexUtil.decode("06092A864886F70D010101"))).asOid(), DERObjectIdentifier.OID_rsaEncryption);
+        assertEquals(((DERObjectIdentifier) DERUtils.parse(HexUtil.decode("06092A864886F70D010105"))).asOid(), DERObjectIdentifier.OID_sha1WithRSAEncryption);
     }
 
     @Test
@@ -143,6 +229,10 @@ public class DEREncodingTest {
 
     @Test
     public void encodeBitString() {
+        assertEquals(HexUtil.encode(new DERBitString(new byte[0]).getEncoded()), "030100");
+        assertEquals(HexUtil.encode(new DERBitString(new byte[] { 0x00 }).getEncoded()), "03020000");
+        assertEquals(HexUtil.encode(new DERBitString(new byte[] { (byte) 0xF0 }).getEncoded()), "030200F0");
+
         // $ echo -n 301D02012B031800301502012A06092A864886F70D010105130548656C6C6F | xxd -p -r | openssl asn1parse -inform der -i
         //     0:d=0  hl=2 l=  29 cons: SEQUENCE
         //     2:d=1  hl=2 l=   1 prim:  INTEGER           :2B

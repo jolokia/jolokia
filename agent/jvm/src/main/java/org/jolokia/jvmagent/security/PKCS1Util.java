@@ -1,5 +1,5 @@
 package org.jolokia.jvmagent.security;/*
- * 
+ *
  * Copyright 2015
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +17,15 @@ package org.jolokia.jvmagent.security;/*
 
 import java.io.*;
 import java.math.BigInteger;
+import java.security.spec.KeySpec;
 import java.security.spec.RSAPrivateCrtKeySpec;
+import java.security.spec.RSAPublicKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+
+import org.jolokia.jvmagent.security.asn1.DERInteger;
+import org.jolokia.jvmagent.security.asn1.DERObject;
+import org.jolokia.jvmagent.security.asn1.DERSequence;
+import org.jolokia.jvmagent.security.asn1.DERUtils;
 
 /**
  * This code is inspired and taken over from net.auth.core:oauth
@@ -36,104 +44,74 @@ class PKCS1Util {
     private PKCS1Util() {
     }
 
-    public static RSAPrivateCrtKeySpec decodePKCS1(byte[] keyBytes) throws IOException {
-        DerParser parser = new DerParser(keyBytes);
-        Asn1Object sequence = parser.read();
-        sequence.validateSequence();
-        parser = new DerParser(sequence.getValue());
-        parser.read();
+    /**
+     * Read encoded {@code RSAPublicKey} specified in
+     * <a href="https://datatracker.ietf.org/doc/html/rfc8017#appendix-A.1.1">RFC 8017</a> and return
+     * {@link RSAPublicKeySpec} which can be used to recreate a {@link java.security.PublicKey}
+     * @param keyBytes
+     * @return
+     */
+    public static KeySpec decodePKCS1PublicKey(byte[] keyBytes) {
+        DERSequence seq = (DERSequence) DERUtils.parse(keyBytes);
 
-        return new RSAPrivateCrtKeySpec(next(parser), next(parser),
-                                        next(parser), next(parser),
-                                        next(parser), next(parser),
-                                        next(parser), next(parser));
-    }
+        // https://datatracker.ietf.org/doc/html/rfc8017#appendix-A.1.1
+        // RSAPublicKey ::= SEQUENCE {
+        //     modulus           INTEGER,  -- n
+        //     publicExponent    INTEGER   -- e
+        // }
+        //
+        // or
+        // https://datatracker.ietf.org/doc/html/rfc5280#section-4.1.2.7
+        // SubjectPublicKeyInfo  ::=  SEQUENCE  {
+        //     algorithm            AlgorithmIdentifier,
+        //     subjectPublicKey     BIT STRING
+        // }
 
-    // ==========================================================================================
-
-    private static BigInteger next(DerParser parser) throws IOException {
-        return parser.read().getInteger();
-    }
-
-    static class DerParser {
-
-        private InputStream in;
-
-        DerParser(byte[] bytes) throws IOException {
-            this.in = new ByteArrayInputStream(bytes);
-        }
-
-        Asn1Object read() throws IOException {
-            int tag = in.read();
-
-            if (tag == -1) {
-                throw new IOException("Invalid DER: stream too short, missing tag");
-            }
-
-            int length = getLength();
-            byte[] value = new byte[length];
-            if (in.read(value) < length) {
-                throw new IOException("Invalid DER: stream too short, missing value");
-            }
-
-            return new Asn1Object(tag, value);
-        }
-
-        private int getLength() throws IOException {
-            int i = in.read();
-            if (i == -1) {
-                throw new IOException("Invalid DER: length missing");
-            }
-
-            if ((i & ~0x7F) == 0) {
-                return i;
-            }
-
-            int num = i & 0x7F;
-            if (i >= 0xFF || num > 4) {
-                throw new IOException("Invalid DER: length field too big ("
-                                      + i + ")");
-            }
-
-            byte[] bytes = new byte[num];
-            if (in.read(bytes) < num) {
-                throw new IOException("Invalid DER: length too short");
-            }
-
-            return new BigInteger(1, bytes).intValue();
+        DERObject v1 = seq.getValues()[0];
+        DERObject v2 = seq.getValues()[1];
+        if (v1 instanceof DERInteger && v2 instanceof DERInteger) {
+            // RSAPublicKey
+            return new RSAPublicKeySpec(((DERInteger) v1).asBigInteger(), ((DERInteger) v2).asBigInteger());
+        } else {
+            // SubjectPublicKeyInfo
+            return new X509EncodedKeySpec(keyBytes);
         }
     }
 
-    static class Asn1Object {
+    /**
+     * Read encoded {@code RSAPrivateKey} specified in
+     * <a href="https://datatracker.ietf.org/doc/html/rfc8017#appendix-A.1.2">RFC 8017</a> and return
+     * {@link RSAPrivateCrtKeySpec} which can be used to recreate a {@link java.security.PrivateKey}
+     * @param keyBytes
+     * @return
+     */
+    public static RSAPrivateCrtKeySpec decodePKCS1(byte[] keyBytes) {
+        DERSequence seq = (DERSequence) DERUtils.parse(keyBytes);
+        // https://datatracker.ietf.org/doc/html/rfc8017#appendix-A.1.2
+        // RSAPrivateKey ::= SEQUENCE {
+        //     version           Version,
+        //     modulus           INTEGER,  -- n
+        //     publicExponent    INTEGER,  -- e
+        //     privateExponent   INTEGER,  -- d
+        //     prime1            INTEGER,  -- p
+        //     prime2            INTEGER,  -- q
+        //     exponent1         INTEGER,  -- d mod (p-1)
+        //     exponent2         INTEGER,  -- d mod (q-1)
+        //     coefficient       INTEGER,  -- (inverse of q) mod p
+        //     otherPrimeInfos   OtherPrimeInfos OPTIONAL
+        // }
+        BigInteger version = ((DERInteger) seq.getValues()[0]).asBigInteger();
+        BigInteger modulus = ((DERInteger) seq.getValues()[1]).asBigInteger();
+        BigInteger publicExponent = ((DERInteger) seq.getValues()[2]).asBigInteger();
+        BigInteger privateExponent = ((DERInteger) seq.getValues()[3]).asBigInteger();
+        BigInteger primeP = ((DERInteger) seq.getValues()[4]).asBigInteger();
+        BigInteger primeQ = ((DERInteger) seq.getValues()[5]).asBigInteger();
+        BigInteger primeExponentP = ((DERInteger) seq.getValues()[6]).asBigInteger();
+        BigInteger primeExponentQ = ((DERInteger) seq.getValues()[7]).asBigInteger();
+        BigInteger crtCoefficient = ((DERInteger) seq.getValues()[8]).asBigInteger();
 
-        private final int type;
-        private final byte[] value;
-        private final int tag;
-
-        public Asn1Object(int tag, byte[] value) {
-            this.tag = tag;
-            this.type = tag & 0x1F;
-            this.value = value;
-        }
-
-        public byte[] getValue() {
-            return value;
-        }
-
-        BigInteger getInteger() throws IOException {
-            if (type != 0x02) {
-                throw new IOException("Invalid DER: object is not integer"); //$NON-NLS-1$
-            }
-            return new BigInteger(value);
-        }
-
-        void validateSequence() throws IOException {
-            if (type != 0x10) {
-                throw new IOException("Invalid DER: not a sequence");
-            }
-            if ((tag & 0x20) != 0x20) {
-                throw new IOException("Invalid DER: can't parse primitive entity");
-            }
-        }
+        return new RSAPrivateCrtKeySpec(modulus, publicExponent, privateExponent, primeP, primeQ,
+            primeExponentP, primeExponentQ, crtCoefficient);
     }
+
 }

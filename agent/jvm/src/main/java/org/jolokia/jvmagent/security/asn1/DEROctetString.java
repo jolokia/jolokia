@@ -20,6 +20,10 @@ import java.nio.charset.StandardCharsets;
 
 public class DEROctetString implements DERObject {
 
+    // 10.2 String encoding forms
+    // For bitstring, octetstring and restricted character string types, the constructed
+    // form of encoding shall not be used. (Contrast with 8.23.6.)
+
     // ISO/IEC 10646 - Unicode
     public static final byte DER_UTF8STRING_TAG = 0x0C;
     // X.680, 41.4: A-Za-z0-9 '()+,-./:=?

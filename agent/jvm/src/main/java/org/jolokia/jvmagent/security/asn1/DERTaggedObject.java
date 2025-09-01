@@ -29,7 +29,24 @@ public class DERTaggedObject implements DERObject {
     private final byte tagNumber;
     private final DERObject value;
 
+    /**
+     * Tagged object is an encoded content of a {@link DERObject} associated with:<ul>
+     *     <li>Identifier octets - ASN.1 tag (class + number) of the type of the data value. This is one octet
+     *         for tags with a number between 0 and 30 and more octets for tags with numbers greater than 30.</li>
+     *     <li>Length octets - encode the length of the content octets which encode actual value.</li>
+     * </ul>
+     *
+     * @param tagClass
+     * @param primitive specifies whether the type is primitive or constructed. Each type is specified explicitly as
+     *                  primitive or constructed (for example SEQUENCE is constructed, while BOOLEAN is primitive)
+     * @param tagNumber
+     * @param value
+     */
     public DERTaggedObject(TagClass tagClass, boolean primitive, int tagNumber, DERObject value) {
+        if (tagNumber > 30) {
+            throw new IllegalArgumentException("Only tag numbers 0-30 are supported");
+        }
+
         this.tagClass = tagClass;
         this.primitive = primitive;
         this.tagNumber = (byte) (tagNumber & 0x1F);
@@ -47,7 +64,7 @@ public class DERTaggedObject implements DERObject {
             byte[] bytes = content.toByteArray();
             byte tag = tagClass.encoded;
             if (!primitive) {
-                tag |= 0x20;
+                tag |= DERObject.DER_CONSTRUCTED_FLAG;
             }
             tag |= tagNumber;
             result.write(tag);
@@ -64,11 +81,16 @@ public class DERTaggedObject implements DERObject {
         return false;
     }
 
+    /**
+     * <p>Class of a tag.</p>
+     * <p>See: X.690, 8.1.2 Identifier octets</p>
+     */
     public enum TagClass {
-        Universal((byte) 0x00),
-        Application((byte) 0x40),
-        ContextSpecific((byte) 0x80),
-        Private((byte) 0xC0);
+        /** Universal tag class is always used for universal tag numbers (00-30) */
+        Universal((byte) 0b00000000),
+        Application((byte) 0b01000000),
+        ContextSpecific((byte) 0b10000000),
+        Private((byte) 0b11000000);
 
         private final byte encoded;
 

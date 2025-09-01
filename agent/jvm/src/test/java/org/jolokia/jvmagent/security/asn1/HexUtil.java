@@ -16,6 +16,7 @@
 
 package org.jolokia.jvmagent.security.asn1;
 
+import java.io.ByteArrayOutputStream;
 import java.io.StringWriter;
 
 public class HexUtil {
@@ -29,6 +30,23 @@ public class HexUtil {
         }
 
         return sw.toString().toUpperCase();
+    }
+
+    public static byte[] decode(String encoded) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        if (encoded.length() % 2 == 1) {
+            encoded = "0" + encoded;
+        }
+        encoded = encoded.toLowerCase();
+
+        char[] chars = encoded.toCharArray();
+        for (int pos = 0; pos < encoded.length(); pos += 2) {
+            int c1 = Character.digit(chars[pos], 16);
+            int c2 = Character.digit(chars[pos + 1], 16);
+            baos.write(c1 << 4 | c2);
+        }
+
+        return baos.toByteArray();
     }
 
 }

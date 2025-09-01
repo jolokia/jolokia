@@ -16,14 +16,23 @@
 
 package org.jolokia.jvmagent.security.asn1;
 
+import java.math.BigInteger;
+
 public class DERInteger implements DERObject {
 
     private static final byte DER_INTEGER_TAG = 0x02;
 
     private final int value;
+    private final BigInteger bigValue;
 
     public DERInteger(int value) {
         this.value = value;
+        this.bigValue = null;
+    }
+
+    public DERInteger(BigInteger value) {
+        this.bigValue = value;
+        this.value = 0;
     }
 
     @Override
@@ -31,6 +40,18 @@ public class DERInteger implements DERObject {
         // encoded values can be checked using:
         // $ echo 0203FF7FFF | xxd -p -r | openssl asn1parse -inform der -i
         //    0:d=0  hl=2 l=   3 prim: INTEGER           :-8001
+
+        if (this.bigValue != null) {
+            // two's-complement representation of this BigInteger
+            byte[] number = this.bigValue.toByteArray();
+            byte[] length = DERUtils.encodeLength(number.length);
+            byte[] result = new byte[1 + length.length + number.length];
+            result[0] = DER_INTEGER_TAG;
+            System.arraycopy(length, 0, result, 1, length.length);
+            System.arraycopy(number, 0, result, 1 + length.length, number.length);
+            return result;
+        }
+
         int v = value;
         if (value < 0) {
             v = (-value - 1) & 0x7fffffff;
@@ -94,6 +115,19 @@ public class DERInteger implements DERObject {
     @Override
     public boolean isPrimitive() {
         return true;
+    }
+
+    public int asInt() {
+        return this.bigValue != null ? this.bigValue.intValue() : this.value;
+    }
+
+    public BigInteger asBigInteger() {
+        return this.bigValue != null ? this.bigValue : BigInteger.valueOf(this.value);
+    }
+
+    public static DERInteger parse(byte[] encoded, int length, int offset) {
+        BigInteger big = new BigInteger(encoded, offset, length);
+        return new DERInteger(big);
     }
 
 }

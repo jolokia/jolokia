@@ -18,6 +18,8 @@ package org.jolokia.jvmagent.security.asn1;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DERSequence implements DERObject {
 
@@ -52,6 +54,25 @@ public class DERSequence implements DERObject {
     @Override
     public boolean isPrimitive() {
         return false;
+    }
+
+    public DERObject[] getValues() {
+        return values;
+    }
+
+    public static DERObject parse(byte[] encoded, int length, int offset) {
+        List<DERObject> objects = new ArrayList<>();
+        int pos = offset;
+        while (pos < offset + length) {
+            // at post we have new tag, at pos + 1 we have the length, because we don't parse
+            // multibyte identifier octets
+            int[] lo = DERUtils.decodeLength(encoded, pos + 1);
+            DERObject el = DERUtils.parse(encoded, pos);
+            objects.add(el);
+            pos += (1 + lo[0] + lo[1]);
+        }
+
+        return new DERSequence(objects.toArray(DERObject[]::new));
     }
 
 }
