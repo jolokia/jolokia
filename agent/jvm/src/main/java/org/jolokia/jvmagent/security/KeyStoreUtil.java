@@ -127,7 +127,7 @@ public class KeyStoreUtil {
         PrivateKey privKey = keypair.getPrivate();
 
         X509Certificate[] chain = new X509Certificate[1];
-        chain[0] = getSelfCertificate(keypair, certAttributes, new Date(), (long) 3650 * 24 * 60 * 60);
+        chain[0] = getSelfCertificate(keypair, certAttributes, new Date(), 1000L * 3650 * 24 * 60 * 60);
         pKeyStore.setKeyEntry("jolokia-agent", privKey, new char[0], chain);
     }
 
