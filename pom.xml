@@ -1188,7 +1188,7 @@
 
     <!-- Versions of test-related dependencies -->
 
-    <version.com.fasterxml.jackson.core>2.19.2</version.com.fasterxml.jackson.core>
+    <version.com.fasterxml.jackson.core>2.20</version.com.fasterxml.jackson.core>
     <version.jakarta.annotation-api>3.0.0</version.jakarta.annotation-api>
     <version.jakarta.authentication-api>3.1.0</version.jakarta.authentication-api>
     <version.org.apache.felix.configadmin>1.9.26</version.org.apache.felix.configadmin>
