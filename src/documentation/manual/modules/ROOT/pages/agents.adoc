@@ -77,7 +77,7 @@ Now all properties may use placeholders in the form of:
 
 * `${sys:configurationOption}` (or `${prop:configurationOption}`) to reference system properties
 * `${env:VARIABLE_NAME}` to reference environment variables
-* `${ip}`, `${ip6}`, `${host}`, `${ip:<interface>}` (e.g., `${ip:eth0}`) to reference networking configuration. `${host}` is resolved to actuall name only if `allowDnsReverseLookup` option is set to `true`. When not (which is the default), the value is the same as `${ip}`.
+* `${ip}`, `${ip6}`, `${host}`, `${ip:<interface>}` (e.g., `${ip:eth0}`) to reference networking configuration. `${host}` is resolved to actual name only if `allowDnsReverseLookup` option is set to `true`. When not (which is the default), the value is the same as `${ip}`.
 
 Additionally if Jolokia detects:
 

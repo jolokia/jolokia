@@ -206,7 +206,7 @@ public class KeyStoreUtilTest {
     }
 
     private void updateKeyStoreWithSelfSignedCert(KeyStore keystore) throws NoSuchAlgorithmException, KeyStoreException {
-        KeyStoreUtil.updateWithSelfSignedServerCertificate(keystore);
+        KeyStoreUtil.updateWithSelfSignedServerCertificate(keystore, null);
         X509Certificate cert = (X509Certificate) keystore.getCertificate("jolokia-agent");
         assertNotNull(cert);
         assertEquals(cert.getSubjectDN().getName(), "CN=Jolokia Agent " + Version.getAgentVersion() + ", OU=JVM, O=jolokia.org, L=Pegnitz, ST=Franconia, C=DE");

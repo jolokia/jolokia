@@ -24,6 +24,7 @@ public class DEROctetString implements DERObject {
     // For bitstring, octetstring and restricted character string types, the constructed
     // form of encoding shall not be used. (Contrast with 8.23.6.)
 
+    public static final byte DER_OCTETSTRING_TAG = 0x04;
     // ISO/IEC 10646 - Unicode
     public static final byte DER_UTF8STRING_TAG = 0x0C;
     // X.680, 41.4: A-Za-z0-9 '()+,-./:=?
@@ -33,6 +34,16 @@ public class DEROctetString implements DERObject {
 
     private final byte tag;
     private final String value;
+    private final byte[] bytes;
+
+    public DEROctetString(byte tag, byte[] value) {
+        if (value.length > 0xFFFF) {
+            throw new IllegalArgumentException("Can't DER encoded Strings longer than 64KiB");
+        }
+        this.tag = tag;
+        this.value = null;
+        this.bytes = value;
+    }
 
     public DEROctetString(byte tag, String value) {
         if (value.length() > 0xFFFF) {
@@ -40,12 +51,13 @@ public class DEROctetString implements DERObject {
         }
         this.tag = tag;
         this.value = value;
+        this.bytes = null;
     }
 
     @Override
     public byte[] getEncoded() {
         byte[] bytes;
-        bytes = value.getBytes(StandardCharsets.UTF_8);
+        bytes = this.bytes != null ? this.bytes : value.getBytes(StandardCharsets.UTF_8);
         if (bytes.length < 128) {
             byte[] result = new byte[bytes.length + 2];
             result[0] = tag;

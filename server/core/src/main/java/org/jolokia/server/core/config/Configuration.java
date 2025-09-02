@@ -16,6 +16,7 @@ package org.jolokia.server.core.config;
  * limitations under the License.
  */
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -55,4 +56,11 @@ public interface Configuration {
      * @return true if the configuration has this key
      */
     boolean containsKey(ConfigKey pKey);
+
+    /**
+     * Get Network configuration - mapping of network properties to ip addresses and host names.
+     * @return
+     */
+    Map<String, String> getNetworkConfig();
+
 }

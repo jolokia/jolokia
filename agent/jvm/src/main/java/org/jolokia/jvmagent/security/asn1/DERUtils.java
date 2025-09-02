@@ -158,7 +158,7 @@ public class DERUtils {
                 break;
         }
 
-        throw new IllegalArgumentException("Unknown ASN.1 tag " + id);
+        throw new IllegalArgumentException("Unsupported ASN.1 tag " + id);
     }
 
 }

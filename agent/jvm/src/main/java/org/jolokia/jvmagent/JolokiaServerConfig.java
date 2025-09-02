@@ -119,6 +119,11 @@ public class JolokiaServerConfig {
     protected final void init(Map<String, String> pConfig, Map<String,String> pDefaultConfig, SystemPropertyMode systemPropertyMode) {
         Map<String, String> resolvedConfig = new HashMap<>();
 
+        // we need this particular option very early
+        if (pConfig.containsKey(ConfigKey.ALLOW_DNS_REVERSE_LOOKUP.getKeyValue())) {
+            pDefaultConfig.put(ConfigKey.ALLOW_DNS_REVERSE_LOOKUP.getKeyValue(), pConfig.get(ConfigKey.ALLOW_DNS_REVERSE_LOOKUP.getKeyValue()));
+        }
+
         jolokiaConfig = new StaticConfiguration(pDefaultConfig, resolvedConfig, systemPropertyMode);
 
         // pDefaultConfig could've been overriden by system properties/env variables, but pConfig

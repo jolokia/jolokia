@@ -37,7 +37,29 @@ public class DERObjectIdentifier implements DERObject {
     public static final String OID_rsaEncryption = "1.2.840.113549.1.1.1";
     public static final String OID_sha1WithRSAEncryption = "1.2.840.113549.1.1.5";
     public static final String OID_sha512WithRSAEncryption = "1.2.840.113549.1.1.13";
+    // https://datatracker.ietf.org/doc/html/rfc9688#name-rsassa-pkcs1-v15-with-sha3
     public static final String OID_SHA3_512withRSA = "2.16.840.1.101.3.4.3.16";
+
+    // X.509 certificate extensions
+
+    // https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.2
+    public static final String OID_subjectKeyIdentifier = "2.5.29.14";
+    // https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.3
+    public static final String OID_keyUsage = "2.5.29.15";
+    // https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.6
+    public static final String OID_subjectAltName = "2.5.29.17";
+    // https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.9
+    public static final String OID_basicConstraints = "2.5.29.19";
+    // https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.1
+    public static final String OID_authorityKeyIdentifier = "2.5.29.35";
+    // https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.12
+    public static final String OID_extKeyUsage = "2.5.29.37";
+
+    // Extended Key Usage OIDs
+    public static final String OID_id_kp_serverAuth = "1.3.6.1.5.5.7.3.1";
+    public static final String OID_id_kp_clientAuth = "1.3.6.1.5.5.7.3.2";
+    public static final String OID_id_kp_codeSigning = "1.3.6.1.5.5.7.3.3";
+    public static final String OID_id_kp_emailProtection = "1.3.6.1.5.5.7.3.4";
 
     private final int[] values;
     private final String value;

@@ -20,6 +20,7 @@ import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -105,10 +106,23 @@ public class StaticConfiguration implements Configuration {
         this.properties = new Properties();
         this.properties.putAll(System.getProperties());
         this.allowDnsReverseLookup = false;
+        boolean allowDnsReverseLookupFound = false;
         for (int i = 0; i < keyAndValues.length; i += 2) {
             if (ConfigKey.ALLOW_DNS_REVERSE_LOOKUP.equals(keyAndValues[i])) {
                 this.allowDnsReverseLookup = Boolean.parseBoolean((String) keyAndValues[i + 1]);
+                allowDnsReverseLookupFound = true;
                 break;
+            }
+        }
+        if (!allowDnsReverseLookupFound) {
+            // try sys/env for this particular property
+            String envKey = ConfigKey.ALLOW_DNS_REVERSE_LOOKUP.asEnvVariable();
+            if (env().containsKey(envKey)) {
+                this.allowDnsReverseLookup = Boolean.parseBoolean(env().get(envKey));
+            }
+            String sysKey = ConfigKey.ALLOW_DNS_REVERSE_LOOKUP.asSystemProperty();
+            if (this.properties.containsKey(sysKey)) {
+                this.allowDnsReverseLookup = Boolean.parseBoolean(this.properties.getProperty(sysKey));
             }
         }
 
@@ -149,7 +163,20 @@ public class StaticConfiguration implements Configuration {
         this.systemPropertyMode = pSystemPropertyMode;
         this.properties = new Properties();
         this.properties.putAll(System.getProperties());
-        this.allowDnsReverseLookup = Boolean.parseBoolean(pConfig.getOrDefault(ConfigKey.ALLOW_DNS_REVERSE_LOOKUP.getKeyValue(), "false"));
+        if (pConfig.containsKey(ConfigKey.ALLOW_DNS_REVERSE_LOOKUP.getKeyValue())) {
+            this.allowDnsReverseLookup = Boolean.parseBoolean(pConfig.getOrDefault(ConfigKey.ALLOW_DNS_REVERSE_LOOKUP.getKeyValue(), "false"));
+        } else {
+            // we need these before network initialization, which is then needed for resolution of other properties
+            // try sys/env for this particular property
+            String envKey = ConfigKey.ALLOW_DNS_REVERSE_LOOKUP.asEnvVariable();
+            if (env().containsKey(envKey)) {
+                this.allowDnsReverseLookup = Boolean.parseBoolean(env().get(envKey));
+            }
+            String sysKey = ConfigKey.ALLOW_DNS_REVERSE_LOOKUP.asSystemProperty();
+            if (this.properties.containsKey(sysKey)) {
+                this.allowDnsReverseLookup = Boolean.parseBoolean(this.properties.getProperty(sysKey));
+            }
+        }
 
         initializeFromNetwork();
 
@@ -168,6 +195,10 @@ public class StaticConfiguration implements Configuration {
                 }
             });
         }
+    }
+
+    public Map<String, String> getNetworkConfig() {
+        return Collections.unmodifiableMap(networkConfig);
     }
 
     private void initializeFromNetwork() {

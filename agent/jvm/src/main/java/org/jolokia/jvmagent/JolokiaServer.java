@@ -487,7 +487,7 @@ public class JolokiaServer {
 
             // If no server cert is configured, then use a self-signed server certificate
             if (pConfig.getServerCert() == null) {
-                KeyStoreUtil.updateWithSelfSignedServerCertificate(keystore);
+                KeyStoreUtil.updateWithSelfSignedServerCertificate(keystore, pConfig);
             }
         }
         return keystore;
