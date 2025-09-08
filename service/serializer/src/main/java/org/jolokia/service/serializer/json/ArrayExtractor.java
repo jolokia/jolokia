@@ -9,6 +9,7 @@ import java.util.List;
 import javax.management.AttributeNotFoundException;
 
 import org.jolokia.server.core.service.serializer.ValueFaultHandler;
+import org.jolokia.service.serializer.object.Deserializer;
 import org.jolokia.service.serializer.object.StringToObjectConverter;
 import org.jolokia.json.JSONArray;
 
@@ -82,7 +83,7 @@ public class ArrayExtractor implements Extractor {
      * @throws IllegalAccessException
      * @throws InvocationTargetException
      */
-    public Object setObjectValue(StringToObjectConverter pConverter, Object pInner, String pIndex, Object  pValue)
+    public Object setObjectValue(Deserializer<String> pConverter, Object pInner, String pIndex, Object  pValue)
             throws IllegalAccessException, InvocationTargetException {
         Class<?> clazz = pInner.getClass();
         if (!clazz.isArray()) {

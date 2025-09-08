@@ -30,43 +30,44 @@ import javax.management.openmbean.OpenType;
  * @author Assaf Berg, roland
  * @since 02.08.11
  */
-public class OpenTypeDeserializer {
+public class OpenTypeDeserializer implements Deserializer<OpenType<?>> {
 
-    protected boolean forgiving = false;
+    protected final boolean forgiving;
 
     // List of converters used
-    @SuppressWarnings("rawtypes")
-    private final List<OpenTypeConverter<? extends OpenType>> converters;
+    private final List<OpenTypeConverter<? extends OpenType<?>>> converters;
 
     /**
      * Constructor
      *
      * @param pStringToObjectConverter converter for the 'leaf' values.
      */
-    public OpenTypeDeserializer(StringToObjectConverter pStringToObjectConverter) {
+    public OpenTypeDeserializer(Deserializer<String> pStringToObjectConverter, boolean pForgiving) {
         converters = Arrays.asList(
                 new SimpleTypeConverter(this,pStringToObjectConverter),
                 new ArrayTypeConverter(this),
                 new CompositeTypeConverter(this),
-                new TabularDataConverter(this));
+                new TabularDataConverter(this)
+        );
+        this.forgiving = pForgiving;
     }
 
     /**
      * Handle conversion for OpenTypes. The value is expected to be in JSON (either
-     * an {@link org.jolokia.json.JSONStructure} object or its string representation.
+     * a {@link org.jolokia.json.JSONStructure} object or its string representation.
      *
      * @param pOpenType target type
      * @param pValue value to convert from
      * @return the converted value
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public Object deserialize(OpenType pOpenType, Object pValue) {
+    @Override
+    public Object deserialize(OpenType<?> pOpenType, Object pValue) {
         if (pValue == null) {
             return null;
         } else {
-            for (OpenTypeConverter converter : converters) {
+            for (OpenTypeConverter<? extends OpenType<?>> converter : converters) {
                 if (converter.canConvert(pOpenType)) {
-                    return converter.convertToObject(pOpenType,pValue);
+                    return invokeConverter(converter, pOpenType, pValue);
                 }
             }
             throw new IllegalArgumentException(
@@ -74,8 +75,11 @@ public class OpenTypeDeserializer {
         }
 	}
 
-    public void makeForgiving() {
-        this.forgiving = true;
+    // capture helper trick
+    private <T extends OpenType<?>> Object invokeConverter(OpenTypeConverter<T> converter, OpenType<?> pOpenType, Object pValue) {
+        @SuppressWarnings("unchecked")
+        T casted = (T) pOpenType;
+        return converter.convertToObject(casted, pValue);
     }
 
     public boolean isForgiving() {

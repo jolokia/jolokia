@@ -41,7 +41,7 @@ public interface ValueFaultHandler {
      */
     ValueFaultHandler IGNORING_VALUE_FAULT_HANDLER = new ValueFaultHandler() {
         /**
-         * Ignores any exeception and records them as a string which can be used for business
+         * Ignores any exception and records them as a string which can be used for business
          *
          * @param exception exception to ignore
          * @return a descriptive string of the exception

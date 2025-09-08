@@ -16,9 +16,12 @@ package org.jolokia.server.core.request;
  *  limitations under the License.
  */
 
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.List;
 import javax.management.MalformedObjectNameException;
+
+import org.jolokia.json.JSONObject;
 
 /**
  * Base class for so called <em>request creators</em>, which are used for creating
@@ -34,9 +37,11 @@ import javax.management.MalformedObjectNameException;
 abstract class RequestCreator<R extends JolokiaRequest> {
 
     /**
-     * Create a GET request.
+     * Create a {@code GET} request from a stack of path elements after initial URL mapping (like context
+     * path and servlet path). For example in Jakarta Servlet environment, the stack of URL components is taken from
+     * {@link jakarta.servlet.http.HttpServletRequest#getPathInfo()}
      *
-     * @param pStack parsed and splitted GET url
+     * @param pStack parsed and split GET url
      * @param pParams optional query parameters
      * @return the created request object
      * @throws MalformedObjectNameException if an object name could not be created
@@ -45,16 +50,15 @@ abstract class RequestCreator<R extends JolokiaRequest> {
             throws MalformedObjectNameException;
 
     /**
-     * Process a POST request
+     * Process a {@code POST} request
      *
      * @param requestMap JSON representation of the request
      * @param pParams optional query parameters
      * @return the created request object
      * @throws MalformedObjectNameException if an object name could not be created
      */
-    abstract R create(Map<String, ?> requestMap, ProcessingParameters pParams)
+    abstract R create(JSONObject requestMap, ProcessingParameters pParams)
             throws MalformedObjectNameException;
-
 
     /**
      * Extract extra arguments from the remaining element on the stack.

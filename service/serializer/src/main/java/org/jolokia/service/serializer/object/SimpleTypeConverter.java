@@ -25,10 +25,9 @@ import javax.management.openmbean.SimpleType;
  * @author roland
  * @since 28.09.11
  */
-@SuppressWarnings("rawtypes")
-class SimpleTypeConverter extends OpenTypeConverter<SimpleType> {
+class SimpleTypeConverter extends OpenTypeConverter<SimpleType<?>> {
 
-    private final StringToObjectConverter stringToObjectConverter;
+    private final Deserializer<String> stringToObjectConverter;
 
     /**
      * Constructor
@@ -36,20 +35,20 @@ class SimpleTypeConverter extends OpenTypeConverter<SimpleType> {
      * @param pDispatcher parent converter (not used here)
      * @param pStringToObjectConverter string to object converter for transforming simple types
      */
-    SimpleTypeConverter(OpenTypeDeserializer pDispatcher, StringToObjectConverter pStringToObjectConverter) {
+    SimpleTypeConverter(OpenTypeDeserializer pDispatcher, Deserializer<String> pStringToObjectConverter) {
         super(pDispatcher);
         stringToObjectConverter = pStringToObjectConverter;
     }
 
     /** {@inheritDoc} */
     @Override
-    boolean canConvert(OpenType pType) {
+    boolean canConvert(OpenType<?> pType) {
         return pType instanceof SimpleType;
     }
 
     /** {@inheritDoc} */
     @Override
-    Object convertToObject(SimpleType pType, Object pFrom) {
+    Object convertToObject(SimpleType<?> pType, Object pFrom) {
         return stringToObjectConverter.deserialize(pType.getClassName(), pFrom);
     }
 }

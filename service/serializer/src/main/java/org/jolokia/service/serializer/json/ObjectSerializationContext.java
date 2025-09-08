@@ -1,5 +1,7 @@
 package org.jolokia.service.serializer.json;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
 
 import org.jolokia.server.core.service.serializer.SerializeOptions;
@@ -31,14 +33,19 @@ class ObjectSerializationContext {
 
     // =============================================================================
     // Context used for detecting call loops and the like
-    @SuppressWarnings("rawtypes")
-    private static final Set<Class> SIMPLE_TYPES = new HashSet<>(Arrays.asList(
-            String.class,
-            Number.class,
-            Long.class,
-            Integer.class,
+    private static final Set<Class<?>> SIMPLE_TYPES = new HashSet<>(Arrays.asList(
             Boolean.class,
-            Date.class
+            Character.class,
+            Byte.class,
+            Short.class,
+            Integer.class,
+            Long.class,
+            Float.class,
+            Double.class,
+            String.class,
+            Date.class,
+            BigInteger.class,
+            BigDecimal.class
     ));
 
     private final Set<Integer>   objectsInCallStack = new HashSet<>();
@@ -123,8 +130,8 @@ class ObjectSerializationContext {
     void push(Object object) {
         if (object != null && !SIMPLE_TYPES.contains(object.getClass())) {
             objectsInCallStack.add(System.identityHashCode(object));
+            objectCount++;
         }
-        objectCount++;
     }
 
     /**
@@ -134,6 +141,8 @@ class ObjectSerializationContext {
     void pop(Object value) {
         if (value != null && !SIMPLE_TYPES.contains(value.getClass())) {
             objectsInCallStack.remove(System.identityHashCode(value));
+            // don't decrease the counter - it's for total objects serialized, not max being serialized
+            // at given time
         }
     }
 }

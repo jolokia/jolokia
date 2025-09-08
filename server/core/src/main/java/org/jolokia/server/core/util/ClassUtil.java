@@ -56,6 +56,9 @@ public final class ClassUtil {
      */
     @SuppressWarnings("unchecked")
     public static <T> Class<T> classForName(String pClassName,boolean pInitialize,ClassLoader ... pClassLoaders) {
+        if (pClassName == null) {
+            return null;
+        }
         Set<ClassLoader> tried = new HashSet<>();
         for (ClassLoader loader : findClassLoaders(pClassLoaders)) {
             // Go up the classloader stack to eventually find the server class. Sometimes the WebAppClassLoader

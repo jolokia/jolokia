@@ -76,7 +76,7 @@ public class ToOpenTypeConverter {
         DATE,
         OBJECTNAME,
     };
-    static final JolokiaSerializer CONVERTER = new JolokiaSerializer().makeForgiving();
+    static final JolokiaSerializer CONVERTER = new JolokiaSerializer(true);
     private static HashMap<String, OpenType<?>> TABULAR_CONTENT_TYPE;
 
     private static Map<String, OpenType<?>> TYPE_SPECIFICATIONS;

@@ -130,7 +130,7 @@ public class JolokiaRequestTest {
         }
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*Map.*")
+    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*JSONObject.*")
     public void readRequestInvalidArguments() {
         JolokiaRequestFactory.createPostRequest(
                 createMap("type", "read", "mbean", "java.lang:type=Memory",

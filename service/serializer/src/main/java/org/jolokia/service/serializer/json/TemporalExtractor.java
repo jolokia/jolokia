@@ -34,6 +34,7 @@ import java.util.TimeZone;
 import javax.management.AttributeNotFoundException;
 
 import org.jolokia.server.core.config.ConfigKey;
+import org.jolokia.service.serializer.object.Deserializer;
 import org.jolokia.service.serializer.object.StringToObjectConverter;
 
 /**
@@ -146,7 +147,7 @@ public class TemporalExtractor implements Extractor {
     }
 
     @Override
-    public Object setObjectValue(StringToObjectConverter pConverter, Object pInner, String pAttribute, Object pValue) throws IllegalAccessException, InvocationTargetException, IllegalArgumentException {
+    public Object setObjectValue(Deserializer<String> pConverter, Object pInner, String pAttribute, Object pValue) throws IllegalAccessException, InvocationTargetException, IllegalArgumentException {
         throw new IllegalArgumentException("java.time.Temporal instance is immutable an cannot change its value");
     }
 

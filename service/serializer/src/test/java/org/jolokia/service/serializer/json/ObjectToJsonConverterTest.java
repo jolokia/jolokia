@@ -31,7 +31,6 @@ import static org.testng.AssertJUnit.*;
  * limitations under the License.
  */
 
-
 /**
  * Testing the converter
  *
@@ -69,7 +68,7 @@ public class ObjectToJsonConverterTest {
         //noinspection unchecked
         assertNotNull("Bean2:Bean1 is set",((Map<String, ?>)result.get("bean2")).get("bean1"));
         //noinspection unchecked
-        assertEquals("Reference breackage",((Map<String, ?>)result.get("bean2")).get("bean1").getClass(),String.class);
+        assertEquals("Reference breackage", String.class, ((Map<String, ?>)result.get("bean2")).get("bean1").getClass());
         assertTrue("Bean 3 should be resolved",result.get("bean3") instanceof Map);
     }
 
@@ -139,9 +138,9 @@ public class ObjectToJsonConverterTest {
 
         @SuppressWarnings("unchecked")
         Map<String, ?> ret = (Map<String, ?>) converter.serialize(file, null, SerializeOptions.DEFAULT);
-        assertEquals(ret.get("name"),"myFile");
+        assertEquals("myFile", ret.get("name"));
         String name = (String) converter.serialize(file, List.of("name"), SerializeOptions.DEFAULT);
-        assertEquals(name,"myFile");
+        assertEquals("myFile", name);
     }
 
     @Test
@@ -150,14 +149,30 @@ public class ObjectToJsonConverterTest {
 
         Object oldValue = converter.setInnerValue(bean, "blub", new ArrayList<>(Arrays.asList("map", "foo", "1")));
 
-        assertEquals(oldValue,"baz");
-        assertEquals(bean.getMap().get("foo").get(0),"bar");
-        assertEquals(bean.getMap().get("foo").get(1),"blub");
+        assertEquals("baz", oldValue);
+        assertEquals("bar", bean.getMap().get("foo").get(0));
+        assertEquals("blub", bean.getMap().get("foo").get(1));
 
         oldValue = converter.setInnerValue(bean, "fcn", new ArrayList<>(Arrays.asList("array", "0")));
 
-        assertEquals(oldValue,"bar");
-        assertEquals(bean.getArray()[0],"fcn");
+        assertEquals("bar", oldValue);
+        assertEquals("fcn", bean.getArray()[0]);
+    }
+
+    // TODO: this should be handled better
+    @Test(expectedExceptions = IndexOutOfBoundsException.class)
+    public void setInnerValueTestWithoutPathParts() throws IllegalAccessException, AttributeNotFoundException, InvocationTargetException {
+        InnerValueTestBean bean = new InnerValueTestBean("foo", "bar", "baz");
+
+        converter.setInnerValue(bean, "blub", new ArrayList<>());
+    }
+
+    // TODO: this should be handled better
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void setInnerValueTestWithIncompatiblePathPart() throws IllegalAccessException, AttributeNotFoundException, InvocationTargetException {
+        InnerValueTestBean bean = new InnerValueTestBean("foo", "bar", "baz");
+
+        converter.setInnerValue(bean, "blub", new ArrayList<>(Collections.singletonList("map")));
     }
 
     @Test
@@ -175,7 +190,7 @@ public class ObjectToJsonConverterTest {
             @SuppressWarnings("unchecked")
             Map<String, ?> ret =  (Map<String, ?>)converter.serialize(bean, null, SerializeOptions.DEFAULT);
             assertNull(ret.get("transientValue"));
-            assertEquals(ret.get("value"),"value");
+            assertEquals("value", ret.get("value"));
         } else {
             try {
                 converter.serialize(bean, null, SerializeOptions.DEFAULT);
@@ -261,7 +276,7 @@ public class ObjectToJsonConverterTest {
     }
 
     static class InnerValueTestBean {
-        private final Map<String, List<String>> map;
+        private Map<String, List<String>> map;
 
         private final String[] array;
 
@@ -274,6 +289,10 @@ public class ObjectToJsonConverterTest {
 
         public Map<String, List<String>> getMap() {
             return map;
+        }
+
+        public void setMap(Map<String, List<String>> map) {
+            this.map = map;
         }
 
         public String[] getArray() {

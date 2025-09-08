@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.management.AttributeNotFoundException;
 
 import org.jolokia.server.core.service.serializer.ValueFaultHandler;
+import org.jolokia.service.serializer.object.Deserializer;
 import org.jolokia.service.serializer.object.StringToObjectConverter;
 import org.jolokia.json.JSONObject;
 
@@ -97,6 +98,7 @@ public class MapExtractor implements Extractor {
             // We dont access the map via a lookup since the key
             // are potentially object but we have to deal with string
             // representations
+            // TODO: this is weird...
             if(pPathParth.equals(entry.getKey().toString())) {
                 return pConverter.extractObject(entry.getValue(), pPathParts, jsonify);
             }
@@ -119,7 +121,7 @@ public class MapExtractor implements Extractor {
      * @throws IllegalAccessException
      * @throws InvocationTargetException
      */
-    public Object setObjectValue(StringToObjectConverter pConverter, Object pMap, String pKey, Object pValue)
+    public Object setObjectValue(Deserializer<String> pConverter, Object pMap, String pKey, Object pValue)
             throws IllegalAccessException, InvocationTargetException {
         @SuppressWarnings("unchecked")
         Map<Object,Object> map = (Map<Object,Object>) pMap;

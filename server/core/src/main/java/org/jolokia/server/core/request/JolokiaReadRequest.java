@@ -155,7 +155,7 @@ public class JolokiaReadRequest extends JolokiaObjectNameRequest {
             }
 
             /** {@inheritDoc} */
-            public JolokiaReadRequest create(Map<String, ?> requestMap, ProcessingParameters pParams)
+            public JolokiaReadRequest create(JSONObject requestMap, ProcessingParameters pParams)
                     throws MalformedObjectNameException {
                 return new JolokiaReadRequest(requestMap, pParams);
             }

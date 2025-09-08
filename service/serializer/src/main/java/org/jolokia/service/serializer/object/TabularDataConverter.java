@@ -30,7 +30,7 @@ import org.jolokia.json.*;
  */
 class TabularDataConverter extends OpenTypeConverter<TabularType> {
 
-    // Fixed key names for tabular data represention maps for MXBeans.
+    // Fixed key names for tabular data representation maps for MXBeans.
     private static final String TD_KEY_KEY = "key";
     private static final String TD_KEY_VALUE = "value";
 

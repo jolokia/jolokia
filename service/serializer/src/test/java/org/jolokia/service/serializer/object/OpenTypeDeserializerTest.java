@@ -48,13 +48,14 @@ public class OpenTypeDeserializerTest {
 
     private OpenTypeDeserializer converter;
     private ObjectToJsonConverter otjc;
+    private StringToObjectConverter stringToObjectConverter;
 
 
     @BeforeClass
     public void setup() {
 
-        StringToObjectConverter stringToObjectConverter = new StringToObjectConverter();
-        converter = new OpenTypeDeserializer(stringToObjectConverter);
+        stringToObjectConverter = new StringToObjectConverter();
+        converter = new OpenTypeDeserializer(stringToObjectConverter, false);
         otjc = new ObjectToJsonConverter(stringToObjectConverter);
     }
 
@@ -194,7 +195,7 @@ public class OpenTypeDeserializerTest {
     public void compositeType() throws OpenDataException {
         CompositeTypeAndJson taj = new CompositeTypeAndJson(
                 STRING,"verein","FCN",
-                INTEGER,"platz",6,
+                LONG,"platz",6L,
                 STRING,"trainer",null,
                 BOOLEAN,"absteiger",false
         );
@@ -202,7 +203,7 @@ public class OpenTypeDeserializerTest {
             CompositeData result = (CompositeData) converter.deserialize(taj.getType(), input);
             assertEquals(result.get("verein"),"FCN");
             assertNull(result.get("trainer"));
-            assertEquals(result.get("platz"),6);
+            assertEquals(result.get("platz"),6L);
             assertEquals(result.get("absteiger"),false);
             assertEquals(result.values().size(),4);
         }
@@ -296,7 +297,7 @@ public class OpenTypeDeserializerTest {
             if (o instanceof CompositeData) {
                 CompositeData cd = (CompositeData) o;
                 assertEquals(cd.get("name"),"roland");
-                assertEquals(cd.get("age"),44);
+                assertEquals(cd.get("age"),44L);
                 return cd;
             }
         }
@@ -406,7 +407,7 @@ public class OpenTypeDeserializerTest {
 
 
     @Test
-    public void multipleLevleTabularData() throws OpenDataException {
+    public void multipleLevelTabularData() throws OpenDataException {
         JSONObject map = new JSONObject();
         JSONObject inner = new JSONObject();
         map.put("fcn",inner);
@@ -429,6 +430,13 @@ public class OpenTypeDeserializerTest {
     }
 
 
+//    @Test
+//    public void converters() throws Exception {
+//        OpenTypeConverter<?> c = new SimpleTypeConverter(converter, stringToObjectConverter);
+//        c.canConvert(new ArrayType<String>(STRING, false));
+//    }
+
+
     private TabularTypeAndJson getSampleTabularTypeForMXBeanMap() throws OpenDataException {
         return new TabularTypeAndJson(
                     new String[] { "key" },
@@ -445,7 +453,7 @@ public class OpenTypeDeserializerTest {
         CompositeType keyType = new CompositeType("key","key",
                                                   new String[] { "name", "age"},
                                                   new String[] { "name", "age"},
-                                                  new OpenType[] { STRING, INTEGER});
+                                                  new OpenType[] { STRING, LONG});
         CompositeTypeAndJson ctj = new CompositeTypeAndJson(
                 keyType,"user",null,
                 STRING,"street",null,

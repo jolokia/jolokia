@@ -29,8 +29,7 @@ import org.jolokia.json.parser.ParseException;
  * @author roland
  * @since 28.09.11
  */
-@SuppressWarnings("rawtypes")
-abstract class OpenTypeConverter<T extends OpenType> {
+abstract class OpenTypeConverter<T extends OpenType<?>> {
 
     protected boolean forgiving=false;
     // parent converter
@@ -53,7 +52,7 @@ abstract class OpenTypeConverter<T extends OpenType> {
      * @param pType type to check
      * @return true if this convert can create objects of the given type
      */
-    abstract boolean canConvert(OpenType pType);
+    abstract boolean canConvert(OpenType<?> pType);
 
     /**
      * Convert string/JSON representation to an open type object of the given type.
@@ -72,7 +71,7 @@ abstract class OpenTypeConverter<T extends OpenType> {
      * @return the resulting value
      */
     protected JSONStructure toJSON(Object pValue) {
-        Class givenClass = pValue.getClass();
+        Class<?> givenClass = pValue.getClass();
         if (JSONStructure.class.isAssignableFrom(givenClass)) {
             return (JSONStructure) pValue;
         } else {

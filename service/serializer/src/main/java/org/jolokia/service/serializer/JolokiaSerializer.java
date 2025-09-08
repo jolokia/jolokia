@@ -1,19 +1,3 @@
-package org.jolokia.service.serializer;
-
-import java.lang.reflect.InvocationTargetException;
-import java.util.List;
-
-import javax.management.AttributeNotFoundException;
-import javax.management.openmbean.OpenType;
-
-import org.jolokia.server.core.service.api.JolokiaContext;
-import org.jolokia.server.core.service.serializer.Serializer;
-import org.jolokia.service.serializer.json.ObjectToJsonConverter;
-import org.jolokia.server.core.service.serializer.SerializeOptions;
-import org.jolokia.service.serializer.object.OpenTypeDeserializer;
-import org.jolokia.service.serializer.object.StringToObjectConverter;
-import org.jolokia.server.core.service.api.AbstractJolokiaService;
-
 /*
  * Copyright 2009-2013 Roland Huss
  *
@@ -30,8 +14,29 @@ import org.jolokia.server.core.service.api.AbstractJolokiaService;
  * limitations under the License.
  */
 
+package org.jolokia.service.serializer;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.List;
+
+import javax.management.AttributeNotFoundException;
+import javax.management.openmbean.OpenType;
+
+import org.jolokia.server.core.service.api.JolokiaContext;
+import org.jolokia.server.core.service.serializer.Serializer;
+import org.jolokia.service.serializer.json.ObjectToJsonConverter;
+import org.jolokia.server.core.service.serializer.SerializeOptions;
+import org.jolokia.service.serializer.object.Deserializer;
+import org.jolokia.service.serializer.object.OpenTypeDeserializer;
+import org.jolokia.service.serializer.object.StringToObjectConverter;
+import org.jolokia.server.core.service.api.AbstractJolokiaService;
+
 /**
- * Wrapper class holding various converters
+ * <p>Pluggable {@link org.jolokia.server.core.service.api.JolokiaService} for object (de)serialization</p>
+ *
+ * <p>This service delegates to more granular delegates and provides various type conversion operations:<ul>
+ *     <li></li>
+ * </ul> (string-to-object, string-to-openType and object-to-json)</p>
  *
  * @author roland
  * @since 02.08.11
@@ -41,26 +46,46 @@ public class JolokiaSerializer extends AbstractJolokiaService<Serializer> implem
     // From object to json:
     private ObjectToJsonConverter toJsonConverter;
 
-    // From string/json to object:
-    private final StringToObjectConverter toObjectConverter;
-    private final OpenTypeDeserializer toOpenTypeConverter;
+    /**
+     * Deserializer from String, {@link org.jolokia.json.JSONStructure} or other supported objects
+     * to objects of class specified as {@link String}.
+     */
+    private final Deserializer<String> toObjectConverter;
 
     /**
-     * Default constructor
+     * Deserializer from String, {@link org.jolokia.json.JSONStructure} or other supported objects
+     * to objects of class specified as {@link OpenType} for specialized JMX object conversion..
+     */
+    private final Deserializer<OpenType<?>> toOpenTypeConverter;
+
+    /**
+     * Default constructor - order=100, non-forgiving
      */
     public JolokiaSerializer() {
-        this(100);
+        this(100, false);
     }
 
     /**
-     * Create converters (string-to-object, string-to-openType and object-to-json)
-     *
-     * @param pOrder order to use
+     * Create a serializer with <em>forgiving</em> option
+     * @param forgiving
      */
-    public JolokiaSerializer(int pOrder) {
-        super(Serializer.class,pOrder);
+    public JolokiaSerializer(boolean forgiving) {
+        this(100, forgiving);
+    }
+
+    /**
+     * Create Jolokia serializer (known as <em>converters</em> in Jolokia 1.x)
+     *
+     * @param pOrder     order to use
+     * @param pForgiving
+     */
+    public JolokiaSerializer(int pOrder, boolean pForgiving) {
+        super(Serializer.class, pOrder);
+
+        // generic
         toObjectConverter = new StringToObjectConverter();
-        toOpenTypeConverter = new OpenTypeDeserializer(toObjectConverter);
+        toOpenTypeConverter = new OpenTypeDeserializer(toObjectConverter, pForgiving);
+
         // default version where context is not available
         toJsonConverter = new ObjectToJsonConverter(toObjectConverter, null);
     }
@@ -71,28 +96,24 @@ public class JolokiaSerializer extends AbstractJolokiaService<Serializer> implem
         toJsonConverter = new ObjectToJsonConverter(toObjectConverter, pJolokiaContext);
     }
 
-    /** {@inheritDoc} */
+    @Override
     public Object serialize(Object pValue, List<String> pPathParts, SerializeOptions pOptions) throws AttributeNotFoundException {
-        return toJsonConverter.serialize(pValue,pPathParts,pOptions);
+        return toJsonConverter.serialize(pValue, pPathParts, pOptions);
     }
 
-    /** {@inheritDoc} */
+    @Override
     public Object deserialize(String pExpectedClassName, Object pValue) {
-        return toObjectConverter.deserialize(pExpectedClassName,pValue);
+        return toObjectConverter.deserialize(pExpectedClassName, pValue);
     }
 
-    /** {@inheritDoc} */
+    @Override
     public Object setInnerValue(Object pOuterObject, Object pNewValue, List<String> pPathParts) throws AttributeNotFoundException, IllegalAccessException, InvocationTargetException {
-        return toJsonConverter.setInnerValue(pOuterObject,pNewValue,pPathParts);
+        return toJsonConverter.setInnerValue(pOuterObject, pNewValue, pPathParts);
     }
 
-    /** {@inheritDoc} */
+    @Override
     public Object deserializeOpenType(OpenType<?> pOpenType, Object pValue) {
-        return toOpenTypeConverter.deserialize(pOpenType,pValue);
+        return toOpenTypeConverter.deserialize(pOpenType, pValue);
     }
 
-    public JolokiaSerializer makeForgiving() {
-        toOpenTypeConverter.makeForgiving();
-        return this;
-    }
 }

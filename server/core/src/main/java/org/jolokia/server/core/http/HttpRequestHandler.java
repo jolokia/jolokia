@@ -94,7 +94,6 @@ public class HttpRequestHandler extends BaseRequestHandler {
      * within the answer.
      * @throws IOException if reading from the input stream fails
      */
-    @SuppressWarnings("unchecked")
     public JSONStructure handlePostRequest(String pUri, InputStream pInputStream, String pEncoding, Map<String, String[]> pParameterMap)
         throws IOException, EmptyResponseException {
         if (jolokiaCtx.isDebug()) {
@@ -104,7 +103,7 @@ public class HttpRequestHandler extends BaseRequestHandler {
         ProcessingParameters parameters = getProcessingParameter(pParameterMap);
         Object jsonRequest = extractJsonRequest(pInputStream, pEncoding);
         if (jsonRequest instanceof JSONArray) {
-            List<JolokiaRequest> jolokiaRequests = JolokiaRequestFactory.createPostRequests((List<?>) jsonRequest, parameters);
+            List<JolokiaRequest> jolokiaRequests = JolokiaRequestFactory.createPostRequests((JSONArray) jsonRequest, parameters);
 
             JSONArray responseList = new JSONArray(jolokiaRequests.size());
             for (JolokiaRequest jmxReq : jolokiaRequests) {
@@ -117,7 +116,7 @@ public class HttpRequestHandler extends BaseRequestHandler {
             }
             return responseList;
         } else if (jsonRequest instanceof JSONObject) {
-            JolokiaRequest jmxReq = JolokiaRequestFactory.createPostRequest((Map<String, ?>) jsonRequest, parameters);
+            JolokiaRequest jmxReq = JolokiaRequestFactory.createPostRequest((JSONObject) jsonRequest, parameters);
             return executeRequest(jmxReq);
         } else {
             throw new BadRequestException("Invalid JSON Request. Expected Object or Array");

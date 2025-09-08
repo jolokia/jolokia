@@ -12,6 +12,7 @@ import java.util.*;
 
 import javax.management.AttributeNotFoundException;
 
+import org.jolokia.service.serializer.object.Deserializer;
 import org.jolokia.service.serializer.object.StringToObjectConverter;
 import org.jolokia.server.core.service.serializer.ValueFaultHandler;
 import org.jolokia.server.core.util.EscapeUtil;
@@ -89,7 +90,7 @@ public class BeanExtractor implements Extractor {
             return pConverter.extractObject(attributeValue, pPathParts, jsonify);
         } else {
             if (jsonify) {
-                // We need the jsonfied value from here on.
+                // We need the jsonified value from here on.
                 return exctractJsonifiedValue(pConverter, pValue, pPathParts);
             } else {
                 // No jsonification requested, hence we are returning the object itself
@@ -100,7 +101,7 @@ public class BeanExtractor implements Extractor {
 
     // Using standard set semantics
     /** {@inheritDoc} */
-    public Object setObjectValue(StringToObjectConverter pConverter,Object pInner, String pAttribute, Object pValue)
+    public Object setObjectValue(Deserializer<String> pConverter, Object pInner, String pAttribute, Object pValue)
             throws IllegalAccessException, InvocationTargetException {
         // Move this to plain object handler
         String rest = new StringBuilder(pAttribute.substring(0,1).toUpperCase())

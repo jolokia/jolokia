@@ -134,7 +134,7 @@ public class BeanExtractorTest extends AbstractExtractorTest {
         this.getInner().setInnerDate(sdf.parse("20240722142242999"));
 
         converter.setupContext(new SerializeOptions.Builder().useAttributeFilter(true).build());
-        Field handlersField = ObjectToJsonConverter.class.getDeclaredField("handlers");
+        Field handlersField = ObjectToJsonConverter.class.getDeclaredField("extractors");
         handlersField.setAccessible(true);
         @SuppressWarnings("unchecked")
         List<Extractor> handlers = (List<Extractor>) handlersField.get(converter);
@@ -217,7 +217,7 @@ public class BeanExtractorTest extends AbstractExtractorTest {
         this.getInner().setTemporals(temporals.toArray(new Temporal[0]));
 
         converter.setupContext(new SerializeOptions.Builder().useAttributeFilter(true).build());
-        Field handlersField = ObjectToJsonConverter.class.getDeclaredField("handlers");
+        Field handlersField = ObjectToJsonConverter.class.getDeclaredField("extractors");
         handlersField.setAccessible(true);
         @SuppressWarnings("unchecked")
         List<Extractor> handlers = (List<Extractor>) handlersField.get(converter);

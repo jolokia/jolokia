@@ -29,8 +29,7 @@ import org.jolokia.json.JSONStructure;
  * @author roland
  * @since 28.09.11
  */
-@SuppressWarnings("rawtypes")
-class ArrayTypeConverter extends OpenTypeConverter<ArrayType> {
+class ArrayTypeConverter extends OpenTypeConverter<ArrayType<?>> {
 
     /**
      * Constructor
@@ -42,13 +41,13 @@ class ArrayTypeConverter extends OpenTypeConverter<ArrayType> {
 
     /** {@inheritDoc} */
     @Override
-    public boolean canConvert(OpenType pType) {
+    public boolean canConvert(OpenType<?> pType) {
         return pType instanceof ArrayType<?>;
     }
 
     /** {@inheritDoc} */
     @Override
-    public Object convertToObject(ArrayType type, Object pFrom) {
+    public Object convertToObject(ArrayType<?> type, Object pFrom) {
         JSONStructure value = toJSON(pFrom);
         // prepare each value in the array and then process the array of values
         if (!(value instanceof JSONArray)) {
@@ -59,7 +58,7 @@ class ArrayTypeConverter extends OpenTypeConverter<ArrayType> {
         }
 
         JSONArray jsonArray = (JSONArray) value;
-        OpenType elementOpenType = type.getElementOpenType();
+        OpenType<?> elementOpenType = type.getElementOpenType();
         Object valueArray = createTargetArray(type, jsonArray.size());
         if (type.getDimension() > 1) {
             try {
@@ -83,11 +82,11 @@ class ArrayTypeConverter extends OpenTypeConverter<ArrayType> {
 
     // =======================================================================
 
-    private Object createTargetArray(OpenType pElementType, int pLength) {
+    private Object createTargetArray(OpenType<?> pElementType, int pLength) {
         if (pElementType instanceof SimpleType) {
             try {
-                SimpleType simpleType = (SimpleType) pElementType;
-                Class elementClass = Class.forName(simpleType.getClassName());
+                SimpleType<?> simpleType = (SimpleType<?>) pElementType;
+                Class<?> elementClass = Class.forName(simpleType.getClassName());
                 return Array.newInstance(elementClass, pLength);
             } catch (ClassNotFoundException e) {
                 throw new IllegalArgumentException("Can't find class " + pElementType.getClassName() +

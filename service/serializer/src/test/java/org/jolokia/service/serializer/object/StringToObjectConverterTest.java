@@ -7,6 +7,7 @@ import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
@@ -139,15 +140,30 @@ public class StringToObjectConverterTest {
     @Test
     public void enumConversion() {
         ConfigKey key = (ConfigKey) converter.deserialize(ConfigKey.class.getName(), "MAX_DEPTH");
-        assertEquals(key, ConfigKey.MAX_DEPTH);
+        assertEquals(ConfigKey.MAX_DEPTH, key);
+
+        try {
+            converter.deserialize(TimeUnit.class.getName(), "dd");
+            fail("Should fail because of unknown enum value");
+        } catch (IllegalArgumentException expected) {
+        }
+
+        try {
+            converter.deserialize(TimeUnit.class.getName(), new HashMap<String, Object>() {
+                @Override
+                public String toString() {
+                    return "SECONDS";
+                }
+            });
+            fail("We shouldn't allow converting non-String values to enums");
+        } catch (IllegalArgumentException expected) {
+        }
     }
-
-
 
     @Test
     public void dateConversion() {
         Date date = (Date) converter.convertFromString(Date.class.getName(),"0");
-        assertEquals(date.getTime(),0);
+        assertEquals(0, date.getTime());
         Date now = new Date();
         date = (Date) converter.convertFromString(Date.class.getName(), DateUtil.toISO8601(now));
         assertEquals(date.getTime() / 1000,now.getTime() / 1000);
@@ -194,18 +210,18 @@ public class StringToObjectConverterTest {
 
         // Escaped arrays
         String[] strings = (String[]) converter.convertFromString(String[].class.getName(), "hallo!,hans!!,wu!!rs!t");
-        assertEquals(strings.length,2);
+        assertEquals(2, strings.length);
         assertEquals("hallo,hans!",strings[0]);
         assertEquals("wu!rst",strings[1]);
 
         try {
-            obj = converter.convertFromString("[Lbla;","10,20,30");
+            converter.convertFromString("[Lbla;","10,20,30");
             fail("Unknown object type");
         } catch (IllegalArgumentException ignored) {}
 
 
         try {
-            obj = converter.convertFromString("[X","10,20,30");
+            converter.convertFromString("[X","10,20,30");
             fail("Unknown object type");
         } catch (IllegalArgumentException ignored) {}
     }
@@ -221,7 +237,7 @@ public class StringToObjectConverterTest {
         Object obj = converter.convertFromString("java.lang.String","\"\"");
         assertEquals("Empty String check",0,((String) obj).length());
         try {
-            obj = converter.convertFromString("java.lang.Integer","\"\"");
+            converter.convertFromString("java.lang.Integer","\"\"");
             fail("Empty string conversion only for string");
         } catch (IllegalArgumentException ignored) {}
     }
@@ -237,8 +253,8 @@ public class StringToObjectConverterTest {
     @Test
     public void prepareValue() {
         assertNull(converter.deserialize("java.lang.String", null));
-        assertEquals(converter.deserialize("java.lang.Long", 10L), 10L);
-        assertEquals(converter.deserialize("java.lang.Long", "10"), 10L);
+        assertEquals(10L, converter.deserialize("java.lang.Long", 10L));
+        assertEquals(10L, converter.deserialize("java.lang.Long", "10"));
         Map<String,String> map = new HashMap<>();
         map.put("euro","fcn");
         assertSame(converter.deserialize("java.util.Map", map), map);
@@ -340,10 +356,11 @@ public class StringToObjectConverterTest {
 
     @Test
     public void prepareValueWithConstructorList() {
-        Object o = converter.deserialize(this.getClass().getCanonicalName() + "$Example", List.of("test"));
+        Object o = converter.deserialize(this.getClass().getCanonicalName() + "$Example", List.of("test", "another"));
         assertTrue(o instanceof Example);
-        assertNull(((Example) o).getList());
-        assertEquals("[test]", ((Example) o).getValue());
+        assertNotNull(((Example) o).getList());
+        assertEquals("another", ((Example) o).getList().get(1));
+        assertNull("[test]", ((Example) o).getValue());
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,

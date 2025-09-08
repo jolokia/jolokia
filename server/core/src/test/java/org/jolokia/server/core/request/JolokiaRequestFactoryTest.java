@@ -18,6 +18,8 @@ package org.jolokia.server.core.request;
 
 import java.util.*;
 
+import org.jolokia.json.JSONArray;
+import org.jolokia.json.JSONObject;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.util.HttpMethod;
 import org.jolokia.server.core.util.RequestType;
@@ -51,7 +53,7 @@ public class JolokiaRequestFactoryTest {
 
     @Test
     public void simplePost() {
-        Map<String,Object> reqMap = createMap(
+        JSONObject reqMap = createMap(
                 "type","read",
                 "mbean","java.lang:type=Memory",
                 "attribute","HeapMemoryUsage");
@@ -65,7 +67,7 @@ public class JolokiaRequestFactoryTest {
 
     @Test
     public void simplePostWithPath() {
-        Map<String,Object> reqMap = createMap(
+        JSONObject reqMap = createMap(
                 "type","read",
                 "mbean","java.lang:type=Memory",
                 "attribute","HeapMemoryUsage",
@@ -111,9 +113,9 @@ public class JolokiaRequestFactoryTest {
 
     @Test
     public void simplePostWithMergedMaps() {
-        Map<String, Object> config = new HashMap<>();
+        Map<String, Object> config = new JSONObject();
         config.put("maxDepth","10");
-        Map<String,Object> reqMap = createMap(
+        JSONObject reqMap = createMap(
                 "type","read",
                 "mbean","java.lang:type=Memory",
                 "attribute","HeapMemoryUsage",
@@ -128,22 +130,24 @@ public class JolokiaRequestFactoryTest {
 
     @Test
     public void multiPostRequests() {
-        Map<String,Object> req1Map = createMap(
+        JSONObject req1Map = createMap(
                 "type","read",
                 "mbean","java.lang:type=Memory",
                 "attribute","HeapMemoryUsage");
-        Map<String,Object> req2Map = createMap(
+        JSONObject req2Map = createMap(
                 "type","list");
-        List<JolokiaRequest> req = JolokiaRequestFactory.createPostRequests(Arrays.asList(req1Map, req2Map), procParams);
+        JSONArray reqList = new JSONArray(Arrays.asList(req1Map, req2Map));
+        List<JolokiaRequest> req = JolokiaRequestFactory.createPostRequests(reqList, procParams);
         assertEquals(req.get(0).getType(), RequestType.READ);
         assertEquals(req.get(1).getType(), RequestType.LIST);
     }
 
     @Test(expectedExceptions = { IllegalArgumentException.class })
     public void multiPostRequestsWithWrongArg() {
-        Map<String,Object> reqMap = createMap(
+        JSONObject reqMap = createMap(
                 "type", "list");
-        JolokiaRequestFactory.createPostRequests(Arrays.asList(reqMap, "Wrong"), procParams);
+        JSONArray reqList = new JSONArray(Arrays.asList(reqMap, "Wrong"));
+        JolokiaRequestFactory.createPostRequests(reqList, procParams);
     }
 
     @Test

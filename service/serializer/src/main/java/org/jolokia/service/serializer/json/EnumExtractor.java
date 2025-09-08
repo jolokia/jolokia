@@ -5,6 +5,7 @@ import java.util.Deque;
 
 import javax.management.AttributeNotFoundException;
 
+import org.jolokia.service.serializer.object.Deserializer;
 import org.jolokia.service.serializer.object.StringToObjectConverter;
 
 /**
@@ -37,7 +38,7 @@ public class EnumExtractor implements Extractor {
     }
 
     /** {@inheritDoc} */
-    public Object setObjectValue(StringToObjectConverter pConverter, Object pInner, String pAttribute, Object pValue) throws IllegalAccessException, InvocationTargetException {
+    public Object setObjectValue(Deserializer<String> pConverter, Object pInner, String pAttribute, Object pValue) throws IllegalAccessException, InvocationTargetException {
         throw new IllegalArgumentException("An enum itself is immutable an cannot change its value");
     }
 

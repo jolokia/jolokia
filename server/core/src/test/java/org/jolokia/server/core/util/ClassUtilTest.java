@@ -49,6 +49,20 @@ public class ClassUtilTest {
     private String stringProp;
     private int intProp;
 
+    @Test
+    public void classForNameForPrimitiveTypes() {
+        assertTrue(ClassUtil.checkForClass("[I"));
+        assertSame(ClassUtil.classForName("[I"), int[].class);
+        assertSame(ClassUtil.classForName("[[[Z"), boolean[][][].class);
+    }
+
+    @Test
+    public void primitiveTypes() {
+        // while Class.forName() can load "[Z" as boolean[], it can't load "Z" as boolean....
+        assertFalse(ClassUtil.checkForClass("Z"));
+        assertSame(boolean.class, Boolean.TYPE);
+        assertNotSame(boolean.class, Boolean.class);
+    }
 
     @Test
     public void classForName() {

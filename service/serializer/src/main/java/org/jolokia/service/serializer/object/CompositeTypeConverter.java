@@ -30,7 +30,6 @@ import org.jolokia.json.JSONObject;
  * @author roland
  * @since 28.09.11
  */
-@SuppressWarnings("rawtypes")
 class CompositeTypeConverter extends OpenTypeConverter<CompositeType> {
 
     /**
@@ -43,7 +42,7 @@ class CompositeTypeConverter extends OpenTypeConverter<CompositeType> {
 
     /** {@inheritDoc} */
     @Override
-    boolean canConvert(OpenType pType) {
+    boolean canConvert(OpenType<?> pType) {
         return pType instanceof CompositeType;
     }
 
@@ -102,9 +101,9 @@ class CompositeTypeConverter extends OpenTypeConverter<CompositeType> {
         for (String itemName : pType.keySet()) {
             if (!pCompositeValues.containsKey(itemName)) {
                 Object itemValue = null;
-                OpenType itemType = pType.getType(itemName);
+                OpenType<?> itemType = pType.getType(itemName);
                 if (itemType instanceof SimpleType) {
-                    SimpleType sType = (SimpleType) itemType;
+                    SimpleType<?> sType = (SimpleType<?>) itemType;
                     itemValue = DEFAULT_PRIMITIVE_VALUES.get(sType.getClassName());
                 }
                 pCompositeValues.put(itemName, itemValue);

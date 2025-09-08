@@ -10,6 +10,7 @@ import java.util.TimeZone;
 import javax.management.AttributeNotFoundException;
 
 import org.jolokia.server.core.config.ConfigKey;
+import org.jolokia.service.serializer.object.Deserializer;
 import org.jolokia.service.serializer.object.StringToObjectConverter;
 import org.jolokia.server.core.util.DateUtil;
 
@@ -103,7 +104,7 @@ public class DateExtractor implements Extractor {
     // date. Contrast this to the case, where the date is set directly (without a path). For this,
     // the StringToObjectConverter is responsible (along with its date parser)
     /** {@inheritDoc} */
-    public Object setObjectValue(StringToObjectConverter pConverter, Object pInner, String pAttribute, Object pValue)
+    public Object setObjectValue(Deserializer<String> pConverter, Object pInner, String pAttribute, Object pValue)
             throws IllegalAccessException, InvocationTargetException {
         Date date = (Date) pInner;
         if ("time".equals(pAttribute)) {

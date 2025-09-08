@@ -22,6 +22,7 @@ import java.util.*;
 import javax.management.AttributeNotFoundException;
 
 import org.jolokia.server.core.service.serializer.ValueFaultHandler;
+import org.jolokia.service.serializer.object.Deserializer;
 import org.jolokia.service.serializer.object.StringToObjectConverter;
 import org.jolokia.json.JSONArray;
 
@@ -105,7 +106,7 @@ public class CollectionExtractor implements Extractor {
     /**
      * Setting of an object value is not supported for the collection converter
      */
-    public Object setObjectValue(StringToObjectConverter pConverter, Object pInner, String pAttribute, Object pValue) throws IllegalAccessException, InvocationTargetException {
+    public Object setObjectValue(Deserializer<String> pConverter, Object pInner, String pAttribute, Object pValue) throws IllegalAccessException, InvocationTargetException {
         throw new IllegalArgumentException("A collection (beside Lists and Maps) cannot be modified");
     }
 

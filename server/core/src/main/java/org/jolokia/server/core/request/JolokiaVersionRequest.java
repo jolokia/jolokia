@@ -19,6 +19,7 @@ package org.jolokia.server.core.request;
 import java.util.Deque;
 import java.util.Map;
 
+import org.jolokia.json.JSONObject;
 import org.jolokia.server.core.util.RequestType;
 
 /**
@@ -68,7 +69,7 @@ public class JolokiaVersionRequest extends JolokiaRequest {
             }
 
             /** {@inheritDoc} */
-            public JolokiaVersionRequest create(Map<String, ?> requestMap, ProcessingParameters pParams) {
+            public JolokiaVersionRequest create(JSONObject requestMap, ProcessingParameters pParams) {
                 return new JolokiaVersionRequest(requestMap, pParams);
             }
         };

@@ -21,6 +21,7 @@ import java.util.Deque;
 
 import javax.management.AttributeNotFoundException;
 
+import org.jolokia.service.serializer.object.Deserializer;
 import org.jolokia.service.serializer.object.StringToObjectConverter;
 
 /**
@@ -72,7 +73,7 @@ public interface Extractor {
      * @throws InvocationTargetException reflection error
      * @throws IllegalArgumentException if the attribute can't be converted to desired value
      */
-    Object setObjectValue(StringToObjectConverter pConverter,Object pInner, String pAttribute, Object pValue)
+    Object setObjectValue(Deserializer<String> pConverter, Object pInner, String pAttribute, Object pValue)
             throws IllegalAccessException, InvocationTargetException, IllegalArgumentException;
 
     /**

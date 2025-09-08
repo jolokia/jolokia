@@ -18,6 +18,7 @@ package org.jolokia.server.core.request;
 
 import java.util.*;
 
+import org.jolokia.json.JSONObject;
 import org.jolokia.server.core.util.RequestType;
 
 /**
@@ -88,7 +89,7 @@ public class JolokiaListRequest extends JolokiaRequest {
             }
 
             /** {@inheritDoc} */
-            public JolokiaListRequest create(Map<String, ?> requestMap, ProcessingParameters pParams) {
+            public JolokiaListRequest create(JSONObject requestMap, ProcessingParameters pParams) {
                 return new JolokiaListRequest(requestMap, pParams);
             }
         };

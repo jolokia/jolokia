@@ -49,7 +49,7 @@ public class JolokiaNotificationRequestTest {
     @Test
     public void testSimpleMap() throws Exception {
         RequestCreator<JolokiaNotificationRequest> creator = JolokiaNotificationRequest.newCreator();
-        Map<String,String> map = new HashMap<>();
+        JSONObject map = new JSONObject();
         map.put("type","notification");
         map.put("command","ping");
         map.put("client","dummy");
@@ -65,7 +65,7 @@ public class JolokiaNotificationRequestTest {
     @Test
     public void testToJson() throws Exception {
         RequestCreator<JolokiaNotificationRequest> creator = JolokiaNotificationRequest.newCreator();
-        Map<String,Object> map = new HashMap<>();
+        JSONObject map = new JSONObject();
         map.put("type","notification");
         map.put("command","add");
         map.put("client","dummy");

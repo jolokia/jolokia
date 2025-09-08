@@ -9,9 +9,7 @@ import javax.management.openmbean.OpenType;
 import org.jolokia.server.core.service.api.JolokiaService;
 
 /**
- * Interface defining a Jolokia serializer which is also a plugable service. This interface
- * is still connected to particular JSON library, but this dependency might be removed in
- * the future.
+ * Interface defining a Jolokia serializer which is also a pluggable service.
  *
  * @author roland
  * @since 02.10.13
@@ -19,7 +17,7 @@ import org.jolokia.server.core.service.api.JolokiaService;
 public interface Serializer extends JolokiaService<Serializer> {
 
     /**
-     * Convert the return value to a JSON object.
+     * Convert a Java object to a JSON object.
      *
      * @param pValue the value to convert
      * @param pPathParts path parts to use for extraction
@@ -41,6 +39,16 @@ public interface Serializer extends JolokiaService<Serializer> {
     Object deserialize(String pExpectedClassName, Object pValue);
 
     /**
+     * Handle conversion for OpenTypes. The value is expected to be in JSON (either
+     * an {@link org.jolokia.json.JSONStructure} object or its string representation.
+     *
+     * @param pOpenType target type
+     * @param pValue value to convert from
+     * @return the converted value
+     */
+    Object deserializeOpenType(OpenType<?> pOpenType, Object pValue);
+
+    /**
      * Set an inner value of a complex object. A given path must point to the attribute/index to set within the outer object.
      *
      * @param pOuterObject the object to dive in
@@ -55,13 +63,4 @@ public interface Serializer extends JolokiaService<Serializer> {
     Object setInnerValue(Object pOuterObject, Object pNewValue, List<String> pPathParts)
             throws AttributeNotFoundException, IllegalAccessException, InvocationTargetException;
 
-    /**
-     * Handle conversion for OpenTypes. The value is expected to be in JSON (either
-     * an {@link org.jolokia.json.JSONStructure} object or its string representation.
-     *
-     * @param pOpenType target type
-     * @param pValue value to convert from
-     * @return the converted value
-     */
-    Object deserializeOpenType(OpenType<?> pOpenType, Object pValue);
 }

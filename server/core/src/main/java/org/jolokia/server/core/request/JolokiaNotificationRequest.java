@@ -76,7 +76,7 @@ public class JolokiaNotificationRequest extends JolokiaRequest {
             }
 
             /** {@inheritDoc} */
-            public JolokiaNotificationRequest create(Map<String, ?> requestMap, ProcessingParameters pParams)
+            public JolokiaNotificationRequest create(JSONObject requestMap, ProcessingParameters pParams)
                     throws MalformedObjectNameException {
                 NotificationCommand notifCommand = NotificationCommandFactory.createCommand(requestMap);
                 return new JolokiaNotificationRequest(notifCommand, requestMap, pParams);

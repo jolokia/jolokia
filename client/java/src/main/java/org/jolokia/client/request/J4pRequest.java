@@ -188,7 +188,7 @@ public abstract class J4pRequest {
      *      If the argument is <code>null</code> null is returned.
      *    </li>
      *    <li>
-     *      If the argument is of type {@link org.jolokia.json.JSONStructure}, the it is used directly for inclusion
+     *      If the argument is of type {@link org.jolokia.json.JSONStructure}, then it is used directly for inclusion
      *      in the POST request.
      *    </li>
      *    <li>
@@ -201,7 +201,7 @@ public abstract class J4pRequest {
      *      So it is only save fto use or a simple map with string keys.
      *    </li>
      *    <li>
-     *      If the argument is a {@link Collection}, it is transformed into a {@see JSONArray} with
+     *      If the argument is a {@link Collection}, it is transformed into a {@link JSONArray} with
      *      the values recursively serialized to their JSON representation.
      *    </li>
      *    <li>

@@ -142,7 +142,7 @@ public class JolokiaWriteRequest extends JolokiaObjectNameRequest {
             }
 
             /** {@inheritDoc} */
-            public JolokiaWriteRequest create(Map<String, ?> requestMap, ProcessingParameters pParams)
+            public JolokiaWriteRequest create(JSONObject requestMap, ProcessingParameters pParams)
                     throws MalformedObjectNameException {
                 return new JolokiaWriteRequest(requestMap, pParams);
             }

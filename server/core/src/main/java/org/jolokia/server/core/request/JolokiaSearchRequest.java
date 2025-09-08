@@ -21,6 +21,7 @@ import java.util.Map;
 
 import javax.management.MalformedObjectNameException;
 
+import org.jolokia.json.JSONObject;
 import org.jolokia.server.core.util.RequestType;
 
 /**
@@ -80,7 +81,7 @@ public class JolokiaSearchRequest extends JolokiaObjectNameRequest {
             }
 
             /** {@inheritDoc} */
-            public JolokiaSearchRequest create(Map<String, ?> requestMap, ProcessingParameters pParams)
+            public JolokiaSearchRequest create(JSONObject requestMap, ProcessingParameters pParams)
                     throws MalformedObjectNameException {
                 return new JolokiaSearchRequest(requestMap,pParams);
             }

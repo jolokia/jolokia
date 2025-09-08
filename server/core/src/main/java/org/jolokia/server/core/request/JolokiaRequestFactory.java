@@ -4,6 +4,8 @@ import java.util.*;
 
 import javax.management.MalformedObjectNameException;
 
+import org.jolokia.json.JSONArray;
+import org.jolokia.json.JSONObject;
 import org.jolokia.server.core.util.EscapeUtil;
 import org.jolokia.server.core.util.RequestType;
 
@@ -23,9 +25,8 @@ import org.jolokia.server.core.util.RequestType;
  * limitations under the License.
  */
 
-
 /**
- * Factory for creating {@link JolokiaRequest}s
+ * Factory for creating {@link JolokiaRequest Jolokia requests}
  *
  * @author roland
  * @since Oct 29, 2009
@@ -36,24 +37,24 @@ public final class JolokiaRequestFactory {
     private JolokiaRequestFactory() { }
 
     /**
-     *
-     * Create a JMX request from a GET Request with a REST Url.
      * <p>
-     * The REST-Url which gets recognized has the following format:
+     * Create a JMX request from a GET Request with a REST URL.
      * <p>
-     * <pre>
-     *    &lt;base_url&gt;/&lt;type&gt;/&lt;param1&gt;/&lt;param2&gt;/....
-     * </pre>
+     * The REST URL which gets recognized has the following format:
+     * <p>
+     * {@code
+     *    <base_url>/<type>/<param1>/<param2>/...
+     * }
      * <p>
      * where <code>base_url<code> is the URL specifying the overall servlet (including
      * the servlet context, something like "http://localhost:8080/j4p-agent"),
      * <code>type</code> the operational mode and <code>param1 .. paramN<code>
-     * the provided parameters which are dependend on the <code>type<code>
+     * the provided parameters which are dependent on the <code>type<code>
      * <p>
      * The following types are recognized so far, along with there parameters:
      *
      * <ul>
-     *   <li>Type: <b>read</b> ({@link RequestType#READ}<br/>
+     *   <li>Type: <b>read</b> ({@link RequestType#READ})<br/>
      *       Parameters: <code>param1<code> = MBean name, <code>param2</code> = Attribute name,
      *       <code>param3 ... paramN</code> = Inner Path.
      *       The inner path is optional and specifies a path into complex MBean attributes
@@ -62,26 +63,31 @@ public final class JolokiaRequestFactory {
      *       a numeric index, in maps/composite data <code>paramX</code> is a used as a string
      *       key.</li>. If the attribute name contains "," it is interpreted as a list of attributes.
      *       which should be returned.
-     *   <li>Type: <b>write</b> ({@link RequestType#WRITE}<br/>
+     *   <li>Type: <b>write</b> ({@link RequestType#WRITE})<br/>
      *       Parameters: <code>param1</code> = MBean name, <code>param2</code> = Attribute name,
      *       <code>param3</code> = value, <code>param4 ... paramN</code> = Inner Path.
      *       The value must be URL encoded (with UTF-8 as charset), and must be convertible into
      *       a data structure</li>
-     *   <li>Type: <b>exec</b> ({@link RequestType#EXEC}<br/>
+     *   <li>Type: <b>exec</b> ({@link RequestType#EXEC})<br/>
      *       Parameters: <code>param1</code> = MBean name, <code>param2</code> = operation name,
      *       <code>param4 ... paramN</code> = arguments for the operation.
      *       The arguments must be URL encoded (with UTF-8 as charset), and must be convertable into
      *       a data structure</li>
-     *    <li>Type: <b>version</b> ({@link RequestType#VERSION}<br/>
+     *    <li>Type: <b>version</b> ({@link RequestType#VERSION})<br/>
      *        Parameters: none
-     *    <li>Type: <b>search</b> ({@link RequestType#SEARCH}<br/>
+     *    <li>Type: <b>search</b> ({@link RequestType#SEARCH})<br/>
      *        Parameters: <code>param1</code> = MBean name pattern
+     *    <li>Type: <b>list</b> ({@link RequestType#LIST})<br/>
+     *        Parameters: <code>param1 ... paramN</code> = Inner Path.
+     *    <li>Type: <b>notification</b> ({@link RequestType#NOTIFICATION})<br/>
+     *        Parameters: <code>param1</code> = Client ID, <code>param2 ... paramN</code> = Notification command
+     *        specific parameters.
      * </ul>
+     *
      * @param pPathInfo path info of HTTP request
      * @param pProcessingParameters processing parameters. Must not be null/
      * @return a newly created {@link JolokiaRequest}
      */
-    @SuppressWarnings("unchecked")
     public static <R extends JolokiaRequest> R createGetRequest(String pPathInfo, ProcessingParameters pProcessingParameters) {
         RequestType type = null;
         try {
@@ -94,7 +100,8 @@ public final class JolokiaRequestFactory {
             type = !elements.isEmpty() ? RequestType.getTypeByName(elements.pop()) : RequestType.VERSION;
 
             // Parse request
-            return (R) getCreator(type).create(elements, pProcessingParameters);
+            RequestCreator<R> creator = getCreator(type);
+            return creator.create(elements, pProcessingParameters);
         } catch (MalformedObjectNameException e) {
             throw new IllegalArgumentException("Invalid object name. " + e.getMessage(),e);
         } catch (NoSuchElementException exp) {
@@ -102,20 +109,23 @@ public final class JolokiaRequestFactory {
         }
     }
 
-
     /**
-     * Create a single {@link JolokiaRequest}s from a JSON map representation of a request
+     * Create a single {@link JolokiaRequest} from a JSON map representation of the request
      *
      * @param pRequestMap JSON representation of a {@link JolokiaRequest}
      * @param pProcessingParams additional map of operational parameters. Must not be null.
      * @return the created {@link JolokiaRequest}
      */
-    @SuppressWarnings("unchecked")
-    public static <R extends JolokiaRequest> R createPostRequest(Map<String, ?> pRequestMap, ProcessingParameters pProcessingParams) {
+    public static <R extends JolokiaRequest> R createPostRequest(JSONObject pRequestMap, ProcessingParameters pProcessingParams) {
         try {
-            ProcessingParameters paramsMerged = pProcessingParams.mergedParams((Map<String,String>) pRequestMap.get("config"));
+            // "config" should be a map - we don't support any other type for "config" field
+            Object config = pRequestMap.get("config");
+            ProcessingParameters paramsMerged = config instanceof JSONObject
+                ? pProcessingParams.mergedParams((JSONObject) pRequestMap.get("config"))
+                : pProcessingParams;
             RequestType type = RequestType.getTypeByName((String) pRequestMap.get("type"));
-            return (R) getCreator(type).create(pRequestMap, paramsMerged);
+            RequestCreator<R> creator = getCreator(type);
+            return creator.create(pRequestMap, paramsMerged);
         } catch (MalformedObjectNameException e) {
             throw new IllegalArgumentException("Invalid object name. " + e.getMessage(),e);
         }
@@ -128,15 +138,14 @@ public final class JolokiaRequestFactory {
      * @param pProcessingParams processing options. Must not be null.
      * @return list with one or more {@link JolokiaRequest}
      */
-    @SuppressWarnings("unchecked")
-    public static List<JolokiaRequest> createPostRequests(List<?> pJsonRequests, ProcessingParameters pProcessingParams) {
+    public static List<JolokiaRequest> createPostRequests(JSONArray pJsonRequests, ProcessingParameters pProcessingParams) {
         List<JolokiaRequest> ret = new ArrayList<>();
         for (Object o : pJsonRequests) {
-            if (!(o instanceof Map)) {
+            if (!(o instanceof JSONObject)) {
                 throw new IllegalArgumentException("Not a request within the list of requests " + pJsonRequests +
-                        ". Expected map, but found: " + o);
+                        ". Expected JSONObject, but found: " + o);
             }
-            ret.add(createPostRequest((Map<String,?>) o,pProcessingParams));
+            ret.add(createPostRequest((JSONObject) o,pProcessingParams));
         }
         return ret;
     }
@@ -157,8 +166,6 @@ public final class JolokiaRequestFactory {
         return normalizePathInfo(pathInfo);
     }
 
-
-
     // Return always a non-null string and strip of leading slash
     private static String normalizePathInfo(String pPathInfo) {
         if (pPathInfo != null && !pPathInfo.isEmpty()) {
@@ -172,12 +179,13 @@ public final class JolokiaRequestFactory {
     // Dedicated creator for the various operations. They are installed as static processors.
 
     // Get the request creator for a specific type
-    private static RequestCreator<?> getCreator(RequestType pType) {
+    @SuppressWarnings("unchecked")
+    private static <R extends RequestCreator<T>, T extends JolokiaRequest> R getCreator(RequestType pType) {
         RequestCreator<?> creator = CREATOR_MAP.get(pType);
         if (creator == null) {
             throw new UnsupportedOperationException("Type " + pType + " is not supported (yet)");
         }
-        return creator;
+        return (R) creator;
     }
 
     private static final Map<RequestType,RequestCreator<?>> CREATOR_MAP;

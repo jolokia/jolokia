@@ -8,6 +8,7 @@ import javax.management.AttributeNotFoundException;
 
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.service.api.JolokiaContext;
+import org.jolokia.service.serializer.object.Deserializer;
 import org.jolokia.service.serializer.object.StringToObjectConverter;
 import org.jolokia.server.core.service.serializer.SerializeOptions;
 import org.jolokia.server.core.service.serializer.ValueFaultHandler;
@@ -44,8 +45,8 @@ import org.jolokia.server.core.util.EscapeUtil;
  */
 public final class ObjectToJsonConverter {
 
-    // List of dedicated handlers used for delegation in serialization/deserializatin
-    private final List<Extractor> handlers;
+    // List of dedicated handlers used for delegation in serialization/deserialization
+    private final List<Extractor> extractors;
 
     private final ArrayExtractor arrayExtractor;
 
@@ -53,11 +54,13 @@ public final class ObjectToJsonConverter {
     private final ThreadLocal<ObjectSerializationContext> stackContextLocal = new ThreadLocal<>();
 
     // Used for converting string to objects when setting attributes
-    private final StringToObjectConverter stringToObjectConverter;
+    private final Deserializer<String> stringToObjectConverter;
 
     // Definition of simplifiers
     private static final String SIMPLIFIERS_DEFAULT_DEF = "META-INF/jolokia/simplifiers-default";
     private static final String SIMPLIFIERS_DEF         = "META-INF/jolokia/simplifiers";
+
+    private static final Deque<String> EMPTY_DEQUE = new LinkedList<>();
 
     private final JolokiaContext context;
 
@@ -70,37 +73,37 @@ public final class ObjectToJsonConverter {
      *
      * @param pStringToObjectConverter used when setting values
      */
-    public ObjectToJsonConverter(StringToObjectConverter pStringToObjectConverter, JolokiaContext context) {
+    public ObjectToJsonConverter(Deserializer<String> pStringToObjectConverter, JolokiaContext context) {
 
-        handlers = new ArrayList<>();
+        extractors = new ArrayList<>();
 
         // TabularDataExtractor must be before MapExtractor
         // since TabularDataSupport isa Map
-        handlers.add(new TabularDataExtractor());
-        handlers.add(new CompositeDataExtractor());
+        extractors.add(new TabularDataExtractor());
+        extractors.add(new CompositeDataExtractor());
 
         // Collection handlers
-        handlers.add(new ListExtractor());
-        handlers.add(new MapExtractor());
-        handlers.add(new CollectionExtractor());
+        extractors.add(new ListExtractor());
+        extractors.add(new MapExtractor());
+        extractors.add(new CollectionExtractor());
 
         // Special, well known objects
-        addSimplifiers(handlers);
+        addSimplifiers(extractors);
 
         // Enum handling
-        handlers.add(new EnumExtractor());
+        extractors.add(new EnumExtractor());
 
         // Special date handling
         String dateFormat = context == null
             ? ConfigKey.DATE_FORMAT.getDefaultValue() : context.getConfig(ConfigKey.DATE_FORMAT);
         TimeZone dateFormatZone = context == null
             ? TimeZone.getDefault() : TimeZone.getTimeZone(context.getConfig(ConfigKey.DATE_FORMAT_ZONE));
-        handlers.add(new DateExtractor(dateFormat, dateFormatZone));
-        handlers.add(new CalendarExtractor(dateFormat, dateFormatZone));
-        handlers.add(new TemporalExtractor(dateFormat, dateFormatZone));
+        extractors.add(new DateExtractor(dateFormat, dateFormatZone));
+        extractors.add(new CalendarExtractor(dateFormat, dateFormatZone));
+        extractors.add(new TemporalExtractor(dateFormat, dateFormatZone));
 
         // Must be last in handlers, used default algorithm
-        handlers.add(new BeanExtractor());
+        extractors.add(new BeanExtractor());
 
         arrayExtractor = new ArrayExtractor();
 
@@ -172,13 +175,11 @@ public final class ObjectToJsonConverter {
             throws AttributeNotFoundException {
         ObjectSerializationContext stackContext = stackContextLocal.get();
         String limitReached = checkForLimits(pValue, stackContext);
-        Deque<String> pathStack = pPathParts != null ? pPathParts : new LinkedList<>();
+        Deque<String> pathStack = pPathParts != null ? pPathParts : EMPTY_DEQUE;
         if (limitReached != null) {
             return limitReached;
         }
         try {
-            stackContext.push(pValue);
-
             if (pValue == null) {
                 return pathStack.isEmpty() ?
                         null :
@@ -186,6 +187,7 @@ public final class ObjectToJsonConverter {
                                 new AttributeNotFoundException("Cannot apply a path to an null value"));
             }
 
+            stackContext.push(pValue);
             if (pValue.getClass().isArray()) {
                 // Special handling for arrays
                 return arrayExtractor.extractObject(this,pValue,pathStack,pJsonify);
@@ -246,10 +248,10 @@ public final class ObjectToJsonConverter {
         if (clazz.isArray()) {
             return arrayExtractor.setObjectValue(stringToObjectConverter,pInner,pAttribute,pValue);
         }
-        Extractor handler = getExtractor(clazz);
+        Extractor extractor = getExtractor(clazz);
 
-        if (handler != null) {
-            return handler.setObjectValue(stringToObjectConverter,pInner,pAttribute,pValue);
+        if (extractor != null) {
+            return extractor.setObjectValue(stringToObjectConverter,pInner,pAttribute,pValue);
         } else {
             throw new IllegalStateException(
                     "Internal error: No handler found for class " + clazz + " for setting object value." +
@@ -262,7 +264,7 @@ public final class ObjectToJsonConverter {
     /**
      * Get the length of an extracted collection, but not larger than the configured limit.
      *
-     * @param originalLength the orginal length
+     * @param originalLength the original length
      * @return the original length if is smaller than then the configured maximum length. Otherwise, the
      *         maximum length is returned.
      */
@@ -320,7 +322,7 @@ public final class ObjectToJsonConverter {
 
     // Get the extractor for a certain class
     private Extractor getExtractor(Class<?> pClazz) {
-        for (Extractor handler : handlers) {
+        for (Extractor handler : extractors) {
             if (handler.canSetValue() && handler.getType() != null && handler.getType().isAssignableFrom(pClazz)) {
                 return handler;
             }
@@ -349,7 +351,7 @@ public final class ObjectToJsonConverter {
     private Object callHandler(Object pValue, Deque<String> pPathParts, boolean pJsonify)
             throws AttributeNotFoundException {
         Class<?> pClazz = pValue.getClass();
-        for (Extractor handler : handlers) {
+        for (Extractor handler : extractors) {
             if (handler.getType() != null && handler.getType().isAssignableFrom(pClazz)) {
                 return handler.extractObject(this,pValue,pPathParts,pJsonify);
             }
@@ -365,7 +367,7 @@ public final class ObjectToJsonConverter {
         return stackContextLocal;
     }
 
-    // Simplifiers are added either explicitely or by reflection from a subpackage
+    // Simplifiers are added either explicitly or by reflection from a subpackage
     private void addSimplifiers(List<Extractor> pHandlers) {
         // Add all
         List<Extractor> services = LocalServiceFactory.createServices(this.getClass().getClassLoader(),

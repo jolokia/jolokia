@@ -113,7 +113,8 @@ public class WriteHandlerTest {
         handler.doHandleSingleServerRequest(getMBeanServer(), req);
     }
 
-    @Test
+    @Test(expectedExceptions = IllegalArgumentException.class,
+        expectedExceptionsMessageRegExp = ".*\"java.lang.Integer\" value to \"java.lang.Boolean\".*")
     public void invalidValue() throws Exception {
         JolokiaWriteRequest req = new JolokiaRequestBuilder(WRITE,oName).attribute("Boolean").value(10).build();
         handler.doHandleSingleServerRequest(getMBeanServer(), req);
