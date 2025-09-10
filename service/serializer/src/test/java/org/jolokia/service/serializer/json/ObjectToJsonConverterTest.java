@@ -8,7 +8,7 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.service.serializer.object.StringToObjectConverter;
+import org.jolokia.service.serializer.object.ObjectToObjectConverter;
 import org.jolokia.server.core.service.serializer.SerializeOptions;
 import org.testng.annotations.*;
 
@@ -43,7 +43,7 @@ public class ObjectToJsonConverterTest {
 
     @BeforeMethod
     public void setup() {
-        converter = new ObjectToJsonConverter(new StringToObjectConverter());
+        converter = new ObjectToJsonConverter(new ObjectToObjectConverter());
         converter.setupContext();
     }
 

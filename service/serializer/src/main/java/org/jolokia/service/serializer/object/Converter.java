@@ -16,17 +16,17 @@
 package org.jolokia.service.serializer.object;
 
 /**
- * Generic deserialization interface
+ * Generic deserialization/conversion interface.
  * @param <T>
  */
-public interface Deserializer<T> {
+public interface Converter<T> {
 
     /**
-     * <p>Generic deserialization method, where:<ul>
+     * <p>Generic deserialization/conversion method, where:<ul>
      *     <li>{@code targetType} describes the desired type of the deserialized object (deserializers usually use {@link Class},
-     *     but we have other parameters to specify the target type.</li>
-     *     <li>{@code value} comes in some wire format (String or JSON), but for generic cases these may already
-     *     be of the target type.</li>
+     *     but we have other ways to specify the target type).</li>
+     *     <li>{@code value} comes in some wire format (String or JSON), but we can also
+     *     <em>convert</em> (which is wider term than <em>deserialization</em>) them from other types.</li>
      * </ul>
      * </p>
      *
@@ -34,6 +34,6 @@ public interface Deserializer<T> {
      * @param value
      * @return
      */
-    Object deserialize(T targetType, Object value);
+    Object convert(T targetType, Object value);
 
 }

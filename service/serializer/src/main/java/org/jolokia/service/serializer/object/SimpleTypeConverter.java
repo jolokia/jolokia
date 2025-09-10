@@ -1,5 +1,3 @@
-package org.jolokia.service.serializer.object;
-
 /*
  * Copyright 2009-2011 Roland Huss
  *
@@ -15,40 +13,42 @@ package org.jolokia.service.serializer.object;
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+package org.jolokia.service.serializer.object;
 
 import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
 
 /**
- * Converter used for simple types
+ * Converter used for {@link SimpleType}. It simply delegates to
+ * {@link org.jolokia.service.serializer.json.ObjectToJsonConverter}
  *
  * @author roland
  * @since 28.09.11
  */
 class SimpleTypeConverter extends OpenTypeConverter<SimpleType<?>> {
 
-    private final Deserializer<String> stringToObjectConverter;
+    private final Converter<String> objectToObjectConverter;
 
     /**
      * Constructor
      *
-     * @param pDispatcher parent converter (not used here)
-     * @param pStringToObjectConverter string to object converter for transforming simple types
+     * @param pOpenTypeDeserializer    parent converter (not used here, because simple types do not contain other
+     *                                 values)
+     * @param pObjectToObjectConverter object to object converter for transforming simple types
      */
-    SimpleTypeConverter(OpenTypeDeserializer pDispatcher, Deserializer<String> pStringToObjectConverter) {
-        super(pDispatcher);
-        stringToObjectConverter = pStringToObjectConverter;
+    SimpleTypeConverter(OpenTypeDeserializer pOpenTypeDeserializer, Converter<String> pObjectToObjectConverter) {
+        super(pOpenTypeDeserializer);
+        objectToObjectConverter = pObjectToObjectConverter;
     }
 
-    /** {@inheritDoc} */
     @Override
     boolean canConvert(OpenType<?> pType) {
         return pType instanceof SimpleType;
     }
 
-    /** {@inheritDoc} */
     @Override
-    Object convertToObject(SimpleType<?> pType, Object pFrom) {
-        return stringToObjectConverter.deserialize(pType.getClassName(), pFrom);
+    public Object convert(SimpleType<?> pType, Object pFrom) {
+        return objectToObjectConverter.convert(pType.getClassName(), pFrom);
     }
+
 }

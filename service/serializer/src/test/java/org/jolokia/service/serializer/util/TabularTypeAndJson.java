@@ -1,9 +1,3 @@
-package org.jolokia.service.serializer.util;
-
-import javax.management.openmbean.*;
-
-import org.jolokia.json.JSONObject;
-
 /*
  * Copyright 2009-2011 Roland Huss
  *
@@ -19,31 +13,66 @@ import org.jolokia.json.JSONObject;
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+package org.jolokia.service.serializer.util;
+
+import javax.management.openmbean.ArrayType;
+import javax.management.openmbean.CompositeData;
+import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.OpenDataException;
+import javax.management.openmbean.TabularData;
+import javax.management.openmbean.TabularType;
+
+import org.jolokia.json.JSONObject;
 
 /**
-* @author roland
-* @since 07.08.11
+ * <p>{@link TabularData} is not simply an array. Arrays (and {@link ArrayType} values) are indexed with int.
+ * {@link TabularData} values are indexed by declared number of index keys (of String type) and the values
+ * are {@link CompositeData} of specified (single) {@link CompositeType}.</p>
+ *
+ * <p>The array of String indexes need to be a subset of keys that can be passed to
+ * {@link CompositeType#getType(String)}.</p>
+ *
+ * @author roland
+ * @since 07.08.11
 */
 public class TabularTypeAndJson {
     TabularType type;
-    JSONObject   json;
+    JSONObject json;
+    CompositeTypeAndJson caj;
 
-    public TabularTypeAndJson(String[] index, CompositeTypeAndJson taj, Object... rowVals) throws OpenDataException {
-        CompositeType cType = taj.getType();
+    /**
+     * Create a {@link TabularType} (not {@link TabularData}) and its Jolokia JSON representation as {@link JSONObject}.
+     *
+     * @param index   array of String keys as subset of keys from {@link CompositeType}
+     * @param caj     {@link CompositeType} (not value) needed to construct {@link TabularType} inside
+     *                {@link CompositeTypeAndJson} which already contains "first row" of values for the data
+     *                of this {@link TabularType}
+     * @param rowVals 1D array of flattened rows processed in groups according to indexes of the
+     *                {@link TabularType#getRowType()} - these are added after the data found in
+     *                {@link CompositeTypeAndJson}
+     * @throws OpenDataException
+     */
+    public TabularTypeAndJson(String[] index, CompositeTypeAndJson caj, Object... rowVals) throws OpenDataException {
+        this.caj = caj;
+        CompositeType cType = caj.getType();
         json = new JSONObject();
-        addRow(json, taj.getJson(), index);
         int nrCols = cType.keySet().size();
-        for (int i = 0 ; i < rowVals.length; i += nrCols) {
+
+        // first row from the composite data
+        addRow(json, caj.getJson(), index);
+
+        // more rows from the passed values
+        for (int i = 0; i < rowVals.length; i += nrCols) {
             JSONObject row = new JSONObject();
             for (int j = 0; j < nrCols; j++) {
-                row.put(taj.getKey(j),rowVals[i+j]);
+                row.put(caj.getKey(j), rowVals[i + j]);
             }
             addRow(json, row, index);
         }
-        //System.out.println(json.toJSONString());
-        type = new TabularType("test","test",cType,index);
-    }
 
+        // construct the TabularType from CompositeType and selected indexes
+        type = new TabularType("test", "test", cType, index);
+    }
 
     public TabularType getType() {
         return type;
@@ -57,9 +86,17 @@ public class TabularTypeAndJson {
         return json.toJSONString();
     }
 
+    /**
+     * Construct a row for {@link TabularData}. For multi-key indexes, the ultimate value is stored
+     * under multiply nested keys
+     *
+     * @param pJson
+     * @param pRow
+     * @param pIndex
+     */
     private void addRow(JSONObject pJson, JSONObject pRow, String[] pIndex) {
         JSONObject map = pJson;
-        for (int i = 0; i < pIndex.length -1; i++) {
+        for (int i = 0; i < pIndex.length - 1; i++) {
             String key = (String) pRow.get(pIndex[i]);
             if (key == null) {
                 return;
@@ -67,7 +104,7 @@ public class TabularTypeAndJson {
             JSONObject inner = (JSONObject) map.get(key);
             if (inner == null) {
                 inner = new JSONObject();
-                map.put(key,inner);
+                map.put(key, inner);
             }
             map = inner;
         }

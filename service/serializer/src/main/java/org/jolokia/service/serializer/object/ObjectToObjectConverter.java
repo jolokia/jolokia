@@ -42,15 +42,17 @@ import org.jolokia.server.core.util.DateUtil;
 import org.jolokia.server.core.util.EscapeUtil;
 
 /**
- * <p>Converter from a {@link String} representation to a Java object of desired target type.
+ * <p>Converter from some object representation to desired target type.
  * This converter accepts not only String values and doesn't change the value if it's already of the target type.</p>
  *
- * <p>This converted no longer calls {@link Object#toString()} as in Jolokia 1.x</p>
+ * <p>This converted no longer calls {@link Object#toString()} as in Jolokia 1.x.</p>
+ *
+ * <p>Internally this class uses parser abstractions for several built-in types.</p>
  *
  * @author roland
  * @since Jun 11, 2009
  */
-public class StringToObjectConverter implements Deserializer<String> {
+public class ObjectToObjectConverter implements Converter<String> {
 
     private static final Map<String, Class<?>> TYPE_SIGNATURE_MAP = new HashMap<>();
     private static final Map<String, Class<?>> PRIMITIVE_TYPE_MAP = new HashMap<>();
@@ -148,7 +150,7 @@ public class StringToObjectConverter implements Deserializer<String> {
      * @return the converted object which is of type {@code pExpectedClassName}
      */
     @Override
-    public Object deserialize(String pExpectedClassName, Object pValue) {
+    public Object convert(String pExpectedClassName, Object pValue) {
         if (pValue == null) {
             return null;
         }
@@ -167,7 +169,7 @@ public class StringToObjectConverter implements Deserializer<String> {
         }
 
         // we know the class
-        return deserialize(expectedClass, pValue);
+        return convert(expectedClass, pValue);
     }
 
     /**
@@ -177,7 +179,7 @@ public class StringToObjectConverter implements Deserializer<String> {
      * @param pValue value to either take directly or to convert from its string representation.
      * @return the converted object which is of type {@code pExpectedClassName}
      */
-    private Object deserialize(Class<?> pExpectedClass, Object pValue) {
+    private Object convert(Class<?> pExpectedClass, Object pValue) {
         // quick win without conversion
         if (pExpectedClass.isAssignableFrom(pValue.getClass())) {
             if (pExpectedClass == String.class) {
@@ -260,7 +262,7 @@ public class StringToObjectConverter implements Deserializer<String> {
                     Array.set(ret, i++, convertCollectionToArray(valueType, (Collection<?>) value));
                 } else {
                     // Try to convert in generic way
-                    Array.set(ret, i++, deserialize(valueType, value));
+                    Array.set(ret, i++, convert(valueType, value));
                 }
             }
         }
@@ -268,7 +270,7 @@ public class StringToObjectConverter implements Deserializer<String> {
     }
 
     /**
-     * Deserialize a string representation to an object for a given type specified as String
+     * Convert a string representation to an object for a given type specified as String
      *
      * @param pType type to convert to
      * @param pValue the value to convert from
@@ -302,7 +304,7 @@ public class StringToObjectConverter implements Deserializer<String> {
     }
 
     /**
-     * Deserialize a string representation to an object for a given type specified as resolved Class
+     * Convert a string representation to an object of a given type specified as resolved Class
      *
      * @param pType type to convert to
      * @param pValue the value to convert from
@@ -361,7 +363,7 @@ public class StringToObjectConverter implements Deserializer<String> {
         Object ret = Array.newInstance(valueType, values.length);
         int i = 0;
         for (String value : values) {
-            Array.set(ret, i++, value.equals("[null]") ? null : deserialize(valueType, value));
+            Array.set(ret, i++, value.equals("[null]") ? null : convert(valueType, value));
         }
         return ret;
     }

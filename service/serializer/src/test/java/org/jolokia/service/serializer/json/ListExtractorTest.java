@@ -81,20 +81,20 @@ public class ListExtractorTest extends AbstractExtractorTest {
     public void testSetValue() throws Exception {
         assertTrue(extractor.canSetValue());
         List<String> list = Arrays.asList("null", "bla");
-        extractor.setObjectValue(stringToObjectConverter, list, "1", "blub");
+        extractor.setObjectValue(objectToObjectConverter, list, "1", "blub");
         assertEquals(list.get(1),"blub");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testSetValueInvalidIndex() throws Exception {
         List<String> list = Arrays.asList("null", "bla");
-        extractor.setObjectValue(stringToObjectConverter, list, "NaN", "blub");
+        extractor.setObjectValue(objectToObjectConverter, list, "NaN", "blub");
     }
 
     @Test(expectedExceptions = IndexOutOfBoundsException.class)
     public void testSetValueIndexOutOfBounds() throws Exception {
         List<String> list = Arrays.asList("null", "bla");
-        extractor.setObjectValue(stringToObjectConverter, list, "3", "blub");
+        extractor.setObjectValue(objectToObjectConverter, list, "3", "blub");
     }
 
     @Override

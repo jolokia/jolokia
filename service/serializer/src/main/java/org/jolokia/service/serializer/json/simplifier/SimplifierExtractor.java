@@ -8,8 +8,7 @@ import javax.management.AttributeNotFoundException;
 import org.jolokia.server.core.service.serializer.ValueFaultHandler;
 import org.jolokia.service.serializer.json.Extractor;
 import org.jolokia.service.serializer.json.ObjectToJsonConverter;
-import org.jolokia.service.serializer.object.Deserializer;
-import org.jolokia.service.serializer.object.StringToObjectConverter;
+import org.jolokia.service.serializer.object.Converter;
 import org.jolokia.json.JSONObject;
 
 /*
@@ -119,7 +118,7 @@ public abstract class SimplifierExtractor<T> implements Extractor {
     /**
      * Throws always {@link IllegalArgumentException} since a simplifier cannot be written to
      */
-    public Object setObjectValue(Deserializer<String> pConverter, Object pInner,
+    public Object setObjectValue(Converter<String> pConverter, Object pInner,
                                  String pAttribute, Object pValue) throws IllegalAccessException, InvocationTargetException {
         // never called
         throw new IllegalArgumentException("A simplify handler can't set a value");

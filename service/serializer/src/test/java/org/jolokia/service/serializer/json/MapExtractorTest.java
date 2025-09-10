@@ -57,7 +57,7 @@ public class MapExtractorTest extends AbstractExtractorTest {
     @Test
     public void testSetValue() throws Exception {
         assertTrue(extractor.canSetValue());
-        extractor.setObjectValue(stringToObjectConverter, map, "eins", "une");
+        extractor.setObjectValue(objectToObjectConverter, map, "eins", "une");
         assertEquals(map.get("eins"), "une");
     }
 

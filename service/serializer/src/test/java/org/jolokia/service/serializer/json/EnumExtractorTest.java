@@ -6,7 +6,7 @@ import java.util.LinkedList;
 
 import javax.management.AttributeNotFoundException;
 
-import org.jolokia.service.serializer.object.StringToObjectConverter;
+import org.jolokia.service.serializer.object.ObjectToObjectConverter;
 import org.testng.annotations.*;
 
 import static org.testng.Assert.*;
@@ -23,7 +23,7 @@ public class EnumExtractorTest {
     @BeforeMethod
     public void setup() {
         enumExtractor = new EnumExtractor();
-        converter = new ObjectToJsonConverter(new StringToObjectConverter());
+        converter = new ObjectToJsonConverter(new ObjectToObjectConverter());
         converter.setupContext();
     }
 

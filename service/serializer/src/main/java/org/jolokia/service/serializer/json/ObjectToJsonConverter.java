@@ -8,8 +8,8 @@ import javax.management.AttributeNotFoundException;
 
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.service.api.JolokiaContext;
-import org.jolokia.service.serializer.object.Deserializer;
-import org.jolokia.service.serializer.object.StringToObjectConverter;
+import org.jolokia.service.serializer.object.Converter;
+import org.jolokia.service.serializer.object.ObjectToObjectConverter;
 import org.jolokia.server.core.service.serializer.SerializeOptions;
 import org.jolokia.server.core.service.serializer.ValueFaultHandler;
 import org.jolokia.server.core.util.LocalServiceFactory;
@@ -54,7 +54,7 @@ public final class ObjectToJsonConverter {
     private final ThreadLocal<ObjectSerializationContext> stackContextLocal = new ThreadLocal<>();
 
     // Used for converting string to objects when setting attributes
-    private final Deserializer<String> stringToObjectConverter;
+    private final Converter<String> stringToObjectConverter;
 
     // Definition of simplifiers
     private static final String SIMPLIFIERS_DEFAULT_DEF = "META-INF/jolokia/simplifiers-default";
@@ -64,8 +64,8 @@ public final class ObjectToJsonConverter {
 
     private final JolokiaContext context;
 
-    public ObjectToJsonConverter(StringToObjectConverter pStringToObjectConverter) {
-        this(pStringToObjectConverter, null);
+    public ObjectToJsonConverter(ObjectToObjectConverter pObjectToObjectConverter) {
+        this(pObjectToObjectConverter, null);
     }
 
     /**
@@ -73,7 +73,7 @@ public final class ObjectToJsonConverter {
      *
      * @param pStringToObjectConverter used when setting values
      */
-    public ObjectToJsonConverter(Deserializer<String> pStringToObjectConverter, JolokiaContext context) {
+    public ObjectToJsonConverter(Converter<String> pStringToObjectConverter, JolokiaContext context) {
 
         extractors = new ArrayList<>();
 

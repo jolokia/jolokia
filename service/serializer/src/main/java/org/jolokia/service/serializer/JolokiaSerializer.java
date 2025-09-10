@@ -26,9 +26,9 @@ import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.serializer.Serializer;
 import org.jolokia.service.serializer.json.ObjectToJsonConverter;
 import org.jolokia.server.core.service.serializer.SerializeOptions;
-import org.jolokia.service.serializer.object.Deserializer;
+import org.jolokia.service.serializer.object.Converter;
 import org.jolokia.service.serializer.object.OpenTypeDeserializer;
-import org.jolokia.service.serializer.object.StringToObjectConverter;
+import org.jolokia.service.serializer.object.ObjectToObjectConverter;
 import org.jolokia.server.core.service.api.AbstractJolokiaService;
 
 /**
@@ -43,20 +43,20 @@ import org.jolokia.server.core.service.api.AbstractJolokiaService;
  */
 public class JolokiaSerializer extends AbstractJolokiaService<Serializer> implements Serializer {
 
-    // From object to json:
-    private ObjectToJsonConverter toJsonConverter;
-
     /**
-     * Deserializer from String, {@link org.jolokia.json.JSONStructure} or other supported objects
-     * to objects of class specified as {@link String}.
+     * Most generic converted for any values (usually Strings) to objects of target class
+     * specified as {@link String}. It is used by other, specialized converters.
      */
-    private final Deserializer<String> toObjectConverter;
+    private final Converter<String> objectToObjectConverter;
 
     /**
      * Deserializer from String, {@link org.jolokia.json.JSONStructure} or other supported objects
      * to objects of class specified as {@link OpenType} for specialized JMX object conversion..
      */
-    private final Deserializer<OpenType<?>> toOpenTypeConverter;
+    private final Converter<OpenType<?>> toOpenTypeConverter;
+
+    // From object to json:
+    private ObjectToJsonConverter toJsonConverter;
 
     /**
      * Default constructor - order=100, non-forgiving
@@ -82,18 +82,19 @@ public class JolokiaSerializer extends AbstractJolokiaService<Serializer> implem
     public JolokiaSerializer(int pOrder, boolean pForgiving) {
         super(Serializer.class, pOrder);
 
-        // generic
-        toObjectConverter = new StringToObjectConverter();
-        toOpenTypeConverter = new OpenTypeDeserializer(toObjectConverter, pForgiving);
+        // generic converter of any values (primitive, basic like dates and arrays)
+        objectToObjectConverter = new ObjectToObjectConverter();
+
+        toOpenTypeConverter = new OpenTypeDeserializer(objectToObjectConverter, pForgiving);
 
         // default version where context is not available
-        toJsonConverter = new ObjectToJsonConverter(toObjectConverter, null);
+        toJsonConverter = new ObjectToJsonConverter(objectToObjectConverter, null);
     }
 
     @Override
     public void init(JolokiaContext pJolokiaContext) {
         super.init(pJolokiaContext);
-        toJsonConverter = new ObjectToJsonConverter(toObjectConverter, pJolokiaContext);
+        toJsonConverter = new ObjectToJsonConverter(objectToObjectConverter, pJolokiaContext);
     }
 
     @Override
@@ -103,7 +104,7 @@ public class JolokiaSerializer extends AbstractJolokiaService<Serializer> implem
 
     @Override
     public Object deserialize(String pExpectedClassName, Object pValue) {
-        return toObjectConverter.deserialize(pExpectedClassName, pValue);
+        return objectToObjectConverter.convert(pExpectedClassName, pValue);
     }
 
     @Override
@@ -113,7 +114,7 @@ public class JolokiaSerializer extends AbstractJolokiaService<Serializer> implem
 
     @Override
     public Object deserializeOpenType(OpenType<?> pOpenType, Object pValue) {
-        return toOpenTypeConverter.deserialize(pOpenType, pValue);
+        return toOpenTypeConverter.convert(pOpenType, pValue);
     }
 
 }

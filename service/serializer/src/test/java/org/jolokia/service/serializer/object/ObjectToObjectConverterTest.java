@@ -49,13 +49,13 @@ import static org.testng.AssertJUnit.assertNull;
  * @author roland
  * @since Feb 14, 2010
  */
-public class StringToObjectConverterTest {
+public class ObjectToObjectConverterTest {
 
-    StringToObjectConverter converter;
+    ObjectToObjectConverter converter;
 
     @BeforeClass
     public void setup() {
-       converter = new StringToObjectConverter();
+       converter = new ObjectToObjectConverter();
     }
 
     @Test
@@ -139,17 +139,17 @@ public class StringToObjectConverterTest {
 
     @Test
     public void enumConversion() {
-        ConfigKey key = (ConfigKey) converter.deserialize(ConfigKey.class.getName(), "MAX_DEPTH");
+        ConfigKey key = (ConfigKey) converter.convert(ConfigKey.class.getName(), "MAX_DEPTH");
         assertEquals(ConfigKey.MAX_DEPTH, key);
 
         try {
-            converter.deserialize(TimeUnit.class.getName(), "dd");
+            converter.convert(TimeUnit.class.getName(), "dd");
             fail("Should fail because of unknown enum value");
         } catch (IllegalArgumentException expected) {
         }
 
         try {
-            converter.deserialize(TimeUnit.class.getName(), new HashMap<String, Object>() {
+            converter.convert(TimeUnit.class.getName(), new HashMap<String, Object>() {
                 @Override
                 public String toString() {
                     return "SECONDS";
@@ -171,7 +171,7 @@ public class StringToObjectConverterTest {
 
     @Test(expectedExceptions = { IllegalArgumentException.class})
     public void dateConversionFailed() {
-        converter.deserialize(Date.class.getName(), "illegal-date-format");
+        converter.convert(Date.class.getName(), "illegal-date-format");
     }
 
     @Test
@@ -252,24 +252,24 @@ public class StringToObjectConverterTest {
 
     @Test
     public void prepareValue() {
-        assertNull(converter.deserialize("java.lang.String", null));
-        assertEquals(10L, converter.deserialize("java.lang.Long", 10L));
-        assertEquals(10L, converter.deserialize("java.lang.Long", "10"));
+        assertNull(converter.convert("java.lang.String", null));
+        assertEquals(10L, converter.convert("java.lang.Long", 10L));
+        assertEquals(10L, converter.convert("java.lang.Long", "10"));
         Map<String,String> map = new HashMap<>();
         map.put("euro","fcn");
-        assertSame(converter.deserialize("java.util.Map", map), map);
+        assertSame(converter.convert("java.util.Map", map), map);
     }
 
     @Test(expectedExceptions = { IllegalArgumentException.class })
     public void prepareValueInvalidClass() {
-        converter.deserialize("blubber.bla.hello", 10L);
+        converter.convert("blubber.bla.hello", 10L);
     }
     @Test
     public void prepareValueListConversion1() {
         List<Boolean> list = new ArrayList<>();
         list.add(true);
         list.add(false);
-        boolean[] res = (boolean[]) converter.deserialize("[Z", list);
+        boolean[] res = (boolean[]) converter.convert("[Z", list);
         assertTrue(res[0]);
         assertFalse(res[1]);
         Assert.assertEquals(res.length,2);
@@ -281,7 +281,7 @@ public class StringToObjectConverterTest {
         list.add(true);
         list.add(false);
         list.add(null);
-        Boolean[] res = (Boolean[]) converter.deserialize("[Ljava.lang.Boolean;", list);
+        Boolean[] res = (Boolean[]) converter.convert("[Ljava.lang.Boolean;", list);
         assertTrue(res[0]);
         assertFalse(res[1]);
         assertNull(res[2]);
@@ -293,7 +293,7 @@ public class StringToObjectConverterTest {
         List<Integer> list = new ArrayList<>();
         list.add(10);
         list.add(null);
-        converter.deserialize("[I", list);
+        converter.convert("[I", list);
     }
 
     public static class Example {
@@ -349,14 +349,14 @@ public class StringToObjectConverterTest {
 
     @Test
     public void prepareValueWithConstructor() {
-        Object o = converter.deserialize(this.getClass().getCanonicalName() + "$Example", "test");
+        Object o = converter.convert(this.getClass().getCanonicalName() + "$Example", "test");
         assertTrue(o instanceof Example);
         assertEquals("test", ((Example) o).getValue());
     }
 
     @Test
     public void prepareValueWithConstructorList() {
-        Object o = converter.deserialize(this.getClass().getCanonicalName() + "$Example", List.of("test", "another"));
+        Object o = converter.convert(this.getClass().getCanonicalName() + "$Example", List.of("test", "another"));
         assertTrue(o instanceof Example);
         assertNotNull(((Example) o).getList());
         assertEquals("another", ((Example) o).getList().get(1));
@@ -366,13 +366,13 @@ public class StringToObjectConverterTest {
     @Test(expectedExceptions = IllegalArgumentException.class,
         expectedExceptionsMessageRegExp = ".*Cannot convert.*")
     public void prepareValueWithPrivateExample() {
-        converter.deserialize(this.getClass().getCanonicalName() + "$PrivateExample", "test");
+        converter.convert(this.getClass().getCanonicalName() + "$PrivateExample", "test");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,
         expectedExceptionsMessageRegExp = ".*Cannot convert.*")
     public void prepareValueWithMultipleConstructors() {
-        converter.deserialize(this.getClass().getCanonicalName() + "$MultipleConstructorExample", "test");
+        converter.convert(this.getClass().getCanonicalName() + "$MultipleConstructorExample", "test");
     }
 
     @Test

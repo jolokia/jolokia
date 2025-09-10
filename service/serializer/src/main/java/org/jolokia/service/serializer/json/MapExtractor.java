@@ -8,8 +8,7 @@ import java.util.Map;
 import javax.management.AttributeNotFoundException;
 
 import org.jolokia.server.core.service.serializer.ValueFaultHandler;
-import org.jolokia.service.serializer.object.Deserializer;
-import org.jolokia.service.serializer.object.StringToObjectConverter;
+import org.jolokia.service.serializer.object.Converter;
 import org.jolokia.json.JSONObject;
 
 /*
@@ -121,7 +120,7 @@ public class MapExtractor implements Extractor {
      * @throws IllegalAccessException
      * @throws InvocationTargetException
      */
-    public Object setObjectValue(Deserializer<String> pConverter, Object pMap, String pKey, Object pValue)
+    public Object setObjectValue(Converter<String> pConverter, Object pMap, String pKey, Object pValue)
             throws IllegalAccessException, InvocationTargetException {
         @SuppressWarnings("unchecked")
         Map<Object,Object> map = (Map<Object,Object>) pMap;
@@ -139,7 +138,7 @@ public class MapExtractor implements Extractor {
         }
         Object value =
                 oldValue != null ?
-                        pConverter.deserialize(oldValue.getClass().getName(), pValue) :
+                        pConverter.convert(oldValue.getClass().getName(), pValue) :
                         pValue;
         map.put(oldKey,value);
         return oldValue;

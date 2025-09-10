@@ -8,8 +8,7 @@ import java.util.List;
 import javax.management.AttributeNotFoundException;
 
 import org.jolokia.server.core.service.serializer.ValueFaultHandler;
-import org.jolokia.service.serializer.object.Deserializer;
-import org.jolokia.service.serializer.object.StringToObjectConverter;
+import org.jolokia.service.serializer.object.Converter;
 import org.jolokia.json.JSONArray;
 
 
@@ -83,7 +82,7 @@ public class ListExtractor implements Extractor {
      * @throws IllegalAccessException
      * @throws InvocationTargetException
      */
-    public Object setObjectValue(Deserializer<String> pConverter, Object pInner, String pIndex, Object  pValue)
+    public Object setObjectValue(Converter<String> pConverter, Object pInner, String pIndex, Object  pValue)
             throws IllegalAccessException, InvocationTargetException {
         @SuppressWarnings("unchecked")
         List<Object> list = (List<Object>) pInner;
@@ -100,7 +99,7 @@ public class ListExtractor implements Extractor {
         Object oldValue = list.get(idx);
         Object value =
                 oldValue != null ?
-                        pConverter.deserialize(oldValue.getClass().getName(), pValue) :
+                        pConverter.convert(oldValue.getClass().getName(), pValue) :
                         pValue;
         list.set(idx,value);
         return oldValue;

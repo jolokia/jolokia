@@ -21,8 +21,7 @@ import java.util.Deque;
 
 import javax.management.AttributeNotFoundException;
 
-import org.jolokia.service.serializer.object.Deserializer;
-import org.jolokia.service.serializer.object.StringToObjectConverter;
+import org.jolokia.service.serializer.object.Converter;
 
 /**
  * Interface for extractor serializing an object to a JSON representation.
@@ -73,7 +72,7 @@ public interface Extractor {
      * @throws InvocationTargetException reflection error
      * @throws IllegalArgumentException if the attribute can't be converted to desired value
      */
-    Object setObjectValue(Deserializer<String> pConverter, Object pInner, String pAttribute, Object pValue)
+    Object setObjectValue(Converter<String> pConverter, Object pInner, String pAttribute, Object pValue)
             throws IllegalAccessException, InvocationTargetException, IllegalArgumentException;
 
     /**

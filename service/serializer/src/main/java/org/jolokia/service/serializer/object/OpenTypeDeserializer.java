@@ -1,11 +1,3 @@
-package org.jolokia.service.serializer.object;
-
-import java.util.Arrays;
-import java.util.List;
-
-import javax.management.openmbean.OpenType;
-
-
 /*
  * Copyright 2009-2011 Roland Huss
  *
@@ -21,16 +13,42 @@ import javax.management.openmbean.OpenType;
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  */
+package org.jolokia.service.serializer.object;
 
+import java.util.Arrays;
+import java.util.List;
+
+import javax.management.openmbean.OpenType;
 
 /**
- * Converter which converts an string or JSON representation to
- * an object represented by an {@link OpenType}.
+ * <p>Dedicated {@link Converter} which specifies target type as {@link OpenType}. It handles null values
+ * and delegates non-null values to one of four implementations of {@link OpenTypeConverter} for this fixed
+ * list of {@liok OpenType open types}:<ul>
+ *     <li>{@link javax.management.openmbean.SimpleType}</li>
+ *     <li>{@link javax.management.openmbean.ArrayType}</li>
+ *     <li>{@link javax.management.openmbean.CompositeType}</li>
+ *     <li>{@link javax.management.openmbean.TabularType}</li>
+ * </ul>
+ * </p>
+ *
+ * <p>Delegation to {@link OpenTypeConverter} introduces some constraints on the type of values that can be converted.
+ * <ul>
+ *     <li>{@link SimpleTypeConverter} handles simple types and it delegates (<em>back</em>) to generic
+ *     {@link ObjectToObjectConverter}.</li>
+ *     <li>{@link ArrayTypeConverter} handles multidimensional arrays of objects, so the value being converted
+ *     has to be a {@link java.util.Collection} or a String parsed using {@link org.jolokia.json.parser.JSONParser}
+ *     into a {@link org.jolokia.json.JSONArray}.</li>
+ *     <li>{@link CompositeTypeConverter} handles {@link java.util.Map} values (possibly parsed from strings into
+ *     {@link org.jolokia.json.JSONObject}) and converts them to {@link javax.management.openmbean.CompositeData}
+ *     according to information specified in {@link javax.management.openmbean.CompositeType}.</li>
+ *     <li>{@link TabularDataConverter} handles {@link javax.management.openmbean.TabularType}</li>
+ * </ul>
+ * </p>
  *
  * @author Assaf Berg, roland
  * @since 02.08.11
  */
-public class OpenTypeDeserializer implements Deserializer<OpenType<?>> {
+public class OpenTypeDeserializer implements Converter<OpenType<?>> {
 
     protected final boolean forgiving;
 
@@ -40,14 +58,14 @@ public class OpenTypeDeserializer implements Deserializer<OpenType<?>> {
     /**
      * Constructor
      *
-     * @param pStringToObjectConverter converter for the 'leaf' values.
+     * @param pObjectToObjectConverter converter for the <em>leaf</em> values which do not contain inner values.
      */
-    public OpenTypeDeserializer(Deserializer<String> pStringToObjectConverter, boolean pForgiving) {
+    public OpenTypeDeserializer(Converter<String> pObjectToObjectConverter, boolean pForgiving) {
         converters = Arrays.asList(
-                new SimpleTypeConverter(this,pStringToObjectConverter),
-                new ArrayTypeConverter(this),
-                new CompositeTypeConverter(this),
-                new TabularDataConverter(this)
+            new SimpleTypeConverter(this, pObjectToObjectConverter),
+            new ArrayTypeConverter(this),
+            new CompositeTypeConverter(this),
+            new TabularDataConverter(this)
         );
         this.forgiving = pForgiving;
     }
@@ -61,7 +79,7 @@ public class OpenTypeDeserializer implements Deserializer<OpenType<?>> {
      * @return the converted value
      */
     @Override
-    public Object deserialize(OpenType<?> pOpenType, Object pValue) {
+    public Object convert(OpenType<?> pOpenType, Object pValue) {
         if (pValue == null) {
             return null;
         } else {
@@ -79,7 +97,7 @@ public class OpenTypeDeserializer implements Deserializer<OpenType<?>> {
     private <T extends OpenType<?>> Object invokeConverter(OpenTypeConverter<T> converter, OpenType<?> pOpenType, Object pValue) {
         @SuppressWarnings("unchecked")
         T casted = (T) pOpenType;
-        return converter.convertToObject(casted, pValue);
+        return converter.convert(casted, pValue);
     }
 
     public boolean isForgiving() {

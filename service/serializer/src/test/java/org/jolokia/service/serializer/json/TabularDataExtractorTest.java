@@ -24,7 +24,7 @@ import javax.management.openmbean.*;
 
 import org.jolokia.server.core.service.serializer.SerializeOptions;
 import org.jolokia.server.core.service.serializer.ValueFaultHandler;
-import org.jolokia.service.serializer.object.StringToObjectConverter;
+import org.jolokia.service.serializer.object.ObjectToObjectConverter;
 import org.jolokia.service.serializer.util.CompositeTypeAndJson;
 import org.jolokia.service.serializer.util.TabularTypeAndJson;
 import org.jolokia.json.JSONObject;
@@ -47,7 +47,7 @@ public class TabularDataExtractorTest {
 
     @BeforeMethod
     public void setup() {
-        converter = new ObjectToJsonConverter(new StringToObjectConverter());
+        converter = new ObjectToJsonConverter(new ObjectToObjectConverter());
         converter.setupContext(new SerializeOptions.Builder().useAttributeFilter(true).build());
     }
 
@@ -64,7 +64,7 @@ public class TabularDataExtractorTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = ".*written to.*")
     public void setValue() throws InvocationTargetException, IllegalAccessException {
-        extractor.setObjectValue(new StringToObjectConverter(), new Object(), "bla", "blub");
+        extractor.setObjectValue(new ObjectToObjectConverter(), new Object(), "bla", "blub");
     }
 
     @Test

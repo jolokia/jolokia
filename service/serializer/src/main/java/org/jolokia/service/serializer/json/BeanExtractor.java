@@ -12,8 +12,7 @@ import java.util.*;
 
 import javax.management.AttributeNotFoundException;
 
-import org.jolokia.service.serializer.object.Deserializer;
-import org.jolokia.service.serializer.object.StringToObjectConverter;
+import org.jolokia.service.serializer.object.Converter;
 import org.jolokia.server.core.service.serializer.ValueFaultHandler;
 import org.jolokia.server.core.util.EscapeUtil;
 
@@ -101,7 +100,7 @@ public class BeanExtractor implements Extractor {
 
     // Using standard set semantics
     /** {@inheritDoc} */
-    public Object setObjectValue(Deserializer<String> pConverter, Object pInner, String pAttribute, Object pValue)
+    public Object setObjectValue(Converter<String> pConverter, Object pInner, String pAttribute, Object pValue)
             throws IllegalAccessException, InvocationTargetException {
         // Move this to plain object handler
         String rest = new StringBuilder(pAttribute.substring(0,1).toUpperCase())
@@ -137,7 +136,7 @@ public class BeanExtractor implements Extractor {
             oldValue = null;
         }
         AccessController.doPrivileged(new SetMethodAccessibleAction(found));
-        found.invoke(pInner,pConverter.deserialize(params[0].getName(), pValue));
+        found.invoke(pInner,pConverter.convert(params[0].getName(), pValue));
         return oldValue;
     }
 

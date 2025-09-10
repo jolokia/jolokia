@@ -7,8 +7,7 @@ import javax.management.*;
 import javax.management.openmbean.*;
 
 import org.jolokia.server.core.service.serializer.ValueFaultHandler;
-import org.jolokia.service.serializer.object.Deserializer;
-import org.jolokia.service.serializer.object.StringToObjectConverter;
+import org.jolokia.service.serializer.object.Converter;
 import org.jolokia.json.JSONArray;
 import org.jolokia.json.JSONObject;
 
@@ -333,7 +332,7 @@ public class TabularDataExtractor implements Extractor {
     /**
      * Throws always {@link IllegalArgumentException} since tabular data is immutable
      */
-    public Object setObjectValue(Deserializer<String> pConverter, Object pInner, String pAttribute, Object pValue)
+    public Object setObjectValue(Converter<String> pConverter, Object pInner, String pAttribute, Object pValue)
             throws IllegalAccessException, InvocationTargetException {
         throw new IllegalArgumentException("TabularData cannot be written to");
     }

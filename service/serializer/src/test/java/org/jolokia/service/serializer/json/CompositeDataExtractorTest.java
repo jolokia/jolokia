@@ -23,7 +23,7 @@ public class CompositeDataExtractorTest extends AbstractExtractorTest {
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void noSettingAllowed() throws InvocationTargetException, IllegalAccessException {
         assertFalse(extractor.canSetValue());
-        extractor.setObjectValue(stringToObjectConverter,new File("test"),"executable",Boolean.TRUE);
+        extractor.setObjectValue(objectToObjectConverter,new File("test"),"executable",Boolean.TRUE);
     }
 
     @Test

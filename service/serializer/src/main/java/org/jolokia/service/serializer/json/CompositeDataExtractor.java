@@ -8,8 +8,7 @@ import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.InvalidKeyException;
 
 import org.jolokia.server.core.service.serializer.ValueFaultHandler;
-import org.jolokia.service.serializer.object.Deserializer;
-import org.jolokia.service.serializer.object.StringToObjectConverter;
+import org.jolokia.service.serializer.object.Converter;
 import org.jolokia.json.JSONObject;
 
 /*
@@ -78,7 +77,7 @@ public class CompositeDataExtractor implements Extractor {
     }
 
     /** {@inheritDoc} */
-    public Object setObjectValue(Deserializer<String> pConverter, Object pInner, String pAttribute, Object pValue)
+    public Object setObjectValue(Converter<String> pConverter, Object pInner, String pAttribute, Object pValue)
             throws IllegalAccessException, InvocationTargetException {
         throw new IllegalArgumentException("CompositeData cannot be written to");
     }

@@ -16,7 +16,6 @@
 package org.jolokia.service.serializer.json;
 
 import java.lang.reflect.InvocationTargetException;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -24,7 +23,6 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
 import java.time.YearMonth;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
@@ -34,8 +32,7 @@ import java.util.TimeZone;
 import javax.management.AttributeNotFoundException;
 
 import org.jolokia.server.core.config.ConfigKey;
-import org.jolokia.service.serializer.object.Deserializer;
-import org.jolokia.service.serializer.object.StringToObjectConverter;
+import org.jolokia.service.serializer.object.Converter;
 
 /**
  * Extractor for implementations of {@link Temporal}, like:<ul>
@@ -147,7 +144,7 @@ public class TemporalExtractor implements Extractor {
     }
 
     @Override
-    public Object setObjectValue(Deserializer<String> pConverter, Object pInner, String pAttribute, Object pValue) throws IllegalAccessException, InvocationTargetException, IllegalArgumentException {
+    public Object setObjectValue(Converter<String> pConverter, Object pInner, String pAttribute, Object pValue) throws IllegalAccessException, InvocationTargetException, IllegalArgumentException {
         throw new IllegalArgumentException("java.time.Temporal instance is immutable an cannot change its value");
     }
 

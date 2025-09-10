@@ -26,8 +26,7 @@ import javax.management.AttributeNotFoundException;
 
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.util.DateUtil;
-import org.jolokia.service.serializer.object.Deserializer;
-import org.jolokia.service.serializer.object.StringToObjectConverter;
+import org.jolokia.service.serializer.object.Converter;
 
 /**
  * Extractor for {@link Calendar} instances.
@@ -94,7 +93,7 @@ public class CalendarExtractor implements Extractor {
     }
 
     @Override
-    public Object setObjectValue(Deserializer<String> pConverter, Object pInner, String pAttribute, Object pValue) throws IllegalAccessException, InvocationTargetException, IllegalArgumentException {
+    public Object setObjectValue(Converter<String> pConverter, Object pInner, String pAttribute, Object pValue) throws IllegalAccessException, InvocationTargetException, IllegalArgumentException {
         Calendar cal = (Calendar) pInner;
         if ("time".equals(pAttribute)) {
             long time;

@@ -22,7 +22,7 @@ import java.util.*;
 import javax.management.AttributeNotFoundException;
 
 import org.jolokia.server.core.service.serializer.SerializeOptions;
-import org.jolokia.service.serializer.object.StringToObjectConverter;
+import org.jolokia.service.serializer.object.ObjectToObjectConverter;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
@@ -34,12 +34,12 @@ abstract public class AbstractExtractorTest {
 
     protected Extractor extractor;
     protected ObjectToJsonConverter converter;
-    protected StringToObjectConverter stringToObjectConverter;
+    protected ObjectToObjectConverter objectToObjectConverter;
     @BeforeMethod
     public void setup() {
         extractor = createExtractor();
-        stringToObjectConverter = new StringToObjectConverter();
-        converter = new ObjectToJsonConverter(stringToObjectConverter);
+        objectToObjectConverter = new ObjectToObjectConverter();
+        converter = new ObjectToJsonConverter(objectToObjectConverter);
         converter.setupContext(new SerializeOptions.Builder().useAttributeFilter(true).build());
     }
 
@@ -57,7 +57,7 @@ abstract public class AbstractExtractorTest {
     }
 
     protected Object setObject(Object pInner,String pAttribute,Object pValue) throws InvocationTargetException, IllegalAccessException {
-        return extractor.setObjectValue(stringToObjectConverter,pInner,pAttribute,pValue);
+        return extractor.setObjectValue(objectToObjectConverter,pInner,pAttribute,pValue);
     }
 
     private Object extract(Object pValue, String[] extraArgs, boolean pJsonify) throws AttributeNotFoundException {
