@@ -1,20 +1,3 @@
-package org.jolokia.service.serializer.json;
-
-
-import java.lang.reflect.InvocationTargetException;
-import java.util.*;
-
-import javax.management.AttributeNotFoundException;
-
-import org.jolokia.server.core.config.ConfigKey;
-import org.jolokia.server.core.service.api.JolokiaContext;
-import org.jolokia.service.serializer.object.Converter;
-import org.jolokia.service.serializer.object.ObjectToObjectConverter;
-import org.jolokia.server.core.service.serializer.SerializeOptions;
-import org.jolokia.server.core.service.serializer.ValueFaultHandler;
-import org.jolokia.server.core.util.LocalServiceFactory;
-import org.jolokia.server.core.util.EscapeUtil;
-
 /*
  * Copyright 2009-2013 Roland Huss
  *
@@ -30,31 +13,42 @@ import org.jolokia.server.core.util.EscapeUtil;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.service.serializer.json;
 
+import java.lang.reflect.InvocationTargetException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.*;
+
+import javax.management.AttributeNotFoundException;
+
+import org.jolokia.json.JSONArray;
+import org.jolokia.json.JSONObject;
+import org.jolokia.server.core.service.api.JolokiaContext;
+import org.jolokia.service.serializer.json.simplifier.SimplifierAccessor;
+import org.jolokia.service.serializer.object.Converter;
+import org.jolokia.server.core.service.serializer.SerializeOptions;
+import org.jolokia.server.core.service.serializer.ValueFaultHandler;
+import org.jolokia.server.core.util.LocalServiceFactory;
+import org.jolokia.server.core.util.EscapeUtil;
+import org.jolokia.service.serializer.object.ObjectToObjectConverter;
 
 /**
- * A converter which converts attribute and return values
- * into a JSON representation. It uses certain handlers for this which
- * are registered in the constructor.
- * <p>
- * Each handler gets a reference to this converter object so that it
- * can use it for a recursive solution of nested objects.
+ * <p>A converter/serializer that transforms Java objects (JMX attribute values, JMX operation parameters
+ * and return values) into a JSON representation. It delegates handling of supported types to
+ * {@link ObjectAccessor} implementations.</p>
+ *
+ * <p>Each {@link ObjectAccessor} gets a reference to this converter object so it can use it for a recursive
+ * serialization of nested objects.</p>
+ *
+ * <p>Additionally (since the dawn of Jolokia) this converter is used to set <em>inner</em> values of any objects.
+ * Also by delegating to extractors which can handle particular object types. For example {@link DateAccessor}
+ * can call {@link Date#setTime(long)}.</p>
  *
  * @author roland
  * @since Apr 19, 2009
  */
 public final class ObjectToJsonConverter {
-
-    // List of dedicated handlers used for delegation in serialization/deserialization
-    private final List<Extractor> extractors;
-
-    private final ArrayExtractor arrayExtractor;
-
-    // Thread-Local set in order to prevent infinite recursions
-    private final ThreadLocal<ObjectSerializationContext> stackContextLocal = new ThreadLocal<>();
-
-    // Used for converting string to objects when setting attributes
-    private final Converter<String> stringToObjectConverter;
 
     // Definition of simplifiers
     private static final String SIMPLIFIERS_DEFAULT_DEF = "META-INF/jolokia/simplifiers-default";
@@ -62,63 +56,140 @@ public final class ObjectToJsonConverter {
 
     private static final Deque<String> EMPTY_DEQUE = new LinkedList<>();
 
-    private final JolokiaContext context;
-
-    public ObjectToJsonConverter(ObjectToObjectConverter pObjectToObjectConverter) {
-        this(pObjectToObjectConverter, null);
-    }
+    /**
+     * Classes of the objects that can be returned directly as proper JSON types. All other objects <em>need to</em>
+     * be converted in some way to proper JSON objects.
+     */
+    public static final Set<Class<?>> JSON_TYPES = Set.of(
+        String.class,
+        Boolean.TYPE,
+        Boolean.class,
+        Long.TYPE,
+        Long.class,
+        BigInteger.class,
+        BigDecimal.class,
+        JSONArray.class,
+        JSONObject.class
+    );
 
     /**
-     * New object-to-json converter
-     *
-     * @param pStringToObjectConverter used when setting values
+     * Simple types which are not proper JSON types (even if they seem to) but can be easily converted.
      */
-    public ObjectToJsonConverter(Converter<String> pStringToObjectConverter, JolokiaContext context) {
+    public static final Map<Class<?>, String> JSON_CONVERSIONS = Map.ofEntries(
+        Map.entry(Character.class, String.class.getName()),
+        Map.entry(Character.TYPE, String.class.getName()),
+        Map.entry(Float.class, BigDecimal.class.getName()),
+        Map.entry(Float.TYPE, BigDecimal.class.getName()),
+        Map.entry(Double.class, BigDecimal.class.getName()),
+        Map.entry(Double.TYPE, BigDecimal.class.getName()),
+        Map.entry(Byte.class, Long.class.getName()),
+        Map.entry(Byte.TYPE, Long.class.getName()),
+        Map.entry(Short.class, Long.class.getName()),
+        Map.entry(Short.TYPE, Long.class.getName()),
+        Map.entry(Integer.class, Long.class.getName()),
+        Map.entry(Integer.TYPE, Long.class.getName())
+    );
 
-        extractors = new ArrayList<>();
+    // Thread-Local set in order to prevent infinite recursions
+    private final ThreadLocal<ObjectSerializationContext> stackContextLocal = new ThreadLocal<>();
 
+    // List of dedicated extractors used for inner values
+    private final List<ObjectAccessor> objectAccessors = new ArrayList<>();
+
+    // Separate ArrayExtractor to handle arrays
+    private final ArrayAccessor arrayAccessor;
+
+    // Separate SimpleAccessor to handle objects that should go through straight conversion instead of
+    // "extraction". No access to internal attributes
+    private final SimpleAccessor simpleAccessor;
+
+    // Used for converting strings to objects - only when setting attributes
+    // see: https://github.com/jolokia/jolokia/issues/888#issuecomment-3278472424
+    private final Converter<String> objectToObjectConverter;
+
+    // Cache for actual accessors. Because we do class.isAssignableFrom(), it's better to keep the resolved
+    // accessors for quick access
+    private final Map<Class<?>, ObjectAccessor> ACCESSORS_CACHE = Collections.synchronizedMap(new HashMap<>());
+
+    /**
+     * Create a converter that can serialize objects into JSON representation
+     *
+     * @param pObjectToObjectConverter used when setting values
+     * @param pContext                 {@link JolokiaContext} used to load {@link ObjectAccessor} services
+     */
+    public ObjectToJsonConverter(ObjectToObjectConverter pObjectToObjectConverter, JolokiaContext pContext) {
         // TabularDataExtractor must be before MapExtractor
-        // since TabularDataSupport isa Map
-        extractors.add(new TabularDataExtractor());
-        extractors.add(new CompositeDataExtractor());
+        // since javax.management.openmbean.TabularDataSupport implements java.util.Map interface
+        // (while javax.management.openmbean.TabularData doesn't)
+        objectAccessors.add(new TabularDataObjectAccessor());
+        objectAccessors.add(new CompositeDataObjectAccessor());
 
-        // Collection handlers
-        extractors.add(new ListExtractor());
-        extractors.add(new MapExtractor());
-        extractors.add(new CollectionExtractor());
+        objectAccessors.add(new MapAccessor());
 
-        // Special, well known objects
-        addSimplifiers(extractors);
+        // Collection accessors
+        // ListExtractor before CollectionExtractor, because we can set values only for List, not Set
+        objectAccessors.add(new ListAccessor());
+        objectAccessors.add(new CollectionAccessor());
+
+        // discoverable simplifiers
+        List<SimplifierAccessor<?>> simplifiers = new ArrayList<>();
+        loadSimplifiers(simplifiers, pContext);
+        objectAccessors.addAll(simplifiers);
+
+        // if the discovered simplifier supports toString conversion, be ready to pass that to other converters
+        // List of ObjectAccessors, which supports explicit to String conversion
+        // but we need to add the discovered ones later, to override the built-in ones
+        Map<Class<?>, ObjectAccessor> stringConverters = new HashMap<>();
 
         // Enum handling
-        extractors.add(new EnumExtractor());
+        EnumObjectAccessor enumAccessor = new EnumObjectAccessor();
+        objectAccessors.add(enumAccessor);
+        stringConverters.put(enumAccessor.getType(), enumAccessor);
 
-        // Special date handling
-        String dateFormat = context == null
-            ? ConfigKey.DATE_FORMAT.getDefaultValue() : context.getConfig(ConfigKey.DATE_FORMAT);
-        TimeZone dateFormatZone = context == null
-            ? TimeZone.getDefault() : TimeZone.getTimeZone(context.getConfig(ConfigKey.DATE_FORMAT_ZONE));
-        extractors.add(new DateExtractor(dateFormat, dateFormatZone));
-        extractors.add(new CalendarExtractor(dateFormat, dateFormatZone));
-        extractors.add(new TemporalExtractor(dateFormat, dateFormatZone));
+        // Special date/calendar/temporal handling with configurable patterns
+        DateFormatConfiguration dfc = new DateFormatConfiguration(pContext);
+        DateAccessor dateAccessor = new DateAccessor(dfc);
+        CalendarAccessor calendarAccessor = new CalendarAccessor(dfc);
+        JavaTimeTemporalAccessor temporalAccessor = new JavaTimeTemporalAccessor(dfc);
+        objectAccessors.add(dateAccessor);
+        objectAccessors.add(calendarAccessor);
+        objectAccessors.add(temporalAccessor);
+        // these are know to support toString conversion
+        stringConverters.put(dateAccessor.getType(), dateAccessor);
+        stringConverters.put(calendarAccessor.getType(), calendarAccessor);
+        stringConverters.put(temporalAccessor.getType(), temporalAccessor);
 
-        // Must be last in handlers, used default algorithm
-        extractors.add(new BeanExtractor());
+        // override the built-in accessors that are also String converters with the custom ones
+        for (SimplifierAccessor<?> simplifier : simplifiers) {
+            if (simplifier.supportsStringConversion()) {
+                stringConverters.put(simplifier.getType(), simplifier);
+            }
+        }
 
-        arrayExtractor = new ArrayExtractor();
+        // to prevent bean/reflection access to types like Long, BigDecimal or String - these should not go to
+        // BeanAccessor
+        simpleAccessor = new SimpleAccessor();
 
-        stringToObjectConverter = pStringToObjectConverter;
+        // Must be treated as the fallback accessor, which uses default algorithm to access "bean" properties
+        // with various protection rules (for security reasons)
+        objectAccessors.add(new BeanAccessor());
 
-        this.context = context;
+        arrayAccessor = new ArrayAccessor();
+
+        // this is a two-way dependency, we should be careful, it's not perfect, but we can avoid
+        // duplication and leverage discoverability
+        if (pObjectToObjectConverter != null) {
+            pObjectToObjectConverter.setStringConverters(stringConverters);
+        }
+        objectToObjectConverter = pObjectToObjectConverter;
     }
-
 
     /**
      * Convert the return value to a JSON object.
      *
-     * @param pValue the value to convert
+     * @param pValue     the value to convert
      * @param pPathParts path parts to use for extraction
-     * @param pOptions options used for parsing
+     * @param pOptions   options used for parsing
      * @return the converter object. This either a subclass of {@link org.jolokia.json.JSONStructure} or a basic data type like String or Long.
      * @throws AttributeNotFoundException if within a path an attribute could not be found
      */
@@ -132,10 +203,9 @@ public final class ObjectToJsonConverter {
      * Set an inner value of a complex object. A given path must point to the attribute/index to set within the outer object.
      *
      * @param pOuterObject the object to dive in
-     * @param pNewValue the value to set
-     * @param pPathParts the path within the outer object. This object will be modified and must be a modifiable list.
+     * @param pNewValue    the value to set
+     * @param pPathParts   the path within the outer object. This object will be modified and must be a modifiable list.
      * @return the old value
-     *
      * @throws AttributeNotFoundException
      * @throws IllegalAccessException
      * @throws InvocationTargetException
@@ -145,16 +215,15 @@ public final class ObjectToJsonConverter {
         String lastPathElement = pPathParts.remove(pPathParts.size()-1);
         Deque<String> extraStack = EscapeUtil.reversePath(pPathParts);
 
-        // Get the object pointed to do with path-1
+        // Get the object pointed to do with path parts excluding the last path element
         // We are using no limits here, since a path must have been given (see above), and hence we should
-        // be safe anyway.
+        // be safe anyway as there's no conversion to JSON
         Object inner = extractObjectWithContext(pOuterObject, extraStack, SerializeOptions.DEFAULT, false);
 
         // Set the attribute pointed to by the path elements
         // (depending on the parent object's type)
         return setObjectValue(inner, lastPathElement, pNewValue);
     }
-
 
     /**
      * Related to {@link #extractObjectWithContext} except that
@@ -165,9 +234,9 @@ public final class ObjectToJsonConverter {
      * Use {@link #serialize(Object, List, SerializeOptions)} or
      * {@link #setInnerValue(Object, Object, List)} instead.
      *
-     * @param pValue value to extract from
+     * @param pValue     value to extract from
      * @param pPathParts stack for diving into the object
-     * @param pJsonify whether a JSON representation {@link org.jolokia.json.JSONObject}
+     * @param pJsonify   whether a JSON representation {@link org.jolokia.json.JSONObject}
      * @return extracted object either in native format or as {@link org.jolokia.json.JSONObject}
      * @throws AttributeNotFoundException if an attribute is not found during traversal
      */
@@ -182,17 +251,26 @@ public final class ObjectToJsonConverter {
         try {
             if (pValue == null) {
                 return pathStack.isEmpty() ?
-                        null :
-                        stackContext.getValueFaultHandler().handleException(
-                                new AttributeNotFoundException("Cannot apply a path to an null value"));
+                    null :
+                    stackContext.getValueFaultHandler().handleException(
+                        new AttributeNotFoundException("Cannot apply a path to an null value"));
             }
 
             stackContext.push(pValue);
-            if (pValue.getClass().isArray()) {
+            Class<?> cls = pValue.getClass();
+            if (cls.isArray()) {
                 // Special handling for arrays
-                return arrayExtractor.extractObject(this,pValue,pathStack,pJsonify);
+                return arrayAccessor.extractObject(this, pValue, pathStack, pJsonify);
             }
-            return callHandler(pValue, pathStack, pJsonify);
+            if (cls.isPrimitive() || JSON_TYPES.contains(cls) || JSON_CONVERSIONS.containsKey(cls)) {
+                // Special "don't drill into" classes that should be handled by PrimitiveAccessor
+                if (!pathStack.isEmpty()) {
+                    // skip any attribute which we never get from these values
+                    throw new ValueFaultHandler.AttributeFilteredException();
+                }
+                return simpleAccessor.extractObject(this, pValue, null, pJsonify);
+            }
+            return invokeAccessor(pValue, pathStack, pJsonify);
         } finally {
             stackContext.pop(pValue);
         }
@@ -205,13 +283,12 @@ public final class ObjectToJsonConverter {
      * (if <code>pExtraArgs</code> is not null) and/or to convert
      * it to JSON (if <code>pJsonify</code> is true).
      *
-     *
-     * @param pValue value to extract from
+     * @param pValue     value to extract from
      * @param pExtraArgs stack used for diving in to the value
-     * @param pOpts options from which various processing
-     *        parameters (like maxDepth, maxCollectionSize and maxObjects) are taken and put
-     *        into context in order to influence the object traversal.
-     * @param pJsonify whether the result should be returned as an JSON object
+     * @param pOpts      options from which various processing
+     *                   parameters (like maxDepth, maxCollectionSize and maxObjects) are taken and put
+     *                   into context in order to influence the object traversal.
+     * @param pJsonify   whether the result should be returned as an JSON object
      * @return extracted value, either natively or as JSON
      * @throws AttributeNotFoundException if during traversal an attribute is not found as specified in the stack
      */
@@ -232,29 +309,32 @@ public final class ObjectToJsonConverter {
     /**
      * Set an value of an inner object
      *
-     * @param pInner the inner object
+     * @param pInner     the inner object
      * @param pAttribute the attribute to set
-     * @param pValue the value to set
+     * @param pValue     the value to set
      * @return the old value
-     * @throws IllegalAccessException if the reflection code fails during setting of the value
+     * @throws IllegalAccessException    if the reflection code fails during setting of the value
      * @throws InvocationTargetException reflection error
      */
     private Object setObjectValue(Object pInner, String pAttribute, Object pValue)
             throws IllegalAccessException, InvocationTargetException {
 
-        // Call various handlers depending on the type of the inner object, as is extract Object
+        // Call various accessors depending on the type of the inner object, as is extract Object
 
         Class<?> clazz = pInner.getClass();
         if (clazz.isArray()) {
-            return arrayExtractor.setObjectValue(stringToObjectConverter,pInner,pAttribute,pValue);
+            return arrayAccessor.setObjectValue(objectToObjectConverter, pInner, pAttribute, pValue);
         }
-        Extractor extractor = getExtractor(clazz);
+        // primitive values and objects like java.lang.Integer will still be handled by BeanAccessor
+        // but that's destined to fail. setObjectValue is called MUCH less often than serialize, so
+        // we skip cache and optimization
+        ObjectAccessor objectAccessor = getWriteAccessor(clazz);
 
-        if (extractor != null) {
-            return extractor.setObjectValue(stringToObjectConverter,pInner,pAttribute,pValue);
+        if (objectAccessor != null) {
+            return objectAccessor.setObjectValue(objectToObjectConverter, pInner, pAttribute, pValue);
         } else {
             throw new IllegalStateException(
-                    "Internal error: No handler found for class " + clazz + " for setting object value." +
+                "Internal error: No ObjectAccessor found for class " + clazz + " for setting object value." +
                     " (object: " + pInner + ", attribute: " + pAttribute + ", value: " + pValue + ")");
         }
     }
@@ -271,6 +351,15 @@ public final class ObjectToJsonConverter {
     int getCollectionLength(int originalLength) {
         ObjectSerializationContext ctx = stackContextLocal.get();
         return ctx.getCollectionSizeTruncated(originalLength);
+    }
+
+    /**
+     * {@link ObjectAccessor} may need to access the converter (like {@link MapAccessor} for key conversion)
+     *
+     * @return
+     */
+    Converter<String> getConverter() {
+        return this.objectToObjectConverter;
     }
 
     /**
@@ -320,13 +409,59 @@ public final class ObjectToJsonConverter {
 
     // =================================================================================
 
-    // Get the extractor for a certain class
-    private Extractor getExtractor(Class<?> pClazz) {
-        for (Extractor handler : extractors) {
-            if (handler.canSetValue() && handler.getType() != null && handler.getType().isAssignableFrom(pClazz)) {
-                return handler;
+    /**
+     * Get {@link ObjectAccessor} for specific class which supports writing
+     *
+     * @param pClazz
+     * @return
+     */
+    private ObjectAccessor getWriteAccessor(Class<?> pClazz) {
+        ObjectAccessor accessor = cachedAccessor(pClazz);
+        if (accessor != null && accessor.canSetValue()) {
+            return accessor;
+        }
+        return null;
+    }
+
+    /**
+     * Find and call {@link ObjectAccessor} for specific class. If not found, {@link IllegalStateException}
+     * is thrown.
+     *
+     * @param pValue
+     * @param pPathParts
+     * @param pJsonify
+     * @return
+     * @throws AttributeNotFoundException
+     */
+    private Object invokeAccessor(Object pValue, Deque<String> pPathParts, boolean pJsonify)
+        throws AttributeNotFoundException {
+        Class<?> cls = pValue.getClass();
+        ObjectAccessor accessor = cachedAccessor(cls);
+        if (accessor != null) {
+            return accessor.extractObject(this, pValue, pPathParts, pJsonify);
+        }
+        throw new IllegalStateException("Internal error: No ObjectAccessor found for class " + cls);
+    }
+
+    /**
+     * Get {@link ObjectAccessor} from cache for given class.
+     *
+     * @param pClazz
+     * @return
+     */
+    private ObjectAccessor cachedAccessor(Class<?> pClazz) {
+        ObjectAccessor found = ACCESSORS_CACHE.get(pClazz);
+        if (found != null) {
+            return found;
+        }
+
+        for (ObjectAccessor accessor : objectAccessors) {
+            if (accessor.getType() != null && accessor.getType().isAssignableFrom(pClazz)) {
+                ACCESSORS_CACHE.put(pClazz, accessor);
+                return accessor;
             }
         }
+
         return null;
     }
 
@@ -346,35 +481,18 @@ public final class ObjectToJsonConverter {
         return null;
     }
 
-
-
-    private Object callHandler(Object pValue, Deque<String> pPathParts, boolean pJsonify)
-            throws AttributeNotFoundException {
-        Class<?> pClazz = pValue.getClass();
-        for (Extractor handler : extractors) {
-            if (handler.getType() != null && handler.getType().isAssignableFrom(pClazz)) {
-                return handler.extractObject(this,pValue,pPathParts,pJsonify);
-            }
-        }
-        throw new IllegalStateException(
-                "Internal error: No handler found for class " + pClazz +
-                    " (object: " + pValue + ", extraArgs: " + pPathParts + ")");
-    }
-
-
     // Used for testing only. Hence final and package local
     ThreadLocal<ObjectSerializationContext> getStackContextLocal() {
         return stackContextLocal;
     }
 
-    // Simplifiers are added either explicitly or by reflection from a subpackage
-    private void addSimplifiers(List<Extractor> pHandlers) {
-        // Add all
-        List<Extractor> services = LocalServiceFactory.createServices(this.getClass().getClassLoader(),
+    private void loadSimplifiers(List<SimplifierAccessor<?>> pSimplifiers, JolokiaContext context) {
+        List<SimplifierAccessor<?>> services = LocalServiceFactory.createServices(this.getClass().getClassLoader(),
             SIMPLIFIERS_DEFAULT_DEF, SIMPLIFIERS_DEF);
 
         if (LocalServiceFactory.validateServices(services, context)) {
-            pHandlers.addAll(services);
+            pSimplifiers.addAll(services);
         }
     }
+
 }

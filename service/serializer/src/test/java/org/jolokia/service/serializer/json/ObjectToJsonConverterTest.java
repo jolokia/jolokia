@@ -8,6 +8,7 @@ import java.util.*;
 
 import javax.management.*;
 
+import org.jolokia.json.JSONObject;
 import org.jolokia.service.serializer.object.ObjectToObjectConverter;
 import org.jolokia.server.core.service.serializer.SerializeOptions;
 import org.testng.annotations.*;
@@ -43,7 +44,7 @@ public class ObjectToJsonConverterTest {
 
     @BeforeMethod
     public void setup() {
-        converter = new ObjectToJsonConverter(new ObjectToObjectConverter());
+        converter = new ObjectToJsonConverter(new ObjectToObjectConverter(), null);
         converter.setupContext();
     }
 
@@ -106,29 +107,28 @@ public class ObjectToJsonConverterTest {
         field.set(opts,pVal);
     }
 
-
     @Test
     public void customSimplifier() throws AttributeNotFoundException {
         Date date = new Date();
-        @SuppressWarnings("unchecked")
-        Map<String, ?> result = (Map<String, ?>) converter.extractObject(date, new LinkedList<>(), true);
-        assertEquals(date.getTime(),result.get("millis"));
+        JSONObject result = (JSONObject) converter.extractObject(date, new LinkedList<>(), true);
+        assertNotNull(result);
+        assertEquals(date.getTime(), result.get("millis"));
     }
 
     @Test
     public void fileSimplifier() throws AttributeNotFoundException {
-        @SuppressWarnings("unchecked")
-        Map<String, ?> result = (Map<String, ?>) converter.extractObject(new File("/tmp"), new LinkedList<>(), true);
+        JSONObject result = (JSONObject) converter.extractObject(new File("/tmp"), new LinkedList<>(), true);
+        assertNotNull(result);
         assertNull(result.get("parent"));
     }
 
     @Test
-    public void customNegativeSimpifier() throws MalformedObjectNameException, AttributeNotFoundException {
+    public void customNegativeSimplifier() throws MalformedObjectNameException, AttributeNotFoundException {
         ObjectName name = new ObjectName("java.lang:type=Memory");
-        @SuppressWarnings("unchecked")
-        Map<String, ?> result = (Map<String, ?>) converter.extractObject(name, new LinkedList<>(), true);
-        // Since we removed the objectname simplifier from the list of simplifiers-default
-        // explicitely, the converter should return the full-blown object;
+        JSONObject result = (JSONObject) converter.extractObject(name, new LinkedList<>(), true);
+        // Since we removed the objectName simplifier from the list of simplifiers-default
+        // explicitly, the converter should return the full-blown object;
+        assertNotNull(result);
         assertEquals("type=Memory",result.get("canonicalKeyPropertyListString"));
     }
 
@@ -159,7 +159,6 @@ public class ObjectToJsonConverterTest {
         assertEquals("fcn", bean.getArray()[0]);
     }
 
-    // TODO: this should be handled better
     @Test(expectedExceptions = IndexOutOfBoundsException.class)
     public void setInnerValueTestWithoutPathParts() throws IllegalAccessException, AttributeNotFoundException, InvocationTargetException {
         InnerValueTestBean bean = new InnerValueTestBean("foo", "bar", "baz");
@@ -167,7 +166,6 @@ public class ObjectToJsonConverterTest {
         converter.setInnerValue(bean, "blub", new ArrayList<>());
     }
 
-    // TODO: this should be handled better
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void setInnerValueTestWithIncompatiblePathPart() throws IllegalAccessException, AttributeNotFoundException, InvocationTargetException {
         InnerValueTestBean bean = new InnerValueTestBean("foo", "bar", "baz");
@@ -324,4 +322,5 @@ public class ObjectToJsonConverterTest {
             this.transientValue = transientValue;
         }
     }
+
 }

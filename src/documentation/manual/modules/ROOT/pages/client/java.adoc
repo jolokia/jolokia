@@ -282,19 +282,19 @@ Example: `\http://tom:sEcReT@my.proxy.com:8080`
 |
 
 |`responseExtractor`
-|A response extractor can be used for hooking into the JSON
+|A response objectAccessor can be used for hooking into the JSON
 deserialization process when a JSON response is converted
 into a `J4pResponse` object. By
 default, the received JSON object is examined for a status
 code of 200 and only then creates a response
-object. Otherwise an exception is thrown. An extractor is
+object. Otherwise an exception is thrown. An objectAccessor is
 specified by the interface
 `J4pResponseExtractor`. Beside the
-default extractor, an alternate extractor
+default objectAccessor, an alternate objectAccessor
 `ValidatingResponseExtractor` can be
 used, which instead of throwing an exception returns a
 `null` object when the response has a status of
-404. An extractor can be specified as extra argument to the
+404. An objectAccessor can be specified as extra argument to the
 execute method, too.
 |
 |===

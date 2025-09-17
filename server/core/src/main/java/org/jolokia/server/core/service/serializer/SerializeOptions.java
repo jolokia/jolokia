@@ -20,11 +20,11 @@ package org.jolokia.server.core.service.serializer;
  * Options object influencing the serializing of JSON objects.
  * E.g. the max serialization depth when serializing a complex object.
  * <p>
- * JsonConvertOptions are create via a Builder. This Builder can get hard limits
+ * JsonConvertOptions are created via a Builder. This Builder can get hard limits
  * during construction time and can be reused. After each "build()" the
  * Builder is reset (except for the hard limits). Hard limits can be exceeded
  * when setting the actual values and can be used to ensure, that serialization
- * does not goe crazy.
+ * does not go crazy.
  * <p>
  * A limit of 0 means, that there is no limit set at all for this value.
  *

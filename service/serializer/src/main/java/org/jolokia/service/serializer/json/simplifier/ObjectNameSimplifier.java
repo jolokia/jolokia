@@ -1,7 +1,3 @@
-package org.jolokia.service.serializer.json.simplifier;
-
-import javax.management.ObjectName;
-
 /*
  * Copyright 2009-2013 Roland Huss
  *
@@ -17,7 +13,9 @@ import javax.management.ObjectName;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.service.serializer.json.simplifier;
 
+import javax.management.ObjectName;
 
 /**
  * Special deserialization for ObjectNames to their canonical format. It represents an
@@ -27,7 +25,7 @@ import javax.management.ObjectName;
  * @author roland
  * @since Jul 27, 2009
  */
-public class ObjectNameSimplifier extends SimplifierExtractor<ObjectName> {
+public class ObjectNameSimplifier extends SimplifierAccessor<ObjectName> {
 
     /**
      * Default constructor
@@ -37,13 +35,16 @@ public class ObjectNameSimplifier extends SimplifierExtractor<ObjectName> {
         addExtractor("objectName", new ObjectNameAttributeExtractor());
     }
 
-    // ==================================================================================
+    @Override
+    public String extractString(Object pValue) {
+        return ((ObjectName) pValue).getCanonicalName();
+    }
 
-    /** {@inheritDoc} */
     private static class ObjectNameAttributeExtractor implements AttributeExtractor<ObjectName> {
-        /** {@inheritDoc} */
+        @Override
         public Object extract(ObjectName value)  {
             return value.getCanonicalName();
         }
     }
+
 }

@@ -26,11 +26,16 @@ import org.testng.annotations.Test;
  * @since Jul 2, 2010
  */
 @Test(enabled = false)
-public class TestSimplifier extends SimplifierExtractor<Date> {
+public class TestSimplifier extends SimplifierAccessor<Date> {
     public TestSimplifier() {
         super(Date.class);
 
-        Object[][] pAttrs = {{"millis", (AttributeExtractor<Date>) Date::getTime}};
-        addExtractors(pAttrs);
+        addExtractor("millis", Date::getTime);
     }
+
+    @Override
+    public String extractString(Object pValue) {
+        return "UNIX-time:" + ((Date) pValue).getTime();
+    }
+
 }

@@ -36,10 +36,10 @@ class CompositeTypeConverter extends OpenTypeConverter<CompositeType> {
     /**
      * Constructor
      *
-     * @param pOpenTypeDeserializer parent converter used for recursive conversion
+     * @param pObjectToOpenTypeConverter parent converter used for recursive conversion
      */
-    CompositeTypeConverter(OpenTypeDeserializer pOpenTypeDeserializer) {
-        super(pOpenTypeDeserializer);
+    CompositeTypeConverter(ObjectToOpenTypeConverter pObjectToOpenTypeConverter) {
+        super(pObjectToOpenTypeConverter);
     }
 
     @Override
@@ -92,7 +92,7 @@ class CompositeTypeConverter extends OpenTypeConverter<CompositeType> {
             }
             // don't put null values - will be added (if type allows) later
             if (value != null) {
-                Object convertedValue = openTypeDeserializer.convert(pType.getType(key), value);
+                Object convertedValue = objectToOpenTypeConverter.convert(pType.getType(key), value);
                 pCompositeValues.put(key, convertedValue);
             }
         }

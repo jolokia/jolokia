@@ -29,7 +29,7 @@ Only implementations of detectors and simplifiers were detected respectively fro
 In Jolokia 2 there's another resource checked - `services[-default]` and additionaly the declaration files were moved to more specific location:
 
 * `META-INF/jolokia/detectors[-default]` (implementations of `org.jolokia.server.core.detector.ServerDetector`)
-* `META-INF/jolokia/simplifiers[-default]` (implementations of `org.jolokia.service.serializer.json.Extractor`)
+* `META-INF/jolokia/simplifiers[-default]` (implementations of `org.jolokia.service.serializer.json.ObjectAccessor`)
 * `META-INF/jolokia/services[-default]` (implementations of `org.jolokia.server.core.service.api.JolokiaService`)
 
 For example, what was a dedicated `org.jolokia.history.HistoryStore` in Jolokia 1, used directly by `org.jolokia.backend.BackendManager` is now used by `org.jolokia.service.history.HistoryMBeanRequestInterceptor` _Jolokia service_ declared in `META-INF/jolokia/services-default` resource in `org.jolokia:jolokia-service-history` module.

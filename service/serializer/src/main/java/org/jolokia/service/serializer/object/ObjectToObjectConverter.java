@@ -18,28 +18,35 @@ package org.jolokia.service.serializer.object;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import javax.management.ObjectName;
 
 import org.jolokia.json.JSONArray;
 import org.jolokia.json.JSONObject;
 import org.jolokia.json.parser.ParseException;
+import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.util.ClassUtil;
 import org.jolokia.server.core.util.DateUtil;
 import org.jolokia.server.core.util.EscapeUtil;
+import org.jolokia.service.serializer.json.DateFormatConfiguration;
+import org.jolokia.service.serializer.json.ObjectAccessor;
 
 /**
  * <p>Converter from some object representation to desired target type.
@@ -58,6 +65,11 @@ public class ObjectToObjectConverter implements Converter<String> {
     private static final Map<String, Class<?>> PRIMITIVE_TYPE_MAP = new HashMap<>();
     private static final Map<String, Parser> PARSER_MAP = new HashMap<>();
 
+    // String parser is special, because it can be configured with discovered simplifiers
+    private static final StringParser stringParser;
+    // date/calendar/temporal parsers can be configured with date format
+    private static final DateParser dateParser;
+    private static final CalendarParser calendarParser;
     private static final TemporalParser temporalParser;
 
     private static final BigDecimal MIN_FLOAT = new BigDecimal(-Float.MAX_VALUE);
@@ -117,28 +129,67 @@ public class ObjectToObjectConverter implements Converter<String> {
         PARSER_MAP.put("double", doubleParser);
 
         // java.lang, java.util, javax.management types for Open MBeans
-        PARSER_MAP.put(String.class.getName(), new StringParser());
+        stringParser = new StringParser();
+        PARSER_MAP.put(String.class.getName(), stringParser);
         PARSER_MAP.put(BigDecimal.class.getName(), new BigDecimalParser());
         PARSER_MAP.put(BigInteger.class.getName(), new BigIntegerParser());
-        PARSER_MAP.put(Date.class.getName(), new DateParser());
+        dateParser = new DateParser();
+        PARSER_MAP.put(Date.class.getName(), dateParser);
         PARSER_MAP.put(ObjectName.class.getName(), new ObjectNameParser());
 
         // javax.management.openmbean.ArrayType/CompositeType/TabularType for Open MBeans (?)
 
         // other simple types not part of Open MBeans
         PARSER_MAP.put(URL.class.getName(), new URLParser());
-        PARSER_MAP.put(Calendar.class.getName(), new CalendarParser());
+        PARSER_MAP.put(URI.class.getName(), new URIParser());
+        // Calendar is not an actual class of object being parsed, but a target interface and we don't
+        // use instanceof here
+        calendarParser = new CalendarParser();
+        PARSER_MAP.put(Calendar.class.getName(), calendarParser);
 
-        // types that can be parser from JSON
+        // types that can be parsed from JSON
+        // while List and Map are interfaces, we don't use pValue.getClass() as the key, only the desired
+        // target type
         JSONParser jsonParser = new JSONParser();
         PARSER_MAP.put(List.class.getName(), jsonParser);
         PARSER_MAP.put(JSONArray.class.getName(), jsonParser);
         PARSER_MAP.put(Map.class.getName(), jsonParser);
         PARSER_MAP.put(JSONObject.class.getName(), jsonParser);
 
-        // for target types where instanceof / java.lang.Class.isAssignableFrom() can be used - we can't
+        // for target types where instanceof/java.lang.Class.isAssignableFrom()/package can be used - we can't
         // simply put the type into PARSER_MAP
         temporalParser = new TemporalParser();
+    }
+
+    public ObjectToObjectConverter() {
+        // will create default date format configuration
+        setJolokiaContext(null);
+    }
+
+    /**
+     * When this converter is configured with {@link JolokiaContext}, we can get configuration of some
+     * conversion-related properties like date format.
+     *
+     * @param pJolokiaContext
+     */
+    public void setJolokiaContext(JolokiaContext pJolokiaContext) {
+        // better configuration of date formats
+        DateFormatConfiguration dateFormatConfiguration = new DateFormatConfiguration(pJolokiaContext);
+
+        stringParser.setDateFormatConfiguration(dateFormatConfiguration);
+        dateParser.setDateFormatConfiguration(dateFormatConfiguration);
+        calendarParser.setDateFormatConfiguration(dateFormatConfiguration);
+        temporalParser.setDateFormatConfiguration(dateFormatConfiguration);
+    }
+
+    /**
+     * We can configure {@link ObjectAccessor#supportsStringConversion() stringConverters} for discoverable
+     * String serialization for custom (and some built-in) types
+     *
+     * @param stringConverters
+     */
+    public void setStringConverters(Map<Class<?>, ObjectAccessor> stringConverters) {
+        stringParser.setStringConverters(stringConverters);
     }
 
     /**
@@ -183,7 +234,7 @@ public class ObjectToObjectConverter implements Converter<String> {
         // quick win without conversion
         if (pExpectedClass.isAssignableFrom(pValue.getClass())) {
             if (pExpectedClass == String.class) {
-                return convertFromString(String.class, (String) pValue);
+                return EscapeUtil.convertSpecialStringTags((String) pValue);
             }
             return pValue;
         }
@@ -216,7 +267,7 @@ public class ObjectToObjectConverter implements Converter<String> {
                 return parser.parse(pValue);
             }
 
-            if (pExpectedClass.getPackage().getName().equals("java.time") && temporalParser.supports(pValue.getClass(), pValue)) {
+            if (pExpectedClass.getPackage() == Instant.class.getPackage() && temporalParser.supports(pValue.getClass(), pValue)) {
                 // we'll try to parse non-String as some Temporal values
                 return temporalParser.extract(pExpectedClass, pValue);
             }
@@ -446,6 +497,17 @@ public class ObjectToObjectConverter implements Converter<String> {
         }
     }
 
+    /**
+     * Interface for {@link Parser parsers} which want to use specific {@link DateFormatConfiguration}
+     */
+    private interface DateFormatConfigurationAware {
+        /**
+         * Configure with {@link DateFormatConfiguration}
+         * @param configuration
+         */
+        void setDateFormatConfiguration(DateFormatConfiguration configuration);
+    }
+
     // implementations for direct type matching
 
     private static class BooleanParser implements Parser {
@@ -588,10 +650,138 @@ public class ObjectToObjectConverter implements Converter<String> {
         }
     }
 
-    private static class StringParser implements Parser {
+    /**
+     * <p>String {@link Parser} is a bit special. We want to avoid blindly calling {@code .toString()} when converting
+     * to strings. To String conversion is however very important if we need strings - for example
+     * as {@link Map} keys when serializing maps to JSON. This means we need to be able to explicitly
+     * support several types as potential map keys.</p>
+     *
+     * <p>Some JDK classes are known for having good {@code .toString()} implementation and we should use them.
+     * However {@link Date#toString()} is not something we should rely on.</p>
+     *
+     * <p>For example see <a href="https://github.com/jolokia/jolokia/issues/732">jolokia/jolokia#732</a> when
+     * handling {@code Map<InetAddress, Float>} for Cassandra.</p>
+     */
+    private static class StringParser implements Parser, DateFormatConfigurationAware {
+
+        // cache for classes with .toString() that we can call or will never call
+        private static final Set<Class<?>> KNOWN_TO_STRING = Collections.synchronizedSet(new HashSet<>());
+        private static final Set<Class<?>> UNDESIRED_TO_STRING = new HashSet<>();
+
+        private static final Map<Class<?>, ObjectAccessor> ACCESSORS = new HashMap<>();
+        private static final Map<Class<?>, ObjectAccessor> ALL_ACCESSORS = Collections.synchronizedMap(new HashMap<>());
+
+        static {
+            // All javax.management.openmbean.SimpleTypes for OpenMBeans
+            KNOWN_TO_STRING.add(Boolean.class);
+            KNOWN_TO_STRING.add(Character.class);
+            KNOWN_TO_STRING.add(Byte.class);
+            KNOWN_TO_STRING.add(Short.class);
+            KNOWN_TO_STRING.add(Integer.class);
+            KNOWN_TO_STRING.add(Long.class);
+            KNOWN_TO_STRING.add(Float.class);
+            KNOWN_TO_STRING.add(Double.class);
+            KNOWN_TO_STRING.add(BigInteger.class);
+            KNOWN_TO_STRING.add(BigDecimal.class);
+            UNDESIRED_TO_STRING.add(Date.class);
+            // supported as DateAccessor
+//            SUPPORTED.add(Date.class);
+            // supported as simplifier
+//            KNOWN_TO_STRING.add(ObjectName.class);
+
+            // java.time - uses configurable patterns
+            // supported via JavaTimeTemporalAccessor
+//            SUPPORTED.add(Instant.class);
+//            SUPPORTED.add(LocalDate.class);
+//            SUPPORTED.add(LocalDateTime.class);
+//            SUPPORTED.add(LocalTime.class);
+//            SUPPORTED.add(OffsetDateTime.class);
+//            SUPPORTED.add(OffsetTime.class);
+//            SUPPORTED.add(Year.class);
+//            SUPPORTED.add(YearMonth.class);
+//            SUPPORTED.add(ZonedDateTime.class);
+
+            // some random JDK classes that may be used in map keys
+            // Class, Package and Module supported as simplifiers
+//            SUPPORTED.add(Class.class);
+//            SUPPORTED.add(Package.class);
+//            SUPPORTED.add(Module.class);
+            // supported as simplifier
+//            KNOWN_TO_STRING.add(URI.class);
+//            KNOWN_TO_STRING.add(URL.class);
+//            SUPPORTED.add(Calendar.class);
+            // 2 types of InetAddresses supported via simplifiers
+//            KNOWN_TO_STRING.add(Inet4Address.class);
+//            KNOWN_TO_STRING.add(Inet6Address.class);
+            KNOWN_TO_STRING.add(Locale.class);
+            KNOWN_TO_STRING.add(UUID.class);
+        }
+
+        private DateFormatConfiguration dateFormatConfiguration;
+
+        public StringParser() {
+            this.dateFormatConfiguration = new DateFormatConfiguration();
+        }
+
+        @Override
+        public void setDateFormatConfiguration(DateFormatConfiguration configuration) {
+            this.dateFormatConfiguration = configuration;
+        }
+
+        public void setStringConverters(Map<Class<?>, ObjectAccessor> accessors) {
+            ACCESSORS.putAll(accessors);
+            ALL_ACCESSORS.putAll(accessors);
+        }
+
         @Override
         public Object parse(String pValue) {
             return pValue;
+        }
+
+        @Override
+        public Object parse(Object pValue) {
+            // first with dedicated accessor
+            ObjectAccessor accessor = ALL_ACCESSORS.get(pValue.getClass());
+            // we assume it supports conversion to String - otherwise we'd not get it via setStringConverters
+            if (accessor != null) {
+                return accessor.extractString(pValue);
+            }
+
+            // last - toString() where we know it's fine
+            if (KNOWN_TO_STRING.contains(pValue.getClass())) {
+                return pValue.toString();
+            }
+
+            throw new IllegalArgumentException("Can't convert " + pValue.getClass().getName() + " to String");
+        }
+
+        @Override
+        public boolean supports(Class<?> pValueClass, Object pValue) {
+            if (KNOWN_TO_STRING.contains(pValueClass) || ALL_ACCESSORS.containsKey(pValueClass)) {
+                return true;
+            }
+            // org.jolokia.service.serializer.json.ObjectAccessor.extractString() checking
+            for (Map.Entry<Class<?>, ObjectAccessor> entry : ACCESSORS.entrySet()) {
+                Class<?> c = entry.getKey();
+                ObjectAccessor accessor = entry.getValue();
+                if (c.isAssignableFrom(pValueClass)) {
+                    ALL_ACCESSORS.put(pValueClass, accessor);
+                    return true;
+                }
+            }
+            // toString() checking
+            if (!UNDESIRED_TO_STRING.contains(pValueClass)) {
+                try {
+                    Method toString = pValueClass.getMethod("toString");
+                    if (toString.getDeclaringClass() != Object.class) {
+                        KNOWN_TO_STRING.add(pValueClass);
+                        return true;
+                    }
+                } catch (NoSuchMethodException ignored) {
+                }
+            }
+
+            return false;
         }
     }
 
@@ -599,6 +789,26 @@ public class ObjectToObjectConverter implements Converter<String> {
         @Override
         public Object parse(String pValue) {
             return new BigDecimal(pValue);
+        }
+
+        @Override
+        public Object parse(Object pValue) {
+            Number n = (Number) pValue;
+            if (n instanceof Float) {
+                // BigDecimal(float) gives different (worse!) result than BigDecimal(float.toString())...
+//                return new BigDecimal(n.floatValue());
+                return new BigDecimal(Float.toString((Float) n));
+            }
+            if (n instanceof Double) {
+//                return new BigDecimal(n.doubleValue());
+                return new BigDecimal(Double.toString((Double) n));
+            }
+            return new BigDecimal(n.toString());
+        }
+
+        @Override
+        public boolean supports(Class<?> pValueClass, Object pValue) {
+            return pValue instanceof Number;
         }
     }
 
@@ -609,13 +819,32 @@ public class ObjectToObjectConverter implements Converter<String> {
         }
     }
 
-    private static class DateParser implements Parser {
+    private static class DateParser implements Parser, DateFormatConfigurationAware {
+        private DateFormatConfiguration dateFormatConfiguration;
+
+        @Override
+        public void setDateFormatConfiguration(DateFormatConfiguration configuration) {
+            this.dateFormatConfiguration = configuration;
+        }
+
         @Override
         public Object parse(String pValue) {
             try {
-                long time = Long.parseLong(pValue);
-                return new Date(time);
-            } catch (NumberFormatException exp) {
+                if (dateFormatConfiguration.usesUnixTime()) {
+                    Long v = Long.parseLong(pValue);
+                    return dateFormatConfiguration.unixTimeToDate(v);
+                } else {
+                    // still, user (or test case) may have sent long value despite the configuration
+                    // but we have to assume it's millis
+                    try {
+                        return dateFormatConfiguration.unixTimeInMillisToDate(Long.parseLong(pValue));
+                    } catch (NumberFormatException e) {
+                        // we expect value according to configured format
+                        return dateFormatConfiguration.parseAsDate(pValue);
+                    }
+                }
+            } catch (NumberFormatException | java.text.ParseException exp) {
+                // this is fallback after expecting long or proper format
                 return DateUtil.fromISO8601(pValue);
             }
         }
@@ -632,6 +861,13 @@ public class ObjectToObjectConverter implements Converter<String> {
         }
     }
 
+    private static class URIParser implements Parser {
+        @Override
+        public Object parse(String pValue) {
+            return URI.create(pValue);
+        }
+    }
+
     private static class URLParser implements Parser {
         @Override
         public Object parse(String pValue) {
@@ -643,16 +879,43 @@ public class ObjectToObjectConverter implements Converter<String> {
         }
     }
 
-    private static class CalendarParser implements Parser {
+    private static class CalendarParser implements Parser, DateFormatConfigurationAware {
+        private DateFormatConfiguration dateFormatConfiguration;
+
+        @Override
+        public void setDateFormatConfiguration(DateFormatConfiguration configuration) {
+            this.dateFormatConfiguration = configuration;
+        }
+
         @Override
         public Object parse(String pValue) {
-            Calendar result = Calendar.getInstance();
             try {
-                long time = Long.parseLong(pValue);
-                result.setTime(new Date(time));
-                return result;
-            } catch (NumberFormatException exp) {
+                if (dateFormatConfiguration.usesUnixTime()) {
+                    Long v = Long.parseLong(pValue);
+                    Date date = dateFormatConfiguration.unixTimeToDate(v);
+                    Calendar result = Calendar.getInstance();
+                    result.setTime(date);
+                    return result;
+                } else {
+                    // still, user (or test case) may have sent long value despite the configuration
+                    // but we have to assume it's millis
+                    try {
+                        Date date = dateFormatConfiguration.unixTimeInMillisToDate(Long.parseLong(pValue));
+                        Calendar result = Calendar.getInstance();
+                        result.setTime(date);
+                        return result;
+                    } catch (NumberFormatException e) {
+                        // we expect value according to configured format
+                        Date date = dateFormatConfiguration.parseAsDate(pValue);
+                        Calendar result = Calendar.getInstance();
+                        result.setTime(date);
+                        return result;
+                    }
+                }
+            } catch (NumberFormatException | java.text.ParseException exp) {
+                // this is fallback after expecting long or proper format
                 Date date = DateUtil.fromISO8601(pValue);
+                Calendar result = Calendar.getInstance();
                 result.setTime(date);
                 return result;
             }
@@ -673,30 +936,47 @@ public class ObjectToObjectConverter implements Converter<String> {
         }
     }
 
-    private static class TemporalParser {
+    private static class TemporalParser implements DateFormatConfigurationAware {
+        private DateFormatConfiguration dateFormatConfiguration;
+
+        @Override
+        public void setDateFormatConfiguration(DateFormatConfiguration configuration) {
+            this.dateFormatConfiguration = configuration;
+        }
+
         public Object extract(Class<?> temporalType, String pValue) {
-            // client should send a unix nano time
             try {
-                long unixNano = Long.parseLong(pValue);
-                return extract(temporalType, unixNano);
-            } catch (NumberFormatException e) {
-                throw new IllegalArgumentException("Cannot parse Temporal " + pValue + ": " + e, e);
+                if (dateFormatConfiguration.usesUnixTime()) {
+                    Long v = Long.parseLong(pValue);
+                    return dateFormatConfiguration.unixTimeToTemporal(temporalType, v);
+                } else {
+                    // still, user (or test case) may have sent long value despite the configuration
+                    // but we have to assume it's millis
+                    try {
+                        return dateFormatConfiguration.unixTimeInNanosToTemporal(temporalType, Long.parseLong(pValue));
+                    } catch (NumberFormatException e) {
+                        // we expect value according to configured format
+                        return dateFormatConfiguration.parseAsTemporal(temporalType, pValue);
+                    }
+                }
+            } catch (NumberFormatException exp) {
+                throw new IllegalArgumentException("Cannot create " + temporalType + " from \"" + pValue + "\"");
             }
         }
 
         public Object extract(Class<?> temporalType, Object pValue) {
-            long unixNano = ((Number) pValue).longValue();
-            // we assume that an instant is always in UTC
-            Instant instant = Instant.ofEpochSecond(unixNano / 1_000_000_000, unixNano % 1_000_000_000);
-            if (temporalType == Instant.class) {
-                return instant;
+            if (pValue instanceof Number) {
+                if (dateFormatConfiguration.usesUnixTime()) {
+                    return dateFormatConfiguration.unixTimeToTemporal(temporalType, ((Number) pValue).longValue());
+                } else {
+                    // despite the configuration, user has sent Long value, so let's convert from nanos
+                    // which is the default (for now) behavior for jolokia-client-java
+                    return dateFormatConfiguration.unixTimeInNanosToTemporal(temporalType, ((Number) pValue).longValue());
+                }
+            } else if (pValue instanceof String) {
+                return extract(temporalType, (String) pValue);
             }
-            if (temporalType == OffsetDateTime.class) {
-                return OffsetDateTime.ofInstant(instant, ZoneId.of("UTC"));
-            }
-            if (temporalType == ZonedDateTime.class) {
-                return ZonedDateTime.ofInstant(instant, ZoneId.of("UTC"));
-            }
+
             throw new IllegalArgumentException("Cannot handle Temporal of class \"" + temporalType + "\" for value " + pValue);
         }
 

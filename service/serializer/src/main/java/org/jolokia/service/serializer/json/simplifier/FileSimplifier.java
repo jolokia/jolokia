@@ -1,8 +1,3 @@
-package org.jolokia.service.serializer.json.simplifier;
-
-import java.io.File;
-import java.io.IOException;
-
 /*
  * Copyright 2009-2013 Roland Huss
  *
@@ -18,7 +13,10 @@ import java.io.IOException;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.service.serializer.json.simplifier;
 
+import java.io.File;
+import java.io.IOException;
 
 /**
  * Special deserialization for Files to shorten the info
@@ -26,7 +24,7 @@ import java.io.IOException;
  * @author roland
  * @since Jul 27, 2009
  */
-public class FileSimplifier extends SimplifierExtractor<File> {
+public class FileSimplifier extends SimplifierAccessor<File> {
 
     /**
      * Default constructor
@@ -34,37 +32,46 @@ public class FileSimplifier extends SimplifierExtractor<File> {
     public FileSimplifier() {
         super(File.class);
 
-        Object[][] attrExtractors = {
-                { "name", new NameAttributeExtractor() },
-                { "length", new LengthAttributeExtractor() },
-                { "directory", new IsDirectoryAttributeExtractor() },
-                { "canonicalPath", new PathAttributeExtractor() },
-                { "exists", new ExistsAttributeExtractor() },
-                { "lastModified", new LastModifiedAttributeExtractor()}
-        };
-
-        addExtractors(attrExtractors);
+        addExtractor("name", new NameAttributeExtractor());
+        addExtractor("length", new LengthAttributeExtractor());
+        addExtractor("directory", new IsDirectoryAttributeExtractor());
+        addExtractor("canonicalPath", new PathAttributeExtractor());
+        addExtractor("exists", new ExistsAttributeExtractor());
+        addExtractor("lastModified", new LastModifiedAttributeExtractor());
     }
 
-    // ==========================================================================
-    // Static inner classes as usage extractors
+    @Override
+    public String extractString(Object pValue) {
+        try {
+            return ((File) pValue).getCanonicalPath();
+        } catch (IOException e) {
+            return ((File) pValue).getAbsolutePath();
+        }
+    }
+
     private static class NameAttributeExtractor implements AttributeExtractor<File> {
-        /** {@inheritDoc} */
-        public Object extract(File file) { return file.getName(); }
+        @Override
+        public Object extract(File file) {
+            return file.getName();
+        }
     }
 
     private static class LengthAttributeExtractor implements AttributeExtractor<File> {
-        /** {@inheritDoc} */
-        public Object extract(File file) { return file.length(); }
+        @Override
+        public Object extract(File file) {
+            return file.length();
+        }
     }
 
     private static class IsDirectoryAttributeExtractor implements AttributeExtractor<File> {
-        /** {@inheritDoc} */
-        public Object extract(File file) { return file.isDirectory(); }
+        @Override
+        public Object extract(File file) {
+            return file.isDirectory();
+        }
     }
 
     private static class PathAttributeExtractor implements AttributeExtractor<File> {
-        /** {@inheritDoc} */
+        @Override
         public Object extract(File file) {
             try {
                 return file.getCanonicalPath();
@@ -73,13 +80,19 @@ public class FileSimplifier extends SimplifierExtractor<File> {
             }
         }
     }
+
     private static class ExistsAttributeExtractor implements AttributeExtractor<File> {
-        /** {@inheritDoc} */
-        public Object extract(File file) { return file.exists(); }
+        @Override
+        public Object extract(File file) {
+            return file.exists();
+        }
     }
 
     private static class LastModifiedAttributeExtractor implements AttributeExtractor<File> {
-        /** {@inheritDoc} */
-        public Object extract(File value) { return value.lastModified(); }
+        @Override
+        public Object extract(File value) {
+            return value.lastModified();
+        }
     }
+
 }

@@ -5,6 +5,7 @@ import java.lang.management.ManagementFactory;
 
 import javax.management.*;
 import javax.management.openmbean.CompositeData;
+import javax.management.openmbean.TabularData;
 
 import org.jolokia.server.core.request.*;
 import org.jolokia.server.core.service.serializer.Serializer;
@@ -131,7 +132,8 @@ public class OpenExecHandlerTest {
                 operation("opSetData").
                 arguments("[ { \"stringField\":\"aString\" } ]").
                 build();
-        handler.handleSingleServerRequest(getMBeanServer(), request);
+        Object o = handler.handleSingleServerRequest(getMBeanServer(), request);
+        assertTrue(o instanceof CompositeData[]);
     }
 
     /**
@@ -143,7 +145,8 @@ public class OpenExecHandlerTest {
                 operation("mapData").
                 arguments("{ \"aKey\":{ \"stringField\":\"aString\" } }").
                 build();
-        handler.handleSingleServerRequest(getMBeanServer(), request);
+        Object o = handler.handleSingleServerRequest(getMBeanServer(), request);
+        assertTrue(o instanceof TabularData);
     }
 
     /**

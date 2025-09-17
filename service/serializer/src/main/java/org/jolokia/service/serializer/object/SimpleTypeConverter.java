@@ -32,12 +32,12 @@ class SimpleTypeConverter extends OpenTypeConverter<SimpleType<?>> {
     /**
      * Constructor
      *
-     * @param pOpenTypeDeserializer    parent converter (not used here, because simple types do not contain other
+     * @param pObjectToOpenTypeConverter    parent converter (not used here, because simple types do not contain other
      *                                 values)
      * @param pObjectToObjectConverter object to object converter for transforming simple types
      */
-    SimpleTypeConverter(OpenTypeDeserializer pOpenTypeDeserializer, Converter<String> pObjectToObjectConverter) {
-        super(pOpenTypeDeserializer);
+    SimpleTypeConverter(ObjectToOpenTypeConverter pObjectToOpenTypeConverter, Converter<String> pObjectToObjectConverter) {
+        super(pObjectToOpenTypeConverter);
         objectToObjectConverter = pObjectToObjectConverter;
     }
 

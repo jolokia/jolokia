@@ -3,7 +3,6 @@ package org.jolokia.service.serializer.json;
 import org.jolokia.json.JSONObject;
 import org.jolokia.server.core.service.serializer.SerializeOptions;
 import org.jolokia.server.core.service.serializer.ValueFaultHandler;
-import org.jolokia.service.serializer.json.simplifier.BigIntegerSimplifier;
 import org.jolokia.service.serializer.json.simplifier.FileSimplifier;
 import org.jolokia.service.serializer.json.simplifier.UrlSimplifier;
 import org.testng.annotations.BeforeMethod;
@@ -14,7 +13,10 @@ import java.io.File;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -26,34 +28,33 @@ import static org.testng.Assert.assertTrue;
 @Test()
 public class SimplifiersTest {
 
-    private BigIntegerSimplifier bigIntegerSimplifier;
     private UrlSimplifier urlSimplifier;
     private ObjectToJsonConverter converter;
     private FileSimplifier fileSimplifier;
 
     @BeforeMethod
     public void setup() {
-        bigIntegerSimplifier = new BigIntegerSimplifier();
         urlSimplifier = new UrlSimplifier();
         fileSimplifier = new FileSimplifier();
 
         // Needed for subclassing final object
-        converter = new ObjectToJsonConverter(null);
+        converter = new ObjectToJsonConverter(null, null);
         converter.setupContext(new SerializeOptions.Builder().faultHandler(ValueFaultHandler.THROWING_VALUE_FAULT_HANDLER).build());
     }
 
     @Test
     public void bigIntegerSimplifier() throws AttributeNotFoundException {
         BigInteger bigInt = new BigInteger("12345678901234567890");
-        Object result = bigIntegerSimplifier.extractObject(converter, bigInt, new LinkedList<>(), false);
+        Object result = converter.extractObject(bigInt, new LinkedList<>(), false);
         assertEquals(result, bigInt);
     }
 
     @Test
     public void bigIntegerSimplifierJson() throws AttributeNotFoundException {
         BigInteger bigInt = new BigInteger("12345678901234567890");
-        Object result = bigIntegerSimplifier.extractObject(converter, bigInt, new LinkedList<>(), true);
-        assertEquals(((JSONObject) result).toJSONString(), "{\"bigint\":\"12345678901234567890\"}");
+        Object result = converter.extractObject(bigInt, new LinkedList<>(), true);
+        // BigInteger is proper JSON value, so no need to convert it to String
+        assertEquals(result, bigInt);
     }
 
     @Test
@@ -61,6 +62,17 @@ public class SimplifiersTest {
         URL url = new URL("https://www.jolokia.org");
         Object result = urlSimplifier.extractObject(converter, url, new LinkedList<>(), false);
         assertEquals(result, url);
+    }
+
+    @Test(expectedExceptions = ValueFaultHandler.AttributeFilteredException.class)
+    public void urlSimplifierWithPaths() throws AttributeNotFoundException, MalformedURLException {
+        URL url = new URL("https://www.jolokia.org");
+        // we can get a "url" property from the object returned by UrlSimplifier
+        Object result = urlSimplifier.extractObject(converter, url, new LinkedList<>(List.of("url")), false);
+        assertEquals(result, "https://www.jolokia.org");
+
+        // but we can't get "bytes" property of a String
+        urlSimplifier.extractObject(converter, url, new LinkedList<>(Arrays.asList("url", "bytes")), false);
     }
 
     @Test

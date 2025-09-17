@@ -16,7 +16,6 @@
 package org.jolokia.service.serializer.object;
 
 import java.io.IOException;
-import java.io.Reader;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -38,17 +37,17 @@ abstract class OpenTypeConverter<T extends OpenType<?>> implements Converter<T> 
     protected boolean forgiving = false;
 
     // parent converter, that can be called for inner elements of given OpenType
-    protected final OpenTypeDeserializer openTypeDeserializer;
+    protected final ObjectToOpenTypeConverter objectToOpenTypeConverter;
 
     /**
      * Constructor which needs the <em>parent</em> converter. This parent converter
      * can be used to dispatch conversion back for inner objects when it comes
      * to convert collection types (like {@link CompositeType} or {@link ArrayType})
      *
-     * @param openTypeDeserializer
+     * @param objectToOpenTypeConverter
      */
-    OpenTypeConverter(OpenTypeDeserializer openTypeDeserializer) {
-        this.openTypeDeserializer = openTypeDeserializer;
+    OpenTypeConverter(ObjectToOpenTypeConverter objectToOpenTypeConverter) {
+        this.objectToOpenTypeConverter = objectToOpenTypeConverter;
     }
 
     /**
@@ -133,7 +132,7 @@ abstract class OpenTypeConverter<T extends OpenType<?>> implements Converter<T> 
      * @return whether I accept (and ignore) values that are not in the target type
      */
     protected boolean isForgiving() {
-        return this.forgiving || (this.openTypeDeserializer != null && this.openTypeDeserializer.isForgiving());
+        return this.forgiving || (this.objectToOpenTypeConverter != null && this.objectToOpenTypeConverter.isForgiving());
     }
 
     /**

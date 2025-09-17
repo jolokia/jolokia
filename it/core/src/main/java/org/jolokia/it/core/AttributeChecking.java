@@ -317,7 +317,7 @@ public class AttributeChecking implements AttributeCheckingMBean,MBeanRegistrati
     public void postDeregister() {
     }
 
-    final static private class TestBean implements Serializable {
+    final static public class TestBean implements Serializable {
         private int value;
         private String name;
 

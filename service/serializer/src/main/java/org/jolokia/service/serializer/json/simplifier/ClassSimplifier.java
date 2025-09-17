@@ -1,5 +1,3 @@
-package org.jolokia.service.serializer.json.simplifier;
-
 /*
  * Copyright 2009-2013 Roland Huss
  *
@@ -15,7 +13,7 @@ package org.jolokia.service.serializer.json.simplifier;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+package org.jolokia.service.serializer.json.simplifier;
 
 /**
  * Simplifier for class objects. It adds a <code>name</code> value and a list of
@@ -25,7 +23,7 @@ package org.jolokia.service.serializer.json.simplifier;
  * @since Jul 27, 2009
  */
 @SuppressWarnings("rawtypes")
-public class ClassSimplifier extends SimplifierExtractor<Class> {
+public class ClassSimplifier extends SimplifierAccessor<Class> {
 
     /**
      * Empty constructor
@@ -33,22 +31,24 @@ public class ClassSimplifier extends SimplifierExtractor<Class> {
     public ClassSimplifier() {
         super(Class.class);
 
-        Object[][] pAttrs = {
-                { "name", new NameAttributeExtractor() },
-                { "interfaces", new InterfaceAttributeExtractor() }
-        };
-        addExtractors(pAttrs);
+        addExtractor("name", new NameAttributeExtractor());
+        addExtractor("interfaces", new InterfaceAttributeExtractor());
     }
 
-    // ==================================================================================
+    @Override
+    public String extractString(Object pValue) {
+        return ((Class<?>) pValue).getName();
+    }
 
     private static class NameAttributeExtractor implements AttributeExtractor<Class> {
-        /** {@inheritDoc} */
-        public Object extract(Class pClass) { return pClass.getName(); }
+        @Override
+        public Object extract(Class pClass) {
+            return pClass.getName();
+        }
     }
 
     private static class InterfaceAttributeExtractor implements AttributeExtractor<Class> {
-        /** {@inheritDoc} */
+        @Override
         public Object extract(Class value) throws SkipAttributeException {
             if (value.isInterface()) {
                 throw new SkipAttributeException();
@@ -56,4 +56,5 @@ public class ClassSimplifier extends SimplifierExtractor<Class> {
             return value.getInterfaces();
         }
     }
+
 }

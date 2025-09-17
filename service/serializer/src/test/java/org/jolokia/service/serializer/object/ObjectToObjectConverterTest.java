@@ -16,6 +16,7 @@ import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.util.DateUtil;
 import org.jolokia.json.JSONArray;
 import org.jolokia.json.JSONObject;
+import org.jolokia.server.core.util.TestJolokiaContext;
 import org.testng.Assert;
 import org.testng.annotations.*;
 
@@ -162,11 +163,24 @@ public class ObjectToObjectConverterTest {
 
     @Test
     public void dateConversion() {
-        Date date = (Date) converter.convertFromString(Date.class.getName(),"0");
+        converter = new ObjectToObjectConverter();
+        converter.setJolokiaContext(new TestJolokiaContext() {
+            @Override
+            public String getConfig(ConfigKey pKey) {
+                if (pKey == ConfigKey.DATE_FORMAT) {
+                    return "time";
+                }
+                return super.getConfig(pKey);
+            }
+        });
+        Date date = (Date) converter.convertFromString(Date.class.getName(), "0");
         assertEquals(0, date.getTime());
         Date now = new Date();
         date = (Date) converter.convertFromString(Date.class.getName(), DateUtil.toISO8601(now));
-        assertEquals(date.getTime() / 1000,now.getTime() / 1000);
+        assertEquals(date.getTime() / 1000, now.getTime() / 1000);
+
+        // cleanup
+        converter = new ObjectToObjectConverter();
     }
 
     @Test(expectedExceptions = { IllegalArgumentException.class})

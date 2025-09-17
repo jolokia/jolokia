@@ -1,7 +1,3 @@
-package org.jolokia.service.serializer.json.simplifier;
-
-import java.net.URL;
-
 /*
  * Copyright 2009-2013 Roland Huss
  *
@@ -17,7 +13,9 @@ import java.net.URL;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.service.serializer.json.simplifier;
 
+import java.net.URL;
 
 /**
  * Simplifier for URLs which result in a map with a single key <code>url</code>
@@ -25,7 +23,7 @@ import java.net.URL;
  * @author roland
  * @since Jul 27, 2009
  */
-public class UrlSimplifier extends SimplifierExtractor<URL> {
+public class UrlSimplifier extends SimplifierAccessor<URL> {
 
     /**
      * No arg constructor as required for simplifiers
@@ -35,8 +33,16 @@ public class UrlSimplifier extends SimplifierExtractor<URL> {
         addExtractor("url", new UrlAttributeExtractor());
     }
 
-    private static class UrlAttributeExtractor implements AttributeExtractor<URL> {
-        /** {@inheritDoc} */
-        public Object extract(URL pUrl) { return pUrl.toExternalForm(); }
+    @Override
+    public String extractString(Object pValue) {
+        return ((URL) pValue).toExternalForm();
     }
+
+    private static class UrlAttributeExtractor implements AttributeExtractor<URL> {
+        @Override
+        public Object extract(URL pUrl) {
+            return pUrl.toExternalForm();
+        }
+    }
+
 }

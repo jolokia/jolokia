@@ -80,6 +80,17 @@ public final class DateUtil {
     }
 
     /**
+     * Convert a given date to an ISO-8601 compliant string with milliseconds
+     * representation for the default timezone
+     *
+     * @param pDate date to convert
+     * @return the ISO-8601 representation of the date
+     */
+    public static String toISO8601WithMilliseconds(Date pDate) {
+        return toISO8601WithMilliseconds(pDate,TimeZone.getDefault());
+    }
+
+    /**
      * Convert a given date to an ISO-8601 compliant string
      * representation for a given timezone
      *
@@ -94,4 +105,21 @@ public final class DateUtil {
         ret = ret.replaceAll("\\+0000$", "Z");
         return ret.replaceAll("(\\d\\d)$", ":$1");
     }
+
+    /**
+     * Convert a given date to an ISO-8601 compliant string with milliseconds
+     * representation for a given timezone
+     *
+     * @param pDate date to convert
+     * @param pTimeZone timezone to use
+     * @return the ISO-8601 representation of the date
+     */
+    public static String toISO8601WithMilliseconds(Date pDate,TimeZone pTimeZone) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+        dateFormat.setTimeZone(pTimeZone);
+        String ret = dateFormat.format(pDate);
+        ret = ret.replaceAll("\\+0000$", "Z");
+        return ret.replaceAll("(\\d\\d)$", ":$1");
+    }
+
 }

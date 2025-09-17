@@ -21,7 +21,6 @@ import java.util.Collection;
 import javax.management.openmbean.*;
 
 import org.jolokia.json.JSONArray;
-import org.jolokia.json.JSONStructure;
 
 /**
  * Converter for {@link ArrayType} which can handle {@link java.util.Collection} values or String values
@@ -35,10 +34,10 @@ class ArrayTypeConverter extends OpenTypeConverter<ArrayType<?>> {
 
     /**
      * Constructor
-     * @param pOpenTypeDeserializer parent converter used for recursively converting inner values
+     * @param pObjectToOpenTypeConverter parent converter used for recursively converting inner values
      */
-    ArrayTypeConverter(OpenTypeDeserializer pOpenTypeDeserializer) {
-        super(pOpenTypeDeserializer);
+    ArrayTypeConverter(ObjectToOpenTypeConverter pObjectToOpenTypeConverter) {
+        super(pObjectToOpenTypeConverter);
     }
 
     @Override
@@ -67,7 +66,7 @@ class ArrayTypeConverter extends OpenTypeConverter<ArrayType<?>> {
 
         int i = 0;
         for (Object element : jsonArray) {
-            Array.set(valueArray, i++, openTypeDeserializer.convert(elementOpenType, element));
+            Array.set(valueArray, i++, objectToOpenTypeConverter.convert(elementOpenType, element));
         }
 
         return valueArray;

@@ -80,10 +80,10 @@ class TabularDataConverter extends OpenTypeConverter<TabularType> {
     /**
      * Constructor
      *
-     * @param pOpenTypeDeserializer parent converter used for recursive conversion
+     * @param pObjectToOpenTypeConverter parent converter used for recursive conversion
      */
-    public TabularDataConverter(OpenTypeDeserializer pOpenTypeDeserializer) {
-        super(pOpenTypeDeserializer);
+    public TabularDataConverter(ObjectToOpenTypeConverter pObjectToOpenTypeConverter) {
+        super(pObjectToOpenTypeConverter);
     }
 
     @Override
@@ -110,8 +110,10 @@ class TabularDataConverter extends OpenTypeConverter<TabularType> {
             return convertTabularDataFromFullRepresentation(pType, givenValues);
         }
 
-        // It's a plain TabularData non conforming to @MXBean specification, which is tried to be converted
-        // from a map of maps. The more elements in the index, the more nested maps we expect.
+        // #3. It's a plain TabularData non conforming to @MXBean specification, which is tried to be converted
+        // from a map of maps. The more elements in the index, the more nested maps we expect. At the lowest level
+        // the map should contain all the keys/values anyway (even if the're recoverable from the nested index
+        // keys and child maps
         TabularDataSupport tabularData = new TabularDataSupport(pType);
         // Recursively go down the map and collect the values
         putRowsToTabularData(pType, givenValues, tabularData, pType.getIndexNames().size());
@@ -232,8 +234,8 @@ class TabularDataConverter extends OpenTypeConverter<TabularType> {
             // HashMap/TreeMap distinguishment is used when converting TabularData back to a Map
             Map<String, Object> map = new HashMap<>();
             // key can be any SimpleType and we'll convert it to OpenType of the "key" item
-            map.put(TD_KEY_KEY, openTypeDeserializer.convert(rowType.getType("key"), entry.getKey()));
-            map.put(TD_KEY_VALUE, openTypeDeserializer.convert(rowType.getType("value"), entry.getValue()));
+            map.put(TD_KEY_KEY, objectToOpenTypeConverter.convert(rowType.getType("key"), entry.getKey()));
+            map.put(TD_KEY_VALUE, objectToOpenTypeConverter.convert(rowType.getType("value"), entry.getValue()));
 
             try {
                 CompositeData compositeData = new CompositeDataSupport(rowType, map);
@@ -312,7 +314,7 @@ class TabularDataConverter extends OpenTypeConverter<TabularType> {
                 throw new IllegalArgumentException("TabularData values must be given as Maps or JSONObjects, not "
                     + val.getClass().getName());
             }
-            tabularData.put((CompositeData) openTypeDeserializer.convert(pType.getRowType(), val));
+            tabularData.put((CompositeData) objectToOpenTypeConverter.convert(pType.getRowType(), val));
         }
 
         return tabularData;
@@ -344,7 +346,7 @@ class TabularDataConverter extends OpenTypeConverter<TabularType> {
                 putRowsToTabularData(pType, jsonValue, pTabularData, pLevel - 1);
             } else {
                 // convert the "final" map into a CompositeDate
-                pTabularData.put((CompositeData) openTypeDeserializer.convert(pType.getRowType(), jsonValue));
+                pTabularData.put((CompositeData) objectToOpenTypeConverter.convert(pType.getRowType(), jsonValue));
             }
         }
     }

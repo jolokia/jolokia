@@ -40,7 +40,7 @@ public interface Serializer extends JolokiaService<Serializer> {
 
     /**
      * Handle conversion for OpenTypes. The value is expected to be in JSON (either
-     * an {@link org.jolokia.json.JSONStructure} object or its string representation.
+     * an {@link org.jolokia.json.JSONStructure} object or its string representation).
      *
      * @param pOpenType target type
      * @param pValue value to convert from
