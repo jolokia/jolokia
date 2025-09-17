@@ -170,7 +170,7 @@ public class BeanAccessorTest extends AbstractObjectAccessorTest {
 
     @Test
     public void simpleWithoutTestSimplifier() throws AttributeNotFoundException, NoSuchFieldException, IllegalAccessException, ParseException {
-        converter = new ObjectToJsonConverter(objectToObjectConverter, new TestJolokiaContext() {
+        converter = new ObjectToJsonConverter(objectToObjectConverter, null, new TestJolokiaContext() {
             @Override
             public String getConfig(ConfigKey pKey) {
                 if (pKey == ConfigKey.DATE_FORMAT) {
@@ -222,7 +222,7 @@ public class BeanAccessorTest extends AbstractObjectAccessorTest {
 
     @Test
     public void calendarsDatesAndTemporals() throws AttributeNotFoundException, NoSuchFieldException, IllegalAccessException, ParseException {
-        converter = new ObjectToJsonConverter(objectToObjectConverter, new TestJolokiaContext() {
+        converter = new ObjectToJsonConverter(objectToObjectConverter, null, new TestJolokiaContext() {
             @Override
             public String getConfig(ConfigKey pKey) {
                 if (pKey == ConfigKey.DATE_FORMAT) {

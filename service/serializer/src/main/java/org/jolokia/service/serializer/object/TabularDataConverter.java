@@ -44,20 +44,24 @@ import org.jolokia.server.core.util.ClassUtil;
  * <li><strong>#1.{@link javax.management.MXBean} compatible {@link Map}/{@link SortedMap}</strong>: requires
  * {@link TabularType#getRowType()} to define two items: {@code key} and {@code value}.
  * {@link TabularType#getIndexNames()} should contain one item: {@code key}. If the type of {@code} item
- * is {@link SimpleType#STRING}, we can convert <em>any</em> map, otherwise we expect maps that can
+ * is {@link SimpleType}, we can convert <em>any</em> map, otherwise we expect maps that can
  * be handled by flavors #2 and #3.</li>
  *
  * <li><strong>#2. non {@code @MXBean} maps with {@code indexNames} and {@code values} top level fields</strong>: this
- * is Jolokia-specific representation.</li>
+ * is Jolokia-specific representation which directly represents {@link TabularData}, where each
+ * {@link TabularType#getRowType() row} is separate JSON object added to JSON array under {@code values} field of
+ * top-level map. This should be used if {@link TabularType#getIndexNames()} point to fields in {@link CompositeType}
+ * which are not {@link SimpleType simple types}.</li>
  *
  * <li><strong>#3. other non {@code @MXBean} maps</strong>: {@link TabularType#getIndexNames()} are nested maps which
- * eventually lead to the values.</li>
+ * eventually lead to the values. This representation is supported only if {@link TabularType#getIndexNames()} point
+ * to fields in {@link CompositeType} which are {@link SimpleType}.</li>
  * </ul></p>
  *
  * @author roland
  * @since 28.09.11
  */
-class TabularDataConverter extends OpenTypeConverter<TabularType> {
+public class TabularDataConverter extends OpenTypeConverter<TabularType> {
 
     // Fixed key names for tabular data representation of Maps for MXBeans
     // see: https://docs.oracle.com/en/java/javase/17/docs/api/java.management/javax/management/MXBean.html
@@ -106,14 +110,14 @@ class TabularDataConverter extends OpenTypeConverter<TabularType> {
         // If it is given a a full representation (with "indexNames" and "values"), then parse this accordingly
         // with validation. Each object under "values" will be added as single CompositeData. We don't
         // get automatic uniqueness validation as in #1
-        if (checkForFullTabularDataRepresentation(pType, givenValues)) {
-            return convertTabularDataFromFullRepresentation(pType, givenValues);
+        if (isFullRepresentation(pType, givenValues)) {
+            return createTabularDataFromFullRepresentation(pType, givenValues);
         }
 
         // #3. It's a plain TabularData non conforming to @MXBean specification, which is tried to be converted
         // from a map of maps. The more elements in the index, the more nested maps we expect. At the lowest level
-        // the map should contain all the keys/values anyway (even if the're recoverable from the nested index
-        // keys and child maps
+        // the map should contain all the keys/values anyway (even if they're recoverable from the nested index
+        // keys and child maps. This requires all key fields to be of javax.management.openmbean.SimpleType
         TabularDataSupport tabularData = new TabularDataSupport(pType);
         // Recursively go down the map and collect the values
         putRowsToTabularData(pType, givenValues, tabularData, pType.getIndexNames().size());
@@ -188,13 +192,12 @@ class TabularDataConverter extends OpenTypeConverter<TabularType> {
 
     /**
      * Check if a {@link TabularType} matches the mapping for {@code Map<K, V>} in {@link javax.management.MXBean}
-     * specification. On top of {@link javax.management.MXBean} specification, we also check if they keys
-     * are of {@link SimpleType#STRING}, because of JSON serialization
+     * specification. We also check if they keys are of {@link SimpleType}, because of JSON serialization.
      *
      * @param pType
      * @return
      */
-    private boolean isMXBeanMapWithSimpleKeys(TabularType pType) {
+    public static boolean isMXBeanMapWithSimpleKeys(TabularType pType) {
         // index with one "key" item
         List<String> indexNames = pType.getIndexNames();
         if (!(indexNames.size() == 1 && indexNames.contains(TD_KEY_KEY))) {
@@ -258,7 +261,7 @@ class TabularDataConverter extends OpenTypeConverter<TabularType> {
      * @param pValue
      * @return
      */
-    private boolean checkForFullTabularDataRepresentation(TabularType pType, Map<String, Object> pValue) {
+    private boolean isFullRepresentation(TabularType pType, Map<String, Object> pValue) {
         if (pValue.containsKey(JOLOKIA_KEY_INDEX_NAMES) && pValue.containsKey(JOLOKIA_KEY_VALUES) && pValue.size() == 2) {
             Object indexNamesValue = pValue.get(JOLOKIA_KEY_INDEX_NAMES);
             if (!(indexNamesValue instanceof Collection)) {
@@ -304,7 +307,7 @@ class TabularDataConverter extends OpenTypeConverter<TabularType> {
      * @param pValue
      * @return
      */
-    private TabularData convertTabularDataFromFullRepresentation(TabularType pType, Map<String, Object> pValue) {
+    private TabularData createTabularDataFromFullRepresentation(TabularType pType, Map<String, Object> pValue) {
         // already checked earlier
         Collection<?> jsonVal = (Collection<?>) pValue.get("values");
 

@@ -44,7 +44,7 @@ public class ObjectToJsonConverterTest {
 
     @BeforeMethod
     public void setup() {
-        converter = new ObjectToJsonConverter(new ObjectToObjectConverter(), null);
+        converter = new ObjectToJsonConverter(new ObjectToObjectConverter(), null, null);
         converter.setupContext();
     }
 

@@ -48,7 +48,7 @@ public class CalendarAccessorTest {
         objectAccessor = new CalendarAccessor(new DateFormatConfiguration());
 
         // Needed for subclassing final object
-        ObjectToJsonConverter converter = new ObjectToJsonConverter(null, null);
+        ObjectToJsonConverter converter = new ObjectToJsonConverter(null, null, null);
         converter.setupContext(
             new SerializeOptions.Builder()
                 .faultHandler(ValueFaultHandler.THROWING_VALUE_FAULT_HANDLER)

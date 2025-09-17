@@ -52,7 +52,7 @@ public class JavaTimeTemporalAccessorTest {
     public void setup() {
         objectAccessor = new JavaTimeTemporalAccessor(new DateFormatConfiguration());
 
-        ObjectToJsonConverter converter = new ObjectToJsonConverter(null, null);
+        ObjectToJsonConverter converter = new ObjectToJsonConverter(null, null, null);
         converter.setupContext(
             new SerializeOptions.Builder()
                 .faultHandler(ValueFaultHandler.THROWING_VALUE_FAULT_HANDLER)

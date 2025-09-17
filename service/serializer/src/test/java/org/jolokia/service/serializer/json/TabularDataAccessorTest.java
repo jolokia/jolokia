@@ -25,6 +25,7 @@ import javax.management.openmbean.*;
 import org.jolokia.server.core.service.serializer.SerializeOptions;
 import org.jolokia.server.core.service.serializer.ValueFaultHandler;
 import org.jolokia.service.serializer.object.ObjectToObjectConverter;
+import org.jolokia.service.serializer.object.ObjectToOpenTypeConverter;
 import org.jolokia.service.serializer.util.CompositeTypeAndJson;
 import org.jolokia.service.serializer.util.TabularTypeAndJson;
 import org.jolokia.json.JSONObject;
@@ -37,17 +38,18 @@ import static org.testng.Assert.*;
  * @since 05.08.11
  */
 @Test
-public class TabularDataObjectAccessorTest {
+public class TabularDataAccessorTest {
 
     private static final String TEST_VALUE = "value1";
 
-    TabularDataObjectAccessor extractor = new TabularDataObjectAccessor();
-
     ObjectToJsonConverter converter;
+    TabularDataAccessor extractor;
 
     @BeforeMethod
     public void setup() {
-        converter = new ObjectToJsonConverter(new ObjectToObjectConverter(), null);
+        ObjectToObjectConverter objectToObjectConverter = new ObjectToObjectConverter();
+        converter = new ObjectToJsonConverter(objectToObjectConverter, null, null);
+        extractor = new TabularDataAccessor(new ObjectToOpenTypeConverter(objectToObjectConverter, false));
         converter.setupContext(new SerializeOptions.Builder().useAttributeFilter(true).build());
     }
 
@@ -297,24 +299,45 @@ public class TabularDataObjectAccessorTest {
         extract(true, getComplexTabularData(), "meyer");
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*Boolean.*")
-    void extractTabularDataWithPathButWrongIndexType() throws OpenDataException, AttributeNotFoundException {
+    @Test
+    void extractTabularDataWithPathAndBooleanKey() throws OpenDataException, AttributeNotFoundException {
         TabularTypeAndJson taj = new TabularTypeAndJson(
-                new String[] { "verein", "absteiger" },
-                new CompositeTypeAndJson(
-                        STRING,"verein",null,
-                        INTEGER,"platz",null,
-                        BOOLEAN,"absteiger",null
-                ));
+            new String[]{"verein", "absteiger"},
+            new CompositeTypeAndJson(
+                STRING, "verein", null,
+                INTEGER, "platz", null,
+                BOOLEAN, "absteiger", null
+            ));
         TabularData data = new TabularDataSupport(taj.getType());
         data.put(new CompositeDataSupport(
-                taj.getType().getRowType(),
-                new String[] { "verein", "platz", "absteiger" },
-                new Object[] { "fcn", 6, false }
+            taj.getType().getRowType(),
+            new String[]{"verein", "platz", "absteiger"},
+            new Object[]{"fcn", 6, false}
         ));
-        extract(true,data,"fcn","true");
+        JSONObject v = (JSONObject) extract(true, data, "fcn", "false");
+        assertEquals(v.size(), 3);
+        assertEquals(v.get("verein"), "fcn");
     }
 
+    @Test
+    void extractTabularDataWithoutPathAndBooleanKey() throws OpenDataException, AttributeNotFoundException {
+        TabularTypeAndJson taj = new TabularTypeAndJson(
+            new String[]{"verein", "absteiger"},
+            new CompositeTypeAndJson(
+                STRING, "verein", null,
+                INTEGER, "platz", null,
+                BOOLEAN, "absteiger", null
+            ));
+        TabularData data = new TabularDataSupport(taj.getType());
+        data.put(new CompositeDataSupport(
+            taj.getType().getRowType(),
+            new String[]{"verein", "platz", "absteiger"},
+            new Object[]{"fcn", 6, false}
+        ));
+        JSONObject v = (JSONObject) extract(true, data);
+        assertEquals(v.size(), 1);
+        assertEquals(((JSONObject) ((JSONObject) v.get("fcn")).get("false")).get("verein"), "fcn");
+    }
 
     @Test
     void emptyMxMBeanTabularData() throws MalformedObjectNameException, OpenDataException, AttributeNotFoundException {

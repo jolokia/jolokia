@@ -18,7 +18,7 @@ import static org.testng.Assert.*;
  * @author roland
  * @since 04.06.14
  */
-public class CompositeDataObjectAccessorTest extends AbstractObjectAccessorTest {
+public class CompositeDataAccessorTest extends AbstractObjectAccessorTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void noSettingAllowed() throws InvocationTargetException, IllegalAccessException {
@@ -81,7 +81,7 @@ public class CompositeDataObjectAccessorTest extends AbstractObjectAccessorTest 
 
     @Override
     ObjectAccessor createExtractor() {
-        return new CompositeDataObjectAccessor();
+        return new CompositeDataAccessor();
     }
 
 

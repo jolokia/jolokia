@@ -40,7 +40,7 @@ abstract public class AbstractObjectAccessorTest {
     public void setup() {
         objectAccessor = createExtractor();
         objectToObjectConverter = new ObjectToObjectConverter();
-        converter = new ObjectToJsonConverter(objectToObjectConverter, null);
+        converter = new ObjectToJsonConverter(objectToObjectConverter, null, null);
         converter.setupContext(new SerializeOptions.Builder()
             .useAttributeFilter(true)
             .maxCollectionSize(5)

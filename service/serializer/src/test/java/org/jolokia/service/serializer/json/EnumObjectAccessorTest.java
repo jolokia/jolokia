@@ -23,7 +23,7 @@ public class EnumObjectAccessorTest {
     @BeforeMethod
     public void setup() {
         enumExtractor = new EnumObjectAccessor();
-        converter = new ObjectToJsonConverter(new ObjectToObjectConverter(), null);
+        converter = new ObjectToJsonConverter(new ObjectToObjectConverter(), null, null);
         converter.setupContext();
     }
 

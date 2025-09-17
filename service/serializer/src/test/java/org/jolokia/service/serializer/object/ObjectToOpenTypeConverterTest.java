@@ -52,7 +52,7 @@ public class ObjectToOpenTypeConverterTest {
     public void setup() {
         ObjectToObjectConverter objectToObjectConverter = new ObjectToObjectConverter();
         converter = new ObjectToOpenTypeConverter(objectToObjectConverter, false);
-        otjc = new ObjectToJsonConverter(objectToObjectConverter, null);
+        otjc = new ObjectToJsonConverter(objectToObjectConverter, null, null);
     }
 
     @Test

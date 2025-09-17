@@ -99,7 +99,7 @@ public class MapAccessorTest extends AbstractObjectAccessorTest {
 
     @Test
     public void allSupportedConvertersWithMapKeys() throws Exception {
-        converter = new ObjectToJsonConverter(objectToObjectConverter, new TestJolokiaContext() {
+        converter = new ObjectToJsonConverter(objectToObjectConverter, null, new TestJolokiaContext() {
             @Override
             public String getConfig(ConfigKey pKey) {
                 if (pKey == ConfigKey.DATE_FORMAT) {

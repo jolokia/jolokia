@@ -40,7 +40,7 @@ public class CollectionAccessorTest {
     @BeforeMethod
     public void setup() {
         extractor = new CollectionAccessor();
-        converter = new ObjectToJsonConverter(new ObjectToObjectConverter(), null);
+        converter = new ObjectToJsonConverter(new ObjectToObjectConverter(), null, null);
         converter.setupContext(new SerializeOptions.Builder()
             .maxCollectionSize(5)
             .build());

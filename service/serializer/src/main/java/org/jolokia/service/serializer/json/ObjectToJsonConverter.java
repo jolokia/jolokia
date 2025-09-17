@@ -32,6 +32,7 @@ import org.jolokia.server.core.service.serializer.ValueFaultHandler;
 import org.jolokia.server.core.util.LocalServiceFactory;
 import org.jolokia.server.core.util.EscapeUtil;
 import org.jolokia.service.serializer.object.ObjectToObjectConverter;
+import org.jolokia.service.serializer.object.ObjectToOpenTypeConverter;
 
 /**
  * <p>A converter/serializer that transforms Java objects (JMX attribute values, JMX operation parameters
@@ -114,15 +115,17 @@ public final class ObjectToJsonConverter {
     /**
      * Create a converter that can serialize objects into JSON representation
      *
-     * @param pObjectToObjectConverter used when setting values
-     * @param pContext                 {@link JolokiaContext} used to load {@link ObjectAccessor} services
+     * @param pObjectToObjectConverter   used when setting values
+     * @param pObjectToOpenTypeConverter used when converting {@link javax.management.openmbean.TabularData}
+     * @param pContext                   {@link JolokiaContext} used to load {@link ObjectAccessor} services
      */
-    public ObjectToJsonConverter(ObjectToObjectConverter pObjectToObjectConverter, JolokiaContext pContext) {
+    public ObjectToJsonConverter(ObjectToObjectConverter pObjectToObjectConverter, ObjectToOpenTypeConverter pObjectToOpenTypeConverter,
+                                 JolokiaContext pContext) {
         // TabularDataExtractor must be before MapExtractor
         // since javax.management.openmbean.TabularDataSupport implements java.util.Map interface
         // (while javax.management.openmbean.TabularData doesn't)
-        objectAccessors.add(new TabularDataObjectAccessor());
-        objectAccessors.add(new CompositeDataObjectAccessor());
+        objectAccessors.add(new TabularDataAccessor(pObjectToOpenTypeConverter));
+        objectAccessors.add(new CompositeDataAccessor());
 
         objectAccessors.add(new MapAccessor());
 

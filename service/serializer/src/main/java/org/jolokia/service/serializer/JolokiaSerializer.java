@@ -88,14 +88,16 @@ public class JolokiaSerializer extends AbstractJolokiaService<Serializer> implem
         objectToOpenTypeConverter = new ObjectToOpenTypeConverter(objectToObjectConverter, pForgiving);
 
         // default version where JolokiaContext is not available
-        toJsonConverter = new ObjectToJsonConverter((ObjectToObjectConverter) objectToObjectConverter, null);
+        toJsonConverter = new ObjectToJsonConverter((ObjectToObjectConverter) objectToObjectConverter,
+            (ObjectToOpenTypeConverter) objectToOpenTypeConverter, null);
     }
 
     @Override
     public void init(JolokiaContext pJolokiaContext) {
         super.init(pJolokiaContext);
         ((ObjectToObjectConverter) objectToObjectConverter).setJolokiaContext(pJolokiaContext);
-        toJsonConverter = new ObjectToJsonConverter((ObjectToObjectConverter) objectToObjectConverter, pJolokiaContext);
+        toJsonConverter = new ObjectToJsonConverter((ObjectToObjectConverter) objectToObjectConverter,
+            (ObjectToOpenTypeConverter) objectToOpenTypeConverter, pJolokiaContext);
     }
 
     @Override

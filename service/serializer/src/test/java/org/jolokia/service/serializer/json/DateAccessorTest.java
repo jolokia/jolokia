@@ -53,7 +53,7 @@ public class DateAccessorTest {
         extractor = new DateAccessor(new DateFormatConfiguration());
 
         // Needed for subclassing final object
-        converter = new ObjectToJsonConverter(null, null);
+        converter = new ObjectToJsonConverter(null, null, null);
         converter.setupContext(
             new SerializeOptions.Builder()
                 .faultHandler(ValueFaultHandler.THROWING_VALUE_FAULT_HANDLER)
