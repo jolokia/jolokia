@@ -130,6 +130,10 @@
               <argLine>
                 -Djava.net.preferIPv4Stack=true
               </argLine>
+              <includes>
+                <include>**/NetworkUtilTest.java</include>
+                <include>**/StaticConfigurationTest.java</include>
+              </includes>
             </configuration>
           </execution>
           <execution>
@@ -142,6 +146,10 @@
               <argLine>
                 -Djava.net.preferIPv6Addresses=true
               </argLine>
+              <includes>
+                <include>**/NetworkUtilTest.java</include>
+                <include>**/StaticConfigurationTest.java</include>
+              </includes>
             </configuration>
           </execution>
         </executions>

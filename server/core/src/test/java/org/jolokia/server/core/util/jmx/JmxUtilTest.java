@@ -83,6 +83,7 @@ public class JmxUtilTest implements NotificationListener {
     }
 
     public void handleNotification(Notification notification, Object handback) {
+        System.out.println("got notification: " + notification);
         counter++;
     }
 
