@@ -155,12 +155,12 @@
           <artifactId>maven-compiler-plugin</artifactId>
           <version>${plugin.maven-compiler-plugin}</version>
           <configuration>
-            <source>11</source>
-            <testSource>11</testSource>
-            <target>11</target>
-            <testTarget>11</testTarget>
-            <release>11</release>
-            <testRelease>11</testRelease>
+            <source>17</source>
+            <testSource>17</testSource>
+            <target>17</target>
+            <testTarget>17</testTarget>
+            <release>17</release>
+            <testRelease>17</testRelease>
           </configuration>
         </plugin>
 
