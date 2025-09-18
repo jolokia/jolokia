@@ -19,11 +19,13 @@ package org.jolokia.jvmagent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.zip.CRC32;
@@ -82,6 +84,9 @@ public final class JvmAgent {
     // System property used for communicating the agent's state
     public static final String JOLOKIA_AGENT_URL = "jolokia.agent";
 
+    private static String version = null;
+    private static long pid = 0;
+
     // This Java agent classes is supposed to be used by the Java attach API only
     private JvmAgent() {}
 
@@ -116,6 +121,20 @@ public final class JvmAgent {
         JvmAgent.config = pConfig;
         JvmAgent.lazy = pLazy;
 
+        try (InputStream is = JvmAgent.class.getResourceAsStream("/jolokia-agent-version.properties")) {
+            Properties props = new Properties();
+            if (is != null) {
+                props.load(is);
+            }
+            version = props.getProperty("version");
+        } catch (IOException ignored) {
+            version = null;
+        }
+        try {
+            pid = ProcessHandle.current().pid();
+        } catch (UnsupportedOperationException ignored) {
+        }
+
         // start the JolokiaServer in a new daemon thread
         Thread jolokiaStartThread = new Thread("JolokiaStart") {
             public void run() {
@@ -132,7 +151,9 @@ public final class JvmAgent {
                         configureWatcher(server, pConfig);
                     }
 
-                    System.out.println("Jolokia: Agent started with URL " + server.getUrl());
+                    String v = version == null ? "" : " " + version;
+                    String processId = pid == 0L ? "" : " and PID " + pid;
+                    System.out.println("Jolokia: Agent" + v + " started with URL " + server.getUrl() + processId);
                 } catch (RuntimeException | IOException exp) {
                     System.err.println("Could not start Jolokia agent: " + exp);
                 }
