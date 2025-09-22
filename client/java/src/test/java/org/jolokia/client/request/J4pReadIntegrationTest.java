@@ -23,8 +23,6 @@ import java.util.concurrent.*;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.jolokia.client.J4pClient;
 import org.jolokia.client.exception.*;
 import org.jolokia.json.JSONObject;
@@ -42,8 +40,8 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
 
     @Test
     public void nameTest() throws MalformedObjectNameException, J4pException {
-        checkNames(HttpGet.METHOD_NAME,itSetup.getStrangeNames(),itSetup.getEscapedNames());
-        checkNames(HttpPost.METHOD_NAME,itSetup.getStrangeNames(),itSetup.getEscapedNames());
+        checkNames("GET",itSetup.getStrangeNames(),itSetup.getEscapedNames());
+        checkNames("POST",itSetup.getStrangeNames(),itSetup.getEscapedNames());
     }
 
     @Test

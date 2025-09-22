@@ -1,5 +1,3 @@
-package org.jolokia.client;
-
 /*
  * Copyright 2009-2013 Roland Huss
  *
@@ -15,83 +13,142 @@ package org.jolokia.client;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.client;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.Authenticator;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.PasswordAuthentication;
+import java.net.ProxySelector;
+import java.net.SocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
+//import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.channels.SelectionKey;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLContext;
+import java.util.Optional;
+import java.util.ServiceConfigurationError;
+import java.util.ServiceLoader;
 
-import org.apache.http.Header;
-import org.apache.http.HttpHost;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CookieStore;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.config.ConnectionConfig;
-import org.apache.http.config.Registry;
-import org.apache.http.config.RegistryBuilder;
-import org.apache.http.config.SocketConfig;
-import org.apache.http.conn.HttpClientConnectionManager;
-import org.apache.http.conn.HttpConnectionFactory;
-import org.apache.http.conn.ManagedHttpClientConnection;
-import org.apache.http.conn.routing.HttpRoute;
-import org.apache.http.conn.socket.ConnectionSocketFactory;
-import org.apache.http.conn.socket.PlainConnectionSocketFactory;
-import org.apache.http.conn.ssl.DefaultHostnameVerifier;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.impl.client.BasicCookieStore;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
-import org.apache.http.impl.conn.ManagedHttpClientConnectionFactory;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.apache.http.impl.io.DefaultHttpRequestWriterFactory;
-import org.apache.http.impl.io.DefaultHttpResponseParserFactory;
-import org.apache.http.protocol.HTTP;
-import org.apache.http.ssl.SSLContexts;
-import org.apache.http.util.VersionInfo;
+import org.jolokia.client.jdkclient.JdkClientBuilder;
 import org.jolokia.client.request.J4pResponseExtractor;
 import org.jolokia.client.request.J4pTargetConfig;
 import org.jolokia.client.request.ValidatingResponseExtractor;
+import org.jolokia.client.spi.HttpClientBuilder;
+import org.jolokia.client.spi.HttpClientSpi;
+import org.jolokia.client.spi.HttpHeader;
 
 /**
- * A builder for a {@link org.jolokia.client.J4pClient}.
+ * <p>A builder that creates a {@link org.jolokia.client.J4pClient}.</p>
+ *
+ * <p>The actual implementation will be discovered using {@link java.util.ServiceLoader} mechanism on first
+ * demand, when the builder is loaded.</p>
  *
  * @author roland
  * @since 26.11.10
  */
 public class J4pClientBuilder {
 
+    private static HttpClientBuilder httpClientBuilder = null;
+
+    // Universal properties, that can be configured for every client implementation are configured
+    // with property methods of the builder
+
+    // socket/tcp options
+
+    /**
+     * Connection timeout in milliseconds.
+     * In blocking mode it is ultimately passed to {@link java.net.Socket#connect(SocketAddress, int)} method.
+     * In NIO, it's used as a timeout waiting for {@link SelectionKey#OP_CONNECT}.
+     */
     private int connectionTimeout;
+
+    /**
+     * Socket/read/write timeout in milliseconds.
+     * In blocking mode it is ultimately passed to {@link java.net.Socket#setSoTimeout(int)} method.
+     * In NIO, it's used as a timeout waiting for {@link SelectionKey#OP_READ}.{@link SelectionKey#OP_WRITE}.
+     */
     private int socketTimeout;
-    private int maxTotalConnections;
-    private int defaultMaxConnectionsPerRoute;
-    private int maxConnectionPoolTimeout;
-    private Charset contentCharset;
-    private boolean expectContinue;
-    private boolean tcpNoDelay;
+
+    /**
+     * {@link java.net.SocketOptions#TCP_NODELAY} option, defaults to {@code false} which means <em>delay</em>
+     * sending the data until there's more data, so less frames need to be send. This increases delay a bit, but
+     * should be fine unless you want to quickly send 1 octet at a time. But we're not emulating terminals here.
+     */
+    private boolean tcpNoDelay = false;
+
+    /**
+     * Buffer size for reading/writing data. Various implementations may use this value differently. It can
+     * be passed down to {@link java.net.Socket#setSendBufferSize(int)}, as {@link java.net.SocketOptions#SO_SNDBUF}
+     * or otherwise.
+     */
     private int socketBufferSize;
 
+    // TLS options
+
     // Add socket factories to tune
-    private ConnectionSocketFactory sslConnectionSocketFactory;
+//    private ConnectionSocketFactory sslConnectionSocketFactory;
 
-    // whether to use thread safe, pooled connections
-    private boolean pooledConnections;
+    // HTTP options
 
-    // Connection URL to use
+    /**
+     * {@link Charset} used to create {@link Charset#newEncoder()}/{@link Charset#newDecoder()} for
+     * outgoing/incoming data.
+     */
+    private Charset contentCharset;
+
+    /**
+     * Target based Jolokia URL to use. For example when the target Jolokia agent responds with {@code version}
+     * response at {@code http://localhost:8778/jolokia/version}, the base URL should be
+     * {@code http://localhost:8778/jolokia} or {@code http://localhost:8778/jolokia/} (some target servers may
+     * not handle root URL access properly)
+     */
     private String url;
 
-    // User to use for authentication
+    /**
+     * For {@code basic} authentication, we can specify user credentials. For other authentication mechanisms,
+     * dedicated customizer should be used in implementation-specific configuration.
+     */
     private String user;
 
-    // Password to use for authentication
+    /**
+     * Password for {@code basic} authentication.
+     */
     private String password;
+
+    /**
+     * HTTP proxy settings when accessing target Jolokia Agent URL. It may be configured directly or using
+     * system properties/environment variables. TODO: check -Dhttp.proxyHost, -Dhttp.nonProxyHosts, ...
+     */
+    private Proxy httpProxy;
+
+    /**
+     * When set to {@code true}, POST requests will send {@code Expect: 100-continue} headers first. Data will
+     * be send only after successful {@link HTTP/1.1 100 Continue}.
+     */
+    private boolean expectContinue;
+
+    /**
+     * Collection of additional HTTP headers to send to target Jolokia agent - specified as a collection of
+     * name-value pairs.
+     */
+    private Collection<HttpHeader> defaultHttpHeaders;
+
+    // Extractor used creating responses
+    private J4pResponseExtractor responseExtractor;
+
+    // JMX options, when connecting via HTTP to one Jolokia Agent used in proxy mode, where Jolokia uses
+    // standard JMX remote connection to ultimate JVM which doesn't run Jolokia agent on its own.
 
     // Service-URL when used in proxy mode
     private String targetUrl;
@@ -102,20 +159,17 @@ public class J4pClientBuilder {
     // Password to use for JSR-160 communication when using with a proxy (i.e. targetUrl != null and targetUser != null)
     private String targetPassword;
 
-    // Cookie store to use, might contain already prepared cookies used for a login
-    private CookieStore cookieStore;
-
-    // Authenticator to use for performing a login
-    private J4pAuthenticator authenticator;
-
-    // HTTP proxy settings
-    private Proxy httpProxy;
-
-    // Extractor used creating responses
-    private J4pResponseExtractor responseExtractor;
-
-    // Default http headers to use for each HTTP requests
-    private Collection<? extends Header> defaultHttpHeaders;
+//    // whether to use thread safe, pooled connections
+//    private boolean pooledConnections;
+//    private int maxTotalConnections;
+//    private int defaultMaxConnectionsPerRoute;
+//    private int maxConnectionPoolTimeout;
+//
+//    // Cookie store to use, might contain already prepared cookies used for a login
+//    private CookieStore cookieStore;
+//
+//    // Authenticator to use for performing a login
+//    private J4pClientCustomizer customizer;
 
     /**
      * Package access constructor, use static method on J4pClient for creating
@@ -124,19 +178,28 @@ public class J4pClientBuilder {
     public J4pClientBuilder() {
         connectionTimeout(20 * 1000);
         socketTimeout(-1);
-        maxTotalConnections(20);
-        defaultMaxConnectionsPerRoute(20);
-        maxConnectionPoolTimeout(500);
-        contentCharset(HTTP.DEF_CONTENT_CHARSET.name());
-        expectContinue(true);
-        tcpNoDelay(true);
+        tcpNoDelay(false);
         socketBufferSize(8192);
-        pooledConnections();
-        user(null);
-        password(null);
-        cookieStore(new BasicCookieStore());
-        authenticator(new BasicAuthenticator());
+        contentCharset(StandardCharsets.UTF_8.name());
+        expectContinue(true);
         responseExtractor(ValidatingResponseExtractor.DEFAULT);
+//        maxTotalConnections(20);
+//        defaultMaxConnectionsPerRoute(20);
+//        maxConnectionPoolTimeout(500);
+//        pooledConnections();
+//        cookieStore(new BasicCookieStore());
+//        authenticator(new BasicClientCustomizer());
+
+        try {
+            Optional<HttpClientBuilder> clientBuilder = ServiceLoader.load(HttpClientBuilder.class).findFirst();
+            if (clientBuilder.isEmpty()) {
+                clientBuilder = ServiceLoader.load(HttpClientBuilder.class, null).findFirst();
+            }
+            // discovered, default builder based on JDK HTTP Client
+            httpClientBuilder = clientBuilder.orElseGet(JdkClientBuilder::new);
+        } catch (ServiceConfigurationError ignored) {
+            httpClientBuilder = new JdkClientBuilder();
+        }
     }
 
     /**
@@ -200,24 +263,24 @@ public class J4pClientBuilder {
         return this;
     }
 
-    /**
-     * Use a single threaded client for connecting to the agent. This
-     * is not very suitable in multithreaded environments
-     */
-    public final J4pClientBuilder singleConnection() {
-        pooledConnections = false;
-        return this;
-    }
-
-    /**
-     * Use a pooled connection manager for connecting to the agent, which
-     * uses a pool of connections (see {@link #maxTotalConnections(int), {@link #maxConnectionPoolTimeout(int) {@link #defaultMaxConnectionsPerRoute}} for
-     * tuning the pool}
-     */
-    public final J4pClientBuilder pooledConnections() {
-        pooledConnections = true;
-        return this;
-    }
+//    /**
+//     * Use a single threaded client for connecting to the agent. This
+//     * is not very suitable in multithreaded environments
+//     */
+//    public final J4pClientBuilder singleConnection() {
+//        pooledConnections = false;
+//        return this;
+//    }
+//
+//    /**
+//     * Use a pooled connection manager for connecting to the agent, which
+//     * uses a pool of connections (see {@link #maxTotalConnections(int), {@link #maxConnectionPoolTimeout(int) {@link #defaultMaxConnectionsPerRoute}} for
+//     * tuning the pool}
+//     */
+//    public final J4pClientBuilder pooledConnections() {
+//        pooledConnections = true;
+//        return this;
+//    }
 
     /**
      * Determines the timeout in milliseconds until a connection is established. A timeout value of zero is
@@ -243,35 +306,35 @@ public class J4pClientBuilder {
         return this;
     }
 
-    /**
-     * Sets the maximum number of connections allowed when using {@link #pooledConnections()}.
-     * @param pConnections number of max. simultaneous connections.
-     */
-    public final J4pClientBuilder maxTotalConnections(int pConnections) {
-        maxTotalConnections = pConnections;
-        return this;
-    }
-
-    /**
-     * Sets the maximum number of connections per route allowed when using {@link #pooledConnections()}
-     * @param pDefaultMaxConnectionsPerRoute number of max connections per route.
-     */
-    public final J4pClientBuilder defaultMaxConnectionsPerRoute(int pDefaultMaxConnectionsPerRoute) {
-        defaultMaxConnectionsPerRoute = pDefaultMaxConnectionsPerRoute;
-        return this;
-    }
-
-    /**
-     * Sets the timeout in milliseconds used when retrieving a connection
-     * from the connection manager. Default is 500ms, if set to -1 the system default is used. Use
-     * 0 for an infinite timeout.
-     *
-     * @param pConnectionPoolTimeout timeout in milliseconds
-     */
-    public final J4pClientBuilder maxConnectionPoolTimeout(int pConnectionPoolTimeout) {
-        maxConnectionPoolTimeout = pConnectionPoolTimeout;
-        return this;
-    }
+//    /**
+//     * Sets the maximum number of connections allowed when using {@link #pooledConnections()}.
+//     * @param pConnections number of max. simultaneous connections.
+//     */
+//    public final J4pClientBuilder maxTotalConnections(int pConnections) {
+//        maxTotalConnections = pConnections;
+//        return this;
+//    }
+//
+//    /**
+//     * Sets the maximum number of connections per route allowed when using {@link #pooledConnections()}
+//     * @param pDefaultMaxConnectionsPerRoute number of max connections per route.
+//     */
+//    public final J4pClientBuilder defaultMaxConnectionsPerRoute(int pDefaultMaxConnectionsPerRoute) {
+//        defaultMaxConnectionsPerRoute = pDefaultMaxConnectionsPerRoute;
+//        return this;
+//    }
+//
+//    /**
+//     * Sets the timeout in milliseconds used when retrieving a connection
+//     * from the connection manager. Default is 500ms, if set to -1 the system default is used. Use
+//     * 0 for an infinite timeout.
+//     *
+//     * @param pConnectionPoolTimeout timeout in milliseconds
+//     */
+//    public final J4pClientBuilder maxConnectionPoolTimeout(int pConnectionPoolTimeout) {
+//        maxConnectionPoolTimeout = pConnectionPoolTimeout;
+//        return this;
+//    }
 
     /**
      * Defines the charset to be used per default for encoding content body.
@@ -291,13 +354,14 @@ public class J4pClientBuilder {
     }
 
     /**
-     * Activates 'Expect: 100-Continue' handshake for the entity enclosing methods.
-     * The purpose of the 'Expect: 100-Continue' handshake to allow a client that is
+     * <p>Activates {@code Expect: 100-Continue} handshake for the entity enclosing methods.
+     * The purpose of the {@code Expect: 100-Continue} handshake is to allow a client that is
      * sending a request message with a request body to determine if the origin server
      * is willing to accept the request (based on the request headers) before the client
-     * sends the request body.
-     * The use of the 'Expect: 100-continue' handshake can result in noticable peformance
-     * improvement for entity enclosing requests that require the target server's authentication.
+     * sends the request body.</p>
+     *
+     * <p>The use of the {@code Expect: 100-continue} handshake can result in noticeable performance
+     * improvement for entity enclosing requests that require the target server's authentication.</p>
      *
      * @param pUse whether to use this algorithm or not
      */
@@ -310,8 +374,9 @@ public class J4pClientBuilder {
      * Determines whether Nagle's algorithm is to be used. The Nagle's algorithm tries to conserve
      * bandwidth by minimizing the number of segments that are sent. When applications wish to
      * decrease network latency and increase performance, they can disable Nagle's
-     * algorithm (that is enable TCP_NODELAY). Data will be sent earlier, at the cost
+     * algorithm (that is enable {@code TCP_NODELAY}). Data will be sent earlier, at the cost
      * of an increase in bandwidth consumption.
+     *
      * @param pUse whether to use NO_DELAY or not
      */
     public final J4pClientBuilder tcpNoDelay(boolean pUse) {
@@ -329,25 +394,15 @@ public class J4pClientBuilder {
         return this;
     }
 
-    /**
-     * Use the given cookie store. This useful is some form baed authentication had to be performed.
-     *
-     * @param pCookieStore cookiestore containing the cookies to send for requests.
-     */
-    public final J4pClientBuilder cookieStore(CookieStore pCookieStore) {
-        cookieStore = pCookieStore;
-        return this;
-    }
-
-    /**
-     * Set the authenticator for this client
-     *
-     * @param pAuthenticator authenticator used for checking the given user and password (if any).
-     */
-    public final J4pClientBuilder authenticator(J4pAuthenticator pAuthenticator) {
-        authenticator = pAuthenticator;
-        return this;
-    }
+//    /**
+//     * Set the authenticator for this client
+//     *
+//     * @param pAuthenticator authenticator used for checking the given user and password (if any).
+//     */
+//    public final J4pClientBuilder authenticator(J4pClientCustomizer<T> pAuthenticator) {
+//        customizer = pAuthenticator;
+//        return this;
+//    }
 
     /**
      * Set the proxy for this client
@@ -411,24 +466,24 @@ public class J4pClientBuilder {
         return this;
     }
 
-    /**
-     * Set the SSL connection factory to use when connecting via SSL. This can be used to tune
-     * the SSL setup (SSLv3, TLSv1.2...),
-     *
-     * @param pSslConnectionSocketFactory the SSL connection factory to use
-     * @return this builder object
-     */
-    public final J4pClientBuilder sslConnectionSocketFactory(ConnectionSocketFactory pSslConnectionSocketFactory) {
-        this.sslConnectionSocketFactory = pSslConnectionSocketFactory;
-        return this;
-    }
+//    /**
+//     * Set the SSL connection factory to use when connecting via SSL. This can be used to tune
+//     * the SSL setup (SSLv3, TLSv1.2...),
+//     *
+//     * @param pSslConnectionSocketFactory the SSL connection factory to use
+//     * @return this builder object
+//     */
+//    public final J4pClientBuilder sslConnectionSocketFactory(ConnectionSocketFactory pSslConnectionSocketFactory) {
+//        this.sslConnectionSocketFactory = pSslConnectionSocketFactory;
+//        return this;
+//    }
 
     /**
      * Set the default HTTP Headers for each HTTP requests.
      * @param pHttpHeaders http headers to set
      * @return this builder object
      */
-    public final J4pClientBuilder setDefaultHttpHeaders(Collection<? extends Header> pHttpHeaders) {
+    public final J4pClientBuilder setDefaultHttpHeaders(Collection<HttpHeader> pHttpHeaders) {
         this.defaultHttpHeaders = pHttpHeaders;
         return this;
     }
@@ -446,27 +501,10 @@ public class J4pClientBuilder {
                              responseExtractor);
     }
 
-    public HttpClient createHttpClient() {
-        HttpClientConnectionManager connManager =
-                pooledConnections ? createPoolingConnectionManager() : createBasicConnectionManager();
-
-        HttpClientBuilder builder = HttpClients.custom()
-                .setConnectionManager(connManager)
-                .setDefaultCookieStore(cookieStore)
-                .setUserAgent("Jolokia JMX-Client (using Apache-HttpClient/" + getVersionInfo() + ")")
-                .setDefaultRequestConfig(createRequestConfig());
-
-        if (defaultHttpHeaders != null) {
-           builder.setDefaultHeaders(this.defaultHttpHeaders);
-        }
-
-        if (user != null && authenticator != null) {
-            authenticator.authenticate(builder, user, password);
-        }
-
-        setupProxyIfNeeded(builder);
-
-        return builder.build();
+    HttpClientSpi<?> createHttpClient() {
+        return httpClientBuilder.buildHttpClient(new Configuration(url, user, password,
+            httpProxy, connectionTimeout, socketTimeout, tcpNoDelay, socketBufferSize, contentCharset, expectContinue,
+            defaultHttpHeaders));
     }
 
     /**
@@ -488,105 +526,127 @@ public class J4pClientBuilder {
 
     // ==========================================================================================
 
-    private void setupProxyIfNeeded(HttpClientBuilder builder) {
-        if (httpProxy != null) {
-            builder.setProxy(new HttpHost(httpProxy.getHost(),httpProxy.getPort()));
-            if (httpProxy.getUser() != null) {
-                AuthScope proxyAuthScope = new AuthScope(httpProxy.getHost(),httpProxy.getPort());
-                UsernamePasswordCredentials proxyCredentials = new UsernamePasswordCredentials(httpProxy.getUser(),httpProxy.getPass());
-                CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-                credentialsProvider.setCredentials(proxyAuthScope,proxyCredentials);
-                builder.setDefaultCredentialsProvider(credentialsProvider);
-            }
-        }
-    }
-
-    private String getVersionInfo() {
-        // determine the release version from packaged version info
-        final VersionInfo vi = VersionInfo.loadVersionInfo("org.apache.http.client", getClass().getClassLoader());
-        return (vi != null) ? vi.getRelease() : VersionInfo.UNAVAILABLE;
-    }
-
-    private RequestConfig createRequestConfig() {
-        RequestConfig.Builder requestConfigB = RequestConfig.custom();
-
-        requestConfigB.setNormalizeUri(false);
-        requestConfigB.setExpectContinueEnabled(expectContinue);
-        if (socketTimeout > -1) {
-            requestConfigB.setSocketTimeout(socketTimeout);
-        }
-        if (connectionTimeout > -1) {
-            requestConfigB.setConnectTimeout(connectionTimeout);
-        }
-        if (maxConnectionPoolTimeout > -1) {
-            requestConfigB.setConnectionRequestTimeout(maxConnectionPoolTimeout);
-        }
-        return requestConfigB.build();
-    }
-
-    private BasicHttpClientConnectionManager createBasicConnectionManager() {
-        BasicHttpClientConnectionManager connManager =
-                new BasicHttpClientConnectionManager(getSocketFactoryRegistry(),getConnectionFactory());
-        connManager.setSocketConfig(createSocketConfig());
-        connManager.setConnectionConfig(createConnectionConfig());
-        return connManager;
-    }
-
-    private PoolingHttpClientConnectionManager createPoolingConnectionManager() {
-        PoolingHttpClientConnectionManager connManager =
-            new PoolingHttpClientConnectionManager(getSocketFactoryRegistry(), getConnectionFactory());
-        connManager.setDefaultSocketConfig(createSocketConfig());
-        connManager.setDefaultConnectionConfig(createConnectionConfig());
-        if (maxTotalConnections != 0) {
-            connManager.setMaxTotal(maxTotalConnections);
-            connManager.setDefaultMaxPerRoute(defaultMaxConnectionsPerRoute);
-        }
-
-        return connManager;
-    }
-
-
-    private SSLConnectionSocketFactory createDefaultSSLConnectionSocketFactory() {
-        SSLContext sslcontext = SSLContexts.createSystemDefault();
-        HostnameVerifier hostnameVerifier = new DefaultHostnameVerifier();
-        return new SSLConnectionSocketFactory(sslcontext, hostnameVerifier);
-    }
-
-    private ConnectionConfig createConnectionConfig() {
-        return ConnectionConfig.custom()
-                .setBufferSize(socketBufferSize)
-                .setCharset(contentCharset)
-                .build();
-    }
-
-    private SocketConfig createSocketConfig() {
-        SocketConfig.Builder socketConfigB = SocketConfig.custom();
-        if (socketTimeout >= 0) {
-            socketConfigB.setSoTimeout(socketTimeout);
-        }
-        socketConfigB.setTcpNoDelay(tcpNoDelay);
-        return socketConfigB.build();
-    }
-
-    private Registry<ConnectionSocketFactory> getSocketFactoryRegistry() {
-        return RegistryBuilder.<ConnectionSocketFactory>create()
-                              .register("http", PlainConnectionSocketFactory.INSTANCE)
-                              .register("https", sslConnectionSocketFactory != null ?
-                                  sslConnectionSocketFactory :
-                                  createDefaultSSLConnectionSocketFactory())
-                              .build();
-    }
-
-    private HttpConnectionFactory<HttpRoute, ManagedHttpClientConnection> getConnectionFactory() {
-        return new ManagedHttpClientConnectionFactory(new DefaultHttpRequestWriterFactory(),
-                                                      new DefaultHttpResponseParserFactory());
-    }
-
+//    private void setupProxyIfNeeded(HttpClientBuilder builder) {
+//        if (httpProxy != null) {
+//            builder.setProxy(new HttpHost(httpProxy.getHost(),httpProxy.getPort()));
+//            if (httpProxy.getUser() != null) {
+//                AuthScope proxyAuthScope = new AuthScope(httpProxy.getHost(),httpProxy.getPort());
+//                UsernamePasswordCredentials proxyCredentials = new UsernamePasswordCredentials(httpProxy.getUser(),httpProxy.getPass());
+//                CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+//                credentialsProvider.setCredentials(proxyAuthScope,proxyCredentials);
+//                builder.setDefaultCredentialsProvider(credentialsProvider);
+//            }
+//        }
+//    }
+//
+//    private String getVersionInfo() {
+//        // determine the release version from packaged version info
+//        final VersionInfo vi = VersionInfo.loadVersionInfo("org.apache.http.client", getClass().getClassLoader());
+//        return (vi != null) ? vi.getRelease() : VersionInfo.UNAVAILABLE;
+//    }
+//
+//    private RequestConfig createRequestConfig() {
+//        RequestConfig.Builder requestConfigB = RequestConfig.custom();
+//
+//        requestConfigB.setNormalizeUri(false);
+//        requestConfigB.setExpectContinueEnabled(expectContinue);
+//        if (socketTimeout > -1) {
+//            requestConfigB.setSocketTimeout(socketTimeout);
+//        }
+//        if (connectionTimeout > -1) {
+//            requestConfigB.setConnectTimeout(connectionTimeout);
+//        }
+//        if (maxConnectionPoolTimeout > -1) {
+//            requestConfigB.setConnectionRequestTimeout(maxConnectionPoolTimeout);
+//        }
+//        return requestConfigB.build();
+//    }
+//
+//    private BasicHttpClientConnectionManager createBasicConnectionManager() {
+//        BasicHttpClientConnectionManager connManager =
+//                new BasicHttpClientConnectionManager(getSocketFactoryRegistry(),getConnectionFactory());
+//        connManager.setSocketConfig(createSocketConfig());
+//        connManager.setConnectionConfig(createConnectionConfig());
+//        return connManager;
+//    }
+//
+//    private PoolingHttpClientConnectionManager createPoolingConnectionManager() {
+//        PoolingHttpClientConnectionManager connManager =
+//            new PoolingHttpClientConnectionManager(getSocketFactoryRegistry(), getConnectionFactory());
+//        connManager.setDefaultSocketConfig(createSocketConfig());
+//        connManager.setDefaultConnectionConfig(createConnectionConfig());
+//        if (maxTotalConnections != 0) {
+//            connManager.setMaxTotal(maxTotalConnections);
+//            connManager.setDefaultMaxPerRoute(defaultMaxConnectionsPerRoute);
+//        }
+//
+//        return connManager;
+//    }
+//
+//
+//    private SSLConnectionSocketFactory createDefaultSSLConnectionSocketFactory() {
+//        SSLContext sslcontext = SSLContexts.createSystemDefault();
+//        HostnameVerifier hostnameVerifier = new DefaultHostnameVerifier();
+//        return new SSLConnectionSocketFactory(sslcontext, hostnameVerifier);
+//    }
+//
+//    private ConnectionConfig createConnectionConfig() {
+//        return ConnectionConfig.custom()
+//                .setBufferSize(socketBufferSize)
+//                .setCharset(contentCharset)
+//                .build();
+//    }
+//
+//    private SocketConfig createSocketConfig() {
+//        SocketConfig.Builder socketConfigB = SocketConfig.custom();
+//        if (socketTimeout >= 0) {
+//            socketConfigB.setSoTimeout(socketTimeout);
+//        }
+//        socketConfigB.setTcpNoDelay(tcpNoDelay);
+//        return socketConfigB.build();
+//    }
+//
+//    private Registry<ConnectionSocketFactory> getSocketFactoryRegistry() {
+//        return RegistryBuilder.<ConnectionSocketFactory>create()
+//                              .register("http", PlainConnectionSocketFactory.INSTANCE)
+//                              .register("https", sslConnectionSocketFactory != null ?
+//                                  sslConnectionSocketFactory :
+//                                  createDefaultSSLConnectionSocketFactory())
+//                              .build();
+//    }
+//
+//    private HttpConnectionFactory<HttpRoute, ManagedHttpClientConnection> getConnectionFactory() {
+//        return new ManagedHttpClientConnectionFactory(new DefaultHttpRequestWriterFactory(),
+//                                                      new DefaultHttpResponseParserFactory());
+//    }
 
     /**
-     * Internal representation of proxy server. Package protected so that it can be accessed by tests.
+     * Configuration DTO to pass to implementation-specific builder of actual HTTP Client. Only relevant properties
+     * are passed.
+     *
+     * @param url
+     * @param user
+     * @param password
+     * @param proxy
+     * @param connectionTimeout
+     * @param socketTimeout
+     * @param tcpNoDelay
+     * @param socketBufferSize
+     * @param contentCharset
+     * @param expectContinue
+     * @param defaultHttpHeaders
      */
-    static class Proxy {
+    public record Configuration(String url, String user, String password, Proxy proxy,
+                                int connectionTimeout, int socketTimeout, boolean tcpNoDelay, int socketBufferSize,
+                                Charset contentCharset, boolean expectContinue,
+                                Collection<HttpHeader> defaultHttpHeaders) {
+    }
+
+    /**
+     * Internal representation of an HTTP proxy server. It may contain basic authentication credentials.
+     * Package protected so that it can be accessed by tests.
+     */
+    public static class Proxy {
         private final String host;
         private final int port;
         private String user;
@@ -647,4 +707,5 @@ public class J4pClientBuilder {
             return pass;
         }
     }
+
 }

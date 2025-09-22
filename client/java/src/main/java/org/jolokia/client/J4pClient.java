@@ -1,5 +1,3 @@
-package org.jolokia.client;
-
 /*
  * Copyright 2009-2013 Roland Huss
  *
@@ -15,19 +13,37 @@ package org.jolokia.client;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.client;
 
 import java.io.IOException;
-import java.net.*;
-import java.util.*;
+import java.io.InputStream;
+import java.net.ConnectException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.http.HttpConnectTimeoutException;
+import java.net.http.HttpResponse;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
-import org.apache.http.*;
-import org.apache.http.client.HttpClient;
-import org.apache.http.conn.ConnectTimeoutException;
-import org.jolokia.client.exception.*;
-import org.jolokia.client.request.*;
-import org.jolokia.json.*;
+import org.jolokia.client.exception.J4pBulkRemoteException;
+import org.jolokia.client.exception.J4pConnectException;
+import org.jolokia.client.exception.J4pException;
+import org.jolokia.client.exception.J4pRemoteException;
+import org.jolokia.client.exception.J4pTimeoutException;
+import org.jolokia.client.request.J4pQueryParameter;
+import org.jolokia.client.request.J4pRequest;
+import org.jolokia.client.request.J4pRequestHandler;
+import org.jolokia.client.request.J4pResponse;
+import org.jolokia.client.request.J4pResponseExtractor;
+import org.jolokia.client.request.J4pTargetConfig;
+import org.jolokia.client.request.ValidatingResponseExtractor;
+import org.jolokia.client.spi.HttpClientSpi;
+import org.jolokia.json.JSONArray;
+import org.jolokia.json.JSONObject;
+import org.jolokia.json.JSONStructure;
 import org.jolokia.json.parser.ParseException;
-
 
 /**
  * Client class for accessing the j4p agent
@@ -35,10 +51,10 @@ import org.jolokia.json.parser.ParseException;
  * @author roland
  * @since Apr 24, 2010
  */
-public class J4pClient extends J4pClientBuilderFactory {
+public class J4pClient {
 
     // Http client used for connecting the j4p Agent
-    private final HttpClient httpClient;
+    private final HttpClientSpi httpClient;
 
     // Creating and parsing HTTP-Requests and Responses
     private final J4pRequestHandler requestHandler;
@@ -61,7 +77,7 @@ public class J4pClient extends J4pClientBuilderFactory {
      * @param pJ4pServerUrl the agent URL for how to contact the server.
      * @param pHttpClient HTTP client to use for the connecting to the agent
      */
-    public J4pClient(String pJ4pServerUrl, HttpClient pHttpClient) {
+    public J4pClient(String pJ4pServerUrl, HttpClientSpi pHttpClient) {
         this(pJ4pServerUrl,pHttpClient,null);
     }
 
@@ -73,7 +89,7 @@ public class J4pClient extends J4pClientBuilderFactory {
      * @param pHttpClient HTTP client to use for the connecting to the agent
      * @param pTargetConfig optional target
      */
-    public J4pClient(String pJ4pServerUrl, HttpClient pHttpClient,J4pTargetConfig pTargetConfig) {
+    public J4pClient(String pJ4pServerUrl, HttpClientSpi<?> pHttpClient,J4pTargetConfig pTargetConfig) {
         this(pJ4pServerUrl,pHttpClient,pTargetConfig, ValidatingResponseExtractor.DEFAULT);
     }
 
@@ -87,7 +103,7 @@ public class J4pClient extends J4pClientBuilderFactory {
      * @param pTargetConfig optional target
      * @param pExtractor response extractor to use
      */
-    public J4pClient(String pJ4pServerUrl, HttpClient pHttpClient,J4pTargetConfig pTargetConfig,J4pResponseExtractor pExtractor) {
+    public J4pClient(String pJ4pServerUrl, HttpClientSpi<?> pHttpClient,J4pTargetConfig pTargetConfig,J4pResponseExtractor pExtractor) {
         requestHandler = new J4pRequestHandler(pJ4pServerUrl,pTargetConfig);
         responseExtractor = pExtractor;
         // Using the default as defined in the client builder
@@ -171,32 +187,29 @@ public class J4pClient extends J4pClientBuilderFactory {
     /**
      * Execute a single J4pRequest which returns a single response.
      *
-     * @param pRequest request to execute
-     * @param pMethod method to use which should be either "GET" or "POST"
+     * @param pRequest           request to execute
+     * @param pMethod            method to use which should be either "GET" or "POST"
      * @param pProcessingOptions optional map of processing options
-     * @param pExtractor extractor for actually creating the response
-     *
-     * @param <RESP> response type
-     * @param <REQ> request type
+     * @param pExtractor         extractor for actually creating the response
+     * @param <RESP>             response type
+     * @param <REQ>              request type
      * @return response object
      * @throws J4pException if something's wrong (e.g. connection failed or read timeout)
      */
-    public <RESP extends J4pResponse<REQ>, REQ extends J4pRequest> RESP execute(REQ pRequest,String pMethod,
-                                                                     Map<J4pQueryParameter,String> pProcessingOptions,
-                                                                     J4pResponseExtractor pExtractor)
+    public <RESP extends J4pResponse<REQ>, REQ extends J4pRequest> RESP execute(REQ pRequest, String pMethod,
+                                                                                Map<J4pQueryParameter, String> pProcessingOptions,
+                                                                                J4pResponseExtractor pExtractor)
             throws J4pException {
-
         try {
-            HttpResponse response = httpClient.execute(requestHandler.getHttpRequest(pRequest,pMethod,pProcessingOptions));
-            JSONStructure jsonResponse = extractJsonResponse(pRequest,response);
-            if (! (jsonResponse instanceof JSONObject)) {
+            HttpResponse<InputStream> response = httpClient.execute(requestHandler.getHttpRequest(pRequest, pMethod, pProcessingOptions));
+            JSONStructure jsonResponse = extractJsonResponse(pRequest, response);
+            if (!(jsonResponse instanceof JSONObject)) {
                 throw new J4pException("Invalid JSON answer for a single request (expected a map but got a " + jsonResponse.getClass() + ")");
             }
             boolean excludeRequest = pProcessingOptions != null
-                    && "false".equals(pProcessingOptions.get(J4pQueryParameter.INCLUDE_REQUEST));
+                && "false".equals(pProcessingOptions.get(J4pQueryParameter.INCLUDE_REQUEST));
             return pExtractor.extract(pRequest, (JSONObject) jsonResponse, !excludeRequest);
-        }
-        catch (IOException | URISyntaxException e) {
+        } catch (IOException | URISyntaxException e) {
             throw mapException(e);
         }
     }
@@ -249,7 +262,7 @@ public class J4pClient extends J4pClientBuilderFactory {
                                                                                       J4pResponseExtractor pResponseExtractor)
             throws J4pException {
         try {
-            HttpResponse response = httpClient.execute(requestHandler.getHttpRequest(pRequests,pProcessingOptions));
+            HttpResponse<InputStream> response = httpClient.execute(requestHandler.getHttpRequest(pRequests,pProcessingOptions));
             JSONStructure jsonResponse = extractJsonResponse(null, response);
 
             verifyBulkJsonResponse(jsonResponse);
@@ -263,19 +276,17 @@ public class J4pClient extends J4pClientBuilderFactory {
     // =====================================================================================================
 
     @SuppressWarnings("PMD.PreserveStackTrace")
-    private <REQ extends J4pRequest> JSONStructure extractJsonResponse(REQ pRequest, HttpResponse pResponse) throws J4pException {
+    private <REQ extends J4pRequest> JSONStructure extractJsonResponse(REQ pRequest, HttpResponse<InputStream> pResponse) throws J4pException {
         try {
+            int code = pResponse.statusCode();
+            if (200 != code) {
+                throw new J4pRemoteException(pRequest, String.format("HTTP %d", code), null, code, null, null);
+            }
             return requestHandler.extractJsonResponse(pResponse);
         } catch (IOException e) {
-            throw new J4pException("IO-Error while reading the response: " + e,e);
+            throw new J4pException("IO-Error while reading the response: " + e, e);
         } catch (ParseException e) {
-            // It's a parse exception. Now, check whether the HTTResponse is
-            // an error and prepare the proper J4pException
-            StatusLine statusLine = pResponse.getStatusLine();
-            if (HttpStatus.SC_OK != statusLine.getStatusCode()) {
-                throw new J4pRemoteException(pRequest,statusLine.getReasonPhrase(), null, statusLine.getStatusCode(),null, null);
-            }
-            throw new J4pException("Could not parse answer: " + e,e);
+            throw new J4pException("Could not parse the response: " + e.getMessage(), e);
         }
     }
 
@@ -324,12 +335,13 @@ public class J4pClient extends J4pClientBuilderFactory {
     private J4pException mapException(Exception pException) {
         if (pException instanceof ConnectException) {
             return new J4pConnectException(
-                    "Cannot connect to " + requestHandler.getJ4pServerUrl() + ": " + pException.getMessage(),
+                    "Cannot connect to " + requestHandler.getJ4pServerUrl()
+                        + (pException.getMessage() != null ? ": " + pException.getMessage() : ""),
                     (ConnectException) pException);
-        } else if (pException instanceof ConnectTimeoutException) {
+        } else if (pException instanceof HttpConnectTimeoutException) {
             return new J4pTimeoutException(
                     "Read timeout while request " + requestHandler.getJ4pServerUrl() + ": " + pException.getMessage(),
-                    (ConnectTimeoutException) pException);
+                    (HttpConnectTimeoutException) pException);
         } else if (pException instanceof IOException) {
             return new J4pException("IO-Error while contacting the server: " + pException,pException);
         } else if (pException instanceof URISyntaxException) {
@@ -371,14 +383,13 @@ public class J4pClient extends J4pClientBuilderFactory {
     }
 
     /**
-     * Expose the embedded {@link org.apache.http.client.HttpClient} for tuning connection parameters.
+     * Expose the implementation used by {@link HttpClientSpi} to configure implementation-specific parameters.
      *
      * @return the http client used for HTTP communications
      */
-    public HttpClient getHttpClient() {
-        return httpClient;
+    public <T> T getHttpClient(Class<T> clientClass) {
+        return (T) httpClient.getClient(clientClass);
     }
-
 
     /**
      * Get base URL for Jolokia requests

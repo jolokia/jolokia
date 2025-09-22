@@ -71,7 +71,7 @@ public class J4pDefaultProxyTest extends AbstractJ4pIntegrationTest {
                 .url(url)
                 .user("jolokia")
                 .password("jolokia")
-                .pooledConnections()
+//                .pooledConnections()
                 .target(config.getUrl())
                 .build();
     }

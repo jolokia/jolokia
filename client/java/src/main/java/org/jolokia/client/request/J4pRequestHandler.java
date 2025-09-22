@@ -1,5 +1,3 @@
-package org.jolokia.client.request;
-
 /*
  * Copyright 2009-2013 Roland Huss
  *
@@ -15,22 +13,29 @@ package org.jolokia.client.request;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.client.request;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Flow;
 import java.util.regex.Pattern;
 
-import org.apache.http.*;
-import org.apache.http.client.methods.*;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.protocol.HTTP;
-import org.apache.http.util.EntityUtils;
-import org.jolokia.json.*;
+import org.jolokia.client.exception.J4pRemoteException;
+import org.jolokia.json.JSONArray;
+import org.jolokia.json.JSONObject;
+import org.jolokia.json.JSONStructure;
 import org.jolokia.json.parser.JSONParser;
 import org.jolokia.json.parser.ParseException;
 
@@ -72,19 +77,19 @@ public class J4pRequestHandler {
      * @param pProcessingOptions optional map of processiong options
      * @return the request used with HttpClient to obtain the result.
      */
-    public HttpUriRequest getHttpRequest(J4pRequest pRequest, String pPreferredMethod,
-                                         Map<J4pQueryParameter, String> pProcessingOptions) throws UnsupportedEncodingException, URISyntaxException {
+    public HttpRequest getHttpRequest(J4pRequest pRequest, String pPreferredMethod,
+                                      Map<J4pQueryParameter, String> pProcessingOptions) throws UnsupportedEncodingException, URISyntaxException {
         String method = pPreferredMethod;
         if (method == null) {
             method = pRequest.getPreferredHttpMethod();
         }
         if (method == null) {
-            method = doUseProxy(pRequest) ? HttpPost.METHOD_NAME : HttpGet.METHOD_NAME;
+            method = doUseProxy(pRequest) ? "POST" : "GET";
         }
         String queryParams = prepareQueryParameters(pProcessingOptions);
 
         // GET request
-        if (method.equals(HttpGet.METHOD_NAME)) {
+        if (method.equals("GET")) {
             if (doUseProxy(pRequest)) {
                 throw new IllegalArgumentException("Proxy mode can only be used with POST requests");
             }
@@ -98,16 +103,24 @@ public class J4pRequestHandler {
                     requestPath.append("/");
                     requestPath.append(escape(p));
                 }
-                return new HttpGet(createRequestURI(requestPath.toString(),queryParams));
+                URI uri = createRequestURI(requestPath.toString(), queryParams);
+                return HttpRequest.newBuilder().GET().uri(uri)
+                    .timeout(Duration.ofSeconds(3600))
+                    .build();
+//                return new HttpGet(createRequestURI(requestPath.toString(),queryParams));
             }
         }
 
         // We are using a post method as fallback
         JSONObject requestContent = getJsonRequestContent(pRequest);
-        HttpPost postReq = new HttpPost(createRequestURI(j4pServerUrl.getPath(),queryParams));
-        postReq.setEntity(new StringEntity(requestContent.toJSONString(),"utf-8"));
-        postReq.addHeader(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
-        return postReq;
+//        HttpPost postReq = new HttpPost(createRequestURI(j4pServerUrl.getPath(),queryParams));
+//        postReq.setEntity(new StringEntity(requestContent.toJSONString(),"utf-8"));
+//        postReq.addHeader(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
+//        return postReq;
+        return HttpRequest.newBuilder().POST(HttpRequest.BodyPublishers.ofString(requestContent.toJSONString(), StandardCharsets.UTF_8))
+            .uri(createRequestURI(j4pServerUrl.getPath(), queryParams))
+            .timeout(Duration.ofSeconds(3600))
+            .build();
     }
 
     private boolean doUseProxy(J4pRequest pRequest) {
@@ -131,18 +144,23 @@ public class J4pRequestHandler {
      * @param pRequests requests to put into a HTTP request
      * @return HTTP request to send to the server
      */
-    public <T extends J4pRequest> HttpUriRequest getHttpRequest(List<T> pRequests,Map<J4pQueryParameter,String> pProcessingOptions)
+    public <T extends J4pRequest> HttpRequest getHttpRequest(List<T> pRequests,Map<J4pQueryParameter,String> pProcessingOptions)
             throws UnsupportedEncodingException, URISyntaxException {
         JSONArray bulkRequest = new JSONArray(pRequests.size());
         String queryParams = prepareQueryParameters(pProcessingOptions);
-        HttpPost postReq = new HttpPost(createRequestURI(j4pServerUrl.getPath(),queryParams));
+//        HttpPost postReq = new HttpPost(createRequestURI(j4pServerUrl.getPath(),queryParams));
         for (T request : pRequests) {
             JSONObject requestContent = getJsonRequestContent(request);
             bulkRequest.add(requestContent);
         }
-        postReq.setEntity(new StringEntity(bulkRequest.toJSONString(),"utf-8"));
-        postReq.addHeader(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
-        return postReq;
+        return HttpRequest.newBuilder().POST(HttpRequest.BodyPublishers.ofString(bulkRequest.toJSONString(), StandardCharsets.UTF_8))
+            .uri(createRequestURI(j4pServerUrl.getPath(), queryParams))
+            .header("Content-Type", "application/json")
+            .build();
+//        postReq.setEntity(new StringEntity(bulkRequest.toJSONString(),"utf-8"));
+//        postReq.addHeader(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
+//        return postReq;
+//        return HttpRequest.newBuilder().POST(null).build();
     }
 
 
@@ -153,20 +171,11 @@ public class J4pRequestHandler {
      * @return JSON content of the answer
      */
     @SuppressWarnings("PMD.PreserveStackTrace")
-    public JSONStructure extractJsonResponse(HttpResponse pHttpResponse) throws IOException, ParseException {
-        HttpEntity entity = pHttpResponse.getEntity();
-        try {
+    public JSONStructure extractJsonResponse(HttpResponse<InputStream> pHttpResponse) throws IOException, ParseException {
+        try (InputStream body = pHttpResponse.body()) {
             JSONParser parser = new JSONParser();
-            Header contentEncoding = entity.getContentEncoding();
-            if (contentEncoding != null) {
-                return (JSONStructure) parser.parse(new InputStreamReader(entity.getContent(), Charset.forName(contentEncoding.getValue())));
-            } else {
-                return (JSONStructure) parser.parse(new InputStreamReader(entity.getContent()));
-            }
-        } finally {
-            if (entity != null) {
-                EntityUtils.consume(entity);
-            }
+            String contentEncoding = pHttpResponse.headers().firstValue("Content-Encoding").orElse(StandardCharsets.ISO_8859_1.name());
+            return (JSONStructure) parser.parse(new InputStreamReader(body, Charset.forName(contentEncoding)));
         }
     }
 

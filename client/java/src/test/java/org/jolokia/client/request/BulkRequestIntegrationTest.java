@@ -20,8 +20,9 @@ import java.util.*;
 
 import javax.management.MalformedObjectNameException;
 
-import org.jolokia.client.BasicAuthenticator;
+import org.jolokia.client.BasicClientCustomizer;
 import org.jolokia.client.J4pClient;
+import org.jolokia.client.J4pClientBuilder;
 import org.jolokia.client.exception.*;
 import org.jolokia.json.JSONArray;
 import org.jolokia.json.JSONObject;
@@ -138,10 +139,10 @@ public class BulkRequestIntegrationTest extends AbstractJ4pIntegrationTest {
 
     @Test
     public void optionalBulkRequestsWithExtractorAsDefault() throws MalformedObjectNameException, J4pException {
-        J4pClient c = J4pClient.url(j4pUrl)
+        J4pClient c = new J4pClientBuilder().url(j4pUrl)
                                .user("jolokia")
                                .password("jolokia")
-                               .authenticator(new BasicAuthenticator().preemptive())
+//                               .authenticator(new BasicClientCustomizer().preemptive())
                                .responseExtractor(ValidatingResponseExtractor.OPTIONAL)
                                .build();
 

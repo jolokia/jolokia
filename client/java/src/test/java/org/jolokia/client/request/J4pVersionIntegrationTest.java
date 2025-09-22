@@ -1,5 +1,3 @@
-package org.jolokia.client.request;
-
 /*
  * Copyright 2009-2013 Roland Huss
  *
@@ -15,15 +13,16 @@ package org.jolokia.client.request;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.client.request;
 
 import java.util.Set;
 
-import org.apache.http.client.methods.HttpPost;
-import org.jolokia.server.core.Version;
 import org.jolokia.client.exception.J4pException;
+import org.jolokia.server.core.Version;
 import org.testng.annotations.Test;
 
-import static org.testng.AssertJUnit.*;
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertTrue;
 
 /**
  * @author roland
@@ -40,24 +39,23 @@ public class J4pVersionIntegrationTest extends AbstractJ4pIntegrationTest {
 
     @Test
     public void versionPostRequest() throws J4pException {
-        for (J4pTargetConfig cfg : new J4pTargetConfig[] { null, getTargetProxyConfig()}) {
+        for (J4pTargetConfig cfg : new J4pTargetConfig[]{null, getTargetProxyConfig()}) {
             J4pVersionRequest req = new J4pVersionRequest(cfg);
-            req.setPreferredHttpMethod(HttpPost.METHOD_NAME);
+            req.setPreferredHttpMethod("POST");
             J4pVersionResponse resp = j4pClient.execute(req);
             verifyResponse(resp);
         }
     }
 
-   private void verifyResponse(J4pVersionResponse pResp) {
-       assertEquals("Proper agent version", Version.getAgentVersion(), pResp.getAgentVersion());
-       assertEquals("Proper protocol version",Version.getProtocolVersion(), pResp.getProtocolVersion());
-       assertTrue("Request timestamp", pResp.getRequestDate().getTime() <= System.currentTimeMillis());
-       assertEquals("Jetty", "jetty", pResp.getProduct());
-       assertTrue("Mortbay or Eclipse", pResp.getVendor().contains("Eclipse") || pResp.getVendor().contains("Mortbay"));
-       Set<String> providers = pResp.getProviders();
-       assertTrue(providers.contains("jmx"));
-       assertEquals(pResp.getExtraInfo("jmx").size(),0);
+    private void verifyResponse(J4pVersionResponse pResp) {
+        assertEquals("Proper agent version", Version.getAgentVersion(), pResp.getAgentVersion());
+        assertEquals("Proper protocol version", Version.getProtocolVersion(), pResp.getProtocolVersion());
+        assertTrue("Request timestamp", pResp.getRequestDate().getTime() <= System.currentTimeMillis());
+        assertEquals("Jetty", "jetty", pResp.getProduct());
+        assertTrue("Mortbay or Eclipse", pResp.getVendor().contains("Eclipse") || pResp.getVendor().contains("Mortbay"));
+        Set<String> providers = pResp.getProviders();
+        assertTrue(providers.contains("jmx"));
+        assertEquals(0, pResp.getExtraInfo("jmx").size());
     }
-
 
 }

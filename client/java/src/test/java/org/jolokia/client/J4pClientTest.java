@@ -18,15 +18,21 @@ package org.jolokia.client;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.http.HttpClient;
+import java.net.http.HttpConnectTimeoutException;
+import java.net.http.HttpHeaders;
+import java.net.http.HttpResponse;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import javax.management.MalformedObjectNameException;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.conn.ConnectTimeoutException;
-import org.apache.http.message.BasicHeader;
+//import org.apache.http.HttpEntity;
+//import org.apache.http.HttpResponse;
+//import org.apache.http.client.HttpClient;
+//import org.apache.http.conn.ConnectTimeoutException;
+//import org.apache.http.message.BasicHeader;
 import org.easymock.EasyMock;
 import org.jolokia.client.exception.J4pException;
 import org.jolokia.client.exception.J4pRemoteException;
@@ -34,6 +40,7 @@ import org.jolokia.client.exception.J4pTimeoutException;
 import org.jolokia.client.request.J4pQueryParameter;
 import org.jolokia.client.request.J4pReadRequest;
 import org.jolokia.client.request.J4pReadResponse;
+import org.jolokia.client.spi.HttpClientSpi;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.testng.collections.Maps;
@@ -77,7 +84,7 @@ public class J4pClientTest {
 
     @Test
     public void simple() throws MalformedObjectNameException, J4pException, IOException {
-        HttpClient client = prepareMocks("utf-8",MEMORY_RESPONSE);
+        HttpClientSpi client = prepareMocks("utf-8",MEMORY_RESPONSE);
 
         J4pClient j4p = new J4pClient(TEST_URL,client);
         J4pReadResponse resp = j4p.execute(TEST_REQUEST);
@@ -86,7 +93,7 @@ public class J4pClientTest {
 
     @Test(expectedExceptions = J4pException.class,expectedExceptionsMessageRegExp = ".*JSONArray.*")
     public void invalidArrayResponse() throws J4pException, IOException {
-        HttpClient client = prepareMocks(null,ARRAY_RESPONSE);
+        HttpClientSpi client = prepareMocks(null,ARRAY_RESPONSE);
 
         J4pClient j4p = new J4pClient(TEST_URL,client);
         Map<J4pQueryParameter,String> opts = new HashMap<>();
@@ -96,7 +103,7 @@ public class J4pClientTest {
 
     @Test(expectedExceptions = J4pTimeoutException.class,expectedExceptionsMessageRegExp = ".*timeout.*")
     public void timeout() throws IOException, J4pException {
-        throwException(false, new ConnectTimeoutException());
+        throwException(false, new HttpConnectTimeoutException("timeout"));
     }
 
     @Test(expectedExceptions = J4pException.class,expectedExceptionsMessageRegExp = ".*IO-Error.*")
@@ -106,7 +113,7 @@ public class J4pClientTest {
 
     @Test(expectedExceptions = J4pTimeoutException.class,expectedExceptionsMessageRegExp = ".*timeout.*")
     public void connectExceptionForBulkRequests() throws IOException, J4pException {
-        throwException(true,new ConnectTimeoutException());
+        throwException(true,new HttpConnectTimeoutException("timeout"));
     }
 
     @Test(expectedExceptions = J4pException.class,expectedExceptionsMessageRegExp = ".*IO-Error.*")
@@ -114,17 +121,16 @@ public class J4pClientTest {
         throwException(true,new IOException());
     }
 
-    @Test(expectedExceptions = J4pException.class,expectedExceptionsMessageRegExp = ".*reading.*response.*")
+    @Test(expectedExceptions = J4pException.class,expectedExceptionsMessageRegExp = ".*Could not parse the response.*")
     public void throwIOExceptionWhenParsingAnswer() throws IOException, J4pException {
-        HttpClient client = createMock(HttpClient.class);
-        HttpResponse response  = createMock(HttpResponse.class);
-        HttpEntity entity = createMock(HttpEntity.class);
+        HttpClientSpi<?> client = createMock(HttpClientSpi.class);
+        HttpResponse<InputStream> response  = createMock(HttpResponse.class);
+        expect(response.statusCode()).andReturn(200);
+        expect(response.headers()).andReturn(HttpHeaders.of(Collections.emptyMap(), (n, v) -> true));
+        expect(response.body()).andReturn(new ByteArrayInputStream(new byte[0]));
         expect(client.execute(EasyMock.anyObject())).andReturn(response);
-        expect(response.getEntity()).andReturn(entity);
-        expect(entity.getContentEncoding()).andReturn(null);
-        expect(entity.isStreaming()).andReturn(false);
-        expect(entity.getContent()).andThrow(new IOException());
-        replay(client, entity, response);
+//        expect(response.body()).andThrow(new IOException());
+        replay(client, response);
 
         J4pClient j4p = new J4pClient(TEST_URL,client);
         j4p.execute(TEST_REQUEST);
@@ -132,7 +138,7 @@ public class J4pClientTest {
 
     @Test(expectedExceptions = J4pException.class,expectedExceptionsMessageRegExp = ".*Invalid.*bulk.*")
     public void invalidBulkRequestResponse() throws IOException, J4pException {
-        HttpClient client = prepareMocks(null,MEMORY_RESPONSE);
+        HttpClientSpi client = prepareMocks(null,MEMORY_RESPONSE);
 
         J4pClient j4p = new J4pClient(TEST_URL,client);
         j4p.execute(TEST_REQUEST,TEST_REQUEST_2);
@@ -140,7 +146,7 @@ public class J4pClientTest {
 
     @Test(expectedExceptions = J4pRemoteException.class,expectedExceptionsMessageRegExp = ".*Invalid.*")
     public void noStatus() throws IOException, J4pException {
-        HttpClient client = prepareMocks(null,EMPTY_RESPONSE);
+        HttpClientSpi client = prepareMocks(null,EMPTY_RESPONSE);
 
         J4pClient j4p = new J4pClient(TEST_URL,client);
         j4p.execute(TEST_REQUEST);
@@ -148,7 +154,7 @@ public class J4pClientTest {
 
     @Test(expectedExceptions = J4pRemoteException.class)
     public void remoteExceptionErrorValue() throws IOException, J4pException {
-        HttpClient client = prepareMocks("utf-8", ERROR_VALUE_RESPONSE);
+        HttpClientSpi client = prepareMocks("utf-8", ERROR_VALUE_RESPONSE);
 
         J4pClient j4p = new J4pClient(TEST_URL,client);
         Map<J4pQueryParameter, String> options = Maps.newHashMap();
@@ -166,7 +172,7 @@ public class J4pClientTest {
     }
 
     private void throwException(boolean bulk,Exception exp) throws IOException, J4pException {
-        HttpClient client = createMock(HttpClient.class);
+        HttpClientSpi client = createMock(HttpClientSpi.class);
         expect(client.execute(EasyMock.anyObject())).andThrow(exp);
         replay(client);
 
@@ -178,19 +184,18 @@ public class J4pClientTest {
         }
     }
 
-    private HttpClient prepareMocks(String encoding,String jsonResp) throws IOException {
-        HttpClient client = createMock(HttpClient.class);
-        HttpResponse response  = createMock(HttpResponse.class);
-        HttpEntity entity = createMock(HttpEntity.class);
+    private HttpClientSpi prepareMocks(String encoding,String jsonResp) throws IOException {
+        HttpClientSpi<?> client = createMock(HttpClientSpi.class);
+        HttpResponse<InputStream> response  = createMock(HttpResponse.class);
         expect(client.execute(EasyMock.anyObject())).andReturn(response);
-        expect(response.getEntity()).andReturn(entity);
-        expect(entity.isStreaming()).andReturn(false);
-        expect(entity.getContentEncoding()).andReturn(encoding != null ? new BasicHeader("Content-Encoding",encoding) : null);
-
-        final ByteArrayInputStream bis =
-                new ByteArrayInputStream(jsonResp.getBytes());
-        expect(entity.getContent()).andReturn(bis);
-        replay(client, response, entity);
+        final ByteArrayInputStream bis = new ByteArrayInputStream(jsonResp.getBytes());
+        expect(response.statusCode()).andReturn(200);
+        expect(response.headers()).andReturn(HttpHeaders.of(Collections.emptyMap(), (n, v) -> true));
+        expect(response.body()).andReturn(bis).anyTimes();
+//        expect(entity.isStreaming()).andReturn(false);
+//        expect(entity.getContentEncoding()).andReturn(encoding != null ? new BasicHeader("Content-Encoding",encoding) : null);
+//
+        replay(client, response);
         return client;
     }
 }

@@ -1,7 +1,5 @@
-package org.jolokia.client.exception;
-
 /*
- * Copyright 2009-2013 Roland Huss
+ * Copyright 2009-2025 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,24 +13,17 @@ package org.jolokia.client.exception;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.client.spi;
 
-import java.net.http.HttpConnectTimeoutException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 
-/**
- * Exception thrown in case of an timeout
- *
- * @author roland
- * @since 15.12.10
- */
-public class J4pTimeoutException extends J4pException {
+public interface HttpClientSpi<T> {
 
-    /**
-     * Exception thrown when a timeout occured
-     *
-     * @param pMessage error message
-     * @param pException timeout exception
-     */
-    public J4pTimeoutException(String pMessage, HttpConnectTimeoutException pException) {
-        super(pMessage,pException);
-    }
+    T getClient(Class<T> clientClass);
+
+    HttpResponse<InputStream> execute(HttpRequest httpRequest) throws IOException;
+
 }
