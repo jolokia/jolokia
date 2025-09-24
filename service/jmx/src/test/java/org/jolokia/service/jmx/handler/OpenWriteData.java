@@ -21,7 +21,7 @@ import java.util.Set;
  * limitations under the License.
  */
 
-
+// TODO: add comment referring to https://docs.oracle.com/en/java/javase/17/docs/api/java.management/javax/management/MXBean.html
 public class OpenWriteData {
     private int intField;
     private String stringField;
@@ -91,6 +91,8 @@ public class OpenWriteData {
     }
 
 
+    // MXBean - any other type is converted to CompositeType
+    // there are some restrictions and no enforcement of getters having related setters (important for restructuring)
     public static class Nested {
         private String nestedField;
 
