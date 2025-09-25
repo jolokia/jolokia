@@ -23,7 +23,7 @@ import org.jolokia.json.JSONObject;
 import org.jolokia.server.core.util.RequestType;
 
 /**
- * A JMX request for a <code>version</code> request.
+ * A JMX request for a {@link RequestType#VERSION} request. Doesn't require any parameters.
  *
  * @author roland
  * @since 15.03.11
