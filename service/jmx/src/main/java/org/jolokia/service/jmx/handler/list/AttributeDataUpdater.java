@@ -51,7 +51,10 @@ class AttributeDataUpdater extends DataUpdater {
                 JSONObject map = new JSONObject();
                 map.put(TYPE.getKey(), attrInfo.getType());
                 map.put(DESCRIPTION.getKey(), attrInfo.getDescription());
+                map.put(READ.getKey(), attrInfo.isReadable());
+                map.put(WRITE.getKey(), attrInfo.isWritable());
                 map.put(READ_WRITE.getKey(), attrInfo.isWritable() && attrInfo.isReadable());
+                map.put(IS.getKey(), attrInfo.isIs());
                 attrMap.put(attrInfo.getName(), map);
             }
         }

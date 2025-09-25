@@ -36,6 +36,10 @@ public enum DataKeys {
     KEYS("keys"),
     NOTIFICATIONS("notif"),
     TYPE("type"),
+    // attribute information
+    IS("is"),
+    READ("r"),
+    WRITE("w"),
     READ_WRITE("rw");
 
     private final String key;
