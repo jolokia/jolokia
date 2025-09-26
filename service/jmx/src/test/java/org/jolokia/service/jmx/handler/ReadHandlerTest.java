@@ -82,9 +82,11 @@ public class ReadHandlerTest extends BaseHandlerTest {
         String[] attrs = new String[] {"attr0","atrr1","attr2"};
         String[] vals = new String[] {"val0", "val1", "val2"};
         prepareMBeanInfos(server, testBeanName, attrs);
-        for (int i=0;i<attrs.length;i++) {
-            expect(server.getAttribute(testBeanName,attrs[i])).andReturn(vals[i]);
-        }
+        expect(server.getAttributes(testBeanName,attrs)).andReturn(new AttributeList(List.of(
+            new Attribute(attrs[0], vals[0]),
+            new Attribute(attrs[1], vals[1]),
+            new Attribute(attrs[2], vals[2])
+        )));
         replay(server);
 
         @SuppressWarnings("unchecked")
@@ -105,8 +107,10 @@ public class ReadHandlerTest extends BaseHandlerTest {
 
         MBeanServer server = createMBeanServer();
         expect(server.isRegistered(testBeanName)).andStubReturn(true);
-        expect(server.getAttribute(testBeanName,"attr0")).andReturn("val0");
-        expect(server.getAttribute(testBeanName,"attr1")).andReturn("val1");
+        expect(server.getAttributes(testBeanName,new String[] {"attr0", "attr1"})).andReturn(new AttributeList(List.of(
+            new Attribute("attr0", "val0"),
+            new Attribute("attr1", "val1")
+        )));
         replay(server);
 
         @SuppressWarnings("unchecked")
@@ -125,7 +129,9 @@ public class ReadHandlerTest extends BaseHandlerTest {
 
         MBeanServer server = createMock(MBeanServer.class);
         expect(server.isRegistered(testBeanName)).andStubReturn(true);
-        expect(server.getAttribute(testBeanName,"attr0")).andReturn("val0");
+        expect(server.getAttributes(testBeanName,new String[] {"attr0", "attr1"})).andReturn(new AttributeList(List.of(
+            new Attribute("attr0", "val0")
+        )));
         expect(server.getAttribute(testBeanName,"attr1")).andThrow(new AttributeNotFoundException("Couldn't find attr1"));
         replay(server);
 
@@ -142,7 +148,9 @@ public class ReadHandlerTest extends BaseHandlerTest {
 
         MBeanServer server = createMock(MBeanServer.class);
         expect(server.isRegistered(testBeanName)).andStubReturn(true);
-        expect(server.getAttribute(testBeanName,"attr0")).andReturn("val0");
+        expect(server.getAttributes(testBeanName,new String[] {"attr0", "attr1"})).andReturn(new AttributeList(List.of(
+            new Attribute("attr0", "val0")
+        )));
         expect(server.getAttribute(testBeanName,"attr1")).andThrow(new AttributeNotFoundException("Couldn't find attr1"));
         replay(server);
 
@@ -215,13 +223,17 @@ public class ReadHandlerTest extends BaseHandlerTest {
                     new ObjectName("java.lang:type=GarbageCollection")
             };
             MBeanServer server = prepareMultiAttributeTest(patternMBean, beans);
-            expect(server.getAttribute(beans[0],"mem0")).andReturn("memval0");
-            expect(server.getAttribute(beans[0],"mem1")).andReturn("memval1");
-            expect(server.getAttribute(beans[0],"common")).andReturn("commonVal0");
-            expect(server.getAttribute(beans[1],"gc0")).andReturn("gcval0");
-            expect(server.getAttribute(beans[1],"gc1")).andReturn("gcval1");
-            expect(server.getAttribute(beans[1],"gc3")).andReturn("gcval3");
-            expect(server.getAttribute(beans[1],"common")).andReturn("commonVal1");
+            expect(server.getAttributes(beans[0],new String[] {"mem0", "mem1", "common"})).andReturn(new AttributeList(List.of(
+                new Attribute("mem0", "memval0"),
+                new Attribute("mem1", "memval1"),
+                new Attribute("common", "commonVal0")
+            )));
+            expect(server.getAttributes(beans[1],new String[] {"gc0", "gc1", "gc3", "common"})).andReturn(new AttributeList(List.of(
+                new Attribute("gc0", "gcval0"),
+                new Attribute("gc1", "gcval1"),
+                new Attribute("gc3", "gcval3"),
+                new Attribute("common", "commonVal1")
+            )));
             replay(server);
 
             Map<String, ?> res = (Map<String, ?>) handler.handleAllServerRequest(getMBeanServerManager(server), request, null);
