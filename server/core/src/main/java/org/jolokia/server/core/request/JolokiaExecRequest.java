@@ -38,7 +38,7 @@ public class JolokiaExecRequest extends JolokiaObjectNameRequest {
 
     // List of arguments for the operation to execute. Can be either already of the
     // proper type or, if not, in a string representation.
-    private final List<?> arguments;
+    private List<?> arguments;
 
     /**
      * Constructor for creating a JmxRequest resulting from an HTTP GET request
@@ -100,6 +100,18 @@ public class JolokiaExecRequest extends JolokiaObjectNameRequest {
         return ret;
     }
 
+    /**
+     * For exec requests, <em>after</em> we decide on the number of arguments, we may want to change the
+     * request, so it contains valid path and arguments.
+     *
+     * @param nrParams new argument count
+     * @param pathParts path parts created from extra arguments
+     */
+    public void splitArgumentsAndPath(int nrParams, List<String> pathParts) {
+        this.arguments = this.arguments.subList(0, nrParams);
+        this.setPathParts(pathParts);
+    }
+
     // =================================================================================
 
     /**
@@ -114,7 +126,7 @@ public class JolokiaExecRequest extends JolokiaObjectNameRequest {
                 return new JolokiaExecRequest(
                         pStack.pop(), // Object name
                         pStack.pop(), // Operation name
-                        convertSpecialStringTags(prepareExtraArgs(pStack)), // arguments
+                        convertSpecialStringTags(prepareExtraArgs(pStack)), // arguments - consume entire path
                         pParams);
             }
 

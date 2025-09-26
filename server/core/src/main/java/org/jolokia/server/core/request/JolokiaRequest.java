@@ -46,7 +46,7 @@ public abstract class JolokiaRequest {
     private final HttpMethod method;
 
     // Path parts, which are used for selecting parts of the return value
-    private final List<String> pathParts;
+    private List<String> pathParts;
 
     // Free-form options
     private JSONObject options = null;
@@ -248,6 +248,16 @@ public abstract class JolokiaRequest {
      */
     public List<String> getPathParts() {
         return pathParts;
+    }
+
+    /**
+     * For some requests we may want to set the path parts after we are able to determine them after some
+     * extra processing.
+     *
+     * @param pathParts path parts created from extra arguments
+     */
+    public void setPathParts(List<String> pathParts) {
+        this.pathParts = pathParts;
     }
 
     /**

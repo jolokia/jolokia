@@ -70,8 +70,43 @@ public class ExecHandlerTest {
         assertNull(res);
     }
 
-    @Test(expectedExceptions = { IllegalArgumentException.class })
-    public void simpleWithWrongArguments() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, MalformedObjectNameException, NotChangedException, EmptyResponseException {
+    @Test
+    public void simpleWithArguments() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, MBeanException, AttributeNotFoundException, NotChangedException, EmptyResponseException {
+        JolokiaExecRequest request = new JolokiaRequestBuilder(EXEC, oName).
+                operation("simpleWithArguments").
+                arguments("2025-09-26T13:36:42").
+                build();
+        assertEquals(handler.getType(), EXEC);
+        Object res = handler.handleSingleServerRequest(getMBeanServer(), request);
+        assertTrue(res instanceof Date);
+    }
+
+    @Test
+    public void simpleWithNullable() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, MBeanException, AttributeNotFoundException, NotChangedException, EmptyResponseException {
+        JolokiaExecRequest request = new JolokiaRequestBuilder(EXEC, oName).
+                operation("simpleWithNullable").
+                arguments("v1").
+                build();
+        Object res = handler.handleSingleServerRequest(getMBeanServer(), request);
+        assertEquals(res, "v1");
+
+        request = new JolokiaRequestBuilder(EXEC, oName).
+                operation("simpleWithNullable").
+                arguments("null").
+                build();
+        res = handler.handleSingleServerRequest(getMBeanServer(), request);
+        assertEquals(res, "null");
+
+        request = new JolokiaRequestBuilder(EXEC, oName).
+                operation("simpleWithNullable").
+                arguments(new Object[] { null }).
+                build();
+        res = handler.handleSingleServerRequest(getMBeanServer(), request);
+        assertEquals(res, "<null>");
+    }
+
+    @Test
+    public void simpleWithWrongArgumentsThatWillBeTreatedAsPath() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, MalformedObjectNameException, NotChangedException, EmptyResponseException {
         JolokiaExecRequest request = new JolokiaRequestBuilder(EXEC, oName).
                 operation("simple").
                 arguments("blub","bla").

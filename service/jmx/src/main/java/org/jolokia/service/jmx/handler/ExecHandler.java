@@ -73,16 +73,29 @@ public class ExecHandler extends AbstractCommandHandler<JolokiaExecRequest> {
         Object[] params = new Object[nrParams];
         @SuppressWarnings("unchecked")
         List<Object> args = (List<Object>) request.getArguments();
+        // all path elements were consumed as arguments, but if there's more, we'll treat them as path for return value
+        // they should be Strings
+        if (args != null && nrParams < args.size()) {
+            List<Object> trail = new ArrayList<>(args.subList(nrParams, args.size()));
+            List<String> path = new LinkedList<>();
+            for (Object el : trail) {
+                if (el instanceof String) {
+                    path.add((String) el);
+                }
+            }
+            request.splitArgumentsAndPath(nrParams, path);
+
+            args = (List<Object>) request.getArguments();
+        }
         verifyArguments(request, types, nrParams, args);
-        for (int i = 0;i < nrParams; i++) {
-        	if (types.paramOpenTypes[i] != null) {
-        		params[i] = context.getMandatoryService(Serializer.class).deserializeOpenType(types.paramOpenTypes[i], args.get(i));
-        	} else {
-        		params[i] = context.getMandatoryService(Serializer.class).deserialize(types.paramClasses[i], args.get(i));
-        	}
+        for (int i = 0; i < nrParams; i++) {
+            if (types.paramOpenTypes[i] != null) {
+                params[i] = context.getMandatoryService(Serializer.class).deserializeOpenType(types.paramOpenTypes[i], args.get(i));
+            } else {
+                params[i] = context.getMandatoryService(Serializer.class).deserialize(types.paramClasses[i], args.get(i));
+            }
         }
 
-        // TODO: Maybe allow for a path as well which could be applied on the return value ...
         return server.invoke(request.getObjectName(),types.operationName,params,types.paramClasses);
     }
 
