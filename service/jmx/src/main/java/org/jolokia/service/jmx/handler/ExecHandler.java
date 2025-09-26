@@ -25,9 +25,12 @@ import javax.management.*;
 import javax.management.openmbean.OpenMBeanParameterInfo;
 import javax.management.openmbean.OpenType;
 
+import org.jolokia.json.JSONObject;
 import org.jolokia.server.core.request.JolokiaExecRequest;
 import org.jolokia.server.core.service.serializer.Serializer;
+import org.jolokia.server.core.service.serializer.ValueFaultHandler;
 import org.jolokia.server.core.util.RequestType;
+import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 
 
 /**
@@ -51,6 +54,16 @@ public class ExecHandler extends AbstractCommandHandler<JolokiaExecRequest> {
             throw new SecurityException("Operation " + pRequest.getOperation() +
                     " forbidden for MBean " + pRequest.getObjectNameAsString());
         }
+    }
+
+    /**
+     * EXEC may be performed on multiple objects if they match the {@link ObjectName} pattern
+     * @param pRequest
+     * @return
+     */
+    @Override
+    public boolean handleAllServersAtOnce(JolokiaExecRequest pRequest) {
+        return pRequest.getObjectName().isPattern();
     }
 
     /**
@@ -85,7 +98,10 @@ public class ExecHandler extends AbstractCommandHandler<JolokiaExecRequest> {
             }
             request.splitArgumentsAndPath(nrParams, path);
 
+            //noinspection unchecked
             args = (List<Object>) request.getArguments();
+        } else if (args == null) {
+            args = Collections.emptyList();
         }
         verifyArguments(request, types, nrParams, args);
         for (int i = 0; i < nrParams; i++) {
@@ -97,6 +113,30 @@ public class ExecHandler extends AbstractCommandHandler<JolokiaExecRequest> {
         }
 
         return server.invoke(request.getObjectName(),types.operationName,params,types.paramClasses);
+    }
+
+    @Override
+    public Object doHandleAllServerRequest(MBeanServerAccess pServerManager, JolokiaExecRequest pRequest, Object pPreviousResult)
+        throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+        ObjectName oName = pRequest.getObjectName();
+        ValueFaultHandler faultHandler = pRequest.getValueFaultHandler();
+        if (oName.isPattern()) {
+            // search first
+            Set<ObjectName> names = pServerManager.queryNames(oName);
+            if (names.isEmpty()) {
+                throw new InstanceNotFoundException("No MBean with pattern " + oName + " found for invoking JMX operations");
+            }
+            JSONObject result = new JSONObject();
+            for (ObjectName name : names) {
+                Object singleResult = pServerManager.call(name, (connection, objectName, extra)
+                    -> ExecHandler.this.doHandleSingleServerRequest(connection, pRequest.withChangedObjectName(name)));
+                result.put(pRequest.getOrderedObjectName(name), singleResult);
+            }
+            return result;
+        } else {
+            return pServerManager.call(oName, (connection, objectName, extra)
+                -> ExecHandler.this.doHandleSingleServerRequest(connection, pRequest));
+        }
     }
 
     // check whether the given arguments are compatible with the signature and if not so, raise an excepton

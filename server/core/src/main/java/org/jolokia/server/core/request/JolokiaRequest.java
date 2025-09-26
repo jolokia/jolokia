@@ -36,7 +36,7 @@ public abstract class JolokiaRequest {
     private final RequestType type;
 
     // Processing configuration for tis request object
-    private ProcessingParameters processingConfig;
+    protected ProcessingParameters processingConfig;
 
     // A value fault handler for dealing with exception when extracting values
     private ValueFaultHandler valueFaultHandler;

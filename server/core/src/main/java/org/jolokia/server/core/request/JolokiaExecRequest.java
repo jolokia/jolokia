@@ -19,6 +19,7 @@ package org.jolokia.server.core.request;
 import java.util.*;
 
 import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
 
 import org.jolokia.server.core.util.EscapeUtil;
 import org.jolokia.server.core.util.RequestType;
@@ -39,6 +40,9 @@ public class JolokiaExecRequest extends JolokiaObjectNameRequest {
     // List of arguments for the operation to execute. Can be either already of the
     // proper type or, if not, in a string representation.
     private List<?> arguments;
+
+    /** Flag set after calling {@link #splitArgumentsAndPath} to not call it anymore */
+    private boolean pathCreated;
 
     /**
      * Constructor for creating a JmxRequest resulting from an HTTP GET request
@@ -67,6 +71,21 @@ public class JolokiaExecRequest extends JolokiaObjectNameRequest {
         super(pRequestMap, pParams, true);
         arguments = (List<?>) pRequestMap.get("arguments");
         operation = (String) pRequestMap.get("operation");
+    }
+
+    /**
+     * When performing pattern exec requests, we need to do a copy of existing request with specific (from search)
+     * ObjectName.
+     *
+     * @param name
+     * @return
+     */
+    public JolokiaExecRequest withChangedObjectName(ObjectName name) {
+        try {
+            return new JolokiaExecRequest(name.getCanonicalName(), operation, arguments, this.processingConfig);
+        } catch (MalformedObjectNameException e) {
+            throw new IllegalArgumentException(e.getMessage(), e);
+        }
     }
 
     /**
@@ -108,8 +127,12 @@ public class JolokiaExecRequest extends JolokiaObjectNameRequest {
      * @param pathParts path parts created from extra arguments
      */
     public void splitArgumentsAndPath(int nrParams, List<String> pathParts) {
+        if (pathCreated) {
+            return;
+        }
         this.arguments = this.arguments.subList(0, nrParams);
         this.setPathParts(pathParts);
+        this.pathCreated = true;
     }
 
     // =================================================================================
@@ -165,4 +188,5 @@ public class JolokiaExecRequest extends JolokiaObjectNameRequest {
         ret.append("]");
         return ret.toString();
     }
+
 }
