@@ -17,20 +17,27 @@ package org.jolokia.jvmagent.security;/*
 
 import java.io.IOException;
 import java.io.Writer;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSocketFactory;
 
-import javax.net.ssl.*;
-
-import com.sun.net.httpserver.*;
+import com.sun.net.httpserver.Authenticator;
+import com.sun.net.httpserver.Headers;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpPrincipal;
 import jakarta.servlet.Servlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.jolokia.server.core.http.security.AuthorizationHeaderParser;
 import org.jolokia.test.util.EnvTestUtil;
-import org.testng.annotations.*;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
 
@@ -52,10 +59,11 @@ public class DelegatingAuthenticatorTest extends BaseAuthenticatorTest {
     public void setup() throws Exception {
         int port = EnvTestUtil.getFreePort();
         jettyServer = new Server(port);
-        ServletContextHandler jettyContext = new ServletContextHandler(jettyServer, "/");
+        ServletContextHandler jettyContext = new ServletContextHandler("/");
         ServletHolder holder = new ServletHolder(createServlet());
         jettyContext.addServlet(holder, "/test/*");
 
+        jettyServer.setHandler(jettyContext);
         jettyServer.start();
         url = "http://127.0.0.1:" + port + "/test";
     }
