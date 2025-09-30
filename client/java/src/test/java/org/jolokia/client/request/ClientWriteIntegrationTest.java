@@ -44,7 +44,7 @@ import static org.testng.AssertJUnit.*;
  * @author roland
  * @since Jun 5, 2010
  */
-public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
+public class ClientWriteIntegrationTest extends AbstractClientIntegrationTest {
 
     public static final String IT_MXBEAN = "jolokia.it:type=mxbean";
     public static final String IT_ATTRIBUTE_MBEAN = "jolokia.it:type=attribute";
@@ -83,11 +83,11 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
 
         // Write an not yet known key
         JolokiaWriteRequest wReq = new JolokiaWriteRequest(IT_ATTRIBUTE_MBEAN,"Map","hofstadter","douglas");
-        JolokiaWriteResponse wResp = j4pClient.execute(wReq);
+        JolokiaWriteResponse wResp = jolokiaClient.execute(wReq);
         assertNull(wResp.getValue());
         JolokiaReadRequest rReq = new JolokiaReadRequest(IT_ATTRIBUTE_MBEAN,"Map");
         rReq.setPath("douglas");
-        JolokiaReadResponse rResp = j4pClient.execute(rReq);
+        JolokiaReadResponse rResp = jolokiaClient.execute(rReq);
         assertEquals("hofstadter", rResp.getValue());
     }
 
@@ -199,7 +199,7 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
     @Test(expectedExceptions = J4pRemoteException.class,expectedExceptionsMessageRegExp = ".*immutable.*")
     public void mxMapWithPath() throws MalformedObjectNameException, J4pException {
         JolokiaWriteRequest req = new JolokiaWriteRequest(IT_MXBEAN,"Map","hofstadter","douglas");
-        j4pClient.execute(req,HttpMethod.POST);
+        jolokiaClient.execute(req,HttpMethod.POST);
     }
 
     // ==========================================================================================================
@@ -234,15 +234,15 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
                 if (pPath != null) {
                     readReq.setPath(pPath);
                 }
-                JolokiaReadResponse readResp = j4pClient.execute(readReq,method);
+                JolokiaReadResponse readResp = jolokiaClient.execute(readReq,method);
                 Object oldValue = readResp.getValue();
                 assertNotNull("Old value must not be null",oldValue);
 
                 JolokiaWriteRequest req = new JolokiaWriteRequest(cfg,mBean,pAttribute,pValue,pPath);
-                JolokiaWriteResponse resp = j4pClient.execute(req,method);
+                JolokiaWriteResponse resp = jolokiaClient.execute(req,method);
                 assertEquals("Old value should be returned",oldValue,resp.getValue());
 
-                readResp = j4pClient.execute(readReq);
+                readResp = jolokiaClient.execute(readReq);
                 if (pFinalAssert != null && pFinalAssert.length > 0) {
                     pFinalAssert[0].assertResponse(readResp);
                 } else {
@@ -253,7 +253,7 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
     }
 
     private void reset(JolokiaTargetConfig cfg) throws MalformedObjectNameException, J4pException {
-        j4pClient.execute(new JolokiaExecRequest(cfg,IT_ATTRIBUTE_MBEAN, "reset"));
+        jolokiaClient.execute(new JolokiaExecRequest(cfg,IT_ATTRIBUTE_MBEAN, "reset"));
     }
 
     private interface ResponseAssertion {

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright 2009-2013 Roland Huss
+  ~ Copyright 2009-2025 Roland Huss
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -18,12 +18,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>jolokia-client-java</artifactId>
+  <artifactId>jolokia-client-java-httpclient4</artifactId>
   <version>2.4.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>jolokia-client-java</name>
-  <description>Jolokia :: Client :: Java</description>
+  <name>jolokia-client-java-httpclient4</name>
+  <description>Jolokia :: Client :: HttpClient 4</description>
 
   <parent>
     <groupId>org.jolokia</groupId>
@@ -97,6 +97,17 @@
       <scope>test</scope>
     </dependency>
 
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-client-java</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-client-java</artifactId>
+      <classifier>tests</classifier>
+      <scope>test</scope>
+    </dependency>
+
     <!-- JakartaEE dependencies -->
 
     <dependency>
@@ -123,6 +134,15 @@
     <!-- Other dependencies -->
 
     <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpcore</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
       <scope>test</scope>
@@ -132,18 +152,6 @@
 
   <build>
     <plugins>
-      <plugin>
-        <!-- For mock objects usable by other tests -->
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <executions>
-          <execution>
-            <goals>
-              <goal>test-jar</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
 
       <plugin>
         <groupId>org.apache.felix</groupId>
@@ -160,14 +168,38 @@
               <!-- jolokia-json -->
               org.jolokia.json;version="[2.2,3)",
               org.jolokia.json.parser;version="[2.2,3)"
+              <!-- jolokia-client -->
+              org.jolokia.client;version="[2.4,3)",
+              org.jolokia.client.exception;version="[2.4,3)",
+              org.jolokia.client.jdkclient;version="[2.4,3)",
+              org.jolokia.client.request;version="[2.4,3)",
+              org.jolokia.client.response;version="[2.4,3)",
+              org.jolokia.client.spi;version="[2.4,3)",
+              <!-- httpcore -->
+              org.apache.http;version="[4.4,5)",
+              org.apache.http.config;version="[4.4,5)",
+              org.apache.http.entity;version="[4.4,5)",
+              org.apache.http.impl.io;version="[4.4,5)",
+              org.apache.http.io;version="[4.4,5)",
+              org.apache.http.message;version="[4.4,5)",
+              org.apache.http.protocol;version="[4.4,5)",
+              org.apache.http.ssl;version="[4.4,5)",
+              org.apache.http.util;version="[4.4,5)",
+              <!-- httpclient -->
+              org.apache.http.auth;version="[4.5,5)",
+              org.apache.http.client;version="[4.5,5)",
+              org.apache.http.client.config;version="[4.5,5)",
+              org.apache.http.client.methods;version="[4.5,5)",
+              org.apache.http.conn;version="[4.5,5)",
+              org.apache.http.conn.routing;version="[4.5,5)",
+              org.apache.http.conn.socket;version="[4.5,5)",
+              org.apache.http.conn.ssl;version="[4.5,5)",
+              org.apache.http.impl.auth;version="[4.5,5)",
+              org.apache.http.impl.client;version="[4.5,5)",
+              org.apache.http.impl.conn;version="[4.5,5)"
             </Import-Package>
             <Export-Package>
-              org.jolokia.client,
-              org.jolokia.client.exception,
-              org.jolokia.client.jdkclient,
-              org.jolokia.client.request,
-              org.jolokia.client.response,
-              org.jolokia.client.spi
+              org.jolokia.client.httpclient4
             </Export-Package>
           </instructions>
         </configuration>

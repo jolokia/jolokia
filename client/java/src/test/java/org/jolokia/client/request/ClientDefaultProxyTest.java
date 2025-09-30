@@ -20,8 +20,8 @@ import java.util.List;
 
 import javax.management.MalformedObjectNameException;
 
-import org.jolokia.client.J4pClient;
-import org.jolokia.client.J4pClientBuilder;
+import org.jolokia.client.JolokiaClient;
+import org.jolokia.client.JolokiaClientBuilder;
 import org.jolokia.client.JolokiaTargetConfig;
 import org.jolokia.client.exception.*;
 import org.jolokia.client.response.JolokiaReadResponse;
@@ -35,11 +35,11 @@ import static org.testng.Assert.*;
  * @author roland
  * @since Apr 27, 2010
  */
-public class J4pDefaultProxyTest extends AbstractJ4pIntegrationTest {
+public class ClientDefaultProxyTest extends AbstractClientIntegrationTest {
 
     @Test
     public void baseTest() throws MalformedObjectNameException, J4pException {
-        JolokiaReadResponse resp = j4pClient.execute(new JolokiaReadRequest("java.lang:type=Memory","HeapMemoryUsage"));
+        JolokiaReadResponse resp = jolokiaClient.execute(new JolokiaReadRequest("java.lang:type=Memory","HeapMemoryUsage"));
         assertFalse(resp.getRequest().toJson().containsKey("target"));
         assertNotNull(resp.getValue());
     }
@@ -47,7 +47,7 @@ public class J4pDefaultProxyTest extends AbstractJ4pIntegrationTest {
     @Test
     public void baseBulkTest() throws MalformedObjectNameException, J4pException {
         try {
-            j4pClient.execute(
+            jolokiaClient.execute(
                     new JolokiaReadRequest("java.lang:type=Memory","HeapMemoryUsage"),
                     new JolokiaReadRequest("java.lang:type=Thread","ThreadNumber"));
             fail();
@@ -63,13 +63,13 @@ public class J4pDefaultProxyTest extends AbstractJ4pIntegrationTest {
     public void invalidMethodTest() throws MalformedObjectNameException, J4pException {
         JolokiaReadRequest req = new JolokiaReadRequest("java.lang:type=Memory","HeapMemoryUsage");
         req.setPreferredHttpMethod(HttpMethod.GET);
-        j4pClient.execute(req);
+        jolokiaClient.execute(req);
     }
 
     @Override
-    protected J4pClient createJ4pClient(String url) {
+    protected JolokiaClient createJolokiaClient(String url) {
         JolokiaTargetConfig config = getTargetProxyConfig();
-        return new J4pClientBuilder()
+        return new JolokiaClientBuilder()
                 .url(url)
                 .user("jolokia")
                 .password("jolokia")

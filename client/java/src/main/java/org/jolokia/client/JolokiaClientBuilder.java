@@ -36,7 +36,7 @@ import org.jolokia.client.spi.HttpClientSpi;
 import org.jolokia.client.spi.HttpHeader;
 
 /**
- * <p>A builder that creates a {@link org.jolokia.client.J4pClient}.</p>
+ * <p>A builder that creates a {@link JolokiaClient}.</p>
  *
  * <p>The actual implementation will be discovered using {@link java.util.ServiceLoader} mechanism on first
  * demand, when the builder is loaded.</p>
@@ -44,7 +44,7 @@ import org.jolokia.client.spi.HttpHeader;
  * @author roland
  * @since 26.11.10
  */
-public class J4pClientBuilder {
+public class JolokiaClientBuilder {
 
     private static HttpClientBuilder<?> httpClientBuilder = null;
 
@@ -159,10 +159,10 @@ public class J4pClientBuilder {
 //    private J4pClientCustomizer customizer;
 
     /**
-     * Package access constructor, use static method on J4pClient for creating
+     * Package access constructor, use static method on JolokiaClient for creating
      * the builder.
      */
-    public J4pClientBuilder() {
+    public JolokiaClientBuilder() {
         connectionTimeout(20 * 1000);
         socketTimeout(-1);
         tcpNoDelay(false);
@@ -179,8 +179,10 @@ public class J4pClientBuilder {
 
         try {
             @SuppressWarnings("rawtypes")
+            // Load with TCCL
             Optional<HttpClientBuilder> clientBuilder = ServiceLoader.load(HttpClientBuilder.class).findFirst();
             if (clientBuilder.isEmpty()) {
+                // Load with App classloader
                 clientBuilder = ServiceLoader.load(HttpClientBuilder.class, null).findFirst();
             }
             // discovered, default builder based on JDK HTTP Client
@@ -195,7 +197,7 @@ public class J4pClientBuilder {
      *
      * @param pUrl agent URL
      */
-    public final J4pClientBuilder url(String pUrl) {
+    public final JolokiaClientBuilder url(String pUrl) {
         url = URI.create(pUrl);
         return this;
     }
@@ -205,7 +207,7 @@ public class J4pClientBuilder {
      *
      * @param pUrl agent URL
      */
-    public final J4pClientBuilder url(URI pUrl) {
+    public final JolokiaClientBuilder url(URI pUrl) {
         url = pUrl;
         return this;
     }
@@ -215,7 +217,7 @@ public class J4pClientBuilder {
      *
      * @param pUser user name
      */
-    public final J4pClientBuilder user(String pUser) {
+    public final JolokiaClientBuilder user(String pUser) {
         user  = pUser;
         return this;
     }
@@ -225,7 +227,7 @@ public class J4pClientBuilder {
      *
      * @param pPassword password to use
      */
-    public final J4pClientBuilder password(String pPassword) {
+    public final JolokiaClientBuilder password(String pPassword) {
         password  = pPassword;
         return this;
     }
@@ -235,7 +237,7 @@ public class J4pClientBuilder {
      *
      * @param pUrl JMX service URL for the 'real' target (that gets contacted by the agent)
      */
-    public final J4pClientBuilder target(String pUrl) {
+    public final JolokiaClientBuilder target(String pUrl) {
         targetUrl = pUrl;
         return this;
     }
@@ -245,7 +247,7 @@ public class J4pClientBuilder {
      *
      * @param pUser User to be used for authentication in JSR-160 proxy communication
      */
-    public final J4pClientBuilder targetUser(String pUser) {
+    public final JolokiaClientBuilder targetUser(String pUser) {
         targetUser = pUser;
         return this;
     }
@@ -256,7 +258,7 @@ public class J4pClientBuilder {
      *
      * @param pPassword Password to be used for authentication in JSR-160 proxy communication
      */
-    public final J4pClientBuilder targetPassword(String pPassword) {
+    public final JolokiaClientBuilder targetPassword(String pPassword) {
         targetPassword = pPassword;
         return this;
     }
@@ -286,7 +288,7 @@ public class J4pClientBuilder {
      *
      * @param pTimeOut timeout in milliseconds
      */
-    public final J4pClientBuilder connectionTimeout(int pTimeOut) {
+    public final JolokiaClientBuilder connectionTimeout(int pTimeOut) {
         connectionTimeout = pTimeOut;
         return this;
     }
@@ -299,7 +301,7 @@ public class J4pClientBuilder {
      *
      * @param pTimeOut SO_TIMEOUT value in milliseconds, 0 mean no timeout at all.
      */
-    public final J4pClientBuilder socketTimeout(int pTimeOut) {
+    public final JolokiaClientBuilder socketTimeout(int pTimeOut) {
         socketTimeout = pTimeOut;
         return this;
     }
@@ -338,7 +340,7 @@ public class J4pClientBuilder {
      * Defines the charset to be used per default for encoding content body.
      * @param pContentCharset the charset to use
      */
-    public final J4pClientBuilder contentCharset(String pContentCharset) {
+    public final JolokiaClientBuilder contentCharset(String pContentCharset) {
         return contentCharset(Charset.forName(pContentCharset));
     }
 
@@ -346,7 +348,7 @@ public class J4pClientBuilder {
      * Defines the charset to be used per default for encoding content body.
      * @param pContentCharset the charset to use
      */
-    public final J4pClientBuilder contentCharset(Charset pContentCharset) {
+    public final JolokiaClientBuilder contentCharset(Charset pContentCharset) {
         contentCharset = pContentCharset;
         return this;
     }
@@ -363,7 +365,7 @@ public class J4pClientBuilder {
      *
      * @param pUse whether to use this algorithm or not
      */
-    public final J4pClientBuilder expectContinue(boolean pUse) {
+    public final JolokiaClientBuilder expectContinue(boolean pUse) {
         expectContinue = pUse;
         return this;
     }
@@ -377,7 +379,7 @@ public class J4pClientBuilder {
      *
      * @param pUse whether to use NO_DELAY or not
      */
-    public final J4pClientBuilder tcpNoDelay(boolean pUse) {
+    public final JolokiaClientBuilder tcpNoDelay(boolean pUse) {
         tcpNoDelay = pUse;
         return this;
     }
@@ -387,7 +389,7 @@ public class J4pClientBuilder {
      * transmitting HTTP messages.
      * @param pSize size of socket buffer
      */
-    public final J4pClientBuilder socketBufferSize(int pSize) {
+    public final JolokiaClientBuilder socketBufferSize(int pSize) {
         socketBufferSize = pSize;
         return this;
     }
@@ -408,7 +410,7 @@ public class J4pClientBuilder {
      * @param pProxy proxy definition in the format <code>http://user:pass@host:port</code> or <code>http://host:port</code>
      *               Example:   <code>http://tom:sEcReT@my.proxy.com:8080</code>
      */
-    public final J4pClientBuilder proxy(String pProxy) {
+    public final JolokiaClientBuilder proxy(String pProxy) {
         httpProxy = parseProxySettings(pProxy);
         return this;
     }
@@ -419,7 +421,7 @@ public class J4pClientBuilder {
      * @param pProxyHost proxy hostname
      * @param pProxyPort proxy port number
      */
-    public final J4pClientBuilder proxy(String pProxyHost, int pProxyPort) {
+    public final JolokiaClientBuilder proxy(String pProxyHost, int pProxyPort) {
         httpProxy = new Proxy(pProxyHost,pProxyPort);
         return this;
     }
@@ -432,7 +434,7 @@ public class J4pClientBuilder {
      * @param pProxyUser  proxy authentication username
      * @param pProxyPass  proxy authentication password
      */
-    public final J4pClientBuilder proxy(String pProxyHost, int pProxyPort, String pProxyUser, String pProxyPass) {
+    public final JolokiaClientBuilder proxy(String pProxyHost, int pProxyPort, String pProxyUser, String pProxyPass) {
         httpProxy = new Proxy(pProxyHost,pProxyPort, pProxyUser,pProxyPass);
         return this;
     }
@@ -440,7 +442,7 @@ public class J4pClientBuilder {
     /**
      * Set the proxy for this client based on http_proxy system environment variable
      */
-    public final J4pClientBuilder useProxyFromEnvironment(){
+    public final JolokiaClientBuilder useProxyFromEnvironment(){
         Map<String, String> env = System.getenv();
         for (String key : env.keySet()) {
             if (key.equalsIgnoreCase("http_proxy")){
@@ -459,7 +461,7 @@ public class J4pClientBuilder {
      *
      * @param pResponseExtractor response extractor to use.
      */
-    public final J4pClientBuilder responseExtractor(J4pResponseExtractor pResponseExtractor) {
+    public final JolokiaClientBuilder responseExtractor(J4pResponseExtractor pResponseExtractor) {
         this.responseExtractor = pResponseExtractor;
         return this;
     }
@@ -481,7 +483,7 @@ public class J4pClientBuilder {
      * @param pHttpHeaders http headers to set
      * @return this builder object
      */
-    public final J4pClientBuilder setDefaultHttpHeaders(Collection<HttpHeader> pHttpHeaders) {
+    public final JolokiaClientBuilder setDefaultHttpHeaders(Collection<HttpHeader> pHttpHeaders) {
         this.defaultHttpHeaders = pHttpHeaders;
         return this;
     }
@@ -491,10 +493,10 @@ public class J4pClientBuilder {
     /**
      * Build the agent with the information given before
      *
-     * @return a new J4pClient
+     * @return a new JolokiaClient
      */
-    public J4pClient build() {
-        return new J4pClient(url, createHttpClient(),
+    public JolokiaClient build() {
+        return new JolokiaClient(url, createHttpClient(),
             targetUrl != null ? new JolokiaTargetConfig(targetUrl, targetUser, targetPassword) : null,
             responseExtractor);
     }

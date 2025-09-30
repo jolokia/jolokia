@@ -95,19 +95,19 @@ print out the memory usage of your Tomcat server:
 ----
 import java.util.Map;
 
-import org.jolokia.client.J4pClient;
-import org.jolokia.client.request.J4pReadRequest;
-import org.jolokia.client.request.J4pReadResponse;
+import org.jolokia.client.JolokiaClient;
+import org.jolokia.client.request.JolokiaReadRequest;
+import org.jolokia.client.request.JolokiaReadResponse;
 
 public class JolokiaDemo {
 
     public static void main(String[] args) throws Exception {
-        J4pClient j4pClient = J4pClient.url("http://localhost:8080/jolokia")
+        JolokiaClient jolokiaClient = new JolokiaClientBuilder().url("http://localhost:8080/jolokia")
                 .user("jolokia")
                 .password("jolokia")
                 .build();
-        J4pReadRequest req = new J4pReadRequest("java.lang:type=Memory", "HeapMemoryUsage");
-        J4pReadResponse resp = j4pClient.execute(req);
+        JolokiaReadRequest req = new JolokiaReadRequest("java.lang:type=Memory", "HeapMemoryUsage");
+        JolokiaReadResponse resp = jolokiaClient.execute(req);
         Map<String, Long> vals = resp.getValue();
         long used = vals.get("used");
         long max = vals.get("max");

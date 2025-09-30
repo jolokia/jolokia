@@ -57,6 +57,7 @@
     <module>it/osgi</module>
 
     <module>client/java</module>
+    <module>client/java-httpclient4</module>
     <module>client/javascript</module>
     <module>client/javascript-esm</module>
     <module>client/jmx-adapter</module>

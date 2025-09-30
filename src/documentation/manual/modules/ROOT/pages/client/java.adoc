@@ -41,7 +41,7 @@ better than false transparency in order to know the price tag.
 The Java client library follows a strict request-response
 paradigm, much like the underlying HTTP. It uses generics heavily
 and can be centered around three classes:
-`J4pClient` is the client side agent, which
+`JolokiaClient` is the client side agent, which
 has various variants of a `execute()` for
 sending requests. This method takes one or more
 `JolokiaRequest` objects as arguments and returns
@@ -72,12 +72,12 @@ which finally is printed out to standard output.
 
 [,java]
 ----
-import org.jolokia.client.J4pClient;
+import org.jolokia.client.JolokiaClient;
 import org.jolokia.client.request.*;
 
 public class MemoryDemo {
   public static void main(String[] args) {
-    J4pClient client = J4pClient.url("http://localhost:8080/jolokia")
+    JolokiaClient client = new JolokiaClientBuilder().url("http://localhost:8080/jolokia")
         .user("jolokia")
         .password("jolokia")
         .build();
@@ -111,20 +111,20 @@ the other two as transitive dependencies):
 ----
 
 [#client-client]
-=== J4pClient
+=== JolokiaClient
 
-`J4pClient` is the entry point for sending
+`JolokiaClient` is the entry point for sending
 requests to a remote Jolokia agent. It can be created in multiple
 ways. For simple cases, public constructors are provided taking
 the mandatory Jolokia agent URL and optionally a
 `org.apache.http.client.HttpClient`
 instance which is used for the HTTP business. The recommended style
-is to use the `J4pClientBuilder`, though. This way, all
+is to use the `JolokiaClientBuilder`, though. This way, all
 parameters for the HTTP communication can easily be set:
 
 [,java]
 ----
-J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
+JolokiaClient j4p = new JolokiaClientBuilder().url("http://localhost:8080/jolokia")
   .user("roland")
   .password("s!cr!t")
   .authenticator(new BasicAuthenticator().preemptive())
@@ -135,7 +135,7 @@ J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
 The builder supports the following parameters with the given
 defaults:
 
-.J4pClient parameters
+.JolokiaClient parameters
 [cols="15,~,20"]
 |===
 |Parameter|Description|Default
@@ -191,7 +191,7 @@ infinite timeout.
 connection manager, which is thread safe and can service
 connection requests from multiples threads
 simultaneously. This is important if the
-`J4pClient` is to be used in a multi
+`JolokiaClient` is to be used in a multi
 threaded context. The size of the pool is restricted by the
 parameter `maxTotalConnection`.
 `ThreadSafeClientConnManager` is the
@@ -202,7 +202,7 @@ default.
 |`singleConnection`
 |Specifies that single connection should be used which
 maintains only one active connection at a time.  Even though
-`J4pClient` is still thread-safe it
+`JolokiaClient` is still thread-safe it
 ought to be used by one execution thread only. The
 underlying connection manager is
 `SingleClientConnManager` Pooled
@@ -299,7 +299,7 @@ execute method, too.
 |
 |===
 
-The `J4pClient` provides various variants
+The `JolokiaClient` provides various variants
 of a `execute()` method, which takes
 either one single request or a list of requests. For a single
 request, the preferred HTTP method (GET or POST) can be
@@ -314,7 +314,7 @@ method. The possible options are shown in table
 <<client-java-queryopts>>.
 
 [#client-java-queryopts]
-.J4pClient query parameters
+.JolokiaClient query parameters
 [cols="20,~"]
 |===
 |J4pQueryParameter enum|Description
@@ -381,7 +381,7 @@ property `preferredHttpMethod` to either
 
 Each request type has a corresponding response type which used
 for the return values of the
-`J4pClient.execute()`.
+`JolokiaClient.execute()`.
 
 The constructor of each kind of request can take a
 `JolokiaTargetConfig` as argument for using a
@@ -390,7 +390,7 @@ configurational object holds the JMX service url and
 (optionally) credentials for JSR-160 authentication. When
 given, this proxy target specification overrides any default
 proxy configuration set during the initialization of the
-`J4pClient`.
+`JolokiaClient`.
 
 `JolokiaReadRequest` and `JolokiaReadResponse`:: `JolokiaReadRequest` is a read request to
 get one or more attributes from one or more MBeans within

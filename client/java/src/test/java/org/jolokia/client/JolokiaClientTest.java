@@ -56,7 +56,7 @@ import static org.testng.Assert.fail;
  * @author roland
  * @since 23.09.11
  */
-public class J4pClientTest {
+public class JolokiaClientTest {
 
     private static final String MEMORY_RESPONSE = """
         {
@@ -92,7 +92,7 @@ public class J4pClientTest {
     public void simple() throws J4pException, IOException {
         HttpClientSpi<?> client = prepareMocks("utf-8", MEMORY_RESPONSE);
 
-        J4pClient j4p = new J4pClient(TEST_URL, client);
+        JolokiaClient j4p = new JolokiaClient(TEST_URL, client);
         JolokiaReadResponse resp = j4p.execute(TEST_REQUEST);
         assertEquals(((Map<?, ?>) resp.getValue()).get("max"), 530186240L);
     }
@@ -101,9 +101,9 @@ public class J4pClientTest {
     public void invalidArrayResponse() throws J4pException, IOException {
         HttpClientSpi<?> client = prepareMocks(null, ARRAY_RESPONSE);
 
-        J4pClient j4p = new J4pClient(TEST_URL, client);
-        Map<J4pQueryParameter, String> opts = new HashMap<>();
-        opts.put(J4pQueryParameter.IGNORE_ERRORS, "true");
+        JolokiaClient j4p = new JolokiaClient(TEST_URL, client);
+        Map<JolokiaQueryParameter, String> opts = new HashMap<>();
+        opts.put(JolokiaQueryParameter.IGNORE_ERRORS, "true");
         j4p.execute(TEST_REQUEST, opts);
     }
 
@@ -138,7 +138,7 @@ public class J4pClientTest {
 //        expect(response.body()).andThrow(new IOException());
         replay(client, response);
 
-        J4pClient j4p = new J4pClient(TEST_URL, client);
+        JolokiaClient j4p = new JolokiaClient(TEST_URL, client);
         j4p.execute(TEST_REQUEST);
     }
 
@@ -146,7 +146,7 @@ public class J4pClientTest {
     public void invalidBulkRequestResponse() throws IOException, J4pException {
         HttpClientSpi<?> client = prepareMocks(null, MEMORY_RESPONSE, true);
 
-        J4pClient j4p = new J4pClient(TEST_URL, client);
+        JolokiaClient j4p = new JolokiaClient(TEST_URL, client);
         j4p.execute(TEST_REQUEST, TEST_REQUEST_2);
     }
 
@@ -154,7 +154,7 @@ public class J4pClientTest {
     public void noStatus() throws IOException, J4pException {
         HttpClientSpi<?> client = prepareMocks(null, EMPTY_RESPONSE);
 
-        J4pClient j4p = new J4pClient(TEST_URL, client);
+        JolokiaClient j4p = new JolokiaClient(TEST_URL, client);
         j4p.execute(TEST_REQUEST);
     }
 
@@ -162,10 +162,10 @@ public class J4pClientTest {
     public void remoteExceptionErrorValue() throws IOException, J4pException {
         HttpClientSpi<?> client = prepareMocks("utf-8", ERROR_VALUE_RESPONSE);
 
-        J4pClient j4p = new J4pClient(TEST_URL, client);
-        Map<J4pQueryParameter, String> options = Maps.newHashMap();
-        options.put(J4pQueryParameter.SERIALIZE_EXCEPTION, "true");
-        options.put(J4pQueryParameter.INCLUDE_STACKTRACE, "false");
+        JolokiaClient j4p = new JolokiaClient(TEST_URL, client);
+        Map<JolokiaQueryParameter, String> options = Maps.newHashMap();
+        options.put(JolokiaQueryParameter.SERIALIZE_EXCEPTION, "true");
+        options.put(JolokiaQueryParameter.INCLUDE_STACKTRACE, "false");
 
         try {
             j4p.execute(TEST_REQUEST, options);
@@ -187,7 +187,7 @@ public class J4pClientTest {
         }
         replay(client);
 
-        J4pClient j4p = new J4pClient(TEST_URL, new JdkHttpClient(client, J4pClientBuilder.Configuration.withUrl(URI.create("http://localhost"))));
+        JolokiaClient j4p = new JolokiaClient(TEST_URL, new JdkHttpClient(client, JolokiaClientBuilder.Configuration.withUrl(URI.create("http://localhost"))));
         if (bulk) {
             j4p.execute(TEST_REQUEST, TEST_REQUEST_2);
         } else {
@@ -202,7 +202,7 @@ public class J4pClientTest {
     private HttpClientSpi<?> prepareMocks(String encoding, String jsonResp, boolean bulk) throws IOException {
         HttpClient client = createMock(HttpClient.class);
         HttpResponse<InputStream> response = createMock(HttpResponse.class);
-        HttpClientSpi<HttpClient> spi = new JdkHttpClient(client, J4pClientBuilder.Configuration.withUrl(URI.create("http://localhost")));
+        HttpClientSpi<HttpClient> spi = new JdkHttpClient(client, JolokiaClientBuilder.Configuration.withUrl(URI.create("http://localhost")));
         try {
             //noinspection unchecked
             expect(client.send(EasyMock.anyObject(), (HttpResponse.BodyHandler<InputStream>) EasyMock.anyObject())).andReturn(response);

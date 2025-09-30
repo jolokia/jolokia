@@ -15,7 +15,7 @@
  */
 package org.jolokia.client.spi;
 
-import org.jolokia.client.J4pClientBuilder;
+import org.jolokia.client.JolokiaClientBuilder;
 
 /**
  * Authenticator which is called during construction and which can perform
@@ -36,7 +36,7 @@ public interface J4pClientCustomizer<T> {
 //     */
 //    void authenticate(HttpClientBuilder pBuilder,String pUser, String pPassword);
 
-    void configure(J4pClientBuilder builder);
+    void configure(JolokiaClientBuilder builder);
 
 //    public interface
 }

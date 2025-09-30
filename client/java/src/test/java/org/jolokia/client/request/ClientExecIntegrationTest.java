@@ -38,18 +38,18 @@ import static org.testng.AssertJUnit.assertTrue;
  * @author roland
  * @since May 18, 2010
  */
-public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
+public class ClientExecIntegrationTest extends AbstractClientIntegrationTest {
 
 
     @Test
     public void simpleOperation() throws MalformedObjectNameException, J4pException {
         for (JolokiaTargetConfig cfg : new JolokiaTargetConfig[] { null, getTargetProxyConfig()}) {
             JolokiaExecRequest request = new JolokiaExecRequest(cfg,itSetup.getOperationMBean(),"reset");
-            j4pClient.execute(request);
+            jolokiaClient.execute(request);
             request = new JolokiaExecRequest(cfg,itSetup.getOperationMBean(),"fetchNumber","inc");
-            JolokiaExecResponse resp = j4pClient.execute(request);
+            JolokiaExecResponse resp = jolokiaClient.execute(request);
             assertEquals(0, (long) resp.getValue());
-            resp = j4pClient.execute(request);
+            resp = jolokiaClient.execute(request);
             assertEquals(1, (long) resp.getValue());
         }
     }
@@ -59,7 +59,7 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
         JolokiaExecRequest request = new JolokiaExecRequest(itSetup.getMxBean(),
                                                     "echoBean",
                                                     "{\"name\": \"hello\", \"value\": \"world\"}");
-        JolokiaExecResponse resp = j4pClient.execute(request);
+        JolokiaExecResponse resp = jolokiaClient.execute(request);
         JSONObject bean = resp.getValue();
         Assert.assertEquals(bean.get("name"),"hello");
         Assert.assertEquals(bean.get("value"),"world");
@@ -69,7 +69,7 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
     public void failedOperation() throws MalformedObjectNameException, J4pException {
         for (JolokiaExecRequest request : execRequests("fetchNumber","bla")) {
             try {
-                j4pClient.execute(request);
+                jolokiaClient.execute(request);
                 fail();
             } catch (J4pRemoteException exp) {
                 assertEquals(400L,exp.getStatus());
@@ -90,7 +90,7 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
     public void checkedException() throws MalformedObjectNameException, J4pException {
         for (JolokiaExecRequest request : execRequests("throwCheckedException")) {
             try {
-                j4pClient.execute(request);
+                jolokiaClient.execute(request);
                 fail();
             } catch (J4pRemoteException exp) {
                 assertEquals(500,exp.getStatus());
@@ -103,7 +103,7 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
     @Test
     public void nullArgumentCheck() throws MalformedObjectNameException, J4pException {
         for (JolokiaExecRequest request : execRequests("nullArgumentCheck",null,null))  {
-            JolokiaExecResponse resp = j4pClient.execute(request);
+            JolokiaExecResponse resp = jolokiaClient.execute(request);
             assertTrue(resp.getValue());
         }
     }
@@ -111,7 +111,7 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
     @Test
     public void emptyStringArgumentCheck() throws MalformedObjectNameException, J4pException {
         for (JolokiaExecRequest request : execRequests("emptyStringArgumentCheck","")) {
-            JolokiaExecResponse resp = j4pClient.execute(request);
+            JolokiaExecResponse resp = jolokiaClient.execute(request);
             assertTrue(resp.getValue());
         }
     }
@@ -127,7 +127,7 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
                     if (type.equals(HttpMethod.GET) && request.getTargetConfig() != null) {
                         continue;
                     }
-                    JolokiaExecResponse resp = j4pClient.execute(request,type);
+                    JolokiaExecResponse resp = jolokiaClient.execute(request,type);
                     assertEquals("roland",resp.getValue());
 
                     // Check request params
@@ -136,12 +136,12 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
 
                     // With null
                     request = new JolokiaExecRequest(itSetup.getOperationMBean(),"arrayArguments",new String[] { null, "bla", null },"myExtra");
-                    resp = j4pClient.execute(request);
+                    resp = jolokiaClient.execute(request);
                     assertNull(resp.getValue());
 
                     // With ints
                     request = new JolokiaExecRequest(itSetup.getOperationMBean(),"arrayArguments",new Integer[] { 1,2,3 },"myExtra");
-                    resp = j4pClient.execute(request);
+                    resp = jolokiaClient.execute(request);
                     assertEquals("1",resp.getValue());
                 }
             }
@@ -155,7 +155,7 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
     public void objectArray() throws MalformedObjectNameException, J4pException {
         Object[] args = new Object[] { 12,true,null, "Bla" };
         for (JolokiaExecRequest request : execRequests("objectArrayArg",new Object[] { args })) {
-            JolokiaExecResponse resp = j4pClient.execute(request,HttpMethod.POST);
+            JolokiaExecResponse resp = jolokiaClient.execute(request,HttpMethod.POST);
             assertEquals(12, (long) resp.getValue());
         }
     }
@@ -166,7 +166,7 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
         List<?> args = Arrays.asList("roland", 12, true);
         for (JolokiaExecRequest request : execRequests("listArgument", args)) {
             JolokiaExecResponse resp;
-            resp = j4pClient.execute(request, HttpMethod.POST);
+            resp = jolokiaClient.execute(request, HttpMethod.POST);
             assertEquals("roland", resp.getValue());
         }
     }
@@ -181,21 +181,21 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
                     continue;
                 }
                 request = new JolokiaExecRequest(cfg,itSetup.getOperationMBean(),"booleanArguments",true,Boolean.TRUE);
-                resp = j4pClient.execute(request,type);
+                resp = jolokiaClient.execute(request,type);
                 assertTrue(resp.getValue());
 
                 request = new JolokiaExecRequest(cfg,itSetup.getOperationMBean(),"booleanArguments",Boolean.TRUE,false);
-                resp = j4pClient.execute(request,type);
+                resp = jolokiaClient.execute(request,type);
                 assertFalse(resp.getValue());
 
                 request = new JolokiaExecRequest(cfg,itSetup.getOperationMBean(),"booleanArguments",true,null);
-                resp = j4pClient.execute(request,type);
+                resp = jolokiaClient.execute(request,type);
                 assertNull(resp.getValue());
 
 
                 try {
                     request = new JolokiaExecRequest(cfg,itSetup.getOperationMBean(),"booleanArguments",null,null);
-                    j4pClient.execute(request,type);
+                    jolokiaClient.execute(request,type);
                     fail();
                 } catch (J4pRemoteException exp) {
                     assertEquals("java.lang.IllegalArgumentException", exp.getErrorType());
@@ -214,16 +214,16 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
                     continue;
                 }
                 request = new JolokiaExecRequest(cfg,itSetup.getOperationMBean(),"intArguments",10,20);
-                resp = j4pClient.execute(request,type);
+                resp = jolokiaClient.execute(request,type);
                 assertEquals(30, (long) resp.getValue());
 
                 request = new JolokiaExecRequest(cfg,itSetup.getOperationMBean(),"intArguments",10,null);
-                resp = j4pClient.execute(request,type);
+                resp = jolokiaClient.execute(request,type);
                 assertEquals(-1, (long) resp.getValue());
 
                 try {
                     request = new JolokiaExecRequest(cfg,itSetup.getOperationMBean(),"intArguments",null,null);
-                    j4pClient.execute(request,type);
+                    jolokiaClient.execute(request,type);
                     fail();
                 } catch (J4pRemoteException exp) {
                     assertEquals("java.lang.IllegalArgumentException", exp.getErrorType());
@@ -241,16 +241,16 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
                     continue;
                 }
                 request = new JolokiaExecRequest(cfg,itSetup.getOperationMBean(),"doubleArguments",1.5,1.5);
-                resp = j4pClient.execute(request,type);
+                resp = jolokiaClient.execute(request,type);
                 assertEquals(new BigDecimal("3.0"), resp.getValue());
 
                 request = new JolokiaExecRequest(cfg,itSetup.getOperationMBean(),"doubleArguments",1.5,null);
-                resp = j4pClient.execute(request,type);
+                resp = jolokiaClient.execute(request,type);
                 assertEquals(new BigDecimal("-1.0"),resp.getValue());
 
                 try {
                     request = new JolokiaExecRequest(cfg,itSetup.getOperationMBean(),"doubleArguments",null,null);
-                    j4pClient.execute(request,type);
+                    jolokiaClient.execute(request,type);
                     fail();
                 } catch (J4pRemoteException exp) {
                     assertEquals("java.lang.IllegalArgumentException", exp.getErrorType());
@@ -280,7 +280,7 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
                 if (method.equals(HttpMethod.GET) && cfg != null) {
                     continue;
                 }
-                resp = j4pClient.execute(request,method);
+                resp = jolokiaClient.execute(request,method);
                 Map<?, ?> res = resp.getValue();
                 assertEquals("fcn", res.get("eins"));
                 assertEquals("svw", ((List<?>) res.get("zwei")).get(1));
@@ -289,7 +289,7 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
             }
 
             request = new JolokiaExecRequest(itSetup.getOperationMBean(),"mapArgument",new Object[]{null});
-            resp = j4pClient.execute(request,HttpMethod.POST);
+            resp = jolokiaClient.execute(request,HttpMethod.POST);
             assertNull(resp.getValue());
         }
     }
@@ -304,7 +304,7 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
                     continue;
                 }
                 request = new JolokiaExecRequest(cfg,itSetup.getOperationMBean(),"withDates",new Date());
-                resp = j4pClient.execute(request,type);
+                resp = jolokiaClient.execute(request,type);
                 assertNotNull(resp);
             }
         }

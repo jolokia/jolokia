@@ -1,4 +1,4 @@
-package org.jolokia.client.request;
+package org.jolokia.client;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -20,7 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-import org.jolokia.client.JolokiaOperation;
+import org.jolokia.client.request.JolokiaRequest;
 import org.jolokia.client.response.JolokiaResponse;
 import org.jolokia.json.JSONArray;
 import org.jolokia.json.JSONObject;

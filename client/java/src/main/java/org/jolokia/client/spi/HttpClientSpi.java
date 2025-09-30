@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import org.jolokia.client.J4pQueryParameter;
+import org.jolokia.client.JolokiaQueryParameter;
 import org.jolokia.client.JolokiaTargetConfig;
 import org.jolokia.client.exception.J4pException;
 import org.jolokia.client.request.HttpMethod;
@@ -50,7 +50,7 @@ public interface HttpClientSpi<T> extends Closeable {
      * @throws IOException
      */
     <REQ extends JolokiaRequest, RES extends JolokiaResponse<REQ>>
-    JSONStructure execute(REQ request, HttpMethod method, Map<J4pQueryParameter, String> parameters, JolokiaTargetConfig targetConfig)
+    JSONStructure execute(REQ request, HttpMethod method, Map<JolokiaQueryParameter, String> parameters, JolokiaTargetConfig targetConfig)
             throws IOException, J4pException;
 
     /**
@@ -67,7 +67,7 @@ public interface HttpClientSpi<T> extends Closeable {
      * @throws IOException
      */
     <REQ extends JolokiaRequest, RES extends JolokiaResponse<REQ>>
-    JSONStructure execute(List<REQ> requests, Map<J4pQueryParameter, String> parameters, JolokiaTargetConfig targetConfig)
+    JSONStructure execute(List<REQ> requests, Map<JolokiaQueryParameter, String> parameters, JolokiaTargetConfig targetConfig)
             throws IOException, J4pException;
 
     /**

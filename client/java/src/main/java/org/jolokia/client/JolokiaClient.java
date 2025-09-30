@@ -48,10 +48,10 @@ import org.jolokia.json.JSONStructure;
  * @author roland
  * @since Apr 24, 2010
  */
-public class J4pClient {
+public class JolokiaClient {
 
     /**
-     * Discoverable {@link HttpClientSpi} used to perform actual HTTP requests, so this {@link J4pClient} is
+     * Discoverable {@link HttpClientSpi} used to perform actual HTTP requests, so this {@link JolokiaClient} is
      * implementation agnostic.
      */
     private final HttpClientSpi<?> httpClient;
@@ -75,7 +75,7 @@ public class J4pClient {
      *
      * @param pJolokiaAgentUrl URL of the remote Jolokia Agent
      */
-    public J4pClient(URI pJolokiaAgentUrl) {
+    public JolokiaClient(URI pJolokiaAgentUrl) {
         this(pJolokiaAgentUrl, null);
     }
 
@@ -85,7 +85,7 @@ public class J4pClient {
      * @param pJolokiaAgentUrl URL of the remote Jolokia Agent
      * @param pHttpClient      {@link HttpClientSpi} for actual HTTP connection to the agent
      */
-    public J4pClient(URI pJolokiaAgentUrl, HttpClientSpi<?> pHttpClient) {
+    public JolokiaClient(URI pJolokiaAgentUrl, HttpClientSpi<?> pHttpClient) {
         this(pJolokiaAgentUrl, pHttpClient, null);
     }
 
@@ -97,13 +97,13 @@ public class J4pClient {
      * @param pHttpClient      {@link HttpClientSpi} for actual HTTP connection to the agent
      * @param pTargetConfig    information for proxy mode
      */
-    public J4pClient(URI pJolokiaAgentUrl, HttpClientSpi<?> pHttpClient, JolokiaTargetConfig pTargetConfig) {
+    public JolokiaClient(URI pJolokiaAgentUrl, HttpClientSpi<?> pHttpClient, JolokiaTargetConfig pTargetConfig) {
         this(pJolokiaAgentUrl, pHttpClient, pTargetConfig, ValidatingResponseExtractor.DEFAULT);
     }
 
 
     /**
-     * The constructor with all parameters to create a {@link J4pClient} for connections to remote Jolokia Agent using
+     * The constructor with all parameters to create a {@link JolokiaClient} for connections to remote Jolokia Agent using
      * selected {@link HttpClientSpi}, optional {@link JolokiaTargetConfig proxy configuration} and actual
      * {@link J4pResponseExtractor} for handling responses.
      *
@@ -112,7 +112,7 @@ public class J4pClient {
      * @param pTargetConfig    information for proxy mode
      * @param pExtractor       response extractor to use
      */
-    public J4pClient(URI pJolokiaAgentUrl, HttpClientSpi<?> pHttpClient, JolokiaTargetConfig pTargetConfig, J4pResponseExtractor pExtractor) {
+    public JolokiaClient(URI pJolokiaAgentUrl, HttpClientSpi<?> pHttpClient, JolokiaTargetConfig pTargetConfig, J4pResponseExtractor pExtractor) {
         jolokiaAgentUrl = pJolokiaAgentUrl;
         targetConfig = pTargetConfig;
         responseExtractor = pExtractor;
@@ -121,7 +121,7 @@ public class J4pClient {
         if (pHttpClient != null) {
             httpClient = pHttpClient;
         } else {
-            J4pClientBuilder builder = new J4pClientBuilder().url(pJolokiaAgentUrl);
+            JolokiaClientBuilder builder = new JolokiaClientBuilder().url(pJolokiaAgentUrl);
             if (targetConfig != null) {
                 builder.target(targetConfig.url()).targetUser(targetConfig.user()).targetPassword(targetConfig.password());
             }
@@ -177,7 +177,7 @@ public class J4pClient {
      * @throws J4pException if something's wrong (e.g. connection failed or read timeout)
      */
     public <RESP extends JolokiaResponse<REQ>, REQ extends JolokiaRequest>
-    RESP execute(REQ pRequest, Map<J4pQueryParameter, String> pProcessingOptions) throws J4pException {
+    RESP execute(REQ pRequest, Map<JolokiaQueryParameter, String> pProcessingOptions) throws J4pException {
         return execute(pRequest, null, pProcessingOptions);
     }
 
@@ -212,7 +212,7 @@ public class J4pClient {
      * @throws J4pException if something's wrong (e.g. connection failed or read timeout)
      */
     public <RESP extends JolokiaResponse<REQ>, REQ extends JolokiaRequest>
-    RESP execute(REQ pRequest, HttpMethod pMethod, Map<J4pQueryParameter, String> pProcessingOptions) throws J4pException {
+    RESP execute(REQ pRequest, HttpMethod pMethod, Map<JolokiaQueryParameter, String> pProcessingOptions) throws J4pException {
         return execute(pRequest, pMethod, pProcessingOptions, responseExtractor);
     }
 
@@ -232,7 +232,7 @@ public class J4pClient {
      * @throws J4pException if something's wrong (e.g. connection failed or read timeout)
      */
     public <RESP extends JolokiaResponse<REQ>, REQ extends JolokiaRequest>
-    RESP execute(REQ pRequest, HttpMethod pMethod, Map<J4pQueryParameter, String> pProcessingOptions, J4pResponseExtractor pResponseExtractor)
+    RESP execute(REQ pRequest, HttpMethod pMethod, Map<JolokiaQueryParameter, String> pProcessingOptions, J4pResponseExtractor pResponseExtractor)
             throws J4pException {
         try {
             JSONStructure jsonResponse = httpClient.execute(pRequest, pMethod, pProcessingOptions, targetConfig);
@@ -267,7 +267,7 @@ public class J4pClient {
 
     /**
      * Execute multiple requests at once. All given {@link JolokiaRequest requests} will be sent using
-     * a single HTTP request (with additional {@link J4pQueryParameter parameters}) where it gets dispatched
+     * a single HTTP request (with additional {@link JolokiaQueryParameter parameters}) where it gets dispatched
      * on the agent side. The {@link JolokiaResponse results} are returned in the same order as the provided requests.
      *
      * @param pRequests          requests to send
@@ -278,7 +278,7 @@ public class J4pClient {
      * @throws J4pException when a communication error occurs
      */
     public <RESP extends JolokiaResponse<REQ>, REQ extends JolokiaRequest>
-    List<RESP> execute(List<REQ> pRequests, Map<J4pQueryParameter, String> pProcessingOptions) throws J4pException {
+    List<RESP> execute(List<REQ> pRequests, Map<JolokiaQueryParameter, String> pProcessingOptions) throws J4pException {
         return execute(pRequests, pProcessingOptions, responseExtractor);
     }
 
@@ -302,7 +302,7 @@ public class J4pClient {
 
     /**
      * Execute multiple requests at once. All given {@link JolokiaRequest requests} will be sent using
-     * a single HTTP request (with additional {@link J4pQueryParameter parameters}) where it gets dispatched
+     * a single HTTP request (with additional {@link JolokiaQueryParameter parameters}) where it gets dispatched
      * on the agent side. The {@link JolokiaResponse results} are returned in the same order as the provided requests.
      * The response is created with the help of the passed {@link J4pResponseExtractor}.
      *
@@ -315,7 +315,7 @@ public class J4pClient {
      * @throws J4pException when a communication error occurs
      */
     public <RESP extends JolokiaResponse<REQ>, REQ extends JolokiaRequest>
-    List<RESP> execute(List<REQ> pRequests, Map<J4pQueryParameter, String> pProcessingOptions, J4pResponseExtractor pResponseExtractor)
+    List<RESP> execute(List<REQ> pRequests, Map<JolokiaQueryParameter, String> pProcessingOptions, J4pResponseExtractor pResponseExtractor)
             throws J4pException {
         try {
             JSONStructure jsonResponse = httpClient.execute(pRequests, pProcessingOptions, targetConfig);
@@ -351,9 +351,9 @@ public class J4pClient {
      * @throws J4pException
      */
     private <RESP extends JolokiaResponse<REQ>, REQ extends JolokiaRequest>
-    RESP extractResponse(JSONObject jsonResponse, REQ pRequest, Map<J4pQueryParameter, String> pProcessingOptions, J4pResponseExtractor pResponseExtractor)
+    RESP extractResponse(JSONObject jsonResponse, REQ pRequest, Map<JolokiaQueryParameter, String> pProcessingOptions, J4pResponseExtractor pResponseExtractor)
             throws J4pException {
-        boolean excludeRequest = pProcessingOptions != null && "false".equals(pProcessingOptions.get(J4pQueryParameter.INCLUDE_REQUEST));
+        boolean excludeRequest = pProcessingOptions != null && "false".equals(pProcessingOptions.get(JolokiaQueryParameter.INCLUDE_REQUEST));
         return pResponseExtractor.extract(pRequest, jsonResponse, !excludeRequest);
     }
 
@@ -375,7 +375,7 @@ public class J4pClient {
      * @throws J4pException
      */
     private <RESP extends JolokiaResponse<REQ>, REQ extends JolokiaRequest>
-    List<RESP> extractResponses(JSONArray pJsonResponse, List<REQ> pRequests, Map<J4pQueryParameter, String> pProcessingOptions,
+    List<RESP> extractResponses(JSONArray pJsonResponse, List<REQ> pRequests, Map<JolokiaQueryParameter, String> pProcessingOptions,
                                 J4pResponseExtractor pResponseExtractor)
             throws J4pException {
         // the trick is that any initial request may result in proper JolokiaResponse or an error object
@@ -383,7 +383,7 @@ public class J4pClient {
         J4pRemoteException[] remoteExceptions = new J4pRemoteException[pJsonResponse.size()];
 
         boolean excludeRequest = pProcessingOptions != null
-            && "false".equals(pProcessingOptions.get(J4pQueryParameter.INCLUDE_REQUEST));
+            && "false".equals(pProcessingOptions.get(JolokiaQueryParameter.INCLUDE_REQUEST));
 
         boolean exceptionFound = false;
         for (int i = 0; i < pRequests.size(); i++) {

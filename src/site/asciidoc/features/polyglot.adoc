@@ -76,8 +76,8 @@ the memory example above looks in JavaScript like this:
 
 [source,javascript]
 ----
-var j4p = new Jolokia("/jolokia");
-j4p.request({
+var jolokia = new Jolokia("/jolokia");
+jolokia.request({
     type: "read",
     mbean: "java.lang:type=Memory",
     attribute: "HeapMemoryUsage"
@@ -112,13 +112,13 @@ import java.util.Map;
 public class JolokiaSample {
 
     public static void main(String[] args) throws Exception {
-        J4pClient j4pClient = J4pClient.url("http://localhost:8080/jolokia")
+        JolokiaClient jolokiaClient = new JolokiaClientBuilder().url("http://localhost:8080/jolokia")
                 .user("jolokia")
                 .password("jolokia")
                 .build();
-        J4pReadRequest req = new J4pReadRequest("java.lang:type=Memory",
+        JolokiaReadRequest req = new JolokiaReadRequest("java.lang:type=Memory",
                 "HeapMemoryUsage");
-        J4pReadResponse resp = j4pClient.execute(req);
+        JolokiaReadResponse resp = jolokiaClient.execute(req);
         Map<String, Object> vals = resp.getValue();
         long used = (long) vals.get("used");
         long max = (long) vals.get("max");

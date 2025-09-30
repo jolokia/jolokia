@@ -38,12 +38,12 @@ public class ProxyConfigTest {
                 "host:8080"
         }) {
             try {
-                new J4pClientBuilder.Proxy(spec);
+                new JolokiaClientBuilder.Proxy(spec);
                 fail();
             } catch (URISyntaxException exp) {
                 // that's expected
             }
-            J4pClientBuilder.Proxy proxy = J4pClientBuilder.parseProxySettings(spec);
+            JolokiaClientBuilder.Proxy proxy = JolokiaClientBuilder.parseProxySettings(spec);
             assertNull(proxy);
         }
     }
@@ -57,7 +57,7 @@ public class ProxyConfigTest {
                 { "http://user:pass@host:8080", "host", "8080", "user", "pass" },
         };
         for (String[] d : testData) {
-            J4pClientBuilder.Proxy proxy = new J4pClientBuilder.Proxy(d[0]);
+            JolokiaClientBuilder.Proxy proxy = new JolokiaClientBuilder.Proxy(d[0]);
             assertNotNull(proxy);
             assertEquals(d[1], proxy.getHost());
             assertEquals(Integer.parseInt(d[2]),proxy.getPort());

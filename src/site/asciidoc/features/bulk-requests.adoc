@@ -50,14 +50,14 @@ request easy by providing an extra layer of abstraction:
 
 [source,java,options=nowrap]
 ----
-J4pClient j4pClient = J4pClient.url("http://localhost:8080/jolokia")
+JolokiaClient jolokiaClient = new JolokiaClientBuilder().url("http://localhost:8080/jolokia")
         .user("jolokia")
         .password("jolokia")
         .build();
-J4pReadRequest req1 = new J4pReadRequest("java.lang:type=Memory", "HeapMemoryUsage");
-J4pExecRequest req2 = new J4pExecRequest("java.lang:type=Memory", "gc");
-J4pReadRequest req3 = new J4pReadRequest("java.lang:type=Memory", "HeapMemoryUsage");
-List<J4pResponse<J4pRequest>> responses = j4pClient.execute(req1, req2, req3);
+JolokiaReadRequest req1 = new JolokiaReadRequest("java.lang:type=Memory", "HeapMemoryUsage");
+JolokiaExecRequest req2 = new JolokiaExecRequest("java.lang:type=Memory", "gc");
+JolokiaReadRequest req3 = new JolokiaReadRequest("java.lang:type=Memory", "HeapMemoryUsage");
+List<JolokiaResponse<JolokiaRequest>> responses = jolokiaClient.execute(req1, req2, req3);
 Map<String, Object> m1 = responses.get(0).getValue();
 Map<String, Object> m2 = responses.get(2).getValue();
 System.out.println("Memory usage before gc(): used: " + m1.get("used")
@@ -68,7 +68,7 @@ System.out.println("Memory usage after gc(): used: " + m2.get("used")
 
 This gets translated in the following JSON request, which is
 transmitted to the agent via an HTTP POST request (the URL has
-been set up in the `j4pClient` object above):
+been set up in the `jolokiaClient` object above):
 
 [source,json]
 ----

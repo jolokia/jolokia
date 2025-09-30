@@ -13,28 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jolokia.client.jdkclient;
+package org.jolokia.client.httpclient4;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.ConnectException;
 import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpConnectTimeoutException;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.net.http.HttpTimeoutException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.util.Base64;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
-import org.jolokia.client.HttpUtil;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.conn.ConnectTimeoutException;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
 import org.jolokia.client.EscapeUtil;
+import org.jolokia.client.HttpUtil;
 import org.jolokia.client.JolokiaClientBuilder;
 import org.jolokia.client.JolokiaQueryParameter;
 import org.jolokia.client.JolokiaTargetConfig;
@@ -46,19 +51,21 @@ import org.jolokia.client.request.HttpMethod;
 import org.jolokia.client.request.JolokiaRequest;
 import org.jolokia.client.response.JolokiaResponse;
 import org.jolokia.client.spi.HttpClientSpi;
-import org.jolokia.client.spi.HttpHeader;
 import org.jolokia.json.JSONArray;
 import org.jolokia.json.JSONObject;
 import org.jolokia.json.JSONStructure;
 import org.jolokia.json.parser.ParseException;
 
-public class JdkHttpClient implements HttpClientSpi<HttpClient> {
+/**
+ * {@link HttpClientSpi} implementation based on Apache HttpClient 4
+ */
+public class Http4Client implements HttpClientSpi<HttpClient> {
 
-    private final HttpClient client;
+    private final CloseableHttpClient client;
     private final JolokiaClientBuilder.Configuration config;
     private final URI jolokiaAgentUrl;
 
-    public JdkHttpClient(HttpClient client, JolokiaClientBuilder.Configuration configuration) {
+    public Http4Client(CloseableHttpClient client, JolokiaClientBuilder.Configuration configuration) {
         this.client = client;
         this.config = configuration;
         this.jolokiaAgentUrl = this.config.url();
@@ -76,8 +83,7 @@ public class JdkHttpClient implements HttpClientSpi<HttpClient> {
     public <REQ extends JolokiaRequest, RES extends JolokiaResponse<REQ>>
     JSONStructure execute(REQ pRequest, HttpMethod method, Map<JolokiaQueryParameter, String> parameters, JolokiaTargetConfig targetConfig)
             throws IOException, J4pException {
-        // JDK HTTP request from Jolokia request
-        HttpRequest httpRequest = prepareRequest(pRequest, method, parameters, targetConfig);
+        HttpUriRequest httpRequest = prepareRequest(pRequest, method, parameters, targetConfig);
 
         return execute(httpRequest, pRequest, pRequest.getType().getValue());
     }
@@ -86,18 +92,19 @@ public class JdkHttpClient implements HttpClientSpi<HttpClient> {
     public <REQ extends JolokiaRequest, RES extends JolokiaResponse<REQ>>
     JSONStructure execute(List<REQ> pRequests, Map<JolokiaQueryParameter, String> parameters, JolokiaTargetConfig targetConfig)
             throws IOException, J4pException {
-        // JDK HTTP request from bulk Jolokia request
-        HttpRequest httpRequest = prepareRequests(pRequests, parameters, targetConfig);
+        HttpUriRequest httpRequest = prepareRequests(pRequests, parameters, targetConfig);
 
         return execute(httpRequest, null, "bulk");
     }
 
     @Override
-    public void close() {
-        // noop
+    public void close() throws IOException {
+        if (client != null) {
+            client.close();
+        }
     }
 
-    // methods that help to convert between Jolokia requests/responses and HTTP requests/responses for JDK HTTP Client
+    // methods that help to convert between Jolokia requests/responses and HTTP requests/responses for Apache Http4 Client
 
     /**
      * Prepare an {@link HttpRequest} to send a {@link JolokiaRequest} over HTTP. {@link JolokiaTargetConfig} is used
@@ -111,14 +118,14 @@ public class JdkHttpClient implements HttpClientSpi<HttpClient> {
      * @param <REQ>
      */
     private <REQ extends JolokiaRequest>
-    HttpRequest prepareRequest(REQ pRequest, HttpMethod method, Map<JolokiaQueryParameter, String> parameters, JolokiaTargetConfig pTargetConfig) {
+    HttpUriRequest prepareRequest(REQ pRequest, HttpMethod method, Map<JolokiaQueryParameter, String> parameters, JolokiaTargetConfig pTargetConfig) {
         JolokiaTargetConfig targetConfig = HttpUtil.determineTargetConfig(pRequest, pTargetConfig);
         HttpMethod selectedMethod = HttpUtil.determineHttpMethod(pRequest, method, targetConfig);
         String queryParams = HttpUtil.toQueryString(parameters);
 
         Charset charset = config.contentCharset() == null ? StandardCharsets.UTF_8 : config.contentCharset();
 
-        HttpRequest.Builder builder = null;
+        HttpUriRequest request = null;
         // GET request
         if (selectedMethod.equals(HttpMethod.GET)) {
             if (targetConfig != null) {
@@ -139,24 +146,19 @@ public class JdkHttpClient implements HttpClientSpi<HttpClient> {
                 }
                 URI uri = HttpUtil.prepareFullUrl(jolokiaAgentUrl, requestPath.toString(), queryParams);
 
-                builder = HttpRequest.newBuilder().uri(uri).GET();
+                request = new HttpGet(uri);
             }
         }
 
-        if (builder == null) {
-            // POST - we need to pass the body to the request
+        if (request == null) {
+            HttpPost postRequest = new HttpPost(HttpUtil.prepareFullUrl(jolokiaAgentUrl, jolokiaAgentUrl.getPath(), queryParams));
             JSONObject requestContent = HttpUtil.getJsonRequestContent(pRequest, targetConfig);
-            HttpRequest.BodyPublisher publisher = HttpRequest.BodyPublishers.ofString(requestContent.toJSONString(), charset);
-
-            builder = HttpRequest.newBuilder()
-                .uri(HttpUtil.prepareFullUrl(jolokiaAgentUrl, jolokiaAgentUrl.getPath(), queryParams))
-                .header("Content-Type", "application/json")
-                .POST(publisher);
-            // for POST only
-            builder.expectContinue(config.expectContinue());
+            postRequest.setEntity(new StringEntity(requestContent.toJSONString(), StandardCharsets.UTF_8));
+            postRequest.addHeader(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
+            request = postRequest;
         }
 
-        return configureRequest(builder);
+        return request;
     }
 
     /**
@@ -171,7 +173,7 @@ public class JdkHttpClient implements HttpClientSpi<HttpClient> {
      * @param <REQ>
      */
     private <REQ extends JolokiaRequest>
-    HttpRequest prepareRequests(List<REQ> pRequests, Map<JolokiaQueryParameter, String> parameters, JolokiaTargetConfig pTargetConfig) {
+    HttpUriRequest prepareRequests(List<REQ> pRequests, Map<JolokiaQueryParameter, String> parameters, JolokiaTargetConfig pTargetConfig) {
         String queryParams = HttpUtil.toQueryString(parameters);
         Charset charset = config.contentCharset() == null ? StandardCharsets.UTF_8 : config.contentCharset();
 
@@ -182,47 +184,12 @@ public class JdkHttpClient implements HttpClientSpi<HttpClient> {
             bulkRequest.add(requestContent);
         }
 
-        HttpRequest.BodyPublisher publisher = HttpRequest.BodyPublishers.ofString(bulkRequest.toJSONString(), charset);
+        HttpPost request = new HttpPost(HttpUtil.prepareFullUrl(jolokiaAgentUrl, jolokiaAgentUrl.getPath(), queryParams));
+        // POST - we need to pass the body to the request
+        request.setEntity(new StringEntity(bulkRequest.toJSONString(), StandardCharsets.UTF_8));
+        request.addHeader(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
 
-        HttpRequest.Builder builder = HttpRequest.newBuilder()
-            .uri(HttpUtil.prepareFullUrl(jolokiaAgentUrl, jolokiaAgentUrl.getPath(), queryParams))
-            .header("Content-Type", "application/json")
-            .POST(publisher);
-
-        // for POST only
-        builder.expectContinue(config.expectContinue());
-
-        return configureRequest(builder);
-    }
-
-    /**
-     * Complete configuration of {@link HttpRequest.Builder} by setting common configuration options.
-     *
-     * @param builder
-     * @return
-     */
-    private HttpRequest configureRequest(HttpRequest.Builder builder) {
-        if (config.socketTimeout() > 0) {
-            builder.timeout(Duration.ofMillis(config.socketTimeout()));
-        }
-
-        // emulate preemptive authentication here
-        if (config.user() != null && !config.user().isEmpty()) {
-            String credentials = config.user() + ":" + (config.password() == null ? "" : config.password());
-            String encoded = Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
-            builder.header("Authorization", "Basic " + encoded);
-        }
-
-        Collection<HttpHeader> customHeaders = config.defaultHttpHeaders();
-        if (customHeaders != null) {
-            for (HttpHeader h : customHeaders) {
-                builder.setHeader(h.name(), h.value());
-            }
-        }
-
-        return builder
-            .header("Content-Type", "application/json")
-            .build();
+        return request;
     }
 
     /**
@@ -233,44 +200,47 @@ public class JdkHttpClient implements HttpClientSpi<HttpClient> {
      * @param requestType    for logging purpose
      * @return
      */
-    private JSONStructure execute(HttpRequest httpRequest, JolokiaRequest jolokiaRequest, String requestType) throws IOException, J4pException {
-        // Response to be handled/returned as InputStream
-        HttpResponse.BodyHandler<InputStream> responseHandler = HttpResponse.BodyHandlers.ofInputStream();
+    private JSONStructure execute(HttpUriRequest httpRequest, JolokiaRequest jolokiaRequest, String requestType) throws IOException, J4pException {
         try {
-            HttpResponse<InputStream> response = client.send(httpRequest, responseHandler);
-            int errorCode = response.statusCode();
+            HttpResponse response = client.execute(httpRequest);
+            StatusLine statusLine = response.getStatusLine();
+            int errorCode = statusLine.getStatusCode();
 
-            // just parse without interpretation
-            try (InputStream body = response.body()) {
-                if (errorCode != 200) {
-                    // no need to parse, because Jolokia JSON responses for errors are sent with HTTP 200 code
-                    throw new J4pRemoteException(jolokiaRequest, "HTTP error " + errorCode + " sending " + requestType + " Jolokia request",
-                        null, errorCode, null, null);
-                }
+            if (errorCode != 200) {
+                // no need to parse, because Jolokia JSON responses for errors are sent with HTTP 200 code
+                throw new J4pRemoteException(jolokiaRequest, "HTTP error " + errorCode + " sending " + requestType + " Jolokia request",
+                    null, errorCode, null, null);
+            }
 
-                Optional<String> encoding = response.headers().firstValue("Content-Encoding");
-                if (encoding.isEmpty()) {
-                    encoding = Optional.of((config.contentCharset() == null ? StandardCharsets.ISO_8859_1 : config.contentCharset()).name());
+            HttpEntity entity = response.getEntity();
+            try {
+                Charset encoding;
+                Header contentEncoding = entity.getContentEncoding();
+                if (contentEncoding == null) {
+                    encoding = config.contentCharset() == null ? StandardCharsets.ISO_8859_1 : config.contentCharset();
+                } else {
+                    encoding = Charset.forName(contentEncoding.getValue());
                 }
-                return HttpUtil.parseJsonResponse(body, Charset.forName(encoding.get()));
+                return HttpUtil.parseJsonResponse(entity.getContent(), encoding);
             } catch (ParseException e) {
                 // JSON parsing error - convert to Jolokia exception
                 String errorType = e.getClass().getName();
                 String message = "Error parsing " + requestType + " response: " + e.getMessage();
                 throw new J4pRemoteException(jolokiaRequest, message, errorType, errorCode, null, null);
+            } finally {
+                if (entity != null) {
+                    EntityUtils.consume(entity);
+                }
             }
         } catch (ConnectException e) {
             String msg = "Cannot connect to " + jolokiaAgentUrl + ": " + e.getMessage();
             throw new J4pConnectException(msg, e);
-        } catch (HttpConnectTimeoutException e) {
+        } catch (ConnectTimeoutException e) {
             String msg = "Connection timeout when sending " + requestType + " request to " + jolokiaAgentUrl + ": " + e.getMessage();
             throw new J4pTimeoutException(msg, e);
-        } catch (HttpTimeoutException e) {
-            String msg = "Timeout when processing " + requestType + " request to " + jolokiaAgentUrl + ": " + e.getMessage();
+        } catch (IOException e) {
+            String msg = "IO exception when processing " + requestType + " request to " + jolokiaAgentUrl + ": " + e.getMessage();
             throw new J4pTimeoutException(msg, e);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new J4pException("Interrupted while sending " + requestType + " Jolokia request", e);
         }
     }
 

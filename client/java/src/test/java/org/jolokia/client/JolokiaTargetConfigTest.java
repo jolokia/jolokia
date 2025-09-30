@@ -1,4 +1,4 @@
-package org.jolokia.client.request;
+package org.jolokia.client;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -16,7 +16,6 @@ package org.jolokia.client.request;
  * limitations under the License.
  */
 
-import org.jolokia.client.JolokiaTargetConfig;
 import org.jolokia.json.JSONObject;
 import org.testng.annotations.Test;
 

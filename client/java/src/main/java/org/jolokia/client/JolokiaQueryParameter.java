@@ -27,7 +27,7 @@ package org.jolokia.client;
  * @author roland
  * @since 15.09.11
  */
-public enum J4pQueryParameter {
+public enum JolokiaQueryParameter {
 
     /**
      * Maximum traversal depth for serialization of complex objects.
@@ -123,7 +123,7 @@ public enum J4pQueryParameter {
 
     private final String param;
 
-    J4pQueryParameter(String pParam) {
+    JolokiaQueryParameter(String pParam) {
         param = pParam;
     }
 

@@ -20,8 +20,8 @@ package org.jolokia.client.request;
 //import com.github.tomakehurst.wiremock.core.Options;
 //import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 //import com.github.tomakehurst.wiremock.direct.DirectCallHttpServerFactory;
-import org.jolokia.client.J4pClient;
-import org.jolokia.client.J4pClientBuilder;
+import org.jolokia.client.JolokiaClient;
+import org.jolokia.client.JolokiaClientBuilder;
 import org.jolokia.client.response.JolokiaSearchResponse;
 import org.jolokia.json.JSONArray;
 import org.jolokia.json.JSONObject;
@@ -30,7 +30,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import javax.management.ObjectName;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
@@ -70,7 +69,7 @@ public class J4pConnectionPoolingIntegrationTest {
 //        verify(20, getRequestedFor(urlPathMatching("/test/([a-z.:=*/]*)")));
     }
 
-    private void searchParallel(J4pClient j4pClient) throws Exception {
+    private void searchParallel(JolokiaClient jolokiaClient) throws Exception {
 //        stubFor(get(urlPathMatching("/test/([a-z.:=*/]*)")).willReturn(aResponse().withFixedDelay(1000).withBody(getJsonResponse("test"))));
 
         final ExecutorService executorService = Executors.newFixedThreadPool(20);
@@ -79,7 +78,7 @@ public class J4pConnectionPoolingIntegrationTest {
         final List<Future<Void>> requestsList = new ArrayList<>();
 
         for (int i = 0; i < 20; i++) {
-            requestsList.add(executorService.submit(new AsyncRequest(j4pClient, j4pSearchRequest)));
+            requestsList.add(executorService.submit(new AsyncRequest(jolokiaClient, j4pSearchRequest)));
         }
 
         for (Future<Void> requests : requestsList) {
@@ -95,8 +94,8 @@ public class J4pConnectionPoolingIntegrationTest {
 //        wireMockServer.stop();
     }
 
-    private J4pClient createJ4pClient(String url, int maxTotalConnections, int connectionsPerRoute) {
-        return new J4pClientBuilder().url(url)
+    private JolokiaClient createJ4pClient(String url, int maxTotalConnections, int connectionsPerRoute) {
+        return new JolokiaClientBuilder().url(url)
 //                .pooledConnections()
 //                .maxTotalConnections(maxTotalConnections)
 //                .defaultMaxConnectionsPerRoute(connectionsPerRoute)
@@ -104,16 +103,16 @@ public class J4pConnectionPoolingIntegrationTest {
     }
 
     static class AsyncRequest implements Callable<Void> {
-        private final J4pClient j4pClient;
+        private final JolokiaClient jolokiaClient;
         private final JolokiaSearchRequest j4pSearchRequest;
 
-        public AsyncRequest(J4pClient j4pClient, JolokiaSearchRequest j4pSearchRequest) {
-            this.j4pClient = j4pClient;
+        public AsyncRequest(JolokiaClient jolokiaClient, JolokiaSearchRequest j4pSearchRequest) {
+            this.jolokiaClient = jolokiaClient;
             this.j4pSearchRequest = j4pSearchRequest;
         }
 
         public Void call() throws Exception {
-            JolokiaSearchResponse resp = j4pClient.execute(j4pSearchRequest);
+            JolokiaSearchResponse resp = jolokiaClient.execute(j4pSearchRequest);
             assertNotNull(resp);
             List<ObjectName> names = resp.getObjectNames();
             assertTrue(names.contains(new ObjectName("java.lang:type=Memory")));

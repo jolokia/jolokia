@@ -34,7 +34,7 @@ import static org.testng.AssertJUnit.*;
  *
  * @author roland
  */
-public class J4pSearchIntegrationTest extends AbstractJ4pIntegrationTest {
+public class ClientSearchIntegrationTest extends AbstractClientIntegrationTest {
 
     @Test
     public void simple() throws MalformedObjectNameException, J4pException {
@@ -42,7 +42,7 @@ public class J4pSearchIntegrationTest extends AbstractJ4pIntegrationTest {
                 new JolokiaSearchRequest("java.lang:type=*"),
                 new JolokiaSearchRequest(getTargetProxyConfig(),"java.lang:type=*")
         }) {
-            JolokiaSearchResponse resp = j4pClient.execute(req);
+            JolokiaSearchResponse resp = jolokiaClient.execute(req);
             assertNotNull(resp);
             List<ObjectName> names = resp.getObjectNames();
             assertTrue(names.contains(new ObjectName("java.lang:type=Memory")));
@@ -52,7 +52,7 @@ public class J4pSearchIntegrationTest extends AbstractJ4pIntegrationTest {
     @Test
     public void emptySearch() throws MalformedObjectNameException, J4pException {
         for (JolokiaTargetConfig cfg : new JolokiaTargetConfig[] { null, getTargetProxyConfig()}) {
-            JolokiaSearchResponse resp = j4pClient.execute(new JolokiaSearchRequest(cfg,"bla:gimme=*"));
+            JolokiaSearchResponse resp = jolokiaClient.execute(new JolokiaSearchRequest(cfg,"bla:gimme=*"));
             assertEquals(0, resp.getObjectNames().size());
             assertEquals(0, resp.getMBeanNames().size());
         }
@@ -65,11 +65,11 @@ public class J4pSearchIntegrationTest extends AbstractJ4pIntegrationTest {
 
     @Test
     public void advancedPattern() throws MalformedObjectNameException, J4pException {
-        JolokiaSearchResponse resp = j4pClient.execute(new JolokiaSearchRequest("java.lang:type=Mem*"));
+        JolokiaSearchResponse resp = jolokiaClient.execute(new JolokiaSearchRequest("java.lang:type=Mem*"));
         JSONArray names = resp.getMBeanNames();
         assertEquals(1, names.size());
 
-        resp = j4pClient.execute(new JolokiaSearchRequest(getTargetProxyConfig(), "java.lang:type=Mem*"));
+        resp = jolokiaClient.execute(new JolokiaSearchRequest(getTargetProxyConfig(), "java.lang:type=Mem*"));
         names = resp.getMBeanNames();
         assertEquals(2, names.size());
     }

@@ -270,7 +270,7 @@ public abstract class JolokiaRequest {
      * @param pArg the object to serialize
      * @return a JSON serialized object
      */
-    protected Object serializeArgumentToJson(Object pArg) {
+    public Object serializeArgumentToJson(Object pArg) {
         if (pArg == null) {
             return null;
         } else if (pArg instanceof JSONStructure) {

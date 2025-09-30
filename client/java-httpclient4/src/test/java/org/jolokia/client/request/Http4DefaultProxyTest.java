@@ -13,19 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jolokia.client.spi;
+package org.jolokia.client.request;
 
-import org.jolokia.client.JolokiaClientBuilder;
-
-public interface HttpClientBuilder<T> {
-
-    /**
-     * Based on data collected in Jolokia {@link JolokiaClientBuilder}, create an instance of actual
-     * HTTP client and return it wrapped in {@link HttpClientSpi}
-     *
-     * @param jolokiaClientBuilder
-     * @return
-     */
-    HttpClientSpi<T> buildHttpClient(JolokiaClientBuilder.Configuration jolokiaClientBuilder);
-
+public class Http4DefaultProxyTest extends ClientDefaultProxyTest {
 }

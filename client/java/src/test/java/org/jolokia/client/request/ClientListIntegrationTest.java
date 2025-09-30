@@ -34,7 +34,7 @@ import static org.testng.AssertJUnit.*;
  *
  * @author roland
  */
-public class J4pListIntegrationTest extends AbstractJ4pIntegrationTest {
+public class ClientListIntegrationTest extends AbstractClientIntegrationTest {
 
     static private final String TYPE_ESCAPED = "type=naming!/";
     static private final String TYPE_UNESCAPED = "type=naming/";
@@ -45,7 +45,7 @@ public class J4pListIntegrationTest extends AbstractJ4pIntegrationTest {
                 new JolokiaListRequest(),
                 new JolokiaListRequest(getTargetProxyConfig())
         }) {
-            JolokiaListResponse resp = j4pClient.execute(req);
+            JolokiaListResponse resp = jolokiaClient.execute(req);
             assertNotNull(resp);
         }
     }
@@ -57,7 +57,7 @@ public class J4pListIntegrationTest extends AbstractJ4pIntegrationTest {
                 new JolokiaListRequest(objectName),
                 new JolokiaListRequest(getTargetProxyConfig(), new ObjectName("proxy@" + objectName))
         }) {
-            JolokiaListResponse resp = j4pClient.execute(req);
+            JolokiaListResponse resp = jolokiaClient.execute(req);
             JSONObject val = resp.getValue();
             // the response is recombined, so it always contains top level domains and 2nd level ObjectNames
             val = (JSONObject) val.values().iterator().next();
@@ -74,7 +74,7 @@ public class J4pListIntegrationTest extends AbstractJ4pIntegrationTest {
                 new JolokiaListRequest("jolokia.it/name=name with space," + TYPE_ESCAPED),
                 new JolokiaListRequest(getTargetProxyConfig(),"jolokia.it/name=name with space," + TYPE_ESCAPED)
         }) {
-            JolokiaListResponse resp = j4pClient.execute(req);
+            JolokiaListResponse resp = jolokiaClient.execute(req);
             JSONObject val = resp.getValue();
             // the response is recombined, so it always contains top level domains and 2nd level ObjectNames
             val = (JSONObject) val.get("jolokia.it");
@@ -94,7 +94,7 @@ public class J4pListIntegrationTest extends AbstractJ4pIntegrationTest {
                 new JolokiaListRequest(getTargetProxyConfig(),"jolokia.it/" + TYPE_ESCAPED + ",name=n!!a!!m!!e with !!!/!!")
         };
         for (JolokiaListRequest req : reqs) {
-            JolokiaListResponse resp = j4pClient.execute(req);
+            JolokiaListResponse resp = jolokiaClient.execute(req);
             JSONObject val = resp.getValue();
             // the response is recombined, so it always contains top level domains and 2nd level ObjectNames
             val = (JSONObject) val.values().iterator().next();
@@ -106,11 +106,11 @@ public class J4pListIntegrationTest extends AbstractJ4pIntegrationTest {
     @Test
     public void withEscapedWildcards() throws Exception {
         JolokiaSearchRequest searchRequest = new JolokiaSearchRequest("jboss.as.expr:*");
-        JolokiaSearchResponse searchResp = j4pClient.execute(searchRequest);
+        JolokiaSearchResponse searchResp = jolokiaClient.execute(searchRequest);
 
         for (ObjectName oName : searchResp.getObjectNames()) {
             JolokiaListRequest listRequest = new JolokiaListRequest(oName);
-            JolokiaListResponse listResp = j4pClient.execute(listRequest);
+            JolokiaListResponse listResp = jolokiaClient.execute(listRequest);
             Map<?, ?> val = listResp.getValue();
             assertEquals("java.lang.String", ((Map<?, ?>) ((Map<?, ?>) val.get("attr")).get("Ok")).get("type"));
         }

@@ -29,14 +29,14 @@ import static org.testng.Assert.*;
  * @author roland
  * @since 13.01.13
  */
-public class JSR160HiddenTest extends AbstractJ4pIntegrationTest {
+public class ClientJsr160HiddenTest extends AbstractClientIntegrationTest {
 
     @Test
     public void hiddenMBeanNotAvailableForJSR160() throws MalformedObjectNameException {
         try {
             JolokiaReadRequest request = new JolokiaReadRequest(getTargetProxyConfig(),
                                                         ItSetup.JOLOKIA_IT_DOMAIN_HIDDEN + ":type=attribute","LongSeconds");
-            j4pClient.execute(request);
+            jolokiaClient.execute(request);
             fail("Exception should have been thrown");
         } catch (J4pException exp) {
             assertTrue(exp.getMessage().contains("InstanceNotFoundException"));
@@ -47,7 +47,7 @@ public class JSR160HiddenTest extends AbstractJ4pIntegrationTest {
     @Test
     public void hiddenMBeanAvailableForJolokia() throws MalformedObjectNameException, J4pException {
         JolokiaReadRequest request = new JolokiaReadRequest(ItSetup.JOLOKIA_IT_DOMAIN + ":type=attribute","LongSeconds");
-        JolokiaReadResponse response = j4pClient.execute(request);
+        JolokiaReadResponse response = jolokiaClient.execute(request);
         assertNotNull(response.getValue());
     }
 }

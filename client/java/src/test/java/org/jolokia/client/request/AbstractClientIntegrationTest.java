@@ -44,8 +44,8 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.util.Callback;
 import org.eclipse.jetty.util.security.Password;
-import org.jolokia.client.J4pClient;
-import org.jolokia.client.J4pClientBuilder;
+import org.jolokia.client.JolokiaClient;
+import org.jolokia.client.JolokiaClientBuilder;
 import org.jolokia.client.JolokiaTargetConfig;
 import org.jolokia.it.core.ItSetup;
 import org.jolokia.server.core.http.AgentServlet;
@@ -61,20 +61,20 @@ import org.testng.annotations.BeforeClass;
  * @author roland
  * @since Apr 26, 2010
  */
-abstract public class AbstractJ4pIntegrationTest {
+abstract public class AbstractClientIntegrationTest {
 
-    public static final Logger LOG = LoggerFactory.getLogger(AbstractJ4pIntegrationTest.class);
+    public static final Logger LOG = LoggerFactory.getLogger(AbstractClientIntegrationTest.class);
     private static String jettyVersion;
 
     private Server jettyServer;
 
     protected ItSetup itSetup;
 
-    protected String j4pUrl;
+    protected String jolokiaUrl;
     protected static String externalUrl;
 
     // Client which can be used by subclasses for testing
-    protected J4pClient j4pClient;
+    protected JolokiaClient jolokiaClient;
 
     static {
         externalUrl = System.getProperty("j4p.url");
@@ -103,7 +103,8 @@ abstract public class AbstractJ4pIntegrationTest {
                 @Override
                 protected void doFilter(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
                         throws IOException, ServletException {
-                    LOG.info("[{}:{}]> {}: {}", req.getRemoteAddr(), req.getRemotePort(), req.getMethod(), req.getRequestURI());
+                    LOG.info("[{}:{}]> {}: {} (Agent: {})",
+                        req.getRemoteAddr(), req.getRemotePort(), req.getMethod(), req.getRequestURI(), req.getHeader("User-Agent"));
                     chain.doFilter(req, res);
                 }
             }), "/j4p/*", EnumSet.of(DispatcherType.REQUEST));
@@ -122,16 +123,16 @@ abstract public class AbstractJ4pIntegrationTest {
             jettyServer.setHandler(jettyContext);
             jettyServer.start();
 
-            j4pUrl = "http://localhost:" + port + "/j4p";
-            LOG.info("Started Jetty Server ({}). Jolokia available at {}", jettyVersion, j4pUrl);
+            jolokiaUrl = "http://localhost:" + port + "/j4p";
+            LOG.info("Started Jetty Server ({}). Jolokia available at {}", jettyVersion, jolokiaUrl);
 
             // Start the integration MBeans
             itSetup = new ItSetup();
             itSetup.start();
         } else {
-            j4pUrl = externalUrl;
+            jolokiaUrl = externalUrl;
         }
-        j4pClient = createJ4pClient(j4pUrl);
+        jolokiaClient = createJolokiaClient(jolokiaUrl);
     }
 
     @AfterClass
@@ -145,7 +146,7 @@ abstract public class AbstractJ4pIntegrationTest {
     }
 
     private static void checkJettyVersion() {
-        try (InputStream is = AbstractJ4pIntegrationTest.class.getResourceAsStream("/META-INF/maven/org.eclipse.jetty/jetty-server/pom.properties")) {
+        try (InputStream is = AbstractClientIntegrationTest.class.getResourceAsStream("/META-INF/maven/org.eclipse.jetty/jetty-server/pom.properties")) {
             if (is != null) {
                 Properties props = new Properties();
                 props.load(is);
@@ -203,8 +204,8 @@ abstract public class AbstractJ4pIntegrationTest {
         return securityHandler;
     }
 
-    protected J4pClient createJ4pClient(String url) {
-        return new J4pClientBuilder()
+    protected JolokiaClient createJolokiaClient(String url) {
+        return new JolokiaClientBuilder()
             .url(url)
             .user("jolokia")
             .password("jolokia")
@@ -230,21 +231,21 @@ abstract public class AbstractJ4pIntegrationTest {
             jettyServer.start();
 
             String serverUrl = "http://localhost:" + port ;
-            j4pUrl = serverUrl + "/j4p";
+            jolokiaUrl = serverUrl + "/j4p";
             LOG.info("Started Jetty Server ({}) without Jolokia at {}", jettyVersion, serverUrl);
 
             // Start the integration MBeans
             itSetup = new ItSetup();
             itSetup.start();
         } else {
-            j4pUrl = externalUrl;
+            jolokiaUrl = externalUrl;
         }
 
-        j4pClient = new J4pClient(URI.create(j4pUrl));
+        jolokiaClient = new JolokiaClient(URI.create(jolokiaUrl));
     }
 
-    public String getJ4pUrl() {
-        return j4pUrl;
+    public String getJolokiaUrl() {
+        return jolokiaUrl;
     }
 
     public JolokiaTargetConfig getTargetProxyConfig() {

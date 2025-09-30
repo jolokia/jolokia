@@ -31,12 +31,12 @@ import static org.testng.AssertJUnit.*;
  * @since 23.09.11
  */
 @SuppressWarnings("ResultOfMethodCallIgnored")
-public class J4pClientBuilderTest {
+public class JolokiaClientBuilderTest {
 
     @Test
     public void simple() {
-        J4pClient client =
-                new J4pClientBuilder()
+        JolokiaClient client =
+                new JolokiaClientBuilder()
                         .url("http://localhost:8080/jolokia")
                         .user("roland")
                         .password("s!c!r!t")
@@ -57,32 +57,14 @@ public class J4pClientBuilderTest {
     }
 
     @Test
-    public void entry() {
-//        assertNotNull(J4pClient.user("roland"));
-//        assertNotNull(J4pClient.password("s!cr!t"));
-//        assertNotNull(J4pClient.connectionTimeout(100));
-//        assertNotNull(J4pClient.expectContinue(true));
-//        assertNotNull(J4pClient.tcpNoDelay(true));
-//        assertNotNull(J4pClient.contentCharset("utf-8"));
-//        assertNotNull(J4pClient.maxConnectionPoolTimeout(3000));
-//        assertNotNull(J4pClient.maxTotalConnections(100));
-//        assertNotNull(J4pClient.singleConnection());
-//        assertNotNull(J4pClient.pooledConnections());
-//        assertNotNull(J4pClient.socketBufferSize(8192));
-//        assertNotNull(J4pClient.socketTimeout(5000));
-//        assertNotNull(J4pClient.cookieStore(new BasicCookieStore()));
-//        assertNotNull(J4pClient.defaultMaxConnectionsPerRoute(100));
-    }
-
-    @Test
     public void testParseProxySettings_null() {
-        assertNull(J4pClientBuilder.parseProxySettings(null));
+        assertNull(JolokiaClientBuilder.parseProxySettings(null));
     }
 
     @Test
     public void proxy_stringWithUserPassHostAndPort() {
-        J4pClient client =
-                new J4pClientBuilder()
+        JolokiaClient client =
+                new JolokiaClientBuilder()
                         .url("http://localhost:8080/jolokia")
                         .proxy("http://user:pass@host:8080")
                         .build();
@@ -91,8 +73,8 @@ public class J4pClientBuilderTest {
 
     @Test
     public void proxy_hostAndPort() {
-        J4pClient client =
-            new J4pClientBuilder()
+        JolokiaClient client =
+            new JolokiaClientBuilder()
                         .url("http://localhost:8080/jolokia")
                         .proxy("host", 8080)
                         .build();
@@ -101,8 +83,8 @@ public class J4pClientBuilderTest {
 
     @Test
     public void proxy_hostPortUserAndPassword() {
-        J4pClient client =
-            new J4pClientBuilder()
+        JolokiaClient client =
+            new JolokiaClientBuilder()
                         .url("http://localhost:8080/jolokia")
                         .proxy("host",8080,"user","pass")
                         .build();
@@ -110,8 +92,8 @@ public class J4pClientBuilderTest {
     }
     @Test
     public void proxy_useProxyFromEnvironment() {
-        J4pClient client =
-            new J4pClientBuilder()
+        JolokiaClient client =
+            new JolokiaClientBuilder()
                         .url("http://localhost:8080/jolokia")
                         .useProxyFromEnvironment()
                         .build();
@@ -120,8 +102,8 @@ public class J4pClientBuilderTest {
 
     @Test(expectedExceptions = J4pConnectException.class, expectedExceptionsMessageRegExp = ".*Cannot connect to http://localhost:8080/jolokia.*")
     public void proxy_executeNoProxy() throws MalformedObjectNameException, J4pException {
-        J4pClient client =
-            new J4pClientBuilder()
+        JolokiaClient client =
+            new JolokiaClientBuilder()
                         .url("http://localhost:8080/jolokia")
                         .proxy("localhost", 65535, "user", "pass") // most likely there is no proxy on this port
                         .build();

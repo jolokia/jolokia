@@ -30,12 +30,12 @@ import static org.testng.AssertJUnit.assertTrue;
  * @author roland
  * @since Apr 26, 2010
  */
-public class J4pVersionIntegrationTest extends AbstractJ4pIntegrationTest {
+public class ClientVersionIntegrationTest extends AbstractClientIntegrationTest {
 
     @Test
     public void versionGetRequest() throws J4pException {
         JolokiaVersionRequest req = new JolokiaVersionRequest();
-        JolokiaVersionResponse resp = j4pClient.execute(req);
+        JolokiaVersionResponse resp = jolokiaClient.execute(req);
         verifyResponse(resp);
     }
 
@@ -44,7 +44,7 @@ public class J4pVersionIntegrationTest extends AbstractJ4pIntegrationTest {
         for (JolokiaTargetConfig cfg : new JolokiaTargetConfig[]{null/*, getTargetProxyConfig()*/}) {
             JolokiaVersionRequest req = new JolokiaVersionRequest(cfg);
             req.setPreferredHttpMethod(HttpMethod.POST);
-            JolokiaVersionResponse resp = j4pClient.execute(req);
+            JolokiaVersionResponse resp = jolokiaClient.execute(req);
             verifyResponse(resp);
         }
     }

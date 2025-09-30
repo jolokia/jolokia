@@ -27,7 +27,7 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
 
-import org.jolokia.client.J4pClientBuilder;
+import org.jolokia.client.JolokiaClientBuilder;
 import org.jolokia.client.spi.HttpClientBuilder;
 import org.jolokia.client.spi.HttpClientSpi;
 import org.jolokia.client.spi.HttpHeader;
@@ -38,11 +38,11 @@ import org.jolokia.client.spi.HttpHeader;
 public class JdkHttpClientBuilder implements HttpClientBuilder<HttpClient> {
 
     @Override
-    public HttpClientSpi<HttpClient> buildHttpClient(J4pClientBuilder.Configuration jcb) {
+    public HttpClientSpi<HttpClient> buildHttpClient(JolokiaClientBuilder.Configuration jcb) {
         // client specific properties
         String user = jcb.user();
         String password = jcb.password();
-        J4pClientBuilder.Proxy httpProxy = jcb.proxy();
+        JolokiaClientBuilder.Proxy httpProxy = jcb.proxy();
         int connectionTimeout = jcb.connectionTimeout();
 
         // ssl configuration
