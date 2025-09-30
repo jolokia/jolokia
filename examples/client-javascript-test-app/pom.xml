@@ -141,8 +141,8 @@
           Configuration: https://eclipse.dev/jetty/documentation/jetty-11/programming-guide/index.html#jetty-maven-plugin
           Use `mvn clean package jetty:run-war` and browse to http://localhost:8080/jolokia-all-test.html
         -->
-        <groupId>org.eclipse.jetty</groupId>
-        <artifactId>jetty-maven-plugin</artifactId>
+        <groupId>org.eclipse.jetty.ee10</groupId>
+        <artifactId>jetty-ee10-maven-plugin</artifactId>
         <version>${version.org.eclipse.jetty}</version>
         <configuration>
           <scan>10</scan>

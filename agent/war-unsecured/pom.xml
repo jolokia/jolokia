@@ -88,8 +88,8 @@
           $ curl -s http://localhost:8080/jolokia/read/java.lang:type=Runtime/Name | jq .value
           $ curl -s http://localhost:8080/jolokia/read/java.lang:type=OperatingSystem/Version | jq .value
         -->
-        <groupId>org.eclipse.jetty</groupId>
-        <artifactId>jetty-maven-plugin</artifactId>
+        <groupId>org.eclipse.jetty.ee10</groupId>
+        <artifactId>jetty-ee10-maven-plugin</artifactId>
         <version>${version.org.eclipse.jetty}</version>
         <configuration>
           <scan>10</scan>
