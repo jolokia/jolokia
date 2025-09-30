@@ -892,14 +892,32 @@
         <groupId>org.osgi</groupId>
         <artifactId>org.osgi.service.cm</artifactId>
         <version>${version.org.osgi.service.cm}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.namespace.implementation</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>org.osgi</groupId>
         <artifactId>org.osgi.service.servlet</artifactId>
         <version>${version.org.osgi.service.servlet}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.namespace.implementation</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
 
       <!-- Test dependencies -->
+
+      <dependency>
+        <groupId>net.bytebuddy</groupId>
+        <artifactId>byte-buddy</artifactId>
+        <version>${version.net.bytebuddy}</version>
+      </dependency>
 
       <dependency>
         <groupId>org.testng</groupId>
@@ -925,6 +943,12 @@
         <groupId>org.easymock</groupId>
         <artifactId>easymock</artifactId>
         <version>${version.org.easymock}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
 
       <dependency>
@@ -1205,6 +1229,7 @@
     <version.com.fasterxml.jackson.core.annotations>2.20</version.com.fasterxml.jackson.core.annotations>
     <version.jakarta.annotation-api>3.0.0</version.jakarta.annotation-api>
     <version.jakarta.authentication-api>3.1.0</version.jakarta.authentication-api>
+    <version.net.bytebuddy>1.17.7</version.net.bytebuddy>
     <version.org.apache.felix.configadmin>1.9.26</version.org.apache.felix.configadmin>
     <version.org.apache.felix.framework>7.0.5</version.org.apache.felix.framework>
     <version.org.apache.felix.http.jetty12>1.0.36</version.org.apache.felix.http.jetty12>

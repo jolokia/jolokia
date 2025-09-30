@@ -34,8 +34,8 @@ import javax.management.openmbean.InvalidOpenTypeException;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenType;
 
-import org.jolokia.client.J4pClient;
-import org.jolokia.client.J4pClientBuilder;
+import org.jolokia.client.JolokiaClient;
+import org.jolokia.client.JolokiaClientBuilder;
 import org.jolokia.client.exception.J4pBulkRemoteException;
 import org.jolokia.client.exception.J4pException;
 import org.jolokia.client.exception.J4pRemoteException;
@@ -48,7 +48,7 @@ import org.jolokia.client.request.JolokiaRequest;
 import org.jolokia.client.request.JolokiaSearchRequest;
 import org.jolokia.client.response.JolokiaExecResponse;
 import org.jolokia.client.response.JolokiaListResponse;
-import org.jolokia.client.J4pQueryParameter;
+import org.jolokia.client.JolokiaQueryParameter;
 import org.jolokia.client.response.JolokiaReadResponse;
 import org.jolokia.client.response.JolokiaResponse;
 import org.jolokia.client.response.JolokiaSearchResponse;
@@ -73,8 +73,8 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
     String protocolVersion;
     private String agentId;
 
-    private final J4pClient connector;
-    private HashMap<J4pQueryParameter, String> defaultProcessingOptions;
+    private final JolokiaClient connector;
+    private HashMap<JolokiaQueryParameter, String> defaultProcessingOptions;
     protected final Map<ObjectName, MBeanInfo> mbeanInfoCache = new HashMap<>();
 
     /**
@@ -84,16 +84,16 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
      * @throws IOException
      */
     public RemoteJmxAdapter(final String url) throws IOException {
-        this(new J4pClientBuilder().url(url).build());
+        this(new JolokiaClientBuilder().url(url).build());
     }
 
     /**
-     * Create Jolokia backed {@link MBeanServerConnection} using existing {@link J4pClient}
+     * Create Jolokia backed {@link MBeanServerConnection} using existing {@link JolokiaClient}
      *
      * @param connector
      * @throws IOException
      */
-    public RemoteJmxAdapter(final J4pClient connector) throws IOException {
+    public RemoteJmxAdapter(final JolokiaClient connector) throws IOException {
         this.connector = connector;
         try {
             JolokiaVersionResponse response = this.unwrapExecute(new JolokiaVersionRequest());
@@ -252,11 +252,11 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
         }
     }
 
-    private Map<J4pQueryParameter, String> defaultProcessingOptions() {
+    private Map<JolokiaQueryParameter, String> defaultProcessingOptions() {
         if (defaultProcessingOptions == null) {
             defaultProcessingOptions = new HashMap<>();
-            defaultProcessingOptions.put(J4pQueryParameter.MAX_DEPTH, "10"); // in case of stack overflow
-            defaultProcessingOptions.put(J4pQueryParameter.SERIALIZE_EXCEPTION, "true");
+            defaultProcessingOptions.put(JolokiaQueryParameter.MAX_DEPTH, "10"); // in case of stack overflow
+            defaultProcessingOptions.put(JolokiaQueryParameter.SERIALIZE_EXCEPTION, "true");
         }
         return defaultProcessingOptions;
     }
