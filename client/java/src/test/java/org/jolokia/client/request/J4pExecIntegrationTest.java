@@ -21,8 +21,10 @@ import java.util.*;
 
 import javax.management.MalformedObjectNameException;
 
+import org.jolokia.client.JolokiaTargetConfig;
 import org.jolokia.client.exception.J4pException;
 import org.jolokia.client.exception.J4pRemoteException;
+import org.jolokia.client.response.JolokiaExecResponse;
 import org.jolokia.json.JSONArray;
 import org.jolokia.json.JSONObject;
 import org.testng.Assert;
@@ -41,11 +43,11 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
 
     @Test
     public void simpleOperation() throws MalformedObjectNameException, J4pException {
-        for (J4pTargetConfig cfg : new J4pTargetConfig[] { null, getTargetProxyConfig()}) {
-            J4pExecRequest request = new J4pExecRequest(cfg,itSetup.getOperationMBean(),"reset");
+        for (JolokiaTargetConfig cfg : new JolokiaTargetConfig[] { null, getTargetProxyConfig()}) {
+            JolokiaExecRequest request = new JolokiaExecRequest(cfg,itSetup.getOperationMBean(),"reset");
             j4pClient.execute(request);
-            request = new J4pExecRequest(cfg,itSetup.getOperationMBean(),"fetchNumber","inc");
-            J4pExecResponse resp = j4pClient.execute(request);
+            request = new JolokiaExecRequest(cfg,itSetup.getOperationMBean(),"fetchNumber","inc");
+            JolokiaExecResponse resp = j4pClient.execute(request);
             assertEquals(0, (long) resp.getValue());
             resp = j4pClient.execute(request);
             assertEquals(1, (long) resp.getValue());
@@ -54,10 +56,10 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
 
     @Test
     public void beanSerialization() throws MalformedObjectNameException, J4pException {
-        J4pExecRequest request = new J4pExecRequest(itSetup.getMxBean(),
+        JolokiaExecRequest request = new JolokiaExecRequest(itSetup.getMxBean(),
                                                     "echoBean",
                                                     "{\"name\": \"hello\", \"value\": \"world\"}");
-        J4pExecResponse resp = j4pClient.execute(request);
+        JolokiaExecResponse resp = j4pClient.execute(request);
         JSONObject bean = resp.getValue();
         Assert.assertEquals(bean.get("name"),"hello");
         Assert.assertEquals(bean.get("value"),"world");
@@ -65,7 +67,7 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
 
     @Test
     public void failedOperation() throws MalformedObjectNameException, J4pException {
-        for (J4pExecRequest request : execRequests("fetchNumber","bla")) {
+        for (JolokiaExecRequest request : execRequests("fetchNumber","bla")) {
             try {
                 j4pClient.execute(request);
                 fail();
@@ -77,16 +79,16 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
         }
     }
 
-    private J4pExecRequest[] execRequests(String pOperation, Object... pArgs) throws MalformedObjectNameException {
-        return new J4pExecRequest[] {
-                new J4pExecRequest(itSetup.getOperationMBean(),pOperation,pArgs),
-                new J4pExecRequest(getTargetProxyConfig(),itSetup.getOperationMBean(),pOperation,pArgs)
+    private JolokiaExecRequest[] execRequests(String pOperation, Object... pArgs) throws MalformedObjectNameException {
+        return new JolokiaExecRequest[] {
+                new JolokiaExecRequest(itSetup.getOperationMBean(),pOperation,pArgs),
+                new JolokiaExecRequest(getTargetProxyConfig(),itSetup.getOperationMBean(),pOperation,pArgs)
         };
     }
 
     @Test
     public void checkedException() throws MalformedObjectNameException, J4pException {
-        for (J4pExecRequest request : execRequests("throwCheckedException")) {
+        for (JolokiaExecRequest request : execRequests("throwCheckedException")) {
             try {
                 j4pClient.execute(request);
                 fail();
@@ -100,32 +102,32 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
 
     @Test
     public void nullArgumentCheck() throws MalformedObjectNameException, J4pException {
-        for (J4pExecRequest request : execRequests("nullArgumentCheck",null,null))  {
-            J4pExecResponse resp = j4pClient.execute(request);
+        for (JolokiaExecRequest request : execRequests("nullArgumentCheck",null,null))  {
+            JolokiaExecResponse resp = j4pClient.execute(request);
             assertTrue(resp.getValue());
         }
     }
 
     @Test
     public void emptyStringArgumentCheck() throws MalformedObjectNameException, J4pException {
-        for (J4pExecRequest request : execRequests("emptyStringArgumentCheck","")) {
-            J4pExecResponse resp = j4pClient.execute(request);
+        for (JolokiaExecRequest request : execRequests("emptyStringArgumentCheck","")) {
+            JolokiaExecResponse resp = j4pClient.execute(request);
             assertTrue(resp.getValue());
         }
     }
 
     @Test
     public void collectionArg() throws MalformedObjectNameException, J4pException {
-        for (String type : new String[] { "GET", "POST" }) {
+        for (HttpMethod type : new HttpMethod[] { HttpMethod.GET, HttpMethod.POST }) {
             for (Object args : new Object[] {
                     new String[] { "roland","tanja","forever" },
                     Arrays.asList("roland", "tanja","forever")
             }) {
-                for (J4pExecRequest request : execRequests("arrayArguments",args,"myExtra")) {
-                    if (type.equals("GET") && request.getTargetConfig() != null) {
+                for (JolokiaExecRequest request : execRequests("arrayArguments",args,"myExtra")) {
+                    if (type.equals(HttpMethod.GET) && request.getTargetConfig() != null) {
                         continue;
                     }
-                    J4pExecResponse resp = j4pClient.execute(request,type);
+                    JolokiaExecResponse resp = j4pClient.execute(request,type);
                     assertEquals("roland",resp.getValue());
 
                     // Check request params
@@ -133,12 +135,12 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
                     assertEquals(2,request.getArguments().size());
 
                     // With null
-                    request = new J4pExecRequest(itSetup.getOperationMBean(),"arrayArguments",new String[] { null, "bla", null },"myExtra");
+                    request = new JolokiaExecRequest(itSetup.getOperationMBean(),"arrayArguments",new String[] { null, "bla", null },"myExtra");
                     resp = j4pClient.execute(request);
                     assertNull(resp.getValue());
 
                     // With ints
-                    request = new J4pExecRequest(itSetup.getOperationMBean(),"arrayArguments",new Integer[] { 1,2,3 },"myExtra");
+                    request = new JolokiaExecRequest(itSetup.getOperationMBean(),"arrayArguments",new Integer[] { 1,2,3 },"myExtra");
                     resp = j4pClient.execute(request);
                     assertEquals("1",resp.getValue());
                 }
@@ -152,8 +154,8 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
     @Test
     public void objectArray() throws MalformedObjectNameException, J4pException {
         Object[] args = new Object[] { 12,true,null, "Bla" };
-        for (J4pExecRequest request : execRequests("objectArrayArg",new Object[] { args })) {
-            J4pExecResponse resp = j4pClient.execute(request,"POST");
+        for (JolokiaExecRequest request : execRequests("objectArrayArg",new Object[] { args })) {
+            JolokiaExecResponse resp = j4pClient.execute(request,HttpMethod.POST);
             assertEquals(12, (long) resp.getValue());
         }
     }
@@ -162,41 +164,41 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
     // Lists are only supported for POST requests
     public void listArg() throws MalformedObjectNameException, J4pException {
         List<?> args = Arrays.asList("roland", 12, true);
-        for (J4pExecRequest request : execRequests("listArgument", args)) {
-            J4pExecResponse resp;
-            resp = j4pClient.execute(request, "POST");
+        for (JolokiaExecRequest request : execRequests("listArgument", args)) {
+            JolokiaExecResponse resp;
+            resp = j4pClient.execute(request, HttpMethod.POST);
             assertEquals("roland", resp.getValue());
         }
     }
 
     @Test
     public void booleanArgs() throws MalformedObjectNameException, J4pException {
-        J4pExecRequest request;
-        J4pExecResponse resp;
-        for (J4pTargetConfig cfg : new J4pTargetConfig[] { null, getTargetProxyConfig()}) {
-            for (String type : new String[] { "GET", "POST" }) {
-                if (type.equals("GET") && cfg != null) {
+        JolokiaExecRequest request;
+        JolokiaExecResponse resp;
+        for (JolokiaTargetConfig cfg : new JolokiaTargetConfig[] { null, getTargetProxyConfig()}) {
+            for (HttpMethod type : new HttpMethod[] { HttpMethod.GET, HttpMethod.POST }) {
+                if (type.equals(HttpMethod.GET) && cfg != null) {
                     continue;
                 }
-                request = new J4pExecRequest(cfg,itSetup.getOperationMBean(),"booleanArguments",true,Boolean.TRUE);
+                request = new JolokiaExecRequest(cfg,itSetup.getOperationMBean(),"booleanArguments",true,Boolean.TRUE);
                 resp = j4pClient.execute(request,type);
                 assertTrue(resp.getValue());
 
-                request = new J4pExecRequest(cfg,itSetup.getOperationMBean(),"booleanArguments",Boolean.TRUE,false);
+                request = new JolokiaExecRequest(cfg,itSetup.getOperationMBean(),"booleanArguments",Boolean.TRUE,false);
                 resp = j4pClient.execute(request,type);
                 assertFalse(resp.getValue());
 
-                request = new J4pExecRequest(cfg,itSetup.getOperationMBean(),"booleanArguments",true,null);
+                request = new JolokiaExecRequest(cfg,itSetup.getOperationMBean(),"booleanArguments",true,null);
                 resp = j4pClient.execute(request,type);
                 assertNull(resp.getValue());
 
 
                 try {
-                    request = new J4pExecRequest(cfg,itSetup.getOperationMBean(),"booleanArguments",null,null);
+                    request = new JolokiaExecRequest(cfg,itSetup.getOperationMBean(),"booleanArguments",null,null);
                     j4pClient.execute(request,type);
                     fail();
                 } catch (J4pRemoteException exp) {
-                    assertEquals(exp.getErrorType(),"java.lang.IllegalArgumentException");
+                    assertEquals("java.lang.IllegalArgumentException", exp.getErrorType());
                 }
             }
         }
@@ -204,54 +206,54 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
 
     @Test
     public void intArgs() throws MalformedObjectNameException, J4pException {
-        J4pExecRequest request;
-        J4pExecResponse resp;
-        for (J4pTargetConfig cfg : new J4pTargetConfig[] { null, getTargetProxyConfig()}) {
-            for (String type : new String[] { "GET", "POST" }) {
-                if (type.equals("GET") && cfg != null) {
+        JolokiaExecRequest request;
+        JolokiaExecResponse resp;
+        for (JolokiaTargetConfig cfg : new JolokiaTargetConfig[] { null, getTargetProxyConfig()}) {
+            for (HttpMethod type : new HttpMethod[] { HttpMethod.GET, HttpMethod.POST }) {
+                if (type.equals(HttpMethod.GET) && cfg != null) {
                     continue;
                 }
-                request = new J4pExecRequest(cfg,itSetup.getOperationMBean(),"intArguments",10,20);
+                request = new JolokiaExecRequest(cfg,itSetup.getOperationMBean(),"intArguments",10,20);
                 resp = j4pClient.execute(request,type);
                 assertEquals(30, (long) resp.getValue());
 
-                request = new J4pExecRequest(cfg,itSetup.getOperationMBean(),"intArguments",10,null);
+                request = new JolokiaExecRequest(cfg,itSetup.getOperationMBean(),"intArguments",10,null);
                 resp = j4pClient.execute(request,type);
                 assertEquals(-1, (long) resp.getValue());
 
                 try {
-                    request = new J4pExecRequest(cfg,itSetup.getOperationMBean(),"intArguments",null,null);
+                    request = new JolokiaExecRequest(cfg,itSetup.getOperationMBean(),"intArguments",null,null);
                     j4pClient.execute(request,type);
                     fail();
                 } catch (J4pRemoteException exp) {
-                    assertEquals(exp.getErrorType(),"java.lang.IllegalArgumentException");
+                    assertEquals("java.lang.IllegalArgumentException", exp.getErrorType());
                 }
             }
         }
     }
     @Test
     public void doubleArgs() throws MalformedObjectNameException, J4pException {
-        J4pExecRequest request;
-        J4pExecResponse resp;
-        for (J4pTargetConfig cfg : new J4pTargetConfig[] { null, getTargetProxyConfig()}) {
-            for (String type : new String[] { "GET", "POST" }) {
-                if (type.equals("GET") && cfg != null) {
+        JolokiaExecRequest request;
+        JolokiaExecResponse resp;
+        for (JolokiaTargetConfig cfg : new JolokiaTargetConfig[] { null, getTargetProxyConfig()}) {
+            for (HttpMethod type : new HttpMethod[] { HttpMethod.GET, HttpMethod.POST }) {
+                if (type.equals(HttpMethod.GET) && cfg != null) {
                     continue;
                 }
-                request = new J4pExecRequest(cfg,itSetup.getOperationMBean(),"doubleArguments",1.5,1.5);
+                request = new JolokiaExecRequest(cfg,itSetup.getOperationMBean(),"doubleArguments",1.5,1.5);
                 resp = j4pClient.execute(request,type);
                 assertEquals(new BigDecimal("3.0"), resp.getValue());
 
-                request = new J4pExecRequest(cfg,itSetup.getOperationMBean(),"doubleArguments",1.5,null);
+                request = new JolokiaExecRequest(cfg,itSetup.getOperationMBean(),"doubleArguments",1.5,null);
                 resp = j4pClient.execute(request,type);
                 assertEquals(new BigDecimal("-1.0"),resp.getValue());
 
                 try {
-                    request = new J4pExecRequest(cfg,itSetup.getOperationMBean(),"doubleArguments",null,null);
+                    request = new JolokiaExecRequest(cfg,itSetup.getOperationMBean(),"doubleArguments",null,null);
                     j4pClient.execute(request,type);
                     fail();
                 } catch (J4pRemoteException exp) {
-                    assertEquals(exp.getErrorType(),"java.lang.IllegalArgumentException");
+                    assertEquals("java.lang.IllegalArgumentException", exp.getErrorType());
                 }
             }
         }
@@ -260,8 +262,8 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
 
     @Test
     public void mapArg() throws MalformedObjectNameException, J4pException {
-        J4pExecRequest request;
-        J4pExecResponse resp;
+        JolokiaExecRequest request;
+        JolokiaExecResponse resp;
 
         JSONObject map = new JSONObject();
         map.put("eins","fcn");
@@ -272,36 +274,36 @@ public class J4pExecIntegrationTest extends AbstractJ4pIntegrationTest {
         map.put("drei",10L);
         map.put("vier",true);
 
-        for (J4pTargetConfig cfg : new J4pTargetConfig[] { null, getTargetProxyConfig()}) {
-            request = new J4pExecRequest(cfg,itSetup.getOperationMBean(),"mapArgument",map);
-            for (String method : new String[] { "GET", "POST" }) {
-                if (method.equals("GET") && cfg != null) {
+        for (JolokiaTargetConfig cfg : new JolokiaTargetConfig[] { null, getTargetProxyConfig()}) {
+            request = new JolokiaExecRequest(cfg,itSetup.getOperationMBean(),"mapArgument",map);
+            for (HttpMethod method : new HttpMethod[] { HttpMethod.GET, HttpMethod.POST }) {
+                if (method.equals(HttpMethod.GET) && cfg != null) {
                     continue;
                 }
                 resp = j4pClient.execute(request,method);
                 Map<?, ?> res = resp.getValue();
-                assertEquals(res.get("eins"),"fcn");
-                assertEquals(((List<?>) res.get("zwei")).get(1),"svw");
-                assertEquals(res.get("drei"),10L);
-                assertEquals(res.get("vier"),true);
+                assertEquals("fcn", res.get("eins"));
+                assertEquals("svw", ((List<?>) res.get("zwei")).get(1));
+                assertEquals(10L, res.get("drei"));
+                assertEquals(true, res.get("vier"));
             }
 
-            request = new J4pExecRequest(itSetup.getOperationMBean(),"mapArgument",new Object[]{null});
-            resp = j4pClient.execute(request,"POST");
+            request = new JolokiaExecRequest(itSetup.getOperationMBean(),"mapArgument",new Object[]{null});
+            resp = j4pClient.execute(request,HttpMethod.POST);
             assertNull(resp.getValue());
         }
     }
 
     @Test
     public void dateArgs() throws MalformedObjectNameException, J4pException {
-        J4pExecRequest request;
-        J4pExecResponse resp;
-        for (J4pTargetConfig cfg : new J4pTargetConfig[] { null, getTargetProxyConfig()}) {
-            for (String type : new String[] { "GET", "POST" }) {
-                if (type.equals("GET") && cfg != null) {
+        JolokiaExecRequest request;
+        JolokiaExecResponse resp;
+        for (JolokiaTargetConfig cfg : new JolokiaTargetConfig[] { null, getTargetProxyConfig()}) {
+            for (HttpMethod type : new HttpMethod[] { HttpMethod.GET, HttpMethod.POST }) {
+                if (type.equals(HttpMethod.GET) && cfg != null) {
                     continue;
                 }
-                request = new J4pExecRequest(cfg,itSetup.getOperationMBean(),"withDates",new Date());
+                request = new JolokiaExecRequest(cfg,itSetup.getOperationMBean(),"withDates",new Date());
                 resp = j4pClient.execute(request,type);
                 assertNotNull(resp);
             }

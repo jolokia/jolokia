@@ -20,6 +20,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
+import org.jolokia.client.JolokiaOperation;
+import org.jolokia.client.response.JolokiaResponse;
 import org.jolokia.json.JSONArray;
 import org.jolokia.json.JSONObject;
 import org.jolokia.json.parser.JSONParser;
@@ -115,14 +117,14 @@ public class JsonSerializationTest {
 
 
     private Object serialize(Object o) {
-        J4pRequest req = new J4pRequest(J4pType.VERSION,null) {
+        JolokiaRequest req = new JolokiaRequest(JolokiaOperation.VERSION,null) {
             @Override
-            List<String> getRequestParts() {
+            public List<String> getRequestParts() {
                 return null;
             }
 
             @Override
-            <R extends J4pResponse<? extends J4pRequest>> R createResponse(JSONObject pResponse) {
+            public <RES extends JolokiaResponse<REQ>, REQ extends JolokiaRequest> RES createResponse(JSONObject pResponse) {
                 return null;
             }
         };

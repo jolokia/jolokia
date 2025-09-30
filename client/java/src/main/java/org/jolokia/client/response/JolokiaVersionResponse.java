@@ -1,5 +1,3 @@
-package org.jolokia.client.request;
-
 /*
  * Copyright 2009-2013 Roland Huss
  *
@@ -15,40 +13,55 @@ package org.jolokia.client.request;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.client.response;
 
-import java.util.Map;
 import java.util.Set;
 
+import org.jolokia.client.request.JolokiaVersionRequest;
 import org.jolokia.json.JSONObject;
 
 /**
- * Response for J4pVersion request
+ * Response for {@link JolokiaVersionRequest}
  *
  * @author roland
  * @since Apr 24, 2010
  */
-public final class J4pVersionResponse extends J4pResponse<J4pVersionRequest> {
+public final class JolokiaVersionResponse extends JolokiaResponse<JolokiaVersionRequest> {
 
-    private final String jolokiaId;
-
-    private JSONObject info;
-
+    /** Version of Jolokia agent and the library as available in Maven Central */
     private final String agentVersion;
 
+    /** <a href="https://jolokia.org/reference/html/manual/jolokia_protocol.html#versions">Jolokia protocol version</a> */
     private final String protocolVersion;
 
     private JSONObject details;
+    private final String jolokiaId;
+    private JSONObject config;
+    private JSONObject info;
 
-    J4pVersionResponse(J4pVersionRequest pRequest, JSONObject pResponse) {
-        super(pRequest,pResponse);
+    /**
+     * Create a response to {@link org.jolokia.client.JolokiaOperation#VERSION} based on defined structure.
+     *
+     * @param pRequest
+     * @param pResponse
+     */
+    public JolokiaVersionResponse(JolokiaVersionRequest pRequest, JSONObject pResponse) {
+        super(pRequest, pResponse);
         JSONObject value = getValue();
         agentVersion = (String) value.get("agent");
         protocolVersion = (String) value.get("protocol");
-        details = (JSONObject) value.get("details");
         jolokiaId = (String) value.get("id");
+
+        details = (JSONObject) value.get("details");
         if (details == null) {
             details = new JSONObject();
         }
+
+        config = (JSONObject) value.get("config");
+        if (config == null) {
+            config = new JSONObject();
+        }
+
         info = (JSONObject) value.get("info");
         if (info == null) {
             info = new JSONObject();
@@ -65,7 +78,7 @@ public final class J4pVersionResponse extends J4pResponse<J4pVersionRequest> {
     }
 
     /**
-     * Jolokia protocol version by the remote Jolokia agent
+     * Jolokia protocol version used by the remote Jolokia agent
      *
      * @return protocol version (as string)
      */
@@ -78,7 +91,7 @@ public final class J4pVersionResponse extends J4pResponse<J4pVersionRequest> {
      * not be detected
      *
      * @return remote application server type or <code>null</code> if the agent
-     *         could not detect it.
+     * could not detect it.
      */
     public String getProduct() {
         return (String) details.get("server_product");
@@ -88,7 +101,7 @@ public final class J4pVersionResponse extends J4pResponse<J4pVersionRequest> {
      * Get the vendor of the remote application server or <code>null</code> if the
      * Jolokia agent could not detect the server
      *
-     * @return venor name or <code>null</code>
+     * @return vendor name or <code>null</code>
      */
     public String getVendor() {
         return (String) details.get("server_vendor");
@@ -118,8 +131,16 @@ public final class J4pVersionResponse extends J4pResponse<J4pVersionRequest> {
      * @param pProvider provider for which information is requested
      * @return extra information for the provider, which might be null
      */
-    public Map<?, ?> getExtraInfo(String pProvider) {
-        return (Map<?, ?>) info.get(pProvider);
+    public JSONObject getExtraInfo(String pProvider) {
+        return (JSONObject) info.get(pProvider);
     }
-}
 
+    /**
+     * Return {@code config} information from version response.
+     * @return
+     */
+    public JSONObject getConfig() {
+        return config;
+    }
+
+}

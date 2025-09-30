@@ -17,6 +17,7 @@ package org.jolokia.client.request;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.EnumSet;
 import java.util.Properties;
 
@@ -36,7 +37,6 @@ import org.eclipse.jetty.security.Constraint;
 import org.eclipse.jetty.security.HashLoginService;
 import org.eclipse.jetty.security.SecurityHandler;
 import org.eclipse.jetty.security.UserStore;
-import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Response;
@@ -44,9 +44,9 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.util.Callback;
 import org.eclipse.jetty.util.security.Password;
-import org.jolokia.client.BasicClientCustomizer;
 import org.jolokia.client.J4pClient;
 import org.jolokia.client.J4pClientBuilder;
+import org.jolokia.client.JolokiaTargetConfig;
 import org.jolokia.it.core.ItSetup;
 import org.jolokia.server.core.http.AgentServlet;
 import org.jolokia.test.util.EnvTestUtil;
@@ -208,7 +208,8 @@ abstract public class AbstractJ4pIntegrationTest {
             .url(url)
             .user("jolokia")
             .password("jolokia")
-//            .authenticator(new BasicClientCustomizer().preemptive())
+            .connectionTimeout(3600000)
+            .socketTimeout(3600000)
 //            .pooledConnections()
             .build();
     }
@@ -239,15 +240,15 @@ abstract public class AbstractJ4pIntegrationTest {
             j4pUrl = externalUrl;
         }
 
-        j4pClient = new J4pClient(j4pUrl);
+        j4pClient = new J4pClient(URI.create(j4pUrl));
     }
 
     public String getJ4pUrl() {
         return j4pUrl;
     }
 
-    public J4pTargetConfig getTargetProxyConfig() {
-        return new J4pTargetConfig("service:jmx:rmi:///jndi/rmi://localhost:45888/jmxrmi",null,null);
+    public JolokiaTargetConfig getTargetProxyConfig() {
+        return new JolokiaTargetConfig("service:jmx:rmi:///jndi/rmi://localhost:45888/jmxrmi",null,null);
     }
 
 }

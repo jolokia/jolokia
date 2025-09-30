@@ -15,35 +15,22 @@
  */
 package org.jolokia.client;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.Authenticator;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.PasswordAuthentication;
-import java.net.ProxySelector;
 import java.net.SocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
-//import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.channels.SelectionKey;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.util.Collection;
-import java.util.List;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
 
-import org.jolokia.client.jdkclient.JdkClientBuilder;
-import org.jolokia.client.request.J4pResponseExtractor;
-import org.jolokia.client.request.J4pTargetConfig;
-import org.jolokia.client.request.ValidatingResponseExtractor;
+import org.jolokia.client.jdkclient.JdkHttpClientBuilder;
+import org.jolokia.client.response.J4pResponseExtractor;
+import org.jolokia.client.response.ValidatingResponseExtractor;
 import org.jolokia.client.spi.HttpClientBuilder;
 import org.jolokia.client.spi.HttpClientSpi;
 import org.jolokia.client.spi.HttpHeader;
@@ -59,7 +46,7 @@ import org.jolokia.client.spi.HttpHeader;
  */
 public class J4pClientBuilder {
 
-    private static HttpClientBuilder httpClientBuilder = null;
+    private static HttpClientBuilder<?> httpClientBuilder = null;
 
     // Universal properties, that can be configured for every client implementation are configured
     // with property methods of the builder
@@ -113,7 +100,7 @@ public class J4pClientBuilder {
      * {@code http://localhost:8778/jolokia} or {@code http://localhost:8778/jolokia/} (some target servers may
      * not handle root URL access properly)
      */
-    private String url;
+    private URI url;
 
     /**
      * For {@code basic} authentication, we can specify user credentials. For other authentication mechanisms,
@@ -191,14 +178,15 @@ public class J4pClientBuilder {
 //        authenticator(new BasicClientCustomizer());
 
         try {
+            @SuppressWarnings("rawtypes")
             Optional<HttpClientBuilder> clientBuilder = ServiceLoader.load(HttpClientBuilder.class).findFirst();
             if (clientBuilder.isEmpty()) {
                 clientBuilder = ServiceLoader.load(HttpClientBuilder.class, null).findFirst();
             }
             // discovered, default builder based on JDK HTTP Client
-            httpClientBuilder = clientBuilder.orElseGet(JdkClientBuilder::new);
+            httpClientBuilder = clientBuilder.orElseGet(JdkHttpClientBuilder::new);
         } catch (ServiceConfigurationError ignored) {
-            httpClientBuilder = new JdkClientBuilder();
+            httpClientBuilder = new JdkHttpClientBuilder();
         }
     }
 
@@ -208,6 +196,16 @@ public class J4pClientBuilder {
      * @param pUrl agent URL
      */
     public final J4pClientBuilder url(String pUrl) {
+        url = URI.create(pUrl);
+        return this;
+    }
+
+    /**
+     * The Agent URL to connect to
+     *
+     * @param pUrl agent URL
+     */
+    public final J4pClientBuilder url(URI pUrl) {
         url = pUrl;
         return this;
     }
@@ -496,9 +494,9 @@ public class J4pClientBuilder {
      * @return a new J4pClient
      */
     public J4pClient build() {
-        return new J4pClient(url,createHttpClient(),
-                             targetUrl != null ? new J4pTargetConfig(targetUrl,targetUser,targetPassword) :  null,
-                             responseExtractor);
+        return new J4pClient(url, createHttpClient(),
+            targetUrl != null ? new JolokiaTargetConfig(targetUrl, targetUser, targetPassword) : null,
+            responseExtractor);
     }
 
     HttpClientSpi<?> createHttpClient() {
@@ -513,7 +511,6 @@ public class J4pClientBuilder {
      * @return proxy object or null if none is set
      */
     static Proxy parseProxySettings(String spec) {
-
         try {
             if (spec == null || spec.isEmpty()) {
                 return null;
@@ -524,122 +521,31 @@ public class J4pClientBuilder {
         }
     }
 
-    // ==========================================================================================
-
-//    private void setupProxyIfNeeded(HttpClientBuilder builder) {
-//        if (httpProxy != null) {
-//            builder.setProxy(new HttpHost(httpProxy.getHost(),httpProxy.getPort()));
-//            if (httpProxy.getUser() != null) {
-//                AuthScope proxyAuthScope = new AuthScope(httpProxy.getHost(),httpProxy.getPort());
-//                UsernamePasswordCredentials proxyCredentials = new UsernamePasswordCredentials(httpProxy.getUser(),httpProxy.getPass());
-//                CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-//                credentialsProvider.setCredentials(proxyAuthScope,proxyCredentials);
-//                builder.setDefaultCredentialsProvider(credentialsProvider);
-//            }
-//        }
-//    }
-//
-//    private String getVersionInfo() {
-//        // determine the release version from packaged version info
-//        final VersionInfo vi = VersionInfo.loadVersionInfo("org.apache.http.client", getClass().getClassLoader());
-//        return (vi != null) ? vi.getRelease() : VersionInfo.UNAVAILABLE;
-//    }
-//
-//    private RequestConfig createRequestConfig() {
-//        RequestConfig.Builder requestConfigB = RequestConfig.custom();
-//
-//        requestConfigB.setNormalizeUri(false);
-//        requestConfigB.setExpectContinueEnabled(expectContinue);
-//        if (socketTimeout > -1) {
-//            requestConfigB.setSocketTimeout(socketTimeout);
-//        }
-//        if (connectionTimeout > -1) {
-//            requestConfigB.setConnectTimeout(connectionTimeout);
-//        }
-//        if (maxConnectionPoolTimeout > -1) {
-//            requestConfigB.setConnectionRequestTimeout(maxConnectionPoolTimeout);
-//        }
-//        return requestConfigB.build();
-//    }
-//
-//    private BasicHttpClientConnectionManager createBasicConnectionManager() {
-//        BasicHttpClientConnectionManager connManager =
-//                new BasicHttpClientConnectionManager(getSocketFactoryRegistry(),getConnectionFactory());
-//        connManager.setSocketConfig(createSocketConfig());
-//        connManager.setConnectionConfig(createConnectionConfig());
-//        return connManager;
-//    }
-//
-//    private PoolingHttpClientConnectionManager createPoolingConnectionManager() {
-//        PoolingHttpClientConnectionManager connManager =
-//            new PoolingHttpClientConnectionManager(getSocketFactoryRegistry(), getConnectionFactory());
-//        connManager.setDefaultSocketConfig(createSocketConfig());
-//        connManager.setDefaultConnectionConfig(createConnectionConfig());
-//        if (maxTotalConnections != 0) {
-//            connManager.setMaxTotal(maxTotalConnections);
-//            connManager.setDefaultMaxPerRoute(defaultMaxConnectionsPerRoute);
-//        }
-//
-//        return connManager;
-//    }
-//
-//
-//    private SSLConnectionSocketFactory createDefaultSSLConnectionSocketFactory() {
-//        SSLContext sslcontext = SSLContexts.createSystemDefault();
-//        HostnameVerifier hostnameVerifier = new DefaultHostnameVerifier();
-//        return new SSLConnectionSocketFactory(sslcontext, hostnameVerifier);
-//    }
-//
-//    private ConnectionConfig createConnectionConfig() {
-//        return ConnectionConfig.custom()
-//                .setBufferSize(socketBufferSize)
-//                .setCharset(contentCharset)
-//                .build();
-//    }
-//
-//    private SocketConfig createSocketConfig() {
-//        SocketConfig.Builder socketConfigB = SocketConfig.custom();
-//        if (socketTimeout >= 0) {
-//            socketConfigB.setSoTimeout(socketTimeout);
-//        }
-//        socketConfigB.setTcpNoDelay(tcpNoDelay);
-//        return socketConfigB.build();
-//    }
-//
-//    private Registry<ConnectionSocketFactory> getSocketFactoryRegistry() {
-//        return RegistryBuilder.<ConnectionSocketFactory>create()
-//                              .register("http", PlainConnectionSocketFactory.INSTANCE)
-//                              .register("https", sslConnectionSocketFactory != null ?
-//                                  sslConnectionSocketFactory :
-//                                  createDefaultSSLConnectionSocketFactory())
-//                              .build();
-//    }
-//
-//    private HttpConnectionFactory<HttpRoute, ManagedHttpClientConnection> getConnectionFactory() {
-//        return new ManagedHttpClientConnectionFactory(new DefaultHttpRequestWriterFactory(),
-//                                                      new DefaultHttpResponseParserFactory());
-//    }
-
     /**
      * Configuration DTO to pass to implementation-specific builder of actual HTTP Client. Only relevant properties
      * are passed.
      *
-     * @param url
-     * @param user
-     * @param password
-     * @param proxy
-     * @param connectionTimeout
-     * @param socketTimeout
-     * @param tcpNoDelay
-     * @param socketBufferSize
-     * @param contentCharset
-     * @param expectContinue
-     * @param defaultHttpHeaders
+     * @param url                URI for the remote Jolokia Agent.
+     * @param user               Basic authentication user name
+     * @param password           Basic authentication password
+     * @param proxy              HTTP proxy configuration
+     * @param connectionTimeout  connection timeout in milliseconds used when establishing HTTP connection
+     * @param socketTimeout      socket/request timeout in milliseconds
+     * @param tcpNoDelay         TCP_NODELAY option
+     * @param socketBufferSize   socket and buffer size to use
+     * @param contentCharset     charset to use when sending the request
+     * @param expectContinue     whether to send {@code Expect: 100-continue} before sending POST data.
+     * @param defaultHttpHeaders collection of headers to send with each request
      */
-    public record Configuration(String url, String user, String password, Proxy proxy,
+    public record Configuration(URI url, String user, String password, Proxy proxy,
                                 int connectionTimeout, int socketTimeout, boolean tcpNoDelay, int socketBufferSize,
                                 Charset contentCharset, boolean expectContinue,
                                 Collection<HttpHeader> defaultHttpHeaders) {
+
+        public static Configuration withUrl(URI url) {
+            return new Configuration(url, null, null, null, 5000, 5000, false, 8192, StandardCharsets.UTF_8,
+                false, Collections.emptySet());
+        }
     }
 
     /**

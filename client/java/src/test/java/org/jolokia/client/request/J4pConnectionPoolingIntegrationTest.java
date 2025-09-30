@@ -22,6 +22,7 @@ package org.jolokia.client.request;
 //import com.github.tomakehurst.wiremock.direct.DirectCallHttpServerFactory;
 import org.jolokia.client.J4pClient;
 import org.jolokia.client.J4pClientBuilder;
+import org.jolokia.client.response.JolokiaSearchResponse;
 import org.jolokia.json.JSONArray;
 import org.jolokia.json.JSONObject;
 import org.testng.annotations.AfterMethod;
@@ -29,7 +30,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import javax.management.ObjectName;
-import java.net.http.HttpConnectTimeoutException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
@@ -73,7 +74,7 @@ public class J4pConnectionPoolingIntegrationTest {
 //        stubFor(get(urlPathMatching("/test/([a-z.:=*/]*)")).willReturn(aResponse().withFixedDelay(1000).withBody(getJsonResponse("test"))));
 
         final ExecutorService executorService = Executors.newFixedThreadPool(20);
-        final J4pSearchRequest j4pSearchRequest = new J4pSearchRequest("java.lang:type=*");
+        final JolokiaSearchRequest j4pSearchRequest = new JolokiaSearchRequest("java.lang:type=*");
 
         final List<Future<Void>> requestsList = new ArrayList<>();
 
@@ -104,15 +105,15 @@ public class J4pConnectionPoolingIntegrationTest {
 
     static class AsyncRequest implements Callable<Void> {
         private final J4pClient j4pClient;
-        private final J4pSearchRequest j4pSearchRequest;
+        private final JolokiaSearchRequest j4pSearchRequest;
 
-        public AsyncRequest(J4pClient j4pClient, J4pSearchRequest j4pSearchRequest) {
+        public AsyncRequest(J4pClient j4pClient, JolokiaSearchRequest j4pSearchRequest) {
             this.j4pClient = j4pClient;
             this.j4pSearchRequest = j4pSearchRequest;
         }
 
         public Void call() throws Exception {
-            J4pSearchResponse resp = j4pClient.execute(j4pSearchRequest);
+            JolokiaSearchResponse resp = j4pClient.execute(j4pSearchRequest);
             assertNotNull(resp);
             List<ObjectName> names = resp.getObjectNames();
             assertTrue(names.contains(new ObjectName("java.lang:type=Memory")));

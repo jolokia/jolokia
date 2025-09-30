@@ -16,19 +16,12 @@
 package org.jolokia.client.jdkclient;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.Authenticator;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.PasswordAuthentication;
 import java.net.Proxy;
 import java.net.ProxySelector;
 import java.net.SocketAddress;
 import java.net.URI;
-import java.net.URL;
 import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.charset.Charset;
 import java.time.Duration;
 import java.util.Collection;
@@ -39,7 +32,10 @@ import org.jolokia.client.spi.HttpClientBuilder;
 import org.jolokia.client.spi.HttpClientSpi;
 import org.jolokia.client.spi.HttpHeader;
 
-public class JdkClientBuilder implements HttpClientBuilder<HttpClient> {
+/**
+ * {@link HttpClientBuilder} that creates {@link HttpClientSpi} based on {@link HttpClient JDK HTTP Client}.
+ */
+public class JdkHttpClientBuilder implements HttpClientBuilder<HttpClient> {
 
     @Override
     public HttpClientSpi<HttpClient> buildHttpClient(J4pClientBuilder.Configuration jcb) {
@@ -52,7 +48,7 @@ public class JdkClientBuilder implements HttpClientBuilder<HttpClient> {
         // ssl configuration
 
         // properties to be used when performing requests
-        String url = jcb.url();
+        URI jolokiaAgentUrl = jcb.url();
         int socketTimeout = jcb.socketTimeout();
         Charset contentCharset = jcb.contentCharset();
         boolean expectContinue = jcb.expectContinue();
@@ -68,7 +64,7 @@ public class JdkClientBuilder implements HttpClientBuilder<HttpClient> {
         int socketBufferSize = jcb.socketBufferSize();
 
         HttpClient.Builder builder = HttpClient.newBuilder()
-            .version(HttpClient.Version.HTTP_2)
+            .version(HttpClient.Version.HTTP_1_1)
             .connectTimeout(Duration.ofMillis(connectionTimeout))
             .followRedirects(HttpClient.Redirect.NORMAL)
 //            .cookieHandler(null)
@@ -77,20 +73,25 @@ public class JdkClientBuilder implements HttpClientBuilder<HttpClient> {
 //            .sslParameters(null)
             .priority(1);
 
-        if (user != null && !user.isBlank()) {
-            builder.authenticator(new Authenticator() {
-                @Override
-                public PasswordAuthentication requestPasswordAuthenticationInstance(String host, InetAddress addr, int port, String protocol, String prompt, String scheme, URL url, RequestorType reqType) {
-                    return switch (reqType) {
-                        case SERVER
-                            -> new PasswordAuthentication(user, password == null ? new char[0] : password.toCharArray());
-                        case PROXY
-                            -> new PasswordAuthentication(httpProxy.getUser(),
-                            httpProxy.getPass() == null ? new char[0] : httpProxy.getPass().toCharArray());
-                    };
-                }
-            });
-        }
+        // instead of relying on java.net.http.HttpClient.Builder.authenticator(), we will force preemptive
+        // authentication by manually sending the Authorization header.
+        // If we set the authenticator, JDK HTTP Client will remove Authorization and Proxy-Authorization headers
+        // see: jdk.internal.net.http.common.Utils.CONTEXT_RESTRICTED
+//        if (user != null && !user.isBlank()) {
+//            builder.authenticator(new Authenticator() {
+//                @Override
+//                public PasswordAuthentication requestPasswordAuthenticationInstance(String host, InetAddress addr, int port, String protocol, String prompt, String scheme, URL url, RequestorType reqType) {
+//                    return switch (reqType) {
+//                        case SERVER
+//                            -> new PasswordAuthentication(user, password == null ? new char[0] : password.toCharArray());
+//                        case PROXY
+//                            -> new PasswordAuthentication(httpProxy.getUser(),
+//                            httpProxy.getPass() == null ? new char[0] : httpProxy.getPass().toCharArray());
+//                    };
+//                }
+//            });
+//        }
+
         if (httpProxy != null) {
             // java.net.ProxySelector.of() will try to resolve the host during configuration.
             builder.proxy(new ProxySelector() {
@@ -105,32 +106,13 @@ public class JdkClientBuilder implements HttpClientBuilder<HttpClient> {
                 }
             });
         }
+        // TODO: customizer for the builder (not for the built client)
 //        if (customizer != null) {
 //            customizer.configure(builder);
 //        }
-        HttpClient client = builder.build();
 
         // return the wrapper
-        return new HttpClientSpi<>() {
-            @Override
-            public HttpClient getClient(Class<HttpClient> clientClass) {
-                if (clientClass.isAssignableFrom(client.getClass())) {
-                    return clientClass.cast(client);
-                }
-                return null;
-            }
-
-            @Override
-            public HttpResponse<InputStream> execute(HttpRequest httpRequest) throws IOException {
-                HttpResponse.BodyHandler<InputStream> responseHandler = HttpResponse.BodyHandlers.ofInputStream();
-                try {
-                    return client.send(httpRequest, responseHandler);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    throw new RuntimeException("Interrupted", e);
-                }
-            }
-        };
+        return new JdkHttpClient(builder.build(), jcb);
     }
 
 }

@@ -19,6 +19,7 @@ package org.jolokia.client.request;
 import javax.management.MalformedObjectNameException;
 
 import org.jolokia.client.exception.J4pException;
+import org.jolokia.client.response.JolokiaReadResponse;
 import org.jolokia.it.core.ItSetup;
 import org.testng.annotations.Test;
 
@@ -33,7 +34,7 @@ public class JSR160HiddenTest extends AbstractJ4pIntegrationTest {
     @Test
     public void hiddenMBeanNotAvailableForJSR160() throws MalformedObjectNameException {
         try {
-            J4pReadRequest request = new J4pReadRequest(getTargetProxyConfig(),
+            JolokiaReadRequest request = new JolokiaReadRequest(getTargetProxyConfig(),
                                                         ItSetup.JOLOKIA_IT_DOMAIN_HIDDEN + ":type=attribute","LongSeconds");
             j4pClient.execute(request);
             fail("Exception should have been thrown");
@@ -45,8 +46,8 @@ public class JSR160HiddenTest extends AbstractJ4pIntegrationTest {
 
     @Test
     public void hiddenMBeanAvailableForJolokia() throws MalformedObjectNameException, J4pException {
-        J4pReadRequest request = new J4pReadRequest(ItSetup.JOLOKIA_IT_DOMAIN + ":type=attribute","LongSeconds");
-        J4pReadResponse response = j4pClient.execute(request);
+        JolokiaReadRequest request = new JolokiaReadRequest(ItSetup.JOLOKIA_IT_DOMAIN + ":type=attribute","LongSeconds");
+        JolokiaReadResponse response = j4pClient.execute(request);
         assertNotNull(response.getValue());
     }
 }

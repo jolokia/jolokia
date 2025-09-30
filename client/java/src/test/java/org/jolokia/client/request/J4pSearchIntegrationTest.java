@@ -21,7 +21,10 @@ import java.util.*;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
+import org.jolokia.client.JolokiaTargetConfig;
 import org.jolokia.client.exception.J4pException;
+import org.jolokia.client.response.JolokiaSearchResponse;
+import org.jolokia.json.JSONArray;
 import org.testng.annotations.Test;
 
 import static org.testng.AssertJUnit.*;
@@ -35,11 +38,11 @@ public class J4pSearchIntegrationTest extends AbstractJ4pIntegrationTest {
 
     @Test
     public void simple() throws MalformedObjectNameException, J4pException {
-        for (J4pSearchRequest req : new J4pSearchRequest[] {
-                new J4pSearchRequest("java.lang:type=*"),
-                new J4pSearchRequest(getTargetProxyConfig(),"java.lang:type=*")
+        for (JolokiaSearchRequest req : new JolokiaSearchRequest[] {
+                new JolokiaSearchRequest("java.lang:type=*"),
+                new JolokiaSearchRequest(getTargetProxyConfig(),"java.lang:type=*")
         }) {
-            J4pSearchResponse resp = j4pClient.execute(req);
+            JolokiaSearchResponse resp = j4pClient.execute(req);
             assertNotNull(resp);
             List<ObjectName> names = resp.getObjectNames();
             assertTrue(names.contains(new ObjectName("java.lang:type=Memory")));
@@ -48,26 +51,26 @@ public class J4pSearchIntegrationTest extends AbstractJ4pIntegrationTest {
 
     @Test
     public void emptySearch() throws MalformedObjectNameException, J4pException {
-        for (J4pTargetConfig cfg : new J4pTargetConfig[] { null, getTargetProxyConfig()}) {
-            J4pSearchResponse resp = j4pClient.execute(new J4pSearchRequest(cfg,"bla:gimme=*"));
-            assertEquals(resp.getObjectNames().size(),0);
-            assertEquals(resp.getMBeanNames().size(),0);
+        for (JolokiaTargetConfig cfg : new JolokiaTargetConfig[] { null, getTargetProxyConfig()}) {
+            JolokiaSearchResponse resp = j4pClient.execute(new JolokiaSearchRequest(cfg,"bla:gimme=*"));
+            assertEquals(0, resp.getObjectNames().size());
+            assertEquals(0, resp.getMBeanNames().size());
         }
     }
 
     @Test(expectedExceptions = { MalformedObjectNameException.class })
     public void invalidSearchPattern() throws MalformedObjectNameException {
-        new J4pSearchRequest("bla:blub:args=*");
+        new JolokiaSearchRequest("bla:blub:args=*");
     }
 
     @Test
     public void advancedPattern() throws MalformedObjectNameException, J4pException {
-        J4pSearchResponse resp = j4pClient.execute(new J4pSearchRequest("java.lang:type=Mem*"));
-        List<String> names = resp.getMBeanNames();
-        assertEquals(names.size(),1);
+        JolokiaSearchResponse resp = j4pClient.execute(new JolokiaSearchRequest("java.lang:type=Mem*"));
+        JSONArray names = resp.getMBeanNames();
+        assertEquals(1, names.size());
 
-        resp = j4pClient.execute(new J4pSearchRequest(getTargetProxyConfig(), "java.lang:type=Mem*"));
+        resp = j4pClient.execute(new JolokiaSearchRequest(getTargetProxyConfig(), "java.lang:type=Mem*"));
         names = resp.getMBeanNames();
-        assertEquals(names.size(),2);
+        assertEquals(2, names.size());
     }
 }

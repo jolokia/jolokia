@@ -1,5 +1,3 @@
-package org.jolokia.client.exception;
-
 /*
  * Copyright 2009-2013 Roland Huss
  *
@@ -15,74 +13,89 @@ package org.jolokia.client.exception;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.client.exception;
 
-import org.jolokia.client.request.J4pRequest;
+import org.jolokia.client.request.JolokiaRequest;
 import org.jolokia.json.JSONObject;
 
 /**
- * Exception occurred on the remote side (i.e the server).
+ * Exception occurred on the remote side (i.e the server) and contains details about the error occurred
+ * at remote Jolokia Agent side.
  *
  * @author roland
  * @since Jun 9, 2010
  */
 public class J4pRemoteException extends J4pException {
 
-    // Status code of the error
+    // Status code of the error, extracted from the JSON response - not from HTTP response
     private final int status;
 
     // Stacktrace of a remote exception (optional)
     private final String remoteStacktrace;
 
     // Request leading to this error
-    private final J4pRequest request;
+    private final JolokiaRequest request;
 
     // Java class of remote error
     private final String errorType;
 
-    // JSONObject containing value of the remote error
+    // JSONObject containing value of the remote error - "value" field of the response JSON
     private final JSONObject errorValue;
 
-    // String containing the entire response
+    // the entire response JSON object
     private JSONObject response;
 
     /**
-     * Constructor for a remote exception
+     * Constructor for a remote exception, where the details are passed directly
      *
-     * @param pMessage error message of the exception occurred remotely
-     * @param pErrorType kind of error used
-     * @param pStatus status code
-     * @param pStacktrace stacktrace of the remote exception
+     * @param pJolokiaRequest {@link JolokiaRequest} that ended with an error
+     * @param pMessage        error message of the exception occurred remotely
+     * @param pErrorType      kind of error used
+     * @param pStatus         status code
+     * @param pStacktrace     stacktrace of the remote exception
+     * @param pErrorValue     the error JSON object
      */
-    public J4pRemoteException(J4pRequest pJ4pRequest, String pMessage, String pErrorType, int pStatus, String pStacktrace, JSONObject pErrorValue) {
+    public J4pRemoteException(JolokiaRequest pJolokiaRequest, String pMessage, String pErrorType, int pStatus, String pStacktrace, JSONObject pErrorValue) {
         super(pMessage);
         status = pStatus;
         errorType = pErrorType;
         remoteStacktrace = pStacktrace;
-        request = pJ4pRequest;
+        request = pJolokiaRequest;
         errorValue = pErrorValue;
     }
 
-    public J4pRemoteException(J4pRequest pJ4pRequest, JSONObject pJsonRespObject) {
-        super(generateErrorMessage(pJ4pRequest, pJsonRespObject));
-	Object statusO = pJsonRespObject.get("status");
-        Integer statusL = statusO instanceof Integer ? (Integer) statusO : (statusO instanceof Long ? ((Long) statusO).intValue() : null);
-        status = statusL != null ? statusL : 500;
-        request = pJ4pRequest;
-	response = pJsonRespObject;
+    /**
+     * Constructor for a remote exception, where the error details are passed as {@link JSONObject} received
+     * in HTTP response. This object is expected to include error details according to Jolokia protocol.
+     *
+     * @param pJolokiaRequest
+     * @param pJsonRespObject
+     */
+    public J4pRemoteException(JolokiaRequest pJolokiaRequest, JSONObject pJsonRespObject) {
+        super(generateErrorMessage(pJolokiaRequest, pJsonRespObject));
+
+        Object statusO = pJsonRespObject.get("status");
+        status = statusO instanceof Number n ? n.intValue() : 500;
+
+        request = pJolokiaRequest;
+        response = pJsonRespObject;
         errorType = (String) pJsonRespObject.get("error_type");
         remoteStacktrace = (String) pJsonRespObject.get("stacktrace");
+
+        // result of org.jolokia.server.core.backend.BackendManager.convertExceptionToJson()
         errorValue = (JSONObject) pJsonRespObject.get("error_value");
     }
 
-    private static String generateErrorMessage(J4pRequest pJ4pRequest, JSONObject pJsonRespObject) {
-	if( pJsonRespObject.get("error") != null ) {
-		return "Error: " + pJsonRespObject.get("error");
-	}
-	Object o = pJsonRespObject.get("status");
-	if( o != null && !(o instanceof Long)) {
-		return "Invalid status of type " + o.getClass().getName() + "('" + o + "') received";
-	}
-	return "Invalid response received";
+    private static String generateErrorMessage(JolokiaRequest pJolokiaRequest, JSONObject pJsonRespObject) {
+        if (pJsonRespObject.get("error") != null) {
+            return "Error: " + pJsonRespObject.get("error");
+        }
+        Object o = pJsonRespObject.get("status");
+        if (o != null && !(o instanceof Number)) {
+            return "Invalid status of type " + o.getClass().getName() + " ('" + o + "') received. Expected a number.";
+        }
+
+        return "Invalid response received";
     }
 
     /**
@@ -119,7 +132,7 @@ public class J4pRemoteException extends J4pException {
      *
      * @return request which caused this exception
      */
-    public J4pRequest getRequest() {
+    public JolokiaRequest getRequest() {
         return request;
     }
 
@@ -141,4 +154,5 @@ public class J4pRemoteException extends J4pException {
     public JSONObject getResponse() {
         return response;
     }
+
 }

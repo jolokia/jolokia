@@ -1,5 +1,4 @@
-package org.jolokia.client.request;/*
- *
+/*
  * Copyright 2014 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,15 +13,18 @@ package org.jolokia.client.request;/*
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.client.response;
 
 import java.util.HashSet;
 import java.util.Set;
 
 import org.jolokia.client.exception.J4pRemoteException;
+import org.jolokia.client.request.JolokiaRequest;
 import org.jolokia.json.JSONObject;
 
 /**
- * A response extractor which does validation based on Jolokia status codes.
+ * A response extractor which does validation based on Jolokia status codes. This is where {@link JolokiaRequest}
+ * is asked to create correct {@link JolokiaResponse} with the {@link JSONObject} content.
  *
  * @author roland
  * @since 23/12/14
@@ -36,12 +38,18 @@ public class ValidatingResponseExtractor implements J4pResponseExtractor {
 
     /**
      * Extractor which permits code 200 and 404 (NotFound) as possible values. If 404 is returned it returns an empty
-     * object.
+     * object. (Used for tests)
      */
     public final static ValidatingResponseExtractor OPTIONAL = new ValidatingResponseExtractor(404);
 
     Set<Integer> allowedCodes;
 
+    /**
+     * Create a {@link ValidatingResponseExtractor} with all the HTTP response codes accepted. HTTP 200 is
+     * always treated as the expected allowed HTTP response code.
+     *
+     * @param pCodesAllowed
+     */
     public ValidatingResponseExtractor(int... pCodesAllowed) {
         allowedCodes = new HashSet<>();
         // 200 is always contained
@@ -51,19 +59,14 @@ public class ValidatingResponseExtractor implements J4pResponseExtractor {
         }
     }
 
-    public <RESP extends J4pResponse<REQ>, REQ extends J4pRequest> RESP extract(REQ pRequest,
-                                                                                JSONObject pJsonResp,
-                                                                                boolean includeRequest)
+    @Override
+    public <RESP extends JolokiaResponse<REQ>, REQ extends JolokiaRequest> RESP extract(REQ pRequest, JSONObject pJsonResp, boolean includeRequest)
             throws J4pRemoteException {
-
         int status = 0;
         if (pJsonResp.containsKey("status")) {
             Object o = pJsonResp.get("status");
-            if (o instanceof Integer) {
-                status = (Integer) o;
-            }
-            if (o instanceof Long) {
-                status = ((Long) o).intValue();
+            if (o instanceof Number n) {
+                status = n.intValue();
             }
         }
 
@@ -77,6 +80,8 @@ public class ValidatingResponseExtractor implements J4pResponseExtractor {
             }
             return response;
         }
+
         return null;
     }
+
 }

@@ -1,5 +1,3 @@
-package org.jolokia.client.exception;
-
 /*
  * Copyright 2009-2013 Roland Huss
  *
@@ -15,6 +13,7 @@ package org.jolokia.client.exception;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.client.exception;
 
 import java.net.ConnectException;
 
@@ -29,10 +28,11 @@ public class J4pConnectException extends J4pException {
     /**
      * Constructor
      *
-     * @param pMessage error message
-     * @param pNestedException connect exception occured
+     * @param pMessage          error message
+     * @param pConnectException connect exception occurred
      */
-    public J4pConnectException(String pMessage, ConnectException pNestedException) {
-        super(pMessage,pNestedException);
+    public J4pConnectException(String pMessage, ConnectException pConnectException) {
+        super(pMessage, pConnectException);
     }
+
 }

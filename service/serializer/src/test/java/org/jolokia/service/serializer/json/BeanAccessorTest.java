@@ -38,9 +38,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 import javax.management.AttributeNotFoundException;
-import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import org.jolokia.json.JSONArray;
@@ -68,6 +68,7 @@ public class BeanAccessorTest extends AbstractObjectAccessorTest {
     private Inner inner;
     private Nacked nacked;
     private Object nulli;
+    private TimeUnit innerEnum;
 
     private BeanAccessorTest self;
     private BeanAccessorTest hiddenSelf;
@@ -329,6 +330,15 @@ public class BeanAccessorTest extends AbstractObjectAccessorTest {
         assertEquals(getText(),"NewText");
     }
 
+    @Test
+    public void enumSet() throws InvocationTargetException, IllegalAccessException {
+        assertTrue(objectAccessor.canSetValue());
+        TimeUnit old = (TimeUnit) setObject(this, "innerEnum", TimeUnit.DAYS.name());
+        assertNull(old);
+        old = (TimeUnit) setObject(this, "innerEnum", TimeUnit.MILLISECONDS.name());
+        assertEquals(old, TimeUnit.DAYS);
+    }
+
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*setFlag.*")
     public void invalidSet() throws InvocationTargetException, IllegalAccessException {
         setObject(this,"flag",true);
@@ -374,6 +384,14 @@ public class BeanAccessorTest extends AbstractObjectAccessorTest {
 
     public void setText(String pText) {
         text = pText;
+    }
+
+    public TimeUnit getInnerEnum() {
+        return innerEnum;
+    }
+
+    public void setInnerEnum(TimeUnit innerEnum) {
+        this.innerEnum = innerEnum;
     }
 
     public Inner getInner() {

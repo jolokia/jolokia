@@ -1,5 +1,3 @@
-package org.jolokia.client.exception;
-
 /*
  * Copyright 2009-2013 Roland Huss
  *
@@ -15,9 +13,11 @@ package org.jolokia.client.exception;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.client.exception;
 
 /**
- * Base exception potentially raised when communicating with the server
+ * Base exception potentially raised when communicating with the remote Jolokia Agent.
+ *
  * @author roland
  * @since Jun 8, 2010
  */
@@ -36,7 +36,7 @@ public class J4pException extends Exception {
      * Exception with a nested exception
      *
      * @param message description of this exception
-     * @param cause exception causing this exception
+     * @param cause   exception causing this exception
      */
     public J4pException(String message, Throwable cause) {
         super(message, cause);

@@ -17,6 +17,7 @@ package org.jolokia.client.request;
  */
 
 import java.math.BigDecimal;
+import java.net.URI;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -24,7 +25,9 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import org.jolokia.client.J4pClient;
+import org.jolokia.client.J4pQueryParameter;
 import org.jolokia.client.exception.*;
+import org.jolokia.client.response.JolokiaReadResponse;
 import org.jolokia.json.JSONObject;
 import org.testng.annotations.Test;
 
@@ -40,27 +43,28 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
 
     @Test
     public void nameTest() throws MalformedObjectNameException, J4pException {
-        checkNames("GET",itSetup.getStrangeNames(),itSetup.getEscapedNames());
-        checkNames("POST",itSetup.getStrangeNames(),itSetup.getEscapedNames());
+        checkNames(HttpMethod.GET,itSetup.getStrangeNames(),itSetup.getEscapedNames());
+        checkNames(HttpMethod.POST,itSetup.getStrangeNames(),itSetup.getEscapedNames());
     }
 
     @Test
     public void errorTest() throws MalformedObjectNameException, J4pException {
-        J4pReadRequest req = new J4pReadRequest("no.domain:name=vacuum","oxygen");
+        JolokiaReadRequest req = new JolokiaReadRequest("no.domain:name=vacuum","oxygen");
         try {
             j4pClient.execute(req);
             fail();
         } catch (J4pRemoteException exp) {
-            assertEquals(404,exp.getStatus());
+            assertEquals(exp.getStatus(), 404);
             assertTrue(exp.getMessage().contains("InstanceNotFoundException"));
             assertTrue(exp.getRemoteStackTrace().contains("InstanceNotFoundException"));
         }
     }
 
-    @Test void errorConnectionRefusedTest() throws J4pException, MalformedObjectNameException {
+    @Test
+    public void errorConnectionRefusedTest() throws J4pException, MalformedObjectNameException {
         try {
-            final J4pReadRequest req = new J4pReadRequest(itSetup.getAttributeMBean(),"LongSeconds");
-            J4pClient anotherClient = new J4pClient("http://localhost:27654/jolokia");
+            final JolokiaReadRequest req = new JolokiaReadRequest(itSetup.getAttributeMBean(),"LongSeconds");
+            J4pClient anotherClient = new J4pClient(URI.create("http://localhost:27654/jolokia"));
             anotherClient.execute(req);
             fail();
         } catch (J4pConnectException exp) {
@@ -69,14 +73,14 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
     }
     @Test
     public void error404ConnectionTest() throws Exception {
-        final J4pReadRequest req = new J4pReadRequest(itSetup.getAttributeMBean(),"LongSeconds");
+        final JolokiaReadRequest req = new JolokiaReadRequest(itSetup.getAttributeMBean(),"LongSeconds");
         try {
             stop();
             startWithoutAgent();
             j4pClient.execute(req);
             fail();
         } catch (J4pRemoteException exp) {
-            assertEquals(404,exp.getStatus());
+            assertEquals(exp.getStatus(), 404);
         }
         stop();
         start();
@@ -88,7 +92,6 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
                 j4pClient.execute(req);
             } catch (Exception e) {
                 errors.add(1);
-                e.printStackTrace();
             }
             try {
                 barrier.await();
@@ -101,32 +104,32 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
         }
         if (barrier.await() == 0) {
             //System.err.println("Finished");
-            assertEquals(0, errors.size(), "Concurrent calls should work");
+            assertEquals(errors.size(), 0, "Concurrent calls should work");
         }
     }
 
     @Test
     public void nameWithSpace() throws MalformedObjectNameException, J4pException {
-        for (J4pReadRequest req : readRequests("jolokia.it:type=naming/,name=name with space","Ok")) {
-            J4pReadResponse resp = j4pClient.execute(req);
+        for (JolokiaReadRequest req : readRequests("jolokia.it:type=naming/,name=name with space","Ok")) {
+            JolokiaReadResponse resp = j4pClient.execute(req);
             assertNotNull(resp);
         }
     }
 
-    private J4pReadRequest[] readRequests(String mbean, String ... attributes) throws MalformedObjectNameException {
-        return new J4pReadRequest[] {
-                new J4pReadRequest(mbean,attributes),
-                new J4pReadRequest(getTargetProxyConfig(),mbean,attributes)
+    private JolokiaReadRequest[] readRequests(String mbean, String ... attributes) throws MalformedObjectNameException {
+        return new JolokiaReadRequest[] {
+                new JolokiaReadRequest(mbean,attributes),
+                new JolokiaReadRequest(getTargetProxyConfig(),mbean,attributes)
         };
     }
 
     @Test
     public void multipleAttributes() throws MalformedObjectNameException, J4pException {
 
-        for (J4pReadRequest req : readRequests(itSetup.getAttributeMBean(),"LongSeconds","SmallMinutes")) {
-            J4pReadResponse resp = j4pClient.execute(req);
+        for (JolokiaReadRequest req : readRequests(itSetup.getAttributeMBean(),"LongSeconds","SmallMinutes")) {
+            JolokiaReadResponse resp = j4pClient.execute(req);
             assertFalse(req.hasSingleAttribute());
-            assertEquals(2,req.getAttributes().size());
+            assertEquals(req.getAttributes().size(), 2);
             Map<?, ?> respVal = resp.getValue();
             assertTrue(respVal.containsKey("LongSeconds"));
             assertTrue(respVal.containsKey("SmallMinutes"));
@@ -144,7 +147,7 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
             }
 
             Set<String> allAttrs = new HashSet<>(resp.getAttributes());
-            assertEquals(2,allAttrs.size());
+            assertEquals(allAttrs.size(), 2);
             assertTrue(allAttrs.contains("LongSeconds"));
             assertTrue(allAttrs.contains("SmallMinutes"));
 
@@ -169,7 +172,7 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
             }
 
             try {
-                resp.getValue(null);
+                resp.getValue((String) null);
                 fail();
             } catch (IllegalArgumentException exp) {
                 assertTrue(exp.getMessage().contains("null"));
@@ -178,7 +181,7 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
             try {
                 req.getAttribute();
                 fail();
-            } catch (IllegalArgumentException exp) {
+            } catch (IllegalStateException exp) {
                 assertTrue(exp.getMessage().contains("than one"));
             }
         }
@@ -186,11 +189,11 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
 
     @Test
     public void allAttributes() throws MalformedObjectNameException, J4pException {
-        for (J4pReadRequest req : readRequests(itSetup.getAttributeMBean())) {
-            J4pReadResponse resp = j4pClient.execute(req);
+        for (JolokiaReadRequest req : readRequests(itSetup.getAttributeMBean())) {
+            JolokiaReadResponse resp = j4pClient.execute(req);
             assertFalse(req.hasSingleAttribute());
             assertTrue(req.hasAllAttributes());
-            assertEquals(0,req.getAttributes().size());
+            assertEquals(req.getAttributes().size(), 0);
             Map<?, ?> respVal = resp.getValue();
             assertTrue(respVal.containsKey("LongSeconds"));
             assertTrue(respVal.containsKey("SmallMinutes"));
@@ -229,7 +232,7 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
             try {
                 req.getAttribute();
                 fail();
-            } catch (IllegalArgumentException exp) {
+            } catch (IllegalStateException exp) {
                 assertTrue(exp.getMessage().contains("than one"));
             }
         }
@@ -237,17 +240,17 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
 
     @Test
     public void mbeanPattern() throws MalformedObjectNameException, J4pException {
-        for (J4pReadRequest req : readRequests("*:type=attribute","LongSeconds")) {
-            J4pReadResponse resp = j4pClient.execute(req);
-            assertEquals(1,resp.getObjectNames().size());
+        for (JolokiaReadRequest req : readRequests("*:type=attribute","LongSeconds")) {
+            JolokiaReadResponse resp = j4pClient.execute(req);
+            assertEquals(resp.getObjectNames().size(), 1);
             Map<?, ?> respVal = resp.getValue();
             assertTrue(respVal.containsKey(itSetup.getAttributeMBean()));
             Map<?, ?> attrs = (Map<?, ?>) respVal.get(itSetup.getAttributeMBean());
-            assertEquals(1,attrs.size());
+            assertEquals(attrs.size(), 1);
             assertTrue(attrs.containsKey("LongSeconds"));
 
             Set<String> attrSet = new HashSet<>(resp.getAttributes(new ObjectName(itSetup.getAttributeMBean())));
-            assertEquals(1,attrSet.size());
+            assertEquals(attrSet.size(), 1);
             assertTrue(attrSet.contains("LongSeconds"));
 
             try {
@@ -275,13 +278,13 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
 
     @Test
     public void mbeanPatternWithAttributes() throws MalformedObjectNameException, J4pException {
-        for (J4pReadRequest req : readRequests("*:type=attribute","LongSeconds","List")) {
+        for (JolokiaReadRequest req : readRequests("*:type=attribute","LongSeconds","List")) {
             assertNull(req.getPath());
-            J4pReadResponse resp = j4pClient.execute(req);
-            assertEquals(1,resp.getObjectNames().size());
+            JolokiaReadResponse resp = j4pClient.execute(req);
+            assertEquals(resp.getObjectNames().size(), 1);
             Map<?, ?> respVal = resp.getValue();
             Map<?, ?> attrs = (Map<?, ?>) respVal.get(itSetup.getAttributeMBean());
-            assertEquals(2,attrs.size());
+            assertEquals(attrs.size(), 2);
             assertTrue(attrs.containsKey("LongSeconds"));
             assertTrue(attrs.containsKey("List"));
 
@@ -299,8 +302,8 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
 
     @Test
     public void mxBeanReadTest() throws MalformedObjectNameException, J4pException {
-        for (J4pReadRequest request  : readRequests("jolokia.it:type=mxbean","ComplexTestData")) {
-            J4pReadResponse response = j4pClient.execute(request);
+        for (JolokiaReadRequest request  : readRequests("jolokia.it:type=mxbean","ComplexTestData")) {
+            JolokiaReadResponse response = j4pClient.execute(request);
             JSONObject value = response.getValue();
             assertEquals(value.get("number"),1968L);
             assertEquals(value.get("string"),"late");
@@ -336,15 +339,15 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
 
     @Test
     public void processingOptionsTest() throws J4pException, MalformedObjectNameException {
-        for (J4pReadRequest request : readRequests("jolokia.it:type=mxbean","ComplexTestData")) {
+        for (JolokiaReadRequest request : readRequests("jolokia.it:type=mxbean","ComplexTestData")) {
             Map<J4pQueryParameter,String> params = new HashMap<>();
             params.put(J4pQueryParameter.MAX_DEPTH,"1");
             params.put(J4pQueryParameter.IGNORE_ERRORS,"true");
-            for (String method : new String[] { "GET", "POST" }) {
-                if (request.getTargetConfig() != null && method.equals("GET")) {
+            for (HttpMethod method : new HttpMethod[] { HttpMethod.GET, HttpMethod.POST }) {
+                if (request.getTargetConfig() != null && method.equals(HttpMethod.GET)) {
                     continue;
                 }
-                J4pReadResponse response = j4pClient.execute(request,method,params);
+                JolokiaReadResponse response = j4pClient.execute(request,method,params);
                 JSONObject value = response.getValue();
                 Object complex = value.get("complex");
                 assertTrue(complex instanceof String);
@@ -354,20 +357,20 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
     }
 
     @SafeVarargs
-    private void checkNames(String pMethod, List<String> ... pNames) throws MalformedObjectNameException, J4pException {
+    private void checkNames(HttpMethod pMethod, List<String> ... pNames) throws MalformedObjectNameException, J4pException {
         for (List<String> pName : pNames) {
             for (String name : pName) {
                 System.out.println(name);
                 ObjectName oName = new ObjectName(name);
-                J4pReadRequest req = new J4pReadRequest(oName, "Ok");
+                JolokiaReadRequest req = new JolokiaReadRequest(oName, "Ok");
                 req.setPreferredHttpMethod(pMethod);
-                J4pReadResponse resp = j4pClient.execute(req);
+                JolokiaReadResponse resp = j4pClient.execute(req);
                 Collection<ObjectName> names = resp.getObjectNames();
-                assertEquals(1, names.size());
+                assertEquals(names.size(), 1);
                 assertEquals(oName, names.iterator().next());
-                assertEquals("OK", resp.getValue());
+                assertEquals(resp.getValue(), "OK");
                 Collection<String> attrs = resp.getAttributes();
-                assertEquals(1, attrs.size());
+                assertEquals(attrs.size(), 1);
 
                 assertNotNull(resp.getValue("Ok"));
                 try {
@@ -382,8 +385,8 @@ public class J4pReadIntegrationTest extends AbstractJ4pIntegrationTest {
 
     @Test
     public void nonStringKeyInAMap() throws J4pException, MalformedObjectNameException {
-        J4pReadRequest request = new J4pReadRequest(itSetup.getAttributeMBean(), "NonStringKeyMap");
-        J4pReadResponse response = j4pClient.execute(request, "POST", Collections.emptyMap());
+        JolokiaReadRequest request = new JolokiaReadRequest(itSetup.getAttributeMBean(), "NonStringKeyMap");
+        JolokiaReadResponse response = j4pClient.execute(request, HttpMethod.POST, Collections.emptyMap());
         JSONObject value = response.getValue();
         assertEquals(value.values().iterator().next(), new BigDecimal("0.9"));
     }

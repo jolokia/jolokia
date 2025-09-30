@@ -22,7 +22,9 @@ import javax.management.MalformedObjectNameException;
 
 import org.jolokia.client.J4pClient;
 import org.jolokia.client.J4pClientBuilder;
+import org.jolokia.client.JolokiaTargetConfig;
 import org.jolokia.client.exception.*;
+import org.jolokia.client.response.JolokiaReadResponse;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -37,7 +39,7 @@ public class J4pDefaultProxyTest extends AbstractJ4pIntegrationTest {
 
     @Test
     public void baseTest() throws MalformedObjectNameException, J4pException {
-        J4pReadResponse resp = j4pClient.execute(new J4pReadRequest("java.lang:type=Memory","HeapMemoryUsage"));
+        JolokiaReadResponse resp = j4pClient.execute(new JolokiaReadRequest("java.lang:type=Memory","HeapMemoryUsage"));
         assertFalse(resp.getRequest().toJson().containsKey("target"));
         assertNotNull(resp.getValue());
     }
@@ -46,33 +48,33 @@ public class J4pDefaultProxyTest extends AbstractJ4pIntegrationTest {
     public void baseBulkTest() throws MalformedObjectNameException, J4pException {
         try {
             j4pClient.execute(
-                    new J4pReadRequest("java.lang:type=Memory","HeapMemoryUsage"),
-                    new J4pReadRequest("java.lang:type=Thread","ThreadNumber"));
+                    new JolokiaReadRequest("java.lang:type=Memory","HeapMemoryUsage"),
+                    new JolokiaReadRequest("java.lang:type=Thread","ThreadNumber"));
             fail();
         } catch (J4pBulkRemoteException exp) {
-            List<J4pReadResponse> resps = exp.getResponses();
+            List<JolokiaReadResponse> resps = exp.getResponses();
             assertNotNull(resps.get(0).getValue());
             J4pRemoteException jExp = exp.getRemoteExceptions().get(0);
             assertTrue(jExp.getRemoteStackTrace().contains("RMI"));
         }
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*Proxy mode.*")
+    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*Proxy requests should be sent using POST method.*")
     public void invalidMethodTest() throws MalformedObjectNameException, J4pException {
-        J4pReadRequest req = new J4pReadRequest("java.lang:type=Memory","HeapMemoryUsage");
-        req.setPreferredHttpMethod("GET");
+        JolokiaReadRequest req = new JolokiaReadRequest("java.lang:type=Memory","HeapMemoryUsage");
+        req.setPreferredHttpMethod(HttpMethod.GET);
         j4pClient.execute(req);
     }
 
     @Override
     protected J4pClient createJ4pClient(String url) {
-        J4pTargetConfig config = getTargetProxyConfig();
+        JolokiaTargetConfig config = getTargetProxyConfig();
         return new J4pClientBuilder()
                 .url(url)
                 .user("jolokia")
                 .password("jolokia")
 //                .pooledConnections()
-                .target(config.getUrl())
+                .target(config.url())
                 .build();
     }
 }

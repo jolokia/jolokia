@@ -1,5 +1,3 @@
-package org.jolokia.client.exception;
-
 /*
  * Copyright 2009-2013 Roland Huss
  *
@@ -15,27 +13,31 @@ package org.jolokia.client.exception;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.client.exception;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jolokia.client.request.J4pResponse;
+import org.jolokia.client.response.JolokiaResponse;
 
 /**
  * Exception thrown when a bulk request fails on the remote side
+ *
  * @author roland
  * @since Jun 9, 2010
  */
 public class J4pBulkRemoteException extends J4pException {
 
-    // List of results obtained from the remote side. This can be either exceptions for a single
-    // request or a succeeded request
+    /**
+     * List of results obtained from the remote side. Each item may be a successful {@link JolokiaResponse}
+     * or a {@link J4pRemoteException}
+     */
     private final List<Object> results;
 
     /**
      * Constructor
      *
-     * @param pResults list of results which should be of type {@link J4pResponse}
+     * @param pResults list of results which should be of type {@link JolokiaResponse}
      */
     public J4pBulkRemoteException(List<Object> pResults) {
         super("Bulk request failed remotely");
@@ -44,7 +46,7 @@ public class J4pBulkRemoteException extends J4pException {
 
     /**
      * Get the result list. Object in this list are either {@link J4pRemoteException} for an error or
-     * {@link J4pResponse} for successful requests.
+     * a {@link JolokiaResponse} for successful requests.
      *
      * @return a list of results
      */
@@ -58,10 +60,10 @@ public class J4pBulkRemoteException extends J4pException {
      * @param <T> response type
      * @return list of successful responses.
      */
-    public <T extends J4pResponse<?>> List<T> getResponses() {
+    public <T extends JolokiaResponse<?>> List<T> getResponses() {
         List<T> ret = new ArrayList<>();
         for (Object entry : results) {
-            if (entry instanceof J4pResponse) {
+            if (entry instanceof JolokiaResponse) {
                 //noinspection unchecked
                 ret.add((T) entry);
             }
@@ -70,7 +72,7 @@ public class J4pBulkRemoteException extends J4pException {
     }
 
     /**
-     * Get the list of {@link J4pRemoteException}. At list with all remote exceptions is collected in this list.
+     * Get the list of {@link J4pRemoteException}. A list with all remote exceptions is collected in this list.
      *
      * @return list of remote exceptions
      */
@@ -83,4 +85,5 @@ public class J4pBulkRemoteException extends J4pException {
         }
         return ret;
     }
+
 }

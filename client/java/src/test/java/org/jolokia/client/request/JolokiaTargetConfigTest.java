@@ -16,6 +16,7 @@ package org.jolokia.client.request;
  * limitations under the License.
  */
 
+import org.jolokia.client.JolokiaTargetConfig;
 import org.jolokia.json.JSONObject;
 import org.testng.annotations.Test;
 
@@ -25,21 +26,21 @@ import static org.testng.Assert.assertEquals;
  * @author roland
  * @since 27.12.11
  */
-public class J4pTargetConfigTest {
+public class JolokiaTargetConfigTest {
 
     static String URL = "http://localhost:8080";
 
     @Test
     public void simple() {
-        J4pTargetConfig cfg = new J4pTargetConfig(URL,"roland","s!cr!t");
-        assertEquals(cfg.getUrl(),URL);
-        assertEquals(cfg.getUser(),"roland");
-        assertEquals(cfg.getPassword(),"s!cr!t");
+        JolokiaTargetConfig cfg = new JolokiaTargetConfig(URL,"roland","s!cr!t");
+        assertEquals(cfg.url(),URL);
+        assertEquals(cfg.user(),"roland");
+        assertEquals(cfg.password(),"s!cr!t");
     }
 
     @Test
     public void json() {
-        J4pTargetConfig cfg = new J4pTargetConfig(URL,"roland","s!cr!t");
+        JolokiaTargetConfig cfg = new JolokiaTargetConfig(URL,"roland","s!cr!t");
         JSONObject j = cfg.toJson();
         assertEquals(j.get("url"),URL);
         assertEquals(j.get("user"),"roland");

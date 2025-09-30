@@ -21,7 +21,7 @@ import javax.management.MalformedObjectNameException;
 
 import org.jolokia.client.exception.J4pConnectException;
 import org.jolokia.client.exception.J4pException;
-import org.jolokia.client.request.J4pReadRequest;
+import org.jolokia.client.request.JolokiaReadRequest;
 import org.testng.annotations.Test;
 
 import static org.testng.AssertJUnit.*;
@@ -52,7 +52,8 @@ public class J4pClientBuilderTest {
                         .socketTimeout(5000)
 //                        .cookieStore(new BasicCookieStore())
                         .build();
-        client.getHttpClient(HttpClient.class);
+        HttpClient realClient = client.getHttpClient(HttpClient.class);
+        assertNotNull(realClient);
     }
 
     @Test
@@ -124,7 +125,7 @@ public class J4pClientBuilderTest {
                         .url("http://localhost:8080/jolokia")
                         .proxy("localhost", 65535, "user", "pass") // most likely there is no proxy on this port
                         .build();
-        J4pReadRequest readRequest = new J4pReadRequest("java.lang:type=Memory", "HeapMemoryUsage");
+        JolokiaReadRequest readRequest = new JolokiaReadRequest("java.lang:type=Memory", "HeapMemoryUsage");
         client.execute(readRequest);
     }
 

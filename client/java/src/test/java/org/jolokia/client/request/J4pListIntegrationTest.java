@@ -22,6 +22,9 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import org.jolokia.client.exception.J4pException;
+import org.jolokia.client.response.JolokiaListResponse;
+import org.jolokia.client.response.JolokiaSearchResponse;
+import org.jolokia.json.JSONObject;
 import org.testng.annotations.Test;
 
 import static org.testng.AssertJUnit.*;
@@ -38,11 +41,11 @@ public class J4pListIntegrationTest extends AbstractJ4pIntegrationTest {
 
     @Test
     public void simple() throws J4pException {
-        for (J4pListRequest req : new J4pListRequest[]{
-                new J4pListRequest(),
-                new J4pListRequest(getTargetProxyConfig())
+        for (JolokiaListRequest req : new JolokiaListRequest[]{
+                new JolokiaListRequest(),
+                new JolokiaListRequest(getTargetProxyConfig())
         }) {
-            J4pListResponse resp = j4pClient.execute(req);
+            JolokiaListResponse resp = j4pClient.execute(req);
             assertNotNull(resp);
         }
     }
@@ -50,12 +53,15 @@ public class J4pListIntegrationTest extends AbstractJ4pIntegrationTest {
     @Test
     public void mbeanMeta() throws J4pException, MalformedObjectNameException {
         ObjectName objectName = new ObjectName("java.lang:type=Memory");
-        for (J4pListRequest req : new J4pListRequest[]{
-                new J4pListRequest(objectName),
-                new J4pListRequest(getTargetProxyConfig(), new ObjectName("proxy@" + objectName))
+        for (JolokiaListRequest req : new JolokiaListRequest[]{
+                new JolokiaListRequest(objectName),
+                new JolokiaListRequest(getTargetProxyConfig(), new ObjectName("proxy@" + objectName))
         }) {
-            J4pListResponse resp = j4pClient.execute(req);
-            Map<?, ?> val = resp.getValue();
+            JolokiaListResponse resp = j4pClient.execute(req);
+            JSONObject val = resp.getValue();
+            // the response is recombined, so it always contains top level domains and 2nd level ObjectNames
+            val = (JSONObject) val.values().iterator().next();
+            val = (JSONObject) val.get("type=Memory");
             assertTrue(val.containsKey("desc"));
             assertTrue(val.containsKey("op"));
             assertTrue(val.containsKey("attr"));
@@ -64,43 +70,49 @@ public class J4pListIntegrationTest extends AbstractJ4pIntegrationTest {
 
     @Test
     public void withSpace() throws J4pException {
-        for (J4pListRequest req : new J4pListRequest[] {
-                new J4pListRequest("jolokia.it/name=name with space," + TYPE_ESCAPED),
-                new J4pListRequest(getTargetProxyConfig(),"jolokia.it/name=name with space," + TYPE_ESCAPED)
+        for (JolokiaListRequest req : new JolokiaListRequest[] {
+                new JolokiaListRequest("jolokia.it/name=name with space," + TYPE_ESCAPED),
+                new JolokiaListRequest(getTargetProxyConfig(),"jolokia.it/name=name with space," + TYPE_ESCAPED)
         }) {
-            J4pListResponse resp = j4pClient.execute(req);
-            Map<?, ?> val = resp.getValue();
-            assertEquals(((Map<?, ?>) ((Map<?, ?>) val.get("attr")).get("Ok")).get("type"), "java.lang.String");
+            JolokiaListResponse resp = j4pClient.execute(req);
+            JSONObject val = resp.getValue();
+            // the response is recombined, so it always contains top level domains and 2nd level ObjectNames
+            val = (JSONObject) val.get("jolokia.it");
+            val = (JSONObject) val.get("name=name with space," + TYPE_UNESCAPED);
+            assertEquals("java.lang.String", ((Map<?, ?>) ((Map<?, ?>) val.get("attr")).get("Ok")).get("type"));
         }
     }
 
     @Test
     public void withSlash() throws MalformedObjectNameException, J4pException {
-        J4pListRequest[] reqs =  new J4pListRequest[] {
-                new J4pListRequest(new ObjectName("jolokia.it:" + TYPE_UNESCAPED + ",name=n!a!m!e with !/!")),
-                new J4pListRequest(getTargetProxyConfig(),new ObjectName("jolokia.it:" + TYPE_UNESCAPED + ",name=n!a!m!e with !/!")),
-                new J4pListRequest(Arrays.asList("jolokia.it",TYPE_UNESCAPED + ",name=n!a!m!e with !/!")),
-                new J4pListRequest(getTargetProxyConfig(),Arrays.asList("jolokia.it", TYPE_UNESCAPED + ",name=n!a!m!e with !/!")),
-                new J4pListRequest("jolokia.it/" + TYPE_ESCAPED + ",name=n!!a!!m!!e with !!!/!!"),
-                new J4pListRequest(getTargetProxyConfig(),"jolokia.it/" + TYPE_ESCAPED + ",name=n!!a!!m!!e with !!!/!!")
+        JolokiaListRequest[] reqs =  new JolokiaListRequest[] {
+                new JolokiaListRequest(new ObjectName("jolokia.it:" + TYPE_UNESCAPED + ",name=n!a!m!e with !/!")),
+                new JolokiaListRequest(getTargetProxyConfig(),new ObjectName("jolokia.it:" + TYPE_UNESCAPED + ",name=n!a!m!e with !/!")),
+                new JolokiaListRequest(Arrays.asList("jolokia.it",TYPE_UNESCAPED + ",name=n!a!m!e with !/!")),
+                new JolokiaListRequest(getTargetProxyConfig(),Arrays.asList("jolokia.it", TYPE_UNESCAPED + ",name=n!a!m!e with !/!")),
+                new JolokiaListRequest("jolokia.it/" + TYPE_ESCAPED + ",name=n!!a!!m!!e with !!!/!!"),
+                new JolokiaListRequest(getTargetProxyConfig(),"jolokia.it/" + TYPE_ESCAPED + ",name=n!!a!!m!!e with !!!/!!")
         };
-        for (J4pListRequest req : reqs) {
-            J4pListResponse resp = j4pClient.execute(req);
-            Map<?, ?> val = resp.getValue();
-            assertEquals(((Map<?, ?>) ((Map<?, ?>) val.get("attr")).get("Ok")).get("type"), "java.lang.String");
+        for (JolokiaListRequest req : reqs) {
+            JolokiaListResponse resp = j4pClient.execute(req);
+            JSONObject val = resp.getValue();
+            // the response is recombined, so it always contains top level domains and 2nd level ObjectNames
+            val = (JSONObject) val.values().iterator().next();
+            val = (JSONObject) val.values().iterator().next();
+            assertEquals("java.lang.String", ((Map<?, ?>) ((Map<?, ?>) val.get("attr")).get("Ok")).get("type"));
         }
     }
 
     @Test
     public void withEscapedWildcards() throws Exception {
-        J4pSearchRequest searchRequest = new J4pSearchRequest("jboss.as.expr:*");
-        J4pSearchResponse searchResp = j4pClient.execute(searchRequest);
+        JolokiaSearchRequest searchRequest = new JolokiaSearchRequest("jboss.as.expr:*");
+        JolokiaSearchResponse searchResp = j4pClient.execute(searchRequest);
 
         for (ObjectName oName : searchResp.getObjectNames()) {
-            J4pListRequest listRequest = new J4pListRequest(oName);
-            J4pListResponse listResp = j4pClient.execute(listRequest);
+            JolokiaListRequest listRequest = new JolokiaListRequest(oName);
+            JolokiaListResponse listResp = j4pClient.execute(listRequest);
             Map<?, ?> val = listResp.getValue();
-            assertEquals(((Map<?, ?>) ((Map<?, ?>) val.get("attr")).get("Ok")).get("type"), "java.lang.String");
+            assertEquals("java.lang.String", ((Map<?, ?>) ((Map<?, ?>) val.get("attr")).get("Ok")).get("type"));
         }
     }
 }

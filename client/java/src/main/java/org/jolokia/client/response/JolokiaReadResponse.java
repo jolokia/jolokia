@@ -1,5 +1,3 @@
-package org.jolokia.client.request;
-
 /*
  * Copyright 2009-2013 Roland Huss
  *
@@ -15,44 +13,51 @@ package org.jolokia.client.request;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.client.response;
 
-import java.util.*;
-
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
+import org.jolokia.client.JolokiaOperation;
+import org.jolokia.client.request.JolokiaReadRequest;
 import org.jolokia.json.JSONObject;
 
 /**
- * Response for a {@link org.jolokia.client.request.J4pType#READ} request. Since a single
+ * Response for a {@link JolokiaOperation#READ} request. Since a single
  * READ request can result in multiple values returned, this response object
- * allows for obtaining iteration of those values in case the MBean name given for the request
- * was a pattern of when multiple attributes were requested.
+ * allows for obtaining a collection of those values in case the MBean name given for the request
+ * was {@link ObjectName#isPattern() a pattern} of when multiple attributes were requested.
  *
  * @author roland
  * @since Apr 26, 2010
  */
-public final class J4pReadResponse extends J4pResponse<J4pReadRequest> {
+public final class JolokiaReadResponse extends JolokiaResponse<JolokiaReadRequest> {
 
     /**
      * Constructor, which should be used directly.
      *
-     * @param pRequest the request which lead to this response.
+     * @param pRequest      the request which lead to this response.
      * @param pJsonResponse the JSON response as obtained from the server agent.
      */
-    J4pReadResponse(J4pReadRequest pRequest, JSONObject pJsonResponse) {
+    public JolokiaReadResponse(JolokiaReadRequest pRequest, JSONObject pJsonResponse) {
         super(pRequest, pJsonResponse);
     }
 
     /**
-     * Get all MBean names for which the request fetched values. If the request
-     * contained an MBean pattern then all MBean names matching this pattern and which contained
-     * attributes of the given name are returned. If the MBean wasnt a pattern a single
-     * value collection with the single MBean name of the request is returned.
+     * <p>Get all MBean {@link ObjectName names} for which the request fetched the attribute values.</p>
+     *
+     * <p>If the request contained an MBean pattern then all MBean names matching this pattern and which contained
+     * attributes of the given name are returned. If the MBean wasn't a pattern, a single
+     * collection of attribute values for the MBean from {@link JolokiaReadRequest} is returned.</p>
      *
      * @return list of MBean names
      * @throws MalformedObjectNameException if the returned MBean names could not be converted to
-     *                                      {@link ObjectName}s. Shouldnt occur, though.
+     *                                      {@link ObjectName}s. Shouldn't occur, though.
      */
     public Collection<ObjectName> getObjectNames() throws MalformedObjectNameException {
         ObjectName mBean = getRequest().getObjectName();
@@ -65,6 +70,7 @@ public final class J4pReadResponse extends J4pResponse<J4pReadRequest> {
             }
             return ret;
         } else {
+            // There's only one MBean and we can get it only from the initial request
             return List.of(mBean);
         }
     }
@@ -72,7 +78,7 @@ public final class J4pReadResponse extends J4pResponse<J4pReadRequest> {
     /**
      * Get the name of all attributes fetched for a certain MBean name. If the request was
      * performed for a single MBean, then the given name must match that of the MBean name
-     * provided in the request. If <code>null</code> is given as argument, then this method
+     * provided in the request. If {@code null} is given as argument, then this method
      * will return all attributes for the single MBean given in the request
      *
      * @param pObjectName MBean for which to get the attribute names,
@@ -87,7 +93,7 @@ public final class J4pReadResponse extends J4pResponse<J4pReadRequest> {
         } else {
             if (pObjectName != null && !pObjectName.equals(requestMBean)) {
                 throw new IllegalArgumentException("Given ObjectName " + pObjectName + " doesn't match with" +
-                        " the single ObjectName " + requestMBean + " given in the request");
+                    " the single ObjectName " + requestMBean + " given in the request");
             }
             return getAttributes();
         }
@@ -98,23 +104,23 @@ public final class J4pReadResponse extends J4pResponse<J4pReadRequest> {
      * was not a pattern (i.e. the request was for a single MBean).
      *
      * @return a list of attributes for this request. If the request was performed for
-     *         only a single attribute, the attribute name of the request is returend as
-     *         a single valued list. For more than one attribute, the attribute names
-     *         a returned from the returned list.
+     * only a single attribute, the attribute name of the request is returned as
+     * a single valued list. For more than one attribute, the attribute names
+     * a returned from the returned list.
      */
     public Collection<String> getAttributes() {
-        J4pReadRequest request = getRequest();
+        JolokiaReadRequest request = getRequest();
         ObjectName requestBean = request.getObjectName();
         if (requestBean.isPattern()) {
-            throw new IllegalArgumentException(
-                    "Attributes can be fetched only for non-pattern request (current: " +
-                            requestBean.getCanonicalName() + ")");
+            throw new IllegalArgumentException("Attributes can be fetched only for non-pattern request (current: " +
+                    requestBean.getCanonicalName() + ")");
         }
         // The attribute names are the same as from the request
         if (request.hasSingleAttribute()) {
             // Contains only a single attribute:
             return request.getAttributes();
         } else {
+            // just return all names of the returned attributes
             JSONObject attributes = getValue();
             return attributes.keySet();
         }
@@ -128,22 +134,22 @@ public final class J4pReadResponse extends J4pResponse<J4pReadRequest> {
      * parameters must match the parameters given in the request.
      *
      * @param pObjectName name of the Mbean or <code>null</code> if the request was only for a single
-     *        Mbeans in which case this single MBean is taken from the request
-     * @param pAttribute the attribute or <code>null</code> if the request was for a single
-     *        attribute in which case the attribute name is taken from the request
-     * @param <V> the object type of the return value ({@link String},{@link Map} or {@link List})
+     *                    Mbeans in which case this single MBean is taken from the request
+     * @param pAttribute  the attribute or <code>null</code> if the request was for a single
+     *                    attribute in which case the attribute name is taken from the request
+     * @param <V>         the object type of the return value ({@link String},{@link Map} or {@link List})
      * @return the value
      * @throws IllegalArgumentException if there was no value for the given parameters or if <code>null</code>
-     *         was given for given for one or both arguments and the request was for multiple MBeans
-     *         or attributes.
+     *                                  was given for given for one or both arguments and the request was for multiple MBeans
+     *                                  or attributes.
      */
-    public <V> V getValue(ObjectName pObjectName,String pAttribute) {
+    public <V> V getValue(ObjectName pObjectName, String pAttribute) {
         ObjectName requestMBean = getRequest().getObjectName();
         if (requestMBean.isPattern()) {
             JSONObject mAttributes = getAttributesForObjectNameWithPatternRequest(pObjectName);
             if (!mAttributes.containsKey(pAttribute)) {
                 throw new IllegalArgumentException("No attribute " + pAttribute + " for ObjectName " + pObjectName + " returned for" +
-                        " the given request");
+                    " the given request");
             }
             //noinspection unchecked
             return (V) mAttributes.get(pAttribute);
@@ -160,25 +166,26 @@ public final class J4pReadResponse extends J4pResponse<J4pReadRequest> {
      * a single attribute, otherwise it will raise an {@link IllegalArgumentException}
      *
      * @param pAttribute attribute for which to get the value
-     * @param <V> value type
+     * @param <V>        value type
      * @return value
      * @throws IllegalArgumentException if the attribute could not be found in the return value or if this method
-     * is called with a <code>null</code> argument, but the request leads to multiple attribute return values.
+     *                                  is called with a <code>null</code> argument, but the request leads to multiple
+     *                                  attribute return values.
      */
     public <V> V getValue(String pAttribute) {
-        J4pReadRequest request = getRequest();
+        JolokiaReadRequest request = getRequest();
         ObjectName requestBean = request.getObjectName();
         if (requestBean.isPattern()) {
             throw new IllegalArgumentException(
-                    "Attributes without ObjectName can be fetched only for non-pattern request (current: " +
-                            requestBean.getCanonicalName() + ")");
+                "Attributes without ObjectName can be fetched only for non-pattern request (current: " +
+                    requestBean.getCanonicalName() + ")");
         }
         // The attribute names are the same as from the request
         if (request.hasSingleAttribute()) {
             // Contains only a single attribute:
             if (pAttribute != null && !pAttribute.equals(request.getAttribute())) {
                 throw new IllegalArgumentException("Given attribute " + pAttribute + " doesnt match single attribute " +
-                        "given " + request.getAttribute() + " in the request");
+                    "given " + request.getAttribute() + " in the request");
             }
             return getValue();
         } else {
@@ -194,17 +201,29 @@ public final class J4pReadResponse extends J4pResponse<J4pReadRequest> {
         }
     }
 
-    // ============================================================================================================
-
+    /**
+     * Get name-value mapping for all the MBeans from the response that match given
+     * {@link ObjectName#isPattern() pattern}.
+     *
+     * @param pObjectName
+     * @return
+     */
     private JSONObject getAttributesForObjectNameWithPatternRequest(ObjectName pObjectName) {
+        if (pObjectName == null) {
+            try {
+                pObjectName = new ObjectName("*:*");
+            } catch (MalformedObjectNameException ignored) {
+            }
+        }
         ObjectName pMBeanFromRequest = getRequest().getObjectName();
         ObjectName objectName = pObjectName == null ? pMBeanFromRequest : pObjectName;
         JSONObject values = getValue();
         JSONObject attributes = (JSONObject) values.get(objectName.getCanonicalName());
         if (attributes == null) {
             throw new IllegalArgumentException("No ObjectName " + objectName + " found in the set of returned " +
-                    " ObjectNames for requested pattern " + pMBeanFromRequest);
+                " ObjectNames for requested pattern " + pMBeanFromRequest);
         }
         return attributes;
     }
+
 }

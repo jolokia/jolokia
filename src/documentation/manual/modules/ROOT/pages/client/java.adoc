@@ -44,8 +44,8 @@ and can be centered around three classes:
 `J4pClient` is the client side agent, which
 has various variants of a `execute()` for
 sending requests. This method takes one or more
-`J4pRequest` objects as arguments and returns
-one or more `J4pResponse` objects as result.
+`JolokiaRequest` objects as arguments and returns
+one or more `JolokiaResponse` objects as result.
 
 .What the heck is this "J4p"?
 ****
@@ -67,7 +67,7 @@ A read request for querying the heap memory usage from the
 `MemoryMXBean` is created and then send via
 the `execute()` to the agent. The
 response returned is of type
-`J4pReadResponse` and holds the result
+`JolokiaReadResponse` and holds the result
 which finally is printed out to standard output.
 
 [,java]
@@ -156,8 +156,8 @@ must be set, too
 |
 
 |`authenticator`
-|Implementation of `J4pAuthenticator`. The Java client comes with
-one implementation `BasicAuthenticator` for using basic authentication.
+|Implementation of `J4pClientCustomizer`. The Java client comes with
+one implementation `BasicClientCustomizer` for using basic authentication.
 This class supports also _preemptive_ authentication. Call `preemptive()` to
 switch this on (see above for an example). Basic authentication is the default if no other
 authenticator is set.Only used when `user` is set, too.
@@ -284,7 +284,7 @@ Example: `\http://tom:sEcReT@my.proxy.com:8080`
 |`responseExtractor`
 |A response objectAccessor can be used for hooking into the JSON
 deserialization process when a JSON response is converted
-into a `J4pResponse` object. By
+into a `JolokiaResponse` object. By
 default, the received JSON object is examined for a status
 code of 200 and only then creates a response
 object. Otherwise an exception is thrown. An objectAccessor is
@@ -374,7 +374,7 @@ the requests using index number - responses come in the same order as requests. 
 
 For each request type a dedicated request object is provided
 which all are subclasses from
-`J4pRequest`. For all requests it can be
+`JolokiaRequest`. For all requests it can be
 specified which HTTP method is to be used by setting the
 property `preferredHttpMethod` to either
 `GET` or `POST`.
@@ -384,7 +384,7 @@ for the return values of the
 `J4pClient.execute()`.
 
 The constructor of each kind of request can take a
-`J4pTargetConfig` as argument for using a
+`JolokiaTargetConfig` as argument for using a
 request in xref:proxy_mode.adoc[]. This
 configurational object holds the JMX service url and
 (optionally) credentials for JSR-160 authentication. When
@@ -392,7 +392,7 @@ given, this proxy target specification overrides any default
 proxy configuration set during the initialization of the
 `J4pClient`.
 
-`J4pReadRequest` and `J4pReadResponse`:: `J4pReadRequest` is a read request to
+`JolokiaReadRequest` and `JolokiaReadResponse`:: `JolokiaReadRequest` is a read request to
 get one or more attributes from one or more MBeans within
 a single request. Various constructor variants can be used
 to specify one or more attributes along with the
@@ -400,7 +400,7 @@ ObjectName (which can be a pattern). A
 `path` can be set as property for
 specifying an _inner path_, too.
 +
-`J4pReadResponse` is the
+`JolokiaReadResponse` is the
 corresponding response type and allows typed access to the
 fetched value for a single attribute fetch or to multiple
 values for a multi attribute read. In the latter case, the
@@ -410,9 +410,9 @@ well.
 For more information on fetching the value of multiple
 attributes and multiple MBeans at once, please refer to
 xref:protocol/read.adoc[Reading attributes (read)] or the Javadoc of
-`J4pReadResponse`.
+`JolokiaReadResponse`.
 
-`J4pWriteRequest` and `J4pWriteResponse`:: A `J4pWriteRequest` is used to set
+`JolokiaWriteRequest` and `JolokiaWriteResponse`:: A `JolokiaWriteRequest` is used to set
 the value of an MBean attribute. Beside the mandatory
 object and attribute name the value must be give in the
 constructor as well. Optionally a `path`
@@ -420,9 +420,9 @@ can be provided, too. Only certain types for the given
 value can be serialized properly for calling the Jolokia
 agent as described in xref:jolokia_protocol.adoc#serialization-request[Request parameter serialization].
 +
-The old value is returned as ``J4pWriteResponse``'s value.
+The old value is returned as ``JolokiaWriteResponse``'s value.
 
-`J4pExecRequest` and `J4pExecResponse`:: ``J4pExecRequest``'s are used for
+`JolokiaExecRequest` and `JolokiaExecResponse`:: ``JolokiaExecRequest``'s are used for
 executing operation on MBeans. The constructor takes as
 mandatory arguments the MBean's object name, the operation
 name and any arguments required by the operation. Only
@@ -430,18 +430,18 @@ certain types for the given arguments can be serialized
 properly for calling the Jolokia agent as described in
 xref:jolokia_protocol.adoc#serialization-request[Request parameter serialization].
 +
-The returned `J4pExecResponse`
+The returned `JolokiaExecResponse`
 contains the return value of the operation called.
 
-`J4pSearchRequest` and `J4pSearchResponse`:: A `J4pSearchRequest` contains a
+`JolokiaSearchRequest` and `JolokiaSearchResponse`:: A `JolokiaSearchRequest` contains a
 valid single MBean object name pattern which is used for
 searching MBeans.
 +
-The `J4pSearchResponse` holds a
+The `JolokiaSearchResponse` holds a
 list of found object names.
 
-`J4pListRequest` and `J4pListResponse`:: For obtaining meta data on MBeans a
-`J4pListRequest` should be used. It
+`JolokiaListRequest` and `JolokiaListResponse`:: For obtaining meta data on MBeans a
+`JolokiaListRequest` should be used. It
 can be used with a _inner path_ to
 obtain only a subtree of the response, otherwise the whole
 tree as described in xref:jolokia_protocol.adoc#response-list[List response] is
@@ -450,15 +450,15 @@ returned. With the query parameter
 depth of returned tree.
 +
 The single value of a
-`J4pListResponse` is a tree (or
+`JolokiaListResponse` is a tree (or
 subtree) as a JSON object, which has the format described
 in xref:jolokia_protocol.adoc#response-list[List response].
 
-`J4pVersionRequest` and `J4pVersionResponse`:: A `J4pVersionRequest` request the
+`JolokiaVersionRequest` and `JolokiaVersionResponse`:: A `JolokiaVersionRequest` request the
 Jolokia agent's version information and takes no
 argument.
 +
-The `J4pVersionResponse` returns the
+The `JolokiaVersionResponse` returns the
 agent's version (`agentVersion`), the
 protocol version (`protocolVersion`), the
 application server product name
@@ -492,7 +492,7 @@ stacktrace as string) can be obtained from this exception.
 `J4pBulkRemoteException`:: Exception thrown when a bulk request fails on the remote
 side. This contains a mixed list which contains the
 `J4pRemoteException` occurred as well
-as the `J4pResponse` objects for the
+as the `JolokiaResponse` objects for the
 requests, which succeeded. The list obtained by
 `getResults()` contains these
 objects in the same order as the list of requests given to

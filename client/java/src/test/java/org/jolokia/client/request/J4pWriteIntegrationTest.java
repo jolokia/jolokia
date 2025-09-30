@@ -24,8 +24,13 @@ import java.util.*;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
+import org.jolokia.client.JolokiaTargetConfig;
+import org.jolokia.client.JolokiaOperation;
 import org.jolokia.client.exception.J4pException;
 import org.jolokia.client.exception.J4pRemoteException;
+import org.jolokia.client.response.JolokiaReadResponse;
+import org.jolokia.client.response.JolokiaResponse;
+import org.jolokia.client.response.JolokiaWriteResponse;
 import org.jolokia.json.JSONArray;
 import org.jolokia.json.JSONObject;
 import org.jolokia.server.core.config.ConfigKey;
@@ -72,18 +77,18 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
     @Test
     void map() throws MalformedObjectNameException, J4pException {
         Map<String, Object> map = createTestMap();
-        checkWrite(new String[]{"POST"}, "Map", null, map);
+        checkWrite(new HttpMethod[]{HttpMethod.POST}, "Map", null, map);
         checkWrite("Map","fcn","svw");
         checkWrite("Map","zahl",20L);
 
         // Write an not yet known key
-        J4pWriteRequest wReq = new J4pWriteRequest(IT_ATTRIBUTE_MBEAN,"Map","hofstadter","douglas");
-        J4pWriteResponse wResp = j4pClient.execute(wReq);
+        JolokiaWriteRequest wReq = new JolokiaWriteRequest(IT_ATTRIBUTE_MBEAN,"Map","hofstadter","douglas");
+        JolokiaWriteResponse wResp = j4pClient.execute(wReq);
         assertNull(wResp.getValue());
-        J4pReadRequest  rReq = new J4pReadRequest(IT_ATTRIBUTE_MBEAN,"Map");
+        JolokiaReadRequest rReq = new JolokiaReadRequest(IT_ATTRIBUTE_MBEAN,"Map");
         rReq.setPath("douglas");
-        J4pReadResponse rResp = j4pClient.execute(rReq);
-        assertEquals(rResp.getValue(),"hofstadter");
+        JolokiaReadResponse rResp = j4pClient.execute(rReq);
+        assertEquals("hofstadter", rResp.getValue());
     }
 
     private Map<String, Object> createTestMap() {
@@ -104,7 +109,7 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
         list.add(createTestMap());
         list.add(null);
         list.add(new BigDecimal("23.2"));
-        checkWrite(new String[] { "POST" }, "List",null,list);
+        checkWrite(new HttpMethod[] { HttpMethod.POST }, "List",null,list);
         checkWrite("List","0",null);
         checkWrite("List","0","");
         checkWrite("List","2",42L);
@@ -130,7 +135,7 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
     @Test
     public void array2D() throws MalformedObjectNameException, J4pException {
         final long[][] input = new long[][] { { 1, 2 }, { 3, 4 } };
-        checkWrite(new String[] { "POST" }, "Array2D", null, input, resp -> {
+        checkWrite(new HttpMethod[] { HttpMethod.POST }, "Array2D", null, input, resp -> {
             JSONArray val = resp.getValue();
             assertEquals(val.size(), input.length);
             for (int i = 0; i < input.length; i++) {
@@ -144,7 +149,7 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
     public void instant() throws MalformedObjectNameException, J4pException {
         Instant input = Instant.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(ConfigKey.DATE_FORMAT.getDefaultValue()).withZone(TimeZone.getDefault().toZoneId());
-        checkWrite(new String[] { "POST" }, "Instant", null, input, resp -> {
+        checkWrite(new HttpMethod[] { HttpMethod.POST }, "Instant", null, input, resp -> {
             String val = resp.getValue();
             assertEquals(val, formatter.format(input));
         });
@@ -153,16 +158,14 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
     @Test
     public void access() throws MalformedObjectNameException {
 
-        for (J4pWriteRequest req : new J4pWriteRequest[] {
-                new J4pWriteRequest(IT_ATTRIBUTE_MBEAN,"List","bla"),
-                new J4pWriteRequest(getTargetProxyConfig(),IT_ATTRIBUTE_MBEAN,"List","bla")
+        for (JolokiaWriteRequest req : new JolokiaWriteRequest[] {
+                new JolokiaWriteRequest(IT_ATTRIBUTE_MBEAN,"List","bla"),
+                new JolokiaWriteRequest(getTargetProxyConfig(),IT_ATTRIBUTE_MBEAN,"List","bla")
         }) {
-            req.setPath("0");
-            assertEquals(req.getPath(),"0");
             assertEquals(req.getAttribute(),"List");
             assertEquals(req.getObjectName(),new ObjectName(IT_ATTRIBUTE_MBEAN));
             assertEquals(req.getValue(),"bla");
-            assertEquals(req.getType(),J4pType.WRITE);
+            assertEquals(req.getType(), JolokiaOperation.WRITE);
         }
     }
 
@@ -184,7 +187,7 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
         final Map<String,Long> input = new HashMap<>();
         input.put("roland",13L);
         input.put("heino",19L);
-        checkMxWrite(new String[] {"POST"},"Map", null, input, resp -> {
+        checkMxWrite(new HttpMethod[] { HttpMethod.POST },"Map", null, input, resp -> {
             JSONObject val = resp.getValue();
             assertEquals(val.size(), input.size());
             for (String key : input.keySet()) {
@@ -195,48 +198,48 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
 
     @Test(expectedExceptions = J4pRemoteException.class,expectedExceptionsMessageRegExp = ".*immutable.*")
     public void mxMapWithPath() throws MalformedObjectNameException, J4pException {
-        J4pWriteRequest req = new J4pWriteRequest(IT_MXBEAN,"Map","hofstadter","douglas");
-        j4pClient.execute(req,"POST");
+        JolokiaWriteRequest req = new JolokiaWriteRequest(IT_MXBEAN,"Map","hofstadter","douglas");
+        j4pClient.execute(req,HttpMethod.POST);
     }
 
     // ==========================================================================================================
 
     private void checkWrite(String pAttribute,String pPath,Object pValue,ResponseAssertion ... pFinalAssert) throws MalformedObjectNameException, J4pException {
-        checkWrite(new String[]{"GET", "POST"}, pAttribute, pPath, pValue, pFinalAssert);
+        checkWrite(new HttpMethod[] { HttpMethod.GET, HttpMethod.POST }, pAttribute, pPath, pValue, pFinalAssert);
     }
 
     private void checkMxWrite(String pAttribute,String pPath,Object pValue,ResponseAssertion ... pFinalAssert) throws MalformedObjectNameException, J4pException {
-        checkMxWrite(new String[]{"GET", "POST"}, pAttribute, pPath, pValue, pFinalAssert);
+        checkMxWrite(new HttpMethod[] { HttpMethod.GET, HttpMethod.POST }, pAttribute, pPath, pValue, pFinalAssert);
     }
 
-    private void checkWrite(String[] methods,String pAttribute,String pPath,Object pValue,ResponseAssertion ... pFinalAssert) throws MalformedObjectNameException, J4pException {
+    private void checkWrite(HttpMethod[] methods,String pAttribute,String pPath,Object pValue,ResponseAssertion ... pFinalAssert) throws MalformedObjectNameException, J4pException {
         checkWrite(IT_ATTRIBUTE_MBEAN,methods,pAttribute,pPath,pValue,pFinalAssert);
     }
 
-    private void checkMxWrite(String[] methods,String pAttribute,String pPath,Object pValue,ResponseAssertion ... pFinalAssert) throws MalformedObjectNameException, J4pException {
+    private void checkMxWrite(HttpMethod[] methods,String pAttribute,String pPath,Object pValue,ResponseAssertion ... pFinalAssert) throws MalformedObjectNameException, J4pException {
         if (hasMxBeanSupport()) {
             checkWrite(IT_MXBEAN,methods,pAttribute,pPath,pValue,pFinalAssert);
         }
     }
 
-    private void checkWrite(String mBean,String[] methods,String pAttribute,String pPath,Object pValue,ResponseAssertion ... pFinalAssert) throws MalformedObjectNameException, J4pException {
-        for (J4pTargetConfig cfg : new J4pTargetConfig[] { null, getTargetProxyConfig()  }) {
-            for (String method : methods) {
-                if (method.equals("GET") && cfg != null) {
+    private void checkWrite(String mBean,HttpMethod[] methods,String pAttribute,String pPath,Object pValue,ResponseAssertion ... pFinalAssert) throws MalformedObjectNameException, J4pException {
+        for (JolokiaTargetConfig cfg : new JolokiaTargetConfig[] { null, getTargetProxyConfig()  }) {
+            for (HttpMethod method : methods) {
+                if (method.equals(HttpMethod.GET) && cfg != null) {
                     // No proxy for GET
                     continue;
                 }
                 reset(cfg);
-                J4pReadRequest readReq = new J4pReadRequest(cfg,mBean,pAttribute);
+                JolokiaReadRequest readReq = new JolokiaReadRequest(cfg,mBean,pAttribute);
                 if (pPath != null) {
                     readReq.setPath(pPath);
                 }
-                J4pReadResponse readResp = j4pClient.execute(readReq,method);
+                JolokiaReadResponse readResp = j4pClient.execute(readReq,method);
                 Object oldValue = readResp.getValue();
                 assertNotNull("Old value must not be null",oldValue);
 
-                J4pWriteRequest req = new J4pWriteRequest(cfg,mBean,pAttribute,pValue,pPath);
-                J4pWriteResponse resp = j4pClient.execute(req,method);
+                JolokiaWriteRequest req = new JolokiaWriteRequest(cfg,mBean,pAttribute,pValue,pPath);
+                JolokiaWriteResponse resp = j4pClient.execute(req,method);
                 assertEquals("Old value should be returned",oldValue,resp.getValue());
 
                 readResp = j4pClient.execute(readReq);
@@ -249,12 +252,12 @@ public class J4pWriteIntegrationTest extends AbstractJ4pIntegrationTest {
         }
     }
 
-    private void reset(J4pTargetConfig cfg) throws MalformedObjectNameException, J4pException {
-        j4pClient.execute(new J4pExecRequest(cfg,IT_ATTRIBUTE_MBEAN, "reset"));
+    private void reset(JolokiaTargetConfig cfg) throws MalformedObjectNameException, J4pException {
+        j4pClient.execute(new JolokiaExecRequest(cfg,IT_ATTRIBUTE_MBEAN, "reset"));
     }
 
     private interface ResponseAssertion {
-        void assertResponse(J4pResponse<?> resp);
+        void assertResponse(JolokiaResponse<?> resp);
     }
 
 

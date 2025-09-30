@@ -15,15 +15,67 @@
  */
 package org.jolokia.client.spi;
 
+import java.io.Closeable;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
+import java.util.List;
+import java.util.Map;
 
-public interface HttpClientSpi<T> {
+import org.jolokia.client.J4pQueryParameter;
+import org.jolokia.client.JolokiaTargetConfig;
+import org.jolokia.client.exception.J4pException;
+import org.jolokia.client.request.HttpMethod;
+import org.jolokia.client.request.JolokiaRequest;
+import org.jolokia.client.response.JolokiaResponse;
+import org.jolokia.json.JSONStructure;
 
+/**
+ * <p>Implementation-agnostic HTTP client SPI. The SPI implementation is provided by selected Jolokia library and defaults
+ * to an implementation based on JDK HTTP Client.</p>
+ *
+ * @param <T>
+ */
+public interface HttpClientSpi<T> extends Closeable {
+
+    /**
+     * Send a {@link JolokiaRequest} using desired {@link HttpMethod} and query parameters. Optionally
+     * pass {@link JolokiaTargetConfig proxy configuration} if the target Jolokia Agent is running in Proxy mode.
+     *
+     * @param request
+     * @param method
+     * @param parameters
+     * @param targetConfig
+     * @return
+     * @param <REQ>
+     * @param <RES>
+     * @throws IOException
+     */
+    <REQ extends JolokiaRequest, RES extends JolokiaResponse<REQ>>
+    JSONStructure execute(REQ request, HttpMethod method, Map<J4pQueryParameter, String> parameters, JolokiaTargetConfig targetConfig)
+            throws IOException, J4pException;
+
+    /**
+     * Send multiple {@link JolokiaRequest requests} in a single HTTP request (a <em>bulk request</em>).
+     * Optionally pass {@link JolokiaTargetConfig proxy configuration} if the target Jolokia Agent is running in Proxy mode.
+     * With bulk requests we can only use {@link HttpMethod#POST} method.
+     *
+     * @param requests
+     * @param parameters
+     * @param targetConfig
+     * @return
+     * @param <REQ>
+     * @param <RES>
+     * @throws IOException
+     */
+    <REQ extends JolokiaRequest, RES extends JolokiaResponse<REQ>>
+    JSONStructure execute(List<REQ> requests, Map<J4pQueryParameter, String> parameters, JolokiaTargetConfig targetConfig)
+            throws IOException, J4pException;
+
+    /**
+     * Retrieve underlying, implementation-specific HTTP Client if it matches the passed type.
+     *
+     * @param clientClass
+     * @return
+     */
     T getClient(Class<T> clientClass);
-
-    HttpResponse<InputStream> execute(HttpRequest httpRequest) throws IOException;
 
 }

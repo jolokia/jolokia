@@ -1,7 +1,5 @@
-package org.jolokia.client.request;
-
 /*
- * Copyright 2009-2013 Roland Huss
+ * Copyright 2009-2025 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +13,11 @@ package org.jolokia.client.request;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import org.jolokia.json.JSONObject;
+package org.jolokia.client.request;
 
 /**
- * Response for an execute request
- *
- * @author roland
- * @since May 18, 2010
+ * Enumeration of all HTTP methods used by Jolokia.
  */
-public final class J4pExecResponse extends J4pResponse<J4pExecRequest> {
-
-    J4pExecResponse(J4pExecRequest pRequest, JSONObject pJsonResponse) {
-        super(pRequest, pJsonResponse);
-    }
+public enum HttpMethod {
+    GET, POST
 }

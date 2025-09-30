@@ -1,5 +1,3 @@
-package org.jolokia.client.request;
-
 /*
  * Copyright 2009-2013 Roland Huss
  *
@@ -15,54 +13,96 @@ package org.jolokia.client.request;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.client.request;
 
 import java.lang.reflect.Array;
 import java.time.temporal.ChronoField;
 import java.time.temporal.Temporal;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
-import org.jolokia.json.*;
+import org.jolokia.client.JolokiaOperation;
+import org.jolokia.client.JolokiaTargetConfig;
+import org.jolokia.client.response.JolokiaResponse;
+import org.jolokia.json.JSONArray;
+import org.jolokia.json.JSONObject;
+import org.jolokia.json.JSONStructure;
 
 /**
- * Request object abstracting a request to a j4p agent.
+ * <p>Abstract representation of <em>Jolokia request</em> targeted at Jolokia agent. Each Jolokia request has single
+ * type (indicating an operation to perform, like reading MBean attribute or invoking JMX operation).</p>
+ *
+ * <p>Each supported request should have two representations specific to {@link HttpMethod} chosen:<ul>
+ *     <li>{@link HttpMethod#GET} - request arguments are encoded into request URI, so it is subject to
+ *     URI compliance, as specified in RFC 3986. Some values simply can't be encoded into a URI</li>
+ *     <li>{@link HttpMethod#POST} - request arguments are encoded into JSON fields of the request body serialized
+ *     from {@link JSONObject}.</li>
+ * </ul></p>
+ *
+ * <p>JSON form of generic {@link HttpMethod#POST} is:<pre>{@code
+ * {
+ *     "type": "operation-id",
+ *     "path": "path/to/response",
+ *     "target": {
+ *         "url": "target remote JMX URI",
+ *         "user": "remote JMX connector username",
+ *         "password": "remote JMX connector password"
+ *     }
+ * }
+ * }</pre>
+ * {@code target} field is optional. {@code path} field is for requests that use a path and is the same as
+ * if it was used with {@link HttpMethod#GET}.
+ * </p>
+ *
+ * <p>For {@link HttpMethod#GET}, "type" is encoded as first path segment after Jolokia Agent base URI and "path"
+ * is appended to the end. In between we may have request-specific arguments.</p>
+ *
+ * <p>A request may be a proxied request - to be passed by target Jolokia agent to yet another JVM using Remote
+ * JMX connection (JSR-160). JMX Remote specification defines {@link javax.management.remote.JMXServiceURL} in
+ * several forms:<ul>
+ *     <li>{@code service:jmx:rmi://host:port/xxx} - communication based on RMI - this is required protocol from
+ *     JSR-160.</li>
+ *     <li>{@code service:jmx:jmxmp://host:port} - communication based on non-RMI protocol based
+ *     on object serialization, TLS and SASL - this is optional protocol from JSR-160</li>
+ *     <li>{@code service:jmx:iiop://host:port} - based on CORBA Protocol - no longer supported in JDK.</li>
+ * </ul>
+ * Nothing prevents to use URI like {@code service:jmx:jolokia://host:port/path}!</p>
  *
  * @author roland
  * @since Apr 24, 2010
  */
-public abstract class J4pRequest {
+public abstract class JolokiaRequest {
 
+    /** Specific {@link JolokiaOperation request type} of this request */
+    private final JolokiaOperation type;
 
-    // request type
-    private final J4pType type;
+    /**
+     * Request should be associated with some HTTP method. Sometimes the method may be overridden, if a method is not
+     * suitable (for example we can't use {@link HttpMethod#GET} with proxy Jolokia requests.
+     */
+    private HttpMethod preferredHttpMethod;
 
-    // "GET" or "POST"
-    private String preferredHttpMethod;
-
-    // target configuration for this request when used as a JSR-160 proxy
-    private final J4pTargetConfig targetConfig;
+    /**
+     * <p>For proxied requests, we may specify {@link javax.management.remote.JMXServiceURL} of the target JVM.
+     * The request will be sent to one Jolokia agent, but it'll check the {@code target} and possibly send the
+     * request to another JVM (which may run ordinary, RMI-based {@link javax.management.remote.JMXConnectorServer}.</p>
+     *
+     * <p>Proxied requests will always used {@link HttpMethod#POST}.</p>
+     */
+    private final JolokiaTargetConfig targetConfig;
 
     /**
      * Constructor for subclasses
-     * @param pType type of this request
+     *
+     * @param pType         type of this request
      * @param pTargetConfig a target configuration if used in proxy mode or <code>null</code>
      *                      if this is a direct request
      */
-    protected J4pRequest(J4pType pType, J4pTargetConfig pTargetConfig) {
+    protected JolokiaRequest(JolokiaOperation pType, JolokiaTargetConfig pTargetConfig) {
         type = pType;
         targetConfig = pTargetConfig;
-    }
-
-    /**
-     * Escape a input (like the part of an path) so that it can be safely used
-     * e.g. as a path
-     *
-     * @param pInput input to escape
-     * @return the escaped input
-     */
-    public static String escape(String pInput) {
-        return pInput.replaceAll("!","!!").replaceAll("/","!/");
     }
 
     /**
@@ -70,7 +110,7 @@ public abstract class J4pRequest {
      *
      * @return request's type
      */
-    public J4pType getType() {
+    public JolokiaOperation getType() {
         return type;
     }
 
@@ -79,7 +119,7 @@ public abstract class J4pRequest {
      *
      * @return the target config or <code>null</code> if this is a direct request
      */
-    public J4pTargetConfig getTargetConfig() {
+    public JolokiaTargetConfig getTargetConfig() {
         return targetConfig;
     }
 
@@ -87,7 +127,7 @@ public abstract class J4pRequest {
      * The preferred HTTP method to use (either 'GET' or 'POST')
      * @return the HTTP method to use for this request, or <code>null</code> if the method should be automatically selected.
      */
-    public String getPreferredHttpMethod() {
+    public HttpMethod getPreferredHttpMethod() {
         return preferredHttpMethod;
     }
 
@@ -96,42 +136,54 @@ public abstract class J4pRequest {
      *
      * @param pPreferredHttpMethod HTTP method to use.
      */
-    public void setPreferredHttpMethod(String pPreferredHttpMethod) {
-        preferredHttpMethod = pPreferredHttpMethod != null ? pPreferredHttpMethod.toUpperCase() : null;
+    public void setPreferredHttpMethod(HttpMethod pPreferredHttpMethod) {
+        preferredHttpMethod = pPreferredHttpMethod;
     }
 
+    /**
+     * Create a {@link JolokiaResponse} based on {@link JSONObject} from the remote Jolokia Agent. Each
+     * {@link JolokiaRequest} knows what kind of {@link JolokiaResponse} to create.
+     *
+     * @param pResponse http response as obtained from the remote Jolokia Agent over HTTP.
+     * @return the create response
+     */
+    public abstract <RES extends JolokiaResponse<REQ>, REQ extends JolokiaRequest> RES createResponse(JSONObject pResponse);
+
     // ==================================================================================================
-    // Methods used for building up HTTP Requests and setting up the reponse
+    // Methods used for building up HTTP Requests and setting up the response
     // These methods are package visible only since are used only internally
 
-    // Get the parts to build up a GET url (without the type as the first part)
-    abstract List<String> getRequestParts();
+    /**
+     * <p>When a {@link JolokiaRequest} is used with {@link HttpMethod#GET}, arguments should be encoded in
+     * the request URI. And opposite - if a request returns {@code null} here, {@link HttpMethod#POST} will
+     * be used. For {@link HttpMethod#GET} request, the operation type is not returned among the parts.</p>
+     *
+     * <p>Not every argument is easily convertible and may be illegal and rejected by some
+     * security-aware HTTP servers. But in case everything works fine (at user's responsibility), this is the
+     * method that should be implemented by subclasses.</p>
+     *
+     * @return
+     */
+    public abstract List<String> getRequestParts();
 
-    // Get a JSON representation of this request
-    JSONObject toJson() {
+    /**
+     * Get a JSON representation of this request as {@link JSONObject}. Subclasses should call this method
+     * and add operation-specific fields.
+     *
+     * @return
+     */
+    public JSONObject toJson() {
         JSONObject ret = new JSONObject();
         ret.put("type", type.getValue());
         if (targetConfig != null) {
+            // information about ultimate target of the request when this client connects to Jolokia
+            // Agent running in Proxy mode.
             ret.put("target", targetConfig.toJson());
         }
         return ret;
     }
 
-    /**
-     * Create a response from a given JSON response
-     *
-     * @param pResponse http response as obtained from the Http-Request
-     * @return the create response
-     */
-    abstract <R extends J4pResponse<? extends J4pRequest>> R createResponse(JSONObject pResponse);
-
-    // Helper class
-    protected void addPath(List<String> pParts, String pPath) {
-        if (pPath != null) {
-            // Split up path
-            pParts.addAll(splitPath(pPath));
-        }
-    }
+    // TODO: the below methods should use low-level conversion methods now available in jolokia-service-serializer
 
     /**
      * Serialize an object to a string which can be uses as URL part in a GET request
@@ -144,6 +196,8 @@ public abstract class J4pRequest {
      * <p>
      * You should consider POST requests when you need a more sophisticated JSON serialization.
      * </p>
+     * TODO: Move to serializer
+     *
      * @param pArg the argument to serialize for an GET request
      * @return the string representation
      */
@@ -208,9 +262,10 @@ public abstract class J4pRequest {
      *      Otherwise the object is used directly.
      *    </li>
      * </ul>
-     *
+     * <p>
      * Future version of this lib will probably provide a more sophisticated serialization mechanism.
      * <em>This is how it is supposed to be for the next release, currently a simplified serialization is in place</em>
+     * TODO: Move to serializer
      *
      * @param pArg the object to serialize
      * @return a JSON serialized object
@@ -231,9 +286,8 @@ public abstract class J4pRequest {
             // pass Date as long (there's no TZ information here just like in java.time.Instant)
             Date d = (Date) pArg;
             return Long.toString(d.getTime());
-        } else if (pArg instanceof Temporal) {
+        } else if (pArg instanceof Temporal t) {
             // special handling for the temporals that can easily be converted to unix time (in nanos)
-            Temporal t = (Temporal) pArg;
             if (t.isSupported(ChronoField.INSTANT_SECONDS)) {
                 return t.getLong(ChronoField.INSTANT_SECONDS) * 1_000_000_000L
                     + t.getLong(ChronoField.NANO_OF_SECOND);
@@ -245,28 +299,6 @@ public abstract class J4pRequest {
         } else {
             return pArg instanceof Number || pArg instanceof Boolean ? pArg : pArg.toString();
         }
-    }
-
-    // pattern used for escaping business
-    private static final Pattern SLASH_ESCAPE_PATTERN = Pattern.compile("((?:[^!/]|!.)*)(?:/|$)");
-    private static final Pattern UNESCAPE_PATTERN = Pattern.compile("!(.)");
-
-    /**
-     * Split up a path taking into account proper escaping (as described in the
-     * <a href="http://www.jolokia.org/reference">reference manual</a>).
-     *
-     * @param pArg string to split with escaping taken into account
-     * @return split element or null if the argument was null.
-     */
-    protected List<String> splitPath(String pArg) {
-        List<String> ret = new ArrayList<>();
-        if (pArg != null) {
-            Matcher m = SLASH_ESCAPE_PATTERN.matcher(pArg);
-            while (m.find() && m.start(1) != pArg.length()) {
-                ret.add(UNESCAPE_PATTERN.matcher(m.group(1)).replaceAll("$1"));
-            }
-        }
-        return ret;
     }
 
     // =====================================================================================================
@@ -290,7 +322,7 @@ public abstract class J4pRequest {
     private Object serializeArray(Object pArg) {
         int length = Array.getLength(pArg);
         JSONArray innerArray = new JSONArray(length);
-        for (int i = 0; i < length; i++ ) {
+        for (int i = 0; i < length; i++) {
             innerArray.add(serializeArgumentToJson(Array.get(pArg, i)));
         }
         return innerArray;
@@ -298,7 +330,7 @@ public abstract class J4pRequest {
 
     private String getArrayForArgument(Object[] pArg) {
         StringBuilder inner = new StringBuilder();
-        for (int i = 0; i< pArg.length; i++) {
+        for (int i = 0; i < pArg.length; i++) {
             inner.append(nullEscape(pArg[i]));
             if (i < pArg.length - 1) {
                 inner.append(",");
@@ -319,6 +351,5 @@ public abstract class J4pRequest {
             return pArg.toString();
         }
     }
-
 
 }

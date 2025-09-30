@@ -1,5 +1,3 @@
-package org.jolokia.client.request;
-
 /*
  * Copyright 2009-2013 Roland Huss
  *
@@ -15,19 +13,24 @@ package org.jolokia.client.request;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.client.response;
 
+import org.jolokia.client.request.JolokiaWriteRequest;
 import org.jolokia.json.JSONObject;
 
 /**
- * Response for a {@link J4pWriteRequest}. As value it returns the old value of the
- * attribute.
+ * Response for a {@link JolokiaWriteRequest}. As value it returns the old value of the
+ * attribute, potentially extracted information using "path" passed with the request. There are no special
+ * methods (unlike as in {@link JolokiaReadResponse} for getting the value exception base
+ * {@link JolokiaResponse#getValue()}
  *
  * @author roland
  * @since Jun 5, 2010
  */
-public final class J4pWriteResponse extends J4pResponse<J4pWriteRequest> {
+public final class JolokiaWriteResponse extends JolokiaResponse<JolokiaWriteRequest> {
 
-    J4pWriteResponse(J4pWriteRequest pRequest, JSONObject pJsonResponse) {
+    public JolokiaWriteResponse(JolokiaWriteRequest pRequest, JSONObject pJsonResponse) {
         super(pRequest, pJsonResponse);
     }
+
 }

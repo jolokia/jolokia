@@ -1,5 +1,3 @@
-package org.jolokia.client.request;
-
 /*
  * Copyright 2009-2013 Roland Huss
  *
@@ -15,46 +13,51 @@ package org.jolokia.client.request;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.client.request;
 
 import java.util.Collections;
 import java.util.List;
 
+import org.jolokia.client.JolokiaOperation;
+import org.jolokia.client.JolokiaTargetConfig;
+import org.jolokia.client.response.JolokiaVersionResponse;
 import org.jolokia.json.JSONObject;
 
 /**
- * Request for version and server information
+ * Request for version and server information. This request doesn't use any parameters and paths, so the format
+ * of POST message and GET path is the same as documented in {@link JolokiaRequest}.
  *
  * @author roland
  * @since Apr 24, 2010
  */
-public class J4pVersionRequest extends J4pRequest {
+public class JolokiaVersionRequest extends JolokiaRequest {
 
     /**
-     * Plain Constructor
+     * Version request without {@link JolokiaTargetConfig}
      */
-    public J4pVersionRequest() {
+    public JolokiaVersionRequest() {
         this(null);
     }
 
     /**
-     * Constructor with using a proxy configuration
+     * Constructor with a {@link JolokiaTargetConfig proxy configuration}
+     *
      * @param pConfig proxy configuration for a JSR-160 proxy
      */
-    public J4pVersionRequest(J4pTargetConfig pConfig) {
-        super(J4pType.VERSION,pConfig);
+    public JolokiaVersionRequest(JolokiaTargetConfig pConfig) {
+        super(JolokiaOperation.VERSION, pConfig);
     }
 
-    /** {@inheritDoc} */
     @Override
-    List<String> getRequestParts() {
+    public List<String> getRequestParts() {
+        // non-null, empty list - URL is just /version
         return Collections.emptyList();
     }
 
-    /** {@inheritDoc} */
     @Override
     @SuppressWarnings("unchecked")
-    J4pVersionResponse createResponse(JSONObject pResponse) {
-        return new J4pVersionResponse(this,pResponse);
+    public JolokiaVersionResponse createResponse(JSONObject pResponse) {
+        return new JolokiaVersionResponse(this, pResponse);
     }
 
 }

@@ -186,6 +186,7 @@
               org.jolokia.client,
               org.jolokia.client.exception,
               org.jolokia.client.request,
+              org.jolokia.client.response,
               org.jolokia.client.spi
             </Export-Package>
           </instructions>

@@ -20,10 +20,16 @@ import java.util.*;
 
 import javax.management.MalformedObjectNameException;
 
-import org.jolokia.client.BasicClientCustomizer;
 import org.jolokia.client.J4pClient;
 import org.jolokia.client.J4pClientBuilder;
+import org.jolokia.client.J4pQueryParameter;
+import org.jolokia.client.JolokiaOperation;
 import org.jolokia.client.exception.*;
+import org.jolokia.client.response.JolokiaExecResponse;
+import org.jolokia.client.response.JolokiaReadResponse;
+import org.jolokia.client.response.JolokiaResponse;
+import org.jolokia.client.response.JolokiaVersionResponse;
+import org.jolokia.client.response.ValidatingResponseExtractor;
 import org.jolokia.json.JSONArray;
 import org.jolokia.json.JSONObject;
 import org.testng.annotations.Test;
@@ -42,63 +48,63 @@ public class BulkRequestIntegrationTest extends AbstractJ4pIntegrationTest {
 
     @Test
     public void simpleBulkRequest() throws MalformedObjectNameException, J4pException {
-        J4pRequest req1 = new J4pExecRequest(itSetup.getOperationMBean(),"fetchNumber","inc");
-        J4pVersionRequest req2 = new J4pVersionRequest();
+        JolokiaRequest req1 = new JolokiaExecRequest(itSetup.getOperationMBean(),"fetchNumber","inc");
+        JolokiaVersionRequest req2 = new JolokiaVersionRequest();
         List<?> resp = j4pClient.execute(req1,req2);
         assertEquals(resp.size(),2);
-        assertTrue(resp.get(0) instanceof J4pExecResponse);
-        assertTrue(resp.get(1) instanceof J4pVersionResponse);
-        List<J4pResponse<J4pRequest>> typeSaveResp = j4pClient.execute(req1,req2);
-        for (J4pResponse<?> r : typeSaveResp) {
-            assertTrue(r instanceof J4pExecResponse || r instanceof J4pVersionResponse);
+        assertTrue(resp.get(0) instanceof JolokiaExecResponse);
+        assertTrue(resp.get(1) instanceof JolokiaVersionResponse);
+        List<JolokiaResponse<JolokiaRequest>> typeSaveResp = j4pClient.execute(req1,req2);
+        for (JolokiaResponse<?> r : typeSaveResp) {
+            assertTrue(r instanceof JolokiaExecResponse || r instanceof JolokiaVersionResponse);
         }
     }
 
     @Test
     public void simpleBulkRequestWithOptions() throws MalformedObjectNameException, J4pException {
-        J4pRequest req1 = new J4pReadRequest(itSetup.getAttributeMBean(), "ComplexNestedValue");
-        J4pVersionRequest req2 = new J4pVersionRequest();
+        JolokiaRequest req1 = new JolokiaReadRequest(itSetup.getAttributeMBean(), "ComplexNestedValue");
+        JolokiaVersionRequest req2 = new JolokiaVersionRequest();
         Map<J4pQueryParameter, String> params = new HashMap<>();
         params.put(J4pQueryParameter.MAX_DEPTH, "2");
         List<?> resps = j4pClient.execute(Arrays.asList(req1, req2), params);
         assertEquals(resps.size(), 2);
-        J4pReadResponse resp = (J4pReadResponse) resps.get(0);
+        JolokiaReadResponse resp = (JolokiaReadResponse) resps.get(0);
         JSONObject value = resp.getValue();
         JSONArray inner = (JSONArray) value.get("Blub");
         assertTrue(inner.get(1) instanceof String);
 
         // requests can be found inside the response
-        assertEquals(((J4pReadResponse) resps.get(0)).getRequest().getType(), J4pType.READ);
-        assertEquals(((J4pVersionResponse) resps.get(1)).getRequest().getType(), J4pType.VERSION);
+        assertEquals(((JolokiaReadResponse) resps.get(0)).getRequest().getType(), JolokiaOperation.READ);
+        assertEquals(((JolokiaVersionResponse) resps.get(1)).getRequest().getType(), JolokiaOperation.VERSION);
     }
 
     @Test
     public void simpleBulkRequestWithRequestExcludedFromResponse() throws MalformedObjectNameException, J4pException {
-        J4pRequest req1 = new J4pReadRequest(itSetup.getAttributeMBean(), "ComplexNestedValue");
-        J4pVersionRequest req2 = new J4pVersionRequest();
+        JolokiaRequest req1 = new JolokiaReadRequest(itSetup.getAttributeMBean(), "ComplexNestedValue");
+        JolokiaVersionRequest req2 = new JolokiaVersionRequest();
         Map<J4pQueryParameter, String> params = new HashMap<>();
         params.put(J4pQueryParameter.MAX_DEPTH, "2");
         params.put(J4pQueryParameter.INCLUDE_REQUEST, "false");
         List<?> resps = j4pClient.execute(Arrays.asList(req1, req2), params);
         assertEquals(resps.size(), 2);
-        J4pReadResponse resp = (J4pReadResponse) resps.get(0);
+        JolokiaReadResponse resp = (JolokiaReadResponse) resps.get(0);
         JSONObject value = resp.getValue();
         JSONArray inner = (JSONArray) value.get("Blub");
         assertTrue(inner.get(1) instanceof String);
 
         // requests can be found inside the response
-        assertNull(((J4pReadResponse) resps.get(0)).getRequest());
-        assertNull(((J4pVersionResponse) resps.get(1)).getRequest());
+        assertNull(((JolokiaReadResponse) resps.get(0)).getRequest());
+        assertNull(((JolokiaVersionResponse) resps.get(1)).getRequest());
 
         // but we can correlate by order
-        assertEquals(req1.getType(), ((J4pResponse<?>) resps.get(0)).getType());
-        assertEquals(req2.getType(), ((J4pResponse<?>) resps.get(1)).getType());
+        assertEquals(req1.getType(), ((JolokiaResponse<?>) resps.get(0)).getType());
+        assertEquals(req2.getType(), ((JolokiaResponse<?>) resps.get(1)).getType());
     }
 
     @Test
     public void bulkRequestWithErrors() throws MalformedObjectNameException, J4pException {
 
-        List<J4pReadRequest> requests = createBulkRequests();
+        List<JolokiaReadRequest> requests = createBulkRequests();
         try {
             j4pClient.execute(requests);
             fail();
@@ -107,9 +113,9 @@ public class BulkRequestIntegrationTest extends AbstractJ4pIntegrationTest {
             assertEquals(3, results.size());
             results = e.getResponses();
             assertEquals(2, results.size());
-            assertTrue(results.get(0) instanceof J4pReadResponse);
-            assertEquals("Bla", ((J4pReadResponse) results.get(0)).getValue());
-            assertTrue(results.get(1) instanceof J4pReadResponse);
+            assertTrue(results.get(0) instanceof JolokiaReadResponse);
+            assertEquals("Bla", ((JolokiaReadResponse) results.get(0)).getValue());
+            assertTrue(results.get(1) instanceof JolokiaReadResponse);
 
             results = e.getRemoteExceptions();
             assertEquals(1, results.size());
@@ -122,17 +128,17 @@ public class BulkRequestIntegrationTest extends AbstractJ4pIntegrationTest {
         }
     }
 
-    private List<J4pReadRequest> createBulkRequests() throws MalformedObjectNameException {
-        J4pReadRequest req1 = new J4pReadRequest(itSetup.getAttributeMBean(),"ComplexNestedValue");
+    private List<JolokiaReadRequest> createBulkRequests() throws MalformedObjectNameException {
+        JolokiaReadRequest req1 = new JolokiaReadRequest(itSetup.getAttributeMBean(),"ComplexNestedValue");
         req1.setPath("Blub/0");
-        J4pReadRequest req2 = new J4pReadRequest("bla:type=blue","Sucks");
-        J4pReadRequest req3 = new J4pReadRequest("java.lang:type=Memory","HeapMemoryUsage");
+        JolokiaReadRequest req2 = new JolokiaReadRequest("bla:type=blue","Sucks");
+        JolokiaReadRequest req3 = new JolokiaReadRequest("java.lang:type=Memory","HeapMemoryUsage");
         return Arrays.asList(req1,req2,req3);
     }
 
     @Test
     public void optionalBulkRequestsWithExtractorAsArgument() throws MalformedObjectNameException, J4pException {
-        List<J4pReadResponse> resp = j4pClient.execute(createBulkRequests(),null, ValidatingResponseExtractor.OPTIONAL);
+        List<JolokiaReadResponse> resp = j4pClient.execute(createBulkRequests(),null, ValidatingResponseExtractor.OPTIONAL);
 
         verifyOptionalBulkResponses(resp);
     }
@@ -146,13 +152,13 @@ public class BulkRequestIntegrationTest extends AbstractJ4pIntegrationTest {
                                .responseExtractor(ValidatingResponseExtractor.OPTIONAL)
                                .build();
 
-        List<J4pReadResponse> resp = c.execute(createBulkRequests());
+        List<JolokiaReadResponse> resp = c.execute(createBulkRequests());
 
         verifyOptionalBulkResponses(resp);
     }
 
 
-    private void verifyOptionalBulkResponses(List<J4pReadResponse> resp) {
+    private void verifyOptionalBulkResponses(List<JolokiaReadResponse> resp) {
         assertEquals(3, resp.size());
         assertNotNull(resp.get(0));
         assertEquals("Bla", resp.get(0).getValue());

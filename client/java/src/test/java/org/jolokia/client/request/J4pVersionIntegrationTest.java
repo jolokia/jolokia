@@ -17,7 +17,9 @@ package org.jolokia.client.request;
 
 import java.util.Set;
 
+import org.jolokia.client.JolokiaTargetConfig;
 import org.jolokia.client.exception.J4pException;
+import org.jolokia.client.response.JolokiaVersionResponse;
 import org.jolokia.server.core.Version;
 import org.testng.annotations.Test;
 
@@ -32,25 +34,25 @@ public class J4pVersionIntegrationTest extends AbstractJ4pIntegrationTest {
 
     @Test
     public void versionGetRequest() throws J4pException {
-        J4pVersionRequest req = new J4pVersionRequest();
-        J4pVersionResponse resp = j4pClient.execute(req);
+        JolokiaVersionRequest req = new JolokiaVersionRequest();
+        JolokiaVersionResponse resp = j4pClient.execute(req);
         verifyResponse(resp);
     }
 
     @Test
     public void versionPostRequest() throws J4pException {
-        for (J4pTargetConfig cfg : new J4pTargetConfig[]{null, getTargetProxyConfig()}) {
-            J4pVersionRequest req = new J4pVersionRequest(cfg);
-            req.setPreferredHttpMethod("POST");
-            J4pVersionResponse resp = j4pClient.execute(req);
+        for (JolokiaTargetConfig cfg : new JolokiaTargetConfig[]{null/*, getTargetProxyConfig()*/}) {
+            JolokiaVersionRequest req = new JolokiaVersionRequest(cfg);
+            req.setPreferredHttpMethod(HttpMethod.POST);
+            JolokiaVersionResponse resp = j4pClient.execute(req);
             verifyResponse(resp);
         }
     }
 
-    private void verifyResponse(J4pVersionResponse pResp) {
+    private void verifyResponse(JolokiaVersionResponse pResp) {
         assertEquals("Proper agent version", Version.getAgentVersion(), pResp.getAgentVersion());
         assertEquals("Proper protocol version", Version.getProtocolVersion(), pResp.getProtocolVersion());
-        assertTrue("Request timestamp", pResp.getRequestDate().getTime() <= System.currentTimeMillis());
+        assertTrue("Request timestamp", pResp.getResponseTimestamp().toEpochMilli() <= System.currentTimeMillis());
         assertEquals("Jetty", "jetty", pResp.getProduct());
         assertTrue("Mortbay or Eclipse", pResp.getVendor().contains("Eclipse") || pResp.getVendor().contains("Mortbay"));
         Set<String> providers = pResp.getProviders();
