@@ -21,7 +21,7 @@ import java.util.*;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
-import org.jolokia.client.exception.J4pException;
+import org.jolokia.client.exception.JolokiaException;
 import org.jolokia.client.response.JolokiaListResponse;
 import org.jolokia.client.response.JolokiaSearchResponse;
 import org.jolokia.json.JSONObject;
@@ -40,7 +40,7 @@ public class ClientListIntegrationTest extends AbstractClientIntegrationTest {
     static private final String TYPE_UNESCAPED = "type=naming/";
 
     @Test
-    public void simple() throws J4pException {
+    public void simple() throws JolokiaException {
         for (JolokiaListRequest req : new JolokiaListRequest[]{
                 new JolokiaListRequest(),
                 new JolokiaListRequest(getTargetProxyConfig())
@@ -51,7 +51,7 @@ public class ClientListIntegrationTest extends AbstractClientIntegrationTest {
     }
 
     @Test
-    public void mbeanMeta() throws J4pException, MalformedObjectNameException {
+    public void mbeanMeta() throws JolokiaException, MalformedObjectNameException {
         ObjectName objectName = new ObjectName("java.lang:type=Memory");
         for (JolokiaListRequest req : new JolokiaListRequest[]{
                 new JolokiaListRequest(objectName),
@@ -69,7 +69,7 @@ public class ClientListIntegrationTest extends AbstractClientIntegrationTest {
     }
 
     @Test
-    public void withSpace() throws J4pException {
+    public void withSpace() throws JolokiaException {
         for (JolokiaListRequest req : new JolokiaListRequest[] {
                 new JolokiaListRequest("jolokia.it/name=name with space," + TYPE_ESCAPED),
                 new JolokiaListRequest(getTargetProxyConfig(),"jolokia.it/name=name with space," + TYPE_ESCAPED)
@@ -84,7 +84,7 @@ public class ClientListIntegrationTest extends AbstractClientIntegrationTest {
     }
 
     @Test
-    public void withSlash() throws MalformedObjectNameException, J4pException {
+    public void withSlash() throws MalformedObjectNameException, JolokiaException {
         JolokiaListRequest[] reqs =  new JolokiaListRequest[] {
                 new JolokiaListRequest(new ObjectName("jolokia.it:" + TYPE_UNESCAPED + ",name=n!a!m!e with !/!")),
                 new JolokiaListRequest(getTargetProxyConfig(),new ObjectName("jolokia.it:" + TYPE_UNESCAPED + ",name=n!a!m!e with !/!")),

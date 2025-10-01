@@ -36,9 +36,9 @@ import javax.management.openmbean.OpenType;
 
 import org.jolokia.client.JolokiaClient;
 import org.jolokia.client.JolokiaClientBuilder;
-import org.jolokia.client.exception.J4pBulkRemoteException;
-import org.jolokia.client.exception.J4pException;
-import org.jolokia.client.exception.J4pRemoteException;
+import org.jolokia.client.exception.JolokiaBulkRemoteException;
+import org.jolokia.client.exception.JolokiaException;
+import org.jolokia.client.exception.JolokiaRemoteException;
 import org.jolokia.client.exception.UncheckedJmxAdapterException;
 import org.jolokia.client.request.HttpMethod;
 import org.jolokia.client.request.JolokiaExecRequest;
@@ -246,7 +246,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
         try {
             pRequest.setPreferredHttpMethod(HttpMethod.POST);
             return this.connector.execute(pRequest, defaultProcessingOptions());
-        } catch (J4pException e) {
+        } catch (JolokiaException e) {
             //noinspection unchecked
             return (RESP) unwrapException(e);
         }
@@ -265,7 +265,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
         Collections.singleton("java.lang.UnsupportedOperationException");
 
     @SuppressWarnings("rawtypes")
-    protected JolokiaResponse unwrapException(J4pException e) throws IOException, InstanceNotFoundException {
+    protected JolokiaResponse unwrapException(JolokiaException e) throws IOException, InstanceNotFoundException {
         if (e.getCause() instanceof IOException) {
             throw (IOException) e.getCause();
         } else if (e.getCause() instanceof RuntimeException) {
@@ -275,10 +275,10 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
         } else if (e.getMessage()
             .matches("Error: java.lang.IllegalArgumentException : No MBean '.+' found")) {
             throw new InstanceNotFoundException();
-        } else if (e instanceof J4pRemoteException
-            && UNCHECKED_REMOTE_EXCEPTIONS.contains(((J4pRemoteException) e).getErrorType())) {
+        } else if (e instanceof JolokiaRemoteException
+            && UNCHECKED_REMOTE_EXCEPTIONS.contains(((JolokiaRemoteException) e).getErrorType())) {
             throw new RuntimeMBeanException(
-                ClassUtil.newInstance(((J4pRemoteException) e).getErrorType(), e.getMessage()));
+                ClassUtil.newInstance(((JolokiaRemoteException) e).getErrorType(), e.getMessage()));
         } else {
             throw new UncheckedJmxAdapterException(e);
         }
@@ -302,9 +302,9 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
             final Object rawValue = unwrapExecute(new JolokiaReadRequest(name, attribute)).getValue();
             return adaptJsonToOptimalResponseValue(name, attribute, rawValue, getAttributeTypeFromMBeanInfo(name, attribute));
         } catch (UncheckedJmxAdapterException e) {
-            if (e.getCause() instanceof J4pRemoteException
+            if (e.getCause() instanceof JolokiaRemoteException
                 && "javax.management.AttributeNotFoundException"
-                .equals(((J4pRemoteException) e.getCause()).getErrorType())) {
+                .equals(((JolokiaRemoteException) e.getCause()).getErrorType())) {
                 throw new AttributeNotFoundException((e.getCause().getMessage()));
             } else {
                 throw e;
@@ -382,9 +382,9 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
         try {
             responses = this.connector.execute(requests, this.defaultProcessingOptions());
 
-        } catch (J4pBulkRemoteException e) {
+        } catch (JolokiaBulkRemoteException e) {
             responses = e.getResults();
-        } catch (J4pException ignore) {
+        } catch (JolokiaException ignore) {
             //will result in empty return
         }
         for (Object item : responses) {
@@ -407,8 +407,8 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
         try {
             this.unwrapExecute(request);
         } catch (UncheckedJmxAdapterException e) {
-            if (e.getCause() instanceof J4pRemoteException) {
-                J4pRemoteException remote = (J4pRemoteException) e.getCause();
+            if (e.getCause() instanceof JolokiaRemoteException) {
+                JolokiaRemoteException remote = (JolokiaRemoteException) e.getCause();
                 if ("javax.management.AttributeNotFoundException".equals(remote.getErrorType())) {
                     throw new AttributeNotFoundException((e.getCause().getMessage()));
                 }
@@ -434,7 +434,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
         }
         try {
             this.connector.execute(attributeWrites);
-        } catch (J4pException e) {
+        } catch (JolokiaException e) {
             unwrapException(e);
         }
 
@@ -454,7 +454,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
                     new JolokiaExecRequest(name, operationName + makeSignature(signature), params));
             return adaptJsonToOptimalResponseValue(name, operationName, response.getValue(), getOperationTypeFromMBeanInfo(name, operationName, signature));
         } catch (UncheckedJmxAdapterException e) {
-            if (e.getCause() instanceof J4pRemoteException) {
+            if (e.getCause() instanceof JolokiaRemoteException) {
                 throw new MBeanException((Exception) e.getCause());
             }
             throw e;

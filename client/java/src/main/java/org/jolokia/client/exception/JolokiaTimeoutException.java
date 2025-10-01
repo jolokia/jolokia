@@ -23,7 +23,7 @@ import java.io.IOException;
  * @author roland
  * @since 15.12.10
  */
-public class J4pTimeoutException extends J4pException {
+public class JolokiaTimeoutException extends JolokiaException {
 
     /**
      * Exception thrown when a timeout occurred
@@ -31,7 +31,7 @@ public class J4pTimeoutException extends J4pException {
      * @param pMessage          error message
      * @param pTimeoutException timeout exception - actual exception may depend on the HTTP Client implementation used
      */
-    public J4pTimeoutException(String pMessage, IOException pTimeoutException) {
+    public JolokiaTimeoutException(String pMessage, IOException pTimeoutException) {
         super(pMessage, pTimeoutException);
     }
 

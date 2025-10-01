@@ -289,7 +289,7 @@ default, the received JSON object is examined for a status
 code of 200 and only then creates a response
 object. Otherwise an exception is thrown. An objectAccessor is
 specified by the interface
-`J4pResponseExtractor`. Beside the
+`JolokiaResponseExtractor`. Beside the
 default objectAccessor, an alternate objectAccessor
 `ValidatingResponseExtractor` can be
 used, which instead of throwing an exception returns a
@@ -471,27 +471,27 @@ the Jolokia is running on.
 === Exceptions
 
 In case of an error when executing a request a
-`J4pException` or one its subclass is
+`JolokiaException` or one its subclass is
 thrown.
 
-`J4pConnectException`:: Exception thrown when the connection to the server
+`JolokiaConnectException`:: Exception thrown when the connection to the server
 fails. It contains the original
 `ConnectException` as nested value.
 
-`J4pTimeoutException`:: Exception thrown in case of an timeout. The nested
+`JolokiaTimeoutException`:: Exception thrown in case of an timeout. The nested
 exception is of type
 `ConnectTimeoutException`.
 
-`J4pRemoteException`:: Generic exception thrown when an exception occurred on the
+`JolokiaRemoteException`:: Generic exception thrown when an exception occurred on the
 remote side. This is the case when the JSON response
 obtained is an error response as described in
 xref:jolokia_protocol.adoc#responses[Responses]. The error type, error value, the
 status, the request leading to this error and the remote
 stacktrace as string) can be obtained from this exception.
 
-`J4pBulkRemoteException`:: Exception thrown when a bulk request fails on the remote
+`JolokiaBulkRemoteException`:: Exception thrown when a bulk request fails on the remote
 side. This contains a mixed list which contains the
-`J4pRemoteException` occurred as well
+`JolokiaRemoteException` occurred as well
 as the `JolokiaResponse` objects for the
 requests, which succeeded. The list obtained by
 `getResults()` contains these
@@ -500,6 +500,6 @@ objects in the same order as the list of requests given to
 exceptions can also be obtained separately in homogeneous
 lists.
 
-`J4pException`:: Base exception thrown, when no other exception fits,
+`JolokiaException`:: Base exception thrown, when no other exception fits,
 i.e. when the exception happened on the client side. The
 original exception is contained as nested exception.

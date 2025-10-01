@@ -22,7 +22,7 @@ import java.util.Map;
 
 import org.jolokia.client.JolokiaQueryParameter;
 import org.jolokia.client.JolokiaTargetConfig;
-import org.jolokia.client.exception.J4pException;
+import org.jolokia.client.exception.JolokiaException;
 import org.jolokia.client.request.HttpMethod;
 import org.jolokia.client.request.JolokiaRequest;
 import org.jolokia.client.response.JolokiaResponse;
@@ -51,7 +51,7 @@ public interface HttpClientSpi<T> extends Closeable {
      */
     <REQ extends JolokiaRequest, RES extends JolokiaResponse<REQ>>
     JSONStructure execute(REQ request, HttpMethod method, Map<JolokiaQueryParameter, String> parameters, JolokiaTargetConfig targetConfig)
-            throws IOException, J4pException;
+            throws IOException, JolokiaException;
 
     /**
      * Send multiple {@link JolokiaRequest requests} in a single HTTP request (a <em>bulk request</em>).
@@ -68,7 +68,7 @@ public interface HttpClientSpi<T> extends Closeable {
      */
     <REQ extends JolokiaRequest, RES extends JolokiaResponse<REQ>>
     JSONStructure execute(List<REQ> requests, Map<JolokiaQueryParameter, String> parameters, JolokiaTargetConfig targetConfig)
-            throws IOException, J4pException;
+            throws IOException, JolokiaException;
 
     /**
      * Retrieve underlying, implementation-specific HTTP Client if it matches the passed type.

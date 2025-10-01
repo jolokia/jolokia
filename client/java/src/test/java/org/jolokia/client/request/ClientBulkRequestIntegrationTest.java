@@ -47,7 +47,7 @@ import static org.testng.AssertJUnit.assertTrue;
 public class ClientBulkRequestIntegrationTest extends AbstractClientIntegrationTest {
 
     @Test
-    public void simpleBulkRequest() throws MalformedObjectNameException, J4pException {
+    public void simpleBulkRequest() throws MalformedObjectNameException, JolokiaException {
         JolokiaRequest req1 = new JolokiaExecRequest(itSetup.getOperationMBean(),"fetchNumber","inc");
         JolokiaVersionRequest req2 = new JolokiaVersionRequest();
         List<?> resp = jolokiaClient.execute(req1,req2);
@@ -61,7 +61,7 @@ public class ClientBulkRequestIntegrationTest extends AbstractClientIntegrationT
     }
 
     @Test
-    public void simpleBulkRequestWithOptions() throws MalformedObjectNameException, J4pException {
+    public void simpleBulkRequestWithOptions() throws MalformedObjectNameException, JolokiaException {
         JolokiaRequest req1 = new JolokiaReadRequest(itSetup.getAttributeMBean(), "ComplexNestedValue");
         JolokiaVersionRequest req2 = new JolokiaVersionRequest();
         Map<JolokiaQueryParameter, String> params = new HashMap<>();
@@ -79,7 +79,7 @@ public class ClientBulkRequestIntegrationTest extends AbstractClientIntegrationT
     }
 
     @Test
-    public void simpleBulkRequestWithRequestExcludedFromResponse() throws MalformedObjectNameException, J4pException {
+    public void simpleBulkRequestWithRequestExcludedFromResponse() throws MalformedObjectNameException, JolokiaException {
         JolokiaRequest req1 = new JolokiaReadRequest(itSetup.getAttributeMBean(), "ComplexNestedValue");
         JolokiaVersionRequest req2 = new JolokiaVersionRequest();
         Map<JolokiaQueryParameter, String> params = new HashMap<>();
@@ -102,13 +102,13 @@ public class ClientBulkRequestIntegrationTest extends AbstractClientIntegrationT
     }
 
     @Test
-    public void bulkRequestWithErrors() throws MalformedObjectNameException, J4pException {
+    public void bulkRequestWithErrors() throws MalformedObjectNameException, JolokiaException {
 
         List<JolokiaReadRequest> requests = createBulkRequests();
         try {
             jolokiaClient.execute(requests);
             fail();
-        } catch (J4pBulkRemoteException e) {
+        } catch (JolokiaBulkRemoteException e) {
             List<?> results = e.getResults();
             assertEquals(3, results.size());
             results = e.getResponses();
@@ -119,8 +119,8 @@ public class ClientBulkRequestIntegrationTest extends AbstractClientIntegrationT
 
             results = e.getRemoteExceptions();
             assertEquals(1, results.size());
-            assertTrue(results.get(0) instanceof J4pRemoteException);
-            J4pRemoteException exp = (J4pRemoteException) results.get(0);
+            assertTrue(results.get(0) instanceof JolokiaRemoteException);
+            JolokiaRemoteException exp = (JolokiaRemoteException) results.get(0);
             assertEquals(404, exp.getStatus());
             assertTrue(exp.getMessage().contains("InstanceNotFoundException"));
             assertTrue(exp.getRemoteStackTrace().contains("InstanceNotFoundException"));
@@ -137,14 +137,14 @@ public class ClientBulkRequestIntegrationTest extends AbstractClientIntegrationT
     }
 
     @Test
-    public void optionalBulkRequestsWithExtractorAsArgument() throws MalformedObjectNameException, J4pException {
+    public void optionalBulkRequestsWithExtractorAsArgument() throws MalformedObjectNameException, JolokiaException {
         List<JolokiaReadResponse> resp = jolokiaClient.execute(createBulkRequests(),null, ValidatingResponseExtractor.OPTIONAL);
 
         verifyOptionalBulkResponses(resp);
     }
 
     @Test
-    public void optionalBulkRequestsWithExtractorAsDefault() throws MalformedObjectNameException, J4pException {
+    public void optionalBulkRequestsWithExtractorAsDefault() throws MalformedObjectNameException, JolokiaException {
         JolokiaClient c = new JolokiaClientBuilder().url(jolokiaUrl)
                                .user("jolokia")
                                .password("jolokia")

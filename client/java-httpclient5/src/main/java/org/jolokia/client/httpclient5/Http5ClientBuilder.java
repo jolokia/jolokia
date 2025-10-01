@@ -16,7 +16,6 @@
 package org.jolokia.client.httpclient5;
 
 import java.net.URI;
-import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLContext;
@@ -33,6 +32,8 @@ import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.BasicHttpClientConnectionManager;
 import org.apache.hc.client5.http.impl.io.ManagedHttpClientConnectionFactory;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.apache.hc.client5.http.io.HttpClientConnectionManager;
 import org.apache.hc.client5.http.ssl.DefaultClientTlsStrategy;
 import org.apache.hc.client5.http.ssl.TlsSocketStrategy;
@@ -125,22 +126,23 @@ public class Http5ClientBuilder implements HttpClientBuilder<HttpClient> {
     private HttpClientConnectionManager createConnectionManager(JolokiaClientBuilder.Configuration jcb) {
         // connection config
         ConnectionConfig.Builder ccBuilder = ConnectionConfig.custom();
-        if (jcb.connectionTimeout() != -1) {
-            ccBuilder.setConnectTimeout(jcb.connectionTimeout(), TimeUnit.MILLISECONDS);
+        JolokiaClientBuilder.ConnectionConfiguration jcbConnectionConfig = jcb.connectionConfig();
+        if (jcbConnectionConfig.connectionTimeout() != -1) {
+            ccBuilder.setConnectTimeout(jcbConnectionConfig.connectionTimeout(), TimeUnit.MILLISECONDS);
         }
-        if (jcb.socketTimeout() != -1) {
-            ccBuilder.setSocketTimeout(jcb.socketTimeout(), TimeUnit.MILLISECONDS);
+        if (jcbConnectionConfig.socketTimeout() != -1) {
+            ccBuilder.setSocketTimeout(jcbConnectionConfig.socketTimeout(), TimeUnit.MILLISECONDS);
         }
         ConnectionConfig connectionConfig = ccBuilder.build();
 
         // socket config
         SocketConfig.Builder scBuilder = SocketConfig.custom();
-        scBuilder.setRcvBufSize(jcb.socketBufferSize());
-        scBuilder.setSndBufSize(jcb.socketBufferSize());
-        if (jcb.socketTimeout() != -1) {
-            scBuilder.setSoTimeout(jcb.socketTimeout(), TimeUnit.MILLISECONDS);
+        scBuilder.setRcvBufSize(jcbConnectionConfig.socketBufferSize());
+        scBuilder.setSndBufSize(jcbConnectionConfig.socketBufferSize());
+        if (jcbConnectionConfig.socketTimeout() != -1) {
+            scBuilder.setSoTimeout(jcbConnectionConfig.socketTimeout(), TimeUnit.MILLISECONDS);
         }
-        scBuilder.setTcpNoDelay(jcb.tcpNoDelay());
+        scBuilder.setTcpNoDelay(jcbConnectionConfig.tcpNoDelay());
         SocketConfig socketConfig = scBuilder.build();
 
         // TLS config
@@ -155,46 +157,52 @@ public class Http5ClientBuilder implements HttpClientBuilder<HttpClient> {
             .register("https", tlsStrategy)
             .build();
 
-//        // pooling connection manager - with a builder
-//        PoolingHttpClientConnectionManager poolingManager = PoolingHttpClientConnectionManagerBuilder.create()
-//            .setSchemePortResolver(DefaultSchemePortResolver.INSTANCE)
-//            .setDnsResolver(SystemDefaultDnsResolver.INSTANCE)
-//            .setConnectionFactory(ManagedHttpClientConnectionFactory.INSTANCE)
-//            .setDefaultConnectionConfig(connectionConfig)
-//            .setDefaultSocketConfig(socketConfig)
-//            .setMaxConnTotal()
-//            .setTlsSocketStrategy(tlsStrategy)
-//            .setDefaultTlsConfig(tlsConfig)
-//            .build();
-//
-//        poolingManager.setDefaultMaxPerRoute(1);
-//        poolingManager.setMaxTotal(1);
+        HttpClientConnectionManager manager;
 
-        // basic connection manager - no builder
-        BasicHttpClientConnectionManager basicManager = BasicHttpClientConnectionManager.create(
-            DefaultSchemePortResolver.INSTANCE,
-            SystemDefaultDnsResolver.INSTANCE,
-            registry,
-            ManagedHttpClientConnectionFactory.INSTANCE
-        );
-        basicManager.setConnectionConfig(connectionConfig);
-        basicManager.setSocketConfig(socketConfig);
-        basicManager.setTlsConfig(tlsConfig);
+        if (jcb.poolConfig().usePool()) {
+            // pooling connection manager - with a builder
+            PoolingHttpClientConnectionManager poolingManager = PoolingHttpClientConnectionManagerBuilder.create()
+                .setSchemePortResolver(DefaultSchemePortResolver.INSTANCE)
+                .setDnsResolver(SystemDefaultDnsResolver.INSTANCE)
+                .setConnectionFactory(ManagedHttpClientConnectionFactory.INSTANCE)
+                .setDefaultConnectionConfig(connectionConfig)
+                .setDefaultSocketConfig(socketConfig)
+                .setMaxConnTotal(jcb.poolConfig().maxConnections())
+                .setMaxConnPerRoute(jcb.poolConfig().maxConnections())
+                .setTlsSocketStrategy(tlsStrategy)
+                .setDefaultTlsConfig(tlsConfig)
+                .build();
 
-        return basicManager;
+//            poolingManager.setDefaultMaxPerRoute(1);
+//            poolingManager.setMaxTotal(1);
+            manager = poolingManager;
+        } else {
+            // basic connection manager - no builder
+            BasicHttpClientConnectionManager basicManager = BasicHttpClientConnectionManager.create(
+                DefaultSchemePortResolver.INSTANCE, SystemDefaultDnsResolver.INSTANCE,
+                registry, ManagedHttpClientConnectionFactory.INSTANCE
+            );
+            basicManager.setConnectionConfig(connectionConfig);
+            basicManager.setSocketConfig(socketConfig);
+            basicManager.setTlsConfig(tlsConfig);
+            manager = basicManager;
+        }
+
+        return manager;
     }
 
     private RequestConfig createRequestConfig(JolokiaClientBuilder.Configuration jcb) {
         RequestConfig.Builder builder = RequestConfig.custom();
         builder.setExpectContinueEnabled(jcb.expectContinue());
-        if (jcb.socketTimeout() > -1) {
+        if (jcb.connectionConfig().socketTimeout() > -1) {
             // milliseconds
-            builder.setResponseTimeout(jcb.socketTimeout(), TimeUnit.MILLISECONDS);
+            builder.setResponseTimeout(jcb.connectionConfig().socketTimeout(), TimeUnit.MILLISECONDS);
         }
-        // TODO: pool lease timeout
-//        if (maxConnectionPoolTimeout > -1) {
-//            builder.setConnectionRequestTimeout(jcb.socketTimeout(), TimeUnit.MILLISECONDS);
-//        }
+        if ((jcb.poolConfig().usePool())) {
+            if (jcb.poolConfig().connectionPoolTimeout() > -1) {
+                builder.setConnectionRequestTimeout(jcb.poolConfig().connectionPoolTimeout(), TimeUnit.MILLISECONDS);
+            }
+        }
         return builder.build();
     }
 

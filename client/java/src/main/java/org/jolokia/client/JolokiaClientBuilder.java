@@ -29,7 +29,7 @@ import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
 
 import org.jolokia.client.jdkclient.JdkHttpClientBuilder;
-import org.jolokia.client.response.J4pResponseExtractor;
+import org.jolokia.client.response.JolokiaResponseExtractor;
 import org.jolokia.client.response.ValidatingResponseExtractor;
 import org.jolokia.client.spi.HttpClientBuilder;
 import org.jolokia.client.spi.HttpClientSpi;
@@ -79,7 +79,7 @@ public class JolokiaClientBuilder {
      * be passed down to {@link java.net.Socket#setSendBufferSize(int)}, as {@link java.net.SocketOptions#SO_SNDBUF}
      * or otherwise.
      */
-    private int socketBufferSize;
+    private int socketBufferSize = 8 * 1024;
 
     // TLS options
 
@@ -132,7 +132,7 @@ public class JolokiaClientBuilder {
     private Collection<HttpHeader> defaultHttpHeaders;
 
     // Extractor used creating responses
-    private J4pResponseExtractor responseExtractor;
+    private JolokiaResponseExtractor responseExtractor;
 
     // JMX options, when connecting via HTTP to one Jolokia Agent used in proxy mode, where Jolokia uses
     // standard JMX remote connection to ultimate JVM which doesn't run Jolokia agent on its own.
@@ -146,12 +146,24 @@ public class JolokiaClientBuilder {
     // Password to use for JSR-160 communication when using with a proxy (i.e. targetUrl != null and targetUser != null)
     private String targetPassword;
 
-//    // whether to use thread safe, pooled connections
-//    private boolean pooledConnections;
-//    private int maxTotalConnections;
-//    private int defaultMaxConnectionsPerRoute;
-//    private int maxConnectionPoolTimeout;
-//
+    /**
+     * Whether to use thread safe, pooled connections. Not all implementations support this. For example JDK HTTP
+     * Client configures the connection pool internally and there are only few system properties to tweak
+     * the configuration.
+     */
+    private boolean pooledConnections;
+
+    /**
+     * Max total number of connections in HTTP connection pool. Used only with HttpClient4 / HttpClient5
+     * implementations
+     */
+    private int maxTotalConnections;
+
+    /**
+     * Timeout in milliseconds for leasing connection from the HTTP connection pool.
+     */
+    private int maxConnectionPoolTimeout = 500;
+
 //    // Cookie store to use, might contain already prepared cookies used for a login
 //    private CookieStore cookieStore;
 //
@@ -170,10 +182,9 @@ public class JolokiaClientBuilder {
         contentCharset(StandardCharsets.UTF_8.name());
         expectContinue(true);
         responseExtractor(ValidatingResponseExtractor.DEFAULT);
-//        maxTotalConnections(20);
-//        defaultMaxConnectionsPerRoute(20);
-//        maxConnectionPoolTimeout(500);
-//        pooledConnections();
+        maxTotalConnections(20);
+        maxConnectionPoolTimeout(500);
+        pooledConnections();
 //        cookieStore(new BasicCookieStore());
 //        authenticator(new BasicClientCustomizer());
 
@@ -263,24 +274,46 @@ public class JolokiaClientBuilder {
         return this;
     }
 
-//    /**
-//     * Use a single threaded client for connecting to the agent. This
-//     * is not very suitable in multithreaded environments
-//     */
-//    public final J4pClientBuilder singleConnection() {
-//        pooledConnections = false;
-//        return this;
-//    }
-//
-//    /**
-//     * Use a pooled connection manager for connecting to the agent, which
-//     * uses a pool of connections (see {@link #maxTotalConnections(int), {@link #maxConnectionPoolTimeout(int) {@link #defaultMaxConnectionsPerRoute}} for
-//     * tuning the pool}
-//     */
-//    public final J4pClientBuilder pooledConnections() {
-//        pooledConnections = true;
-//        return this;
-//    }
+    /**
+     * Use a single threaded client for connecting to the agent. This
+     * is not very suitable in multithreaded environments. For default JDK HTTP Client implementation we have
+     * internal connection pool anyway (see {@code jdk.internal.net.http.ConnectionPool}).
+     */
+    public final JolokiaClientBuilder singleConnection() {
+        pooledConnections = false;
+        return this;
+    }
+
+    /**
+     * Use a pooled connection manager for connecting to the agent, which
+     * uses a pool of connections (see {@link #maxTotalConnections(int) and {@link #maxConnectionPoolTimeout(int)} for
+     * tuning the pool).
+     */
+    public final JolokiaClientBuilder pooledConnections() {
+        pooledConnections = true;
+        return this;
+    }
+
+    /**
+     * Sets the maximum number of connections allowed when using {@link #pooledConnections()}.
+     * @param pConnections number of max. simultaneous connections.
+     */
+    public final JolokiaClientBuilder maxTotalConnections(int pConnections) {
+        maxTotalConnections = pConnections;
+        return this;
+    }
+
+    /**
+     * Sets the timeout in milliseconds used when retrieving a connection
+     * from the connection manager. Default is 500ms, if set to -1 the system default is used. Use
+     * 0 for an infinite timeout.
+     *
+     * @param pConnectionPoolTimeout timeout in milliseconds
+     */
+    public final JolokiaClientBuilder maxConnectionPoolTimeout(int pConnectionPoolTimeout) {
+        maxConnectionPoolTimeout = pConnectionPoolTimeout;
+        return this;
+    }
 
     /**
      * Determines the timeout in milliseconds until a connection is established. A timeout value of zero is
@@ -306,36 +339,6 @@ public class JolokiaClientBuilder {
         socketTimeout = pTimeOut;
         return this;
     }
-
-//    /**
-//     * Sets the maximum number of connections allowed when using {@link #pooledConnections()}.
-//     * @param pConnections number of max. simultaneous connections.
-//     */
-//    public final J4pClientBuilder maxTotalConnections(int pConnections) {
-//        maxTotalConnections = pConnections;
-//        return this;
-//    }
-//
-//    /**
-//     * Sets the maximum number of connections per route allowed when using {@link #pooledConnections()}
-//     * @param pDefaultMaxConnectionsPerRoute number of max connections per route.
-//     */
-//    public final J4pClientBuilder defaultMaxConnectionsPerRoute(int pDefaultMaxConnectionsPerRoute) {
-//        defaultMaxConnectionsPerRoute = pDefaultMaxConnectionsPerRoute;
-//        return this;
-//    }
-//
-//    /**
-//     * Sets the timeout in milliseconds used when retrieving a connection
-//     * from the connection manager. Default is 500ms, if set to -1 the system default is used. Use
-//     * 0 for an infinite timeout.
-//     *
-//     * @param pConnectionPoolTimeout timeout in milliseconds
-//     */
-//    public final J4pClientBuilder maxConnectionPoolTimeout(int pConnectionPoolTimeout) {
-//        maxConnectionPoolTimeout = pConnectionPoolTimeout;
-//        return this;
-//    }
 
     /**
      * Defines the charset to be used per default for encoding content body.
@@ -462,7 +465,7 @@ public class JolokiaClientBuilder {
      *
      * @param pResponseExtractor response extractor to use.
      */
-    public final JolokiaClientBuilder responseExtractor(J4pResponseExtractor pResponseExtractor) {
+    public final JolokiaClientBuilder responseExtractor(JolokiaResponseExtractor pResponseExtractor) {
         this.responseExtractor = pResponseExtractor;
         return this;
     }
@@ -503,9 +506,10 @@ public class JolokiaClientBuilder {
     }
 
     HttpClientSpi<?> createHttpClient() {
-        return httpClientBuilder.buildHttpClient(new Configuration(url, user, password,
-            httpProxy, connectionTimeout, socketTimeout, tcpNoDelay, socketBufferSize, contentCharset, expectContinue,
-            defaultHttpHeaders));
+        return httpClientBuilder.buildHttpClient(new Configuration(url, user, password, httpProxy,
+            new ConnectionConfiguration(connectionTimeout, socketTimeout, tcpNoDelay, socketBufferSize),
+            new PoolConfiguration(this.pooledConnections, this.maxTotalConnections, this.maxConnectionPoolTimeout),
+            contentCharset, expectContinue, defaultHttpHeaders));
     }
 
     /**
@@ -532,23 +536,43 @@ public class JolokiaClientBuilder {
      * @param user               Basic authentication user name
      * @param password           Basic authentication password
      * @param proxy              HTTP proxy configuration
-     * @param connectionTimeout  connection timeout in milliseconds used when establishing HTTP connection. Defaults to 20s.
-     * @param socketTimeout      socket/request timeout in milliseconds. Defaults to 0 (infinite).
-     * @param tcpNoDelay         TCP_NODELAY option
-     * @param socketBufferSize   socket and buffer size to use
      * @param contentCharset     charset to use when sending the request
      * @param expectContinue     whether to send {@code Expect: 100-continue} before sending POST data.
      * @param defaultHttpHeaders collection of headers to send with each request
      */
     public record Configuration(URI url, String user, String password, Proxy proxy,
-                                int connectionTimeout, int socketTimeout, boolean tcpNoDelay, int socketBufferSize,
+                                ConnectionConfiguration connectionConfig,
+                                PoolConfiguration poolConfig,
                                 Charset contentCharset, boolean expectContinue,
                                 Collection<HttpHeader> defaultHttpHeaders) {
 
         public static Configuration withUrl(URI url) {
-            return new Configuration(url, null, null, null, 5000, 5000, false, 8192, StandardCharsets.UTF_8,
-                false, Collections.emptySet());
+            return new Configuration(url, null, null, null,
+                new ConnectionConfiguration(5000, 5000, false, 8192),
+                new PoolConfiguration(true, 20, 500),
+                StandardCharsets.UTF_8, false, Collections.emptySet());
         }
+    }
+
+    /**
+     * Connection aspects of configuration
+     *
+     * @param connectionTimeout  connection timeout in milliseconds used when establishing HTTP connection. Defaults to 20s.
+     * @param socketTimeout      socket/request timeout in milliseconds. Defaults to 0 (infinite).
+     * @param tcpNoDelay         TCP_NODELAY option
+     * @param socketBufferSize   socket and buffer size to use
+     */
+    public record ConnectionConfiguration(int connectionTimeout, int socketTimeout, boolean tcpNoDelay, int socketBufferSize) {
+    }
+
+    /**
+     * Configuration DTO for pooling aspects of the HTTP Client - not all implementations may support these options.
+     *
+     * @param usePool
+     * @param maxConnections
+     * @param connectionPoolTimeout
+     */
+    public record PoolConfiguration(boolean usePool, int maxConnections, int connectionPoolTimeout) {
     }
 
     /**

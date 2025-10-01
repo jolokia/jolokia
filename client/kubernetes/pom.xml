@@ -40,6 +40,11 @@
 
     <dependency>
       <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-client-java-httpclient4</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jolokia</groupId>
       <artifactId>jolokia-client-jmx-adapter</artifactId>
       <scope>provided</scope>
     </dependency>

@@ -18,7 +18,7 @@ package org.jolokia.client.request;
 
 import javax.management.MalformedObjectNameException;
 
-import org.jolokia.client.exception.J4pException;
+import org.jolokia.client.exception.JolokiaException;
 import org.jolokia.client.response.JolokiaReadResponse;
 import org.jolokia.it.core.ItSetup;
 import org.testng.annotations.Test;
@@ -38,14 +38,14 @@ public class ClientJsr160HiddenTest extends AbstractClientIntegrationTest {
                                                         ItSetup.JOLOKIA_IT_DOMAIN_HIDDEN + ":type=attribute","LongSeconds");
             jolokiaClient.execute(request);
             fail("Exception should have been thrown");
-        } catch (J4pException exp) {
+        } catch (JolokiaException exp) {
             assertTrue(exp.getMessage().contains("InstanceNotFoundException"));
         }
 
     }
 
     @Test
-    public void hiddenMBeanAvailableForJolokia() throws MalformedObjectNameException, J4pException {
+    public void hiddenMBeanAvailableForJolokia() throws MalformedObjectNameException, JolokiaException {
         JolokiaReadRequest request = new JolokiaReadRequest(ItSetup.JOLOKIA_IT_DOMAIN + ":type=attribute","LongSeconds");
         JolokiaReadResponse response = jolokiaClient.execute(request);
         assertNotNull(response.getValue());

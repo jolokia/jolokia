@@ -35,9 +35,9 @@ import javax.management.MalformedObjectNameException;
 //import org.apache.http.conn.ConnectTimeoutException;
 //import org.apache.http.message.BasicHeader;
 import org.easymock.EasyMock;
-import org.jolokia.client.exception.J4pException;
-import org.jolokia.client.exception.J4pRemoteException;
-import org.jolokia.client.exception.J4pTimeoutException;
+import org.jolokia.client.exception.JolokiaException;
+import org.jolokia.client.exception.JolokiaRemoteException;
+import org.jolokia.client.exception.JolokiaTimeoutException;
 import org.jolokia.client.jdkclient.JdkHttpClient;
 import org.jolokia.client.request.JolokiaReadRequest;
 import org.jolokia.client.response.JolokiaReadResponse;
@@ -89,7 +89,7 @@ public class JolokiaClientTest {
     }
 
     @Test
-    public void simple() throws J4pException, IOException {
+    public void simple() throws JolokiaException, IOException {
         HttpClientSpi<?> client = prepareMocks("utf-8", MEMORY_RESPONSE);
 
         JolokiaClient j4p = new JolokiaClient(TEST_URL, client);
@@ -97,8 +97,8 @@ public class JolokiaClientTest {
         assertEquals(((Map<?, ?>) resp.getValue()).get("max"), 530186240L);
     }
 
-    @Test(expectedExceptions = J4pException.class, expectedExceptionsMessageRegExp = ".*JSONArray.*")
-    public void invalidArrayResponse() throws J4pException, IOException {
+    @Test(expectedExceptions = JolokiaException.class, expectedExceptionsMessageRegExp = ".*JSONArray.*")
+    public void invalidArrayResponse() throws JolokiaException, IOException {
         HttpClientSpi<?> client = prepareMocks(null, ARRAY_RESPONSE);
 
         JolokiaClient j4p = new JolokiaClient(TEST_URL, client);
@@ -107,28 +107,28 @@ public class JolokiaClientTest {
         j4p.execute(TEST_REQUEST, opts);
     }
 
-    @Test(expectedExceptions = J4pTimeoutException.class, expectedExceptionsMessageRegExp = ".*timeout.*")
-    public void timeout() throws IOException, J4pException {
+    @Test(expectedExceptions = JolokiaTimeoutException.class, expectedExceptionsMessageRegExp = ".*timeout.*")
+    public void timeout() throws IOException, JolokiaException {
         throwException(false, new HttpConnectTimeoutException("timeout"));
     }
 
-    @Test(expectedExceptions = J4pException.class, expectedExceptionsMessageRegExp = ".*IO-Error.*")
-    public void ioException() throws IOException, J4pException {
+    @Test(expectedExceptions = JolokiaException.class, expectedExceptionsMessageRegExp = ".*IO-Error.*")
+    public void ioException() throws IOException, JolokiaException {
         throwException(false, new IOException());
     }
 
-    @Test(expectedExceptions = J4pTimeoutException.class, expectedExceptionsMessageRegExp = ".*timeout.*")
-    public void connectExceptionForBulkRequests() throws IOException, J4pException {
+    @Test(expectedExceptions = JolokiaTimeoutException.class, expectedExceptionsMessageRegExp = ".*timeout.*")
+    public void connectExceptionForBulkRequests() throws IOException, JolokiaException {
         throwException(true, new HttpConnectTimeoutException("timeout"));
     }
 
-    @Test(expectedExceptions = J4pException.class, expectedExceptionsMessageRegExp = ".*IO-Error.*")
-    public void ioExceptionForBulkRequests() throws IOException, J4pException {
+    @Test(expectedExceptions = JolokiaException.class, expectedExceptionsMessageRegExp = ".*IO-Error.*")
+    public void ioExceptionForBulkRequests() throws IOException, JolokiaException {
         throwException(true, new IOException());
     }
 
-    @Test(expectedExceptions = J4pException.class, expectedExceptionsMessageRegExp = ".*Invalid JSON response for a single request.*")
-    public void throwIOExceptionWhenParsingAnswer() throws IOException, J4pException {
+    @Test(expectedExceptions = JolokiaException.class, expectedExceptionsMessageRegExp = ".*Invalid JSON response for a single request.*")
+    public void throwIOExceptionWhenParsingAnswer() throws IOException, JolokiaException {
         HttpClientSpi<?> client = createMock(HttpClientSpi.class);
         HttpResponse<InputStream> response = createMock(HttpResponse.class);
         expect(response.statusCode()).andReturn(200);
@@ -142,24 +142,24 @@ public class JolokiaClientTest {
         j4p.execute(TEST_REQUEST);
     }
 
-    @Test(expectedExceptions = J4pException.class, expectedExceptionsMessageRegExp = ".*Invalid.*bulk.*")
-    public void invalidBulkRequestResponse() throws IOException, J4pException {
+    @Test(expectedExceptions = JolokiaException.class, expectedExceptionsMessageRegExp = ".*Invalid.*bulk.*")
+    public void invalidBulkRequestResponse() throws IOException, JolokiaException {
         HttpClientSpi<?> client = prepareMocks(null, MEMORY_RESPONSE, true);
 
         JolokiaClient j4p = new JolokiaClient(TEST_URL, client);
         j4p.execute(TEST_REQUEST, TEST_REQUEST_2);
     }
 
-    @Test(expectedExceptions = J4pRemoteException.class, expectedExceptionsMessageRegExp = ".*Invalid.*")
-    public void noStatus() throws IOException, J4pException {
+    @Test(expectedExceptions = JolokiaRemoteException.class, expectedExceptionsMessageRegExp = ".*Invalid.*")
+    public void noStatus() throws IOException, JolokiaException {
         HttpClientSpi<?> client = prepareMocks(null, EMPTY_RESPONSE);
 
         JolokiaClient j4p = new JolokiaClient(TEST_URL, client);
         j4p.execute(TEST_REQUEST);
     }
 
-    @Test(expectedExceptions = J4pRemoteException.class)
-    public void remoteExceptionErrorValue() throws IOException, J4pException {
+    @Test(expectedExceptions = JolokiaRemoteException.class)
+    public void remoteExceptionErrorValue() throws IOException, JolokiaException {
         HttpClientSpi<?> client = prepareMocks("utf-8", ERROR_VALUE_RESPONSE);
 
         JolokiaClient j4p = new JolokiaClient(TEST_URL, client);
@@ -169,7 +169,7 @@ public class JolokiaClientTest {
 
         try {
             j4p.execute(TEST_REQUEST, options);
-        } catch (J4pRemoteException e) {
+        } catch (JolokiaRemoteException e) {
             assertEquals(e.getErrorValue().toJSONString(), "{\"test\":\"ok\"}");
             throw e;
         }
@@ -177,7 +177,7 @@ public class JolokiaClientTest {
         fail("No exception was thrown");
     }
 
-    private void throwException(boolean bulk, Exception exp) throws IOException, J4pException {
+    private void throwException(boolean bulk, Exception exp) throws IOException, JolokiaException {
         HttpClient client = createMock(HttpClient.class);
         try {
             //noinspection unchecked

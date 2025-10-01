@@ -18,7 +18,7 @@ package org.jolokia.client.response;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.jolokia.client.exception.J4pRemoteException;
+import org.jolokia.client.exception.JolokiaRemoteException;
 import org.jolokia.client.request.JolokiaRequest;
 import org.jolokia.json.JSONObject;
 
@@ -29,7 +29,7 @@ import org.jolokia.json.JSONObject;
  * @author roland
  * @since 23/12/14
  */
-public class ValidatingResponseExtractor implements J4pResponseExtractor {
+public class ValidatingResponseExtractor implements JolokiaResponseExtractor {
 
     /**
      * Extractor which only considers status code 200 as valid
@@ -61,7 +61,7 @@ public class ValidatingResponseExtractor implements J4pResponseExtractor {
 
     @Override
     public <RESP extends JolokiaResponse<REQ>, REQ extends JolokiaRequest> RESP extract(REQ pRequest, JSONObject pJsonResp, boolean includeRequest)
-            throws J4pRemoteException {
+            throws JolokiaRemoteException {
         int status = 0;
         if (pJsonResp.containsKey("status")) {
             Object o = pJsonResp.get("status");
@@ -71,7 +71,7 @@ public class ValidatingResponseExtractor implements J4pResponseExtractor {
         }
 
         if (!allowedCodes.contains(status)) {
-            throw new J4pRemoteException(pRequest, pJsonResp);
+            throw new JolokiaRemoteException(pRequest, pJsonResp);
         }
         if (status == 200) {
             RESP response = pRequest.createResponse(pJsonResp);

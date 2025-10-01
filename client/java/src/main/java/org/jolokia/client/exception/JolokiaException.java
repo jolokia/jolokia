@@ -21,14 +21,14 @@ package org.jolokia.client.exception;
  * @author roland
  * @since Jun 8, 2010
  */
-public class J4pException extends Exception {
+public class JolokiaException extends Exception {
 
     /**
      * Constructor with a simple message
      *
      * @param message exception description
      */
-    public J4pException(String message) {
+    public JolokiaException(String message) {
         super(message);
     }
 
@@ -38,7 +38,7 @@ public class J4pException extends Exception {
      * @param message description of this exception
      * @param cause   exception causing this exception
      */
-    public J4pException(String message, Throwable cause) {
+    public JolokiaException(String message, Throwable cause) {
         super(message, cause);
     }
 

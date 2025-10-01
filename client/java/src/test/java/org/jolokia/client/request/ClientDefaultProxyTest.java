@@ -38,29 +38,29 @@ import static org.testng.Assert.*;
 public class ClientDefaultProxyTest extends AbstractClientIntegrationTest {
 
     @Test
-    public void baseTest() throws MalformedObjectNameException, J4pException {
+    public void baseTest() throws MalformedObjectNameException, JolokiaException {
         JolokiaReadResponse resp = jolokiaClient.execute(new JolokiaReadRequest("java.lang:type=Memory","HeapMemoryUsage"));
         assertFalse(resp.getRequest().toJson().containsKey("target"));
         assertNotNull(resp.getValue());
     }
 
     @Test
-    public void baseBulkTest() throws MalformedObjectNameException, J4pException {
+    public void baseBulkTest() throws MalformedObjectNameException, JolokiaException {
         try {
             jolokiaClient.execute(
                     new JolokiaReadRequest("java.lang:type=Memory","HeapMemoryUsage"),
                     new JolokiaReadRequest("java.lang:type=Thread","ThreadNumber"));
             fail();
-        } catch (J4pBulkRemoteException exp) {
+        } catch (JolokiaBulkRemoteException exp) {
             List<JolokiaReadResponse> resps = exp.getResponses();
             assertNotNull(resps.get(0).getValue());
-            J4pRemoteException jExp = exp.getRemoteExceptions().get(0);
+            JolokiaRemoteException jExp = exp.getRemoteExceptions().get(0);
             assertTrue(jExp.getRemoteStackTrace().contains("RMI"));
         }
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*Proxy requests should be sent using POST method.*")
-    public void invalidMethodTest() throws MalformedObjectNameException, J4pException {
+    public void invalidMethodTest() throws MalformedObjectNameException, JolokiaException {
         JolokiaReadRequest req = new JolokiaReadRequest("java.lang:type=Memory","HeapMemoryUsage");
         req.setPreferredHttpMethod(HttpMethod.GET);
         jolokiaClient.execute(req);

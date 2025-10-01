@@ -15,7 +15,7 @@
  */
 package org.jolokia.client.response;
 
-import org.jolokia.client.exception.J4pRemoteException;
+import org.jolokia.client.exception.JolokiaRemoteException;
 import org.jolokia.client.request.JolokiaRequest;
 import org.jolokia.json.JSONObject;
 
@@ -26,7 +26,7 @@ import org.jolokia.json.JSONObject;
  * @author roland
  * @since 23/12/14
  */
-public interface J4pResponseExtractor {
+public interface JolokiaResponseExtractor {
 
     /**
      * Prepare and create {@link JolokiaResponse} based on JSON response from remote Jolokia Agent and the original
@@ -39,9 +39,9 @@ public interface J4pResponseExtractor {
      * @param <RESP>         response type
      * @param <REQ>          request type
      * @return the created {@link JolokiaResponse response}
-     * @throws J4pRemoteException if the response is in an error state this exception should be thrown.
+     * @throws JolokiaRemoteException if the response is in an error state this exception should be thrown.
      */
     <RESP extends JolokiaResponse<REQ>, REQ extends JolokiaRequest> RESP extract(REQ request, JSONObject jsonResp,
-                                                                                 boolean includeRequest) throws J4pRemoteException;
+                                                                                 boolean includeRequest) throws JolokiaRemoteException;
 
 }

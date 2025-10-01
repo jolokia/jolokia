@@ -38,10 +38,10 @@ import org.jolokia.client.EscapeUtil;
 import org.jolokia.client.JolokiaClientBuilder;
 import org.jolokia.client.JolokiaQueryParameter;
 import org.jolokia.client.JolokiaTargetConfig;
-import org.jolokia.client.exception.J4pConnectException;
-import org.jolokia.client.exception.J4pException;
-import org.jolokia.client.exception.J4pRemoteException;
-import org.jolokia.client.exception.J4pTimeoutException;
+import org.jolokia.client.exception.JolokiaConnectException;
+import org.jolokia.client.exception.JolokiaException;
+import org.jolokia.client.exception.JolokiaRemoteException;
+import org.jolokia.client.exception.JolokiaTimeoutException;
 import org.jolokia.client.request.HttpMethod;
 import org.jolokia.client.request.JolokiaRequest;
 import org.jolokia.client.response.JolokiaResponse;
@@ -75,7 +75,7 @@ public class JdkHttpClient implements HttpClientSpi<HttpClient> {
     @Override
     public <REQ extends JolokiaRequest, RES extends JolokiaResponse<REQ>>
     JSONStructure execute(REQ pRequest, HttpMethod method, Map<JolokiaQueryParameter, String> parameters, JolokiaTargetConfig targetConfig)
-            throws IOException, J4pException {
+            throws IOException, JolokiaException {
         // JDK HTTP request from Jolokia request
         HttpRequest httpRequest = prepareRequest(pRequest, method, parameters, targetConfig);
 
@@ -85,7 +85,7 @@ public class JdkHttpClient implements HttpClientSpi<HttpClient> {
     @Override
     public <REQ extends JolokiaRequest, RES extends JolokiaResponse<REQ>>
     JSONStructure execute(List<REQ> pRequests, Map<JolokiaQueryParameter, String> parameters, JolokiaTargetConfig targetConfig)
-            throws IOException, J4pException {
+            throws IOException, JolokiaException {
         // JDK HTTP request from bulk Jolokia request
         HttpRequest httpRequest = prepareRequests(pRequests, parameters, targetConfig);
 
@@ -202,8 +202,8 @@ public class JdkHttpClient implements HttpClientSpi<HttpClient> {
      * @return
      */
     private HttpRequest configureRequest(HttpRequest.Builder builder) {
-        if (config.socketTimeout() > 0) {
-            builder.timeout(Duration.ofMillis(config.socketTimeout()));
+        if (config.connectionConfig().socketTimeout() > 0) {
+            builder.timeout(Duration.ofMillis(config.connectionConfig().socketTimeout()));
         }
 
         // emulate preemptive authentication here
@@ -233,7 +233,7 @@ public class JdkHttpClient implements HttpClientSpi<HttpClient> {
      * @param requestType    for logging purpose
      * @return
      */
-    private JSONStructure execute(HttpRequest httpRequest, JolokiaRequest jolokiaRequest, String requestType) throws IOException, J4pException {
+    private JSONStructure execute(HttpRequest httpRequest, JolokiaRequest jolokiaRequest, String requestType) throws IOException, JolokiaException {
         // Response to be handled/returned as InputStream
         HttpResponse.BodyHandler<InputStream> responseHandler = HttpResponse.BodyHandlers.ofInputStream();
         try {
@@ -244,7 +244,7 @@ public class JdkHttpClient implements HttpClientSpi<HttpClient> {
             try (InputStream body = response.body()) {
                 if (errorCode != 200) {
                     // no need to parse, because Jolokia JSON responses for errors are sent with HTTP 200 code
-                    throw new J4pRemoteException(jolokiaRequest, "HTTP error " + errorCode + " sending " + requestType + " Jolokia request",
+                    throw new JolokiaRemoteException(jolokiaRequest, "HTTP error " + errorCode + " sending " + requestType + " Jolokia request",
                         null, errorCode, null, null);
                 }
 
@@ -257,20 +257,20 @@ public class JdkHttpClient implements HttpClientSpi<HttpClient> {
                 // JSON parsing error - convert to Jolokia exception
                 String errorType = e.getClass().getName();
                 String message = "Error parsing " + requestType + " response: " + e.getMessage();
-                throw new J4pRemoteException(jolokiaRequest, message, errorType, errorCode, null, null);
+                throw new JolokiaRemoteException(jolokiaRequest, message, errorType, errorCode, null, null);
             }
         } catch (ConnectException e) {
             String msg = "Cannot connect to " + jolokiaAgentUrl + ": " + e.getMessage();
-            throw new J4pConnectException(msg, e);
+            throw new JolokiaConnectException(msg, e);
         } catch (HttpConnectTimeoutException e) {
             String msg = "Connection timeout when sending " + requestType + " request to " + jolokiaAgentUrl + ": " + e.getMessage();
-            throw new J4pTimeoutException(msg, e);
+            throw new JolokiaTimeoutException(msg, e);
         } catch (HttpTimeoutException e) {
             String msg = "Timeout when processing " + requestType + " request to " + jolokiaAgentUrl + ": " + e.getMessage();
-            throw new J4pTimeoutException(msg, e);
+            throw new JolokiaTimeoutException(msg, e);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new J4pException("Interrupted while sending " + requestType + " Jolokia request", e);
+            throw new JolokiaException("Interrupted while sending " + requestType + " Jolokia request", e);
         }
     }
 

@@ -25,7 +25,7 @@ import org.jolokia.json.JSONObject;
  * @author roland
  * @since Jun 9, 2010
  */
-public class J4pRemoteException extends J4pException {
+public class JolokiaRemoteException extends JolokiaException {
 
     // Status code of the error, extracted from the JSON response - not from HTTP response
     private final int status;
@@ -55,7 +55,7 @@ public class J4pRemoteException extends J4pException {
      * @param pStacktrace     stacktrace of the remote exception
      * @param pErrorValue     the error JSON object
      */
-    public J4pRemoteException(JolokiaRequest pJolokiaRequest, String pMessage, String pErrorType, int pStatus, String pStacktrace, JSONObject pErrorValue) {
+    public JolokiaRemoteException(JolokiaRequest pJolokiaRequest, String pMessage, String pErrorType, int pStatus, String pStacktrace, JSONObject pErrorValue) {
         super(pMessage);
         status = pStatus;
         errorType = pErrorType;
@@ -71,7 +71,7 @@ public class J4pRemoteException extends J4pException {
      * @param pJolokiaRequest
      * @param pJsonRespObject
      */
-    public J4pRemoteException(JolokiaRequest pJolokiaRequest, JSONObject pJsonRespObject) {
+    public JolokiaRemoteException(JolokiaRequest pJolokiaRequest, JSONObject pJsonRespObject) {
         super(generateErrorMessage(pJolokiaRequest, pJsonRespObject));
 
         Object statusO = pJsonRespObject.get("status");

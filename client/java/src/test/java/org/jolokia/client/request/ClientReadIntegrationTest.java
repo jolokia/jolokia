@@ -42,18 +42,18 @@ import static org.testng.Assert.*;
 public class ClientReadIntegrationTest extends AbstractClientIntegrationTest {
 
     @Test
-    public void nameTest() throws MalformedObjectNameException, J4pException {
+    public void nameTest() throws MalformedObjectNameException, JolokiaException {
         checkNames(HttpMethod.GET,itSetup.getStrangeNames(),itSetup.getEscapedNames());
         checkNames(HttpMethod.POST,itSetup.getStrangeNames(),itSetup.getEscapedNames());
     }
 
     @Test
-    public void errorTest() throws MalformedObjectNameException, J4pException {
+    public void errorTest() throws MalformedObjectNameException, JolokiaException {
         JolokiaReadRequest req = new JolokiaReadRequest("no.domain:name=vacuum","oxygen");
         try {
             jolokiaClient.execute(req);
             fail();
-        } catch (J4pRemoteException exp) {
+        } catch (JolokiaRemoteException exp) {
             assertEquals(exp.getStatus(), 404);
             assertTrue(exp.getMessage().contains("InstanceNotFoundException"));
             assertTrue(exp.getRemoteStackTrace().contains("InstanceNotFoundException"));
@@ -61,13 +61,13 @@ public class ClientReadIntegrationTest extends AbstractClientIntegrationTest {
     }
 
     @Test
-    public void errorConnectionRefusedTest() throws J4pException, MalformedObjectNameException {
+    public void errorConnectionRefusedTest() throws JolokiaException, MalformedObjectNameException {
         try {
             final JolokiaReadRequest req = new JolokiaReadRequest(itSetup.getAttributeMBean(),"LongSeconds");
             JolokiaClient anotherClient = new JolokiaClient(URI.create("http://localhost:27654/jolokia"));
             anotherClient.execute(req);
             fail();
-        } catch (J4pConnectException exp) {
+        } catch (JolokiaConnectException exp) {
             // all fine
         }
     }
@@ -79,7 +79,7 @@ public class ClientReadIntegrationTest extends AbstractClientIntegrationTest {
             startWithoutAgent();
             jolokiaClient.execute(req);
             fail();
-        } catch (J4pRemoteException exp) {
+        } catch (JolokiaRemoteException exp) {
             assertEquals(exp.getStatus(), 404);
         }
         stop();
@@ -109,7 +109,7 @@ public class ClientReadIntegrationTest extends AbstractClientIntegrationTest {
     }
 
     @Test
-    public void nameWithSpace() throws MalformedObjectNameException, J4pException {
+    public void nameWithSpace() throws MalformedObjectNameException, JolokiaException {
         for (JolokiaReadRequest req : readRequests("jolokia.it:type=naming/,name=name with space","Ok")) {
             JolokiaReadResponse resp = jolokiaClient.execute(req);
             assertNotNull(resp);
@@ -124,7 +124,7 @@ public class ClientReadIntegrationTest extends AbstractClientIntegrationTest {
     }
 
     @Test
-    public void multipleAttributes() throws MalformedObjectNameException, J4pException {
+    public void multipleAttributes() throws MalformedObjectNameException, JolokiaException {
 
         for (JolokiaReadRequest req : readRequests(itSetup.getAttributeMBean(),"LongSeconds","SmallMinutes")) {
             JolokiaReadResponse resp = jolokiaClient.execute(req);
@@ -188,7 +188,7 @@ public class ClientReadIntegrationTest extends AbstractClientIntegrationTest {
     }
 
     @Test
-    public void allAttributes() throws MalformedObjectNameException, J4pException {
+    public void allAttributes() throws MalformedObjectNameException, JolokiaException {
         for (JolokiaReadRequest req : readRequests(itSetup.getAttributeMBean())) {
             JolokiaReadResponse resp = jolokiaClient.execute(req);
             assertFalse(req.hasSingleAttribute());
@@ -239,7 +239,7 @@ public class ClientReadIntegrationTest extends AbstractClientIntegrationTest {
     }
 
     @Test
-    public void mbeanPattern() throws MalformedObjectNameException, J4pException {
+    public void mbeanPattern() throws MalformedObjectNameException, JolokiaException {
         for (JolokiaReadRequest req : readRequests("*:type=attribute","LongSeconds")) {
             JolokiaReadResponse resp = jolokiaClient.execute(req);
             assertEquals(resp.getObjectNames().size(), 1);
@@ -277,7 +277,7 @@ public class ClientReadIntegrationTest extends AbstractClientIntegrationTest {
     }
 
     @Test
-    public void mbeanPatternWithAttributes() throws MalformedObjectNameException, J4pException {
+    public void mbeanPatternWithAttributes() throws MalformedObjectNameException, JolokiaException {
         for (JolokiaReadRequest req : readRequests("*:type=attribute","LongSeconds","List")) {
             assertNull(req.getPath());
             JolokiaReadResponse resp = jolokiaClient.execute(req);
@@ -301,7 +301,7 @@ public class ClientReadIntegrationTest extends AbstractClientIntegrationTest {
     }
 
     @Test
-    public void mxBeanReadTest() throws MalformedObjectNameException, J4pException {
+    public void mxBeanReadTest() throws MalformedObjectNameException, JolokiaException {
         for (JolokiaReadRequest request  : readRequests("jolokia.it:type=mxbean","ComplexTestData")) {
             JolokiaReadResponse response = jolokiaClient.execute(request);
             JSONObject value = response.getValue();
@@ -338,7 +338,7 @@ public class ClientReadIntegrationTest extends AbstractClientIntegrationTest {
     }
 
     @Test
-    public void processingOptionsTest() throws J4pException, MalformedObjectNameException {
+    public void processingOptionsTest() throws JolokiaException, MalformedObjectNameException {
         for (JolokiaReadRequest request : readRequests("jolokia.it:type=mxbean","ComplexTestData")) {
             Map<JolokiaQueryParameter,String> params = new HashMap<>();
             params.put(JolokiaQueryParameter.MAX_DEPTH,"1");
@@ -357,7 +357,7 @@ public class ClientReadIntegrationTest extends AbstractClientIntegrationTest {
     }
 
     @SafeVarargs
-    private void checkNames(HttpMethod pMethod, List<String> ... pNames) throws MalformedObjectNameException, J4pException {
+    private void checkNames(HttpMethod pMethod, List<String> ... pNames) throws MalformedObjectNameException, JolokiaException {
         for (List<String> pName : pNames) {
             for (String name : pName) {
                 System.out.println(name);
@@ -384,7 +384,7 @@ public class ClientReadIntegrationTest extends AbstractClientIntegrationTest {
     }
 
     @Test
-    public void nonStringKeyInAMap() throws J4pException, MalformedObjectNameException {
+    public void nonStringKeyInAMap() throws JolokiaException, MalformedObjectNameException {
         JolokiaReadRequest request = new JolokiaReadRequest(itSetup.getAttributeMBean(), "NonStringKeyMap");
         JolokiaReadResponse response = jolokiaClient.execute(request, HttpMethod.POST, Collections.emptyMap());
         JSONObject value = response.getValue();

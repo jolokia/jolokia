@@ -23,7 +23,7 @@ import java.net.ConnectException;
  * @author roland
  * @since 13.12.10
  */
-public class J4pConnectException extends J4pException {
+public class JolokiaConnectException extends JolokiaException {
 
     /**
      * Constructor
@@ -31,7 +31,7 @@ public class J4pConnectException extends J4pException {
      * @param pMessage          error message
      * @param pConnectException connect exception occurred
      */
-    public J4pConnectException(String pMessage, ConnectException pConnectException) {
+    public JolokiaConnectException(String pMessage, ConnectException pConnectException) {
         super(pMessage, pConnectException);
     }
 

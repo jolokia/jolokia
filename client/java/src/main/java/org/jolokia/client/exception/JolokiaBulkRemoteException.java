@@ -26,11 +26,11 @@ import org.jolokia.client.response.JolokiaResponse;
  * @author roland
  * @since Jun 9, 2010
  */
-public class J4pBulkRemoteException extends J4pException {
+public class JolokiaBulkRemoteException extends JolokiaException {
 
     /**
      * List of results obtained from the remote side. Each item may be a successful {@link JolokiaResponse}
-     * or a {@link J4pRemoteException}
+     * or a {@link JolokiaRemoteException}
      */
     private final List<Object> results;
 
@@ -39,13 +39,13 @@ public class J4pBulkRemoteException extends J4pException {
      *
      * @param pResults list of results which should be of type {@link JolokiaResponse}
      */
-    public J4pBulkRemoteException(List<Object> pResults) {
+    public JolokiaBulkRemoteException(List<Object> pResults) {
         super("Bulk request failed remotely");
         results = pResults;
     }
 
     /**
-     * Get the result list. Object in this list are either {@link J4pRemoteException} for an error or
+     * Get the result list. Object in this list are either {@link JolokiaRemoteException} for an error or
      * a {@link JolokiaResponse} for successful requests.
      *
      * @return a list of results
@@ -72,15 +72,15 @@ public class J4pBulkRemoteException extends J4pException {
     }
 
     /**
-     * Get the list of {@link J4pRemoteException}. A list with all remote exceptions is collected in this list.
+     * Get the list of {@link JolokiaRemoteException}. A list with all remote exceptions is collected in this list.
      *
      * @return list of remote exceptions
      */
-    public List<J4pRemoteException> getRemoteExceptions() {
-        List<J4pRemoteException> ret = new ArrayList<>();
+    public List<JolokiaRemoteException> getRemoteExceptions() {
+        List<JolokiaRemoteException> ret = new ArrayList<>();
         for (Object entry : results) {
-            if (entry instanceof J4pRemoteException) {
-                ret.add((J4pRemoteException) entry);
+            if (entry instanceof JolokiaRemoteException) {
+                ret.add((JolokiaRemoteException) entry);
             }
         }
         return ret;

@@ -43,10 +43,10 @@ import org.jolokia.client.HttpUtil;
 import org.jolokia.client.JolokiaClientBuilder;
 import org.jolokia.client.JolokiaQueryParameter;
 import org.jolokia.client.JolokiaTargetConfig;
-import org.jolokia.client.exception.J4pConnectException;
-import org.jolokia.client.exception.J4pException;
-import org.jolokia.client.exception.J4pRemoteException;
-import org.jolokia.client.exception.J4pTimeoutException;
+import org.jolokia.client.exception.JolokiaConnectException;
+import org.jolokia.client.exception.JolokiaException;
+import org.jolokia.client.exception.JolokiaRemoteException;
+import org.jolokia.client.exception.JolokiaTimeoutException;
 import org.jolokia.client.request.HttpMethod;
 import org.jolokia.client.request.JolokiaRequest;
 import org.jolokia.client.response.JolokiaResponse;
@@ -61,11 +61,11 @@ import org.jolokia.json.parser.ParseException;
  */
 public class Http4Client implements HttpClientSpi<HttpClient> {
 
-    private final CloseableHttpClient client;
+    private final HttpClient client;
     private final JolokiaClientBuilder.Configuration config;
     private final URI jolokiaAgentUrl;
 
-    public Http4Client(CloseableHttpClient client, JolokiaClientBuilder.Configuration configuration) {
+    public Http4Client(HttpClient client, JolokiaClientBuilder.Configuration configuration) {
         this.client = client;
         this.config = configuration;
         this.jolokiaAgentUrl = this.config.url();
@@ -82,7 +82,7 @@ public class Http4Client implements HttpClientSpi<HttpClient> {
     @Override
     public <REQ extends JolokiaRequest, RES extends JolokiaResponse<REQ>>
     JSONStructure execute(REQ pRequest, HttpMethod method, Map<JolokiaQueryParameter, String> parameters, JolokiaTargetConfig targetConfig)
-            throws IOException, J4pException {
+            throws IOException, JolokiaException {
         HttpUriRequest httpRequest = prepareRequest(pRequest, method, parameters, targetConfig);
 
         return execute(httpRequest, pRequest, pRequest.getType().getValue());
@@ -91,7 +91,7 @@ public class Http4Client implements HttpClientSpi<HttpClient> {
     @Override
     public <REQ extends JolokiaRequest, RES extends JolokiaResponse<REQ>>
     JSONStructure execute(List<REQ> pRequests, Map<JolokiaQueryParameter, String> parameters, JolokiaTargetConfig targetConfig)
-            throws IOException, J4pException {
+            throws IOException, JolokiaException {
         HttpUriRequest httpRequest = prepareRequests(pRequests, parameters, targetConfig);
 
         return execute(httpRequest, null, "bulk");
@@ -99,8 +99,8 @@ public class Http4Client implements HttpClientSpi<HttpClient> {
 
     @Override
     public void close() throws IOException {
-        if (client != null) {
-            client.close();
+        if (client instanceof CloseableHttpClient closable) {
+            closable.close();
         }
     }
 
@@ -200,7 +200,7 @@ public class Http4Client implements HttpClientSpi<HttpClient> {
      * @param requestType    for logging purpose
      * @return
      */
-    private JSONStructure execute(HttpUriRequest httpRequest, JolokiaRequest jolokiaRequest, String requestType) throws IOException, J4pException {
+    private JSONStructure execute(HttpUriRequest httpRequest, JolokiaRequest jolokiaRequest, String requestType) throws JolokiaException {
         try {
             HttpResponse response = client.execute(httpRequest);
             StatusLine statusLine = response.getStatusLine();
@@ -208,7 +208,7 @@ public class Http4Client implements HttpClientSpi<HttpClient> {
 
             if (errorCode != 200) {
                 // no need to parse, because Jolokia JSON responses for errors are sent with HTTP 200 code
-                throw new J4pRemoteException(jolokiaRequest, "HTTP error " + errorCode + " sending " + requestType + " Jolokia request",
+                throw new JolokiaRemoteException(jolokiaRequest, "HTTP error " + errorCode + " sending " + requestType + " Jolokia request",
                     null, errorCode, null, null);
             }
 
@@ -226,7 +226,7 @@ public class Http4Client implements HttpClientSpi<HttpClient> {
                 // JSON parsing error - convert to Jolokia exception
                 String errorType = e.getClass().getName();
                 String message = "Error parsing " + requestType + " response: " + e.getMessage();
-                throw new J4pRemoteException(jolokiaRequest, message, errorType, errorCode, null, null);
+                throw new JolokiaRemoteException(jolokiaRequest, message, errorType, errorCode, null, null);
             } finally {
                 if (entity != null) {
                     EntityUtils.consume(entity);
@@ -234,13 +234,13 @@ public class Http4Client implements HttpClientSpi<HttpClient> {
             }
         } catch (ConnectException e) {
             String msg = "Cannot connect to " + jolokiaAgentUrl + ": " + e.getMessage();
-            throw new J4pConnectException(msg, e);
+            throw new JolokiaConnectException(msg, e);
         } catch (ConnectTimeoutException e) {
             String msg = "Connection timeout when sending " + requestType + " request to " + jolokiaAgentUrl + ": " + e.getMessage();
-            throw new J4pTimeoutException(msg, e);
+            throw new JolokiaTimeoutException(msg, e);
         } catch (IOException e) {
             String msg = "IO exception when processing " + requestType + " request to " + jolokiaAgentUrl + ": " + e.getMessage();
-            throw new J4pTimeoutException(msg, e);
+            throw new JolokiaTimeoutException(msg, e);
         }
     }
 

@@ -2,19 +2,15 @@ package org.jolokia.kubernetes.client;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXServiceURL;
-
-import org.jolokia.client.J4pClient;
-import org.jolokia.client.jmxadapter.JolokiaJmxConnector;
-import org.jolokia.client.jmxadapter.RemoteJmxAdapter;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Pod;
@@ -23,6 +19,10 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.http.HttpResponse;
+import org.jolokia.client.JolokiaClient;
+import org.jolokia.client.httpclient4.Http4Client;
+import org.jolokia.client.jmxadapter.JolokiaJmxConnector;
+import org.jolokia.client.jmxadapter.RemoteJmxAdapter;
 
 public class KubernetesJmxConnector extends JolokiaJmxConnector {
 
@@ -51,7 +51,7 @@ public class KubernetesJmxConnector extends JolokiaJmxConnector {
     this.postCreateAdapter();
   }
 
-  protected RemoteJmxAdapter createAdapter(J4pClient client) throws IOException {
+  protected RemoteJmxAdapter createAdapter(JolokiaClient client) throws IOException {
     return new RemoteJmxAdapter(client);
   }
 
@@ -82,10 +82,10 @@ public class KubernetesJmxConnector extends JolokiaJmxConnector {
   /**
    * @return a connection if successful
    */
-  protected J4pClient expandAndProbeUrl(KubernetesClient client,
+  protected JolokiaClient expandAndProbeUrl(KubernetesClient client,
       Map<String, Object> env) throws MalformedURLException {
     String proxyPath = this.serviceUrl.getURLPath();
-    J4pClient connection;
+      JolokiaClient connection;
     final HashMap<String, String> headersForProbe = createHeadersForProbe(env);
     try {
       if (POD_PATTERN.matcher(proxyPath).matches()) {
@@ -154,7 +154,7 @@ public class KubernetesJmxConnector extends JolokiaJmxConnector {
   /**
    * Probe whether we find Jolokia in given namespace, pod and path
    */
-  public static J4pClient probeProxyPath(Map<String, Object> env, KubernetesClient client,
+  public static JolokiaClient probeProxyPath(Map<String, Object> env, KubernetesClient client,
       StringBuilder url,
       HashMap<String, String> headers) {
     try {
@@ -163,8 +163,8 @@ public class KubernetesJmxConnector extends JolokiaJmxConnector {
                 proxyPath,
                 "{\"type\":\"version\"}".getBytes(), null, headers);
       if (response.isSuccessful()) {
-        return new J4pClient(
-            proxyPath, new MinimalHttpClientAdapter(client, proxyPath, env));
+          Http4Client client4 = new Http4Client(new MinimalHttpClientAdapter(client, proxyPath, env), null);
+        return new JolokiaClient(URI.create(proxyPath), client4);
       }
     } catch (IOException | InterruptedException | ExecutionException ignore) {
     }

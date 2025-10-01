@@ -19,8 +19,8 @@ package org.jolokia.client;
 import java.net.http.HttpClient;
 import javax.management.MalformedObjectNameException;
 
-import org.jolokia.client.exception.J4pConnectException;
-import org.jolokia.client.exception.J4pException;
+import org.jolokia.client.exception.JolokiaConnectException;
+import org.jolokia.client.exception.JolokiaException;
 import org.jolokia.client.request.JolokiaReadRequest;
 import org.testng.annotations.Test;
 
@@ -100,8 +100,8 @@ public class JolokiaClientBuilderTest {
         client.getHttpClient(HttpClient.class);
     }
 
-    @Test(expectedExceptions = J4pConnectException.class, expectedExceptionsMessageRegExp = ".*Cannot connect to http://localhost:8080/jolokia.*")
-    public void proxy_executeNoProxy() throws MalformedObjectNameException, J4pException {
+    @Test(expectedExceptions = JolokiaConnectException.class, expectedExceptionsMessageRegExp = ".*Cannot connect to http://localhost:8080/jolokia.*")
+    public void proxy_executeNoProxy() throws MalformedObjectNameException, JolokiaException {
         JolokiaClient client =
             new JolokiaClientBuilder()
                         .url("http://localhost:8080/jolokia")

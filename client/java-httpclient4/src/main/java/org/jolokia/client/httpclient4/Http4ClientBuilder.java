@@ -15,8 +15,6 @@
  */
 package org.jolokia.client.httpclient4;
 
-import java.net.URI;
-import java.nio.charset.Charset;
 import java.util.Collection;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
@@ -52,6 +50,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
 import org.apache.http.impl.conn.DefaultHttpResponseParserFactory;
 import org.apache.http.impl.conn.ManagedHttpClientConnectionFactory;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.impl.io.DefaultHttpRequestWriterFactory;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HttpContext;
@@ -69,25 +68,12 @@ public class Http4ClientBuilder implements HttpClientBuilder<HttpClient> {
 
     @Override
     public HttpClientSpi<HttpClient> buildHttpClient(JolokiaClientBuilder.Configuration jcb) {
-        // client specific properties
         String user = jcb.user();
         String password = jcb.password();
-        JolokiaClientBuilder.Proxy httpProxy = jcb.proxy();
-        int connectionTimeout = jcb.connectionTimeout();
 
-        // ssl configuration
-
-        // properties to be used when performing requests
-        URI jolokiaAgentUrl = jcb.url();
-        int socketTimeout = jcb.socketTimeout();
-        Charset contentCharset = jcb.contentCharset();
-        boolean expectContinue = jcb.expectContinue();
-        Collection<HttpHeader> defaultHttpHeaders = jcb.defaultHttpHeaders();
-        boolean tcpNoDelay = jcb.tcpNoDelay();
-        int socketBufferSize = jcb.socketBufferSize();
-
-        HttpClientConnectionManager connManager =
-            /*pooledConnections ? createPoolingConnectionManager(jcb) :*/ createBasicConnectionManager(jcb);
+        HttpClientConnectionManager connManager = jcb.poolConfig().usePool()
+            ? createPoolingConnectionManager(jcb)
+            : createBasicConnectionManager(jcb);
 
         org.apache.http.impl.client.HttpClientBuilder builder = HttpClients.custom()
             .setConnectionManager(connManager)
@@ -95,6 +81,7 @@ public class Http4ClientBuilder implements HttpClientBuilder<HttpClient> {
             .setUserAgent("Jolokia JMX-Client (using Apache-HttpClient/" + getVersionInfo() + ")")
             .setDefaultRequestConfig(createRequestConfig(jcb));
 
+        Collection<HttpHeader> defaultHttpHeaders = jcb.defaultHttpHeaders();
         if (defaultHttpHeaders != null && !defaultHttpHeaders.isEmpty()) {
             Collection<BasicHeader> headers = defaultHttpHeaders.stream().map(h -> new BasicHeader(h.name(), h.value())).toList();
             builder.setDefaultHeaders(headers);
@@ -140,39 +127,45 @@ public class Http4ClientBuilder implements HttpClientBuilder<HttpClient> {
 
         builder.setNormalizeUri(false);
         builder.setExpectContinueEnabled(jcb.expectContinue());
-        if (jcb.socketTimeout() > -1) {
+        if (jcb.connectionConfig().socketTimeout() > -1) {
             // milliseconds
-            builder.setSocketTimeout(jcb.socketTimeout());
+            builder.setSocketTimeout(jcb.connectionConfig().socketTimeout());
         }
-        if (jcb.connectionTimeout() > -1) {
-            builder.setConnectTimeout(jcb.connectionTimeout());
+        if (jcb.connectionConfig().connectionTimeout() > -1) {
+            // milliseconds
+            builder.setConnectTimeout(jcb.connectionConfig().connectionTimeout());
         }
-//        if (maxConnectionPoolTimeout > -1) {
-//            builder.setConnectionRequestTimeout(maxConnectionPoolTimeout);
-//        }
+        if (jcb.poolConfig().usePool() && jcb.poolConfig().connectionPoolTimeout() > -1) {
+            // milliseconds
+            builder.setConnectionRequestTimeout(jcb.poolConfig().connectionPoolTimeout());
+        }
         return builder.build();
     }
 
     private BasicHttpClientConnectionManager createBasicConnectionManager(JolokiaClientBuilder.Configuration jcb) {
-        BasicHttpClientConnectionManager connManager =
-            new BasicHttpClientConnectionManager(getSocketFactoryRegistry(), getConnectionFactory());
+        BasicHttpClientConnectionManager connManager
+            = new BasicHttpClientConnectionManager(getSocketFactoryRegistry(), getConnectionFactory());
+
         connManager.setSocketConfig(createSocketConfig(jcb));
         connManager.setConnectionConfig(createConnectionConfig(jcb));
+
         return connManager;
     }
 
-//    private PoolingHttpClientConnectionManager createPoolingConnectionManager(J4pClientBuilder.Configuration jcb) {
-//        PoolingHttpClientConnectionManager connManager =
-//            new PoolingHttpClientConnectionManager(getSocketFactoryRegistry(), getConnectionFactory());
-//        connManager.setDefaultSocketConfig(createSocketConfig(jcb));
-//        connManager.setDefaultConnectionConfig(createConnectionConfig(jcb));
-//        if (maxTotalConnections != 0) {
-//            connManager.setMaxTotal(maxTotalConnections);
-//            connManager.setDefaultMaxPerRoute(defaultMaxConnectionsPerRoute);
-//        }
-//
-//        return connManager;
-//    }
+    private PoolingHttpClientConnectionManager createPoolingConnectionManager(JolokiaClientBuilder.Configuration jcb) {
+        PoolingHttpClientConnectionManager connManager
+            = new PoolingHttpClientConnectionManager(getSocketFactoryRegistry(), getConnectionFactory());
+        connManager.setDefaultSocketConfig(createSocketConfig(jcb));
+        connManager.setDefaultConnectionConfig(createConnectionConfig(jcb));
+
+        if (jcb.poolConfig().maxConnections() != 0) {
+            connManager.setMaxTotal(jcb.poolConfig().maxConnections());
+            // there's only one route anyway.
+            connManager.setMaxPerRoute(new HttpRoute(new HttpHost(jcb.url().getHost(), jcb.url().getPort())), jcb.poolConfig().maxConnections());
+        }
+
+        return connManager;
+    }
 
     private SSLConnectionSocketFactory createDefaultSSLConnectionSocketFactory() {
         SSLContext sslcontext = SSLContexts.createSystemDefault();
@@ -182,17 +175,17 @@ public class Http4ClientBuilder implements HttpClientBuilder<HttpClient> {
 
     private ConnectionConfig createConnectionConfig(JolokiaClientBuilder.Configuration jcb) {
         return ConnectionConfig.custom()
-            .setBufferSize(jcb.socketBufferSize())
+            .setBufferSize(jcb.connectionConfig().socketBufferSize())
             .setCharset(jcb.contentCharset())
             .build();
     }
 
     private SocketConfig createSocketConfig(JolokiaClientBuilder.Configuration jcb) {
         SocketConfig.Builder socketConfigB = SocketConfig.custom();
-        if (jcb.socketTimeout() >= 0) {
-            socketConfigB.setSoTimeout(jcb.socketTimeout());
+        if (jcb.connectionConfig().socketTimeout() >= 0) {
+            socketConfigB.setSoTimeout(jcb.connectionConfig().socketTimeout());
         }
-        socketConfigB.setTcpNoDelay(jcb.tcpNoDelay());
+        socketConfigB.setTcpNoDelay(jcb.connectionConfig().tcpNoDelay());
         return socketConfigB.build();
     }
 

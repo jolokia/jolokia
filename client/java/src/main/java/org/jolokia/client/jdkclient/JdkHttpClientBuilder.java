@@ -22,15 +22,12 @@ import java.net.ProxySelector;
 import java.net.SocketAddress;
 import java.net.URI;
 import java.net.http.HttpClient;
-import java.nio.charset.Charset;
 import java.time.Duration;
-import java.util.Collection;
 import java.util.List;
 
 import org.jolokia.client.JolokiaClientBuilder;
 import org.jolokia.client.spi.HttpClientBuilder;
 import org.jolokia.client.spi.HttpClientSpi;
-import org.jolokia.client.spi.HttpHeader;
 
 /**
  * {@link HttpClientBuilder} that creates {@link HttpClientSpi} based on {@link HttpClient JDK HTTP Client}.
@@ -39,39 +36,25 @@ public class JdkHttpClientBuilder implements HttpClientBuilder<HttpClient> {
 
     @Override
     public HttpClientSpi<HttpClient> buildHttpClient(JolokiaClientBuilder.Configuration jcb) {
-        // client specific properties
-        String user = jcb.user();
-        String password = jcb.password();
-        JolokiaClientBuilder.Proxy httpProxy = jcb.proxy();
-        int connectionTimeout = jcb.connectionTimeout();
-
-        // ssl configuration
-
-        // properties to be used when performing requests
-        URI jolokiaAgentUrl = jcb.url();
-        int socketTimeout = jcb.socketTimeout();
-        Charset contentCharset = jcb.contentCharset();
-        boolean expectContinue = jcb.expectContinue();
-        Collection<HttpHeader> defaultHttpHeaders = jcb.defaultHttpHeaders();
-
         // properties that can't be used with JDK client, unless we want to mess with global system properties
         // https://docs.oracle.com/en/java/javase/21/docs/api/java.net.http/module-summary.html
         // jdk.httpclient.bufsize
         // jdk.httpclient.receiveBufferSize
         // jdk.httpclient.sendBufferSize
         // jdk.httpclient.connectionPoolSize
-        boolean tcpNoDelay = jcb.tcpNoDelay();
-        int socketBufferSize = jcb.socketBufferSize();
 
         HttpClient.Builder builder = HttpClient.newBuilder()
             .version(HttpClient.Version.HTTP_1_1)
-            .connectTimeout(Duration.ofMillis(connectionTimeout))
             .followRedirects(HttpClient.Redirect.NORMAL)
 //            .cookieHandler(null)
 //            .executor(null)
 //            .sslContext(null)
 //            .sslParameters(null)
             .priority(1);
+
+        if (jcb.connectionConfig().connectionTimeout() != -1) {
+            builder.connectTimeout(Duration.ofMillis(jcb.connectionConfig().connectionTimeout()));
+        }
 
         // instead of relying on java.net.http.HttpClient.Builder.authenticator(), we will force preemptive
         // authentication by manually sending the Authorization header.
@@ -92,6 +75,7 @@ public class JdkHttpClientBuilder implements HttpClientBuilder<HttpClient> {
 //            });
 //        }
 
+        JolokiaClientBuilder.Proxy httpProxy = jcb.proxy();
         if (httpProxy != null) {
             // java.net.ProxySelector.of() will try to resolve the host during configuration.
             builder.proxy(new ProxySelector() {

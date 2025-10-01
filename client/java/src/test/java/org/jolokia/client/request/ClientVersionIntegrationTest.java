@@ -18,7 +18,7 @@ package org.jolokia.client.request;
 import java.util.Set;
 
 import org.jolokia.client.JolokiaTargetConfig;
-import org.jolokia.client.exception.J4pException;
+import org.jolokia.client.exception.JolokiaException;
 import org.jolokia.client.response.JolokiaVersionResponse;
 import org.jolokia.server.core.Version;
 import org.testng.annotations.Test;
@@ -33,14 +33,14 @@ import static org.testng.AssertJUnit.assertTrue;
 public class ClientVersionIntegrationTest extends AbstractClientIntegrationTest {
 
     @Test
-    public void versionGetRequest() throws J4pException {
+    public void versionGetRequest() throws JolokiaException {
         JolokiaVersionRequest req = new JolokiaVersionRequest();
         JolokiaVersionResponse resp = jolokiaClient.execute(req);
         verifyResponse(resp);
     }
 
     @Test
-    public void versionPostRequest() throws J4pException {
+    public void versionPostRequest() throws JolokiaException {
         for (JolokiaTargetConfig cfg : new JolokiaTargetConfig[]{null/*, getTargetProxyConfig()*/}) {
             JolokiaVersionRequest req = new JolokiaVersionRequest(cfg);
             req.setPreferredHttpMethod(HttpMethod.POST);

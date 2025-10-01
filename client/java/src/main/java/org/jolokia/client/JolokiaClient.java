@@ -23,14 +23,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import org.jolokia.client.exception.J4pBulkRemoteException;
-import org.jolokia.client.exception.J4pConnectException;
-import org.jolokia.client.exception.J4pException;
-import org.jolokia.client.exception.J4pRemoteException;
+import org.jolokia.client.exception.JolokiaBulkRemoteException;
+import org.jolokia.client.exception.JolokiaConnectException;
+import org.jolokia.client.exception.JolokiaException;
+import org.jolokia.client.exception.JolokiaRemoteException;
 import org.jolokia.client.request.HttpMethod;
 import org.jolokia.client.request.JolokiaRequest;
 import org.jolokia.client.response.JolokiaResponse;
-import org.jolokia.client.response.J4pResponseExtractor;
+import org.jolokia.client.response.JolokiaResponseExtractor;
 import org.jolokia.client.response.ValidatingResponseExtractor;
 import org.jolokia.client.spi.HttpClientSpi;
 import org.jolokia.json.JSONArray;
@@ -67,8 +67,8 @@ public class JolokiaClient {
      */
     private final JolokiaTargetConfig targetConfig;
 
-    /** {@link J4pResponseExtractor} that builds actual {@link JolokiaResponse Jolokia responses} */
-    private final J4pResponseExtractor responseExtractor;
+    /** {@link JolokiaResponseExtractor} that builds actual {@link JolokiaResponse Jolokia responses} */
+    private final JolokiaResponseExtractor responseExtractor;
 
     /**
      * Construct a new client for a given server url (as String)
@@ -105,14 +105,14 @@ public class JolokiaClient {
     /**
      * The constructor with all parameters to create a {@link JolokiaClient} for connections to remote Jolokia Agent using
      * selected {@link HttpClientSpi}, optional {@link JolokiaTargetConfig proxy configuration} and actual
-     * {@link J4pResponseExtractor} for handling responses.
+     * {@link JolokiaResponseExtractor} for handling responses.
      *
      * @param pJolokiaAgentUrl the agent URL for how to contact the server.
      * @param pHttpClient      {@link HttpClientSpi} for actual HTTP connection to the agent
      * @param pTargetConfig    information for proxy mode
      * @param pExtractor       response extractor to use
      */
-    public JolokiaClient(URI pJolokiaAgentUrl, HttpClientSpi<?> pHttpClient, JolokiaTargetConfig pTargetConfig, J4pResponseExtractor pExtractor) {
+    public JolokiaClient(URI pJolokiaAgentUrl, HttpClientSpi<?> pHttpClient, JolokiaTargetConfig pTargetConfig, JolokiaResponseExtractor pExtractor) {
         jolokiaAgentUrl = pJolokiaAgentUrl;
         targetConfig = pTargetConfig;
         responseExtractor = pExtractor;
@@ -158,10 +158,10 @@ public class JolokiaClient {
      * @param <REQ>    request type
      * @param <RESP>   response type
      * @return the response as returned by the server
-     * @throws J4pException if something's wrong (e.g. connection failed or read timeout)
+     * @throws JolokiaException if something's wrong (e.g. connection failed or read timeout)
      */
     public <RESP extends JolokiaResponse<REQ>, REQ extends JolokiaRequest>
-    RESP execute(REQ pRequest) throws J4pException {
+    RESP execute(REQ pRequest) throws JolokiaException {
         return execute(pRequest, null, null);
     }
 
@@ -174,10 +174,10 @@ public class JolokiaClient {
      * @param <REQ>              request type
      * @param <RESP>             response type
      * @return the response as returned by the server
-     * @throws J4pException if something's wrong (e.g. connection failed or read timeout)
+     * @throws JolokiaException if something's wrong (e.g. connection failed or read timeout)
      */
     public <RESP extends JolokiaResponse<REQ>, REQ extends JolokiaRequest>
-    RESP execute(REQ pRequest, Map<JolokiaQueryParameter, String> pProcessingOptions) throws J4pException {
+    RESP execute(REQ pRequest, Map<JolokiaQueryParameter, String> pProcessingOptions) throws JolokiaException {
         return execute(pRequest, null, pProcessingOptions);
     }
 
@@ -191,10 +191,10 @@ public class JolokiaClient {
      * @param <REQ>    request type
      * @param <RESP>   response type
      * @return response object
-     * @throws J4pException if something's wrong (e.g. connection failed or read timeout)
+     * @throws JolokiaException if something's wrong (e.g. connection failed or read timeout)
      */
     public <RESP extends JolokiaResponse<REQ>, REQ extends JolokiaRequest>
-    RESP execute(REQ pRequest, HttpMethod pMethod) throws J4pException {
+    RESP execute(REQ pRequest, HttpMethod pMethod) throws JolokiaException {
         return execute(pRequest, pMethod, null);
     }
 
@@ -209,10 +209,10 @@ public class JolokiaClient {
      * @param <REQ>              request type
      * @param <RESP>             response type
      * @return response object
-     * @throws J4pException if something's wrong (e.g. connection failed or read timeout)
+     * @throws JolokiaException if something's wrong (e.g. connection failed or read timeout)
      */
     public <RESP extends JolokiaResponse<REQ>, REQ extends JolokiaRequest>
-    RESP execute(REQ pRequest, HttpMethod pMethod, Map<JolokiaQueryParameter, String> pProcessingOptions) throws J4pException {
+    RESP execute(REQ pRequest, HttpMethod pMethod, Map<JolokiaQueryParameter, String> pProcessingOptions) throws JolokiaException {
         return execute(pRequest, pMethod, pProcessingOptions, responseExtractor);
     }
 
@@ -220,7 +220,7 @@ public class JolokiaClient {
      * Send a single {@link JolokiaRequest} with additional processing parameters and retrieve {@link JolokiaResponse}.
      * The HTTP Method used is passed with the request and should be valid according to the request.
      * HTTP connection is performed using {@link HttpClientSpi}. The response is created with the help
-     * of the passed {@link J4pResponseExtractor}.
+     * of the passed {@link JolokiaResponseExtractor}.
      *
      * @param pRequest           request to execute
      * @param pMethod            method to use which should be either "GET" or "POST"
@@ -229,16 +229,16 @@ public class JolokiaClient {
      * @param <REQ>              request type
      * @param <RESP>             response type
      * @return response object
-     * @throws J4pException if something's wrong (e.g. connection failed or read timeout)
+     * @throws JolokiaException if something's wrong (e.g. connection failed or read timeout)
      */
     public <RESP extends JolokiaResponse<REQ>, REQ extends JolokiaRequest>
-    RESP execute(REQ pRequest, HttpMethod pMethod, Map<JolokiaQueryParameter, String> pProcessingOptions, J4pResponseExtractor pResponseExtractor)
-            throws J4pException {
+    RESP execute(REQ pRequest, HttpMethod pMethod, Map<JolokiaQueryParameter, String> pProcessingOptions, JolokiaResponseExtractor pResponseExtractor)
+            throws JolokiaException {
         try {
             JSONStructure jsonResponse = httpClient.execute(pRequest, pMethod, pProcessingOptions, targetConfig);
             if (!(jsonResponse instanceof JSONObject)) {
                 String msg = jsonResponse == null ? "an empty response" : "a " + jsonResponse.getClass().getName();
-                throw new J4pException("Invalid JSON response for a single request (expected a Map but got " + msg + ")");
+                throw new JolokiaException("Invalid JSON response for a single request (expected a Map but got " + msg + ")");
             }
 
             return extractResponse((JSONObject) jsonResponse, pRequest, pProcessingOptions, pResponseExtractor);
@@ -258,10 +258,10 @@ public class JolokiaClient {
      * @param <REQ>     request type
      * @param <RESP>    response type
      * @return list of responses, one response for each request
-     * @throws J4pException when a communication error occurs
+     * @throws JolokiaException when a communication error occurs
      */
     public <RESP extends JolokiaResponse<REQ>, REQ extends JolokiaRequest>
-    List<RESP> execute(List<REQ> pRequests) throws J4pException {
+    List<RESP> execute(List<REQ> pRequests) throws JolokiaException {
         return execute(pRequests, null);
     }
 
@@ -275,10 +275,10 @@ public class JolokiaClient {
      * @param <REQ>              request type
      * @param <RESP>             response type
      * @return list of responses, one response for each request
-     * @throws J4pException when a communication error occurs
+     * @throws JolokiaException when a communication error occurs
      */
     public <RESP extends JolokiaResponse<REQ>, REQ extends JolokiaRequest>
-    List<RESP> execute(List<REQ> pRequests, Map<JolokiaQueryParameter, String> pProcessingOptions) throws J4pException {
+    List<RESP> execute(List<REQ> pRequests, Map<JolokiaQueryParameter, String> pProcessingOptions) throws JolokiaException {
         return execute(pRequests, pProcessingOptions, responseExtractor);
     }
 
@@ -286,17 +286,17 @@ public class JolokiaClient {
      * Execute multiple requests at once. All given {@link JolokiaRequest requests} will be sent using
      * a single HTTP request where it gets dispatched on the agent side.
      * The {@link JolokiaResponse results} are returned in the same order as the provided requests.
-     * The response is created with the help of the passed {@link J4pResponseExtractor}.
+     * The response is created with the help of the passed {@link JolokiaResponseExtractor}.
      *
      * @param pRequests requests to execute
      * @param <REQ>     request type
      * @param <RESP>    response type
      * @return list of responses, one response for each request
-     * @throws J4pException when a communication error occurs
+     * @throws JolokiaException when a communication error occurs
      */
     @SafeVarargs
     public final <RESP extends JolokiaResponse<REQ>, REQ extends JolokiaRequest>
-    List<RESP> execute(REQ... pRequests) throws J4pException {
+    List<RESP> execute(REQ... pRequests) throws JolokiaException {
         return this.execute(Arrays.asList(pRequests));
     }
 
@@ -304,7 +304,7 @@ public class JolokiaClient {
      * Execute multiple requests at once. All given {@link JolokiaRequest requests} will be sent using
      * a single HTTP request (with additional {@link JolokiaQueryParameter parameters}) where it gets dispatched
      * on the agent side. The {@link JolokiaResponse results} are returned in the same order as the provided requests.
-     * The response is created with the help of the passed {@link J4pResponseExtractor}.
+     * The response is created with the help of the passed {@link JolokiaResponseExtractor}.
      *
      * @param pRequests          requests to execute
      * @param pProcessingOptions processing options to use
@@ -312,21 +312,21 @@ public class JolokiaClient {
      * @param <REQ>              request type
      * @param <RESP>             response type
      * @return list of responses, one response for each request
-     * @throws J4pException when a communication error occurs
+     * @throws JolokiaException when a communication error occurs
      */
     public <RESP extends JolokiaResponse<REQ>, REQ extends JolokiaRequest>
-    List<RESP> execute(List<REQ> pRequests, Map<JolokiaQueryParameter, String> pProcessingOptions, J4pResponseExtractor pResponseExtractor)
-            throws J4pException {
+    List<RESP> execute(List<REQ> pRequests, Map<JolokiaQueryParameter, String> pProcessingOptions, JolokiaResponseExtractor pResponseExtractor)
+            throws JolokiaException {
         try {
             JSONStructure jsonResponse = httpClient.execute(pRequests, pProcessingOptions, targetConfig);
             if (!(jsonResponse instanceof JSONArray)) {
                 if (jsonResponse instanceof JSONObject errorObject) {
                     // bulk response may end with single JSONObject, let's check if it's a "proper error"
                     if (!errorObject.containsKey("status") || ((Number) errorObject.get("status")).intValue() != 200) {
-                        throw new J4pRemoteException(null, errorObject);
+                        throw new JolokiaRemoteException(null, errorObject);
                     }
                 }
-                throw new J4pException("Invalid JSON response for a bulk request (expected an array but got a " + jsonResponse.getClass().getName() + ")");
+                throw new JolokiaException("Invalid JSON response for a bulk request (expected an array but got a " + jsonResponse.getClass().getName() + ")");
             }
 
             return extractResponses((JSONArray) jsonResponse, pRequests, pProcessingOptions, pResponseExtractor);
@@ -348,11 +348,11 @@ public class JolokiaClient {
      * @return
      * @param <REQ>
      * @param <RESP>
-     * @throws J4pException
+     * @throws JolokiaException
      */
     private <RESP extends JolokiaResponse<REQ>, REQ extends JolokiaRequest>
-    RESP extractResponse(JSONObject jsonResponse, REQ pRequest, Map<JolokiaQueryParameter, String> pProcessingOptions, J4pResponseExtractor pResponseExtractor)
-            throws J4pException {
+    RESP extractResponse(JSONObject jsonResponse, REQ pRequest, Map<JolokiaQueryParameter, String> pProcessingOptions, JolokiaResponseExtractor pResponseExtractor)
+            throws JolokiaException {
         boolean excludeRequest = pProcessingOptions != null && "false".equals(pProcessingOptions.get(JolokiaQueryParameter.INCLUDE_REQUEST));
         return pResponseExtractor.extract(pRequest, jsonResponse, !excludeRequest);
     }
@@ -363,7 +363,7 @@ public class JolokiaClient {
      * Combine a list of initial {@link JolokiaRequest requests} and received {@link JSONObject} bulk response
      * and return list of proper {@link JolokiaResponse} responses. Because any individual request may end up with
      * a Jolokia error, we either return a {@link List} of {@link JolokiaResponse Jolokia responses} or throw
-     * a {@link J4pException} where we can find successful responses and exception in correct order.
+     * a {@link JolokiaException} where we can find successful responses and exception in correct order.
      *
      * @param pJsonResponse
      * @param pRequests
@@ -372,15 +372,15 @@ public class JolokiaClient {
      * @return
      * @param <REQ>
      * @param <RESP>
-     * @throws J4pException
+     * @throws JolokiaException
      */
     private <RESP extends JolokiaResponse<REQ>, REQ extends JolokiaRequest>
     List<RESP> extractResponses(JSONArray pJsonResponse, List<REQ> pRequests, Map<JolokiaQueryParameter, String> pProcessingOptions,
-                                J4pResponseExtractor pResponseExtractor)
-            throws J4pException {
+                                JolokiaResponseExtractor pResponseExtractor)
+            throws JolokiaException {
         // the trick is that any initial request may result in proper JolokiaResponse or an error object
         List<RESP> ret = new ArrayList<>(pJsonResponse.size());
-        J4pRemoteException[] remoteExceptions = new J4pRemoteException[pJsonResponse.size()];
+        JolokiaRemoteException[] remoteExceptions = new JolokiaRemoteException[pJsonResponse.size()];
 
         boolean excludeRequest = pProcessingOptions != null
             && "false".equals(pProcessingOptions.get(JolokiaQueryParameter.INCLUDE_REQUEST));
@@ -390,12 +390,12 @@ public class JolokiaClient {
             REQ request = pRequests.get(i);
             Object jsonResp = pJsonResponse.get(i);
             if (!(jsonResp instanceof JSONObject)) {
-                throw new J4pException("Response for request Nr " + i + " is invalid (expected a Map but got "
+                throw new JolokiaException("Response for request Nr " + i + " is invalid (expected a Map but got "
                     + jsonResp.getClass().getName() + ")");
             }
             try {
                 ret.add(i, pResponseExtractor.extract(request, (JSONObject) jsonResp, !excludeRequest));
-            } catch (J4pRemoteException exp) {
+            } catch (JolokiaRemoteException exp) {
                 remoteExceptions[i] = exp;
                 exceptionFound = true;
                 // add a null response to not mess up with the order
@@ -407,14 +407,14 @@ public class JolokiaClient {
             // we've collected some responses, but will "return" them in the bulk exception thrown
             List<Object> responsesAndErrors = new ArrayList<>();
             for (int i = 0; i < pRequests.size(); i++) {
-                J4pRemoteException exp = remoteExceptions[i];
+                JolokiaRemoteException exp = remoteExceptions[i];
                 if (exp != null) {
                     responsesAndErrors.add(exp);
                 } else {
                     responsesAndErrors.add(ret.get(i));
                 }
             }
-            throw new J4pBulkRemoteException(responsesAndErrors);
+            throw new JolokiaBulkRemoteException(responsesAndErrors);
         }
 
         // here we have all successful responses
@@ -422,17 +422,17 @@ public class JolokiaClient {
     }
 
     /**
-     * Translate {@link IOException} to {@link J4pException}
+     * Translate {@link IOException} to {@link JolokiaException}
      *
      * @param ex
      * @return
      */
-    private J4pException mapException(IOException ex) {
+    private JolokiaException mapException(IOException ex) {
         if (ex instanceof ConnectException cex) {
             String msg = "Cannot connect to " + jolokiaAgentUrl + (ex.getMessage() != null ? ": " + ex.getMessage() : "");
-            return new J4pConnectException(msg, cex);
+            return new JolokiaConnectException(msg, cex);
         } else {
-            return new J4pException("IO-Error during connection to " + jolokiaAgentUrl + ": " + ex.getMessage(), ex);
+            return new JolokiaException("IO-Error during connection to " + jolokiaAgentUrl + ": " + ex.getMessage(), ex);
         }
     }
 

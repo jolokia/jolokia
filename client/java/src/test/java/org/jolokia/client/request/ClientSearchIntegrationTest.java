@@ -22,7 +22,7 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import org.jolokia.client.JolokiaTargetConfig;
-import org.jolokia.client.exception.J4pException;
+import org.jolokia.client.exception.JolokiaException;
 import org.jolokia.client.response.JolokiaSearchResponse;
 import org.jolokia.json.JSONArray;
 import org.testng.annotations.Test;
@@ -37,7 +37,7 @@ import static org.testng.AssertJUnit.*;
 public class ClientSearchIntegrationTest extends AbstractClientIntegrationTest {
 
     @Test
-    public void simple() throws MalformedObjectNameException, J4pException {
+    public void simple() throws MalformedObjectNameException, JolokiaException {
         for (JolokiaSearchRequest req : new JolokiaSearchRequest[] {
                 new JolokiaSearchRequest("java.lang:type=*"),
                 new JolokiaSearchRequest(getTargetProxyConfig(),"java.lang:type=*")
@@ -50,7 +50,7 @@ public class ClientSearchIntegrationTest extends AbstractClientIntegrationTest {
     }
 
     @Test
-    public void emptySearch() throws MalformedObjectNameException, J4pException {
+    public void emptySearch() throws MalformedObjectNameException, JolokiaException {
         for (JolokiaTargetConfig cfg : new JolokiaTargetConfig[] { null, getTargetProxyConfig()}) {
             JolokiaSearchResponse resp = jolokiaClient.execute(new JolokiaSearchRequest(cfg,"bla:gimme=*"));
             assertEquals(0, resp.getObjectNames().size());
@@ -64,7 +64,7 @@ public class ClientSearchIntegrationTest extends AbstractClientIntegrationTest {
     }
 
     @Test
-    public void advancedPattern() throws MalformedObjectNameException, J4pException {
+    public void advancedPattern() throws MalformedObjectNameException, JolokiaException {
         JolokiaSearchResponse resp = jolokiaClient.execute(new JolokiaSearchRequest("java.lang:type=Mem*"));
         JSONArray names = resp.getMBeanNames();
         assertEquals(1, names.size());

@@ -26,8 +26,8 @@ import javax.management.ObjectName;
 
 import org.jolokia.client.JolokiaTargetConfig;
 import org.jolokia.client.JolokiaOperation;
-import org.jolokia.client.exception.J4pException;
-import org.jolokia.client.exception.J4pRemoteException;
+import org.jolokia.client.exception.JolokiaException;
+import org.jolokia.client.exception.JolokiaRemoteException;
 import org.jolokia.client.response.JolokiaReadResponse;
 import org.jolokia.client.response.JolokiaResponse;
 import org.jolokia.client.response.JolokiaWriteResponse;
@@ -50,32 +50,32 @@ public class ClientWriteIntegrationTest extends AbstractClientIntegrationTest {
     public static final String IT_ATTRIBUTE_MBEAN = "jolokia.it:type=attribute";
 
     @Test
-    public void simple() throws MalformedObjectNameException, J4pException {
+    public void simple() throws MalformedObjectNameException, JolokiaException {
         checkWrite("IntValue",null,42L);
     }
 
     @Test
-    public void withPath() throws MalformedObjectNameException, J4pException {
+    public void withPath() throws MalformedObjectNameException, JolokiaException {
         checkWrite("ComplexNestedValue","Blub/1/numbers/0",13L);
     }
 
     @Test
-    public void withBeanPath() throws MalformedObjectNameException, J4pException {
+    public void withBeanPath() throws MalformedObjectNameException, JolokiaException {
         checkWrite("Bean","value",41L);
     }
 
     @Test
-    public void nullValue() throws MalformedObjectNameException, J4pException {
+    public void nullValue() throws MalformedObjectNameException, JolokiaException {
         checkWrite("Bean","name",null);
     }
 
     @Test
-    public void emptyString() throws MalformedObjectNameException, J4pException {
+    public void emptyString() throws MalformedObjectNameException, JolokiaException {
         checkWrite("Bean","name","");
     }
 
     @Test
-    void map() throws MalformedObjectNameException, J4pException {
+    void map() throws MalformedObjectNameException, JolokiaException {
         Map<String, Object> map = createTestMap();
         checkWrite(new HttpMethod[]{HttpMethod.POST}, "Map", null, map);
         checkWrite("Map","fcn","svw");
@@ -102,7 +102,7 @@ public class ClientWriteIntegrationTest extends AbstractClientIntegrationTest {
     }
 
     @Test
-    void list() throws MalformedObjectNameException, J4pException {
+    void list() throws MalformedObjectNameException, JolokiaException {
         List<Object> list = new ArrayList<>();
         list.add("fcn");
         list.add(42L);
@@ -117,7 +117,7 @@ public class ClientWriteIntegrationTest extends AbstractClientIntegrationTest {
 
 
     @Test
-    public void stringArray() throws MalformedObjectNameException, J4pException {
+    public void stringArray() throws MalformedObjectNameException, JolokiaException {
         try {
             final String[] input = new String[] { "eins", "zwei", null, "drei" };
             checkWrite("StringArray", null, input, resp -> {
@@ -127,13 +127,13 @@ public class ClientWriteIntegrationTest extends AbstractClientIntegrationTest {
                     assertEquals(val.get(i),input[i]);
                 }
             });
-        } catch (J4pRemoteException exp) {
+        } catch (JolokiaRemoteException exp) {
             exp.printStackTrace();
         }
     }
 
     @Test
-    public void array2D() throws MalformedObjectNameException, J4pException {
+    public void array2D() throws MalformedObjectNameException, JolokiaException {
         final long[][] input = new long[][] { { 1, 2 }, { 3, 4 } };
         checkWrite(new HttpMethod[] { HttpMethod.POST }, "Array2D", null, input, resp -> {
             JSONArray val = resp.getValue();
@@ -146,7 +146,7 @@ public class ClientWriteIntegrationTest extends AbstractClientIntegrationTest {
     }
 
     @Test
-    public void instant() throws MalformedObjectNameException, J4pException {
+    public void instant() throws MalformedObjectNameException, JolokiaException {
         Instant input = Instant.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(ConfigKey.DATE_FORMAT.getDefaultValue()).withZone(TimeZone.getDefault().toZoneId());
         checkWrite(new HttpMethod[] { HttpMethod.POST }, "Instant", null, input, resp -> {
@@ -171,7 +171,7 @@ public class ClientWriteIntegrationTest extends AbstractClientIntegrationTest {
 
 
     @Test
-    public void mxNumbers() throws MalformedObjectNameException, J4pException {
+    public void mxNumbers() throws MalformedObjectNameException, JolokiaException {
         final Long[] input = { 1L, 2L };
         checkMxWrite("Numbers",null,input, resp -> {
             JSONArray val = resp.getValue();
@@ -183,7 +183,7 @@ public class ClientWriteIntegrationTest extends AbstractClientIntegrationTest {
     }
 
     @Test
-    public void mxMap() throws MalformedObjectNameException, J4pException {
+    public void mxMap() throws MalformedObjectNameException, JolokiaException {
         final Map<String,Long> input = new HashMap<>();
         input.put("roland",13L);
         input.put("heino",19L);
@@ -196,33 +196,33 @@ public class ClientWriteIntegrationTest extends AbstractClientIntegrationTest {
         });
     }
 
-    @Test(expectedExceptions = J4pRemoteException.class,expectedExceptionsMessageRegExp = ".*immutable.*")
-    public void mxMapWithPath() throws MalformedObjectNameException, J4pException {
+    @Test(expectedExceptions = JolokiaRemoteException.class,expectedExceptionsMessageRegExp = ".*immutable.*")
+    public void mxMapWithPath() throws MalformedObjectNameException, JolokiaException {
         JolokiaWriteRequest req = new JolokiaWriteRequest(IT_MXBEAN,"Map","hofstadter","douglas");
         jolokiaClient.execute(req,HttpMethod.POST);
     }
 
     // ==========================================================================================================
 
-    private void checkWrite(String pAttribute,String pPath,Object pValue,ResponseAssertion ... pFinalAssert) throws MalformedObjectNameException, J4pException {
+    private void checkWrite(String pAttribute,String pPath,Object pValue,ResponseAssertion ... pFinalAssert) throws MalformedObjectNameException, JolokiaException {
         checkWrite(new HttpMethod[] { HttpMethod.GET, HttpMethod.POST }, pAttribute, pPath, pValue, pFinalAssert);
     }
 
-    private void checkMxWrite(String pAttribute,String pPath,Object pValue,ResponseAssertion ... pFinalAssert) throws MalformedObjectNameException, J4pException {
+    private void checkMxWrite(String pAttribute,String pPath,Object pValue,ResponseAssertion ... pFinalAssert) throws MalformedObjectNameException, JolokiaException {
         checkMxWrite(new HttpMethod[] { HttpMethod.GET, HttpMethod.POST }, pAttribute, pPath, pValue, pFinalAssert);
     }
 
-    private void checkWrite(HttpMethod[] methods,String pAttribute,String pPath,Object pValue,ResponseAssertion ... pFinalAssert) throws MalformedObjectNameException, J4pException {
+    private void checkWrite(HttpMethod[] methods,String pAttribute,String pPath,Object pValue,ResponseAssertion ... pFinalAssert) throws MalformedObjectNameException, JolokiaException {
         checkWrite(IT_ATTRIBUTE_MBEAN,methods,pAttribute,pPath,pValue,pFinalAssert);
     }
 
-    private void checkMxWrite(HttpMethod[] methods,String pAttribute,String pPath,Object pValue,ResponseAssertion ... pFinalAssert) throws MalformedObjectNameException, J4pException {
+    private void checkMxWrite(HttpMethod[] methods,String pAttribute,String pPath,Object pValue,ResponseAssertion ... pFinalAssert) throws MalformedObjectNameException, JolokiaException {
         if (hasMxBeanSupport()) {
             checkWrite(IT_MXBEAN,methods,pAttribute,pPath,pValue,pFinalAssert);
         }
     }
 
-    private void checkWrite(String mBean,HttpMethod[] methods,String pAttribute,String pPath,Object pValue,ResponseAssertion ... pFinalAssert) throws MalformedObjectNameException, J4pException {
+    private void checkWrite(String mBean,HttpMethod[] methods,String pAttribute,String pPath,Object pValue,ResponseAssertion ... pFinalAssert) throws MalformedObjectNameException, JolokiaException {
         for (JolokiaTargetConfig cfg : new JolokiaTargetConfig[] { null, getTargetProxyConfig()  }) {
             for (HttpMethod method : methods) {
                 if (method.equals(HttpMethod.GET) && cfg != null) {
@@ -252,7 +252,7 @@ public class ClientWriteIntegrationTest extends AbstractClientIntegrationTest {
         }
     }
 
-    private void reset(JolokiaTargetConfig cfg) throws MalformedObjectNameException, J4pException {
+    private void reset(JolokiaTargetConfig cfg) throws MalformedObjectNameException, JolokiaException {
         jolokiaClient.execute(new JolokiaExecRequest(cfg,IT_ATTRIBUTE_MBEAN, "reset"));
     }
 
