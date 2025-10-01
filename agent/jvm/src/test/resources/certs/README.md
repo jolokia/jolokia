@@ -142,6 +142,20 @@ OU = Dev
 L = Pegnitz
 ST = Bavaria
 C = DE
+
+[ req_jolokia_client ]
+default_bits = 2048
+default_md = sha512
+prompt = no
+distinguished_name = req_jolokia_client_dn
+
+[ req_jolokia_client_dn ]
+CN = Client Certificate
+O = jolokia.org
+OU = Test
+L = Pegnitz
+ST = Franconia
+C = DE
 ```
 
 Server certificate generation using the above sections:
@@ -151,20 +165,35 @@ openssl req -new -outform pem -out server.csr -keyout key.pem -newkey rsa:2048 -
 openssl req -new -outform pem -out server2.csr -keyout key2.pem -newkey rsa:2048 -noenc -section req_jolokia_server2
 ```
 
+Client certificate generation using the above sections:
+```
+cd client/
+openssl req -new -outform pem -out server.csr -keyout key.pem -newkey rsa:2048 -noenc -section req_jolokia_client
+```
+
 Server certificate signing using CA certificate and extension file:
 ```
 openssl x509 -req -extfile ../server.ext -days $((19*365+5)) -in server.csr -out cert.pem -CA ../ca/cert.pem -CAkey ../ca/key.pem -set_serial 1 -sha1
 openssl x509 -req -extfile ../server.ext -days $((19*365+5)) -in server2.csr -out cert2.pem -CA ../ca/cert.pem -CAkey ../ca/key.pem -set_serial 2 -sha256
 ```
 
+Server certificate signing using CA certificate and extension file:
+```
+openssl x509 -req -extfile ../client.ext -days $((19*365+5)) -in client.csr -out client.pem -CA ../ca/cert.pem -CAkey ../ca/key.pem -set_serial 3 -sha1
+```
+
 # Create a Client Key & signing request & sign it
+```
 cd client/<new-dir>/
 openssl genrsa -des3 -out key.pem 4096
 openssl req -new -key key.pem -out client.csr
 openssl x509 -extfile ../../client.ext -req -days 2500 -in client.csr -CA ../../ca/cert.pem -CAkey ../../ca/key.pem -set_serial 02 -out cert.pem
+```
 
 # Convert client key to PKCS
+```
 openssl pkcs12 -export -clcerts -in cert.pem -inkey key.pem -out cert.p12
+openssl pkcs12 -export -in client/client.pem -inkey client/key.pem -out client/client.p12 -name client
+```
 
 # Import client key to Browser
-```

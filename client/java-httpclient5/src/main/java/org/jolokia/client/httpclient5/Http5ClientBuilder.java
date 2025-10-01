@@ -15,10 +15,16 @@
  */
 package org.jolokia.client.httpclient5;
 
+import java.io.FileInputStream;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.security.KeyStore;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
+import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
 
 import org.apache.hc.client5.http.SystemDefaultDnsResolver;
 import org.apache.hc.client5.http.auth.AuthScope;
@@ -27,21 +33,25 @@ import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.config.ConnectionConfig;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.config.TlsConfig;
+import org.apache.hc.client5.http.cookie.BasicCookieStore;
 import org.apache.hc.client5.http.impl.DefaultSchemePortResolver;
 import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.BasicHttpClientConnectionManager;
 import org.apache.hc.client5.http.impl.io.ManagedHttpClientConnectionFactory;
-import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.apache.hc.client5.http.io.HttpClientConnectionManager;
 import org.apache.hc.client5.http.ssl.DefaultClientTlsStrategy;
 import org.apache.hc.client5.http.ssl.TlsSocketStrategy;
+import org.apache.hc.core5.http.EntityDetails;
 import org.apache.hc.core5.http.HttpHost;
+import org.apache.hc.core5.http.HttpRequest;
+import org.apache.hc.core5.http.HttpRequestInterceptor;
 import org.apache.hc.core5.http.config.Registry;
 import org.apache.hc.core5.http.config.RegistryBuilder;
 import org.apache.hc.core5.http.io.SocketConfig;
 import org.apache.hc.core5.http.message.BasicHeader;
+import org.apache.hc.core5.http.protocol.HttpContext;
 import org.apache.hc.core5.ssl.SSLContexts;
 import org.apache.hc.core5.util.VersionInfo;
 import org.jolokia.client.JolokiaClientBuilder;
@@ -66,6 +76,7 @@ public class Http5ClientBuilder implements HttpClientBuilder<HttpClient> {
         org.apache.hc.client5.http.impl.classic.HttpClientBuilder builder = HttpClients.custom()
             .setUserAgent("Jolokia JMX-Client (using Apache-HttpClient/" + getVersionInfo() + ")")
             .setConnectionManager(createConnectionManager(jcb))
+            .setDefaultCookieStore(new BasicCookieStore())
             .setDefaultRequestConfig(createRequestConfig(jcb));
 
         // Default headers
@@ -86,6 +97,10 @@ public class Http5ClientBuilder implements HttpClientBuilder<HttpClient> {
             AuthScope targetScope = new AuthScope(jolokiaAgentUrl.getHost(), jolokiaAgentUrl.getPort());
             credentialsProvider.setCredentials(targetScope, new UsernamePasswordCredentials(user, password.toCharArray()));
             credentialsProvided = true;
+        }
+
+        if (jcb.user() != null && !jcb.user().isEmpty()) {
+            builder.addRequestInterceptorFirst(new PreemptiveAuthRequestInterceptor(jcb));
         }
 
         // Proxy
@@ -110,6 +125,7 @@ public class Http5ClientBuilder implements HttpClientBuilder<HttpClient> {
 
     /**
      * Version information for HttpClient5
+     *
      * @return
      */
     private static String getVersionInfo() {
@@ -120,6 +136,7 @@ public class Http5ClientBuilder implements HttpClientBuilder<HttpClient> {
 
     /**
      * {@link HttpClientConnectionManager} may be pooling or basic and configures low-level connection options
+     *
      * @param jcb
      * @return
      */
@@ -146,22 +163,35 @@ public class Http5ClientBuilder implements HttpClientBuilder<HttpClient> {
         SocketConfig socketConfig = scBuilder.build();
 
         // TLS config
-        TlsConfig.Builder tcBuilder = TlsConfig.custom();
-        TlsConfig tlsConfig = tcBuilder.build();
+        TlsConfig tlsConfig = null;
+        SSLContext sslContext;
+        TlsSocketStrategy tlsStrategy = null;
 
-        SSLContext sslContext = SSLContexts.createSystemDefault();
-//        TlsSocketStrategy tlsStrategy = new DefaultClientTlsStrategy(sslContext);
-        TlsSocketStrategy tlsStrategy = DefaultClientTlsStrategy.createSystemDefault();
+        RegistryBuilder<TlsSocketStrategy> registryBuilder = RegistryBuilder.create();
+        Registry<TlsSocketStrategy> registry;
 
-        Registry<TlsSocketStrategy> registry = RegistryBuilder.<TlsSocketStrategy>create()
-            .register("https", tlsStrategy)
-            .build();
+        if (jcb.tlsConfig() != null && jcb.tlsConfig().protocolVersion() != null) {
+            TlsConfig.Builder tcBuilder = TlsConfig.custom();
+            tcBuilder.setSupportedProtocols(jcb.tlsConfig().protocolVersion());
+            tlsConfig = tcBuilder.build();
+
+            try {
+                sslContext = createSSLSocketFactory(jcb);
+                tlsStrategy = new DefaultClientTlsStrategy(sslContext);
+
+                registryBuilder.register("https", tlsStrategy);
+
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Problem with TLS configuration: " + e.getMessage(), e);
+            }
+        }
+        registry = registryBuilder.build();
 
         HttpClientConnectionManager manager;
 
         if (jcb.poolConfig().usePool()) {
             // pooling connection manager - with a builder
-            PoolingHttpClientConnectionManager poolingManager = PoolingHttpClientConnectionManagerBuilder.create()
+            manager = PoolingHttpClientConnectionManagerBuilder.create()
                 .setSchemePortResolver(DefaultSchemePortResolver.INSTANCE)
                 .setDnsResolver(SystemDefaultDnsResolver.INSTANCE)
                 .setConnectionFactory(ManagedHttpClientConnectionFactory.INSTANCE)
@@ -172,10 +202,6 @@ public class Http5ClientBuilder implements HttpClientBuilder<HttpClient> {
                 .setTlsSocketStrategy(tlsStrategy)
                 .setDefaultTlsConfig(tlsConfig)
                 .build();
-
-//            poolingManager.setDefaultMaxPerRoute(1);
-//            poolingManager.setMaxTotal(1);
-            manager = poolingManager;
         } else {
             // basic connection manager - no builder
             BasicHttpClientConnectionManager basicManager = BasicHttpClientConnectionManager.create(
@@ -204,6 +230,50 @@ public class Http5ClientBuilder implements HttpClientBuilder<HttpClient> {
             }
         }
         return builder.build();
+    }
+
+    private SSLContext createSSLSocketFactory(JolokiaClientBuilder.Configuration jcb) throws Exception {
+        JolokiaClientBuilder.TlsConfiguration tlsConfiguration = jcb.tlsConfig();
+        KeyStore ks = null;
+        if (tlsConfiguration.keystore() != null) {
+            KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+            ks = KeyStore.getInstance(KeyStore.getDefaultType());
+            try (FileInputStream fis = new FileInputStream(tlsConfiguration.keystore().toFile())) {
+                ks.load(fis, tlsConfiguration.keystorePassword() == null ? new char[0] : tlsConfiguration.keystorePassword().toCharArray());
+                // no init - will be done by HttpClient4
+            }
+        }
+
+        KeyStore ts = null;
+        if (tlsConfiguration.truststore() != null) {
+            TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            ts = KeyStore.getInstance(KeyStore.getDefaultType());
+            try (FileInputStream fis = new FileInputStream(tlsConfiguration.truststore().toFile())) {
+                ts.load(fis, tlsConfiguration.truststorePassword() == null ? new char[0] : tlsConfiguration.truststorePassword().toCharArray());
+                tmf.init(ts);
+            }
+        }
+
+        return SSLContexts.custom()
+            .setProtocol(tlsConfiguration.protocolVersion())
+            .loadKeyMaterial(ks, tlsConfiguration.keyPassword() == null ? new char[0] : tlsConfiguration.keyPassword().toCharArray())
+            .loadTrustMaterial(ts, null)
+            .build();
+    }
+
+    private static class PreemptiveAuthRequestInterceptor implements HttpRequestInterceptor {
+        private final String authorization;
+
+        public PreemptiveAuthRequestInterceptor(JolokiaClientBuilder.Configuration jcb) {
+            String credentials = jcb.user() + ":" + (jcb.password() == null ? "" : jcb.password());
+            authorization = "Basic " + Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
+        }
+
+        @Override
+        public void process(HttpRequest request, EntityDetails entity, HttpContext context) {
+            request.setHeader("Authorization", authorization);
+            context.getAttribute("");
+        }
     }
 
 }

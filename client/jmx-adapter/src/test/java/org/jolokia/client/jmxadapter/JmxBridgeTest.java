@@ -53,6 +53,7 @@ import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 import org.jolokia.client.JolokiaClient;
 import org.jolokia.client.JolokiaClientBuilder;
+import org.jolokia.client.request.JolokiaVersionRequest;
 import org.jolokia.jvmagent.JvmAgent;
 import org.jolokia.server.core.Version;
 import org.jolokia.server.core.util.ClassUtil;
@@ -400,7 +401,7 @@ public class JmxBridgeTest {
         // wait for agent to be running
         await().until(() -> {
             //will throw exception if connection is not ready
-            connector.execute(new J4pVersionRequest());
+            connector.execute(new JolokiaVersionRequest());
             return true;
         });
         this.adapter = new RemoteJmxAdapter(connector);

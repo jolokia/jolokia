@@ -380,7 +380,7 @@ public final class JolokiaListResponse extends JolokiaResponse<JolokiaListReques
             String domain = e1.getKey();
             if (e1.getValue() instanceof JSONObject mbeans) {
                 for (Entry<String, Object> e2: mbeans.entrySet()) {
-                    String mbean = e1.getKey();
+                    String mbean = e2.getKey();
                     if (e2.getValue() instanceof JSONObject data && data.get("class") instanceof String cls) {
                         result.add(new ObjectInstance(new ObjectName(domain + ":" + mbean), cls));
                     }
@@ -480,40 +480,46 @@ public final class JolokiaListResponse extends JolokiaResponse<JolokiaListReques
 
         Object attributesV = info.get("attr");
         MBeanAttributeInfo[] attributes;
+        Object constructorsV = info.get("ctor");
+        MBeanConstructorInfo[] constructors;
         Object operationsV = info.get("op");
         MBeanOperationInfo[] operations;
         Object notificationsV = info.get("notif");
         MBeanNotificationInfo[] notifications;
-        // TODO MBeanConstructorInfo
 
-        if (classV instanceof String cs) {
-            className = cs;
+        if (classV == null || classV instanceof String) {
+            className = (String) classV;
         } else {
             throw new IllegalStateException("Classname from MBeanInfo of " + name + " is invalid: " + classV);
         }
-        if (descriptionV instanceof String ds) {
-            description = ds;
+        if (descriptionV == null || descriptionV instanceof String) {
+            description = (String) descriptionV;
         } else {
             throw new IllegalStateException("Description from MBeanInfo of " + name + " is invalid: " + descriptionV);
         }
 
-        if (attributesV instanceof JSONObject aJson) {
-            attributes = attributesFrom(aJson);
+        if (attributesV == null || attributesV instanceof JSONObject) {
+            attributes = attributesFrom((JSONObject) attributesV);
         } else {
             throw new IllegalStateException("Attributes from MBeanInfo of " + name + " are invalid: " + attributesV);
         }
-        if (operationsV instanceof JSONObject oJson) {
-            operations = operationsFrom(oJson);
+        if (operationsV == null || operationsV instanceof JSONObject) {
+            operations = operationsFrom((JSONObject) operationsV);
         } else {
             throw new IllegalStateException("Operations from MBeanInfo of " + name + " are invalid: " + operationsV);
         }
-        if (notificationsV instanceof JSONObject nJson) {
-            notifications = notificationsFrom(nJson);
+        if (constructorsV == null || constructorsV instanceof JSONObject) {
+            constructors = constructorsFrom((JSONObject) constructorsV);
+        } else {
+            throw new IllegalStateException("Constructors from MBeanInfo of " + name + " are invalid: " + operationsV);
+        }
+        if (notificationsV == null || notificationsV instanceof JSONObject) {
+            notifications = notificationsFrom((JSONObject) notificationsV);
         } else {
             throw new IllegalStateException("Notifications from MBeanInfo of " + name + " are invalid: " + notificationsV);
         }
 
-        return new MBeanInfo(className, description, attributes, new MBeanConstructorInfo[0], operations, notifications);
+        return new MBeanInfo(className, description, attributes, constructors, operations, notifications);
     }
 
     /**
@@ -644,6 +650,59 @@ public final class JolokiaListResponse extends JolokiaResponse<JolokiaListReques
         String type = parameter.get("type") instanceof String typeV ? typeV : "<unknown>";
         String desc = parameter.get("desc") instanceof String descV ? descV : "p" + pn;
         return new MBeanParameterInfo(name, type, desc);
+    }
+
+    /**
+     * Convert Jolokia representation of constructors from {@link MBeanInfo} to an array of {@link MBeanConstructorInfo}
+     * @param constructors
+     * @return
+     */
+    private MBeanConstructorInfo[] constructorsFrom(JSONObject constructors) {
+        if (constructors == null || constructors.isEmpty()) {
+            return new MBeanConstructorInfo[0];
+        }
+        final List<MBeanConstructorInfo> result = new ArrayList<>(constructors.size());
+
+        for (Map.Entry<String, Object> constructor : constructors.entrySet()) {
+            // if more operations with same name (overloaded), the value part is an array
+            if (constructor.getValue() instanceof JSONArray overloaded) {
+                for (Object constructorItem : overloaded) {
+                    if (constructorItem instanceof JSONObject item) {
+                        result.add(constructorFrom(constructor.getKey(), item));
+                    } else {
+                        throw new IllegalArgumentException("Representation of overloaded constructor \""
+                            + constructor.getKey() + "\" is invalid: " + constructorItem);
+                    }
+                }
+            } else if (constructor.getValue() instanceof JSONObject op) {
+                result.add(constructorFrom(constructor.getKey(), op));
+            } else {
+                throw new IllegalArgumentException("Representation of constructor \""
+                    + constructor.getKey() + "\" is invalid: " + constructor.getValue());
+            }
+        }
+        return result.toArray(new MBeanConstructorInfo[0]);
+    }
+
+    /**
+     * Convert Jolokia representation of single constructor from {@link MBeanInfo} to {@link MBeanConstructorInfo}
+     *
+     * @param name
+     * @param json
+     * @return
+     */
+    private MBeanConstructorInfo constructorFrom(String name, JSONObject json) {
+        String desc = json.get("desc") instanceof String descV ? descV : "";
+        Object parametersV = json.get("args");
+        MBeanParameterInfo[] parameters;
+
+        if (parametersV instanceof JSONArray pJson) {
+            parameters = parametersFrom(name, pJson);
+        } else {
+            throw new IllegalStateException("Parameters from constructor " + name + " are invalid: " + parametersV);
+        }
+
+        return new MBeanConstructorInfo(name, desc, parameters);
     }
 
     /**

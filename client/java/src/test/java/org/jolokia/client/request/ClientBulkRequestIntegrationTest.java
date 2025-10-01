@@ -16,6 +16,7 @@ package org.jolokia.client.request;
  * limitations under the License.
  */
 
+import java.nio.file.Path;
 import java.util.*;
 
 import javax.management.MalformedObjectNameException;
@@ -146,17 +147,21 @@ public class ClientBulkRequestIntegrationTest extends AbstractClientIntegrationT
     @Test
     public void optionalBulkRequestsWithExtractorAsDefault() throws MalformedObjectNameException, JolokiaException {
         JolokiaClient c = new JolokiaClientBuilder().url(jolokiaUrl)
-                               .user("jolokia")
-                               .password("jolokia")
-//                               .authenticator(new BasicClientCustomizer().preemptive())
-                               .responseExtractor(ValidatingResponseExtractor.OPTIONAL)
-                               .build();
+            .user("jolokia")
+            .password("jolokia")
+            .protocolVersion("TLSv1.3")
+            .keystore(Path.of("../java/src/test/resources/certificates/client.p12"))
+            .keystorePassword("1234")
+            .keyPassword("1234")
+            .truststore(Path.of("../java/src/test/resources/certificates/server.p12"))
+            .truststorePassword("1234")
+            .responseExtractor(ValidatingResponseExtractor.OPTIONAL)
+            .build();
 
         List<JolokiaReadResponse> resp = c.execute(createBulkRequests());
 
         verifyOptionalBulkResponses(resp);
     }
-
 
     private void verifyOptionalBulkResponses(List<JolokiaReadResponse> resp) {
         assertEquals(3, resp.size());

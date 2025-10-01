@@ -20,6 +20,7 @@ import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.http.HttpResponse;
 import org.jolokia.client.JolokiaClient;
+import org.jolokia.client.JolokiaClientBuilder;
 import org.jolokia.client.httpclient4.Http4Client;
 import org.jolokia.client.jmxadapter.JolokiaJmxConnector;
 import org.jolokia.client.jmxadapter.RemoteJmxAdapter;
@@ -163,7 +164,8 @@ public class KubernetesJmxConnector extends JolokiaJmxConnector {
                 proxyPath,
                 "{\"type\":\"version\"}".getBytes(), null, headers);
       if (response.isSuccessful()) {
-          Http4Client client4 = new Http4Client(new MinimalHttpClientAdapter(client, proxyPath, env), null);
+          Http4Client client4 = new Http4Client(new MinimalHttpClientAdapter(client, proxyPath, env),
+              JolokiaClientBuilder.Configuration.withUrl(URI.create(proxyPath)));
         return new JolokiaClient(URI.create(proxyPath), client4);
       }
     } catch (IOException | InterruptedException | ExecutionException ignore) {

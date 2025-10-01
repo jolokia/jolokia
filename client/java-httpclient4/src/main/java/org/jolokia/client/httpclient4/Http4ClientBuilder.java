@@ -15,9 +15,12 @@
  */
 package org.jolokia.client.httpclient4;
 
+import java.io.FileInputStream;
+import java.security.KeyStore;
 import java.util.Collection;
-import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
 
 import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
@@ -41,10 +44,12 @@ import org.apache.http.conn.HttpConnectionFactory;
 import org.apache.http.conn.ManagedHttpClientConnection;
 import org.apache.http.conn.routing.HttpRoute;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.LayeredConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.DefaultHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
@@ -71,15 +76,30 @@ public class Http4ClientBuilder implements HttpClientBuilder<HttpClient> {
         String user = jcb.user();
         String password = jcb.password();
 
-        HttpClientConnectionManager connManager = jcb.poolConfig().usePool()
-            ? createPoolingConnectionManager(jcb)
-            : createBasicConnectionManager(jcb);
-
         org.apache.http.impl.client.HttpClientBuilder builder = HttpClients.custom()
-            .setConnectionManager(connManager)
-//                .setDefaultCookieStore(cookieStore)
             .setUserAgent("Jolokia JMX-Client (using Apache-HttpClient/" + getVersionInfo() + ")")
+            .setDefaultCookieStore(new BasicCookieStore())
             .setDefaultRequestConfig(createRequestConfig(jcb));
+
+        RegistryBuilder<ConnectionSocketFactory> registryBuilder = RegistryBuilder.create();
+        registryBuilder.register("http", PlainConnectionSocketFactory.INSTANCE);
+
+        if (jcb.tlsConfig() != null && jcb.tlsConfig().protocolVersion() != null) {
+            try {
+                LayeredConnectionSocketFactory sslSocketFactory = createSSLSocketFactory(jcb);
+                builder.setSSLSocketFactory(sslSocketFactory);
+                registryBuilder.register("https", sslSocketFactory);
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Problem with TLS configuration: " + e.getMessage(), e);
+            }
+        }
+        Registry<ConnectionSocketFactory> registry = registryBuilder.build();
+
+        HttpClientConnectionManager connManager = jcb.poolConfig().usePool()
+            ? createPoolingConnectionManager(jcb, registry)
+            : createBasicConnectionManager(jcb, registry);
+
+        builder.setConnectionManager(connManager);
 
         Collection<HttpHeader> defaultHttpHeaders = jcb.defaultHttpHeaders();
         if (defaultHttpHeaders != null && !defaultHttpHeaders.isEmpty()) {
@@ -142,9 +162,9 @@ public class Http4ClientBuilder implements HttpClientBuilder<HttpClient> {
         return builder.build();
     }
 
-    private BasicHttpClientConnectionManager createBasicConnectionManager(JolokiaClientBuilder.Configuration jcb) {
+    private BasicHttpClientConnectionManager createBasicConnectionManager(JolokiaClientBuilder.Configuration jcb, Registry<ConnectionSocketFactory> registry) {
         BasicHttpClientConnectionManager connManager
-            = new BasicHttpClientConnectionManager(getSocketFactoryRegistry(), getConnectionFactory());
+            = new BasicHttpClientConnectionManager(registry, getConnectionFactory());
 
         connManager.setSocketConfig(createSocketConfig(jcb));
         connManager.setConnectionConfig(createConnectionConfig(jcb));
@@ -152,9 +172,9 @@ public class Http4ClientBuilder implements HttpClientBuilder<HttpClient> {
         return connManager;
     }
 
-    private PoolingHttpClientConnectionManager createPoolingConnectionManager(JolokiaClientBuilder.Configuration jcb) {
+    private PoolingHttpClientConnectionManager createPoolingConnectionManager(JolokiaClientBuilder.Configuration jcb, Registry<ConnectionSocketFactory> registry) {
         PoolingHttpClientConnectionManager connManager
-            = new PoolingHttpClientConnectionManager(getSocketFactoryRegistry(), getConnectionFactory());
+            = new PoolingHttpClientConnectionManager(registry, getConnectionFactory());
         connManager.setDefaultSocketConfig(createSocketConfig(jcb));
         connManager.setDefaultConnectionConfig(createConnectionConfig(jcb));
 
@@ -167,10 +187,35 @@ public class Http4ClientBuilder implements HttpClientBuilder<HttpClient> {
         return connManager;
     }
 
-    private SSLConnectionSocketFactory createDefaultSSLConnectionSocketFactory() {
-        SSLContext sslcontext = SSLContexts.createSystemDefault();
-        HostnameVerifier hostnameVerifier = new DefaultHostnameVerifier();
-        return new SSLConnectionSocketFactory(sslcontext, hostnameVerifier);
+    private LayeredConnectionSocketFactory createSSLSocketFactory(JolokiaClientBuilder.Configuration jcb) throws Exception {
+        JolokiaClientBuilder.TlsConfiguration tlsConfiguration = jcb.tlsConfig();
+        KeyStore ks = null;
+        if (tlsConfiguration.keystore() != null) {
+            KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+            ks = KeyStore.getInstance(KeyStore.getDefaultType());
+            try (FileInputStream fis = new FileInputStream(tlsConfiguration.keystore().toFile())) {
+                ks.load(fis, tlsConfiguration.keystorePassword() == null ? new char[0] : tlsConfiguration.keystorePassword().toCharArray());
+                // no init - will be done by HttpClient4
+            }
+        }
+
+        KeyStore ts = null;
+        if (tlsConfiguration.truststore() != null) {
+            TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            ts = KeyStore.getInstance(KeyStore.getDefaultType());
+            try (FileInputStream fis = new FileInputStream(tlsConfiguration.truststore().toFile())) {
+                ts.load(fis, tlsConfiguration.truststorePassword() == null ? new char[0] : tlsConfiguration.truststorePassword().toCharArray());
+                tmf.init(ts);
+            }
+        }
+
+        SSLContext sslcontext = SSLContexts.custom()
+            .setProtocol(tlsConfiguration.protocolVersion())
+            .loadKeyMaterial(ks, tlsConfiguration.keyPassword() == null ? new char[0] : tlsConfiguration.keyPassword().toCharArray())
+            .loadTrustMaterial(ts, null)
+            .build();
+
+        return new SSLConnectionSocketFactory(sslcontext, new DefaultHostnameVerifier());
     }
 
     private ConnectionConfig createConnectionConfig(JolokiaClientBuilder.Configuration jcb) {
@@ -187,15 +232,6 @@ public class Http4ClientBuilder implements HttpClientBuilder<HttpClient> {
         }
         socketConfigB.setTcpNoDelay(jcb.connectionConfig().tcpNoDelay());
         return socketConfigB.build();
-    }
-
-    private Registry<ConnectionSocketFactory> getSocketFactoryRegistry() {
-        return RegistryBuilder.<ConnectionSocketFactory>create()
-            .register("http", PlainConnectionSocketFactory.INSTANCE)
-//            .register("https", sslConnectionSocketFactory != null ?
-//                sslConnectionSocketFactory :
-//                createDefaultSSLConnectionSocketFactory())
-            .build();
     }
 
     private HttpConnectionFactory<HttpRoute, ManagedHttpClientConnection> getConnectionFactory() {

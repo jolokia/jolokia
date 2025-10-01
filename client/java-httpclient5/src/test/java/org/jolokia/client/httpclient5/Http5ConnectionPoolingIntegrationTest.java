@@ -91,7 +91,7 @@ public class Http5ConnectionPoolingIntegrationTest {
             @Override
             protected void service(HttpServletRequest req, HttpServletResponse resp) throws IOException {
                 try {
-                    Thread.sleep(500);
+                    Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }

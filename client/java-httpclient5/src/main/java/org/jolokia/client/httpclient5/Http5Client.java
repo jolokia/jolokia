@@ -219,6 +219,7 @@ public class Http5Client implements HttpClientSpi<HttpClient> {
         if (credentials instanceof UsernamePasswordCredentials basicAuth) {
             // https://github.com/apache/httpcomponents-client/blob/master/httpclient5/src/test/java/org/apache/hc/client5/http/examples/ClientPreemptiveBasicAuthentication.java
             httpContext = ContextBuilder.create()
+                .useCredentialsProvider(credentialsProvider)
                 .preemptiveBasicAuth(jolokiaHost, basicAuth)
                 .build();
         }

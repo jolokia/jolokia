@@ -18,6 +18,7 @@ package org.jolokia.client.request;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.file.Path;
 import java.util.EnumSet;
 import java.util.Properties;
 
@@ -32,18 +33,26 @@ import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.eclipse.jetty.ee10.servlet.security.ConstraintMapping;
 import org.eclipse.jetty.ee10.servlet.security.ConstraintSecurityHandler;
+import org.eclipse.jetty.http.HttpCompliance;
+import org.eclipse.jetty.http.HttpScheme;
+import org.eclipse.jetty.http.HttpVersion;
 import org.eclipse.jetty.http.UriCompliance;
 import org.eclipse.jetty.security.Constraint;
 import org.eclipse.jetty.security.HashLoginService;
 import org.eclipse.jetty.security.SecurityHandler;
 import org.eclipse.jetty.security.UserStore;
+import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Response;
+import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.util.Callback;
 import org.eclipse.jetty.util.security.Password;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.jolokia.client.JolokiaClient;
 import org.jolokia.client.JolokiaClientBuilder;
 import org.jolokia.client.JolokiaTargetConfig;
@@ -85,15 +94,26 @@ abstract public class AbstractClientIntegrationTest {
         checkJettyVersion();
 
         if (externalUrl == null) {
-            int port = EnvTestUtil.getFreePort();
-            jettyServer = new Server(port);
+            jettyServer = new Server();
             UriCompliance jolokiaCompliance = UriCompliance.DEFAULT
                 .with("JOLOKIA",
                     UriCompliance.Violation.SUSPICIOUS_PATH_CHARACTERS,
                     UriCompliance.Violation.AMBIGUOUS_PATH_ENCODING,
                     UriCompliance.Violation.AMBIGUOUS_EMPTY_SEGMENT);
-            ((HttpConnectionFactory) jettyServer.getConnectors()[0].getDefaultConnectionFactory())
-                    .getHttpConfiguration().setUriCompliance(jolokiaCompliance);
+
+            // HTTP
+            int plainPort = EnvTestUtil.getFreePort();
+            ServerConnector connector = new ServerConnector(jettyServer);
+            connector.setPort(plainPort);
+            ((HttpConnectionFactory) connector.getDefaultConnectionFactory()).getHttpConfiguration().setUriCompliance(jolokiaCompliance);
+            jettyServer.addConnector(connector);
+
+            // HTTPS
+            int securePort = plainPort + 1;
+            ServerConnector httpsConnector = prepareHttpsConnector(jettyServer, securePort, jolokiaCompliance);
+            jettyServer.addConnector(httpsConnector);
+
+            int port = EnvTestUtil.getFreePort();
             ServletContextHandler jettyContext = new ServletContextHandler("/");
             jettyContext.getServletHandler().setDecodeAmbiguousURIs(true);
             ServletHolder holder = new ServletHolder(new AgentServlet());
@@ -103,8 +123,9 @@ abstract public class AbstractClientIntegrationTest {
                 @Override
                 protected void doFilter(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
                         throws IOException, ServletException {
-                    LOG.info("[{}:{}]> {}: {} (Agent: {})",
-                        req.getRemoteAddr(), req.getRemotePort(), req.getMethod(), req.getRequestURI(), req.getHeader("User-Agent"));
+                    LOG.info("[{}:{} {}}]> {}: {} (Agent: {})",
+                        req.getRemoteAddr(), req.getRemotePort(), req.isSecure() ? "secure" : "non-secure",
+                        req.getMethod(), req.getRequestURI(), req.getHeader("User-Agent"));
                     chain.doFilter(req, res);
                 }
             }), "/j4p/*", EnumSet.of(DispatcherType.REQUEST));
@@ -124,6 +145,7 @@ abstract public class AbstractClientIntegrationTest {
             jettyServer.start();
 
             jolokiaUrl = "http://localhost:" + port + "/j4p";
+//            jolokiaUrl = "https://localhost:" + securePort + "/j4p";
             LOG.info("Started Jetty Server ({}). Jolokia available at {}", jettyVersion, jolokiaUrl);
 
             // Start the integration MBeans
@@ -206,12 +228,13 @@ abstract public class AbstractClientIntegrationTest {
 
     protected JolokiaClient createJolokiaClient(String url) {
         return new JolokiaClientBuilder()
-            .url(url)
-            .user("jolokia")
-            .password("jolokia")
-            .connectionTimeout(3600000)
-            .socketTimeout(3600000)
-//            .pooledConnections()
+            .url(url).user("jolokia").password("jolokia")
+            .protocolVersion("TLSv1.3")
+            .keystore(Path.of("../java/src/test/resources/certificates/client.p12"))
+            .keystorePassword("1234")
+            .keyPassword("1234")
+            .truststore(Path.of("../java/src/test/resources/certificates/server.p12"))
+            .truststorePassword("1234")
             .build();
     }
 
@@ -250,6 +273,66 @@ abstract public class AbstractClientIntegrationTest {
 
     public JolokiaTargetConfig getTargetProxyConfig() {
         return new JolokiaTargetConfig("service:jmx:rmi:///jndi/rmi://localhost:45888/jmxrmi",null,null);
+    }
+
+    private ServerConnector prepareHttpsConnector(Server jettyServer, int securePort, UriCompliance jolokiaCompliance) {
+        HttpConfiguration httpsConfig = new HttpConfiguration();
+        httpsConfig.addCustomizer(new SecureRequestCustomizer());
+        httpsConfig.setSecureScheme(HttpScheme.HTTPS.asString());
+        httpsConfig.setSecurePort(securePort);
+        httpsConfig.setHttpCompliance(HttpCompliance.RFC7230);
+
+        SslContextFactory.Server sslContextFactory = new SslContextFactory.Server();
+
+        // --- server keystore for server's own identity
+
+        sslContextFactory.setKeyStoreType("PKCS12");
+        sslContextFactory.setKeyStorePath("../java/src/test/resources/certificates/server.p12");
+        sslContextFactory.setKeyStorePassword("1234");
+        sslContextFactory.setCertAlias("server");
+        sslContextFactory.setKeyManagerPassword("1234");
+
+        // --- server truststore for client validation
+
+        sslContextFactory.setTrustStoreType("PKCS12");
+        sslContextFactory.setTrustStorePath("../java/src/test/resources/certificates/server.p12");
+        sslContextFactory.setTrustStorePassword("1234");
+        sslContextFactory.setWantClientAuth(false);
+        sslContextFactory.setNeedClientAuth(true);
+
+        sslContextFactory.setTrustAll(false);
+        sslContextFactory.setHostnameVerifier(null);
+
+        // --- protocols and cipher suites
+
+        sslContextFactory.setIncludeProtocols("TLSv1.3");
+        sslContextFactory.setExcludeProtocols("TLSv1.2", "TLSv1.1", "TLSv1", "TLS", "SSLv3");
+        sslContextFactory.setProtocol("TLSv1.3");
+
+        // javax.net.ssl.SSLParameters.setUseCipherSuitesOrder()
+        sslContextFactory.setUseCipherSuitesOrder(true);
+
+        ServerConnector secureConnector = new ServerConnector(jettyServer, null, null, null, -1, -1);
+        secureConnector.clearConnectionFactories();
+
+        secureConnector.setHost("0.0.0.0");
+        secureConnector.setPort(securePort);
+        secureConnector.setName("secure");
+
+        // connection factories of secure connector in order presented in org.eclipse.jetty.embedded.Http2Server:
+        // 1. org.eclipse.jetty.server.SslConnectionFactory with "alpn" specified as _next_ protocol
+        // 2. org.eclipse.jetty.alpn.server.ALPNServerConnectionFactory with HttpVersion.HTTP_1_1 as _default_ protocol
+        // 3. org.eclipse.jetty.http2.server.HTTP2ServerConnectionFactory with https config
+        // 4. org.eclipse.jetty.server.HttpConnectionFactory as last connection factory
+
+        secureConnector.addConnectionFactory(new SslConnectionFactory(sslContextFactory, HttpVersion.HTTP_1_1.asString()));
+
+        // final connection factory
+        HttpConnectionFactory httpConnectionFactory = new HttpConnectionFactory(httpsConfig);
+        httpConnectionFactory.getHttpConfiguration().setUriCompliance(jolokiaCompliance);
+        secureConnector.addConnectionFactory(httpConnectionFactory);
+
+        return secureConnector;
     }
 
 }

@@ -15,15 +15,29 @@
  */
 package org.jolokia.client.jdkclient;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.CookieManager;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.ProxySelector;
 import java.net.SocketAddress;
 import java.net.URI;
 import java.net.http.HttpClient;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 import java.time.Duration;
 import java.util.List;
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
 
 import org.jolokia.client.JolokiaClientBuilder;
 import org.jolokia.client.spi.HttpClientBuilder;
@@ -46,11 +60,18 @@ public class JdkHttpClientBuilder implements HttpClientBuilder<HttpClient> {
         HttpClient.Builder builder = HttpClient.newBuilder()
             .version(HttpClient.Version.HTTP_1_1)
             .followRedirects(HttpClient.Redirect.NORMAL)
-//            .cookieHandler(null)
-//            .executor(null)
-//            .sslContext(null)
+            .cookieHandler(new CookieManager())
 //            .sslParameters(null)
+//            .executor(null)
             .priority(1);
+
+        if (jcb.tlsConfig() != null && jcb.tlsConfig().protocolVersion() != null) {
+            try {
+                builder.sslContext(createSSLContest(jcb.tlsConfig()));
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Problem with TLS configuration: " + e.getMessage(), e);
+            }
+        }
 
         if (jcb.connectionConfig().connectionTimeout() != -1) {
             builder.connectTimeout(Duration.ofMillis(jcb.connectionConfig().connectionTimeout()));
@@ -97,6 +118,39 @@ public class JdkHttpClientBuilder implements HttpClientBuilder<HttpClient> {
 
         // return the wrapper
         return new JdkHttpClient(builder.build(), jcb);
+    }
+
+    private SSLContext createSSLContest(JolokiaClientBuilder.TlsConfiguration tlsConfiguration) throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException, IOException, CertificateException, UnrecoverableKeyException {
+        if (tlsConfiguration.protocolVersion() == null) {
+            return null;
+        }
+        SSLContext context = SSLContext.getInstance(tlsConfiguration.protocolVersion());
+
+        KeyManager[] keyManagers = null;
+        TrustManager[] trustManagers = null;
+        if (tlsConfiguration.keystore() != null) {
+            KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+            KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+            try (FileInputStream fis = new FileInputStream(tlsConfiguration.keystore().toFile())) {
+                ks.load(fis, tlsConfiguration.keystorePassword() == null ? new char[0] : tlsConfiguration.keystorePassword().toCharArray());
+                kmf.init(ks, tlsConfiguration.keyPassword() == null ? new char[0] : tlsConfiguration.keyPassword().toCharArray());
+            }
+            keyManagers = kmf.getKeyManagers();
+        }
+
+        if (tlsConfiguration.truststore() != null) {
+            TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+            try (FileInputStream fis = new FileInputStream(tlsConfiguration.truststore().toFile())) {
+                ks.load(fis, tlsConfiguration.truststorePassword() == null ? new char[0] : tlsConfiguration.truststorePassword().toCharArray());
+                tmf.init(ks);
+            }
+            trustManagers = tmf.getTrustManagers();
+        }
+
+        context.init(keyManagers, trustManagers, SecureRandom.getInstance("SHA1PRNG"));
+
+        return context;
     }
 
 }

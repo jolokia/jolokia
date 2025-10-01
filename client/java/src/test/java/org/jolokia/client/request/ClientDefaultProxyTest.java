@@ -16,6 +16,7 @@ package org.jolokia.client.request;
  * limitations under the License.
  */
 
+import java.nio.file.Path;
 import java.util.List;
 
 import javax.management.MalformedObjectNameException;
@@ -70,10 +71,13 @@ public class ClientDefaultProxyTest extends AbstractClientIntegrationTest {
     protected JolokiaClient createJolokiaClient(String url) {
         JolokiaTargetConfig config = getTargetProxyConfig();
         return new JolokiaClientBuilder()
-                .url(url)
-                .user("jolokia")
-                .password("jolokia")
-//                .pooledConnections()
+                .url(url).user("jolokia").password("jolokia")
+                .protocolVersion("TLSv1.3")
+                .keystore(Path.of("../java/src/test/resources/certificates/client.p12"))
+                .keystorePassword("1234")
+                .keyPassword("1234")
+                .truststore(Path.of("../java/src/test/resources/certificates/server.p12"))
+                .truststorePassword("1234")
                 .target(config.url())
                 .build();
     }

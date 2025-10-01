@@ -21,6 +21,7 @@ import java.net.URISyntaxException;
 import java.nio.channels.SelectionKey;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -83,8 +84,35 @@ public class JolokiaClientBuilder {
 
     // TLS options
 
-    // Add socket factories to tune
-//    private ConnectionSocketFactory sslConnectionSocketFactory;
+    /**
+     * TLS protocol version, like {@code TLSv1.3}
+     */
+    private String protocolVersion;
+
+    /**
+     * Path to Java Keystore with client certificate and key
+     */
+    private Path keystore;
+
+    /**
+     * Password to the entire keystore
+     */
+    private String keystorePassword;
+
+    /**
+     * Password to key entry to use
+     */
+    private String keyPassword;
+
+    /**
+     * Path to Java Truststore for server certificate trust
+     */
+    private Path truststore;
+
+    /**
+     * Password to the truststore
+     */
+    private String truststorePassword;
 
     // HTTP options
 
@@ -131,20 +159,26 @@ public class JolokiaClientBuilder {
      */
     private Collection<HttpHeader> defaultHttpHeaders;
 
-    // Extractor used creating responses
-    private JolokiaResponseExtractor responseExtractor;
-
     // JMX options, when connecting via HTTP to one Jolokia Agent used in proxy mode, where Jolokia uses
     // standard JMX remote connection to ultimate JVM which doesn't run Jolokia agent on its own.
 
-    // Service-URL when used in proxy mode
+    /**
+     * URL for the target JMX server we access through Jolokia Agent running in Proxy Mode. The URL should
+     * be in the form of {@link javax.management.remote.JMXServiceURL}.
+     */
     private String targetUrl;
 
-    // User used for JSR-160 communication when using with a proxy (i.e. targetUrl != null)
+    /**
+     * User used for JSR-160 communication when using with a proxy (i.e. targetUrl != null)
+     */
     private String targetUser;
 
-    // Password to use for JSR-160 communication when using with a proxy (i.e. targetUrl != null and targetUser != null)
+    /**
+     * Password to use for JSR-160 communication when using with a proxy (i.e. targetUrl != null and targetUser != null)
+     */
     private String targetPassword;
+
+    // Connection Pool configuration (not for every implementation)
 
     /**
      * Whether to use thread safe, pooled connections. Not all implementations support this. For example JDK HTTP
@@ -164,11 +198,13 @@ public class JolokiaClientBuilder {
      */
     private int maxConnectionPoolTimeout = 500;
 
-//    // Cookie store to use, might contain already prepared cookies used for a login
-//    private CookieStore cookieStore;
-//
 //    // Authenticator to use for performing a login
 //    private J4pClientCustomizer customizer;
+
+    /**
+     * Extractor used creating responses
+     */
+    private JolokiaResponseExtractor responseExtractor;
 
     /**
      * Package access constructor, use static method on JolokiaClient for creating
@@ -409,6 +445,54 @@ public class JolokiaClientBuilder {
 //    }
 
     /**
+     * TLS protocol version to use
+     */
+    public final JolokiaClientBuilder protocolVersion(String protocolVersion) {
+        this.protocolVersion = protocolVersion;
+        return this;
+    }
+
+    /**
+     * Path to Java Keystore with client certificate and key
+     */
+    public final JolokiaClientBuilder keystore(Path keystore) {
+        this.keystore = keystore;
+        return this;
+    }
+
+    /**
+     * Password to the entire keystore
+     */
+    public final JolokiaClientBuilder keystorePassword(String password) {
+        this.keystorePassword = password;
+        return this;
+    }
+
+    /**
+     * Password to key entry to use
+     */
+    public final JolokiaClientBuilder keyPassword(String password) {
+        this.keyPassword = password;
+        return this;
+    }
+
+    /**
+     * Path to Java Truststore for server certificate trust
+     */
+    public final JolokiaClientBuilder truststore(Path truststore) {
+        this.truststore = truststore;
+        return this;
+    }
+
+    /**
+     * Password to the truststore
+     */
+    public final JolokiaClientBuilder truststorePassword(String password) {
+        this.truststorePassword = password;
+        return this;
+    }
+
+    /**
      * Set the proxy for this client
      *
      * @param pProxy proxy definition in the format <code>http://user:pass@host:port</code> or <code>http://host:port</code>
@@ -508,6 +592,7 @@ public class JolokiaClientBuilder {
     HttpClientSpi<?> createHttpClient() {
         return httpClientBuilder.buildHttpClient(new Configuration(url, user, password, httpProxy,
             new ConnectionConfiguration(connectionTimeout, socketTimeout, tcpNoDelay, socketBufferSize),
+            new TlsConfiguration(protocolVersion, keystore, keystorePassword, keyPassword, truststore, truststorePassword),
             new PoolConfiguration(this.pooledConnections, this.maxTotalConnections, this.maxConnectionPoolTimeout),
             contentCharset, expectContinue, defaultHttpHeaders));
     }
@@ -542,16 +627,33 @@ public class JolokiaClientBuilder {
      */
     public record Configuration(URI url, String user, String password, Proxy proxy,
                                 ConnectionConfiguration connectionConfig,
+                                TlsConfiguration tlsConfig,
                                 PoolConfiguration poolConfig,
                                 Charset contentCharset, boolean expectContinue,
                                 Collection<HttpHeader> defaultHttpHeaders) {
 
         public static Configuration withUrl(URI url) {
             return new Configuration(url, null, null, null,
+                // defaults
                 new ConnectionConfiguration(5000, 5000, false, 8192),
+                null,
                 new PoolConfiguration(true, 20, 500),
                 StandardCharsets.UTF_8, false, Collections.emptySet());
         }
+    }
+
+    /**
+     * Configuration of the keystore/truststore used for TLS communication
+     *
+     * @param keystore
+     * @param keystorePassword
+     * @param keyPassword
+     * @param truststore
+     * @param truststorePassword
+     */
+    public record TlsConfiguration(String protocolVersion,
+                                   Path keystore, String keystorePassword, String keyPassword,
+                                   Path truststore, String truststorePassword) {
     }
 
     /**
