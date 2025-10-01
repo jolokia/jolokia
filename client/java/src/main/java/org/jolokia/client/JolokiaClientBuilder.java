@@ -58,14 +58,14 @@ public class JolokiaClientBuilder {
      * In blocking mode it is ultimately passed to {@link java.net.Socket#connect(SocketAddress, int)} method.
      * In NIO, it's used as a timeout waiting for {@link SelectionKey#OP_CONNECT}.
      */
-    private int connectionTimeout;
+    private int connectionTimeout = 20_000;
 
     /**
      * Socket/read/write timeout in milliseconds.
      * In blocking mode it is ultimately passed to {@link java.net.Socket#setSoTimeout(int)} method.
      * In NIO, it's used as a timeout waiting for {@link SelectionKey#OP_READ}.{@link SelectionKey#OP_WRITE}.
      */
-    private int socketTimeout;
+    private int socketTimeout = 0;
 
     /**
      * {@link java.net.SocketOptions#TCP_NODELAY} option, defaults to {@code false} which means <em>delay</em>
@@ -284,7 +284,8 @@ public class JolokiaClientBuilder {
 
     /**
      * Determines the timeout in milliseconds until a connection is established. A timeout value of zero is
-     * interpreted as an infinite timeout. Default is 20 seconds.
+     * interpreted as an infinite timeout. Timeout value of -1 means <em>use http client default</em>.
+     * Default is 20 seconds.
      *
      * @param pTimeOut timeout in milliseconds
      */
@@ -299,7 +300,7 @@ public class JolokiaClientBuilder {
      * a maximum period inactivity between two consecutive data packets).
      * A timeout value of zero is interpreted as an infinite timeout, a negative value means the system default.
      *
-     * @param pTimeOut SO_TIMEOUT value in milliseconds, 0 mean no timeout at all.
+     * @param pTimeOut SO_TIMEOUT value in milliseconds, 0 mean no timeout at all. Default value is 0.
      */
     public final JolokiaClientBuilder socketTimeout(int pTimeOut) {
         socketTimeout = pTimeOut;
@@ -531,8 +532,8 @@ public class JolokiaClientBuilder {
      * @param user               Basic authentication user name
      * @param password           Basic authentication password
      * @param proxy              HTTP proxy configuration
-     * @param connectionTimeout  connection timeout in milliseconds used when establishing HTTP connection
-     * @param socketTimeout      socket/request timeout in milliseconds
+     * @param connectionTimeout  connection timeout in milliseconds used when establishing HTTP connection. Defaults to 20s.
+     * @param socketTimeout      socket/request timeout in milliseconds. Defaults to 0 (infinite).
      * @param tcpNoDelay         TCP_NODELAY option
      * @param socketBufferSize   socket and buffer size to use
      * @param contentCharset     charset to use when sending the request

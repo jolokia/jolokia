@@ -58,6 +58,7 @@
 
     <module>client/java</module>
     <module>client/java-httpclient4</module>
+    <module>client/java-httpclient5</module>
     <module>client/javascript</module>
     <module>client/javascript-esm</module>
     <module>client/jmx-adapter</module>
@@ -1089,6 +1090,17 @@
       </dependency>
 
       <dependency>
+        <groupId>org.apache.httpcomponents.core5</groupId>
+        <artifactId>httpcore5</artifactId>
+        <version>${version.org.apache.httpcomponents.core5}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents.client5</groupId>
+        <artifactId>httpclient5</artifactId>
+        <version>${version.org.apache.httpcomponents.client5}</version>
+      </dependency>
+
+      <dependency>
         <groupId>commons-codec</groupId>
         <artifactId>commons-codec</artifactId>
         <version>${version.commons-codec}</version>
@@ -1254,6 +1266,8 @@
     <version.io.fabric8.kubernetes-client>7.4.0</version.io.fabric8.kubernetes-client>
     <version.jakarta.servlet-api>5.0.0</version.jakarta.servlet-api>
     <version.jakarta.servlet-api6>6.1.0</version.jakarta.servlet-api6>
+    <version.org.apache.httpcomponents.client5>5.5.1</version.org.apache.httpcomponents.client5>
+    <version.org.apache.httpcomponents.core5>5.3.6</version.org.apache.httpcomponents.core5>
     <version.org.apache.httpcomponents.httpclient>4.5.14</version.org.apache.httpcomponents.httpclient>
     <version.org.apache.httpcomponents.httpcore>4.4.16</version.org.apache.httpcomponents.httpcore>
     <!-- we support wide range of OSGI Core API - in Import-Package we use [1.8,2.0) (R6), but we need newer version for tests -->
