@@ -17,9 +17,20 @@ package org.jolokia.service.jmx.handler.list;
  */
 
 import java.io.IOException;
-import java.util.*;
-
-import javax.management.*;
+import java.util.Collection;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Set;
+import javax.management.InstanceNotFoundException;
+import javax.management.IntrospectionException;
+import javax.management.MBeanInfo;
+import javax.management.MBeanServerConnection;
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectInstance;
+import javax.management.ObjectName;
+import javax.management.ReflectionException;
 
 import org.jolokia.json.JSONObject;
 import org.jolokia.service.jmx.api.CacheKeyProvider;
@@ -34,7 +45,7 @@ import org.jolokia.service.jmx.api.CacheKeyProvider;
  *     <li>A given path selects only partial information from the tree</li>
  * </ul>
  * Both limiting factors are taken care of when adding the information so that this map doesn't get unnecessarily
- * to large.
+ * too large.
  *
  * <pre>{@code
  * {
@@ -78,6 +89,10 @@ import org.jolokia.service.jmx.api.CacheKeyProvider;
  * }
  * }</pre>
  *
+ * With {@link org.jolokia.server.core.config.ConfigKey#LIST_CACHE} optimization, top level fields of "list"
+ * response should always be {@code cache} and {@code domains}. and some JSON representation of {@link MBeanInfo}
+ * may be a String key into the "cache".
+ *
  * @author roland
  * @since 13.09.11
  */
@@ -86,13 +101,34 @@ public class MBeanInfoData {
     // max depth for map to return
     private final int maxDepth;
 
-    // stack for an inner path
+    /**
+     * Stack of path elements for Jolokia list operation. Two first elements are for {@link ObjectName#getDomain()}
+     * and {@link ObjectName#getCanonicalKeyPropertyListString()}, 3rd element is to select single updater to use
+     * like {@code class} or {@code attr}.
+     */
     private final Deque<String> pathStack;
 
+    /**
+     * ObjectName or pattern recreated from the passed pathStack. Used to filter response elements. {@code null}
+     * means <em>all match</em>.
+     */
+    private final ObjectName pathObjectName;
+
+    /**
+     * 3rd path segment can be used to select single {@link DataUpdater}. No more path segments are supported.
+     */
+    private final String selectedUpdater;
+
+    /**
+     * If a path consists of non-wildcard segments, we actually want to retrieve nested tree from the list
+     * response. Otherwise we treat the path as a filter, not as a pointer to nested structure.
+     */
+    private int retrieveAtDepth = 0;
+
     // Map holding information. Without narrowing the list (using maxDepth), this should be:
-    // domain -> mbean (by key property listing) -> JSONified mbeanInfo
-    // for opitmized list() variant, the map is a bit more complex and the above mapping is under "domains" key,
-    // while "cache" key contains full, JSONified MBeanInfo
+    // domain -> mbean (by key property listing) -> JSON representation of mbeanInfo.
+    // For optimized list() variant, the map is a bit more complex and the above mapping is under "domains" key,
+    // while "cache" key contains full, JSON representation of some MBeanInfos from the MBeans under "domains"
     private final Map<String, Object> infoMap = new JSONObject();
 
     // static updaters for basic mapping of javax.management.MBeanInfo
@@ -106,12 +142,13 @@ public class MBeanInfoData {
     private final boolean listKeys;
 
     // whether to use optimized list() response (with cache/domain)
-    private final boolean listCache;
+    private boolean listCache;
 
     static {
         for (DataUpdater updater : new DataUpdater[] {
                 new DescriptionDataUpdater(),
                 new ClassNameDataUpdater(),
+                new ConstructorDataUpdater(),
                 new AttributeDataUpdater(),
                 new OperationDataUpdater(),
                 new NotificationDataUpdater(),
@@ -127,7 +164,7 @@ public class MBeanInfoData {
     /**
      * Constructor taking a max depth. The <em>max depth</em> specifies how deep the info tree should be build
      * up. The tree will be truncated if it gets larger than this value. A <em>path</em> (in form of a stack)
-     * can be given, in which only a sub information (subtree or leaf value) is stored
+     * can be given, in which only a sub information (subtree or leaf value) is returned
      *
      * @param pMaxDepth         max depth
      * @param pPathStack        the stack for restricting the information to add. The given stack will be cloned
@@ -143,30 +180,93 @@ public class MBeanInfoData {
         listCache = pListCache;
         pathStack = pPathStack != null ? new LinkedList<>(pPathStack) : new LinkedList<>();
         this.pProvider = pProvider;
+
+        // In list operation, path may be in the form of:
+        //  - 1 element: domain-or-pattern
+        //  - 2 elements: domain-or-pattern/keys-or-pattern
+        try {
+            if (pathStack.isEmpty()) {
+                pathObjectName = null;
+            } else {
+                String domain = pathStack.pop();
+                if (domain == null) {
+                    domain = "*";
+                }
+                domain = removeProviderIfNeeded(domain);
+                String name = "*";
+                if (!pathStack.isEmpty()) {
+                    name = pathStack.pop();
+                    if (name == null) {
+                        name = "*";
+                    }
+                }
+                pathObjectName = "*".equals(domain) && "*".equals(name) ? null : new ObjectName(domain + ":" + name);
+                if (pathObjectName != null) {
+                    if (!pathObjectName.isDomainPattern()) {
+                        retrieveAtDepth++;
+                        if (!pathObjectName.isPropertyListPattern() && !pathObjectName.isPropertyValuePattern()) {
+                            retrieveAtDepth++;
+                        }
+                    }
+                }
+            }
+        } catch (MalformedObjectNameException e) {
+            throw new IllegalArgumentException(e.getMessage(), e);
+        }
+
+        // if the pathObjectName is not a pattern, we can "navigate the path" and return subset of the tree.
+        // in other case the returned tree will be filtered by the pattern and will already contain subsets of the
+        // objects.
+        // also without a pattern there's no point in caching
+        if (pathObjectName != null && !pathObjectName.isPattern()) {
+            listCache = false;
+        }
+
+        if (pathStack.isEmpty()) {
+            selectedUpdater = null;
+        } else {
+            selectedUpdater = pathStack.pop();
+            if (pathObjectName != null && !pathObjectName.isPattern()) {
+                retrieveAtDepth++;
+            }
+        }
+
+        if (!pathStack.isEmpty()) {
+            throw new IllegalArgumentException("List operation supports only 3 path segments for MBean domain," +
+                "canonical list of ObjectName properties and updater to use. Remaining path: " + String.join(", ", pathStack));
+        }
     }
 
     /**
-     * The first two levels of this map (tree) consist of the MBean's domain name and name properties, which are
-     * independent of an MBean's metadata. If the max depth given at construction time is less or equals than 2 (and
-     * no inner path into the map is given), then a client of this map does not need to query the MBeanServer for
-     * MBeanInfo metadata.
-     * <p></p>
-     * This method checks this condition and returns true if this is the case. As side effect it will update this
-     * map with the name part extracted from the given object name
+     * <p>The first two levels of this map (tree) consist of the MBean's domain name and name properties, which are
+     * independent of an MBean's metadata. If the max depth given at construction time is less or equals than 2,
+     * then a caller does not need to query the MBeanServer for MBeanInfo metadata, because it's not expected.</p>
      *
-     * @param pName the objectname used for the first two levels
-     * @return true if the object name has been added.
+     * <p>This method checks this condition and returns true if this is the case. As side effect it will update this
+     * map with the name part extracted from the given object name</p>
+     *
+     * @param pName the {@link ObjectName} used for the first two levels
+     * @return true if the object name has been added and {@link MBeanServerConnection#getMBeanInfo} is not needed
      */
     public boolean handleFirstOrSecondLevel(ObjectName pName) {
-        if (maxDepth == 1 && pathStack.isEmpty()) {
-            // Only add domain names with a dummy value if max depth is restricted to 1
-            // But only when used without path
-            infoMap.put(addProviderIfNeeded(pName.getDomain()), 1);
+        if (maxDepth > 2) {
+            // full or partial serialization of MBeanInfo
+            return false;
+        }
+        if (maxDepth == 1) {
+            // Only add domain names with a dummy value if max depth is restricted to 1.
+            // Only if the MBean matches ObjectName pattern created from 2 first segments of the path
+            if (pathObjectName == null || pathObjectName.apply(pName)) {
+                infoMap.put(addProviderIfNeeded(pName.getDomain()), 1);
+            }
             return true;
-        } else if (maxDepth == 2 && pathStack.isEmpty()) {
-            // Add domain an object name into the map, final value is a dummy value
-            Map<String, Object> domain = getOrCreateJSONObject(infoMap, addProviderIfNeeded(pName.getDomain()));
-            domain.put(getKeyPropertyString(pName),1);
+        } else if (maxDepth == 2) {
+            // Add domain an object name into the map, final value is a dummy value. Only if
+            // Only if the MBean matches ObjectName pattern created from 2 first segments of the path
+            if (pathObjectName == null || pathObjectName.apply(pName)) {
+                Map<String, Object> domain = getOrCreateJSONObject(infoMap, addProviderIfNeeded(pName.getDomain()));
+                domain.put(getKeyPropertyString(pName), 1);
+            }
             return true;
         }
         return false;
@@ -196,20 +296,21 @@ public class MBeanInfoData {
                              Set<CacheKeyProvider> cacheKeyProviders)
             throws InstanceNotFoundException, IntrospectionException, ReflectionException, IOException {
 
+        if (pathObjectName != null && !pathObjectName.apply(pInstance.getObjectName())) {
+            // filtered MBean
+            return;
+        }
+
         ObjectName objectName = pInstance.getObjectName();
         MBeanInfo mBeanInfo = pConn.getMBeanInfo(objectName);
         String domainName = addProviderIfNeeded(objectName.getDomain());
         String mbeanKeyListing = getKeyPropertyString(objectName);
 
-        // Trim down stack to get rid of domain/property list
-        Deque<String> stack = truncatePathStack(2);
-
-        Map<String, Object> cache = null;
+        Map<String, Object> cache;
         Map<String, Object> domains;
         Map<String, Object> domain;
         Map<String, Object> mbean = null;
-        if (listCache && stack.isEmpty()) {
-            cache = getOrCreateJSONObject(infoMap, "cache");
+        if (listCache) {
             domains = getOrCreateJSONObject(infoMap, "domains");
             domain = getOrCreateJSONObject(domains, domainName);
         } else {
@@ -217,37 +318,35 @@ public class MBeanInfoData {
             mbean = getOrCreateJSONObject(domain, mbeanKeyListing);
         }
 
-        if (stack.isEmpty()) {
-            if (!listCache) {
-                // normal JSONification of MBeanInfo
-                addFullMBeanInfo(mbean, objectName, mBeanInfo, objectName, customUpdaters);
-            } else {
-                // cached MBeanInfo
-                String key = null;
-                for (CacheKeyProvider provider : cacheKeyProviders) {
-                    key = provider.determineKey(pInstance);
-                    if (key != null) {
-                        break;
-                    }
-                }
-                if (key != null && cache != null) {
-                    // an MBean may share its JSONified MBeanInfo with other MBeans
-                    // object name points to a key
-                    domain.put(mbeanKeyListing, key);
-                    // while key points to shared JSONified MBeanInfo
-                    mbean = getOrCreateJSONObject(cache, key);
-                    if (mbean.isEmpty()) {
-                        addFullMBeanInfo(mbean, objectName, mBeanInfo, objectName, customUpdaters);
-                    }
-                } else {
-                    // back to normal behavior
-                    mbean = getOrCreateJSONObject(domain, mbeanKeyListing);
-                    addFullMBeanInfo(mbean, objectName, mBeanInfo, objectName, customUpdaters);
+        if (!listCache) {
+            // normal JSON representation of MBeanInfo without a cache
+            addFullMBeanInfo(mbean, objectName, mBeanInfo, objectName, customUpdaters);
+        } else {
+            // cached MBeanInfo
+            String key = null;
+            for (CacheKeyProvider provider : cacheKeyProviders) {
+                key = provider.determineKey(pInstance);
+                if (key != null) {
+                    break;
                 }
             }
-        } else {
-            addPartialMBeanInfo(mbean, objectName, mBeanInfo, objectName, stack);
+            cache = getOrCreateJSONObject(infoMap, "cache");
+            if (key != null) {
+                // an MBean may share its JSON representation of MBeanInfo with other MBeans
+                // object name points to a key
+                domain.put(mbeanKeyListing, key);
+                // while key points to shared JSON representation of MBeanInfo
+                mbean = getOrCreateJSONObject(cache, key);
+                if (mbean.isEmpty()) {
+                    addFullMBeanInfo(mbean, objectName, mBeanInfo, objectName, customUpdaters);
+                }
+            } else {
+                // back to normal behavior
+                mbean = getOrCreateJSONObject(domain, mbeanKeyListing);
+                addFullMBeanInfo(mbean, objectName, mBeanInfo, objectName, customUpdaters);
+            }
         }
+
         // Trim if required
         if (mbean != null && mbean.isEmpty()) {
             domain.remove(mbeanKeyListing);
@@ -261,6 +360,11 @@ public class MBeanInfoData {
         return pProvider != null ? pProvider + "@" + pDomain : pDomain;
     }
 
+    private String removeProviderIfNeeded(String pDomain) {
+        return pProvider != null && pDomain.startsWith(pProvider)
+            ? pDomain.substring(pProvider.length() + 1) : pDomain;
+    }
+
     /**
      * Add an exception which occurred during extraction of an {@link MBeanInfo} for
      * a certain {@link ObjectName} to this map.
@@ -272,7 +376,7 @@ public class MBeanInfoData {
     public void handleException(ObjectName pName, IOException pExp) throws IOException {
         // In case of a remote call, IOException can occur e.g. for
         // NonSerializableExceptions
-        if (pathStack.isEmpty()) {
+        if (retrieveAtDepth == 0) {
             addException(pName, pExp);
         } else {
             // Happens for a deeper request, i.e. with a path pointing directly into an MBean,
@@ -292,7 +396,7 @@ public class MBeanInfoData {
      */
     public void handleException(ObjectName pName, IllegalStateException pExp) {
         // This happen happens for JBoss 7.1 in some cases.
-        if (pathStack.isEmpty()) {
+        if (retrieveAtDepth == 0) {
             addException(pName, pExp);
         } else {
             throw new IllegalStateException("IllegalStateException for MBean " + pName + " (" + pExp.getMessage() + ")",pExp);
@@ -309,7 +413,7 @@ public class MBeanInfoData {
      */
     public void handleException(ObjectName pName, InstanceNotFoundException pExp) throws InstanceNotFoundException {
         // This happen happens for JBoss 7.1 in some cases (i.e. ResourceAdapterModule)
-        if (pathStack.isEmpty()) {
+        if (retrieveAtDepth == 0) {
            addException(pName, pExp);
         } else {
            throw new InstanceNotFoundException("InstanceNotFoundException for MBean " + pName + " (" + pExp.getMessage() + ")");
@@ -356,35 +460,25 @@ public class MBeanInfoData {
      * @param customUpdaters
      */
     private void addFullMBeanInfo(Map<String, Object> pMBeanMap, ObjectName pObjectName, MBeanInfo pMBeanInfo, ObjectName pName, Set<DataUpdater> customUpdaters) {
+        boolean updaterFound = false;
         for (DataUpdater updater : UPDATERS.values()) {
-            updater.update(pMBeanMap, pObjectName, pMBeanInfo, null);
+            if (selectedUpdater == null || updater.getKey().equals(selectedUpdater)) {
+                updater.update(pMBeanMap, pObjectName, pMBeanInfo, null);
+                updaterFound = true;
+            }
         }
-        if (listKeys) {
+        if (listKeys && (selectedUpdater == null || LIST_KEYS_UPDATER.getKey().equals(selectedUpdater))) {
             LIST_KEYS_UPDATER.update(pMBeanMap, pObjectName, pMBeanInfo, null);
+            updaterFound = true;
         }
         for (DataUpdater customUpdater : customUpdaters) {
-            customUpdater.update(pMBeanMap, pObjectName, pMBeanInfo, null);
+            if (selectedUpdater == null || customUpdater.getKey().equals(selectedUpdater)) {
+                customUpdater.update(pMBeanMap, pObjectName, pMBeanInfo, null);
+                updaterFound = true;
+            }
         }
-    }
-
-    /**
-     * Populates JSON MBean information based on {@link MBeanInfo} using selected {@link DataUpdater updater}.
-     *
-     * @param pObjectName
-     * @param pMBeanMap
-     * @param pMBeanInfo
-     * @param pName
-     */
-    private void addPartialMBeanInfo(Map<String, Object> pMBeanMap, ObjectName pObjectName, MBeanInfo pMBeanInfo, ObjectName pName, Deque<String> pPathStack) {
-        String what = pPathStack.isEmpty() ? null : pPathStack.pop();
-        DataUpdater updater = UPDATERS.get(what);
-        if (updater == null && "keys".equals(what)) {
-            updater = LIST_KEYS_UPDATER;
-        }
-        if (updater != null) {
-            updater.update(pMBeanMap, pObjectName, pMBeanInfo, pPathStack);
-        } else {
-            throw new IllegalArgumentException("Illegal path element " + what);
+        if (!updaterFound) {
+            throw new IllegalArgumentException("Illegal path element for updater selection: " + selectedUpdater);
         }
     }
 
@@ -422,46 +516,35 @@ public class MBeanInfoData {
         return ret;
     }
 
-    // Trim down the stack by some value or return an empty stack
-    private Deque<String> truncatePathStack(int pLevel) {
-        if (pathStack.size() < pLevel) {
-            return new LinkedList<>();
-        } else {
-            // Trim of domain and MBean properties
-            // pathStack gets cloned here since the processing will eat it up
-            Deque<String> ret = new LinkedList<>(pathStack);
-            for (int i = 0;i < pLevel;i++) {
-                ret.pop();
-            }
-            return ret;
-        }
-    }
-
     // Navigate to sub map or leaf value
     private Object navigatePath() {
-        int size = pathStack.size();
+        int size = retrieveAtDepth;
         Map<String, Object> innerMap = infoMap;
 
-        while (size > 0) {
-            Collection<Object> vals = innerMap.values();
-            if (vals.isEmpty()) {
-                return innerMap;
-            } else if (vals.size() != 1) {
-                throw new IllegalStateException("Internal: More than one key found when extracting with path: " + vals);
-            }
-            Object value = vals.iterator().next();
+        if (!listCache) {
+            // no optimization, standard handling of maxDepth and path
+            while (size > 0) {
+                Collection<Object> vals = innerMap.values();
+                if (vals.isEmpty()) {
+                    return innerMap;
+                } else if (vals.size() != 1) {
+                    throw new IllegalStateException("Internal: More than one key found when extracting with path: " + vals);
+                }
+                Object value = vals.iterator().next();
 
-            // End leaf, return it ....
-            if (size == 1) {
-                return value;
+                // End leaf, return it ....
+                if (size == 1) {
+                    return value;
+                }
+                // Dive in deeper ...
+                if (!(value instanceof JSONObject)) {
+                    throw new IllegalStateException("Internal: Value within path extraction must be a Map, not " + value.getClass());
+                }
+                innerMap = (JSONObject) value;
+                --size;
             }
-            // Dive in deeper ...
-            if (!(value instanceof JSONObject)) {
-                throw new IllegalStateException("Internal: Value within path extraction must be a Map, not " + value.getClass());
-            }
-            innerMap = (JSONObject) value;
-            --size;
         }
+
         return innerMap;
     }
 }

@@ -28,6 +28,8 @@ public interface ExecDataMBean {
 
     Date simpleWithArguments(String p);
 
+    String simpleWithNullable(String p);
+
     Map<?, ?> withArgs(long p1, List<?> p2, boolean p3);
 
     int overloaded(int p1);

@@ -25,7 +25,9 @@ import org.jolokia.json.JSONObject;
 import org.jolokia.server.core.util.RequestType;
 
 /**
- * A JMX request for a <code>search</code> operation, i.e. for searching MBeans.
+ * A JMX request for a {@link RequestType#SEARCH} operation, i.e. for searching MBeans. Handles single
+ * additional argument, which may be an {@link javax.management.ObjectName} (or pattern) for filtering out
+ * the response.
  *
  * @author roland
  * @since 15.03.11
@@ -35,7 +37,7 @@ public class JolokiaSearchRequest extends JolokiaObjectNameRequest {
     /**
      * Constructor for GET requests.
      *
-     * @param pObjectName object name pattern to search for, which must not be null.
+     * @param pObjectName object name pattern to search for. If it's null, it's used as {@code *:*} pattern.
      * @param pParams optional processing parameters
      * @throws MalformedObjectNameException if the name is not a proper object name
      */
@@ -77,7 +79,7 @@ public class JolokiaSearchRequest extends JolokiaObjectNameRequest {
         return new RequestCreator<>() {
             /** {@inheritDoc} */
             public JolokiaSearchRequest create(Deque<String> pStack, ProcessingParameters pParams) throws MalformedObjectNameException {
-                return new JolokiaSearchRequest(pStack.pop(),pParams);
+                return new JolokiaSearchRequest(pStack.isEmpty() ? null : pStack.pop(),pParams);
             }
 
             /** {@inheritDoc} */

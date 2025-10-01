@@ -19,7 +19,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>jolokia-support-spring</artifactId>
-  <version>2.3.1-SNAPSHOT</version>
+  <version>2.4.0-SNAPSHOT</version>
 
   <name>jolokia-support-spring</name>
   <description>Jolokia :: Support :: Spring JVM Agent</description>
@@ -27,7 +27,7 @@
   <parent>
     <groupId>org.jolokia</groupId>
     <artifactId>jolokia-parent</artifactId>
-    <version>2.3.1-SNAPSHOT</version>
+    <version>2.4.0-SNAPSHOT</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
@@ -112,22 +112,5 @@
     </dependency>
 
   </dependencies>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>17</source>
-          <testSource>17</testSource>
-          <target>17</target>
-          <testTarget>17</testTarget>
-          <release>17</release>
-          <testRelease>17</testRelease>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 
 </project>

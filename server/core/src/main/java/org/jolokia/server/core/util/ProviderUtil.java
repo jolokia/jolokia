@@ -27,7 +27,7 @@ public final class ProviderUtil {
      */
     public static ProviderObjectNamePair extractProvider(String pName) throws MalformedObjectNameException {
         if (pName == null) {
-            throw new IllegalArgumentException("Object name can not be null");
+            pName = "*:*";
         }
         Matcher matcher = ProviderUtil.PROVIDER_PATTERN.matcher(pName);
         if (matcher.matches()) {
@@ -44,7 +44,7 @@ public final class ProviderUtil {
      * @return object name containing the extracted provider (which can be null) and the object name itself. Is never null.
      */
     public static ProviderObjectNamePair extractProvider(ObjectName pName) throws MalformedObjectNameException {
-        return extractProvider(pName.toString());
+        return extractProvider(pName.getCanonicalName());
     }
 
     /**

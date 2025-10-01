@@ -167,12 +167,12 @@ public enum ConfigKey {
 
     /**
      * Whether to include the incoming request in the {@code request} field of the response.
-     * Be careful when corelating bulk requests/responses. Defaults to {@code true}.
+     * Be careful when correlating bulk requests/responses. Defaults to {@code true}.
      */
     INCLUDE_REQUEST("includeRequest", true, true, null, Boolean.class),
 
     /**
-     * A request parameter for {@code list} operation, which tells Jolokia to return a map of keys obtained from
+     * A request parameter for {@code list} operation, which tells Jolokia to return a map of the keys obtained from
      * {@link javax.management.ObjectName#getKeyPropertyList()} under {@code keys} field of the data for an MBean.
      */
     LIST_KEYS("listKeys", false, true, Constants.FALSE, Boolean.class),

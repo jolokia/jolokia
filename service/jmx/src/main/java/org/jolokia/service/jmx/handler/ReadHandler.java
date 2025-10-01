@@ -60,6 +60,16 @@ public class ReadHandler extends AbstractCommandHandler<JolokiaReadRequest> {
                 }
             };
 
+    // MBean Handler for getting all attributes
+    private static final MBeanServerAccess.MBeanAction<AttributeList> MBEAN_ATTRIBUTES_READ_HANDLER =
+            new MBeanServerAccess.MBeanAction<>() {
+                /** {@inheritDoc} */
+                public AttributeList execute(MBeanServerConnection pConn, ObjectName pName, Object... extraArgs)
+                        throws ReflectionException, InstanceNotFoundException, IOException {
+                    return pConn.getAttributes(pName, (String[]) extraArgs);
+                }
+            };
+
 
     /** {@inheritDoc} */
     public RequestType getType() {
@@ -175,12 +185,34 @@ public class ReadHandler extends AbstractCommandHandler<JolokiaReadRequest> {
             throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
 
         List<String> attributes = resolveAttributes(pServerManager, pMBeanName, pAttributeNames);
-        Map<String,Object> ret = new HashMap<>();
+        Map<String, Object> ret = new HashMap<>();
+
+        // fetch the attributes first and then check the restrictions, so we can spare some time
+        // see https://github.com/jolokia/jolokia/issues/893
+        Map<String, Object> mapping = new HashMap<>();
+        boolean allFetched = false;
+        if (attributes.size() > 1) {
+            AttributeList allAttributes = getAttributes(pServerManager, pMBeanName, attributes.toArray(String[]::new));
+            for (Attribute a : allAttributes.asList()) {
+                mapping.put(a.getName(), a.getValue());
+            }
+            allFetched = attributes.size() == mapping.size();
+        }
 
         for (String attribute : attributes) {
             try {
                 checkRestriction(pMBeanName, attribute);
-                ret.put(attribute,getAttribute(pServerManager, pMBeanName, attribute));
+                if (allFetched) {
+                    ret.put(attribute, mapping.get(attribute));
+                } else {
+                    if (mapping.containsKey(attribute)) {
+                        // we can use it, even if it's null
+                        ret.put(attribute, mapping.get(attribute));
+                    } else {
+                        // we have to fetch it individually to get the exception
+                        ret.put(attribute, getAttribute(pServerManager, pMBeanName, attribute));
+                    }
+                }
             } catch (MBeanException e) {
                 // The fault handler might to decide to rethrow the
                 // exception in which case nothing is put extra into ret.
@@ -231,6 +263,10 @@ public class ReadHandler extends AbstractCommandHandler<JolokiaReadRequest> {
     private Object getAttribute(MBeanServerAccess pServerManager, ObjectName pMBeanName, String attribute)
             throws MBeanException, ReflectionException, IOException, AttributeNotFoundException, InstanceNotFoundException {
         return pServerManager.call(pMBeanName, MBEAN_ATTRIBUTE_READ_HANDLER, attribute);
+    }
+    private AttributeList getAttributes(MBeanServerAccess pServerManager, ObjectName pMBeanName, String[] attributes)
+            throws MBeanException, ReflectionException, IOException, AttributeNotFoundException, InstanceNotFoundException {
+        return pServerManager.call(pMBeanName, MBEAN_ATTRIBUTES_READ_HANDLER, (Object[]) attributes);
     }
 
     // Return a set of attributes as a map with the attribute name as key and their values as values

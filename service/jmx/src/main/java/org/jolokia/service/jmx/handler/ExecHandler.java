@@ -25,9 +25,12 @@ import javax.management.*;
 import javax.management.openmbean.OpenMBeanParameterInfo;
 import javax.management.openmbean.OpenType;
 
+import org.jolokia.json.JSONObject;
 import org.jolokia.server.core.request.JolokiaExecRequest;
 import org.jolokia.server.core.service.serializer.Serializer;
+import org.jolokia.server.core.service.serializer.ValueFaultHandler;
 import org.jolokia.server.core.util.RequestType;
+import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 
 
 /**
@@ -54,6 +57,16 @@ public class ExecHandler extends AbstractCommandHandler<JolokiaExecRequest> {
     }
 
     /**
+     * EXEC may be performed on multiple objects if they match the {@link ObjectName} pattern
+     * @param pRequest
+     * @return
+     */
+    @Override
+    public boolean handleAllServersAtOnce(JolokiaExecRequest pRequest) {
+        return pRequest.getObjectName().isPattern();
+    }
+
+    /**
      * Execute an JMX operation. The operation name is taken from the request, as well as the
      * arguments to use. If the operation is given in the format "op(type1,type2,...)"
      * (e.g "getText(java.lang.String,int)" then the argument types are taken into account
@@ -73,17 +86,57 @@ public class ExecHandler extends AbstractCommandHandler<JolokiaExecRequest> {
         Object[] params = new Object[nrParams];
         @SuppressWarnings("unchecked")
         List<Object> args = (List<Object>) request.getArguments();
+        // all path elements were consumed as arguments, but if there's more, we'll treat them as path for return value
+        // they should be Strings
+        if (args != null && nrParams < args.size()) {
+            List<Object> trail = new ArrayList<>(args.subList(nrParams, args.size()));
+            List<String> path = new LinkedList<>();
+            for (Object el : trail) {
+                if (el instanceof String) {
+                    path.add((String) el);
+                }
+            }
+            request.splitArgumentsAndPath(nrParams, path);
+
+            //noinspection unchecked
+            args = (List<Object>) request.getArguments();
+        } else if (args == null) {
+            args = Collections.emptyList();
+        }
         verifyArguments(request, types, nrParams, args);
-        for (int i = 0;i < nrParams; i++) {
-        	if (types.paramOpenTypes[i] != null) {
-        		params[i] = context.getMandatoryService(Serializer.class).deserializeOpenType(types.paramOpenTypes[i], args.get(i));
-        	} else {
-        		params[i] = context.getMandatoryService(Serializer.class).deserialize(types.paramClasses[i], args.get(i));
-        	}
+        for (int i = 0; i < nrParams; i++) {
+            if (types.paramOpenTypes[i] != null) {
+                params[i] = context.getMandatoryService(Serializer.class).deserializeOpenType(types.paramOpenTypes[i], args.get(i));
+            } else {
+                params[i] = context.getMandatoryService(Serializer.class).deserialize(types.paramClasses[i], args.get(i));
+            }
         }
 
-        // TODO: Maybe allow for a path as well which could be applied on the return value ...
         return server.invoke(request.getObjectName(),types.operationName,params,types.paramClasses);
+    }
+
+    @Override
+    public Object doHandleAllServerRequest(MBeanServerAccess pServerManager, JolokiaExecRequest pRequest, Object pPreviousResult)
+        throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+        ObjectName oName = pRequest.getObjectName();
+        ValueFaultHandler faultHandler = pRequest.getValueFaultHandler();
+        if (oName.isPattern()) {
+            // search first
+            Set<ObjectName> names = pServerManager.queryNames(oName);
+            if (names.isEmpty()) {
+                throw new InstanceNotFoundException("No MBean with pattern " + oName + " found for invoking JMX operations");
+            }
+            JSONObject result = new JSONObject();
+            for (ObjectName name : names) {
+                Object singleResult = pServerManager.call(name, (connection, objectName, extra)
+                    -> ExecHandler.this.doHandleSingleServerRequest(connection, pRequest.withChangedObjectName(name)));
+                result.put(pRequest.getOrderedObjectName(name), singleResult);
+            }
+            return result;
+        } else {
+            return pServerManager.call(oName, (connection, objectName, extra)
+                -> ExecHandler.this.doHandleSingleServerRequest(connection, pRequest));
+        }
     }
 
     // check whether the given arguments are compatible with the signature and if not so, raise an excepton

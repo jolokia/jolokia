@@ -1,0 +1,76 @@
+package org.jolokia.client.request;
+
+/*
+ * Copyright 2009-2013 Roland Huss
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import java.util.*;
+
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+
+import org.jolokia.client.JolokiaTargetConfig;
+import org.jolokia.client.exception.JolokiaException;
+import org.jolokia.client.response.JolokiaSearchResponse;
+import org.jolokia.json.JSONArray;
+import org.testng.annotations.Test;
+
+import static org.testng.AssertJUnit.*;
+
+/**
+ * Integration test for searching MBeans
+ *
+ * @author roland
+ */
+public class ClientSearchIntegrationTest extends AbstractClientIntegrationTest {
+
+    @Test
+    public void simple() throws MalformedObjectNameException, JolokiaException {
+        for (JolokiaSearchRequest req : new JolokiaSearchRequest[] {
+                new JolokiaSearchRequest("java.lang:type=*"),
+                new JolokiaSearchRequest(getTargetProxyConfig(),"java.lang:type=*")
+        }) {
+            JolokiaSearchResponse resp = jolokiaClient.execute(req);
+            assertNotNull(resp);
+            List<ObjectName> names = resp.getObjectNames();
+            assertTrue(names.contains(new ObjectName("java.lang:type=Memory")));
+        }
+    }
+
+    @Test
+    public void emptySearch() throws MalformedObjectNameException, JolokiaException {
+        for (JolokiaTargetConfig cfg : new JolokiaTargetConfig[] { null, getTargetProxyConfig()}) {
+            JolokiaSearchResponse resp = jolokiaClient.execute(new JolokiaSearchRequest(cfg,"bla:gimme=*"));
+            assertEquals(0, resp.getObjectNames().size());
+            assertEquals(0, resp.getMBeanNames().size());
+        }
+    }
+
+    @Test(expectedExceptions = { MalformedObjectNameException.class })
+    public void invalidSearchPattern() throws MalformedObjectNameException {
+        new JolokiaSearchRequest("bla:blub:args=*");
+    }
+
+    @Test
+    public void advancedPattern() throws MalformedObjectNameException, JolokiaException {
+        JolokiaSearchResponse resp = jolokiaClient.execute(new JolokiaSearchRequest("java.lang:type=Mem*"));
+        JSONArray names = resp.getMBeanNames();
+        assertEquals(1, names.size());
+
+        resp = jolokiaClient.execute(new JolokiaSearchRequest(getTargetProxyConfig(), "java.lang:type=Mem*"));
+        names = resp.getMBeanNames();
+        assertEquals(2, names.size());
+    }
+}

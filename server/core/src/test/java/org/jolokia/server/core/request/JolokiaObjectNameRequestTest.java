@@ -52,8 +52,8 @@ public class JolokiaObjectNameRequestTest {
         }
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = "^.*null.*$")
-    public void illegalObjectName() throws MalformedObjectNameException {
+    @Test
+    public void nullObjectNameAsWildcard() throws MalformedObjectNameException {
             JolokiaReadRequest request =
                     new JolokiaRequestBuilder(RequestType.READ, (String) null).build();
     }

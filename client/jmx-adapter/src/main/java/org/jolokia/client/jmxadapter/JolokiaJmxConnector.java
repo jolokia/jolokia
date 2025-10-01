@@ -1,7 +1,7 @@
 package org.jolokia.client.jmxadapter;
 
 import java.util.HashMap;
-import org.jolokia.client.J4pClientBuilder;
+import org.jolokia.client.JolokiaClientBuilder;
 
 import javax.management.ListenerNotFoundException;
 import javax.management.MBeanServerConnection;
@@ -55,7 +55,7 @@ public class JolokiaJmxConnector implements JMXConnector {
     }
     Map<String, Object> mergedEnv = mergedEnvironment(env);
     final String internalProtocol = getJolokiaProtocol(mergedEnv);
-    final J4pClientBuilder clientBuilder = new J4pClientBuilder().url(
+    final JolokiaClientBuilder clientBuilder = new JolokiaClientBuilder().url(
         internalProtocol + "://" + this.serviceUrl.getHost() + ":" + this.serviceUrl.getPort()
             + prefixWithSlashIfNone(this.serviceUrl.getURLPath()));
     if (mergedEnv.containsKey(CREDENTIALS)) {
@@ -98,8 +98,8 @@ public class JolokiaJmxConnector implements JMXConnector {
     return mergedEnv;
   }
 
-  protected RemoteJmxAdapter instantiateAdapter(J4pClientBuilder clientBuilder,
-      Map<String, Object> ignoredMergedEnv) throws IOException {
+  protected RemoteJmxAdapter instantiateAdapter(JolokiaClientBuilder clientBuilder,
+                                                Map<String, Object> ignoredMergedEnv) throws IOException {
     return new RemoteJmxAdapter(clientBuilder.build());
   }
 

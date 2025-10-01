@@ -22,13 +22,13 @@ request-response paradigm and is easy to use:
 
 [source,java,options=nowrap]
 ----
-J4pClient j4pClient = J4pClient.url("http://localhost:8080/jolokia")
+JolokiaClient jolokiaClient = new JolokiaClientBuilder().url("http://localhost:8080/jolokia")
         .user("jolokia")
         .password("jolokia")
         .build();
-J4pReadRequest req = new J4pReadRequest("java.lang:type=Memory", "HeapMemoryUsage");
+JolokiaReadRequest req = new JolokiaReadRequest("java.lang:type=Memory", "HeapMemoryUsage");
 req.setPath("used");
-J4pReadResponse resp = j4pClient.execute(req);
+JolokiaReadResponse resp = jolokiaClient.execute(req);
 System.out.println("Memory used: " + resp.getValue());
 ----
 

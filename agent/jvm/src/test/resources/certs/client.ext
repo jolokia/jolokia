@@ -1,5 +1,6 @@
 basicConstraints        = CA:FALSE
 nsCertType              = client
-keyUsage                = digitalSignature, keyEncipherment
+keyUsage                = nonRepudiation, digitalSignature, keyEncipherment
 extendedKeyUsage        = clientAuth
-
+subjectKeyIdentifier    = hash
+authorityKeyIdentifier  = keyid,issuer

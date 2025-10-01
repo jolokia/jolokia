@@ -20,7 +20,7 @@
 
   <groupId>org.jolokia</groupId>
   <artifactId>jolokia-parent</artifactId>
-  <version>2.3.1-SNAPSHOT</version>
+  <version>2.4.0-SNAPSHOT</version>
 
   <name>${project.artifactId}</name>
   <description>Jolokia :: Parent :: POM</description>
@@ -54,17 +54,24 @@
 
     <module>it/core</module>
     <module>it/war</module>
+    <module>it/osgi</module>
 
     <module>client/java</module>
+    <module>client/java-httpclient4</module>
+    <module>client/java-httpclient5</module>
     <module>client/javascript</module>
     <module>client/javascript-esm</module>
     <module>client/jmx-adapter</module>
     <module>client/kubernetes</module>
 
     <module>support/jmx</module>
+    <module>support/spring</module>
 
     <module>examples/osgi-restrictor</module>
     <module>examples/client-javascript-test-app</module>
+    <module>examples/spring</module>
+    <module>examples/spring-boot</module>
+    <module>examples/spring-boot-actuator</module>
   </modules>
 
   <build>
@@ -155,12 +162,12 @@
           <artifactId>maven-compiler-plugin</artifactId>
           <version>${plugin.maven-compiler-plugin}</version>
           <configuration>
-            <source>11</source>
-            <testSource>11</testSource>
-            <target>11</target>
-            <testTarget>11</testTarget>
-            <release>11</release>
-            <testRelease>11</testRelease>
+            <source>17</source>
+            <testSource>17</testSource>
+            <target>17</target>
+            <testTarget>17</testTarget>
+            <release>17</release>
+            <testRelease>17</testRelease>
           </configuration>
         </plugin>
 
@@ -765,6 +772,22 @@
       </dependency>
       <dependency>
         <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-client-java</artifactId>
+        <classifier>tests</classifier>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-client-java-httpclient4</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-client-java-httpclient5</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
         <artifactId>jolokia-client-javascript</artifactId>
         <version>${project.version}</version>
       </dependency>
@@ -880,14 +903,32 @@
         <groupId>org.osgi</groupId>
         <artifactId>org.osgi.service.cm</artifactId>
         <version>${version.org.osgi.service.cm}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.namespace.implementation</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>org.osgi</groupId>
         <artifactId>org.osgi.service.servlet</artifactId>
         <version>${version.org.osgi.service.servlet}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.namespace.implementation</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
 
       <!-- Test dependencies -->
+
+      <dependency>
+        <groupId>net.bytebuddy</groupId>
+        <artifactId>byte-buddy</artifactId>
+        <version>${version.net.bytebuddy}</version>
+      </dependency>
 
       <dependency>
         <groupId>org.testng</groupId>
@@ -913,6 +954,12 @@
         <groupId>org.easymock</groupId>
         <artifactId>easymock</artifactId>
         <version>${version.org.easymock}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
 
       <dependency>
@@ -1053,6 +1100,17 @@
       </dependency>
 
       <dependency>
+        <groupId>org.apache.httpcomponents.core5</groupId>
+        <artifactId>httpcore5</artifactId>
+        <version>${version.org.apache.httpcomponents.core5}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents.client5</groupId>
+        <artifactId>httpclient5</artifactId>
+        <version>${version.org.apache.httpcomponents.client5}</version>
+      </dependency>
+
+      <dependency>
         <groupId>commons-codec</groupId>
         <artifactId>commons-codec</artifactId>
         <version>${version.commons-codec}</version>
@@ -1142,7 +1200,7 @@
     <plugin.maven-assembly-plugin>3.7.1</plugin.maven-assembly-plugin>
     <plugin.maven-changes-plugin>2.12.1</plugin.maven-changes-plugin>
     <plugin.maven-clean-plugin>3.5.0</plugin.maven-clean-plugin>
-    <plugin.maven-compiler-plugin>3.14.0</plugin.maven-compiler-plugin>
+    <plugin.maven-compiler-plugin>3.14.1</plugin.maven-compiler-plugin>
     <plugin.maven-dependency-plugin>3.8.1</plugin.maven-dependency-plugin>
     <plugin.maven-deploy-plugin>3.1.4</plugin.maven-deploy-plugin>
     <plugin.maven-failsafe-plugin>3.5.4</plugin.maven-failsafe-plugin>
@@ -1193,12 +1251,13 @@
     <version.com.fasterxml.jackson.core.annotations>2.20</version.com.fasterxml.jackson.core.annotations>
     <version.jakarta.annotation-api>3.0.0</version.jakarta.annotation-api>
     <version.jakarta.authentication-api>3.1.0</version.jakarta.authentication-api>
+    <version.net.bytebuddy>1.17.7</version.net.bytebuddy>
     <version.org.apache.felix.configadmin>1.9.26</version.org.apache.felix.configadmin>
     <version.org.apache.felix.framework>7.0.5</version.org.apache.felix.framework>
     <version.org.apache.felix.http.jetty12>1.0.36</version.org.apache.felix.http.jetty12>
     <version.org.awaitility>4.3.0</version.org.awaitility>
     <version.org.easymock>5.6.0</version.org.easymock>
-    <version.org.eclipse.jetty>11.0.25</version.org.eclipse.jetty>
+    <version.org.eclipse.jetty>12.1.1</version.org.eclipse.jetty>
     <version.org.testng>7.11.0</version.org.testng>
     <version.org.wiremock>3.13.1</version.org.wiremock>
     <version.org.apache.servicemix.bundles.javax-inject>1_3</version.org.apache.servicemix.bundles.javax-inject>
@@ -1217,6 +1276,8 @@
     <version.io.fabric8.kubernetes-client>7.4.0</version.io.fabric8.kubernetes-client>
     <version.jakarta.servlet-api>5.0.0</version.jakarta.servlet-api>
     <version.jakarta.servlet-api6>6.1.0</version.jakarta.servlet-api6>
+    <version.org.apache.httpcomponents.client5>5.5.1</version.org.apache.httpcomponents.client5>
+    <version.org.apache.httpcomponents.core5>5.3.6</version.org.apache.httpcomponents.core5>
     <version.org.apache.httpcomponents.httpclient>4.5.14</version.org.apache.httpcomponents.httpclient>
     <version.org.apache.httpcomponents.httpcore>4.4.16</version.org.apache.httpcomponents.httpcore>
     <!-- we support wide range of OSGI Core API - in Import-Package we use [1.8,2.0) (R6), but we need newer version for tests -->
@@ -1229,72 +1290,11 @@
     <!-- Versions of Maven dependencies for Jolokia Spring-related libraries (JDK17 only) -->
 
     <!-- Spring Framework and Spring Boot should be aligned -->
-    <version.org.springframework>6.2.10</version.org.springframework>
-    <version.org.springframework.boot>3.5.5</version.org.springframework.boot>
+    <version.org.springframework>6.2.11</version.org.springframework>
+    <version.org.springframework.boot>3.5.6</version.org.springframework.boot>
   </properties>
 
   <profiles>
-
-    <profile>
-      <id>jdk17</id>
-      <activation>
-        <jdk>[17,)</jdk>
-      </activation>
-      <modules>
-        <module>support/spring</module>
-        <module>examples/spring</module>
-        <module>examples/spring-boot</module>
-        <module>examples/spring-boot-actuator</module>
-        <module>it/osgi</module>
-      </modules>
-    </profile>
-
-    <profile>
-      <id>jdk11-16</id>
-      <activation>
-        <jdk>[11,17)</jdk>
-      </activation>
-      <build>
-        <pluginManagement>
-          <plugins>
-            <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-surefire-plugin</artifactId>
-              <version>${plugin.maven-surefire-plugin}</version>
-              <configuration>
-                <argLine>
-                  --illegal-access=deny
-                  --add-opens java.management/javax.management.modelmbean=ALL-UNNAMED
-                </argLine>
-              </configuration>
-            </plugin>
-          </plugins>
-        </pluginManagement>
-      </build>
-    </profile>
-
-    <profile>
-      <id>jdk17-23</id>
-      <activation>
-        <jdk>[17,24)</jdk>
-      </activation>
-      <build>
-        <pluginManagement>
-          <plugins>
-            <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-surefire-plugin</artifactId>
-              <version>${plugin.maven-surefire-plugin}</version>
-              <configuration>
-                <argLine>
-                  --add-opens java.management/javax.management.modelmbean=ALL-UNNAMED
-                </argLine>
-              </configuration>
-            </plugin>
-          </plugins>
-        </pluginManagement>
-      </build>
-    </profile>
 
     <profile>
       <!-- Distribution to Maven Central. This is default deployment target -->

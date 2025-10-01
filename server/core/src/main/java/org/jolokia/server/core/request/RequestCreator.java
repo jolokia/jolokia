@@ -73,6 +73,7 @@ abstract class RequestCreator<R extends JolokiaRequest> {
         List<String> ret = new ArrayList<>();
         while (!pElements.isEmpty()) {
             String element = pElements.pop();
+            // https://github.com/jolokia/jolokia/issues/106
             ret.add("*".equals(element) ? null : element);
         }
         return ret;

@@ -332,12 +332,26 @@ public class ListHandlerTest extends BaseHandlerTest {
         execute(handler, request);
     }
 
-    @Test(expectedExceptions = { IllegalArgumentException.class })
-    public void invalidPath4() throws Exception {
+    @Test
+    public void wildcardPath4() throws Exception {
+        // wildcard at level 2 - return objects of java.lang domain at level 1
         JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST)
                 .pathParts("java.lang", "type=*")
                 .build();
-        execute(handler, request);
+        Map<String, ?> response = execute(handler, request);
+        assertTrue(response.containsKey("type=Memory"));
+        assertTrue(response.containsKey("type=Threading"));
+
+        // wildcard at level 1 - top level response fields are matching domains
+        
+        request = new JolokiaRequestBuilder(RequestType.LIST)
+                .pathParts("java.*", "type=*")
+                .build();
+        response = execute(handler, request);
+        assertTrue(response.containsKey("java.util.logging"));
+        assertTrue(response.containsKey("java.lang"));
+        JSONObject javaLang = (JSONObject) response.get("java.lang");
+        assertTrue(javaLang.containsKey("type=Threading"));
     }
 
     @Test

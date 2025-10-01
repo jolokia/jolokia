@@ -127,15 +127,18 @@ public class ListHandler extends AbstractCommandHandler<JolokiaListRequest> {
         }
         Deque<String> path = new LinkedList<>(pPathStack);
         String domain = path.pop();
+        if (domain == null) {
+            // revert behaviour implemented for read requests in https://github.com/jolokia/jolokia/issues/106
+            domain = "*";
+        }
         if (path.isEmpty()) {
             return new ObjectName(domain + ":*");
         }
         String props = path.pop();
-        ObjectName mbean = new ObjectName(domain + ":" + props);
-        if (mbean.isPattern()) {
-            throw new IllegalArgumentException("Cannot use an MBean pattern as path (given MBean: " + mbean + ")");
+        if (props == null) {
+            props = "*";
         }
-        return mbean;
+        return new ObjectName(domain + ":" + props);
     }
 
 }

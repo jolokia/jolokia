@@ -51,9 +51,9 @@ import javax.management.remote.JMXConnectionNotification;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
-import org.jolokia.client.J4pClient;
-import org.jolokia.client.J4pClientBuilder;
-import org.jolokia.client.request.J4pVersionRequest;
+import org.jolokia.client.JolokiaClient;
+import org.jolokia.client.JolokiaClientBuilder;
+import org.jolokia.client.request.JolokiaVersionRequest;
 import org.jolokia.jvmagent.JvmAgent;
 import org.jolokia.server.core.Version;
 import org.jolokia.server.core.util.ClassUtil;
@@ -396,12 +396,12 @@ public class JmxBridgeTest {
             MBeanExample.class.getName(),
             RemoteJmxAdapter.getObjectName("jolokia.test:name=MBeanExample"));
         JvmAgent.agentmain("port=" + (agentPort = EnvTestUtil.getFreePort()) + ",agentId=local-jvm", null);
-        final J4pClient connector =
-            new J4pClientBuilder().url("http://localhost:" + this.agentPort + "/jolokia/").build();
+        final JolokiaClient connector =
+            new JolokiaClientBuilder().url("http://localhost:" + this.agentPort + "/jolokia/").build();
         // wait for agent to be running
         await().until(() -> {
             //will throw exception if connection is not ready
-            connector.execute(new J4pVersionRequest());
+            connector.execute(new JolokiaVersionRequest());
             return true;
         });
         this.adapter = new RemoteJmxAdapter(connector);
@@ -583,7 +583,7 @@ public class JmxBridgeTest {
 
     @Test(expectedExceptions = IOException.class)
     public void ensureThatIOExceptionIsChanneledOut() throws IOException {
-        new RemoteJmxAdapter(new J4pClientBuilder().url("http://localhost:10/jolokia").build())
+        new RemoteJmxAdapter(new JolokiaClientBuilder().url("http://localhost:10/jolokia").build())
             .queryMBeans(null, null);
     }
 

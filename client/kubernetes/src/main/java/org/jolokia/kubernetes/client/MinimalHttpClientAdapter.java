@@ -44,7 +44,7 @@ import io.fabric8.kubernetes.client.utils.KubernetesSerialization;
 import okhttp3.HttpUrl;
 
 /**
- * This is a minimum implementation of the HttpClient interface based on what is used by J4PClient
+ * This is a minimum implementation of the HttpClient interface based on what is used by JolokiaClient
  * hence the need to adapt One HTTP client to another HTTP client API
  */
 public class MinimalHttpClientAdapter implements HttpClient {

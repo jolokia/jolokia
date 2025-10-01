@@ -32,6 +32,10 @@ public class ExecData implements ExecDataMBean {
         return DateUtil.fromISO8601(p1);
     }
 
+    public String simpleWithNullable(String p1) {
+        return p1 == null ? "<null>" : p1;
+    }
+
     public Map<?, ?> withArgs(long p1, List<?> p2, boolean p3) {
         JSONObject ret = new JSONObject();
         ret.put("long", p1);

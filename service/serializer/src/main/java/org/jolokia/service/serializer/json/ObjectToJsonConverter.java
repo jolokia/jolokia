@@ -74,6 +74,20 @@ public final class ObjectToJsonConverter {
     );
 
     /**
+     * Classes of the objects that can be returned directly as proper JSON types and can't be used with
+     * extra "path" do return part of the value.
+     */
+    public static final Set<Class<?>>JSON_BASIC_TYPES = Set.of(
+        String.class,
+        Boolean.TYPE,
+        Boolean.class,
+        Long.TYPE,
+        Long.class,
+        BigInteger.class,
+        BigDecimal.class
+    );
+
+    /**
      * Simple types which are not proper JSON types (even if they seem to) but can be easily converted.
      */
     public static final Map<Class<?>, String> JSON_CONVERSIONS = Map.ofEntries(
@@ -265,7 +279,7 @@ public final class ObjectToJsonConverter {
                 // Special handling for arrays
                 return arrayAccessor.extractObject(this, pValue, pathStack, pJsonify);
             }
-            if (cls.isPrimitive() || JSON_TYPES.contains(cls) || JSON_CONVERSIONS.containsKey(cls)) {
+            if (cls.isPrimitive() || JSON_BASIC_TYPES.contains(cls) || JSON_CONVERSIONS.containsKey(cls)) {
                 // Special "don't drill into" classes that should be handled by PrimitiveAccessor
                 if (!pathStack.isEmpty()) {
                     // skip any attribute which we never get from these values

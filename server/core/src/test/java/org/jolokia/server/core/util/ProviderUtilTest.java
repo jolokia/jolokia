@@ -7,6 +7,7 @@ import javax.management.ObjectName;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 /**
  * @author roland
@@ -35,9 +36,10 @@ public class ProviderUtilTest {
         }
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*not be null.*")
+    @Test
     public void nullName() throws MalformedObjectNameException {
-        ProviderUtil.extractProvider((String) null);
+        assertNull(ProviderUtil.extractProvider((String) null).getProvider());
+        assertEquals(ProviderUtil.extractProvider((String) null).getObjectName().getCanonicalName(), "*:*");
     }
 
 
