@@ -1164,7 +1164,7 @@
     <!-- Versions of Maven plugins (other plugins) -->
 
     <plugin.com.devspan.mojo.javascript-maven-plugin>0.9.3</plugin.com.devspan.mojo.javascript-maven-plugin>
-    <plugin.com.github.eirslett.frontend-maven-plugin>1.15.1</plugin.com.github.eirslett.frontend-maven-plugin>
+    <plugin.com.github.eirslett.frontend-maven-plugin>1.15.4</plugin.com.github.eirslett.frontend-maven-plugin>
     <plugin.com.github.site-maven-plugin>0.12</plugin.com.github.site-maven-plugin>
     <plugin.org.apache.felix.maven-bundle-plugin>5.1.9</plugin.org.apache.felix.maven-bundle-plugin>
     <plugin.org.apache.rat.apache-rat-plugin>0.16.1</plugin.org.apache.rat.apache-rat-plugin>
