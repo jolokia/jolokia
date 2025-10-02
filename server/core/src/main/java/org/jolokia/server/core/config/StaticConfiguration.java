@@ -85,7 +85,7 @@ public class StaticConfiguration implements Configuration {
 
     private final SystemPropertyMode systemPropertyMode;
 
-    // The global configuration provided in constructor - override'able with update()
+    // The global configuration provided in constructor - overrideable with update()
     private final Map<ConfigKey, String> configMap = new HashMap<>();
 
     private final Set<ConfigKey> keys = new HashSet<>();
@@ -136,6 +136,13 @@ public class StaticConfiguration implements Configuration {
 
         // now initialize from sys/env to override defaults
         initializeFromEnvironment(null);
+
+        // special property that could be handy for clients
+        // see https://github.com/jolokia/jolokia/issues/870#issuecomment-3297148281
+        if (!configMap.containsKey(ConfigKey.DATE_FORMAT)) {
+            configMap.put(ConfigKey.DATE_FORMAT, ConfigKey.DATE_FORMAT.getDefaultValue());
+            keys.add(ConfigKey.DATE_FORMAT);
+        }
     }
 
     /**
@@ -154,7 +161,7 @@ public class StaticConfiguration implements Configuration {
      * but if user passes a map in {@code pResolved} argument, it'll be populated with values from {@code pConfig}
      * but resolved - also the ones which do not have corresponding {@link ConfigKey}.
      *
-     * @param pConfig config map from where to take the initial configuration - override'able with sys/env
+     * @param pConfig config map from where to take the initial configuration - overrideable with sys/env
      *                properties and following {@link #update} methods
      * @param pResolved map to collect resolved properties
      * @param pSystemPropertyMode how to handle system properties
@@ -194,6 +201,16 @@ public class StaticConfiguration implements Configuration {
                     pResolved.put(k, resolve(v));
                 }
             });
+        }
+
+        // special property that could be handy for clients
+        // see https://github.com/jolokia/jolokia/issues/870#issuecomment-3297148281
+        if (!configMap.containsKey(ConfigKey.DATE_FORMAT)) {
+            configMap.put(ConfigKey.DATE_FORMAT, ConfigKey.DATE_FORMAT.getDefaultValue());
+            keys.add(ConfigKey.DATE_FORMAT);
+        }
+        if (!pConfig.containsKey(ConfigKey.DATE_FORMAT.name())) {
+            pConfig.put(ConfigKey.DATE_FORMAT.getKeyValue(), ConfigKey.DATE_FORMAT.getDefaultValue());
         }
     }
 
