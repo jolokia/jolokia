@@ -15,11 +15,14 @@
  */
 package org.jolokia.it.osgi;
 
+import java.lang.management.ManagementFactory;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+
+import javax.management.ObjectName;
 
 import jakarta.servlet.ServletContext;
 import org.jolokia.json.JSONObject;
@@ -64,6 +67,22 @@ public class PaxWebWithOSGiAgentIntegrationTest extends AbstractOsgiTestBase {
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
         JSONObject version = (JSONObject) new JSONParser().parse(response.body());
         assertEquals(System.getProperty("version.jolokia"), ((JSONObject) version.get("value")).get("agent"));
+    }
+
+    @Test
+    public void readSomeAttributes() throws Exception {
+        ServiceTracker<?, ?> tracker = new ServiceTracker<>(context,
+            context.createFilter("(&(objectClass=jakarta.servlet.ServletContext)(osgi.web.contextpath=/jolokia))"), null);
+        tracker.open();
+        ServletContext jolokiaContext = (ServletContext) tracker.waitForService(5000);
+        assertNotNull(jolokiaContext);
+
+        HttpRequest request = HttpRequest.newBuilder().uri(new URI("http://localhost:8080/jolokia/read/java.lang:type=Runtime/Name")).GET().build();
+        HttpClient client = HttpClient.newHttpClient();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+        JSONObject res = (JSONObject) new JSONParser().parse(response.body());
+        assertEquals(ManagementFactory.getPlatformMBeanServer().getAttribute(new ObjectName("java.lang:type=Runtime"), "Name"), res.get("value"));
     }
 
 }

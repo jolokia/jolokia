@@ -242,7 +242,7 @@
               jolokia-server-detector;inline=true,
               jolokia-service-discovery;inline=true|!META-INF/jolokia/services-default,
               jolokia-service-history;inline=true|!META-INF/jolokia/services-default,
-              jolokia-service-jmx;inline=true|!META-INF/jolokia/*,
+              jolokia-service-jmx;inline=true|!META-INF/jolokia/services-default,
               jolokia-service-jsr160;inline=true|!META-INF/jolokia/services-default,
               jolokia-service-notif-pull;inline=true|!META-INF/jolokia/services-default,
               jolokia-service-notif-sse;inline=true|!META-INF/jolokia/services-default,
