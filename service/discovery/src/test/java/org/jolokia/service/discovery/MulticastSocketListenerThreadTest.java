@@ -47,6 +47,10 @@ public class MulticastSocketListenerThreadTest {
 
     @Test
     public void simple() throws IOException, InterruptedException {
+        String os = System.getProperty("os.name");
+        if (!"Linux".equals(os)) {
+            throw new SkipException("Works only on Linux (for now)");
+        }
         checkForMulticastSupport();
 
         String id = UUID.randomUUID().toString();
@@ -90,6 +94,10 @@ public class MulticastSocketListenerThreadTest {
 
     @Test
     public void simpleIPv6() throws IOException, InterruptedException {
+        String os = System.getProperty("os.name");
+        if (!"Linux".equals(os)) {
+            throw new SkipException("Works only on Linux (for now)");
+        }
         checkForMulticastSupport();
 
         // is there any non link-local IPv6 address?
@@ -146,6 +154,10 @@ public class MulticastSocketListenerThreadTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void simpleIPv6NonAny() throws IOException, InterruptedException {
+        String os = System.getProperty("os.name");
+        if (!"Linux".equals(os)) {
+            throw new SkipException("Works only on Linux (for now)");
+        }
         checkForMulticastSupport();
 
         String id = UUID.randomUUID().toString();

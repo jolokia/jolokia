@@ -22,11 +22,19 @@ public class DiscoveryMulticastResponderTest {
 
     @Test
     public void enabledLookup() throws IOException, InterruptedException {
+        String os = System.getProperty("os.name");
+        if (!"Linux".equals(os)) {
+            throw new SkipException("Works only on Linux (for now)");
+        }
         lookup(true);
     }
 
     @Test
     public void disabledLookup() throws IOException, InterruptedException {
+        String os = System.getProperty("os.name");
+        if (!"Linux".equals(os)) {
+            throw new SkipException("Works only on Linux (for now)");
+        }
         lookup(false);
     }
 
