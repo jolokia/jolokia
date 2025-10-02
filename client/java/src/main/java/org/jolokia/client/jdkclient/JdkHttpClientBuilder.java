@@ -15,6 +15,7 @@
  */
 package org.jolokia.client.jdkclient;
 
+import java.beans.Customizer;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.CookieManager;
@@ -33,6 +34,7 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.time.Duration;
 import java.util.List;
+import java.util.function.Consumer;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -111,10 +113,15 @@ public class JdkHttpClientBuilder implements HttpClientBuilder<HttpClient> {
                 }
             });
         }
-        // TODO: customizer for the builder (not for the built client)
-//        if (customizer != null) {
-//            customizer.configure(builder);
-//        }
+
+        if (jcb.customizer() != null) {
+            Class<?> builderClass = jcb.clientBuilderClass();
+            if (!builderClass.isAssignableFrom(builder.getClass())) {
+                throw new IllegalArgumentException("Unsupported class for JDK Client builder associated with the customizer: " + builderClass.getName());
+            }
+            //noinspection unchecked
+            ((Consumer<HttpClient.Builder>) jcb.customizer()).accept(builder);
+        }
 
         // return the wrapper
         return new JdkHttpClient(builder.build(), jcb);

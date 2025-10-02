@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
+import java.util.function.Consumer;
 
 import org.jolokia.client.jdkclient.JdkHttpClientBuilder;
 import org.jolokia.client.response.JolokiaResponseExtractor;
@@ -198,8 +199,17 @@ public class JolokiaClientBuilder {
      */
     private int maxConnectionPoolTimeout = 500;
 
-//    // Authenticator to use for performing a login
-//    private J4pClientCustomizer customizer;
+    /**
+     * Dedicated customizer, which can be used by specific {@link HttpClientSpi} implementation to let the
+     * caller do some special configuration on actual Http Client builder (all 3 supported implementations:
+     * JDK Client, HttpClient4 and HttpClient5) constructs the HTTP client using some kind of <em>builder</em>.
+     */
+    private Consumer<?> customizer;
+
+    /**
+     * Builder to be passed with a {@link #customizer} for type safety
+     */
+    private Class<?> clientBuilderClass;
 
     /**
      * Extractor used creating responses
@@ -434,15 +444,23 @@ public class JolokiaClientBuilder {
         return this;
     }
 
-//    /**
-//     * Set the authenticator for this client
-//     *
-//     * @param pAuthenticator authenticator used for checking the given user and password (if any).
-//     */
-//    public final J4pClientBuilder authenticator(J4pClientCustomizer<T> pAuthenticator) {
-//        customizer = pAuthenticator;
-//        return this;
-//    }
+    /**
+     * Allows setting a <em>customizer</em> - dedicated {@link Consumer} which expects a HTTP Client
+     * builder of a specific class
+     *
+     * @param builderClass
+     * @param customizer
+     * @return
+     * @param <T>
+     */
+    public <T> JolokiaClientBuilder withCustomizer(Class<T> builderClass, Consumer<T> customizer) {
+        this.clientBuilderClass = builderClass;
+        this.customizer = customizer;
+        if (builderClass == null) {
+            throw new IllegalArgumentException("HTTP Client Builder customizer should be associated with correct HTTP Client Builder class");
+        }
+        return this;
+    }
 
     /**
      * TLS protocol version to use
@@ -554,18 +572,6 @@ public class JolokiaClientBuilder {
         return this;
     }
 
-//    /**
-//     * Set the SSL connection factory to use when connecting via SSL. This can be used to tune
-//     * the SSL setup (SSLv3, TLSv1.2...),
-//     *
-//     * @param pSslConnectionSocketFactory the SSL connection factory to use
-//     * @return this builder object
-//     */
-//    public final J4pClientBuilder sslConnectionSocketFactory(ConnectionSocketFactory pSslConnectionSocketFactory) {
-//        this.sslConnectionSocketFactory = pSslConnectionSocketFactory;
-//        return this;
-//    }
-
     /**
      * Set the default HTTP Headers for each HTTP requests.
      * @param pHttpHeaders http headers to set
@@ -594,7 +600,7 @@ public class JolokiaClientBuilder {
             new ConnectionConfiguration(connectionTimeout, socketTimeout, tcpNoDelay, socketBufferSize),
             new TlsConfiguration(protocolVersion, keystore, keystorePassword, keyPassword, truststore, truststorePassword),
             new PoolConfiguration(this.pooledConnections, this.maxTotalConnections, this.maxConnectionPoolTimeout),
-            contentCharset, expectContinue, defaultHttpHeaders));
+            contentCharset, expectContinue, defaultHttpHeaders, customizer, clientBuilderClass));
     }
 
     /**
@@ -624,13 +630,16 @@ public class JolokiaClientBuilder {
      * @param contentCharset     charset to use when sending the request
      * @param expectContinue     whether to send {@code Expect: 100-continue} before sending POST data.
      * @param defaultHttpHeaders collection of headers to send with each request
+     * @param customizer
+     * @param clientBuilderClass
      */
     public record Configuration(URI url, String user, String password, Proxy proxy,
                                 ConnectionConfiguration connectionConfig,
                                 TlsConfiguration tlsConfig,
                                 PoolConfiguration poolConfig,
                                 Charset contentCharset, boolean expectContinue,
-                                Collection<HttpHeader> defaultHttpHeaders) {
+                                Collection<HttpHeader> defaultHttpHeaders,
+                                Consumer<?> customizer, Class<?> clientBuilderClass) {
 
         public static Configuration withUrl(URI url) {
             return new Configuration(url, null, null, null,
@@ -638,7 +647,7 @@ public class JolokiaClientBuilder {
                 new ConnectionConfiguration(5000, 5000, false, 8192),
                 null,
                 new PoolConfiguration(true, 20, 500),
-                StandardCharsets.UTF_8, false, Collections.emptySet());
+                StandardCharsets.UTF_8, false, Collections.emptySet(), null, null);
         }
     }
 

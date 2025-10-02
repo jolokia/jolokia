@@ -22,6 +22,7 @@ import java.security.KeyStore;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
@@ -118,6 +119,15 @@ public class Http5ClientBuilder implements HttpClientBuilder<HttpClient> {
 
         if (credentialsProvided) {
             builder.setDefaultCredentialsProvider(credentialsProvider);
+        }
+
+        if (jcb.customizer() != null) {
+            Class<?> builderClass = jcb.clientBuilderClass();
+            if (!builderClass.isAssignableFrom(builder.getClass())) {
+                throw new IllegalArgumentException("Unsupported class for HttpClient5 builder associated with the customizer: " + builderClass.getName());
+            }
+            //noinspection unchecked
+            ((Consumer<org.apache.hc.client5.http.impl.classic.HttpClientBuilder>) jcb.customizer()).accept(builder);
         }
 
         return new Http5Client(builder.build(), jcb, credentialsProvider);

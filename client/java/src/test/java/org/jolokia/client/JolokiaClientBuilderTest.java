@@ -16,6 +16,7 @@ package org.jolokia.client;
  *  limitations under the License.
  */
 
+import java.io.IOException;
 import java.net.http.HttpClient;
 import javax.management.MalformedObjectNameException;
 
@@ -34,7 +35,7 @@ import static org.testng.AssertJUnit.*;
 public class JolokiaClientBuilderTest {
 
     @Test
-    public void simple() {
+    public void simple() throws IOException {
         JolokiaClient client =
                 new JolokiaClientBuilder()
                         .url("http://localhost:8080/jolokia")
@@ -44,16 +45,26 @@ public class JolokiaClientBuilderTest {
                         .expectContinue(false)
                         .tcpNoDelay(true)
                         .contentCharset("utf-8")
-//                        .maxConnectionPoolTimeout(3000)
-//                        .maxTotalConnections(500)
-//                        .defaultMaxConnectionsPerRoute(500)
-//                        .pooledConnections()
                         .socketBufferSize(8192)
                         .socketTimeout(5000)
-//                        .cookieStore(new BasicCookieStore())
                         .build();
         HttpClient realClient = client.getHttpClient(HttpClient.class);
         assertNotNull(realClient);
+        client.close();
+    }
+
+    @Test
+    public void withBuilderCustomizer() throws IOException {
+        final boolean[] called = {false};
+        JolokiaClient client = new JolokiaClientBuilder().url("http://localhost:8080/jolokia")
+            .withCustomizer(HttpClient.Builder.class, (HttpClient.Builder builder) -> {
+                builder.priority(4);
+                called[0] = true;
+            }).build();
+        HttpClient realClient = client.getHttpClient(HttpClient.class);
+        assertNotNull(realClient);
+        assertTrue(called[0]);
+        client.close();
     }
 
     @Test

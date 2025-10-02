@@ -15,17 +15,21 @@
  */
 package org.jolokia.client.httpclient4;
 
+import java.io.IOException;
+
 import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.jolokia.client.JolokiaClient;
 import org.jolokia.client.JolokiaClientBuilder;
 import org.testng.annotations.Test;
 
 import static org.testng.AssertJUnit.assertNotNull;
+import static org.testng.AssertJUnit.assertTrue;
 
 public class JolokiaClientBuilderTest {
 
     @Test
-    public void simple() {
+    public void simple() throws IOException {
         JolokiaClient client =
             new JolokiaClientBuilder()
                 .url("http://localhost:8080/jolokia")
@@ -40,10 +44,24 @@ public class JolokiaClientBuilderTest {
                 .pooledConnections()
                 .socketBufferSize(8192)
                 .socketTimeout(5000)
-//                        .cookieStore(new BasicCookieStore())
                 .build();
         HttpClient realClient = client.getHttpClient(HttpClient.class);
         assertNotNull(realClient);
+        client.close();
+    }
+
+    @Test
+    public void withBuilderCustomizer() throws IOException {
+        final boolean[] called = {false};
+        JolokiaClient client = new JolokiaClientBuilder().url("http://localhost:8080/jolokia")
+            .withCustomizer(HttpClientBuilder.class, (HttpClientBuilder builder) -> {
+                builder.setUserAgent("My Client based on HttpClient 4");
+                called[0] = true;
+            }).build();
+        HttpClient realClient = client.getHttpClient(HttpClient.class);
+        assertNotNull(realClient);
+        assertTrue(called[0]);
+        client.close();
     }
 
 }

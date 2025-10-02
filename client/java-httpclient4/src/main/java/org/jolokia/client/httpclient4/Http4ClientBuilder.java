@@ -18,6 +18,7 @@ package org.jolokia.client.httpclient4;
 import java.io.FileInputStream;
 import java.security.KeyStore;
 import java.util.Collection;
+import java.util.function.Consumer;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
@@ -118,6 +119,15 @@ public class Http4ClientBuilder implements HttpClientBuilder<HttpClient> {
         }
 
         setupProxyIfNeeded(jcb.proxy(), builder);
+
+        if (jcb.customizer() != null) {
+            Class<?> builderClass = jcb.clientBuilderClass();
+            if (!builderClass.isAssignableFrom(builder.getClass())) {
+                throw new IllegalArgumentException("Unsupported class for HttpClient4 builder associated with the customizer: " + builderClass.getName());
+            }
+            //noinspection unchecked
+            ((Consumer<org.apache.http.impl.client.HttpClientBuilder>) jcb.customizer()).accept(builder);
+        }
 
         // return the wrapper
         return new Http4Client(builder.build(), jcb);
