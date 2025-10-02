@@ -15,6 +15,7 @@
  */
 package org.jolokia.client;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.URI;
@@ -48,7 +49,7 @@ import org.jolokia.json.JSONStructure;
  * @author roland
  * @since Apr 24, 2010
  */
-public class JolokiaClient {
+public class JolokiaClient implements Closeable {
 
     /**
      * Discoverable {@link HttpClientSpi} used to perform actual HTTP requests, so this {@link JolokiaClient} is
@@ -333,6 +334,11 @@ public class JolokiaClient {
         } catch (IOException e) {
             throw mapException(e);
         }
+    }
+
+    @Override
+    public void close() throws IOException {
+        this.httpClient.close();
     }
 
     // private helper methods
