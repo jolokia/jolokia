@@ -183,7 +183,7 @@ public class AgentServlet extends HttpServlet {
      *
      * @return generated configuration
      */
-    protected Configuration createWebConfig() {
+    protected Configuration createWebConfig() throws ServletException {
         StaticConfiguration config = new StaticConfiguration(
                 Collections.singletonMap(ConfigKey.AGENT_ID.getKeyValue(),
                                          NetworkUtil.getAgentId(this.hashCode(), "servlet")));
@@ -191,6 +191,18 @@ public class AgentServlet extends HttpServlet {
         config.update(new ServletConfigFacade(getServletConfig()));
         // from ServletContext - for entire web application (<context-param> in web.xml)
         config.update(new ServletContextFacade(getServletContext()));
+
+        String basicRealm = config.getConfig(ConfigKey.BASIC_AUTHENTICATION_REALM);
+        if (basicRealm != null && !basicRealm.isEmpty()) {
+            config.addSupportedAuthentication(SecurityDetails.AuthMethod.BASIC, basicRealm);
+        }
+        String mtlsEnabled = config.getConfig(ConfigKey.MTLS_AUTHENTICATION_ENABLED);
+        if (mtlsEnabled != null && !(ConfigKey.enabledValues.contains(mtlsEnabled) || ConfigKey.disabledValues.contains(mtlsEnabled))) {
+            throw new ServletException("Invalid value of " + ConfigKey.MTLS_AUTHENTICATION_ENABLED.getKeyValue() + " parameter");
+        }
+        if (Boolean.parseBoolean(mtlsEnabled)) {
+            config.addSupportedAuthentication(SecurityDetails.AuthMethod.MTLS, null);
+        }
 
         return config;
     }

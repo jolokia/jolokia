@@ -144,6 +144,25 @@
       <param-name>discoveryEnabled</param-name>
       <param-value>false</param-value>
     </init-param>
+    <init-param>
+      <description>
+        If basicAuthenticationRealm parameter is set, AgentServlet will correctly expose information about
+        supported BASIC authentication mechanism (/config endpoint).
+        Without explicit servlet parameter configuration, there's
+        no way for Servlet Application to check if the login-config element is configured in the WEB-INF/web.xml
+        descriptor for the application (without accessing container-specific details)
+      </description>
+      <param-name>basicAuthenticationRealm</param-name>
+      <param-value>jolokia</param-value>
+    </init-param>
+    <init-param>
+      <description>
+        If login-config uses auth-method=CLIENT-CERT, this parameter must be set to true, so AgentServlet can correctly
+        expose information about mTLS authentication mechanism (/config endpoint).
+      </description>
+      <param-name>mtlsAuthenticationEnabled</param-name>
+      <param-value>false</param-value>
+    </init-param>
     <load-on-startup>1</load-on-startup>
     <async-supported>true</async-supported>
   </servlet>
@@ -169,6 +188,12 @@
     <auth-constraint>
       <role-name>jolokia</role-name>
     </auth-constraint>
+  </security-constraint>
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>Jolokia-Agent Anonymous Access</web-resource-name>
+      <url-pattern>/config</url-pattern>
+    </web-resource-collection>
   </security-constraint>
 
   <security-role>

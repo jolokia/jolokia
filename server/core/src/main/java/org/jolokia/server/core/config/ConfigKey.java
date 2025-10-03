@@ -260,6 +260,18 @@ public enum ConfigKey {
     REALM("realm", true, false, "jolokia"),
 
     /**
+     * Servlet Configuration parameter only - used to declare (in {@code WEB-INF/web.xml} that the web application
+     * uses basic authentication.
+     */
+    BASIC_AUTHENTICATION_REALM("basicAuthenticationRealm", true, false),
+
+    /**
+     * Servlet Configuration parameter only - used to declare (in {@code WEB-INF/web.xml} that the web application
+     * uses certificate authentication (<em>mtls</em>, known as {@code CLIENT-CERT}).
+     */
+    MTLS_AUTHENTICATION_ENABLED("mtlsAuthenticationEnabled", true, false, null, Boolean.class),
+
+    /**
      * What authentication to use. Support values: "basic" for basic authentication, "jaas" for
      * JaaS authentication, "delegate" for delegating to another HTTP service.
      * For OSGi agent there are the additional modes "service-all" and "service-any" to use Authenticator services
