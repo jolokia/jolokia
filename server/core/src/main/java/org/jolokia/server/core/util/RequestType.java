@@ -31,6 +31,9 @@ public enum RequestType {
     WRITE("write"),
     EXEC("exec"),
     VERSION("version"),
+    // see https://github.com/jolokia/jolokia/issues/870
+    // we had it for long time in org.jolokia.client.JolokiaOperation.CONFIG
+    CONFIG("config"),
     SEARCH("search"),
     NOTIFICATION("notification");
 

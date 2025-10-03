@@ -34,7 +34,7 @@ import org.jolokia.server.core.util.jmx.*;
  */
 public class TestJolokiaContext implements JolokiaContext {
 
-    // Switch on for more debuggin
+    // Switch on for more debugging
     private static final boolean DEBUG = true;
 
     Map<Class<?>, SortedSet<?>> services;
@@ -43,6 +43,7 @@ public class TestJolokiaContext implements JolokiaContext {
     Configuration config;
     ServerHandle handle;
     private final AgentDetails agentDetails;
+    private final SecurityDetails securityDetails;
     private final Set<ObjectName> mbeans;
     private final MBeanServerAccess mBeanServerAccess;
 
@@ -62,6 +63,7 @@ public class TestJolokiaContext implements JolokiaContext {
         this.services = pServices != null ? pServices : new HashMap<>();
         String agentId = pConfig != null ? pConfig.getConfig(ConfigKey.AGENT_ID) : null;
         this.agentDetails = pAgentDetails != null ? pAgentDetails : new AgentDetails(agentId != null ? agentId : UUID.randomUUID().toString());
+        this.securityDetails = new SecurityDetails();
         mbeans = new HashSet<>();
         mBeanServerAccess = new SingleMBeanServerAccess(ManagementFactory.getPlatformMBeanServer());
     }
@@ -134,6 +136,11 @@ public class TestJolokiaContext implements JolokiaContext {
 
     public AgentDetails getAgentDetails() {
         return agentDetails;
+    }
+
+    @Override
+    public SecurityDetails getSecurityDetails() {
+        return securityDetails;
     }
 
     public void debug(String message) {

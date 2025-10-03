@@ -95,4 +95,13 @@ public class MultiAuthenticator extends Authenticator {
         // Return last result, which is either SUCCESS for mode.ALL or FAILURE for mode.ANY
         return result;
     }
+
+    public ArrayList<Authenticator> getAuthenticators() {
+        return authenticators;
+    }
+
+    public Mode getMode() {
+        return mode;
+    }
+
 }

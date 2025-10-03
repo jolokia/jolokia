@@ -60,6 +60,11 @@ public class JolokiaContextImpl implements JolokiaContext {
         return serviceManager.getAgentDetails();
     }
 
+    @Override
+    public SecurityDetails getSecurityDetails() {
+        return serviceManager.getSecurityDetails();
+    }
+
     /** {@inheritDoc} */
     public String getConfig(ConfigKey pOption) {
         return getConfiguration().getConfig(pOption);

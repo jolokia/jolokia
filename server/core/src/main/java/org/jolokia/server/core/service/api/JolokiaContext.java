@@ -74,6 +74,13 @@ public interface JolokiaContext extends LogHandler, Restrictor {
     AgentDetails getAgentDetails();
 
     /**
+     * Get details about registered and supported authentication methods - to be used by {@code /config} endpoint.
+     *
+     * @return
+     */
+    SecurityDetails getSecurityDetails();
+
+    /**
      * Register an MBean which gets automatically unregistered during shutdown.
      *
      * @param pMBean MBean to register
@@ -111,5 +118,4 @@ public interface JolokiaContext extends LogHandler, Restrictor {
      * @return
      */
     boolean isServiceEnabled(String serviceClassName);
-
 }

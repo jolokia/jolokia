@@ -201,6 +201,7 @@ public final class JolokiaRequestFactory {
         CREATOR_MAP.put(RequestType.VERSION, JolokiaVersionRequest.newCreator());
         CREATOR_MAP.put(RequestType.SEARCH, JolokiaSearchRequest.newCreator());
         CREATOR_MAP.put(RequestType.NOTIFICATION, JolokiaNotificationRequest.newCreator());
+        CREATOR_MAP.put(RequestType.CONFIG, JolokiaConfigRequest.newCreator());
     }
 
 }

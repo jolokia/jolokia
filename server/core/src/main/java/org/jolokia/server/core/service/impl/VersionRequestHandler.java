@@ -2,18 +2,18 @@ package org.jolokia.server.core.service.impl;
 
 import java.io.IOException;
 import java.util.Set;
-
 import javax.management.JMException;
 
+import org.jolokia.json.JSONObject;
 import org.jolokia.server.core.Version;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.request.JolokiaRequest;
 import org.jolokia.server.core.request.NotChangedException;
-import org.jolokia.server.core.service.api.*;
+import org.jolokia.server.core.service.api.AbstractJolokiaService;
+import org.jolokia.server.core.service.api.AgentDetails;
+import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.request.RequestHandler;
-import org.jolokia.server.core.util.NetworkUtil;
 import org.jolokia.server.core.util.RequestType;
-import org.jolokia.json.JSONObject;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -66,18 +66,20 @@ public class VersionRequestHandler extends AbstractJolokiaService<RequestHandler
             ret.put("details", agentDetails.toJSONObject());
         }
 
-        // Each request handler adds an extra information
+        // Each request handler adds an extra information under "info" key (legacy reasons...)
         JSONObject info = new JSONObject();
 
         for (RequestHandler handler : context.getServices(RequestHandler.class)) {
-            // Skip myself
-            if (handler == this) {
+            // Skip myself or Config handler
+            if (handler == this || handler.getProvider() == null) {
                 continue;
             }
             Object rtInfo = handler.getRuntimeInfo();
             info.put(handler.getProvider(), rtInfo != null ? rtInfo : new JSONObject());
         }
-        ret.put("info",info);
+        ret.put("info", info);
+
+        // Global (not request-specific) configuration
         ret.put("config", configToJSONObject());
 
         return ret;

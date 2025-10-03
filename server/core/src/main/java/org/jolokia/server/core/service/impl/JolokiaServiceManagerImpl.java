@@ -50,6 +50,9 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
     // Details of this agent
     private AgentDetails agentDetails;
 
+    // Details of the supported authentication mechanisms
+    private SecurityDetails securityDetails;
+
     // Lookup for finding detectors
     private final ServerDetectorLookup detectorLookup;
 
@@ -126,6 +129,8 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
         detectorLookup = pDetectorLookup != null ? pDetectorLookup : new ClasspathServerDetectorLookup();
         // The version request handler must be always present and always be first
         addService(new VersionRequestHandler());
+        // Config request handler responds to "config" command and shouldn't even be protected
+        addService(new ConfigRequestHandler());
         // DebugStore is also a service, so we can integrate it with JolokiaContext
         debugStore = new DebugStore();
         addService(debugStore);
@@ -206,6 +211,8 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
                 }
             });
             agentDetails = new AgentDetails(configuration,handle);
+
+            securityDetails = configuration.getSecurityDetails();
 
             // Create context and remember
             jolokiaContext = new JolokiaContextImpl(this);
@@ -457,6 +464,14 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
      */
     public AgentDetails getAgentDetails() {
         return agentDetails;
+    }
+
+    /**
+     * Returns information about supported authentication methods
+     * @return
+     */
+    public SecurityDetails getSecurityDetails() {
+        return securityDetails;
     }
 
     /**

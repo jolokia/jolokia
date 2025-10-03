@@ -29,6 +29,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.function.Function;
 
+import org.jolokia.server.core.service.api.SecurityDetails;
 import org.jolokia.server.core.util.InetAddresses;
 import org.jolokia.server.core.util.NetworkUtil;
 import org.jolokia.server.core.util.StringUtil;
@@ -94,6 +95,10 @@ public class StaticConfiguration implements Configuration {
 
     // Whether to allow reverse DNS lookup for resolving host names
     private boolean allowDnsReverseLookup;
+
+    // Security details prepared after initialization of authentication mechanism (JVM Agent)
+    // or by other means (WAR, SpringBoot, ...)
+    private final SecurityDetails securityDetails = new SecurityDetails();
 
     /**
      * Convenience constructor for setting up base configuration with key values pairs. This constructor
@@ -397,6 +402,15 @@ public class StaticConfiguration implements Configuration {
     /** {@inheritDoc} */
     public boolean containsKey(ConfigKey pKey) {
         return keys.contains(pKey);
+    }
+
+    public void addSupportedAuthentication(SecurityDetails.AuthMethod method, String realm) {
+        securityDetails.registerAuthenticationMethod(method, realm);
+    }
+
+    @Override
+    public SecurityDetails getSecurityDetails() {
+        return securityDetails;
     }
 
 }

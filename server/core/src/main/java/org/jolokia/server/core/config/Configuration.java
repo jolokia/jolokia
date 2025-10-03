@@ -19,6 +19,8 @@ package org.jolokia.server.core.config;
 import java.util.Map;
 import java.util.Set;
 
+import org.jolokia.server.core.service.api.SecurityDetails;
+
 /**
  * Interface for accessing Jolokia configuration.
  *
@@ -62,5 +64,12 @@ public interface Configuration {
      * @return
      */
     Map<String, String> getNetworkConfig();
+
+    /**
+     * Get {@link SecurityDetails} prepared more or less at the same time this {@link Configuration} was prepared
+     *
+     * @return
+     */
+    SecurityDetails getSecurityDetails();
 
 }

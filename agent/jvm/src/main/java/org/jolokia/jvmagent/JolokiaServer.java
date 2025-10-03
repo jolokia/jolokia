@@ -77,6 +77,7 @@ public class JolokiaServer {
 
     // HttpContext created when we start it up
     private HttpContext httpContext;
+    private HttpContext httpConfigContext;
 
     private final List<File> filesToWatch = new ArrayList<>();
 
@@ -149,9 +150,14 @@ public class JolokiaServer {
      *              properly
      */
     public void start(boolean pLazy) {
-
         HttpHandler jolokiaHttpHandler = createJolokiaHttpHandler(pLazy);
-        httpContext = httpServer.createContext(config.getContextPath(), jolokiaHttpHandler);
+
+        String base = config.getContextPath();
+        while (base.endsWith("/")) {
+            base = base.substring(0, base.length() - 1);
+        }
+        httpConfigContext = httpServer.createContext(base + "/config", jolokiaHttpHandler);
+        httpContext = httpServer.createContext(base, jolokiaHttpHandler);
 
         setupAuthentication();
         if (useOwnServer) {
@@ -314,13 +320,11 @@ public class JolokiaServer {
         }
     }
 
-
     // If running an own server, we need to check that shutdown properly
     private void startCleanupThread() {
         // Starting our own server in an own thread group with a fixed name
         // so that the cleanup thread can recognize it.
         ThreadGroup threadGroup = new ThreadGroup("jolokia");
-        threadGroup.setDaemon(false);
 
         Thread starterThread = new Thread(threadGroup, () -> httpServer.start());
         starterThread.start();

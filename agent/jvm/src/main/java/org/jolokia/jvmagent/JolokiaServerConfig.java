@@ -24,15 +24,31 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.GeneralSecurityException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import com.sun.net.httpserver.Authenticator;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLParameters;
-import org.jolokia.jvmagent.security.*;
-import org.jolokia.server.core.config.*;
+
+import com.sun.net.httpserver.Authenticator;
+import com.sun.net.httpserver.BasicAuthenticator;
+import org.jolokia.jvmagent.security.ClientCertAuthenticator;
+import org.jolokia.jvmagent.security.DelegatingAuthenticator;
+import org.jolokia.jvmagent.security.JaasHttpAuthenticator;
+import org.jolokia.jvmagent.security.MultiAuthenticator;
+import org.jolokia.jvmagent.security.UserPasswordHttpAuthenticator;
+import org.jolokia.server.core.config.ConfigKey;
+import org.jolokia.server.core.config.Configuration;
+import org.jolokia.server.core.config.MapConfigExtractor;
+import org.jolokia.server.core.config.StaticConfiguration;
+import org.jolokia.server.core.config.SystemPropertyMode;
+import org.jolokia.server.core.service.api.SecurityDetails;
 import org.jolokia.server.core.util.JolokiaCipher;
 import org.jolokia.server.core.util.NetworkUtil;
 
@@ -126,7 +142,7 @@ public class JolokiaServerConfig {
 
         jolokiaConfig = new StaticConfiguration(pDefaultConfig, resolvedConfig, systemPropertyMode);
 
-        // pDefaultConfig could've been overriden by system properties/env variables, but pConfig
+        // pDefaultConfig could've been overridden by system properties/env variables, but pConfig
         // will now possible override these too
         jolokiaConfig.update(new MapConfigExtractor(pConfig), resolvedConfig);
 
@@ -426,11 +442,19 @@ public class JolokiaServerConfig {
         }
     }
 
+    /**
+     * Initialization of {@link Authenticator authenticator(s)} used by JDK HTTP Server.
+     */
     protected void initAuthenticator() {
         initCustomAuthenticator();
         if (authenticator == null) {
             initAuthenticatorFromAuthMode();
         }
+
+        // Knowing the authenticators used (when more, these are packed into org.jolokia.jvmagent.security.MultiAuthenticator)
+        // we can register information about the authenticators in the Jolokia config
+        // see https://github.com/jolokia/jolokia/issues/870
+        registerAuthenticationMetadata();
     }
 
     private void initCustomAuthenticator() {
@@ -536,6 +560,49 @@ public class JolokiaServerConfig {
             // Multiple auth strategies were configured, pass auth if any of them
             // succeed.
             authenticator = new MultiAuthenticator(MultiAuthenticator.Mode.fromString(jolokiaConfig.getConfig(ConfigKey.AUTH_MATCH)), authenticators);
+        }
+    }
+
+    /**
+     * <em>After</em> configuring the {@link Authenticator} instance, we have to tell the configuration about supported
+     * authentication methods. This information will be usd in the {@code /config} endpoint, so clients (like Hawtio)
+     * can select proper authentication method to connect to remote Jolokia Agents.
+     */
+    private void registerAuthenticationMetadata() {
+        if (authenticator == null)
+            return;
+
+        if (authenticator instanceof MultiAuthenticator multi) {
+            if (multi.getMode() == MultiAuthenticator.Mode.ALL) {
+                int count = multi.getAuthenticators().size();
+                if (count > 1) {
+                    // there's no single authentication methods, so let's skip
+                } else if (count == 1) {
+                    possibleRegisterAuthenticationMethod(multi.getAuthenticators().get(0));
+                }
+            } else {
+                // any - so register all exposable
+                for (Authenticator authenticator : multi.getAuthenticators()) {
+                    possibleRegisterAuthenticationMethod(authenticator);
+                }
+            }
+        } else {
+            // there's a single one
+            possibleRegisterAuthenticationMethod(authenticator);
+        }
+    }
+
+    /**
+     * If an {@link Authenticator} can be <em>described</em> without exposing too many details, register it
+     * to be available at {@code /config} endpoint
+     *
+     * @param authenticator
+     */
+    private void possibleRegisterAuthenticationMethod(Authenticator authenticator) {
+        if (authenticator instanceof BasicAuthenticator basic) {
+            jolokiaConfig.addSupportedAuthentication(SecurityDetails.AuthMethod.BASIC, basic.getRealm());
+        } else if (authenticator instanceof ClientCertAuthenticator mtls) {
+            jolokiaConfig.addSupportedAuthentication(SecurityDetails.AuthMethod.MTLS, null);
         }
     }
 
