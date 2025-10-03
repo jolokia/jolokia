@@ -1201,7 +1201,7 @@
     <plugin.maven-changes-plugin>2.12.1</plugin.maven-changes-plugin>
     <plugin.maven-clean-plugin>3.5.0</plugin.maven-clean-plugin>
     <plugin.maven-compiler-plugin>3.14.1</plugin.maven-compiler-plugin>
-    <plugin.maven-dependency-plugin>3.8.1</plugin.maven-dependency-plugin>
+    <plugin.maven-dependency-plugin>3.9.0</plugin.maven-dependency-plugin>
     <plugin.maven-deploy-plugin>3.1.4</plugin.maven-deploy-plugin>
     <plugin.maven-failsafe-plugin>3.5.4</plugin.maven-failsafe-plugin>
     <plugin.maven-gpg-plugin>3.2.8</plugin.maven-gpg-plugin>
