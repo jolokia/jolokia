@@ -95,14 +95,21 @@ public class VersionRequestHandler extends AbstractJolokiaService<RequestHandler
     private JSONObject configToJSONObject() {
         JSONObject info = new JSONObject();
         Set<ConfigKey> keys = context.getConfigKeys();
+        boolean hasDateFormat = false;
         for (ConfigKey key : keys) {
-                if (key.isGlobalConfig()) {
-                    if (key == ConfigKey.PASSWORD) {
-                        info.put(key.getKeyValue(), "********");
-                    } else {
-                        info.put(key.getKeyValue(), context.getConfig(key));
-                    }
+            if (key == ConfigKey.DATE_FORMAT) {
+                hasDateFormat = true;
+            }
+            if (key.isGlobalConfig()) {
+                if (key == ConfigKey.PASSWORD) {
+                    info.put(key.getKeyValue(), "********");
+                } else {
+                    info.put(key.getKeyValue(), context.getConfig(key));
                 }
+            }
+        }
+        if (!hasDateFormat) {
+            info.put(ConfigKey.DATE_FORMAT.getKeyValue(), ConfigKey.DATE_FORMAT.getDefaultValue());
         }
         return info;
     }

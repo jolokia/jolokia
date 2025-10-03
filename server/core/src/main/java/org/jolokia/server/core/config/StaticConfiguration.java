@@ -141,13 +141,6 @@ public class StaticConfiguration implements Configuration {
 
         // now initialize from sys/env to override defaults
         initializeFromEnvironment(null);
-
-        // special property that could be handy for clients
-        // see https://github.com/jolokia/jolokia/issues/870#issuecomment-3297148281
-        if (!configMap.containsKey(ConfigKey.DATE_FORMAT)) {
-            configMap.put(ConfigKey.DATE_FORMAT, ConfigKey.DATE_FORMAT.getDefaultValue());
-            keys.add(ConfigKey.DATE_FORMAT);
-        }
     }
 
     /**
@@ -206,16 +199,6 @@ public class StaticConfiguration implements Configuration {
                     pResolved.put(k, resolve(v));
                 }
             });
-        }
-
-        // special property that could be handy for clients
-        // see https://github.com/jolokia/jolokia/issues/870#issuecomment-3297148281
-        if (!configMap.containsKey(ConfigKey.DATE_FORMAT)) {
-            configMap.put(ConfigKey.DATE_FORMAT, ConfigKey.DATE_FORMAT.getDefaultValue());
-            keys.add(ConfigKey.DATE_FORMAT);
-        }
-        if (!pConfig.containsKey(ConfigKey.DATE_FORMAT.name())) {
-            pConfig.put(ConfigKey.DATE_FORMAT.getKeyValue(), ConfigKey.DATE_FORMAT.getDefaultValue());
         }
     }
 
