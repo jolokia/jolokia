@@ -1267,7 +1267,7 @@
 
     <!-- Versions of optional and example-related dependencies -->
 
-    <version.org.apache.logging.log4j>2.25.1</version.org.apache.logging.log4j>
+    <version.org.apache.logging.log4j>2.25.2</version.org.apache.logging.log4j>
     <version.org.slf4j>2.0.17</version.org.slf4j>
 
     <!-- Versions of actual Maven dependencies for Jolokia core/service/client libraries -->
