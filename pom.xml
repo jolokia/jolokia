@@ -1229,11 +1229,11 @@
     <!-- Please stay at 3.1.0. With 3.2.0 we have "[INFO] Issues found in: null" -->
     <plugin.org.asciidoctor.asciidoctor-maven-plugin>3.1.0</plugin.org.asciidoctor.asciidoctor-maven-plugin>
     <plugin.org.codehaus.mojo.build-helper-maven-plugin>3.6.1</plugin.org.codehaus.mojo.build-helper-maven-plugin>
-    <plugin.org.codehaus.mojo.versions-maven-plugin>2.19.0</plugin.org.codehaus.mojo.versions-maven-plugin>
+    <plugin.org.codehaus.mojo.versions-maven-plugin>2.19.1</plugin.org.codehaus.mojo.versions-maven-plugin>
     <plugin.org.jacoco.jacoco-maven-plugin>0.7.6.201602180812</plugin.org.jacoco.jacoco-maven-plugin>
     <plugin.org.vafer.jdeb>1.14</plugin.org.vafer.jdeb>
     <plugin.org.apache.servicemix.tooling>1.5.0</plugin.org.apache.servicemix.tooling>
-    <plugin.sonatype.central-publishing-maven-plugin>0.8.0</plugin.sonatype.central-publishing-maven-plugin>
+    <plugin.sonatype.central-publishing-maven-plugin>0.9.0</plugin.sonatype.central-publishing-maven-plugin>
 
     <!-- Versions of build-related dependencies -->
 
