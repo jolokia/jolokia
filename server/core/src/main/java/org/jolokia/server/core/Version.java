@@ -45,7 +45,7 @@ public final class Version {
         } catch (IOException e) {
             // should never happen, unless this code is repackaged in different project
             version = "2.1.0";
-            protocol = "8.0";
+            protocol = "8.1";
         }
         VERSION = version;
         PROTOCOL = protocol;

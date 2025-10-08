@@ -66,7 +66,7 @@ type RequestArguments = {
   fetchErrorCb?: FetchErrorCallback
 }
 
-const CLIENT_VERSION = "2.3.0"
+const CLIENT_VERSION = "2.4.0"
 
 /**
  * Default parameters for GET and POST requests
@@ -138,14 +138,14 @@ const Jolokia = function (this: IJolokia, config: JolokiaConfiguration | string)
     // calculation of arguments. jobs will have this function called once to skip it for consecutive calls
     const args = prepareRequest(request, agentOptions, params)
 
-    // potientially time-consuming operation
+    // potentially time-consuming operation
     if (args.fetchOptions.method === "POST") {
       args.fetchOptions.body = JSON.stringify(request)
     }
 
     // In original jolokia.js at this stage there was different processing depending on the existence of
     // "success" option in passed params.
-    // without such callback the request was treated as synchronus (ajaxSettings.async = false), but we can't do
+    // without such callback the request was treated as synchronous (ajaxSettings.async = false), but we can't do
     // this with Fetch API (which is good). So we simply resolve fetch' Promise to get
     // https://developer.mozilla.org/en-US/docs/Web/API/Response
     // end return new a promise resolving to string or an array of Jolokia responses (whether successful or failed ones)
@@ -416,7 +416,7 @@ const Jolokia = function (this: IJolokia, config: JolokiaConfiguration | string)
     "sse": {
       // "sse" handler is based on https://developer.mozilla.org/en-US/docs/Web/API/EventSource
       // and continuous stream of events sent over single HTTP connection with text/event-stream MIME type
-      // the messages sent are JSONified org.jolokia.server.core.service.notification.NotificationResult instances
+      // the messages sent are JSON representations of org.jolokia.server.core.service.notification.NotificationResult instances
 
       // --- operations of sse notification mechanism
 
@@ -540,7 +540,7 @@ function prepareRequest(request: JolokiaRequest | JolokiaRequest[], agentOptions
 
   if (opts.headers) {
     // If user has specified `headers` option, these are copied here. Some headers
-    // (Content-Type and Authorization) may be overriden below
+    // (Content-Type and Authorization) may be overridden below
     Object.assign(fetchOptions.headers, opts.headers)
   }
 
@@ -581,7 +581,7 @@ function prepareRequest(request: JolokiaRequest | JolokiaRequest[], agentOptions
     errorCb = constructCallbackDispatcher(opts.error)
   }
   if ("error" in opts && !opts.success) {
-    // response is ignored, only error callback is used. This also turns off meaningfull Promise return value
+    // response is ignored, only error callback is used. This also turns off meaningful Promise return value
     successCb = constructCallbackDispatcher("ignore")
     errorCb = constructCallbackDispatcher(opts.error)
   }
@@ -767,7 +767,7 @@ function createJolokiaInvocation(jobs: Job[], agentOptions: JolokiaConfiguration
             errorCbs.push(errorCb)
           }
         } else if (job.callback) {
-          // single job.callback accepting an array of mixed successful and error Joloka responses
+          // single job.callback accepting an array of mixed successful and error Jolokia responses
           // that's why, when a job has such a callback for N requests, N-1 requests should be handled simply
           // by collecting responses (or errors)  and N-th request should be handled by passing the collected
           // array to this callback
@@ -852,7 +852,7 @@ function constructErrorJobCallback(job: Job, jobId: number): ErrorCallback {
 
 /**
  * Prepare a pair of callbacks for job callback that should receive all the responses. Callback for N-1
- * responses simply collect the responses, and callback for N-th responses collects the responsss and passes
+ * responses simply collect the responses, and callback for N-th responses collects the responses and passes
  * all them collectively to {@link JobCallback}.
  * @param job a Job with `callback` configured
  * @param jobId job identifier
@@ -941,7 +941,7 @@ function extractMethod(request: BaseRequest | BaseRequest[], params: RequestOpti
 
   if (methodGiven) {
     if (methodGiven === "get") {
-      // can't be used for bulk or multireadrequests
+      // can't be used for bulk or multi-read requests
       if (Array.isArray(request)) {
         throw new Error("Cannot use GET with bulk requests")
       }
