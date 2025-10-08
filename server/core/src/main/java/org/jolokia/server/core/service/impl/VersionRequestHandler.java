@@ -43,6 +43,11 @@ public class VersionRequestHandler extends AbstractJolokiaService<RequestHandler
     // Context from where to get information
     private JolokiaContext context;
 
+    private static final Set<ConfigKey> hiddenGlobalKeys = Set.of(
+        ConfigKey.USER,
+        ConfigKey.PASSWORD
+    );
+
     /**
      * Constructor
      */
@@ -100,12 +105,8 @@ public class VersionRequestHandler extends AbstractJolokiaService<RequestHandler
             if (key == ConfigKey.DATE_FORMAT) {
                 hasDateFormat = true;
             }
-            if (key.isGlobalConfig()) {
-                if (key == ConfigKey.PASSWORD) {
-                    info.put(key.getKeyValue(), "********");
-                } else {
-                    info.put(key.getKeyValue(), context.getConfig(key));
-                }
+            if (key.isGlobalConfig() && !hiddenGlobalKeys.contains(key)) {
+                info.put(key.getKeyValue(), context.getConfig(key));
             }
         }
         if (!hasDateFormat) {
