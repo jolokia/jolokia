@@ -584,7 +584,7 @@ export type JmxDomains = Record<string, JmxDomain>
 export type JmxDomain = Record<string, MBeanInfo | MBeanInfoError | string>
 
 /**
- * Information about single MBean. Thanks to `org.jolokia.service.jmx.handler.list.DataUpdater` services, the
+ * Information about single MBean. Thanks to `org.jolokia.server.core.service.api.DataUpdater` services, the
  * list of fields for MBeanInfo is extensible (for example RBAC information can be added).
  */
 export type MBeanInfo = {

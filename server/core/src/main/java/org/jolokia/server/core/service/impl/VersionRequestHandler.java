@@ -1,20 +1,3 @@
-package org.jolokia.server.core.service.impl;
-
-import java.io.IOException;
-import java.util.Set;
-import javax.management.JMException;
-
-import org.jolokia.json.JSONObject;
-import org.jolokia.server.core.Version;
-import org.jolokia.server.core.config.ConfigKey;
-import org.jolokia.server.core.request.JolokiaRequest;
-import org.jolokia.server.core.request.NotChangedException;
-import org.jolokia.server.core.service.api.AbstractJolokiaService;
-import org.jolokia.server.core.service.api.AgentDetails;
-import org.jolokia.server.core.service.api.JolokiaContext;
-import org.jolokia.server.core.service.request.RequestHandler;
-import org.jolokia.server.core.util.RequestType;
-
 /*
  * Copyright 2009-2013 Roland Huss
  *
@@ -30,7 +13,25 @@ import org.jolokia.server.core.util.RequestType;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.server.core.service.impl;
 
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.TreeSet;
+import javax.management.JMException;
+
+import org.jolokia.json.JSONObject;
+import org.jolokia.server.core.Version;
+import org.jolokia.server.core.config.ConfigKey;
+import org.jolokia.server.core.request.JolokiaRequest;
+import org.jolokia.server.core.request.NotChangedException;
+import org.jolokia.server.core.service.api.AbstractJolokiaService;
+import org.jolokia.server.core.service.api.AgentDetails;
+import org.jolokia.server.core.service.api.DataUpdater;
+import org.jolokia.server.core.service.api.JolokiaContext;
+import org.jolokia.server.core.service.request.RequestHandler;
+import org.jolokia.server.core.util.RequestType;
 
 /**
  * Get the version of this agent as well as the protocol version
@@ -61,19 +62,24 @@ public class VersionRequestHandler extends AbstractJolokiaService<RequestHandler
         context = pJolokiaContext;
     }
 
+    @Override
     public Object handleRequest(JolokiaRequest pJmxReq, Object pPreviousResult) throws JMException, IOException, NotChangedException {
         JSONObject ret = new JSONObject();
+
+        // basic information - shared with /config endpoint
         ret.put("agent", Version.getAgentVersion());
         ret.put("protocol",Version.getProtocolVersion());
         ret.put("id", context.getConfig(ConfigKey.AGENT_ID));
+
+        // agent details
         AgentDetails agentDetails = context.getAgentDetails();
         if (agentDetails != null) {
             ret.put("details", agentDetails.toJSONObject());
         }
 
+        // request handler details
         // Each request handler adds an extra information under "info" key (legacy reasons...)
         JSONObject info = new JSONObject();
-
         for (RequestHandler handler : context.getServices(RequestHandler.class)) {
             // Skip myself or Config handler
             if (handler == this || handler.getProvider() == null) {
@@ -84,13 +90,30 @@ public class VersionRequestHandler extends AbstractJolokiaService<RequestHandler
         }
         ret.put("info", info);
 
-        // Global (not request-specific) configuration
+        // Global (not request-specific) configuration details
         ret.put("config", configToJSONObject());
+
+        // data updater details, so we know which updaters are available and used for "list" operation
+        JSONObject updaters = new JSONObject();
+        // Built-in updaters (desc, class, ctor, attr, op, notif, keys) are not available as services, so we
+        // can assume they're always available. But we want the custom ones to be presented in /version response
+        for (DataUpdater updater : context.getServices(DataUpdater.class)) {
+            String key = updater.getKey();
+            if (key == null) {
+                key = updater.getClass().getName();
+            }
+            JSONObject updaterInfo = updater.getInfo();
+            if (updaterInfo == null) {
+                updaterInfo = new JSONObject();
+            }
+            updaters.put(key, updaterInfo);
+        }
+        ret.put("decorators", updaters);
 
         return ret;
     }
 
-    /** {@inheritDoc} */
+    @Override
     public boolean canHandle(JolokiaRequest pJolokiaRequest) {
         return pJolokiaRequest.getType() == RequestType.VERSION;
     }
@@ -115,12 +138,14 @@ public class VersionRequestHandler extends AbstractJolokiaService<RequestHandler
         return info;
     }
 
-    // Not used here
+    @Override
     public String getProvider() {
         return null;
     }
 
+    @Override
     public Object getRuntimeInfo() {
         return null;
     }
+
 }

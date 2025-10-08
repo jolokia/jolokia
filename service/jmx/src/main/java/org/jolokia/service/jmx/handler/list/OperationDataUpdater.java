@@ -18,6 +18,7 @@ package org.jolokia.service.jmx.handler.list;
 
 import javax.management.*;
 
+import org.jolokia.server.core.service.api.DataUpdater;
 import org.jolokia.server.core.util.JsonUtil;
 import org.jolokia.json.JSONArray;
 import org.jolokia.json.JSONObject;

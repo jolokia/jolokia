@@ -29,6 +29,15 @@ import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.request.RequestHandler;
 import org.jolokia.server.core.util.RequestType;
 
+/**
+ * <p>This endpoint handles {@link RequestType#CONFIG} operation and returns <em>discovery</em> information and
+ * is expected to NOT be protected, so be careful what you return here.</p>
+ *
+ * <p>For now (<a href="https://github.com/jolokia/jolokia/issues/870">jolokia#870</a>) we want to return a list
+ * of supported authentication mechanisms.</p>
+ *
+ * <p>This endpoint is kind of an endpoint that could be exposed under {@code /.well-known/} prefix</p>
+ */
 public class ConfigRequestHandler extends AbstractJolokiaService<RequestHandler> implements RequestHandler {
 
     private JolokiaContext context;
@@ -49,18 +58,14 @@ public class ConfigRequestHandler extends AbstractJolokiaService<RequestHandler>
 
     @Override
     public <R extends JolokiaRequest> Object handleRequest(R pJmxReq, Object pPreviousResult) throws JMException, IOException, NotChangedException, EmptyResponseException {
-        // This endpoint is supposed to return "discovery" information and is expected to NOT be protected
-        // so be careful what you return here
-        // for now (https://github.com/jolokia/jolokia/issues/870) we want to return a list of supported
-        // authentication mechanisms
-        //
-        // this endpoint is kind of an endpoint that could be exposed under `/.well-known/` prefix
-
         JSONObject ret = new JSONObject();
+
+        // basic information - shared with /version endpoint
         ret.put("agent", Version.getAgentVersion());
         ret.put("protocol", Version.getProtocolVersion());
         ret.put("id", context.getConfig(ConfigKey.AGENT_ID));
 
+        // security details - supported authentication methods for now
         ret.put("security", context.getSecurityDetails().toJSONObject());
 
         return ret;

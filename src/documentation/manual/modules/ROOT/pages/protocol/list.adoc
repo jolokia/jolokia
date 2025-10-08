@@ -225,9 +225,9 @@ When returning `list()` results, Jolokia translates each MBean's `javax.manageme
 * `op`
 * `notif`
 
-These fields are added by default, built-in implementations of `org.jolokia.service.jmx.handler.list.DataUpdater`.
+These fields are added by default, built-in implementations of `org.jolokia.server.core.service.api.DataUpdater`.
 
-Since Jolokia 2.1.0 we can now discover (using `/META-INF/jolokia/services`) additional services of `org.jolokia.service.jmx.handler.list.DataUpdater` class which can be used to construct (or override) additional fields of MBean's JSON information. +
+Since Jolokia 2.1.0 we can now discover (using `/META-INF/jolokia/services`) additional services of `org.jolokia.server.core.service.api.DataUpdater` class which can be used to construct (or override) additional fields of MBean's JSON information. +
 Potential use-case may be information related to RBAC (Role-based Access Control).
 
 One additional built-in _data updater_ is `org.jolokia.service.jmx.handler.list.ListKeysDataUpdater` which can be enabled using `listKeys=true` processing parameter. We can use it to get additional `"keys"` MBeanInfo containing keys obtained from MBean's ObjectName. For example:

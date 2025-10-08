@@ -30,7 +30,7 @@ import javax.management.ReflectionException;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 import org.jolokia.service.jmx.api.CacheKeyProvider;
-import org.jolokia.service.jmx.handler.list.DataUpdater;
+import org.jolokia.server.core.service.api.DataUpdater;
 import org.jolokia.service.jmx.handler.list.MBeanInfoData;
 
 /**

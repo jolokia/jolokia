@@ -36,7 +36,7 @@ import org.jolokia.server.core.util.RequestType;
 import org.jolokia.server.core.util.TestJolokiaContext;
 import org.jolokia.service.jmx.api.CacheKeyProvider;
 import org.jolokia.service.jmx.handler.list.DataKeys;
-import org.jolokia.service.jmx.handler.list.DataUpdater;
+import org.jolokia.server.core.service.api.DataUpdater;
 import org.testng.annotations.*;
 
 import static org.easymock.EasyMock.*;
@@ -343,7 +343,7 @@ public class ListHandlerTest extends BaseHandlerTest {
         assertTrue(response.containsKey("type=Threading"));
 
         // wildcard at level 1 - top level response fields are matching domains
-        
+
         request = new JolokiaRequestBuilder(RequestType.LIST)
                 .pathParts("java.*", "type=*")
                 .build();

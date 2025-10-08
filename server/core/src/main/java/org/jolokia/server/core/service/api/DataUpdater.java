@@ -1,5 +1,3 @@
-package org.jolokia.service.jmx.handler.list;
-
 /*
  * Copyright 2009-2011 Roland Huss
  *
@@ -15,6 +13,7 @@ package org.jolokia.service.jmx.handler.list;
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+package org.jolokia.server.core.service.api;
 
 import java.util.Deque;
 import java.util.Map;
@@ -23,11 +22,10 @@ import javax.management.MBeanInfo;
 import javax.management.ObjectName;
 
 import org.jolokia.json.JSONObject;
-import org.jolokia.server.core.service.api.AbstractJolokiaService;
-import org.jolokia.server.core.service.api.JolokiaService;
 
 /**
- * Interface for updating a {@link MBeanInfoData} for a certain aspect of an {@link MBeanInfo}
+ * Interface for updating a JSON representation of an {@link MBeanInfo} when handling
+ * {@link org.jolokia.server.core.request.JolokiaListRequest}
  *
  * @author roland
  * @since 13.09.11
@@ -94,4 +92,13 @@ public abstract class DataUpdater extends AbstractJolokiaService<DataUpdater> im
             throw new IllegalArgumentException("Path contains extra elements not usable for a list request: " + pPathStack);
         }
     }
+
+    /**
+     * Custom updater may return some {@link JSONObject} with information describing its role.
+     * @return
+     */
+    public JSONObject getInfo() {
+        return null;
+    }
+
 }

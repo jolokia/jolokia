@@ -20,7 +20,7 @@ import java.util.Map;
 import javax.management.MBeanInfo;
 import javax.management.ObjectName;
 
-import org.jolokia.service.jmx.handler.list.DataUpdater;
+import org.jolokia.server.core.service.api.DataUpdater;
 
 public class CustomUpdater extends DataUpdater {
 

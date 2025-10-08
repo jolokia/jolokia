@@ -22,6 +22,7 @@ import javax.management.ObjectName;
 
 import org.jolokia.json.JSONArray;
 import org.jolokia.json.JSONObject;
+import org.jolokia.server.core.service.api.DataUpdater;
 import org.jolokia.server.core.util.JsonUtil;
 
 import static org.jolokia.service.jmx.handler.list.DataKeys.*;

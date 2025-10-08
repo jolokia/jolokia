@@ -112,7 +112,7 @@ Basically instead of duplicating the same JSONified `javax.management.MBeanInfo`
 
 1. Jolokia calls `javax.management.MBeanServerConnection.queryMBeans()` normally, getting a set of `javax.management.ObjectInstance` objects.
 2. Each `ObjectInstance` carries an `ObjectName` and `className`.
-3. Without any optimization, `ObjectName` is used in `javax.management.MBeanServerConnection.getMBeanInfo()` call and result is the serialized using `org.jolokia.service.jmx.handler.list.DataUpdater` services.
+3. Without any optimization, `ObjectName` is used in `javax.management.MBeanServerConnection.getMBeanInfo()` call and result is the serialized using `org.jolokia.server.core.service.api.DataUpdater` services.
 4. However, both `ObjectName` and ``ObjectInstance``'s class can be used to obtain a _key_ (or a _hint_) which determines that some MBeans may _share_ its `javax.management.MBeanInfo` with other MBeans.
 5. When a non-null key for an MBean is obtained, its MBeanInfo is cached under `"cache"` field and related MBean under `"domains"` field simply points to cached JSON data of `javax.management.MBeanInfo`.
 
@@ -237,7 +237,7 @@ See https://github.com/jolokia/jolokia/discussions/705[jolokia/jolokia#705,role=
 
 Previous section described services that may affect the structure of _entire_ `list()` response. This section is about services that affect single MBeanInfo of any MBean.
 
-`org.jolokia.service.jmx.handler.list.DataUpdater` is an interface used by `list()` operation. Normally when invoking xref:jolokia_protocol.adoc#list[list] operation, we get a JSON tree with a structure like this:
+`org.jolokia.server.core.service.api.DataUpdater` is an interface used by `list()` operation. Normally when invoking xref:jolokia_protocol.adoc#list[list] operation, we get a JSON tree with a structure like this:
 
 [,json]
 ----
@@ -258,17 +258,17 @@ Previous section described services that may affect the structure of _entire_ `l
 
 Such JSON contains information obtained from `javax.management.MBeanInfo` objects and describes what is known about the registered MBean from the perspective of `javax.management.MBeanServer`.
 
-Built-in implementations of `org.jolokia.service.jmx.handler.list.DataUpdater` interface simply add these fields (`attr`, `op`, ...) to the JSON data.
+Built-in implementations of `org.jolokia.server.core.service.api.DataUpdater` interface simply add these fields (`attr`, `op`, ...) to the JSON data.
 
 However, there may be scenarios where for each MBean we need some additional data - for example the security roles assigned to given MBean (to implement a form of Role-Based Access Control (RBAC)). Jolokia isn't aware of the way an application implements security mechanisms, but should allow for any extension of the basic MBean data.
 
-We can provide an extension module, add it on the CLASSPATH and declare additional _data updaters_ in `META-INF/jolokia/services`. `org.jolokia.service.jmx.handler.list.DataUpdater` is already an implementation of `org.jolokia.server.core.service.api.JolokiaService` and it's an abstract class we can extend. For example:
+We can provide an extension module, add it on the CLASSPATH and declare additional _data updaters_ in `META-INF/jolokia/services`. `org.jolokia.server.core.service.api.DataUpdater` is already an implementation of `org.jolokia.server.core.service.api.JolokiaService` and it's an abstract class we can extend. For example:
 
 [source,java]
 ----
 package com.example;
 
-public class MyUpdater extends org.jolokia.service.jmx.handler.list.DataUpdater {
+public class MyUpdater extends org.jolokia.server.core.service.api.DataUpdater {
 
     public MyUpdater() {
         super(100);
@@ -299,7 +299,7 @@ NOTE:: It is recommended for advanced 3rd party extensions to implement both _ca
 
 ==== `ListKeysDataUpdater`
 
-Since 2.1.0, Jolokia provides optional implementation of `org.jolokia.service.jmx.handler.list.DataUpdater` service which can be enabled using `listKeys` processing parameter. When it is set (at request time) to `true`, in addition to standard `attr`, `op`, `notif`, `class` and `desc` fields of serialized MBeanInfo, we get another field `keys`. +
+Since 2.1.0, Jolokia provides optional implementation of `org.jolokia.server.core.service.api.DataUpdater` service which can be enabled using `listKeys` processing parameter. When it is set (at request time) to `true`, in addition to standard `attr`, `op`, `notif`, `class` and `desc` fields of serialized MBeanInfo, we get another field `keys`. +
 It contains a map of keys obtained from the `ObjectName` itself using `javax.management.ObjectName.getKeyPropertyList()` method.
 
 With this parameter we can get the below response:

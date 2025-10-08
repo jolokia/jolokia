@@ -47,7 +47,7 @@ public class OsgiAgentServletTest {
 
 
     @BeforeMethod
-    public void setup() {
+    public void setup() throws Exception {
 
         config = createMock(ServletConfig.class);
         servletContext = createMock(ServletContext.class);
@@ -55,6 +55,10 @@ public class OsgiAgentServletTest {
 
         expect(config.getServletContext()).andReturn(servletContext).anyTimes();
         expect(config.getServletName()).andReturn("jolokia").anyTimes();
+        expect(bundleContext.createFilter(anyObject())).andReturn(null).anyTimes();
+        bundleContext.addServiceListener(anyObject(), anyObject());
+        expectLastCall().anyTimes();
+        expect(bundleContext.getServiceReferences((String) anyObject(), anyObject())).andReturn(null).anyTimes();
     }
 
     @Test

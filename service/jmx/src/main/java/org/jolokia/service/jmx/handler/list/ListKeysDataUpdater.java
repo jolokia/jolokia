@@ -19,6 +19,7 @@ import javax.management.MBeanInfo;
 import javax.management.ObjectName;
 
 import org.jolokia.json.JSONObject;
+import org.jolokia.server.core.service.api.DataUpdater;
 
 import static org.jolokia.service.jmx.handler.list.DataKeys.KEYS;
 

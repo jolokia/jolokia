@@ -33,6 +33,7 @@ import javax.management.ObjectName;
 import javax.management.ReflectionException;
 
 import org.jolokia.json.JSONObject;
+import org.jolokia.server.core.service.api.DataUpdater;
 import org.jolokia.service.jmx.api.CacheKeyProvider;
 
 /**
