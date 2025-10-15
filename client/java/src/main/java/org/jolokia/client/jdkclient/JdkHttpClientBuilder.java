@@ -15,7 +15,6 @@
  */
 package org.jolokia.client.jdkclient;
 
-import java.beans.Customizer;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.CookieManager;
