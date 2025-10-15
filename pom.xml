@@ -1237,7 +1237,7 @@
 
     <!-- Versions of build-related dependencies -->
 
-    <version.org.apache.bcel>6.10.0</version.org.apache.bcel>
+    <version.org.apache.bcel>6.11.0</version.org.apache.bcel>
     <version.org.apache.maven.wagon>2.7</version.org.apache.maven.wagon>
     <!-- https://nodejs.org/en/about/previous-releases#looking-for-latest-release-of-a-version-branch -->
     <version.nodejs>v20.9.0</version.nodejs>
