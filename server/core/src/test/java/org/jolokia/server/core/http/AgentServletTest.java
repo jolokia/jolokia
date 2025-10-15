@@ -131,6 +131,7 @@ public class AgentServletTest {
 
         expect(config.getServletContext()).andStubReturn(context);
         expect(config.getServletName()).andStubReturn("jolokia");
+        expect(context.getAttribute(AgentServlet.EXTERNAL_BASIC_AUTH_REALM)).andReturn(null).anyTimes();
         replay(config, context);
 
         servlet.init(config);
@@ -645,6 +646,8 @@ public class AgentServletTest {
         EasyMock.expectLastCall().asStub();
         context.log(anyObject(),isA(JMException.class));
         expectLastCall().anyTimes();
+
+        expect(context.getAttribute(AgentServlet.EXTERNAL_BASIC_AUTH_REALM)).andReturn(null).anyTimes();
     }
 
     private String[] prepareDebugLogging(String[] pInitParams) {

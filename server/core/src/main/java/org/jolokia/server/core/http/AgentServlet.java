@@ -1,32 +1,3 @@
-package org.jolokia.server.core.http;
-
-import java.io.*;
-import java.net.*;
-import java.nio.charset.StandardCharsets;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
-import java.util.*;
-
-import javax.management.RuntimeMBeanException;
-import javax.security.auth.Subject;
-import jakarta.servlet.*;
-import jakarta.servlet.http.*;
-
-import org.jolokia.server.core.config.*;
-import org.jolokia.server.core.detector.ServerDetectorLookup;
-import org.jolokia.server.core.request.BadRequestException;
-import org.jolokia.server.core.request.EmptyResponseException;
-import org.jolokia.server.core.restrictor.RestrictorFactory;
-import org.jolokia.server.core.service.JolokiaServiceManagerFactory;
-import org.jolokia.server.core.service.api.*;
-import org.jolokia.server.core.service.impl.ClasspathServiceCreator;
-import org.jolokia.server.core.util.ClassUtil;
-import org.jolokia.server.core.util.IoUtil;
-import org.jolokia.server.core.util.MimeTypeUtil;
-import org.jolokia.server.core.util.NetworkUtil;
-import org.jolokia.json.JSONStructure;
-
-
 /*
  * Copyright 2009-2013 Roland Huss
  *
@@ -42,7 +13,55 @@ import org.jolokia.json.JSONStructure;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.server.core.http;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import javax.management.RuntimeMBeanException;
+import javax.security.auth.Subject;
+
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.jolokia.json.JSONStructure;
+import org.jolokia.server.core.config.ConfigExtractor;
+import org.jolokia.server.core.config.ConfigKey;
+import org.jolokia.server.core.config.Configuration;
+import org.jolokia.server.core.config.StaticConfiguration;
+import org.jolokia.server.core.detector.ServerDetectorLookup;
+import org.jolokia.server.core.request.BadRequestException;
+import org.jolokia.server.core.request.EmptyResponseException;
+import org.jolokia.server.core.restrictor.RestrictorFactory;
+import org.jolokia.server.core.service.JolokiaServiceManagerFactory;
+import org.jolokia.server.core.service.api.AgentDetails;
+import org.jolokia.server.core.service.api.JolokiaContext;
+import org.jolokia.server.core.service.api.JolokiaServiceManager;
+import org.jolokia.server.core.service.api.LogHandler;
+import org.jolokia.server.core.service.api.Restrictor;
+import org.jolokia.server.core.service.api.SecurityDetails;
+import org.jolokia.server.core.service.impl.ClasspathServiceCreator;
+import org.jolokia.server.core.util.ClassUtil;
+import org.jolokia.server.core.util.IoUtil;
+import org.jolokia.server.core.util.MimeTypeUtil;
+import org.jolokia.server.core.util.NetworkUtil;
 
 /**
  * Agent servlet which connects to a local JMX MBeanServer for
@@ -59,7 +78,16 @@ import org.jolokia.json.JSONStructure;
  */
 public class AgentServlet extends HttpServlet {
 
-    private static final long serialVersionUID = 42L;
+    // no one should serialize servlets nowadays...
+//    private static final long serialVersionUID = 42L;
+
+    /**
+     * A key for a {@link jakarta.servlet.ServletContext#getAttribute} to check for pre configured
+     * <em>authentication method</em> to
+     * {@link org.jolokia.server.core.service.api.SecurityDetails#registerAuthenticationMethod register} on
+     * behalf of the web application that uses this servlet.
+     */
+    public static final String EXTERNAL_BASIC_AUTH_REALM = ".jolokia.basicAuth.realm";
 
     // POST- and GET- HttpRequestHandler
     private ServletRequestHandler httpGetHandler, httpPostHandler;
@@ -125,6 +153,13 @@ public class AgentServlet extends HttpServlet {
         Configuration config = createWebConfig();
         LogHandler logHandler = createLogHandler(pServletConfig, config);
         Restrictor restrictor = createRestrictor(config, logHandler);
+
+        Object realmAttribute = pServletConfig.getServletContext().getAttribute(EXTERNAL_BASIC_AUTH_REALM);
+        if (realmAttribute instanceof String realm) {
+            // this is how Hawtio can tell Jolokia that it's accessible using Basic authentication
+            // not perfect and we may change it later
+            config.getSecurityDetails().registerAuthenticationMethod(SecurityDetails.AuthMethod.BASIC, realm);
+        }
 
         // Create the service manager and initialize
         serviceManager =

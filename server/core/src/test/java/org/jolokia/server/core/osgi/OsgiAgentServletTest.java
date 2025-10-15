@@ -22,6 +22,7 @@ import org.easymock.EasyMock;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.config.StaticConfiguration;
 import org.jolokia.server.core.detector.ServerDetectorLookup;
+import org.jolokia.server.core.http.AgentServlet;
 import org.jolokia.server.core.restrictor.AllowAllRestrictor;
 import org.jolokia.server.core.service.api.JolokiaService;
 import org.jolokia.server.core.service.api.LogHandler;
@@ -59,6 +60,7 @@ public class OsgiAgentServletTest {
         bundleContext.addServiceListener(anyObject(), anyObject());
         expectLastCall().anyTimes();
         expect(bundleContext.getServiceReferences((String) anyObject(), anyObject())).andReturn(null).anyTimes();
+        expect(servletContext.getAttribute(AgentServlet.EXTERNAL_BASIC_AUTH_REALM)).andReturn(null).anyTimes();
     }
 
     @Test

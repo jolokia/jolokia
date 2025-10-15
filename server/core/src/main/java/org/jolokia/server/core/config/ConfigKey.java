@@ -260,7 +260,7 @@ public enum ConfigKey {
     REALM("realm", true, false, "jolokia"),
 
     /**
-     * Servlet Configuration parameter only - used to declare (in {@code WEB-INF/web.xml} that the web application
+     * Servlet Configuration parameter only - used to declare (in {@code WEB-INF/web.xml}) that the web application
      * uses basic authentication.
      */
     BASIC_AUTHENTICATION_REALM("basicAuthenticationRealm", true, false),
