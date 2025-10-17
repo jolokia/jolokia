@@ -1801,10 +1801,10 @@ meaning and are dummy values.</p>
 </ul>
 </div>
 <div class="paragraph">
-<p>These fields are added by default, built-in implementations of <code>org.jolokia.service.jmx.handler.list.DataUpdater</code>.</p>
+<p>These fields are added by default, built-in implementations of <code>org.jolokia.server.core.service.api.DataUpdater</code>.</p>
 </div>
 <div class="paragraph">
-<p>Since Jolokia 2.1.0 we can now discover (using <code>/META-INF/jolokia/services</code>) additional services of <code>org.jolokia.service.jmx.handler.list.DataUpdater</code> class which can be used to construct (or override) additional fields of MBean&#8217;s JSON information.<br>
+<p>Since Jolokia 2.1.0 we can now discover (using <code>/META-INF/jolokia/services</code>) additional services of <code>org.jolokia.server.core.service.api.DataUpdater</code> class which can be used to construct (or override) additional fields of MBean&#8217;s JSON information.<br>
 Potential use-case may be information related to RBAC (Role-based Access Control).</p>
 </div>
 <div class="paragraph">
@@ -2752,10 +2752,10 @@ provided as path info.</p>
     "type": "version"
   },
   "value": {
-    "agent": "2.3.0",
+    "agent": "2.4.0",
     "protocol": "7.2",
     "details": {
-      "agent_version": "2.3.0",
+      "agent_version": "2.4.0",
       "agent_id": "192.168.0.221-21185-5ce94d31-servlet",
       "server_product": "tomcat",
       "server_vendor": "Apache",
@@ -2975,7 +2975,7 @@ completely into a JSON value object. It can detect cycles in
 the object graph and provides a way to limit the depth of
 serialization. For certain types (like
 <code>File</code> or
-<code>ObjectName</code>) it uses a service <code>org.jolokia.service.serializer.json.simplifier.SimplifierExtractor</code> to not
+<code>ObjectName</code>) it uses a service <code>org.jolokia.service.serializer.json.simplifier.SimplifierAccessor</code> to not
 expose internal and redundant information.</p>
 </div>
 <div class="paragraph">
@@ -3654,7 +3654,7 @@ the following format</p>
 <div class="listingblock">
 <div class="content">
 <pre>$ echo '{"type":"query"}' | socat STDIO UDP4-DATAGRAM:239.192.48.84:24884
-{"agent_version":"2.3.0","agent_id":"jolokia-7778","type":"response","secured":false,"url":"http://192.168.0.165:7778/jolokia/"}{"agent_version":"2.3.0","agent_id":"jolokia-7779","type":"response","secured":false,"url":"http://192.168.0.165:7778/jolokia/"}</pre>
+{"agent_version":"2.4.0","agent_id":"jolokia-7778","type":"response","secured":false,"url":"http://192.168.0.165:7778/jolokia/"}{"agent_version":"2.4.0","agent_id":"jolokia-7779","type":"response","secured":false,"url":"http://192.168.0.165:7778/jolokia/"}</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -3663,7 +3663,7 @@ the following format</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "agent_version": "2.3.0",
+  "agent_version": "2.4.0",
   "agent_id": "192.168.0.221-67980-7e985ce9-servlet",
   "server_product": "tomcat",
   "type": "response",

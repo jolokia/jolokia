@@ -147,7 +147,7 @@
 <p><code>META-INF/jolokia/detectors[-default]</code> (implementations of <code>org.jolokia.server.core.detector.ServerDetector</code>)</p>
 </li>
 <li>
-<p><code>META-INF/jolokia/simplifiers[-default]</code> (implementations of <code>org.jolokia.service.serializer.json.Extractor</code>)</p>
+<p><code>META-INF/jolokia/simplifiers[-default]</code> (implementations of <code>org.jolokia.service.serializer.json.ObjectAccessor</code>)</p>
 </li>
 <li>
 <p><code>META-INF/jolokia/services[-default]</code> (implementations of <code>org.jolokia.server.core.service.api.JolokiaService</code>)</p>
@@ -286,7 +286,7 @@
 <p>Each <code>ObjectInstance</code> carries an <code>ObjectName</code> and <code>className</code>.</p>
 </li>
 <li>
-<p>Without any optimization, <code>ObjectName</code> is used in <code>javax.management.MBeanServerConnection.getMBeanInfo()</code> call and result is the serialized using <code>org.jolokia.service.jmx.handler.list.DataUpdater</code> services.</p>
+<p>Without any optimization, <code>ObjectName</code> is used in <code>javax.management.MBeanServerConnection.getMBeanInfo()</code> call and result is the serialized using <code>org.jolokia.server.core.service.api.DataUpdater</code> services.</p>
 </li>
 <li>
 <p>However, both <code>ObjectName</code> and <code>ObjectInstance</code>'s class can be used to obtain a <em>key</em> (or a <em>hint</em>) which determines that some MBeans may <em>share</em> its <code>javax.management.MBeanInfo</code> with other MBeans.</p>
@@ -442,7 +442,7 @@
 <p>Previous section described services that may affect the structure of <em>entire</em> <code>list()</code> response. This section is about services that affect single MBeanInfo of any MBean.</p>
 </div>
 <div class="paragraph">
-<p><code>org.jolokia.service.jmx.handler.list.DataUpdater</code> is an interface used by <code>list()</code> operation. Normally when invoking <a href="jolokia_protocol.html#list" class="xref page">list</a> operation, we get a JSON tree with a structure like this:</p>
+<p><code>org.jolokia.server.core.service.api.DataUpdater</code> is an interface used by <code>list()</code> operation. Normally when invoking <a href="jolokia_protocol.html#list" class="xref page">list</a> operation, we get a JSON tree with a structure like this:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -465,19 +465,19 @@
 <p>Such JSON contains information obtained from <code>javax.management.MBeanInfo</code> objects and describes what is known about the registered MBean from the perspective of <code>javax.management.MBeanServer</code>.</p>
 </div>
 <div class="paragraph">
-<p>Built-in implementations of <code>org.jolokia.service.jmx.handler.list.DataUpdater</code> interface simply add these fields (<code>attr</code>, <code>op</code>, &#8230;&#8203;) to the JSON data.</p>
+<p>Built-in implementations of <code>org.jolokia.server.core.service.api.DataUpdater</code> interface simply add these fields (<code>attr</code>, <code>op</code>, &#8230;&#8203;) to the JSON data.</p>
 </div>
 <div class="paragraph">
 <p>However, there may be scenarios where for each MBean we need some additional data - for example the security roles assigned to given MBean (to implement a form of Role-Based Access Control (RBAC)). Jolokia isn&#8217;t aware of the way an application implements security mechanisms, but should allow for any extension of the basic MBean data.</p>
 </div>
 <div class="paragraph">
-<p>We can provide an extension module, add it on the CLASSPATH and declare additional <em>data updaters</em> in <code>META-INF/jolokia/services</code>. <code>org.jolokia.service.jmx.handler.list.DataUpdater</code> is already an implementation of <code>org.jolokia.server.core.service.api.JolokiaService</code> and it&#8217;s an abstract class we can extend. For example:</p>
+<p>We can provide an extension module, add it on the CLASSPATH and declare additional <em>data updaters</em> in <code>META-INF/jolokia/services</code>. <code>org.jolokia.server.core.service.api.DataUpdater</code> is already an implementation of <code>org.jolokia.server.core.service.api.JolokiaService</code> and it&#8217;s an abstract class we can extend. For example:</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">package com.example;
 
-public class MyUpdater extends org.jolokia.service.jmx.handler.list.DataUpdater {
+public class MyUpdater extends org.jolokia.server.core.service.api.DataUpdater {
 
     public MyUpdater() {
         super(100);
@@ -517,7 +517,7 @@ public class MyUpdater extends org.jolokia.service.jmx.handler.list.DataUpdater 
 <div class="sect3">
 <h4 id="_listkeysdataupdater"><a class="anchor" href="#_listkeysdataupdater"></a><code>ListKeysDataUpdater</code></h4>
 <div class="paragraph">
-<p>Since 2.1.0, Jolokia provides optional implementation of <code>org.jolokia.service.jmx.handler.list.DataUpdater</code> service which can be enabled using <code>listKeys</code> processing parameter. When it is set (at request time) to <code>true</code>, in addition to standard <code>attr</code>, <code>op</code>, <code>notif</code>, <code>class</code> and <code>desc</code> fields of serialized MBeanInfo, we get another field <code>keys</code>.<br>
+<p>Since 2.1.0, Jolokia provides optional implementation of <code>org.jolokia.server.core.service.api.DataUpdater</code> service which can be enabled using <code>listKeys</code> processing parameter. When it is set (at request time) to <code>true</code>, in addition to standard <code>attr</code>, <code>op</code>, <code>notif</code>, <code>class</code> and <code>desc</code> fields of serialized MBeanInfo, we get another field <code>keys</code>.<br>
 It contains a map of keys obtained from the <code>ObjectName</code> itself using <code>javax.management.ObjectName.getKeyPropertyList()</code> method.</p>
 </div>
 <div class="paragraph">

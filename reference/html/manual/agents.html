@@ -192,7 +192,7 @@ their own.</p>
 <p><code>${env:VARIABLE_NAME}</code> to reference environment variables</p>
 </li>
 <li>
-<p><code>${ip}</code>, <code>${ip6}</code>, <code>${host}</code>, <code>${ip:&lt;interface&gt;}</code> (e.g., <code>${ip:eth0}</code>) to reference networking configuration. <code>${host}</code> is resolved to actuall name only if <code>allowDnsReverseLookup</code> option is set to <code>true</code>. When not (which is the default), the value is the same as <code>${ip}</code>.</p>
+<p><code>${ip}</code>, <code>${ip6}</code>, <code>${host}</code>, <code>${ip:&lt;interface&gt;}</code> (e.g., <code>${ip:eth0}</code>) to reference networking configuration. <code>${host}</code> is resolved to actual name only if <code>allowDnsReverseLookup</code> option is set to <code>true</code>. When not (which is the default), the value is the same as <code>${ip}</code>.</p>
 </li>
 </ul>
 </div>
@@ -725,7 +725,7 @@ dependency on this jar artifact:</p>
     &lt;dependency&gt;
       &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
       &lt;artifactId&gt;jolokia-server-core&lt;/artifactId&gt;
-      &lt;version&gt;2.3.0&lt;/version&gt;
+      &lt;version&gt;2.4.0&lt;/version&gt;
     &lt;/dependency&gt;
   &lt;/dependencies&gt;
   &lt;!-- .... --&gt;
@@ -1251,7 +1251,7 @@ maven project can be found in the Jolokia source at
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>karaf@root()&gt; install -s mvn:org.jolokia/jolokia-example-osgi-restrictor/2.3.0
+<pre>karaf@root()&gt; install -s mvn:org.jolokia/jolokia-example-osgi-restrictor/2.4.0
 Register sample restrictor service
 Bundle ID: 68
 
@@ -1351,7 +1351,7 @@ performance. See below for details.</p>
 <p><code>agent.jar</code> is the filename of the Jolokia
 JVM agent. The agent can be downloaded like the others from the <a href="https://jolokia.org/download.html" class="externalLink" target="_blank" rel="noopener">download page</a>.
 When downloading from a Maven repository you need to check for the classifier <code>javaagent</code> (i.e. the
-jar to download looks like <code>jolokia-agent-jvm-2.3.0-javaagent.jar</code>, not <code>jolokia-agent-jvm-2.3.0.jar</code>).
+jar to download looks like <code>jolokia-agent-jvm-2.4.0-javaagent.jar</code>, not <code>jolokia-agent-jvm-2.4.0.jar</code>).
 Options can be appended as a comma separated
 list. The available options are the same as described in
 <a href="agents/war.html#agent-war-init-params" class="xref page">Servlet init parameters</a> plus the one described in
@@ -1845,12 +1845,12 @@ application which can be reached via the
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>$ java -jar jolokia-agent-jvm-2.3.0-javaagent.jar --help
+<pre>$ java -jar jolokia-agent-jvm-2.4.0-javaagent.jar --help
 
 Jolokia Agent Launcher
 ======================
 
-Usage: java -jar jolokia-agent-jvm-2.3.0-javaagent.jar [options] &lt;command&gt; &lt;pid/regexp&gt;
+Usage: java -jar jolokia-agent-jvm-2.4.0-javaagent.jar [options] &lt;command&gt; &lt;pid/regexp&gt;
 
 where &lt;command&gt; is one of
     start     -- Start a Jolokia agent for the process specified
@@ -1936,7 +1936,7 @@ where &lt;command&gt; is one of
     --dateFormatTimeZone &lt;tz&gt;       TimeZone to use for formatting dates/times/calendars/temporals (default: local time zone)
     --config &lt;configfile&gt;           Path to a property file from where to read the configuration
     --help                          This help documentation
-    --version                       Version of this agent (it's 2.3.0 btw :)
+    --version                       Version of this agent (it's 2.4.0 btw :)
 
 &lt;pid/regexp&gt; can be either a numeric process id or a regular expression. A regular expression is matched
 against the processes' names (ignoring case) and must be specific enough to select exactly one process.
@@ -2046,7 +2046,7 @@ shot scripts are possible <sup class="footnote" id="_footnote_rest-comment">[<a 
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#!/bin/sh
 
-url=`java -jar jolokia-agent-jvm-2.3.0-javaagent.jar start $1 | tail -1`
+url=`java -jar jolokia-agent-jvm-2.4.0-javaagent.jar start $1 | tail -1`
 
 memory_url="${url}read/java.lang:type=Memory/HeapMemoryUsage"
 used=`curl -s "${memory_url}/used" | jq .value`
@@ -2054,7 +2054,7 @@ max=`curl -s "${memory_url}/max" | jq .value`
 usage=$((${used}*100/${max}))
 echo "Memory Usage: $usage %"
 
-java -jar jolokia-agent-jvm-2.3.0-javaagent.jar --quiet stop $1</code></pre>
+java -jar jolokia-agent-jvm-2.4.0-javaagent.jar --quiet stop $1</code></pre>
 </div>
 </div>
 </div>

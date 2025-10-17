@@ -222,8 +222,8 @@ Then we can refer to the scripts from HTML page:</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;head&gt;
-  &lt;script src="jolokia-2.3.0.min.js"&gt;&lt;/script&gt;
-  &lt;script src="jolokia-simple-2.3.0.min.js"&gt;&lt;/script&gt;
+  &lt;script src="jolokia-2.4.0.min.js"&gt;&lt;/script&gt;
+  &lt;script src="jolokia-simple-2.4.0.min.js"&gt;&lt;/script&gt;
 &lt;/head&gt;</code></pre>
 </div>
 </div>
@@ -909,7 +909,7 @@ method.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "agent": "2.3.0",
+  "agent": "2.4.0",
   "protocol": "8.0",
   "details": {
     "agent_version": "2.1.0-SNAPSHOT",
@@ -1751,7 +1751,7 @@ method.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "agent": "2.3.0",
+  "agent": "2.4.0",
   "protocol": "7.2",
   "details": {
     "agent_version": "2.0.0-SNAPSHOT",
@@ -1985,7 +1985,7 @@ be used within a <code>pom.xml</code>:</p>
       &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
       &lt;artifactId&gt;jolokia-client-javascript&lt;/artifactId&gt;
       &lt;type&gt;javascript&lt;/type&gt;
-      &lt;version&gt;2.3.0&lt;/version&gt;
+      &lt;version&gt;2.4.0&lt;/version&gt;
     &lt;/dependency&gt;
     ....
   &lt;/dependencies&gt;
@@ -2088,11 +2088,11 @@ better than false transparency in order to know the price tag.</p>
 <p>The Java client library follows a strict request-response
 paradigm, much like the underlying HTTP. It uses generics heavily
 and can be centered around three classes:
-<code>J4pClient</code> is the client side agent, which
+<code>JolokiaClient</code> is the client side agent, which
 has various variants of a <code>execute()</code> for
 sending requests. This method takes one or more
-<code>J4pRequest</code> objects as arguments and returns
-one or more <code>J4pResponse</code> objects as result.</p>
+<code>JolokiaRequest</code> objects as arguments and returns
+one or more <code>JolokiaResponse</code> objects as result.</p>
 </div>
 <div class="sidebarblock">
 <div class="content">
@@ -2118,17 +2118,17 @@ A read request for querying the heap memory usage from the
 <code>MemoryMXBean</code> is created and then send via
 the <code>execute()</code> to the agent. The
 response returned is of type
-<code>J4pReadResponse</code> and holds the result
+<code>JolokiaReadResponse</code> and holds the result
 which finally is printed out to standard output.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import org.jolokia.client.J4pClient;
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import org.jolokia.client.JolokiaClient;
 import org.jolokia.client.request.*;
 
 public class MemoryDemo {
   public static void main(String[] args) {
-    J4pClient client = J4pClient.url("http://localhost:8080/jolokia")
+    JolokiaClient client = new JolokiaClientBuilder().url("http://localhost:8080/jolokia")
         .user("jolokia")
         .password("jolokia")
         .build();
@@ -2170,26 +2170,26 @@ the other two as transitive dependencies):</p>
 <pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
     &lt;artifactId&gt;jolokia-client-java&lt;/artifactId&gt;
-    &lt;version&gt;2.3.0&lt;/version&gt;
+    &lt;version&gt;2.4.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 </div>
 <div class="sect2">
-<h3 id="client-client"><a class="anchor" href="#client-client"></a>J4pClient</h3>
+<h3 id="client-client"><a class="anchor" href="#client-client"></a>JolokiaClient</h3>
 <div class="paragraph">
-<p><code>J4pClient</code> is the entry point for sending
+<p><code>JolokiaClient</code> is the entry point for sending
 requests to a remote Jolokia agent. It can be created in multiple
 ways. For simple cases, public constructors are provided taking
 the mandatory Jolokia agent URL and optionally a
 <code>org.apache.http.client.HttpClient</code>
 instance which is used for the HTTP business. The recommended style
-is to use the <code>J4pClientBuilder</code>, though. This way, all
+is to use the <code>JolokiaClientBuilder</code>, though. This way, all
 parameters for the HTTP communication can easily be set:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">J4pClient j4p = J4pClient.url("http://localhost:8080/jolokia")
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">JolokiaClient j4p = new JolokiaClientBuilder().url("http://localhost:8080/jolokia")
   .user("roland")
   .password("s!cr!t")
   .authenticator(new BasicAuthenticator().preemptive())
@@ -2202,7 +2202,7 @@ parameters for the HTTP communication can easily be set:</p>
 defaults:</p>
 </div>
 <table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 3. J4pClient parameters</caption>
+<caption class="title">Table 3. JolokiaClient parameters</caption>
 <colgroup>
 <col style="width: 15%;">
 <col>
@@ -2236,8 +2236,8 @@ must be set, too</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>authenticator</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Implementation of <code>J4pAuthenticator</code>. The Java client comes with
-one implementation <code>BasicAuthenticator</code> for using basic authentication.
+<td class="tableblock halign-left valign-top"><p class="tableblock">Implementation of <code>J4pClientCustomizer</code>. The Java client comes with
+one implementation <code>BasicClientCustomizer</code> for using basic authentication.
 This class supports also <em>preemptive</em> authentication. Call <code>preemptive()</code> to
 switch this on (see above for an example). Basic authentication is the default if no other
 authenticator is set.Only used when <code>user</code> is set, too.</p></td>
@@ -2276,7 +2276,7 @@ infinite timeout.</p></td>
 connection manager, which is thread safe and can service
 connection requests from multiples threads
 simultaneously. This is important if the
-<code>J4pClient</code> is to be used in a multi
+<code>JolokiaClient</code> is to be used in a multi
 threaded context. The size of the pool is restricted by the
 parameter <code>maxTotalConnection</code>.
 <code>ThreadSafeClientConnManager</code> is the
@@ -2288,7 +2288,7 @@ default.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>singleConnection</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Specifies that single connection should be used which
 maintains only one active connection at a time.  Even though
-<code>J4pClient</code> is still thread-safe it
+<code>JolokiaClient</code> is still thread-safe it
 ought to be used by one execution thread only. The
 underlying connection manager is
 <code>SingleClientConnManager</code> Pooled
@@ -2379,26 +2379,26 @@ Example: <code>http://tom:sEcReT@my.proxy.com:8080</code></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>responseExtractor</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">A response extractor can be used for hooking into the JSON
+<td class="tableblock halign-left valign-top"><p class="tableblock">A response objectAccessor can be used for hooking into the JSON
 deserialization process when a JSON response is converted
-into a <code>J4pResponse</code> object. By
+into a <code>JolokiaResponse</code> object. By
 default, the received JSON object is examined for a status
 code of 200 and only then creates a response
-object. Otherwise an exception is thrown. An extractor is
+object. Otherwise an exception is thrown. An objectAccessor is
 specified by the interface
-<code>J4pResponseExtractor</code>. Beside the
-default extractor, an alternate extractor
+<code>JolokiaResponseExtractor</code>. Beside the
+default objectAccessor, an alternate objectAccessor
 <code>ValidatingResponseExtractor</code> can be
 used, which instead of throwing an exception returns a
 <code>null</code> object when the response has a status of
-404. An extractor can be specified as extra argument to the
+404. An objectAccessor can be specified as extra argument to the
 execute method, too.</p></td>
 <td class="tableblock halign-left valign-top"></td>
 </tr>
 </tbody>
 </table>
 <div class="paragraph">
-<p>The <code>J4pClient</code> provides various variants
+<p>The <code>JolokiaClient</code> provides various variants
 of a <code>execute()</code> method, which takes
 either one single request or a list of requests. For a single
 request, the preferred HTTP method (GET or POST) can be
@@ -2411,10 +2411,10 @@ untyped list must be used.</p>
 <p>Each request can be tuned by giving a map of processing options
 along with their values to the <code>execute</code>
 method. The possible options are shown in table
-<a href="#client-java-queryopts">Table 4, &#8220;J4pClient query parameters&#8221;</a>.</p>
+<a href="#client-java-queryopts">Table 4, &#8220;JolokiaClient query parameters&#8221;</a>.</p>
 </div>
 <table id="client-java-queryopts" class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 4. J4pClient query parameters</caption>
+<caption class="title">Table 4. JolokiaClient query parameters</caption>
 <colgroup>
 <col style="width: 20%;">
 <col>
@@ -2491,7 +2491,7 @@ the requests using index number - responses come in the same order as requests.<
 <div class="paragraph">
 <p>For each request type a dedicated request object is provided
 which all are subclasses from
-<code>J4pRequest</code>. For all requests it can be
+<code>JolokiaRequest</code>. For all requests it can be
 specified which HTTP method is to be used by setting the
 property <code>preferredHttpMethod</code> to either
 <code>GET</code> or <code>POST</code>.</p>
@@ -2499,23 +2499,23 @@ property <code>preferredHttpMethod</code> to either
 <div class="paragraph">
 <p>Each request type has a corresponding response type which used
 for the return values of the
-<code>J4pClient.execute()</code>.</p>
+<code>JolokiaClient.execute()</code>.</p>
 </div>
 <div class="paragraph">
 <p>The constructor of each kind of request can take a
-<code>J4pTargetConfig</code> as argument for using a
+<code>JolokiaTargetConfig</code> as argument for using a
 request in <a href="proxy_mode.html" class="xref page">Proxy Mode</a>. This
 configurational object holds the JMX service url and
 (optionally) credentials for JSR-160 authentication. When
 given, this proxy target specification overrides any default
 proxy configuration set during the initialization of the
-<code>J4pClient</code>.</p>
+<code>JolokiaClient</code>.</p>
 </div>
 <div class="dlist">
 <dl>
-<dt class="hdlist1"><code>J4pReadRequest</code> and <code>J4pReadResponse</code></dt>
+<dt class="hdlist1"><code>JolokiaReadRequest</code> and <code>JolokiaReadResponse</code></dt>
 <dd>
-<p><code>J4pReadRequest</code> is a read request to
+<p><code>JolokiaReadRequest</code> is a read request to
 get one or more attributes from one or more MBeans within
 a single request. Various constructor variants can be used
 to specify one or more attributes along with the
@@ -2523,7 +2523,7 @@ ObjectName (which can be a pattern). A
 <code>path</code> can be set as property for
 specifying an <em>inner path</em>, too.</p>
 <div class="paragraph">
-<p><code>J4pReadResponse</code> is the
+<p><code>JolokiaReadResponse</code> is the
 corresponding response type and allows typed access to the
 fetched value for a single attribute fetch or to multiple
 values for a multi attribute read. In the latter case, the
@@ -2534,12 +2534,12 @@ well.</p>
 <p>For more information on fetching the value of multiple
 attributes and multiple MBeans at once, please refer to
 <a href="protocol/read.html" class="xref page">Reading attributes (read)</a> or the Javadoc of
-<code>J4pReadResponse</code>.</p>
+<code>JolokiaReadResponse</code>.</p>
 </div>
 </dd>
-<dt class="hdlist1"><code>J4pWriteRequest</code> and <code>J4pWriteResponse</code></dt>
+<dt class="hdlist1"><code>JolokiaWriteRequest</code> and <code>JolokiaWriteResponse</code></dt>
 <dd>
-<p>A <code>J4pWriteRequest</code> is used to set
+<p>A <code>JolokiaWriteRequest</code> is used to set
 the value of an MBean attribute. Beside the mandatory
 object and attribute name the value must be give in the
 constructor as well. Optionally a <code>path</code>
@@ -2547,12 +2547,12 @@ can be provided, too. Only certain types for the given
 value can be serialized properly for calling the Jolokia
 agent as described in <a href="jolokia_protocol.html#serialization-request" class="xref page">Request parameter serialization</a>.</p>
 <div class="paragraph">
-<p>The old value is returned as <code>J4pWriteResponse</code>'s value.</p>
+<p>The old value is returned as <code>JolokiaWriteResponse</code>'s value.</p>
 </div>
 </dd>
-<dt class="hdlist1"><code>J4pExecRequest</code> and <code>J4pExecResponse</code></dt>
+<dt class="hdlist1"><code>JolokiaExecRequest</code> and <code>JolokiaExecResponse</code></dt>
 <dd>
-<p><code>J4pExecRequest</code>'s are used for
+<p><code>JolokiaExecRequest</code>'s are used for
 executing operation on MBeans. The constructor takes as
 mandatory arguments the MBean&#8217;s object name, the operation
 name and any arguments required by the operation. Only
@@ -2560,24 +2560,24 @@ certain types for the given arguments can be serialized
 properly for calling the Jolokia agent as described in
 <a href="jolokia_protocol.html#serialization-request" class="xref page">Request parameter serialization</a>.</p>
 <div class="paragraph">
-<p>The returned <code>J4pExecResponse</code>
+<p>The returned <code>JolokiaExecResponse</code>
 contains the return value of the operation called.</p>
 </div>
 </dd>
-<dt class="hdlist1"><code>J4pSearchRequest</code> and <code>J4pSearchResponse</code></dt>
+<dt class="hdlist1"><code>JolokiaSearchRequest</code> and <code>JolokiaSearchResponse</code></dt>
 <dd>
-<p>A <code>J4pSearchRequest</code> contains a
+<p>A <code>JolokiaSearchRequest</code> contains a
 valid single MBean object name pattern which is used for
 searching MBeans.</p>
 <div class="paragraph">
-<p>The <code>J4pSearchResponse</code> holds a
+<p>The <code>JolokiaSearchResponse</code> holds a
 list of found object names.</p>
 </div>
 </dd>
-<dt class="hdlist1"><code>J4pListRequest</code> and <code>J4pListResponse</code></dt>
+<dt class="hdlist1"><code>JolokiaListRequest</code> and <code>JolokiaListResponse</code></dt>
 <dd>
 <p>For obtaining meta data on MBeans a
-<code>J4pListRequest</code> should be used. It
+<code>JolokiaListRequest</code> should be used. It
 can be used with a <em>inner path</em> to
 obtain only a subtree of the response, otherwise the whole
 tree as described in <a href="jolokia_protocol.html#response-list" class="xref page">List response</a> is
@@ -2586,18 +2586,18 @@ returned. With the query parameter
 depth of returned tree.</p>
 <div class="paragraph">
 <p>The single value of a
-<code>J4pListResponse</code> is a tree (or
+<code>JolokiaListResponse</code> is a tree (or
 subtree) as a JSON object, which has the format described
 in <a href="jolokia_protocol.html#response-list" class="xref page">List response</a>.</p>
 </div>
 </dd>
-<dt class="hdlist1"><code>J4pVersionRequest</code> and <code>J4pVersionResponse</code></dt>
+<dt class="hdlist1"><code>JolokiaVersionRequest</code> and <code>JolokiaVersionResponse</code></dt>
 <dd>
-<p>A <code>J4pVersionRequest</code> request the
+<p>A <code>JolokiaVersionRequest</code> request the
 Jolokia agent&#8217;s version information and takes no
 argument.</p>
 <div class="paragraph">
-<p>The <code>J4pVersionResponse</code> returns the
+<p>The <code>JolokiaVersionResponse</code> returns the
 agent&#8217;s version (<code>agentVersion</code>), the
 protocol version (<code>protocolVersion</code>), the
 application server product name
@@ -2614,24 +2614,24 @@ the Jolokia is running on.</p>
 <h3 id="client-java-exceptions"><a class="anchor" href="#client-java-exceptions"></a>Exceptions</h3>
 <div class="paragraph">
 <p>In case of an error when executing a request a
-<code>J4pException</code> or one its subclass is
+<code>JolokiaException</code> or one its subclass is
 thrown.</p>
 </div>
 <div class="dlist">
 <dl>
-<dt class="hdlist1"><code>J4pConnectException</code></dt>
+<dt class="hdlist1"><code>JolokiaConnectException</code></dt>
 <dd>
 <p>Exception thrown when the connection to the server
 fails. It contains the original
 <code>ConnectException</code> as nested value.</p>
 </dd>
-<dt class="hdlist1"><code>J4pTimeoutException</code></dt>
+<dt class="hdlist1"><code>JolokiaTimeoutException</code></dt>
 <dd>
 <p>Exception thrown in case of an timeout. The nested
 exception is of type
 <code>ConnectTimeoutException</code>.</p>
 </dd>
-<dt class="hdlist1"><code>J4pRemoteException</code></dt>
+<dt class="hdlist1"><code>JolokiaRemoteException</code></dt>
 <dd>
 <p>Generic exception thrown when an exception occurred on the
 remote side. This is the case when the JSON response
@@ -2640,12 +2640,12 @@ obtained is an error response as described in
 status, the request leading to this error and the remote
 stacktrace as string) can be obtained from this exception.</p>
 </dd>
-<dt class="hdlist1"><code>J4pBulkRemoteException</code></dt>
+<dt class="hdlist1"><code>JolokiaBulkRemoteException</code></dt>
 <dd>
 <p>Exception thrown when a bulk request fails on the remote
 side. This contains a mixed list which contains the
-<code>J4pRemoteException</code> occurred as well
-as the <code>J4pResponse</code> objects for the
+<code>JolokiaRemoteException</code> occurred as well
+as the <code>JolokiaResponse</code> objects for the
 requests, which succeeded. The list obtained by
 <code>getResults()</code> contains these
 objects in the same order as the list of requests given to
@@ -2653,7 +2653,7 @@ objects in the same order as the list of requests given to
 exceptions can also be obtained separately in homogeneous
 lists.</p>
 </dd>
-<dt class="hdlist1"><code>J4pException</code></dt>
+<dt class="hdlist1"><code>JolokiaException</code></dt>
 <dd>
 <p>Base exception thrown, when no other exception fits,
 i.e. when the exception happened on the client side. The
@@ -2692,7 +2692,7 @@ Java Visual VM a Jolokia plugin can be downloaded from <a href="https://skarsaun
 <div class="ulist">
 <ul>
 <li>
-<p>Jolokia&#8217;s <code>remote-jmx-adapter-2.3.0-javaagent.jar</code>
+<p>Jolokia&#8217;s <code>remote-jmx-adapter-2.4.0-javaagent.jar</code>
 must be on the classpath. See the <a href="/download.html">Download page</a> for the latest versions of this adapter jar.</p>
 </li>
 <li>
@@ -2750,12 +2750,12 @@ When running Jolokia as JVM agent, using <code>-javaagent</code> JVM option, be 
 <div class="ulist">
 <ul>
 <li>
-<p>Jolokia&#8217;s <code>remote-jmx-adapter-2.3.0-javaagent.jar</code>
+<p>Jolokia&#8217;s <code>remote-jmx-adapter-2.4.0-javaagent.jar</code>
 must be on the classpath. See the <a href="/download.html">Download page</a> for the latest versions of this adapter jar.</p>
 </li>
 <li>
 <p>In addition, the Jolokia Kubernetes extension
-<code>jolokia-kubernetes-2.3.0-javaagent.jar</code>
+<code>jolokia-kubernetes-2.4.0-javaagent.jar</code>
 must be on the classpath. This can be also downloaded from the
 <a href="/download.html">Download page</a>.</p>
 </li>
@@ -2798,9 +2798,9 @@ You need to add the Jolokia connector client libraries when launching <code>jcon
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>java -cp jolokia-agent-jvm-2.3.0-javaagent.jar:\
-jolokia-client-jmx-adapter-2.3.0-standalone.jar:\
-jolokia-client-kubernetes-2.3.0-standalone.jar \
+<pre>java -cp jolokia-agent-jvm-2.4.0-javaagent.jar:\
+jolokia-client-jmx-adapter-2.4.0-standalone.jar:\
+jolokia-client-kubernetes-2.4.0-standalone.jar \
 -Djconsole.showOutputViewer sun.tools.jconsole.JConsole</pre>
 </div>
 </div>
