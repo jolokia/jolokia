@@ -23,6 +23,77 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
+    <release version="2.4.0" description="Release 2.4.0" date="2025-10-17">
+      <action dev="ggrzybek" type="add" issue="151">
+        Path support for EXEC request
+      </action>
+      <action dev="ggrzybek" type="add" issue="152">
+        Allow patterns for EXEC requests
+      </action>
+      <action dev="ggrzybek" type="fix" issue="230">
+        Provide way to shutdown Java J4pClient
+      </action>
+      <action dev="ggrzybek" type="fix" issue="556">
+        Improve self-generated certificate
+      </action>
+      <action dev="ggrzybek" type="add" issue="565">
+        Consider using JDK own HTTP client
+      </action>
+      <action dev="ggrzybek" type="add" issue="870">
+        Metadata for supporting multiple authentication methods
+      </action>
+      <action dev="ggrzybek" type="fix" issue="871">
+        Recreate agent/jvm/src/test/resources/certs/server/cert.pem
+      </action>
+      <action dev="ggrzybek" type="add" issue="872">
+        Decode PKCS#1 data in org.jolokia.jvmagent.security.asn1 package
+      </action>
+      <action dev="ggrzybek" type="fix" issue="883">
+        Self signed certificate from updateWithSelfSignedServerCertificate has short validity
+      </action>
+      <action dev="ggrzybek" type="add" issue="886">
+        Generate Jolokia self-signed certificate with newer digest and certificate extensions
+      </action>
+      <action dev="ggrzybek" type="fix" issue="887">
+        allowDnsReverseLookup option can't be specified using sys/env property
+      </action>
+      <action dev="ggrzybek" type="add" issue="890">
+        Switch to JDK 17 as the baseline
+      </action>
+      <action dev="ggrzybek" type="add" issue="893">
+        Reading all the attributes from a MBean could be improved
+      </action>
+      <action dev="ggrzybek" type="fix" issue="894">
+        Optimized list response doesn't work with "path" argument
+      </action>
+      <action dev="ggrzybek" type="fix" issue="895">
+        SEARCH request doesn't handle objectName parameter correctly
+      </action>
+      <action dev="ggrzybek" type="add" issue="896">
+        Add more information for AttributeDataUpdater
+      </action>
+      <action dev="ggrzybek" type="add" issue="897">
+        MBeanConstructorInfo is not available in list response
+      </action>
+      <action dev="ggrzybek" type="add" issue="898">
+        Upgrade to Jetty 12.1.x (tests)
+      </action>
+      <action dev="ggrzybek" type="fix" issue="908">
+        Jolokia 2.3.0 does not (really) work with OSGi
+      </action>
+      <action dev="ggrzybek" type="add" issue="910">
+        Allow customization of 3 supported HTTP Client builders using single API
+      </action>
+      <action dev="ggrzybek" type="add" issue="912">
+        Create new protocol version (8.1)
+      </action>
+      <action dev="ggrzybek" type="add" issue="915">
+        Expose information about used decorators for list response
+      </action>
+      <action dev="ggrzybek" type="add" issue="917">
+        Allow embedding applications to register auth methods for /config endpoint
+      </action>
+    </release>
     <release version="2.3.0" description="Release 2.3.0" date="2025-08-01">
       <action dev="tadayosi" type="fix" issue="856">
         Provide a generic invm request handler for agents

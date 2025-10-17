@@ -15,6 +15,36 @@
 ////
 == News
 
+=== Jolokia 2.4.0 released
+
+[.news-date]
+2025-10-17
+
+Why not 2.3.1? Because there's much more changes than initially planned!
+
+There was https://github.com/jolokia/jolokia/issues/565[an issue] created even before the release of Jolokia 2.0 suggesting
+that we could move away from https://hc.apache.org/httpcomponents-client-4.5.x/index.html[HttpClient 4] and use
+https://docs.oracle.com/en/java/javase/17/docs/api/java.net.http/java/net/http/HttpClient.html[JDK HTTP Client] instead. Back then, last HttpClient 4
+release was already 1 year old and no new releases were published since then. +
+New Jolokia version is 2.4.0 mainly because we did it - Jolokia now supports JDK HTTP Client!
+
+But it's not all - JDK HTTP Client support required some API changes, so we took the opportunity to introduce an SPI
+for the implementation and we now support *three*, discoverable implementations:
+
+* https://docs.oracle.com/en/java/javase/17/docs/api/java.net.http/java/net/http/HttpClient.html[JDK HTTP Client]
+* https://hc.apache.org/httpcomponents-client-4.5.x/index.html[HttpClient 4]
+* https://hc.apache.org/httpcomponents-client-5.5.x/index.html[HttpClient 5]
+
+Along the HTTP Client changes we've reviewed some (very) old issues related to Jolokia operations - consistently
+handling path arguments and response conversion for all supported operation (read, write, exec, search, ...).
+
+New minor release comes after https://blogs.oracle.com/java/post/the-arrival-of-java-25[the release new new Java 25 LTS version].
+It is about time to move to JDK 17 as a baseline - welcome `if (value instanceof JSONObject map)`!
+
+Big https://jolokia.org/reference/html/manual/index.html[reference documentation] changes are coming soon after this release.
+
+Refer to https://jolokia.org/changes-report.html#a2.4.0[changelog] and https://github.com/jolokia/jolokia/releases/tag/v2.4.0[GitHub release notes] for more details.
+
 === Jolokia 2.3.0 released
 
 [.news-date]
