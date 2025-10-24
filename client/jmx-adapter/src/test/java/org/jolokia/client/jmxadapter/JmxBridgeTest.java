@@ -333,23 +333,23 @@ public class JmxBridgeTest {
         return new Object[][]{
             {RemoteJmxAdapter.getObjectName("java.lang:type=Threading"),
                 "getThreadInfo",
-                new Object[]{1L},
+                new Object[]{Thread.currentThread().getId()},
                 new String[]{"long"}},
             {RemoteJmxAdapter.getObjectName("java.lang:type=Threading"),
                 "getThreadInfo",
-                new Object[]{1L, 10},
+                new Object[]{Thread.currentThread().getId(), 10},
                 new String[]{"long", "int"}},
             {RemoteJmxAdapter.getObjectName("java.lang:type=Threading"),
                 "getThreadInfo",
-                new Object[]{new long[]{1L}},
+                new Object[]{new long[]{Thread.currentThread().getId()}},
                 new String[]{"[J"}},
             {RemoteJmxAdapter.getObjectName("java.lang:type=Threading"),
                 "getThreadInfo",
-                new Object[]{new long[]{1L}, 10},
+                new Object[]{new long[]{Thread.currentThread().getId()}, 10},
                 new String[]{"[J", "int"}},
             {RemoteJmxAdapter.getObjectName("java.lang:type=Threading"),
                 "getThreadInfo",
-                new Object[]{new long[]{1L}, true, true},
+                new Object[]{new long[]{Thread.currentThread().getId()}, true, true},
                 new String[]{"[J", "boolean", "boolean"}}
         };
     }
