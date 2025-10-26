@@ -269,6 +269,7 @@ public class ArtemisDetector extends AbstractServerDetector {
         // container locator may be called also when starting a WAR / Spring Boot agent where
         // we don't have access to java.lang.instrument.Instrumentation
 
+        ArtemisLocator result = null;
         try {
             MBeanServer server = ManagementFactory.getPlatformMBeanServer();
             if (!Proxy.isProxyClass(server.getClass())) {
@@ -280,12 +281,11 @@ public class ArtemisDetector extends AbstractServerDetector {
                 if (!(oldJmxHandlerClass.equals(ihClass) || newJmxHandlerClass.equals(ihClass))) {
                     return null;
                 } else {
-                    ArtemisLocator result = null;
                     // etc/management.xml case
                     if (oldJmxHandlerClass.equals(ihClass)) {
                         Field guardField;
                         try {
-                            guardField = handler.getClass().getDeclaredField("guard");
+                            guardField = Class.forName(oldJmxBuilderClass).getDeclaredField("guard");
                             guardField.setAccessible(true);
                             Object guard = guardField.get(null);
                             if (guard != null) {
@@ -319,7 +319,7 @@ public class ArtemisDetector extends AbstractServerDetector {
         } catch (Exception ignored) {
         }
 
-        return null;
+        return result;
     }
 
     private class ArtemisLocator extends AbstractJolokiaService<ContainerLocator> implements ContainerLocator {
