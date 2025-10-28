@@ -38,6 +38,17 @@
         <exclude>**/*.iws</exclude>
         <exclude>.node/**</exclude>
         <exclude>**/node_modules/**</exclude>
+        <exclude>**/javascript-esm/packages/**/dist/**</exclude>
+        <exclude>**/javascript/dist/**</exclude>
+        <exclude>**/javascript/.npmignore</exclude>
+        <exclude>**/javascript/jest.config.js</exclude>
+        <exclude>**/.yarn/**</exclude>
+        <exclude>**/eslint.config.js</exclude>
+        <exclude>**/jest.config.ts</exclude>
+        <exclude>**/rollup.config.js</exclude>
+        <exclude>**/tsconfig.json</exclude>
+        <exclude>**/yarn.lock</exclude>
+        <exclude>**/.yarnrc.yml</exclude>
         <exclude>*.pl</exclude>
         <exclude>.editorconfig</exclude>
         <exclude>.gitignore</exclude>
