@@ -20,9 +20,9 @@
 [.news-date]
 2025-10-28
 
-After 2.4.0 we've identified single issue with Artemis server detector, which breaks cache optimization with
-Jolokia being part of https://hawt.io[Hawtio Console] in https://github.com/apache/activemq-artemis[Apache ActiveMQ Artemis] (thanks https://github.com/jbertram[Justin Bertram]!). +
-This is the only change in new micro release of Jolokia 2.4.1.
+After releasing Jolokia 2.4.0, we've identified a single issue with Artemis server detector. This issue breaks cache
+optimization with Jolokia being part of https://hawt.io[Hawtio Console] in https://github.com/apache/activemq-artemis[Apache ActiveMQ Artemis] (thanks https://github.com/jbertram[Justin Bertram]!). +
+This is the only change in the new micro release of Jolokia 2.4.1.
 
 (Documentation still has to wait a bit...)
 
