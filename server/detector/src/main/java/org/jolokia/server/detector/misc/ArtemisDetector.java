@@ -285,7 +285,8 @@ public class ArtemisDetector extends AbstractServerDetector {
                     if (oldJmxHandlerClass.equals(ihClass)) {
                         Field guardField;
                         try {
-                            guardField = Class.forName(oldJmxBuilderClass).getDeclaredField("guard");
+                            Class<?> c = handler.getClass().getClassLoader().loadClass(oldJmxBuilderClass);
+                            guardField = c.getDeclaredField("guard");
                             guardField.setAccessible(true);
                             Object guard = guardField.get(null);
                             if (guard != null) {
