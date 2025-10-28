@@ -1196,7 +1196,7 @@
 
     <!-- Versions of Maven plugins (org.apache.maven.plugins) -->
 
-    <plugin.maven-antrun-plugin>3.1.0</plugin.maven-antrun-plugin>
+    <plugin.maven-antrun-plugin>3.2.0</plugin.maven-antrun-plugin>
     <plugin.maven-assembly-plugin>3.7.1</plugin.maven-assembly-plugin>
     <plugin.maven-changes-plugin>2.12.1</plugin.maven-changes-plugin>
     <plugin.maven-clean-plugin>3.5.0</plugin.maven-clean-plugin>
@@ -1217,7 +1217,7 @@
     <plugin.maven-site-plugin>3.12.1</plugin.maven-site-plugin>
     <plugin.maven-source-plugin>3.3.1</plugin.maven-source-plugin>
     <plugin.maven-surefire-plugin>3.5.4</plugin.maven-surefire-plugin>
-    <plugin.maven-war-plugin>3.4.0</plugin.maven-war-plugin>
+    <plugin.maven-war-plugin>3.5.0</plugin.maven-war-plugin>
 
     <!-- Versions of Maven plugins (other plugins) -->
 
@@ -1225,7 +1225,7 @@
     <plugin.com.github.eirslett.frontend-maven-plugin>1.15.4</plugin.com.github.eirslett.frontend-maven-plugin>
     <plugin.com.github.site-maven-plugin>0.12</plugin.com.github.site-maven-plugin>
     <plugin.org.apache.felix.maven-bundle-plugin>5.1.9</plugin.org.apache.felix.maven-bundle-plugin>
-    <plugin.org.apache.rat.apache-rat-plugin>0.16.1</plugin.org.apache.rat.apache-rat-plugin>
+    <plugin.org.apache.rat.apache-rat-plugin>0.17</plugin.org.apache.rat.apache-rat-plugin>
     <!-- Please stay at 3.1.0. With 3.2.0 we have "[INFO] Issues found in: null" -->
     <plugin.org.asciidoctor.asciidoctor-maven-plugin>3.1.0</plugin.org.asciidoctor.asciidoctor-maven-plugin>
     <plugin.org.codehaus.mojo.build-helper-maven-plugin>3.6.1</plugin.org.codehaus.mojo.build-helper-maven-plugin>
