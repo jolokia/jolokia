@@ -23,6 +23,14 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
+    <release version="2.4.0" description="Release 2.4.1" date="2025-10-28">
+      <action dev="ggrzybek" type="fix" issue="919">
+        assembly/target/jolokia-2.4.0-source.zip is too big
+      </action>
+      <action dev="ggrzybek" type="fix" issue="924">
+        ArtemisDetector not working
+      </action>
+    </release>
     <release version="2.4.0" description="Release 2.4.0" date="2025-10-17">
       <action dev="ggrzybek" type="add" issue="151">
         Path support for EXEC request
