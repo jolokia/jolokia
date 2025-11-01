@@ -1246,7 +1246,7 @@
 
     <!-- Versions of test-related dependencies -->
 
-    <version.com.fasterxml.jackson.core>2.20.0</version.com.fasterxml.jackson.core>
+    <version.com.fasterxml.jackson.core>2.20.1</version.com.fasterxml.jackson.core>
     <!-- see https://github.com/FasterXML/jackson-annotations/issues/294. TODO: move to jackson bom -->
     <version.com.fasterxml.jackson.core.annotations>2.20</version.com.fasterxml.jackson.core.annotations>
     <version.jakarta.annotation-api>3.0.0</version.jakarta.annotation-api>
