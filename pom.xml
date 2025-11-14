@@ -831,44 +831,6 @@
         <version>${project.version}</version>
       </dependency>
 
-      <!-- JSON -->
-
-      <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-annotations</artifactId>
-        <version>${version.com.fasterxml.jackson.core.annotations}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-core</artifactId>
-        <version>${version.com.fasterxml.jackson.core}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-databind</artifactId>
-        <version>${version.com.fasterxml.jackson.core}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.dataformat</groupId>
-        <artifactId>jackson-dataformat-yaml</artifactId>
-        <version>${version.com.fasterxml.jackson.core}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.datatype</groupId>
-        <artifactId>jackson-datatype-jdk8</artifactId>
-        <version>${version.com.fasterxml.jackson.core}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.datatype</groupId>
-        <artifactId>jackson-datatype-jsr310</artifactId>
-        <version>${version.com.fasterxml.jackson.core}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.module</groupId>
-        <artifactId>jackson-module-parameter-names</artifactId>
-        <version>${version.com.fasterxml.jackson.core}</version>
-      </dependency>
-
       <!-- JakartaEE dependencies -->
 
       <dependency>
@@ -1246,9 +1208,7 @@
 
     <!-- Versions of test-related dependencies -->
 
-    <version.com.fasterxml.jackson.core>2.20.1</version.com.fasterxml.jackson.core>
-    <!-- see https://github.com/FasterXML/jackson-annotations/issues/294. TODO: move to jackson bom -->
-    <version.com.fasterxml.jackson.core.annotations>2.20</version.com.fasterxml.jackson.core.annotations>
+    <version.com.fasterxml.jackson>2.20.1</version.com.fasterxml.jackson>
     <version.jakarta.annotation-api>3.0.0</version.jakarta.annotation-api>
     <version.jakarta.authentication-api>3.1.0</version.jakarta.authentication-api>
     <version.net.bytebuddy>1.18.1</version.net.bytebuddy>
