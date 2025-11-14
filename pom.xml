@@ -1210,7 +1210,7 @@
     <plugin.maven-javadoc-plugin>3.12.0</plugin.maven-javadoc-plugin>
     <!-- don't use 3.x (non-boxed org.apache.maven.reporting.AbstractMavenReportRenderer#verbatimLink()) -->
     <plugin.maven-project-info-reports-plugin>2.9</plugin.maven-project-info-reports-plugin>
-    <plugin.maven-release-plugin>3.1.1</plugin.maven-release-plugin>
+    <plugin.maven-release-plugin>3.2.0</plugin.maven-release-plugin>
     <plugin.maven-resources-plugin>3.3.1</plugin.maven-resources-plugin>
     <plugin.maven-shade-plugin>3.6.1</plugin.maven-shade-plugin>
     <!-- Please stay at 3.12.1, as we have issues with newer versions and asciidoctor-doxia integration -->
