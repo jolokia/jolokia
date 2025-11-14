@@ -1251,7 +1251,7 @@
     <version.com.fasterxml.jackson.core.annotations>2.20</version.com.fasterxml.jackson.core.annotations>
     <version.jakarta.annotation-api>3.0.0</version.jakarta.annotation-api>
     <version.jakarta.authentication-api>3.1.0</version.jakarta.authentication-api>
-    <version.net.bytebuddy>1.17.8</version.net.bytebuddy>
+    <version.net.bytebuddy>1.18.1</version.net.bytebuddy>
     <version.org.apache.felix.configadmin>1.9.26</version.org.apache.felix.configadmin>
     <version.org.apache.felix.framework>7.0.5</version.org.apache.felix.framework>
     <version.org.apache.felix.http.jetty12>1.0.36</version.org.apache.felix.http.jetty12>
@@ -1272,7 +1272,7 @@
 
     <!-- Versions of actual Maven dependencies for Jolokia core/service/client libraries -->
 
-    <version.commons-codec>1.19.0</version.commons-codec>
+    <version.commons-codec>1.20.0</version.commons-codec>
     <version.io.fabric8.kubernetes-client>7.4.0</version.io.fabric8.kubernetes-client>
     <version.jakarta.servlet-api>5.0.0</version.jakarta.servlet-api>
     <version.jakarta.servlet-api6>6.1.0</version.jakarta.servlet-api6>
