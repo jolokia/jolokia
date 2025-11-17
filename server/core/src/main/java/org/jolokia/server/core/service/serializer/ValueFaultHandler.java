@@ -16,6 +16,8 @@ package org.jolokia.server.core.service.serializer;
  * limitations under the License.
  */
 
+import org.jolokia.json.JSONObject;
+
 /**
  *  Interface in order to deal with value exceptions
  *
@@ -47,7 +49,11 @@ public interface ValueFaultHandler {
          * @return a descriptive string of the exception
          */
         public <T extends Throwable> Object handleException(T exception) {
-            return "ERROR: " + exception.getMessage() + " (" + exception.getClass() + ")";
+            JSONObject result = new JSONObject();
+            result.put(".error", true);
+            result.put("error", exception.getMessage());
+            result.put("error_type", exception.getClass().getName());
+            return result;
         }
     };
 

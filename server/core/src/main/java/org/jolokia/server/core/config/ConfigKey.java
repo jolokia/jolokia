@@ -104,9 +104,13 @@ public enum ConfigKey {
     ALLOW_DNS_REVERSE_LOOKUP("allowDnsReverseLookup", true, false, Constants.FALSE),
 
     /**
-     * Runtime configuration (i.e. must come in with a request)
+     * <p>Runtime configuration (i.e. must come in with a request)
      * for ignoring errors during JMX operations and JSON serialization.
-     * This works only for certain operations like pattern reads.
+     * This works only for certain operations like pattern reads.</p>
+     *
+     * <p>With {@code ignoreErrors} enabled, attribute read operation doesn't return
+     * an error message. Instead an attribute value is returned as a {@link org.jolokia.json.JSONObject}
+     * with {@code .error} field indicator.</p>
      */
     IGNORE_ERRORS("ignoreErrors", false, true, null, String.class),
 

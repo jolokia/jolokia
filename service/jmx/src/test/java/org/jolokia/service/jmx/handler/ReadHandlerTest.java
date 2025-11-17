@@ -22,6 +22,7 @@ import java.util.*;
 
 import javax.management.*;
 
+import org.jolokia.json.JSONObject;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.request.JolokiaReadRequest;
 import org.jolokia.server.core.request.JolokiaRequestBuilder;
@@ -158,8 +159,9 @@ public class ReadHandlerTest extends BaseHandlerTest {
         Map<String, ?> res = (Map<String, ?>) handler.handleAllServerRequest(getMBeanServerManager(server),request,null);
         verify(server);
         assertEquals("val0",res.get("attr0"));
-        String err = (String) res.get("attr1");
-        assertTrue(err != null && err.contains("ERROR"));
+        Object result = res.get("attr1");
+        assertTrue(result instanceof JSONObject);
+        assertTrue(((String) ((JSONObject) result).get("error")).contains("Couldn't find attr1"));
     }
 
     // ======================================================================================================
