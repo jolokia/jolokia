@@ -15,6 +15,20 @@
 ////
 == News
 
+=== Jolokia 2.4.2 released
+
+[.news-date]
+2025-10-28
+
+We're announcing a new tiny micro release of Jolokia 2.4.2. This release fixes
+one specific scenario where multiple MBean attributes are fetched and there's a security
+interceptor (at `MBeanServer` level) involved. +
+This is the only change in the new micro release of Jolokia 2.4.2.
+
+(Documentation still has to wait a bit... Hopefully not that long.)
+
+Refer to https://jolokia.org/changes-report.html#a2.4.2[changelog] and https://github.com/jolokia/jolokia/releases/tag/v2.4.2[GitHub release notes] for more details.
+
 === Jolokia 2.4.1 released
 
 [.news-date]
@@ -187,7 +201,7 @@ And the biggest change is improved configuration management. All options can use
 
 * `${sys:configurationOption}` (or `${prop:configurationOption}`) to reference system properties
 * `${env:VARIABLE_NAME}` to reference environment variables
-* `${ip}`, `${ip6}`, `${host}`, `${ip:<interface>}` (e.g., `${ip:eth0}`) to reference networking configuration
+* `$\{ip}`, `$\{ip6}`, `$\{host}`, `${ip:<interface>}` (e.g., `${ip:eth0}`) to reference networking configuration
 
 Also, similarly to https://docs.spring.io/spring-boot/reference/features/external-config.html[Spring Boot configuration], Jolokia looks up configuration options in different sources/locations (in order of increasing priority - later sources override previous ones):
 
@@ -251,7 +265,7 @@ What's more, the new JavaScript library is developed using the https://www.types
 
 Since Jolokia was created, https://api.jquery.com/jQuery.ajax/[JQuery Ajax] performed HTTP calls from JavaScript code. +
 Instead of relying on external dependency, we use https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API[Fetch API], which is now standard in all modern, secure browsers. +
-This makes the Jolokia JavaScript library independent of any external dependency. It also makes the code aware of the async/await programming model and https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises[Promises API]. See the dedicated chapter in the link:reference/html/manual/clients.html#client-javascript[reference documentation].
+This makes the Jolokia JavaScript library independent of any external dependency. It also makes the code aware of the async/await programming model and https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises[Promises API]. See the dedicated chapter in the link:https://jolokia.org/reference/html/manual/clients.html#client-javascript[reference documentation].
 
 ==== New JSON parser
 
@@ -264,11 +278,11 @@ The new Jolokia module is `org.jolokia:jolokia-json` and it fully replaces `com.
 
 ==== New Jolokia protocol version
 
-Going with the flow, after moving from JavaScript to TypeScript and getting our own JSON parser, we've introduced a new Jolokia protocol version, `8.0`. There's more information in the link:reference/html/manual/jolokia_protocol.html#optimized-response-list[relevant documentation section], but here's a summary of the changes:
+Going with the flow, after moving from JavaScript to TypeScript and getting our own JSON parser, we've introduced a new Jolokia protocol version, `8.0`. There's more information in the link:https://jolokia.org/reference/html/manual/jolokia_protocol.html#optimized-response-list[relevant documentation section], but here's a summary of the changes:
 
 * With the new `listKeys` processing/request parameter, `list()` operation returns an additional `"keys"` field for MBean's MBeanInfo - it contains a map of the keys obtained from ObjectName
 * With the new `includeRequest` processing/request parameter, we can tell Jolokia not to return incoming requests under the `"request"` field of the response (defaults to `true`)
-* The `list()` operation may be optimized with the new `listCache` processing/request parameter. It allows caching the common JSON-ified MBeanInfo to avoid duplicating it in the `list()` response for, say, 50,000 Artemis queue MBeans. Getting 2MB instead of 0.5GB of JSON is always a good thing. More details can be found in the documentation.
+* The `list()` operation may be optimized with the new `listCache` processing/request parameter. It allows caching the common JSON representation of MBeanInfo to avoid duplicating it in the `list()` response for, say, 50,000 Artemis queue MBeans. Getting 2MB instead of 0.5GB of JSON is always a good thing. More details can be found in the documentation.
 
 ==== New extension points
 
@@ -277,7 +291,7 @@ To make `list()` operation more flexible (based on experience gained from the ht
 In detail, Jolokia offers these new extension hooks:
 
 * With the `org.jolokia.service.jmx.api.CacheKeyProvider` Jolokia service, we can ask third-party libraries whether a given MBean can be translated into a _cache key_. If many MBeans can be translated into a single cache key, we can optimize the `list()` response by caching common MBeanInfo.
-* with the `org.jolokia.service.jmx.handler.list.DataUpdater` Jolokia service, we can get additional information inside JSON-ified `javax.management.MBeanInfo` - 3rd party extensions may add RBAC information or any other data into the MBeanInfo
+* with the `org.jolokia.service.jmx.handler.list.DataUpdater` Jolokia service, we can get additional information inside JSON representation of `javax.management.MBeanInfo` - 3rd party extensions may add RBAC information or any other data into the MBeanInfo
 
 ==== Old issues resolved
 
@@ -336,7 +350,7 @@ This release is a result of our dedicated effort in reviewing, restructuring, re
 * Enhanced connectivity with JMX notifications
 * Integration with Spring Boot 3 and Spring Framework 6
 * A fresh, pluggable service-based architecture
-* A revamped and user-friendly link:reference/html/index.html[Reference Manual] powered by Antora
+* A revamped and user-friendly link:https://jolokia.org/reference/html/index.html[Reference Manual] powered by Antora
 * JDK 11 is the minimal version of JDK required. Spring related Jolokia modules require JDK 17. (No worries, we're still supporting Jolokia 1.x with minimal version of JDK 1.6 supported).
 
 And that's not all. We're already planning more frequent updates, including exciting new features like websockets and IPv6 support.

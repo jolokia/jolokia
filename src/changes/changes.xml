@@ -23,6 +23,11 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
+    <release version="2.4.2" description="Release 2.4.2" date="2025-11-17">
+      <action dev="ggrzybek" type="fix" issue="932">
+        Handle exceptions when fetching multiple attributes
+      </action>
+    </release>
     <release version="2.4.1" description="Release 2.4.1" date="2025-10-28">
       <action dev="ggrzybek" type="fix" issue="919">
         assembly/target/jolokia-2.4.0-source.zip is too big
