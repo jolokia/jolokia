@@ -409,4 +409,22 @@ public class ObjectToObjectConverterTest {
         Date expectedDate = sdf.parse(dateStr.replaceFirst("\\+(0\\d):(\\d{2})$", "+$1$2"));
         assertEquals(expectedDate, obj);
     }
+
+    // regression test for #934
+    @Test
+    public void handleNaNInfinityGracefully() {
+        Object obj = converter.convert(BigDecimal.class.getCanonicalName(), Double.NaN);
+        assertNull("Double.NaN", obj);
+        obj = converter.convert(BigDecimal.class.getCanonicalName(), Double.NEGATIVE_INFINITY);
+        assertNull("Double.NEGATIVE_INFINITY", obj);
+        obj = converter.convert(BigDecimal.class.getCanonicalName(), Double.POSITIVE_INFINITY);
+        assertNull("Double.POSITIVE_INFINITY", obj);
+
+        obj = converter.convert(BigDecimal.class.getCanonicalName(), Float.NaN);
+        assertNull("Float.NaN", obj);
+        obj = converter.convert(BigDecimal.class.getCanonicalName(), Float.NEGATIVE_INFINITY);
+        assertNull("Float.NEGATIVE_INFINITY", obj);
+        obj = converter.convert(BigDecimal.class.getCanonicalName(), Float.POSITIVE_INFINITY);
+        assertNull("Float.POSITIVE_INFINITY", obj);
+    }
 }
