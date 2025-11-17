@@ -192,11 +192,23 @@ public class ReadHandler extends AbstractCommandHandler<JolokiaReadRequest> {
         Map<String, Object> mapping = new HashMap<>();
         boolean allFetched = false;
         if (attributes.size() > 1) {
-            AttributeList allAttributes = getAttributes(pServerManager, pMBeanName, attributes.toArray(String[]::new));
-            for (Attribute a : allAttributes.asList()) {
-                mapping.put(a.getName(), a.getValue());
+            AttributeList allAttributes;
+            try {
+                allAttributes = getAttributes(pServerManager, pMBeanName, attributes.toArray(String[]::new));
+                for (Attribute a : allAttributes.asList()) {
+                    mapping.put(a.getName(), a.getValue());
+                }
+                allFetched = attributes.size() == mapping.size();
+            } catch (RuntimeException ignored) {
+                // exceptions like InstanceNotFoundException are simply rethrown, but RuntimeExceptions
+                // should be handled differently - for example there's
+                // javax.management.MBeanServer interceptor for RBAC installed by a custom
+                // javax.management.MBeanServerBuilder and we can't be sure which exceptions are thrown
+                // (for example Artemis MBean interceptor throws java.lang.SecurityException)
+                // in that case we fail at getting all the attributes, so we switch to checking each attribute
+                // at a time to collect individual errors using
+                // org.jolokia.server.core.service.serializer.ValueFaultHandler.handleException()
             }
-            allFetched = attributes.size() == mapping.size();
         }
 
         for (String attribute : attributes) {
@@ -209,7 +221,8 @@ public class ReadHandler extends AbstractCommandHandler<JolokiaReadRequest> {
                         // we can use it, even if it's null
                         ret.put(attribute, mapping.get(attribute));
                     } else {
-                        // we have to fetch it individually to get the exception
+                        // we have to fetch it individually to get the actual exception which could be
+                        // missing when calling javax.management.MBeanServerConnection.getAttributes()
                         ret.put(attribute, getAttribute(pServerManager, pMBeanName, attribute));
                     }
                 }
