@@ -20,4 +20,5 @@ src/documentation/build/
 .node/
 dependency-reduced-pom.xml
 .yarn/cache/
+.yarn/install-state.gz
 client/javascript-esm/.yarn/
