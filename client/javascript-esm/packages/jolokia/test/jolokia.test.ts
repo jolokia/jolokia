@@ -568,6 +568,14 @@ describe("Jolokia notification tests", () => {
         }
       }
     })
+    await new Promise(resolve => {
+      const h = setInterval(() => {
+        if (jolokia.jobs().length == 1) {
+          clearInterval(h)
+          resolve(true)
+        }
+      }, 100)
+    })
     expect(jolokia.jobs().length).toBe(1)
 
     await new Promise((resolve, _reject) => {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2024 Roland Huss
+ * Copyright 2009-2025 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,7 +110,9 @@ const Jolokia = function (this: IJolokia, config: JolokiaConfiguration | string)
   // Function-scoped state not exposed as properties of Jolokia class or instance
 
   // Registered requests for fetching periodically
-  const jobs: Job[] = []
+  const jobs: Map<number, Job> = new Map()
+  // Global Job ID - not accessible to web workers, so safe to use as Job ID
+  let jobId: number = 1
 
   // Our client id and notification backend config Is null as long as notifications are not used
   let client: NotificationClient
@@ -121,8 +123,8 @@ const Jolokia = function (this: IJolokia, config: JolokiaConfiguration | string)
   // State of the scheduler
   let pollerIsRunning = false
 
-  // timer id for poller's setInterval call
-  let timerId: NodeJS.Timeout | number | null = null
+  // timer id for a single poller's setInterval call
+  let timerId: NodeJS.Timeout | null = null
 
   if (typeof config === "string") {
     config = { url: config }
@@ -187,19 +189,11 @@ const Jolokia = function (this: IJolokia, config: JolokiaConfiguration | string)
   }
 
   this.unregister = function (handle: number) {
-    if (handle < jobs.length) {
-      delete jobs[handle]
-    }
+    jobs.delete(handle)
   }
 
   this.jobs = function () {
-    const ret: number[] = []
-    for (let jobId = 0; jobId < jobs.length; jobId++) {
-      if (jobs[jobId]) {
-        ret.push(jobId)
-      }
-    }
-    return ret
+    return [...jobs.keys()]
   }
 
   this.start = function (interval?) {
@@ -219,10 +213,10 @@ const Jolokia = function (this: IJolokia, config: JolokiaConfiguration | string)
   }
 
   this.stop = function () {
-    if (!pollerIsRunning) {
+    if (!pollerIsRunning || !timerId) {
       return
     }
-    clearInterval(timerId as number)
+    clearInterval(timerId)
     timerId = null
     pollerIsRunning = false
   }
@@ -308,8 +302,22 @@ const Jolokia = function (this: IJolokia, config: JolokiaConfiguration | string)
    * @param job a job to register
    */
   function addJob(job: Job): number {
-    const id = jobs.length
-    jobs[id] = job
+    const id = jobId++
+
+    // before adding new job to the global map, we should immediately call it, so user doesn't wait for the next
+    // refresh tick. Only after the call we add it to the map.
+    // So _next_ call may be performed too early, but the first call will not be too delayed
+    setTimeout(() => {
+      const newJobMap = new Map()
+      newJobMap.set(id, job)
+      const jobFunction = createJolokiaInvocation(newJobMap, agentOptions)
+      try {
+        jobFunction()
+      } finally {
+        // whether or not the job ends with an error, we finally add it as proper job
+        jobs.set(id, job)
+      }
+    }, 0)
     return id
   }
 
@@ -735,7 +743,7 @@ function constructCallbackDispatcher(cb?: "ignore" | ResponseCallback | TextResp
  * @param agentOptions global Jolokia configuration
  * @returns A function which can be passed to {@link window#setInterval}
  */
-function createJolokiaInvocation(jobs: Job[], agentOptions: JolokiaConfiguration) {
+function createJolokiaInvocation(jobs: Map<number, Job>, agentOptions: JolokiaConfiguration) {
   // the function called in window.setInterval needs a fresh state on each call (to operate only on current
   // set of responses for all the requests of each job, but we may prepare some configuration at this stage
 
@@ -751,38 +759,35 @@ function createJolokiaInvocation(jobs: Job[], agentOptions: JolokiaConfiguration
     const requests: JolokiaRequest[] = []
 
     // check all the jobs
-    for (let jobId = 0; jobId < jobs.length; jobId++) {
-      const job = jobs[jobId]
-      if (job) {
-        // and we'll prepare callbacks for all the requests within the job
-        const reqsLen = job.requests.length
-        if (job.success) {
-          // we have separate job.success and job.error callbacks accepting the response (ok or error),
-          // job ID and index of response within an array of requests for single Job
-          const successCb = constructSuccessJobCallback(job, jobId)
-          const errorCb = constructErrorJobCallback(job, jobId)
-          for (let idx = 0; idx < reqsLen; idx++) {
-            requests.push(prepareJobRequest(job, idx))
-            successCbs.push(successCb)
-            errorCbs.push(errorCb)
-          }
-        } else if (job.callback) {
-          // single job.callback accepting an array of mixed successful and error Jolokia responses
-          // that's why, when a job has such a callback for N requests, N-1 requests should be handled simply
-          // by collecting responses (or errors)  and N-th request should be handled by passing the collected
-          // array to this callback
-          const callbackConfiguration = constructJobCallbackConfiguration(job, jobId)
-          // N-1 requests:
-          for (let idx = 0; idx < reqsLen - 1; idx++) {
-            requests.push(prepareJobRequest(job, idx))
-            successCbs.push(callbackConfiguration.cb as ResponseCallback)
-            errorCbs.push(callbackConfiguration.cb as ErrorCallback)
-          }
-          // last request
-          requests.push(prepareJobRequest(job, reqsLen - 1))
-          successCbs.push(callbackConfiguration.lcb as ResponseCallback)
-          errorCbs.push(callbackConfiguration.lcb as ErrorCallback)
+    for (const [ jobId, job ] of jobs) {
+      // and we'll prepare callbacks for all the requests within the job
+      const reqsLen = job.requests.length
+      if (job.success) {
+        // we have separate job.success and job.error callbacks accepting the response (ok or error),
+        // job ID and index of response within an array of requests for single Job
+        const successCb = constructSuccessJobCallback(job, jobId)
+        const errorCb = constructErrorJobCallback(job, jobId)
+        for (let idx = 0; idx < reqsLen; idx++) {
+          requests.push(prepareJobRequest(job, idx))
+          successCbs.push(successCb)
+          errorCbs.push(errorCb)
         }
+      } else if (job.callback) {
+        // single job.callback accepting an array of mixed successful and error Jolokia responses
+        // that's why, when a job has such a callback for N requests, N-1 requests should be handled simply
+        // by collecting responses (or errors)  and N-th request should be handled by passing the collected
+        // array to this callback
+        const callbackConfiguration = constructJobCallbackConfiguration(job, jobId)
+        // N-1 requests:
+        for (let idx = 0; idx < reqsLen - 1; idx++) {
+          requests.push(prepareJobRequest(job, idx))
+          successCbs.push(callbackConfiguration.cb as ResponseCallback)
+          errorCbs.push(callbackConfiguration.cb as ErrorCallback)
+        }
+        // last request
+        requests.push(prepareJobRequest(job, reqsLen - 1))
+        successCbs.push(callbackConfiguration.lcb as ResponseCallback)
+        errorCbs.push(callbackConfiguration.lcb as ErrorCallback)
       }
     }
 
@@ -806,7 +811,9 @@ function createJolokiaInvocation(jobs: Job[], agentOptions: JolokiaConfiguration
       }
 
       // we can now call remote Jolokia agent
-      performRequest(requestArguments)
+      performRequest(requestArguments).catch((e) => {
+        console.warn("Problem invoking a poller", e)
+      })
     }
   }
 }
