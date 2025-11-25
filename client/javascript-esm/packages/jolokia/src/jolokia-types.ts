@@ -594,10 +594,14 @@ export type MBeanInfo = {
   class?: string
   /** Map of attribute definitions */
   attr?: Record<string, MBeanAttribute>
-  /** Map of operation (possible overriden) definitions */
+  /** Map of operation (possible overridden) definitions */
   op?: Record<string, MBeanOperation | MBeanOperation[]>
+  /** Map of constructors */
+  ctor?: Record<string, MBeanConstructor | MBeanConstructor[]>
   /** Map of notification definitions */
   notif?: Record<string, MBeanNotification>
+  /** Map of ObjectName key/values (if `listKeys` parameter is set) */
+  keys?: Record<string, string>
 }
 
 /**
@@ -628,8 +632,23 @@ export type MBeanAttribute = {
   desc: string
   /** Read-Write flag */
   rw: boolean
+  /** Read flag */
+  r: boolean
+  /** Write flag */
+  w: boolean
+  /** "Is" flag for a getter (`isXX` / `getXX`) */
+  is: boolean
 }
 
+/**
+ * Description of a single MBean constructor
+ */
+export type MBeanConstructor = {
+  /** Constructor arguments */
+  args: MBeanOperationArgument[]
+  /** Description */
+  desc: string
+}
 /**
  * Description of a single MBean operation
  */
