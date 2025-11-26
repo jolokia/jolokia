@@ -1,6 +1,6 @@
 {
   "name": "jolokia.js",
-  "version": "2.4.0",
+  "version": "2.4.1",
   "description": "Jolokia JavaScript ES main module",
   "type": "module",
   "license": "Apache-2.0",

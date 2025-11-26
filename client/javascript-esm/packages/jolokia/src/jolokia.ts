@@ -66,7 +66,7 @@ type RequestArguments = {
   fetchErrorCb?: FetchErrorCallback
 }
 
-const CLIENT_VERSION = "2.4.0"
+const CLIENT_VERSION = "2.4.1"
 
 /**
  * Default parameters for GET and POST requests
