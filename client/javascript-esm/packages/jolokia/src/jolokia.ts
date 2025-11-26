@@ -304,19 +304,16 @@ const Jolokia = function (this: IJolokia, config: JolokiaConfiguration | string)
   function addJob(job: Job): number {
     const id = jobId++
 
-    // before adding new job to the global map, we should immediately call it, so user doesn't wait for the next
-    // refresh tick. Only after the call we add it to the map.
+    // We should immediately call the job, so user doesn't wait for the next refresh tick.
+    // But we will also add the job to global job list synchronously
     // So _next_ call may be performed too early, but the first call will not be too delayed
+    jobs.set(id, job)
+
     setTimeout(() => {
       const newJobMap = new Map()
       newJobMap.set(id, job)
       const jobFunction = createJolokiaInvocation(newJobMap, agentOptions)
-      try {
-        jobFunction()
-      } finally {
-        // whether or not the job ends with an error, we finally add it as proper job
-        jobs.set(id, job)
-      }
+      jobFunction()
     }, 0)
     return id
   }
