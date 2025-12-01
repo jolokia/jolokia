@@ -1159,7 +1159,7 @@
     <!-- Versions of Maven plugins (org.apache.maven.plugins) -->
 
     <plugin.maven-antrun-plugin>3.2.0</plugin.maven-antrun-plugin>
-    <plugin.maven-assembly-plugin>3.7.1</plugin.maven-assembly-plugin>
+    <plugin.maven-assembly-plugin>3.8.0</plugin.maven-assembly-plugin>
     <plugin.maven-changes-plugin>2.12.1</plugin.maven-changes-plugin>
     <plugin.maven-clean-plugin>3.5.0</plugin.maven-clean-plugin>
     <plugin.maven-compiler-plugin>3.14.1</plugin.maven-compiler-plugin>
