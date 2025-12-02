@@ -734,7 +734,7 @@ function constructCallbackDispatcher(cb?: "ignore" | ResponseCallback | TextResp
 
 /**
  * Prepares a function that will be invoked in poll-fetching for configured jobs and their requests. All jobs and
- * all requests for each job are handled by single, periodical {@link IJolokia#request} call.
+ * all requests for each job are handled by a single, periodical {@link IJolokia#request} call.
  * Passed parameters come from the scope of {@link IJolokia} constructor function.
  * @param jobs Requests configured for poll-fetching
  * @param agentOptions global Jolokia configuration
@@ -807,7 +807,8 @@ function createJolokiaInvocation(jobs: Map<number, Job>, agentOptions: JolokiaCo
         }
       }
 
-      // we can now call remote Jolokia agent
+      // we can now call remote Jolokia agent using a single request for all the jobs and all the requests
+      // within a job
       performRequest(requestArguments).catch((e) => {
         console.warn("Problem invoking a poller", e)
       })
@@ -877,6 +878,8 @@ function constructJobCallbackConfiguration(job: Job, jobId: number):
       // is obtained. Update job's timestamp internally
       if (allResponses.length > 0) {
         job.lastModified = lastModified
+        // response array is spread into callback parameters. But if the callback accepts a single
+        // parameter without spread syntax (...), only first array element will be available!
         job.callback!(...allResponses)
       }
     }

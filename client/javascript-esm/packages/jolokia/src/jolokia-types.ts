@@ -24,7 +24,7 @@ export type UsedFetchOptions = Pick<RequestInit, "cache" | "credentials" | "head
 /**
  * Processing parameters that influence Jolokia operations.
  * See `org.jolokia.server.core.config.ConfigKey` enum values with `requestConfig=true`.
- * These values may be specified when creating Jolokia instance, but may be overriden for each request.
+ * These values may be specified when creating Jolokia instance, but may be overridden for each request.
  * These are sent either as GET query parameters or within `config` key of JSON data for POST requests.
  * @see {https://jolokia.org/reference/html/manual/jolokia_protocol.html#processing-parameters Jolokia Processing Parameters}
  */
@@ -89,7 +89,7 @@ export type ProcessingParameters = {
   mimeType?: "text/plain" | "application/json"
   /**
    * Whether to include request in its response. There's a global variant of this option
-   * but it may be overriden at request time.
+   * but it may be overridden at request time.
    */
   includeRequest?: boolean
   /**
@@ -160,7 +160,7 @@ export type BaseRequestOptions = ProcessingParameters & UsedFetchOptions & {
 export type RemoteAgentOptions = {
   /** Remote JMX Agent URL, for example `service:jmx:rmi:///jndi/rmi://targethost:9999/jmxrmi` */
   url: string
-  /** Remote JMX usernam */
+  /** Remote JMX username */
   user?: string
   /** Remote JMX password */
   password?: string
@@ -411,7 +411,7 @@ export type JolokiaSuccessResponse = JolokiaResponse & {
   request?: JolokiaRequest
   /** Value returned for the request. Can be null for WriteRequest, but still the value should be available */
   value: string | number | boolean | JolokiaResponseValue | null
-  /** History of previous responses for given reques (if History interceptor is available) */
+  /** History of previous responses for a given request (if History interceptor is available) */
   history?: JolokiaResponse
 }
 
@@ -427,7 +427,7 @@ export type JolokiaErrorResponse = JolokiaResponse & {
   error_type: string
   /** Stack trace as string value when `allowErrorDetails` is `true` and `includeStackTrace` is `true` or `runtime` */
   stacktrace?: string
-  /** JSON-ified value of Exception created by bean extractor (using `java.lang.Exception` getters) */
+  /** JSON value of an Exception created by bean extractor (using `java.lang.Exception` getters) */
   error_value?: Record<string, unknown>
 }
 
@@ -469,7 +469,7 @@ export type ExecResponseValue = string | number | boolean | null | Record<string
 // ------ Search response
 
 /**
- * Straightforward response for `search` reqest
+ * Straightforward response for `search` request
  */
 export type SearchResponseValue = string[]
 
@@ -577,7 +577,7 @@ export type JmxDomains = Record<string, JmxDomain>
  *
  * This string value is dual-purpose:
  * * With small enough `maxDepth`, we may end up just with "1" as the info (the way Jolokia trims the depth
- *   of responses) - that'w why it may be a string.
+ *   of responses) - that's why it may be a string.
  * * With `listCache=true`, some domains instead of full MBeanInfo value may point to the cached value using
  *   string _key_
  */
@@ -699,7 +699,7 @@ export type NotificationResponseValue =
   | null
 
 /**
- * Resulf of notification `register` command for registration of a new client
+ * Result of notification `register` command for registration of a new client
  */
 export type NotificationRegisterResponseValue = {
   /** Client id for the registered notification client (global for single Jolokia instance) */
@@ -757,7 +757,7 @@ export type JMXNotification = {
 //     in round-robin fashion (for bulk-request of 3 and array of 2 callbacks, first callback will be called with
 //     response 0 and 2, while callback 1 will be called with response 1)
 //
-//     for registered jobs, we can specify and generic callback, which will be called with all the responses. This
+//     for registered jobs, we can specify a generic callback, which will be called with all the responses. This
 //     is not possible with normal jolokia.request() call
 
 export type GenericCallback = (response: JolokiaResponse, index: number) => void
@@ -816,14 +816,21 @@ export type FetchErrorCallback = (response: Response | null, error: DOMException
 export type JobResponseCallback = (response: JolokiaSuccessResponse, jobId: number, index: number) => void
 
 /**
- * An error response callback used for registered jobs called periodically. In addition to standard
+ * A Jolokia error response callback used for registered jobs called periodically. In addition to standard
  * {@link ErrorCallback}, this method receives registered job ID as 2nd argument and index of the response is passed
  * as 3rd argument.
  */
 export type JobErrorCallback = (response: JolokiaErrorResponse, jobId: number, index: number) => void
 
 /**
- * Special job-related callback, which simply receives all the responses/errors in single array parameter
+ * Special job-related callback, which simply receives all the responses/errors in single array parameter or
+ * (when HTTP/`fetch()` error occurred), a single {@link JolokiaFetchErrorResponse} is passed.
+ *
+ * The spread syntax used may be tricky, because jobs may be registered with multiple requests, so a callback should
+ * accept a spread parameter too. But TypeScript uses function equivalence as long as the called function may
+ * accept _any_ parameters passed. So we can pass a JobCallback as a function which accepts a single parameter
+ * of one of the 3 types of responses too! This is fine when registering a job with one Jolokia request. But may
+ * start to be confusing with more requests in a job.
  */
 export type JobCallback = (...responses: (JolokiaSuccessResponse | JolokiaErrorResponse)[]) => void
 
@@ -846,7 +853,7 @@ export type JobRegistrationConfig = {
 }
 
 /**
- * Definition of regitered Jolokia job - combines requests to send periodically and callbacks to notify when
+ * Definition of registered Jolokia job - combines requests to send periodically and callbacks to notify when
  * the response is received
  */
 export type Job = {
@@ -893,9 +900,9 @@ export type NotificationOptions = {
   filter?: string
   /** Additional configuration used for notifications */
   config?: Record<string, unknown>
-  /** Any value that's returned with the notification for corelation purposes */
+  /** Any value that's returned with the notification for correlation purposes */
   handback?: string
-  /** A callback for notificaiton handling */
+  /** A callback for notification handling */
   callback?: (result: NotificationPullValue) => void
 }
 
@@ -955,7 +962,8 @@ interface JolokiaStatic {
   isResponseSuccess(resp: unknown): resp is JolokiaSuccessResponse
 
   /**
-   * Utility method which checks whether a response is an error response (HTTP perspective)
+   * Utility method which checks whether a response is a Jolokia error response (HTTP perspective). Jolokia error
+   * is still delivered with HTTP response code 200, but the JSON response is a {@link JolokiaErrorResponse} type.
    * @param resp response to check
    * @return true if response is a success
    */
@@ -978,7 +986,7 @@ interface IJolokia {
    *        {@link https://jolokia.org/reference/html/manual/jolokia_protocol.html|Jolokia protocol} representing
    *        the request(s) to send to remote Jolokia agent.
    * @param params parameters used for sending the request which may override default configuration.
-   *        These are not options passed diretly (unchnaged) to `fetch()` call
+   *        These are not options passed directly (unchanged) to `fetch()` call
    * @returns the response promise object resolving to desired value:<ul>
    *          <li>a string response (when `dataType=text`)</li>
    *          <li>an array of Jolokia responses or single JSON response (when `dataType=json`, default)</li>
