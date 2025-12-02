@@ -28,6 +28,7 @@ import {
   JobRegistrationConfig,
   JolokiaConfiguration,
   JolokiaErrorResponse,
+  JolokiaFetchErrorResponse,
   JolokiaRequest,
   JolokiaResponse,
   JolokiaStatic,
@@ -754,6 +755,10 @@ function createJolokiaInvocation(jobs: Map<number, Job>, agentOptions: JolokiaCo
     const errorCbs: ErrorCallback[] = []
     // array of all the requests for all the jobs - fresh copy for single invocation of window.setInterval's function
     const requests: JolokiaRequest[] = []
+    // when receiving a bulk response, Jolokia passes an index for the response array as parameter to
+    // ResponseCallback/ErrorCallback. But our bulk request here is "bigger" - it combines
+    // requests of all the jobs. So we need a mapping
+    const indexMapping: number[] = []
 
     // check all the jobs
     for (const [ jobId, job ] of jobs) {
@@ -762,12 +767,13 @@ function createJolokiaInvocation(jobs: Map<number, Job>, agentOptions: JolokiaCo
       if (job.success) {
         // we have separate job.success and job.error callbacks accepting the response (ok or error),
         // job ID and index of response within an array of requests for single Job
-        const successCb = constructSuccessJobCallback(job, jobId)
-        const errorCb = constructErrorJobCallback(job, jobId)
+        const successCb = constructSuccessJobCallback(job, jobId, indexMapping)
+        const errorCb = constructErrorJobCallback(job, jobId, indexMapping)
         for (let idx = 0; idx < reqsLen; idx++) {
           requests.push(prepareJobRequest(job, idx))
           successCbs.push(successCb)
           errorCbs.push(errorCb)
+          indexMapping.push(idx)
         }
       } else if (job.callback) {
         // single job.callback accepting an array of mixed successful and error Jolokia responses
@@ -780,11 +786,14 @@ function createJolokiaInvocation(jobs: Map<number, Job>, agentOptions: JolokiaCo
           requests.push(prepareJobRequest(job, idx))
           successCbs.push(callbackConfiguration.cb as ResponseCallback)
           errorCbs.push(callbackConfiguration.cb as ErrorCallback)
+          // we won't be using index mapping for a job which uses a single `job.callback`
+          indexMapping.push(-1)
         }
         // last request
         requests.push(prepareJobRequest(job, reqsLen - 1))
         successCbs.push(callbackConfiguration.lcb as ResponseCallback)
         errorCbs.push(callbackConfiguration.lcb as ErrorCallback)
+        indexMapping.push(-1)
       }
     }
 
@@ -820,9 +829,10 @@ function createJolokiaInvocation(jobs: Map<number, Job>, agentOptions: JolokiaCo
  * Prepare a callback for handling successful responses for registered jobs
  * @param job a Job with `success` and `error` callbacks configured
  * @param jobId job identifier to be passed to {@link JobResponseCallback}
+ * @param indexMapping
  * @returns a normal {@link ResponseCallback} to be passed to {@link IJolokia#request}, but which is job-aware
  */
-function constructSuccessJobCallback(job: Job, jobId: number): ResponseCallback {
+function constructSuccessJobCallback(job: Job, jobId: number, indexMapping: number[]): ResponseCallback {
   if (!job.success) {
     throw "Expected 'success' callback configured for the job with ID=" + jobId
   }
@@ -831,7 +841,7 @@ function constructSuccessJobCallback(job: Job, jobId: number): ResponseCallback 
     if (job.onlyIfModified) {
       job.lastModified = response.timestamp
     }
-    job.success!(response, jobId, index)
+    job.success!(response, jobId, indexMapping[index])
   }
 }
 
@@ -839,9 +849,10 @@ function constructSuccessJobCallback(job: Job, jobId: number): ResponseCallback 
  * Prepare a callback for handling error responses for registered jobs
  * @param job a Job with `success` and `error` callbacks configured
  * @param jobId job identifier to be passed to {@link JobErrorCallback}
+ * @param indexMapping
  * @returns a normal {@link ErrorCallback} to be passed to {@link IJolokia#request}, but which is job-aware
  */
-function constructErrorJobCallback(job: Job, jobId: number): ErrorCallback {
+function constructErrorJobCallback(job: Job, jobId: number, indexMapping: number[]): ErrorCallback {
   if (!job.error) {
     throw "Expected 'error' callback configured for the job with ID=" + jobId
   }
@@ -850,7 +861,7 @@ function constructErrorJobCallback(job: Job, jobId: number): ErrorCallback {
       // If we get a "304 - Not Modified" 'error', we do nothing
       return
     } else {
-      job.error!(response, jobId, index)
+      job.error!(response, jobId, indexMapping[index])
     }
   }
 }

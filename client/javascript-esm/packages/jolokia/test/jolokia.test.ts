@@ -546,6 +546,38 @@ describe("Jolokia job registration tests", () => {
     expect(responses).toEqual([ "2.1.0", "2.1.0", "2.1.0" ])
   })
 
+  test("Register two jobs with different number of requests, called 3 times", async () => {
+    expect.assertions(4)
+    const jolokia = new Jolokia({ url: `http://localhost:${port}/jolokia`, fetchInterval: 100 })
+    const responses1: string[] = []
+    const responses2: string[] = []
+    const p1 = new Promise((resolve, _reject) => {
+      const cb1 = (_response: JolokiaSuccessResponse, jid: number, index: number) => {
+        responses1.push(`${jid}-${index}`)
+        if (responses1.length === 3) {
+          resolve(true)
+        }
+      }
+      jolokia.register({ success: cb1, error: () => {} }, { type: "version" })
+    })
+    const p2 = new Promise((resolve, _reject) => {
+      const cb2 = (_response: JolokiaSuccessResponse, jid: number, index: number) => {
+        responses2.push(`${jid}-${index}`)
+        if (responses2.length === 6) {
+          resolve(true)
+        }
+      }
+      jolokia.register({ success: cb2, error: () => {} }, { type: "version" }, { type: "version" })
+    })
+    jolokia.start()
+    await Promise.all([p1, p2])
+    jolokia.stop()
+    expect(responses1.length).toBe(3)
+    expect(responses2.length).toBe(6)
+    expect(responses1).toEqual([ "1-0", "1-0", "1-0" ])
+    expect(responses2).toEqual([ "2-0", "2-1", "2-0", "2-1", "2-0", "2-1" ])
+  })
+
 })
 
 describe("Jolokia notification tests", () => {
