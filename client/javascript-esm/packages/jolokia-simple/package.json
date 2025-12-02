@@ -1,6 +1,6 @@
 {
   "name": "@jolokia.js/simple",
-  "version": "2.4.1",
+  "version": "2.4.2",
   "description": "Jolokia JavaScript ES Simple module",
   "type": "module",
   "license": "Apache-2.0",
@@ -29,7 +29,7 @@
     "test:jolokia-simple": "jest"
   },
   "dependencies": {
-    "jolokia.js": "2.4.1"
+    "jolokia.js": "2.4.2"
   },
   "devDependencies": {
     "@jest/globals": "^30.0.5",
