@@ -431,6 +431,12 @@ export type JolokiaErrorResponse = JolokiaResponse & {
   error_value?: Record<string, unknown>
 }
 
+/**
+ * Jolokia HTTP/`fetch()` error response type to handle lower level errors (including "connection refused" for example).
+ * {@link FetchErrorCallback} has separate parameters, but this type combines all possible error values
+ */
+export type JolokiaFetchErrorResponse = Response | DOMException | TypeError | string | null
+
 // --- Types related to Jolokia response values - specific to Jolokia request types, but can differ
 //     also within single type. For example "notification" requests have different "command" field values with
 //     distinct responses (or no responses at all). "read" type just returns attribute values (or all attributes)
@@ -832,7 +838,7 @@ export type JobErrorCallback = (response: JolokiaErrorResponse, jobId: number, i
  * of one of the 3 types of responses too! This is fine when registering a job with one Jolokia request. But may
  * start to be confusing with more requests in a job.
  */
-export type JobCallback = (...responses: (JolokiaSuccessResponse | JolokiaErrorResponse)[]) => void
+export type JobCallback = (...responses: (JolokiaSuccessResponse | JolokiaErrorResponse | JolokiaFetchErrorResponse)[]) => void
 
 // --- Types related to job management
 
@@ -844,8 +850,10 @@ export type JobRegistrationConfig = {
   callback?: JobCallback
   /** Success callback called for each successful response */
   success?: JobResponseCallback
-  /** Error callback called for each error response */
+  /** Error callback called for each Jolokia error response */
   error?: JobErrorCallback
+  /** Error callback called for single HTTP/`fetch()` error - not specific to any request of the job or even the job itself */
+  fetchError?: FetchErrorCallback
   /** Parameters to be send under `config` key of POST data */
   config?: ProcessingParameters
   /** Flag to handle HTTP 304 (not modified) headers */
@@ -861,6 +869,7 @@ export type Job = {
   callback?: JobCallback
   success?: JobResponseCallback
   error?: JobErrorCallback
+  fetchError?: FetchErrorCallback
   config?: ProcessingParameters
   onlyIfModified?: boolean
   lastModified?: number
@@ -968,6 +977,14 @@ interface JolokiaStatic {
    * @return true if response is a success
    */
   isResponseError(resp: unknown): resp is JolokiaErrorResponse
+
+  /**
+   * Utility method which checks if a response from Jolokia call is the low level error related to HTTP/`fetch()`
+   * calls.
+   * See https://developer.mozilla.org/en-US/docs/Web/API/Window/fetch#exceptions
+   * @param resp
+   */
+  isResponseFetchError(resp: unknown): resp is JolokiaFetchErrorResponse
 }
 
 /**

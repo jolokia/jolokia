@@ -160,30 +160,32 @@ const Jolokia = function (this: IJolokia, config: JolokiaConfiguration | string)
     return performRequest(args)
   }
 
-  this.register = function (callback: JobCallback | JobRegistrationConfig, ...requests: JolokiaRequest[]): number {
+  this.register = function (jobInfo: JobCallback | JobRegistrationConfig, ...requests: JolokiaRequest[]): number {
     if (!requests || requests.length == 0) {
       throw "At a least one request must be provided"
     }
 
     const job: Job = { requests }
 
-    if (typeof callback === "function") {
+    if (typeof jobInfo === "function") {
       // treat it as a callback accepting an array of responses - intermixed successful and error responses for
       // each request
-      job.callback = callback
+      job.callback = jobInfo
     } else {
       // a configuration object for job registration
-      if ("callback" in callback) {
-        job.callback = callback.callback
-      } else if ("success" in callback && "error" in callback) {
-        job.success = callback.success
-        job.error = callback.error
+      if ("callback" in jobInfo) {
+        job.callback = jobInfo.callback
+      } else if ("success" in jobInfo && "error" in jobInfo) {
+        job.success = jobInfo.success
+        job.error = jobInfo.error
+        // could be undefined
+        job.fetchError = jobInfo.fetchError
       } else {
         throw "Either 'callback' or ('success' and 'error') callback must be provided " +
-        "when registering a Jolokia job"
+          "when registering a Jolokia job"
       }
-      job.config = callback.config
-      job.onlyIfModified = callback.onlyIfModified
+      job.config = jobInfo.config
+      job.onlyIfModified = jobInfo.onlyIfModified
     }
 
     return addJob(job)
@@ -376,9 +378,10 @@ const Jolokia = function (this: IJolokia, config: JolokiaConfiguration | string)
       add: function (this: NotificationPullHandler, _jolokia?: IJolokia, handle?: NotificationHandle, opts?: NotificationOptions) {
         // Add a job for periodically fetching the value and calling the callback with the response
         const job: Job = {
-          callback: function (...resp) {
-            if (resp.length > 0 && !Jolokia.isError(resp[0])) {
-              const notifs = resp[0].value as NotificationPullValue
+          callback: function (resp) {
+            // no spread, so not an array
+            if (!Jolokia.isResponseFetchError(resp) && !Jolokia.isError(resp)) {
+              const notifs = resp.value as NotificationPullValue
               if (notifs && notifs.notifications && notifs.notifications.length > 0) {
                 opts?.callback?.(notifs)
               }
@@ -501,6 +504,19 @@ Jolokia.isResponseSuccess = function(resp: unknown): resp is JolokiaSuccessRespo
 Jolokia.isResponseError = function(resp: unknown): resp is JolokiaErrorResponse {
   if (!resp || typeof resp !== 'object') return false
   return 'error_type' in resp && 'error' in resp
+}
+
+Jolokia.isResponseFetchError = function(resp: unknown): resp is JolokiaFetchErrorResponse {
+  if (resp instanceof Response) {
+    return resp.status >= 400
+  }
+  if (resp instanceof DOMException || resp instanceof TypeError) {
+    // see https://developer.mozilla.org/en-US/docs/Web/API/Window/fetch#exceptions
+    return true
+  }
+  // in practice we should treat string values as errors, but it'd be counter intuitive...
+  // return typeof resp === 'string'
+  return false
 }
 
 // ++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -673,9 +689,9 @@ async function performRequest(args: RequestArguments):
           }
           const ct = response.headers.get("content-type")
           if (dataType === "text" || !ct || !(ct.startsWith("text/json") || ct.startsWith("application/json"))) {
-            return await response.text()
+            return response.text()
           }
-          return await response.json()
+          return response.json()
         })
       if (fetchErrorCb) {
         // we handle serious fetch() exception for user's convenience
@@ -749,24 +765,27 @@ function createJolokiaInvocation(jobs: Map<number, Job>, agentOptions: JolokiaCo
   const requestArguments = prepareRequest([], agentOptions, { method: "post" })
 
   return function () {
-    // while we can use single callback for single array of requests, when flattening request arrays of all
-    // the jobs, we need matching arrays of callbacks to cover responses for single job
+    // This function will invoke a single Jolokia bulk request. The requests are taken from all the registered
+    // jobs and matching responses (or Jolokia error responses) will be passed to related callbacks
     const successCbs: ResponseCallback[] = []
     const errorCbs: ErrorCallback[] = []
-    // array of all the requests for all the jobs - fresh copy for single invocation of window.setInterval's function
+    // array of all the requests for all the jobs - fresh copy for a single invocation of window.setInterval's function
     const requests: JolokiaRequest[] = []
     // when receiving a bulk response, Jolokia passes an index for the response array as parameter to
     // ResponseCallback/ErrorCallback. But our bulk request here is "bigger" - it combines
     // requests of all the jobs. So we need a mapping
     const indexMapping: number[] = []
 
+    // this array has only one callback for each job - if specified (the above arrays are for each request of each job)
+    const fetchErrorCbs: FetchErrorCallback[] = []
+
     // check all the jobs
     for (const [ jobId, job ] of jobs) {
       // and we'll prepare callbacks for all the requests within the job
       const reqsLen = job.requests.length
       if (job.success) {
-        // we have separate job.success and job.error callbacks accepting the response (ok or error),
-        // job ID and index of response within an array of requests for single Job
+        // we have separate job.success and job.error and (optionally) job.fetchError callbacks accepting the
+        // response(s) (ok or error) array or a single FetchError
         const successCb = constructSuccessJobCallback(job, jobId, indexMapping)
         const errorCb = constructErrorJobCallback(job, jobId, indexMapping)
         for (let idx = 0; idx < reqsLen; idx++) {
@@ -775,8 +794,13 @@ function createJolokiaInvocation(jobs: Map<number, Job>, agentOptions: JolokiaCo
           errorCbs.push(errorCb)
           indexMapping.push(idx)
         }
+        // however there's only one fetch error callback (optional) for one job (no "index" parameter)
+        if (job.fetchError) {
+          fetchErrorCbs.push(job.fetchError)
+        }
       } else if (job.callback) {
         // single job.callback accepting an array of mixed successful and error Jolokia responses
+        // or a single FetchError object
         // that's why, when a job has such a callback for N requests, N-1 requests should be handled simply
         // by collecting responses (or errors)  and N-th request should be handled by passing the collected
         // array to this callback
@@ -794,6 +818,14 @@ function createJolokiaInvocation(jobs: Map<number, Job>, agentOptions: JolokiaCo
         successCbs.push(callbackConfiguration.lcb as ResponseCallback)
         errorCbs.push(callbackConfiguration.lcb as ErrorCallback)
         indexMapping.push(-1)
+
+        // same callback passed as fetch error handler (should expect the error object instead of an array
+        // of success/error Jolokia responses)
+        const cb: FetchErrorCallback = (response, error) => {
+          // pass first non empty argument
+          job.callback!(response ?? error)
+        }
+        fetchErrorCbs.push(cb)
       }
     }
 
@@ -809,10 +841,17 @@ function createJolokiaInvocation(jobs: Map<number, Job>, agentOptions: JolokiaCo
         errorCbs[index](response, index)
       }
       requestArguments.fetchErrorCb = function (response: Response | null, error: DOMException | TypeError | string | null) {
-        if (response) {
-          console.error("Problem executing registered jobs: ", response.status, response.statusText)
+        if (fetchErrorCbs.length > 0) {
+          fetchErrorCbs.forEach(cb => {
+            cb(response, error)
+          })
         } else {
-          console.error("Problem executing registered jobs: ", error)
+          // no job contains FetchError callback - we need some error handling though
+          if (response) {
+            console.error("Problem executing registered jobs: ", response.status, response.statusText)
+          } else {
+            console.error("Problem executing registered jobs: ", error)
+          }
         }
       }
 
