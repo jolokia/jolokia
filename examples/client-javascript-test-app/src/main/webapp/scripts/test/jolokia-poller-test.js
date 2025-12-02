@@ -41,8 +41,8 @@ $(document).ready(function () {
         setTimeout(function () {
             j4p.stop();
             assert.ok(!j4p.isRunning(), "Poller should be stopped");
-            assert.equal(counter1, 3, "Request1 should have been called 3 times");
-            assert.equal(counter2, 3, "Request2 should have been called 3 times");
+            assert.equal(counter1, 4, "Request1 should have been called 4 times (including the initial call)");
+            assert.equal(counter2, 4, "Request2 should have been called 4 times (including the initial call)");
             done();
         }, 280);
     });
@@ -60,7 +60,7 @@ $(document).ready(function () {
         setTimeout(function () {
             j4p.stop();
             setTimeout(function () {
-                assert.equal(counter, 4, "Request should have been called 4 times")
+                assert.equal(counter, 5, "Request should have been called 5 times")
                 assert.ok(!j4p.isRunning(), "Poller should be stopped");
                 done();
             }, 300);
@@ -81,22 +81,22 @@ $(document).ready(function () {
         j4p.start(300);
         assert.equal(j4p.jobs().length, 2, "2 jobs registered");
         setTimeout(function () {
-            assert.equal(counter1, 3, "Req1 should be called 2 times");
-            assert.equal(counter2, 3, "Req2 should be called 2 times");
+            assert.equal(counter1, 4, "Req1 should be called 2 times");
+            assert.equal(counter2, 4, "Req2 should be called 2 times");
             j4p.unregister(id1);
             assert.equal(j4p.jobs().length, 1, "1 job remaining");
             setTimeout(function () {
-                assert.equal(counter1, 3, "Req1 stays at 2 times since it was unregistered");
-                assert.equal(counter2, 5, "Req2 should continue to be requested, now for 4 times");
+                assert.equal(counter1, 4, "Req1 stays at 2 times since it was unregistered");
+                assert.equal(counter2, 6, "Req2 should continue to be requested, now for 4 times");
                 j4p.unregister(id2);
                 assert.equal(j4p.jobs().length, 0, "No job remaining");
                 // Handles should stay stable, so the previous unregister of id1 should not change
-                // the meaining of id2 (see http://jolokia.963608.n3.nabble.com/Possible-bug-in-the-scheduler-tp4023893.html
+                // the meaning of id2 (see http://jolokia.963608.n3.nabble.com/Possible-bug-in-the-scheduler-tp4023893.html
                 // for details)
                 setTimeout(function () {
                     j4p.stop();
-                    assert.equal(counter1, 3, "Req1 stays at 3 times since it was unregistered");
-                    assert.equal(counter2, 5, "Req2 stays at 4 times since it was unregistered");
+                    assert.equal(counter1, 4, "Req1 stays at 4 times since it was unregistered");
+                    assert.equal(counter2, 6, "Req2 stays at 6 times since it was unregistered");
                     done();
                 }, 300);
             }, 650);
@@ -123,7 +123,7 @@ $(document).ready(function () {
         j4p.start(200);
         setTimeout(function () {
             j4p.stop();
-            assert.equal(counter, 3, "Req should be called 3 times");
+            assert.equal(counter, 4, "Req should be called 4 times");
             done();
         }, 500);
     })
@@ -173,7 +173,7 @@ $(document).ready(function () {
         setTimeout(function () {
             j4p.stop();
             assert.equal(counter[3], 1);
-            assert.equal(counter[1], 1);
+            assert.equal(counter[1], 2);
             done();
         }, 500);
     });
@@ -222,8 +222,8 @@ $(document).ready(function () {
         j4p.start(200);
         setTimeout(function () {
             j4p.stop();
-            assert.equal(counterS, 5, "Req should be called 4 times successfully");
-            assert.equal(counterE, 3, "One error request, twice");
+            assert.equal(counterS, 7, "Req should be called 7 times successfully");
+            assert.equal(counterE, 4, "One error request, twice");
             done();
         }, 500);
     });
