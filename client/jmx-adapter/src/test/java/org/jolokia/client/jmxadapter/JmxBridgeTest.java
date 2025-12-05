@@ -12,6 +12,7 @@ import java.lang.management.RuntimeMXBean;
 import java.lang.management.ThreadMXBean;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.ConnectException;
 import java.rmi.UnmarshalException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -884,6 +885,22 @@ public class JmxBridgeTest {
         Assert.assertEquals(
             connector.getMBeanServerConnection(),
             this.adapter);
+    }
+
+    @Test(expectedExceptions = ConnectException.class)
+    public void testConnectorIPv6() throws IOException {
+        JMXServiceURL serviceURL = new JMXServiceURL("jolokia", "[::1]", agentPort, "/jolokia/");
+        final Map<String, Object> environment = Collections.emptyMap();
+        JMXConnector connector = new JolokiaJmxConnectionProvider().newJMXConnector(
+            serviceURL,
+            environment);
+        final List<JMXConnectionNotification> receivedNotifications = new LinkedList<>();
+        final Object handback = "foobar";
+        connector.addConnectionNotificationListener((notification, hb) -> {
+            Assert.assertTrue(notification instanceof JMXConnectionNotification);
+            receivedNotifications.add((JMXConnectionNotification) notification);
+        }, null, handback);
+        connector.connect();
     }
 
     @Test
