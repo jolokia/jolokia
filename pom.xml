@@ -1211,7 +1211,7 @@
     <version.com.fasterxml.jackson>2.20.1</version.com.fasterxml.jackson>
     <version.jakarta.annotation-api>3.0.0</version.jakarta.annotation-api>
     <version.jakarta.authentication-api>3.1.0</version.jakarta.authentication-api>
-    <version.net.bytebuddy>1.18.1</version.net.bytebuddy>
+    <version.net.bytebuddy>1.18.2</version.net.bytebuddy>
     <version.org.apache.felix.configadmin>1.9.26</version.org.apache.felix.configadmin>
     <version.org.apache.felix.framework>7.0.5</version.org.apache.felix.framework>
     <version.org.apache.felix.http.jetty12>1.0.36</version.org.apache.felix.http.jetty12>
