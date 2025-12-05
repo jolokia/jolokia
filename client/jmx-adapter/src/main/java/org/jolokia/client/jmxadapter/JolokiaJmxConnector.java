@@ -47,6 +47,14 @@ public class JolokiaJmxConnector implements JMXConnector {
     }
   }
 
+  private String addBracketsIfIPv6(String host) {
+    if (host.contains(":")) {
+      return "[" + host + "]";
+    } else {
+      return host;
+    }
+  }
+
   @Override
   @SuppressWarnings({"raw"})
   public void connect(Map<String, ?> env) throws IOException {
@@ -56,7 +64,7 @@ public class JolokiaJmxConnector implements JMXConnector {
     Map<String, Object> mergedEnv = mergedEnvironment(env);
     final String internalProtocol = getJolokiaProtocol(mergedEnv);
     final JolokiaClientBuilder clientBuilder = new JolokiaClientBuilder().url(
-        internalProtocol + "://" + this.serviceUrl.getHost() + ":" + this.serviceUrl.getPort()
+        internalProtocol + "://" + addBracketsIfIPv6(this.serviceUrl.getHost()) + ":" + this.serviceUrl.getPort()
             + prefixWithSlashIfNone(this.serviceUrl.getURLPath()));
     if (mergedEnv.containsKey(CREDENTIALS)) {
       String[] credentials = (String[]) mergedEnv.get(CREDENTIALS);
