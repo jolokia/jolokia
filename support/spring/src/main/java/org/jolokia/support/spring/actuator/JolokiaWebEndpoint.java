@@ -18,7 +18,6 @@ package org.jolokia.support.spring.actuator;
 import java.util.Map;
 
 import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
-import org.springframework.boot.actuate.autoconfigure.web.server.ManagementServerProperties;
 import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
 import org.springframework.boot.actuate.endpoint.web.annotation.WebEndpoint;
 import org.springframework.boot.autoconfigure.web.servlet.DispatcherServletPath;
@@ -31,12 +30,10 @@ import org.springframework.web.servlet.ModelAndView;
 @WebEndpoint(id = "jolokia")
 public class JolokiaWebEndpoint {
 
-    private final ManagementServerProperties managementServerProperties;
     private final WebEndpointProperties webEndpointProperties;
     private final DispatcherServletPath dispatcherServletPath;
 
-    public JolokiaWebEndpoint(ManagementServerProperties managementServerProperties, WebEndpointProperties webEndpointProperties, DispatcherServletPath dispatcherServletPath) {
-        this.managementServerProperties = managementServerProperties;
+    public JolokiaWebEndpoint(WebEndpointProperties webEndpointProperties, DispatcherServletPath dispatcherServletPath) {
         this.webEndpointProperties = webEndpointProperties;
         this.dispatcherServletPath = dispatcherServletPath;
     }
