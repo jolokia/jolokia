@@ -63,21 +63,25 @@
       <groupId>org.osgi</groupId>
       <artifactId>osgi.core</artifactId>
       <scope>provided</scope>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.service.servlet</artifactId>
       <scope>provided</scope>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.service.cm</artifactId>
       <scope>provided</scope>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.service.log</artifactId>
       <scope>provided</scope>
+      <optional>true</optional>
     </dependency>
 
     <!-- Other dependencies -->
