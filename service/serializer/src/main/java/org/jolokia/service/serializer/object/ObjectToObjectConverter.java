@@ -457,8 +457,7 @@ public class ObjectToObjectConverter implements Converter<String> {
         if (nClass == pValue.getClass()) {
             return true;
         }
-        if (pValue instanceof BigInteger) {
-            BigInteger bi = (BigInteger) pValue;
+        if (pValue instanceof BigInteger bi) {
             return bi.bitLength() <= bits;
         }
         // range check
@@ -612,8 +611,8 @@ public class ObjectToObjectConverter implements Converter<String> {
             if (pValue.getClass() == Float.class) {
                 return true;
             }
-            if (pValue instanceof BigDecimal) {
-                return ((BigDecimal) pValue).compareTo(MAX_FLOAT) >= 0 && ((BigDecimal) pValue).compareTo(MIN_FLOAT) >= 0;
+            if (pValue instanceof BigDecimal bi) {
+                return bi.compareTo(MAX_FLOAT) >= 0 && bi.compareTo(MIN_FLOAT) >= 0;
             } else if (pValue instanceof Double) {
                 double v = (double) pValue;
                 return v >= Float.MIN_VALUE && v <= Float.MAX_VALUE;
@@ -641,8 +640,8 @@ public class ObjectToObjectConverter implements Converter<String> {
             if (pValue.getClass() == Double.class) {
                 return true;
             }
-            if (pValue instanceof BigDecimal) {
-                return ((BigDecimal) pValue).compareTo(MAX_DOUBLE) <= 0 && ((BigDecimal) pValue).compareTo(MIN_DOUBLE) >= 0;
+            if (pValue instanceof BigDecimal bi) {
+                return bi.compareTo(MAX_DOUBLE) <= 0 && bi.compareTo(MIN_DOUBLE) >= 0;
             } else if (pValue instanceof Float) {
                 return true;
             }
@@ -794,14 +793,22 @@ public class ObjectToObjectConverter implements Converter<String> {
         @Override
         public Object parse(Object pValue) {
             Number n = (Number) pValue;
-            if (n instanceof Float) {
+            if (n instanceof Float floatNumber) {
+                // #934 we omit NaN/infinity instead of throwing NumberFormatException
+                if (!Float.isFinite(floatNumber)) {
+                    return null;
+                }
                 // BigDecimal(float) gives different (worse!) result than BigDecimal(float.toString())...
-//                return new BigDecimal(n.floatValue());
-                return new BigDecimal(Float.toString((Float) n));
+//                return new BigDecimal(floatNumber);
+                return new BigDecimal(Float.toString(floatNumber));
             }
-            if (n instanceof Double) {
-//                return new BigDecimal(n.doubleValue());
-                return new BigDecimal(Double.toString((Double) n));
+            if (n instanceof Double doubleNumber) {
+                // #934 we omit NaN/infinity instead of throwing NumberFormatException
+                if (!Double.isFinite(doubleNumber)) {
+                    return null;
+                }
+//                return new BigDecimal(doubleNumber);
+                return new BigDecimal(Double.toString(doubleNumber));
             }
             return new BigDecimal(n.toString());
         }
@@ -950,7 +957,7 @@ public class ObjectToObjectConverter implements Converter<String> {
                     Long v = Long.parseLong(pValue);
                     return dateFormatConfiguration.unixTimeToTemporal(temporalType, v);
                 } else {
-                    // still, user (or test case) may have sent long value despite the configuration
+                    // still, user (or test case) may have sent long value despite the configuration,
                     // but we have to assume it's millis
                     try {
                         return dateFormatConfiguration.unixTimeInNanosToTemporal(temporalType, Long.parseLong(pValue));
@@ -965,16 +972,16 @@ public class ObjectToObjectConverter implements Converter<String> {
         }
 
         public Object extract(Class<?> temporalType, Object pValue) {
-            if (pValue instanceof Number) {
+            if (pValue instanceof Number numberValue) {
                 if (dateFormatConfiguration.usesUnixTime()) {
-                    return dateFormatConfiguration.unixTimeToTemporal(temporalType, ((Number) pValue).longValue());
+                    return dateFormatConfiguration.unixTimeToTemporal(temporalType, numberValue.longValue());
                 } else {
                     // despite the configuration, user has sent Long value, so let's convert from nanos
                     // which is the default (for now) behavior for jolokia-client-java
-                    return dateFormatConfiguration.unixTimeInNanosToTemporal(temporalType, ((Number) pValue).longValue());
+                    return dateFormatConfiguration.unixTimeInNanosToTemporal(temporalType, numberValue.longValue());
                 }
-            } else if (pValue instanceof String) {
-                return extract(temporalType, (String) pValue);
+            } else if (pValue instanceof String stringValue) {
+                return extract(temporalType, stringValue);
             }
 
             throw new IllegalArgumentException("Cannot handle Temporal of class \"" + temporalType + "\" for value " + pValue);
