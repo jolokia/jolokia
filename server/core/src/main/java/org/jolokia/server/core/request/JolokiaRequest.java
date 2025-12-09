@@ -19,7 +19,7 @@ package org.jolokia.server.core.request;
 import java.util.*;
 
 import org.jolokia.server.core.config.ConfigKey;
-import org.jolokia.server.core.service.serializer.ValueFaultHandler;
+import org.jolokia.core.service.serializer.ValueFaultHandler;
 import org.jolokia.server.core.util.*;
 import org.jolokia.json.JSONObject;
 
@@ -84,7 +84,7 @@ public abstract class JolokiaRequest {
     protected JolokiaRequest(Map<String, ?> pMap, ProcessingParameters pProcessingParams, boolean pExclusive) {
         this(RequestType.getTypeByName((String) pMap.get("type")),
              HttpMethod.POST,
-             EscapeUtil.parsePath((String) pMap.get("path")),
+             org.jolokia.core.util.EscapeUtil.parsePath((String) pMap.get("path")),
              pProcessingParams,
              pExclusive);
 
@@ -266,7 +266,7 @@ public abstract class JolokiaRequest {
      * @return path as string or null if no path is given.
      */
     public String getPath() {
-        return EscapeUtil.combineToPath(pathParts);
+        return org.jolokia.core.util.EscapeUtil.combineToPath(pathParts);
     }
 
     /**
@@ -306,7 +306,7 @@ public abstract class JolokiaRequest {
 
     private void verifyPath(List<String> pPathParts) {
         if (pPathParts != null && !pPathParts.isEmpty() && pPathParts.get(pPathParts.size() - 1) == null) {
-            String path = EscapeUtil.combineToPath(pPathParts);
+            String path = org.jolokia.core.util.EscapeUtil.combineToPath(pPathParts);
             throw new IllegalArgumentException("Path '" + path + "' must not end with a wildcard");
         }
     }

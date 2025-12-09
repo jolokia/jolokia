@@ -60,7 +60,7 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
     private final Configuration configuration;
 
     // Logger to use
-    private final LogHandler logHandler;
+    private final org.jolokia.core.api.LogHandler logHandler;
 
     // Restrictor to use
     private final Restrictor restrictor;
@@ -116,7 +116,7 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
      *                        precedence than the classpath based lookup. Might be null.
      */
     public JolokiaServiceManagerImpl(Configuration pConfig,
-                                     LogHandler pLogHandler,
+                                     org.jolokia.core.api.LogHandler pLogHandler,
                                      Restrictor pRestrictor,
                                      ServerDetectorLookup pDetectorLookup) {
         configuration = pConfig;
@@ -155,7 +155,7 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
      *
      * @return loghandler
      */
-    public LogHandler getLogHandler() {
+    public org.jolokia.core.api.LogHandler getLogHandler() {
         return logHandler;
     }
 

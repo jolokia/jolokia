@@ -12,7 +12,7 @@ import javax.net.ssl.*;
 import com.sun.net.httpserver.Authenticator;
 import com.sun.net.httpserver.*;
 import org.jolokia.server.core.http.security.AuthorizationHeaderParser;
-import org.jolokia.server.core.util.EscapeUtil;
+import org.jolokia.core.util.EscapeUtil;
 import org.jolokia.json.JSONArray;
 import org.jolokia.json.JSONObject;
 import org.jolokia.json.parser.JSONParser;

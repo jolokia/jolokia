@@ -31,7 +31,7 @@ import javax.management.MBeanServer;
 
 import org.jolokia.server.core.detector.DefaultServerHandle;
 import org.jolokia.server.core.service.api.AbstractJolokiaService;
-import org.jolokia.server.core.service.api.LogHandler;
+import org.jolokia.core.api.LogHandler;
 import org.jolokia.server.core.service.api.ServerHandle;
 import org.jolokia.server.core.service.container.ContainerLocator;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;

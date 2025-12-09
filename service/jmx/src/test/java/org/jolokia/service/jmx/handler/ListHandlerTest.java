@@ -385,6 +385,7 @@ public class ListHandlerTest extends BaseHandlerTest {
 
 
     @Test
+    @SuppressWarnings({"unchecked"})
     public void emptyMaps() throws Exception {
         JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST)
                 .pathParts("java.lang", "type=Runtime", OPERATIONS.getKey())
@@ -396,12 +397,12 @@ public class ListHandlerTest extends BaseHandlerTest {
         request = new JolokiaRequestBuilder(RequestType.LIST)
                 .pathParts("java.lang", "type=Runtime", NOTIFICATIONS.getKey())
                 .build();
-        //noinspection unchecked
         res = (Map<String, ?>) handler.handleAllServerRequest(executor, request, null);
         assertEquals(res.size(),0);
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void singleMBeanMultipleServers() throws MalformedObjectNameException, InstanceNotFoundException, IOException, AttributeNotFoundException, ReflectionException, MBeanException, IntrospectionException, NotChangedException, EmptyResponseException {
         JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST)
                 .pathParts("java.lang", "type=Memory", ATTRIBUTES.getKey())
@@ -413,9 +414,7 @@ public class ListHandlerTest extends BaseHandlerTest {
 
         expect(dummyConn.getMBeanInfo(new ObjectName("java.lang:type=Memory"))).andThrow(new InstanceNotFoundException());
         replay(dummyConn);
-        @SuppressWarnings("unchecked")
         Map<String, ?> res = (Map<String, ?>) handler.handleAllServerRequest(executor, request, null);
-        //noinspection unchecked
         assertEquals(((Map<String, ?>) res.get("Verbose")).get(TYPE.getKey()),"boolean");
     }
 

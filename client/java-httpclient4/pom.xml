@@ -165,15 +165,15 @@
               javax.management,
               javax.net.ssl,
               <!-- jolokia-json -->
-              org.jolokia.json;version="[2.2,3)",
-              org.jolokia.json.parser;version="[2.2,3)"
+              org.jolokia.json;version="[2.5,3)",
+              org.jolokia.json.parser;version="[2.5,3)",
               <!-- jolokia-client -->
-              org.jolokia.client;version="[2.4,3)",
-              org.jolokia.client.exception;version="[2.4,3)",
-              org.jolokia.client.jdkclient;version="[2.4,3)",
-              org.jolokia.client.request;version="[2.4,3)",
-              org.jolokia.client.response;version="[2.4,3)",
-              org.jolokia.client.spi;version="[2.4,3)",
+              org.jolokia.client;version="[2.5,3)",
+              org.jolokia.client.exception;version="[2.5,3)",
+              org.jolokia.client.jdkclient;version="[2.5,3)",
+              org.jolokia.client.request;version="[2.5,3)",
+              org.jolokia.client.response;version="[2.5,3)",
+              org.jolokia.client.spi;version="[2.5,3)",
               <!-- httpcore -->
               org.apache.http;version="[4.4,5)",
               org.apache.http.config;version="[4.4,5)",

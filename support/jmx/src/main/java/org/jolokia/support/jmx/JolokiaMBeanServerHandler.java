@@ -125,7 +125,7 @@ class JolokiaMBeanServerHandler implements InvocationHandler {
             try {
                 field = findField(clazz, "managedResource");
                 if (field != null) {
-                    isAccessible = field.isAccessible();
+                    isAccessible = field.canAccess(object);
                     field.setAccessible(true);
                     Object managedResource = field.get(object);
                     anno = managedResource.getClass().getAnnotation(JsonMBean.class);
@@ -170,16 +170,16 @@ class JolokiaMBeanServerHandler implements InvocationHandler {
     }
 
     // Extract convert options from annotation
-    private SerializeOptions getJsonConverterOptions(JsonMBean pAnno) {
+    private org.jolokia.core.service.serializer.SerializeOptions getJsonConverterOptions(JsonMBean pAnno) {
         // Extract conversion options from the annotation
         if (pAnno == null) {
-            return SerializeOptions.DEFAULT;
+            return org.jolokia.core.service.serializer.SerializeOptions.DEFAULT;
         } else {
-            ValueFaultHandler faultHandler =
+            org.jolokia.core.service.serializer.ValueFaultHandler faultHandler =
                     pAnno.faultHandling() == JsonMBean.FaultHandler.IGNORE_ERRORS ?
-                            ValueFaultHandler.IGNORING_VALUE_FAULT_HANDLER :
-                            ValueFaultHandler.THROWING_VALUE_FAULT_HANDLER;
-            return new SerializeOptions.Builder()
+                            org.jolokia.core.service.serializer.ValueFaultHandler.IGNORING_VALUE_FAULT_HANDLER :
+                            org.jolokia.core.service.serializer.ValueFaultHandler.THROWING_VALUE_FAULT_HANDLER;
+            return new org.jolokia.core.service.serializer.SerializeOptions.Builder()
                     .maxCollectionSize(pAnno.maxCollectionSize())
                     .maxDepth(pAnno.maxDepth())
                     .maxObjects(pAnno.maxObjects())

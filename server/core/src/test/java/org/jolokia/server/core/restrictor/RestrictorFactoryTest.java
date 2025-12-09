@@ -2,7 +2,7 @@ package org.jolokia.server.core.restrictor;
 
 import org.jolokia.server.core.config.*;
 import org.jolokia.server.core.restrictor.policy.PolicyRestrictor;
-import org.jolokia.server.core.service.api.LogHandler;
+import org.jolokia.core.api.LogHandler;
 import org.jolokia.server.core.service.api.Restrictor;
 import org.testng.annotations.Test;
 

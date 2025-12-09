@@ -5,6 +5,8 @@ import java.util.SortedSet;
 
 import javax.management.*;
 
+import org.jolokia.core.api.LogHandler;
+import org.jolokia.core.config.CoreConfiguration;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 
@@ -17,7 +19,7 @@ import org.jolokia.server.core.util.jmx.MBeanServerAccess;
  * @author roland
  * @since 09.04.13
  */
-public interface JolokiaContext extends LogHandler, Restrictor {
+public interface JolokiaContext extends LogHandler, Restrictor, CoreConfiguration {
 
     /**
      * Get Jolokia services of a certain kind. The returned list might be empty,

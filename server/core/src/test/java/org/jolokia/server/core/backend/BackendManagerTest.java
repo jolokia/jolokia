@@ -24,7 +24,7 @@ import javax.management.*;
 import org.jolokia.server.core.config.*;
 import org.jolokia.server.core.request.*;
 import org.jolokia.server.core.service.api.JolokiaContext;
-import org.jolokia.server.core.service.api.LogHandler;
+import org.jolokia.core.api.LogHandler;
 import org.jolokia.server.core.service.impl.StdoutLogHandler;
 import org.jolokia.server.core.service.request.AbstractRequestHandler;
 import org.jolokia.server.core.service.serializer.Serializer;

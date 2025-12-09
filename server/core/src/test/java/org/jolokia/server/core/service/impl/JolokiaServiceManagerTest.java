@@ -26,7 +26,7 @@ import org.jolokia.server.core.service.api.JolokiaService;
 import org.jolokia.server.core.service.api.JolokiaServiceManager;
 import org.jolokia.server.core.service.request.RequestHandler;
 import org.jolokia.server.core.util.DebugStore;
-import org.jolokia.server.core.util.LocalServiceFactory;
+import org.jolokia.core.util.LocalServiceFactory;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;

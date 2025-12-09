@@ -22,7 +22,7 @@ import javax.management.*;
 import javax.management.openmbean.*;
 
 import org.jolokia.json.JSONStructure;
-import org.jolokia.server.core.service.serializer.SerializeOptions;
+import org.jolokia.core.service.serializer.SerializeOptions;
 import org.jolokia.server.core.service.serializer.Serializer;
 
 /**

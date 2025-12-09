@@ -7,8 +7,9 @@ import java.util.TreeSet;
 
 import org.jolokia.server.core.detector.ServerDetector;
 import org.jolokia.server.core.detector.ServerDetectorLookup;
-import org.jolokia.server.core.service.api.LogHandler;
-import org.jolokia.server.core.util.LocalServiceFactory;
+import org.jolokia.core.api.LogHandler;
+import org.jolokia.server.core.util.JolokiaServicesValidator;
+import org.jolokia.core.util.LocalServiceFactory;
 
 /**
  * Classpath scanner for detectors
@@ -24,7 +25,7 @@ public class ClasspathServerDetectorLookup implements ServerDetectorLookup {
             "META-INF/jolokia/detectors");
 
         services.add(ServerDetector.FALLBACK);
-        if (!LocalServiceFactory.validateServices(services, logHandler)) {
+        if (!JolokiaServicesValidator.validateServices(services, logHandler)) {
             return new TreeSet<>(Collections.singleton(ServerDetector.FALLBACK));
         }
 

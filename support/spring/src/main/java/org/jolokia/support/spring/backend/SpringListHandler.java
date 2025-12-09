@@ -11,7 +11,7 @@ import org.jolokia.json.JSONArray;
 import org.jolokia.json.JSONObject;
 import org.jolokia.server.core.request.JolokiaListRequest;
 import org.jolokia.server.core.service.api.JolokiaContext;
-import org.jolokia.server.core.util.ClassUtil;
+import org.jolokia.core.util.ClassUtil;
 import org.jolokia.server.core.util.JsonUtil;
 import org.jolokia.server.core.util.RequestType;
 import org.jolokia.service.jmx.handler.list.DataKeys;

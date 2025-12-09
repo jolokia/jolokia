@@ -42,6 +42,7 @@ public interface HistoryMBean {
      * @throws MalformedObjectNameException if the given name is not proper object name
      * @deprecated use {@see #setHistoryLimitForAttribute} instead
      */
+    @Deprecated
     void setHistoryEntriesForAttribute(String pMBean,String pAttribute,String pPath,String pTarget,int pMaxEntries) throws MalformedObjectNameException;
 
     /**
@@ -72,6 +73,7 @@ public interface HistoryMBean {
      * @param pMaxEntries max last entries to remember, if 0 history tracking is switched off.
      * @deprecated use {@link #setHistoryLimitForOperation} instead
      */
+    @Deprecated
     void setHistoryEntriesForOperation(String pMBean,String pOperation,String pTarget,int pMaxEntries)
             throws MalformedObjectNameException;
 

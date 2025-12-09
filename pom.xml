@@ -32,6 +32,7 @@
     <module>bom</module>
 
     <module>json</module>
+    <module>core</module>
 
     <module>tools/siteskin</module>
     <module>tools/test-util</module>
@@ -153,6 +154,7 @@
             <instructions>
               <Bundle-Version>${project.version}</Bundle-Version>
               <Bundle-Name>${project.description}</Bundle-Name>
+              <_noimportjava>true</_noimportjava>
             </instructions>
           </configuration>
         </plugin>
@@ -668,6 +670,11 @@
       <dependency>
         <groupId>org.jolokia</groupId>
         <artifactId>jolokia-json</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-core</artifactId>
         <version>${project.version}</version>
       </dependency>
 
@@ -1252,6 +1259,8 @@
     <!-- Spring Framework and Spring Boot should be aligned -->
     <version.org.springframework>6.2.14</version.org.springframework>
     <version.org.springframework.boot>3.5.8</version.org.springframework.boot>
+<!--    <version.org.springframework>7.0.1</version.org.springframework>-->
+<!--    <version.org.springframework.boot>4.0.0</version.org.springframework.boot>-->
   </properties>
 
   <profiles>

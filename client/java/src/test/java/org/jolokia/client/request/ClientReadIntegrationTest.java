@@ -301,6 +301,7 @@ public class ClientReadIntegrationTest extends AbstractClientIntegrationTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void mxBeanReadTest() throws MalformedObjectNameException, JolokiaException {
         for (JolokiaReadRequest request  : readRequests("jolokia.it:type=mxbean","ComplexTestData")) {
             JolokiaReadResponse response = jolokiaClient.execute(request);
@@ -323,7 +324,6 @@ public class ClientReadIntegrationTest extends AbstractClientIntegrationTest {
             assertTrue(array.contains("toy"));
             assertTrue(array.contains("story"));
 
-            //noinspection unchecked
             List<Boolean> list = (List<Boolean>) value.get("list");
             assertEquals(list.size(),3);
             assertTrue(list.get(0));

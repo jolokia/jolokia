@@ -8,11 +8,10 @@ import java.net.URL;
 
 import org.jolokia.server.core.config.Configuration;
 import org.jolokia.server.core.restrictor.policy.PolicyRestrictor;
-import org.jolokia.server.core.service.api.LogHandler;
+import org.jolokia.core.api.LogHandler;
 import org.jolokia.server.core.service.api.Restrictor;
 import org.jolokia.server.core.config.ConfigKey;
-import org.jolokia.server.core.util.ClassUtil;
-import org.jolokia.server.core.util.NetworkUtil;
+import org.jolokia.core.util.ClassUtil;
 
 /*
  * Copyright 2009-2013 Roland Huss

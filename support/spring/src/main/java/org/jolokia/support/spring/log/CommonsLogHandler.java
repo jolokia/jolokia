@@ -2,7 +2,7 @@ package org.jolokia.support.spring.log;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jolokia.server.core.service.api.LogHandler;
+import org.jolokia.core.api.LogHandler;
 
 /**
  * Log Handler using Commons Logging (which is a dependency of Spring anyways).

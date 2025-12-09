@@ -6,7 +6,7 @@ import java.util.*;
 import javax.management.*;
 
 import org.jolokia.server.core.request.JolokiaReadRequest;
-import org.jolokia.server.core.service.serializer.ValueFaultHandler;
+import org.jolokia.core.service.serializer.ValueFaultHandler;
 import org.jolokia.server.core.util.RequestType;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 
@@ -207,7 +207,7 @@ public class ReadHandler extends AbstractCommandHandler<JolokiaReadRequest> {
                 // (for example Artemis MBean interceptor throws java.lang.SecurityException)
                 // in that case we fail at getting all the attributes, so we switch to checking each attribute
                 // at a time to collect individual errors using
-                // org.jolokia.server.core.service.serializer.ValueFaultHandler.handleException()
+                // org.jolokia.core.service.serializer.ValueFaultHandler.handleException()
             }
         }
 

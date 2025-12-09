@@ -48,7 +48,7 @@ import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularType;
 
-import org.jolokia.server.core.util.ClassUtil;
+import org.jolokia.core.util.ClassUtil;
 import org.jolokia.service.serializer.JolokiaSerializer;
 import org.jolokia.json.JSONArray;
 import org.jolokia.json.JSONObject;

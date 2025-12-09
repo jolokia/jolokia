@@ -48,6 +48,10 @@
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-json</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-core</artifactId>
+    </dependency>
 
     <!-- JakartaEE dependencies -->
 
@@ -199,8 +203,13 @@
               jakarta.servlet;version="[5.0,7.0)",
               jakarta.servlet.http;version="[5.0,7.0)",
               <!-- jolokia-json -->
-              org.jolokia.json;version="[2.2,3)",
-              org.jolokia.json.parser;version="[2.2,3)",
+              org.jolokia.json;version="[2.5,3)",
+              org.jolokia.json.parser;version="[2.5,3)",
+              <!-- jolokia-core -->
+              org.jolokia.core.api;version="[2.5,3)",
+              org.jolokia.core.config;version="[2.5,3)",
+              org.jolokia.core.service.serializer;version="[2.5,3)",
+              org.jolokia.core.util;version="[2.5,3)",
               <!-- OSGi Core -->
               org.osgi.framework;version="[1.8,2)",
               org.osgi.util.tracker;version="[1.5,2)",

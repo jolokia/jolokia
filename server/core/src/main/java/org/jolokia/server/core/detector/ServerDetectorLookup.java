@@ -2,7 +2,7 @@ package org.jolokia.server.core.detector;
 
 import java.util.SortedSet;
 
-import org.jolokia.server.core.service.api.LogHandler;
+import org.jolokia.core.api.LogHandler;
 
 /**
  * Interface for a lookup mechanism to find server detector

@@ -1,0 +1,13 @@
+= Jolokia Converter library
+
+This module contains code common to server and client Jolokia modules.
+Before this module, sophisticated conversion and serialization was part of `jolokia-service-serializer` module used by Agent modules. +
+Jolokia client was using simplified conversion.
+
+This module contains:
+
+* Object to Object converter
+* Object to `OpenType` (simple, array, composite, tabular) converter
+* Object to JSON converter
+
+All these foundation converters are used by Jolokia client and `JolokiaSerializer` service now.

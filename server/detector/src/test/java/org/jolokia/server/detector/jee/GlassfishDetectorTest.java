@@ -21,7 +21,7 @@ import java.util.*;
 import javax.management.*;
 
 import org.jolokia.server.core.service.api.ServerHandle;
-import org.jolokia.server.core.service.api.LogHandler;
+import org.jolokia.core.api.LogHandler;
 import org.jolokia.server.core.service.request.RequestInterceptor;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 import org.testng.annotations.Test;

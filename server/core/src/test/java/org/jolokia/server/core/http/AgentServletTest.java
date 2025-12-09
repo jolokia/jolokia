@@ -200,7 +200,7 @@ public class AgentServletTest {
     }
 
 
-    public static class CustomLogHandler implements LogHandler {
+    public static class CustomLogHandler implements org.jolokia.core.api.LogHandler {
 
         private static int infoCount = 0;
 

@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.jolokia.server.core.config.SystemPropertyMode;
-import org.jolokia.server.core.util.EscapeUtil;
+import org.jolokia.core.util.EscapeUtil;
 
 /**
  * Holds all Http-Server and Jolokia configuration.

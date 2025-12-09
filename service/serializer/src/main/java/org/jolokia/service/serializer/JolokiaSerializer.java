@@ -24,11 +24,11 @@ import javax.management.openmbean.OpenType;
 
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.serializer.Serializer;
-import org.jolokia.service.serializer.json.ObjectToJsonConverter;
-import org.jolokia.server.core.service.serializer.SerializeOptions;
-import org.jolokia.service.serializer.object.Converter;
-import org.jolokia.service.serializer.object.ObjectToOpenTypeConverter;
-import org.jolokia.service.serializer.object.ObjectToObjectConverter;
+import org.jolokia.converter.json.ObjectToJsonConverter;
+import org.jolokia.core.service.serializer.SerializeOptions;
+import org.jolokia.converter.object.Converter;
+import org.jolokia.converter.object.ObjectToOpenTypeConverter;
+import org.jolokia.converter.object.ObjectToObjectConverter;
 import org.jolokia.server.core.service.api.AbstractJolokiaService;
 
 /**
@@ -95,7 +95,7 @@ public class JolokiaSerializer extends AbstractJolokiaService<Serializer> implem
     @Override
     public void init(JolokiaContext pJolokiaContext) {
         super.init(pJolokiaContext);
-        ((ObjectToObjectConverter) objectToObjectConverter).setJolokiaContext(pJolokiaContext);
+        ((ObjectToObjectConverter) objectToObjectConverter).setCoreConfiguration(pJolokiaContext);
         toJsonConverter = new ObjectToJsonConverter((ObjectToObjectConverter) objectToObjectConverter,
             (ObjectToOpenTypeConverter) objectToOpenTypeConverter, pJolokiaContext);
     }

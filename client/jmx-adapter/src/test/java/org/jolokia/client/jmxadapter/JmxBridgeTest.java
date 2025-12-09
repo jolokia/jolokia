@@ -57,7 +57,7 @@ import org.jolokia.client.JolokiaClientBuilder;
 import org.jolokia.client.request.JolokiaVersionRequest;
 import org.jolokia.jvmagent.JvmAgent;
 import org.jolokia.server.core.Version;
-import org.jolokia.server.core.util.ClassUtil;
+import org.jolokia.core.util.ClassUtil;
 import org.jolokia.test.util.EnvTestUtil;
 import org.testng.Assert;
 import org.testng.SkipException;

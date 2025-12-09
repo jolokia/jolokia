@@ -39,10 +39,10 @@ public class LocalRequestHandlerTest {
         request = new JolokiaRequestBuilder(RequestType.READ,"java.lang:type=Memory").attribute("HeapMemoryUsage").build();
     }
 
+    @SuppressWarnings("unchecked")
     private CommandHandler<?> injectCommandHandler(LocalRequestHandler pRequestHandler) throws JMException, NoSuchFieldException, IllegalAccessException {
         commandHandler = createMock(CommandHandler.class);
         CommandHandlerManager commandHandlerManager = createMock(CommandHandlerManager.class);
-        //noinspection unchecked
         expect(commandHandlerManager.getCommandHandler(anyObject())).andStubReturn(commandHandler);
         commandHandlerManager.destroy();
         expectLastCall().asStub();

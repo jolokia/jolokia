@@ -51,24 +51,24 @@ public class ClassUtilTest {
 
     @Test
     public void classForNameForPrimitiveTypes() {
-        assertTrue(ClassUtil.checkForClass("[I"));
-        assertSame(ClassUtil.classForName("[I"), int[].class);
-        assertSame(ClassUtil.classForName("[[[Z"), boolean[][][].class);
+        assertTrue(org.jolokia.core.util.ClassUtil.checkForClass("[I"));
+        assertSame(org.jolokia.core.util.ClassUtil.classForName("[I"), int[].class);
+        assertSame(org.jolokia.core.util.ClassUtil.classForName("[[[Z"), boolean[][][].class);
     }
 
     @Test
     public void primitiveTypes() {
         // while Class.forName() can load "[Z" as boolean[], it can't load "Z" as boolean....
-        assertFalse(ClassUtil.checkForClass("Z"));
+        assertFalse(org.jolokia.core.util.ClassUtil.checkForClass("Z"));
         assertSame(boolean.class, Boolean.TYPE);
         assertNotSame(boolean.class, Boolean.class);
     }
 
     @Test
     public void classForName() {
-        assertTrue(ClassUtil.checkForClass("java.lang.String"));
-        assertEquals(ClassUtil.classForName(ClassUtilTest.class.getName()),ClassUtilTest.class);
-        assertNull(ClassUtil.classForName("blablub"));
+        assertTrue(org.jolokia.core.util.ClassUtil.checkForClass("java.lang.String"));
+        assertEquals(org.jolokia.core.util.ClassUtil.classForName(ClassUtilTest.class.getName()),ClassUtilTest.class);
+        assertNull(org.jolokia.core.util.ClassUtil.classForName("blablub"));
     }
 
     @Test
@@ -77,7 +77,7 @@ public class ClassUtilTest {
         ClassLoader cl = new MyCl(oldCl);
         Thread.currentThread().setContextClassLoader(cl);
 
-        Class<?> clazz = ClassUtil.classForName("org.jolokia.server.core.util.RequestType");
+        Class<?> clazz = org.jolokia.core.util.ClassUtil.classForName("org.jolokia.server.core.util.RequestType");
         assertEquals(clazz.getName(),"org.jolokia.server.core.util.RequestType");
         assertEquals(oldCl.loadClass("org.jolokia.server.core.util.RequestType"),clazz);
 
@@ -111,31 +111,31 @@ public class ClassUtilTest {
 
     @Test
     public void testGetResources() throws IOException {
-        Set<String> urls = ClassUtil.getResources("service/test-services");
+        Set<String> urls = org.jolokia.core.util.ClassUtil.getResources("service/test-services");
         assertNotNull(urls);
         assertEquals(urls.size(),1);
     }
 
     @Test
     public void testNewInstance() {
-        ClassUtilTest test = ClassUtil.newInstance(getClass().getCanonicalName());
+        ClassUtilTest test = org.jolokia.core.util.ClassUtil.newInstance(getClass().getCanonicalName());
         assertEquals(test.getClass(),getClass());
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*find.*")
     public void testNewInstanceFail1() {
-        ClassUtil.newInstance("blubber.bla");
+        org.jolokia.core.util.ClassUtil.newInstance("blubber.bla");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*NoSuchMethodException.*")
     public void testNewInstanceFail2() {
-        ClassUtil.newInstance("java.lang.String",Boolean.TRUE);
+        org.jolokia.core.util.ClassUtil.newInstance("java.lang.String",Boolean.TRUE);
     }
 
     @Test
     public void testApply() {
         File testFile = new File("/cannot/possibly/exist/at/all");
-        Boolean result = (Boolean) ClassUtil.applyMethod(testFile,"exists");
+        Boolean result = (Boolean) org.jolokia.core.util.ClassUtil.applyMethod(testFile,"exists");
         assertFalse(result);
     }
 
@@ -143,7 +143,7 @@ public class ClassUtilTest {
     public void testApplyWithPrimitive() {
         ClassUtilTest test = new ClassUtilTest("bla",1);
         assertEquals(test.intProp,1);
-        ClassUtil.applyMethod(test,"setIntProp",2);
+        org.jolokia.core.util.ClassUtil.applyMethod(test,"setIntProp",2);
         assertEquals(test.intProp,2);
     }
     @Test
@@ -151,13 +151,13 @@ public class ClassUtilTest {
         String fs = File.pathSeparator;
         String pathname = fs + "tmp";
         File testFile = new File(pathname);
-        String path = (String) ClassUtil.applyMethod(testFile,"getPath");
+        String path = (String) org.jolokia.core.util.ClassUtil.applyMethod(testFile,"getPath");
         assertEquals(path, pathname);
     }
     @Test
     public void testApplyWithArgs() {
         Map<String,String> map = new HashMap<>();
-        ClassUtil.applyMethod(map,"put","hello","world");
+        org.jolokia.core.util.ClassUtil.applyMethod(map,"put","hello","world");
         assertEquals(map.get("hello"),"world");
     }
 
@@ -165,31 +165,31 @@ public class ClassUtilTest {
     public void testApplyWithNullArg() {
         ClassUtilTest test = new ClassUtilTest("set",0);
         assertEquals(test.stringProp,"set");
-        ClassUtil.applyMethod(test,"setStringProp",new Object[] { null });
+        org.jolokia.core.util.ClassUtil.applyMethod(test,"setStringProp",new Object[] { null });
         assertNull(test.stringProp);
     }
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*NoSuchMethod.*")
     public void testApplyWithArgsFail1() {
         Map<String,String> map = new HashMap<>();
-        ClassUtil.applyMethod(map, "putBlubber", "hello", "world");
+        org.jolokia.core.util.ClassUtil.applyMethod(map, "putBlubber", "hello", "world");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*NoSuchMethod.*")
     public void testApplyWithFail2() {
         ClassUtilTest test = new ClassUtilTest();
-        ClassUtil.applyMethod(test,"setStringProp",Boolean.TRUE);
+        org.jolokia.core.util.ClassUtil.applyMethod(test,"setStringProp",Boolean.TRUE);
     }
 
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*NoSuchMethodException.*")
     public void testApplyFail1() {
-        ClassUtil.applyMethod(new Object(),"bullablu");
+        org.jolokia.core.util.ClassUtil.applyMethod(new Object(),"bullablu");
     }
 
 
     @Test
     public void testNewInstanceWithConstructor() {
-        ClassUtilTest test = ClassUtil.newInstance(getClass().getCanonicalName(),"eins",2);
+        ClassUtilTest test = org.jolokia.core.util.ClassUtil.newInstance(getClass().getCanonicalName(),"eins",2);
         assertEquals(test.getClass(),getClass());
         assertEquals(test.stringProp,"eins");
         assertEquals(test.intProp,2);
@@ -197,12 +197,12 @@ public class ClassUtilTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*Blub.*")
     public void testNewInstanceNotFound() {
-        ClassUtil.newInstance(getClass().getCanonicalName() + "$Blub");
+        org.jolokia.core.util.ClassUtil.newInstance(getClass().getCanonicalName() + "$Blub");
     }
 
     private void checkResources() {
-        assertNotNull(ClassUtil.getResourceAsStream("access-sample1.xml"));
-        assertNull(ClassUtil.getResourceAsStream("plumperquatsch"));
+        assertNotNull(org.jolokia.core.util.ClassUtil.getResourceAsStream("access-sample1.xml"));
+        assertNull(org.jolokia.core.util.ClassUtil.getResourceAsStream("plumperquatsch"));
     }
 
     public static class MyCl extends ClassLoader {

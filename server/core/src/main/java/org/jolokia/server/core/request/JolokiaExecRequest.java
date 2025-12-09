@@ -21,7 +21,7 @@ import java.util.*;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
-import org.jolokia.server.core.util.EscapeUtil;
+import org.jolokia.core.util.EscapeUtil;
 import org.jolokia.server.core.util.RequestType;
 import org.jolokia.json.JSONObject;
 

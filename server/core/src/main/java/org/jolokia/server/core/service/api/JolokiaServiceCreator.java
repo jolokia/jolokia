@@ -33,5 +33,5 @@ public interface JolokiaServiceCreator {
      *
      * @return created services
      */
-    Set<JolokiaService<?>> getServices(LogHandler logHandler);
+    Set<JolokiaService<?>> getServices(org.jolokia.core.api.LogHandler logHandler);
 }

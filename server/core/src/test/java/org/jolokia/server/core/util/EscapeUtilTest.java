@@ -25,7 +25,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.testng.Assert.assertEquals;
 
-import static org.jolokia.server.core.util.EscapeUtil.*;
+import static org.jolokia.core.util.EscapeUtil.*;
 
 /**
  * @author roland
@@ -61,14 +61,14 @@ public class EscapeUtilTest {
 
     @Test
     public void escaping() {
-        assertEquals(EscapeUtil.escape("hello\\world,how are you?",CSV_ESCAPE,","),"hello\\\\world\\,how are you?");
+        assertEquals(org.jolokia.core.util.EscapeUtil.escape("hello\\world,how are you?",CSV_ESCAPE,","),"hello\\\\world\\,how are you?");
     }
 
     @SuppressWarnings("unchecked")
     @Test
     public void pathSplitting() {
         for (int i = 0; i< PATH_SPLIT_TEST_DATA.length; i += 3) {
-            List<?> got = EscapeUtil.parsePath((String) PATH_SPLIT_TEST_DATA[i]);
+            List<?> got = org.jolokia.core.util.EscapeUtil.parsePath((String) PATH_SPLIT_TEST_DATA[i]);
             assertEquals(got, (List<String>) PATH_SPLIT_TEST_DATA[i+1]);
         }
     }
@@ -79,7 +79,7 @@ public class EscapeUtilTest {
         for (int i = 0; i< PATH_SPLIT_TEST_DATA.length; i += 3) {
             // Do reverse test ?
             if ((Boolean) PATH_SPLIT_TEST_DATA[i+2]) {
-                String glued = EscapeUtil.combineToPath((List<String>) PATH_SPLIT_TEST_DATA[i + 1]);
+                String glued = org.jolokia.core.util.EscapeUtil.combineToPath((List<String>) PATH_SPLIT_TEST_DATA[i + 1]);
                 assertEquals(glued,PATH_SPLIT_TEST_DATA[i]);
             }
         }
@@ -89,7 +89,7 @@ public class EscapeUtilTest {
     @Test
     public void commaSplitting() {
         for (int i = 0; i< COMMA_SPLIT_TEST_DATA.length; i +=2) {
-            List<?> got = EscapeUtil.split((String) COMMA_SPLIT_TEST_DATA[i], CSV_ESCAPE, ",");
+            List<?> got = org.jolokia.core.util.EscapeUtil.split((String) COMMA_SPLIT_TEST_DATA[i], CSV_ESCAPE, ",");
             assertEquals(got, (List<String>) COMMA_SPLIT_TEST_DATA[i+1]);
         }
     }
@@ -100,9 +100,9 @@ public class EscapeUtilTest {
         longString.append("!!".repeat(15000));
         List<String> arguments = Collections.singletonList(longString.toString());
 
-        String path = EscapeUtil.combineToPath(arguments);
+        String path = org.jolokia.core.util.EscapeUtil.combineToPath(arguments);
 
-        List<String> parsed = EscapeUtil.parsePath(path); // StackOverflowError inside this method
+        List<String> parsed = org.jolokia.core.util.EscapeUtil.parsePath(path); // StackOverflowError inside this method
         assertEquals(parsed.size(),1);
         assertEquals(parsed.get(0),longString.toString());
     }

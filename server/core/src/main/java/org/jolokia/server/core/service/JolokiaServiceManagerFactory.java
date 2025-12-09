@@ -25,7 +25,7 @@ public final class JolokiaServiceManagerFactory {
      * @param pRestrictor restrictor to apply
      */
     public static JolokiaServiceManager createJolokiaServiceManager(Configuration pConfig,
-                                                                    LogHandler pLogHandler,
+                                                                    org.jolokia.core.api.LogHandler pLogHandler,
                                                                     Restrictor pRestrictor) {
         return createJolokiaServiceManager(pConfig, pLogHandler, pRestrictor, null);
     }
@@ -40,7 +40,7 @@ public final class JolokiaServiceManagerFactory {
      * @param pDetectorLookup lookup class used for finding detectors when the service manager starts up
      */
     public static JolokiaServiceManager createJolokiaServiceManager(Configuration pConfig,
-                                                                    LogHandler pLogHandler,
+                                                                    org.jolokia.core.api.LogHandler pLogHandler,
                                                                     Restrictor pRestrictor,
                                                                     ServerDetectorLookup pDetectorLookup) {
         return new JolokiaServiceManagerImpl(pConfig,pLogHandler,pRestrictor,pDetectorLookup);

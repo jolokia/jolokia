@@ -90,12 +90,16 @@
               javax.management.modelmbean,
               javax.management.openmbean,
               <!-- jolokia-json -->
-              org.jolokia.json;version="[2.2,3)",
+              org.jolokia.json;version="[2.5,3)",
+              <!-- jolokia-core -->
+              org.jolokia.core.api;version="[2.5,3)",
+              org.jolokia.core.service.serializer;version="[2.5,3)",
+              org.jolokia.core.util;version="[2.5,3)",
               <!-- jolokia-server-core -->
-              org.jolokia.server.core.service.api;version="[2.2,3)",
-              org.jolokia.server.core.service.serializer;version="[2.2,3)",
+              org.jolokia.server.core.service.api;version="[2.5,3)",
+              org.jolokia.server.core.service.serializer;version="[2.5,3)",
               <!-- jolokia-service-serializer -->
-              org.jolokia.service.serializer;version="[2.2,3)",
+              org.jolokia.service.serializer;version="[2.5,3)",
               <!-- OSGi Core -->
               org.osgi.framework;version="[1.8,2)",
               org.osgi.util.tracker;version="[1.5,2)"

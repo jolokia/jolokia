@@ -23,7 +23,7 @@ import java.util.Set;
 import javax.management.MBeanServerConnection;
 
 import org.jolokia.server.core.service.api.JolokiaService;
-import org.jolokia.server.core.service.api.LogHandler;
+import org.jolokia.core.api.LogHandler;
 import org.jolokia.server.core.service.api.ServerHandle;
 import org.jolokia.server.core.service.container.ContainerLocator;
 import org.jolokia.server.core.service.request.RequestInterceptor;

@@ -8,7 +8,7 @@ import java.util.concurrent.*;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.service.api.AgentDetails;
 import org.jolokia.server.core.service.api.JolokiaContext;
-import org.jolokia.server.core.service.api.LogHandler;
+import org.jolokia.core.api.LogHandler;
 import org.jolokia.server.core.util.NetworkInterfaceAndAddress;
 import org.jolokia.server.core.util.NetworkUtil;
 

@@ -28,7 +28,7 @@ import javax.management.openmbean.OpenType;
 import org.jolokia.json.JSONObject;
 import org.jolokia.server.core.request.JolokiaExecRequest;
 import org.jolokia.server.core.service.serializer.Serializer;
-import org.jolokia.server.core.service.serializer.ValueFaultHandler;
+import org.jolokia.core.service.serializer.ValueFaultHandler;
 import org.jolokia.server.core.util.RequestType;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 
@@ -84,8 +84,7 @@ public class ExecHandler extends AbstractCommandHandler<JolokiaExecRequest> {
         OperationAndParamType types = extractOperationTypes(server,request);
         int nrParams = types.paramClasses.length;
         Object[] params = new Object[nrParams];
-        @SuppressWarnings("unchecked")
-        List<Object> args = (List<Object>) request.getArguments();
+        List<?> args = request.getArguments();
         // all path elements were consumed as arguments, but if there's more, we'll treat them as path for return value
         // they should be Strings
         if (args != null && nrParams < args.size()) {
@@ -98,8 +97,7 @@ public class ExecHandler extends AbstractCommandHandler<JolokiaExecRequest> {
             }
             request.splitArgumentsAndPath(nrParams, path);
 
-            //noinspection unchecked
-            args = (List<Object>) request.getArguments();
+            args = request.getArguments();
         } else if (args == null) {
             args = Collections.emptyList();
         }
@@ -140,7 +138,7 @@ public class ExecHandler extends AbstractCommandHandler<JolokiaExecRequest> {
     }
 
     // check whether the given arguments are compatible with the signature and if not so, raise an excepton
-    private void verifyArguments(JolokiaExecRequest request, OperationAndParamType pTypes, int pNrParams, List<Object> pArgs) {
+    private void verifyArguments(JolokiaExecRequest request, OperationAndParamType pTypes, int pNrParams, List<?> pArgs) {
         if ( (pNrParams > 0 && pArgs == null) || (pArgs != null && pArgs.size() != pNrParams)) {
             throw new IllegalArgumentException("Invalid number of operation arguments. Operation " +
                     request.getOperation() + " on " + request.getObjectName() + " requires " + pTypes.paramClasses.length +

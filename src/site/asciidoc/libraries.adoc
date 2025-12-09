@@ -141,8 +141,8 @@ These services are declared in `/META-INF/jolokia/<kind>[-default]` files:
 |A service used to find appserver specific `MBeanServer` instances
 
 |`simplifiers`
-|`org.jolokia.service.serializer.json.simplifier.SimplifierAccessor`
-|A service used by `org.jolokia.service.serializer.json.ObjectToJsonConverter` to convert specific Java objects to JSON representation (for example `java.io.File` is changed into JSON containing `name`, `exists`, `length`, ... properties)
+|`org.jolokia.converter.json.simplifier.SimplifierAccessor`
+|A service used by `org.jolokia.converter.json.ObjectToJsonConverter` to convert specific Java objects to JSON representation (for example `java.io.File` is changed into JSON containing `name`, `exists`, `length`, ... properties)
 |===
 
 .Service modules

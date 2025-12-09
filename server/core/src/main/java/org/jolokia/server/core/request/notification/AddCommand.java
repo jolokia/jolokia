@@ -21,7 +21,7 @@ import java.util.*;
 
 import javax.management.*;
 
-import org.jolokia.server.core.util.EscapeUtil;
+import org.jolokia.core.util.EscapeUtil;
 import org.jolokia.json.JSONObject;
 import org.jolokia.json.parser.JSONParser;
 import org.jolokia.json.parser.ParseException;

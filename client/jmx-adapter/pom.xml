@@ -101,15 +101,18 @@
               javax.management.remote,
               javax.security.auth,
               <!-- jolokia-json -->
-              org.jolokia.json;version="[2.2,3)",
+              org.jolokia.json;version="[2.5,3)",
+              <!-- jolokia-core -->
+              org.jolokia.core.util;version="[2.5,3)",
               <!-- jolokia-client-java -->
-              org.jolokia.client;version="[2.2,3)",
-              org.jolokia.client.exception;version="[2.2,3)",
-              org.jolokia.client.request;version="[2.2,3)",
+              org.jolokia.client;version="[2.5,3)",
+              org.jolokia.client.exception;version="[2.5,3)",
+              org.jolokia.client.request;version="[2.5,3)",
+              org.jolokia.client.response;version="[2.5,3)",
               <!-- jolokia-server-core -->
-              org.jolokia.server.core.util;version="[2.2,3)",
+              org.jolokia.server.core.util;version="[2.5,3)",
               <!-- jolokia-service-serializer -->
-              org.jolokia.service.serializer;version="[2.2,3)"
+              org.jolokia.service.serializer;version="[2.5,3)"
             </Import-Package>
             <Export-Package>
               org.jolokia.client.jmxadapter

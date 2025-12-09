@@ -37,13 +37,13 @@ public class DateUtilTest {
 
     @Test(expectedExceptions = {IllegalArgumentException.class})
     public void illegalFormat() {
-        DateUtil.fromISO8601("Bla");
+        org.jolokia.core.util.DateUtil.fromISO8601("Bla");
     }
 
     @Test(expectedExceptions = {IllegalArgumentException.class})
     public void illegalFormat2() throws NoSuchFieldException, IllegalAccessException {
         Object oldValue = exchangeDataTypeFactory();
-        DateUtil.fromISO8601("Bla");
+        org.jolokia.core.util.DateUtil.fromISO8601("Bla");
         resetDataTypeFactory(oldValue);
     }
 
@@ -55,13 +55,13 @@ public class DateUtilTest {
     }
 
     private void resetDataTypeFactory(Object pOldValue) throws NoSuchFieldException, IllegalAccessException {
-        Field field = DateUtil.class.getDeclaredField("datatypeFactory");
+        Field field = org.jolokia.core.util.DateUtil.class.getDeclaredField("datatypeFactory");
         field.setAccessible(true);
         field.set(null, pOldValue);
     }
 
     private Object exchangeDataTypeFactory() throws IllegalAccessException, NoSuchFieldException {
-        Field field = DateUtil.class.getDeclaredField("datatypeFactory");
+        Field field = org.jolokia.core.util.DateUtil.class.getDeclaredField("datatypeFactory");
         field.setAccessible(true);
         Object oldValue = field.get(null);
         field.set(null,null);
@@ -75,9 +75,9 @@ public class DateUtilTest {
         Date testDate = new Date(1303195711000L);
 
         // Check date formatting
-        assertEquals(DateUtil.toISO8601(testDate, TimeZone.getTimeZone("Europe/Berlin")),
+        assertEquals(org.jolokia.core.util.DateUtil.toISO8601(testDate, TimeZone.getTimeZone("Europe/Berlin")),
                      "2011-04-19T08:48:31+02:00");
-        assertEquals(DateUtil.toISO8601(testDate, TimeZone.getTimeZone("Europe/London")),
+        assertEquals(org.jolokia.core.util.DateUtil.toISO8601(testDate, TimeZone.getTimeZone("Europe/London")),
                      "2011-04-19T07:48:31+01:00");
 
         // Check date parsing
@@ -88,7 +88,7 @@ public class DateUtilTest {
                 "2011-04-19T07:18:31+00:30",
         };
         for (String toParse : dateStrings) {
-            Date date =  DateUtil.fromISO8601(toParse);
+            Date date =  org.jolokia.core.util.DateUtil.fromISO8601(toParse);
             assertEquals(date, testDate);
         }
 
@@ -102,7 +102,7 @@ public class DateUtilTest {
         Date currentDate = new Date(1303195711111L);
         Date expectedDateIsWithoutMilliSeconds = new Date();
         expectedDateIsWithoutMilliSeconds.setTime((currentDate.getTime() / 1000) * 1000);
-        Date roundtripValue = DateUtil.fromISO8601(DateUtil.toISO8601(currentDate));
+        Date roundtripValue = org.jolokia.core.util.DateUtil.fromISO8601(org.jolokia.core.util.DateUtil.toISO8601(currentDate));
         assertEquals(roundtripValue, expectedDateIsWithoutMilliSeconds);
     }
 }

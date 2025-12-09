@@ -2,7 +2,7 @@ package org.jolokia.support.spring.log;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jolokia.server.core.service.api.LogHandler;
+import org.jolokia.core.api.LogHandler;
 
 /**
  * Loghandler using Log4j Version 2

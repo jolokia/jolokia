@@ -6,7 +6,7 @@ import javax.management.MalformedObjectNameException;
 
 import org.jolokia.json.JSONArray;
 import org.jolokia.json.JSONObject;
-import org.jolokia.server.core.util.EscapeUtil;
+import org.jolokia.core.util.EscapeUtil;
 import org.jolokia.server.core.util.RequestType;
 
 /*

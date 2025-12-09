@@ -52,10 +52,10 @@ public class JSONWriter {
      * @param writer
      * @throws IOException
      */
-    public static void serializeAnyMap(Map<Object, Object> map, Writer writer) throws IOException {
+    public static void serializeAnyMap(Map<?, ?> map, Writer writer) throws IOException {
         writer.write('{');
         int pos = map.size() - 1;
-        for (Map.Entry<Object, Object> el : map.entrySet()) {
+        for (Map.Entry<?, ?> el : map.entrySet()) {
             serialize(el.getKey() == null ? "" : el.getKey().toString(), writer);
             writer.write(':');
             serialize(el.getValue(), writer);
@@ -72,7 +72,7 @@ public class JSONWriter {
      * @param writer
      * @throws IOException
      */
-    public static void serialize(Collection<Object> collection, Writer writer) throws IOException {
+    public static void serialize(Collection<?> collection, Writer writer) throws IOException {
         writer.write('[');
         int pos = collection.size() - 1;
         for (Object el : collection) {
@@ -114,15 +114,13 @@ public class JSONWriter {
             escape(writer, new char[] { (char) value });
         } else if (value instanceof String) {
             escape(writer, ((String) value).toCharArray());
-        } else if (value instanceof Collection) {
-            //noinspection unchecked
-            serialize((Collection<Object>) value, writer);
+        } else if (value instanceof Collection<?> collection) {
+            serialize(collection, writer);
         } else if (value instanceof JSONObject) {
             serialize((JSONObject) value, writer);
-        } else if (value instanceof Map) {
+        } else if (value instanceof Map<?, ?> map) {
             // not sure about the key types, so be extra careful
-            //noinspection unchecked
-            serializeAnyMap((Map<Object, Object>) value, writer);
+            serializeAnyMap(map, writer);
         } else if (value.getClass().isArray()) {
             int size = Array.getLength(value);
             writer.write('[');

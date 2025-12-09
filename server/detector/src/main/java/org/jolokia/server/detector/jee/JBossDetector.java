@@ -9,7 +9,7 @@ import javax.management.MBeanServerConnection;
 
 import org.jolokia.server.core.detector.DefaultServerHandle;
 import org.jolokia.server.core.service.api.ServerHandle;
-import org.jolokia.server.core.util.ClassUtil;
+import org.jolokia.core.util.ClassUtil;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 
 /**

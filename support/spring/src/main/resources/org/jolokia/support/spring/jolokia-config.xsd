@@ -126,8 +126,8 @@
     <xs:attribute name="log-ref" type="xs:IDREF">
       <xs:annotation>
         <xs:documentation>
-          Referenced to a Spring Bean implementing org.jolokia.server.core.service.api.LogHandler which then is used
-          for logging.
+            Referenced to a Spring Bean implementing org.jolokia.core.api.LogHandler which then is used
+            for logging.
         </xs:documentation>
       </xs:annotation>
     </xs:attribute>

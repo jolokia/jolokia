@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.apache.logging.log4j.Logger;
 import org.jolokia.support.spring.log.CommonsLogHandler;
-import org.jolokia.server.core.service.api.LogHandler;
+import org.jolokia.core.api.LogHandler;
 import org.jolokia.support.spring.log.Log4j2LogHandler;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.Test;

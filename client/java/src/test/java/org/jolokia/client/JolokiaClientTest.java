@@ -177,10 +177,10 @@ public class JolokiaClientTest {
         fail("No exception was thrown");
     }
 
+    @SuppressWarnings("unchecked")
     private void throwException(boolean bulk, Exception exp) throws IOException, JolokiaException {
         HttpClient client = createMock(HttpClient.class);
         try {
-            //noinspection unchecked
             expect(client.send(EasyMock.anyObject(), (HttpResponse.BodyHandler<InputStream>) EasyMock.anyObject())).andThrow(exp);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
@@ -199,12 +199,12 @@ public class JolokiaClientTest {
         return prepareMocks(encoding, jsonResp, false);
     }
 
+    @SuppressWarnings("unchecked")
     private HttpClientSpi<?> prepareMocks(String encoding, String jsonResp, boolean bulk) throws IOException {
         HttpClient client = createMock(HttpClient.class);
         HttpResponse<InputStream> response = createMock(HttpResponse.class);
         HttpClientSpi<HttpClient> spi = new JdkHttpClient(client, JolokiaClientBuilder.Configuration.withUrl(URI.create("http://localhost")));
         try {
-            //noinspection unchecked
             expect(client.send(EasyMock.anyObject(), (HttpResponse.BodyHandler<InputStream>) EasyMock.anyObject())).andReturn(response);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);

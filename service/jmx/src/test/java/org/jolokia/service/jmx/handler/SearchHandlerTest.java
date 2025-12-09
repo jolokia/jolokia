@@ -113,6 +113,7 @@ public class SearchHandlerTest extends BaseHandlerTest {
         verify(server);
     }
 
+    @SuppressWarnings("unchecked")
     private List<String> doSearch(SearchHandler pHandler, String pPattern, Boolean pUseCanonicalName, List<String> previousResult, String ... pFoundNames) throws MalformedObjectNameException, IOException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, NotChangedException, EmptyResponseException {
         ObjectName oName = new ObjectName(pPattern);
         JolokiaRequestBuilder builder = new JolokiaRequestBuilder(RequestType.SEARCH,oName);
@@ -128,7 +129,6 @@ public class SearchHandlerTest extends BaseHandlerTest {
         }
         expect(server.queryNames(oName,null)).andReturn(names);
         replay(server);
-        //noinspection unchecked
         return (List<String>) pHandler.handleAllServerRequest(getMBeanServerManager(server), request, previousResult);
     }
 }

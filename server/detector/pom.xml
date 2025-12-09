@@ -76,15 +76,18 @@
               javax.management,
               javax.naming,
               <!-- jolokia-json -->
-              org.jolokia.json;version="[2.2,3)",
+              org.jolokia.json;version="[2.5,3)",
+              <!-- jolokia-core -->
+              org.jolokia.core.api;version="[2.5,3)",
+              org.jolokia.core.util;version="[2.5,3)",
               <!-- jolokia-server-core -->
-              org.jolokia.server.core.detector;version="[2.2,3)",
-              org.jolokia.server.core.request;version="[2.2,3)",
-              org.jolokia.server.core.service.api;version="[2.2,3)",
-              org.jolokia.server.core.service.container;version="[2.2,3)",
-              org.jolokia.server.core.service.request;version="[2.2,3)",
-              org.jolokia.server.core.util;version="[2.2,3)",
-              org.jolokia.server.core.util.jmx;version="[2.2,3)",
+              org.jolokia.server.core.detector;version="[2.5,3)",
+              org.jolokia.server.core.request;version="[2.5,3)",
+              org.jolokia.server.core.service.api;version="[2.5,3)",
+              org.jolokia.server.core.service.container;version="[2.5,3)",
+              org.jolokia.server.core.service.request;version="[2.5,3)",
+              org.jolokia.server.core.util;version="[2.5,3)",
+              org.jolokia.server.core.util.jmx;version="[2.5,3)",
               <!-- OSGi Core -->
               org.osgi.framework;version="[1.8,2)",
               <!-- Other -->

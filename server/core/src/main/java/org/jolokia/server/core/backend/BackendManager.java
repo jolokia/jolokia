@@ -11,7 +11,7 @@ import org.jolokia.server.core.request.*;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.request.RequestInterceptor;
 import org.jolokia.server.core.service.serializer.Serializer;
-import org.jolokia.server.core.service.serializer.SerializeOptions;
+import org.jolokia.core.service.serializer.SerializeOptions;
 import org.jolokia.json.JSONObject;
 
 import static org.jolokia.server.core.config.ConfigKey.*;

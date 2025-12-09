@@ -24,7 +24,7 @@ import javax.management.ObjectName;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.request.notification.NotificationCommandFactory;
 import org.jolokia.server.core.request.notification.NotificationCommandType;
-import org.jolokia.server.core.util.EscapeUtil;
+import org.jolokia.core.util.EscapeUtil;
 import org.jolokia.server.core.util.RequestType;
 import org.jolokia.json.JSONObject;
 

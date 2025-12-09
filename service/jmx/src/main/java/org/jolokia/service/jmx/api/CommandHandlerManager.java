@@ -22,7 +22,8 @@ import javax.management.JMException;
 
 import org.jolokia.server.core.request.JolokiaRequest;
 import org.jolokia.server.core.service.api.JolokiaContext;
-import org.jolokia.server.core.util.LocalServiceFactory;
+import org.jolokia.server.core.util.JolokiaServicesValidator;
+import org.jolokia.core.util.LocalServiceFactory;
 import org.jolokia.server.core.util.RequestType;
 
 /**
@@ -61,7 +62,7 @@ public class CommandHandlerManager {
         List<CommandHandler<?>> handlers =
                 LocalServiceFactory.createServices (this.getClass().getClassLoader(),"META-INF/jolokia/command-handlers");
 
-        if (LocalServiceFactory.validateServices(handlers, pCtx)) {
+        if (JolokiaServicesValidator.validateServices(handlers, pCtx)) {
             for (CommandHandler<?> handler : handlers) {
                 handler.init(pCtx,pProvider);
                 requestHandlerMap.put(handler.getType(),handler);
@@ -75,12 +76,12 @@ public class CommandHandlerManager {
      * @param pType type of request
      * @return handler which can handle requests of the given type
      */
+    @SuppressWarnings("unchecked")
     public <R extends JolokiaRequest> CommandHandler<R> getCommandHandler(RequestType pType) {
         CommandHandler<?> handler = requestHandlerMap.get(pType);
         if (handler == null) {
             throw new UnsupportedOperationException("Unsupported operation '" + pType + "'");
         }
-        //noinspection unchecked
         return (CommandHandler<R>) handler;
     }
 

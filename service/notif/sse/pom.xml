@@ -75,13 +75,15 @@
               <!-- JDK -->
               javax.management,
               <!-- jolokia-json -->
-              org.jolokia.json;version="[2.2,3)",
+              org.jolokia.json;version="[2.5,3)",
+              <!-- jolokia-core -->
+              org.jolokia.core.service.serializer;version="[2.5,3)",
               <!-- jolokia-server-core -->
-              org.jolokia.server.core.http;version="[2.2,3)",
-              org.jolokia.server.core.service.api;version="[2.2,3)",
-              org.jolokia.server.core.service.notification;version="[2.2,3)",
-              org.jolokia.server.core.service.serializer;version="[2.2,3)",
-              org.jolokia.server.core.util;version="[2.2,3)",
+              org.jolokia.server.core.http;version="[2.5,3)",
+              org.jolokia.server.core.service.api;version="[2.5,3)",
+              org.jolokia.server.core.service.notification;version="[2.5,3)",
+              org.jolokia.server.core.service.serializer;version="[2.5,3)",
+              org.jolokia.server.core.util;version="[2.5,3)",
               <!-- OSGi Core -->
               org.osgi.framework;version="[1.8,2)"
             </Import-Package>

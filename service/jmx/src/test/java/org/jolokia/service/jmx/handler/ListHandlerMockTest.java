@@ -60,6 +60,7 @@ public class ListHandlerMockTest extends BaseHandlerTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void plainTest() throws Exception {
 
         JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST).build();
@@ -75,15 +76,12 @@ public class ListHandlerMockTest extends BaseHandlerTest {
         expect(connection.queryMBeans(null,null)).andReturn(nameSet);
         replay(connection);
 
-        @SuppressWarnings("unchecked")
         Map<String, ?> res = (Map<String, ?>) handler.handleAllServerRequest(getMBeanServerManager(connection), request, null);
         assertTrue(res.containsKey("java.lang"));
-        @SuppressWarnings("unchecked")
         Map<String, ?> inner = (Map<String, ?>) res.get("java.lang");
         assertTrue(inner.containsKey("type=Memory"));
         assertTrue(inner.containsKey("type=Runtime"));
         assertEquals(inner.size(), 2);
-        //noinspection unchecked
         inner = (Map<String, ?>) inner.get("type=Memory");
         for (String k : new String[] {DataKeys.DESCRIPTION.getKey(), DataKeys.OPERATIONS.getKey(), DataKeys.ATTRIBUTES.getKey(), DataKeys.CLASSNAME.getKey(), DataKeys.NOTIFICATIONS.getKey()}) {
             assertTrue(inner.containsKey(k));

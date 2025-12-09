@@ -6,8 +6,9 @@ import java.util.TreeSet;
 
 import org.jolokia.server.core.service.api.JolokiaService;
 import org.jolokia.server.core.service.api.JolokiaServiceCreator;
-import org.jolokia.server.core.service.api.LogHandler;
-import org.jolokia.server.core.util.LocalServiceFactory;
+import org.jolokia.core.api.LogHandler;
+import org.jolokia.server.core.util.JolokiaServicesValidator;
+import org.jolokia.core.util.LocalServiceFactory;
 
 /**
  * A request handler factory which looks up the request handler via
@@ -36,7 +37,7 @@ public class ClasspathServiceCreator implements JolokiaServiceCreator {
         List<JolokiaService<?>> services = LocalServiceFactory.createServices(loader, "META-INF/jolokia/" + base + "-default",
             "META-INF/jolokia/" + base);
 
-        if (LocalServiceFactory.validateServices(services, logHandler)) {
+        if (JolokiaServicesValidator.validateServices(services, logHandler)) {
             return new TreeSet<>(services);
         }
 

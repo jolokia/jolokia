@@ -21,7 +21,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Utils to handle Jolokia escaping. Copy of {@code org.jolokia.server.core.util.EscapeUtil} until
+ * Utils to handle Jolokia escaping. Copy of {@code org.jolokia.core.util.EscapeUtil} until
  * we extract these to top-level {@code jolokia-conversion} module.
  */
 public class EscapeUtil {

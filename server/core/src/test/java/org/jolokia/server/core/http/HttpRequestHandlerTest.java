@@ -27,7 +27,7 @@ import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.request.*;
 import org.jolokia.server.core.restrictor.AllowAllRestrictor;
 import org.jolokia.server.core.service.api.Restrictor;
-import org.jolokia.server.core.service.api.LogHandler;
+import org.jolokia.core.api.LogHandler;
 import org.jolokia.server.core.service.impl.StdoutLogHandler;
 import org.jolokia.server.core.service.request.RequestHandler;
 import org.jolokia.server.core.service.serializer.Serializer;

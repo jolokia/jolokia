@@ -114,7 +114,7 @@ the config MBean during runtime.
 |`logHandlerClass`
 a|Loghandler to use for providing logging output. By default
 logging is written to standard out and error but you can provide
-here a Java class implementing `org.jolokia.server.core.service.api.LogHandler`
+here a Java class implementing `org.jolokia.core.api.LogHandler`
 for an alternative log output. Few implementations are included in WAR
 this agent:
 
@@ -126,7 +126,7 @@ logging completely.
 a|Default: `org.jolokia.server.core.http.AgentServlet.ServletLogHandler`
 
 |`logHandlerName`
-|A parameter which may be used to configure _logger name_ which may be used with some `org.jolokia.server.core.service.api.LogHandler` implementations.
+|A parameter which may be used to configure _logger name_ which may be used with some `org.jolokia.core.api.LogHandler` implementations.
 a|Default: `org.jolokia`
 
 |`historyMaxEntries`

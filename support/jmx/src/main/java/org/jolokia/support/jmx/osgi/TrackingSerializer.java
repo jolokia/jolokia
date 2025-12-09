@@ -7,7 +7,7 @@ import javax.management.AttributeNotFoundException;
 import javax.management.openmbean.OpenType;
 
 import org.jolokia.server.core.service.api.AbstractJolokiaService;
-import org.jolokia.server.core.service.serializer.SerializeOptions;
+import org.jolokia.core.service.serializer.SerializeOptions;
 import org.jolokia.server.core.service.serializer.Serializer;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;

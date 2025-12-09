@@ -38,7 +38,7 @@ public class TestJolokiaContext implements JolokiaContext {
     private static final boolean DEBUG = true;
 
     Map<Class<?>, SortedSet<?>> services;
-    LogHandler logHandler;
+    org.jolokia.core.api.LogHandler logHandler;
     Restrictor restrictor;
     Configuration config;
     ServerHandle handle;
@@ -54,7 +54,7 @@ public class TestJolokiaContext implements JolokiaContext {
 
     private TestJolokiaContext(Configuration pConfig,
                                Restrictor pRestrictor,
-                               LogHandler pLogHandler,
+                               org.jolokia.core.api.LogHandler pLogHandler,
                                Map<Class<?>, SortedSet<?>> pServices,
                                AgentDetails pAgentDetails) {
         this.config = pConfig != null ? pConfig : new StaticConfiguration();
@@ -199,6 +199,16 @@ public class TestJolokiaContext implements JolokiaContext {
         return true;
     }
 
+    @Override
+    public String dateFormat() {
+        return ConfigKey.DATE_FORMAT.getDefaultValue();
+    }
+
+    @Override
+    public TimeZone dateFormatTimeZone() {
+        return TimeZone.getTimeZone(ConfigKey.DATE_FORMAT_ZONE.getDefaultValue());
+    }
+
     // Should be called when MBeans were registered for the test. Not part of the JolokiaContext interface
     public void destroy() throws MBeanRegistrationException, InstanceNotFoundException {
         MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
@@ -211,7 +221,7 @@ public class TestJolokiaContext implements JolokiaContext {
 
     public static class Builder {
 
-        private LogHandler logHandler;
+        private org.jolokia.core.api.LogHandler logHandler;
         private Restrictor restrictor;
         private Configuration config;
         private final Map<Class<?>,SortedSet<?>> services = new HashMap<>();
@@ -232,7 +242,7 @@ public class TestJolokiaContext implements JolokiaContext {
             return this;
         }
 
-        public Builder logHandler(LogHandler pLogHandler) {
+        public Builder logHandler(org.jolokia.core.api.LogHandler pLogHandler) {
             logHandler = pLogHandler;
             return this;
         }

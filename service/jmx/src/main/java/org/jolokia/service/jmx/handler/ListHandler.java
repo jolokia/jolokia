@@ -68,7 +68,7 @@ public class ListHandler extends AbstractCommandHandler<JolokiaListRequest> {
         // Throw an exception if list has not changed
         checkForModifiedSince(pServerManager, pRequest);
 
-        Deque<String> originalPathStack = EscapeUtil.reversePath(pRequest.getPathParts());
+        Deque<String> originalPathStack = org.jolokia.core.util.EscapeUtil.reversePath(pRequest.getPathParts());
         int maxDepth = pRequest.getParameterAsInt(ConfigKey.MAX_DEPTH);
         boolean useCanonicalName = pRequest.getParameterAsBool(ConfigKey.CANONICAL_NAMING);
         boolean listKeys = pRequest.getParameterAsBool(ConfigKey.LIST_KEYS);

@@ -617,7 +617,7 @@ completely into a JSON value object. It can detect cycles in
 the object graph and provides a way to limit the depth of
 serialization. For certain types (like
 `File` or
-`ObjectName`) it uses a service `org.jolokia.service.serializer.json.simplifier.SimplifierAccessor` to not
+`ObjectName`) it uses a service `org.jolokia.converter.json.simplifier.SimplifierAccessor` to not
 expose internal and redundant information.
 
 Object values used for values in

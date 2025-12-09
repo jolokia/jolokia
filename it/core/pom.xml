@@ -72,9 +72,10 @@
               javax.management,
               javax.management.openmbean,
               <!-- jolokia-support-jmx -->
-              org.jolokia.support.jmx;version="[2.2,3)",
+              org.jolokia.support.jmx;version="[2.5,3)",
               <!-- OSGi Core -->
               org.osgi.framework;version="[1.8,2)"
+              ,*
             </Import-Package>
             <Export-Package>
               org.jolokia.it.core,

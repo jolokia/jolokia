@@ -141,15 +141,15 @@ public class NotificationDispatcherTest {
         return getField(dispatcher, "listenerDelegate");
     }
 
+    @SuppressWarnings("unchecked")
     private <T> T getField(Object pObject, String pField) throws NoSuchFieldException, IllegalAccessException {
         Field field = pObject.getClass().getDeclaredField(pField);
         field.setAccessible(true);
-        //noinspection unchecked
         return (T) field.get(pObject);
     }
 
+    @SuppressWarnings("unchecked")
     private <T> T dispatch(NotificationCommand cmd) throws MBeanException, IOException, ReflectionException, EmptyResponseException {
-        //noinspection unchecked
         return (T) dispatcher.dispatch(executor,cmd);
     }
     private <T extends NotificationCommand> T createCommand(Class<T> pClass, Object ... keyValues) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {

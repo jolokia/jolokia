@@ -67,6 +67,10 @@
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-json</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-core</artifactId>
+    </dependency>
 
     <dependency>
       <groupId>org.jolokia</groupId>
@@ -182,6 +186,7 @@
               <artifactSet>
                 <includes>
                   <include>org.jolokia:jolokia-json</include>
+                  <include>org.jolokia:jolokia-core</include>
                   <include>org.jolokia:jolokia-server-core</include>
                   <include>org.jolokia:jolokia-server-detector</include>
                   <include>org.jolokia:jolokia-service-serializer</include>
@@ -196,6 +201,12 @@
               <filters>
                 <filter>
                   <artifact>org.jolokia:jolokia-json</artifact>
+                  <excludes>
+                    <exclude>META-INF/*.MF</exclude>
+                  </excludes>
+                </filter>
+                <filter>
+                  <artifact>org.jolokia:jolokia-core</artifact>
                   <excludes>
                     <exclude>META-INF/*.MF</exclude>
                   </excludes>

@@ -31,6 +31,7 @@ import javax.net.ssl.*;
 
 import com.sun.net.httpserver.Authenticator;
 import com.sun.net.httpserver.*;
+import org.jolokia.core.util.LocalServiceFactory;
 import org.jolokia.jvmagent.handler.JolokiaHttpHandler;
 import org.jolokia.jvmagent.security.KeyStoreUtil;
 import org.jolokia.server.core.config.ConfigKey;
@@ -111,7 +112,7 @@ public class JolokiaServer {
      * @param pLogHandler log handler to use or <code>null</code> if logging should go to stdout
      * @throws IOException if initialization fails
      */
-    public JolokiaServer(JolokiaServerConfig pConfig, LogHandler pLogHandler) throws IOException {
+    public JolokiaServer(JolokiaServerConfig pConfig, org.jolokia.core.api.LogHandler pLogHandler) throws IOException {
         init(pConfig, pLogHandler, null);
     }
 
@@ -123,12 +124,12 @@ public class JolokiaServer {
      * @param pConfig configuration for this server
      * @param pLogHandler log handler to use
      */
-    public JolokiaServer(HttpServer pServer,JolokiaServerConfig pConfig, LogHandler pLogHandler) {
+    public JolokiaServer(HttpServer pServer,JolokiaServerConfig pConfig, org.jolokia.core.api.LogHandler pLogHandler) {
         init(pServer, pConfig, pLogHandler, null);
     }
 
     /**
-     * No arg constructor usable by subclasses. The {@link #init(JolokiaServerConfig,LogHandler)} must be called later on
+     * No arg constructor usable by subclasses. The {@link #init(JolokiaServerConfig, org.jolokia.core.api.LogHandler)} must be called later on
      * for initialization
      */
     @SuppressWarnings("unused")
@@ -215,7 +216,7 @@ public class JolokiaServer {
      * @param pLogHandler log handler to use
      * @throws IOException if the creation of the HttpServer fails
      */
-    protected final void init(JolokiaServerConfig pConfig,LogHandler pLogHandler) throws IOException {
+    protected final void init(JolokiaServerConfig pConfig, org.jolokia.core.api.LogHandler pLogHandler) throws IOException {
         // We manage it on our own
         init(createHttpServer(pConfig), pConfig, pLogHandler, null);
         useOwnServer = true;
@@ -230,7 +231,7 @@ public class JolokiaServer {
      * @param pLookup existing server detector lookup to use
      * @throws IOException if the creation of the HttpServer fails
      */
-    protected final void init(JolokiaServerConfig pConfig,LogHandler pLogHandler, ServerDetectorLookup pLookup) throws IOException {
+    protected final void init(JolokiaServerConfig pConfig, org.jolokia.core.api.LogHandler pLogHandler, ServerDetectorLookup pLookup) throws IOException {
         // We manage it on our own
         init(createHttpServer(pConfig), pConfig, pLogHandler, pLookup);
         useOwnServer = true;
@@ -256,12 +257,12 @@ public class JolokiaServer {
      * @param pLogHandler log handler to use.
      * @param pLookup preconfigured {@link ServerDetectorLookup} to use
      */
-    private void init(HttpServer pServer, JolokiaServerConfig pConfig, LogHandler pLogHandler, ServerDetectorLookup pLookup)  {
+    private void init(HttpServer pServer, JolokiaServerConfig pConfig, org.jolokia.core.api.LogHandler pLogHandler, ServerDetectorLookup pLookup)  {
         config = pConfig;
         httpServer = pServer;
 
         Configuration jolokiaCfg = config.getJolokiaConfig();
-        LogHandler log = pLogHandler != null ?
+        org.jolokia.core.api.LogHandler log = pLogHandler != null ?
                 pLogHandler :
                 createLogHandler(jolokiaCfg.getConfig(ConfigKey.LOGHANDLER_CLASS),
                                  jolokiaCfg.getConfig(ConfigKey.LOGHANDLER_NAME),
@@ -334,9 +335,9 @@ public class JolokiaServer {
 
     // Creat a log handler from either the given class or by creating a default log handler printing
     // out to stderr
-    private LogHandler createLogHandler(String pLogHandlerClass, String pLogHandlerName, final boolean pIsDebug) {
+    private org.jolokia.core.api.LogHandler createLogHandler(String pLogHandlerClass, String pLogHandlerName, final boolean pIsDebug) {
         if (pLogHandlerClass != null) {
-            return ClassUtil.newLogHandlerInstance(pLogHandlerClass, pLogHandlerName, pIsDebug);
+            return org.jolokia.core.util.ClassUtil.newLogHandlerInstance(pLogHandlerClass, pLogHandlerName, pIsDebug);
         } else {
             return new StdoutLogHandler(pIsDebug);
         }

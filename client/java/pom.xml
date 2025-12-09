@@ -158,8 +158,9 @@
               javax.management,
               javax.net.ssl,
               <!-- jolokia-json -->
-              org.jolokia.json;version="[2.2,3)",
-              org.jolokia.json.parser;version="[2.2,3)"
+              org.jolokia.json;version="[2.5,3)",
+              org.jolokia.json.parser;version="[2.5,3)"
+              ,*
             </Import-Package>
             <Export-Package>
               org.jolokia.client,

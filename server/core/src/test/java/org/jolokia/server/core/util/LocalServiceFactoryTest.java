@@ -19,6 +19,7 @@ package org.jolokia.server.core.util;
 import java.util.Iterator;
 import java.util.List;
 
+import org.jolokia.core.util.LocalServiceFactory;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;

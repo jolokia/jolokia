@@ -126,13 +126,16 @@
               <!-- JDK -->
               javax.management.remote,
               <!-- jolokia-json -->
-              org.jolokia.json;version="[2.2,3)",
+              org.jolokia.json;version="[2.5,3)",
               <!-- jolokia-client-java -->
-              org.jolokia.client;version="[2.2,3)",
+              org.jolokia.client;version="[2.5,3)",
+              org.jolokia.client.spi;version="[2.5,3)",
+              <!-- jolokia-client-java-httpclient4 -->
+              org.jolokia.client.httpclient4;version="[2.5,3)",
               <!-- jolokia-client-jmx-adapter -->
-              org.jolokia.client.jmxadapter;version="[2.2,3)",
+              org.jolokia.client.jmxadapter;version="[2.5,3)",
               <!-- jolokia-server-core -->
-              org.jolokia.server.core.util;version="[2.2,3)",
+              org.jolokia.server.core.util;version="[2.5,3)",
               <!-- fabric8:kubernetes-model-core -->
               io.fabric8.kubernetes.api.model,
               <!-- fabric8:kubernetes-client-api, fabric8:kubernetes-client-api (even if 7.3 is not OSGi aware...) -->

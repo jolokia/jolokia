@@ -182,6 +182,7 @@ public class ReadHandlerTest extends BaseHandlerTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void searchPatternSingleAttribute() throws Exception {
         ObjectName patternMBean = new ObjectName("java.lang:type=*");
         JolokiaReadRequest request = new JolokiaRequestBuilder(READ, patternMBean).
@@ -200,7 +201,6 @@ public class ReadHandlerTest extends BaseHandlerTest {
         Map<String, ?> res = (Map<String, ?>) handler.handleAllServerRequest(getMBeanServerManager(server), request, null);
         verify(server);
         assertEquals(1,res.size());
-        //noinspection unchecked
         assertEquals("memval1",((Map<String, ?>) res.get("java.lang:type=Memory")).get("mem1"));
     }
 
@@ -301,6 +301,7 @@ public class ReadHandlerTest extends BaseHandlerTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void searchPatternMultiAttributes1() throws Exception {
         ObjectName patternMBean = new ObjectName("java.lang:type=*");
         JolokiaReadRequest request = new JolokiaRequestBuilder(READ, patternMBean).
@@ -316,13 +317,10 @@ public class ReadHandlerTest extends BaseHandlerTest {
         expect(server.getAttribute(beans[1],"gc3")).andReturn("gcval3");
 
         replay(server);
-        @SuppressWarnings("unchecked")
         Map<String, ?> res = (Map<String, ?>) handler.handleAllServerRequest(getMBeanServerManager(server), request, null);
         verify(server);
         assertEquals(2,res.size());
-        //noinspection unchecked
         assertEquals("memval0",((Map<String, ?>) res.get("java.lang:type=Memory")).get("mem0"));
-        //noinspection unchecked
         assertEquals("gcval3",((Map<String, ?>) res.get("java.lang:type=GarbageCollection")).get("gc3"));
     }
 

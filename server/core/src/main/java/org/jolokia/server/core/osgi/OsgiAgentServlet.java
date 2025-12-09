@@ -111,7 +111,7 @@ public class OsgiAgentServlet extends AgentServlet {
      *                       debugging
      */
     @Override
-    protected LogHandler createLogHandler(ServletConfig pServletConfig, Configuration pConfiguration) {
+    protected org.jolokia.core.api.LogHandler createLogHandler(ServletConfig pServletConfig, Configuration pConfiguration) {
         // If there is a bundle context available, set up a tracker for tracking the logging
         // service
         BundleContext ctx = getBundleContext(pServletConfig);
@@ -167,7 +167,7 @@ public class OsgiAgentServlet extends AgentServlet {
 
     // LogHandler which logs to a LogService if available, otherwise
     // it uses simply the servlets log facility
-    private final class ActivatorLogHandler implements LogHandler {
+    private final class ActivatorLogHandler implements org.jolokia.core.api.LogHandler {
 
         private final ServiceTracker<LogService, LogService> logTracker;
         private final boolean debug;

@@ -19,7 +19,7 @@ import java.util.SortedSet;
 
 import org.jolokia.server.core.detector.ServerDetector;
 import org.jolokia.server.core.detector.ServerDetectorLookup;
-import org.jolokia.server.core.service.api.LogHandler;
+import org.jolokia.core.api.LogHandler;
 
 public class CachingServerDetectorLookup implements ServerDetectorLookup {
 

@@ -183,6 +183,7 @@ public abstract class AbstractOsgiTestBase {
         return new Option[]{
                 mavenBundle("org.osgi", "org.osgi.service.servlet").versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
                 mavenBundle("org.jolokia", "jolokia-json").versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
+                mavenBundle("org.jolokia", "jolokia-core").versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
                 mavenBundle("org.jolokia", "jolokia-server-core").versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
                 mavenBundle("org.jolokia", "jolokia-service-jmx").versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1),
                 mavenBundle("org.jolokia", "jolokia-service-serializer").versionAsInProject().startLevel(START_LEVEL_TEST_BUNDLE - 1)

@@ -16,7 +16,7 @@ package org.jolokia.server.core.service.impl;
  * limitations under the License.
  */
 
-import org.jolokia.server.core.service.api.LogHandler;
+import org.jolokia.core.api.LogHandler;
 
 /**
  * No-Op LogHandler

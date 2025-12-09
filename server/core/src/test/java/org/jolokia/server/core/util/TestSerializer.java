@@ -9,7 +9,7 @@ import javax.management.openmbean.*;
 
 import org.jolokia.server.core.service.api.AbstractJolokiaService;
 import org.jolokia.server.core.service.serializer.Serializer;
-import org.jolokia.server.core.service.serializer.SerializeOptions;
+import org.jolokia.core.service.serializer.SerializeOptions;
 import org.jolokia.json.JSONStructure;
 import org.jolokia.json.JSONObject;
 import org.jolokia.json.parser.JSONParser;

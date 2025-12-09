@@ -39,7 +39,7 @@ import org.jolokia.server.core.service.impl.JolokiaServiceManagerImpl;
 import org.jolokia.server.core.service.impl.JulLogHandler;
 import org.jolokia.server.core.util.Base64Util;
 import org.jolokia.test.util.EnvTestUtil;
-import org.jolokia.server.core.service.api.LogHandler;
+import org.jolokia.core.api.LogHandler;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;

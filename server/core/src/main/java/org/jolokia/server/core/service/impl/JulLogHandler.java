@@ -3,7 +3,7 @@ package org.jolokia.server.core.service.impl;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.jolokia.server.core.service.api.LogHandler;
+import org.jolokia.core.api.LogHandler;
 
 /**
  * Loghandler based on <code>java.util.logging</code>. <code>FINER</code>

@@ -18,8 +18,6 @@ package org.jolokia.jvmagent.client.util;
 
 import java.io.File;
 import java.net.*;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 
 /**
  * Utility class for looking up a class within tools.jar
@@ -98,16 +96,7 @@ public final class ToolsClassFinder {
     // Create a classloader and respect a security manager if installed
     private static ClassLoader createClassLoader(File toolsJar) throws MalformedURLException {
         final URL[] urls = new URL[] {toolsJar.toURI().toURL() };
-        if (System.getSecurityManager() == null) {
-            return new URLClassLoader(urls, getParentClassLoader());
-        } else {
-            return AccessController.doPrivileged(new PrivilegedAction<>() {
-                /** {@inheritDoc} */
-                public ClassLoader run() {
-                    return new URLClassLoader(urls, getParentClassLoader());
-                }
-            });
-        }
+        return new URLClassLoader(urls, getParentClassLoader());
     }
 
     private static ClassLoader getParentClassLoader() {

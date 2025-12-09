@@ -15,10 +15,10 @@ public class SerializerServiceActivator implements BundleActivator {
 
     /** {@inheritDoc} */
     public void start(BundleContext context) throws Exception {
-
         context.registerService(Serializer.class.getName(),new JolokiaSerializer(),null);
     }
 
     /** {@inheritDoc} */
     public void stop(BundleContext context) throws Exception { }
+
 }

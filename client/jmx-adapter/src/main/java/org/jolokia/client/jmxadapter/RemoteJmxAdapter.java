@@ -55,7 +55,7 @@ import org.jolokia.client.response.JolokiaSearchResponse;
 import org.jolokia.client.request.JolokiaVersionRequest;
 import org.jolokia.client.response.JolokiaVersionResponse;
 import org.jolokia.client.request.JolokiaWriteRequest;
-import org.jolokia.server.core.util.ClassUtil;
+import org.jolokia.core.util.ClassUtil;
 import org.jolokia.service.serializer.JolokiaSerializer;
 import org.jolokia.json.JSONObject;
 
@@ -241,13 +241,13 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
                 });
     }
 
+    @SuppressWarnings("unchecked")
     private <RESP extends JolokiaResponse<REQ>, REQ extends JolokiaRequest> RESP unwrapExecute(REQ pRequest)
             throws IOException, InstanceNotFoundException {
         try {
             pRequest.setPreferredHttpMethod(HttpMethod.POST);
             return this.connector.execute(pRequest, defaultProcessingOptions());
         } catch (JolokiaException e) {
-            //noinspection unchecked
             return (RESP) unwrapException(e);
         }
     }

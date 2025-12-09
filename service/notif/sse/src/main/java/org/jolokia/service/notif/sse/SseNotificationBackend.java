@@ -12,7 +12,7 @@ import org.jolokia.server.core.http.BackChannel;
 import org.jolokia.server.core.service.api.AbstractJolokiaService;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.notification.*;
-import org.jolokia.server.core.service.serializer.SerializeOptions;
+import org.jolokia.core.service.serializer.SerializeOptions;
 import org.jolokia.server.core.service.serializer.Serializer;
 import org.jolokia.json.JSONObject;
 

@@ -285,6 +285,7 @@ public class HistoryStore {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private JSONObject updateHistoryForPatternRead(JolokiaReadRequest pJmxReq, long pTimestamp, Map<String, Object> pValues) {
         JSONObject history = new JSONObject();
         List<String> pathParts = pJmxReq.getPathParts();
@@ -299,8 +300,6 @@ public class HistoryStore {
                 beanHistory = addPathFilteredAttributeValue(pJmxReq, pTimestamp, beanName, value);
             }
             if (value instanceof Map) {
-                //noinspection unchecked
-                beanHistory =
                         addMultipleAttributeValues(
                                 pJmxReq,
                                 ((Map<String, Object>) beanEntry.getValue()),

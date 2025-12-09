@@ -18,7 +18,7 @@ package org.jolokia.server.core.request;
 
 import java.util.*;
 
-import org.jolokia.server.core.util.EscapeUtil;
+import org.jolokia.core.util.EscapeUtil;
 import org.jolokia.server.core.util.RequestType;
 import org.jolokia.json.JSONObject;
 import org.testng.annotations.*;

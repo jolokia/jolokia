@@ -56,7 +56,7 @@ import static org.testng.Assert.fail;
 public class KeyStoreUtilTest {
 
     public static final String CA_CERT_SUBJECT_DN_CN = "CN=ca.test.jolokia.org";
-    public static final String SERVER_CERT_SUBJECT_DN = "C=DE, ST=Franconia, L=Pegnitz, OU=Test, O=jolokia.org, CN=Server Cert signed and with extended key usage server";
+    public static final String SERVER_CERT_SUBJECT_DN = "C=DE,ST=Franconia,L=Pegnitz,OU=Test,O=jolokia.org,CN=Server Cert signed and with extended key usage server";
 
     public static final String CA_ALIAS = "1.2.840.113549.1.9.1=#1612726f6c616e64406a6f6c6f6b69612e6f7267,C=DE,ST=Bavaria,L=Pegnitz,OU=Dev,O=Jolokia,CN=ca.test.jolokia.org|52247990346977554835626411219862801398774599212";
     public static final String SERVER_ALIAS = "c=de,st=franconia,l=pegnitz,ou=test,o=jolokia.org,cn=server cert signed and with extended key usage server";
@@ -73,7 +73,7 @@ public class KeyStoreUtilTest {
         String alias = aliases.get(0);
         assertTrue(alias.contains("ca.test.jolokia.org"));
         X509Certificate cert = (X509Certificate) keystore.getCertificate(alias);
-        assertTrue(cert.getSubjectDN().getName().contains(CA_CERT_SUBJECT_DN_CN));
+        assertTrue(cert.getSubjectX500Principal().getName().contains(CA_CERT_SUBJECT_DN_CN));
         RSAPublicKey key = (RSAPublicKey) cert.getPublicKey();
         assertEquals(key.getAlgorithm(),"RSA");
     }
@@ -99,7 +99,7 @@ public class KeyStoreUtilTest {
             assertNotNull(expectedSubjectDN);
 
             X509Certificate cert = (X509Certificate) keystore.getCertificate(alias);
-            assertTrue(cert.getSubjectDN().getName().contains(expectedSubjectDN));
+            assertTrue(cert.getSubjectX500Principal().getName().contains(expectedSubjectDN));
             RSAPublicKey certPublicKey = (RSAPublicKey) cert.getPublicKey();
             assertEquals(certPublicKey.getAlgorithm(),"RSA");
         }
@@ -120,11 +120,11 @@ public class KeyStoreUtilTest {
         assertTrue(alias.contains("server"));
 
         X509Certificate cert = (X509Certificate) keystore.getCertificate(alias);
-        assertEquals(cert.getSubjectDN().getName(), SERVER_CERT_SUBJECT_DN);
+        assertEquals(cert.getSubjectX500Principal().getName(), SERVER_CERT_SUBJECT_DN);
         RSAPrivateCrtKey key = (RSAPrivateCrtKey) keystore.getKey(alias, new char[0]);
-        assertEquals("RSA", key.getAlgorithm());
+        assertEquals(key.getAlgorithm(), "RSA");
         RSAPublicKey pubKey = (RSAPublicKey) cert.getPublicKey();
-        assertEquals("RSA", pubKey.getAlgorithm());
+        assertEquals(pubKey.getAlgorithm(), "RSA");
     }
 
     @Test
@@ -144,20 +144,20 @@ public class KeyStoreUtilTest {
         assertEquals(chain.length, 3);
 
         String[] expectedSubjectDNs = new String[]{
-            "CN=Server Cert signed and with extended key usage server, C=DE, ST=Franconia, L=Pegnitz, OU=Test, O=jolokia.org",
-            "CN=Intermediate CA, OU=Test, O=jolokia.org, L=Mountain View, ST=California, C=US",
-            "CN=Root CA, OU=Test, O=jolokia.org, L=Mountain View, ST=California, C=US"
+            "CN=Server Cert signed and with extended key usage server,C=DE,ST=Franconia,L=Pegnitz,OU=Test,O=jolokia.org",
+            "CN=Intermediate CA,OU=Test,O=jolokia.org,L=Mountain View,ST=California,C=US",
+            "CN=Root CA,OU=Test,O=jolokia.org,L=Mountain View,ST=California,C=US"
         };
 
         for (int i = 0; i < expectedSubjectDNs.length; i++) {
-            assertEquals(((X509Certificate) chain[i]).getSubjectDN().getName(), expectedSubjectDNs[i]);
+            assertEquals(((X509Certificate) chain[i]).getSubjectX500Principal().getName(), expectedSubjectDNs[i]);
             RSAPublicKey pubKey = (RSAPublicKey) chain[i].getPublicKey();
-            assertEquals("RSA", pubKey.getAlgorithm());
+            assertEquals(pubKey.getAlgorithm(), "RSA");
         }
 
         X509Certificate serverCert = (X509Certificate) chain[0];
         RSAPrivateCrtKey key = (RSAPrivateCrtKey) keystore.getKey(alias, new char[0]);
-        assertEquals("RSA", key.getAlgorithm());
+        assertEquals(key.getAlgorithm(), "RSA");
     }
 
     @Test
@@ -209,8 +209,8 @@ public class KeyStoreUtilTest {
         KeyStoreUtil.updateWithSelfSignedServerCertificate(keystore, null);
         X509Certificate cert = (X509Certificate) keystore.getCertificate("jolokia-agent");
         assertNotNull(cert);
-        assertEquals(cert.getSubjectDN().getName(), "CN=Jolokia Agent " + Version.getAgentVersion() + ", OU=JVM, O=jolokia.org, L=Pegnitz, ST=Franconia, C=DE");
-        assertEquals(cert.getSubjectDN(), cert.getIssuerDN());
+        assertEquals(cert.getSubjectX500Principal().getName(), "CN=Jolokia Agent " + Version.getAgentVersion() + ",OU=JVM,O=jolokia.org,L=Pegnitz,ST=Franconia,C=DE");
+        assertEquals(cert.getSubjectX500Principal(), cert.getIssuerX500Principal());
     }
 
     // ========================================================
@@ -222,14 +222,15 @@ public class KeyStoreUtilTest {
     }
 
     private File getTempFile(String path) throws IOException {
-        InputStream is = this.getClass().getResourceAsStream("/certs/" + path);
-        File dest = File.createTempFile("cert-", "pem");
-        try (LineNumberReader reader = new LineNumberReader(new InputStreamReader(Objects.requireNonNull(is))); FileWriter writer = new FileWriter(dest)) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                writer.write(line + "\n");
+        try (InputStream is = this.getClass().getResourceAsStream("/certs/" + path)) {
+            File dest = File.createTempFile("cert-", "pem");
+            try (LineNumberReader reader = new LineNumberReader(new InputStreamReader(Objects.requireNonNull(is))); FileWriter writer = new FileWriter(dest)) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    writer.write(line + "\n");
+                }
+                return dest;
             }
-            return dest;
         }
     }
 

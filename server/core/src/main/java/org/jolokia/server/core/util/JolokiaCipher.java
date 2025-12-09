@@ -163,7 +163,7 @@ public class JolokiaCipher {
     private static class KeyHolderImpl implements KeyHolder {
 
         public String getKey() {
-            InputStream in = ClassUtil.getResourceAsStream(JOLOKIA_CYPHER_PASSWORD_FILE);
+            InputStream in = org.jolokia.core.util.ClassUtil.getResourceAsStream(JOLOKIA_CYPHER_PASSWORD_FILE);
             if (in != null) {
                 try (in) {
                     return new BufferedReader(new InputStreamReader(in)).readLine();

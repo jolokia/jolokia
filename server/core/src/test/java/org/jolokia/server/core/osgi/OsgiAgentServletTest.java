@@ -25,7 +25,7 @@ import org.jolokia.server.core.detector.ServerDetectorLookup;
 import org.jolokia.server.core.http.AgentServlet;
 import org.jolokia.server.core.restrictor.AllowAllRestrictor;
 import org.jolokia.server.core.service.api.JolokiaService;
-import org.jolokia.server.core.service.api.LogHandler;
+import org.jolokia.core.api.LogHandler;
 import org.jolokia.server.core.util.HttpTestUtil;
 import org.osgi.framework.*;
 import org.osgi.framework.Filter;
