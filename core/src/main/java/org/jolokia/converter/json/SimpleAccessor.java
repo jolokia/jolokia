@@ -17,7 +17,6 @@ package org.jolokia.converter.json;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Deque;
-import javax.management.AttributeNotFoundException;
 
 import org.jolokia.converter.object.Converter;
 
@@ -30,7 +29,7 @@ public class SimpleAccessor implements org.jolokia.converter.json.ObjectAccessor
     }
 
     @Override
-    public Object extractObject(ObjectToJsonConverter pConverter, Object pValue, Deque<String> pPathParts, boolean pJsonify) throws AttributeNotFoundException {
+    public Object extractObject(ObjectToJsonConverter pConverter, Object pValue, Deque<String> pPathParts, boolean pJsonify) {
         Class<?> clazz = pValue.getClass();
 
         if (!pJsonify) {

@@ -118,31 +118,28 @@ public class ClientExecIntegrationTest extends AbstractClientIntegrationTest {
 
     @Test
     public void collectionArg() throws MalformedObjectNameException, JolokiaException {
-        for (HttpMethod type : new HttpMethod[] { HttpMethod.GET, HttpMethod.POST }) {
-            for (Object args : new Object[] {
-                    new String[] { "roland","tanja","forever" },
-                    Arrays.asList("roland", "tanja","forever")
+        for (HttpMethod type : new HttpMethod[]{HttpMethod.POST}) {
+            for (Object args : new Object[]{
+                new String[]{"roland", "tanja", "forever"},
+                Arrays.asList("roland", "tanja", "forever")
             }) {
-                for (JolokiaExecRequest request : execRequests("arrayArguments",args,"myExtra")) {
-                    if (type.equals(HttpMethod.GET) && request.getTargetConfig() != null) {
-                        continue;
-                    }
-                    JolokiaExecResponse resp = jolokiaClient.execute(request,type);
-                    assertEquals("roland",resp.getValue());
+                for (JolokiaExecRequest request : execRequests("arrayArguments", args, "myExtra")) {
+                    JolokiaExecResponse resp = jolokiaClient.execute(request, type);
+                    assertEquals("roland", resp.getValue());
 
                     // Check request params
-                    assertEquals("arrayArguments",request.getOperation());
-                    assertEquals(2,request.getArguments().size());
+                    assertEquals("arrayArguments", request.getOperation());
+                    assertEquals(2, request.getArguments().size());
 
                     // With null
-                    request = new JolokiaExecRequest(itSetup.getOperationMBean(),"arrayArguments",new String[] { null, "bla", null },"myExtra");
-                    resp = jolokiaClient.execute(request);
+                    request = new JolokiaExecRequest(itSetup.getOperationMBean(), "arrayArguments", new String[]{null, "bla", null}, "myExtra");
+                    resp = jolokiaClient.execute(request, type);
                     assertNull(resp.getValue());
 
                     // With ints
-                    request = new JolokiaExecRequest(itSetup.getOperationMBean(),"arrayArguments",new Integer[] { 1,2,3 },"myExtra");
-                    resp = jolokiaClient.execute(request);
-                    assertEquals("1",resp.getValue());
+                    request = new JolokiaExecRequest(itSetup.getOperationMBean(), "arrayArguments", new Integer[]{1, 2, 3}, "myExtra");
+                    resp = jolokiaClient.execute(request, type);
+                    assertEquals("1", resp.getValue());
                 }
             }
         }

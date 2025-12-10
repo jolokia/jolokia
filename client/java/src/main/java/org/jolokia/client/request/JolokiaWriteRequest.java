@@ -185,7 +185,6 @@ public class JolokiaWriteRequest extends JolokiaMBeanRequest {
     public List<String> getRequestParts() {
         List<String> parts = super.getRequestParts();
         parts.add(attribute);
-        // TODO: better serialization
         parts.add(serializeArgumentToRequestPart(value));
         parts.addAll(EscapeUtil.splitPath(path));
         return parts;
@@ -195,7 +194,6 @@ public class JolokiaWriteRequest extends JolokiaMBeanRequest {
     public JSONObject toJson() {
         JSONObject ret = super.toJson();
         ret.put("attribute", attribute);
-        // TODO: better serialization
         ret.put("value", serializeArgumentToJson(value));
         if (path != null) {
             ret.put("path", path);

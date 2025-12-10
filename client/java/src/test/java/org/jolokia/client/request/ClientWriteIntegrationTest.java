@@ -110,26 +110,29 @@ public class ClientWriteIntegrationTest extends AbstractClientIntegrationTest {
         list.add(null);
         list.add(new BigDecimal("23.2"));
         checkWrite(new HttpMethod[] { HttpMethod.POST }, "List",null,list);
-        checkWrite("List","0",null);
-        checkWrite("List","0","");
-        checkWrite("List","2",42L);
+        checkWrite(new HttpMethod[] { HttpMethod.POST }, "List","0",null);
+        checkWrite(new HttpMethod[] { HttpMethod.POST }, "List","0","");
+        checkWrite(new HttpMethod[] { HttpMethod.POST }, "List","2",42L);
     }
 
 
     @Test
     public void stringArray() throws MalformedObjectNameException, JolokiaException {
-        try {
-            final String[] input = new String[] { "eins", "zwei", null, "drei" };
-            checkWrite("StringArray", null, input, resp -> {
-                JSONArray val = resp.getValue();
-                assertEquals(val.size(), input.length);
-                for (int i = 0; i < input.length; i++) {
-                    assertEquals(val.get(i),input[i]);
-                }
-            });
-        } catch (JolokiaRemoteException exp) {
-            exp.printStackTrace();
-        }
+        final String[] input = new String[] { "eins", "zwei", null, "drei,cztery" };
+        checkWrite(new HttpMethod[] { HttpMethod.POST }, "StringArray", null, input, resp -> {
+            JSONArray val = resp.getValue();
+            assertEquals(val.size(), input.length);
+            for (int i = 0; i < input.length; i++) {
+                assertEquals(val.get(i),input[i]);
+            }
+        });
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void stringArrayAsGET() throws MalformedObjectNameException, JolokiaException {
+        final String[] input = new String[] { "eins", "zwei", null, "drei,cztery" };
+        checkWrite(new HttpMethod[] { HttpMethod.GET }, "StringArray", null, input, resp -> {
+        });
     }
 
     @Test
@@ -162,10 +165,10 @@ public class ClientWriteIntegrationTest extends AbstractClientIntegrationTest {
                 new JolokiaWriteRequest(IT_ATTRIBUTE_MBEAN,"List","bla"),
                 new JolokiaWriteRequest(getTargetProxyConfig(),IT_ATTRIBUTE_MBEAN,"List","bla")
         }) {
-            assertEquals(req.getAttribute(),"List");
-            assertEquals(req.getObjectName(),new ObjectName(IT_ATTRIBUTE_MBEAN));
-            assertEquals(req.getValue(),"bla");
-            assertEquals(req.getType(), JolokiaOperation.WRITE);
+            assertEquals("List", req.getAttribute());
+            assertEquals(new ObjectName(IT_ATTRIBUTE_MBEAN), req.getObjectName());
+            assertEquals("bla", req.getValue());
+            assertEquals(JolokiaOperation.WRITE, req.getType());
         }
     }
 
@@ -173,12 +176,19 @@ public class ClientWriteIntegrationTest extends AbstractClientIntegrationTest {
     @Test
     public void mxNumbers() throws MalformedObjectNameException, JolokiaException {
         final Long[] input = { 1L, 2L };
-        checkMxWrite("Numbers",null,input, resp -> {
+        checkMxWrite(new HttpMethod[] { HttpMethod.POST },"Numbers",null,input, resp -> {
             JSONArray val = resp.getValue();
             assertEquals(val.size(), input.length);
             for (int i = 0; i < input.length; i++) {
                 assertEquals(val.get(i), input[i]);
             }
+        });
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void mxNumbersAsGET() throws MalformedObjectNameException, JolokiaException {
+        final Long[] input = { 1L, 2L };
+        checkMxWrite(new HttpMethod[] { HttpMethod.GET },"Numbers",null,input, resp -> {
         });
     }
 

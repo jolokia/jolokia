@@ -202,7 +202,7 @@ public class ObjectToObjectConverterTest {
 
     @Test
     public void arrayConversions() {
-        int[] expected = new int[] { 10,20,30};
+        int[] expected = new int[] { 10,20,30 };
         Object obj = converter.convertFromString(int[].class.getName(), "10,20,30");
         for (int i = 0;i < expected.length;i++) {
             assertEquals(expected[i],((int[]) obj)[i]);

@@ -68,8 +68,7 @@ public class JavaTimeTemporalAccessor implements org.jolokia.converter.json.Obje
     }
 
     @Override
-    public Object extractObject(ObjectToJsonConverter pConverter, Object pTemporal, Deque<String> pPathParts, boolean pJsonify)
-            throws AttributeNotFoundException {
+    public Object extractObject(ObjectToJsonConverter pConverter, Object pTemporal, Deque<String> pPathParts, boolean pJsonify) {
         if (!pJsonify || pTemporal == null) {
             return pTemporal;
         }

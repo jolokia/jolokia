@@ -163,7 +163,6 @@ public class JolokiaExecRequest extends JolokiaMBeanRequest {
         ret.add(operation);
         if (!arguments.isEmpty()) {
             for (Object argument : arguments) {
-                // TODO: better serialization
                 ret.add(serializeArgumentToRequestPart(argument));
             }
         }
@@ -180,7 +179,6 @@ public class JolokiaExecRequest extends JolokiaMBeanRequest {
         if (!arguments.isEmpty()) {
             JSONArray args = new JSONArray(arguments.size());
             for (Object arg : arguments) {
-                // TODO: better serialization
                 args.add(serializeArgumentToJson(arg));
             }
             ret.put("arguments", args);

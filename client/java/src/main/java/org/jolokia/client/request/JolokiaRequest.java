@@ -15,20 +15,19 @@
  */
 package org.jolokia.client.request;
 
-import java.lang.reflect.Array;
-import java.time.temporal.ChronoField;
-import java.time.temporal.Temporal;
-import java.util.Collection;
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
+import javax.management.AttributeNotFoundException;
+import javax.management.openmbean.OpenType;
 
 import org.jolokia.client.JolokiaOperation;
 import org.jolokia.client.JolokiaTargetConfig;
 import org.jolokia.client.response.JolokiaResponse;
-import org.jolokia.json.JSONArray;
+import org.jolokia.converter.json.ObjectToJsonConverter;
+import org.jolokia.converter.object.Converter;
+import org.jolokia.converter.object.ObjectToObjectConverter;
+import org.jolokia.converter.object.ObjectToOpenTypeConverter;
+import org.jolokia.core.service.serializer.SerializeOptions;
 import org.jolokia.json.JSONObject;
-import org.jolokia.json.JSONStructure;
 
 /**
  * <p>Abstract representation of <em>Jolokia request</em> targeted at Jolokia agent. Each Jolokia request has single
@@ -74,6 +73,32 @@ import org.jolokia.json.JSONStructure;
  * @since Apr 24, 2010
  */
 public abstract class JolokiaRequest {
+
+    /**
+     * Most generic converted for any values (usually Strings) to objects of target class
+     * specified as {@link String}. It is used by other, specialized converters.
+     */
+    private static final Converter<String> objectToObjectConverter;
+
+    /**
+     * Deserializer from String, {@link org.jolokia.json.JSONStructure} or other supported objects
+     * to objects of class specified as {@link OpenType} for specialized JMX object conversion.
+     */
+    private static final Converter<OpenType<?>> objectToOpenTypeConverter;
+
+    // From object to json:
+    private static final ObjectToJsonConverter toJsonConverter;
+
+    static {
+        // generic converter of any values (primitive, basic like dates and arrays)
+        objectToObjectConverter = new ObjectToObjectConverter();
+
+        objectToOpenTypeConverter = new ObjectToOpenTypeConverter(objectToObjectConverter, false);
+
+        // default version where CoreConfiguration is not available
+        toJsonConverter = new ObjectToJsonConverter((ObjectToObjectConverter) objectToObjectConverter,
+            (ObjectToOpenTypeConverter) objectToOpenTypeConverter, null);
+    }
 
     /** Specific {@link JolokiaOperation request type} of this request */
     private final JolokiaOperation type;
@@ -183,89 +208,33 @@ public abstract class JolokiaRequest {
         return ret;
     }
 
-    // TODO: the below methods should use low-level conversion methods now available in jolokia-service-serializer
-
     /**
-     * Serialize an object to a string which can be uses as URL part in a GET request
-     * when object should be transmitted <em>to</em> the agent. The serialization is
-     * rather limited: If it is an array, the array's member's string representation are used
-     * in a comma separated list (without escaping so far, so the strings must not contain any
-     * commas themselves). If it is not an array, the string representation ist used (<code>Object.toString()</code>)
-     * Any <code>null</code> value is transformed in the special marker <code>[null]</code> which on the
-     * agent side is converted back into a <code>null</code>.
-     * <p>
-     * You should consider POST requests when you need a more sophisticated JSON serialization.
-     * </p>
-     * TODO: Move to serializer
+     * <p>Serialize an object to a string which can be uses as URL part in a GET request
+     * when object should be transmitted <em>to</em> the agent. The serialization uses the same
+     * mechanisms which are used at the server and {@link Object#toString()} is used only in limited
+     * scenarios - and it's always explicit (some types like {@link java.net.URL} have <em>good</em>
+     * {@code toString()} method).</p>
+     * <p>Any <code>null</code> value is transformed in the special marker <code>[null]</code> which on the
+     * agent side is converted back into a <code>null</code>.</p>
+     * <p>Sophisticated serialization is available for POST request, where the data is sent as JSON body
+     * of the HTTP request.</p>
      *
-     * @param pArg the argument to serialize for an GET request
+     * @param pArg the argument to serialize for a {@code GET} request
      * @return the string representation
+     * @throws IllegalArgumentException when given object can't be easily converted to a String. This is clearly
+     *         an indication that {@link HttpMethod#POST} method should be used.
      */
-    protected String serializeArgumentToRequestPart(Object pArg) {
-        if (pArg != null) {
-            if (pArg.getClass().isArray()) {
-                return getArrayForArgument((Object[]) pArg);
-            } else if (List.class.isAssignableFrom(pArg.getClass())) {
-                List<?> list = (List<?>) pArg;
-                Object[] args = new Object[list.size()];
-                int i = 0;
-                for (Object e : list) {
-                    args[i++] = e;
-                }
-                return getArrayForArgument(args);
-            } else if (Date.class == pArg.getClass()) {
-                // pass Date as long (there's no TZ information here just like in java.time.Instant)
-                Date d = (Date) pArg;
-                return Long.toString(d.getTime());
-            } else if (Temporal.class.isAssignableFrom(pArg.getClass())) {
-                // special handling for the temporals that can easily be converted to unix time (in nanos)
-                Temporal t = (Temporal) pArg;
-                if (t.isSupported(ChronoField.INSTANT_SECONDS)) {
-                    long instant = t.getLong(ChronoField.INSTANT_SECONDS) * 1_000_000_000L
-                        + t.getLong(ChronoField.NANO_OF_SECOND);
-                    return Long.toString(instant);
-                } else {
-                    // for now we can't nicely convert it and we don't know what's the pattern used
-                    // at server side
-                    return t.toString();
-                }
-            }
+    protected String serializeArgumentToRequestPart(Object pArg) throws IllegalArgumentException {
+        String v = nullEscape(pArg);
+        if (v != null) {
+            return v;
         }
-        return nullEscape(pArg);
+        return (String) objectToObjectConverter.convert(String.class.getName(), pArg);
     }
 
     /**
-     * Serialize an object to an string or JSON structure for write/exec POST requests.
-     * Serialization is up to now rather limited:
-     * <ul>
-     *    <li>
-     *      If the argument is <code>null</code> null is returned.
-     *    </li>
-     *    <li>
-     *      If the argument is of type {@link org.jolokia.json.JSONStructure}, then it is used directly for inclusion
-     *      in the POST request.
-     *    </li>
-     *    <li>
-     *      If the argument is an array, this array's content is put into
-     *      an {@link org.jolokia.json.JSONArray}, where each array member is serialized recursively.
-     *    </li>
-     *    <li>
-     *      If the argument is a map, it is transformed into a {@link org.jolokia.json.JSONObject} with the keys taken
-     *      directly from the map and the values recursively serialized to their JSON representation.
-     *      So it is only save fto use or a simple map with string keys.
-     *    </li>
-     *    <li>
-     *      If the argument is a {@link Collection}, it is transformed into a {@link JSONArray} with
-     *      the values recursively serialized to their JSON representation.
-     *    </li>
-     *    <li>
-     *      Otherwise the object is used directly.
-     *    </li>
-     * </ul>
-     * <p>
-     * Future version of this lib will probably provide a more sophisticated serialization mechanism.
-     * <em>This is how it is supposed to be for the next release, currently a simplified serialization is in place</em>
-     * TODO: Move to serializer
+     * <p>Serialize an object to an string or JSON structure for write/exec {@code POST} requests.</p>
+     * <p>Since Jolokia 2.5.0, full serialization mechanism is used (the same as at the server side).</p>
      *
      * @param pArg the object to serialize
      * @return a JSON serialized object
@@ -273,83 +242,27 @@ public abstract class JolokiaRequest {
     public Object serializeArgumentToJson(Object pArg) {
         if (pArg == null) {
             return null;
-        } else if (pArg instanceof JSONStructure) {
-            return pArg;
-        } else if (pArg.getClass().isArray()) {
-            return serializeArray(pArg);
-        } else if (pArg instanceof Map) {
-            //noinspection unchecked
-            return serializeMap((Map<String, Object>) pArg);
-        } else if (pArg instanceof Collection) {
-            return serializeCollection((Collection<?>) pArg);
-        } else if (Date.class == pArg.getClass()) {
-            // pass Date as long (there's no TZ information here just like in java.time.Instant)
-            Date d = (Date) pArg;
-            return Long.toString(d.getTime());
-        } else if (pArg instanceof Temporal t) {
-            // special handling for the temporals that can easily be converted to unix time (in nanos)
-            if (t.isSupported(ChronoField.INSTANT_SECONDS)) {
-                return t.getLong(ChronoField.INSTANT_SECONDS) * 1_000_000_000L
-                    + t.getLong(ChronoField.NANO_OF_SECOND);
-            } else {
-                // for now we can't nicely convert it and we don't know what's the pattern used
-                // at server side
-                return t.toString();
-            }
-        } else {
-            return pArg instanceof Number || pArg instanceof Boolean ? pArg : pArg.toString();
+        }
+        try {
+            return toJsonConverter.serialize(pArg, null, SerializeOptions.DEFAULT);
+        } catch (AttributeNotFoundException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    // =====================================================================================================
-
-    private Object serializeCollection(Collection<?> pArg) {
-        JSONArray array = new JSONArray(pArg.size());
-        for (Object value : pArg) {
-            array.add(serializeArgumentToJson(value));
-        }
-        return array;
-    }
-
-    private Object serializeMap(Map<String, Object> pArg) {
-        JSONObject map = new JSONObject();
-        for (Map.Entry<String, Object> entry : pArg.entrySet()) {
-            map.put(entry.getKey(), serializeArgumentToJson(entry.getValue()));
-        }
-        return map;
-    }
-
-    private Object serializeArray(Object pArg) {
-        int length = Array.getLength(pArg);
-        JSONArray innerArray = new JSONArray(length);
-        for (int i = 0; i < length; i++) {
-            innerArray.add(serializeArgumentToJson(Array.get(pArg, i)));
-        }
-        return innerArray;
-    }
-
-    private String getArrayForArgument(Object[] pArg) {
-        StringBuilder inner = new StringBuilder();
-        for (int i = 0; i < pArg.length; i++) {
-            inner.append(nullEscape(pArg[i]));
-            if (i < pArg.length - 1) {
-                inner.append(",");
-            }
-        }
-        return inner.toString();
-    }
-
-    // null escape used for GET requests
+    /**
+     * Escaping some special values for GET requests
+     * @param pArg
+     * @return
+     */
     private String nullEscape(Object pArg) {
         if (pArg == null) {
             return "[null]";
         } else if (pArg instanceof String && ((String) pArg).isEmpty()) {
             return "\"\"";
-        } else if (pArg instanceof JSONStructure) {
-            return ((JSONStructure) pArg).toJSONString();
-        } else {
-            return pArg.toString();
         }
+
+        return null;
     }
 
 }

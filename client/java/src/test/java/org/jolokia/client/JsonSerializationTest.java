@@ -18,6 +18,7 @@ package org.jolokia.client;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.*;
 
 import org.jolokia.client.request.JolokiaRequest;
@@ -48,7 +49,7 @@ public class JsonSerializationTest {
     public void JSONStructureSerialization() {
         JSONObject arg = new JSONObject();
         Object result = serialize(arg);
-        assertSame(arg, result);
+        assertEquals(arg, result);
     }
 
     @Test
@@ -57,8 +58,8 @@ public class JsonSerializationTest {
         Object result = serialize(arg);
         assertTrue(result instanceof JSONArray);
         JSONArray res = (JSONArray) result;
-        assertEquals(res.get(0),1);
-        assertEquals(res.size(),3);
+        assertEquals(res.get(0), 1L);
+        assertEquals(res.size(), 3);
     }
 
     @Test
@@ -68,7 +69,7 @@ public class JsonSerializationTest {
         Object result = serialize(arg);
         assertTrue(result instanceof JSONObject);
         JSONObject res = (JSONObject) result;
-        assertEquals(res.get("arg"), 10.0);
+        assertEquals(res.get("arg"), new BigDecimal("10.0"));
     }
 
     @Test
@@ -101,15 +102,15 @@ public class JsonSerializationTest {
         JSONArray arr = (JSONArray) res.get("second");
         assertEquals(arr.size(), 5);
         assertNull(arr.get(0));
-        assertEquals(arr.get(1), "tmp");
-        assertEquals(arr.get(2), 10);
-        assertEquals(arr.get(3), 42.0);
+        assertEquals(((JSONObject) arr.get(1)).get("name"), "tmp");
+        assertEquals(arr.get(2), 10L);
+        assertEquals(arr.get(3), new BigDecimal("42.0"));
         assertEquals(arr.get(4), false);
         String json = res.toJSONString();
         assertNotNull(json);
         JSONObject reparsed = new JSONParser().parse(json, JSONObject.class);
         assertNotNull(reparsed);
-        assertEquals(((List<?>) reparsed.get("second")).get(1), "tmp");
+        assertEquals(((JSONObject) ((List<?>) reparsed.get("second")).get(1)).get("name"), "tmp");
     }
 
 
