@@ -1,6 +1,8 @@
 package org.jolokia.it.core;
 
 import java.io.File;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.time.Instant;
 import java.util.*;
 
@@ -118,5 +120,8 @@ public interface AttributeCheckingMBean {
     Instant getInstant();
 
     void setInstant(Instant instant);
+
+    // https://github.com/jolokia/jolokia/issues/888#issuecomment-3284125385
+    Map<InetAddress, Float> getCassandraOwnership() throws UnknownHostException;
 
 }

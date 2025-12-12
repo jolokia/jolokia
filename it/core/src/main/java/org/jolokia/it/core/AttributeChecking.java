@@ -3,6 +3,8 @@ package org.jolokia.it.core;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.Instant;
@@ -302,6 +304,14 @@ public class AttributeChecking implements AttributeCheckingMBean,MBeanRegistrati
 
     public void setInstant(Instant instant) {
         this.instant = instant;
+    }
+
+    @Override
+    public Map<InetAddress, Float> getCassandraOwnership() throws UnknownHostException {
+        return Map.of(
+            Inet4Address.getByAddress("my-host", new byte[] { (byte) (127 & 0xff), (byte) (1 & 0xff), (byte) (2 & 0xff), (byte) (3 & 0xff) }), 3.4f,
+            Inet6Address.getByAddress("my-host-6", new byte[] { 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4 }), 4.2f
+        );
     }
 
     public ObjectName preRegister(MBeanServer server, ObjectName name) throws Exception {

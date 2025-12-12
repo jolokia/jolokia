@@ -188,6 +188,14 @@ public class ClientReadIntegrationTest extends AbstractClientIntegrationTest {
     }
 
     @Test
+    public void inetFloatMapAttribute() throws MalformedObjectNameException, JolokiaException {
+        JolokiaReadResponse res = jolokiaClient.execute(new JolokiaReadRequest(itSetup.getAttributeMBean(), "CassandraOwnership"));
+        Map<String, BigDecimal> map = res.getValue();
+        assertEquals(map.size(), 2);
+        assertEquals(map.get("127.1.2.3"), new BigDecimal("3.4"));
+    }
+
+    @Test
     public void allAttributes() throws MalformedObjectNameException, JolokiaException {
         for (JolokiaReadRequest req : readRequests(itSetup.getAttributeMBean())) {
             JolokiaReadResponse resp = jolokiaClient.execute(req);
