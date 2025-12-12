@@ -70,7 +70,7 @@ The response value for a version request looks like:
       "agentId": "192.168.0.221-21185-5ce94d31-servlet",
       "maxCollectionSize": "0",
       "debug": "false",
-      "canonicalNaming": "true",
+      "canonicalNaming": "false",
       "historyMaxEntries": "10",
       "serializeException": "false",
       "includeStackTrace": "false",

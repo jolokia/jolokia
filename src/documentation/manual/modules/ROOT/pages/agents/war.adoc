@@ -214,13 +214,13 @@ If any other type is given, Jolokia falls back to `text/plain`.
 |This option specifies in which order the key-value
 properties within ObjectNames as returned by
 `list` or `search` are
-returned. By default this is the so called 'canonical order'
-in which the keys are sorted alphabetically. If this option
-is set to `false`, then the natural order
-is used, i.e. the object name as it was registered. This
+returned. By default this is the order of properties as specified
+at registration time. If this option
+is set to `true`, the so called _canonical order_
+will be used, where the keys are sorted alphabetically. This
 option can be overridden with a query parameter of the same
 name.
-|Default: `true`
+|Default: `false`
 
 |`includeStackTrace`
 |Whether to include a stacktrace of an exception in case of

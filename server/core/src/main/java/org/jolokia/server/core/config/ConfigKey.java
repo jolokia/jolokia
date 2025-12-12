@@ -142,7 +142,7 @@ public enum ConfigKey {
      * The allowed values are either "true" in which case the canonical key order (== alphabetical
      * sorted) is used or "false" for getting the keys as registered. Default is "true"
      */
-    CANONICAL_NAMING("canonicalNaming", true, true, Constants.TRUE, Boolean.class),
+    CANONICAL_NAMING("canonicalNaming", true, true, Constants.FALSE, Boolean.class),
 
     /**
      * Whether to use streaming json responses. Default is "true"

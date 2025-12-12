@@ -509,7 +509,7 @@ where <command> is one of
     --restrictorClass <class>       Classname of an custom restrictor which must be loadable from the classpath
     --policyLocation <url>          Location of a Jolokia policy file
     --mbeanQualifier <qualifier>    Qualifier to use when registering Jolokia internal MBeans
-    --canonicalNaming <t|f>         whether to use canonicalName for ObjectNames in 'list' or 'search' (default: true)
+    --canonicalNaming <t|f>         whether to use canonicalName for ObjectNames in 'list' or 'search' (default: false)
     --includeStackTrace <t|f>       whether to include StackTraces for error messages (default: false)
     --serializeException <t|f>      whether to add a serialized version of the exception in the Jolokia response (default: false)
     --includeRequest <t|f>          whether to include entire request in the response (default: true)

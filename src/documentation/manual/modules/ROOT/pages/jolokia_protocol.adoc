@@ -582,8 +582,8 @@ This may save you time parsing the name yourself. +
 With this flag enabled, `list()` operation returns a bit different structure (that's why we've upgraded protocol version to `8.0`) where some MBeans may _point to_ cached, shared MBeanInfo JSON fragment. This heavily decreases the size of `list()` response.
 *Added since Jolokia 2.1.0*
 
-`canonicalNaming`:: Defaults to `true` to return the canonical format of property lists.
-If set to `false` then the default unsorted property list is returned.
+`canonicalNaming`:: Defaults to `false` to return the defined (at creation time) format of property lists.
+If set to `true` then the default sorted property list is returned.
 
 `includeStackTrace`:: If set to `true`, then in case of an error the stack trace is included.
 With `false` no stack trace will be returned, and when this parameter
