@@ -1,0 +1,529 @@
+////
+  Copyright 2009-2025 Roland Huss
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+////
+= JMX Guide
+
+This chapter focuses on JMX itself and provides information about how this technology can be used to monitor and manage
+Java applications.
+
+The following sections show how basic monitoring and management can be performed starting from pure Java, non-JMX
+approach. Along the way JMX concepts are introduced and discussed. Eventually we show how Jolokia fits in the JMX architecture.
+
+[#_java-objects-interfaces-proxies]
+== Java, objects, interfaces, proxies
+
+This section is about the obvious and inherent nature of Java, which is an object oriented language.
+
+When writing Java applications, we always deal with objects, which may be implement interfaces. This is a fundamental aspect
+of Java. It is so natural that we hardly even think about this.
+
+Object oriented principals state that we invoke methods on objects. The most primitive ways to _get_ these objects
+in the first place is to instantiate them using `new` operator. This is straightforward, but we couple our code with
+some specific implementation.
+
+.Using objects directly
+[source,java]
+----
+java.lang.management.MemoryUsage usage
+    = new java.lang.management.MemoryUsage(1024L, 512L, 512L, 2048L);
+System.out.println("Memory usage: " + usage.toString());
+----
+
+If our code can _get_ the object in some better way, we reach loose coupling and leave the implementation details to some other mechanism
+like https://en.wikipedia.org/wiki/Dependency_injection[_dependency injection_], https://en.wikipedia.org/wiki/Service_locator_pattern[_service locator_] or other.
+
+The first level of _separation_ is to use an API (interface) and leave the details of how the implementation is created to other
+parts of the system (JDK, dependency injection framework, ...).
+
+.Using objects through interfaces
+[source,java]
+----
+java.lang.management.MemoryMXBean memory = java.lang.management.ManagementFactory.getMemoryMXBean();
+System.out.println("Memory usage: " + memory.getHeapMemoryUsage().toString());
+----
+
+The above example uses the _service locator_ pattern. Our code is aware of the _locator_ (here: `java.lang.management.ManagementFactory`), but
+we don't really know what _exactly_ do we locate - we only know the interface of the actual _located_ service.
+
+Using objects directly and through interfaces is fundamental part of Java language.
+
+[#_objects_and_interfaces]
+=== How objects, classes and interfaces relate?
+
+Fundamentally, a Java object declares that it can be _represented_ by one or more interfaces using `implements` statement.
+This is a https://docs.oracle.com/javase/specs/jls/se17/html/jls-8.html#jls-8.1.5[feature of the language itself].
+
+However there's something amazing in the Java Development Kit's https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/reflect/package-summary.html[`java.lang.reflect` package]. 
+
+While a class (the implementation) and an interface (well ... the interface) can relate directly and _statically_, we can have more
+dynamic relation between an interface (or a set of interfaces) and an implementation:
+
+* `java.lang.reflect.Proxy` - a utility to create _dynamic proxies_
+* `java.lang.reflect.InvocationHandler` - a generic interface with one method `invoke()` that can be used to perform or delegate an operation invoked on a _proxy_.
+
+.Using proxies
+[source,java]
+----
+java.lang.management.MemoryMXBean memory = (java.lang.management.MemoryMXBean) java.lang.reflect.Proxy.newProxyInstance(null, new Class<?>[] { MemoryMXBean.class }, new InvocationHandler() {
+    @Override
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        if ("getHeapMemoryUsage".equals(method.getName())) {
+            return new MemoryUsage(1024L, 512L, 512L, 2048L);
+        }
+        throw new UnsupportedOperationException(method.getName());
+    }
+});
+System.out.println("Memory usage: " + memory.getHeapMemoryUsage());
+----
+
+In this example, we still use `java.lang.management.MemoryMXBean` interface, but this time it is _not_ bound to any _real_
+object of some particular class. The implementation behind proxy is dynamic, represented by `InvocationHandler.invoke()` method. +
+In this simple example we just create a result directly, but the implementation may be much more sophisticated. For example we can
+check the the memory usage of a remote JVM by reaching out to another Java application using network (yes - it's a hint for upcoming JMX and Jolokia sections).
+
+=== How objects are obtained?
+
+`java.lang.management.ManagementFactory.getMemoryMXBean()` method is using _service locator_ pattern, where we know the _locator_ (`ManagementFactory` class) and a way to get particular object of a desired interface (`getMemoryMXBean()` method).
+
+But again - there's more. We can get the implementation (the object) _injected_ by some Dependency Injection framework like:
+
+* https://docs.spring.io/spring-framework/reference/6.2/core/beans/introduction.html[Spring Framework]
+* https://jakarta.ee/specifications/cdi/[Jakarta Contexts and Dependency Injection] (CDI)
+* https://github.com/google/guice[Google Guice]
+
+Dependency Injection is a great architectural pattern that allows separation of interfaces and implementations.
+
+Probably more traditional way of getting an implementation for some interface, which falls into a category of _service location_ is through
+some kind of _mapping_. Note that Dependency Injection frameworks usually also allow this kind of interaction.
+
+_Naming Systems_ exist to _bind_ objects (services, records, values) to names:
+
+* https://en.wikipedia.org/wiki/Domain_Name_System[DNS]
+* https://docs.oracle.com/en/java/javase/17/docs/specs/rmi/registry.html[RMI registry]
+* https://docs.oracle.com/javase/8/docs/api/org/omg/CosNaming/NamingContext.html[CORBA naming system]
+
+_Bound_ objects can be _looked up_ in the registry using user friendly (or not) identifiers.
+
+There are two important and distinguished kinds of mappings:
+
+* by name - this is more "traditional" approach where the _registry_ keeps the objects under String keys
+* by interface - this is more modern approach, where the _registry_ keeps the objects under keys which are the interfaces of the bound objects
+
+Spring Framework allows both approaches with these methods respectively:
+
+* `Object org.springframework.beans.factory.BeanFactory.getBean(java.lang.String)`
+* `<T> T org.springframework.beans.factory.BeanFactory.getBean(java.lang.Class<T>)`
+
+=== More about the _registry_
+
+_Objects_ (implementation) are represented by _interfaces_ (behavior specifications) and are reachable using _keys_ (identifiers, which may be character strings or interface names).
+
+This idea is a core part of a software component which may be called a _registry_. Java and other programming languages implement some
+kind of registry. In Java we have:
+
+* `org.springframework.beans.factory.BeanFactory` in Spring Framework
+* `jakarta.enterprise.inject.spi.BeanManager` in CDI
+* `org.osgi.framework.BundleContext` in OSGi
+* and yes, `javax.management.MBeanServer` and `com.sun.jmx.mbeanserver.Repository` in JMX
+
+== Three elements
+
+Before moving to JMX, we can summarize three components of the system we're trying to describe.
+
+Objects / Services:: objects provide some implementation and are accessed using an interface directly (`implements`) or indirectly (JDK proxies).
+
+The registry:: a _place_ where objects/services are stored/registered/bound and made available for others to look up/retrieve.
+
+Metadata:: When a registry stores an object/service, it makes it available using some identifier (name or interface). Additionally, each object may be associated with dedicated metadata - either for human user (like description) or other applications (a structural specification of the interface of a given object, perhaps some security/audit requirements, etc.).
+
+It is important to realize that even the _name_ under which a given implementation is available may be considered a part of the _metadata_.
+
+== JMX
+
+https://jcp.org/en/jsr/detail?id=3[Java™ Management Extensions] is a dedicated technology used for monitoring and management of Java applications.
+
+JMX uses the concepts described in the <<_java-objects-interfaces-proxies>> chapter. In particular:
+
+* the interface is represented both by _methods_ (operations) we can _invoke_ and _attributes_ we can _read_ or _write_. There are also _notifications_ which can be emitted.
+* the interface is separated from the implementation. Technically it's not relevant if the separation is provided using the `implements` statement from Java language or dynamic proxies. JMX may use both forms of separation. Proxies are required for _remote access_.
+* the implementation is stored in a registry (`javax.management.MBeanServer` and `com.sun.jmx.mbeanserver.Repository.domainTb`)
+* the _keys_ under which an implementation is available are represented by `javax.management.ObjectName` with JMX-specific syntax.
+* the metadata is represented by `javax.management.MBeanInfo`.
+
+From programming point of view, JMX consist of:
+
+* A _registry_ provided by the JDK. We can get access to the registry by obtaining a reference to `javax.management.MBeanServer` - for example using `java.lang.management.ManagementFactory.getPlatformMBeanServer()`. Note that we use _service locator_ pattern to obtain an interface which we can use to access an object created somewhere else by something else. Using `MBeanServer` interface we access other objects by interface - this time by JMX interface. There are more examples of this pattern.
+* A set of MBeans (managed beans) which are bound in the registry under some `javax.management.ObjectName` in association with their `javax.management.MBeanInfo`.
+* A series of MBean invocations and attribute access.
+
+Let's discuss these elements below in more details.
+
+=== JMX Registry - `javax.management.MBeanServer`
+
+A _service registry_ is a place where ... services are registered (and can be looked up from). In Spring Framework, the _services_
+are called _beans_ and the registry is named a _factory_ (because the beans are not only stored, but also created there), so it's
+called a _bean factory_.
+
+In JMX, the beans are called _MBeans_ (management beans) and the registry is called the _server_. That's why our first abstraction is
+`javax.management.MBeanServer`.
+
+_Everything_ in Java (from the point of view of a developer writing applications, not from a perspective of someone who actually writes the JVM itself in C/C++) can be viewed as an object of a class. Such class contains implementation of methods and the object holds some state.
+
+While the JMX registry (`MBeanServer`) is a way to access the MBeans (more on that later), it also:
+
+* has some implementation
+* has an interface through which we access it
+* has to be created and obtained in some way
+
+Looking at concepts which don't match (classes, objects, JMX, MBeans, the registry) at first glance from different perspective is very important skill for understanding complex systems.
+
+==== How do we obtain a reference to an `MBeanServer`?
+
+Let's start from a user perspective. The _canonical_ way to obtain a reference to an MBeanServer is this code:
+
+[source,java]
+----
+javax.management.MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+----
+
+With this reference we can use `javax.management.MBeanServer` API to access the _platform MBeanServer_. This is the default, built-in,
+preconfigured JMX registry, where we can find (because Java runtime did it for us) some standard MBeans which we can use without any effort.
+
+[#_platform_mbeanserver]
+==== How the platform `MBeanServer` is created?
+
+Because the platform _JMX registry_ is a critical component of entire JMX infrastructure, it is created by the JVM itself, when Java
+application starts. In most cases, a user should not be responsible for creating it or even for any explicit configuration. The JMX
+registry should just be there.
+
+Simply calling `java.lang.management.ManagementFactory.getPlatformMBeanServer()` ensures that the JMX registry is created, but _how_ it is
+created?
+
+In more details, as with many of the _enterprise_ components of Java, the creation is performed using a _factory_ pattern, where the factory is
+`javax.management.MBeanServerFactory` and its method `createMBeanServer()`. +
+But because it'd be too easy, this single factory uses yet another layer of delegation - it uses a configurable implementation of `javax.management.MBeanServerBuilder` (it's a class, but not final, so anyone may provide custom implementation).
+
+Actual implementation of the builder may be specified using `-Djavax.management.builder.initial` system property and if it's not available,
+the builder is `javax.management.MBeanServerBuilder`.
+
+Here's the detailed process:
+
+1. During initialization, `java.lang.management.ManagementFactory` calls `javax.management.MBeanServerFactory.newMBeanServer()`
+2. `MBeanServerFactory` checks `-Djavax.management.builder.initial` property for a class that can be used as `javax.management.MBeanServerBuilder`
+3. Whether custom or default `javax.management.MBeanServerBuilder` is used, it is responsible to create two objects:
+** `javax.management.MBeanServerDelegate` - _management view_ of `javax.management.MBeanServer` - providing some information and notification support of the second object created (MBeanServer)
+** `javax.management.MBeanServer` - the JMX registry and MBean server itself
+4. The created `MBeanServer` is added to `javax.management.MBeanServerFactory.mBeanServerList` list for future discovery.
+
+After calling `ManagementFactory.getPlatformMBeanServer()` these conditions are `true`:
+
+[source,java]
+----
+MBeanServerFactory.findMBeanServer(null).size() == 1;
+MBeanServerFactory.findMBeanServer(null).get(0) == ManagementFactory.getPlatformMBeanServer();
+----
+
+And there's only one available instance of `javax.management.MBeanServer` available
+
+==== How to create more more `MBeanServers`?
+
+Should we? At least we should be able to. Normally it's good to have just one, central `MBeanServer` running in a single
+Java application (JVM process). But it's not uncommon to have _more_ such servers.
+
+We can simply think about each server as one, isolated, dedicated registry of MBeans we can access (invoke operations, register for notifications, read and write the attributes).
+
+The best way to create more MBeanServers is to do what `ManagementFactory.getPlatformMBeanServer()` - use `javax.management.MBeanServerFactory`!
+There are two methods for this:
+
+* `javax.management.MBeanServerFactory.newMBeanServer(java.lang.String defaultDomain)` (if `null` is passed, default domain becomes `DefaultDomain`...) - this method creates an `MBeanServer` instance using the builder pattern (and possibly `-Djavax.management.builder.initial`)
+* `javax.management.MBeanServerFactory.createMBeanServer(java.lang.String defaultDomain)` - calls `newMBeanServer()` and adds the created
+`MBeanServer` to internal list, so we can later _find_ this `MBeanServer` using its _agent it_.
+
+Of course we can simply instantiate and implementation of `javax.management.MBeanServer` and ... put it somewhere. It'd be good then
+to document where a user of our application/library can find such _custom_ MBeanServer.
+
+==== How to find and identify non-platform `MBeanServers`?
+
+`MBeanServers` created using `javax.management.MBeanServerFactory.createMBeanServer()` can be easily found using this Java code:
+
+[source,java]
+----
+ArrayList<MBeanServer> list = MBeanServerFactory.findMBeanServer(null);
+for (MBeanServer mBeanServer : list) {
+    System.out.println(mBeanServer.getAttribute(MBeanServerDelegate.DELEGATE_NAME, "MBeanServerId"));
+}
+----
+
+`MBeanServer` created using other means is _not_ visible to `MBeanServerFactory.findMBeanServer`, so it's up to the creator to
+put it in some known place. Well, we can register it as an MBean in the platform MBeanServer too. That's what Jolokia is doing in `jolokia-support-jmx` module - custom `MBeanServer` is registered under `jolokia:type=MBeanServer` ObjectName in the platform MBeanServer.
+
+What is `agent id` passed to `MBeanServerFactory.findMBeanServer(String agentId)`? If we pass `null` we'll get all
+available `MBeanServers`. Otherwise we'll get only the ones with matching _agent ID_.
+
+As mentioned before, `javax.management.MBeanServerBuilder` should create the `MBeanServer`, but also its _management view_ in the form
+of `javax.management.MBeanServerDelegate`. By default, for default `com.sun.jmx.mbeanserver.JmxMBeanServer` implementations, this delegate is `com.sun.jmx.mbeanserver.MBeanServerDelegateImpl`.
+
+JMX specification defines one (among others) special MBean registered under `JMImplementation:type=MBeanServerDelegate` ObjectName. This is the _management view_ associated with an MBeanServer. 
+
+`MBeanServerBuilder` uses `MBeanServerFactory` to create both the delegate and actual server and then the default `MBeanServer` implementation
+registers the delegate under `JMImplementation:type=MBeanServerDelegate` ObjectName in _itself_.
+
+The delegate (the _management view_ of the MBeanServer) has two purposes:
+
+* identification - by providing these attributes:
+** MBeanServerId - this is the _agent id_ used by `MBeanServerFactory.findMBeanServer()`
+** SpecificationName
+** SpecificationVersion
+** SpecificationVendor
+** ImplementationName
+** ImplementationVersion
+** ImplementationVendor
+* notification support for MBean registration
+
+NOTE: While JMX notifications in general should be discussed in dedicated chapter, `JMImplementation:type=MBeanServerDelegate` MBean is special, so we have to mention this particular notification type (MBean registration/unregistration) here.
+
+This is an example usage of the delegate:
+[source,java]
+----
+javax.management.MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+server.addNotificationListener(MBeanServerDelegate.DELEGATE_NAME, new NotificationListener() {
+    @Override
+    public void handleNotification(Notification notification, Object handback) {
+        if (notification instanceof MBeanServerNotification serverNotification) {
+            if (serverNotification.getType().equals(MBeanServerNotification.REGISTRATION_NOTIFICATION)) {
+                System.out.println("MBean registered: " + serverNotification.getMBeanName());
+            }
+        }
+    }
+}, null, null);
+----
+
+==== A _client_ view of an `MBeanServer` - `MBeanServerConnection`
+
+This is almost everything we need to know about the JMX Registry. However if we look at the definition of `MBeanServer` interface, we'll see
+this:
+
+[source,java]
+----
+public interface MBeanServer extends MBeanServerConnection
+----
+
+`MBeanServerConnection` and `MBeanServer` share a lot of methods, but there are important differences:
+
+* `javax.management.MBeanServer` represents a _local_ JMX registry (MBean server), so none of the methods throw `IOException`
+* `javax.management.MBeanServerConnection` represents a _local_ *or* _remote_ JMX registry (MBean server), so:
+** all the methods throw `IOException`
+** there are no `instantiate()` methods
+** there's no `registerMBean()` method, because it operates on a `java.lang.Object` parameter which is _the_ MBean - actual object.
+
+This is _very_ important. When we describe remote JMX servers, remote connections, security and Jolokia, we'll use `MBeanServerConnection` interface more often than `MBeanServer` emphasizing the remote nature of JMX. And at the same time everything will be valid for _local_ scenarios.
+
+[#_mbeans_and_metadata]
+=== MBeans and metadata
+
+An empty JMX registry (an empty MBeanServer without any registered MBeans) is useless - just like an empty HashMap. `javax.management.MBeanServerConnection` and `javax.management.MBeanServer` interfaces (APIs) are important, but the power of JMX is in the MBeans we can access.
+
+Before discussing various ways of registering our own MBeans, lets focus on the ones we can access by default. Simply because any Java application started registers own MBeans. +
+Instead of simply listing what we can access by default, let's see it from the JVM perspective.
+
+In <<_platform_mbeanserver>> we've described how the _platform MBeanServer_ is obtained and created using _factory_ and _builder_ patterns.
+
+`java.lang.management.ManagementFactory` uses internal `java.lang.management.ManagementFactory.PlatformMBeanFinder` _finder_ which loads (using https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/ServiceLoader.html[Java Service Loader]) services of `sun.management.spi.PlatformMBeanProvider` class. There are 3 such services in standard JDK and each provider is responsible for _providing_ one ore more _platform components_ which are then registered in the `MBeanServer` being created. Here are the providers and their _platform components_ listed as MBean names (in order of processing and MBean declaration):
+
+* `com.sun.management.internal.PlatformMBeanProviderImpl`
+** `pass:[java.lang:type=GarbageCollector,name=*]` - different `name` for each implementation of `java.lang.management.GarbageCollectorMXBean`
+** `java.lang:type=Threading`
+** `java.lang:type=OperatingSystem`
+** `com.sun.management:type=HotSpotDiagnostic`
+** `com.sun.management:type=DiagnosticCommand`
+* `java.lang.management.DefaultPlatformMBeanProvider`
+** `java.lang:type=ClassLoading`
+** `java.lang:type=Compilation`
+** `java.lang:type=Memory`
+** `pass:[java.lang:type=GarbageCollector,name=*]` - different `name` for each `java.lang.management.GarbageCollectorMXBean` found. Duplication from the previous provider.
+** `pass:[java.lang:type=MemoryManager,name=*]` - different `name` for each `java.lang.management.MemoryManagerMXBean` found
+** `pass:[java.lang:type=MemoryPool,name=*]` - different `name` for each `java.lang.management.MemoryPoolMXBean` found
+** `java.lang:type=Runtime`
+** `java.lang:type=Threading` - Duplication from the previous provider. However This MBean is `sun.management.ThreadImpl`, while the one from the previous provider is an extension - `com.sun.management.internal.HotSpotThreadImpl`
+** `java.util.logging:type=Logging`
+** `pass:[java.nio:type=BufferPool,name=*]` - different `name` for each `java.lang.management.BufferPoolMXBean` found
+** `java.lang:type=OperatingSystem` - Duplication from the previous provider. Here it's `sun.management.BaseOperatingSystemImpl`, previous provider registers an extension - `com.sun.management.internal.OperatingSystemImpl`
+* `jdk.management.jfr.internal.FlightRecorderMXBeanProvider`
+** `jdk.management.jfr:type=FlightRecorder`
+
+Each such provider contains some _platform components_ and if more providers include the same MBeans, the first one is registered. In the above list it means that these are taken from `com.sun.management.internal.PlatformMBeanProviderImpl`, not from `java.lang.management.DefaultPlatformMBeanProvider`:
+
+* `java.lang:type=GarbageCollector,name=*`
+* `java.lang:type=Threading`
+* `java.lang:type=OperatingSystem`
+
+With just the default MBeans we can use JMX technology to monitor any Java application by checking the most important information about threads, memory, CPU usage etc. However we can easily register our own MBeans to provide as much information and control as we want.
+
+JMX wouldn't be considered an _enterprise_ feature if it was limited to built-in MBeans. We can register our own MBeans using this simple call:
+
+[source,java]
+----
+javax.management.MBeanServer server = ManagementFactory.getPlatformMBeanServer();\
+server.registerMBean(new MyMBean(), javax.management.ObjectName.getInstance("com.example:name=mymbean"));
+----
+
+The first argument of `javax.management.MBeanServer.registerMBean()` method is a `java.lang.Object`, so from Java perspective it can be ... anything.
+
+But from JMX perspective we can _register_ only an MBean that is _compliant_. Otherwise we'll get a `javax.management.NotCompliantMBeanException`.
+
+This is an inherent aspect of the enterprise programming and actually even of human social interactions - by following some rules we ensure
+better interaction and predictable/expected behavior. The following subsections of this <<_mbeans_and_metadata>> chapter present conventions defined directly in the JMX specification.
+
+==== What is the management interface?
+
+Quoting chapter 1.4.1.1 _Managed Beans (MBeans)_ of the JMX specification:
+
+> An MBean is a Java object that implements a specific interface and conforms to
+certain design patterns. These requirements formalize the representation of the
+resource’s management interface in the MBean. The management interface of a
+resource is the set of all necessary information and controls that a management
+application needs to operate on the resource.
+
+Let's dissect this definition and explain all the terms that require clarification.
+
+a Java object that implements a specific interface:: this is pure Java language requirement. We have an object which is an instance of some class which implements some interface.
+
+management interface:: a combination of attributes we can read and/or write, operations we can invoke and notification we can observe. Sure - Java language interface _may_ be used to specify such _management interface_, but it is not a 1:1 requirement. The _management interface_ may be perceived as an API for some well defined aspect of management and monitoring.
+
+resource:: the implementation of the _management interface_. It can be a well defined Java class implementing an interface, but it doesn't have to. The _resource_ is a component that fulfills the _management interface_ and is accessed via this _management interface_ through and `MBeanServer` or generally through an `MBeanServerConnection`.
+
+a management application:: a component that needs to manage/monitor a Java application. Imagine a browser-based dashboard HTML page were we can see a chart of memory usage of a Java application. It needs to know _where_ the monitored application runs (this is the remote aspect, see later), but more importantly it needs to know _how_ to get the required information. In JMX terms - which attributes should be read or which operations should be invoked.
+
+set of all necessary information and controls:: as programmers, we have various sources to learn about what can we do with JDK. The best way to know what are the methods provided by some Java interface is to read the source code. But it's not that easy from automation point of view. Just as Java language and JDK gives us the Reflection API, JMX allows us (and the _management applications_) to discover what can we do with the _management interface_ of an MBean. We can also check all the available MBeans in the first place. Such information can be used to dynamically build user interfaces without any hard-coded information.
+
+Hopefully it is now clear that the object we _register_ using the `javax.management.MBeanServer.registerMBean()` method needs to be somehow associated with a proper _management interface_. +
+The JMX specification precisely defines 4 types of MBeans we can register and we'll discuss each type in the following sections.
+
+Looking from user (who registers the MBean using the `javax.management.MBeanServer.registerMBean()` method) There are exactly _two_ kinds of MBeans:
+
+Static MBeans:: A Java object of a class implementing a Java interface. In this Java interface each _JMX attribute_ is represented as a getter/setter Java method and each _JMX operation_ is represented by a non-attribute Java method.
+
+Dynamic MBeans:: A Java object of a class implementing (directly or indirectly) the `javax.management.DynamicMBean` interface. Here each _JMX attribute_ is handled dynamically by `setAttribute()`/`setAttributes()`/`getAttribute()`/`getAttributes()` implementation and each _JMX operation_ is handled dynamically in an implementation of the generic `invoke()` method.
+
+NOTE: _JMX notifications_ are orthogonal to the above categories and are handled by implementing the `javax.management.NotificationEmitter` interface - whether the MBean is _static_ or _dynamic_.
+
+NOTE: Whether the registered MBean is _static_ or _dynamic_ it is internally (by the default JMX implementation) stored as a _dynamic_ MBean. Simply _static_ MBeans are analyzed using Java reflection and wrapped using `com.sun.jmx.mbeanserver.Introspector.makeDynamicMBean()` as _dynamic_ MBeans.
+
+==== What is the metadata?
+
+Whatever kind (static, dynamic) and type (standard, dynamic, open, model) of the MBean we use, the JMX registry needs an MBean metadata that describes an MBean.
+
+Similarly to Java Reflection API, JMX _describes_ an MBean using one of the interfaces specific to a type of MBean. We will describe the metadata in relevant sections, but here's the list:
+
+* `javax.management.MBeanInfo` - the basic (and usually sufficient for all kinds of MBeans) metadata describing the attributes, operations, notifications, constructors and a description of an MBean. It is a class, not an interface.
+* `javax.management.openmbean.OpenMBeanInfo` - this is a metadata specific for Open MBeans. It was supposed to extend `javax.management.MBeanInfo` which was supposed to be changed into an interface long time ago...
+* `javax.management.modelmbean.ModelMBeanInfo` - this is a metadata specific for Model MBeans.
+
+[#_standard_mbeans]
+==== Standard MBeans
+
+_Standard MBeans_ adhere to a simple convention which dates back to Java Beans™ specification:
+
+* We need a class that `implements` a Java interface. This interface defines the _management interface_ of the standard MBean.
+* Each method of the interface which matches `get*`/`is*` name becomes a readable JMX attribute
+* Each method of the interface which matches `set*` name becomes a writable JMX attribute (usually together with a matching getter)
+* Other methods of the interface become a JMX operation
+
+The last requirement is that the interface being implemented by the class has to be named after the class name with special suffix. And for _standard MBeans_ we have exactly two such suffices:
+
+1. `MBean` (for example `class MyService implements MyServiceMBean`) - this is the _standard_ standard MBean with absolutely no restriction on the types of attributes, operation parameters and return types.
+2. `MXBean` (for example `class MyService implements MyServiceMXBean`) - this is a special version of a standard MBean called "MX Bean" where we can use only the types specified for _Open MBeans_ type of _dynamic MBeans_.
+
+Additionally option 2 can be chosen by annotating the interface (with any name) using `@javax.management.MXBean` annotation.
+
+Here's an example of a standard MBean interface. If we create a class that implements such interface, we can pass an object of this class to the `javax.management.MBeanServer.registerMBean()` method.
+
+[source,java]
+----
+public interface MyServiceMBean {
+    String getMessage();
+
+    String hello();
+}
+----
+
+This interface defines one read-only attribute named "Message" and one operation named "hello". Now we only need a class in the same package as this interface and named `MyService` to be able to register an MBean.
+
+By constraining ourselves to the Open Types only we can define an special variant of an MBean called the "MX Bean". The advantage is that (after allowing remote access) such MBean can be accessed not only by Java applications, but all other types of _clients_ which only have to be aware of precisely defined set of data types.
+
+<<_open_mbeans>> sections provides more information about the _open_ set of Java types which can be used with MX Beans. Full "MX Bean" specification is available in https://docs.oracle.com/en/java/javase/17/docs/api/java.management/javax/management/MXBean.html[@MXBean Javadoc].
+
+NOTE: https://docs.oracle.com/en/java/javase/17/docs/api/java.management/javax/management/MXBean.html[@MXBean Javadoc] provides _much_ more information about MX Beans than the https://jcp.org/en/jsr/detail?id=3[JMX specification] itself.
+
+The nice thing about _static_ MBeans (or MX Beans) is that we don't have to build/implement dedicated metadata (`javax.management.MBeanInfo`) - we'll get it for free during registration time thanks to `com.sun.jmx.mbeanserver.MBeanIntrospector`.
+
+==== Dynamic MBeans
+
+As mentioned in the <<_objects_and_interfaces>> section we have two kinds of relation between an implementation and interface in Java:
+
+* `class AnImplementation implements AnInterface` - static declaration that a class implements an interface
+* `java.lang.reflect.Proxy` and `java.lang.reflect.InvocationHandler` - dynamic association of an interface with implementation
+
+We have the same concept materialized in JMX. Standard (static) MBeans use a class which `implements` a Java interface (with special suffix or annotation though). +
+Dynamic MBeans are classes that implement `javax.management.DynamicMBean` interface, where each attribute and each operation do _not_ require dedicated Java interface method.
+
+* all JMX attributes are handled by generic `javax.management.DynamicMBean.getAttribute()`/`getAttributes()`/`setAttribute()`/`setAttributes()` methods
+* all JMX operations are handled by a generic `javax.management.DynamicMBean.invoke()` method.
+* the JMX metadata is provided by `javax.management.DynamicMBean.getMBeanInfo()` method.
+
+That's it. Dynamic MBeans can be used to dynamically implement JMX attributes and JMX operations instead of defining dedicated getters/setters/methods.
+
+It may be surprising to learn that `javax.management.StandardMBean` interface is _not_ a standard MBean as shown in the <<_standard_mbeans>> section. Instances of `javax.management.StandardMBean` are _dynamic MBeans_ that are constructed by performing an introspection of a class that implements some interface which doesn't have to follow the `*MBean` / `*MXBean` naming convention.
+
+By extending `javax.management.StandardMBean` we can override some behavior and alter the returned metadata, thus getting more flexibility (it's still a _dynamic MBean_) and keeping some simplicity (the reflection based approach is still applied internally by `com.sun.jmx.mbeanserver.MBeanIntrospector`).
+
+[#_open_mbeans]
+==== Open MBeans
+
+_Open MBeans_ are specialized (constrained) _dynamic MBeans_ which use only predetermined set of Java types.
+
+NOTE: The term _open_ means that the MBeans following this convention are more _open_ to the wider range of management applications. It means we can access them not only from Java applications, but other applications as well - provided that the strict set of data types is supported.
+
+There's no dedicated `javax.management.DynamicMBean` extension for _open MBeans_.
+
+However there _is_ a dedicated JMX metadata interface for _open MBeans_: `javax.management.openmbean.OpenMBeanInfo`. +
+If our _dynamic MBean_ implements `javax.management.DynamicMBean.getMBeanInfo()` to return `javax.management.openmbean.OpenMBeanInfoSupport` instead, the MBean is treated as _open MBean_.
+
+JMX Specification defines a very strict set of supported types which can be used for JMX attributes and JMX operation parameters and return values. All the types fall into 4 categories which have their Java representation in the form of `javax.management.openmbean.OpenType` class. +
+Here's the list of categories and related types:
+
+* `javax.management.openmbean.SimpleType`
+** 8 primitive and wrapper types (`byte`, `short`, `int`, `long`, `float`, `double`, `char`, `boolean`)
+** `java.lang.String`
+** `java.math.BigInteger`
+** `java.math.BigDecimal`
+** `java.util.Date`
+** `javax.management.ObjectName`
+** `java.lang.Void`
+* `javax.management.openmbean.ArrayType` - single and multidimensional arrays of all 4 categories of open types
+* `javax.management.openmbean.CompositeType` - types that can represents maps or more generally the key-value pairs. A composite type requires a specification of _all_ items it can contain, where each item has a specified name and a type of the value. The value type may be any of the 4 categories of open types allowing for great flexibility.
+* `javax.management.openmbean.TabularType` - the best analogy would be a database table containing rows of data. Each such row is of the single defined `CompositeType`, but additionally the `TabularType` defines a subset of items of the row's `CompositeType` which build an _index_. There can't be no rows available with the same index (the same values for each of the items of the defined index).
+
+<<_standard_mbeans>> sections mentioned that "MX Beans" follow the type rules for Open Types. See https://docs.oracle.com/en/java/javase/17/docs/api/java.management/javax/management/MXBean.html[@MXBean] Javadoc for full MX Beans specification. +
+In particular this specification mentions that the types that can be used for MXBeans may be the types that are specified for Open MBeans, but also types which are _convertible to_ and _reconstructible from_ the open types.
+
+For example there are rules to convert `java.util.Map` objects into `javax.management.openmbean.TabularType` and any bean classes into `javax.management.openmbean.CompositeType`.
+
+==== Model MBeans
+
+Well, the final boss of MBean types...
+
+[#_accessing_mbeans]
+=== Accessing MBeans

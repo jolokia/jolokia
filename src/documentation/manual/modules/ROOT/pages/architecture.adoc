@@ -39,7 +39,7 @@ _because_ it hides the remoteness of JMX
 calls. There are several subtle issues, performance
 being one of them. It _does_ matter whether a
 call is invoked locally or remotely. A caller should at least be
-aware what happens and what the consequences are. On the other
+aware of what happens and what the consequences are. On the other
 hand, there are message-passing models which include remoting
 explicitly, so that the caller _knows_ from
 the programming model that she is calling a potentially expensive
