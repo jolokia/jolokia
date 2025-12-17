@@ -50,7 +50,7 @@ class JolokiaMBeanServerHandler implements InvocationHandler {
 
         // PlatformMBeanServer is a singleton, but still created using
         // javax.management.MBeanServerFactory.newMBeanServer(java), which involves
-        // javax.management.MBeanServerBuilder which may be overriden using -Djavax. management. builder. initial
+        // javax.management.MBeanServerBuilder which may be overridden using -Djavax. management. builder. initial
         delegateServer = ManagementFactory.getPlatformMBeanServer();
 
         delegatedMBeans = new HashSet<>();

@@ -1,6 +1,7 @@
 * xref:index.adoc[]
 * xref:architecture.adoc[]
 * xref:jmx_guide.adoc[]
+* xref:jmx_remote_guide.adoc[]
 * xref:agents.adoc[]
 * xref:security.adoc[]
 * xref:proxy_mode.adoc[]

@@ -647,7 +647,7 @@ ____
 Declaratively controlled Reflection-based introspection
 ____
 
-The declaration is very verbose, but for complex systems it may be justified to externalize such declarations in XML/JSON/YAML formats to support Java classes that can't be turned into MBeans in easier way.
+The declaration is very verbose, but for complex systems it may be justified to externalize such declarations in XML/JSON/YAML formats to support Java classes that can't be turned into MBeans in an easier way.
 
 [#_accessing_mbeans]
 === Accessing MBeans
@@ -794,4 +794,36 @@ ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
 
 The returned references are _not_ proxies - these are references to actual objects registered in JMX. So for platform MBean access we can skip the reflective invocation.
 
-== JMX Remote connections
+== Summary
+
+This chapter presented a big chunk of the original https://jcp.org/en/jsr/detail?id=3[JMX Specification] and in particular:
+
+* Entire chapter I _JMX Instrumentation Specification_.
+* Most of the chapter II _JMX Agent Specification_ without some parts which either do not need separate explanation or are a bit less relevant from Jolokia and JMX user point of view. Like:
+** details about some helper classes like `javax.management.ObjectInstance`
+** some aspects of MBean registration like `javax.management.MBeanRegistration` interface
+** queries
+** M-Lets (_management applets_) - this is now much less relevant topic, as it covers dynamic and remote class loading which is most of the time a security issue. After all we don't want to make it easy to download such XML file from a remote location:
++
+[source,xml]
+----
+<MLET CODE=object6 ARCHIVE=mybean.jar NAME="object6">
+</MLET>
+----
+** `javax.management.monitor` package and JMX monitoring
+** `javax.management.timer` package and JMX timers
+** `javax.management.relation` package and JMX relations
+** non-remote JMX security, as this chapter is based on `java.lang.SecurityManager` which has been removed with https://openjdk.org/jeps/486[JEP 486] in JDK 24
+
+NOTE: Chapter "5.3. Protocol Adaptors and Connectors" will be presented in xref:jmx_remote_guide.adoc[] chapter.
+
+As we can see, there's no mention of _Remote JMX_ which was originally part of https://jcp.org/en/jsr/detail?id=160[JSR 160: Java™ Management Extensions (JMX) Remote API] specification, but which is now part of https://jcp.org/en/jsr/detail?id=3[JSR 3: Java™ Management Extensions (JMX™) Specification].
+
+Where does Jolokia fit in? Jolokia shines in the remote features of JMX and we have a dedicated chapter for this. See xref:jmx_remote_guide.adoc[].
+
+However there are few features Jolokia provides for the non-remote part of JMX:
+
+* xref:jolokia_jmx.adoc[] - shows how Jolokia deals with multiple instances of `javax.management.MBeanServer` and what are `@JsonMBeans`
+* xref:jolokia_mbeans.adoc[] - shows MBeans which Jolokia itself registers into the Platform MBean Server. 
+
+See the xref:jmx_remote_guide.adoc[] chapter where we discuss https://jcp.org/en/jsr/detail?id=160[JSR 160: Java™ Management Extensions (JMX) Remote API] and how Jolokia makes it much more approachable.

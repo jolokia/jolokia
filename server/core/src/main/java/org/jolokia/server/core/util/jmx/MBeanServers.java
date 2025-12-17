@@ -12,7 +12,7 @@ import static javax.management.MBeanServerNotification.*;
  */
 public class MBeanServers implements NotificationListener {
 
-    // All detected MBeanServces
+    // All detected MBeanServices
     private final Set<MBeanServerConnection> detectedMBeanServers;
 
     // detectedMBeanServers + JolokiaMBeanServer (if available)
