@@ -25,4 +25,6 @@ https://metacpan.org/dist/jmx4perl[elsewhere,role=externalLink,window=_blank,win
 include::client/javascript.adoc[]
 include::client/javascript-old.adoc[]
 include::client/java.adoc[]
+
+[#_jolokia_jmx_connectors]
 include::client/mbeanserverconnection.adoc[]

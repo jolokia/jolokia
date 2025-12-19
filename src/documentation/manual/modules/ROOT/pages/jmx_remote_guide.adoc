@@ -115,6 +115,7 @@ Such object encapsulates the state and behavior that can be used in one place (t
 In such systems, remote objects (services) are accessed through stubs and the stubs are initially _located_ in technology-specific way. +
 We will provide more information in sections about RMI.
 
+[#_standard_jmx_connectors]
 === JMX Connectors defined in the specification
 
 JMX Remote specification defines connectors based on two protocols:
@@ -356,6 +357,7 @@ image::jmx-rmi-connectors.png[]
 
 We already know that "JMX Connector" = "JMX Connector Client" + "JMX Connector Server". Each deserves a dedicated section.
 
+[#_jmx_remote_rmi_connector_server]
 === JMX Remote RMI Connector Server
 
 When a Java application starts, the _platform MBean Server_ is created automatically as mentioned in xref:jmx_guide.adoc#_platform_mbeanserver[How the platform `MBeanServer` is created?].
@@ -379,6 +381,7 @@ See https://docs.oracle.com/en/java/javase/21/management/monitoring-and-manageme
 
 See more about how the client side of the JMX Connector works in <<_jmx_remote_rmi_connector_client>>.
 
+[#_jmx_over_rmi_implementation]
 ==== How the remote JMX over RMI is implemented?
 
 With a single `-Dcom.sun.management.jmxremote.port=<tcp-port-number>` we end up with:
@@ -590,7 +593,7 @@ javaClassNames: javax.management.remote.rmi.RMIServerImpl_Stub
 
 `javaClassName`, `javaClassNames` and `javaSerializedData` attributes are strictly defined in https://datatracker.ietf.org/doc/html/rfc2713[RFC 2713: Schema for Representing Java™ Objects in an LDAP Directory].
 
-WARNING: Remember https://en.wikipedia.org/wiki/Log4Shell[Log4Shell]? It was _all_ about forcing an application to fetch an LDAP record containing `javaSerializedData` attribute and deserialize it with catastrophic consequences. +
+WARNING: Remember https://en.wikipedia.org/wiki/Log4Shell[Log4Shell]? It was _all_ about forcing an application to fetch an LDAP record containing `javaSerializedData` and `javaCodebase` attributes and deserialize the data with catastrophic consequences. +
 The `trustSerialData` flag https://github.com/openjdk/jdk8u/commit/da6b2652f5a[is `false`] since 2024, but the `trustURLCodebase` flag https://github.com/openjdk/jdk8u/commit/006e84fc77a[is `false`] since ... 2009.
 
 The issue with LDAP-bound stubs for remote _RMIServer_ is that it's really not recommended. An attempt to use such stub should end with:
@@ -620,3 +623,56 @@ But there's more for the client side in the following section.
 
 [#_jmx_remote_rmi_connector_client]
 === JMX Remote RMI Connector Client
+
+This section is about `javax.management.remote.JMXConnector` part of the remote JMX Connector. Our goal is to actually get a `javax.management.MBeanServerConnection` reference to access the remote MBeanServer. From the chapter <<_standard_jmx_connectors>> we know that we can have an RMI-based JMX Connector Client and <<_obtaining_a_connector_client>> shows that we start with a _recipe_ `JMXServiceURL` to get it.
+
+in <<_jmx_over_rmi_implementation>> we've learned about `javax.management.remote.JMXConnectorServerFactory.newJMXConnectorServer()` factory method. We have the client-side equivalent too.
+
+==== Obtaining an RMI JMX connector (client)
+
+Here's an example about how to use a `JMXServiceURL` _recipe_ and `JMXConnectorFactory` factory to access a remote MBeanServer
+[source,java]
+----
+JMXServiceURL url = new JMXServiceURL("rmi", "localhost", 44444, "/jndi/rmi://localhost:1099/my-mbean-server");
+
+JMXConnector connector = JMXConnectorFactory.newJMXConnector(url, new HashMap<>());
+connector.connect();
+
+ObjectName name = new ObjectName("com.sun.management:type=DiagnosticCommand");
+Object version = connector.getMBeanServerConnection().invoke(name, "vmVersion", new Object[0], new String[0]);
+System.out.println("version: " + version);
+
+name = new ObjectName("java.lang:type=Runtime");
+Object runtimeName = connector.getMBeanServerConnection().getAttribute(name, "Name");
+System.out.println("runtime name: " + runtimeName);
+
+connector.close();
+----
+
+Not much to add. The `JMXServiceURL` matches the same _recipe_ used at the server side to create and export the server side of the remote JMX Connector.
+
+There's however _one_ interesting thing. Actually it is specific to RMI implementation. Noticed that there are _two_ ports in the JMX Service URL? Port `44444` (at `localhost`) is where the `sun.rmi.transport.tcp.TCPEndpoint` is accepting the connections for the exported `javax.management.remote.rmi.RMIJRMPServerImpl`. But this information is already available in the _stub_ retrieved from the RMI registry running at `localhost:1099` where the `javax.management.remote.rmi.RMIServer` is bound under `my-mbean-server` name!
+
+The full `new JMXServiceURL("rmi", "localhost", 44444, "/jndi/rmi://localhost:1099/my-mbean-server").toString()` is:
+----
+service:jmx:rmi://localhost:44444/jndi/rmi://localhost:1099/my-mbean-server
+----
+
+But we can also use one of these URLs:
+[source,java]
+----
+JMXServiceURL url1 = new JMXServiceURL("rmi", null, 0, "/jndi/rmi://localhost:1099/my-mbean-server");
+JMXServiceURL url2 = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:1099/my-mbean-server");
+----
+
+Yes - `service:jmx:rmi:///jndi/rmi://localhost:1099/my-mbean-server` has enough information to locate an `RMIServer` _stub_ which _contains_ all the information needed to access its remote part. So we don't need `localhost:44444` at all.
+
+[#_jmx_remote_jolokia_connector]
+== JMX Remote Jolokia Connector
+
+Jolokia doesn't implement _entire_ JMX Connector, only the client-side.
+
+* `org.jolokia.client.jmxadapter.JolokiaJmxConnector` for `service:jmx:jolokia:` JMX Service URLs
+* `org.jolokia.kubernetes.client.KubernetesJmxConnector` for `service:jmx:kubernetes:` JMX Service URLs
+
+See the details in xref:clients.adoc#_jolokia_jmx_connectors[Jolokia MBeanServerConnection adapter].
