@@ -42,7 +42,10 @@
     <a class="nav-link" href="../architecture.html">Architecture</a>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="../extensions.html">Extending Jolokia</a>
+    <a class="nav-link" href="../jmx_guide.html">JMX Guide</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../jmx_remote_guide.html">JMX Remote Guide</a>
   </li>
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="../agents.html">Agents</a>
@@ -58,6 +61,9 @@
   </li>
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="../jolokia_mbeans.html">Jolokia MBeans</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../extensions.html">Extending Jolokia</a>
   </li>
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="../clients.html">Clients</a>
@@ -229,7 +235,7 @@ the config MBean during runtime.</p></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
 <p>Loghandler to use for providing logging output. By default
 logging is written to standard out and error but you can provide
-here a Java class implementing <code>org.jolokia.server.core.service.api.LogHandler</code>
+here a Java class implementing <code>org.jolokia.core.api.LogHandler</code>
 for an alternative log output. Few implementations are included in WAR
 this agent:</p>
 </div>
@@ -256,7 +262,7 @@ logging completely.</p>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>logHandlerName</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">A parameter which may be used to configure <em>logger name</em> which may be used with some <code>org.jolokia.server.core.service.api.LogHandler</code> implementations.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A parameter which may be used to configure <em>logger name</em> which may be used with some <code>org.jolokia.core.api.LogHandler</code> implementations.</p></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
 <p>Default: <code>org.jolokia</code></p>
 </div></div></td>
@@ -370,13 +376,13 @@ If any other type is given, Jolokia falls back to <code>text/plain</code>.</p></
 <td class="tableblock halign-left valign-top"><p class="tableblock">This option specifies in which order the key-value
 properties within ObjectNames as returned by
 <code>list</code> or <code>search</code> are
-returned. By default this is the so called 'canonical order'
-in which the keys are sorted alphabetically. If this option
-is set to <code>false</code>, then the natural order
-is used, i.e. the object name as it was registered. This
+returned. By default this is the order of properties as specified
+at registration time. If this option
+is set to <code>true</code>, the so called <em>canonical order</em>
+will be used, where the keys are sorted alphabetically. This
 option can be overridden with a query parameter of the same
 name.</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>true</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>false</code></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>includeStackTrace</code></p></td>

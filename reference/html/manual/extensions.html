@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Extending Jolokia :: Jolokia</title>
     <link rel="canonical" href="https://jolokia.org/manual/extensions.html">
-    <link rel="prev" href="architecture.html">
-    <link rel="next" href="agents.html">
+    <link rel="prev" href="jolokia_mbeans.html">
+    <link rel="next" href="clients.html">
     <meta name="generator" content="Antora 3.1.4">
     <link rel="stylesheet" href="../_/css/site.css">
     <link rel="stylesheet" href="../_/css/jolokia.css">
@@ -43,8 +43,11 @@
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="architecture.html">Architecture</a>
   </li>
-  <li class="nav-item is-current-page" data-depth="1">
-    <a class="nav-link" href="extensions.html">Extending Jolokia</a>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="jmx_guide.html">JMX Guide</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="jmx_remote_guide.html">JMX Remote Guide</a>
   </li>
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="agents.html">Agents</a>
@@ -60,6 +63,9 @@
   </li>
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="jolokia_mbeans.html">Jolokia MBeans</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="1">
+    <a class="nav-link" href="extensions.html">Extending Jolokia</a>
   </li>
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="clients.html">Clients</a>
@@ -147,7 +153,7 @@
 <p><code>META-INF/jolokia/detectors[-default]</code> (implementations of <code>org.jolokia.server.core.detector.ServerDetector</code>)</p>
 </li>
 <li>
-<p><code>META-INF/jolokia/simplifiers[-default]</code> (implementations of <code>org.jolokia.service.serializer.json.ObjectAccessor</code>)</p>
+<p><code>META-INF/jolokia/simplifiers[-default]</code> (implementations of <code>org.jolokia.converter.json.ObjectAccessor</code>)</p>
 </li>
 <li>
 <p><code>META-INF/jolokia/services[-default]</code> (implementations of <code>org.jolokia.server.core.service.api.JolokiaService</code>)</p>
@@ -549,8 +555,8 @@ It contains a map of keys obtained from the <code>ObjectName</code> itself using
 </div>
 </div>
 <nav class="pagination">
-  <span class="prev"><a href="architecture.html">Architecture</a></span>
-  <span class="next"><a href="agents.html">Agents</a></span>
+  <span class="prev"><a href="jolokia_mbeans.html">Jolokia MBeans</a></span>
+  <span class="next"><a href="clients.html">Clients</a></span>
 </nav>
 </article>
   </div>

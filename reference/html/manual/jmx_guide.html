@@ -1,0 +1,1547 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>JMX Guide :: Jolokia</title>
+    <link rel="canonical" href="https://jolokia.org/manual/jmx_guide.html">
+    <link rel="prev" href="architecture.html">
+    <link rel="next" href="jmx_remote_guide.html">
+    <meta name="generator" content="Antora 3.1.4">
+    <link rel="stylesheet" href="../_/css/site.css">
+    <link rel="stylesheet" href="../_/css/jolokia.css">
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://jolokia.org">Jolokia</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="manual" data-version="">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <button class="nav-menu-toggle" aria-label="Toggle expand/collapse all" style="display: none"></button>
+    <h3 class="title"><a href="index.html">Jolokia Manual</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="index.html">Introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="architecture.html">Architecture</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="1">
+    <a class="nav-link" href="jmx_guide.html">JMX Guide</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="jmx_remote_guide.html">JMX Remote Guide</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="agents.html">Agents</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="security.html">Security</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="proxy_mode.html">Proxy Mode</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="jolokia_protocol.html">Jolokia Protocol</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="jolokia_mbeans.html">Jolokia MBeans</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="extensions.html">Extending Jolokia</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="clients.html">Clients</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="jolokia_jmx.html">JMX Support</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="spring.html">Spring Support</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Jolokia Manual</span>
+    <span class="version"></span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <div class="title"><a href="index.html">Jolokia Manual</a></div>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="index.html">Jolokia Manual</a></li>
+    <li><a href="jmx_guide.html">JMX Guide</a></li>
+  </ul>
+</nav>
+<div class="edit-this-page"><a href="https://github.com/jolokia/jolokia/tree/main/src/documentation/manual/modules/ROOT/pages/jmx_guide.adoc">Help improving this page</a></div>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">JMX Guide</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>This chapter focuses on JMX itself and provides information about how this technology can be used to monitor and manage
+Java applications.</p>
+</div>
+<div class="paragraph">
+<p>The following sections show how basic monitoring and management can be performed starting from pure Java, non-JMX
+approach. Along the way JMX concepts are introduced and discussed. Eventually we show how Jolokia fits in the JMX architecture.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_java-objects-interfaces-proxies"><a class="anchor" href="#_java-objects-interfaces-proxies"></a>Java, objects, interfaces, proxies</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This section is about the obvious and inherent nature of Java, which is an object oriented language.</p>
+</div>
+<div class="paragraph">
+<p>When writing Java applications, we always deal with objects, which may be implement interfaces. This is a fundamental aspect
+of Java. It is so natural that we hardly even think about this.</p>
+</div>
+<div class="paragraph">
+<p>Object oriented principals state that we invoke methods on objects. The most primitive ways to <em>get</em> these objects
+in the first place is to instantiate them using <code>new</code> operator. This is straightforward, but we couple our code with
+some specific implementation.</p>
+</div>
+<div class="listingblock">
+<div class="title">Using objects directly</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">java.lang.management.MemoryUsage usage
+    = new java.lang.management.MemoryUsage(1024L, 512L, 512L, 2048L);
+System.out.println("Memory usage: " + usage.toString());</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If our code can <em>get</em> the object in some better way, we reach loose coupling and leave the implementation details to some other mechanism
+like <a href="https://en.wikipedia.org/wiki/Dependency_injection"><em>dependency injection</em></a>, <a href="https://en.wikipedia.org/wiki/Service_locator_pattern"><em>service locator</em></a> or other.</p>
+</div>
+<div class="paragraph">
+<p>The first level of <em>separation</em> is to use an API (interface) and leave the details of how the implementation is created to other
+parts of the system (JDK, dependency injection framework, &#8230;&#8203;).</p>
+</div>
+<div class="listingblock">
+<div class="title">Using objects through interfaces</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">java.lang.management.MemoryMXBean memory = java.lang.management.ManagementFactory.getMemoryMXBean();
+System.out.println("Memory usage: " + memory.getHeapMemoryUsage().toString());</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The above example uses the <em>service locator</em> pattern. Our code is aware of the <em>locator</em> (here: <code>java.lang.management.ManagementFactory</code>), but
+we don&#8217;t really know what <em>exactly</em> do we locate - we only know the interface of the actual <em>located</em> service.</p>
+</div>
+<div class="paragraph">
+<p>Using objects directly and through interfaces is fundamental part of Java language.</p>
+</div>
+<div class="sect2">
+<h3 id="_objects_and_interfaces"><a class="anchor" href="#_objects_and_interfaces"></a>How objects, classes and interfaces relate?</h3>
+<div class="paragraph">
+<p>Fundamentally, a Java object declares that it can be <em>represented</em> by one or more interfaces using <code>implements</code> statement.
+This is a <a href="https://docs.oracle.com/javase/specs/jls/se17/html/jls-8.html#jls-8.1.5">feature of the language itself</a>.</p>
+</div>
+<div class="paragraph">
+<p>However there&#8217;s something amazing in the Java Development Kit&#8217;s <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/reflect/package-summary.html"><code>java.lang.reflect</code> package</a>.</p>
+</div>
+<div class="paragraph">
+<p>While a class (the implementation) and an interface (well &#8230;&#8203; the interface) can relate directly and <em>statically</em>, we can have more
+dynamic relation between an interface (or a set of interfaces) and an implementation:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>java.lang.reflect.Proxy</code> - a utility to create <em>dynamic proxies</em></p>
+</li>
+<li>
+<p><code>java.lang.reflect.InvocationHandler</code> - a generic interface with one method <code>invoke()</code> that can be used to perform or delegate an operation invoked on a <em>proxy</em>.</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="title">Using proxies</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">java.lang.management.MemoryMXBean memory = (java.lang.management.MemoryMXBean) java.lang.reflect.Proxy.newProxyInstance(null, new Class&lt;?&gt;[] { MemoryMXBean.class }, new InvocationHandler() {
+    @Override
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        if ("getHeapMemoryUsage".equals(method.getName())) {
+            return new MemoryUsage(1024L, 512L, 512L, 2048L);
+        }
+        throw new UnsupportedOperationException(method.getName());
+    }
+});
+System.out.println("Memory usage: " + memory.getHeapMemoryUsage());</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In this example, we still use <code>java.lang.management.MemoryMXBean</code> interface, but this time it is <em>not</em> bound to any <em>real</em>
+object of some particular class. The implementation behind proxy is dynamic, represented by <code>InvocationHandler.invoke()</code> method.<br>
+In this simple example we just create a result directly, but the implementation may be much more sophisticated. For example we can
+check the the memory usage of a remote JVM by reaching out to another Java application using network (yes - it&#8217;s a hint for upcoming JMX and Jolokia sections).</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_how_objects_are_obtained"><a class="anchor" href="#_how_objects_are_obtained"></a>How objects are obtained?</h3>
+<div class="paragraph">
+<p><code>java.lang.management.ManagementFactory.getMemoryMXBean()</code> method is using <em>service locator</em> pattern, where we know the <em>locator</em> (<code>ManagementFactory</code> class) and a way to get particular object of a desired interface (<code>getMemoryMXBean()</code> method).</p>
+</div>
+<div class="paragraph">
+<p>But again - there&#8217;s more. We can get the implementation (the object) <em>injected</em> by some Dependency Injection framework like:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://docs.spring.io/spring-framework/reference/6.2/core/beans/introduction.html">Spring Framework</a></p>
+</li>
+<li>
+<p><a href="https://jakarta.ee/specifications/cdi/">Jakarta Contexts and Dependency Injection</a> (CDI)</p>
+</li>
+<li>
+<p><a href="https://github.com/google/guice">Google Guice</a></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Dependency Injection is a great architectural pattern that allows separation of interfaces and implementations.</p>
+</div>
+<div class="paragraph">
+<p>Probably more traditional way of getting an implementation for some interface, which falls into a category of <em>service location</em> is through
+some kind of <em>mapping</em>. Note that Dependency Injection frameworks usually also allow this kind of interaction.</p>
+</div>
+<div class="paragraph">
+<p><em>Naming Systems</em> exist to <em>bind</em> objects (services, records, values) to names:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://en.wikipedia.org/wiki/Domain_Name_System">DNS</a></p>
+</li>
+<li>
+<p><a href="https://docs.oracle.com/en/java/javase/17/docs/specs/rmi/registry.html">RMI registry</a></p>
+</li>
+<li>
+<p><a href="https://docs.oracle.com/javase/8/docs/api/org/omg/CosNaming/NamingContext.html">CORBA naming system</a></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><em>Bound</em> objects can be <em>looked up</em> in the registry using user friendly (or not) identifiers.</p>
+</div>
+<div class="paragraph">
+<p>There are two important and distinguished kinds of mappings:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>by name - this is more "traditional" approach where the <em>registry</em> keeps the objects under String keys</p>
+</li>
+<li>
+<p>by interface - this is more modern approach, where the <em>registry</em> keeps the objects under keys which are the interfaces of the bound objects</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Spring Framework allows both approaches with these methods respectively:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>Object org.springframework.beans.factory.BeanFactory.getBean(java.lang.String)</code></p>
+</li>
+<li>
+<p><code>&lt;T&gt; T org.springframework.beans.factory.BeanFactory.getBean(java.lang.Class&lt;T&gt;)</code></p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_more_about_the_registry"><a class="anchor" href="#_more_about_the_registry"></a>More about the <em>registry</em></h3>
+<div class="paragraph">
+<p><em>Objects</em> (implementation) are represented by <em>interfaces</em> (behavior specifications) and are reachable using <em>keys</em> (identifiers, which may be character strings or interface names).</p>
+</div>
+<div class="paragraph">
+<p>This idea is a core part of a software component which may be called a <em>registry</em>. Java and other programming languages implement some
+kind of registry. In Java we have:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>org.springframework.beans.factory.BeanFactory</code> in Spring Framework</p>
+</li>
+<li>
+<p><code>jakarta.enterprise.inject.spi.BeanManager</code> in CDI</p>
+</li>
+<li>
+<p><code>org.osgi.framework.BundleContext</code> in OSGi</p>
+</li>
+<li>
+<p>and yes, <code>javax.management.MBeanServer</code> and <code>com.sun.jmx.mbeanserver.Repository</code> in JMX</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_three_elements"><a class="anchor" href="#_three_elements"></a>Three elements</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Before moving to JMX, we can summarize three components of the system we&#8217;re trying to describe.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Objects / Services</dt>
+<dd>
+<p>objects provide some implementation and are accessed using an interface directly (<code>implements</code>) or indirectly (JDK proxies).</p>
+</dd>
+<dt class="hdlist1">The registry</dt>
+<dd>
+<p>a <em>place</em> where objects/services are stored/registered/bound and made available for others to look up/retrieve.</p>
+</dd>
+<dt class="hdlist1">Metadata</dt>
+<dd>
+<p>When a registry stores an object/service, it makes it available using some identifier (name or interface). Additionally, each object may be associated with dedicated metadata - either for human user (like description) or other applications (a structural specification of the interface of a given object, perhaps some security/audit requirements, etc.).</p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>It is important to realize that even the <em>name</em> under which a given implementation is available may be considered a part of the <em>metadata</em>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_jmx"><a class="anchor" href="#_jmx"></a>JMX</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><a href="https://jcp.org/en/jsr/detail?id=3">Java™ Management Extensions</a> is a dedicated technology used for monitoring and management of Java applications.</p>
+</div>
+<div class="paragraph">
+<p>JMX uses the concepts described in the <a href="#_java-objects-interfaces-proxies">Java, objects, interfaces, proxies</a> chapter. In particular:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>the interface is represented both by <em>methods</em> (operations) we can <em>invoke</em> and <em>attributes</em> we can <em>read</em> or <em>write</em>. There are also <em>notifications</em> which can be emitted.</p>
+</li>
+<li>
+<p>the interface is separated from the implementation. Technically it&#8217;s not relevant if the separation is provided using the <code>implements</code> statement from Java language or dynamic proxies. JMX may use both forms of separation. Proxies are required for <em>remote access</em>.</p>
+</li>
+<li>
+<p>the implementation is stored in a registry (<code>javax.management.MBeanServer</code> and <code>com.sun.jmx.mbeanserver.Repository.domainTb</code>)</p>
+</li>
+<li>
+<p>the <em>keys</em> under which an implementation is available are represented by <code>javax.management.ObjectName</code> with JMX-specific syntax.</p>
+</li>
+<li>
+<p>the metadata is represented by <code>javax.management.MBeanInfo</code>.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>From programming point of view, JMX consist of:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>A <em>registry</em> provided by the JDK. We can get access to the registry by obtaining a reference to <code>javax.management.MBeanServer</code> - for example using <code>java.lang.management.ManagementFactory.getPlatformMBeanServer()</code>. Note that we use <em>service locator</em> pattern to obtain an interface which we can use to access an object created somewhere else by something else. Using <code>MBeanServer</code> interface we access other objects by interface - this time by JMX interface. There are more examples of this pattern.</p>
+</li>
+<li>
+<p>A set of MBeans (managed beans) which are bound in the registry under some <code>javax.management.ObjectName</code> in association with their <code>javax.management.MBeanInfo</code>.</p>
+</li>
+<li>
+<p>A series of MBean invocations and attribute access.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s discuss these elements below in more details.</p>
+</div>
+<div class="sect2">
+<h3 id="_jmx_registry_javax_management_mbeanserver"><a class="anchor" href="#_jmx_registry_javax_management_mbeanserver"></a>JMX Registry - <code>javax.management.MBeanServer</code></h3>
+<div class="paragraph">
+<p>A <em>service registry</em> is a place where &#8230;&#8203; services are registered (and can be looked up from). In Spring Framework, the <em>services</em>
+are called <em>beans</em> and the registry is named a <em>factory</em> (because the beans are not only stored, but also created there), so it&#8217;s
+called a <em>bean factory</em>.</p>
+</div>
+<div class="paragraph">
+<p>In JMX, the beans are called <em>MBeans</em> (management beans) and the registry is called the <em>server</em>. That&#8217;s why our first abstraction is
+<code>javax.management.MBeanServer</code>.</p>
+</div>
+<div class="paragraph">
+<p><em>Everything</em> in Java (from the point of view of a developer writing applications, not from a perspective of someone who actually writes the JVM itself in C/C++) can be viewed as an object of a class. Such class contains implementation of methods and the object holds some state.</p>
+</div>
+<div class="paragraph">
+<p>While the JMX registry (<code>MBeanServer</code>) is a way to access the MBeans (more on that later), it also:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>has some implementation</p>
+</li>
+<li>
+<p>has an interface through which we access it</p>
+</li>
+<li>
+<p>has to be created and obtained in some way</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Looking at concepts which don&#8217;t match (classes, objects, JMX, MBeans, the registry) at first glance from different perspective is very important skill for understanding complex systems.</p>
+</div>
+<div class="sect3">
+<h4 id="_how_do_we_obtain_a_reference_to_an_mbeanserver"><a class="anchor" href="#_how_do_we_obtain_a_reference_to_an_mbeanserver"></a>How do we obtain a reference to an <code>MBeanServer</code>?</h4>
+<div class="paragraph">
+<p>Let&#8217;s start from a user perspective. The <em>canonical</em> way to obtain a reference to an MBeanServer is this code:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">javax.management.MBeanServer server = ManagementFactory.getPlatformMBeanServer();</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>With this reference we can use <code>javax.management.MBeanServer</code> API to access the <em>platform MBeanServer</em>. This is the default, built-in,
+preconfigured JMX registry, where we can find (because Java runtime did it for us) some standard MBeans which we can use without any effort.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_platform_mbeanserver"><a class="anchor" href="#_platform_mbeanserver"></a>How the platform <code>MBeanServer</code> is created?</h4>
+<div class="paragraph">
+<p>Because the platform <em>JMX registry</em> is a critical component of entire JMX infrastructure, it is created by the JVM itself, when Java
+application starts. In most cases, a user should not be responsible for creating it or even for any explicit configuration. The JMX
+registry should just be there.</p>
+</div>
+<div class="paragraph">
+<p>Simply calling <code>java.lang.management.ManagementFactory.getPlatformMBeanServer()</code> ensures that the JMX registry is created, but <em>how</em> it is
+created?</p>
+</div>
+<div class="paragraph">
+<p>In more details, as with many of the <em>enterprise</em> components of Java, the creation is performed using a <em>factory</em> pattern, where the factory is
+<code>javax.management.MBeanServerFactory</code> and its method <code>createMBeanServer()</code>.<br>
+But because it&#8217;d be too easy, this single factory uses yet another layer of delegation - it uses a configurable implementation of <code>javax.management.MBeanServerBuilder</code> (it&#8217;s a class, but not final, so anyone may provide custom implementation).</p>
+</div>
+<div class="paragraph">
+<p>Actual implementation of the builder may be specified using <code>-Djavax.management.builder.initial</code> system property and if it&#8217;s not available,
+the builder is <code>javax.management.MBeanServerBuilder</code>.</p>
+</div>
+<div class="paragraph">
+<p>Here&#8217;s the detailed process:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>During initialization, <code>java.lang.management.ManagementFactory</code> calls <code>javax.management.MBeanServerFactory.newMBeanServer()</code></p>
+</li>
+<li>
+<p><code>MBeanServerFactory</code> checks <code>-Djavax.management.builder.initial</code> property for a class that can be used as <code>javax.management.MBeanServerBuilder</code></p>
+</li>
+<li>
+<p>Whether custom or default <code>javax.management.MBeanServerBuilder</code> is used, it is responsible to create two objects:</p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>javax.management.MBeanServerDelegate</code> - <em>management view</em> of <code>javax.management.MBeanServer</code> - providing some information and notification support of the second object created (MBeanServer)</p>
+</li>
+<li>
+<p><code>javax.management.MBeanServer</code> - the JMX registry and MBean server itself</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>The created <code>MBeanServer</code> is added to <code>javax.management.MBeanServerFactory.mBeanServerList</code> list for future discovery.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>After calling <code>ManagementFactory.getPlatformMBeanServer()</code> these conditions are <code>true</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">MBeanServerFactory.findMBeanServer(null).size() == 1;
+MBeanServerFactory.findMBeanServer(null).get(0) == ManagementFactory.getPlatformMBeanServer();</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And there&#8217;s only one available instance of <code>javax.management.MBeanServer</code> available</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_how_to_create_more_more_mbeanservers"><a class="anchor" href="#_how_to_create_more_more_mbeanservers"></a>How to create more more <code>MBeanServers</code>?</h4>
+<div class="paragraph">
+<p>Should we? At least we should be able to. Normally it&#8217;s good to have just one, central <code>MBeanServer</code> running in a single
+Java application (JVM process). But it&#8217;s not uncommon to have <em>more</em> such servers.</p>
+</div>
+<div class="paragraph">
+<p>We can simply think about each server as one, isolated, dedicated registry of MBeans we can access (invoke operations, register for notifications, read and write the attributes).</p>
+</div>
+<div class="paragraph">
+<p>The best way to create more MBeanServers is to do what <code>ManagementFactory.getPlatformMBeanServer()</code> - use <code>javax.management.MBeanServerFactory</code>!
+There are two methods for this:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>javax.management.MBeanServerFactory.newMBeanServer(java.lang.String defaultDomain)</code> (if <code>null</code> is passed, default domain becomes <code>DefaultDomain</code>&#8230;&#8203;) - this method creates an <code>MBeanServer</code> instance using the builder pattern (and possibly <code>-Djavax.management.builder.initial</code>)</p>
+</li>
+<li>
+<p><code>javax.management.MBeanServerFactory.createMBeanServer(java.lang.String defaultDomain)</code> - calls <code>newMBeanServer()</code> and adds the created
+<code>MBeanServer</code> to internal list, so we can later <em>find</em> this <code>MBeanServer</code> using its <em>agent it</em>.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Of course we can simply instantiate and implementation of <code>javax.management.MBeanServer</code> and &#8230;&#8203; put it somewhere. It&#8217;d be good then
+to document where a user of our application/library can find such <em>custom</em> MBeanServer.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_how_to_find_and_identify_non_platform_mbeanservers"><a class="anchor" href="#_how_to_find_and_identify_non_platform_mbeanservers"></a>How to find and identify non-platform <code>MBeanServers</code>?</h4>
+<div class="paragraph">
+<p><code>MBeanServers</code> created using <code>javax.management.MBeanServerFactory.createMBeanServer()</code> can be easily found using this Java code:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">ArrayList&lt;MBeanServer&gt; list = MBeanServerFactory.findMBeanServer(null);
+for (MBeanServer mBeanServer : list) {
+    System.out.println(mBeanServer.getAttribute(MBeanServerDelegate.DELEGATE_NAME, "MBeanServerId"));
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>MBeanServer</code> created using other means is <em>not</em> visible to <code>MBeanServerFactory.findMBeanServer</code>, so it&#8217;s up to the creator to
+put it in some known place. Well, we can register it as an MBean in the platform MBeanServer too. That&#8217;s what Jolokia is doing in <code>jolokia-support-jmx</code> module - custom <code>MBeanServer</code> is registered under <code>jolokia:type=MBeanServer</code> ObjectName in the platform MBeanServer.</p>
+</div>
+<div class="paragraph">
+<p>What is <code>agent id</code> passed to <code>MBeanServerFactory.findMBeanServer(String agentId)</code>? If we pass <code>null</code> we&#8217;ll get all
+available <code>MBeanServers</code>. Otherwise we&#8217;ll get only the ones with matching <em>agent ID</em>.</p>
+</div>
+<div class="paragraph">
+<p>As mentioned before, <code>javax.management.MBeanServerBuilder</code> should create the <code>MBeanServer</code>, but also its <em>management view</em> in the form
+of <code>javax.management.MBeanServerDelegate</code>. By default, for default <code>com.sun.jmx.mbeanserver.JmxMBeanServer</code> implementations, this delegate is <code>com.sun.jmx.mbeanserver.MBeanServerDelegateImpl</code>.</p>
+</div>
+<div class="paragraph">
+<p>JMX specification defines one (among others) special MBean registered under <code>JMImplementation:type=MBeanServerDelegate</code> ObjectName. This is the <em>management view</em> associated with an MBeanServer.</p>
+</div>
+<div class="paragraph">
+<p><code>MBeanServerBuilder</code> uses <code>MBeanServerFactory</code> to create both the delegate and actual server and then the default <code>MBeanServer</code> implementation
+registers the delegate under <code>JMImplementation:type=MBeanServerDelegate</code> ObjectName in <em>itself</em>.</p>
+</div>
+<div class="paragraph">
+<p>The delegate (the <em>management view</em> of the MBeanServer) has two purposes:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>identification - by providing these attributes:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>MBeanServerId - this is the <em>agent id</em> used by <code>MBeanServerFactory.findMBeanServer()</code></p>
+</li>
+<li>
+<p>SpecificationName</p>
+</li>
+<li>
+<p>SpecificationVersion</p>
+</li>
+<li>
+<p>SpecificationVendor</p>
+</li>
+<li>
+<p>ImplementationName</p>
+</li>
+<li>
+<p>ImplementationVersion</p>
+</li>
+<li>
+<p>ImplementationVendor</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>notification support for MBean registration</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+While JMX notifications in general should be discussed in dedicated chapter, <code>JMImplementation:type=MBeanServerDelegate</code> MBean is special, so we have to mention this particular notification type (MBean registration/unregistration) here.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>This is an example usage of the delegate:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">javax.management.MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+server.addNotificationListener(MBeanServerDelegate.DELEGATE_NAME, new NotificationListener() {
+    @Override
+    public void handleNotification(Notification notification, Object handback) {
+        if (notification instanceof MBeanServerNotification serverNotification) {
+            if (serverNotification.getType().equals(MBeanServerNotification.REGISTRATION_NOTIFICATION)) {
+                System.out.println("MBean registered: " + serverNotification.getMBeanName());
+            }
+        }
+    }
+}, null, null);</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_a_client_view_of_an_mbeanserver_mbeanserverconnection"><a class="anchor" href="#_a_client_view_of_an_mbeanserver_mbeanserverconnection"></a>A <em>client</em> view of an <code>MBeanServer</code> - <code>MBeanServerConnection</code></h4>
+<div class="paragraph">
+<p>This is almost everything we need to know about the JMX Registry. However if we look at the definition of <code>MBeanServer</code> interface, we&#8217;ll see
+this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public interface MBeanServer extends MBeanServerConnection</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>MBeanServerConnection</code> and <code>MBeanServer</code> share a lot of methods, but there are important differences:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>javax.management.MBeanServer</code> represents a <em>local</em> JMX registry (MBean server), so none of the methods throw <code>IOException</code></p>
+</li>
+<li>
+<p><code>javax.management.MBeanServerConnection</code> represents a <em>local</em> <strong>or</strong> <em>remote</em> JMX registry (MBean server), so:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>all the methods throw <code>IOException</code></p>
+</li>
+<li>
+<p>there are no <code>instantiate()</code> methods</p>
+</li>
+<li>
+<p>there&#8217;s no <code>registerMBean()</code> method, because it operates on a <code>java.lang.Object</code> parameter which is <em>the</em> MBean - actual object.</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>This is <em>very</em> important. When we describe remote JMX servers, remote connections, security and Jolokia, we&#8217;ll use <code>MBeanServerConnection</code> interface more often than <code>MBeanServer</code> emphasizing the remote nature of JMX. And at the same time everything will be valid for <em>local</em> scenarios.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_mbeans_and_metadata"><a class="anchor" href="#_mbeans_and_metadata"></a>MBeans and metadata</h3>
+<div class="paragraph">
+<p>An empty JMX registry (an empty MBeanServer without any registered MBeans) is useless - just like an empty HashMap. <code>javax.management.MBeanServerConnection</code> and <code>javax.management.MBeanServer</code> interfaces (APIs) are important, but the power of JMX is in the MBeans we can access.</p>
+</div>
+<div class="paragraph">
+<p>Before discussing various ways of registering our own MBeans, lets focus on the ones we can access by default. Simply because any Java application started registers own MBeans.<br>
+Instead of simply listing what we can access by default, let&#8217;s see it from the JVM perspective.</p>
+</div>
+<div class="paragraph">
+<p>In <a href="#_platform_mbeanserver">How the platform <code>MBeanServer</code> is created?</a> we&#8217;ve described how the <em>platform MBeanServer</em> is obtained and created using <em>factory</em> and <em>builder</em> patterns.</p>
+</div>
+<div class="paragraph">
+<p><code>java.lang.management.ManagementFactory</code> uses internal <code>java.lang.management.ManagementFactory.PlatformMBeanFinder</code> <em>finder</em> which loads (using <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/ServiceLoader.html">Java Service Loader</a>) services of <code>sun.management.spi.PlatformMBeanProvider</code> class. There are 3 such services in standard JDK and each provider is responsible for <em>providing</em> one ore more <em>platform components</em> which are then registered in the <code>MBeanServer</code> being created. Here are the providers and their <em>platform components</em> listed as MBean names (in order of processing and MBean declaration):</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>com.sun.management.internal.PlatformMBeanProviderImpl</code></p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>java.lang:type=GarbageCollector,name=*</code> - different <code>name</code> for each implementation of <code>java.lang.management.GarbageCollectorMXBean</code></p>
+</li>
+<li>
+<p><code>java.lang:type=Threading</code></p>
+</li>
+<li>
+<p><code>java.lang:type=OperatingSystem</code></p>
+</li>
+<li>
+<p><code>com.sun.management:type=HotSpotDiagnostic</code></p>
+</li>
+<li>
+<p><code>com.sun.management:type=DiagnosticCommand</code></p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p><code>java.lang.management.DefaultPlatformMBeanProvider</code></p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>java.lang:type=ClassLoading</code></p>
+</li>
+<li>
+<p><code>java.lang:type=Compilation</code></p>
+</li>
+<li>
+<p><code>java.lang:type=Memory</code></p>
+</li>
+<li>
+<p><code>java.lang:type=GarbageCollector,name=*</code> - different <code>name</code> for each <code>java.lang.management.GarbageCollectorMXBean</code> found. Duplication from the previous provider.</p>
+</li>
+<li>
+<p><code>java.lang:type=MemoryManager,name=*</code> - different <code>name</code> for each <code>java.lang.management.MemoryManagerMXBean</code> found</p>
+</li>
+<li>
+<p><code>java.lang:type=MemoryPool,name=*</code> - different <code>name</code> for each <code>java.lang.management.MemoryPoolMXBean</code> found</p>
+</li>
+<li>
+<p><code>java.lang:type=Runtime</code></p>
+</li>
+<li>
+<p><code>java.lang:type=Threading</code> - Duplication from the previous provider. However This MBean is <code>sun.management.ThreadImpl</code>, while the one from the previous provider is an extension - <code>com.sun.management.internal.HotSpotThreadImpl</code></p>
+</li>
+<li>
+<p><code>java.util.logging:type=Logging</code></p>
+</li>
+<li>
+<p><code>java.nio:type=BufferPool,name=*</code> - different <code>name</code> for each <code>java.lang.management.BufferPoolMXBean</code> found</p>
+</li>
+<li>
+<p><code>java.lang:type=OperatingSystem</code> - Duplication from the previous provider. Here it&#8217;s <code>sun.management.BaseOperatingSystemImpl</code>, previous provider registers an extension - <code>com.sun.management.internal.OperatingSystemImpl</code></p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p><code>jdk.management.jfr.internal.FlightRecorderMXBeanProvider</code></p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>jdk.management.jfr:type=FlightRecorder</code></p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Each such provider contains some <em>platform components</em> and if more providers include the same MBeans, the first one is registered. In the above list it means that these are taken from <code>com.sun.management.internal.PlatformMBeanProviderImpl</code>, not from <code>java.lang.management.DefaultPlatformMBeanProvider</code>:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>java.lang:type=GarbageCollector,name=*</code></p>
+</li>
+<li>
+<p><code>java.lang:type=Threading</code></p>
+</li>
+<li>
+<p><code>java.lang:type=OperatingSystem</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>With just the default MBeans we can use JMX technology to monitor any Java application by checking the most important information about threads, memory, CPU usage etc. However we can easily register our own MBeans to provide as much information and control as we want.</p>
+</div>
+<div class="paragraph">
+<p>JMX wouldn&#8217;t be considered an <em>enterprise</em> feature if it was limited to built-in MBeans. We can register our own MBeans using this simple call:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">javax.management.MBeanServer server = ManagementFactory.getPlatformMBeanServer();\
+server.registerMBean(new MyMBean(), javax.management.ObjectName.getInstance("com.example:name=mymbean"));</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The first argument of <code>javax.management.MBeanServer.registerMBean()</code> method is a <code>java.lang.Object</code>, so from Java perspective it can be &#8230;&#8203; anything.</p>
+</div>
+<div class="paragraph">
+<p>But from JMX perspective we can <em>register</em> only an MBean that is <em>compliant</em>. Otherwise we&#8217;ll get a <code>javax.management.NotCompliantMBeanException</code>.</p>
+</div>
+<div class="paragraph">
+<p>This is an inherent aspect of the enterprise programming and actually even of human social interactions - by following some rules we ensure
+better interaction and predictable/expected behavior. The following subsections of this <a href="#_mbeans_and_metadata">MBeans and metadata</a> chapter present conventions defined directly in the JMX specification.</p>
+</div>
+<div class="sect3">
+<h4 id="_what_is_the_management_interface"><a class="anchor" href="#_what_is_the_management_interface"></a>What is the management interface?</h4>
+<div class="paragraph">
+<p>Quoting chapter 1.4.1.1 <em>Managed Beans (MBeans)</em> of the JMX specification:</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>An MBean is a Java object that implements a specific interface and conforms to
+certain design patterns. These requirements formalize the representation of the
+resource’s management interface in the MBean. The management interface of a
+resource is the set of all necessary information and controls that a management
+application needs to operate on the resource.</p>
+</div>
+</blockquote>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s dissect this definition and explain all the terms that require clarification.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">a Java object that implements a specific interface</dt>
+<dd>
+<p>this is pure Java language requirement. We have an object which is an instance of some class which implements some interface.</p>
+</dd>
+<dt class="hdlist1">management interface</dt>
+<dd>
+<p>a combination of attributes we can read and/or write, operations we can invoke and notification we can observe. Sure - Java language interface <em>may</em> be used to specify such <em>management interface</em>, but it is not a 1:1 requirement. The <em>management interface</em> may be perceived as an API for some well defined aspect of management and monitoring.</p>
+</dd>
+<dt class="hdlist1">resource</dt>
+<dd>
+<p>the implementation of the <em>management interface</em>. It can be a well defined Java class implementing an interface, but it doesn&#8217;t have to. The <em>resource</em> is a component that fulfills the <em>management interface</em> and is accessed via this <em>management interface</em> through and <code>MBeanServer</code> or generally through an <code>MBeanServerConnection</code>.</p>
+</dd>
+<dt class="hdlist1">a management application</dt>
+<dd>
+<p>a component that needs to manage/monitor a Java application. Imagine a browser-based dashboard HTML page were we can see a chart of memory usage of a Java application. It needs to know <em>where</em> the monitored application runs (this is the remote aspect, see later), but more importantly it needs to know <em>how</em> to get the required information. In JMX terms - which attributes should be read or which operations should be invoked.</p>
+</dd>
+<dt class="hdlist1">set of all necessary information and controls</dt>
+<dd>
+<p>as programmers, we have various sources to learn about what can we do with JDK. The best way to know what are the methods provided by some Java interface is to read the source code. But it&#8217;s not that easy from automation point of view. Just as Java language and JDK gives us the Reflection API, JMX allows us (and the <em>management applications</em>) to discover what can we do with the <em>management interface</em> of an MBean. We can also check all the available MBeans in the first place. Such information can be used to dynamically build user interfaces without any hard-coded information.</p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>Hopefully it is now clear that the object we <em>register</em> using the <code>javax.management.MBeanServer.registerMBean()</code> method needs to be somehow associated with a proper <em>management interface</em>.<br>
+The JMX specification precisely defines 4 types of MBeans we can register and we&#8217;ll discuss each type in the following sections.</p>
+</div>
+<div class="paragraph">
+<p>Looking from user (who registers the MBean using the <code>javax.management.MBeanServer.registerMBean()</code> method) There are exactly <em>two</em> kinds of MBeans:</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Static MBeans</dt>
+<dd>
+<p>A Java object of a class implementing a Java interface. In this Java interface each <em>JMX attribute</em> is represented as a getter/setter Java method and each <em>JMX operation</em> is represented by a non-attribute Java method.</p>
+</dd>
+<dt class="hdlist1">Dynamic MBeans</dt>
+<dd>
+<p>A Java object of a class implementing (directly or indirectly) the <code>javax.management.DynamicMBean</code> interface. Here each <em>JMX attribute</em> is handled dynamically by <code>setAttribute()</code>/<code>setAttributes()</code>/<code>getAttribute()</code>/<code>getAttributes()</code> implementation and each <em>JMX operation</em> is handled dynamically in an implementation of the generic <code>invoke()</code> method.</p>
+</dd>
+</dl>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<em>JMX notifications</em> are orthogonal to the above categories and are handled by implementing the <code>javax.management.NotificationEmitter</code> interface - whether the MBean is <em>static</em> or <em>dynamic</em>.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Whether the registered MBean is <em>static</em> or <em>dynamic</em> it is internally (by the default JMX implementation) stored as a <em>dynamic</em> MBean. Simply <em>static</em> MBeans are analyzed using Java reflection and wrapped using <code>com.sun.jmx.mbeanserver.Introspector.makeDynamicMBean()</code> as <em>dynamic</em> MBeans.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_what_is_the_metadata"><a class="anchor" href="#_what_is_the_metadata"></a>What is the metadata?</h4>
+<div class="paragraph">
+<p>Whatever kind (static, dynamic) and type (standard, dynamic, open, model) of the MBean we use, the JMX registry needs an MBean metadata that describes an MBean.</p>
+</div>
+<div class="paragraph">
+<p>Similarly to Java Reflection API, JMX <em>describes</em> an MBean using one of the interfaces specific to a type of MBean. We will describe the metadata in relevant sections, but here&#8217;s the list:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>javax.management.MBeanInfo</code> - the basic (and usually sufficient for all kinds of MBeans) metadata describing the attributes, operations, notifications, constructors and a description of an MBean. It is a class, not an interface.</p>
+</li>
+<li>
+<p><code>javax.management.openmbean.OpenMBeanInfo</code> - this is a metadata specific for Open MBeans. It was supposed to extend <code>javax.management.MBeanInfo</code> which was supposed to be changed into an interface long time ago&#8230;&#8203;</p>
+</li>
+<li>
+<p><code>javax.management.modelmbean.ModelMBeanInfo</code> - this is a metadata specific for Model MBeans.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_standard_mbeans"><a class="anchor" href="#_standard_mbeans"></a>Standard MBeans</h4>
+<div class="paragraph">
+<p><em>Standard MBeans</em> adhere to a simple convention which dates back to Java Beans™ specification:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>We need a class that <code>implements</code> a Java interface. This interface defines the <em>management interface</em> of the standard MBean.</p>
+</li>
+<li>
+<p>Each method of the interface which matches <code>get*</code>/<code>is*</code> name becomes a readable JMX attribute</p>
+</li>
+<li>
+<p>Each method of the interface which matches <code>set*</code> name becomes a writable JMX attribute (usually together with a matching getter)</p>
+</li>
+<li>
+<p>Other methods of the interface become a JMX operation</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The last requirement is that the interface being implemented by the class has to be named after the class name with special suffix. And for <em>standard MBeans</em> we have exactly two such suffices:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><code>MBean</code> (for example <code>class MyService implements MyServiceMBean</code>) - this is the <em>standard</em> standard MBean with absolutely no restriction on the types of attributes, operation parameters and return types.</p>
+</li>
+<li>
+<p><code>MXBean</code> (for example <code>class MyService implements MyServiceMXBean</code>) - this is a special version of a standard MBean called "MX Bean" where we can use only the types specified for <em>Open MBeans</em> type of <em>dynamic MBeans</em>.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Additionally option 2 can be chosen by annotating the interface (with any name) using <code>@javax.management.MXBean</code> annotation.</p>
+</div>
+<div class="paragraph">
+<p>Here&#8217;s an example of a standard MBean interface. If we create a class that implements such interface, we can pass an object of this class to the <code>javax.management.MBeanServer.registerMBean()</code> method.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public interface MyServiceMBean {
+    String getMessage();
+
+    String hello();
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This interface defines one read-only attribute named "Message" and one operation named "hello". Now we only need a class in the same package as this interface and named <code>MyService</code> to be able to register an MBean.</p>
+</div>
+<div class="paragraph">
+<p>By constraining ourselves to the Open Types only we can define an special variant of an MBean called the "MX Bean". The advantage is that (after allowing remote access) such MBean can be accessed not only by Java applications, but all other types of <em>clients</em> which only have to be aware of precisely defined set of data types.</p>
+</div>
+<div class="paragraph">
+<p><a href="#_open_mbeans">Open MBeans</a> sections provides more information about the <em>open</em> set of Java types which can be used with MX Beans. Full "MX Bean" specification is available in <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.management/javax/management/MXBean.html">@MXBean Javadoc</a>.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.management/javax/management/MXBean.html">@MXBean Javadoc</a> provides <em>much</em> more information about MX Beans than the <a href="https://jcp.org/en/jsr/detail?id=3">JMX specification</a> itself.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The nice thing about <em>static</em> MBeans (or MX Beans) is that we don&#8217;t have to build/implement dedicated metadata (<code>javax.management.MBeanInfo</code>) - we&#8217;ll get it for free during registration time thanks to <code>com.sun.jmx.mbeanserver.MBeanIntrospector</code>.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_dynamic_mbeans"><a class="anchor" href="#_dynamic_mbeans"></a>Dynamic MBeans</h4>
+<div class="paragraph">
+<p>As mentioned in the <a href="#_objects_and_interfaces">How objects, classes and interfaces relate?</a> section we have two kinds of relation between an implementation and interface in Java:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>class AnImplementation implements AnInterface</code> - static declaration that a class implements an interface</p>
+</li>
+<li>
+<p><code>java.lang.reflect.Proxy</code> and <code>java.lang.reflect.InvocationHandler</code> - dynamic association of an interface with implementation</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>We have the same concept materialized in JMX. Standard (static) MBeans use a class which <code>implements</code> a Java interface (with special suffix or annotation though).<br>
+Dynamic MBeans are classes that implement <code>javax.management.DynamicMBean</code> interface, where each attribute and each operation do <em>not</em> require dedicated Java interface method.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>all JMX attributes are handled by generic <code>javax.management.DynamicMBean.getAttribute()</code>/<code>getAttributes()</code>/<code>setAttribute()</code>/<code>setAttributes()</code> methods</p>
+</li>
+<li>
+<p>all JMX operations are handled by a generic <code>javax.management.DynamicMBean.invoke()</code> method.</p>
+</li>
+<li>
+<p>the JMX metadata is provided by <code>javax.management.DynamicMBean.getMBeanInfo()</code> method.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>That&#8217;s it. Dynamic MBeans can be used to dynamically implement JMX attributes and JMX operations instead of defining dedicated getters/setters/methods.</p>
+</div>
+<div class="paragraph">
+<p>It may be surprising to learn that <code>javax.management.StandardMBean</code> interface is <em>not</em> a standard MBean as shown in the <a href="#_standard_mbeans">Standard MBeans</a> section. Instances of <code>javax.management.StandardMBean</code> are <em>dynamic MBeans</em> that are constructed by performing an introspection of a class that implements some interface which doesn&#8217;t have to follow the <code>*MBean</code> / <code>*MXBean</code> naming convention.</p>
+</div>
+<div class="paragraph">
+<p>By extending <code>javax.management.StandardMBean</code> we can override some behavior and alter the returned metadata, thus getting more flexibility (it&#8217;s still a <em>dynamic MBean</em>) and keeping some simplicity (the reflection based approach is still applied internally by <code>com.sun.jmx.mbeanserver.MBeanIntrospector</code>).</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_open_mbeans"><a class="anchor" href="#_open_mbeans"></a>Open MBeans</h4>
+<div class="paragraph">
+<p><em>Open MBeans</em> are specialized (constrained) <em>dynamic MBeans</em> which use only predetermined set of Java types.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The term <em>open</em> means that the MBeans following this convention are more <em>open</em> to the wider range of management applications. It means we can access them not only from Java applications, but other applications as well - provided that the strict set of data types is supported.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>There&#8217;s no dedicated <code>javax.management.DynamicMBean</code> extension for <em>open MBeans</em>.</p>
+</div>
+<div class="paragraph">
+<p>However there <em>is</em> a dedicated JMX metadata interface for <em>open MBeans</em>: <code>javax.management.openmbean.OpenMBeanInfo</code>.<br>
+If our <em>dynamic MBean</em> implements <code>javax.management.DynamicMBean.getMBeanInfo()</code> to return <code>javax.management.openmbean.OpenMBeanInfoSupport</code> instead, the MBean is treated as <em>open MBean</em>.</p>
+</div>
+<div class="paragraph">
+<p>JMX Specification defines a very strict set of supported types which can be used for JMX attributes and JMX operation parameters and return values. All the types fall into 4 categories which have their Java representation in the form of <code>javax.management.openmbean.OpenType</code> class.<br>
+Here&#8217;s the list of categories and related types:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>javax.management.openmbean.SimpleType</code></p>
+<div class="ulist">
+<ul>
+<li>
+<p>8 primitive and wrapper types (<code>byte</code>, <code>short</code>, <code>int</code>, <code>long</code>, <code>float</code>, <code>double</code>, <code>char</code>, <code>boolean</code>)</p>
+</li>
+<li>
+<p><code>java.lang.String</code></p>
+</li>
+<li>
+<p><code>java.math.BigInteger</code></p>
+</li>
+<li>
+<p><code>java.math.BigDecimal</code></p>
+</li>
+<li>
+<p><code>java.util.Date</code></p>
+</li>
+<li>
+<p><code>javax.management.ObjectName</code></p>
+</li>
+<li>
+<p><code>java.lang.Void</code></p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p><code>javax.management.openmbean.ArrayType</code> - single and multidimensional arrays of all 4 categories of open types</p>
+</li>
+<li>
+<p><code>javax.management.openmbean.CompositeType</code> - types that can represents maps or more generally the key-value pairs. A composite type requires a specification of <em>all</em> items it can contain, where each item has a specified name and a type of the value. The value type may be any of the 4 categories of open types allowing for great flexibility.</p>
+</li>
+<li>
+<p><code>javax.management.openmbean.TabularType</code> - the best analogy would be a database table containing rows of data. Each such row is of the single defined <code>CompositeType</code>, but additionally the <code>TabularType</code> defines a subset of items of the row&#8217;s <code>CompositeType</code> which build an <em>index</em>. There can&#8217;t be no rows available with the same index (the same values for each of the items of the defined index).</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><a href="#_standard_mbeans">Standard MBeans</a> sections mentioned that "MX Beans" follow the type rules for Open Types. See <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.management/javax/management/MXBean.html">@MXBean</a> Javadoc for full MX Beans specification.<br>
+In particular this specification mentions that the types that can be used for MXBeans may be the types that are specified for Open MBeans, but also types which are <em>convertible to</em> and <em>reconstructible from</em> the open types.</p>
+</div>
+<div class="paragraph">
+<p>For example there are rules to convert <code>java.util.Map</code> objects into <code>javax.management.openmbean.TabularType</code> and any bean classes into <code>javax.management.openmbean.CompositeType</code>.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_model_mbeans"><a class="anchor" href="#_model_mbeans"></a>Model MBeans</h4>
+<div class="paragraph">
+<p>Well, the final boss of all MBean types&#8230;&#8203;</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s see the progression:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><em>standard MBeans</em> (static) have the _management interface hardcoded as Java interface methods and the metadata is generated by reflection</p>
+</li>
+<li>
+<p><em>dynamic MBeans</em> (including <em>open MBeans</em> with restricted types) make the implementation dynamic (<code>setAttribute()</code>, <code>invoke()</code>) but the metadata (<code>MBeanInfo</code>) is returned from the same class (implementing <code>javax.management.DynamicMBean</code>)</p>
+</li>
+<li>
+<p><em>model MBeans</em> separate the implementation and metadata. And put emphasis on the metadata&#8230;&#8203;</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>How does it work? Well, let&#8217;s assume we have a class written in mid 1990s, which doesn&#8217;t implement any interface and there are no getters. However we want to use it as <em>managed bean</em> (MBean) accessible using JMX.</p>
+</div>
+<div class="paragraph">
+<p>For example we have this trivial class:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public static class ServerStats {
+    private int activeConnections = 5;
+
+    public int connections() {
+        return activeConnections;
+    }
+
+    public void changeConnections(int value) {
+        this.activeConnections = value;
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If we can&#8217;t (afford to) refactor this class and we want to register it as an MBean with one "ActiveConnections" attribute (read/write), we can craft special metadata (in the form of <code>javax.management.modelmbean.ModelMBeanInfo</code>) which tells JMX <em>everything</em> that describes our MBean.</p>
+</div>
+<div class="paragraph">
+<p>Here&#8217;s an example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Descriptor activeConnectionsDesc = new DescriptorSupport(new String[] {
+        "name=ActiveConnections",
+        "descriptorType=attribute",
+        "getMethod=connections",
+        "setMethod=changeConnections",
+});
+ModelMBeanAttributeInfo activeConnectionsAttr =
+        new ModelMBeanAttributeInfo(
+                "ActiveConnections",
+                "int",
+                "Number of currently active connections",
+                true,   // readable
+                true,   // writable
+                false,  // isIs
+                activeConnectionsDesc
+        );
+
+Descriptor connectionsDesc = new DescriptorSupport(new String[] {
+        "name=connections",
+        "descriptorType=operation",
+        "role=getter",
+        "attribute=ActiveConnections"
+});
+Descriptor changeConnectionsDesc = new DescriptorSupport(new String[] {
+        "name=changeConnections",
+        "descriptorType=operation",
+        "role=setter",
+        "attribute=ActiveConnections"
+});
+
+ModelMBeanOperationInfo connectionsOperation =
+        new ModelMBeanOperationInfo(
+                "connections",
+                "Returns the number of active connections",
+                null,
+                "int",
+                ModelMBeanOperationInfo.INFO
+        );
+
+MBeanParameterInfo[] setConnParams = {
+        new MBeanParameterInfo(
+                "value",
+                "int",
+                "New number of active connections"
+        )
+};
+
+ModelMBeanOperationInfo changeConnectionsOp =
+        new ModelMBeanOperationInfo(
+                "changeConnections",
+                "Sets the number of active connections",
+                setConnParams,
+                "void",
+                ModelMBeanOperationInfo.ACTION
+        );
+
+ModelMBeanInfo modelMBeanInfo =
+        new ModelMBeanInfoSupport(
+                ServerStats.class.getName(),
+                "ModelMBean exposing ServerStats via non-standard methods",
+                new ModelMBeanAttributeInfo[] {
+                        activeConnectionsAttr
+                },
+                null, // constructors
+                new ModelMBeanOperationInfo[] {
+                        connectionsOperation,
+                        changeConnectionsOp
+                },
+                null  // notifications
+        );
+
+ServerStats resource = new ServerStats();
+
+RequiredModelMBean modelMBean = new RequiredModelMBean(modelMBeanInfo);
+modelMBean.setManagedResource(resource, "ObjectReference");
+
+MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+
+ObjectName name = new ObjectName("example.jmx:type=ServerStatsModelMBean");
+mbs.registerMBean(modelMBean, name);
+
+mbs.setAttribute(name, new Attribute("ActiveConnections", 42));
+Object connections = mbs.getAttribute(name, "ActiveConnections");
+System.out.println(connections);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>A lot of hassle, but shows how powerful and complex <em>model MBeans</em> are. We can think about this approach as:</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>Declaratively controlled Reflection-based introspection</p>
+</div>
+</blockquote>
+</div>
+<div class="paragraph">
+<p>The declaration is very verbose, but for complex systems it may be justified to externalize such declarations in XML/JSON/YAML formats to support Java classes that can&#8217;t be turned into MBeans in an easier way.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_accessing_mbeans"><a class="anchor" href="#_accessing_mbeans"></a>Accessing MBeans</h3>
+<div class="paragraph">
+<p>With the background provided earlier, we now have this simple summary:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>A JMX Registry (<code>MBeanServer</code>) for registration and accessing MBeans</p>
+</li>
+<li>
+<p>MBeans of different types from which we can choose according to requirements</p>
+</li>
+<li>
+<p>MBean metadata that describe the MBeans and can either be generated (by Reflection), provided (by implementing <code>javax.management.DynamicMBean.getMBeanInfo()</code>) explicitly in code or provided declaratively for <em>model MBeans</em></p>
+</li>
+<li>
+<p><em>management interfaces</em> that describe what can we do with the MBeans (access attributes, invoke operations, react to notifications)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Before moving to the remote aspects of JMX let&#8217;s finish this section by showing <em>how</em> to access the MBeans.</p>
+</div>
+<div class="paragraph">
+<p>There are <em>two</em> ways - fully generic and more Java language friendly.</p>
+</div>
+<div class="sect3">
+<h4 id="_generic_access_to_mbeans"><a class="anchor" href="#_generic_access_to_mbeans"></a>Generic access to MBeans</h4>
+<div class="paragraph">
+<p><em>Generic</em> access means the MBeans are accessed in the same way whatever their <em>management interface</em> is. We simply use <code>MBeanServer</code> or <code>MBeanServerConnection</code> API.</p>
+</div>
+<div class="paragraph">
+<p>Here&#8217;s an example of getting some attributes for built in MBean related to memory:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+
+CompositeData usage = (CompositeData) server.getAttribute(ObjectName.getInstance("java.lang:type=Memory"), "HeapMemoryUsage");
+System.out.println("Used memory: " + usage.get("used"));</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>javax.management.openmbean.CompositeData</code> is one of the supported <em>open types</em>. If we look at the <code>MBeanInfo</code> of <code>java.lang:type=Memory</code> MBean and <code>MBeanAttributeInfo</code> for its `HeapMemoryUsage attribute, we can see the definition (formatted for clarity):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-none hljs">javax.management.openmbean.OpenMBeanAttributeInfoSupport(
+    name=HeapMemoryUsage,
+    openType=javax.management.openmbean.CompositeType(
+        name=java.lang.management.MemoryUsage,
+        items=(
+            (
+                itemName=committed,
+                itemType=javax.management.openmbean.SimpleType(name=java.lang.Long)
+            ),
+            (
+                itemName=init,
+                itemType=javax.management.openmbean.SimpleType(name=java.lang.Long)
+            ),
+            (
+                itemName=max,
+                itemType=javax.management.openmbean.SimpleType(name=java.lang.Long)
+            ),
+            (
+                itemName=used,
+                itemType=javax.management.openmbean.SimpleType(name=java.lang.Long)
+            )
+        )
+    ),
+    default=null,
+    minValue=null,
+    maxValue=null,
+    legalValues=null,
+    descriptor={
+        openType=javax.management.openmbean.CompositeType(
+            name=java.lang.management.MemoryUsage,
+            items=(
+                (
+                    itemName=committed,
+                    itemType=javax.management.openmbean.SimpleType(name=java.lang.Long)
+                ),
+                (
+                    itemName=init,
+                    itemType=javax.management.openmbean.SimpleType(name=java.lang.Long)
+                ),
+                (
+                    itemName=max,
+                    itemType=javax.management.openmbean.SimpleType(name=java.lang.Long)
+                ),
+                (
+                    itemName=used,
+                    itemType=javax.management.openmbean.SimpleType(name=java.lang.Long)
+                )
+            )
+        ),
+        originalType=java.lang.management.MemoryUsage
+    }
+)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As mentioned in <a href="#_open_mbeans">Open MBeans</a> section, this is how various complex types are mapped into a strict set of supported <em>open types</em>.</p>
+</div>
+<div class="paragraph">
+<p>This is also a reason why Jolokia can handle various MBeans in generic way - simply by using a generic <code>javax.management.MBeanServer[Connection]</code> API.</p>
+</div>
+<div class="paragraph">
+<p>But there&#8217;s more.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_access_to_mbeans_using_jmx_proxies"><a class="anchor" href="#_access_to_mbeans_using_jmx_proxies"></a>Access to MBeans using JMX proxies</h4>
+<div class="paragraph">
+<p><a href="#_standard_mbeans">Standard MBeans</a> section describe MBeans and MXBeans where a registered MBean <em>needs to</em> implement (using <code>implements</code> clause) an interface with <code>MBean</code> or <code>MXBean</code> suffix.<br>
+Wouldn&#8217;t it be nice if we could access the MBeans using these interfaces? After all we started this chapter with <a href="#_java-objects-interfaces-proxies">Java, objects, interfaces, proxies</a> section - perhaps we could create a <code>java.lang.reflect.Proxy</code> with an interface like <code>java.lang.management.MemoryMXBean</code> and a <code>java.lang.reflect.InvocationHandler</code> that transparently turns the method argument into a call to <code>javax.management.MBeanServer[Connection]</code>?</p>
+</div>
+<div class="paragraph">
+<p>Well, <code>javax.management.JMX</code> utility does exactly that! The above scenario is implemented by two methods:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>javax.management.JMX.newMBeanProxy()</code></p>
+</li>
+<li>
+<p><code>javax.management.JMX.newMXBeanProxy()</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>And here&#8217;s how we can use them:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+
+MemoryMXBean bean = JMX.newMXBeanProxy(server, ObjectName.getInstance("java.lang:type=Memory"), MemoryMXBean.class);
+MemoryUsage usage = bean.getHeapMemoryUsage();
+System.out.println("Used memory: " + usage.getUsed());</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Isn&#8217;t it nice? And what&#8217;s more, instead of getting <code>javax.management.openmbean.CompositeData</code> for <code>HeapMemoryUsage</code> attribute, we get <code>java.lang.management.MemoryUsage</code> object directly! And JMX proxy performs the <em>open type conversion</em> for us.</p>
+</div>
+<div class="paragraph">
+<p>But there&#8217;s more. At least for _platform MBeans.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_access_to_platform_mbeans"><a class="anchor" href="#_access_to_platform_mbeans"></a>Access to platform MBeans</h4>
+<div class="paragraph">
+<p>We&#8217;ve already used <code>ManagementFactory.getPlatformMBeanServer()</code> to get access to the <em>platform MBeanServer</em>. The same static class
+can be used to access some platform MBeans <em>directly</em>! Here are the methods:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
+System.out.println("Used memory: " + memoryMXBean.getHeapMemoryUsage().getUsed());
+
+List&lt;MemoryManagerMXBean&gt; memoryManagerMXBeans = ManagementFactory.getMemoryManagerMXBeans();
+
+ClassLoadingMXBean classLoadingMXBean = ManagementFactory.getClassLoadingMXBean();
+System.out.println("Total loaded class count: " + classLoadingMXBean.getTotalLoadedClassCount());
+
+CompilationMXBean compilationMXBean = ManagementFactory.getCompilationMXBean();
+
+List&lt;GarbageCollectorMXBean&gt; garbageCollectorMXBeans = ManagementFactory.getGarbageCollectorMXBeans();
+
+List&lt;MemoryPoolMXBean&gt; memoryPoolMXBeans = ManagementFactory.getMemoryPoolMXBeans();
+
+OperatingSystemMXBean operatingSystemMXBean = ManagementFactory.getOperatingSystemMXBean();
+System.out.println(operatingSystemMXBean.getName() + " / " + operatingSystemMXBean.getVersion());
+
+RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
+System.out.println(runtimeMXBean.getVmVersion());
+
+ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The returned references are <em>not</em> proxies - these are references to actual objects registered in JMX. So for platform MBean access we can skip the reflective invocation.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_summary"><a class="anchor" href="#_summary"></a>Summary</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This chapter presented a big chunk of the original <a href="https://jcp.org/en/jsr/detail?id=3">JMX Specification</a> and in particular:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Entire chapter I <em>JMX Instrumentation Specification</em>.</p>
+</li>
+<li>
+<p>Most of the chapter II <em>JMX Agent Specification</em> without some parts which either do not need separate explanation or are a bit less relevant from Jolokia and JMX user point of view. Like:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>details about some helper classes like <code>javax.management.ObjectInstance</code></p>
+</li>
+<li>
+<p>some aspects of MBean registration like <code>javax.management.MBeanRegistration</code> interface</p>
+</li>
+<li>
+<p>queries</p>
+</li>
+<li>
+<p>M-Lets (<em>management applets</em>) - this is now much less relevant topic, as it covers dynamic and remote class loading which is most of the time a security issue. After all we don&#8217;t want to make it easy to download such XML file from a remote location:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;MLET CODE=object6 ARCHIVE=mybean.jar NAME="object6"&gt;
+&lt;/MLET&gt;</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p><code>javax.management.monitor</code> package and JMX monitoring</p>
+</li>
+<li>
+<p><code>javax.management.timer</code> package and JMX timers</p>
+</li>
+<li>
+<p><code>javax.management.relation</code> package and JMX relations</p>
+</li>
+<li>
+<p>non-remote JMX security, as this chapter is based on <code>java.lang.SecurityManager</code> which has been removed with <a href="https://openjdk.org/jeps/486">JEP 486</a> in JDK 24</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Chapter "5.3. Protocol Adaptors and Connectors" will be presented in <a href="jmx_remote_guide.html" class="xref page">JMX Remote Guide</a> chapter.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>As we can see, there&#8217;s no mention of <em>Remote JMX</em> which was originally part of <a href="https://jcp.org/en/jsr/detail?id=160">JSR 160: Java™ Management Extensions (JMX) Remote API</a> specification, but which is now part of <a href="https://jcp.org/en/jsr/detail?id=3">JSR 3: Java™ Management Extensions (JMX™) Specification</a>.</p>
+</div>
+<div class="paragraph">
+<p>Where does Jolokia fit in? Jolokia shines in the remote features of JMX and we have a dedicated chapter for this. See <a href="jmx_remote_guide.html" class="xref page">JMX Remote Guide</a>.</p>
+</div>
+<div class="paragraph">
+<p>However there are few features Jolokia provides for the non-remote part of JMX:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="jolokia_jmx.html" class="xref page">JMX Support</a> - shows how Jolokia deals with multiple instances of <code>javax.management.MBeanServer</code> and what are <code>@JsonMBeans</code></p>
+</li>
+<li>
+<p><a href="jolokia_mbeans.html" class="xref page">Jolokia MBeans</a> - shows MBeans which Jolokia itself registers into the Platform MBean Server.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>See the <a href="jmx_remote_guide.html" class="xref page">JMX Remote Guide</a> chapter where we discuss <a href="https://jcp.org/en/jsr/detail?id=160">JSR 160: Java™ Management Extensions (JMX) Remote API</a> and how Jolokia makes it much more approachable.</p>
+</div>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="architecture.html">Architecture</a></span>
+  <span class="next"><a href="jmx_remote_guide.html">JMX Remote Guide</a></span>
+</nav>
+</article>
+  </div>
+<footer class="footer">
+  This page was built using the Antora default UI. The source code for this UI is licensed under the terms of the MPL-2.0 license. | Copyright © 2010 -
+  2023 Roland Huß
+</footer>
+<script id="site-script" src="../_/js/site.js" data-ui-root-path="../_"></script>
+<script async src="../_/js/vendor/highlight.js"></script>
+</main>
+</div>
+  </body>
+</html>

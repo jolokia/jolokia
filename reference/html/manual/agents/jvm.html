@@ -42,7 +42,10 @@
     <a class="nav-link" href="../architecture.html">Architecture</a>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="../extensions.html">Extending Jolokia</a>
+    <a class="nav-link" href="../jmx_guide.html">JMX Guide</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../jmx_remote_guide.html">JMX Remote Guide</a>
   </li>
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="../agents.html">Agents</a>
@@ -58,6 +61,9 @@
   </li>
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="../jolokia_mbeans.html">Jolokia MBeans</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../extensions.html">Extending Jolokia</a>
   </li>
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="../clients.html">Clients</a>
@@ -735,7 +741,7 @@ where &lt;command&gt; is one of
     --restrictorClass &lt;class&gt;       Classname of an custom restrictor which must be loadable from the classpath
     --policyLocation &lt;url&gt;          Location of a Jolokia policy file
     --mbeanQualifier &lt;qualifier&gt;    Qualifier to use when registering Jolokia internal MBeans
-    --canonicalNaming &lt;t|f&gt;         whether to use canonicalName for ObjectNames in 'list' or 'search' (default: true)
+    --canonicalNaming &lt;t|f&gt;         whether to use canonicalName for ObjectNames in 'list' or 'search' (default: false)
     --includeStackTrace &lt;t|f&gt;       whether to include StackTraces for error messages (default: false)
     --serializeException &lt;t|f&gt;      whether to add a serialized version of the exception in the Jolokia response (default: false)
     --includeRequest &lt;t|f&gt;          whether to include entire request in the response (default: true)

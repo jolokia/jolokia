@@ -6,7 +6,7 @@
     <title>Architecture :: Jolokia</title>
     <link rel="canonical" href="https://jolokia.org/manual/architecture.html">
     <link rel="prev" href="index.html">
-    <link rel="next" href="extensions.html">
+    <link rel="next" href="jmx_guide.html">
     <meta name="generator" content="Antora 3.1.4">
     <link rel="stylesheet" href="../_/css/site.css">
     <link rel="stylesheet" href="../_/css/jolokia.css">
@@ -44,7 +44,10 @@
     <a class="nav-link" href="architecture.html">Architecture</a>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="extensions.html">Extending Jolokia</a>
+    <a class="nav-link" href="jmx_guide.html">JMX Guide</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="jmx_remote_guide.html">JMX Remote Guide</a>
   </li>
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="agents.html">Agents</a>
@@ -60,6 +63,9 @@
   </li>
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="jolokia_mbeans.html">Jolokia MBeans</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="extensions.html">Extending Jolokia</a>
   </li>
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="clients.html">Clients</a>
@@ -147,7 +153,7 @@ comfort for Java clients of this API, but it is also dangerous
 calls. There are several subtle issues, performance
 being one of them. It <em>does</em> matter whether a
 call is invoked locally or remotely. A caller should at least be
-aware what happens and what the consequences are. On the other
+aware of what happens and what the consequences are. On the other
 hand, there are message-passing models which include remoting
 explicitly, so that the caller <em>knows</em> from
 the programming model that she is calling a potentially expensive
@@ -269,7 +275,7 @@ merging of MBeanServers (exposing a unified view) are not available in the proxy
 </div>
 <nav class="pagination">
   <span class="prev"><a href="index.html">Introduction</a></span>
-  <span class="next"><a href="extensions.html">Extending Jolokia</a></span>
+  <span class="next"><a href="jmx_guide.html">JMX Guide</a></span>
 </nav>
 </article>
   </div>

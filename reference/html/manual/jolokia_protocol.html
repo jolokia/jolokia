@@ -44,7 +44,10 @@
     <a class="nav-link" href="architecture.html">Architecture</a>
   </li>
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="extensions.html">Extending Jolokia</a>
+    <a class="nav-link" href="jmx_guide.html">JMX Guide</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="jmx_remote_guide.html">JMX Remote Guide</a>
   </li>
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="agents.html">Agents</a>
@@ -60,6 +63,9 @@
   </li>
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="jolokia_mbeans.html">Jolokia MBeans</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="extensions.html">Extending Jolokia</a>
   </li>
   <li class="nav-item" data-depth="1">
     <a class="nav-link" href="clients.html">Clients</a>
@@ -2770,7 +2776,7 @@ provided as path info.</p>
       "agentId": "192.168.0.221-21185-5ce94d31-servlet",
       "maxCollectionSize": "0",
       "debug": "false",
-      "canonicalNaming": "true",
+      "canonicalNaming": "false",
       "historyMaxEntries": "10",
       "serializeException": "false",
       "includeStackTrace": "false",
@@ -2928,8 +2934,8 @@ With this flag enabled, <code>list()</code> operation returns a bit different st
 </dd>
 <dt class="hdlist1"><code>canonicalNaming</code></dt>
 <dd>
-<p>Defaults to <code>true</code> to return the canonical format of property lists.
-If set to <code>false</code> then the default unsorted property list is returned.</p>
+<p>Defaults to <code>false</code> to return the defined (at creation time) format of property lists.
+If set to <code>true</code> then the default sorted property list is returned.</p>
 </dd>
 <dt class="hdlist1"><code>includeStackTrace</code></dt>
 <dd>
@@ -2975,7 +2981,7 @@ completely into a JSON value object. It can detect cycles in
 the object graph and provides a way to limit the depth of
 serialization. For certain types (like
 <code>File</code> or
-<code>ObjectName</code>) it uses a service <code>org.jolokia.service.serializer.json.simplifier.SimplifierAccessor</code> to not
+<code>ObjectName</code>) it uses a service <code>org.jolokia.converter.json.simplifier.SimplifierAccessor</code> to not
 expose internal and redundant information.</p>
 </div>
 <div class="paragraph">
