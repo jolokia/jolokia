@@ -28,6 +28,7 @@ We already know that:
 
 JMX Remote may simply be understood as an implementation of `javax.management.MBeanServerConnection` that connects to a remote MBeanServer underneath. This chapter covers all necessary details expanding on the topics covered in xref:jmx_guide.adoc[].
 
+[#_jmx_remote_concepts]
 == JMX Connectors and Protocol Adaptors concepts
 
 In the chapter II JMX Agent Specification, there's a short 5.3. part about _connectors_ and _protocol adaptors_. From the perspective of _local_ MBeanServer, these are two _hints_ about how to allow a remote access to MBeans registered in MBeanServer.
@@ -55,10 +56,13 @@ With protocol adaptors we use a _protocol_ that not necessarily map 1:1 with the
 Jolokia may be perceived as JMX Protocol Adaptor that maps HTTP protocol and JSON messages into `MBeanServer[Connection]` operations. That's the key goal of Jolokia. +
 But with `org.jolokia:jolokia-client-jmx-adapter` Jolokia also provides a `javax.management.remote.JMXConnector` implementation which makes it an actual _JMX Connector_ as well.
 
+[#_jmx_connectors]
 == JMX Connectors - an overview
 
 Here's a diagram depicting a JMX Connector:
 
+.JMX Remote Connector
+[#_img_jmx_remote_connector]
 image::jmx-connectors.png[]
 
 The `MBeanServer` component is a _local_ MbeanServer with registered MBeans. The one we access within the same JVM using `java.lang.management.ManagementFactory.getPlatformMBeanServer()`. To make the MBeans available remotely using a JMX Connector we need two things:
@@ -89,24 +93,26 @@ Here's a list of the steps to take starting from what we need to how do we get i
 1. We need a reference to the `javax.management.MBeanServerConnection` which we can use to access remote MBeans.
 2. We can get such reference using `javax.management.remote.JMXConnector.getMBeanServerConnection()` method, so we need a JMX Connector (Client).
 3. We can get a JMX Connector (Client) using `javax.management.remote.JMXConnectorFactory.newJMXConnector()`, so we need a JMX Connector (Client) Factory.
-4. `javax.management.remote.JMXConnectorFactory` contains static methods, so we don't have to _get_ it, we just need to be able to call relevant methods
+4. `javax.management.remote.JMXConnectorFactory` contains static methods, so we don't have to _get_ it, we just need to be able to call relevant methods.
 5. There's _one_ method called `newJMXConnector(JMXServiceURL serviceURL, Map<String,?> environment)` (the `connect()` methods use this one and call `javax.management.remote.JMXConnector.connect()` on the created connector)
-6. That's why we need `javax.management.remote.JMXServiceURL` - and we have to create it.
+6. That's why we need a `javax.management.remote.JMXServiceURL` - and we have to create it.
 
-Reversing the checklist, we need a `javax.management.remote.JMXServiceURL`.
+Reversing the checklist, we need to start with a `javax.management.remote.JMXServiceURL` - we can call it a _starting point_.
 Chapter 13.8 "Connector Server Addresses" of the JMX specification defines what the _JMX Service URL_ is. The definition of the URL is simple:
 
+[#_jmx_service_url]
+.JMX Service URL format
 ----
 service:jmx:<protocol-specific-part>
 ----
 
-It's the `<protocol-specific-part>` that may be more complex. And we'll discuss them in respective sections for particular protocols.
+It's the `<protocol-specific-part>` that may be more complex. And we'll discuss the details in the respective sections for particular protocols.
 
-This URL suggest we know some _address_ which may be an IP address + TCP port, but doesn't have to. Everything depends on the actual protocol being used.
+This URL suggest we know some _address_ which may be an IP address + TCP port, but doesn't have to be. Everything depends on the actual protocol being used.
 
 There's another way to get a client connector - by obtaining an object called a https://en.wikipedia.org/wiki/Stub_(distributed_computing)[_stub_]. +
-Such object encapsulates the state and behavior that can be used in one place (the client) to manipulate a remote service/object just as if it was available locally. This concept is related to distribute programming and is present in technologies such as https://en.wikipedia.org/wiki/Common_Object_Request_Broker_Architecture[Corba] or RMI. +
-In such systems, remote objects (services) are accessed through stubs and the stubs are initially _located_ in technology-specific repositories. +
+Such object encapsulates the state and behavior that can be used in one place (the client) to manipulate a remote service/object just as if it was available locally. This concept is related to distribute programming and is present in technologies such as https://en.wikipedia.org/wiki/Common_Object_Request_Broker_Architecture[Corba] or https://docs.oracle.com/en/java/javase/17/docs/specs/rmi/index.html[RMI]. +
+In such systems, remote objects (services) are accessed through stubs and the stubs are initially _located_ in technology-specific way. +
 We will provide more information in sections about RMI.
 
 === JMX Connectors defined in the specification
@@ -114,30 +120,26 @@ We will provide more information in sections about RMI.
 JMX Remote specification defines connectors based on two protocols:
 
 * mandatory https://docs.oracle.com/en/java/javase/17/docs/specs/rmi/index.html[RMI] using Java Object serialization
-* optional JMX Messaging Protocol (JMXMP) based directly on TCP sockets. This connector is specified in Chapter 15 "Generic Connector" of the JMX Specification and in theory allows for _pluggable_ implementation of handshakes, messages and profiles. +
+* optional JMX Messaging Protocol (JMXMP) based directly on TCP sockets. This connector is specified in Chapter 15 "Generic Connector" of the JMX Specification and in theory allows for _pluggable_ implementation of handshakes, messages and profiles and generally the entire protocol. +
 But it is optional and not available in standard JDK distribution, so we won't discuss it any further.
 
 So we're left with one mandatory protocol implemented by RMI Connector (Chapter 14 of the JMX Specification). It's fully covered in the following sections, but here let's clarify one thing. 
 
 RMI technology defines two _transports_:
 
-* default JRMP transport using `pass:[java.rmi.*]` package. It's full name is RMI/JRMP
-* deprecated IIOP transport defined by https://en.wikipedia.org/wiki/Common_Object_Request_Broker_Architecture[Corba] using `pass:[javax.rmi.*]` and `pass:[org.omg.*]` packages. It's full name is RMI/IIOP. Corba packages and classes are no longer available and were removed with https://openjdk.org/jeps/320[JEP 320] in JDK 11. +
+* default JRMP transport using `pass:[java.rmi.*]` package. It's full name is `RMI/JRMP`
+* deprecated IIOP transport defined by https://en.wikipedia.org/wiki/Common_Object_Request_Broker_Architecture[Corba] using `pass:[javax.rmi.*]` and `pass:[org.omg.*]` packages. It's full name is `RMI/IIOP`. Corba packages and classes are no longer available and were removed with https://openjdk.org/jeps/320[JEP 320] in JDK 11. +
 It's worth to mention that `javax.management.remote.rmi.RMIIIOPServerImpl` is deprecated and its `export()` method throws an `UnsupportedOperationException("Method not supported. JMX RMI-IIOP is deprecated")` exception.
 
-It is simple then - we have one JMX Connector based on RMI and we have one RMI transport to choose (JRMP).
-
-Then next section provides the detailed information about JMX Remote RMI Connector. Even if it doesn't cover Jolokia at all, it should provide a great foundation for the final sections of this chapter where we show how Jolokia fits in.
-
-== JMX Remote RMI Connector
-
+It is simple then - we have one JMX Connector based on RMI and we have one RMI transport to choose (JRMP). +
 JMX Connector implementation based on https://docs.oracle.com/en/java/javase/17/docs/specs/rmi/[RMI] technology is the default and only mandatory implementation in JMX Remote specification.
 
-I didn't really feel like the information on RMI should be added to this Jolokia Reference documentation. But I wanted to, so the picture is complete. Also, showing the configuration of RMI Connector can help to understand the decisions made when implementing Jolokia.
+I didn't really feel like the information on RMI itself should be part of Jolokia Reference documentation. +
+But I wanted to, so the picture is complete. Also, showing the configuration of RMI Connector for JMX may help to understand the decisions made when implementing Jolokia.
 
 Let's start by showing what the RMI actually is (without references to JMX Remote).
 
-=== Remote Method Invocation
+== Remote Method Invocation
 
 WARNING: I'll try to be concise, but I can't promise anything because this is a very interesting subject.
 
@@ -161,7 +163,7 @@ Assuming that _everything is an object_, RMI specifies clearly that a _remote ob
 ** accept parameters and return values that are either other _remote objects_ or implement `java.io.Serializable` interface
 
 [#_creating_and_exporting_the_remote_objects]
-==== Creating and exporting the remote objects
+=== Creating and exporting the remote objects
 
 A _remote object_ can be invoked remotely. RMI uses TCP protocol and Java Serialization mechanism, so it's clear that there's a need for a TCP listener and `java.io.ObjectInputStream`/`java.io.ObjectOutputStream`. +
 The act of making a Java object which matches the _remote object_ contract (presented earlier) ready to be invoked remotely is called _exporting_.
@@ -223,7 +225,7 @@ The stub returned from `java.rmi.server.UnicastRemoteObject.exportObject()` is o
 ** are used to compute a mapping between numbers and Java methods using `sun.rmi.server.Util.computeMethodHash()`. This method translates a `java.lang.reflect.Method` into a `long` value which is the first 8 bytes of an SHA digest of method _descriptor_.
 
 [#_accessing_the_remote_objects]
-==== Accessing the remote objects
+=== Accessing the remote objects
 
 In the previous example we've obtained the _dynamic stub_ (a `java.lang.reflect.Proxy`) by exporting the remote object. This means that we're actually working in the same JVM. However calling the proxy will already lead to a remote method invocation.
 
@@ -239,14 +241,15 @@ Here's what's happening when we call `remote.sayHello()`:
 
 TCP connection is involved, but let's not dig into the details of additional configuration (like SSL) - we'll discuss these in <<_jmx_remote_rmi_connector_details>>.
 
-==== Obtaining the dynamic stubs
+[#_rmi_registry]
+=== Obtaining the dynamic stubs - the RMI Registry
 
 In previous section we've shown how the remote object is exported and its dynamic stub (a proxy) is created. We used the proxy to perform a remote invocation. This was easy, because we got the proxy from the `exportObject()` method in the same JVM.
 
 Normally the return value from the `exportObject()` call has to be stored somewhere and made available for actual remote clients to use. Ideally, we need something short and enough to represent a remote object.
 
 As mentioned in <<_accessing_the_remote_objects>>, parameters passed to remote methods are subject to Java Serialization. But it's not plain `java.io.ObjectOutputStream` that's being used, it's a special `sun.rmi.server.MarshalOutputStream` implementation where some objects may get _replaced_ during serialization. Each `java.rmi.Remote` passed is replaced by what's returned from the related `sun.rmi.transport.Target.getStub()`. +
-When the `Target` is not available (because the binding is performed remotely) the proxy is marshalled with its `java.rmi.server.RemoteObjectInvocationHandler`, however there's special `java.rmi.server.RemoteObject.writeObject` which _optimizes_ the serialization. So instead of sending entire serialized proxy or its invocation handler, what is really marshaled over the network is defined in `sun.rmi.transport.LiveRef.write()`. Here's everything that's marshalled as _any_ `java.rmi.Remote` object:
+When the `Target` is not available (because the binding is performed remotely) the proxy is marshaled with its `java.rmi.server.RemoteObjectInvocationHandler`, however there's special `java.rmi.server.RemoteObject.writeObject` which _optimizes_ the serialization. So instead of sending entire serialized proxy or its invocation handler, what is really marshaled over the network is defined in `sun.rmi.transport.LiveRef.write()`. Here's everything that's marshaled as _any_ `java.rmi.Remote` object:
 
 * host and port from `sun.rmi.transport.tcp.TCPEndpoint`
 * object number from `java.rmi.server.ObjID`
@@ -255,7 +258,7 @@ When the `Target` is not available (because the binding is performed remotely) t
 Knowing how a _remote object_ is serialized we just need a place to keep these few bytes of data and make it available using some name/id. +
 What makes the registration of _remote objects_ (actually their _dynamic_ (but also _static_) stubs) possible is how lightweight the stubs can be. After all we need the way to access the remote object - not the remote object itself.
 
-In RMI we can obtain the _dynamic stubs_ using ... RMI. Chicken and egg problem? Not necessarily, because we can obtain _any_ dynamic stub for an exported object using a dynamic stub for one _known_ object. The interface of the dynamic stub's proxy is `java.rmi.registry.Registry`.
+In RMI we can obtain the _dynamic stubs_ using ... RMI. Chicken and egg problem? Not necessarily, because we can obtain _any_ dynamic stub for exported objects using a dynamic stub for one _known_ object. The interface of the dynamic stub's proxy is `java.rmi.registry.Registry`.
 
 https://docs.oracle.com/en/java/javase/17/docs/specs/rmi/registry.html[RMI Registry] is responsible for:
 
@@ -272,7 +275,7 @@ public void bind(String name, java.rmi.Remote obj)
 
 Because the `java.rmi.registry.Registry` is also a `java.rmi.Remote`, we have the same procedure involved as described in <<_creating_and_exporting_the_remote_objects>> and <<_accessing_the_remote_objects>>. However it's a bit easier than manually exporting an object and getting its stub.
 
-Here's how we start an RMI Registry:
+Here's how we start the RMI Registry:
 
 [source,java]
 ----
@@ -284,9 +287,9 @@ This single call:
 
 * creates an instance of `sun.rmi.registry.RegistryImpl.RegistryImpl`
 * exports the object using `sun.rmi.server.UnicastServerRef.exportObject()`
-** special `java.rmi.server.ObjID.REGISTRY_ID` object id is used with `unique=0, time=0, count=0` 
+** special `java.rmi.server.ObjID.REGISTRY_ID` object id is used with `unique=0, time=0, count=0`
 
-Here's what the server side should do in addition to exporting the object:
+Here's what the server side should do after exporting the object:
 
 [source,java]
 ----
@@ -307,21 +310,313 @@ hello.sayHello();
 
 NOTE: The server where the object is exported can of course bind the _dynamic stub_ in a _remote_ RMI registry located using `LocateRegistry.getRegistry(Registry.REGISTRY_PORT)` instead of the _local_ one created (and exported) using `LocateRegistry.createRegistry(Registry.REGISTRY_PORT)`.
 
-==== RMI Summary
+The last interesting thing about RMI Registry is that we access it remotely using a _static_ stub - not a dynamic one. Static stubs are used for several built-in JDK remote objects and are not based on a proxy and a `java.rmi.server.RemoteObjectInvocationHandler`. The implementation of the registry is `sun.rmi.registry.RegistryImpl` and static stubs are detected by RMI infrastructure by locating a nearby (in the same package) class with `_Stub` suffix. And `sun.rmi.registry.RegistryImpl_Stub` is such static stub for the remote registry.
 
-We have now all the information required to understand how JMX uses RMI for remote MBeanServer access. Actually there's one more thing.
+Static stub's code performs the same actions that are implemented in generic `RemoteObjectInvocationHandler` for dynamic stubs.
 
-If you noticed that `javax.management.MBeanServerConnection` (we mentioned that it's a _remote_ interface for the MBeanServer, because the methods are declared to throw `IOException`) is _not_ extending `java.rmi.Remote` and looking for an explanation, here it is.
+=== RMI Summary
 
-`javax.management.MBeanServerConnection` is indeed used for a _remote_ access to an MBeanServer, but it's not used for a _remote RMI_ access. The one missing piece is `javax.management.remote.rmi.RMIConnection` interface. This interface (surprise!) duplicates (again) all the methods from `javax.management.MBeanServerConnection` (and `javax.management.MBeanServer`). There's no need to declare all the methods to throw `java.rmi.RemoteException`, because this exception extends `java.io.IOException`, which is enough for an object to match _remote object_ requirements.
+We have now all the information required to understand how JMX uses RMI for remote MBeanServer access.
 
-In <<_obtaining_a_connector_client>> we've mentioned that we get a (client) `javax.management.remote.JMXConnector` from a `javax.management.remote.JMXConnectorFactory` which delegates to a `javax.management.remote.JMXConnectorProvider`:
-
-* default (client) JMX Connector provider is `com.sun.jmx.remote.protocol.rmi.ClientProvider`
-* it returns a `javax.management.remote.rmi.RMIConnector` implementation of `javax.management.remote.JMXConnector`
-* upon `javax.management.remote.JMXConnector.connect()` the selected `javax.management.remote.JMXServiceURL` is used to locate a `javax.management.remote.rmi.RMIServer` which is a _remote_ representation of an MBeanServer able to produce `javax.management.remote.rmi.RMIConnection` remote objects for accessing the remote MBeanServer
-
-How the `JMXServiceURL` can be used to locate an `RMIServer` is described in more details later. And yes - `javax.management.remote.rmi.RMIServer` implementation is created, exported at the server side of the JMX Connector and bound in an RMI Registry.
+* interfaces extending `java.rmi.Remote` may be used to call remote object as if they were available locally. All the methods may throw `java.rmi.RemoteException` (or generally `java.io.IOException`)
+* from the client (the caller) perspective, _dynamic stub_ or _static stub_ is used to marshal (serialize) method arguments and return values and send them using TCP
+* the target remote object and the invoked method is identified by a combination of `java.rmi.server.ObjID` and `sun.rmi.transport.tcp.TCPEndpoint`
+* _dynamic stubs_ are implemented by `java.rmi.server.RemoteObjectInvocationHandler` and `java.lang.reflect.Proxy`. _static stubs_ are pregenerated classes that contain code specific for given remote interface.
+* from the server (the target) perspective, the remote object implementations are _exported_. There's one TCP listener (ServerSocket) for each port used during the export. Incoming connections are handled by reading and deserializing Java objects that identify the method to invoke on an exported remote object
 
 [#_jmx_remote_rmi_connector_details]
-=== JMX Remote RMI Connector - the details
+== JMX Remote RMI Connector - the details
+
+The remaining sections of this chapter cover the RMI implementation of the JMX Connector. In other words we cover entire chapter 14 "RMI Connector" of the JMX specification.
+
+If you noticed that `javax.management.MBeanServerConnection` (we mentioned that it's a _remote_ interface for the MBeanServer, because the methods are declared to throw `IOException`) is _not_ extending `java.rmi.Remote` and are looking for an explanation, read further.
+
+`javax.management.MBeanServerConnection` is indeed used for a _remote_ access to an MBeanServer, but it's not used for a _remote RMI_ access. `javax.management.MBeanServerConnection` is generic _remote JMX access interface_, not specific to RMI. The point is to have such `javax.management.remote.JMXConnector.getMBeanServerConnection()` that returns an `MBeanServerConnection` which uses RMI.
+
+As shown in <<_jmx_connectors>>, the _JMX Connector_ consists of the Connector Server and the Connector Client. In the _RMI JMX Connector_:
+
+* connector client is `javax.management.remote.rmi.RMIConnector`
+* connector server is `javax.management.remote.rmi.RMIConnectorServer`
+
+As shown in <<_creating_and_exporting_the_remote_objects>> we need a `java.rmi.Remote` _remote object_ exported and exposed at the server side and made available to the client side as the _dynamic stub_. +
+The _remote object_ we need is `javax.management.remote.rmi.RMIServer`. This _remote interface_ is:
+
+* exported at server side as `javax.management.remote.rmi.RMIJRMPServerImpl` implementation
+* _attached to_ the local MBeanServer being exposed remotely
+* made available for the client side depending on the `javax.management.remote.JMXServiceURL` (more details later):
+** by binding in RMI registry using `java.rmi.registry.Registry.bind()`
+** by binding in LDAP using `javax.naming.InitialContext.bind()`
+** by generating a Base64 encoded serialized `javax.management.remote.rmi.RMIServer` stub using `javax.management.remote.rmi.RMIConnectorServer.encodeJRMPStub`
+
+We can now add more details to <<_img_jmx_remote_connector>>:
+
+.JMX RMI Remote Connector
+[#_img_jmx_rmi_remote_connector]
+image::jmx-rmi-connectors.png[]
+
+We already know that "JMX Connector" = "JMX Connector Client" + "JMX Connector Server". Each deserves a dedicated section.
+
+=== JMX Remote RMI Connector Server
+
+When a Java application starts, the _platform MBean Server_ is created automatically as mentioned in xref:jmx_guide.adoc#_platform_mbeanserver[How the platform `MBeanServer` is created?].
+
+According to JMX Remote Specification, a _Connector Server_ _attaches to_ a local MBeanServer. But this doesn't happen automatically. From user perspective we just need to set some system variables. From the internal perspective, a remote object needs to be exported using RMI.
+
+==== How to enable remote JMX (using RMI) in Java application?
+
+When the user sets any system property like `-Dcom.sun.management`, https://github.com/openjdk/jdk17u/blob/30ef840c3736270330fc0a26849c2456406facfe/src/hotspot/share/runtime/arguments.cpp#L2650-L2659[JVM sets the global `ManagementServer` flag]. Then https://github.com/openjdk/jdk17u/blob/30ef840c3736270330fc0a26849c2456406facfe/src/hotspot/share/services/management.cpp#L153-L180[`jdk.internal.agent.Agent.startAgent()` is called].
+
+* If `-Dcom.sun.management.jmxremote` is used (no value needed), `sun.management.jmxremote.ConnectorBootstrap.startLocalConnectorServer()` is called
+* If `-Dcom.sun.management.jmxremote.port` is set, `sun.management.jmxremote.ConnectorBootstrap.startRemoteConnectorServer()` *and* the above is called
+
+That's it - we now have an application _opened for management_ and we can:
+
+* locate a remote `javax.management.remote.rmi.RMIServer` object
+* call `javax.management.remote.rmi.RMIServer.newClient()` to get a `javax.management.remote.rmi.RMIConnection`
+* use `RMIConnection` to call methods like `javax.management.remote.rmi.RMIConnection.queryMBeans()`.
+
+See https://docs.oracle.com/en/java/javase/21/management/monitoring-and-management-using-jmx-technology.html#GUID-2C1922AD-4BA0-4397-A3FE-7823F42A94A3__READY-TO-USEMONITORINGANDMANAGEMENT-0CCB777F[Table 2-1 Ready-to-Use Monitoring and Management Properties] for more details about `com.sun.management.jmxremote` properties.
+
+See more about how the client side of the JMX Connector works in <<_jmx_remote_rmi_connector_client>>.
+
+==== How the remote JMX over RMI is implemented?
+
+With a single `-Dcom.sun.management.jmxremote.port=<tcp-port-number>` we end up with:
+
+* instances of `javax.management.remote.rmi.RMIConnectorServer`
+* instances of `javax.management.remote.rmi.RMIJRMPServerImpl` - the local one will use special `sun.management.jmxremote.LocalRMIServerSocketFactory` accepting only local connections
+* servers in the `javax.management.remote.rmi.RMIConnectorServer.openedServers` static set
+
+Additionally the _local_ connector server's address (`javax.management.remote.rmi.RMIConnectorServer.getAddress()`) is _exported to the instrumentation buffer_, so this application is available to tools like `jconsole`. See `jdk.internal.perf.Perf` for details.
+
+Without `Dcom.sun.management.jmxremote` properties we can still _enable remote JMX_ using `jcmd` tool to start remote or local JMX Connector Server:
+
+[source,shell]
+----
+$ jcmd <pid> help ManagementAgent.start
+<pid>:
+ManagementAgent.start
+Start remote management agent.
+
+Impact: Low: No impact
+
+Syntax : ManagementAgent.start [options]
+
+Options: (options must be specified using the <key> or <key>=<value> syntax)
+	config.file : [optional] set com.sun.management.config.file (STRING, no default value)
+	jmxremote.host : [optional] set com.sun.management.jmxremote.host (STRING, no default value)
+	jmxremote.port : [optional] set com.sun.management.jmxremote.port (STRING, no default value)
+	jmxremote.rmi.port : [optional] set com.sun.management.jmxremote.rmi.port (STRING, no default value)
+	jmxremote.ssl : [optional] set com.sun.management.jmxremote.ssl (STRING, no default value)
+	jmxremote.registry.ssl : [optional] set com.sun.management.jmxremote.registry.ssl (STRING, no default value)
+	jmxremote.authenticate : [optional] set com.sun.management.jmxremote.authenticate (STRING, no default value)
+	jmxremote.password.file : [optional] set com.sun.management.jmxremote.password.file (STRING, no default value)
+	jmxremote.access.file : [optional] set com.sun.management.jmxremote.access.file (STRING, no default value)
+	jmxremote.login.config : [optional] set com.sun.management.jmxremote.login.config (STRING, no default value)
+	jmxremote.ssl.enabled.cipher.suites : [optional] set com.sun.management.jmxremote.ssl.enabled.cipher.suite (STRING, no default value)
+	jmxremote.ssl.enabled.protocols : [optional] set com.sun.management.jmxremote.ssl.enabled.protocols (STRING, no default value)
+	jmxremote.ssl.need.client.auth : [optional] set com.sun.management.jmxremote.need.client.auth (STRING, no default value)
+	jmxremote.ssl.config.file : [optional] set com.sun.management.jmxremote.ssl.config.file (STRING, no default value)
+	jmxremote.autodiscovery : [optional] set com.sun.management.jmxremote.autodiscovery (STRING, no default value)
+	jdp.port : [optional] set com.sun.management.jdp.port (INT, no default value)
+	jdp.address : [optional] set com.sun.management.jdp.address (STRING, no default value)
+	jdp.source_addr : [optional] set com.sun.management.jdp.source_addr (STRING, no default value)
+	jdp.ttl : [optional] set com.sun.management.jdp.ttl (INT, no default value)
+	jdp.pause : [optional] set com.sun.management.jdp.pause (INT, no default value)
+	jdp.name : [optional] set com.sun.management.jdp.name (STRING, no default value)
+
+$ jcmd <pid> help ManagementAgent.start_local
+<pid>:
+ManagementAgent.start_local
+Start local management agent.
+
+Impact: Low: No impact
+
+Syntax: ManagementAgent.start_local
+----
+
+This command invokes `jdk.internal.agent.Agent.startLocalManagementAgent` directly using https://github.com/openjdk/jdk17u/blob/30ef840c3736270330fc0a26849c2456406facfe/src/hotspot/share/services/diagnosticCommand.cpp#L744-L759[`JMXStartLocalDCmd::execute` native method].
+
+The above behavior is built inside `jdk.internal.agent.Agent` in `jdk.management.agent` module. But we can achieve the same result programmatically. For example https://github.com/apache/karaf/blob/41fb3f7228ea0c4215071bc3bd906d22df032014/management/server/src/main/java/org/apache/karaf/management/ConnectorServerFactory.java#L295[Apache Karaf] is using this approach.
+
+When looking at the server side of <<_img_jmx_rmi_remote_connector>>, we have 3 components:
+
+* `javax.management.remote.rmi.RMIConnectorServer` implementation of `javax.management.remote.JMXConnectorServer`
+* `javax.management.remote.rmi.RMIJRMPServerImpl` (RMI over Java Remote Method Protocol) implementation of `javax.management.remote.rmi.RMIServer`
+* `javax.management.remote.rmi.RMIConnectionImpl` implementation of `javax.management.remote.rmi.RMIConnection`
+
+At lower (only RMI) level, we need to export `javax.management.remote.rmi.RMIJRMPServerImpl` as a _remote object_ and make its _stub_ available for remote applications.
+
+But there's a helper method that does exactly that and works with `javax.management.remote.JMXServiceURL`. This saves us from the low-level RMI details and puts emphasis on what we have called a _starting point_ in <<_obtaining_a_connector_client>> - the _JMX Service URL_.
+
+Here's the static method:
+[source,java]
+----
+public static JMXConnectorServer newJMXConnectorServer(
+    JMXServiceURL serviceURL, Map<String,?> environment, MBeanServer mbeanServer)
+        throws IOException {
+----
+
+There are 3 parameters:
+
+* `serviceURL` that describes how we want to make the `JMXConnectorServer` available
+* `environment` which can be used to configure the actual implementation (RMI) - see the source code for `javax.management.remote.rmi.RMIConnectorServer` to check the properties which are used
+* `mbeanServer` to which the JMX Connector Server _attaches_ as mentioned in <<_jmx_connectors>>.
+
+So finally we can explain <<_jmx_service_url>> better - here, from the server (`JMXConnectorServerProvider`) perspective.
+
+`javax.management.remote.JMXServiceURL` constructor has 4 arguments: protocol, host, port and a path.
+
+* JMX Remote Specification defines `rmi` (mandatory) and `jmxmp` (optional) protocols. And because the only available implementation of `javax.management.remote.JMXConnectorServerProvider` is `com.sun.jmx.remote.protocol.rmi.ServerProvider`, we _have to_ use `rmi`. This protocol ID is actually a hint for the `JMXConnectorServerFactory` to select proper `JMXConnectorServerProvider`.
++
+WARNING: If the protocol is `null`, it's assumed to be `"jmxmp"`, so be careful.
++
+* The host is _not_ used when exporting the remote object for `javax.management.remote.rmi.RMIConnectorServer` - it's used to construct another `JMXServiceURL` to be used at client side
+* The port is _exactly_ the same port which is passed to the `java.rmi.server.UnicastRemoteObject.exportObject(java.rmi.Remote, int)` call for RMI export
+* The path must be empty or needs to start with `/jndi/` - see below.
+
+Now the service URL format has more details and we have two forms used when exporting a JMX Connector Server.
+
+.Service JMX URL without a path
+----
+service:jmx:rmi://<host-of-the-exported-server-connector>:<tcp-port>
+----
+
+.Service JMX URL with a path
+----
+service:jmx:rmi://<host-of-the-exported-server-connector>:<tcp-port>/jndi/<registry-url>
+----
+
+Calling `javax.management.remote.JMXConnectorServerFactory.newJMXConnectorServer()` does a lot of work for us and we won't repeat how the RMI object is exported. The return value is an RMI based implementation `javax.management.remote.rmi.RMIConnectorServer` that holds a reference to the `javax.management.remote.rmi.RMIServer` remote object (already exported). We simply have to call `javax.management.remote.JMXConnectorServer.start()`.
+
+What is interesting is what we get from the `javax.management.remote.rmi.RMIConnectorServer.getAddress()` - it's _another_ `JMXServiceURL` to be used at client side (see <<_jmx_remote_rmi_connector_client>>), but it's adjusted to just created JMX Connector Server.
+
+In other words, we used one `JMXServiceURL` as a _recipe_ for creating a JMX Connector Server and got another `JMXServiceURL` with more information. This additional information is needed for a client to connect to the just created server.
+
+Here's what we get after creating and starting the `RMIConnectorServer` without specified _path_ argument:
+
+.Stub form of client Service JMX URL
+----
+service:jmx:rmi://localhost:44444/stub/rO0ABXNyAC5qYXZheC5t...
+----
+
+`javax.management.remote.rmi.RMIConnectorServer.encodeStub()` serializes and base64-encodes the `javax.management.remote.rmi.RMIServer` stub. We just have to use the URL as is at the client side. The encoded value will be deserialized as `javax.management.remote.rmi.RMIServer` stub and we can call the remote methods!
+
+What's more interesting is the _recipe_ `JMXServiceURL` that contains `/jndi/<registry-url>` prefixed path. +
+When `JMXConnectorServer` contains this path, the _stub_ part of the `RMIServer` is registered in the _directory service_.
+
+====
+In Java, _directory services_ are accessed using https://www.oracle.com/java/technologies/naming-and-directory-interface.html[Java Naming and Directory Interface (JNDI) API]. +
+The easy concept expressed by `javax.naming.Context` interface is all about binding names to objects. The details may be complex though.
+Java provides built-in support for these particular _directory services_:
+
+* DNS - Domain Name System (`com.sun.jndi.dns.DnsContext`)
+* LDAP - Lightweight Directory Access Protocol (`javax.naming.ldap.LdapContext`)
+* RMI Registry (`com.sun.jndi.rmi.registry.RegistryContext`), which delegates to _remote object_ `java.rmi.registry.Registry` described in <<_rmi_registry>>
+* bonus Corba CosNaming (removed after JDK8) (`com.sun.jndi.cosnaming.CNCtx`)
+====
+
+Knowing that, we can use full JMX Service URL with two registries that can be used (no one expects stubs to be bound in DNS...).
+
+.Registering an `RMIServer` stub in an RMI Registry
+[source,java]
+----
+// create a new or locate an existing RMI Registry
+LocateRegistry.createRegistry(Registry.REGISTRY_PORT);
+
+// JMXServiceURL _recipe_ for creating an RMI-based JMXConnectoServer bound to an RMI Registry
+JMXServiceURL url = new JMXServiceURL("rmi", "localhost", 44444, "/jndi/rmi://localhost:1099/my-mbean-server");
+
+// Create a JMX Connector Server (the server part of remote JMX Connector) based on RMI, as hinted by "rmi" protocol
+// specified in the URL
+JMXConnectorServer connectorServer = JMXConnectorServerFactory.newJMXConnectorServer(url, null, ManagementFactory.getPlatformMBeanServer());
+
+// Start the Connector Server which binds the RMIServer in the RMI Registry
+connectorServer.start();
+
+// ...
+
+// Locate and use the RMIServer at client side (in another application)
+Registry registry = LocateRegistry.getRegistry(1099);
+RMIServer rmiServer = (RMIServer) registry.lookup("my-mbean-server");
+System.out.println(rmiServer.getVersion());
+----
+
+RMI operations (like exporting the remote object) are hidden inside `JMXConnectorServerFactory.newJMXConnectorServer()` call.
+
+.Registering an `RMIServer` stub in an LDAP Registry
+[source,java]
+----
+// JMXServiceURL _recipe_ for creating an RMI-based JMXConnectoServer bound to an LDAP Registry
+JMXServiceURL url = new JMXServiceURL("rmi", "localhost", 44444, "/jndi/ldap://localhost:389/cn=my-mbean-server,ou=registry,dc=everfree,dc=forest");
+
+// Create a JMX Connector Server (the server part of remote JMX Connector) based on RMI, as hinted by "rmi" protocol
+// specified in the URL. The `environment` parameter is used by JNDI for binding
+JMXConnectorServer server = JMXConnectorServerFactory.newJMXConnectorServer(url, Map.of(
+        "java.naming.security.principal", "cn=admin,dc=everfree,dc=forest",
+        "java.naming.security.credentials", "s3cr3t"
+), ManagementFactory.getPlatformMBeanServer());
+
+// Start the Connector Server which binds the RMIServer in the LDAP Registry
+connectorServer.start();
+----
+
+We can actually see _how_ the bound stub looks like in LDAP:
+
+image:rmiserver-in-ldap.png[]
+
+And in LDIF:
+[source,properties]
+----
+dn: cn=my-mbean-server,ou=registry,dc=everfree,dc=forest
+objectClass: javaContainer
+objectClass: javaObject
+objectClass: javaSerializedObject
+objectClass: top
+cn: my-mbean-server
+javaClassName: javax.management.remote.rmi.RMIServerImpl_Stub
+javaSerializedData:: rO0ABXNyAC5qYXZheC5tYW5hZ2VtZW50LnJlbW90ZS5ybWkuUk1JU2V
+ ydmVySW1wbF9TdHViAAAAAAAAAAICAAB4cgAaamF2YS5ybWkuc2VydmVyLlJlbW90ZVN0dWLp/t
+ zJi+FlGgIAAHhyABxqYXZhLnJtaS5zZXJ2ZXIuUmVtb3RlT2JqZWN002G0kQxhMx4DAAB4cHc2A
+ ApVbmljYXN0UmVmAA0xOTIuMTY4LjAuMTY1AACtnMQ5QHrCUgBl1xndiwAAAZs1/wzPgAEAeA==
+javaClassNames: java.io.Serializable
+javaClassNames: java.lang.Object
+javaClassNames: java.rmi.Remote
+javaClassNames: java.rmi.server.RemoteObject
+javaClassNames: java.rmi.server.RemoteStub
+javaClassNames: javax.management.remote.rmi.RMIServer
+javaClassNames: javax.management.remote.rmi.RMIServerImpl_Stub
+----
+
+`javaClassName`, `javaClassNames` and `javaSerializedData` attributes are strictly defined in https://datatracker.ietf.org/doc/html/rfc2713[RFC 2713: Schema for Representing Java™ Objects in an LDAP Directory].
+
+WARNING: Remember https://en.wikipedia.org/wiki/Log4Shell[Log4Shell]? It was _all_ about forcing an application to fetch an LDAP record containing `javaSerializedData` attribute and deserialize it with catastrophic consequences. +
+The `trustSerialData` flag https://github.com/openjdk/jdk8u/commit/da6b2652f5a[is `false`] since 2024, but the `trustURLCodebase` flag https://github.com/openjdk/jdk8u/commit/006e84fc77a[is `false`] since ... 2009.
+
+The issue with LDAP-bound stubs for remote _RMIServer_ is that it's really not recommended. An attempt to use such stub should end with:
+----
+Caused by: javax.naming.NamingException: Object deserialization is not allowed; remaining name 'cn=my-mbean-server,ou=registry,dc=everfree,dc=forest'
+	at java.naming/com.sun.jndi.ldap.Obj.decodeObject(Obj.java:237)
+	at java.naming/com.sun.jndi.ldap.LdapCtx.c_lookup(LdapCtx.java:1081)
+	at java.naming/com.sun.jndi.toolkit.ctx.ComponentContext.p_lookup(ComponentContext.java:542)
+	at java.naming/com.sun.jndi.toolkit.ctx.PartialCompositeContext.lookup(PartialCompositeContext.java:177)
+	at java.naming/com.sun.jndi.toolkit.url.GenericURLContext.lookup(GenericURLContext.java:220)
+	at java.naming/com.sun.jndi.url.ldap.ldapURLContext.lookup(ldapURLContext.java:94)
+	at java.naming/javax.naming.InitialContext.lookup(InitialContext.java:409)
+	at java.management.rmi/javax.management.remote.rmi.RMIConnector.findRMIServerJNDI(RMIConnector.java:1839)
+	at java.management.rmi/javax.management.remote.rmi.RMIConnector.findRMIServer(RMIConnector.java:1813)
+	at java.management.rmi/javax.management.remote.rmi.RMIConnector.connect(RMIConnector.java:302)
+	... 2 more
+----
+
+==== JMX Connector Server summary and relationship with Jolokia
+
+While the entire discussion about the server-side part of the JMX Connectors (in particular the RMI implementation) is not critical to understand what Jolokia is doing, I simply thought it's nice to have everything in one place.
+
+Actually at the server side, Jolokia is _not_ a JMX Connector at all! <<_jmx_remote_concepts>> highlights that Jolokia (Agent) is actually a JMX Protocol Adaptor. +
+The reason is that Jolokia doesn't include an implementation of `javax.management.remote.JMXConnectorServer` and instead it simply provides HTTP/JSON endpoints used to interact with an MBeanServer.
+
+But there's more for the client side in the following section.
+
+[#_jmx_remote_rmi_connector_client]
+=== JMX Remote RMI Connector Client
