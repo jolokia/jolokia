@@ -57,7 +57,7 @@ interface JolokiaSimpleStatic extends JolokiaStatic {
 interface IJolokiaSimple extends IJolokia {
 
   /**
-   * Reetrieves selected attributes of given `mbean`
+   * Retrieves selected attributes of given `mbean`
    * @param mbean MBean to get attributes from (for example `java.lang:type=Memory`)
    * @param params attribute to get and possibly additional path parameters to further navigate into MBean's attribute
    *               (for example `committed`). If last parameter is an object, it is treated as SimpleRequestOptions
@@ -69,7 +69,7 @@ interface IJolokiaSimple extends IJolokia {
   /**
    * Sets an attribute on an MBean with additional `path` for nested value access
    *
-   * @param mbean objectname of MBean to set
+   * @param mbean ObjectName of MBean to set
    * @param attribute the attribute to set
    * @param value the value to set
    * @param params an optional _inner path_ which, when given, is used to determine an inner object to set the value on.
@@ -81,7 +81,7 @@ interface IJolokiaSimple extends IJolokia {
   /**
    * Executes a JMX operation and returns the result value
    *
-   * @param mbean objectname of the MBean to operate on
+   * @param mbean ObjectName of the MBean to operate on
    * @param operation name of operation to execute. Can contain a signature in case overloaded
    *                  operations are to be called (comma separated fully qualified argument types
    *                  append to the operation name within parentheses)
