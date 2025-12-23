@@ -32,7 +32,7 @@ import org.springframework.context.annotation.Condition;
  * We don't declare any {@link Bean} that registers a servlet or a controller.</p>
  *
  * <p>Note: Adding {@link ConditionalOnAvailableEndpoint} on the bean method that produces the endpoint in
- * the first place is completely fine - related {@link Condition} will check proper exposure config amd
+ * the first place is completely fine - related {@link Condition} will check proper exposure config and
  * Spring will not even create {@link JolokiaWebEndpoint} in the first place.</p>
  */
 @AutoConfiguration

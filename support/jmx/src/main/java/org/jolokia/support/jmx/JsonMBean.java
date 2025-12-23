@@ -32,7 +32,7 @@ public @interface JsonMBean {
     /**
      * How deep to serialize the return value when exposing at the MBeanServer. By default,
      * no restriction applies
-     * @return maximum depth used for downstram serialization
+     * @return maximum depth used for downstream serialization
      */
     int maxDepth() default 0;
 
@@ -51,7 +51,7 @@ public @interface JsonMBean {
     int maxObjects() default 0;
 
     /**
-     * How to deal with exceptions occuring during deserialization. By default, exceptions
+     * How to deal with exceptions occurring during deserialization. By default, exceptions
      * are thrown through (and encapsulated in a IllegalArgumentException).
      * @return fault handler
      */

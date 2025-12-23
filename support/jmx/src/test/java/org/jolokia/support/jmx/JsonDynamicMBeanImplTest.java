@@ -56,7 +56,7 @@ import static org.testng.Assert.assertEquals;
  * @author roland
  * @since 26.01.13
  */
-public class JsonDymamicMBeanImplTest {
+public class JsonDynamicMBeanImplTest {
 
     private MBeanServer server;
     private MBeanServer        platformServer;

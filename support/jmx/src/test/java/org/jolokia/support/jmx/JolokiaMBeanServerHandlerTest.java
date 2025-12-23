@@ -88,16 +88,16 @@ public class JolokiaMBeanServerHandlerTest {
 
         server.registerMBean(new JsonAnnoPlainTest(),oName);
 
-        MBeanServer plattformServer = ManagementFactory.getPlatformMBeanServer();
+        MBeanServer platformServer = ManagementFactory.getPlatformMBeanServer();
 
-        String deepDive = (String) plattformServer.getAttribute(oName,"DeepDive");
+        String deepDive = (String) platformServer.getAttribute(oName,"DeepDive");
         JSONObject deepDiveS = new JSONParser().parse(deepDive, JSONObject.class);
         assertEquals(deepDiveS.size(),1);
         // Serialization is truncated because of maxDepth = 1
         assertTrue(deepDiveS.get("map") instanceof String);
         assertTrue(deepDiveS.get("map").toString().matches(".*hot=.*Chili.*"));
         server.unregisterMBean(oName);
-        Assert.assertFalse(plattformServer.isRegistered(oName));
+        Assert.assertFalse(platformServer.isRegistered(oName));
         Assert.assertFalse(server.isRegistered(oName));
     }
 
@@ -124,13 +124,13 @@ public class JolokiaMBeanServerHandlerTest {
         ObjectName oName = new ObjectName("test:type=jsonMBean");
 
         server.registerMBean(modelMBean,oName);
-        MBeanServer plattformServer = ManagementFactory.getPlatformMBeanServer();
+        MBeanServer platformServer = ManagementFactory.getPlatformMBeanServer();
 
-        Assert.assertTrue(plattformServer.isRegistered(oName));
+        Assert.assertTrue(platformServer.isRegistered(oName));
         Assert.assertTrue(server.isRegistered(oName));
 
         server.unregisterMBean(oName);
-        Assert.assertFalse(plattformServer.isRegistered(oName));
+        Assert.assertFalse(platformServer.isRegistered(oName));
         Assert.assertFalse(server.isRegistered(oName));
 
     }

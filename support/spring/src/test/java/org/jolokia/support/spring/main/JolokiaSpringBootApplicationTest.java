@@ -51,7 +51,7 @@ public class JolokiaSpringBootApplicationTest {
 
         String jolokiaPath = props.getProperty("management.endpoints.web.path-mapping.jolokia", "jolokia");
 
-        URL jolokiaVersion = null;
+        URL jolokiaVersion;
 
         if (serverPort == managementPort) {
             // there's one org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext

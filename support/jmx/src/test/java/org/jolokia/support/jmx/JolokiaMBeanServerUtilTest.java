@@ -20,7 +20,6 @@ import java.lang.management.ManagementFactory;
 
 import javax.management.*;
 
-import org.jolokia.server.core.service.impl.MBeanRegistry;
 import org.testng.Assert;
 import org.testng.annotations.*;
 
@@ -31,18 +30,6 @@ import static org.testng.Assert.assertTrue;
  * @since 13.01.13
  */
 public class JolokiaMBeanServerUtilTest {
-
-    MBeanRegistry handler;
-
-    @BeforeClass
-    public void setup() {
-        handler = new MBeanRegistry();
-    }
-
-    @AfterClass
-    public void tearDown() throws JMException {
-        handler.destroy();
-    }
 
     @Test
     public void checkNotRegistered() {

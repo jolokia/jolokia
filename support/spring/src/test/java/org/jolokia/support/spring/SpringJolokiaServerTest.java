@@ -68,7 +68,7 @@ public class SpringJolokiaServerTest extends BaseServerTest {
         System.getProperties().remove("jolokia.agentContext");
         checkServerAndStop(server);
         // Allow to shutdown server ...
-        Thread.sleep(500);
+//        Thread.sleep(500);
     }
 
     @Test

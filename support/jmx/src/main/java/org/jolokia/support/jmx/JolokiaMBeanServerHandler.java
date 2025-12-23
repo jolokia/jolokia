@@ -83,7 +83,7 @@ class JolokiaMBeanServerHandler implements InvocationHandler {
         // considered.
         JsonMBean anno = extractJsonMBeanAnnotation(object);
         if (anno != null) {
-            // The real name can be different than the given one in case the default
+            // The real name can be different from the given one in case the default
             // domain was omitted and/or the MBean implements MBeanRegistration
             ObjectName realName = ret.getObjectName();
 

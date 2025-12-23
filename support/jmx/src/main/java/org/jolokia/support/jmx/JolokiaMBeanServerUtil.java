@@ -88,7 +88,7 @@ public final class JolokiaMBeanServerUtil {
      * Unregister an MBean at the JolokiaMBeanServer. This call is directly delegated
      * to the JolokiaMBeanServer
      *
-     * @param name objectname of the MBean to unregister
+     * @param name {@link ObjectName} of the MBean to unregister
      * @throws InstanceNotFoundException
      * @throws MBeanRegistrationException
      */

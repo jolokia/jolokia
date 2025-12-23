@@ -235,9 +235,10 @@ MBeanServerFactory.findMBeanServer(null).size() == 1;
 MBeanServerFactory.findMBeanServer(null).get(0) == ManagementFactory.getPlatformMBeanServer();
 ----
 
-And there's only one available instance of `javax.management.MBeanServer` available
+And there's only one instance of `javax.management.MBeanServer` available.
 
-==== How to create more more `MBeanServers`?
+[#_how_to_create_more_mbeanservers]
+==== How to create more `MBeanServers`?
 
 Should we? At least we should be able to. Normally it's good to have just one, central `MBeanServer` running in a single
 Java application (JVM process). But it's not uncommon to have _more_ such servers.

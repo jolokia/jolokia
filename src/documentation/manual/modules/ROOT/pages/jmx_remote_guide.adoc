@@ -675,4 +675,4 @@ Jolokia doesn't implement _entire_ JMX Connector, only the client-side.
 * `org.jolokia.client.jmxadapter.JolokiaJmxConnector` for `service:jmx:jolokia:` JMX Service URLs
 * `org.jolokia.kubernetes.client.KubernetesJmxConnector` for `service:jmx:kubernetes:` JMX Service URLs
 
-See the details in xref:clients.adoc#_jolokia_jmx_connectors[Jolokia MBeanServerConnection adapter].
+See the details in xref:clients.adoc#client-jmx-adapter[Jolokia MBeanServerConnection adapter].

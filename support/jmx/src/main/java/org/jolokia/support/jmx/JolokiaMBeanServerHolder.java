@@ -31,7 +31,7 @@ import org.jolokia.server.core.util.jmx.MBeanServers;
  */
 public class JolokiaMBeanServerHolder implements JolokiaMBeanServerHolderMBean {
 
-    // The privat Jolokia MBeanServer
+    // The private Jolokia MBeanServer
     private final MBeanServer jolokiaMBeanServer;
 
     //
