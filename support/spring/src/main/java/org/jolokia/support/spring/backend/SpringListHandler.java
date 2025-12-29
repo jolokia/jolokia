@@ -33,7 +33,7 @@ import static org.jolokia.service.jmx.handler.list.DataKeys.*;
 public class SpringListHandler extends SpringCommandHandler<JolokiaListRequest> {
 
     private static final String NAME_PREFIX = "name=";
-    private final static Map<Class<?>,String> WRAPPER_TO_PRIMITIVE;
+    private static final Map<Class<?>,String> WRAPPER_TO_PRIMITIVE;
 
     public SpringListHandler(ApplicationContext pAppContext, JolokiaContext pJolokiaContext) {
         super(pAppContext, pJolokiaContext, RequestType.LIST);
