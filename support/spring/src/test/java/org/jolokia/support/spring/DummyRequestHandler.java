@@ -17,6 +17,7 @@ public class DummyRequestHandler extends AbstractRequestHandler {
         return null;
     }
 
+    @Override
     public boolean canHandle(JolokiaRequest pJolokiaRequest) {
         return false;
     }

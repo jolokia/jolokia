@@ -46,6 +46,7 @@ public class SpringJolokiaMBeanServerFactory implements FactoryBean<MBeanServer>
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean isSingleton() {
         return true;
     }
