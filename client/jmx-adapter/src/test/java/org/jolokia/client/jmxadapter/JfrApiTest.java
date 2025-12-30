@@ -47,7 +47,7 @@ import org.testng.annotations.Ignore;import org.testng.annotations.Test;
 import static org.testng.Assert.assertNotNull;
 
 /**
- * This test shows how to use JFR API directly from Java code (without using JMX, and hence Jolokia)
+ * This test shows how to use JFR API directly from Java code
  */
 @Ignore("Manual test showing JFR API usage")
 public class JfrApiTest {

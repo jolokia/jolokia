@@ -277,7 +277,7 @@ public enum ConfigKey {
 
     /**
      * What authentication to use. Support values: "basic" for basic authentication, "jaas" for
-     * JaaS authentication, "delegate" for delegating to another HTTP service.
+     * JAAS authentication, "delegate" for delegating to another HTTP service.
      * For OSGi agent there are the additional modes "service-all" and "service-any" to use Authenticator services
      * provided via an OSGi service registry.
      */
@@ -434,7 +434,14 @@ public enum ConfigKey {
      * Processing parameter used to enable <em>smart list response</em> where JSON data for each {@link javax.management.MBeanInfo}
      * is cached instead of being duplicated for each (potentially the same) MBean of similar class.
      */
-    LIST_CACHE("listCache", false, true, Constants.FALSE, Boolean.class);
+    LIST_CACHE("listCache", false, true, Constants.FALSE, Boolean.class),
+
+    /**
+     * A request parameter for {@code list} operation, which tells Jolokia to return a list of all the interfaces
+     * implemented by the MBean's class. This may be used to implement {@link javax.management.MBeanServerConnection#isInstanceOf}
+     * method (see jolokia/jolokia#666).
+     */
+    LIST_INTERFACES("listInterfaces", false, true, Constants.FALSE, Boolean.class);
 
     /**
      * JAAS Subject to attach to an HTTP request as attribute if JAAS based authentication is in use.

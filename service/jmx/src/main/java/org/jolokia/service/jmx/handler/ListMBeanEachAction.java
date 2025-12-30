@@ -56,14 +56,15 @@ class ListMBeanEachAction implements MBeanServerAccess.MBeanEachCallback, MBeanS
      * @param pUseCanonicalName whether to use a canonical naming for the MBean property lists or the original
      * @param pListKeys         whether to dissect {@link ObjectName#getKeyPropertyList()} into MBean information
      * @param pListCache        whether optimized {@code list()} operation is performed
+     * @param listInterfaces
      * @param pProvider         provider to prepend to any domain (if not null)
      * @param pContext          {@link JolokiaContext} for filtering MBeans
      */
     public ListMBeanEachAction(int pMaxDepth, Deque<String> pPathStack, boolean pUseCanonicalName,
-                               boolean pListKeys, boolean pListCache, String pProvider, JolokiaContext pContext) {
+                               boolean pListKeys, boolean pListCache, boolean listInterfaces, String pProvider, JolokiaContext pContext) {
         context = pContext;
         // TOCHECK: MBeanInfoData can be filled with pre-cached, long-lived MBeans
-        infoData = new MBeanInfoData(pMaxDepth, pPathStack, pUseCanonicalName, pListKeys, pListCache, pProvider);
+        infoData = new MBeanInfoData(pMaxDepth, pPathStack, pUseCanonicalName, pListKeys, pListCache, listInterfaces, pProvider);
         customUpdaters = context.getServices(DataUpdater.class);
         cacheKeyProviders = context.getServices(CacheKeyProvider.class);
     }
