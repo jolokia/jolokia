@@ -1,3 +1,18 @@
+/*
+ * Copyright 2009-2025 Roland Huss
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.jolokia.client.jmxadapter;
 
 import java.io.IOException;
@@ -8,13 +23,11 @@ import javax.management.remote.JMXConnectorProvider;
 import javax.management.remote.JMXServiceURL;
 
 /**
- * I provide support for handling JMX urls for the Jolokia protocol
- * Syntax service:jmx:jolokia://host:port/path/to/jolokia/with/slash/suffix/
- * My Jar contains a service loader, so that Jolokia JMX protocol is supported
- * as long as my jar (jmx-adapter-version-standalone.jar) is on the classpath
+ * <p>{@link JMXConnectorProvider} implementation for handling JMX URLs using the Jolokia protocol</p>
+ * <p>Syntax: {@code service:jmx:jolokia[+http[s]]://host:port/path/to/jolokia/with/slash/suffix/}</p>
  *
- * <pre>
- *   Example:
+ * Example:
+ * <pre>{@code
  *   //NB: include trailing slash
  *   https will be used if port number fits the pattern *443 or connect env map contains "jmx.remote.x.check.stub"->"true"
  *   JMXConnector connector = JMXConnectorFactory
@@ -23,15 +36,15 @@ import javax.management.remote.JMXServiceURL;
  *         connector.connect();
  *         connector.getMBeanServerConnection();
  *
- * </pre>
+ * }</pre>
  */
 public class JolokiaJmxConnectionProvider implements JMXConnectorProvider {
     @Override
     public JMXConnector newJMXConnector(JMXServiceURL serviceURL, Map<String, ?> environment) throws IOException {
-        //the exception will be handled by JMXConnectorFactory so that other handlers are allowed to handle
-        //other protocols
-        if(!"jolokia".equals(serviceURL.getProtocol())) {
-            throw new MalformedURLException(String.format("Invalid URL %s : Only protocol \"jolokia\" is supported (not %s)",  serviceURL, serviceURL.getProtocol()));
+        // the exception will be handled by javax.management.remote.JMXConnectorFactory so that other handlers are
+        // allowed to handle other protocols
+        if (!serviceURL.getProtocol().startsWith("jolokia")) {
+            throw new MalformedURLException(String.format("Invalid URL %s : Only protocol \"jolokia\" is supported (not %s)", serviceURL, serviceURL.getProtocol()));
         }
         return new JolokiaJmxConnector(serviceURL, environment);
     }

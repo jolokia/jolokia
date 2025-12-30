@@ -1,6 +1,22 @@
+/*
+ * Copyright 2009-2025 Roland Huss
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.jolokia.client.jmxadapter;
 
 import java.util.HashMap;
+
 import org.jolokia.client.JolokiaClientBuilder;
 
 import javax.management.ListenerNotFoundException;
@@ -22,138 +38,130 @@ import java.util.Map;
  */
 public class JolokiaJmxConnector implements JMXConnector {
 
-  protected final JMXServiceURL serviceUrl;
-  private final Map<String, ?> environment;
-  protected RemoteJmxAdapter adapter;
-  private final NotificationBroadcasterSupport broadcasterSupport = new NotificationBroadcasterSupport();
-  private long clientNotifSeqNo = 1L;
-  private String connectionId;
+    protected final JMXServiceURL serviceUrl;
+    private final Map<String, ?> environment;
+    protected RemoteJmxAdapter adapter;
+    private final NotificationBroadcasterSupport broadcasterSupport = new NotificationBroadcasterSupport();
+    private long clientNotifSeqNo = 1L;
+    private String connectionId;
 
-  public JolokiaJmxConnector(JMXServiceURL serviceURL, Map<String, ?> environment) {
-    this.serviceUrl = serviceURL;
-    this.environment = environment;
-  }
-
-  @Override
-  public void connect() throws IOException {
-    connect(Collections.emptyMap());
-  }
-
-  private String prefixWithSlashIfNone(String urlPath) {
-    if (urlPath.startsWith("/")) {
-      return urlPath;
-    } else {
-      return "/" + urlPath;
+    public JolokiaJmxConnector(JMXServiceURL serviceURL, Map<String, ?> environment) {
+        this.serviceUrl = serviceURL;
+        this.environment = environment;
     }
-  }
 
-  private String addBracketsIfIPv6(String host) {
-    if (host.contains(":")) {
-      return "[" + host + "]";
-    } else {
-      return host;
+    @Override
+    public void connect() throws IOException {
+        connect(Collections.emptyMap());
     }
-  }
 
-  @Override
-  @SuppressWarnings({"raw"})
-  public void connect(Map<String, ?> env) throws IOException {
-    if (!"jolokia".equals(this.serviceUrl.getProtocol())) {
-      throw new MalformedURLException(String.format("Invalid URL %s : Only protocol \"jolokia\" is supported (not %s)",  this.serviceUrl, this.serviceUrl.getProtocol()));
+    private String prefixWithSlashIfNone(String urlPath) {
+        if (urlPath.startsWith("/")) {
+            return urlPath;
+        } else {
+            return "/" + urlPath;
+        }
     }
-    Map<String, Object> mergedEnv = mergedEnvironment(env);
-    final String internalProtocol = getJolokiaProtocol(mergedEnv);
-    final JolokiaClientBuilder clientBuilder = new JolokiaClientBuilder().url(
-        internalProtocol + "://" + addBracketsIfIPv6(this.serviceUrl.getHost()) + ":" + this.serviceUrl.getPort()
-            + prefixWithSlashIfNone(this.serviceUrl.getURLPath()));
-    if (mergedEnv.containsKey(CREDENTIALS)) {
-      String[] credentials = (String[]) mergedEnv.get(CREDENTIALS);
-      clientBuilder.user(credentials[0]);
-      clientBuilder.password(credentials[1]);
+
+    private String addBracketsIfIPv6(String host) {
+        if (host.contains(":")) {
+            return "[" + host + "]";
+        } else {
+            return host;
+        }
     }
-    this.adapter = instantiateAdapter(clientBuilder, mergedEnv);
-    postCreateAdapter();
-  }
 
-  public String getJolokiaProtocol(Map<String, Object> env) {
-    String protocol = "http";
-    if (String.valueOf(this.serviceUrl.getPort()).endsWith("443") || "true"
-        .equals(env.get("jmx.remote.x.check.stub"))) {
-      protocol = "https";
+    @Override
+    @SuppressWarnings({"raw"})
+    public void connect(Map<String, ?> env) throws IOException {
+        String protocol = this.serviceUrl.getProtocol();
+        if (!protocol.startsWith("jolokia")) {
+            throw new MalformedURLException(String.format("Invalid URL %s : Only protocol \"jolokia\" is supported (not %s)", this.serviceUrl, protocol));
+        }
+        Map<String, Object> mergedEnv = mergedEnvironment(env);
+        final String internalProtocol = getJolokiaProtocol(mergedEnv);
+        final JolokiaClientBuilder clientBuilder = new JolokiaClientBuilder().url(internalProtocol + "://" + addBracketsIfIPv6(this.serviceUrl.getHost()) + ":" + this.serviceUrl.getPort() + prefixWithSlashIfNone(this.serviceUrl.getURLPath()));
+        if (mergedEnv.containsKey(CREDENTIALS)) {
+            String[] credentials = (String[]) mergedEnv.get(CREDENTIALS);
+            clientBuilder.user(credentials[0]);
+            clientBuilder.password(credentials[1]);
+        }
+        this.adapter = instantiateAdapter(clientBuilder, mergedEnv);
+        postCreateAdapter();
     }
-    return protocol;
-  }
 
-  protected void postCreateAdapter() {
-    this.connectionId = this.adapter.getId();
-    this.broadcasterSupport
-        .sendNotification(new JMXConnectionNotification(JMXConnectionNotification.OPENED,
-            this,
-            this.connectionId,
-            this.clientNotifSeqNo++,
-            "Successful connection",
-            null));
-  }
-
-  protected Map<String, Object> mergedEnvironment(Map<String, ?> env) {
-    Map<String, Object> mergedEnv = new HashMap<>();
-    if (this.environment != null) {
-      mergedEnv.putAll(this.environment);
+    public String getJolokiaProtocol(Map<String, Object> env) {
+        String protocol = "http";
+        String jmxProtocol = this.serviceUrl.getProtocol();
+        if (jmxProtocol.contains("+")) {
+            String after = jmxProtocol.substring(jmxProtocol.indexOf('+') + 1);
+            if (after.equals("http") || after.equals("https")) {
+                protocol = after;
+            } else {
+                throw new IllegalArgumentException("Unknown Jolokia JMX protocol: " + jmxProtocol);
+            }
+        } else {
+            // legacy + heuristics
+            if (String.valueOf(this.serviceUrl.getPort()).endsWith("443")) {
+                protocol = "https";
+            }
+        }
+        return protocol;
     }
-    if (env != null) {
-      mergedEnv.putAll(env);
+
+    protected void postCreateAdapter() {
+        this.connectionId = this.adapter.getId();
+        this.broadcasterSupport.sendNotification(new JMXConnectionNotification(JMXConnectionNotification.OPENED, this, this.connectionId, this.clientNotifSeqNo++, "Successful connection", null));
     }
-    return mergedEnv;
-  }
 
-  protected RemoteJmxAdapter instantiateAdapter(JolokiaClientBuilder clientBuilder,
-                                                Map<String, Object> ignoredMergedEnv) throws IOException {
-    return new RemoteJmxAdapter(clientBuilder.build());
-  }
+    protected Map<String, Object> mergedEnvironment(Map<String, ?> env) {
+        Map<String, Object> mergedEnv = new HashMap<>();
+        if (this.environment != null) {
+            mergedEnv.putAll(this.environment);
+        }
+        if (env != null) {
+            mergedEnv.putAll(env);
+        }
+        return mergedEnv;
+    }
 
-  @Override
-  public MBeanServerConnection getMBeanServerConnection() {
-    return this.adapter;
-  }
+    protected RemoteJmxAdapter instantiateAdapter(JolokiaClientBuilder clientBuilder, Map<String, Object> ignoredMergedEnv) throws IOException {
+        return new RemoteJmxAdapter(clientBuilder.build());
+    }
 
-  public MBeanServerConnection getMBeanServerConnection(Subject delegationSubject) {
-    throw new UnsupportedOperationException(
-        "Jolokia currently do not support connections using a subject, if you have a use case, raise an issue in Jolokias github repo");
-  }
+    @Override
+    public MBeanServerConnection getMBeanServerConnection() {
+        return this.adapter;
+    }
 
-  @Override
-  public void close() {
-    this.broadcasterSupport.sendNotification(
-        new JMXConnectionNotification(JMXConnectionNotification.CLOSED,
-            this,
-            this.connectionId,
-            clientNotifSeqNo++,
-            "Client has been closed",
-            null)
-    );
-    this.adapter = null;
-  }
+    public MBeanServerConnection getMBeanServerConnection(Subject delegationSubject) {
+        throw new UnsupportedOperationException("Jolokia currently do not support connections using a subject, if you have a use case, raise an issue in Jolokia Github repo");
+    }
 
-  @Override
-  public void addConnectionNotificationListener(NotificationListener listener,
-      NotificationFilter filter, Object handback) {
-    this.broadcasterSupport.addNotificationListener(listener, filter, handback);
-  }
+    @Override
+    public void close() {
+        this.broadcasterSupport.sendNotification(new JMXConnectionNotification(JMXConnectionNotification.CLOSED, this, this.connectionId, clientNotifSeqNo++, "Client has been closed", null));
+        this.adapter = null;
+    }
 
-  @Override
-  public void removeConnectionNotificationListener(NotificationListener listener)
-      throws ListenerNotFoundException {
-    this.broadcasterSupport.removeNotificationListener(listener);
-  }
+    @Override
+    public void addConnectionNotificationListener(NotificationListener listener, NotificationFilter filter, Object handback) {
+        this.broadcasterSupport.addNotificationListener(listener, filter, handback);
+    }
 
-  @Override
-  public void removeConnectionNotificationListener(NotificationListener l, NotificationFilter f,
-      Object handback) throws ListenerNotFoundException {
-    this.broadcasterSupport.removeNotificationListener(l, f, handback);
-  }
+    @Override
+    public void removeConnectionNotificationListener(NotificationListener listener) throws ListenerNotFoundException {
+        this.broadcasterSupport.removeNotificationListener(listener);
+    }
 
-  @Override
-  public String getConnectionId() {
-    return this.connectionId;
-  }
+    @Override
+    public void removeConnectionNotificationListener(NotificationListener l, NotificationFilter f, Object handback) throws ListenerNotFoundException {
+        this.broadcasterSupport.removeNotificationListener(l, f, handback);
+    }
+
+    @Override
+    public String getConnectionId() {
+        return this.connectionId;
+    }
+
 }

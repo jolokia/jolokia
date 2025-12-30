@@ -466,6 +466,44 @@ public final class JolokiaListResponse extends JolokiaResponse<JolokiaListReques
     }
 
     /**
+     * Helper for {@link MBeanServerConnection#getMBeanInfo(ObjectName)} returning plain JSON data. We expect no
+     * {@link ObjectName#isPattern() pattern} here. As in
+     * {@code com.sun.jmx.mbeanserver.Repository#retrieveNamedObject()} we return {@code null} if the argument
+     * is a pattern.
+     *
+     * @param name
+     * @return
+     * @throws InstanceNotFoundException
+     */
+    public JSONObject getJSONMbeanInfo(ObjectName name) throws InstanceNotFoundException {
+        if (name == null) {
+            // com.sun.jmx.interceptor.DefaultMBeanServerInterceptor.getMBean throws an exception
+            throw new RuntimeOperationsException(new IllegalArgumentException("Object name can't be null"));
+        }
+        if (name.isPattern()) {
+            return null;
+        }
+
+        JSONObject domains = this.getValue();
+        Object domain = domains.get(name.getDomain());
+        if (domain instanceof JSONObject mbeans) {
+            Object mbean = mbeans.get(pathKeys);
+            if (mbean instanceof JSONObject info) {
+                return info;
+            } else if (mbean == null && mbeans.size() == 1) {
+                // we don't have access to org.jolokia.client.J4pQueryParameter.CANONICAL_NAMING value
+                // sent with JolokiaListRequest here, but we should have only a single MBean here
+                mbean = mbeans.values().iterator().next();
+                if (mbean instanceof JSONObject info) {
+                    return info;
+                }
+            }
+        }
+
+        throw new InstanceNotFoundException("No " + name + " instance found");
+    }
+
+    /**
      * Reconstruct {@link MBeanInfo} from its Jolokia {@link JSONObject} representation.
      *
      * @param name

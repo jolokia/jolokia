@@ -108,6 +108,8 @@ service:jmx:<protocol-specific-part>
 
 It's the `<protocol-specific-part>` that may be more complex. And we'll discuss the details in the respective sections for particular protocols.
 
+NOTE: This URL format is defined in https://www.ietf.org/rfc/rfc2609.html#section-2.1[RFC 2609, section 2.1. Service URL Syntax]
+
 This URL suggest we know some _address_ which may be an IP address + TCP port, but doesn't have to be. Everything depends on the actual protocol being used.
 
 There's another way to get a client connector - by obtaining an object called a https://en.wikipedia.org/wiki/Stub_(distributed_computing)[_stub_]. +
@@ -670,9 +672,9 @@ Yes - `service:jmx:rmi:///jndi/rmi://localhost:1099/my-mbean-server` has enough 
 [#_jmx_remote_jolokia_connector]
 == JMX Remote Jolokia Connector
 
-Jolokia doesn't implement _entire_ JMX Connector, only the client-side.
+Jolokia doesn't implement _entire_ JMX Connector, only the client-side part of it.
 
 * `org.jolokia.client.jmxadapter.JolokiaJmxConnector` for `service:jmx:jolokia:` JMX Service URLs
 * `org.jolokia.kubernetes.client.KubernetesJmxConnector` for `service:jmx:kubernetes:` JMX Service URLs
 
-See the details in xref:clients.adoc#client-jmx-adapter[Jolokia MBeanServerConnection adapter].
+See the details in xref:clients.adoc#client-jmx-adapter[Jolokia JMX Connector Client].
