@@ -215,4 +215,28 @@ public class JfrApiTest {
         }
     }
 
+    @Test
+    public void remoteRecordingStreamWithJolokiaJMXAdapterAndJMXProxy() throws Exception {
+        String url = "service:jmx:jolokia://localhost:7778/jolokia";
+        JMXServiceURL u = new JMXServiceURL(url);
+        try (JMXConnector c = JMXConnectorFactory.connect(u)) {
+            MBeanServerConnection conn = c.getMBeanServerConnection();
+
+            FlightRecorderMXBean jfr = JMX.newMXBeanProxy(conn, ObjectName.getInstance(FlightRecorderMXBean.MXBEAN_NAME), FlightRecorderMXBean.class);
+            long id = jfr.newRecording();
+            jfr.startRecording(id);
+            Thread.sleep(1000);
+            jfr.stopRecording(id);
+            // com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory.TabularMapping.toNonNullOpenValue() will convert
+            // a map to proper CompositeType associated with TabularType
+            // com.sun.jmx.mbeanserver.DefaultMXBeanMappingFactory.keyValueArray is ALWAYS [ "key", "value" ]
+            long stream = jfr.openStream(id, Map.of("streamVersion", "1.0"));
+            byte[] dump = jfr.readStream(stream);
+            jfr.closeStream(stream);
+            jfr.closeRecording(id);
+
+            System.out.println("dump size: " + dump.length);
+        }
+    }
+
 }
