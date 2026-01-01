@@ -1244,7 +1244,7 @@
     <version.jakarta.servlet-api>5.0.0</version.jakarta.servlet-api>
     <version.jakarta.servlet-api6>6.1.0</version.jakarta.servlet-api6>
     <version.org.apache.httpcomponents.client5>5.5.1</version.org.apache.httpcomponents.client5>
-    <version.org.apache.httpcomponents.core5>5.3.6</version.org.apache.httpcomponents.core5>
+    <version.org.apache.httpcomponents.core5>5.4</version.org.apache.httpcomponents.core5>
     <version.org.apache.httpcomponents.httpclient>4.5.14</version.org.apache.httpcomponents.httpclient>
     <version.org.apache.httpcomponents.httpcore>4.4.16</version.org.apache.httpcomponents.httpcore>
     <!-- we support wide range of OSGI Core API - in Import-Package we use [1.8,2.0) (R6), but we need newer version for tests -->
