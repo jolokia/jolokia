@@ -43,6 +43,14 @@
       <artifactId>jolokia-json</artifactId>
     </dependency>
 
+    <!-- Other dependencies -->
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
+    </dependency>
+
   </dependencies>
 
   <build>

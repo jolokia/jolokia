@@ -188,7 +188,7 @@ public class JolokiaServerConfig {
     }
 
     /**
-     * Whether or not to use https as the procol
+     * Whether to use https as the protocol
      *
      * @return true when using https as the protocol
      */
@@ -315,7 +315,7 @@ public class JolokiaServerConfig {
 
     /**
      * Get a path to a CA PEM file which is used to verify client certificates. This path
-     * is only used when {@link #getKeystore()} is not set.
+     * is only used when {@link #getKeystore()} is not set. The file may contain more than one CA certificate.
      *
      * @return the file path where the ca cert is located.
      */
@@ -325,7 +325,7 @@ public class JolokiaServerConfig {
 
     /**
      * Get the path to a server cert which is presented clients when using TLS.
-     * This is only used when {@link #getKeystore()} is not set.
+     * This is only used when {@link #getKeystore()} is not set. The file should contain only one server certificate.
      *
      * @return the file path where the server cert is located.
      */
@@ -335,7 +335,8 @@ public class JolokiaServerConfig {
 
     /**
      * Get the path to a the cert which has the private server key.
-     * This is only used when {@link #getKeystore()} is not set.
+     * This is only used when {@link #getKeystore()} is not set. The key should match the configured
+     * {@link #getServerCert()}.
      *
      * @return the file path where the private server cert is located.
      */
@@ -413,7 +414,7 @@ public class JolokiaServerConfig {
         }
     }
 
-    // Initialise and validate early in order to fail fast in case of an configuration error
+    // Initialize and validate early in order to fail fast in case of an configuration error
     protected void initConfigAndValidate(Map<String,String> agentConfig) {
         lazy = Boolean.parseBoolean(agentConfig.getOrDefault("lazy", "false"));
         initContext();
@@ -623,12 +624,12 @@ public class JolokiaServerConfig {
     private void initHttpsRelatedSettings(Map<String, String> agentConfig) {
         // keystore
         keystore = agentConfig.get("keystore");
+        keyStoreType = agentConfig.get("keyStoreType");
         caCert = agentConfig.get("caCert");
         serverCert = agentConfig.get("serverCert");
         serverKey = agentConfig.get("serverKey");
 
         secureSocketProtocol = agentConfig.get("secureSocketProtocol");
-        keyStoreType = agentConfig.get("keyStoreType");
         keyManagerAlgorithm = agentConfig.get("keyManagerAlgorithm");
         trustManagerAlgorithm = agentConfig.get("trustManagerAlgorithm");
 

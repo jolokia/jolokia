@@ -24,6 +24,7 @@ import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -37,7 +38,6 @@ import org.jolokia.jvmagent.security.KeyStoreUtil;
 import org.jolokia.server.core.Version;
 import org.jolokia.server.core.service.impl.JolokiaServiceManagerImpl;
 import org.jolokia.server.core.service.impl.JulLogHandler;
-import org.jolokia.server.core.util.Base64Util;
 import org.jolokia.test.util.EnvTestUtil;
 import org.jolokia.core.api.LogHandler;
 import org.testng.annotations.Test;
@@ -530,7 +530,7 @@ public class JolokiaServerTest {
         } else {
             KeyStore keystore = KeyStore.getInstance("JKS");
             keystore.load(null);
-            KeyStoreUtil.updateWithCaPem(keystore, new File(getCertPath("ca/cert.pem")));
+            KeyStoreUtil.updateWithCaCertificates(keystore, new File(getCertPath("ca/cert.pem")));
             TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             tmf.init(keystore);
             return tmf.getTrustManagers();
@@ -606,7 +606,7 @@ public class JolokiaServerTest {
             URL url = new URL(server.getUrl());
             URLConnection uc = url.openConnection();
             if (pUserPassword != null) {
-                uc.setRequestProperty("Authorization", "Basic " + Base64Util.encode(pUserPassword.getBytes()));
+                uc.setRequestProperty("Authorization", "Basic " + Base64.getEncoder().encodeToString(pUserPassword.getBytes()));
             }
             uc.connect();
             String resp = EnvTestUtil.readToString(uc.getInputStream());

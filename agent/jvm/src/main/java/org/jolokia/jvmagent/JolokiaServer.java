@@ -1,5 +1,3 @@
-package org.jolokia.jvmagent;
-
 /*
  * Copyright 2009-2014 Roland Huss
  *
@@ -15,6 +13,7 @@ package org.jolokia.jvmagent;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.jvmagent;
 
 import java.io.*;
 import java.net.*;
@@ -171,6 +170,7 @@ public class JolokiaServer {
      */
     public void stop() {
         httpServer.removeContext(httpContext);
+        httpServer.removeContext(httpConfigContext);
         serviceManager.stop();
 
         if (cleaner != null) {
@@ -212,7 +212,7 @@ public class JolokiaServer {
     /**
      * Initialize this JolokiaServer and use an own created HttpServer
      *
-     * @param pConfig configuartion to use
+     * @param pConfig configuration to use
      * @param pLogHandler log handler to use
      * @throws IOException if the creation of the HttpServer fails
      */
@@ -226,7 +226,7 @@ public class JolokiaServer {
      * Initialize this JolokiaServer and use an own created HttpServer. Existing {@link ServerDetectorLookup}
      * can be passed
      *
-     * @param pConfig configuartion to use
+     * @param pConfig configuration to use
      * @param pLogHandler log handler to use
      * @param pLookup existing server detector lookup to use
      * @throws IOException if the creation of the HttpServer fails
@@ -249,7 +249,7 @@ public class JolokiaServer {
     }
 
     /**
-     * Initialize this JolokiaServer with the given HttpServer. The calle is responsible for managing (starting/stopping)
+     * Initialize this JolokiaServer with the given HttpServer. The call is responsible for managing (starting/stopping)
      * the HttpServer.
      *
      * @param pServer server to use
@@ -319,6 +319,8 @@ public class JolokiaServer {
         if (authenticator != null) {
             httpContext.setAuthenticator(authenticator);
         }
+        // explicitly setting no authentication for /config handling
+        httpConfigContext.setAuthenticator(null);
     }
 
     // If running an own server, we need to check that shutdown properly
@@ -357,7 +359,7 @@ public class JolokiaServer {
         if (realAddress.isAnyLocalAddress()) {
             // we can't just say that Agent's URL is http://0.0.0.0:8778/jolokia for example...
             try {
-                // let's be explicit here - for backward compatibilty we'll announce Agent URL using IPv4 by default
+                // let's be explicit here - for backward compatibility we'll announce Agent URL using IPv4 by default
                 boolean preferIPv6Addresses = Boolean.getBoolean("java.net.preferIPv6Addresses");
                 if (realAddress instanceof Inet6Address && preferIPv6Addresses) {
                     realAddress = NetworkUtil.getLocalAddress(Inet6Address.class);
@@ -396,7 +398,7 @@ public class JolokiaServer {
      * used
      *
      * @return HttpServer to use
-     * @throws IOException if something fails during the initialisation
+     * @throws IOException if something fails during the initialization
      */
     private HttpServer createHttpServer(JolokiaServerConfig pConfig) throws IOException {
         // only now init the authenticator, because it may refer to a class not accessible
@@ -431,12 +433,14 @@ public class JolokiaServer {
     // =========================================================================================================
     // HTTPS handling
     private HttpServer createHttpsServer(InetSocketAddress pSocketAddress, JolokiaServerConfig pConfig) {
-        // initialise the HTTPS server
+        // initialize the HTTPS server
         try {
             HttpsServer server = HttpsServer.create(pSocketAddress, pConfig.getBacklog());
             SSLContext sslContext = SSLContext.getInstance(pConfig.getSecureSocketProtocol());
 
-            // initialise the keystore and remember files used (for WatchService)
+            // initialize the keystore and remember files used (for WatchService)
+            // we support both entire keystore (JKS/PKCS12 thanks to sun.security.pkcs12.PKCS12KeyStore.DualFormatPKCS12)
+            // and separate ca/server certificate + server key in PEM/DER format using PKCS#8 or PKCS#1
             KeyStore ks = getKeyStore(pConfig, this.filesToWatch);
 
             // set up the key manager factory
@@ -472,6 +476,30 @@ public class JolokiaServer {
         return KeyManagerFactory.getInstance(algo != null ? algo : KeyManagerFactory.getDefaultAlgorithm());
     }
 
+    /**
+     * <p>Jolokia JVM Agent is based on {@link HttpServer} and this is the method to obtain a {@link KeyStore}
+     * to be used for {@link TrustManagerFactory} and {@link KeyManagerFactory} for the {@link SSLSocket} used with
+     * the server.</p>
+     *
+     * <p>The trust/key material comes from two sources - either the agent is configured with existing {@link KeyStore},
+     * or three items are specified separately:<ul>
+     *     <li>Server key - if not specified, an RSA 4096 bit key will be generated</li>
+     *     <li>Server certificate - if not specified, a self-signed certificate will be generated with 1-year validity</li>
+     *     <li>CA certificate - optional, for client TLS authentication</li>
+     * </ul></p>
+     *
+     * @param pConfig
+     * @param filesToWatch
+     * @return
+     * @throws KeyStoreException
+     * @throws IOException
+     * @throws NoSuchAlgorithmException
+     * @throws CertificateException
+     * @throws InvalidKeySpecException
+     * @throws InvalidKeyException
+     * @throws NoSuchProviderException
+     * @throws SignatureException
+     */
     private KeyStore getKeyStore(JolokiaServerConfig pConfig, List<File> filesToWatch) throws KeyStoreException, IOException,
                                                                      NoSuchAlgorithmException, CertificateException,
                                                                      InvalidKeySpecException, InvalidKeyException,
@@ -510,8 +538,8 @@ public class JolokiaServer {
 
         File[] result = new File[3];
         if (pConfig.getCaCert() != null) {
-            File caCert = getAndValidateFile(pConfig.getCaCert(),"CA cert");
-            KeyStoreUtil.updateWithCaPem(keystore, caCert);
+            File caCert = getAndValidateFile(pConfig.getCaCert(), "CA cert");
+            KeyStoreUtil.updateWithCaCertificates(keystore, caCert);
             result[0] = caCert;
         } else if (pConfig.useSslClientAuthentication()) {
             throw new IllegalArgumentException("Cannot use client cert authentication if no CA is given with 'caCert'");
@@ -519,14 +547,13 @@ public class JolokiaServer {
 
         if (pConfig.getServerCert() != null) {
             // Use the provided server key
-            File serverCert = getAndValidateFile(pConfig.getServerCert(),"server cert");
+            File serverCert = getAndValidateFile(pConfig.getServerCert(), "server cert");
             if (pConfig.getServerKey() == null) {
-                throw new IllegalArgumentException("Cannot use server cert from " + pConfig.getServerCert() +
-                                                   " without a provided a key given with 'serverKey'");
+                throw new IllegalArgumentException("Cannot use server cert from " + pConfig.getServerCert()
+                    + " without a provided a key given with 'serverKey'");
             }
-            File serverKey = getAndValidateFile(pConfig.getServerKey(),"server key");
-            KeyStoreUtil.updateWithServerPems(keystore, serverCert, serverKey,
-                                              pConfig.getServerKeyAlgorithm(), pConfig.getKeystorePassword());
+            File serverKey = getAndValidateFile(pConfig.getServerKey(), "server key");
+            KeyStoreUtil.updateWithServerCertificate(keystore, serverCert, serverKey, pConfig.getServerKeyAlgorithm(), pConfig.getKeystorePassword());
             result[1] = serverCert;
             result[2] = serverKey;
         }

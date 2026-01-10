@@ -11,6 +11,7 @@ import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.Base64;
 import java.util.Random;
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
@@ -47,7 +48,7 @@ public class JolokiaCipher {
         random = new SecureRandom();
         keyHolder = pKeyHolder;
 
-        // Automatic decryption of passwords with Jolokia isnt secure
+        // Automatic decryption of passwords with Jolokia isn't secure
         // anyway (but only stops getting the password by accident),
         // so we are going to use a simple seed for the salt
         random.setSeed(System.currentTimeMillis());
@@ -75,7 +76,7 @@ public class JolokiaCipher {
         allEncryptedBytes[SALT_SIZE] = padLen;
         System.arraycopy(encryptedBytes, 0, allEncryptedBytes, SALT_SIZE + 1, len);
 
-        return Base64Util.encode(allEncryptedBytes);
+        return Base64.getEncoder().encodeToString(allEncryptedBytes);
     }
 
     /**
@@ -86,7 +87,7 @@ public class JolokiaCipher {
      * @throws GeneralSecurityException when decryption fails
      */
     public String decrypt(final String pEncryptedText) throws GeneralSecurityException {
-        byte[] allEncryptedBytes = Base64Util.decode(pEncryptedText);
+        byte[] allEncryptedBytes = Base64.getDecoder().decode(pEncryptedText);
         int totalLen = allEncryptedBytes.length;
         byte[] salt = new byte[SALT_SIZE];
 
