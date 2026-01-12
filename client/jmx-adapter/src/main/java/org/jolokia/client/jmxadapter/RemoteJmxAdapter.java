@@ -16,7 +16,6 @@
 package org.jolokia.client.jmxadapter;
 
 import java.io.IOException;
-import java.lang.management.GarbageCollectorMXBean;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,6 +49,7 @@ import javax.management.RuntimeMBeanException;
 import javax.management.openmbean.InvalidOpenTypeException;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenType;
+import javax.management.remote.JMXConnector;
 
 import org.jolokia.client.JolokiaClient;
 import org.jolokia.client.JolokiaClientBuilder;
@@ -77,17 +77,17 @@ import org.jolokia.json.JSONArray;
 import org.jolokia.json.JSONObject;
 
 /**
- * <p>I emulate a subset of the functionality of a native {@link MBeanServerConnection} but over a Jolokia
- * connection to remote Jolokia Agent, the response types and thrown exceptions attempts to mimic as close as
- * possible the ones from a native Java {@link MBeanServerConnection}</p>
- *
- * <p>Operations that are not supported will throw an {@link UnsupportedOperationException}.</p>
+ * <p>{@link MBeanServerConnection} implementation using {@link JolokiaClient}. It is returned from
+ * {@link JMXConnector#getMBeanServerConnection()}. It is a partial implementation of "JMX Connector (Client) from
+ * JSR-160 Remote JMX specification. Operations which can be mapped to {@link org.jolokia.client.JolokiaOperation}
+ * are supported and the remaining ones throw an {@link UnsupportedOperationException} (for example we can't call
+ * {@link MBeanServerConnection#createMBean(String, ObjectName)}).</p>
  */
 public class RemoteJmxAdapter implements MBeanServerConnection {
 
     // Information retrieved from Jolokia "version" request.
-    String agentVersion;
-    String protocolVersion;
+    private String agentVersion;
+    private String protocolVersion;
     private String agentId;
 
     private final JolokiaClient connector;
@@ -162,6 +162,9 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
         // to satisfy JConsole, which creates MXBean proxies (and verifies the instances) for some platform
         // MBeans we need some mapping. We'll skip javax.management.NotificationBroadcaster/Emitter
         // and JDK specific interfaces (com.sun.management, com.ibm.lang.management, ...)
+        //
+        // Note: IBM Semeru runtime also supports com.sun.management classes/interfaces and extends them, but
+        // we'll hardcode only the default interfaces from java.lang.management package
         try {
             // see sun.tools.jconsole.SummaryTab.formatSummary()
             platformMBeanInterfaces.put(ObjectName.getInstance("java.lang:type=ClassLoading"),
@@ -455,8 +458,9 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
             }
 
             if (rawValue instanceof Number && attributeType != null) {
-                return new JolokiaSerializer()
-                    .deserializeOpenType(attributeType, rawValue);
+                return null;
+//                return new ToOpenTypeConverter()
+//                    .deserializeOpenType(attributeType, rawValue);
             } else {
                 return rawValue;
             }
@@ -756,7 +760,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
             } else {
                 if (platformGarbageCollectorMBeanPattern.apply(name)) {
                     // special pattern matching for GarbageCollector MBean
-                    return GarbageCollectorMXBean.class.getName().equals(className);
+                    return java.lang.management.GarbageCollectorMXBean.class.getName().equals(className);
                 }
                 // the only thing we can do is direct check
                 return className.equals(mbeanClassName);

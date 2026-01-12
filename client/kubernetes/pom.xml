@@ -78,6 +78,12 @@
       <groupId>io.fabric8</groupId>
       <artifactId>kubernetes-server-mock</artifactId>
       <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.bouncycastle</groupId>
+          <artifactId>bcpkix-jdk18on</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>

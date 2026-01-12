@@ -33,8 +33,7 @@ public class KubernetesJmxConnector extends JolokiaJmxConnector {
   private static final Map<String,KubernetesClient> apiClients = Collections.synchronizedMap(new HashMap<>());
   public static String KUBERNETES_CLIENT_CONTEXT ="kubernetes.client.context";
 
-  public KubernetesJmxConnector(JMXServiceURL serviceURL,
-      Map<String, ?> environment) {
+  public KubernetesJmxConnector(JMXServiceURL serviceURL, Map<String, ?> environment) throws IOException {
     super(serviceURL, environment);
   }
 

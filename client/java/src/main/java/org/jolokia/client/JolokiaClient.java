@@ -102,7 +102,6 @@ public class JolokiaClient implements Closeable {
         this(pJolokiaAgentUrl, pHttpClient, pTargetConfig, ValidatingResponseExtractor.DEFAULT);
     }
 
-
     /**
      * The constructor with all parameters to create a {@link JolokiaClient} for connections to remote Jolokia Agent using
      * selected {@link HttpClientSpi}, optional {@link JolokiaTargetConfig proxy configuration} and actual

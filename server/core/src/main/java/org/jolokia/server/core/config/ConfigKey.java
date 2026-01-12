@@ -21,6 +21,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
+import org.jolokia.core.util.PropertyUtil;
+
 /**
  * Enumeration defining the various configuration constant names which
  * can be used to configure the agent globally (e.g. in web.xml) or
@@ -567,57 +569,29 @@ public enum ConfigKey {
      * Get the value of this key as it could be possibly used as
      * a system property to {@link System#getProperty(String)}.
      *
-     * @return key, pefixed with "jolokia."
+     * @return key, prefixed with "jolokia."
      */
     public String asSystemProperty() {
-        return "jolokia." + getKeyValue();
+        return PropertyUtil.asJolokiaSystemProperty(getKeyValue());
     }
 
     /**
      * Get the value of this key as it could be possibly used as
-     * an environment variable in {@link System#getenv(String)}. Note, that
-     * only a few config values can be set that way.
+     * an environment variable in {@link System#getenv(String)}.
      *
-     * @return key, pefixed with "jolokia."
+     * @return key, prefixed with "JOLOKIA_" in env-variable convention (e.g., {@code JOLOKIA_DEBUG_MAX_ENTRIES}.
      */
     public String asEnvVariable() {
-        String kevValue = getKeyValue();
-        StringBuilder buf = new StringBuilder();
-        boolean notFirst = false;
-        for (char c : kevValue.toCharArray()) {
-            if (Character.isUpperCase(c) && notFirst) {
-                buf.append("_").append(c);
-            } else {
-                buf.append(Character.toUpperCase(c));
-            }
-            notFirst = true;
-        }
-        return "JOLOKIA_" + buf;
+        return PropertyUtil.asJolokiaEnvVariable(getKeyValue());
     }
 
     public static ConfigKey fromEnvVariable(String key) {
-        if (!key.startsWith("JOLOKIA_")) {
-            return null;
-        }
         String k = fromEnvVariableFormat(key);
         return k == null ? null : getGlobalConfigKey(k);
     }
 
     public static String fromEnvVariableFormat(String key) {
-        if (!key.startsWith("JOLOKIA_")) {
-            return null;
-        }
-        key = key.substring("JOLOKIA_".length());
-        String[] parts = key.split("_");
-        StringBuilder buf = new StringBuilder();
-        buf.append(parts[0].toLowerCase());
-        for (int i = 1; i < parts.length; i++) {
-            if (!parts[i].isEmpty()) {
-                buf.append(Character.toUpperCase(parts[i].charAt(0)))
-                    .append(parts[i].substring(1).toLowerCase());
-            }
-        }
-        return buf.toString();
+        return PropertyUtil.fromJolokiaEnvVariable(key);
     }
 
     // Constants used for boolean values
@@ -625,4 +599,5 @@ public enum ConfigKey {
         public static final String FALSE = "false";
         public static final String TRUE = "true";
     }
+
 }

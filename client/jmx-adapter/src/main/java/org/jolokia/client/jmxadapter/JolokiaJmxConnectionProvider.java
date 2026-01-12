@@ -24,7 +24,8 @@ import javax.management.remote.JMXServiceURL;
 
 /**
  * <p>{@link JMXConnectorProvider} implementation for handling JMX URLs using the Jolokia protocol</p>
- * <p>Syntax: {@code service:jmx:jolokia[+http[s]]://host:port/path/to/jolokia/with/slash/suffix/}</p>
+ * <p>Syntax: {@code service:jmx:jolokia[+http[s]]://host:port/path/to/jolokia/with/slash/suffix/} - this is compliant
+ * with <a href="https://www.ietf.org/rfc/rfc2609.html#section-2.1">RFC 2609</a></p>
  *
  * Example:
  * <pre>{@code
@@ -39,13 +40,15 @@ import javax.management.remote.JMXServiceURL;
  * }</pre>
  */
 public class JolokiaJmxConnectionProvider implements JMXConnectorProvider {
+
     @Override
     public JMXConnector newJMXConnector(JMXServiceURL serviceURL, Map<String, ?> environment) throws IOException {
         // the exception will be handled by javax.management.remote.JMXConnectorFactory so that other handlers are
         // allowed to handle other protocols
         if (!serviceURL.getProtocol().startsWith("jolokia")) {
-            throw new MalformedURLException(String.format("Invalid URL %s : Only protocol \"jolokia\" is supported (not %s)", serviceURL, serviceURL.getProtocol()));
+            throw new MalformedURLException(String.format("Invalid URL %s : Only protocol \"jolokia[+http[s]]\" is supported (not %s)", serviceURL, serviceURL.getProtocol()));
         }
         return new JolokiaJmxConnector(serviceURL, environment);
     }
+
 }

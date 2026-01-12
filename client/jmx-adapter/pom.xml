@@ -40,33 +40,11 @@
 
     <dependency>
       <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-tools-test</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.jolokia</groupId>
       <artifactId>jolokia-json</artifactId>
     </dependency>
-
-    <!--
-      NOTE: jolokia-jvm dependency must come before jolokia-core
-      as it is shaded and the combination does not work
-      hence unconventionally listing test deps first
-    -->
     <dependency>
       <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-agent-jvm</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-server-core</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-service-serializer</artifactId>
+      <artifactId>jolokia-core</artifactId>
     </dependency>
 
     <dependency>
@@ -116,11 +94,7 @@
               org.jolokia.client;version="[2.5,3)",
               org.jolokia.client.exception;version="[2.5,3)",
               org.jolokia.client.request;version="[2.5,3)",
-              org.jolokia.client.response;version="[2.5,3)",
-              <!-- jolokia-server-core -->
-              org.jolokia.server.core.util;version="[2.5,3)",
-              <!-- jolokia-service-serializer -->
-              org.jolokia.service.serializer;version="[2.5,3)"
+              org.jolokia.client.response;version="[2.5,3)"
             </Import-Package>
             <Export-Package>
               org.jolokia.client.jmxadapter
@@ -128,20 +102,55 @@
           </instructions>
         </configuration>
       </plugin>
+
       <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <configuration>
-          <descriptors>
-            <descriptor>src/main/assembly/standalone.xml</descriptor>
-          </descriptors>
-        </configuration>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
         <executions>
           <execution>
             <id>make-assembly</id>
             <phase>package</phase>
             <goals>
-              <goal>single</goal>
+              <goal>shade</goal>
             </goals>
+            <configuration>
+              <minimizeJar>false</minimizeJar>
+              <createDependencyReducedPom>false</createDependencyReducedPom>
+              <shadedClassifierName>standalone</shadedClassifierName>
+              <shadedArtifactAttached>true</shadedArtifactAttached>
+              <artifactSet>
+                <includes>
+                  <include>org.jolokia:jolokia-json</include>
+                  <include>org.jolokia:jolokia-core</include>
+                  <include>org.jolokia:jolokia-client-java</include>
+                </includes>
+              </artifactSet>
+              <filters>
+                <filter>
+                  <artifact>org.jolokia:jolokia-json</artifact>
+                  <excludes>
+                    <exclude>META-INF/*.MF</exclude>
+                  </excludes>
+                </filter>
+                <filter>
+                  <artifact>org.jolokia:jolokia-core</artifact>
+                  <excludes>
+                    <exclude>META-INF/*.MF</exclude>
+                  </excludes>
+                </filter>
+                <filter>
+                  <artifact>org.jolokia:jolokia-client-java</artifact>
+                  <excludes>
+                    <exclude>META-INF/*.MF</exclude>
+                  </excludes>
+                </filter>
+              </filters>
+              <transformers>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                  <resource>META-INF/jolokia/services-default</resource>
+                </transformer>
+              </transformers>
+            </configuration>
           </execution>
         </executions>
       </plugin>
