@@ -38,6 +38,7 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.HexFormat;
 import java.util.Map;
+import java.util.Set;
 
 import org.jolokia.asn1.DERBitString;
 import org.jolokia.asn1.DERInteger;
@@ -555,6 +556,46 @@ public class CryptoUtilTest {
 //            KeyGenerationTest.printDer(DERUtils.parse(cryptoData.derData()), 0);
             PrivateKey privateKey = factory.generatePrivate(CryptoUtil.decodePrivateKey(cryptoData, "jolokia".toCharArray()));
             assertNotNull(privateKey);
+        }
+    }
+
+    @Test
+    public void matchingPrivateAndPublicKeys() throws Exception {
+        File dir1 = new File("target/test-classes/publickeys");
+        File dir2 = new File("target/test-classes/privatekeys");
+        String[] publicKeys = dir1.list(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.endsWith("-pub.der");
+            }
+        });
+        assertNotNull(publicKeys);
+        assertEquals(publicKeys.length, 11);
+        for (String pk : publicKeys) {
+            System.out.println("Checking " + pk);
+            CryptoUtil.CryptoStructure cryptoData = CryptoUtil.decodePemIfNeeded(new File(dir1, pk));
+            assertEquals(cryptoData.hint(), CryptoUtil.StructureHint.DER);
+            String algorithm = pk.replace("-pub.der", "");
+            KeyFactory factory = KeyFactory.getInstance(algorithm);
+
+            KeySpec spec = CryptoUtil.decodePublicKey(cryptoData);
+            assertTrue(spec instanceof X509EncodedKeySpec);
+            PublicKey publicKey = factory.generatePublic(spec);
+
+            CryptoUtil.CryptoStructure cryptoData2 = CryptoUtil.decodePemIfNeeded(new File(dir2, algorithm + "-pkcs8.pem"));
+            assertEquals(cryptoData2.hint(), CryptoUtil.StructureHint.PKCS8_PRIVATE_KEY);
+
+            KeySpec spec2 = CryptoUtil.decodePrivateKey(cryptoData2, null);
+            assertTrue(spec2 instanceof PKCS8EncodedKeySpec);
+
+            PrivateKey privateKey = factory.generatePrivate(spec2);
+
+            if (Set.of("X448", "X25519", "XDH", "DiffieHellman").contains(algorithm)) {
+                // https://www.rfc-editor.org/rfc/rfc7748.html#section-5
+                assertFalse(CryptoUtil.keysMatch(privateKey, publicKey));
+            } else {
+                assertTrue(CryptoUtil.keysMatch(privateKey, publicKey));
+            }
         }
     }
 
