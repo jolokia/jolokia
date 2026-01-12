@@ -27,10 +27,10 @@ import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.DSAPrivateKeySpec;
-import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPrivateKeySpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAPrivateCrtKeySpec;
 import java.security.spec.RSAPrivateKeySpec;
 import java.security.spec.RSAPublicKeySpec;
@@ -472,7 +472,13 @@ public class CryptoUtilTest {
             String algorithm = pemPrivateKey.replace("-PBEWithSHA1AndDESede-pkcs8-pbes1.der", "");
             KeyFactory factory = KeyFactory.getInstance(algorithm);
 //            KeyGenerationTest.printDer(DERUtils.parse(cryptoData.derData()), 0);
-            PrivateKey privateKey = factory.generatePrivate(CryptoUtil.decodePrivateKey(cryptoData, "jolokia".toCharArray()));
+            KeySpec spec = CryptoUtil.decodePrivateKey(cryptoData, "jolokia".toCharArray());
+            assertTrue(spec instanceof PKCS8EncodedKeySpec);
+            //assertEquals(algMapping.getOrDefault(((PKCS8EncodedKeySpec) spec).getAlgorithm(), algorithm), algorithm);
+            PrivateKey privateKey = factory.generatePrivate(spec);
+//            System.out.println(((PKCS8EncodedKeySpec) spec).getAlgorithm());
+//            System.out.println(factory.getAlgorithm());
+//            System.out.println(privateKey.getAlgorithm());
             assertNotNull(privateKey);
             assertEquals(privateKey.getAlgorithm(), algMapping.getOrDefault(algorithm, algorithm));
         }

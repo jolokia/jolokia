@@ -26,7 +26,12 @@ import java.nio.charset.StandardCharsets;
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
+import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Signature;
+import java.security.SignatureException;
 import java.security.spec.DSAPrivateKeySpec;
 import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPrivateKeySpec;
@@ -34,11 +39,12 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAPrivateCrtKeySpec;
+import java.security.spec.RSAPrivateKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Base64;
-import java.util.HexFormat;
+import java.util.Map;
 
 import javax.crypto.Cipher;
 import javax.crypto.EncryptedPrivateKeyInfo;
@@ -169,7 +175,7 @@ public class CryptoUtil {
         return decodePrivateKey(cryptoStructure, password, true);
     }
 
-    public static KeySpec decodePrivateKey(CryptoStructure cryptoStructure, char[] password, boolean firstCheck) {
+    private static KeySpec decodePrivateKey(CryptoStructure cryptoStructure, char[] password, boolean firstCheck) {
         DERObject object = DERUtils.parse(cryptoStructure.derData());
         if (!(object instanceof DERSequence sequence)) {
             throw new IllegalArgumentException("Expected a private key encoded as ASN.1 SEQUENCE");
@@ -517,6 +523,103 @@ public class CryptoUtil {
     }
 
     /**
+     * Using a {@link KeySpec} and provided hint for a {@link java.security.KeyFactory} algorithm, generate
+     * actual {@link PrivateKey} with proper checking.
+     *
+     * @param keySpec
+     * @param algorithm
+     * @return
+     */
+    public static PrivateKey generatePrivateKey(KeySpec keySpec, String algorithm) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        KeyFactory keyFactory;
+        // we have to rely on the hint from algorithm
+        if (algorithm == null || algorithm.trim().isEmpty()) {
+            if (keySpec instanceof DSAPrivateKeySpec) {
+                // legacy DSA private key
+                keyFactory = KeyFactory.getInstance("DSA");
+            } else if (keySpec instanceof RSAPrivateKeySpec) {
+                // legacy PKCS#1 private key
+                keyFactory = KeyFactory.getInstance("RSA");
+            } else if (keySpec instanceof ECPrivateKeySpec) {
+                // legacy RFC 5915 EC private key
+                keyFactory = KeyFactory.getInstance("EC");
+            } else if (keySpec instanceof PKCS8EncodedKeySpec pkcs8) {
+                // standard PKCS#8
+                keyFactory = KeyFactory.getInstance(pkcs8.getAlgorithm());
+            } else {
+                throw new IllegalArgumentException("Can't determine the private key factory to use for DER-encoded private key");
+            }
+        } else {
+            keyFactory = KeyFactory.getInstance(algorithm);
+        }
+
+        return keyFactory.generatePrivate(keySpec);
+    }
+
+    /**
+     * Check if a {@link PrivateKey} and a {@link PublicKey} match.
+     *
+     * @param privateKey
+     * @param publicKey
+     * @return
+     */
+    public static boolean keysMatch(PrivateKey privateKey, PublicKey publicKey) {
+        byte[] data = "Jolokia JMX".getBytes(java.nio.charset.StandardCharsets.UTF_8);
+
+        Map<String, String> keyToSignature = Map.of(
+            "DSA", "SHA256withDSA",
+            "EC", "",
+            "EdDSA", "",
+            "RSA", "SHA256withRSA",
+            "RSASSA-PSS", "RSASSA-PSS"
+        );
+
+        // EC
+        // SHA256withECDSA     (P-256)
+        // SHA384withECDSA     (P-384)
+        // SHA512withECDSA     (P-521)
+        //
+        // EdDSA
+        // Ed25519
+        // Ed448
+
+        try {
+            if ("EC".equals(privateKey.getAlgorithm())) {
+                if (!"EC".equals(publicKey.getAlgorithm())) {
+                    throw new IllegalArgumentException("EC Private Key can't be used with non-EC Public Key");
+                }
+                return false;
+            }
+            if ("EdDSA".equals(privateKey.getAlgorithm())) {
+                if (!"EdDSA".equals(publicKey.getAlgorithm())) {
+                    throw new IllegalArgumentException("EdDSA Private Key can't be used with non-EdDSA Public Key");
+                }
+                return false;
+            }
+            String signatureAlgorithm = keyToSignature.get(privateKey.getAlgorithm());
+            if (signatureAlgorithm == null) {
+                throw new IllegalArgumentException("Unknown Signature algorithm for private key algorithm \"" + privateKey.getAlgorithm() + "\"");
+            }
+            Signature signer = Signature.getInstance(signatureAlgorithm);
+            signer.initSign(privateKey);
+            signer.update(data);
+            byte[] signature = signer.sign();
+
+            String signatureAlgorithm2 = keyToSignature.get(publicKey.getAlgorithm());
+            if (signatureAlgorithm2 == null) {
+                throw new IllegalArgumentException("Unknown Signature algorithm for public key algorithm \"" + privateKey.getAlgorithm() + "\"");
+            }
+            Signature verifier = Signature.getInstance(signatureAlgorithm2);
+            verifier.initVerify(publicKey);
+            verifier.update(data);
+
+            return verifier.verify(signature);
+        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
+            return false;
+        }
+    }
+
+    /**
      * Write DER data using PEM encoding and selected <em>marker</em>
      * @param marker
      * @param derData
@@ -531,6 +634,12 @@ public class CryptoUtil {
         return data.getBytes(StandardCharsets.UTF_8);
     }
 
+    /**
+     * Read a file which may be a PEM file and try to recode it to DER and parse as a {@link CryptoStructure}.
+     * @param pemFile
+     * @return
+     * @throws IOException
+     */
     // Originally this method was inspired and partly taken over from http://oauth.googlecode.com/svn/code/java/
     // All credits to belong to them.
     public static CryptoStructure decodePemIfNeeded(File pemFile) throws IOException {

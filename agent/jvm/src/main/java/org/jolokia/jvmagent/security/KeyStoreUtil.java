@@ -102,43 +102,19 @@ public class KeyStoreUtil {
 
             CryptoUtil.CryptoStructure cryptoData = CryptoUtil.decodePemIfNeeded(pServerKey);
             byte[] keyBytes = cryptoData.derData();
-            PrivateKey privateKey;
 
-            KeyFactory keyFactory = KeyFactory.getInstance(pKeyAlgo);
-            KeySpec keySpec;
-            try {
-                // First let's try PKCS#8 - RFC 5208
-                // PrivateKeyInfo ::= SEQUENCE {
-                //   version                   Version,
-                //   privateKeyAlgorithm       PrivateKeyAlgorithmIdentifier,
-                //   privateKey                PrivateKey,
-                //   attributes           [0]  IMPLICIT Attributes OPTIONAL
-                // }
-                // Version ::= INTEGER
-                // PrivateKeyAlgorithmIdentifier ::= AlgorithmIdentifier
-                // PrivateKey ::= OCTET STRING
-                // Attributes ::= SET OF Attribute
-                keySpec = new PKCS8EncodedKeySpec(keyBytes);
-                privateKey = keyFactory.generatePrivate(keySpec);
-            } catch (InvalidKeySpecException e) {
-                // Otherwise try PKCS#1 - RFC 8017
-                // RSAPrivateKey ::= SEQUENCE {
-                //    version           Version,
-                //    modulus           INTEGER,  -- n
-                //    publicExponent    INTEGER,  -- e
-                //    privateExponent   INTEGER,  -- d
-                //    prime1            INTEGER,  -- p
-                //    prime2            INTEGER,  -- q
-                //    exponent1         INTEGER,  -- d mod (p-1)
-                //    exponent2         INTEGER,  -- d mod (q-1)
-                //    coefficient       INTEGER,  -- (inverse of q) mod p
-                //    otherPrimeInfos   OtherPrimeInfos OPTIONAL
-                // }
-                keySpec = CryptoUtil.decodePKCS1PrivateKey(keyBytes);
-                privateKey = keyFactory.generatePrivate(keySpec);
+            KeySpec keySpec = CryptoUtil.decodePrivateKey(cryptoData, pPassword);
+
+            PrivateKey privateKey = CryptoUtil.generatePrivateKey(keySpec, pKeyAlgo);
+
+            // check if these match
+            X509Certificate x509Certificate = (X509Certificate) certificates[0];
+
+            if (certificates.length == 1 && !CryptoUtil.keysMatch(privateKey, x509Certificate.getPublicKey())) {
+                throw new IllegalArgumentException("Private key from " + pServerKey + " and public key from " + pServerCert + " do not match");
             }
 
-            String alias = ((X509Certificate) certificates[0]).getSubjectX500Principal().getName();
+            String alias = x509Certificate.getSubjectX500Principal().getName();
             pKeyStore.setKeyEntry(alias, privateKey, pPassword, certificates);
         }
     }

@@ -129,24 +129,6 @@ public class KeyStoreUtilTest {
     }
 
     @Test
-    public void readingEncryptedKeys() throws Exception {
-        CryptoUtil.CryptoStructure cryptoData = CryptoUtil.decodePemIfNeeded(new File("target/keys/rsa_enc.pem"));
-        byte[] data = cryptoData.derData();
-        EncryptedPrivateKeyInfo info = new EncryptedPrivateKeyInfo(data);
-        System.out.println(info.getAlgName());
-        System.out.println(info.getAlgParameters());
-
-        SecretKeyFactory keyFactory = SecretKeyFactory.getInstance(info.getAlgParameters().toString()); // !
-        SecretKey key = keyFactory.generateSecret(new PBEKeySpec("mysecret".toCharArray()));
-        Cipher cipher = Cipher.getInstance(info.getAlgParameters().toString()); // !
-        cipher.init(Cipher.DECRYPT_MODE, key, info.getAlgParameters());
-        PKCS8EncodedKeySpec pkcs8 = info.getKeySpec(cipher);
-
-        PrivateKey pkey = KeyFactory.getInstance(pkcs8.getAlgorithm()).generatePrivate(pkcs8);
-        System.out.println(pkey);
-    }
-
-    @Test
     public void testTrustStore() throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException {
         File caPem = getTempFile("ca/cert.pem");
         KeyStore keystore = createKeyStore();
