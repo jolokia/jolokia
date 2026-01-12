@@ -106,9 +106,7 @@
           <instructions>
             <Bundle-SymbolicName>org.jolokia.json</Bundle-SymbolicName>
             <Bundle-Description>Jolokia JSON Parser</Bundle-Description>
-            <Import-Package>
-              *
-            </Import-Package>
+            <Import-Package />
             <Export-Package>
               org.jolokia.json,
               org.jolokia.json.parser

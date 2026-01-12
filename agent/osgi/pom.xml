@@ -171,9 +171,6 @@
               org.mortbay.jetty;resolution:=optional
             </Import-Package>
             <Export-Package>
-              <!-- jolokia-json -->
-              org.jolokia.json,
-              org.jolokia.json.parser,
               <!-- jolokia-core -->
               org.jolokia.converter.json,
               org.jolokia.converter.json.simplifier,
@@ -182,6 +179,9 @@
               org.jolokia.core.config,
               org.jolokia.core.service.serializer,
               org.jolokia.core.util,
+              <!-- jolokia-json -->
+              org.jolokia.json,
+              org.jolokia.json.parser,
               <!-- jolokia-server-core -->
               org.jolokia.server.core,
               org.jolokia.server.core.auth,
