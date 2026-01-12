@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URL;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -31,8 +32,6 @@ import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.message.BasicStatusLine;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
-import org.jolokia.server.core.http.security.AuthorizationHeaderParser;
-import org.jolokia.server.core.util.Base64Util;
 import org.jolokia.json.JSONObject;
 
 import io.fabric8.kubernetes.api.model.Status;
@@ -48,6 +47,8 @@ import okhttp3.HttpUrl;
  * hence the need to adapt One HTTP client to another HTTP client API
  */
 public class MinimalHttpClientAdapter implements HttpClient {
+
+    public static final String JOLOKIA_ALTERNATE_AUTHORIZATION_HEADER = "X-jolokia-authorization";
 
     private final KubernetesClient client;
     private final KubernetesSerialization serialization;
@@ -69,8 +70,8 @@ public class MinimalHttpClientAdapter implements HttpClient {
     static void authenticate(Map<String, String> headers, String username, String password) {
         if (username != null) {
             //use custom header as Authorization will be stripped by kubernetes proxy
-            headers.put(AuthorizationHeaderParser.JOLOKIA_ALTERNATE_AUTHORIZATION_HEADER, "Basic " + Base64Util
-                .encode((username + ":" + password).getBytes()));
+            headers.put(JOLOKIA_ALTERNATE_AUTHORIZATION_HEADER, "Basic " + Base64.getEncoder()
+                .encodeToString((username + ":" + password).getBytes()));
         }
     }
 

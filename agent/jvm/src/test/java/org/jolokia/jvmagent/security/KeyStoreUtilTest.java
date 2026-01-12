@@ -16,16 +16,18 @@ package org.jolokia.jvmagent.security;/*
  */
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.LineNumberReader;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.security.InvalidKeyException;
+import java.security.KeyFactory;
+import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
 import java.security.SignatureException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
@@ -34,14 +36,23 @@ import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
+import javax.crypto.Cipher;
+import javax.crypto.EncryptedPrivateKeyInfo;
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+
+import org.jolokia.core.util.CryptoUtil;
 import org.jolokia.server.core.Version;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
@@ -55,6 +66,8 @@ import static org.testng.Assert.fail;
  */
 public class KeyStoreUtilTest {
 
+    public static final Logger LOG = LoggerFactory.getLogger(KeyStoreUtilTest.class);
+
     public static final String CA_CERT_SUBJECT_DN_CN = "CN=ca.test.jolokia.org";
     public static final String SERVER_CERT_SUBJECT_DN = "C=DE,ST=Franconia,L=Pegnitz,OU=Test,O=jolokia.org,CN=Server Cert signed and with extended key usage server";
 
@@ -62,11 +75,65 @@ public class KeyStoreUtilTest {
     public static final String SERVER_ALIAS = "c=de,st=franconia,l=pegnitz,ou=test,o=jolokia.org,cn=server cert signed and with extended key usage server";
 
     @Test
+    public void keyFactories() throws Exception {
+        // Temurin-17.0.17+10
+        // DSA - sun.security.provider.DSAKeyFactory
+        // RSA - sun.security.rsa.RSAKeyFactory$Legacy
+        // RSASSA-PSS, PSS - sun.security.rsa.RSAKeyFactory$PSS
+        // EC, EllipticCurve - sun.security.ec.ECKeyFactory
+        // Ed25519 - sun.security.ec.ed.EdDSAKeyFactory.Ed25519
+        // Ed448 - sun.security.ec.ed.EdDSAKeyFactory.Ed448
+        // EdDSA - sun.security.ec.ed.EdDSAKeyFactory
+        // X25519 - sun.security.ec.XDHKeyFactory.X25519
+        // X448 - sun.security.ec.XDHKeyFactory.X448
+        // XDH - sun.security.ec.XDHKeyFactory
+        // DiffieHellman - com.sun.crypto.provider.DHKeyFactory
+        assertNotNull(KeyFactory.getInstance("DSA"));
+        assertNotNull(KeyFactory.getInstance("RSA"));
+        assertNotNull(KeyFactory.getInstance("RSASSA-PSS"));
+        assertNotNull(KeyFactory.getInstance("EC"));
+        assertNotNull(KeyFactory.getInstance("Ed25519"));
+        assertNotNull(KeyFactory.getInstance("Ed448"));
+        assertNotNull(KeyFactory.getInstance("EdDSA"));
+        assertNotNull(KeyFactory.getInstance("X25519"));
+        assertNotNull(KeyFactory.getInstance("X448"));
+        assertNotNull(KeyFactory.getInstance("XDH"));
+        assertNotNull(KeyFactory.getInstance("DiffieHellman"));
+    }
+
+    @Test
+    public void keyGenerators() throws Exception {
+        // Temurin-17.0.17+10
+        // DSA - sun.security.provider.DSAKeyPairGenerator$Current
+        // RSA - sun.security.rsa.RSAKeyPairGenerator$Legacy
+        // RSASSA-PSS, PSS - sun.security.rsa.RSAKeyPairGenerator$PSS
+        // EC, EllipticCurve : sun.security.ec.ECKeyPairGenerator
+        // Ed25519 - sun.security.ec.ed.EdDSAKeyPairGenerator.Ed25519
+        // Ed448 - sun.security.ec.ed.EdDSAKeyPairGenerator.Ed448
+        // EdDSA - sun.security.ec.ed.EdDSAKeyPairGenerator
+        // X25519 - sun.security.ec.XDHKeyPairGenerator.X25519
+        // X448 - sun.security.ec.XDHKeyPairGenerator.X448
+        // XDH - sun.security.ec.XDHKeyPairGenerator
+        // DiffieHellman - com.sun.crypto.provider.DHKeyPairGenerator
+        assertNotNull(KeyPairGenerator.getInstance("DSA"));
+        assertNotNull(KeyPairGenerator.getInstance("RSA"));
+        assertNotNull(KeyPairGenerator.getInstance("RSASSA-PSS"));
+        assertNotNull(KeyPairGenerator.getInstance("EC"));
+        assertNotNull(KeyPairGenerator.getInstance("Ed25519"));
+        assertNotNull(KeyPairGenerator.getInstance("Ed448"));
+        assertNotNull(KeyPairGenerator.getInstance("EdDSA"));
+        assertNotNull(KeyPairGenerator.getInstance("X25519"));
+        assertNotNull(KeyPairGenerator.getInstance("X448"));
+        assertNotNull(KeyPairGenerator.getInstance("XDH"));
+        assertNotNull(KeyPairGenerator.getInstance("DiffieHellman"));
+    }
+
+    @Test
     public void testTrustStore() throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException {
         File caPem = getTempFile("ca/cert.pem");
         KeyStore keystore = createKeyStore();
 
-        KeyStoreUtil.updateWithCaPem(keystore, caPem);
+        KeyStoreUtil.updateWithCaCertificates(keystore, caPem);
 
         List<String> aliases = asList(keystore.aliases());
         assertEquals(aliases.size(), 1);
@@ -83,7 +150,7 @@ public class KeyStoreUtilTest {
         File caPem = getTempFile("ca/cert-multi.pem");
         KeyStore keystore = createKeyStore();
 
-        KeyStoreUtil.updateWithCaPem(keystore, caPem);
+        KeyStoreUtil.updateWithCaCertificates(keystore, caPem);
 
         List<String> aliases = asList(keystore.aliases());
         assertEquals(aliases.size(), 3);
@@ -112,7 +179,28 @@ public class KeyStoreUtilTest {
         File keyPem = getTempFile("server/key.pem");
         KeyStore keystore = createKeyStore();
 
-        KeyStoreUtil.updateWithServerPems(keystore, serverPem, keyPem, "RSA", new char[0]);
+        KeyStoreUtil.updateWithServerCertificate(keystore, serverPem, keyPem, "RSA", new char[0]);
+
+        List<String> aliases = asList(keystore.aliases());
+        assertEquals(aliases.size(), 1);
+        String alias = aliases.get(0);
+        assertTrue(alias.contains("server"));
+
+        X509Certificate cert = (X509Certificate) keystore.getCertificate(alias);
+        assertEquals(cert.getSubjectX500Principal().getName(), SERVER_CERT_SUBJECT_DN);
+        RSAPrivateCrtKey key = (RSAPrivateCrtKey) keystore.getKey(alias, new char[0]);
+        assertEquals(key.getAlgorithm(), "RSA");
+        RSAPublicKey pubKey = (RSAPublicKey) cert.getPublicKey();
+        assertEquals(pubKey.getAlgorithm(), "RSA");
+    }
+
+    @Test
+    public void testKeyStoreWithDerEncodedItems() throws Exception {
+        File serverPem = getTempFile("server/cert.der");
+        File keyPem = getTempFile("server/key.der");
+        KeyStore keystore = createKeyStore();
+
+        KeyStoreUtil.updateWithServerCertificate(keystore, serverPem, keyPem, "RSA", new char[0]);
 
         List<String> aliases = asList(keystore.aliases());
         assertEquals(aliases.size(), 1);
@@ -133,7 +221,7 @@ public class KeyStoreUtilTest {
         File keyPem = getTempFile("server/key.pem");
         KeyStore keystore = createKeyStore();
 
-        KeyStoreUtil.updateWithServerPems(keystore, serverPem, keyPem, "RSA", new char[0]);
+        KeyStoreUtil.updateWithServerCertificate(keystore, serverPem, keyPem, "RSA", new char[0]);
 
         List<String> aliases = asList(keystore.aliases());
         assertEquals(aliases.size(), 1);
@@ -167,8 +255,8 @@ public class KeyStoreUtilTest {
         File keyPem = getTempFile("server/key.pem");
 
         KeyStore keystore = createKeyStore();
-        KeyStoreUtil.updateWithCaPem(keystore, caPem);
-        KeyStoreUtil.updateWithServerPems(keystore, serverPem, keyPem, "RSA", new char[0]);
+        KeyStoreUtil.updateWithCaCertificates(keystore, caPem);
+        KeyStoreUtil.updateWithServerCertificate(keystore, serverPem, keyPem, "RSA", new char[0]);
 
         X509Certificate caCert = (X509Certificate) keystore.getCertificate(CA_ALIAS);
         X509Certificate serverCert = (X509Certificate) keystore.getCertificate(SERVER_ALIAS);
@@ -185,12 +273,12 @@ public class KeyStoreUtilTest {
 
             KeyStore keystore = createKeyStore();
             try {
-                KeyStoreUtil.updateWithCaPem(keystore, invalidPem);
+                KeyStoreUtil.updateWithCaCertificates(keystore, invalidPem);
                 fail();
             } catch (Exception ignored) {
             }
             try {
-                KeyStoreUtil.updateWithServerPems(keystore, getTempFile("server/cert.pem"), invalidPem, "RSA", new char[0]);
+                KeyStoreUtil.updateWithServerCertificate(keystore, getTempFile("server/cert.pem"), invalidPem, "RSA", new char[0]);
                 fail();
             } catch (Exception ignored) {
             }
@@ -224,13 +312,10 @@ public class KeyStoreUtilTest {
     private File getTempFile(String path) throws IOException {
         try (InputStream is = this.getClass().getResourceAsStream("/certs/" + path)) {
             File dest = File.createTempFile("cert-", "pem");
-            try (LineNumberReader reader = new LineNumberReader(new InputStreamReader(Objects.requireNonNull(is))); FileWriter writer = new FileWriter(dest)) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    writer.write(line + "\n");
-                }
-                return dest;
+            if (is != null) {
+                Files.copy(is, dest.toPath(), StandardCopyOption.REPLACE_EXISTING);
             }
+            return dest;
         }
     }
 

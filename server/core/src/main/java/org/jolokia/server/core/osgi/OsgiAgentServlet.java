@@ -145,7 +145,11 @@ public class OsgiAgentServlet extends AgentServlet {
     @Override
     public void destroy() {
         if (logTracker != null) {
-            logTracker.close();
+            try {
+                logTracker.close();
+            } catch (IllegalStateException ignored) {
+                // could be java.lang.IllegalStateException: Invalid BundleContext
+            }
             logTracker = null;
         }
         bundleContextGiven = null;

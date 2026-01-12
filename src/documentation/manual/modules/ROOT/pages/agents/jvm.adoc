@@ -251,7 +251,7 @@ used when no `keyStore` is used. For decrypting the key the password given with
 
 |`serverKeyAlgorithm`
 |Encryption algorithm to use for decrypting the key given with `serverKey`
-(https only)
+(https only). Can be autodetected, when the `serverKey` is in PEM format.
 |`RSA`
 
 |`clientPrincipal`
@@ -481,7 +481,7 @@ where <command> is one of
     --caCert <path>                 Path to a PEM encoded CA cert file (https & sslClientAuth only)
     --serverCert <path>             Path to a PEM encoded server cert file (https only)
     --serverKey <path>              Path to a PEM encoded server key file (https only)
-    --serverKeyAlgorithm <algo>     Algorithm to use for decrypting the server key (https only, default: RSA)
+    --serverKeyAlgorithm <algo>     Algorithm to use for decrypting the server key (https only, default: RSA. Not needed when the serverKey is in PEM format)
     --clientPrincipal <principal>   Allow only this principal in the client cert (https & sslClientAuth only)
                                     If supplied multiple times, any one of the clientPrincipals must match
     --extendedClientCheck <t|f>     Additional validation of client certs for the proper key usage (https & sslClientAuth only)

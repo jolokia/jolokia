@@ -1,3 +1,18 @@
+/*
+ * Copyright 2009-2025 Roland Huss
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.jolokia.client.jmxadapter;
 
 import java.io.IOException;
@@ -10,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.AttributeNotFoundException;
@@ -33,6 +49,7 @@ import javax.management.RuntimeMBeanException;
 import javax.management.openmbean.InvalidOpenTypeException;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenType;
+import javax.management.remote.JMXConnector;
 
 import org.jolokia.client.JolokiaClient;
 import org.jolokia.client.JolokiaClientBuilder;
@@ -56,26 +73,120 @@ import org.jolokia.client.request.JolokiaVersionRequest;
 import org.jolokia.client.response.JolokiaVersionResponse;
 import org.jolokia.client.request.JolokiaWriteRequest;
 import org.jolokia.core.util.ClassUtil;
-import org.jolokia.service.serializer.JolokiaSerializer;
+import org.jolokia.json.JSONArray;
 import org.jolokia.json.JSONObject;
 
 /**
- * <p>I emulate a subset of the functionality of a native {@link MBeanServerConnection} but over a Jolokia
- * connection to remote Jolokia Agent, the response types and thrown exceptions attempts to mimic as close as
- * possible the ones from a native Java {@link MBeanServerConnection}</p>
- *
- * <p>Operations that are not supported will throw an {@link UnsupportedOperationException}.</p>
+ * <p>{@link MBeanServerConnection} implementation using {@link JolokiaClient}. It is returned from
+ * {@link JMXConnector#getMBeanServerConnection()}. It is a partial implementation of "JMX Connector (Client) from
+ * JSR-160 Remote JMX specification. Operations which can be mapped to {@link org.jolokia.client.JolokiaOperation}
+ * are supported and the remaining ones throw an {@link UnsupportedOperationException} (for example we can't call
+ * {@link MBeanServerConnection#createMBean(String, ObjectName)}).</p>
  */
 public class RemoteJmxAdapter implements MBeanServerConnection {
 
     // Information retrieved from Jolokia "version" request.
-    String agentVersion;
-    String protocolVersion;
+    private String agentVersion;
+    private String protocolVersion;
     private String agentId;
 
     private final JolokiaClient connector;
     private HashMap<JolokiaQueryParameter, String> defaultProcessingOptions;
     protected final Map<ObjectName, MBeanInfo> mbeanInfoCache = new HashMap<>();
+
+    private static final Map<ObjectName, Set<String>> platformMBeanInterfaces = new HashMap<>();
+    private static ObjectName platformGarbageCollectorMBeanPattern;
+
+    static {
+        // here's the hierarchy of interfaces and classes for "platform managed objects"
+        // some of these are used by JConsole to monitor an application accessed via remote JMX
+        // (both with RMI and Jolokia connectors).
+        // Since Jolokia 2.5.0 we can get the information about implemented interfaces for the MBeans, but
+        // we should also handle previous Jolokia versions.
+        // Here's the hierarchy for OpenJDK Runtime Environment Temurin-17.0.17+10
+        //
+        // java.lang.management.PlatformManagedObject
+        // +-- java.lang.management.CompilationMXBean
+        // |   +-- sun.management.CompilationImpl
+        // +-- jdk.management.jfr.FlightRecorderMXBean
+        // |   +-- jdk.management.jfr.FlightRecorderMXBeanImpl
+        // +-- java.lang.management.MemoryMXBean
+        // |   +-- sun.management.MemoryImpl
+        // +-- java.lang.management.RuntimeMXBean
+        // |   +-- sun.management.RuntimeImpl
+        // +-- java.lang.management.BufferPoolMXBean
+        // |   +-- sun.management.ManagementFactoryHelper
+        // +-- java.lang.management.MemoryPoolMXBean
+        // |   +-- sun.management.MemoryPoolImpl
+        // +-- java.lang.management.PlatformLoggingMXBean
+        // |   +-- sun.management.ManagementFactoryHelper.PlatformLoggingImpl
+        // +-- com.sun.management.HotSpotDiagnosticMXBean
+        // |   +-- com.sun.management.internal.HotSpotDiagnostic
+        // +-- java.lang.management.MemoryManagerMXBean
+        // |   +-- java.lang.management.GarbageCollectorMXBean
+        // |   |   +-- sun.management.GarbageCollectorImpl
+        // |   |   |   +-- com.sun.management.internal.GarbageCollectorExtImpl
+        // |   |   +-- com.sun.management.GarbageCollectorMXBean
+        // |   |       +-- com.sun.management.internal.GarbageCollectorExtImpl
+        // |   +-- sun.management.MemoryManagerImpl
+        // +-- java.lang.management.ThreadMXBean
+        // |   +-- sun.management.ThreadImpl
+        // |   |   +-- com.sun.management.internal.HotSpotThreadImpl
+        // |   +-- com.sun.management.ThreadMXBean
+        // |       +-- com.sun.management.internal.HotSpotThreadImpl
+        // +-- java.lang.management.OperatingSystemMXBean
+        // |   +-- sun.management.BaseOperatingSystemImpl
+        // |   |   +-- com.sun.management.internal.OperatingSystemImpl
+        // |   +-- com.sun.management.OperatingSystemMXBean
+        // |       +-- com.sun.management.UnixOperatingSystemMXBean
+        // |           +-- com.sun.management.internal.OperatingSystemImpl
+        // +-- java.lang.management.ClassLoadingMXBean
+        //     +-- sun.management.ClassLoadingImpl
+        //
+        // Here's a fragment for IBM Semeru Runtime Open Edition 17.0.17.0 (build 17.0.17+10)
+        // java.lang.management.PlatformManagedObject
+        // +-- java.lang.management.OperatingSystemMXBean
+        //     +-- com.ibm.java.lang.management.internal.OperatingSystemMXBeanImpl
+        //     |   +-- com.ibm.lang.management.internal.ExtendedOperatingSystemMXBeanImpl
+        //     |       +-- com.ibm.lang.management.internal.UnixExtendedOperatingSystem
+        //     +-- com.sun.management.OperatingSystemMXBean
+        //         +-- com.sun.management.UnixOperatingSystemMXBean
+        //         |   +-- com.ibm.lang.management.UnixOperatingSystemMXBean
+        //         |       +-- com.ibm.lang.management.internal.UnixExtendedOperatingSystem
+        //         +-- com.ibm.lang.management.OperatingSystemMXBean
+        //             +-- com.ibm.lang.management.internal.ExtendedOperatingSystemMXBeanImpl
+        //             |   +-- com.ibm.lang.management.internal.UnixExtendedOperatingSystem
+        //             +-- com.ibm.lang.management.UnixOperatingSystemMXBean
+        //                 +-- com.ibm.lang.management.internal.UnixExtendedOperatingSystem
+        //
+        // to satisfy JConsole, which creates MXBean proxies (and verifies the instances) for some platform
+        // MBeans we need some mapping. We'll skip javax.management.NotificationBroadcaster/Emitter
+        // and JDK specific interfaces (com.sun.management, com.ibm.lang.management, ...)
+        //
+        // Note: IBM Semeru runtime also supports com.sun.management classes/interfaces and extends them, but
+        // we'll hardcode only the default interfaces from java.lang.management package
+        try {
+            // see sun.tools.jconsole.SummaryTab.formatSummary()
+            platformMBeanInterfaces.put(ObjectName.getInstance("java.lang:type=ClassLoading"),
+                Set.of(java.lang.management.ClassLoadingMXBean.class.getName()));
+            platformMBeanInterfaces.put(ObjectName.getInstance("java.lang:type=Compilation"),
+                Set.of(java.lang.management.CompilationMXBean.class.getName()));
+            platformMBeanInterfaces.put(ObjectName.getInstance("java.lang:type=Memory"),
+                Set.of(java.lang.management.MemoryMXBean.class.getName()));
+            platformMBeanInterfaces.put(ObjectName.getInstance("java.lang:type=OperatingSystem"),
+                Set.of(java.lang.management.OperatingSystemMXBean.class.getName()));
+            platformMBeanInterfaces.put(ObjectName.getInstance("java.lang:type=Runtime"),
+                Set.of(java.lang.management.RuntimeMXBean.class.getName()));
+            platformMBeanInterfaces.put(ObjectName.getInstance("java.lang:type=Threading"),
+                Set.of(java.lang.management.ThreadMXBean.class.getName()));
+
+            // jconsole also checks:
+            // - com.sun.management.OperatingSystemMXBean - for java.lang:type=OperatingSystem
+            // - java.lang.management.GarbageCollectorMXBean - by java.lang:type=GarbageCollector,* pattern
+            platformGarbageCollectorMBeanPattern = ObjectName.getInstance("java.lang:type=GarbageCollector,*");
+        } catch (MalformedObjectNameException ignored) {
+        }
+    }
 
     /**
      * Create Jolokia backed {@link MBeanServerConnection} using remote Jolokia Agent URI.
@@ -148,7 +259,12 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
     public ObjectInstance getObjectInstance(ObjectName name)
         throws InstanceNotFoundException, IOException {
 
-        JolokiaListResponse listResponse = this.unwrapExecute(new JolokiaListRequest(name));
+        JolokiaListResponse listResponse = this.unwrapExecute(new JolokiaListRequest(name), () -> {
+            Map<JolokiaQueryParameter, String> options = defaultProcessingOptions();
+            // handled by Jolokia 2.5.0+
+            options.put(JolokiaQueryParameter.LIST_INTERFACES, "true");
+            return options;
+        });
         return new ObjectInstance(name, listResponse.getClassName(name));
     }
 
@@ -241,12 +357,22 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
                 });
     }
 
-    @SuppressWarnings("unchecked")
     private <RESP extends JolokiaResponse<REQ>, REQ extends JolokiaRequest> RESP unwrapExecute(REQ pRequest)
+            throws IOException, InstanceNotFoundException {
+        return unwrapExecute(pRequest, new Supplier<>() {
+            @Override
+            public Map<JolokiaQueryParameter, String> get() {
+                return defaultProcessingOptions();
+            }
+        });
+    }
+
+    @SuppressWarnings("unchecked")
+    private <RESP extends JolokiaResponse<REQ>, REQ extends JolokiaRequest> RESP unwrapExecute(REQ pRequest, Supplier<Map<JolokiaQueryParameter, String>> optionsProvider)
             throws IOException, InstanceNotFoundException {
         try {
             pRequest.setPreferredHttpMethod(HttpMethod.POST);
-            return this.connector.execute(pRequest, defaultProcessingOptions());
+            return this.connector.execute(pRequest, optionsProvider == null ? defaultProcessingOptions() : optionsProvider.get());
         } catch (JolokiaException e) {
             return (RESP) unwrapException(e);
         }
@@ -332,8 +458,9 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
             }
 
             if (rawValue instanceof Number && attributeType != null) {
-                return new JolokiaSerializer()
-                    .deserializeOpenType(attributeType, rawValue);
+                return null;
+//                return new ToOpenTypeConverter()
+//                    .deserializeOpenType(attributeType, rawValue);
             } else {
                 return rawValue;
             }
@@ -388,8 +515,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
             //will result in empty return
         }
         for (Object item : responses) {
-            if (item instanceof JolokiaReadResponse) {
-                JolokiaReadResponse value = (JolokiaReadResponse) item;
+            if (item instanceof JolokiaReadResponse value) {
                 final String attribute = value.getRequest().getAttribute();
                 result.add(new Attribute(attribute,
                     adaptJsonToOptimalResponseValue(name, attribute, value.getValue(), getAttributeTypeFromMBeanInfo(name, attribute))));
@@ -407,8 +533,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
         try {
             this.unwrapExecute(request);
         } catch (UncheckedJmxAdapterException e) {
-            if (e.getCause() instanceof JolokiaRemoteException) {
-                JolokiaRemoteException remote = (JolokiaRemoteException) e.getCause();
+            if (e.getCause() instanceof JolokiaRemoteException remote) {
                 if ("javax.management.AttributeNotFoundException".equals(remote.getErrorType())) {
                     throw new AttributeNotFoundException((e.getCause().getMessage()));
                 }
@@ -444,7 +569,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
     @Override
     public Object invoke(ObjectName name, String operationName, Object[] params, String[] signature)
         throws InstanceNotFoundException, MBeanException, IOException {
-        //jvisualvm may send null for no parameters
+        // JVisualVM may send null for no parameters
         if (params == null && (signature == null || signature.length == 0)) {
             params = new Object[0];
         }
@@ -561,15 +686,17 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
         if (result == null) {
             final JolokiaListResponse response = this.unwrapExecute(new JolokiaListRequest(name));
             result = response.getMbeanInfo(name);
-            this.mbeanInfoCache.put(name, result);
-            for (MBeanAttributeInfo attr : result.getAttributes()) {
-                final String qualifiedName = name + "." + attr.getName();
-                try {
-                    if (ToOpenTypeConverter.cachedType(qualifiedName) == null) {
-                        ToOpenTypeConverter
-                            .cacheType(ToOpenTypeConverter.typeFor(attr.getType()), qualifiedName);
+            if (result != null) {
+                this.mbeanInfoCache.put(name, result);
+                for (MBeanAttributeInfo attr : result.getAttributes()) {
+                    final String qualifiedName = name + "." + attr.getName();
+                    try {
+                        if (ToOpenTypeConverter.cachedType(qualifiedName) == null) {
+                            ToOpenTypeConverter
+                                .cacheType(ToOpenTypeConverter.typeFor(attr.getType()), qualifiedName);
+                        }
+                    } catch (OpenDataException | InvalidOpenTypeException ignore) {
                     }
-                } catch (OpenDataException | InvalidOpenTypeException ignore) {
                 }
             }
         }
@@ -588,25 +715,56 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
     }
 
     @Override
-    public boolean isInstanceOf(ObjectName name, String className)
-        throws InstanceNotFoundException, IOException {
-        final ObjectInstance objectInstance = getObjectInstance(name);
-        try {
-            //try to use classes available in this VM to check compatibility
-            return Class.forName(className)
-                .isAssignableFrom(Class.forName(objectInstance.getClassName()));
-        } catch (ClassNotFoundException e) {
-            if (className.equals(objectInstance.getClassName())) {
-                return true;
-            } else {
-                try {
-                    if (ToOpenTypeConverter.cachedType(name.toString()) != null) {//the proprietary Oracle VMs used to have classnames not available in newer openjdk, check for overrides
-                        return ToOpenTypeConverter.cachedType(name.toString()).getTypeName().equals(className);
-                    }
-                } catch (OpenDataException ignore) {
-                }
-            }
+    public boolean isInstanceOf(ObjectName name, String className) throws InstanceNotFoundException, IOException {
+        // the algorithm from the JavaDoc mentions:
+        // > let:
+        // > X be the MBean named by name
+        // > L be the ClassLoader of X
+        // there's no way to get the "L" even if we get a full JSON representation of MBeanInfo using
+        // Jolokia's list() operation. So we can't do any classloading.
+        JolokiaListResponse listResponse = this.unwrapExecute(new JolokiaListRequest(name), () -> {
+            Map<JolokiaQueryParameter, String> options = defaultProcessingOptions();
+            // handled by Jolokia 2.5.0+
+            options.put(JolokiaQueryParameter.LIST_INTERFACES, "true");
+            return options;
+        });
+        JSONObject info = listResponse.getJSONMbeanInfo(name);
+        if (info == null) {
+            // no support from the server side, so we can't do much
             return false;
+        }
+        String mbeanClassName = (String) info.get("class");
+
+        boolean interfacesInfo = false;
+        final Set<String> interfaces = new HashSet<>();
+        if (info.containsKey("interfaces")) {
+            Object interfacesValue = info.get("interfaces");
+            if (interfacesValue instanceof JSONArray array) {
+                interfacesInfo = true;
+                array.forEach(i -> {
+                    if (i instanceof String iName) {
+                        interfaces.add(iName);
+                    }
+                });
+            }
+        }
+        if (interfacesInfo) {
+            // easier with Jolokia 2.5.0+
+            return interfaces.contains(className);
+        } else {
+            // this method may be used by jconsole when crating proxies for platform MBeans. So we can
+            // use some hardcoded information
+            Set<String> knownInterfaces = platformMBeanInterfaces.get(name);
+            if (knownInterfaces != null) {
+                return knownInterfaces.contains(className);
+            } else {
+                if (platformGarbageCollectorMBeanPattern.apply(name)) {
+                    // special pattern matching for GarbageCollector MBean
+                    return java.lang.management.GarbageCollectorMXBean.class.getName().equals(className);
+                }
+                // the only thing we can do is direct check
+                return className.equals(mbeanClassName);
+            }
         }
     }
 

@@ -22,6 +22,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.security.KeyStore;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -91,9 +92,14 @@ public class JolokiaClientBuilder {
     private String protocolVersion;
 
     /**
+     * Preconfigured {@link KeyStore keystore}
+     */
+    private KeyStore keystore;
+
+    /**
      * Path to Java Keystore with client certificate and key
      */
-    private Path keystore;
+    private Path keystorePath;
 
     /**
      * Password to the entire keystore
@@ -106,9 +112,14 @@ public class JolokiaClientBuilder {
     private String keyPassword;
 
     /**
+     * Preconfigured {@link KeyStore truststore}
+     */
+    private KeyStore truststore;
+
+    /**
      * Path to Java Truststore for server certificate trust
      */
-    private Path truststore;
+    private Path truststorePath;
 
     /**
      * Password to the truststore
@@ -471,10 +482,18 @@ public class JolokiaClientBuilder {
     }
 
     /**
+     * Java {@link KeyStore keystore} with client certificate and key
+     */
+    public final JolokiaClientBuilder keystore(KeyStore keystore) {
+        this.keystore = keystore;
+        return this;
+    }
+
+    /**
      * Path to Java Keystore with client certificate and key
      */
     public final JolokiaClientBuilder keystore(Path keystore) {
-        this.keystore = keystore;
+        this.keystorePath = keystore;
         return this;
     }
 
@@ -495,10 +514,18 @@ public class JolokiaClientBuilder {
     }
 
     /**
+     * Java {@link KeyStore truststore} for server certificate trust
+     */
+    public final JolokiaClientBuilder truststore(KeyStore truststore) {
+        this.truststore = truststore;
+        return this;
+    }
+
+    /**
      * Path to Java Truststore for server certificate trust
      */
     public final JolokiaClientBuilder truststore(Path truststore) {
-        this.truststore = truststore;
+        this.truststorePath = truststore;
         return this;
     }
 
@@ -598,7 +625,7 @@ public class JolokiaClientBuilder {
     HttpClientSpi<?> createHttpClient() {
         return httpClientBuilder.buildHttpClient(new Configuration(url, user, password, httpProxy,
             new ConnectionConfiguration(connectionTimeout, socketTimeout, tcpNoDelay, socketBufferSize),
-            new TlsConfiguration(protocolVersion, keystore, keystorePassword, keyPassword, truststore, truststorePassword),
+            new TlsConfiguration(protocolVersion, keystore, keystorePath, keystorePassword, keyPassword, truststore, truststorePath, truststorePassword),
             new PoolConfiguration(this.pooledConnections, this.maxTotalConnections, this.maxConnectionPoolTimeout),
             contentCharset, expectContinue, defaultHttpHeaders, customizer, clientBuilderClass));
     }
@@ -654,15 +681,26 @@ public class JolokiaClientBuilder {
     /**
      * Configuration of the keystore/truststore used for TLS communication
      *
+     * @param protocolVersion
      * @param keystore
+     * @param keystorePath
      * @param keystorePassword
      * @param keyPassword
      * @param truststore
+     * @param truststorePath
      * @param truststorePassword
      */
     public record TlsConfiguration(String protocolVersion,
-                                   Path keystore, String keystorePassword, String keyPassword,
-                                   Path truststore, String truststorePassword) {
+                                   KeyStore keystore, Path keystorePath, String keystorePassword, String keyPassword,
+                                   KeyStore truststore, Path truststorePath, String truststorePassword) {
+        public void validate() {
+            if (keystore != null && keystorePath != null) {
+                throw new IllegalArgumentException("Keystore should be configured explicitly or using a location - not both.");
+            }
+            if (truststore != null && truststorePath != null) {
+                throw new IllegalArgumentException("Truststre should be configured explicitly or using a location - not both.");
+            }
+        }
     }
 
     /**

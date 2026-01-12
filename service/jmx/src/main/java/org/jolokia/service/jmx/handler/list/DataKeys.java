@@ -35,6 +35,7 @@ public enum DataKeys {
     OPERATIONS("op"),
     ATTRIBUTES("attr"),
     KEYS("keys"),
+    INTERFACES("interfaces"),
     NOTIFICATIONS("notif"),
     TYPE("type"),
     // attribute information

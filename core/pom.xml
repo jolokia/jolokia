@@ -43,6 +43,14 @@
       <artifactId>jolokia-json</artifactId>
     </dependency>
 
+    <!-- Other dependencies -->
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
+    </dependency>
+
   </dependencies>
 
   <build>
@@ -57,13 +65,15 @@
             <Bundle-Description>Jolokia Core</Bundle-Description>
             <Import-Package>
               <!-- JDK -->
+              javax.crypto,
+              javax.crypto.spec,
               javax.management,
               javax.management.openmbean,
               javax.xml.datatype,
               org.w3c.dom,
               <!-- jolokia-json -->
               org.jolokia.json;version="[2.5,3)",
-              org.jolokia.json.parser;version="[2.5,3)",
+              org.jolokia.json.parser;version="[2.5,3)"
             </Import-Package>
             <Export-Package>
               org.jolokia.converter.json,

@@ -40,7 +40,6 @@ import static org.testng.AssertJUnit.assertTrue;
  */
 public class ClientExecIntegrationTest extends AbstractClientIntegrationTest {
 
-
     @Test
     public void simpleOperation() throws MalformedObjectNameException, JolokiaException {
         for (JolokiaTargetConfig cfg : new JolokiaTargetConfig[] { null, getTargetProxyConfig()}) {

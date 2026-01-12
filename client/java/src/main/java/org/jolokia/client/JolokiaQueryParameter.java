@@ -119,7 +119,13 @@ public enum JolokiaQueryParameter {
      * Processing parameter used to enable <em>smart list response</em> where JSON data for each {@link javax.management.MBeanInfo}
      * is cached instead of being duplicated for each (potentially the same) MBean of similar class.
      */
-    LIST_CACHE("listCache");
+    LIST_CACHE("listCache"),
+
+    /**
+     * A request parameter for {@code list} operation, which tells Jolokia to return a list of all the interfaces
+     * implemented by the MBean's class.
+     */
+    LIST_INTERFACES("listInterfaces");
 
     private final String param;
 

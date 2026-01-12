@@ -130,24 +130,31 @@ public class JdkHttpClientBuilder implements HttpClientBuilder<HttpClient> {
         if (tlsConfiguration.protocolVersion() == null) {
             return null;
         }
+        tlsConfiguration.validate();
         SSLContext context = SSLContext.getInstance(tlsConfiguration.protocolVersion());
 
         KeyManager[] keyManagers = null;
         TrustManager[] trustManagers = null;
+        KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
         if (tlsConfiguration.keystore() != null) {
-            KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+            tlsConfiguration.keystore().load(null, tlsConfiguration.keystorePassword() == null ? new char[0] : tlsConfiguration.keystorePassword().toCharArray());
+            kmf.init(tlsConfiguration.keystore(), tlsConfiguration.keyPassword() == null ? new char[0] : tlsConfiguration.keyPassword().toCharArray());
+        } else if (tlsConfiguration.keystorePath() != null) {
             KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-            try (FileInputStream fis = new FileInputStream(tlsConfiguration.keystore().toFile())) {
+            try (FileInputStream fis = new FileInputStream(tlsConfiguration.keystorePath().toFile())) {
                 ks.load(fis, tlsConfiguration.keystorePassword() == null ? new char[0] : tlsConfiguration.keystorePassword().toCharArray());
                 kmf.init(ks, tlsConfiguration.keyPassword() == null ? new char[0] : tlsConfiguration.keyPassword().toCharArray());
             }
             keyManagers = kmf.getKeyManagers();
         }
 
+        TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
         if (tlsConfiguration.truststore() != null) {
-            TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            tlsConfiguration.truststore().load(null, tlsConfiguration.truststorePassword() == null ? new char[0] : tlsConfiguration.truststorePassword().toCharArray());
+            tmf.init(tlsConfiguration.truststore());
+        } else if (tlsConfiguration.truststorePath() != null) {
             KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-            try (FileInputStream fis = new FileInputStream(tlsConfiguration.truststore().toFile())) {
+            try (FileInputStream fis = new FileInputStream(tlsConfiguration.truststorePath().toFile())) {
                 ks.load(fis, tlsConfiguration.truststorePassword() == null ? new char[0] : tlsConfiguration.truststorePassword().toCharArray());
                 tmf.init(ks);
             }

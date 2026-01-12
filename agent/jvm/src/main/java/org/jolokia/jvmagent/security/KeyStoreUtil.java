@@ -1,5 +1,4 @@
-package org.jolokia.jvmagent.security;/*
- *
+/*
  * Copyright 2015 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,6 +13,7 @@ package org.jolokia.jvmagent.security;/*
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.jvmagent.security;
 
 import java.io.*;
 import java.math.BigInteger;
@@ -30,21 +30,21 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.jolokia.core.util.CryptoUtil;
 import org.jolokia.jvmagent.JolokiaServerConfig;
-import org.jolokia.jvmagent.security.asn1.DERBitString;
-import org.jolokia.jvmagent.security.asn1.DERBoolean;
-import org.jolokia.jvmagent.security.asn1.DERDirect;
-import org.jolokia.jvmagent.security.asn1.DERInteger;
-import org.jolokia.jvmagent.security.asn1.DERNull;
-import org.jolokia.jvmagent.security.asn1.DERObject;
-import org.jolokia.jvmagent.security.asn1.DERObjectIdentifier;
-import org.jolokia.jvmagent.security.asn1.DEROctetString;
-import org.jolokia.jvmagent.security.asn1.DERSequence;
-import org.jolokia.jvmagent.security.asn1.DERSet;
-import org.jolokia.jvmagent.security.asn1.DERTaggedObject;
-import org.jolokia.jvmagent.security.asn1.DERUtcTime;
+import org.jolokia.asn1.DERBitString;
+import org.jolokia.asn1.DERBoolean;
+import org.jolokia.asn1.DERDirect;
+import org.jolokia.asn1.DERInteger;
+import org.jolokia.asn1.DERNull;
+import org.jolokia.asn1.DERObject;
+import org.jolokia.asn1.DERObjectIdentifier;
+import org.jolokia.asn1.DEROctetString;
+import org.jolokia.asn1.DERSequence;
+import org.jolokia.asn1.DERSet;
+import org.jolokia.asn1.DERTaggedObject;
+import org.jolokia.asn1.DERUtcTime;
 import org.jolokia.server.core.Version;
-import org.jolokia.server.core.util.Base64Util;
 import org.jolokia.server.core.util.NetworkUtil;
 
 /**
@@ -59,14 +59,14 @@ public class KeyStoreUtil {
     }
 
     /**
-     * Update a keystore with a CA certificate
+     * Update a keystore with a CA certificate (stored as <em>certificate entry</em>)
      *
      * @param pTrustStore the keystore to update
-     * @param pCaCert     CA cert as PEM used for the trust store
+     * @param pCaCerts    CA certificate in PEM or DER format - may contain more entries (certificates) if in PEM format
      */
-    public static void updateWithCaPem(KeyStore pTrustStore, File pCaCert)
+    public static void updateWithCaCertificates(KeyStore pTrustStore, File pCaCerts)
             throws IOException, CertificateException, KeyStoreException {
-        try (InputStream is = new FileInputStream(pCaCert)) {
+        try (InputStream is = new FileInputStream(pCaCerts)) {
             CertificateFactory certFactory = CertificateFactory.getInstance("X509");
             Collection<? extends Certificate> certificates = certFactory.generateCertificates(is);
 
@@ -75,6 +75,8 @@ public class KeyStoreUtil {
                 String alias = cert.getSubjectX500Principal().getName();
                 String sid = cert.getSerialNumber().toString();
                 if (sid != null) {
+                    // we need this to be more unique than just DN - for example when certificate is regenerated
+                    // in K8S/OpenShift environment
                     alias += "|" + sid;
                 }
                 pTrustStore.setCertificateEntry(alias, cert);
@@ -83,35 +85,36 @@ public class KeyStoreUtil {
     }
 
     /**
-     * Update a key store with the keys found in a server PEM and its key file.
+     * Update a keystore with a Server certificate and key (stored as <em>(trusted) key entry</em>)
      *
      * @param pKeyStore   keystore to update
-     * @param pServerCert server certificate
-     * @param pServerKey  server key
+     * @param pServerCert server certificate in PEM or DER format - should contain one certificate
+     * @param pServerKey  server key in DER/PEM format encoded using PKCS#1 or PKCS#8 matching the {@code pServerCert}
      * @param pKeyAlgo    algorithm used in the keystore (e.g. "RSA")
-     * @param pPassword   password to use for the key file. must not be null, use <code>char[0]</code>
+     * @param pPassword   password to use for the key file. must not be null, use <code>new char[0]</code>
      *                    for an empty password.
      */
-    public static void updateWithServerPems(KeyStore pKeyStore, File pServerCert, File pServerKey, String pKeyAlgo, char[] pPassword)
+    public static void updateWithServerCertificate(KeyStore pKeyStore, File pServerCert, File pServerKey, String pKeyAlgo, char[] pPassword)
             throws IOException, CertificateException, NoSuchAlgorithmException, InvalidKeySpecException, KeyStoreException {
         try (InputStream is = new FileInputStream(pServerCert)) {
             CertificateFactory certFactory = CertificateFactory.getInstance("X509");
             Certificate[] certificates = certFactory.generateCertificates(is).toArray(new Certificate[1]);
 
-            byte[] keyBytes = decodePem(pServerKey);
-            PrivateKey privateKey;
+            CryptoUtil.CryptoStructure cryptoData = CryptoUtil.decodePemIfNeeded(pServerKey);
+            byte[] keyBytes = cryptoData.derData();
 
-            KeyFactory keyFactory = KeyFactory.getInstance(pKeyAlgo);
-            try {
-                // First let's try PKCS8
-                privateKey = keyFactory.generatePrivate(new PKCS8EncodedKeySpec(keyBytes));
-            } catch (InvalidKeySpecException e) {
-                // Otherwise try PKCS1
-                RSAPrivateCrtKeySpec keySpec = PKCS1Util.decodePKCS1(keyBytes);
-                privateKey = keyFactory.generatePrivate(keySpec);
+            KeySpec keySpec = CryptoUtil.decodePrivateKey(cryptoData, pPassword);
+
+            PrivateKey privateKey = CryptoUtil.generatePrivateKey(keySpec, pKeyAlgo);
+
+            // check if these match
+            X509Certificate x509Certificate = (X509Certificate) certificates[0];
+
+            if (certificates.length == 1 && !CryptoUtil.keysMatch(privateKey, x509Certificate.getPublicKey())) {
+                throw new IllegalArgumentException("Private key from " + pServerKey + " and public key from " + pServerCert + " do not match");
             }
 
-            String alias = ((X509Certificate) certificates[0]).getSubjectX500Principal().getName();
+            String alias = x509Certificate.getSubjectX500Principal().getName();
             pKeyStore.setKeyEntry(alias, privateKey, pPassword, certificates);
         }
     }
@@ -131,10 +134,10 @@ public class KeyStoreUtil {
                                           "jolokia.org",                                // O
                                           "Pegnitz",                                    // L
                                           "Franconia",                                  // ST
-                                          "DE" };
+                                          "DE" };                                       // C
 
         // Need to do it via reflection because Java8 moved class to a different package
-        KeyPair keypair = createKeyPair();
+        KeyPair keypair = createRSAKeyPair();
         PrivateKey privKey = keypair.getPrivate();
 
         X509Certificate[] chain = new X509Certificate[1];
@@ -143,21 +146,18 @@ public class KeyStoreUtil {
         cal.setTime(from);
         cal.add(Calendar.YEAR, 1);
         Date to = cal.getTime();
-        chain[0] = getSelfCertificate(keypair, certAttributes, from, to.getTime() - from.getTime(), pConfig);
+        chain[0] = generateSelfCertificate(keypair, certAttributes, from, to.getTime() - from.getTime(), pConfig);
         pKeyStore.setKeyEntry("jolokia-agent", privKey, new char[0], chain);
     }
 
-    // =============================================================================================
-    // Reflection based access to KeyGen classes:
-
-    private static KeyPair createKeyPair() throws NoSuchAlgorithmException {
+    private static KeyPair createRSAKeyPair() throws NoSuchAlgorithmException {
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
         kpg.initialize(4096);
         return kpg.generateKeyPair();
     }
 
     /**
-     * Generate self-signed X.509 certificate used as server certificate.
+     * Generate self-signed X.509 certificate used as a server certificate.
      *
      * @param keypair
      * @param attributes
@@ -166,7 +166,7 @@ public class KeyStoreUtil {
      * @param pConfig
      * @return
      */
-    private static X509Certificate getSelfCertificate(KeyPair keypair, String[] attributes, Date fromDate, long valid, JolokiaServerConfig pConfig) throws NoSuchAlgorithmException {
+    private static X509Certificate generateSelfCertificate(KeyPair keypair, String[] attributes, Date fromDate, long valid, JolokiaServerConfig pConfig) throws NoSuchAlgorithmException {
         // https://datatracker.ietf.org/doc/html/rfc5280#section-4.1:
         // TBSCertificate  ::=  SEQUENCE  {
         //      version         [0]  EXPLICIT Version DEFAULT v1,
@@ -428,32 +428,4 @@ public class KeyStoreUtil {
         }
     }
 
-    // This method is inspired and partly taken over from
-    // http://oauth.googlecode.com/svn/code/java/
-    // All credits to belong to them.
-    private static byte[] decodePem(File pemFile) throws IOException {
-        try (BufferedReader reader = new BufferedReader(new FileReader(pemFile))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                if (line.contains("-----BEGIN ")) {
-                    return readBytes(pemFile, reader, line.trim().replace("BEGIN", "END"));
-                }
-            }
-            throw new IOException("PEM " + pemFile + " is invalid: no begin marker");
-        }
-    }
-
-    private static byte[] readBytes(File pemFile, BufferedReader reader, String endMarker) throws IOException {
-        String line;
-        StringBuilder buf = new StringBuilder();
-
-        while ((line = reader.readLine()) != null) {
-            if (line.contains(endMarker)) {
-                return Base64Util.decode(buf.toString());
-            }
-            buf.append(line.trim());
-        }
-        throw new IOException(pemFile + " is invalid : No end marker");
-    }
 }
-

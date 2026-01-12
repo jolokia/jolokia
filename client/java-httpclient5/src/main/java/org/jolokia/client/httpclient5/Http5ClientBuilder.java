@@ -244,11 +244,14 @@ public class Http5ClientBuilder implements HttpClientBuilder<HttpClient> {
 
     private SSLContext createSSLSocketFactory(JolokiaClientBuilder.Configuration jcb) throws Exception {
         JolokiaClientBuilder.TlsConfiguration tlsConfiguration = jcb.tlsConfig();
+        tlsConfiguration.validate();
         KeyStore ks = null;
         if (tlsConfiguration.keystore() != null) {
+            ks = tlsConfiguration.keystore();
+        } else if (tlsConfiguration.keystorePath() != null) {
             KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
             ks = KeyStore.getInstance(KeyStore.getDefaultType());
-            try (FileInputStream fis = new FileInputStream(tlsConfiguration.keystore().toFile())) {
+            try (FileInputStream fis = new FileInputStream(tlsConfiguration.keystorePath().toFile())) {
                 ks.load(fis, tlsConfiguration.keystorePassword() == null ? new char[0] : tlsConfiguration.keystorePassword().toCharArray());
                 // no init - will be done by HttpClient4
             }
@@ -256,9 +259,11 @@ public class Http5ClientBuilder implements HttpClientBuilder<HttpClient> {
 
         KeyStore ts = null;
         if (tlsConfiguration.truststore() != null) {
+            ts = tlsConfiguration.truststore();
+        } else if (tlsConfiguration.truststorePath() != null) {
             TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             ts = KeyStore.getInstance(KeyStore.getDefaultType());
-            try (FileInputStream fis = new FileInputStream(tlsConfiguration.truststore().toFile())) {
+            try (FileInputStream fis = new FileInputStream(tlsConfiguration.truststorePath().toFile())) {
                 ts.load(fis, tlsConfiguration.truststorePassword() == null ? new char[0] : tlsConfiguration.truststorePassword().toCharArray());
                 tmf.init(ts);
             }

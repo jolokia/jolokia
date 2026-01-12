@@ -81,7 +81,7 @@ public class AppConfig implements WebMvcConfigurer, WebServerFactoryCustomizer<T
     }
 
     @Bean
-    public MBeanExporter jmxExported() {
+    public MBeanExporter jmxExporter() {
         MBeanExporter exporter = new MBeanExporter();
         exporter.setAutodetect(true);
         JmxAttributeSource jmxAttributeSource = new AnnotationJmxAttributeSource();

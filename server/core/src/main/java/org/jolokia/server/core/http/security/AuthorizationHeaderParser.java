@@ -16,13 +16,12 @@ package org.jolokia.server.core.http.security;
  * limitations under the License.
  */
 
+import java.util.Base64;
 import java.util.StringTokenizer;
-
-import org.jolokia.server.core.util.Base64Util;
 
 public final class AuthorizationHeaderParser {
 
-    public static final String JOLOKIA_ALTERNATE_AUTHORIZATION_HEADER="X-jolokia-authorization";
+    public static final String JOLOKIA_ALTERNATE_AUTHORIZATION_HEADER = "X-jolokia-authorization";
 
     private AuthorizationHeaderParser() { }
 
@@ -30,7 +29,7 @@ public final class AuthorizationHeaderParser {
      * Parse the HTTP authorization header
      *
      * @param pAuthInfo header to parse
-     * @return method, user, password and whehter the header was valid
+     * @return method, user, password and whether the header was valid
      */
     public static Result parse(String pAuthInfo) {
         StringTokenizer stok = new StringTokenizer(pAuthInfo);
@@ -40,7 +39,12 @@ public final class AuthorizationHeaderParser {
         }
 
         String b64Auth = stok.nextToken();
-        String auth = new String(Base64Util.decode(b64Auth));
+        String auth = null;
+        try {
+            auth = new String(Base64.getMimeDecoder().decode(b64Auth));
+        } catch (IllegalArgumentException e) {
+            return new Result(method, null, null, false);
+        }
 
         int p = auth.indexOf(':');
         String user;

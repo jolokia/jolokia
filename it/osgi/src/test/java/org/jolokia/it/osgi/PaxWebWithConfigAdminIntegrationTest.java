@@ -66,6 +66,7 @@ public class PaxWebWithConfigAdminIntegrationTest extends AbstractOsgiTestBase {
         tracker.open();
         ServletContext jolokiaContext = (ServletContext) tracker.waitForService(5000);
         assertNotNull(jolokiaContext);
+        tracker.close();
 
         // now with configadmin update
         org.osgi.service.cm.Configuration configuration = configAdmin.getConfiguration("org.jolokia.osgi", null);
@@ -81,6 +82,7 @@ public class PaxWebWithConfigAdminIntegrationTest extends AbstractOsgiTestBase {
         tracker.open();
         jolokiaContext = (ServletContext) tracker.waitForService(5000);
         assertNotNull(jolokiaContext);
+        tracker.close();
 
         HttpRequest request = HttpRequest.newBuilder().uri(new URI("http://localhost:8080/j/version")).GET().build();
         HttpClient client = HttpClient.newHttpClient();

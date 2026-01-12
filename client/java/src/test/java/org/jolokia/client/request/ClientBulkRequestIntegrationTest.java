@@ -16,6 +16,7 @@ package org.jolokia.client.request;
  * limitations under the License.
  */
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
 
@@ -52,7 +53,7 @@ public class ClientBulkRequestIntegrationTest extends AbstractClientIntegrationT
         JolokiaRequest req1 = new JolokiaExecRequest(itSetup.getOperationMBean(),"fetchNumber","inc");
         JolokiaVersionRequest req2 = new JolokiaVersionRequest();
         List<?> resp = jolokiaClient.execute(req1,req2);
-        assertEquals(resp.size(),2);
+        assertEquals(2, resp.size());
         assertTrue(resp.get(0) instanceof JolokiaExecResponse);
         assertTrue(resp.get(1) instanceof JolokiaVersionResponse);
         List<JolokiaResponse<JolokiaRequest>> typeSaveResp = jolokiaClient.execute(req1,req2);
@@ -67,16 +68,16 @@ public class ClientBulkRequestIntegrationTest extends AbstractClientIntegrationT
         JolokiaVersionRequest req2 = new JolokiaVersionRequest();
         Map<JolokiaQueryParameter, String> params = new HashMap<>();
         params.put(JolokiaQueryParameter.MAX_DEPTH, "2");
-        List<?> resps = jolokiaClient.execute(Arrays.asList(req1, req2), params);
-        assertEquals(resps.size(), 2);
-        JolokiaReadResponse resp = (JolokiaReadResponse) resps.get(0);
+        List<?> responses = jolokiaClient.execute(Arrays.asList(req1, req2), params);
+        assertEquals(2, responses.size());
+        JolokiaReadResponse resp = (JolokiaReadResponse) responses.get(0);
         JSONObject value = resp.getValue();
         JSONArray inner = (JSONArray) value.get("Blub");
         assertTrue(inner.get(1) instanceof String);
 
         // requests can be found inside the response
-        assertEquals(((JolokiaReadResponse) resps.get(0)).getRequest().getType(), JolokiaOperation.READ);
-        assertEquals(((JolokiaVersionResponse) resps.get(1)).getRequest().getType(), JolokiaOperation.VERSION);
+        assertEquals(JolokiaOperation.READ, ((JolokiaReadResponse) responses.get(0)).getRequest().getType());
+        assertEquals(JolokiaOperation.VERSION, ((JolokiaVersionResponse) responses.get(1)).getRequest().getType());
     }
 
     @Test
@@ -86,20 +87,20 @@ public class ClientBulkRequestIntegrationTest extends AbstractClientIntegrationT
         Map<JolokiaQueryParameter, String> params = new HashMap<>();
         params.put(JolokiaQueryParameter.MAX_DEPTH, "2");
         params.put(JolokiaQueryParameter.INCLUDE_REQUEST, "false");
-        List<?> resps = jolokiaClient.execute(Arrays.asList(req1, req2), params);
-        assertEquals(resps.size(), 2);
-        JolokiaReadResponse resp = (JolokiaReadResponse) resps.get(0);
+        List<?> responses = jolokiaClient.execute(Arrays.asList(req1, req2), params);
+        assertEquals(2, responses.size());
+        JolokiaReadResponse resp = (JolokiaReadResponse) responses.get(0);
         JSONObject value = resp.getValue();
         JSONArray inner = (JSONArray) value.get("Blub");
         assertTrue(inner.get(1) instanceof String);
 
         // requests can be found inside the response
-        assertNull(((JolokiaReadResponse) resps.get(0)).getRequest());
-        assertNull(((JolokiaVersionResponse) resps.get(1)).getRequest());
+        assertNull(((JolokiaReadResponse) responses.get(0)).getRequest());
+        assertNull(((JolokiaVersionResponse) responses.get(1)).getRequest());
 
         // but we can correlate by order
-        assertEquals(req1.getType(), ((JolokiaResponse<?>) resps.get(0)).getType());
-        assertEquals(req2.getType(), ((JolokiaResponse<?>) resps.get(1)).getType());
+        assertEquals(req1.getType(), ((JolokiaResponse<?>) responses.get(0)).getType());
+        assertEquals(req2.getType(), ((JolokiaResponse<?>) responses.get(1)).getType());
     }
 
     @Test
@@ -145,7 +146,7 @@ public class ClientBulkRequestIntegrationTest extends AbstractClientIntegrationT
     }
 
     @Test
-    public void optionalBulkRequestsWithExtractorAsDefault() throws MalformedObjectNameException, JolokiaException {
+    public void optionalBulkRequestsWithExtractorAsDefault() throws MalformedObjectNameException, JolokiaException, IOException {
         JolokiaClient c = new JolokiaClientBuilder().url(jolokiaUrl)
             .user("jolokia")
             .password("jolokia")
@@ -161,6 +162,7 @@ public class ClientBulkRequestIntegrationTest extends AbstractClientIntegrationT
         List<JolokiaReadResponse> resp = c.execute(createBulkRequests());
 
         verifyOptionalBulkResponses(resp);
+        c.close();
     }
 
     private void verifyOptionalBulkResponses(List<JolokiaReadResponse> resp) {

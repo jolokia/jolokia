@@ -30,7 +30,7 @@ public final class EscapeUtil {
     /**
      * Escape character used for path escaping as it can be used
      * in a regexp
-     */ // TODO: escaping
+     */
     public static final String PATH_ESCAPE = "!";
 
     /**

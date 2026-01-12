@@ -26,6 +26,7 @@ import java.util.Set;
 import javax.management.InstanceNotFoundException;
 import javax.management.IntrospectionException;
 import javax.management.MBeanInfo;
+import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectInstance;
@@ -135,12 +136,16 @@ public class MBeanInfoData {
     // static updaters for basic mapping of javax.management.MBeanInfo
     private static final Map<String, DataUpdater> UPDATERS = new HashMap<>();
     private static final DataUpdater LIST_KEYS_UPDATER = new ListKeysDataUpdater();
+    private static final ListInterfacesDataUpdater LIST_INTERFACES_UPDATER = new ListInterfacesDataUpdater();
 
     // How to order keys in Object Names
     private final boolean useCanonicalName;
 
     // whether to add a map of keys from Object name to MBeanInfo data of the MBean
     private final boolean listKeys;
+
+    // whether to add a map of interfaces implemented by the MBean
+    private final boolean listInterfaces;
 
     // whether to use optimized list() response (with cache/domain)
     private boolean listCache;
@@ -173,12 +178,15 @@ public class MBeanInfoData {
      * @param pUseCanonicalName whether to use canonical name in listings
      * @param pListKeys
      * @param pListCache
+     * @param pListInterfaces
+     * @param pProvider
      */
-    public MBeanInfoData(int pMaxDepth, Deque<String> pPathStack, boolean pUseCanonicalName, boolean pListKeys, boolean pListCache, String pProvider) {
+    public MBeanInfoData(int pMaxDepth, Deque<String> pPathStack, boolean pUseCanonicalName, boolean pListKeys, boolean pListCache, boolean pListInterfaces, String pProvider) {
         maxDepth = pMaxDepth;
         useCanonicalName = pUseCanonicalName;
         listKeys = pListKeys;
         listCache = pListCache;
+        listInterfaces = pListInterfaces;
         pathStack = pPathStack != null ? new LinkedList<>(pPathStack) : new LinkedList<>();
         this.pProvider = pProvider;
 
@@ -321,7 +329,7 @@ public class MBeanInfoData {
 
         if (!listCache) {
             // normal JSON representation of MBeanInfo without a cache
-            addFullMBeanInfo(mbean, objectName, mBeanInfo, objectName, customUpdaters);
+            addFullMBeanInfo(pConn, mbean, objectName, mBeanInfo, objectName, customUpdaters);
         } else {
             // cached MBeanInfo
             String key = null;
@@ -339,12 +347,12 @@ public class MBeanInfoData {
                 // while key points to shared JSON representation of MBeanInfo
                 mbean = getOrCreateJSONObject(cache, key);
                 if (mbean.isEmpty()) {
-                    addFullMBeanInfo(mbean, objectName, mBeanInfo, objectName, customUpdaters);
+                    addFullMBeanInfo(pConn, mbean, objectName, mBeanInfo, objectName, customUpdaters);
                 }
             } else {
                 // back to normal behavior
                 mbean = getOrCreateJSONObject(domain, mbeanKeyListing);
-                addFullMBeanInfo(mbean, objectName, mBeanInfo, objectName, customUpdaters);
+                addFullMBeanInfo(pConn, mbean, objectName, mBeanInfo, objectName, customUpdaters);
             }
         }
 
@@ -454,13 +462,14 @@ public class MBeanInfoData {
     /**
      * Populates JSON MBean information based on {@link MBeanInfo} using all available {@link DataUpdater updaters}.
      *
-     * @param pObjectName
+     * @param pConn
      * @param pMBeanMap
+     * @param pObjectName
      * @param pMBeanInfo
      * @param pName
      * @param customUpdaters
      */
-    private void addFullMBeanInfo(Map<String, Object> pMBeanMap, ObjectName pObjectName, MBeanInfo pMBeanInfo, ObjectName pName, Set<DataUpdater> customUpdaters) {
+    private void addFullMBeanInfo(MBeanServerConnection pConn, Map<String, Object> pMBeanMap, ObjectName pObjectName, MBeanInfo pMBeanInfo, ObjectName pName, Set<DataUpdater> customUpdaters) {
         boolean updaterFound = false;
         for (DataUpdater updater : UPDATERS.values()) {
             if (selectedUpdater == null || updater.getKey().equals(selectedUpdater)) {
@@ -471,6 +480,18 @@ public class MBeanInfoData {
         if (listKeys && (selectedUpdater == null || LIST_KEYS_UPDATER.getKey().equals(selectedUpdater))) {
             LIST_KEYS_UPDATER.update(pMBeanMap, pObjectName, pMBeanInfo, null);
             updaterFound = true;
+        }
+        if (listInterfaces && (selectedUpdater == null || LIST_INTERFACES_UPDATER.getKey().equals(selectedUpdater))) {
+            // we can get all the interfaces of MBean's implementation only if working locally
+            if (pConn instanceof MBeanServer mBeanServer) {
+                // we can check the kind of MBean we have by checking the MBeanInfo:
+                // - javax.management.openmbean.OpenMBeanInfo
+                // - javax.management.modelmbean.ModelMBeanInfo
+                // but the only thing we can do using JMX API is to get the class from MBeanInfo - it may not
+                // be the actual class because we can return anything for a Dynamic MBean (including Model MBean)
+                LIST_INTERFACES_UPDATER.update(mBeanServer, pMBeanMap, pObjectName, pMBeanInfo, null);
+                updaterFound = true;
+            }
         }
         for (DataUpdater customUpdater : customUpdaters) {
             if (selectedUpdater == null || customUpdater.getKey().equals(selectedUpdater)) {

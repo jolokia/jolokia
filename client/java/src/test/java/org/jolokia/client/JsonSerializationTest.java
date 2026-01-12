@@ -44,7 +44,6 @@ public class JsonSerializationTest {
         assertNull(result);
     }
 
-
     @Test
     public void JSONStructureSerialization() {
         JSONObject arg = new JSONObject();
@@ -113,9 +112,7 @@ public class JsonSerializationTest {
         assertEquals(((JSONObject) ((List<?>) reparsed.get("second")).get(1)).get("name"), "tmp");
     }
 
-
     // =====================================================================================================
-
 
     private Object serialize(Object o) {
         JolokiaRequest req = new JolokiaRequest(JolokiaOperation.VERSION,null) {
@@ -132,6 +129,4 @@ public class JsonSerializationTest {
         return req.serializeArgumentToJson(o);
     }
 
-
 }
-
