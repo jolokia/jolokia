@@ -75,7 +75,7 @@ public class ToOpenTypeConverter {
         DATE,
         OBJECTNAME,
     };
-    static final JolokiaSerializer CONVERTER = new JolokiaSerializer(true);
+//    static final JolokiaSerializer CONVERTER = new JolokiaSerializer(true);
     private static HashMap<String, OpenType<?>> TABULAR_CONTENT_TYPE;
 
     private static Map<String, OpenType<?>> TYPE_SPECIFICATIONS;
@@ -92,7 +92,8 @@ public class ToOpenTypeConverter {
         } else if (rawValue instanceof JSONArray && ((JSONArray) rawValue).isEmpty()) {
             final OpenType<?> type = cachedType(name);
             if (type != null) {
-                return new JolokiaSerializer().deserializeOpenType(type, rawValue);
+//                return new JolokiaSerializer().deserializeOpenType(type, rawValue);
+                return null;
             } else {
                 return rawValue;
             }
@@ -105,7 +106,8 @@ public class ToOpenTypeConverter {
             //noinspection DataFlowIssue
             return toPrimitiveArray((ArrayType<?>) type, (JSONArray) rawValue);
         } else {
-            return CONVERTER.deserializeOpenType(type, rawValue);
+//            return CONVERTER.deserializeOpenType(type, rawValue);
+            return null;
         }
     }
 
