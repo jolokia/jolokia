@@ -76,10 +76,10 @@ public class DERSequence implements DERObject {
         while (pos < offset + length) {
             // at pos we have new tag, at pos + 1 we have the length, because we don't parse
             // multibyte identifier octets
-            int[] lo = DERUtils.decodeLength(encoded, pos + 1);
+            DERLength lo = DERUtils.decodeLength(encoded, pos + 1);
             DERObject el = DERUtils.parse(encoded, pos);
             objects.add(el);
-            pos += (1 + lo[0] + lo[1]);
+            pos += (1 + lo.length() + lo.lengthOctets());
         }
 
         return new DERSequence(objects.toArray(DERObject[]::new));

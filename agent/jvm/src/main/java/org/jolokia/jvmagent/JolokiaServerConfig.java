@@ -345,7 +345,8 @@ public class JolokiaServerConfig {
     }
 
     /**
-     * The algorithm to use for extracting the private server key.
+     * The algorithm to use for extracting the private server key. When the key is configured using PEM
+     * format, it can be auto-detected. For DER encoding we need a hint.
      *
      * @return the server key algorithm
      */

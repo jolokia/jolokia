@@ -41,6 +41,7 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
 
+import org.jolokia.asn1.DERContextSpecific;
 import org.jolokia.asn1.DERObject;
 import org.jolokia.asn1.DERObjectIdentifier;
 import org.jolokia.asn1.DERSequence;
@@ -54,7 +55,7 @@ import org.testng.annotations.Test;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
-//@Ignore("Run manually, rather an API showcase than a real test")
+@Ignore("Run manually, rather an API showcase than a real test")
 public class KeyGenerationTest {
 
     public static final Logger LOG = LoggerFactory.getLogger(KeyGenerationTest.class);
@@ -67,8 +68,7 @@ public class KeyGenerationTest {
         dir.mkdirs();
         Random rnd = SecureRandom.getInstance("SHA1PRNG");
 
-        // here are the _new_ openssl equivalents (`openssl genrsa`, `openssl gendsa`, ..., `openssl rsa`, ...)
-        // should be considered legacy:
+        // here are the _new_ openssl equivalents of the legacy versions (`openssl ec`, `openssl genrsa`, `openssl gendsa`, ..., `openssl rsa`, ...)
         //  - "DSA"           - openssl genpkey -algorithm DSA
         //  - "RSA"           - openssl genpkey -algorithm RSA
         //  - "RSASSA-PSS"    - openssl genpkey -algorithm RSA-PSS
@@ -185,7 +185,7 @@ public class KeyGenerationTest {
 //                LOG.info("    AlgorithmParameters: {}", paramsSpi(parameters));
                 if (algId.length > 1) {
                     parameters.init(algId[1].getEncoded());
-                    printDer(DERUtils.parse(algId[1].getEncoded()), 4);
+//                    printDer(DERUtils.parse(algId[1].getEncoded()), 4);
                     switch (algorithm) {
                         case "DSA": {
                             DSAParameterSpec dsaParameterSpec = parameters.getParameterSpec(DSAParameterSpec.class);
@@ -652,6 +652,14 @@ public class KeyGenerationTest {
             System.out.println(set.getTagAsString());
             for (DERObject el : set.getValues()) {
                 printDer(el, indent + 1);
+            }
+        } else if (der instanceof DERContextSpecific cs) {
+            System.out.print(cs.getTagAsString());
+            if (cs.getMode() == DERContextSpecific.TagMode.EXPLICIT) {
+                System.out.println();
+                printDer(cs.getValue(), indent + 1);
+            } else {
+                System.out.println(" IMPLICIT");
             }
         } else {
             System.out.println(der.getTagAsString() + ": " + der.toString());

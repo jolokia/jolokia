@@ -22,10 +22,17 @@ import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.interfaces.DSAPrivateKey;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.security.spec.DSAPrivateKeySpec;
+import java.security.spec.ECParameterSpec;
+import java.security.spec.ECPrivateKeySpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.security.spec.RSAPrivateCrtKeySpec;
+import java.security.spec.RSAPrivateKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
@@ -291,7 +298,6 @@ public class CryptoUtilTest {
         assertNotNull(pemEncodedPKCS8PrivateKeys);
         assertEquals(pemEncodedPKCS8PrivateKeys.length, 11);
         for (String pemPrivateKey : pemEncodedPKCS8PrivateKeys) {
-            System.out.print("Checking " + pemPrivateKey);
             CryptoUtil.CryptoStructure cryptoData = CryptoUtil.decodePemIfNeeded(new File(dir, pemPrivateKey));
             assertEquals(cryptoData.hint(), CryptoUtil.StructureHint.PKCS8_PRIVATE_KEY);
             String algorithm = pemPrivateKey.replace("-pkcs8.pem", "");
@@ -371,12 +377,11 @@ public class CryptoUtilTest {
         assertNotNull(pemEncodedPKCS8PrivateKeys);
         assertEquals(pemEncodedPKCS8PrivateKeys.length, 11);
         for (String pemPrivateKey : pemEncodedPKCS8PrivateKeys) {
-            System.out.println("Checking " + pemPrivateKey);
             CryptoUtil.CryptoStructure cryptoData = CryptoUtil.decodePemIfNeeded(new File(dir, pemPrivateKey));
             assertEquals(cryptoData.hint(), CryptoUtil.StructureHint.PKCS8_ENCRYPTED_PRIVATE_KEY);
             String algorithm = pemPrivateKey.replace("-PBEWithHmacSHA512AndAES_256-pkcs8-pbes2.pem", "");
             KeyFactory factory = KeyFactory.getInstance(algorithm);
-            KeyGenerationTest.printDer(DERUtils.parse(cryptoData.derData()), 0);
+//            KeyGenerationTest.printDer(DERUtils.parse(cryptoData.derData()), 0);
             PrivateKey privateKey = factory.generatePrivate(CryptoUtil.decodePrivateKey(cryptoData, "jolokia".toCharArray()));
             assertNotNull(privateKey);
             assertEquals(privateKey.getAlgorithm(), algMapping.getOrDefault(algorithm, algorithm));
@@ -402,12 +407,11 @@ public class CryptoUtilTest {
         assertNotNull(pemEncodedPKCS8PrivateKeys);
         assertEquals(pemEncodedPKCS8PrivateKeys.length, 11);
         for (String pemPrivateKey : pemEncodedPKCS8PrivateKeys) {
-            System.out.println("Checking " + pemPrivateKey);
             CryptoUtil.CryptoStructure cryptoData = CryptoUtil.decodePemIfNeeded(new File(dir, pemPrivateKey));
             assertEquals(cryptoData.hint(), CryptoUtil.StructureHint.DER);
             String algorithm = pemPrivateKey.replace("-PBEWithHmacSHA512AndAES_256-pkcs8-pbes2.der", "");
             KeyFactory factory = KeyFactory.getInstance(algorithm);
-            KeyGenerationTest.printDer(DERUtils.parse(cryptoData.derData()), 0);
+//            KeyGenerationTest.printDer(DERUtils.parse(cryptoData.derData()), 0);
             PrivateKey privateKey = factory.generatePrivate(CryptoUtil.decodePrivateKey(cryptoData, "jolokia".toCharArray()));
             assertNotNull(privateKey);
             assertEquals(privateKey.getAlgorithm(), algMapping.getOrDefault(algorithm, algorithm));
@@ -433,12 +437,11 @@ public class CryptoUtilTest {
         assertNotNull(pemEncodedPKCS8PrivateKeys);
         assertEquals(pemEncodedPKCS8PrivateKeys.length, 11);
         for (String pemPrivateKey : pemEncodedPKCS8PrivateKeys) {
-            System.out.println("Checking " + pemPrivateKey);
             CryptoUtil.CryptoStructure cryptoData = CryptoUtil.decodePemIfNeeded(new File(dir, pemPrivateKey));
             assertEquals(cryptoData.hint(), CryptoUtil.StructureHint.PKCS8_ENCRYPTED_PRIVATE_KEY);
             String algorithm = pemPrivateKey.replace("-PBEWithSHA1AndDESede-pkcs8-pbes1.pem", "");
             KeyFactory factory = KeyFactory.getInstance(algorithm);
-            KeyGenerationTest.printDer(DERUtils.parse(cryptoData.derData()), 0);
+//            KeyGenerationTest.printDer(DERUtils.parse(cryptoData.derData()), 0);
             PrivateKey privateKey = factory.generatePrivate(CryptoUtil.decodePrivateKey(cryptoData, "jolokia".toCharArray()));
             assertNotNull(privateKey);
             assertEquals(privateKey.getAlgorithm(), algMapping.getOrDefault(algorithm, algorithm));
@@ -464,15 +467,59 @@ public class CryptoUtilTest {
         assertNotNull(pemEncodedPKCS8PrivateKeys);
         assertEquals(pemEncodedPKCS8PrivateKeys.length, 11);
         for (String pemPrivateKey : pemEncodedPKCS8PrivateKeys) {
-            System.out.println("Checking " + pemPrivateKey);
             CryptoUtil.CryptoStructure cryptoData = CryptoUtil.decodePemIfNeeded(new File(dir, pemPrivateKey));
             assertEquals(cryptoData.hint(), CryptoUtil.StructureHint.DER);
             String algorithm = pemPrivateKey.replace("-PBEWithSHA1AndDESede-pkcs8-pbes1.der", "");
             KeyFactory factory = KeyFactory.getInstance(algorithm);
-            KeyGenerationTest.printDer(DERUtils.parse(cryptoData.derData()), 0);
+//            KeyGenerationTest.printDer(DERUtils.parse(cryptoData.derData()), 0);
             PrivateKey privateKey = factory.generatePrivate(CryptoUtil.decodePrivateKey(cryptoData, "jolokia".toCharArray()));
             assertNotNull(privateKey);
             assertEquals(privateKey.getAlgorithm(), algMapping.getOrDefault(algorithm, algorithm));
+        }
+    }
+
+    @Test
+    public void legacyNonEncryptedPrivateKeysInPEMFormat() throws Exception {
+        File dir = new File("target/test-classes/legacyprivatekeys");
+        String[] legacyKeys = dir.list(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.endsWith("-legacy.der");
+            }
+        });
+        assertNotNull(legacyKeys);
+        assertEquals(legacyKeys.length, 3);
+        for (String key : legacyKeys) {
+            System.out.println("Checking " + key);
+            CryptoUtil.CryptoStructure cryptoData = CryptoUtil.decodePemIfNeeded(new File(dir, key));
+            assertEquals(cryptoData.hint(), CryptoUtil.StructureHint.DER);
+            KeyGenerationTest.printDer(DERUtils.parse(cryptoData.derData()), 0);
+            KeySpec spec = CryptoUtil.decodePrivateKey(cryptoData, "jolokia".toCharArray());
+            String algorithmFromFile = key.replace("-legacy.der", "");
+            String algorithmFromSpec = null;
+            if (spec instanceof DSAPrivateKeySpec) {
+                algorithmFromSpec = "DSA";
+            } else if (spec instanceof RSAPrivateKeySpec) {
+                algorithmFromSpec = "RSA";
+            } else if (spec instanceof ECPrivateKeySpec) {
+                algorithmFromSpec = "EC";
+            } else {
+                fail("Unexpected KeySpec class: " + spec.getClass().getName());
+            }
+            assertNotNull(algorithmFromSpec);
+            assertEquals(algorithmFromSpec, algorithmFromFile);
+            KeyFactory factory = KeyFactory.getInstance(algorithmFromSpec);
+            PrivateKey privateKey = factory.generatePrivate(spec);
+            assertNotNull(privateKey);
+            assertEquals(privateKey.getAlgorithm(), algorithmFromSpec);
+            if (spec instanceof DSAPrivateKeySpec) {
+                assertEquals(((DSAPrivateKey) privateKey).getX(), ((DSAPrivateKeySpec) spec).getX());
+            } else if (spec instanceof RSAPrivateKeySpec) {
+                assertEquals(((RSAPrivateKey) privateKey).getPrivateExponent(), ((RSAPrivateKeySpec) spec).getPrivateExponent());
+            } else /*if (spec instanceof ECPrivateKeySpec) */{
+                // the privateKey.getEncoded() will be PKCS8, not "legacy" EC
+                assertEquals(((ECPrivateKey) privateKey).getS(), ((ECPrivateKeySpec) spec).getS());
+            }
         }
     }
 
@@ -483,7 +530,8 @@ public class CryptoUtilTest {
     }
 
     @Test
-    public void allSupportedPBEsForRSAKeysFormat() throws Exception {
+    public void allSupportedPBEsForRSAEncryptedKeys() throws Exception {
+        // Note: PBEWithHmacSHA* are PBES2, PBEWithMD5*/PBEWithSHA1* PBES1 (legacy)
         File dir = new File("target/test-classes/rsaencryptedkeys");
         String[] privateKeys = dir.list(new FilenameFilter() {
             @Override
@@ -494,15 +542,13 @@ public class CryptoUtilTest {
         assertNotNull(privateKeys);
         assertEquals(privateKeys.length, 16);
         for (String pk : privateKeys) {
-            System.out.println("Checking " + pk);
             CryptoUtil.CryptoStructure cryptoData = CryptoUtil.decodePemIfNeeded(new File(dir, pk));
             assertEquals(cryptoData.hint(), CryptoUtil.StructureHint.PKCS8_ENCRYPTED_PRIVATE_KEY);
             String algorithm = pk.replace("RSA-", "").replace("-pkcs8-pbes2.pem", "").replace("-pkcs8-pbes1.pem", "");
             KeyFactory factory = KeyFactory.getInstance("RSA");
-            KeyGenerationTest.printDer(DERUtils.parse(cryptoData.derData()), 0);
+//            KeyGenerationTest.printDer(DERUtils.parse(cryptoData.derData()), 0);
             PrivateKey privateKey = factory.generatePrivate(CryptoUtil.decodePrivateKey(cryptoData, "jolokia".toCharArray()));
             assertNotNull(privateKey);
-            System.out.println("==============");
         }
     }
 

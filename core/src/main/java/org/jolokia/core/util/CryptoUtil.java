@@ -23,9 +23,13 @@ import java.io.InputStreamReader;
 import java.io.PushbackInputStream;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.spec.DSAPrivateKeySpec;
+import java.security.spec.ECParameterSpec;
+import java.security.spec.ECPrivateKeySpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -34,6 +38,7 @@ import java.security.spec.RSAPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.HexFormat;
 
 import javax.crypto.Cipher;
 import javax.crypto.EncryptedPrivateKeyInfo;
@@ -43,6 +48,7 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
 import org.jolokia.asn1.DERBitString;
+import org.jolokia.asn1.DERContextSpecific;
 import org.jolokia.asn1.DERInteger;
 import org.jolokia.asn1.DERObject;
 import org.jolokia.asn1.DERObjectIdentifier;
@@ -180,12 +186,20 @@ public class CryptoUtil {
                 return decodePrivateKey(cryptoStructure.withNewHint(StructureHint.PKCS8_PRIVATE_KEY), password, false);
             }
             if (seq.length >= 9 && Arrays.stream(seq).limit(9).allMatch(el -> el instanceof DERInteger)) {
-                // try RSAPrivateKey
+                // try PKCS#1 RSAPrivateKey
                 return decodePrivateKey(cryptoStructure.withNewHint(StructureHint.RSA_PRIVATE_KEY), password, false);
+            }
+            if (seq.length >= 6 && Arrays.stream(seq).limit(9).allMatch(el -> el instanceof DERInteger)) {
+                // try DSA private key
+                return decodePrivateKey(cryptoStructure.withNewHint(StructureHint.DSA_PRIVATE_KEY), password, false);
             }
             if (seq.length == 2 && seq[0] instanceof DERSequence && seq[1] instanceof DEROctetString) {
                 // try EncryptedPrivateKeyInfo
                 return decodePrivateKey(cryptoStructure.withNewHint(StructureHint.PKCS8_ENCRYPTED_PRIVATE_KEY), password, false);
+            }
+            if (seq.length >= 3 && seq[0] instanceof DERInteger && seq[1] instanceof DEROctetString && seq[2] instanceof DERContextSpecific) {
+                // try ECPrivateKey
+                return decodePrivateKey(cryptoStructure.withNewHint(StructureHint.EC_PRIVATE_KEY), password, false);
             }
         } else if (cryptoStructure.hint == StructureHint.RSA_PRIVATE_KEY) {
             // https://datatracker.ietf.org/doc/html/rfc8017#appendix-A.1.2
@@ -212,7 +226,7 @@ public class CryptoUtil {
                     break;
                 }
                 if (!(el instanceof DERInteger)) {
-                    throw new IllegalArgumentException("Unexpected ASN.1 element found. Expected ASN.1 Integer, found " + el.getTagAsString());
+                    throw new IllegalArgumentException("Unexpected PKCS#1 RSA private key ASN.1 element found. Expected ASN.1 Integer, found " + el.getTagAsString());
                 }
                 intCount++;
             }
@@ -230,7 +244,84 @@ public class CryptoUtil {
             return new RSAPrivateCrtKeySpec(modulus, publicExponent, privateExponent, primeP, primeQ,
                 primeExponentP, primeExponentQ, crtCoefficient);
         } else if (cryptoStructure.hint == StructureHint.DSA_PRIVATE_KEY) {
+            // Looking for (can't find RFC or ASN.1 grammar):
+            // $ openssl asn1parse -inform der -in DSA-legacy.der
+            //    0:d=0  hl=4 l= 845 cons: SEQUENCE
+            //    4:d=1  hl=2 l=   1 prim: INTEGER           :00
+            //    7:d=1  hl=4 l= 257 prim: INTEGER           :8F7935D9B9AAE9BFABED887ACF4...
+            //  268:d=1  hl=2 l=  29 prim: INTEGER           :BAF696A68578F7DFDEE7FA67C97...
+            //  299:d=1  hl=4 l= 256 prim: INTEGER           :16A65C58204850704E7502A3975...
+            //  559:d=1  hl=4 l= 256 prim: INTEGER           :2CB79A38757F10E05FCB13769AC...
+            //  819:d=1  hl=2 l=  28 prim: INTEGER           :6D592B9E6913608FF52CD423E90...
+            //
+            // interpretation:
+            // $ openssl dsa -inform der -in DSA-legacy.der -noout -text
+            // read DSA key
+            // Private-Key: (2048 bit)
+            // priv:
+            //     6d:59:2b:9e:69:13:60:8f:f5:2c:d4:23:e9:08:ab:
+            //     ...
+            // pub:
+            //     2c:b7:9a:38:75:7f:10:e0:5f:cb:13:76:9a:ca:1c:
+            //     ...
+            // P:
+            //     00:8f:79:35:d9:b9:aa:e9:bf:ab:ed:88:7a:cf:49:
+            //     ...
+            // Q:
+            //     00:ba:f6:96:a6:85:78:f7:df:de:e7:fa:67:c9:77:
+            //     ...
+            // G:
+            //     16:a6:5c:58:20:48:50:70:4e:75:02:a3:97:57:04:
+            //     ...
+
+            if (seq.length < 6) {
+                throw new IllegalArgumentException("ASN.1 SEQUENCE for DSA private key should contain at least 6 ASN.1 Integers");
+            }
+            int intCount = 0;
+            for (DERObject el : seq) {
+                if (intCount >= 6) {
+                    break;
+                }
+                if (!(el instanceof DERInteger)) {
+                    throw new IllegalArgumentException("Unexpected DSA private key ASN.1 element found. Expected ASN.1 Integer, found " + el.getTagAsString());
+                }
+                intCount++;
+            }
+
+            BigInteger probablyVersion = ((DERInteger) seq[0]).asBigInteger();
+            BigInteger p = ((DERInteger) seq[1]).asBigInteger();
+            BigInteger q = ((DERInteger) seq[2]).asBigInteger();
+            BigInteger g = ((DERInteger) seq[3]).asBigInteger();
+            BigInteger pub = ((DERInteger) seq[4]).asBigInteger();
+            BigInteger priv = ((DERInteger) seq[5]).asBigInteger();
+
+            return new DSAPrivateKeySpec(priv, p, q, g);
         } else if (cryptoStructure.hint == StructureHint.EC_PRIVATE_KEY) {
+            // https://www.rfc-editor.org/rfc/rfc5915.html#appendix-A
+            // Looking for
+            //   ECPrivateKey ::= SEQUENCE {
+            //     version        INTEGER { ecPrivkeyVer1(1) } (ecPrivkeyVer1),
+            //     privateKey     OCTET STRING,
+            //     parameters [0] ECParameters {{ NamedCurve }} OPTIONAL,
+            //     publicKey  [1] BIT STRING OPTIONAL
+            //   }
+            if (seq.length < 3 || !(seq[0] instanceof DERInteger version && seq[1] instanceof DEROctetString privateKey)) {
+                throw new IllegalArgumentException("ASN.1 SEQUENCE for EC private key should contain at least version and privateKey");
+            }
+            if (version.asInt() != 1) {
+                throw new IllegalArgumentException("Expected version=1 for ECPrivateKey structure");
+            }
+            if (seq[2] instanceof DERContextSpecific cs) {
+                try {
+                    AlgorithmParameters ecParams = AlgorithmParameters.getInstance("EC");
+                    ecParams.init(cs.getValue().getEncoded());
+                    ECParameterSpec ecParamsSpec = ecParams.getParameterSpec(ECParameterSpec.class);
+                    return new ECPrivateKeySpec(new BigInteger(privateKey.getBytes()), ecParamsSpec);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            throw new IllegalArgumentException("Unrecognized ASN.1 structure for EC private key");
         } else if (cryptoStructure.hint == StructureHint.PKCS8_PRIVATE_KEY) {
             // https://www.rfc-editor.org/rfc/rfc5208.html#section-5
             // we want to read java.security.spec.PKCS8EncodedKeySpec
@@ -272,6 +363,8 @@ public class CryptoUtil {
             if (alg.getValues().length < 1 || !(alg.getValues()[0] instanceof DERObjectIdentifier oid)) {
                 throw new IllegalArgumentException("Unrecognized PKCS#5 algorithm for PKCS#8 Encrypted Private Key");
             }
+
+            String algName;
 
             if (DERObjectIdentifier.OID_PKCS5_PBES2.equals(oid.asOid())) {
                 // PBES2 - PKCS#5: https://www.rfc-editor.org/rfc/rfc8018.html#section-6.2
@@ -326,58 +419,33 @@ public class CryptoUtil {
                 if (!DERObjectIdentifier.SUPPORTED_PBES2_CIPHERS.containsKey(encSchemeOid.asOid())) {
                     throw new IllegalArgumentException("Unsupported PKCS#5 PBES2 Encryption Scheme algorithm: " + encSchemeOid.asOid());
                 }
-                // I think it's enough - remaining validation in javax.crypto.EncryptedPrivateKeyInfo
-                try {
-                    EncryptedPrivateKeyInfo epki = new EncryptedPrivateKeyInfo(cryptoStructure.derData());
-                    // this is strange - epki.getAlgParameters().toString() gives us full algorithm name...
-                    // while epki.getAlgParameters().getAlgorithm() gives is "PBES2"
-//                    String algorithm = epki.getAlgParameters().toString();
-
-                    // try to get KDF:
-                    // PBKDF2-params ::= SEQUENCE {
-                    //    salt CHOICE {
-                    //        specified OCTET STRING,
-                    //        otherSource AlgorithmIdentifier {{PBKDF2-SaltSources}}
-                    //    },
-                    //    iterationCount INTEGER (1..MAX),
-                    //    keyLength INTEGER (1..MAX) OPTIONAL,
-                    //    prf AlgorithmIdentifier {{PBKDF2-PRFs}} DEFAULT
-                    //    algid-hmacWithSHA1 }
-                    DERSequence prf = null;
-                    if (kdfParams.getValues()[2] instanceof DERSequence) {
-                        // skipped keyLength
-                        prf = (DERSequence) kdfParams.getValues()[2];
-                    } else if (kdfParams.getValues().length >= 4 && kdfParams.getValues()[3] instanceof DERSequence) {
-                        prf = (DERSequence) kdfParams.getValues()[3];
-                    }
-                    if (prf == null || prf.getValues().length < 1 || !(prf.getValues()[0] instanceof DERObjectIdentifier prfOid)) {
-                        throw new IllegalArgumentException("Unrecognized PKCS#5 PBES2 Pseudo-random function");
-                    }
-                    if (!DERObjectIdentifier.SUPPORTED_PBES2_PRFS.containsKey(prfOid.asOid())) {
-                        throw new IllegalArgumentException("Unsupported PKCS#5 PBES2 Pseudo-random function: " + prfOid.asOid());
-                    }
-
-                    String algName = String.format("PBEWith%sAnd%s",
-                        DERObjectIdentifier.SUPPORTED_PBES2_PRFS.get(prfOid.asOid()),
-                        DERObjectIdentifier.SUPPORTED_PBES2_CIPHERS.get(encSchemeOid.asOid()));
-
-                    // we only need password, here, PBEKeySpec with salt, ic and iv will be created internally by
-                    // the PBE Cipher
-                    PBEKeySpec spec = new PBEKeySpec(password == null ? new char[0] : password);
-
-                    try {
-                        SecretKeyFactory skf = SecretKeyFactory.getInstance(algName);
-                        SecretKey sk = skf.generateSecret(spec);
-                        Cipher pbeCipher = Cipher.getInstance(algName);
-                        pbeCipher.init(Cipher.DECRYPT_MODE, sk, epki.getAlgParameters());
-                        return epki.getKeySpec(pbeCipher);
-                    } catch (NoSuchAlgorithmException | InvalidKeySpecException | NoSuchPaddingException |
-                             InvalidKeyException | InvalidAlgorithmParameterException e) {
-                        throw new IllegalArgumentException("Can't decrypt Private Key: " + e.getMessage(), e);
-                    }
-                } catch (IOException e) {
-                    throw new IllegalArgumentException("Can't parse Private Key: " + e.getMessage(), e);
+                // try to get KDF:
+                // PBKDF2-params ::= SEQUENCE {
+                //    salt CHOICE {
+                //        specified OCTET STRING,
+                //        otherSource AlgorithmIdentifier {{PBKDF2-SaltSources}}
+                //    },
+                //    iterationCount INTEGER (1..MAX),
+                //    keyLength INTEGER (1..MAX) OPTIONAL,
+                //    prf AlgorithmIdentifier {{PBKDF2-PRFs}} DEFAULT
+                //    algid-hmacWithSHA1 }
+                DERSequence prf = null;
+                if (kdfParams.getValues()[2] instanceof DERSequence) {
+                    // skipped keyLength
+                    prf = (DERSequence) kdfParams.getValues()[2];
+                } else if (kdfParams.getValues().length >= 4 && kdfParams.getValues()[3] instanceof DERSequence) {
+                    prf = (DERSequence) kdfParams.getValues()[3];
                 }
+                if (prf == null || prf.getValues().length < 1 || !(prf.getValues()[0] instanceof DERObjectIdentifier prfOid)) {
+                    throw new IllegalArgumentException("Unrecognized PKCS#5 PBES2 Pseudo-random function");
+                }
+                if (!DERObjectIdentifier.SUPPORTED_PBES2_PRFS.containsKey(prfOid.asOid())) {
+                    throw new IllegalArgumentException("Unsupported PKCS#5 PBES2 Pseudo-random function: " + prfOid.asOid());
+                }
+
+                algName = String.format("PBEWith%sAnd%s",
+                    DERObjectIdentifier.SUPPORTED_PBES2_PRFS.get(prfOid.asOid()),
+                    DERObjectIdentifier.SUPPORTED_PBES2_CIPHERS.get(encSchemeOid.asOid()));
             } else {
                 // there's no OID for PBES1. It's like the structure nested in PBES2, but at the top level.
                 // structure like:
@@ -403,28 +471,41 @@ public class CryptoUtil {
                 if (!DERObjectIdentifier.SUPPORTED_PBES1_KDFS.containsKey(pbes1Oid.asOid())) {
                     throw new IllegalArgumentException("Unsupported PKCS#5 PBES1 KDF algorithm: " + pbes1Oid.asOid());
                 }
+                algName = DERObjectIdentifier.SUPPORTED_PBES1_KDFS.get(pbes1Oid.asOid());
+            }
+
+            try {
+                EncryptedPrivateKeyInfo epki = new EncryptedPrivateKeyInfo(cryptoStructure.derData());
+                // this is strange - epki.getAlgParameters().toString() gives us full algorithm name...
+                // while epki.getAlgParameters().getAlgorithm() gives is "PBES2"
+
+                // we only need password, here, PBEKeySpec with salt, ic and iv will be created internally by
+                // the PBE Cipher
+                PBEKeySpec spec = new PBEKeySpec(password == null ? new char[0] : password);
+
+                SecretKeyFactory skf;
+                Cipher pbeCipher;
                 try {
-                    EncryptedPrivateKeyInfo epki = new EncryptedPrivateKeyInfo(cryptoStructure.derData());
-
-                    String algName = DERObjectIdentifier.SUPPORTED_PBES1_KDFS.get(pbes1Oid.asOid());
-
-                    // we only need password, here, PBEKeySpec with salt, ic and iv will be created internally by
-                    // the PBE Cipher
-                    PBEKeySpec spec = new PBEKeySpec(password == null ? new char[0] : password);
-
-                    try {
-                        SecretKeyFactory skf = SecretKeyFactory.getInstance(algName);
-                        SecretKey sk = skf.generateSecret(spec);
-                        Cipher pbeCipher = Cipher.getInstance(algName);
-                        pbeCipher.init(Cipher.DECRYPT_MODE, sk, epki.getAlgParameters());
-                        return epki.getKeySpec(pbeCipher);
-                    } catch (NoSuchAlgorithmException | InvalidKeySpecException | NoSuchPaddingException |
-                             InvalidKeyException | InvalidAlgorithmParameterException e) {
-                        throw new IllegalArgumentException("Can't decrypt Private Key: " + e.getMessage(), e);
-                    }
-                } catch (IOException e) {
-                    throw new IllegalArgumentException("Can't parse Private Key: " + e.getMessage(), e);
+                    skf = SecretKeyFactory.getInstance(algName);
+                    SecretKey sk = skf.generateSecret(spec);
+                    pbeCipher = Cipher.getInstance(algName);
+                    pbeCipher.init(Cipher.DECRYPT_MODE, sk, epki.getAlgParameters());
+                } catch (NoSuchAlgorithmException e) {
+                    throw new IllegalArgumentException("Can't decrypt PKCS#8 encrypted Private Key - unknown algorithm: " + algName, e);
+                } catch (InvalidKeySpecException e) {
+                    throw new IllegalArgumentException("Can't decrypt PKCS#8 encrypted Private Key - corrupted key specification", e);
+                } catch (NoSuchPaddingException e) {
+                    throw new IllegalArgumentException("Can't decrypt PKCS#8 encrypted Private Key - unknown PBE cipher: " + algName, e);
+                } catch (InvalidAlgorithmParameterException | InvalidKeyException e) {
+                    throw new IllegalArgumentException("Can't decrypt PKCS#8 encrypted Private Key - error initializing PBE cipher", e);
                 }
+                try {
+                    return epki.getKeySpec(pbeCipher);
+                } catch (InvalidKeySpecException e) {
+                    throw new IllegalArgumentException("Can't decrypt PKCS#8 encrypted Private Key", e);
+                }
+            } catch (IOException e) {
+                throw new IllegalArgumentException("Can't parse EncryptedPrivateKeyInfo from DER structure", e);
             }
         }
 

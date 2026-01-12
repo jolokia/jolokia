@@ -42,15 +42,3 @@ $ for n in DSA EC RSA; do echo ================= $n; openssl pkey -inform der -i
 2 encrypted _standard_ formats (-----BEGIN ENCRYPTED PRIVATE KEY-----):
  - PKCS#8 EncryptedPrivateKeyInfo with PKCS#5 PBES1
  - PKCS#8 EncryptedPrivateKeyInfo with PKCS#5 PBES2
-
-3 unencrypted _legacy_ (`openssl pkey -traditional`)
- - RSA (-----BEGIN RSA PRIVATE KEY-----)
- - DSA (-----BEGIN DSA PRIVATE KEY-----)
- - EC (-----BEGIN EC PRIVATE KEY-----)
-
-3 encrypted _legacy_ (`openssl pkey -traditional -<enc-alg>`) formats (encryption outside of ASN.1 structure, only PEM):
- - RSA (-----BEGIN RSA PRIVATE KEY----- + Proc-Type: 4,ENCRYPTED)
- - DSA (-----BEGIN DSA PRIVATE KEY----- + Proc-Type: 4,ENCRYPTED)
- - EC (-----BEGIN EC PRIVATE KEY----- + Proc-Type: 4,ENCRYPTED)
-
-(see https://docs.openssl.org/1.1.1/man3/PEM_read_bio_PrivateKey/#pem-encryption-format)

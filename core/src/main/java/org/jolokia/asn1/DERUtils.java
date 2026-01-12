@@ -69,7 +69,7 @@ public class DERUtils {
      * @param encoded
      * @return [ the length of the DER value, length of encoded length value ]
      */
-    public static int[] decodeLength(byte[] encoded) {
+    public static DERLength decodeLength(byte[] encoded) {
         return decodeLength(encoded, 0);
     }
 
@@ -79,24 +79,37 @@ public class DERUtils {
      * @param offset
      * @return [ the length of the DER value, length of encoded length value ]
      */
-    public static int[] decodeLength(byte[] encoded, int offset) {
+    public static DERLength decodeLength(byte[] encoded, int offset) {
+        if (offset >= encoded.length) {
+            throw new IllegalArgumentException("Can't decode DER value length - end of data");
+        }
+        if (encoded[offset] == (byte) 0b10000000) {
+            throw new IllegalArgumentException("DER value with indefinite length is not supported");
+        }
         if ((encoded[offset] & 0b10000000) == 0) {
-            return new int[]{encoded[offset], 1};
+            // max length is written in 7 bits, so is 0-127 inclusive
+            return new DERLength(encoded[offset], 1);
         }
 
         int ll = encoded[offset] & 0x7F;
         if (ll > 4) {
-            throw new IllegalArgumentException("Can't decode DER value with length over 2^32");
+            throw new IllegalArgumentException("Can't decode DER value with length encoded on more than 4 octets");
+        }
+        int lengthOctets = ll;
+        if (offset + ll >= encoded.length) {
+            throw new IllegalArgumentException("Can't decode DER value length - end of data");
         }
 
         // length > 127 is encoded using at least 2 bytes, so +1 for the initial octet with 0x80 flag
-        int[] result = new int[]{0, ll + 1};
-
+        long length = 0;
         while (ll > 0) {
-            result[0] |= (encoded[++offset] & 0xff) << ((--ll) * 8);
+            length |= (long) (encoded[++offset] & 0xff) << ((--ll) * 8);
+        }
+        if (length > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("Can't decode DER value longer than " + Integer.MAX_VALUE);
         }
 
-        return result;
+        return new DERLength((int) length, 1 + lengthOctets);
     }
 
     public static DERObject parse(byte[] encoded) {
@@ -111,51 +124,59 @@ public class DERUtils {
         byte id = encoded[offset];
         int cls = id & 0b11000000;
         boolean primitive = (id & DERObject.DER_CONSTRUCTED_FLAG) == 0;
+        boolean universal = (id & 0b11000000) == 0;
+        boolean contextSpecific = (id & 0b11000000) == 0b10000000;
         int tag = id & 0b00011111;
 
         if (tag == 0b00011111) {
             throw new IllegalArgumentException("Can't decode tags with number higher than 30");
         }
 
-        int[] lo = decodeLength(encoded, offset + 1);
+        DERLength lo = decodeLength(encoded, offset + 1);
 
-        switch (tag) {
-            case 0x01: // BOOLEAN
-                return DERBoolean.parse(encoded, offset + 1);
-            case 0x02: // INTEGER
-                return DERInteger.parse(encoded, lo[0], offset + 1 + lo[1]);
-            case 0x03: // BIT STRING
-                return DERBitString.parse(encoded, lo[0], offset + 1 + lo[1]);
-            case 0x04: // OCTET STRING
-                return DEROctetString.parse(DEROctetString.DER_OCTETSTRING_TAG, encoded, lo[0], offset + 1 + lo[1]);
-            case 0x05: // NULL
-                return new DERNull();
-            case 0x06: // OBJECT IDENTIFIER
-                return DERObjectIdentifier.parse(encoded, lo[0], offset + 1 + lo[1]);
-            case 0x0A: // ENUMERATED
-                break;
-            case 0x0C: // UTF8String
-                return DEROctetString.parse(DEROctetString.DER_UTF8STRING_TAG, encoded, lo[0], offset + 1 + lo[1]);
-            case 0x10: // SEQUENCE (Constructed)
-                return DERSequence.parse(encoded, lo[0], offset + 1 + lo[1]);
-            case 0x11: // SET (Constructed)
-                break;
-            case 0x12: // NumericString
-                break;
-            case 0x13: // PrintableString
-                return DEROctetString.parse(DEROctetString.DER_PRINTABLESTRING_TAG, encoded, lo[0], offset + 1 + lo[1]);
-            case 0x16: // IA5String
-                return DEROctetString.parse(DEROctetString.DER_IA5STRING_TAG, encoded, lo[0], offset + 1 + lo[1]);
-            case 0x17: // UTCTime
-                break;
-            case 0x1A: // VisibleString
-                break;
-            case 0x1B: // GeneralString
-                break;
-            case 0x1C: // UniversalString
-                break;
-            case 0x1E: // BMPString
-                break;
+        if (universal) {
+            switch (tag) {
+                case 0x01: // BOOLEAN
+                    return DERBoolean.parse(encoded, offset + 1);
+                case 0x02: // INTEGER
+                    return DERInteger.parse(encoded, lo.length(), offset + 1 + lo.lengthOctets());
+                case 0x03: // BIT STRING
+                    return DERBitString.parse(encoded, lo.length(), offset + 1 + lo.lengthOctets());
+                case 0x04: // OCTET STRING
+                    return DEROctetString.parse(DEROctetString.DER_OCTETSTRING_TAG, encoded, lo.length(), offset + 1 + lo.lengthOctets());
+                case 0x05: // NULL
+                    return new DERNull();
+                case 0x06: // OBJECT IDENTIFIER
+                    return DERObjectIdentifier.parse(encoded, lo.length(), offset + 1 + lo.lengthOctets());
+                case 0x0A: // ENUMERATED
+                    break;
+                case 0x0C: // UTF8String
+                    return DEROctetString.parse(DEROctetString.DER_UTF8STRING_TAG, encoded, lo.length(), offset + 1 + lo.lengthOctets());
+                case 0x10: // SEQUENCE (Constructed)
+                    return DERSequence.parse(encoded, lo.length(), offset + 1 + lo.lengthOctets());
+                case 0x11: // SET (Constructed)
+                    break;
+                case 0x12: // NumericString
+                    break;
+                case 0x13: // PrintableString
+                    return DEROctetString.parse(DEROctetString.DER_PRINTABLESTRING_TAG, encoded, lo.length(), offset + 1 + lo.lengthOctets());
+                case 0x16: // IA5String
+                    return DEROctetString.parse(DEROctetString.DER_IA5STRING_TAG, encoded, lo.length(), offset + 1 + lo.lengthOctets());
+                case 0x17: // UTCTime
+                    break;
+                case 0x1A: // VisibleString
+                    break;
+                case 0x1B: // GeneralString
+                    break;
+                case 0x1C: // UniversalString
+                    break;
+                case 0x1E: // BMPString
+                    break;
+            }
+        }
+        if (contextSpecific) {
+            // let's always parse as EXPLICIT, because this knowledge comes from the grammar which we don't have
+            return DERContextSpecific.parse((byte) tag, DERContextSpecific.TagMode.EXPLICIT, primitive, encoded, lo.length(), offset + 1, lo.lengthOctets());
         }
 
         throw new IllegalArgumentException("Unsupported ASN.1 tag " + id);

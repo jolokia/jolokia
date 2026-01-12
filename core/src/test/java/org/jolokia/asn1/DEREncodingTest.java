@@ -16,6 +16,7 @@
 
 package org.jolokia.asn1;
 
+import org.jolokia.core.util.KeyGenerationTest;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -49,15 +50,25 @@ public class DEREncodingTest {
     @Test
     public void decodeLength() {
         HexFormat hex = HexFormat.of().withUpperCase();
-        assertEquals(org.jolokia.asn1.DERUtils.decodeLength(hex.parseHex("7F"))[0], 0x7F);
-        assertEquals(org.jolokia.asn1.DERUtils.decodeLength(hex.parseHex("8180"))[0], 0x80);
-        assertEquals(org.jolokia.asn1.DERUtils.decodeLength(hex.parseHex("81FF"))[0], 0xFF);
-        assertEquals(org.jolokia.asn1.DERUtils.decodeLength(hex.parseHex("820100"))[0], 0x100);
-        assertEquals(org.jolokia.asn1.DERUtils.decodeLength(hex.parseHex("83010203"))[0], 0x010203);
-        assertEquals(org.jolokia.asn1.DERUtils.decodeLength(hex.parseHex("847FFFFFFF"))[0], Integer.MAX_VALUE);
+        assertEquals(org.jolokia.asn1.DERUtils.decodeLength(hex.parseHex("7F")).length(), 0x7F);
+        assertEquals(org.jolokia.asn1.DERUtils.decodeLength(hex.parseHex("8180")).length(), 0x80);
+        assertEquals(org.jolokia.asn1.DERUtils.decodeLength(hex.parseHex("81FF")).length(), 0xFF);
+        assertEquals(org.jolokia.asn1.DERUtils.decodeLength(hex.parseHex("820100")).length(), 0x100);
+        assertEquals(org.jolokia.asn1.DERUtils.decodeLength(hex.parseHex("83010203")).length(), 0x010203);
+        assertEquals(org.jolokia.asn1.DERUtils.decodeLength(hex.parseHex("847FFFFFFF")).length(), Integer.MAX_VALUE);
         try {
             org.jolokia.asn1.DERUtils.decodeLength(HexUtil.decode("850100000000"));
-            fail("Should fail for too big length");
+            fail("Should fail for too many length encoding octects");
+        } catch (IllegalArgumentException ignored) {
+        }
+        try {
+            org.jolokia.asn1.DERUtils.decodeLength(HexUtil.decode("8480000000"));
+            fail("Should fail for too long value");
+        } catch (IllegalArgumentException ignored) {
+        }
+        try {
+            org.jolokia.asn1.DERUtils.decodeLength(HexUtil.decode("84000000"));
+            fail("Should fail for not enough encoding length");
         } catch (IllegalArgumentException ignored) {
         }
     }
@@ -126,8 +137,8 @@ public class DEREncodingTest {
     public void encodeString() {
         Assert.assertEquals(HexUtil.encode(new DEROctetString(DEROctetString.DER_PRINTABLESTRING_TAG, "Hello!").getEncoded()), "130648656C6C6F21");
         Assert.assertEquals(HexUtil.encode(new DEROctetString(DEROctetString.DER_UTF8STRING_TAG, "ąćęłńóśżź").getEncoded()), "0C12C485C487C499C582C584C3B3C59BC5BCC5BA");
-        Assert.assertEquals(HexUtil.encode(new DEROctetString(DEROctetString.DER_OCTETSTRING_TAG, "ąćęłńóśżź").getEncoded()), "0C12C485C487C499C582C584C3B3C59BC5BCC5BA");
-        Assert.assertEquals(HexUtil.encode(new DEROctetString(DEROctetString.DER_IA5STRING_TAG, "ąćęłńóśżź").getEncoded()), "0C12C485C487C499C582C584C3B3C59BC5BCC5BA");
+        Assert.assertEquals(HexUtil.encode(new DEROctetString(DEROctetString.DER_OCTETSTRING_TAG, "ąćęłńóśżź").getEncoded()), "0412C485C487C499C582C584C3B3C59BC5BCC5BA");
+        Assert.assertEquals(HexUtil.encode(new DEROctetString(DEROctetString.DER_IA5STRING_TAG, "ąćęłńóśżź").getEncoded()), "1612C485C487C499C582C584C3B3C59BC5BCC5BA");
         StringWriter sw = new StringWriter();
         for (int i = 0; i < 127; i++) {
             sw.append("A");
@@ -231,6 +242,20 @@ public class DEREncodingTest {
     public void encodeTaggedObject() {
         org.jolokia.asn1.DERTaggedObject object = new org.jolokia.asn1.DERTaggedObject(org.jolokia.asn1.DERTaggedObject.TagClass.ContextSpecific, false, (byte) 0, new org.jolokia.asn1.DERInteger(42));
         Assert.assertEquals(HexUtil.encode(object.getEncoded()), "A00302012A");
+    }
+
+    @Test
+    public void encodeExplicitValue() {
+        DERContextSpecific v = new DERContextSpecific((byte) 30, DERContextSpecific.TagMode.EXPLICIT, false, new DEROctetString(DEROctetString.DER_UTF8STRING_TAG, "Hello"));
+        KeyGenerationTest.printDer(v, 0);
+        System.out.println(HexUtil.encode(v.getEncoded()));
+    }
+
+    @Test
+    public void encodeImplicitValue() {
+        DERContextSpecific v = new DERContextSpecific((byte) 30, DERContextSpecific.TagMode.IMPLICIT, true, new DEROctetString(DEROctetString.DER_UTF8STRING_TAG, "Hello"));
+        KeyGenerationTest.printDer(v, 0);
+        System.out.println(HexUtil.encode(v.getEncoded()));
     }
 
     @Test

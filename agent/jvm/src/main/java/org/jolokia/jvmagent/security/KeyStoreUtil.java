@@ -161,7 +161,7 @@ public class KeyStoreUtil {
                                           "DE" };                                       // C
 
         // Need to do it via reflection because Java8 moved class to a different package
-        KeyPair keypair = createKeyPair();
+        KeyPair keypair = createRSAKeyPair();
         PrivateKey privKey = keypair.getPrivate();
 
         X509Certificate[] chain = new X509Certificate[1];
@@ -174,10 +174,7 @@ public class KeyStoreUtil {
         pKeyStore.setKeyEntry("jolokia-agent", privKey, new char[0], chain);
     }
 
-    // =============================================================================================
-    // Reflection based access to KeyGen classes:
-
-    private static KeyPair createKeyPair() throws NoSuchAlgorithmException {
+    private static KeyPair createRSAKeyPair() throws NoSuchAlgorithmException {
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
         kpg.initialize(4096);
         return kpg.generateKeyPair();
