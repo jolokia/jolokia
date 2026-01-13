@@ -17,6 +17,7 @@ package org.jolokia.core.util;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -497,7 +498,6 @@ public class CryptoUtilTest {
         assertNotNull(legacyKeys);
         assertEquals(legacyKeys.length, 3);
         for (String key : legacyKeys) {
-            System.out.println("Checking " + key);
             CryptoUtil.CryptoStructure cryptoData = CryptoUtil.decodePemIfNeeded(new File(dir, key));
             assertEquals(cryptoData.hint(), CryptoUtil.StructureHint.DER);
             KeyGenerationTest.printDer(DERUtils.parse(cryptoData.derData()), 0);
@@ -526,6 +526,27 @@ public class CryptoUtilTest {
             } else /*if (spec instanceof ECPrivateKeySpec) */{
                 // the privateKey.getEncoded() will be PKCS8, not "legacy" EC
                 assertEquals(((ECPrivateKey) privateKey).getS(), ((ECPrivateKeySpec) spec).getS());
+            }
+        }
+    }
+
+    @Test
+    public void legacyEncryptedPrivateKeysInPEMFormat() throws Exception {
+        File dir = new File("target/test-classes/legacyprivatekeys");
+        String[] legacyKeys = dir.list(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.endsWith("-legacy-encrypted.pem");
+            }
+        });
+        assertNotNull(legacyKeys);
+        assertEquals(legacyKeys.length, 3);
+        for (String key : legacyKeys) {
+            try {
+                CryptoUtil.decodePemIfNeeded(new File(dir, key));
+            } catch (IllegalArgumentException e) {
+                String keyType = key.substring(0, key.indexOf('-'));
+                assertTrue(e.getMessage().contains("Legacy encrypted private key \"" + keyType + " PRIVATE KEY\" is not supported."));
             }
         }
     }
@@ -572,7 +593,6 @@ public class CryptoUtilTest {
         assertNotNull(publicKeys);
         assertEquals(publicKeys.length, 11);
         for (String pk : publicKeys) {
-            System.out.println("Checking " + pk);
             CryptoUtil.CryptoStructure cryptoData = CryptoUtil.decodePemIfNeeded(new File(dir1, pk));
             assertEquals(cryptoData.hint(), CryptoUtil.StructureHint.DER);
             String algorithm = pk.replace("-pub.der", "");

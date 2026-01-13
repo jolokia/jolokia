@@ -61,9 +61,6 @@ import javax.crypto.EncryptedPrivateKeyInfo;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
-import javax.crypto.interfaces.DHPrivateKey;
-import javax.crypto.interfaces.DHPublicKey;
-import javax.crypto.spec.DHParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 
 import org.jolokia.asn1.DERBitString;
@@ -484,6 +481,9 @@ public class CryptoUtil {
                 //  - PBEWithSHA1AndRC2_40
                 //  - PBEWithSHA1AndRC4_128
                 //  - PBEWithSHA1AndRC4_40
+                //
+                // see: https://docs.openssl.org/3.5/man1/openssl-pkcs8/#pkcs5-v15-and-pkcs12-algorithms
+
                 if (alg.getValues().length < 2 || !(alg.getValues()[0] instanceof DERObjectIdentifier pbes1Oid && alg.getValues()[1] instanceof DERSequence)) {
                     throw new IllegalArgumentException("Unrecognized PKCS#5 structure for PKCS#8 Encrypted Private Key");
                 }
@@ -712,14 +712,14 @@ public class CryptoUtil {
     public static CryptoStructure decodePemIfNeeded(File pemFile) throws IOException {
         try (PushbackInputStream is = new PushbackInputStream(new FileInputStream(pemFile))) {
             int v = is.read();
-            boolean soundsLikeDer = v == DERSequence.DER_SEQUENCE_TAG;
+            boolean looksLikeDer = v == DERSequence.DER_SEQUENCE_TAG;
             is.unread(v);
-            if (soundsLikeDer) {
+            if (looksLikeDer) {
                 // let's assume it's a DER sequence
                 return new CryptoStructure(StructureHint.DER, null, is.readAllBytes());
             } else {
-                // let's treat it (failing if the assumption is wrong) as PEM data
-                // will be closed with the wrapping try-with-resources
+                // Let's treat it (failing if the assumption is wrong) as PEM data.
+                // Will be closed with the wrapping try-with-resources
                 BufferedReader reader = new BufferedReader(new InputStreamReader(is));
                 String line = reader.readLine();
                 if (line.startsWith("-----BEGIN ") && line.endsWith("-----")) {
@@ -729,7 +729,7 @@ public class CryptoUtil {
                     if (hint == StructureHint.UNSUPPORTED_PEM) {
                         return new CryptoStructure(StructureHint.UNSUPPORTED_PEM, what, null);
                     } else {
-                        byte[] bytes = readBytes(pemFile, reader, line.trim().replace("BEGIN", "END"));
+                        byte[] bytes = readPemData(pemFile, reader, line.trim().replace("BEGIN", "END"), what);
                         return new CryptoStructure(hint, what, bytes);
                     }
                 } else {
@@ -740,11 +740,27 @@ public class CryptoUtil {
         }
     }
 
-    private static byte[] readBytes(File pemFile, BufferedReader reader, String endMarker) throws IOException {
+    /**
+     * Read all PEM data between the marker lines and return the actual DER data (after Base64 decoding the lines)
+     *
+     * @param pemFile
+     * @param reader
+     * @param endMarker
+     * @param type
+     * @return
+     * @throws IOException
+     */
+    private static byte[] readPemData(File pemFile, BufferedReader reader, String endMarker, String type) throws IOException {
         String line;
         StringBuilder buf = new StringBuilder();
 
         while ((line = reader.readLine()) != null) {
+            if (line.contains("Proc-Type") || line.contains("DEK-Info")) {
+                // https://docs.openssl.org/1.1.1/man3/PEM_read_bio_PrivateKey/#pem-encryption-format
+                // I wanted to support it, but I think it'd be too off topic from what I really wanted to
+                // do with the crypto refactoring (I worked on jmx-adapter at this time...)
+                throw new IllegalArgumentException("Legacy encrypted private key \"" + type + "\" is not supported. Please re-encrypt the key using PKCS#8+PKCS#5 format.");
+            }
             if (line.equals(endMarker)) {
                 return Base64.getMimeDecoder().decode(buf.toString());
             }
