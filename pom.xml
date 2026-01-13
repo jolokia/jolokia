@@ -1219,7 +1219,7 @@
     <version.com.fasterxml.jackson>2.20.1</version.com.fasterxml.jackson>
     <version.jakarta.annotation-api>3.0.0</version.jakarta.annotation-api>
     <version.jakarta.authentication-api>3.1.0</version.jakarta.authentication-api>
-    <version.net.bytebuddy>1.18.2</version.net.bytebuddy>
+    <version.net.bytebuddy>1.18.3</version.net.bytebuddy>
     <version.org.apache.felix.configadmin>1.9.26</version.org.apache.felix.configadmin>
     <version.org.apache.felix.framework>7.0.5</version.org.apache.felix.framework>
     <version.org.apache.felix.http.jetty12>1.0.36</version.org.apache.felix.http.jetty12>
@@ -1235,17 +1235,17 @@
 
     <!-- Versions of optional and example-related dependencies -->
 
-    <version.org.apache.logging.log4j>2.25.2</version.org.apache.logging.log4j>
+    <version.org.apache.logging.log4j>2.25.3</version.org.apache.logging.log4j>
     <version.org.slf4j>2.0.17</version.org.slf4j>
 
     <!-- Versions of actual Maven dependencies for Jolokia core/service/client libraries -->
 
     <version.commons-codec>1.20.0</version.commons-codec>
-    <version.io.fabric8.kubernetes-client>7.4.0</version.io.fabric8.kubernetes-client>
+    <version.io.fabric8.kubernetes-client>7.5.0</version.io.fabric8.kubernetes-client>
     <version.jakarta.servlet-api>5.0.0</version.jakarta.servlet-api>
     <version.jakarta.servlet-api6>6.1.0</version.jakarta.servlet-api6>
-    <version.org.apache.httpcomponents.client5>5.5.1</version.org.apache.httpcomponents.client5>
-    <version.org.apache.httpcomponents.core5>5.3.6</version.org.apache.httpcomponents.core5>
+    <version.org.apache.httpcomponents.client5>5.6</version.org.apache.httpcomponents.client5>
+    <version.org.apache.httpcomponents.core5>5.4</version.org.apache.httpcomponents.core5>
     <version.org.apache.httpcomponents.httpclient>4.5.14</version.org.apache.httpcomponents.httpclient>
     <version.org.apache.httpcomponents.httpcore>4.4.16</version.org.apache.httpcomponents.httpcore>
     <!-- we support wide range of OSGI Core API - in Import-Package we use [1.8,2.0) (R6), but we need newer version for tests -->
