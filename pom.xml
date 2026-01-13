@@ -1180,7 +1180,7 @@
     <plugin.maven-javadoc-plugin>3.12.0</plugin.maven-javadoc-plugin>
     <!-- don't use 3.x (non-boxed org.apache.maven.reporting.AbstractMavenReportRenderer#verbatimLink()) -->
     <plugin.maven-project-info-reports-plugin>2.9</plugin.maven-project-info-reports-plugin>
-    <plugin.maven-release-plugin>3.3.0</plugin.maven-release-plugin>
+    <plugin.maven-release-plugin>3.3.1</plugin.maven-release-plugin>
     <plugin.maven-resources-plugin>3.4.0</plugin.maven-resources-plugin>
     <plugin.maven-shade-plugin>3.6.1</plugin.maven-shade-plugin>
     <!-- Please stay at 3.12.1, as we have issues with newer versions and asciidoctor-doxia integration -->
@@ -1203,7 +1203,7 @@
     <plugin.org.jacoco.jacoco-maven-plugin>0.7.6.201602180812</plugin.org.jacoco.jacoco-maven-plugin>
     <plugin.org.vafer.jdeb>1.14</plugin.org.vafer.jdeb>
     <plugin.org.apache.servicemix.tooling>1.5.0</plugin.org.apache.servicemix.tooling>
-    <plugin.sonatype.central-publishing-maven-plugin>0.9.0</plugin.sonatype.central-publishing-maven-plugin>
+    <plugin.sonatype.central-publishing-maven-plugin>0.10.0</plugin.sonatype.central-publishing-maven-plugin>
 
     <!-- Versions of build-related dependencies -->
 
