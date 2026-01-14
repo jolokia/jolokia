@@ -85,6 +85,16 @@ public class ArtemisDetector extends AbstractServerDetector {
                 Properties props = new Properties();
                 props.load(is);
                 artemisVersion = props.getProperty("version");
+                return;
+            } catch (IOException ignored) {
+            }
+        }
+        URL artemisVersionPropertiesLocation = getClass().getClassLoader().getResource("activemq-version.properties");
+        if (artemisVersionPropertiesLocation != null) {
+            try (InputStream is = artemisVersionPropertiesLocation.openStream()) {
+                Properties props = new Properties();
+                props.load(is);
+                artemisVersion = props.getProperty("activemq.version.versionName");
             } catch (IOException ignored) {
             }
         }
