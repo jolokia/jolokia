@@ -221,7 +221,7 @@ public class JolokiaHttpHandlerTest {
     }
 
     @Test
-    public void simlePostRequestWithCors() throws URISyntaxException, IOException {
+    public void simplePostRequestWithCors() throws URISyntaxException, IOException {
         HttpExchange exchange = prepareExchange("http://localhost:8080/jolokia",
                                                 "Content-Type","text/plain; charset=UTF-8",
                                                 "Origin","http://localhost:8080/"

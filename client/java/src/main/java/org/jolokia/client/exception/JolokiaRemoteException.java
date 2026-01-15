@@ -19,7 +19,7 @@ import org.jolokia.client.request.JolokiaRequest;
 import org.jolokia.json.JSONObject;
 
 /**
- * Exception occurred on the remote side (i.e the server) and contains details about the error occurred
+ * Exception that occurred on the remote side (i.e the server) and which contains details about the error occurred
  * at remote Jolokia Agent side.
  *
  * @author roland
@@ -36,7 +36,7 @@ public class JolokiaRemoteException extends JolokiaException {
     // Request leading to this error
     private final JolokiaRequest request;
 
-    // Java class of remote error
+    // Java class of a remote error
     private final String errorType;
 
     // JSONObject containing value of the remote error - "value" field of the response JSON
@@ -83,6 +83,7 @@ public class JolokiaRemoteException extends JolokiaException {
         remoteStacktrace = (String) pJsonRespObject.get("stacktrace");
 
         // result of org.jolokia.server.core.backend.BackendManager.convertExceptionToJson()
+        // available only if "serializeException" option is true
         errorValue = (JSONObject) pJsonRespObject.get("error_value");
     }
 

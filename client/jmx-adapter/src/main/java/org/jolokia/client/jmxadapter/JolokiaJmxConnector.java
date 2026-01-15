@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2025 Roland Huss
+ * Copyright 2009-2026 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,9 @@
  */
 package org.jolokia.client.jmxadapter;
 
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.InputStream;
 import java.nio.file.Path;
 import java.security.Key;
-import java.security.KeyFactory;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -29,10 +26,8 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
-import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -69,7 +64,7 @@ public class JolokiaJmxConnector implements JMXConnector {
     // environment passed during initialization (can be overridden during connect(env))
     private final Map<String, ?> initEnvironment;
 
-    // RemoteJmxAdapter holds the Jolokia Client instance and performs operations on remote Jolokia Agent
+    // RemoteJmxAdapter holds the Jolokia Client instance and performs operations on a remote Jolokia Agent
     protected RemoteJmxAdapter adapter;
 
     private final NotificationBroadcasterSupport broadcasterSupport = new NotificationBroadcasterSupport();
@@ -80,9 +75,8 @@ public class JolokiaJmxConnector implements JMXConnector {
      * Create new Jolokia {@link JMXConnector} for given {@link JMXServiceURL} and environment.
      * @param serviceURL
      * @param env
-     * @throws IOException
      */
-    public JolokiaJmxConnector(JMXServiceURL serviceURL, Map<String, ?> env) throws IOException {
+    public JolokiaJmxConnector(JMXServiceURL serviceURL, Map<String, ?> env) {
         this.serviceUrl = serviceURL;
         this.initEnvironment = env;
     }
@@ -96,7 +90,8 @@ public class JolokiaJmxConnector implements JMXConnector {
     public void connect(Map<String, ?> env) throws IOException {
         String protocol = this.serviceUrl.getProtocol();
         if (!protocol.startsWith("jolokia")) {
-            throw new MalformedURLException(String.format("Invalid URL %s : Only protocol \"jolokia[+http[s]]\" is supported (not %s)", this.serviceUrl, protocol));
+            throw new MalformedURLException(String.format("Invalid URL %s : Only protocol \"jolokia[+http[s]]\" is supported (not %s)",
+                this.serviceUrl, protocol));
         }
 
         Map<String, Object> mergedEnv = mergedEnvironment(env);
@@ -132,21 +127,25 @@ public class JolokiaJmxConnector implements JMXConnector {
         clientBuilder.user(stringProperty(copy, JolokiaClientOption.USERNAME));
         clientBuilder.password(stringProperty(copy, JolokiaClientOption.PASSWORD));
 
-        clientBuilder.connectionTimeout(intProperty(copy, JolokiaClientOption.CONNECTION_TIMEOUT));
-        clientBuilder.socketTimeout(intProperty(copy, JolokiaClientOption.READ_TIMEOUT));
+        clientBuilder.connectionTimeout(intProperty(copy, JolokiaClientOption.CONNECTION_TIMEOUT, JolokiaClientBuilder.DEFAULT_CONNECTION_TIMEOUT));
+        clientBuilder.socketTimeout(intProperty(copy, JolokiaClientOption.READ_TIMEOUT, JolokiaClientBuilder.DEFAULT_SOCKET_TIMEOUT));
 
         // these methods require Keystore location (JKS or PKCS12), but we may load the material from
         // individual keys and certificates too. We'll always recreate the key/truststore:
-        // - in case there's a client key alias
+        // - in case there's a client key alias and the keystore contains more key entries
         // - in case user specified individual locations for certs / keys
-        clientBuilder.truststore(buildTruststore(copy));
-        clientBuilder.keystore(buildKeystore(copy));
-        // the passwords may be cleared if the keystore is rebuilt by buildTruststore()/buildKeystore()
-        clientBuilder.truststorePassword(stringProperty(copy, JolokiaClientOption.TRUSTSTORE_PASSWORD));
-        clientBuilder.keystorePassword(stringProperty(copy, JolokiaClientOption.KEYSTORE_PASSWORD));
-
-        // this can be used both for individual key file and a key entry in the keystore
-        clientBuilder.keyPassword(stringProperty(copy, JolokiaClientOption.CLIENT_KEY_PASSWORD));
+        KeyStore truststore = buildTruststore(copy);
+        KeyStore keystore = buildKeystore(copy);
+        if (truststore != null || keystore != null || protocol.endsWith("+https")) {
+            clientBuilder.protocolVersion("TLSv1.3");
+            // truststore options to be used by the Jolokia Client
+            clientBuilder.truststore(truststore);
+            clientBuilder.truststorePassword((String) copy.get(JolokiaClientOption.TRUSTSTORE_PASSWORD.asSystemProperty()));
+            // keystore options to be used by the Jolokia Client - we no longer need the alias property
+            clientBuilder.keystore(keystore);
+            clientBuilder.keystorePassword((String) copy.get(JolokiaClientOption.KEYSTORE_PASSWORD.asSystemProperty()));
+            clientBuilder.keyPassword((String) copy.get(JolokiaClientOption.CLIENT_KEY_PASSWORD.asSystemProperty()));
+        }
 
         this.adapter = new RemoteJmxAdapter(clientBuilder.build());
 
@@ -252,12 +251,19 @@ public class JolokiaJmxConnector implements JMXConnector {
         return this.connectionId;
     }
 
+    /**
+     * Get a String value from configuration properties. Defaults to {@code null}.
+     *
+     * @param config
+     * @param option
+     * @return
+     */
     static String stringProperty(Map<String, Object> config, JolokiaClientOption option) {
         Object v = config.get(option.asSystemProperty());
-        String value;
+        String value = null;
         if (v instanceof String) {
             value = (String) v;
-        } else {
+        } else if (v != null) {
             throw new IllegalArgumentException(option.asSystemProperty() + " should be a String value");
         }
 
@@ -274,14 +280,22 @@ public class JolokiaJmxConnector implements JMXConnector {
         return value;
     }
 
-    static int intProperty(Map<String, Object> config, JolokiaClientOption option) {
+    /**
+     * Get a numeric value from configuration properties. Defaults to {@code defaultValue}.
+     *
+     * @param config
+     * @param option
+     * @param defaultValue
+     * @return
+     */
+    static int intProperty(Map<String, Object> config, JolokiaClientOption option, int defaultValue) {
         Object v = config.get(option.asSystemProperty());
-        int value;
+        int value = defaultValue;
         if (v instanceof String) {
             value = Integer.parseInt((String) v);
         } else if (v instanceof Number n) {
             value = n.intValue();
-        } else {
+        } else if (v != null) {
             throw new IllegalArgumentException(option.asSystemProperty() + " should be a String or numeric value");
         }
 
@@ -301,6 +315,8 @@ public class JolokiaJmxConnector implements JMXConnector {
     /**
      * Returns a {@link KeyStore} to be used as server validation truststore. If the store is created
      * from individual certificate(s), the truststore returned has no password.
+     * The passed configuration map can be updated when the store is built.
+     *
      * @param config
      * @return
      */
@@ -331,6 +347,9 @@ public class JolokiaJmxConnector implements JMXConnector {
                 if (!hasCertificate) {
                     throw new IllegalArgumentException("Truststore " + existingTruststore + " does not contain certificate entries");
                 }
+
+                config.put(JolokiaClientOption.TRUSTSTORE_PASSWORD.asSystemProperty(), existingTruststorePassword);
+
                 return truststore;
             } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException e) {
                 throw new IllegalArgumentException("Problem loading truststore from " + existingTruststore, e);
@@ -345,15 +364,17 @@ public class JolokiaJmxConnector implements JMXConnector {
 
                     // PKCS12 should be "dual format" PKCS12KeyStore$DualFormatPKCS12 that also supports JKS
                     KeyStore truststore = KeyStore.getInstance("PKCS12");
+                    truststore.load(null, null);
                     int idx = 0;
                     for (Certificate cert : certificates) {
                         truststore.setCertificateEntry(String.format("cert-%02d", idx++), cert);
                     }
-                    // remove, because we've created new Keystore
+
                     config.remove(JolokiaClientOption.TRUSTSTORE_PASSWORD.asSystemProperty());
+
                     return truststore;
                 }
-            } catch (CertificateException | IOException | KeyStoreException e) {
+            } catch (CertificateException | IOException | KeyStoreException | NoSuchAlgorithmException e) {
                 throw new IllegalArgumentException("Problem loading CA/server certificate from " + caCertificates, e);
             }
         }
@@ -365,6 +386,8 @@ public class JolokiaJmxConnector implements JMXConnector {
     /**
      * Returns a {@link KeyStore} to be used as a keystore for client TLS. If the store is created
      * from individual certificate/key, the keystore returned has no password.
+     * The passed configuration map can be updated when the store is built.
+     *
      * @param config
      * @return
      */
@@ -410,12 +433,18 @@ public class JolokiaJmxConnector implements JMXConnector {
                 if (existingKeystoreKeyAlias != null && !hasMatchingKey) {
                     throw new IllegalArgumentException("Keystore " + existingKeystore + " does not contain key with \"" + existingKeystoreKeyAlias + "\" alias");
                 }
+
+                config.put(JolokiaClientOption.CLIENT_KEY_PASSWORD.asSystemProperty(), keyPassword);
+
                 if (keyCount == 1) {
-                    // we can simply return this keystore
+                    // we can simply return this keystore and ignore the alias
+                    config.put(JolokiaClientOption.KEYSTORE_PASSWORD.asSystemProperty(), existingKeystorePassword);
+
                     return keystore;
                 } else {
                     // we have to rebuild the keystore with just one key entry of the matching alias
                     KeyStore newKeystore = KeyStore.getInstance("PKCS12");
+                    newKeystore.load(null, null);
                     char[] pwd = keyPassword == null ? new char[0] : keyPassword.toCharArray();
                     Key key = keystore.getKey(existingKeystoreKeyAlias, pwd);
                     newKeystore.setKeyEntry(existingKeystoreKeyAlias, key, pwd, keystore.getCertificateChain(existingKeystoreKeyAlias));
@@ -431,6 +460,8 @@ public class JolokiaJmxConnector implements JMXConnector {
             }
         } else if (clientCertificate != null && clientKey != null) {
             // trying to assemble the keystore from a single certificate and private key (PEM or DER)
+            // remove, because we'll create a new Keystore
+            config.remove(JolokiaClientOption.KEYSTORE_PASSWORD.asSystemProperty());
             try {
                 CertificateFactory cf = CertificateFactory.getInstance("X509");
                 Certificate certificate;
@@ -447,7 +478,7 @@ public class JolokiaJmxConnector implements JMXConnector {
                 CryptoUtil.CryptoStructure cryptoData = CryptoUtil.decodePemIfNeeded(Path.of(clientKey).toFile());
                 byte[] keyBytes = cryptoData.derData();
 
-                KeySpec keySpec = CryptoUtil.decodePrivateKey(cryptoData, keyPassword.toCharArray());
+                KeySpec keySpec = CryptoUtil.decodePrivateKey(cryptoData, keyPassword == null ? new char[0] : keyPassword.toCharArray());
 
                 PrivateKey privateKey = CryptoUtil.generatePrivateKey(keySpec, clientKeyAlgorithm);
 
@@ -456,10 +487,11 @@ public class JolokiaJmxConnector implements JMXConnector {
                 }
 
                 KeyStore keystore = KeyStore.getInstance("PKCS12");
-                keystore.setKeyEntry("key", privateKey, keyPassword.toCharArray(), new Certificate[] { certificate });
+                keystore.load(null, null);
+                keystore.setKeyEntry("key", privateKey, keyPassword == null ? new char[0] : keyPassword.toCharArray(), new Certificate[] { certificate });
 
-                // remove, because we've created new Keystore
                 config.remove(JolokiaClientOption.KEYSTORE_PASSWORD.asSystemProperty());
+                config.put(JolokiaClientOption.CLIENT_KEY_PASSWORD.asSystemProperty(), keyPassword);
 
                 return keystore;
             } catch (CertificateException | IOException | KeyStoreException | NoSuchAlgorithmException |

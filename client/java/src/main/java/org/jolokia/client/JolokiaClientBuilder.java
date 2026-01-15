@@ -56,19 +56,22 @@ public class JolokiaClientBuilder {
 
     // socket/tcp options
 
+    public static final int DEFAULT_CONNECTION_TIMEOUT = 20_000;
+    public static final int DEFAULT_SOCKET_TIMEOUT = 0;
+
     /**
      * Connection timeout in milliseconds.
      * In blocking mode it is ultimately passed to {@link java.net.Socket#connect(SocketAddress, int)} method.
      * In NIO, it's used as a timeout waiting for {@link SelectionKey#OP_CONNECT}.
      */
-    private int connectionTimeout = 20_000;
+    private int connectionTimeout = DEFAULT_CONNECTION_TIMEOUT;
 
     /**
      * Socket/read/write timeout in milliseconds.
      * In blocking mode it is ultimately passed to {@link java.net.Socket#setSoTimeout(int)} method.
      * In NIO, it's used as a timeout waiting for {@link SelectionKey#OP_READ}.{@link SelectionKey#OP_WRITE}.
      */
-    private int socketTimeout = 0;
+    private int socketTimeout = DEFAULT_SOCKET_TIMEOUT;
 
     /**
      * {@link java.net.SocketOptions#TCP_NODELAY} option, defaults to {@code false} which means <em>delay</em>

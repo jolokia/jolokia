@@ -68,7 +68,7 @@ public class JdkHttpClientBuilder implements HttpClientBuilder<HttpClient> {
 
         if (jcb.tlsConfig() != null && jcb.tlsConfig().protocolVersion() != null) {
             try {
-                builder.sslContext(createSSLContest(jcb.tlsConfig()));
+                builder.sslContext(createSSLContext(jcb.tlsConfig()));
             } catch (Exception e) {
                 throw new IllegalArgumentException("Problem with TLS configuration: " + e.getMessage(), e);
             }
@@ -126,7 +126,7 @@ public class JdkHttpClientBuilder implements HttpClientBuilder<HttpClient> {
         return new JdkHttpClient(builder.build(), jcb);
     }
 
-    private SSLContext createSSLContest(JolokiaClientBuilder.TlsConfiguration tlsConfiguration) throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException, IOException, CertificateException, UnrecoverableKeyException {
+    private SSLContext createSSLContext(JolokiaClientBuilder.TlsConfiguration tlsConfiguration) throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException, IOException, CertificateException, UnrecoverableKeyException {
         if (tlsConfiguration.protocolVersion() == null) {
             return null;
         }
@@ -137,8 +137,9 @@ public class JdkHttpClientBuilder implements HttpClientBuilder<HttpClient> {
         TrustManager[] trustManagers = null;
         KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
         if (tlsConfiguration.keystore() != null) {
-            tlsConfiguration.keystore().load(null, tlsConfiguration.keystorePassword() == null ? new char[0] : tlsConfiguration.keystorePassword().toCharArray());
+            // don't load the keystore - it should already be loaded
             kmf.init(tlsConfiguration.keystore(), tlsConfiguration.keyPassword() == null ? new char[0] : tlsConfiguration.keyPassword().toCharArray());
+            keyManagers = kmf.getKeyManagers();
         } else if (tlsConfiguration.keystorePath() != null) {
             KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
             try (FileInputStream fis = new FileInputStream(tlsConfiguration.keystorePath().toFile())) {
@@ -150,8 +151,9 @@ public class JdkHttpClientBuilder implements HttpClientBuilder<HttpClient> {
 
         TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
         if (tlsConfiguration.truststore() != null) {
-            tlsConfiguration.truststore().load(null, tlsConfiguration.truststorePassword() == null ? new char[0] : tlsConfiguration.truststorePassword().toCharArray());
+            // don't load the truststore - it should already be loaded
             tmf.init(tlsConfiguration.truststore());
+            trustManagers = tmf.getTrustManagers();
         } else if (tlsConfiguration.truststorePath() != null) {
             KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
             try (FileInputStream fis = new FileInputStream(tlsConfiguration.truststorePath().toFile())) {

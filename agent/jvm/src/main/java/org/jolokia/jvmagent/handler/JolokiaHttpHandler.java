@@ -37,7 +37,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.management.RuntimeMBeanException;
 import javax.security.auth.Subject;
 
 import com.sun.net.httpserver.Headers;
@@ -189,8 +188,7 @@ public class JolokiaHttpHandler implements HttpHandler {
             // No response needed, will answer later ...
             return;
         } catch (Throwable exp) {
-            json = requestHandler.handleThrowable(
-                    exp instanceof RuntimeMBeanException ? ((RuntimeMBeanException) exp).getTargetException() : exp);
+            json = requestHandler.handleThrowable(exp);
         } finally {
             releaseBackChannel();
         }
