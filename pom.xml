@@ -20,7 +20,7 @@
 
   <groupId>org.jolokia</groupId>
   <artifactId>jolokia-parent</artifactId>
-  <version>2.5.0-SNAPSHOT</version>
+  <version>3.0.0-SNAPSHOT</version>
 
   <name>${project.artifactId}</name>
   <description>Jolokia :: Parent :: POM</description>
@@ -1258,10 +1258,8 @@
     <!-- Versions of Maven dependencies for Jolokia Spring-related libraries (JDK17 only) -->
 
     <!-- Spring Framework and Spring Boot should be aligned -->
-    <version.org.springframework>6.2.14</version.org.springframework>
-    <version.org.springframework.boot>3.5.8</version.org.springframework.boot>
-<!--    <version.org.springframework>7.0.1</version.org.springframework>-->
-<!--    <version.org.springframework.boot>4.0.0</version.org.springframework.boot>-->
+    <version.org.springframework>7.0.1</version.org.springframework>
+    <version.org.springframework.boot>4.0.0</version.org.springframework.boot>
   </properties>
 
   <profiles>
