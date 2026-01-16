@@ -30,14 +30,25 @@ import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.SignatureException;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.EdECPrivateKey;
+import java.security.interfaces.EdECPublicKey;
+import java.security.interfaces.XECPrivateKey;
+import java.security.interfaces.XECPublicKey;
+import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.DSAPrivateKeySpec;
 import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPrivateKeySpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
+import java.security.spec.MGF1ParameterSpec;
+import java.security.spec.NamedParameterSpec;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.PSSParameterSpec;
 import java.security.spec.RSAPrivateCrtKeySpec;
 import java.security.spec.RSAPrivateKeySpec;
 import java.security.spec.RSAPublicKeySpec;
@@ -45,7 +56,6 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Map;
-
 import javax.crypto.Cipher;
 import javax.crypto.EncryptedPrivateKeyInfo;
 import javax.crypto.NoSuchPaddingException;
@@ -471,6 +481,9 @@ public class CryptoUtil {
                 //  - PBEWithSHA1AndRC2_40
                 //  - PBEWithSHA1AndRC4_128
                 //  - PBEWithSHA1AndRC4_40
+                //
+                // see: https://docs.openssl.org/3.5/man1/openssl-pkcs8/#pkcs5-v15-and-pkcs12-algorithms
+
                 if (alg.getValues().length < 2 || !(alg.getValues()[0] instanceof DERObjectIdentifier pbes1Oid && alg.getValues()[1] instanceof DERSequence)) {
                     throw new IllegalArgumentException("Unrecognized PKCS#5 structure for PKCS#8 Encrypted Private Key");
                 }
@@ -557,64 +570,118 @@ public class CryptoUtil {
     }
 
     /**
-     * Check if a {@link PrivateKey} and a {@link PublicKey} match.
+     * Check if a {@link PrivateKey} and a {@link PublicKey} match if the algorithm allows such determination.
      *
      * @param privateKey
      * @param publicKey
      * @return
      */
     public static boolean keysMatch(PrivateKey privateKey, PublicKey publicKey) {
-        byte[] data = "Jolokia JMX".getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        byte[] data = new byte[32];
+        new SecureRandom().nextBytes(data);
 
         Map<String, String> keyToSignature = Map.of(
             "DSA", "SHA256withDSA",
-            "EC", "",
-            "EdDSA", "",
             "RSA", "SHA256withRSA",
             "RSASSA-PSS", "RSASSA-PSS"
         );
 
-        // EC
-        // SHA256withECDSA     (P-256)
-        // SHA384withECDSA     (P-384)
-        // SHA512withECDSA     (P-521)
-        //
-        // EdDSA
-        // Ed25519
-        // Ed448
-
         try {
+            String signSignatureAlgorithm = null;
+            String verifySignatureAlgorithm = null;
+
             if ("EC".equals(privateKey.getAlgorithm())) {
                 if (!"EC".equals(publicKey.getAlgorithm())) {
                     throw new IllegalArgumentException("EC Private Key can't be used with non-EC Public Key");
                 }
-                return false;
+                ECParameterSpec privatePs = ((ECPrivateKey) privateKey).getParams();
+                ECParameterSpec publicPs = ((ECPublicKey) publicKey).getParams();
+                int fs1 = privatePs.getCurve().getField().getFieldSize();
+                int fs2 = publicPs.getCurve().getField().getFieldSize();
+                if (fs1 != fs2) {
+                    throw new IllegalArgumentException("Can't match EC keys with different field size (" + fs1 + " and " + fs2 + ")");
+                }
+                if (fs1 <= 256) {
+                    signSignatureAlgorithm = "SHA256withECDSA";
+                    verifySignatureAlgorithm = "SHA256withECDSA";
+                } else if (fs1 <= 384) {
+                    signSignatureAlgorithm = "SHA384withECDSA";
+                    verifySignatureAlgorithm = "SHA384withECDSA";
+                } else /*if (fs1 <= 521)*/ {
+                    signSignatureAlgorithm = "SHA512withECDSA";
+                    verifySignatureAlgorithm = "SHA512withECDSA";
+                }
             }
             if ("EdDSA".equals(privateKey.getAlgorithm())) {
                 if (!"EdDSA".equals(publicKey.getAlgorithm())) {
                     throw new IllegalArgumentException("EdDSA Private Key can't be used with non-EdDSA Public Key");
                 }
+                NamedParameterSpec privatePs = ((EdECPrivateKey) privateKey).getParams();
+                NamedParameterSpec publicPs = ((EdECPublicKey) publicKey).getParams();
+                signSignatureAlgorithm = privatePs.getName();
+                verifySignatureAlgorithm = publicPs.getName();
+                if (!signSignatureAlgorithm.equals(verifySignatureAlgorithm)) {
+                    throw new IllegalArgumentException("EdDSA keys should use the same algorithm");
+                }
+            }
+            if ("DH".equals(privateKey.getAlgorithm())) {
+                if (!"DH".equals(publicKey.getAlgorithm())) {
+                    throw new IllegalArgumentException("DH Private Key can't be used with non-DH Public Key");
+                }
+//                DHParameterSpec privatePs = ((DHPrivateKey) privateKey).getParams();
+//                DHParameterSpec publicPs = ((DHPublicKey) publicKey).getParams();
+//                return privatePs.getP().equals(publicPs.getP()) && privatePs.getG().equals(publicPs.getG()) && privatePs.getL() == publicPs.getL();
+                // only for key agreement
                 return false;
             }
-            String signatureAlgorithm = keyToSignature.get(privateKey.getAlgorithm());
-            if (signatureAlgorithm == null) {
+            if ("XDH".equals(privateKey.getAlgorithm())) {
+                if (!"XDH".equals(publicKey.getAlgorithm())) {
+                    throw new IllegalArgumentException("XDH Private Key can't be used with non-XDH Public Key");
+                }
+                AlgorithmParameterSpec privatePs = ((XECPrivateKey) privateKey).getParams();
+                AlgorithmParameterSpec publicPs = ((XECPublicKey) publicKey).getParams();
+                if (!(privatePs instanceof NamedParameterSpec privateNamedPs && publicPs instanceof NamedParameterSpec publicNamedPs)) {
+                    throw new IllegalArgumentException("Expected NamedParameterSpec for XDH keys");
+                }
+                // https://www.rfc-editor.org/rfc/rfc7748.html#section-5
+                // XDH keys are for key agreement, not signature. and JCA doesn't allow to get the "public components"
+                // from the private key
+                return false;
+            }
+
+            if (signSignatureAlgorithm == null) {
+                signSignatureAlgorithm = keyToSignature.get(privateKey.getAlgorithm());
+            }
+            if (signSignatureAlgorithm == null) {
                 throw new IllegalArgumentException("Unknown Signature algorithm for private key algorithm \"" + privateKey.getAlgorithm() + "\"");
             }
-            Signature signer = Signature.getInstance(signatureAlgorithm);
+            Signature signer = Signature.getInstance(signSignatureAlgorithm);
+
+            if (verifySignatureAlgorithm == null) {
+                verifySignatureAlgorithm = keyToSignature.get(publicKey.getAlgorithm());
+            }
+            if (verifySignatureAlgorithm == null) {
+                throw new IllegalArgumentException("Unknown Signature algorithm for public key algorithm \"" + publicKey.getAlgorithm() + "\"");
+            }
+            Signature verifier = Signature.getInstance(verifySignatureAlgorithm);
+
+            if ("RSASSA-PSS".equals(signSignatureAlgorithm)) {
+                PSSParameterSpec pss = new PSSParameterSpec("SHA-256", "MGF1", MGF1ParameterSpec.SHA256, 32, 1);
+                signer.setParameter(pss);
+                verifier.setParameter(pss);
+            }
+
             signer.initSign(privateKey);
+            verifier.initVerify(publicKey);
+
             signer.update(data);
             byte[] signature = signer.sign();
 
-            String signatureAlgorithm2 = keyToSignature.get(publicKey.getAlgorithm());
-            if (signatureAlgorithm2 == null) {
-                throw new IllegalArgumentException("Unknown Signature algorithm for public key algorithm \"" + privateKey.getAlgorithm() + "\"");
-            }
-            Signature verifier = Signature.getInstance(signatureAlgorithm2);
-            verifier.initVerify(publicKey);
             verifier.update(data);
 
             return verifier.verify(signature);
-        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
+        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException |
+                 InvalidAlgorithmParameterException e) {
             return false;
         }
     }
@@ -645,14 +712,14 @@ public class CryptoUtil {
     public static CryptoStructure decodePemIfNeeded(File pemFile) throws IOException {
         try (PushbackInputStream is = new PushbackInputStream(new FileInputStream(pemFile))) {
             int v = is.read();
-            boolean soundsLikeDer = v == DERSequence.DER_SEQUENCE_TAG;
+            boolean looksLikeDer = v == DERSequence.DER_SEQUENCE_TAG;
             is.unread(v);
-            if (soundsLikeDer) {
+            if (looksLikeDer) {
                 // let's assume it's a DER sequence
                 return new CryptoStructure(StructureHint.DER, null, is.readAllBytes());
             } else {
-                // let's treat it (failing if the assumption is wrong) as PEM data
-                // will be closed with the wrapping try-with-resources
+                // Let's treat it (failing if the assumption is wrong) as PEM data.
+                // Will be closed with the wrapping try-with-resources
                 BufferedReader reader = new BufferedReader(new InputStreamReader(is));
                 String line = reader.readLine();
                 if (line.startsWith("-----BEGIN ") && line.endsWith("-----")) {
@@ -662,7 +729,7 @@ public class CryptoUtil {
                     if (hint == StructureHint.UNSUPPORTED_PEM) {
                         return new CryptoStructure(StructureHint.UNSUPPORTED_PEM, what, null);
                     } else {
-                        byte[] bytes = readBytes(pemFile, reader, line.trim().replace("BEGIN", "END"));
+                        byte[] bytes = readPemData(pemFile, reader, line.trim().replace("BEGIN", "END"), what);
                         return new CryptoStructure(hint, what, bytes);
                     }
                 } else {
@@ -673,11 +740,27 @@ public class CryptoUtil {
         }
     }
 
-    private static byte[] readBytes(File pemFile, BufferedReader reader, String endMarker) throws IOException {
+    /**
+     * Read all PEM data between the marker lines and return the actual DER data (after Base64 decoding the lines)
+     *
+     * @param pemFile
+     * @param reader
+     * @param endMarker
+     * @param type
+     * @return
+     * @throws IOException
+     */
+    private static byte[] readPemData(File pemFile, BufferedReader reader, String endMarker, String type) throws IOException {
         String line;
         StringBuilder buf = new StringBuilder();
 
         while ((line = reader.readLine()) != null) {
+            if (line.contains("Proc-Type") || line.contains("DEK-Info")) {
+                // https://docs.openssl.org/1.1.1/man3/PEM_read_bio_PrivateKey/#pem-encryption-format
+                // I wanted to support it, but I think it'd be too off topic from what I really wanted to
+                // do with the crypto refactoring (I worked on jmx-adapter at this time...)
+                throw new IllegalArgumentException("Legacy encrypted private key \"" + type + "\" is not supported. Please re-encrypt the key using PKCS#8+PKCS#5 format.");
+            }
             if (line.equals(endMarker)) {
                 return Base64.getMimeDecoder().decode(buf.toString());
             }
