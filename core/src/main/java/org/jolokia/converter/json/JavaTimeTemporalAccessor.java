@@ -167,8 +167,8 @@ public class JavaTimeTemporalAccessor implements org.jolokia.converter.json.Obje
     }
 
     @Override
-    public Object setObjectValue(Converter<String> pConverter, Object pObject, String pAttribute, Object pValue) throws IllegalAccessException, InvocationTargetException, IllegalArgumentException {
-        throw new IllegalArgumentException("java.time.Temporal instance is immutable and cannot change its value");
+    public Object setObjectValue(Converter<String> pConverter, Object pObject, String pAttribute, Object pValue) {
+        throw new UnsupportedOperationException("java.time.Temporal instance is immutable and cannot change its value");
     }
 
 }

@@ -124,7 +124,7 @@ public class ClientBulkRequestIntegrationTest extends AbstractClientIntegrationT
             assertTrue(results.get(0) instanceof JolokiaRemoteException);
             JolokiaRemoteException exp = (JolokiaRemoteException) results.get(0);
             assertEquals(404, exp.getStatus());
-            assertTrue(exp.getMessage().contains("InstanceNotFoundException"));
+            assertTrue(exp.getErrorType().contains("InstanceNotFoundException"));
             assertTrue(exp.getRemoteStackTrace().contains("InstanceNotFoundException"));
             assertEquals(exp.getRequest(), requests.get(1));
         }

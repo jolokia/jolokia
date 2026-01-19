@@ -71,8 +71,10 @@ public class ClientExecIntegrationTest extends AbstractClientIntegrationTest {
                 jolokiaClient.execute(request);
                 fail();
             } catch (JolokiaRemoteException exp) {
-                assertEquals(400L,exp.getStatus());
-                assertTrue(exp.getMessage().contains("IllegalArgumentException"));
+                // Changed from 400, because everything in user's request was fine, simply the MBean thrown
+                // an exception, so it's actually 500
+                assertEquals(500L, exp.getStatus());
+                assertTrue(exp.getMessage().contains("Invalid arg bla"));
                 assertTrue(exp.getRemoteStackTrace().contains("IllegalArgumentException"));
             }
         }

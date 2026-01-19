@@ -17,9 +17,9 @@
 package org.jolokia.service.jmx.handler;
 
 import javax.management.MBeanServerConnection;
-import javax.management.MalformedObjectNameException;
 
 import org.jolokia.server.core.config.ConfigKey;
+import org.jolokia.server.core.request.BadRequestException;
 import org.jolokia.server.core.request.JolokiaNotificationRequest;
 import org.jolokia.server.core.request.JolokiaRequestBuilder;
 import org.jolokia.server.core.request.notification.NotificationCommandType;
@@ -64,7 +64,7 @@ public class NotificationHandlerTest extends BaseHandlerTest {
         handler.doHandleAllServerRequest(getMBeanServerManager(connection), request, null);
     }
 
-    private JolokiaNotificationRequest createRequest() throws MalformedObjectNameException {
+    private JolokiaNotificationRequest createRequest() throws BadRequestException {
         return new JolokiaRequestBuilder(RequestType.NOTIFICATION).
                 command(NotificationCommandType.REGISTER).build();
     }

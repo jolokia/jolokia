@@ -53,7 +53,7 @@ public class BackendManagerTest {
     }
 
     @Test
-    public void simpleRead() throws JMException, IOException, EmptyResponseException {
+    public void simpleRead() throws JMException, IOException, EmptyResponseException, BadRequestException {
         JolokiaRequest req = new JolokiaRequestBuilder(RequestType.READ,"java.lang:type=Memory")
                 .attribute("HeapMemoryUsage")
                 .build();
@@ -78,7 +78,7 @@ public class BackendManagerTest {
     }
 
     @Test
-    public void lazyInit() throws JMException, IOException, EmptyResponseException {
+    public void lazyInit() throws JMException, IOException, EmptyResponseException, BadRequestException {
         JolokiaRequest req = new JolokiaRequestBuilder(RequestType.READ,"java.lang:type=Memory")
                 .attribute("HeapMemoryUsage")
                 .build();
@@ -104,7 +104,7 @@ public class BackendManagerTest {
 
 
     @Test
-    public void convertError() throws MalformedObjectNameException {
+    public void convertError() throws BadRequestException {
         BackendManager backendManager = createBackendManager(new Object[0],createDispatcher());
         Exception exp = new IllegalArgumentException("Hans",new IllegalStateException("Kalb"));
         JolokiaRequest req = new JolokiaRequestBuilder(RequestType.READ,"java.lang:type=Memory").build();

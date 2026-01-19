@@ -1,7 +1,5 @@
-package org.jolokia.service.jmx.handler.list;
-
 /*
- * Copyright 2009-2011 Roland Huss
+ * Copyright 2009-2026 Roland Huss
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -15,6 +13,7 @@ package org.jolokia.service.jmx.handler.list;
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+package org.jolokia.service.jmx.handler.list;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -104,13 +103,6 @@ public class MBeanInfoData {
     private final int maxDepth;
 
     /**
-     * Stack of path elements for Jolokia list operation. Two first elements are for {@link ObjectName#getDomain()}
-     * and {@link ObjectName#getCanonicalKeyPropertyListString()}, 3rd element is to select single updater to use
-     * like {@code class} or {@code attr}.
-     */
-    private final Deque<String> pathStack;
-
-    /**
      * ObjectName or pattern recreated from the passed pathStack. Used to filter response elements. {@code null}
      * means <em>all match</em>.
      */
@@ -131,7 +123,7 @@ public class MBeanInfoData {
     // domain -> mbean (by key property listing) -> JSON representation of mbeanInfo.
     // For optimized list() variant, the map is a bit more complex and the above mapping is under "domains" key,
     // while "cache" key contains full, JSON representation of some MBeanInfos from the MBeans under "domains"
-    private final Map<String, Object> infoMap = new JSONObject();
+    private final JSONObject infoMap = new JSONObject();
 
     // static updaters for basic mapping of javax.management.MBeanInfo
     private static final Map<String, DataUpdater> UPDATERS = new HashMap<>();
@@ -187,7 +179,11 @@ public class MBeanInfoData {
         listKeys = pListKeys;
         listCache = pListCache;
         listInterfaces = pListInterfaces;
-        pathStack = pPathStack != null ? new LinkedList<>(pPathStack) : new LinkedList<>();
+
+        // Stack of path elements for Jolokia list operation. Two first elements are for {@link ObjectName#getDomain()}
+        // and {@link ObjectName#getCanonicalKeyPropertyListString()}, 3rd element is to select single updater to use
+        // like {@code class} or {@code attr}.
+        Deque<String> pathStack = pPathStack != null ? new LinkedList<>(pPathStack) : new LinkedList<>();
         this.pProvider = pProvider;
 
         // In list operation, path may be in the form of:
@@ -380,7 +376,7 @@ public class MBeanInfoData {
      *
      * @param pName MBean name for which the error occurred
      * @param pExp exception occurred
-     * @throws IOException if this method decides to rethrow the execption
+     * @throws IOException if this method decides to rethrow the exception
      */
     public void handleException(ObjectName pName, IOException pExp) throws IOException {
         // In case of a remote call, IOException can occur e.g. for
@@ -442,14 +438,14 @@ public class MBeanInfoData {
      * not included by the path. This method then moves up the part pointed to by the path to the top of the
      * tree hierarchy. It also takes into account the maximum depth of the tree and truncates below
      *
-     * @return either a Map for a subtree or the leaf value as an object
+     * @return either a Map for a subtree or the leaf value as an object which may be any type (like number)
      */
     public Object applyPath() {
         Object value = navigatePath();
         if (maxDepth == 0) {
             return value;
         }
-        if (! (value instanceof JSONObject)) {
+        if (!(value instanceof JSONObject)) {
             return value;
         } else {
             // Truncate all levels below
@@ -541,7 +537,7 @@ public class MBeanInfoData {
     // Navigate to sub map or leaf value
     private Object navigatePath() {
         int size = retrieveAtDepth;
-        Map<String, Object> innerMap = infoMap;
+        JSONObject innerMap = infoMap;
 
         if (!listCache) {
             // no optimization, standard handling of maxDepth and path

@@ -3,8 +3,6 @@ package org.jolokia.server.core.request;
 import java.util.Deque;
 import java.util.Map;
 
-import javax.management.MalformedObjectNameException;
-
 import org.jolokia.server.core.request.notification.NotificationCommand;
 import org.jolokia.server.core.request.notification.NotificationCommandFactory;
 import org.jolokia.server.core.util.RequestType;
@@ -27,7 +25,7 @@ public class JolokiaNotificationRequest extends JolokiaRequest {
      * @param pCommand command to use
      * @param pParams processing parameters
      */
-    JolokiaNotificationRequest(NotificationCommand pCommand, ProcessingParameters pParams) {
+    JolokiaNotificationRequest(NotificationCommand pCommand, ProcessingParameters pParams) throws BadRequestException {
         super(RequestType.NOTIFICATION, null, pParams, true);
         command = pCommand;
     }
@@ -39,7 +37,8 @@ public class JolokiaNotificationRequest extends JolokiaRequest {
      * @param pRequestMap object representation of the request
      * @param pParams processing parameters
      */
-    JolokiaNotificationRequest(NotificationCommand pCommand, Map<String, ?> pRequestMap, ProcessingParameters pParams) {
+    JolokiaNotificationRequest(NotificationCommand pCommand, Map<String, ?> pRequestMap, ProcessingParameters pParams)
+            throws BadRequestException {
         super(pRequestMap, pParams, true);
         command = pCommand;
     }
@@ -70,14 +69,13 @@ public class JolokiaNotificationRequest extends JolokiaRequest {
     static RequestCreator<JolokiaNotificationRequest> newCreator() {
         return new RequestCreator<>() {
             /** {@inheritDoc} */
-            public JolokiaNotificationRequest create(Deque<String> pStack, ProcessingParameters pParams) throws MalformedObjectNameException {
+            public JolokiaNotificationRequest create(Deque<String> pStack, ProcessingParameters pParams) throws BadRequestException {
                 NotificationCommand notifCommand = NotificationCommandFactory.createCommand(pStack);
                 return new JolokiaNotificationRequest(notifCommand, pParams);
             }
 
             /** {@inheritDoc} */
-            public JolokiaNotificationRequest create(JSONObject requestMap, ProcessingParameters pParams)
-                    throws MalformedObjectNameException {
+            public JolokiaNotificationRequest create(JSONObject requestMap, ProcessingParameters pParams) throws BadRequestException {
                 NotificationCommand notifCommand = NotificationCommandFactory.createCommand(requestMap);
                 return new JolokiaNotificationRequest(notifCommand, requestMap, pParams);
             }

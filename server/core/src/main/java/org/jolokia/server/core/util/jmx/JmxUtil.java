@@ -6,7 +6,7 @@ import javax.management.*;
 import javax.management.relation.MBeanServerNotificationFilter;
 
 /**
- * Utilit class for dealing with JMX's {@link ObjectName}
+ * Utility class for dealing with JMX's {@link ObjectName}
  *
  * @author roland
  * @since 05.03.13

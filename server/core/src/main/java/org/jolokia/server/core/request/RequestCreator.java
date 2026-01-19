@@ -19,7 +19,6 @@ package org.jolokia.server.core.request;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
-import javax.management.MalformedObjectNameException;
 
 import org.jolokia.json.JSONObject;
 
@@ -44,10 +43,9 @@ abstract class RequestCreator<R extends JolokiaRequest> {
      * @param pStack parsed and split GET url
      * @param pParams optional query parameters
      * @return the created request object
-     * @throws MalformedObjectNameException if an object name could not be created
+     * @throws BadRequestException if any error occurred when processing incoming data (params, {@link javax.management.ObjectName}, JSON, ...}
      */
-    abstract R create(Deque<String> pStack, ProcessingParameters pParams)
-            throws MalformedObjectNameException;
+    abstract R create(Deque<String> pStack, ProcessingParameters pParams) throws BadRequestException;
 
     /**
      * Process a {@code POST} request
@@ -55,10 +53,9 @@ abstract class RequestCreator<R extends JolokiaRequest> {
      * @param requestMap JSON representation of the request
      * @param pParams optional query parameters
      * @return the created request object
-     * @throws MalformedObjectNameException if an object name could not be created
+     * @throws BadRequestException if any error occurred when processing incoming data (params, {@link javax.management.ObjectName}, JSON, ...}
      */
-    abstract R create(JSONObject requestMap, ProcessingParameters pParams)
-            throws MalformedObjectNameException;
+    abstract R create(JSONObject requestMap, ProcessingParameters pParams) throws BadRequestException;
 
     /**
      * Extract extra arguments from the remaining element on the stack.

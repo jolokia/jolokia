@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.stream.Collectors;
 
 import org.jolokia.json.JSONObject;
+import org.jolokia.server.core.request.BadRequestException;
 import org.jolokia.server.core.request.BaseRequestHandler;
 import org.jolokia.server.core.request.EmptyResponseException;
 import org.jolokia.server.core.request.JolokiaExecRequest;
@@ -42,7 +43,7 @@ public class InVmRequestHandler extends BaseRequestHandler {
         super(context);
     }
 
-    public JSONObject handleList(String mbean) throws EmptyResponseException {
+    public JSONObject handleList(String mbean) throws EmptyResponseException, BadRequestException {
         JolokiaListRequest list = JolokiaRequestFactory.createGetRequest(
             RequestType.LIST.getName() + "/" + toPath(mbean),
             new ProcessingParameters(new HashMap<>()));
@@ -56,14 +57,14 @@ public class InVmRequestHandler extends BaseRequestHandler {
         return mbean.replaceAll("!", "!!").replaceAll("/", "!/").replaceFirst(":", "/");
     }
 
-    public JSONObject handleRead(String mbean, String attribute) throws EmptyResponseException {
+    public JSONObject handleRead(String mbean, String attribute) throws EmptyResponseException, BadRequestException {
         JolokiaReadRequest read = JolokiaRequestFactory.createGetRequest(
             RequestType.READ.getName() + "/" + mbean + "/" + attribute,
             new ProcessingParameters(new HashMap<>()));
         return executeRequest(read);
     }
 
-    public JSONObject handleWrite(String mbean, String attribute, Object value) throws EmptyResponseException {
+    public JSONObject handleWrite(String mbean, String attribute, Object value) throws EmptyResponseException, BadRequestException {
         JolokiaWriteRequest write = JolokiaRequestFactory.createGetRequest(
             // TODO: handle object value
             RequestType.WRITE.getName() + "/" + mbean + "/" + attribute + "/" + value,
@@ -71,7 +72,7 @@ public class InVmRequestHandler extends BaseRequestHandler {
         return executeRequest(write);
     }
 
-    public JSONObject handleExec(String mbean, String operation, Object... args) throws EmptyResponseException {
+    public JSONObject handleExec(String mbean, String operation, Object... args) throws EmptyResponseException, BadRequestException {
         String path = RequestType.EXEC.getName() + "/" + mbean + "/" + operation;
         if (args != null && args.length > 0) {
             path += "/" + Arrays.stream(args).map(Object::toString).collect(Collectors.joining("/"));

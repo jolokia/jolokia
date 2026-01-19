@@ -23,6 +23,7 @@ import java.util.List;
 
 import javax.management.*;
 
+import org.jolokia.server.core.request.BadRequestException;
 import org.jolokia.server.core.service.impl.MBeanRegistry;
 import org.jolokia.server.core.util.jmx.DefaultMBeanServerAccess;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
@@ -45,7 +46,7 @@ public class MBeanServerHandlerTest {
     private MBeanRegistry handler;
 
     @BeforeMethod
-    public void setup() throws MalformedObjectNameException {
+    public void setup() throws MalformedObjectNameException, BadRequestException {
         TestDetector.reset();
         handler = new MBeanRegistry();
         request = new JolokiaRequestBuilder(RequestType.READ,"java.lang:type=Memory").attribute("HeapMemoryUsage").build();
@@ -60,7 +61,7 @@ public class MBeanServerHandlerTest {
 
 
     @Test(enabled = false)
-    public void mbeanServers() throws MBeanException, IOException, ReflectionException, MalformedObjectNameException {
+    public void mbeanServers() throws JMException, IOException {
         checkMBeans(new ObjectName("java.lang:type=Memory"));
 
         /*
@@ -75,7 +76,7 @@ public class MBeanServerHandlerTest {
         //checkMBeans(new ObjectName(handler.getObjectName()));
     }
 
-    private void checkMBeans(ObjectName oName) throws MBeanException, IOException, ReflectionException {
+    private void checkMBeans(ObjectName oName) throws JMException, IOException {
         MBeanServerAccess servers = new DefaultMBeanServerAccess();
         final List<Boolean> result = new ArrayList<>();
         servers.each(oName, (pConn, pInstance) -> {

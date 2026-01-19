@@ -1,7 +1,5 @@
-package org.jolokia.server.core.request;
-
 /*
- * Copyright 2009-2013 Roland Huss
+ * Copyright 2009-2026 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +13,9 @@ package org.jolokia.server.core.request;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.server.core.request;
 
 import java.util.*;
-
-import javax.management.MalformedObjectNameException;
 
 import org.jolokia.core.util.EscapeUtil;
 import org.jolokia.server.core.util.RequestType;
@@ -39,17 +36,17 @@ public class JolokiaWriteRequest extends JolokiaObjectNameRequest {
     private final String attributeName;
 
     /**
-     * Constructor for creating a JmxRequest resulting from an HTTP GET request
+     * Constructor for creating a {@link JolokiaWriteRequest} resulting from an HTTP GET request
      *
      * @param pObjectName the name of the MBean to set the object on (must be not null)
      * @param pAttribute attribute to the the value on. Must not be null.
      * @param pValue The value to set
-     * @param pPathParts path parts to the inner part to set the valu on
+     * @param pPathParts path parts to the inner part to set the value on
      * @param pInitParams optional processing parameter
-     * @throws MalformedObjectNameException if the object name is not well formed.
+     * @throws BadRequestException if the object name is not well formed.
      */
     JolokiaWriteRequest(String pObjectName, String pAttribute, Object pValue, List<String> pPathParts,
-                        ProcessingParameters pInitParams) throws MalformedObjectNameException {
+                        ProcessingParameters pInitParams) throws BadRequestException {
         super(RequestType.WRITE, pObjectName, pPathParts, pInitParams, true);
         attributeName = pAttribute;
         value = pValue;
@@ -60,9 +57,9 @@ public class JolokiaWriteRequest extends JolokiaObjectNameRequest {
      *
      * @param pRequestMap object representation of the request
      * @param pParams processing parameters
-     * @throws MalformedObjectNameException if the name is not a proper object name
+     * @throws BadRequestException if the name is not a proper object name
      */
-    JolokiaWriteRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) throws MalformedObjectNameException {
+    JolokiaWriteRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) throws BadRequestException {
         super(pRequestMap, pParams, true);
         value = pRequestMap.get("value");
         attributeName = (String) pRequestMap.get("attribute");
@@ -99,7 +96,7 @@ public class JolokiaWriteRequest extends JolokiaObjectNameRequest {
 
     @Override
     public String toString() {
-        StringBuilder ret = new StringBuilder("JmxWriteRequest[");
+        StringBuilder ret = new StringBuilder("JolokiaWriteRequest[");
         ret.append("attribute=").append(getAttributeName())
                     .append(", value=").append(getValue());
         String baseInfo = getInfo();
@@ -122,8 +119,6 @@ public class JolokiaWriteRequest extends JolokiaObjectNameRequest {
         return ret;
     }
 
-    // ===========================================================================
-
     /**
      * Creator for {@link JolokiaWriteRequest}s
      *
@@ -131,21 +126,36 @@ public class JolokiaWriteRequest extends JolokiaObjectNameRequest {
      */
     static RequestCreator<JolokiaWriteRequest> newCreator() {
         return new RequestCreator<>() {
-            /** {@inheritDoc} */
-            public JolokiaWriteRequest create(Deque<String> pStack, ProcessingParameters pParams) throws MalformedObjectNameException {
+            @Override
+            public JolokiaWriteRequest create(Deque<String> pStack, ProcessingParameters pParams) throws BadRequestException {
+                if (pStack == null || pStack.size() < 3) {
+                    throw new BadRequestException("Write GET requests require at least three path elements");
+                }
                 return new JolokiaWriteRequest(
-                        pStack.pop(), // object name
-                        pStack.pop(), // attribute name
-                        EscapeUtil.convertSpecialStringTags(pStack.pop()), // value
-                        prepareExtraArgs(pStack), // path
-                        pParams);
+                    pStack.pop(), // object name
+                    pStack.pop(), // attribute name
+                    EscapeUtil.convertSpecialStringTags(pStack.pop()), // value
+                    prepareExtraArgs(pStack), // path
+                    pParams);
             }
 
-            /** {@inheritDoc} */
-            public JolokiaWriteRequest create(JSONObject requestMap, ProcessingParameters pParams)
-                    throws MalformedObjectNameException {
+            @Override
+            public JolokiaWriteRequest create(JSONObject requestMap, ProcessingParameters pParams) throws BadRequestException {
+                if (requestMap == null) {
+                    throw new BadRequestException("Can't create Write POST request");
+                }
+                if (!requestMap.containsKey("mbean")) {
+                    throw new BadRequestException("Write POST requests require an ObjectName to write to");
+                }
+                if (!requestMap.containsKey("attribute")) {
+                    throw new BadRequestException("Write POST requests require an attribute name to write to");
+                }
+                if (!requestMap.containsKey("value")) {
+                    throw new BadRequestException("Write POST requests require a value to set (may be a null)");
+                }
                 return new JolokiaWriteRequest(requestMap, pParams);
             }
         };
     }
+
 }

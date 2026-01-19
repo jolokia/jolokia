@@ -22,7 +22,6 @@ import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import javax.management.MalformedObjectNameException;
 
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
@@ -31,6 +30,7 @@ import org.jolokia.server.core.backend.BackendManager;
 import org.jolokia.server.core.backend.RequestDispatcher;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.http.HttpRequestHandler;
+import org.jolokia.server.core.request.BadRequestException;
 import org.jolokia.server.core.request.BaseRequestHandler;
 import org.jolokia.server.core.request.JolokiaRequestBuilder;
 import org.jolokia.server.core.service.api.JolokiaContext;
@@ -62,7 +62,7 @@ public class JolokiaHttpHandlerTest {
 
 
     @BeforeMethod
-    public void setup() throws MalformedObjectNameException, NoSuchFieldException, IllegalAccessException {
+    public void setup() throws NoSuchFieldException, IllegalAccessException, BadRequestException {
         TestJolokiaContext ctx = getContext();
         requestDispatcher = new TestRequestDispatcher.Builder()
                 .request(new JolokiaRequestBuilder(RequestType.READ, "java.lang:type=Memory").attribute("HeapMemoryUsage").build())
@@ -214,10 +214,7 @@ public class JolokiaHttpHandlerTest {
         ByteArrayOutputStream out = prepareResponse(exchange, header);
         handler.handle(exchange);
 
-        JSONObject resp = new JSONParser().parse(out.toString(), JSONObject.class);
-        assertTrue(resp.containsKey("error"));
-        assertEquals(resp.get("error_type"), IllegalArgumentException.class.getName());
-        assertTrue(((String) resp.get("error")).contains("PUT"));
+        assertTrue(out.toString().startsWith("400 (Bad Request)"));
     }
 
     @Test
@@ -261,7 +258,7 @@ public class JolokiaHttpHandlerTest {
     }
 
     @Test
-    public void usingStreamingJSON() throws IOException, URISyntaxException, ParseException, NoSuchFieldException, IllegalAccessException {
+    public void usingStreamingJSON() throws IOException, URISyntaxException, ParseException, NoSuchFieldException, IllegalAccessException, BadRequestException {
         handler = new JolokiaHttpHandler(getContext(ConfigKey.STREAMING, "true"));
         injectRequestDispatcher(handler,requestDispatcher);
 

@@ -95,7 +95,7 @@ public class Http5Client implements HttpClientSpi<HttpClient> {
     @Override
     public <REQ extends JolokiaRequest, RES extends JolokiaResponse<REQ>>
     JSONStructure execute(REQ pRequest, HttpMethod method, Map<JolokiaQueryParameter, String> parameters, JolokiaTargetConfig targetConfig)
-            throws IOException, JolokiaException {
+            throws JolokiaException {
         HttpUriRequest httpRequest = prepareRequest(pRequest, method, parameters, targetConfig);
 
         return execute(httpRequest, pRequest, pRequest.getType().getValue());
@@ -104,7 +104,7 @@ public class Http5Client implements HttpClientSpi<HttpClient> {
     @Override
     public <REQ extends JolokiaRequest, RES extends JolokiaResponse<REQ>>
     JSONStructure execute(List<REQ> pRequests, Map<JolokiaQueryParameter, String> parameters, JolokiaTargetConfig targetConfig)
-            throws IOException, JolokiaException {
+            throws JolokiaException {
         HttpUriRequest httpRequest = prepareRequests(pRequests, parameters, targetConfig);
 
         return execute(httpRequest, null, "bulk");
@@ -213,7 +213,7 @@ public class Http5Client implements HttpClientSpi<HttpClient> {
      * @param requestType    for logging purpose
      * @return
      */
-    private JSONStructure execute(HttpUriRequest httpRequest, JolokiaRequest jolokiaRequest, String requestType) throws IOException, JolokiaException {
+    private JSONStructure execute(HttpUriRequest httpRequest, JolokiaRequest jolokiaRequest, String requestType) throws JolokiaException {
         HttpClientContext httpContext = null;
         Credentials credentials = credentialsProvider.getCredentials(targetAuthScope, null);
         if (credentials instanceof UsernamePasswordCredentials basicAuth) {
@@ -226,19 +226,23 @@ public class Http5Client implements HttpClientSpi<HttpClient> {
 
         HttpClientResponseHandler<ProcessedResponse> responseHandler = new HttpClientResponseHandler<>() {
             @Override
-            public ProcessedResponse handleResponse(ClassicHttpResponse response) {
+            public ProcessedResponse handleResponse(ClassicHttpResponse response) throws IOException {
                 HttpEntity entity = response.getEntity();
                 try {
                     Charset encoding;
-                    String contentEncoding = entity.getContentEncoding();
+                    String contentEncoding = entity == null ? null : entity.getContentEncoding();
                     if (contentEncoding == null) {
                         encoding = config.contentCharset() == null ? StandardCharsets.ISO_8859_1 : config.contentCharset();
                     } else {
                         encoding = Charset.forName(contentEncoding);
                     }
-                    JSONStructure json = HttpUtil.parseJsonResponse(entity.getContent(), encoding);
-                    return new ProcessedResponse(response, json, null, response.getCode());
-                } catch (ParseException | IOException e) {
+                    if (entity != null && entity.getContent() != null) {
+                        JSONStructure json = HttpUtil.parseJsonResponse(entity.getContent(), encoding);
+                        return new ProcessedResponse(response, json, null, response.getCode());
+                    }
+                    // nothing to parse
+                    return new ProcessedResponse(response, null, null, response.getCode());
+                } catch (ParseException e) {
                     return new ProcessedResponse(response, null, e, response.getCode());
                 }
             }
@@ -251,17 +255,23 @@ public class Http5Client implements HttpClientSpi<HttpClient> {
             if (errorCode != 200) {
                 // no need to parse, because Jolokia JSON responses for errors are sent with HTTP 200 code
                 throw new JolokiaRemoteException(jolokiaRequest, "HTTP error " + errorCode + " sending " + requestType + " Jolokia request",
-                    null, errorCode, null, null);
+                    null, null, errorCode, null, null);
             }
 
             Exception e = response.exception();
             if (e != null) {
-                String errorType = e.getClass().getName();
-                String message = "Error processing " + requestType + " response: " + e.getMessage();
-                throw new JolokiaRemoteException(jolokiaRequest, message, errorType, errorCode, null, null);
+                // we know that the only exception we can get here is ParseException, so we can't
+                // throw JolokiaRemoteException because it wraps actual data from JSON error
+                throw new JolokiaException("Error processing " + requestType + " response: " + e.getMessage(), e);
             }
 
-            return response.json();
+            JSONStructure json = response.json();
+            if (json != null) {
+                return json;
+            }
+
+            // no data at all
+            throw new JolokiaException("ASD");
         } catch (ConnectException e) {
             String msg = "Cannot connect to " + jolokiaAgentUrl + ": " + e.getMessage();
             throw new JolokiaConnectException(msg, e);
@@ -272,12 +282,21 @@ public class Http5Client implements HttpClientSpi<HttpClient> {
             String msg = "Timeout getting pooled connection when sending " + requestType + " request to " + jolokiaAgentUrl + ": " + e.getMessage();
             throw new JolokiaTimeoutException(msg, e);
         } catch (IOException e) {
-            String msg = "IO exception when processing " + requestType + " request to " + jolokiaAgentUrl + ": " + e.getMessage();
-            throw new JolokiaTimeoutException(msg, e);
+            String msg = "I/O exception when processing " + requestType + " request to " + jolokiaAgentUrl + ": " + e.getMessage();
+            throw new JolokiaException(msg, e);
         }
     }
 
-    private record ProcessedResponse(ClassicHttpResponse response, JSONStructure json, Exception exception, int code) {
+    /**
+     * A tuple representing initial processing of the HTTP response. It is created when there's no connection/IO
+     * error and we got something that <em>may</em> be parsed as JSON. But eventually we may have a parsing error
+     *
+     * @param response
+     * @param json
+     * @param exception
+     * @param code
+     */
+    private record ProcessedResponse(ClassicHttpResponse response, JSONStructure json, ParseException exception, int code) {
     }
 
 }

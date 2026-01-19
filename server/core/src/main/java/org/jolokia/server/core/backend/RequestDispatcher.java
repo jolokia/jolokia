@@ -1,8 +1,24 @@
+/*
+ * Copyright 2009-2026 Roland Huss
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.jolokia.server.core.backend;
 
 import java.io.IOException;
 
 import javax.management.JMException;
+import javax.management.JMRuntimeException;
 
 import org.jolokia.server.core.request.*;
 import org.jolokia.server.core.service.request.RequestHandler;
@@ -22,12 +38,14 @@ public interface RequestDispatcher {
      *
      * @param pJolokiaRequest the request to dispatch
      * @return result of the dispatch operation.
-     *
-     * @throws NotChangedException the request handler detects no change for the requests' result and
-     *                             hence returns without result.
-     * @throws EmptyResponseException when no response should be created
-     * @throws IOException IO Exception during the operation.
-     * @throws JMException a JMX operation failed.
+     * @throws IOException when there's an error invoking {@link javax.management.MBeanServerConnection} for some commands (which may be remote)
+     * @throws JMException JMX checked exception, because most requests are handled by dealing with MBeans
+     * @throws JMRuntimeException JMX unchecked exception, because most requests are handled by dealing with MBeans
+     * @throws NotChangedException when (according to request parameters) user wants HTTP 304 if nothing has changed
+     * @throws BadRequestException because some commands do more user input parsing in addition to what was checked when the {@link JolokiaRequest} was created
+     * @throws EmptyResponseException if the response should not be closed (expecting further async/stream data)
      */
-    Object dispatch(JolokiaRequest pJolokiaRequest) throws JMException, NotChangedException, EmptyResponseException, IOException;
+    Object dispatch(JolokiaRequest pJolokiaRequest)
+        throws IOException, JMException, JMRuntimeException, NotChangedException, BadRequestException, EmptyResponseException;
+
 }

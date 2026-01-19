@@ -23,7 +23,7 @@ import org.jolokia.server.core.util.RequestType;
 import org.w3c.dom.*;
 
 /**
- * Checks for a certain requst type which are specified within a <code>&lt;commands&gt;</code>
+ * Checks for a certain request type which are specified within a <code>&lt;commands&gt;</code>
  * section. If no such section is present, then all commands are allowed, otherwise only
  * the given type is allowed by this checker.
  * <p>

@@ -35,7 +35,7 @@ public class JolokiaListRequest extends JolokiaRequest {
      * @param pPathParts parts of a path to restrict on the return value
      * @param pParams processing parameters
      */
-    JolokiaListRequest(List<String> pPathParts, ProcessingParameters pParams) {
+    JolokiaListRequest(List<String> pPathParts, ProcessingParameters pParams) throws BadRequestException {
         super(RequestType.LIST,pPathParts,pParams,false);
     }
 
@@ -45,7 +45,7 @@ public class JolokiaListRequest extends JolokiaRequest {
      * @param pRequestMap object representation of the request
      * @param pParams processing parameters
      */
-    JolokiaListRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) {
+    JolokiaListRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) throws BadRequestException {
         super(pRequestMap, pParams,false);
     }
 
@@ -82,14 +82,14 @@ public class JolokiaListRequest extends JolokiaRequest {
     static RequestCreator<JolokiaListRequest> newCreator() {
         return new RequestCreator<>() {
             /** {@inheritDoc} */
-            public JolokiaListRequest create(Deque<String> pStack, ProcessingParameters pParams) {
+            public JolokiaListRequest create(Deque<String> pStack, ProcessingParameters pParams) throws BadRequestException {
                 return new JolokiaListRequest(
                         prepareExtraArgs(pStack), // path
                         pParams);
             }
 
             /** {@inheritDoc} */
-            public JolokiaListRequest create(JSONObject requestMap, ProcessingParameters pParams) {
+            public JolokiaListRequest create(JSONObject requestMap, ProcessingParameters pParams) throws BadRequestException {
                 return new JolokiaListRequest(requestMap, pParams);
             }
         };

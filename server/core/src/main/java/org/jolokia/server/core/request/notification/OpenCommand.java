@@ -18,6 +18,8 @@ package org.jolokia.server.core.request.notification;/*
 import java.util.Deque;
 import java.util.Map;
 
+import org.jolokia.server.core.request.BadRequestException;
+
 /**
  * Command for creating and opening a channel for transmitting notifications
  * back to the client.
@@ -35,10 +37,10 @@ public class OpenCommand extends ClientCommand {
      * Constructor for GET requests
      * @param pStack path parameters
      */
-    public OpenCommand(Deque<String> pStack) {
+    public OpenCommand(Deque<String> pStack) throws BadRequestException {
         super(NotificationCommandType.OPEN, pStack);
         if (pStack.isEmpty()) {
-            throw new IllegalArgumentException("No mode give for " + NotificationCommandType.OPEN);
+            throw new BadRequestException("No mode give for " + NotificationCommandType.OPEN);
         }
         mode = pStack.pop();
     }
@@ -48,10 +50,10 @@ public class OpenCommand extends ClientCommand {
      *
      * @param pMap map containing parameters
      */
-    public OpenCommand(Map<String, ?> pMap) {
+    public OpenCommand(Map<String, ?> pMap) throws BadRequestException {
         super(NotificationCommandType.OPEN, pMap);
                 if (!pMap.containsKey("mode")) {
-            throw new IllegalArgumentException("No mode give for " + NotificationCommandType.ADD);
+            throw new BadRequestException("No mode give for " + NotificationCommandType.ADD);
         }
         mode = (String) pMap.get("mode");
     }
@@ -59,4 +61,5 @@ public class OpenCommand extends ClientCommand {
     public String getMode() {
         return mode;
     }
+
 }

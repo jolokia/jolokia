@@ -109,7 +109,7 @@ public class NotificationListenerDelegateTest {
         try {
             delegate.addListener(executor,command);
             fail();
-        } catch (IllegalArgumentException ignored) {
+        } catch (InstanceNotFoundException ignored) {
         }
         assertEquals(delegate.list(id).size(),0);
     }

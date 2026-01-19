@@ -68,7 +68,7 @@ public enum RequestType {
         }
         RequestType type = typesByNameMap.get(pName.toLowerCase());
         if (type == null) {
-            throw new BadRequestException("No type with name '" + pName + "' exists");
+            throw new IllegalArgumentException("No type with name '" + pName + "' exists");
         }
         return type;
     }

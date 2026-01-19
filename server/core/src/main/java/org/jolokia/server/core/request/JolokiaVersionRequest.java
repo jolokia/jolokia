@@ -35,7 +35,7 @@ public class JolokiaVersionRequest extends JolokiaRequest {
      *
      * @param pInitParams optional init parameters
      */
-    JolokiaVersionRequest(ProcessingParameters pInitParams) {
+    JolokiaVersionRequest(ProcessingParameters pInitParams) throws BadRequestException {
         super(RequestType.VERSION,null,pInitParams,true);
     }
 
@@ -45,7 +45,7 @@ public class JolokiaVersionRequest extends JolokiaRequest {
      * @param pRequestMap object representation of the request
      * @param pParams processing parameters
      */
-    JolokiaVersionRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) {
+    JolokiaVersionRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) throws BadRequestException {
         super(pRequestMap, pParams,true);
     }
 
@@ -64,12 +64,12 @@ public class JolokiaVersionRequest extends JolokiaRequest {
     static RequestCreator<JolokiaVersionRequest> newCreator() {
         return new RequestCreator<>() {
             /** {@inheritDoc} */
-            public JolokiaVersionRequest create(Deque<String> pStack, ProcessingParameters pParams) {
+            public JolokiaVersionRequest create(Deque<String> pStack, ProcessingParameters pParams) throws BadRequestException {
                 return new JolokiaVersionRequest(pParams);
             }
 
             /** {@inheritDoc} */
-            public JolokiaVersionRequest create(JSONObject requestMap, ProcessingParameters pParams) {
+            public JolokiaVersionRequest create(JSONObject requestMap, ProcessingParameters pParams) throws BadRequestException {
                 return new JolokiaVersionRequest(requestMap, pParams);
             }
         };

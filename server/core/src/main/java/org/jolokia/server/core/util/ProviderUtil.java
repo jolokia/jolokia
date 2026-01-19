@@ -7,7 +7,7 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 /**
- * Utility class for helping in managing and finding provider parts of an objectname
+ * Utility class for helping in managing and finding provider parts of an {@link ObjectName}
  *
  * @author roland
  * @since 16.12.13
@@ -69,7 +69,7 @@ public final class ProviderUtil {
     }
 
     /**
-     * Helper class holding the provider (can be null) and an object name belonging to this provider)
+     * Helper class holding the provider (can be null) and an object name belonging to this provider
      */
     public static final class ProviderObjectNamePair {
         private final String provider;

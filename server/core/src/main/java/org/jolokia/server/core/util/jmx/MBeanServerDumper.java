@@ -73,7 +73,7 @@ final class MBeanServerDumper {
                 pRet.append("              ").append(n).append("\n");
             }
         } catch (MalformedObjectNameException e) {
-            // Shouldnt happen
+            // Shouldn't happen
             pRet.append("              INTERNAL ERROR: ").append(e).append("\n");
         }
     }

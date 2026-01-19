@@ -1,7 +1,5 @@
-package org.jolokia.service.jmx.handler;
-
 /*
- * Copyright 2009-2013 Roland Huss
+ * Copyright 2009-2026 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,23 +13,35 @@ package org.jolokia.service.jmx.handler;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.service.jmx.handler;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.management.*;
+import javax.management.InstanceNotFoundException;
+import javax.management.JMException;
+import javax.management.MBeanInfo;
+import javax.management.MBeanOperationInfo;
+import javax.management.MBeanParameterInfo;
+import javax.management.MBeanServerConnection;
+import javax.management.ObjectName;
 import javax.management.openmbean.OpenMBeanParameterInfo;
 import javax.management.openmbean.OpenType;
 
-import org.jolokia.json.JSONObject;
+import org.jolokia.core.service.serializer.ValueFaultHandler;
+import org.jolokia.server.core.request.BadRequestException;
 import org.jolokia.server.core.request.JolokiaExecRequest;
 import org.jolokia.server.core.service.serializer.Serializer;
-import org.jolokia.core.service.serializer.ValueFaultHandler;
 import org.jolokia.server.core.util.RequestType;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
-
 
 /**
  * Handler for dealing with execute requests.
@@ -41,23 +51,22 @@ import org.jolokia.server.core.util.jmx.MBeanServerAccess;
  */
 public class ExecHandler extends AbstractCommandHandler<JolokiaExecRequest> {
 
-
-    /** {@inheritDoc} */
+    @Override
     public RequestType getType() {
         return RequestType.EXEC;
     }
 
-    /** {@inheritDoc} */
     @Override
     protected void checkForRestriction(JolokiaExecRequest pRequest) {
-        if (!context.isOperationAllowed(pRequest.getObjectName(),pRequest.getOperation())) {
+        if (!context.isOperationAllowed(pRequest.getObjectName(), pRequest.getOperation())) {
             throw new SecurityException("Operation " + pRequest.getOperation() +
-                    " forbidden for MBean " + pRequest.getObjectNameAsString());
+                " forbidden for MBean " + pRequest.getObjectNameAsString());
         }
     }
 
     /**
-     * EXEC may be performed on multiple objects if they match the {@link ObjectName} pattern
+     * EXEC may be performed on multiple objects if they match the {@link ObjectName} pattern - similar
+     * to READ requests
      * @param pRequest
      * @return
      */
@@ -67,12 +76,11 @@ public class ExecHandler extends AbstractCommandHandler<JolokiaExecRequest> {
     }
 
     /**
-     * Execute an JMX operation. The operation name is taken from the request, as well as the
+     * Execute an JMX operation on a single MBean. The operation name is taken from the request, as well as the
      * arguments to use. If the operation is given in the format "op(type1,type2,...)"
      * (e.g "getText(java.lang.String,int)" then the argument types are taken into account
      * as well. This way, overloaded JMX operation can be used. If an overloaded JMX operation
-     * is called without specifying the argument types, then an exception is raised.
-     *
+     * is called without specifying the argument types, then an exception is thrown.
      *
      * @param server server to try
      * @param request request to process from where the operation and its arguments are extracted.
@@ -80,8 +88,8 @@ public class ExecHandler extends AbstractCommandHandler<JolokiaExecRequest> {
      */
     @Override
     public Object doHandleSingleServerRequest(MBeanServerConnection server, JolokiaExecRequest request)
-            throws InstanceNotFoundException, ReflectionException, MBeanException, IOException {
-        OperationAndParamType types = extractOperationTypes(server,request);
+            throws IOException, JMException, BadRequestException {
+        OperationAndParamType types = extractOperationTypes(server, request);
         int nrParams = types.paramClasses.length;
         Object[] params = new Object[nrParams];
         List<?> args = request.getArguments();
@@ -102,47 +110,85 @@ public class ExecHandler extends AbstractCommandHandler<JolokiaExecRequest> {
             args = Collections.emptyList();
         }
         verifyArguments(request, types, nrParams, args);
-        for (int i = 0; i < nrParams; i++) {
-            if (types.paramOpenTypes[i] != null) {
-                params[i] = context.getMandatoryService(Serializer.class).deserializeOpenType(types.paramOpenTypes[i], args.get(i));
-            } else {
-                params[i] = context.getMandatoryService(Serializer.class).deserialize(types.paramClasses[i], args.get(i));
+        try {
+            for (int i = 0; i < nrParams; i++) {
+                if (types.paramOpenTypes[i] != null) {
+                    params[i] = context.getMandatoryService(Serializer.class).deserializeOpenType(types.paramOpenTypes[i], args.get(i));
+                } else {
+                    params[i] = context.getMandatoryService(Serializer.class).deserialize(types.paramClasses[i], args.get(i));
+                }
             }
+        } catch (IllegalArgumentException | UnsupportedOperationException e) {
+            // because deserialization of user-provided data is involved, we turn these into BadRequestException
+            throw new BadRequestException("Can't process " + request, e);
         }
 
-        return server.invoke(request.getObjectName(),types.operationName,params,types.paramClasses);
+        return server.invoke(request.getObjectName(), types.operationName, params, types.paramClasses);
     }
 
     @Override
-    public Object doHandleAllServerRequest(MBeanServerAccess pServerManager, JolokiaExecRequest pRequest, Object pPreviousResult)
-        throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
+    public Object doHandleAllServerRequest(MBeanServerAccess jmxAccess, JolokiaExecRequest pRequest, Object pPreviousResult)
+            throws JMException, BadRequestException, IOException {
+        // remember that EXEC JolokiaRequests are "exclusive", so there's no previous result
+
         ObjectName oName = pRequest.getObjectName();
         ValueFaultHandler faultHandler = pRequest.getValueFaultHandler();
+
         if (oName.isPattern()) {
             // search first
-            Set<ObjectName> names = pServerManager.queryNames(oName);
+            Set<ObjectName> names = jmxAccess.queryNames(oName);
             if (names.isEmpty()) {
-                throw new InstanceNotFoundException("No MBean with pattern " + oName + " found for invoking JMX operations");
+                throw new InstanceNotFoundException("No MBean with pattern " + oName + " found for EXEC request");
             }
-            JSONObject result = new JSONObject();
+
+            Map<String, Object> result = new HashMap<>();
+
+            boolean invokedAtLeastOnce = false;
             for (ObjectName name : names) {
-                Object singleResult = pServerManager.call(name, (connection, objectName, extra)
-                    -> ExecHandler.this.doHandleSingleServerRequest(connection, pRequest.withChangedObjectName(name)));
-                result.put(pRequest.getOrderedObjectName(name), singleResult);
+                // iterate the servers manually, because we want to reuse doHandleSingleServerRequest()
+                // with better exception handling (checked BadRequestException)
+                for (MBeanServerConnection server : jmxAccess.getMBeanServers()) {
+                    try {
+                        Object singleResult = doHandleSingleServerRequest(server, pRequest.withChangedObjectName(name));
+                        result.put(pRequest.getOrderedObjectName(name), singleResult);
+                        // do not check other MBeanServers, because we have a result.
+                        // same as if we called org.jolokia.server.core.util.jmx.MBeanServerAccess.call()
+                        break;
+                    } catch (InstanceNotFoundException ignored) {
+                    }
+                }
             }
+
+            if (result.isEmpty()) {
+                // as with request handler, when we don't get anything executing by ObjectName pattern, we
+                // throw the exception. If _some_ queried MBeans are missing during invocation, we ignore them
+                // as if they were not queried in the first place
+                throw new InstanceNotFoundException("No MBean found matching " + oName + " pattern to invoke " + pRequest);
+            }
+
             return result;
         } else {
-            return pServerManager.call(oName, (connection, objectName, extra)
-                -> ExecHandler.this.doHandleSingleServerRequest(connection, pRequest));
+            // single MBean invocation - again manual iteration to reuse doHandleSingleServerRequest()
+            for (MBeanServerConnection server : jmxAccess.getMBeanServers()) {
+                try {
+                    // returned directly without object name at top level
+                    return doHandleSingleServerRequest(server, pRequest.withChangedObjectName(oName));
+                } catch (InstanceNotFoundException ignored) {
+                }
+            }
+
+            // nothing returned, so we have no choice
+            throw new InstanceNotFoundException("No " + oName + " MBean found to invoke " + pRequest);
         }
     }
 
-    // check whether the given arguments are compatible with the signature and if not so, raise an excepton
-    private void verifyArguments(JolokiaExecRequest request, OperationAndParamType pTypes, int pNrParams, List<?> pArgs) {
-        if ( (pNrParams > 0 && pArgs == null) || (pArgs != null && pArgs.size() != pNrParams)) {
-            throw new IllegalArgumentException("Invalid number of operation arguments. Operation " +
-                    request.getOperation() + " on " + request.getObjectName() + " requires " + pTypes.paramClasses.length +
-                    " parameters, not " + (pArgs == null ? 0 : pArgs.size()) + " as given");
+    // check whether the given arguments are compatible with the signature and if not so, raise an exception
+    private void verifyArguments(JolokiaExecRequest request, OperationAndParamType pTypes, int pNrParams, List<?> pArgs)
+            throws BadRequestException {
+        if ((pNrParams > 0 && pArgs == null) || (pArgs != null && pArgs.size() != pNrParams)) {
+            throw new BadRequestException("Invalid number of operation arguments. Operation " +
+                request.getOperation() + " on " + request.getObjectName() + " requires " + pTypes.paramClasses.length +
+                " parameters, not " + (pArgs == null ? 0 : pArgs.size()) + " as given");
         }
     }
 
@@ -154,10 +200,11 @@ public class ExecHandler extends AbstractCommandHandler<JolokiaExecRequest> {
      * @return combined object containing the operation name and parameter classes
      */
     private OperationAndParamType extractOperationTypes(MBeanServerConnection pServer, JolokiaExecRequest pRequest)
-            throws ReflectionException, InstanceNotFoundException, IOException {
+            throws IOException, JMException, BadRequestException {
         if (pRequest.getOperation() == null) {
-            throw new IllegalArgumentException("No operation given for exec Request on MBean " + pRequest.getObjectName());
+            throw new BadRequestException("No operation given for exec Request on MBean " + pRequest.getObjectName());
         }
+
         List<String> opArgs = splitOperation(pRequest.getOperation());
         String operation = opArgs.get(0);
         List<String> types;
@@ -174,7 +221,7 @@ public class ExecHandler extends AbstractCommandHandler<JolokiaExecRequest> {
                 return new OperationAndParamType(operation,paramInfos.get(0));
             } else {
                 // type requested from the operation
-                throw new IllegalArgumentException(
+                throw new BadRequestException(
                         getErrorMessageForMissingSignature(pRequest, operation, paramInfos));
             }
         }
@@ -182,10 +229,11 @@ public class ExecHandler extends AbstractCommandHandler<JolokiaExecRequest> {
         List<MBeanParameterInfo[]> paramInfos = extractMBeanParameterInfos(pServer, pRequest, operation);
         MBeanParameterInfo[] matchingSignature = getMatchingSignature(types, paramInfos);
         if (matchingSignature == null) {
-            throw new IllegalArgumentException(
+            throw new BadRequestException(
                     "No operation " + pRequest.getOperation() + " on MBean " + pRequest.getObjectNameAsString() + " exists. " +
                             "Known signatures: " + signatureToString(paramInfos));
         }
+
         return new OperationAndParamType(operation, matchingSignature);
     }
 
@@ -196,37 +244,33 @@ public class ExecHandler extends AbstractCommandHandler<JolokiaExecRequest> {
      * @param pServer server from where to fetch the MBean info for a given request's object name
      * @param pRequest the JMX request
      * @param pOperation the operation whose signature should be extracted
-     * @return a list of signature. If the operation is overloaded, this contains mutliple entries,
+     * @return a list of signature. If the operation is overloaded, this contains multiple entries,
      *         otherwise only a single entry is contained
      */
     private List<MBeanParameterInfo[]> extractMBeanParameterInfos(MBeanServerConnection pServer, JolokiaExecRequest pRequest,
                                                                   String pOperation)
-            throws InstanceNotFoundException, ReflectionException, IOException {
-        try {
-            MBeanInfo mBeanInfo = pServer.getMBeanInfo(pRequest.getObjectName());
-            List<MBeanParameterInfo[]> paramInfos = new ArrayList<>();
-            for (MBeanOperationInfo opInfo : mBeanInfo.getOperations()) {
-                if (opInfo.getName().equals(pOperation)) {
-                    paramInfos.add(opInfo.getSignature());
-                }
+            throws IOException, JMException, BadRequestException {
+        MBeanInfo mBeanInfo = pServer.getMBeanInfo(pRequest.getObjectName());
+        List<MBeanParameterInfo[]> paramInfos = new ArrayList<>();
+        for (MBeanOperationInfo opInfo : mBeanInfo.getOperations()) {
+            if (opInfo.getName().equals(pOperation)) {
+                paramInfos.add(opInfo.getSignature());
             }
-            if (paramInfos.isEmpty()) {
-                throw new IllegalArgumentException("No operation " + pOperation +
-                        " found on MBean " + pRequest.getObjectNameAsString());
-            }
-            return paramInfos;
-        }  catch (IntrospectionException e) {
-            throw new IllegalStateException("Cannot extract MBeanInfo for " + pRequest.getObjectNameAsString(),e);
         }
+        if (paramInfos.isEmpty()) {
+            throw new BadRequestException("No operation " + pOperation +
+                    " found on MBean " + pRequest.getObjectNameAsString());
+        }
+        return paramInfos;
     }
 
     /**
      * Check whether a matching signature exists from a list of MBean parameter infos. The match is done against a list of types
      * (in string form) which was extracted from the request
      *
-     * @param pTypes types to match agains. These are full qualified class names in string representation
+     * @param pTypes types to match against. These are full qualified class names in string representation
      * @param pParamInfos list of parameter infos
-     * @return the matched signature MBeanParamaterInfo[]
+     * @return the matched signature {@link MBeanParameterInfo} array
      */
     private MBeanParameterInfo[] getMatchingSignature(List<String> pTypes, List<MBeanParameterInfo[]> pParamInfos) {
         OUTER:
@@ -275,14 +319,12 @@ public class ExecHandler extends AbstractCommandHandler<JolokiaExecRequest> {
     }
 
     private String getErrorMessageForMissingSignature(JolokiaExecRequest pRequest, String pOperation, List<MBeanParameterInfo[]> pParamInfos) {
-        StringBuilder msg = new StringBuilder("Operation ");
-        msg.append(pOperation).
-                append(" on MBean ").
-                append(pRequest.getObjectNameAsString()).
-                append(" is overloaded. Signatures found: ");
-        msg.append(signatureToString(pParamInfos));
-        msg.append(". Use a signature when specifying the operation.");
-        return msg.toString();
+        return "Operation " + pOperation +
+            " on MBean " +
+            pRequest.getObjectNameAsString() +
+            " is overloaded. Signatures found: " +
+            signatureToString(pParamInfos) +
+            ". Use a signature when specifying the operation.";
     }
 
     private String signatureToString(List<MBeanParameterInfo[]> pParamInfos) {
@@ -299,20 +341,17 @@ public class ExecHandler extends AbstractCommandHandler<JolokiaExecRequest> {
         return ret.toString();
     }
 
-    // ==================================================================================
-    // Used for parsing
     private static final class OperationAndParamType {
         private OperationAndParamType(String pOperationName, MBeanParameterInfo[] pParameterInfos) {
             operationName = pOperationName;
             paramClasses = new String[pParameterInfos.length];
             paramOpenTypes = new OpenType<?>[pParameterInfos.length];
-            int i=0;
+            int i = 0;
             for (MBeanParameterInfo info : pParameterInfos) {
-            	if (info instanceof OpenMBeanParameterInfo) {
-            		OpenMBeanParameterInfo openTypeInfo = (OpenMBeanParameterInfo) info;
-            		paramOpenTypes[i] = openTypeInfo.getOpenType();
-            	}
-           		paramClasses[i++] = info.getType();
+                if (info instanceof OpenMBeanParameterInfo openTypeInfo) {
+                    paramOpenTypes[i] = openTypeInfo.getOpenType();
+                }
+                paramClasses[i++] = info.getType();
             }
         }
 
@@ -320,4 +359,5 @@ public class ExecHandler extends AbstractCommandHandler<JolokiaExecRequest> {
         private final String[] paramClasses;
         private final OpenType<?>[] paramOpenTypes;
     }
+
 }

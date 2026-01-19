@@ -94,15 +94,15 @@ public class ListHandlerTest extends BaseHandlerTest {
             assertTrue(res.containsKey("proxy@java.lang"));
             assertTrue(res.get("proxy@java.lang") instanceof Map);
 
-            Map<String, String> baseMap = createMap("first", "second");
+            JSONObject baseMap = createMap("first", "second");
             res = execute(handler,request,baseMap);
             assertTrue(res.containsKey("java.lang"));
             assertEquals(res.get("first"), "second");
         }
     }
 
-    private Map<String, String> createMap(String... args) {
-        Map<String, String> map = new HashMap<>();
+    private JSONObject createMap(String... args) {
+        JSONObject map = new JSONObject();
         for (int i = 0; i < args.length; i+=2) {
             map.put(args[i], args[i + 1]);
         }
@@ -378,7 +378,7 @@ public class ListHandlerTest extends BaseHandlerTest {
     }
 
     @SuppressWarnings("unchecked")
-    private Map<String, ?> execute(ListHandler pHandler, JolokiaListRequest pRequest, Map<?, ?> ... pPreviousResult) throws ReflectionException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, IOException, NotChangedException, EmptyResponseException {
+    private Map<String, ?> execute(ListHandler pHandler, JolokiaListRequest pRequest, Map<?, ?> ... pPreviousResult) throws JMException, IOException, NotChangedException, EmptyResponseException, BadRequestException {
         return (Map<String, ?>) pHandler.handleAllServerRequest(executor, pRequest,
                                                      pPreviousResult != null && pPreviousResult.length > 0 ? pPreviousResult[0] : null);
     }
@@ -403,7 +403,7 @@ public class ListHandlerTest extends BaseHandlerTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void singleMBeanMultipleServers() throws MalformedObjectNameException, InstanceNotFoundException, IOException, AttributeNotFoundException, ReflectionException, MBeanException, IntrospectionException, NotChangedException, EmptyResponseException {
+    public void singleMBeanMultipleServers() throws JMException, IOException, NotChangedException, EmptyResponseException, BadRequestException {
         JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST)
                 .pathParts("java.lang", "type=Memory", ATTRIBUTES.getKey())
                 .build();
@@ -418,8 +418,8 @@ public class ListHandlerTest extends BaseHandlerTest {
         assertEquals(((Map<String, ?>) res.get("Verbose")).get(TYPE.getKey()),"boolean");
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = ".*No MBean.*")
-    public void noMBeanMultipleServers() throws MalformedObjectNameException, InstanceNotFoundException, IOException, AttributeNotFoundException, ReflectionException, MBeanException, IntrospectionException, NotChangedException, EmptyResponseException {
+    @Test(expectedExceptions = InstanceNotFoundException.class, expectedExceptionsMessageRegExp = ".*InstanceNotFoundException for MBean bullerbue:country=sweden.*")
+    public void noMBeanMultipleServers() throws JMException, IOException, NotChangedException, EmptyResponseException, BadRequestException {
         JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST)
                 .pathParts("bullerbue", "country=sweden")
                 .build();

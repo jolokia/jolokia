@@ -44,14 +44,14 @@ public interface HttpClientSpi<T> extends Closeable {
      * @param method
      * @param parameters
      * @param targetConfig
-     * @return
+     * @return the {@link JolokiaResponse} as returned by the server. Empty response results in a {@link JolokiaException}
      * @param <REQ>
      * @param <RES>
-     * @throws IOException
+     * @throws JolokiaException
      */
     <REQ extends JolokiaRequest, RES extends JolokiaResponse<REQ>>
     JSONStructure execute(REQ request, HttpMethod method, Map<JolokiaQueryParameter, String> parameters, JolokiaTargetConfig targetConfig)
-            throws IOException, JolokiaException;
+            throws JolokiaException;
 
     /**
      * Send multiple {@link JolokiaRequest requests} in a single HTTP request (a <em>bulk request</em>).
@@ -61,14 +61,14 @@ public interface HttpClientSpi<T> extends Closeable {
      * @param requests
      * @param parameters
      * @param targetConfig
-     * @return
+     * @return Can never be null. Empty response results in a {@link JolokiaException}
      * @param <REQ>
      * @param <RES>
-     * @throws IOException
+     * @throws JolokiaException
      */
     <REQ extends JolokiaRequest, RES extends JolokiaResponse<REQ>>
     JSONStructure execute(List<REQ> requests, Map<JolokiaQueryParameter, String> parameters, JolokiaTargetConfig targetConfig)
-            throws IOException, JolokiaException;
+            throws JolokiaException;
 
     /**
      * Retrieve underlying, implementation-specific HTTP Client if it matches the passed type.

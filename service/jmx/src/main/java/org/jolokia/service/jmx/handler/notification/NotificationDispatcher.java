@@ -1,19 +1,40 @@
+/*
+ * Copyright 2009-2026 Roland Huss
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.jolokia.service.jmx.handler.notification;
 
 import java.io.IOException;
+import javax.management.JMException;
+import javax.management.MBeanException;
+import javax.management.ReflectionException;
 
-import javax.management.*;
-
+import org.jolokia.json.JSONObject;
+import org.jolokia.server.core.request.BadRequestException;
 import org.jolokia.server.core.request.EmptyResponseException;
-import org.jolokia.server.core.request.notification.*;
+import org.jolokia.server.core.request.notification.AddCommand;
+import org.jolokia.server.core.request.notification.ClientCommand;
+import org.jolokia.server.core.request.notification.NotificationCommand;
+import org.jolokia.server.core.request.notification.OpenCommand;
+import org.jolokia.server.core.request.notification.RemoveCommand;
+import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.notification.NotificationBackendManager;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
-import org.jolokia.server.core.service.api.JolokiaContext;
-import org.jolokia.json.JSONObject;
 
 /**
- * Dispatcher for notification commands. Commands are dispatcher  to
- * the appropriate command in a {@link NotificationListenerDelegate}.
+ * Dispatcher for notification commands used by {@link org.jolokia.service.jmx.handler.NotificationHandler}.
+ * (Sub)commands are dispatched to the appropriate command in a {@link NotificationListenerDelegate}.
  *
  * @author roland
  * @since 18.03.13
@@ -44,7 +65,7 @@ public class NotificationDispatcher {
      * @throws ReflectionException
      */
     public Object dispatch(MBeanServerAccess pExecutor, NotificationCommand pCommand)
-            throws MBeanException, IOException, ReflectionException, EmptyResponseException {
+            throws IOException, JMException, BadRequestException, EmptyResponseException {
 
         // Shortcut for client used later
         String client = pCommand instanceof ClientCommand ? ((ClientCommand) pCommand).getClient() : null;
@@ -53,28 +74,38 @@ public class NotificationDispatcher {
             case REGISTER:
                 return register();
             case UNREGISTER:
-                listenerDelegate.unregister(pExecutor,client);
+                listenerDelegate.unregister(pExecutor, client);
                 return null;
             case ADD:
-                return listenerDelegate.addListener(pExecutor, (AddCommand) pCommand);
+                if (pCommand instanceof AddCommand addCommand) {
+                    return listenerDelegate.addListener(pExecutor, addCommand);
+                }
+                throw new IllegalArgumentException("Expected Notification ADD command, got " + pCommand.getType());
             case REMOVE:
-                listenerDelegate.removeListener(pExecutor, client, ((RemoveCommand) pCommand).getHandle());
-                return null;
+                if (pCommand instanceof RemoveCommand removeCommand) {
+                    listenerDelegate.removeListener(pExecutor, client, removeCommand.getHandle());
+                    return null;
+                } else {
+                    throw new IllegalArgumentException("Expected Notification REMOVE command, got " + pCommand.getType());
+                }
             case PING:
                 listenerDelegate.refresh(client);
                 return null;
             case OPEN:
-                listenerDelegate.openChannel((OpenCommand) pCommand);
-                // an EmptyResponseException will be thrown up the stack to org.jolokia.server.core.http.AgentServlet.handle()
+                if (pCommand instanceof OpenCommand openCommand) {
+                    listenerDelegate.openChannel(openCommand);
+                    // an EmptyResponseException will be thrown up the stack to:
+                    //  - jakarta.servlet.http.HttpServlet: org.jolokia.server.core.http.AgentServlet.handle()
+                    //  - com.sun.net.httpserver.HttpHandler: org.jolokia.jvmagent.handler.JolokiaHttpHandler.doHandle()
+                    throw new EmptyResponseException();
+                }
+                throw new IllegalArgumentException("Expected Notification OPEN command, got " + pCommand.getType());
             case LIST:
                 return listenerDelegate.list(client);
         }
-        throw new UnsupportedOperationException("Unsupported notification command " + pCommand.getType());
+
+        throw new BadRequestException("Unsupported notification command " + pCommand.getType());
     }
-
-
-    // =======================================================================================
-
 
     /**
      * Register a new client and return the client id along with the information
@@ -82,12 +113,14 @@ public class NotificationDispatcher {
      *
      * @return client id with backend configs.
      */
-    private JSONObject register()
-    {
+    private JSONObject register() {
         String id = listenerDelegate.register();
+
         JSONObject ret = new JSONObject();
-        ret.put("backend",backendManager.getBackendConfig());
-        ret.put("id",id);
+        ret.put("id", id);
+        ret.put("backend", backendManager.getBackendConfig());
+
         return ret;
     }
+
 }

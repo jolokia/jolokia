@@ -62,9 +62,8 @@ public class CompositeDataAccessor implements org.jolokia.converter.json.ObjectA
     }
 
     @Override
-    public Object setObjectValue(Converter<String> pConverter, Object pObject, String pAttribute, Object pValue)
-            throws IllegalAccessException, InvocationTargetException {
-        throw new IllegalArgumentException("CompositeData cannot be written to");
+    public Object setObjectValue(Converter<String> pConverter, Object pObject, String pAttribute, Object pValue) {
+        throw new UnsupportedOperationException("CompositeData cannot be written to");
     }
 
     /**

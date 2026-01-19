@@ -32,7 +32,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import javax.management.RuntimeMBeanException;
 import javax.security.auth.Subject;
 
 import jakarta.servlet.ServletConfig;
@@ -327,17 +326,13 @@ public class AgentServlet extends HttpServlet {
 
     }
 
-    /** {@inheritDoc} */
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-            throws IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         handle(httpGetHandler, req, resp);
     }
 
-    /** {@inheritDoc} */
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
-            throws IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         handle(httpPostHandler, req, resp);
     }
 
@@ -351,23 +346,77 @@ public class AgentServlet extends HttpServlet {
     protected void doOptions(HttpServletRequest req, HttpServletResponse resp) {
         Map<String,String> responseHeaders =
                 requestHandler.handleCorsPreflightRequest(
-                        getOriginOrReferer(req),
+                        extractOriginOrReferer(req),
                         req.getHeader("Access-Control-Request-Headers"));
         for (Map.Entry<String,String> entry : responseHeaders.entrySet()) {
             resp.setHeader(entry.getKey(),entry.getValue());
         }
     }
 
-    @SuppressWarnings({ "PMD.AvoidCatchingThrowable", "PMD.AvoidInstanceofChecksInCatchClause" })
+    /**
+     * Handle an incoming GET or POST request in a unified way. This is the Servlet API equivalent of
+     * {@code org.jolokia.jvmagent.handler.JolokiaHttpHandler#handle(com.sun.net.httpserver.HttpExchange)} from
+     * JVM Agent which uses {@code com.sun.net.httpserver}
+     *
+     * @param pReqHandler
+     * @param pReq
+     * @param pResp
+     * @throws IOException
+     */
     private void handle(ServletRequestHandler pReqHandler, HttpServletRequest pReq, HttpServletResponse pResp) throws IOException {
-        JSONStructure json = null;
+        Subject subject = (Subject) pReq.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE);
+        if (subject != null) {
+            doHandleAs(subject, pReqHandler, pReq, pResp);
+        } else {
+            doHandle(pReqHandler, pReq, pResp);
+        }
+    }
+
+    /**
+     * Handle the incoming request within a {@link java.security.PrivilegedAction} when a {@link Subject} was found.
+     *
+     * @param pSubject
+     * @param pReqHandler
+     * @param pReq
+     * @param pResp
+     * @return
+     * @throws IOException
+     */
+    private void doHandleAs(Subject pSubject, final ServletRequestHandler pReqHandler, final HttpServletRequest pReq, final HttpServletResponse pResp)
+            throws IOException {
+        try {
+            Subject.doAs(pSubject, (PrivilegedExceptionAction<Void>) () -> {
+                doHandle(pReqHandler,pReq, pResp);
+                return null;
+            });
+        } catch (PrivilegedActionException | SecurityException e) {
+            // PrivilegedActionException happens _only_ when the action has thrown an checked exception.
+            // But we handle all java.lang.Throwables in the doHandle() method anyway.
+            // SecurityException happens _only_ under a SecurityManager and it's being removed anyway.
+            sendInternalServerError(pResp, new Exception(e.getMessage() == null ? e.getClass().getName() : e.getMessage()));
+        }
+    }
+
+    /**
+     * Handle the incoming request. All exceptions during request processing are caught and turned into a Jolokia
+     * JSON error. The only exception thrown is when the handled exception (turned into JSON) can't be sent back.
+     *
+     * @param pReqHandler
+     * @param pReq
+     * @param pResp
+     * @throws IOException thrown only if there's an issue sending the response.
+     */
+    private void doHandle(ServletRequestHandler pReqHandler, HttpServletRequest pReq, HttpServletResponse pResp) throws IOException {
+        JSONStructure json;
 
         try {
+            // Set back channel - for notification handling
+            prepareBackChannel(pReq);
+
             // Check access policy
-            requestHandler.checkAccess(pReq.getScheme(),
-                                       allowDnsReverseLookup ? pReq.getRemoteHost() : null,
-                                       pReq.getRemoteAddr(),
-                                       getOriginOrReferer(pReq));
+            String remoteHost = allowDnsReverseLookup ? pReq.getRemoteHost() : null;
+            String scheme = pReq.getScheme();
+            requestHandler.checkAccess(scheme, remoteHost, pReq.getRemoteAddr(), extractOriginOrReferer(pReq));
 
             // If a callback is given, check this is a valid javascript function name
             validateCallbackIfGiven(pReq);
@@ -375,77 +424,49 @@ public class AgentServlet extends HttpServlet {
             // Remember the agent URL upon the first request. Needed for discovery
             updateAgentDetailsIfNeeded(pReq);
 
-            // Set back channel
-            prepareBackChannel(pReq);
-
-            // Dispatch for the proper HTTP request method
-            json = handleSecurely(pReqHandler, pReq, pResp);
+            // Dispatch for the proper HTTP request method - the returned JSON object may be a proper Jolokia JSON
+            // response or error Jolokia JSON response
+            json = pReqHandler.handleRequest(pReq);
         } catch (BadRequestException exp) {
             String response = "400 (Bad Request)\n";
             if (exp.getMessage() != null) {
                 response += "\n" + exp.getMessage() + "\n";
             }
-            pResp.addHeader("Content-Type", "text/plain");
+            pResp.addHeader("Content-Type", "text/plain; charset=utf-8");
             pResp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             OutputStream os = pResp.getOutputStream();
             os.write(response.getBytes());
             os.close();
             return;
         } catch (EmptyResponseException exp) {
-            // Nothing needs to be done
+            // Don't close the connection, this is used for `Content-Type: text/event-stream` for notifications
+            // which will be sent using org.jolokia.service.notif.sse.SseHeartBeat
             return;
         } catch (Throwable exp) {
-            try {
-                json = requestHandler.handleThrowable(
-                    exp instanceof RuntimeMBeanException ? ((RuntimeMBeanException) exp).getTargetException() : exp);
-            } catch (Throwable exp2) {
-                //noinspection CallToPrintStackTrace
-                exp2.printStackTrace();
-            }
+            // handle exception not handled by org.jolokia.server.core.http.HttpRequestHandler()
+            // so for example should not be JMX exceptions
+            json = requestHandler.handleThrowable(exp);
         } finally {
             releaseBackChannel();
             setCorsHeader(pReq, pResp);
-            if (json == null) {
-                json = requestHandler.handleThrowable(new Exception("Internal error while handling an exception"));
-            }
         }
 
-        sendResponse(pResp, pReq, json);
+        if (json == null) {
+            sendInternalServerError(pResp, new Exception("Internal Server Error (no JSON response)"));
+        } else {
+            sendResponse(pResp, pReq, json);
+        }
+    }
+
+    private void prepareBackChannel(HttpServletRequest pReq) {
+        BackChannelHolder.set(new ServletBackChannel(pReq));
     }
 
     private void releaseBackChannel() {
         BackChannelHolder.remove();
     }
 
-
-    private void prepareBackChannel(HttpServletRequest pReq) {
-        BackChannelHolder.set(new ServletBackChannel(pReq));
-    }
-
-
-    private JSONStructure handleSecurely(final ServletRequestHandler pReqHandler, final HttpServletRequest pReq, final HttpServletResponse pResp)
-            throws IOException, PrivilegedActionException, EmptyResponseException {
-        Subject subject = (Subject) pReq.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE);
-        if (subject != null) {
-            try {
-                return Subject.doAs(subject, (PrivilegedExceptionAction<JSONStructure>) () -> pReqHandler.handleRequest(pReq, pResp));
-            } catch (PrivilegedActionException exp) {
-                // Unwrap an empty response exception
-                Throwable innerExp = exp.getCause();
-                if (innerExp instanceof EmptyResponseException) {
-                    throw (EmptyResponseException) innerExp;
-                } else if (innerExp instanceof BadRequestException) {
-                    throw (BadRequestException) innerExp;
-                } else {
-                    throw exp;
-                }
-            }
-        } else {
-            return pReqHandler.handleRequest(pReq, pResp);
-        }
-    }
-
-    private String getOriginOrReferer(HttpServletRequest pReq) {
+    private String extractOriginOrReferer(HttpServletRequest pReq) {
         String origin = pReq.getHeader("Origin");
         if (origin == null) {
             origin = pReq.getHeader("Referer");
@@ -539,38 +560,48 @@ public class AgentServlet extends HttpServlet {
         }
     }
 
+    /**
+     * A little abstraction of a handler that turns incoming {@link HttpServletRequest} into a {@link JSONStructure}.
+     * Sending to an outgoing {@link HttpServletResponse} is done by the caller.
+     */
     private interface ServletRequestHandler {
         /**
-         * Handle a request and return the answer as a JSON structure
-         * @param pReq request arrived
-         * @param pResp response to return
+         * Handle a request and return the answer as a JSON structure. There's no interaction with the Servlet
+         * response
+         *
+         * @param pReq incoming {@link HttpServletRequest}
          * @return the JSON representation for the answer
-         * @throws IOException if handling of an input or output stream failed
+         * @throws IOException if reading input stream fails - so it doesn't have to be sender's fault
+         * @throws BadRequestException if there's a parsing error or parameter processing error (always sender's fault)
+         * @throws EmptyResponseException if the connection should not be closed (only for notifications)
          */
-        JSONStructure handleRequest(HttpServletRequest pReq, HttpServletResponse pResp)
-                throws IOException, EmptyResponseException;
+        JSONStructure handleRequest(HttpServletRequest pReq) throws IOException, BadRequestException, EmptyResponseException;
     }
 
-    // factory method for POST request handler
-    private ServletRequestHandler newPostHttpRequestHandler() {
+    /**
+     * Factory method for GET request handler using Servlet API
+     * @return
+     */
+    private ServletRequestHandler newGetHttpRequestHandler() {
         return new ServletRequestHandler() {
-            /** {@inheritDoc} */
-             public JSONStructure handleRequest(HttpServletRequest pReq, HttpServletResponse pResp)
-                     throws IOException, EmptyResponseException {
-                 String encoding = pReq.getCharacterEncoding();
-                 InputStream is = pReq.getInputStream();
-                 return requestHandler.handlePostRequest(pReq.getRequestURI(),is, encoding, getParameterMap(pReq));
-             }
+            @Override
+            public JSONStructure handleRequest(HttpServletRequest pReq) throws BadRequestException, EmptyResponseException {
+                return requestHandler.handleGetRequest(pReq.getRequestURI(), pReq.getPathInfo(), getParameterMap(pReq));
+            }
         };
     }
 
-    // factory method for GET request handler
-    private ServletRequestHandler newGetHttpRequestHandler() {
+    /**
+     * Factory method for POST request handler using Servlet API
+     * @return
+     */
+    private ServletRequestHandler newPostHttpRequestHandler() {
         return new ServletRequestHandler() {
-            /** {@inheritDoc} */
-            public JSONStructure handleRequest(HttpServletRequest pReq, HttpServletResponse pResp)
-                    throws EmptyResponseException {
-                return requestHandler.handleGetRequest(pReq.getRequestURI(),pReq.getPathInfo(), getParameterMap(pReq));
+            @Override
+            public JSONStructure handleRequest(HttpServletRequest pReq) throws IOException, BadRequestException, EmptyResponseException {
+                String encoding = pReq.getCharacterEncoding();
+                InputStream is = pReq.getInputStream();
+                return requestHandler.handlePostRequest(pReq.getRequestURI(), is, encoding, getParameterMap(pReq));
             }
         };
     }
@@ -596,6 +627,26 @@ public class AgentServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Called when we can't produce a Jolokia JSON response or error.
+     *
+     * @param res
+     * @param exception
+     * @throws IOException
+     */
+    private void sendInternalServerError(HttpServletResponse res, Exception exception) throws IOException {
+        String response = "500 (Internal Server Error)\n";
+        if (exception != null && exception.getMessage() != null) {
+            response += "\n" + exception.getMessage() + "\n";
+        }
+        setContentType(res, "text/plain");
+        res.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        setNoCacheHeaders(res);
+        OutputStream os = res.getOutputStream();
+        os.write(response.getBytes());
+        os.close();
+    }
+
     private void sendResponse(HttpServletResponse pResp, HttpServletRequest pReq, JSONStructure pJson) throws IOException {
         String callback = pReq.getParameter(ConfigKey.CALLBACK.getKeyValue());
 
@@ -612,10 +663,10 @@ public class AgentServlet extends HttpServlet {
         }
     }
 
-    private void validateCallbackIfGiven(HttpServletRequest pReq) {
+    private void validateCallbackIfGiven(HttpServletRequest pReq) throws BadRequestException {
         String callback = pReq.getParameter(ConfigKey.CALLBACK.getKeyValue());
         if (callback != null && !MimeTypeUtil.isValidCallback(callback)) {
-            throw new IllegalArgumentException("Invalid callback name given, which must be a valid javascript function name");
+            throw new BadRequestException("Invalid callback name given, which must be a valid javascript function name");
         }
     }
     private void sendStreamingResponse(HttpServletResponse pResp, String pCallback, JSONStructure pJson) throws IOException {
@@ -699,4 +750,5 @@ public class AgentServlet extends HttpServlet {
             return servletContext.getInitParameter(pName);
         }
     }
+
 }

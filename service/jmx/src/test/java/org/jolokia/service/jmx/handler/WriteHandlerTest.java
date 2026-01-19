@@ -1,7 +1,5 @@
-package org.jolokia.service.jmx.handler;
-
 /*
- * Copyright 2009-2013 Roland Huss
+ * Copyright 2009-2026 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +13,7 @@ package org.jolokia.service.jmx.handler;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.service.jmx.handler;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -24,7 +23,10 @@ import java.util.Map;
 
 import javax.management.*;
 
+import org.jolokia.server.core.request.BadRequestException;
+import org.jolokia.server.core.request.EmptyResponseException;
 import org.jolokia.server.core.request.JolokiaRequestFactory;
+import org.jolokia.server.core.request.NotChangedException;
 import org.jolokia.server.core.request.ProcessingParameters;
 import org.jolokia.server.core.service.serializer.Serializer;
 import org.jolokia.service.serializer.JolokiaSerializer;
@@ -74,23 +76,23 @@ public class WriteHandlerTest {
     }
 
     @Test
-    public void simple() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
+    public void simple() throws BadRequestException, JMException, IOException, EmptyResponseException, NotChangedException {
         JolokiaWriteRequest req = new JolokiaRequestBuilder(WRITE,oName).attribute("Simple").value("10").build();
         handler.doHandleSingleServerRequest(getMBeanServer(), req);
         req = new JolokiaRequestBuilder(WRITE,oName).attribute("Simple").value("20").build();
         Integer ret = (Integer) handler.doHandleSingleServerRequest(getMBeanServer(), req);
         assertEquals(ret, Integer.valueOf(10));
-        assertEquals(handler.getType(),WRITE);
+        assertEquals(WRITE, handler.getType());
     }
 
     @Test
-    public void writeOnly() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
+    public void writeOnly() throws BadRequestException, JMException, IOException {
         JolokiaWriteRequest req = new JolokiaRequestBuilder(WRITE,oName).attribute("WriteOnly").value("Won't ever read it").build();
         handler.doHandleSingleServerRequest(getMBeanServer(), req);
         req = new JolokiaRequestBuilder(WRITE,oName).attribute("WriteOnly").value("Won't ever read it").build();
         Object ret = handler.doHandleSingleServerRequest(getMBeanServer(), req);
         assertNull(ret);
-        assertEquals(handler.getType(),WRITE);
+        assertEquals(WRITE, handler.getType());
     }
 
     @Test
@@ -103,17 +105,17 @@ public class WriteHandlerTest {
         @SuppressWarnings("unchecked")
         Map<String, ?> ret = (Map<String, ?>) handler.doHandleSingleServerRequest(getMBeanServer(), req);
         assertNotNull(ret);
-        assertEquals(ret.get("answer"), 42);
+        assertEquals(42, ret.get("answer"));
 
     }
 
     @Test(expectedExceptions = {AttributeNotFoundException.class})
-    public void invalidAttribute() throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
+    public void invalidAttribute() throws BadRequestException, JMException, IOException {
         JolokiaWriteRequest req = new JolokiaRequestBuilder(WRITE,oName).attribute("ReadOnly").value("Sommer").build();
         handler.doHandleSingleServerRequest(getMBeanServer(), req);
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class,
+    @Test(expectedExceptions = BadRequestException.class,
         expectedExceptionsMessageRegExp = ".*\"java.lang.Integer\" value to \"java.lang.Boolean\".*")
     public void invalidValue() throws Exception {
         JolokiaWriteRequest req = new JolokiaRequestBuilder(WRITE,oName).attribute("Boolean").value(10).build();

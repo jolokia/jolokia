@@ -39,7 +39,7 @@ public class ClientJsr160HiddenTest extends AbstractClientIntegrationTest {
             jolokiaClient.execute(request);
             fail("Exception should have been thrown");
         } catch (JolokiaException exp) {
-            assertTrue(exp.getMessage().contains("InstanceNotFoundException"));
+            assertTrue(exp.getMessage().contains("Error: jolokia.it.hidden:type=attribute"));
         }
 
     }

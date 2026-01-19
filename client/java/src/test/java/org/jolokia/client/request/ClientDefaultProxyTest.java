@@ -53,8 +53,8 @@ public class ClientDefaultProxyTest extends AbstractClientIntegrationTest {
                     new JolokiaReadRequest("java.lang:type=Thread","ThreadNumber"));
             fail();
         } catch (JolokiaBulkRemoteException exp) {
-            List<JolokiaReadResponse> resps = exp.getResponses();
-            assertNotNull(resps.get(0).getValue());
+            List<JolokiaReadResponse> responses = exp.getResponses();
+            assertNotNull(responses.get(0).getValue());
             JolokiaRemoteException jExp = exp.getRemoteExceptions().get(0);
             assertTrue(jExp.getRemoteStackTrace().contains("RMI"));
         }

@@ -18,7 +18,7 @@ package org.jolokia.client.exception;
 import java.net.ConnectException;
 
 /**
- * Exception thrown when the connection to the server fails.
+ * Exception thrown when the connection to the server fails to be established.
  *
  * @author roland
  * @since 13.12.10

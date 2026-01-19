@@ -141,13 +141,13 @@ public final class EscapeUtil {
      * @param pDelimiter delimiter to use
      * @return the split string as list or an empty array if the argument was null
      */
-    public static List<String> split(String pArg,String pEscape, String pDelimiter) {
+    public static List<String> split(String pArg, String pEscape, String pDelimiter) {
         if (pArg != null) {
             ArrayList<String> ret = new ArrayList<>();
             Pattern[] pattern = SPLIT_PATTERNS.get(pEscape + pDelimiter);
             if (pattern == null) {
                 pattern = createSplitPatterns(pEscape, pDelimiter);
-                SPLIT_PATTERNS.put(pEscape + pDelimiter,pattern);
+                SPLIT_PATTERNS.put(pEscape + pDelimiter, pattern);
             }
 
             final Matcher m = pattern[0].matcher(pArg);

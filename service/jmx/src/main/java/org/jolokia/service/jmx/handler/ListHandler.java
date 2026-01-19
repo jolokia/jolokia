@@ -1,20 +1,5 @@
-package org.jolokia.service.jmx.handler;
-
-
-import java.io.IOException;
-import java.util.*;
-
-import javax.management.*;
-
-import org.jolokia.server.core.config.ConfigKey;
-import org.jolokia.server.core.request.JolokiaListRequest;
-import org.jolokia.server.core.request.NotChangedException;
-import org.jolokia.server.core.util.*;
-import org.jolokia.server.core.util.jmx.MBeanServerAccess;
-import org.jolokia.json.JSONObject;
-
 /*
- * Copyright 2009-2013 Roland Huss
+ * Copyright 2009-2026 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,24 +13,48 @@ import org.jolokia.json.JSONObject;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.service.jmx.handler;
 
+import java.io.IOException;
+import java.util.Deque;
+import java.util.LinkedList;
+import javax.management.JMException;
+import javax.management.MBeanInfo;
+import javax.management.MBeanServerConnection;
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+
+import org.jolokia.core.util.EscapeUtil;
+import org.jolokia.json.JSONObject;
+import org.jolokia.server.core.request.BadRequestException;
+import org.jolokia.server.core.request.JolokiaListRequest;
+import org.jolokia.server.core.request.NotChangedException;
+import org.jolokia.server.core.util.ProviderUtil;
+import org.jolokia.server.core.util.RequestType;
+import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 
 /**
- * Handler for obtaining a list of all available MBeans and its attributes
- * and operations.
+ * Handler for obtaining a list of all available MBeans and its attributes and operations (to get JSON
+ * representations of {@link MBeanInfo}).
  *
  * @author roland
  * @since Jun 12, 2009
  */
 public class ListHandler extends AbstractCommandHandler<JolokiaListRequest> {
 
-    /** {@inheritDoc} */
+    @Override
     public RequestType getType() {
         return RequestType.LIST;
     }
 
+    @Override
+    protected void checkForRestriction(JolokiaListRequest pRequest) {
+        checkType();
+    }
+
     /**
-     * Return true since a list handler needs to merge all information
+     * Return true since a list handler needs to merge all information from all available servers and we
+     * want to do it manually
      *
      * @return always true
      */
@@ -54,71 +63,51 @@ public class ListHandler extends AbstractCommandHandler<JolokiaListRequest> {
         return true;
     }
 
-    /** {@inheritDoc} */
     @Override
-    protected void checkForRestriction(JolokiaListRequest pRequest) {
-        checkType();
+    public Object doHandleSingleServerRequest(MBeanServerConnection server, JolokiaListRequest request) {
+        // because we returned true in handleAllServersAtOnce()
+        throw new UnsupportedOperationException("Internal: Method must not be called when all MBeanServers are handled at once");
     }
 
-    // pPreviousResult must be a Map according to the "list" data format specification
-    /** {@inheritDoc} */
     @Override
     public Object doHandleAllServerRequest(MBeanServerAccess pServerManager, JolokiaListRequest pRequest, Object pPreviousResult)
-            throws IOException, NotChangedException {
+            throws IOException, JMException, BadRequestException, NotChangedException {
         // Throw an exception if list has not changed
         checkForModifiedSince(pServerManager, pRequest);
 
-        Deque<String> originalPathStack = org.jolokia.core.util.EscapeUtil.reversePath(pRequest.getPathParts());
-        int maxDepth = pRequest.getParameterAsInt(ConfigKey.MAX_DEPTH);
-        boolean useCanonicalName = pRequest.getParameterAsBool(ConfigKey.CANONICAL_NAMING);
-        boolean listKeys = pRequest.getParameterAsBool(ConfigKey.LIST_KEYS);
-        boolean listCache = pRequest.getParameterAsBool(ConfigKey.LIST_CACHE);
-        boolean listInterfaces = pRequest.getParameterAsBool(ConfigKey.LIST_INTERFACES);
+        Deque<String> originalPathStack = EscapeUtil.reversePath(pRequest.getPathParts());
 
-        ObjectName oName = null;
         try {
             Deque<String> pathStack = new LinkedList<>(originalPathStack);
-            oName = objectNameFromPath(pathStack);
+            ObjectName oName = objectNameFromPath(pathStack);
 
             if (oName != null) {
                 if (ProviderUtil.matchesProvider(pProvider, oName)) {
                     oName = ProviderUtil.extractProvider(oName).getObjectName();
                 } else {
+                    // pPreviousResult must be a Map according to the "list" data format specification
+                    // the name doesn't match our "provider", so we have nothing to add - return previous result
                     return pPreviousResult != null ? pPreviousResult : new JSONObject();
                 }
             }
 
-            ListMBeanEachAction action = new ListMBeanEachAction(maxDepth, pathStack, useCanonicalName, listKeys, listCache, listInterfaces, pProvider, context);
-            return executeListAction(pServerManager, (Map<?, ?>) pPreviousResult, oName, action);
+            // this action is the full implementation of Jolokia LIST operation
+            ListMBeanEachAction action = new ListMBeanEachAction(pRequest, pathStack, pProvider, context);
+
+            if (oName == null || oName.isPattern()) {
+                pServerManager.each(oName, action);
+            } else {
+                pServerManager.call(oName, action);
+            }
+
+            return action.getResult((JSONObject) pPreviousResult);
         } catch (MalformedObjectNameException e) {
-            throw new IllegalArgumentException("Invalid path within the MBean part given. (Path: " + pRequest.getPath() + ")",e);
-        } catch (InstanceNotFoundException e) {
-            throw new IllegalArgumentException("No MBean '" + oName + "' found",e);
-        } catch (JMException e) {
-            throw new IllegalStateException("Internal error while retrieving list: " + e, e);
+            throw new BadRequestException("Invalid path within the MBean part given. (Path: " + pRequest.getPath() + ")", e);
         }
     }
-
-    private Object executeListAction(MBeanServerAccess pServerManager, Map<?, ?> pPreviousResult, ObjectName pName, ListMBeanEachAction pAction)
-            throws IOException, ReflectionException, MBeanException, AttributeNotFoundException, InstanceNotFoundException {
-        if (pName == null || pName.isPattern()) {
-            pServerManager.each(pName, pAction);
-        } else {
-            pServerManager.call(pName, pAction);
-        }
-        return pAction.getResult(pPreviousResult);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public Object doHandleSingleServerRequest(MBeanServerConnection server, JolokiaListRequest request) {
-        throw new UnsupportedOperationException("Internal: Method must not be called when all MBeanServers are handled at once");
-    }
-
-    // ==========================================================================================================
 
     /**
-     * Prepare an objectname pattern from a path (or "null" if no path is given)
+     * Prepare an {@link ObjectName} pattern from a path (or "null" if no path is given)
      * @param pPathStack path
      * @return created object name (either plain or a pattern)
      */
@@ -129,7 +118,7 @@ public class ListHandler extends AbstractCommandHandler<JolokiaListRequest> {
         Deque<String> path = new LinkedList<>(pPathStack);
         String domain = path.pop();
         if (domain == null) {
-            // revert behaviour implemented for read requests in https://github.com/jolokia/jolokia/issues/106
+            // revert behavior implemented for read requests in https://github.com/jolokia/jolokia/issues/106
             domain = "*";
         }
         if (path.isEmpty()) {

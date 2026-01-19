@@ -383,7 +383,7 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
                 // We are defensive here and wont stop the agent because
                 // there is a problem with the server detection. A error will be logged
                 // nevertheless, though.
-                logHandler.error("Error while using detector " + detector.getClass().getSimpleName() + ": " + exp,exp);
+                logHandler.info("Error while using detector " + detector.getClass().getSimpleName() + ": " + exp.getMessage());
             }
         }
         return DefaultServerHandle.NULL_SERVER_HANDLE;

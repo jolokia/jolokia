@@ -1,3 +1,18 @@
+/*
+ * Copyright 2009-2026 Roland Huss
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 package org.jolokia.service.jmx.handler;
 
 import java.io.IOException;
@@ -15,22 +30,6 @@ import org.testng.annotations.*;
 
 import static org.jolokia.server.core.util.RequestType.EXEC;
 import static org.testng.Assert.*;
-
-/*
- * Copyright 2009-2011 Roland Huss
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- */
 
 public class OpenExecHandlerTest {
     private ExecHandler handler;
@@ -62,7 +61,7 @@ public class OpenExecHandlerTest {
      * If a field in the argument is not set it will be set to its default value
      */
     @Test
-    public void missingField() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, MalformedObjectNameException, NotChangedException, EmptyResponseException {
+    public void missingField() throws IOException, BadRequestException, JMException, EmptyResponseException, NotChangedException {
         // set a value just for stringField, leave out intField
         JolokiaExecRequest request = new JolokiaRequestBuilder(EXEC, oName).
                 operation("compositeData").
@@ -77,8 +76,8 @@ public class OpenExecHandlerTest {
     /**
      * set a non-existing field
      */
-    @Test(expectedExceptions={IllegalArgumentException.class})
-    public void invalidField() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException, EmptyResponseException {
+    @Test(expectedExceptions={BadRequestException.class})
+    public void invalidField() throws BadRequestException, JMException, IOException, EmptyResponseException, NotChangedException {
         // set a value just for stringField, leave out intField
         JolokiaExecRequest request = new JolokiaRequestBuilder(EXEC, oName).
                 operation("compositeData").
@@ -90,8 +89,8 @@ public class OpenExecHandlerTest {
     /**
      * Give an invalid value (wrong type) for the field
      */
-    @Test(expectedExceptions={ NumberFormatException.class })
-    public void invalidValueForField() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException, EmptyResponseException {
+    @Test(expectedExceptions={ BadRequestException.class })
+    public void invalidValueForField() throws BadRequestException, JMException, IOException, EmptyResponseException, NotChangedException {
         JolokiaExecRequest request = new JolokiaRequestBuilder(EXEC, oName).
                 operation("compositeData").
                 arguments("{ \"intField\":\"aString\" }").
@@ -103,7 +102,7 @@ public class OpenExecHandlerTest {
      * The operation argument is an array
      */
     @Test
-    public void arrayOfComposites() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, MalformedObjectNameException, NotChangedException, EmptyResponseException {
+    public void arrayOfComposites() throws BadRequestException, JMException, IOException, EmptyResponseException, NotChangedException {
         JolokiaExecRequest request = new JolokiaRequestBuilder(EXEC, oName).
                 operation("arrayData").
                 arguments("[ { \"stringField\":\"aString\" } ]").
@@ -115,7 +114,7 @@ public class OpenExecHandlerTest {
      * The operation argument is a List
      */
     @Test
-    public void listOfComposites() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, MalformedObjectNameException, NotChangedException, EmptyResponseException {
+    public void listOfComposites() throws BadRequestException, JMException, IOException, EmptyResponseException, NotChangedException {
         JolokiaExecRequest request = new JolokiaRequestBuilder(EXEC, oName).
                 operation("listData").
                 arguments("[ { \"stringField\":\"aString\" } ]").
@@ -127,7 +126,7 @@ public class OpenExecHandlerTest {
      * The operation argument is a Set
      */
     @Test
-    public void setOfComposites() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, MalformedObjectNameException, NotChangedException, EmptyResponseException {
+    public void setOfComposites() throws BadRequestException, JMException, IOException, EmptyResponseException, NotChangedException {
         JolokiaExecRequest request = new JolokiaRequestBuilder(EXEC, oName).
                 operation("opSetData").
                 arguments("[ { \"stringField\":\"aString\" } ]").
@@ -140,7 +139,7 @@ public class OpenExecHandlerTest {
      * The operation argument is a Map
      */
     @Test
-    public void mapOfComposites() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, MalformedObjectNameException, NotChangedException, EmptyResponseException {
+    public void mapOfComposites() throws BadRequestException, JMException, IOException, EmptyResponseException, NotChangedException {
         JolokiaExecRequest request = new JolokiaRequestBuilder(EXEC, oName).
                 operation("mapData").
                 arguments("{ \"aKey\":{ \"stringField\":\"aString\" } }").
@@ -153,7 +152,7 @@ public class OpenExecHandlerTest {
      * Set a nested field inside the composite argument
      */
     @Test
-    public void nested() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException, EmptyResponseException {
+    public void nested() throws BadRequestException, JMException, IOException, EmptyResponseException, NotChangedException {
         JolokiaExecRequest request = new JolokiaRequestBuilder(EXEC, oName).
                 operation("compositeData").
                 arguments("{ \"nestedClass\":{\"nestedField\":\"aString\"} }").
@@ -165,7 +164,7 @@ public class OpenExecHandlerTest {
      * Set an array field inside the composite argument
      */
     @Test
-    public void compositeWithArrayField() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException, EmptyResponseException {
+    public void compositeWithArrayField() throws BadRequestException, JMException, IOException, EmptyResponseException, NotChangedException {
         JolokiaExecRequest request = new JolokiaRequestBuilder(EXEC, oName).
                 operation("compositeData").
                 arguments("{ \"array\":[\"one\", \"two\"] }").
@@ -177,8 +176,8 @@ public class OpenExecHandlerTest {
      * Set a List field inside the composite argument with values that can't be converted to
      * the list element type
      */
-    @Test(expectedExceptions={NumberFormatException.class})
-    public void invalidTypeCompositeWithListField() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException, EmptyResponseException {
+    @Test(expectedExceptions={BadRequestException.class})
+    public void invalidTypeCompositeWithListField() throws BadRequestException, JMException, IOException, EmptyResponseException, NotChangedException {
         JolokiaExecRequest request = new JolokiaRequestBuilder(EXEC, oName).
                 operation("compositeData").
                 arguments("{ \"list\":[\"one\", \"two\"] }").
@@ -190,7 +189,7 @@ public class OpenExecHandlerTest {
      * Set a List field inside the composite argument
      */
     @Test
-    public void compositeWithListField() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException, EmptyResponseException {
+    public void compositeWithListField() throws BadRequestException, JMException, IOException, EmptyResponseException, NotChangedException {
         JolokiaExecRequest request = new JolokiaRequestBuilder(EXEC, oName).
                 operation("compositeData").
                 arguments("{ \"list\":[\"1\", \"2\"] }").
@@ -202,7 +201,7 @@ public class OpenExecHandlerTest {
      * Set a Map field inside the composite argument
      */
     @Test
-    public void compositeWithMapField() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException, EmptyResponseException {
+    public void compositeWithMapField() throws BadRequestException, JMException, IOException, EmptyResponseException, NotChangedException {
         JolokiaExecRequest request = new JolokiaRequestBuilder(EXEC, oName).
                 operation("compositeData").
                 arguments("{ \"map\":{ \"5\":{\"nestedField\":\"value1\"}, \"7\":{\"nestedField\":\"value2\"} } }").
@@ -214,7 +213,7 @@ public class OpenExecHandlerTest {
      * Set a Set field inside the composite argument
      */
     @Test
-    public void compositeWithSetField() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException, EmptyResponseException {
+    public void compositeWithSetField() throws BadRequestException, JMException, IOException, EmptyResponseException, NotChangedException {
         JolokiaExecRequest request = new JolokiaRequestBuilder(EXEC, oName).
                 operation("compositeData").
                 arguments("{ \"set\": [\"value1\",\"value2\"] }").
@@ -222,16 +221,14 @@ public class OpenExecHandlerTest {
         handler.handleSingleServerRequest(getMBeanServer(), request);
     }
 
-
     @Test
-    public void overloaded() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException, EmptyResponseException {
+    public void overloaded() throws BadRequestException, JMException, IOException, EmptyResponseException, NotChangedException {
         JolokiaExecRequest request = new JolokiaRequestBuilder(EXEC, oName).
                 operation("overloaded(javax.management.openmbean.CompositeData)").
                 arguments("{ \"stringField\": \"aString\" }").
                 build();
         handler.handleSingleServerRequest(getMBeanServer(), request);
     }
-
 
     private MBeanServerConnection getMBeanServer() {
         return ManagementFactory.getPlatformMBeanServer();

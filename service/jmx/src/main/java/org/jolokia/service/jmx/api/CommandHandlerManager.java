@@ -1,7 +1,5 @@
-package org.jolokia.service.jmx.api;
-
 /*
- * Copyright 2009-2013 Roland Huss
+ * Copyright 2009-2026 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +13,7 @@ package org.jolokia.service.jmx.api;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.service.jmx.api;
 
 import java.util.*;
 
@@ -46,9 +45,8 @@ public class CommandHandlerManager {
      * @param pCtx jolokia context
      */
     public CommandHandlerManager(JolokiaContext pCtx) {
-        this(pCtx,null);
+        this(pCtx, null);
     }
-
 
     /**
      * Constructor, which creates the manager. This object can be used as a singleton
@@ -93,4 +91,5 @@ public class CommandHandlerManager {
             handler.destroy();
         }
     }
+
 }

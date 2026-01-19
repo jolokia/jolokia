@@ -75,7 +75,7 @@ public class JdkHttpClient implements HttpClientSpi<HttpClient> {
     @Override
     public <REQ extends JolokiaRequest, RES extends JolokiaResponse<REQ>>
     JSONStructure execute(REQ pRequest, HttpMethod method, Map<JolokiaQueryParameter, String> parameters, JolokiaTargetConfig targetConfig)
-            throws IOException, JolokiaException {
+            throws JolokiaException {
         // JDK HTTP request from Jolokia request
         HttpRequest httpRequest = prepareRequest(pRequest, method, parameters, targetConfig);
 
@@ -85,7 +85,7 @@ public class JdkHttpClient implements HttpClientSpi<HttpClient> {
     @Override
     public <REQ extends JolokiaRequest, RES extends JolokiaResponse<REQ>>
     JSONStructure execute(List<REQ> pRequests, Map<JolokiaQueryParameter, String> parameters, JolokiaTargetConfig targetConfig)
-            throws IOException, JolokiaException {
+            throws JolokiaException {
         // JDK HTTP request from bulk Jolokia request
         HttpRequest httpRequest = prepareRequests(pRequests, parameters, targetConfig);
 
@@ -233,7 +233,7 @@ public class JdkHttpClient implements HttpClientSpi<HttpClient> {
      * @param requestType    for logging purpose
      * @return
      */
-    private JSONStructure execute(HttpRequest httpRequest, JolokiaRequest jolokiaRequest, String requestType) throws IOException, JolokiaException {
+    private JSONStructure execute(HttpRequest httpRequest, JolokiaRequest jolokiaRequest, String requestType) throws JolokiaException {
         // Response to be handled/returned as InputStream
         HttpResponse.BodyHandler<InputStream> responseHandler = HttpResponse.BodyHandlers.ofInputStream();
         try {
@@ -245,7 +245,7 @@ public class JdkHttpClient implements HttpClientSpi<HttpClient> {
                 if (errorCode != 200) {
                     // no need to parse, because Jolokia JSON responses for errors are sent with HTTP 200 code
                     throw new JolokiaRemoteException(jolokiaRequest, "HTTP error " + errorCode + " sending " + requestType + " Jolokia request",
-                        null, errorCode, null, null);
+                        null, null, errorCode, null, null);
                 }
 
                 Optional<String> encoding = response.headers().firstValue("Content-Encoding");
@@ -257,7 +257,7 @@ public class JdkHttpClient implements HttpClientSpi<HttpClient> {
                 // JSON parsing error - convert to Jolokia exception
                 String errorType = e.getClass().getName();
                 String message = "Error parsing " + requestType + " response: " + e.getMessage();
-                throw new JolokiaRemoteException(jolokiaRequest, message, errorType, errorCode, null, null);
+                throw new JolokiaRemoteException(jolokiaRequest, message, errorType, null, errorCode, null, null);
             }
         } catch (ConnectException e) {
             String msg = "Cannot connect to " + jolokiaAgentUrl + ": " + e.getMessage();
@@ -268,6 +268,9 @@ public class JdkHttpClient implements HttpClientSpi<HttpClient> {
         } catch (HttpTimeoutException e) {
             String msg = "Timeout when processing " + requestType + " request to " + jolokiaAgentUrl + ": " + e.getMessage();
             throw new JolokiaTimeoutException(msg, e);
+        } catch (IOException e) {
+            String msg = "I/O exception when processing " + requestType + " request to " + jolokiaAgentUrl + ": " + e.getMessage();
+            throw new JolokiaException(msg, e);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new JolokiaException("Interrupted while sending " + requestType + " Jolokia request", e);

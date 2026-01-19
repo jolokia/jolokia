@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2013 Roland Huss
+ * Copyright 2009-2026 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.jolokia.server.core.request;
 
 import java.util.Objects;
-import javax.management.MalformedObjectNameException;
 
 import org.jolokia.server.core.util.RequestType;
 import org.testng.annotations.Test;
@@ -29,11 +28,10 @@ import static org.testng.Assert.assertTrue;
  * @author roland
  * @since 21.11.13
  */
-
 public class JolokiaObjectNameRequestTest {
 
     @Test
-    public void providers() throws MalformedObjectNameException {
+    public void providers() throws BadRequestException {
 
         String[] testData = new String[] {
                 "spring@:name=propertyBean","spring","","name=propertyBean",
@@ -41,8 +39,7 @@ public class JolokiaObjectNameRequestTest {
                 "java.lang:type=Memory",null,"java.lang","type=Memory"
         };
         for (int i = 0; i < testData.length; i+= 4) {
-            JolokiaReadRequest request =
-                    new JolokiaRequestBuilder(RequestType.READ,testData[i]).build();
+            JolokiaReadRequest request = new JolokiaRequestBuilder(RequestType.READ,testData[i]).build();
             assertEquals(request.getProvider(), testData[i + 1]);
             assertEquals(request.getObjectName().getDomain(),testData[i+2]);
             assertEquals(request.getObjectName().getKeyPropertyListString(),testData[i+3]);
@@ -53,8 +50,9 @@ public class JolokiaObjectNameRequestTest {
     }
 
     @Test
-    public void nullObjectNameAsWildcard() throws MalformedObjectNameException {
+    public void nullObjectNameAsWildcard() throws BadRequestException {
             JolokiaReadRequest request =
                     new JolokiaRequestBuilder(RequestType.READ, (String) null).build();
     }
+
 }

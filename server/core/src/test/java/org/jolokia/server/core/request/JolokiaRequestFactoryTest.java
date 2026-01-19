@@ -42,7 +42,7 @@ public class JolokiaRequestFactoryTest {
     }
 
     @Test
-    public void simpleGet() {
+    public void simpleGet() throws BadRequestException {
         JolokiaReadRequest req = JolokiaRequestFactory.createGetRequest("read/java.lang:type=Memory/HeapMemoryUsage", procParams);
         assert req.getType() == RequestType.READ : "Type is read";
         assert req.getObjectName().getCanonicalName().equals("java.lang:type=Memory") : "Name properly parsed";
@@ -52,7 +52,7 @@ public class JolokiaRequestFactoryTest {
     }
 
     @Test
-    public void simplePost() {
+    public void simplePost() throws BadRequestException {
         JSONObject reqMap = createMap(
                 "type","read",
                 "mbean","java.lang:type=Memory",
@@ -66,7 +66,7 @@ public class JolokiaRequestFactoryTest {
     }
 
     @Test
-    public void simplePostWithPath() {
+    public void simplePostWithPath() throws BadRequestException {
         JSONObject reqMap = createMap(
                 "type","read",
                 "mbean","java.lang:type=Memory",
@@ -80,8 +80,8 @@ public class JolokiaRequestFactoryTest {
         assertEquals(req.getPath(),"blub!/bla/hello");
     }
 
-    @Test(expectedExceptions = { IllegalArgumentException.class })
-    public void simplePostWithMalformedObjectName() {
+    @Test(expectedExceptions = { BadRequestException.class })
+    public void simplePostWithMalformedObjectName() throws BadRequestException {
         JolokiaRequestFactory.createPostRequest(createMap("type", "read", "mbean", "bal::blub", "attribute", "HeapMemoryUsage"), procParams);
     }
 
@@ -112,7 +112,7 @@ public class JolokiaRequestFactoryTest {
     }
 
     @Test
-    public void simplePostWithMergedMaps() {
+    public void simplePostWithMergedMaps() throws BadRequestException {
         Map<String, Object> config = new JSONObject();
         config.put("maxDepth","10");
         JSONObject reqMap = createMap(
@@ -129,7 +129,7 @@ public class JolokiaRequestFactoryTest {
     }
 
     @Test
-    public void multiPostRequests() {
+    public void multiPostRequests() throws BadRequestException {
         JSONObject req1Map = createMap(
                 "type","read",
                 "mbean","java.lang:type=Memory",
@@ -143,7 +143,7 @@ public class JolokiaRequestFactoryTest {
     }
 
     @Test(expectedExceptions = { IllegalArgumentException.class })
-    public void multiPostRequestsWithWrongArg() {
+    public void multiPostRequestsWithWrongArg() throws BadRequestException {
         JSONObject reqMap = createMap(
                 "type", "list");
         JSONArray reqList = new JSONArray(Arrays.asList(reqMap, "Wrong"));
@@ -151,7 +151,7 @@ public class JolokiaRequestFactoryTest {
     }
 
     @Test
-    public void simpleGetWithPath() {
+    public void simpleGetWithPath() throws BadRequestException {
         JolokiaWriteRequest req = JolokiaRequestFactory.createGetRequest("write/java.lang:type=Runtime/SystemProperties/7788/[com.sun.management.jmxremote.port]/value", procParams);
         assert req.getType() == RequestType.WRITE : "Type is write";
         assert req.getObjectName().getCanonicalName().equals("java.lang:type=Runtime") : "Name properly parsed";
@@ -162,46 +162,46 @@ public class JolokiaRequestFactoryTest {
     }
 
     @Test
-    public void simpleGetWithEscapedAttribute() {
+    public void simpleGetWithEscapedAttribute() throws BadRequestException {
         JolokiaReadRequest req = JolokiaRequestFactory.createGetRequest("read/java.lang:type=Memory/!/Heap!/Memory!/Usage!/", procParams);
         assertEquals(req.getAttributeName(),"/Heap/Memory/Usage/","Attribute properly parsed");
     }
 
     @Test
-    public void simpleGetWithEscapedPath() {
+    public void simpleGetWithEscapedPath() throws BadRequestException {
         JolokiaReadRequest req = JolokiaRequestFactory.createGetRequest("read/java.lang:type=Memory/HeapMemoryUsage/used!/bla!/blub/bloe", procParams);
         assertEquals(req.getPathParts().size(),2,"Size of path");
         assertEquals(req.getPath(),"used!/bla!/blub/bloe","Path properly parsed");
     }
 
-    @Test(expectedExceptionsMessageRegExp = ".*pathinfo.*",expectedExceptions = {IllegalArgumentException.class})
-    public void illegalPath() {
+    @Test(expectedExceptionsMessageRegExp = ".*at least 1 path element.*",expectedExceptions = {BadRequestException.class})
+    public void illegalPath() throws BadRequestException {
         JolokiaRequestFactory.createGetRequest("read", procParams);
     }
 
-    @Test(expectedExceptionsMessageRegExp = ".*Invalid object name.*",expectedExceptions = {IllegalArgumentException.class})
-    public void invalidObjectName() {
+    @Test(expectedExceptionsMessageRegExp = ".*Invalid character ':'.*",expectedExceptions = {BadRequestException.class})
+    public void invalidObjectName() throws BadRequestException {
         JolokiaRequestFactory.createGetRequest("read/bla::blub", procParams);
     }
 
     @Test(expectedExceptions = {BadRequestException.class})
-    public void unsupportedType() {
+    public void unsupportedType() throws BadRequestException {
         JolokiaRequestFactory.createGetRequest("regnotif", procParams);
     }
 
     @Test
-    public void emptyRequest() {
+    public void emptyRequest() throws BadRequestException {
         JolokiaVersionRequest req = JolokiaRequestFactory.createGetRequest("", procParams);
         JolokiaRequestFactory.createGetRequest(null, procParams);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
-    public void nullProcParams() {
+    public void nullProcParams() throws BadRequestException {
         JolokiaRequestFactory.createGetRequest("", null);
     }
 
     @Test
-    public void simpleGetWithQueryPath() {
+    public void simpleGetWithQueryPath() throws BadRequestException {
         Map<String,String> params = new HashMap<>();
         JolokiaListRequest req = JolokiaRequestFactory.createGetRequest(null,
                                                                         TestProcessingParameters.create(ConfigKey.PATH_QUERY_PARAM,"list/java.lang/type=Memory"));
@@ -211,13 +211,13 @@ public class JolokiaRequestFactoryTest {
 
 
     @Test
-    public void readWithPattern() {
+    public void readWithPattern() throws BadRequestException {
         JolokiaReadRequest req = JolokiaRequestFactory.createGetRequest("read/java.lang:type=*", procParams);
         assert req.getType() == RequestType.READ : "Type is read";
         assert req.getObjectName().getCanonicalName().equals("java.lang:type=*") : "Name properly parsed";
         assert req.getObjectName().isPattern() : "Name is pattern";
-        assert req.getAttributeNames() == null : "No attributes names";
-        assert req.getAttributeName() == null : "No attributes names";
+        assert req.getAttributeNames().isEmpty() : "No attributes names";
+        assert req.isMultiAttributeMode() : "Multi-attribute mode";
         assert req.getPath() == null : "Path is null";
         req = JolokiaRequestFactory.createGetRequest("read/java.lang:type=*/HeapMemoryUsage", procParams);
         assert req.getAttributeName().equals("HeapMemoryUsage") : "No attributes names";
@@ -225,18 +225,18 @@ public class JolokiaRequestFactoryTest {
     }
 
     @Test
-    public void readWithPatternAndAttribute() {
+    public void readWithPatternAndAttribute() throws BadRequestException {
         JolokiaReadRequest req = JolokiaRequestFactory.createGetRequest("read/java.lang:type=*/", procParams);
         assert req.getType() == RequestType.READ : "Type is read";
         assert req.getObjectName().getCanonicalName().equals("java.lang:type=*") : "Name properly parsed";
         assert req.getObjectName().isPattern() : "Name is pattern";
-        assert req.getAttributeNames() == null : "No attributes names";
-        assert req.getAttributeName() == null : "No attributes names";
+        assert req.getAttributeNames().isEmpty() : "No attributes names";
+        assert req.isMultiAttributeMode() : "Multi-attribute mode";
         assert req.getPath() == null : "Path is null";
     }
 
     @Test(expectedExceptions = { ClassCastException.class } )
-    public void castException() {
+    public void castException() throws BadRequestException {
         JolokiaReadRequest req = JolokiaRequestFactory.createGetRequest("exec/java.lang:type=Memory/gc", procParams);
     }
 

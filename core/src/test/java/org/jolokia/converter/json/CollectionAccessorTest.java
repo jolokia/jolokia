@@ -1,5 +1,3 @@
-package org.jolokia.converter.json;
-
 /*
  * Copyright 2009-2013 Roland Huss
  *
@@ -15,16 +13,23 @@ package org.jolokia.converter.json;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.converter.json;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.*;
-
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Deque;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 import javax.management.AttributeNotFoundException;
 
-import org.jolokia.core.service.serializer.SerializeOptions;
 import org.jolokia.converter.object.ObjectToObjectConverter;
+import org.jolokia.core.service.serializer.SerializeOptions;
 import org.jolokia.json.JSONArray;
-import org.testng.annotations.*;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
 
@@ -89,7 +94,6 @@ public class CollectionAccessorTest {
     public void jsonAndInvalidPaths() {
         Collection<String> collection = Arrays.asList("jolokia","habanero");
 
-
         for (String path : new String[] { "bla", "2"}) {
             Deque<String> paths = new LinkedList<>();
             paths.add(path);
@@ -101,7 +105,6 @@ public class CollectionAccessorTest {
         }
     }
 
-
     @Test
     public void noJson() throws AttributeNotFoundException {
         Set<String> set = Set.of("jolokia","habanero");
@@ -109,8 +112,9 @@ public class CollectionAccessorTest {
         assertEquals(ret,set);
     }
 
-    @Test(expectedExceptions = {IllegalArgumentException.class})
-    public void failed() throws InvocationTargetException, IllegalAccessException {
+    @Test(expectedExceptions = {UnsupportedOperationException.class})
+    public void failed() {
         extractor.setObjectValue(null,null,null,null);
     }
+
 }

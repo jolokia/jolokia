@@ -18,7 +18,8 @@ package org.jolokia.client.exception;
 import java.io.IOException;
 
 /**
- * Exception thrown in case of a timeout
+ * Exception thrown in case of a timeout (both connection timeouts during connection establishment and
+ * read/socket timeouts when reading writing over established connections).
  *
  * @author roland
  * @since 15.12.10

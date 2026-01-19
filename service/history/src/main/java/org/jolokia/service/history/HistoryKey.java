@@ -51,12 +51,13 @@ public class HistoryKey implements Serializable {
     HistoryKey(JolokiaReadRequest pJmxRequest) {
         init(pJmxRequest);
 
-        if (pJmxRequest.getAttributeNames() != null && pJmxRequest.getAttributeNames().size() > 1) {
+        if (pJmxRequest.isMultiAttributeMode() && pJmxRequest.getAttributeNames().size() > 1) {
             throw new IllegalArgumentException("A key cannot contain more than one attribute");
         }
 
         type = "attribute";
-        secondary = pJmxRequest.isMultiAttributeMode() ? pJmxRequest.getAttributeNames().get(0) : pJmxRequest.getAttributeName();
+        secondary = pJmxRequest.isMultiAttributeMode()
+            ? pJmxRequest.getAttributeNames().isEmpty() ? null : pJmxRequest.getAttributeNames().get(0) : pJmxRequest.getAttributeName();
         if (secondary == null) {
             secondary = "(all)";
         }

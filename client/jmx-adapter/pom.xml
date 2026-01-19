@@ -52,6 +52,47 @@
       <artifactId>jolokia-client-java</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-tools-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <!--
+      Test dependency on Jolokia Agent, so we have something to test the Jolokia JMX Connector Client on
+    -->
+    <dependency>
+      <groupId>org.jolokia</groupId>
+      <artifactId>jolokia-agent-jvm</artifactId>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.jolokia</groupId>
+          <artifactId>jolokia-server-detector</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.jolokia</groupId>
+          <artifactId>jolokia-service-discovery</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.jolokia</groupId>
+          <artifactId>jolokia-service-history</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.jolokia</groupId>
+          <artifactId>jolokia-service-jsr160</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.jolokia</groupId>
+          <artifactId>jolokia-service-notif-pull</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.jolokia</groupId>
+          <artifactId>jolokia-service-notif-sse</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
     <!-- Test dependencies -->
 
     <dependency>
@@ -161,8 +202,15 @@
         <configuration>
           <reuseForks>false</reuseForks>
           <forkCount>1</forkCount>
-          <argLine>-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=45888 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost</argLine>
-          <!--<argLine>-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=45888 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=8000</argLine>-->
+          <!-- for IJ: https://www.jetbrains.com/help/idea/running-tests.html -->
+          <argLine>
+            -Djava.util.logging.config.file=target/test-classes/logging.properties
+            -Dcom.sun.management.jmxremote
+            -Dcom.sun.management.jmxremote.port=45888
+            -Dcom.sun.management.jmxremote.authenticate=false
+            -Dcom.sun.management.jmxremote.ssl=false
+            -Djava.rmi.server.hostname=localhost
+          </argLine>
         </configuration>
       </plugin>
     </plugins>

@@ -193,21 +193,22 @@ public class HttpRequestHandlerTest {
 
     @Test
     public void requestErrorHandling() throws Exception {
-        Object[] exceptions = new Object[] {
-                new ReflectionException(new NullPointerException()), 404,500,
-                new InstanceNotFoundException(), 404, 500,
-                new MBeanException(new NullPointerException()), 500, 500,
-                new AttributeNotFoundException(), 404, 500,
-                new UnsupportedOperationException(), 500, 500,
-                new IOException(), 500, 500,
-                new IllegalArgumentException(), 400, 400,
-                new SecurityException(),403, 403,
-                new RuntimeMBeanException(new NullPointerException()), 500, 500,
-                new JMException(), 500, 500
+        Object[] exceptions = new Object[]{
+            new ReflectionException(new NullPointerException()), 500, 500,
+            new InstanceNotFoundException(), 404, 500,
+            new MBeanException(new NullPointerException()), 500, 500,
+            new AttributeNotFoundException(), 404, 500,
+            new UnsupportedOperationException(), 500, 500,
+            new IOException(), 500, 500,
+            new IllegalArgumentException(), 500, 500, // because all user's fault is turned into BadRequestException
+            new SecurityException(), 403, 403,
+            new RuntimeMBeanException(new NullPointerException()), 500, 500,
+            new JMException(), 500, 500
         };
 
         for (int i = 0; i < exceptions.length; i += 3) {
             Exception e = (Exception) exceptions[i];
+            System.out.println("Checking " + e.getClass().getName());
             LogHandler log = createMock(LogHandler.class);
             expect(log.isDebug()).andReturn(true).anyTimes();
             log.error(find("" + exceptions[i + 1]), EasyMock.anyObject());
@@ -215,14 +216,14 @@ public class HttpRequestHandlerTest {
             log.debug(anyObject());
             expectLastCall().asStub();
             init(log);
-            expect(requestHandler.handleRequest(EasyMock.anyObject(),EasyMock.anyObject())).andThrow(e);
-            replay(requestHandler,log);
+            expect(requestHandler.handleRequest(EasyMock.anyObject(), EasyMock.anyObject())).andThrow(e);
+            replay(requestHandler, log);
             JSONObject resp = (JSONObject) handler.handleGetRequest("/jolokia",
-                                                                    "/read/java.lang:type=Memory/HeapMemoryUsage",null);
-            assertEquals(resp.get("status"),exceptions[i+1]);
+                "/read/java.lang:type=Memory/HeapMemoryUsage", null);
+            assertEquals(resp.get("status"), exceptions[i + 1]);
 
             resp = handler.handleThrowable(e);
-            assertEquals(resp.get("status"),exceptions[i+2],e.getClass().getName());
+            assertEquals(resp.get("status"), exceptions[i + 2], e.getClass().getName());
             ctx = null;
         }
     }

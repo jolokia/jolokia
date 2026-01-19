@@ -9,6 +9,7 @@ import javax.management.*;
 import org.easymock.EasyMock;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.http.BackChannel;
+import org.jolokia.server.core.request.BadRequestException;
 import org.jolokia.server.core.request.EmptyResponseException;
 import org.jolokia.server.core.request.notification.*;
 import org.jolokia.server.core.service.api.AbstractJolokiaService;
@@ -68,7 +69,7 @@ public class NotificationDispatcherTest {
         assertNotNull(ret);
     }
 
-    private String registerClient() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException, MBeanException, IOException, ReflectionException, EmptyResponseException {
+    private String registerClient() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException, JMException, IOException, EmptyResponseException, BadRequestException {
         RegisterCommand cmd = createCommand(RegisterCommand.class);
         JSONObject config = dispatch(cmd);
         return (String) config.get("id");
@@ -78,10 +79,10 @@ public class NotificationDispatcherTest {
     public void testUnregisterAndPing() throws Exception {
         String id = registerClient();
 
-        UnregisterCommand uregCmd = createCommand(UnregisterCommand.class, "client", id);
+        UnregisterCommand cmd = createCommand(UnregisterCommand.class, "client", id);
         PingCommand pingCmd = createCommand(PingCommand.class, "client", id);
         dispatch(pingCmd);
-        dispatch(uregCmd);
+        dispatch(cmd);
         try {
             dispatch(pingCmd);
             fail("Client with id " + id + " should be unregistered");
@@ -95,8 +96,8 @@ public class NotificationDispatcherTest {
         setupConnectionForAdd();
         AddCommand addCmd = createCommand(AddCommand.class,"client",id,"mbean",TEST_NAME.toString(),"mode","test");
         String handle = dispatch(addCmd);
-        UnregisterCommand uregCmd = createCommand(UnregisterCommand.class,"client",id);
-        dispatch(uregCmd);
+        UnregisterCommand cmd = createCommand(UnregisterCommand.class,"client",id);
+        dispatch(cmd);
     }
 
     @Test
@@ -149,7 +150,7 @@ public class NotificationDispatcherTest {
     }
 
     @SuppressWarnings("unchecked")
-    private <T> T dispatch(NotificationCommand cmd) throws MBeanException, IOException, ReflectionException, EmptyResponseException {
+    private <T> T dispatch(NotificationCommand cmd) throws JMException, IOException, EmptyResponseException, BadRequestException {
         return (T) dispatcher.dispatch(executor,cmd);
     }
     private <T extends NotificationCommand> T createCommand(Class<T> pClass, Object ... keyValues) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {

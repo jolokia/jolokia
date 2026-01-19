@@ -25,6 +25,7 @@ import org.jolokia.core.util.EscapeUtil;
 import org.jolokia.json.JSONObject;
 import org.jolokia.json.parser.JSONParser;
 import org.jolokia.json.parser.ParseException;
+import org.jolokia.server.core.request.BadRequestException;
 
 /**
  * Command for adding a notification listener for a client with optional
@@ -57,21 +58,25 @@ public class AddCommand extends ClientCommand {
      *
      * To add an empty filter (so that the following parameters can be used, too), use a space
      * for this part (%20). To add an empty config use "{}". But at the end,
-     * you are better off by using the POST variant anyways for adding listeners.
+     * you are better off by using the POST variant anyway for adding listeners.
      *
      * @param pStack path stack from where to extract the information
-     * @throws MalformedObjectNameException if the given mbean name is not a valid {@link ObjectName}
+     * @throws BadRequestException if the given mbean name is not a valid {@link ObjectName}
      */
-    AddCommand(Deque<String> pStack) throws MalformedObjectNameException {
+    AddCommand(Deque<String> pStack) throws BadRequestException {
         super(NotificationCommandType.ADD, pStack);
         if (pStack.isEmpty()) {
-            throw new IllegalArgumentException("No mode give for " + NotificationCommandType.ADD);
+            throw new BadRequestException("No mode give for " + NotificationCommandType.ADD);
         }
         mode = pStack.pop();
         if (pStack.isEmpty()) {
-            throw new IllegalArgumentException("No MBean name given for " + NotificationCommandType.ADD);
+            throw new BadRequestException("No MBean name given for " + NotificationCommandType.ADD);
         }
-        objectName = new ObjectName(pStack.pop());
+        try {
+            objectName = new ObjectName(pStack.pop());
+        } catch (MalformedObjectNameException e) {
+            throw new BadRequestException(e.getMessage());
+        }
         if (!pStack.isEmpty()) {
             String element = pStack.pop();
             if (!element.trim().isEmpty()) {
@@ -92,19 +97,23 @@ public class AddCommand extends ClientCommand {
      * can be given. This filter gets applied for the notification type (see {@link NotificationFilterSupport})
      *
      * @param pMap request map
-     * @throws MalformedObjectNameException if the given mbean name is not a valid {@link ObjectName}
+     * @throws BadRequestException if the given mbean name is not a valid {@link ObjectName}
      */
     @SuppressWarnings("unchecked")
-    AddCommand(Map<String,?> pMap) throws MalformedObjectNameException {
+    AddCommand(Map<String,?> pMap) throws BadRequestException {
         super(NotificationCommandType.ADD, pMap);
         if (!pMap.containsKey("mode")) {
-            throw new IllegalArgumentException("No mode give for " + NotificationCommandType.ADD);
+            throw new BadRequestException("No mode give for " + NotificationCommandType.ADD);
         }
         mode = (String) pMap.get("mode");
         if (!pMap.containsKey("mbean")) {
-            throw new IllegalArgumentException("No MBean name given for " + NotificationCommandType.ADD);
+            throw new BadRequestException("No MBean name given for " + NotificationCommandType.ADD);
         }
-        objectName = new ObjectName((String) pMap.get("mbean"));
+        try {
+            objectName = new ObjectName((String) pMap.get("mbean"));
+        } catch (MalformedObjectNameException e) {
+            throw new BadRequestException(e.getMessage());
+        }
         Object f = pMap.get("filter");
         if (f != null) {
             filter = f instanceof List ? (List<String>) f : Collections.singletonList(f.toString());
@@ -127,7 +136,7 @@ public class AddCommand extends ClientCommand {
     }
 
     /**
-     * Objectname of the MBean the listener should connect to
+     * {@link ObjectName} of the MBean the listener should connect to
      * @return mbean name
      */
     public ObjectName getObjectName() {
@@ -181,11 +190,12 @@ public class AddCommand extends ClientCommand {
     // ==============================================================================================
 
     // Parse a string as configuration object
-    private Map<String, Object> parseConfig(String pElement) {
+    private Map<String, Object> parseConfig(String pElement) throws BadRequestException {
         try {
             return new JSONParser().parse(pElement, JSONObject.class);
         } catch (ParseException | ClassCastException | IOException | IllegalArgumentException e) {
-            throw new IllegalArgumentException("Cannot parse config '" + pElement + "' as JSON Object",e);
+            throw new BadRequestException("Cannot parse config '" + pElement + "' as JSON Object", e);
         }
     }
+
 }

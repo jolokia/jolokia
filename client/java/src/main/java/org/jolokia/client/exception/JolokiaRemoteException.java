@@ -20,7 +20,9 @@ import org.jolokia.json.JSONObject;
 
 /**
  * Exception that occurred on the remote side (i.e the server) and which contains details about the error occurred
- * at remote Jolokia Agent side.
+ * at remote Jolokia Agent side. Even errors parsed from the response, but at the client side do not
+ * end with this exception. This exception should be used <em>only</em> when proper JSON error data is parsed
+ * from the HTTP response body.
  *
  * @author roland
  * @since Jun 9, 2010
@@ -39,7 +41,11 @@ public class JolokiaRemoteException extends JolokiaException {
     // Java class of a remote error
     private final String errorType;
 
-    // JSONObject containing value of the remote error - "value" field of the response JSON
+    // If available, this is a class name of an exception from javax.management.JMException / javax.management.JMRuntimeException
+    // hierarchy
+    private final String errorTypeJmx;
+
+    // JSONObject containing value of the remote error - "error_value" field of the response JSON
     private final JSONObject errorValue;
 
     // the entire response JSON object
@@ -51,14 +57,17 @@ public class JolokiaRemoteException extends JolokiaException {
      * @param pJolokiaRequest {@link JolokiaRequest} that ended with an error
      * @param pMessage        error message of the exception occurred remotely
      * @param pErrorType      kind of error used
+     * @param pErrorTypeJmx   kind of JMX error used
      * @param pStatus         status code
      * @param pStacktrace     stacktrace of the remote exception
      * @param pErrorValue     the error JSON object
      */
-    public JolokiaRemoteException(JolokiaRequest pJolokiaRequest, String pMessage, String pErrorType, int pStatus, String pStacktrace, JSONObject pErrorValue) {
+    public JolokiaRemoteException(JolokiaRequest pJolokiaRequest, String pMessage, String pErrorType,
+                                  String pErrorTypeJmx, int pStatus, String pStacktrace, JSONObject pErrorValue) {
         super(pMessage);
         status = pStatus;
         errorType = pErrorType;
+        errorTypeJmx = pErrorTypeJmx;
         remoteStacktrace = pStacktrace;
         request = pJolokiaRequest;
         errorValue = pErrorValue;
@@ -80,6 +89,7 @@ public class JolokiaRemoteException extends JolokiaException {
         request = pJolokiaRequest;
         response = pJsonRespObject;
         errorType = (String) pJsonRespObject.get("error_type");
+        errorTypeJmx = (String) pJsonRespObject.get("error_type_jmx");
         remoteStacktrace = (String) pJsonRespObject.get("stacktrace");
 
         // result of org.jolokia.server.core.backend.BackendManager.convertExceptionToJson()
@@ -106,6 +116,16 @@ public class JolokiaRemoteException extends JolokiaException {
      */
     public String getErrorType() {
         return errorType;
+    }
+
+    /**
+     * Java class of a JMX exception that may be a cause (or final) exception occurring
+     * at the remote Jolokia Agent side.
+     *
+     * @return
+     */
+    public String getErrorTypeJmx() {
+        return errorTypeJmx;
     }
 
     /**

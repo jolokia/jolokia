@@ -1,19 +1,5 @@
-package org.jolokia.service.jmx.handler;
-
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.List;
-
-import javax.management.*;
-import javax.management.openmbean.OpenMBeanAttributeInfo;
-import javax.management.openmbean.OpenType;
-
-import org.jolokia.server.core.request.JolokiaWriteRequest;
-import org.jolokia.server.core.service.serializer.Serializer;
-import org.jolokia.server.core.util.RequestType;
-
 /*
- * Copyright 2009-2013 Roland Huss
+ * Copyright 2009-2026 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +13,27 @@ import org.jolokia.server.core.util.RequestType;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.service.jmx.handler;
 
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.List;
+import javax.management.Attribute;
+import javax.management.AttributeNotFoundException;
+import javax.management.JMException;
+import javax.management.JMRuntimeException;
+import javax.management.MBeanAttributeInfo;
+import javax.management.MBeanInfo;
+import javax.management.MBeanServerConnection;
+import javax.management.ObjectName;
+import javax.management.openmbean.OpenMBeanAttributeInfo;
+import javax.management.openmbean.OpenType;
+
+import org.jolokia.server.core.request.BadRequestException;
+import org.jolokia.server.core.request.JolokiaRequest;
+import org.jolokia.server.core.request.JolokiaWriteRequest;
+import org.jolokia.server.core.service.serializer.Serializer;
+import org.jolokia.server.core.util.RequestType;
 
 /**
  * Handler for dealing with write request.
@@ -37,12 +43,11 @@ import org.jolokia.server.core.util.RequestType;
  */
 public class WriteHandler extends AbstractCommandHandler<JolokiaWriteRequest> {
 
-    /** {@inheritDoc} */
+    @Override
     public RequestType getType() {
         return RequestType.WRITE;
     }
 
-    /** {@inheritDoc} */
     @Override
     protected void checkForRestriction(JolokiaWriteRequest pRequest) {
         if (!context.isAttributeWriteAllowed(pRequest.getObjectName(),pRequest.getAttributeName())) {
@@ -51,27 +56,9 @@ public class WriteHandler extends AbstractCommandHandler<JolokiaWriteRequest> {
         }
     }
 
-    /** {@inheritDoc} */
     @Override
     public Object doHandleSingleServerRequest(MBeanServerConnection server, JolokiaWriteRequest request)
-            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException {
-
-        try {
-            return setAttribute(request, server);
-        } catch (IntrospectionException exp) {
-            throw new IllegalArgumentException("Cannot get info for MBean " + request.getObjectName() + ": " +exp,exp);
-        } catch (InvalidAttributeValueException e) {
-            throw new IllegalArgumentException("Invalid value " + request.getValue() + " for attribute " +
-                    request.getAttributeName() + ", MBean " + request.getObjectNameAsString(),e);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new IllegalArgumentException("Cannot set value " + request.getValue() + " for attribute " +
-                    request.getAttributeName() + ", MBean " + request.getObjectNameAsString(),e);
-        }
-    }
-
-    private Object setAttribute(JolokiaWriteRequest request, MBeanServerConnection server)
-            throws MBeanException, AttributeNotFoundException, InstanceNotFoundException,
-            ReflectionException, IntrospectionException, InvalidAttributeValueException, IllegalAccessException, InvocationTargetException, IOException {
+            throws IOException, JMException, BadRequestException {
 
         MBeanInfo mInfo = server.getMBeanInfo(request.getObjectName());
         MBeanAttributeInfo aInfo = null;
@@ -86,84 +73,96 @@ public class WriteHandler extends AbstractCommandHandler<JolokiaWriteRequest> {
         if (aInfo == null) {
             throw new AttributeNotFoundException("No such attribute: " + request.getAttributeName());
         }
+        if (!aInfo.isWritable()) {
+            throw new AttributeNotFoundException("Can't write attribute: " + request.getAttributeName());
+        }
 
         // it can be write-only though
-        boolean writeOnly = aInfo.isWritable() && !aInfo.isReadable();
+        boolean writeOnly = !aInfo.isReadable();
 
         // Old value, will throw an exception if attribute is not known. That's good.
-        Object oldValue = writeOnly ? null : server.getAttribute(request.getObjectName(), request.getAttributeName());
-        Object[] values;
-        if (aInfo instanceof OpenMBeanAttributeInfo) {
-            OpenMBeanAttributeInfo info = (OpenMBeanAttributeInfo) aInfo;
-            values = getValues(info.getOpenType(), oldValue, request);
+        Object currentAttributeValue = writeOnly ? null : server.getAttribute(request.getObjectName(), request.getAttributeName());
+
+        Values values;
+        if (aInfo instanceof OpenMBeanAttributeInfo info) {
+            // MXBean case - we'll be converting the incoming value to an OpenType
+            values = getOpenTypeAttribute(info.getOpenType(), currentAttributeValue, request);
         } else {
-            // aInfo is != null otherwise getAttribute() would have already thrown an ArgumentNotFoundException
-            values = getValues(aInfo.getType(), oldValue, request);
+            // generic conversion
+            values = handleGenericAttribute(aInfo.getType(), currentAttributeValue, request);
         }
-        Attribute attribute = new Attribute(request.getAttributeName(),values[0]);
-        server.setAttribute(request.getObjectName(),attribute);
-        return values[1];
+
+        Attribute attribute = new Attribute(request.getAttributeName(), values.newValue);
+        server.setAttribute(request.getObjectName(), attribute);
+
+        return values.oldValue;
+    }
+
+    private Values getOpenTypeAttribute(OpenType<?> pOpenType, Object pCurrentValue, JolokiaWriteRequest pRequest) throws BadRequestException {
+        // we treat OpenTypes and MXBeans as "whole" values and we don't support getting part of it (using path)
+        if (pRequest.getPathParts() != null && !pRequest.getPathParts().isEmpty()) {
+            // no BadRequestException here - simply the server MBean doesn't support inner path. So error 500
+            throw new IllegalArgumentException("Cannot set value for OpenType " + pOpenType + " with inner path " +
+                pRequest.getPath() + " since OpenTypes are immutable");
+        }
+
+        try {
+            Object newValue = context.getMandatoryService(Serializer.class).deserializeOpenType(pOpenType, pRequest.getValue());
+            return new Values(newValue, pCurrentValue);
+        } catch (IllegalArgumentException | UnsupportedOperationException e) {
+            // because deserialization of user-provided data is involved, we turn these into BadRequestException
+            throw new BadRequestException("Can't process " + pRequest + ": " + e.getMessage(), e);
+        }
     }
 
     /**
-     * Get values for a write request. This method returns an array with two objects.
-     * If no path is given (<code>pRequest.getExtraArgs() == null</code>), the returned values
-     * are the new value and the old value. However, if a path is set, the returned new value
-     * is the outer value (which can be set by an corresponding JMX set operation) where the
-     * new value is set via the path expression. The old value is the value of the object specified
-     * by the given path.
+     * Prepare an Object to be set for an attribute or its inner value if {@link JolokiaRequest#getPathParts() a path}
+     * is specified. Without a path, we simply return a value to be passed to
+     * {@link MBeanServerConnection#setAttribute(ObjectName, Attribute)}. With a path, the "inner value"
+     * will already be set in the attribute, which is then re-set via JMX.
      *
-     *
-     * @param pType type of the outermost object to set as returned by an MBeanInfo structure.
+     * @param pType         type of the outermost object to set as returned by an MBeanInfo structure.
      * @param pCurrentValue the object of the outermost object which can be null
-     * @param pRequest the initial request
-     * @return object array with two elements, element 0 is the value to set (see above), element 1
-     *         is the old value.
-     *
+     * @param pRequest      the initial request
+     * @return
      * @throws AttributeNotFoundException if no such attribute exists (as specified in the request)
-     * @throws IllegalAccessException if access to MBean fails
-     * @throws InvocationTargetException reflection error when setting an object's attribute
      */
-    private Object[] getValues(String pType, Object pCurrentValue, JolokiaWriteRequest pRequest)
-            throws AttributeNotFoundException, IllegalAccessException, InvocationTargetException {
+    private Values handleGenericAttribute(String pType, Object pCurrentValue, JolokiaWriteRequest pRequest)
+            throws JMException, BadRequestException {
         List<String> pathParts = pRequest.getPathParts();
         Object newValue = pRequest.getValue();
 
-        if (pathParts != null && !pathParts.isEmpty()) {
-            if (pCurrentValue == null ) {
-                throw new IllegalArgumentException(
-                        "Cannot set value with path when parent object is not set");
+        if (pathParts != null && !pathParts.isEmpty() && pCurrentValue == null) {
+            // server-side problem - error 500
+            throw new IllegalArgumentException(
+                "Cannot set value with path when parent object is not set");
+        }
+
+        try {
+            if (pathParts != null && !pathParts.isEmpty()) {
+                // We set an inner value, hence we have to return provided value itself for resetting
+                // it later back via JMX
+                Object oldInnerValue;
+                try {
+                    oldInnerValue = context.getMandatoryService(Serializer.class).setInnerValue(pCurrentValue, newValue, pathParts);
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    // reflection based exception
+                    throw new JMRuntimeException(e.getMessage());
+                }
+                // we already set the inner value, but because MBeanServerConnection.getAttribute() may have
+                // returned a copy (?), we return pCurrentValue as new value to set with MBeanServerConnection.setAttribute()
+                return new Values(pCurrentValue, oldInnerValue);
+            } else {
+                // the value to be set will be deserialized to a proper type and set as a JMX attribute by the caller
+                return new Values(context.getMandatoryService(Serializer.class).deserialize(pType, newValue), pCurrentValue);
             }
-
-            // We set an inner value, hence we have to return provided value itself for resetting
-            // it later back via JMX
-            return new Object[] {
-                    pCurrentValue,
-                    context.getMandatoryService(Serializer.class).setInnerValue(pCurrentValue, newValue, pathParts)
-            };
-
-        } else {
-            // Return the objectified value
-            return new Object[] {
-                    context.getMandatoryService(Serializer.class).deserialize(pType, newValue),
-                    pCurrentValue
-            };
+        } catch (IllegalArgumentException | UnsupportedOperationException e) {
+            // because deserialization of user-provided data is involved, we turn these into BadRequestException
+            throw new BadRequestException("Can't process " + pRequest + ": " + e.getMessage(), e);
         }
     }
 
-    private Object[] getValues(OpenType<?> pOpenType, Object pCurrentValue, JolokiaWriteRequest pRequest) {
-        // TODO: What to do when path is not null ? Simplest: Throw exception. Advanced: Extract other values and create
-        // a new CompositeData with old values and the new value.
-        // However, since this is probably out of scope, we will simply throw an exception if the path is not empty.
-        List<String> pathParts = pRequest.getPathParts();
-        if (pathParts != null && !pathParts.isEmpty()) {
-            throw new IllegalArgumentException("Cannot set value for OpenType " + pOpenType + " with inner path " +
-                                               pRequest.getPath() + " since OpenTypes are immutable");
-        }
-        return new Object[] {
-                context.getMandatoryService(Serializer.class).deserializeOpenType(pOpenType, pRequest.getValue()),
-                pCurrentValue
-        };
+    private record Values(Object newValue, Object oldValue) {
     }
+
 }
-

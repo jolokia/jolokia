@@ -50,8 +50,8 @@ public enum ConfigKey {
     DEBUG_MAX_ENTRIES("debugMaxEntries",true, false, "100"),
 
     /**
-     * Path to a white list of patterns which are matched against possible
-     * JMX service URL for incoming requests
+     * Path to a file with a list of patterns which are matched against possible
+     * JMX service URL for incoming requests when working in proxy mode.
      */
     JSR160_PROXY_ALLOWED_TARGETS("jsr160ProxyAllowedTargets", true, false),
 

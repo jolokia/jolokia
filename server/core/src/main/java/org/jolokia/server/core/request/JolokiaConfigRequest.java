@@ -31,7 +31,7 @@ public class JolokiaConfigRequest extends JolokiaRequest {
      *
      * @param pInitParams optional init parameters
      */
-    JolokiaConfigRequest(ProcessingParameters pInitParams) {
+    JolokiaConfigRequest(ProcessingParameters pInitParams) throws BadRequestException {
         super(RequestType.CONFIG, null, pInitParams, true);
     }
 
@@ -41,7 +41,7 @@ public class JolokiaConfigRequest extends JolokiaRequest {
      * @param pRequestMap object representation of the request
      * @param pParams     processing parameters
      */
-    JolokiaConfigRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) {
+    JolokiaConfigRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) throws BadRequestException {
         super(pRequestMap, pParams, true);
     }
 
@@ -58,7 +58,7 @@ public class JolokiaConfigRequest extends JolokiaRequest {
     static RequestCreator<JolokiaConfigRequest> newCreator() {
         return new RequestCreator<>() {
             @Override
-            public JolokiaConfigRequest create(Deque<String> pStack, ProcessingParameters pParams) {
+            public JolokiaConfigRequest create(Deque<String> pStack, ProcessingParameters pParams) throws BadRequestException {
                 if (!pStack.isEmpty()) {
                     throw new BadRequestException("Illegal path arguments for configuration endpoint");
                 }
@@ -66,10 +66,7 @@ public class JolokiaConfigRequest extends JolokiaRequest {
             }
 
             @Override
-            public JolokiaConfigRequest create(JSONObject requestMap, ProcessingParameters pParams) {
-//                if (!pStack.isEmpty()) {
-//                    throw new BadRequestException("Illegal path arguments for configuration endpoint");
-//                }
+            public JolokiaConfigRequest create(JSONObject requestMap, ProcessingParameters pParams) throws BadRequestException {
                 return new JolokiaConfigRequest(requestMap, pParams);
             }
         };

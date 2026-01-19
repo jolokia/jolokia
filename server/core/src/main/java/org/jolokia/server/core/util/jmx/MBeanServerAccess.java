@@ -1,7 +1,5 @@
-package org.jolokia.server.core.util.jmx;
-
 /*
- * Copyright 2009-2013 Roland Huss
+ * Copyright 2009-2026 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +13,39 @@ package org.jolokia.server.core.util.jmx;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.server.core.util.jmx;
 
 import java.io.IOException;
 import java.util.Set;
-
-import javax.management.*;
+import javax.management.AttributeNotFoundException;
+import javax.management.InstanceNotFoundException;
+import javax.management.JMException;
+import javax.management.JMRuntimeException;
+import javax.management.MBeanServerConnection;
+import javax.management.ObjectInstance;
+import javax.management.ObjectName;
 
 /**
- * An MBeanSever executor is responsible to perform actions on one or more MBeanServers which involve
- * operations on one or more MBeans. It encapsulates completely all available MBeanServers, so no direct
- * access to the MBeanServers are required. This interface is also suitable for implementations with
- * remote {@link MBeanServerConnection}s, e.g. for implementing it with JSR-160 connections.
+ * <p>This is an interface Jolokia uses to <em>manage</em> all available MBean servers to be accessed
+ * through {@link MBeanServerConnection}. The found/discovered MBean servers are then available using
+ * {@link #getMBeanServers()}. Additionally two methods are provided to execute actions on the managed
+ * MBean servers:<ul>
+ *     <li>{@link #each} - invoke an action on all MBean servers and all matching {@link ObjectInstance mbeans} without
+ *     expecting a result (actions are responsible for <em>collecting</em> the result). The action itself is
+ *     never called with a pattern, because the querying is performed outside the action.</li>
+ *     <li>{@link #call} - invoke an action on all MBean servers passing the {@link ObjectName} and
+ *     return a first available result. The action decides what to do if the {@link ObjectName} is a pattern.</li>
+ * </ul></p>
  *
+ * <p>For {@link #each} call, because the {@link ObjectName} we pass may be a pattern, the behavior is to query
+ * the MBean servers for concrete {@link ObjectInstance object instances}. This behavior makes one JMX exception
+ * special - {@link InstanceNotFoundException} - when iterating over the MBean servers and Object instances, this
+ * exception is ignored and doesn't break the iteration - because an MBean may get unregistered between querying
+ * and actual action on this MBean.<br>
+ * All other exceptions break the loop and are propagated to the caller.</p>
+ *
+ * <p>Neither the callbacks nor the {@code each()}/{@code call()} methods throw {@link org.jolokia.server.core.request.BadRequestException}
+ * because validation if user/client input should already be performed.</p>
  *
  * @author roland
  * @since 17.01.13
@@ -34,47 +53,44 @@ import javax.management.*;
 public interface MBeanServerAccess {
 
     /**
-     * Iterate over all MBeanServers managed and call the handler via a callback.
+     * <p>Ask to invoke an {@link MBeanEachCallback} on a given {@link ObjectName} for all managed
+     * {@link MBeanServerConnection MBean server connections} .</p>
      *
-     * If {@param pObjectName} is null or a pattern, the MBean names are queried on each MBeanServer and
-     * feed into the callback. If it is a full object name, then all MBeanServers are called with this object
-     * name in turn.
+     * <p>If {@code pObjectName} is null or a pattern, the MBean names are queried first for each
+     * {@link MBeanServerConnection} and all found {@link ObjectInstance instances} are passed into the callback.
+     * If it is a non-pattern {@link ObjectName}, the query is also performed simply to get the
+     * one {@link ObjectInstance}.</p>
      *
-     * @param pObjectName object name to lookup, which can be a pattern in which case a query is performed.
-     * @param pCallback the action to be called for each MBean found on every server
-     *
-     * @throws IOException
-     * @throws ReflectionException
-     * @throws MBeanException
+     * @param pObjectName object name to use, which can be a pattern (or null) in which case the callback is called with
+     *                    more than one {@link ObjectInstance}.
+     * @param pCallback the action to be called for each {@link ObjectInstance} found on every managed MBean server
+     * @throws IOException when there's an error invoking {@link javax.management.MBeanServerConnection}
+     * @throws JMException JMX checked exception for all possible JMX exceptions from {@link MBeanServerConnection} interface
+     * @throws JMRuntimeException JMX unchecked exception
      */
-    void each(ObjectName pObjectName, MBeanEachCallback pCallback)
-            throws IOException, ReflectionException, MBeanException;
+    void each(ObjectName pObjectName, MBeanEachCallback pCallback) throws IOException, JMException;
 
     /**
-     * Call an action an the first MBeanServer on which the action does not throw an InstanceNotFoundException
-     * will considered to be successful and this method returns with the return value of the succesful
-     * action. If no action was succesful, an {@link IllegalArgumentException} is raised (containing the last
-     * {@link InstanceNotFoundException} from the last tried server)
+     * <p>Ask to invoke an {@link MBeanAction} on a given {@link ObjectName} and get a result of such action
+     * from the first {@link MBeanServerConnection} that provides such result.</p>
      *
-     * @param pObjectName objectname given through to the action
-     * @param pMBeanAction the action to call
-     * @param pExtraArgs any extra args given also to the action
+     * @param pObjectName object name to use by the action - whether it's a pattern or not
+     * @param pAction the action to be called on every managed MBean server until any result is available
+     * @param pExtraArgs any extra args to be passed to the action
+     * @return the return value of the successful action
      * @param <R> type of the return value
-     * @return the return value of the succesful action
-     *
-     * @throws IOException
-     * @throws ReflectionException
-     * @throws MBeanException if the JMX call causes an issue
+     * @throws IOException when there's an error invoking {@link javax.management.MBeanServerConnection}
+     * @throws JMException JMX checked exception for all possible JMX exceptions from {@link MBeanServerConnection} interface
+     * @throws JMRuntimeException JMX unchecked exception
      */
-    <R> R call(ObjectName pObjectName, MBeanAction<R> pMBeanAction, Object... pExtraArgs)
-            throws IOException, ReflectionException, MBeanException, AttributeNotFoundException, InstanceNotFoundException;
+    <R> R call(ObjectName pObjectName, MBeanAction<R> pAction, Object... pExtraArgs) throws IOException, JMException;
 
     /**
-     * Query all MBeanServer and return the union of all results
+     * Query all managed {@link MBeanServerConnection MBean server connections} and return the union of all results
      *
-     * @param pObjectName pattern to query for. If null, then all MBean of all MBeanServers are returned
-     * @return the found MBeans
-     * @throws IOException if called remotely and an IOError occured.
+     * @param pObjectName pattern to query for. If null, then all MBeans of all MBeanServers are returned
+     * @return the found {@link ObjectName MBean names}
+     * @throws IOException if called remotely and an {@link IOException} occurred - on any of the managed servers
      */
     Set<ObjectName> queryNames(ObjectName pObjectName) throws IOException;
 
@@ -102,52 +118,59 @@ public interface MBeanServerAccess {
      */
     Set<MBeanServerConnection> getMBeanServers();
 
+    // ---- Callback interfaces associated with MBeanServerAccess
+
     /**
-     * This callback is used together with {@link #each(ObjectName, MBeanEachCallback)} for iterating over all
-     * active MBeanServers. The callback is responsible on its own to collect the information queried.
+     * <p>This callback is used together with {@link #each(ObjectName, MBeanEachCallback)} when iterating over all
+     * active MBeanServers and all matching {@link ObjectInstance ObjectInstances} (or one, if the {@link ObjectName}
+     * parameter is not a pattern).</p>
+     *
+     * <p>Caller of {@link MBeanServerAccess#each(ObjectName, MBeanEachCallback)} should construct this callback
+     * to <em>collect</em> information from multiple invocations because no return value is expected.</p>
      */
     interface MBeanEachCallback {
+
         /**
-         * Callback call for a specific MBeanServer for a given object name.
+         * Callback invoked for a single {@link MBeanServerConnection} and one {@link ObjectInstance}.
          *
-         * @param pConn MBeanServer
-         * @param pInstance object name+class as given by the surrounding {@link #each(ObjectName, MBeanEachCallback)} call, which
-         *                  can be either a pattern or null (in which case the names are searched for before) or a direct name.
-         * @throws ReflectionException
-         * @throws InstanceNotFoundException if the provided full-ObjectName is not registered at the MBeanServer
-         * @throws IOException
-         * @throws MBeanException if an operation of an MBean fails
+         * @param pConn
+         * @param pInstance MBean name+class derived from the {@link ObjectName} passed to {@link #each(ObjectName, MBeanEachCallback)}
+         *                  call. When the {@link ObjectName} was a pattern or null, there will be more {@link ObjectInstance} objects.
+         * @throws IOException when there's an error invoking {@link javax.management.MBeanServerConnection}
+         * @throws JMException JMX checked exception for all possible JMX exceptions from {@link MBeanServerConnection} interface
+         * @throws JMRuntimeException JMX unchecked exception
          */
-        void callback(MBeanServerConnection pConn, ObjectInstance pInstance)
-                throws ReflectionException, InstanceNotFoundException, IOException, MBeanException;
+        void callback(MBeanServerConnection pConn, ObjectInstance pInstance) throws IOException, JMException;
     }
 
     /**
-     * A MBeanAction represent a single action on a MBeanServer for a given object name. The action is free
-     * to throw a {@link InstanceNotFoundException} or {@link AttributeNotFoundException} if the object name or attribute
-     * is not contained in the give MBeanServer. In this case the next MBeanServer is tried, otherwise the result
-     * from the action is returned and no other MBeanServers are tried
+     * <p>This callback is used together with {@link #call(ObjectName, MBeanAction, Object...)} when iterating over all
+     * active MBeanServers. First call of this action that doesn't throw {@link InstanceNotFoundException}
+     * or {@link AttributeNotFoundException} and provides a result is treated as the final result of the {@code execute()}.
+     * One of these two exceptions is a signal that we should proceed to next MBean server.</p>
+     *
+     * <p>This action is treated as a "get the first available result" action.</p>
      *
      * @param <R> return type for the execute method
      */
     interface MBeanAction<R> {
+
         /**
-         * Execute the action given to {@link #call(ObjectName, MBeanAction, Object...)}.
+         * Action invoked for a single {@link MBeanServerConnection} and the passed {@link ObjectName}. When
+         * there are more servers processed, first action that provides a result stops the iteration.
          *
          * @param pConn MBeanServer on which the action should be performed
-         * @param pName an objectname interpreted specifically by the action
+         * @param pName an {@link ObjectName} interpreted by the action (whether it's a pattern or not)
          * @param extraArgs any extra args given as context from the outside
          * @return the return value
          *
-         * @throws ReflectionException
-         * @throws InstanceNotFoundException if the MBean does not exist. For {@link #call(ObjectName, MBeanAction, Object...)} this
-         *         implies to try the next MBeanServer.
-         * @throws IOException
-         * @throws MBeanException
-         * @throws AttributeNotFoundException if an attribute is read, this exception indicates, that the attribute is not
-         *         known to the MBean specified (although the MBean has been found in the MBeanServer)
+         * @throws IOException when there's an error invoking {@link javax.management.MBeanServerConnection}
+         * @throws JMException JMX checked exception for all possible JMX exceptions from {@link MBeanServerConnection} interface.
+         *         {@link InstanceNotFoundException} or {@link AttributeNotFoundException} indicates that next
+         *         {@link MBeanServerConnection} should be checked.
+         * @throws JMRuntimeException JMX unchecked exception
          */
-        R execute(MBeanServerConnection pConn, ObjectName pName, Object... extraArgs)
-                throws ReflectionException, InstanceNotFoundException, IOException, MBeanException, AttributeNotFoundException;
+        R execute(MBeanServerConnection pConn, ObjectName pName, Object... extraArgs) throws IOException, JMException;
     }
+
 }

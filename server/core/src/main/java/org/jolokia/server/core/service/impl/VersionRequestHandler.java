@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2013 Roland Huss
+ * Copyright 2009-2026 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,12 @@
  */
 package org.jolokia.server.core.service.impl;
 
-import java.io.IOException;
-import java.util.HashSet;
 import java.util.Set;
-import java.util.TreeSet;
-import javax.management.JMException;
 
 import org.jolokia.json.JSONObject;
 import org.jolokia.server.core.Version;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.request.JolokiaRequest;
-import org.jolokia.server.core.request.NotChangedException;
 import org.jolokia.server.core.service.api.AbstractJolokiaService;
 import org.jolokia.server.core.service.api.AgentDetails;
 import org.jolokia.server.core.service.api.DataUpdater;
@@ -63,7 +58,7 @@ public class VersionRequestHandler extends AbstractJolokiaService<RequestHandler
     }
 
     @Override
-    public Object handleRequest(JolokiaRequest pJmxReq, Object pPreviousResult) throws JMException, IOException, NotChangedException {
+    public Object handleRequest(JolokiaRequest pJmxReq, Object pPreviousResult) {
         JSONObject ret = new JSONObject();
 
         // basic information - shared with /config endpoint

@@ -24,6 +24,7 @@ import java.util.Set;
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
+import javax.management.JMException;
 import javax.management.MBeanException;
 import javax.management.MBeanRegistrationException;
 import javax.management.MBeanServer;
@@ -63,7 +64,7 @@ public class DefaultMBeanServerAccessTest {
     }
 
     @Test
-    public void eachNull() throws MBeanException, IOException, ReflectionException {
+    public void eachNull() throws IOException, JMException {
         executor.each(null, (pConn, pInstance) -> {
             if (pConn != ManagementFactory.getPlatformMBeanServer()) {
                 checkHiddenMBeans(pConn, pInstance.getObjectName());
@@ -73,7 +74,7 @@ public class DefaultMBeanServerAccessTest {
 
 
     @Test
-    public void eachObjectName() throws MalformedObjectNameException, MBeanException, IOException, ReflectionException {
+    public void eachObjectName() throws JMException, IOException {
         for (final ObjectName name : new ObjectName[] { new ObjectName("test:type=one"), new ObjectName("test:type=two") }) {
             executor.each(name, (pConn, pInstance) -> {
                 if (pConn != ManagementFactory.getPlatformMBeanServer()) {
@@ -110,7 +111,7 @@ public class DefaultMBeanServerAccessTest {
 
     @Test
     public void destroyWithoutPriorRegistration() {
-        // Should always work, even when no registration has happened. Non exisiting listeners will be simplu ignored, since we didnt do any registration before
+        // Should always work, even when no registration has happened. Non existing listeners will be simply ignored, since we didnt do any registration before
         executor.unregisterFromMBeanNotifications();
     }
 
@@ -119,22 +120,22 @@ public class DefaultMBeanServerAccessTest {
     }
 
     @Test
-    public void call() throws MalformedObjectNameException, MBeanException, IOException, ReflectionException, AttributeNotFoundException, InstanceNotFoundException {
+    public void call() throws JMException, IOException {
         String name = getAttribute(executor,"test:type=one","Name");
         assertEquals(name,"jolokia");
     }
 
-    private String getAttribute(DefaultMBeanServerAccess pExecutor, String name, String attribute) throws IOException, ReflectionException, MBeanException, MalformedObjectNameException, AttributeNotFoundException, InstanceNotFoundException {
+    private String getAttribute(DefaultMBeanServerAccess pExecutor, String name, String attribute) throws IOException, JMException {
         return (String) pExecutor.call(new ObjectName(name), (pConn, pName, extraArgs) -> pConn.getAttribute(pName, (String) extraArgs[0]), attribute);
     }
 
     @Test(expectedExceptions = InstanceNotFoundException.class,expectedExceptionsMessageRegExp = ".*test:type=bla.*")
-    public void callWithInvalidObjectName() throws MalformedObjectNameException, MBeanException, IOException, ReflectionException, AttributeNotFoundException, InstanceNotFoundException {
+    public void callWithInvalidObjectName() throws JMException, IOException {
         getAttribute(executor,"test:type=bla","Name");
     }
 
     @Test(expectedExceptions = AttributeNotFoundException.class,expectedExceptionsMessageRegExp = ".*Bla.*")
-    public void callWithInvalidAttributeName() throws MalformedObjectNameException, MBeanException, IOException, ReflectionException, AttributeNotFoundException, InstanceNotFoundException {
+    public void callWithInvalidAttributeName() throws JMException, IOException {
         getAttribute(executor, "test:type=one", "Bla");
     }
 

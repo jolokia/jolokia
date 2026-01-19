@@ -20,7 +20,7 @@ import static org.testng.Assert.*;
  */
 public class CompositeDataAccessorTest extends AbstractObjectAccessorTest {
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test(expectedExceptions = UnsupportedOperationException.class)
     public void noSettingAllowed() throws InvocationTargetException, IllegalAccessException {
         assertFalse(objectAccessor.canSetValue());
         objectAccessor.setObjectValue(objectToObjectConverter,new File("test"),"executable",Boolean.TRUE);

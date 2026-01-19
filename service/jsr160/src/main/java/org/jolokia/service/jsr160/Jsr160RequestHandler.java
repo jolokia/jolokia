@@ -1,7 +1,5 @@
-package org.jolokia.service.jsr160;
-
 /*
- * Copyright 2009-2013 Roland Huss
+ * Copyright 2009-2026 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +13,7 @@ package org.jolokia.service.jsr160;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.service.jsr160;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -28,14 +27,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
-
-import javax.management.*;
-import javax.management.remote.*;
+import javax.management.AttributeNotFoundException;
+import javax.management.InstanceNotFoundException;
+import javax.management.JMException;
+import javax.management.JMRuntimeException;
+import javax.management.MBeanException;
+import javax.management.MBeanServerConnection;
+import javax.management.ReflectionException;
+import javax.management.remote.JMXConnector;
+import javax.management.remote.JMXConnectorFactory;
+import javax.management.remote.JMXServiceURL;
 import javax.naming.Context;
 import javax.rmi.ssl.SslRMIClientSocketFactory;
 
+import org.jolokia.json.JSONObject;
 import org.jolokia.server.core.config.ConfigKey;
-import org.jolokia.server.core.request.*;
+import org.jolokia.server.core.request.BadRequestException;
+import org.jolokia.server.core.request.EmptyResponseException;
+import org.jolokia.server.core.request.JolokiaRequest;
+import org.jolokia.server.core.request.NotChangedException;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.request.AbstractRequestHandler;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
@@ -44,30 +54,28 @@ import org.jolokia.service.jmx.api.CommandHandler;
 import org.jolokia.service.jmx.api.CommandHandlerManager;
 
 /**
- * Dispatcher for calling JSR-160 connectors
+ * The <em>proxy</em> Jolokia {@link org.jolokia.server.core.service.request.RequestHandler}, which
+ * invokes an operation on a single {@link MBeanServerConnection} using {@link JMXConnector}.
  *
  * @author roland
  * @since Nov 11, 2009
  */
 public class Jsr160RequestHandler extends AbstractRequestHandler {
 
-    // request handler for specific request types
+    /** Each {@link JolokiaRequest} is handled by a dedicated {@link CommandHandler}. */
     private CommandHandlerManager commandHandlerManager;
 
-    // White and blacklist for patterns to match the JMX Service URL against
-    private Set<String> whiteList;
-    private Set<String> blackList;
-
-    public static final String ALLOWED_TARGETS_SYSPROP = "jolokia.jsr160ProxyAllowedTargets";
-    public static final String ALLOWED_TARGETS_ENV = "JOLOKIA_JSR160_PROXY_ALLOWED_TARGETS";
+    // Allowlist and denylist for patterns to match the JMX Service URL against
+    private Set<String> allowList;
+    private Set<String> denyList;
 
     /**
-     * Create this request handler as service
+     * Create a new <em>proxy</em> request handler which accesses remote MBeans.
      *
      * @param pOrder service order as given during construction.
      */
     public Jsr160RequestHandler(int pOrder) {
-        super("proxy",pOrder);
+        super("proxy", pOrder);
     }
 
     /**
@@ -75,10 +83,20 @@ public class Jsr160RequestHandler extends AbstractRequestHandler {
      *
      * @param pContext the jolokia context
      */
+    @Override
     public void init(JolokiaContext pContext) {
         commandHandlerManager = new CommandHandlerManager(pContext, getProvider());
-        whiteList = extractWhiteList(pContext);
-        blackList = extractBlackList(pContext);
+        allowList = extractAllowList(pContext);
+        denyList = extractDenyList(pContext);
+    }
+
+    /**
+     * The request can be handled when a target configuration is given. The provider namespace is optional
+     * here for backwards compatibility.
+     */
+    @Override
+    public boolean canHandle(JolokiaRequest pJolokiaRequest) {
+        return pJolokiaRequest.getOption("target") instanceof JSONObject;
     }
 
     /**
@@ -93,10 +111,12 @@ public class Jsr160RequestHandler extends AbstractRequestHandler {
      * @throws MBeanException
      * @throws IOException
      */
+    @Override
     public <R extends JolokiaRequest> Object handleRequest(R pJmxReq, Object pPreviousResult)
-            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException, NotChangedException, EmptyResponseException {
+            throws IOException, JMException, JMRuntimeException, NotChangedException, BadRequestException, EmptyResponseException {
 
         CommandHandler<R> handler = commandHandlerManager.getCommandHandler(pJmxReq.getType());
+
         JMXConnector connector = null;
         try {
             connector = createConnector(pJmxReq);
@@ -107,6 +127,7 @@ public class Jsr160RequestHandler extends AbstractRequestHandler {
                 MBeanServerAccess manager = new SingleMBeanServerAccess(connection);
                 return handler.handleAllServerRequest(manager, pJmxReq, pPreviousResult);
             } else {
+                // just one MBeanServerConnection to iterate, so propagate any exception
                 return handler.handleSingleServerRequest(connection, pJmxReq);
             }
         } finally {
@@ -124,8 +145,8 @@ public class Jsr160RequestHandler extends AbstractRequestHandler {
 
         JMXServiceURL url = new JMXServiceURL(urlS);
 
-        Map<String,Object> env = prepareEnv(targetConfig.getEnv());
-        return JMXConnectorFactory.newJMXConnector(url,env);
+        Map<String, Object> env = prepareEnv(targetConfig.getEnv());
+        return JMXConnectorFactory.newJMXConnector(url, env);
     }
 
     private void releaseConnector(JMXConnector pConnector) throws IOException {
@@ -140,17 +161,17 @@ public class Jsr160RequestHandler extends AbstractRequestHandler {
      * @param pTargetConfig the target configuration as obtained from the request
      * @return the prepared environment
      */
-    protected Map<String,Object> prepareEnv(Map<String, String> pTargetConfig) {
+    protected Map<String, Object> prepareEnv(Map<String, String> pTargetConfig) {
         if (pTargetConfig == null || pTargetConfig.isEmpty()) {
             return null;
         }
-        Map<String,Object> ret = new HashMap<>(pTargetConfig);
+        Map<String, Object> ret = new HashMap<>(pTargetConfig);
         String user = (String) ret.remove("user");
-        String password  = (String) ret.remove("password");
+        String password = (String) ret.remove("password");
         if (user != null && password != null) {
             ret.put(Context.SECURITY_PRINCIPAL, user);
             ret.put(Context.SECURITY_CREDENTIALS, password);
-            ret.put("jmx.remote.credentials",new String[] { user, password });
+            ret.put("jmx.remote.credentials", new String[]{user, password});
         }
         // Prevents error "java.rmi.ConnectIOException: non-JRMP server at remote endpoint"
         if (System.getProperties().containsKey("javax.net.ssl.trustStore")) {
@@ -159,21 +180,13 @@ public class Jsr160RequestHandler extends AbstractRequestHandler {
         return ret;
     }
 
-    /**
-     * The request can be handled when a target configuration is given. The provider name space is optional
-     * here for backwards compatibility.
-     *
-     * {@inheritDoc}
-     */
-    public boolean canHandle(JolokiaRequest pJolokiaRequest) {
-        return pJolokiaRequest.getOption("target") != null;
-    }
-
     public String getProvider() {
         return "proxy";
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public void destroy() throws JMException {
         commandHandlerManager.destroy();
     }
@@ -181,13 +194,13 @@ public class Jsr160RequestHandler extends AbstractRequestHandler {
     // Whether a given JMX Service URL is acceptable
     private boolean acceptTargetUrl(String urlS) {
         // Whitelist has precedence. Only patterns on the white list are allowed
-        if (whiteList != null) {
-            return checkPattern(whiteList, urlS, true);
+        if (allowList != null) {
+            return checkPattern(allowList, urlS, true);
         }
 
         // Then blacklist: Everything on this list is forbidden
-        if (blackList != null) {
-            return checkPattern(blackList, urlS, false);
+        if (denyList != null) {
+            return checkPattern(denyList, urlS, false);
         }
 
         // If no list is configured, then everything is allowed
@@ -203,15 +216,22 @@ public class Jsr160RequestHandler extends AbstractRequestHandler {
         return !isPositive;
     }
 
-    private Set<String> extractWhiteList(JolokiaContext pContext) {
-        return extractFrom(pContext != null ? pContext.getConfig(ConfigKey.JSR160_PROXY_ALLOWED_TARGETS) : null,
-                           System.getProperty(ALLOWED_TARGETS_SYSPROP),
-                           System.getenv(ALLOWED_TARGETS_ENV));
+    private Set<String> extractAllowList(JolokiaContext pContext) {
+        return extractFrom(
+            System.getenv(ConfigKey.JSR160_PROXY_ALLOWED_TARGETS.asEnvVariable()),
+            System.getProperty(ConfigKey.JSR160_PROXY_ALLOWED_TARGETS.asSystemProperty()),
+            pContext != null ? pContext.getConfig(ConfigKey.JSR160_PROXY_ALLOWED_TARGETS) : null
+        );
     }
 
-    private Set<String> extractFrom(String ... paths) {
+    private Set<String> extractDenyList(JolokiaContext pContext) {
+        // Bad, bad ....
+        return Collections.singleton("service:jmx:rmi:///jndi/ldap:.*");
+    }
+
+    private Set<String> extractFrom(String... pPaths) {
         Set<String> ret = new HashSet<>();
-        for (String path : paths) {
+        for (String path : pPaths) {
             if (path != null) {
                 ret.addAll(readPatterns(path));
             }
@@ -223,12 +243,11 @@ public class Jsr160RequestHandler extends AbstractRequestHandler {
         List<String> ret = new ArrayList<>();
         Pattern commentPattern = Pattern.compile("^\\s*#.*$");
         try (BufferedReader reader = new BufferedReader(new FileReader(pPath))) {
-            String line = reader.readLine();
-            while (line != null) {
-                if (!commentPattern.matcher(line).matches()) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (!line.trim().startsWith("#")) {
                     ret.add(line);
                 }
-                line = reader.readLine();
             }
             return ret;
         } catch (FileNotFoundException e) {
@@ -238,8 +257,4 @@ public class Jsr160RequestHandler extends AbstractRequestHandler {
         }
     }
 
-    private Set<String> extractBlackList(JolokiaContext pContext) {
-        // Bad, bad ....
-        return Collections.singleton("service:jmx:rmi:///jndi/ldap:.*");
-    }
 }

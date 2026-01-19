@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2013 Roland Huss
+ * Copyright 2009-2026 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,22 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.jolokia.service.jmx.handler;
 
 import java.io.IOException;
+import javax.management.JMException;
+import javax.management.MBeanServerConnection;
 
-import javax.management.*;
-
-import org.jolokia.server.core.request.*;
-import org.jolokia.server.core.util.jmx.MBeanServerAccess;
-import org.jolokia.service.jmx.handler.notification.NotificationDispatcher;
+import org.jolokia.server.core.request.BadRequestException;
+import org.jolokia.server.core.request.EmptyResponseException;
+import org.jolokia.server.core.request.JolokiaNotificationRequest;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.util.RequestType;
+import org.jolokia.server.core.util.jmx.MBeanServerAccess;
+import org.jolokia.service.jmx.handler.notification.NotificationDispatcher;
 
 /**
- * A request handler which is responsible for managing notification
- * requests.
+ * A request handler which is responsible for managing notification requests.
  *
  * @author roland
  * @since 19.03.13
@@ -44,35 +44,32 @@ public class NotificationHandler extends AbstractCommandHandler<JolokiaNotificat
         dispatcher = new NotificationDispatcher(pContext);
     }
 
-    /** {@inheritDoc} */
+    @Override
     public RequestType getType() {
         return RequestType.NOTIFICATION;
     }
 
-    /** {@inheritDoc} */
+    @Override
+    protected void checkForRestriction(JolokiaNotificationRequest pRequest) {
+        // Not used currently ...
+    }
+
     @Override
     public boolean handleAllServersAtOnce(JolokiaNotificationRequest pRequest) {
         // We always handler requests on all MBeanServers
         return true;
     }
 
-    /** {@inheritDoc} */
-    @Override
-    protected void checkForRestriction(JolokiaNotificationRequest pRequest) {
-        // Not used currently ...
-    }
-
-    /** {@inheritDoc} */
     @Override
     protected Object doHandleSingleServerRequest(MBeanServerConnection server, JolokiaNotificationRequest request) {
         throw new UnsupportedOperationException("Internal: Notification handler works an all MBeanServers, not on single one");
     }
 
-    /** {@inheritDoc} */
     @Override
     public Object doHandleAllServerRequest(MBeanServerAccess serverManager, JolokiaNotificationRequest request, Object pPreviousResult)
-            throws ReflectionException, MBeanException, IOException, EmptyResponseException {
-        return dispatcher.dispatch(serverManager,request.getCommand());
+            throws IOException, JMException, BadRequestException, EmptyResponseException {
+        // Just delegate
+        return dispatcher.dispatch(serverManager, request.getCommand());
     }
 
 }

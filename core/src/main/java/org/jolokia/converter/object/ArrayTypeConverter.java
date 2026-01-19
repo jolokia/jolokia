@@ -108,7 +108,7 @@ class ArrayTypeConverter extends OpenTypeConverter<ArrayType<?>> {
                                                    " for instantiating array: " + e.getMessage(),e);
             }
         } else {
-            throw new UnsupportedOperationException("Unsupported array element type: " + pElementType);
+            throw new IllegalArgumentException("Unsupported array element type: " + pElementType);
         }
     }
 

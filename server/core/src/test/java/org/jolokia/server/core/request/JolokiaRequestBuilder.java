@@ -18,7 +18,6 @@ package org.jolokia.server.core.request;
 
 import java.util.*;
 
-import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import org.jolokia.server.core.config.ConfigKey;
@@ -40,24 +39,29 @@ public class JolokiaRequestBuilder {
 
     private final Map<ConfigKey,String> procConfig = new HashMap<>();
 
-    public JolokiaRequestBuilder(RequestType pType) throws MalformedObjectNameException {
+    public JolokiaRequestBuilder(RequestType pType) {
         this(pType,(String) null);
     }
 
-    public JolokiaRequestBuilder(RequestType pType, String pObjectName) throws MalformedObjectNameException {
+    public JolokiaRequestBuilder(RequestType pType, String pObjectName) {
         request.put("type",pType.getName());
         if (pObjectName != null) {
             request.put("mbean", pObjectName);
         }
     }
 
-    public JolokiaRequestBuilder(RequestType pType, ObjectName pMBean) throws MalformedObjectNameException {
+    public JolokiaRequestBuilder(RequestType pType, ObjectName pMBean) {
         this(pType,pMBean.getCanonicalName());
     }
 
     @SuppressWarnings("unchecked")
-    public <R extends JolokiaRequest> R build() throws MalformedObjectNameException {
-        RequestType type = RequestType.getTypeByName((String) request.get("type"));
+    public <R extends JolokiaRequest> R build() throws BadRequestException {
+        RequestType type;
+        try {
+            type = RequestType.getTypeByName((String) request.get("type"));
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException(e.getMessage());
+        }
         ProcessingParameters params = new TestProcessingParameters(procConfig);
         switch (type) {
             case READ: return (R) new JolokiaReadRequest(request,params);

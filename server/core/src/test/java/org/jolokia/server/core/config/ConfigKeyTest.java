@@ -31,13 +31,22 @@ public class ConfigKeyTest {
 
     @Test
     public void extractKey() {
-        Map<String,String> map = new HashMap<>();
-        map.put(ConfigKey.MAX_OBJECTS.getKeyValue(),"4711");
-        map.put(ConfigKey.CANONICAL_NAMING.getKeyValue(),"true");
-        map.put("blub","bla");
+        Map<String, String> map = new HashMap<>();
+        map.put(ConfigKey.MAX_OBJECTS.getKeyValue(), "4711");
+        map.put(ConfigKey.CANONICAL_NAMING.getKeyValue(), "true");
+        map.put("blub", "bla");
         StaticConfiguration config = new StaticConfiguration(map);
-        assertEquals(config.getConfigKeys().size(),2);
-        assertEquals(config.getConfig(ConfigKey.MAX_OBJECTS),"4711");
-        assertEquals(config.getConfig(ConfigKey.CANONICAL_NAMING),"true");
+        assertEquals(config.getConfigKeys().size(), 2);
+        assertEquals(config.getConfig(ConfigKey.MAX_OBJECTS), "4711");
+        assertEquals(config.getConfig(ConfigKey.CANONICAL_NAMING), "true");
     }
+
+    @Test
+    public void propertyNames() {
+        assertEquals(ConfigKey.MAX_OBJECTS.asEnvVariable(), "JOLOKIA_MAX_OBJECTS");
+        assertEquals(ConfigKey.MAX_OBJECTS.asSystemProperty(), "jolokia.maxObjects");
+        assertEquals(ConfigKey.JSR160_PROXY_ALLOWED_TARGETS.asEnvVariable(), "JOLOKIA_JSR160_PROXY_ALLOWED_TARGETS");
+        assertEquals(ConfigKey.JSR160_PROXY_ALLOWED_TARGETS.asSystemProperty(), "jolokia.jsr160ProxyAllowedTargets");
+    }
+
 }

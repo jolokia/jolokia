@@ -267,7 +267,7 @@ public class PolicyBasedRestrictorTest {
         InputStream is = getClass().getResourceAsStream("/allow-origin1.xml");
         PolicyRestrictor restrictor = new PolicyRestrictor(is);
 
-        // Allways true since we want a strict check but strict checking is off.
+        // Always true since we want a strict check but strict checking is off.
         assertTrue(restrictor.isOriginAllowed(null, true));
         assertTrue(restrictor.isOriginAllowed("http://bla.com", true));
         assertTrue(restrictor.isOriginAllowed("http://www.jolokia.org", true));

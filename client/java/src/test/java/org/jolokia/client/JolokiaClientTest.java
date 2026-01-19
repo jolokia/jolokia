@@ -112,7 +112,7 @@ public class JolokiaClientTest {
         throwException(false, new HttpConnectTimeoutException("timeout"));
     }
 
-    @Test(expectedExceptions = JolokiaException.class, expectedExceptionsMessageRegExp = ".*IO-Error.*")
+    @Test(expectedExceptions = JolokiaException.class, expectedExceptionsMessageRegExp = ".*I/O exception.*")
     public void ioException() throws IOException, JolokiaException {
         throwException(false, new IOException());
     }
@@ -122,7 +122,7 @@ public class JolokiaClientTest {
         throwException(true, new HttpConnectTimeoutException("timeout"));
     }
 
-    @Test(expectedExceptions = JolokiaException.class, expectedExceptionsMessageRegExp = ".*IO-Error.*")
+    @Test(expectedExceptions = JolokiaException.class, expectedExceptionsMessageRegExp = ".*I/O exception.*")
     public void ioExceptionForBulkRequests() throws IOException, JolokiaException {
         throwException(true, new IOException());
     }

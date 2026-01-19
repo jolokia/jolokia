@@ -55,7 +55,7 @@ public class ClientReadIntegrationTest extends AbstractClientIntegrationTest {
             fail();
         } catch (JolokiaRemoteException exp) {
             assertEquals(exp.getStatus(), 404);
-            assertTrue(exp.getMessage().contains("InstanceNotFoundException"));
+            assertTrue(exp.getErrorType().contains("InstanceNotFoundException"));
             assertTrue(exp.getRemoteStackTrace().contains("InstanceNotFoundException"));
         }
     }

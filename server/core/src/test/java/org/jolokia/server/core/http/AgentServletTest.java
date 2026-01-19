@@ -544,14 +544,14 @@ public class AgentServletTest {
         expect(request.getPathInfo()).andReturn(HttpTestUtil.VERSION_GET_REQUEST);
         expect(request.getAttribute("subject")).andReturn(null);
         expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn(null);
+        response.addHeader("Content-Type", "text/plain; charset=utf-8");
+        response.setStatus(400);
 
         replay(request, response);
 
         servlet.doGet(request, response);
         String resp = sw.toString();
-        assertTrue(resp.contains("error_type"));
-        assertTrue(resp.contains("IllegalArgumentException"));
-        assertTrue(resp.matches(".*status.*400.*"));
+        assertTrue(resp.contains("400 (Bad Request)"));
         servlet.destroy();
     }
 
@@ -564,6 +564,7 @@ public class AgentServletTest {
         servlet.init(config);
         ByteArrayOutputStream sw = initRequestResponseMocks(
                 () -> {
+                    expect(request.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE)).andReturn(null);
                     expect(request.getScheme()).andStubReturn("http");
                     expect(request.getHeader("Origin")).andReturn(null);
                     expect(request.getRemoteAddr()).andThrow(new IllegalStateException());
@@ -581,7 +582,6 @@ public class AgentServletTest {
         servlet.destroy();
         verify(config, context, request, response);
     }
-
 
     @Test
     public void debug() throws IOException, ServletException {

@@ -20,7 +20,7 @@ import org.jolokia.json.JSONObject;
  */
 public class HistoryMBeanRequestInterceptor extends AbstractJolokiaService<RequestInterceptor> implements RequestInterceptor {
 
-    // Objectname for updating the history
+    // ObjectName for updating the history
     private ObjectName historyObjectName;
 
     /**
@@ -84,6 +84,7 @@ public class HistoryMBeanRequestInterceptor extends AbstractJolokiaService<Reque
                     }
                 });
             } catch (PrivilegedActionException ignored) {
+                // wraps unchecked (non Runtime) exceptions
             }
         }
     }

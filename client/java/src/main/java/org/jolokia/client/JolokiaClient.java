@@ -17,7 +17,6 @@ package org.jolokia.client;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.net.ConnectException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.jolokia.client.exception.JolokiaBulkRemoteException;
-import org.jolokia.client.exception.JolokiaConnectException;
 import org.jolokia.client.exception.JolokiaException;
 import org.jolokia.client.exception.JolokiaRemoteException;
 import org.jolokia.client.request.HttpMethod;
@@ -157,7 +155,7 @@ public class JolokiaClient implements Closeable {
      * @param pRequest request to execute
      * @param <REQ>    request type
      * @param <RESP>   response type
-     * @return the response as returned by the server
+     * @return the {@link JolokiaResponse} as returned by the server. Empty response results in a {@link JolokiaException}
      * @throws JolokiaException if something's wrong (e.g. connection failed or read timeout)
      */
     public <RESP extends JolokiaResponse<REQ>, REQ extends JolokiaRequest>
@@ -173,7 +171,7 @@ public class JolokiaClient implements Closeable {
      * @param pProcessingOptions optional map of processing options
      * @param <REQ>              request type
      * @param <RESP>             response type
-     * @return the response as returned by the server
+     * @return the {@link JolokiaResponse} as returned by the server. Empty response results in a {@link JolokiaException}
      * @throws JolokiaException if something's wrong (e.g. connection failed or read timeout)
      */
     public <RESP extends JolokiaResponse<REQ>, REQ extends JolokiaRequest>
@@ -190,7 +188,7 @@ public class JolokiaClient implements Closeable {
      * @param pMethod  {@link HttpMethod} to use
      * @param <REQ>    request type
      * @param <RESP>   response type
-     * @return response object
+     * @return the {@link JolokiaResponse} as returned by the server. Empty response results in a {@link JolokiaException}
      * @throws JolokiaException if something's wrong (e.g. connection failed or read timeout)
      */
     public <RESP extends JolokiaResponse<REQ>, REQ extends JolokiaRequest>
@@ -208,7 +206,7 @@ public class JolokiaClient implements Closeable {
      * @param pProcessingOptions optional map of processing options
      * @param <REQ>              request type
      * @param <RESP>             response type
-     * @return response object
+     * @return the {@link JolokiaResponse} as returned by the server. Empty response results in a {@link JolokiaException}
      * @throws JolokiaException if something's wrong (e.g. connection failed or read timeout)
      */
     public <RESP extends JolokiaResponse<REQ>, REQ extends JolokiaRequest>
@@ -228,23 +226,19 @@ public class JolokiaClient implements Closeable {
      * @param pResponseExtractor         extractor for actually creating the response
      * @param <REQ>              request type
      * @param <RESP>             response type
-     * @return response object
+     * @return the {@link JolokiaResponse} as returned by the server. Empty response results in a {@link JolokiaException}
      * @throws JolokiaException if something's wrong (e.g. connection failed or read timeout)
      */
     public <RESP extends JolokiaResponse<REQ>, REQ extends JolokiaRequest>
     RESP execute(REQ pRequest, HttpMethod pMethod, Map<JolokiaQueryParameter, String> pProcessingOptions, JolokiaResponseExtractor pResponseExtractor)
             throws JolokiaException {
-        try {
-            JSONStructure jsonResponse = httpClient.execute(pRequest, pMethod, pProcessingOptions, targetConfig);
-            if (!(jsonResponse instanceof JSONObject)) {
-                String msg = jsonResponse == null ? "an empty response" : "a " + jsonResponse.getClass().getName();
-                throw new JolokiaException("Invalid JSON response for a single request (expected a Map but got " + msg + ")");
-            }
-
-            return extractResponse((JSONObject) jsonResponse, pRequest, pProcessingOptions, pResponseExtractor);
-        } catch (IOException e) {
-            throw mapException(e);
+        JSONStructure jsonResponse = httpClient.execute(pRequest, pMethod, pProcessingOptions, targetConfig);
+        if (!(jsonResponse instanceof JSONObject)) {
+            String msg = jsonResponse == null ? "an empty response" : "a " + jsonResponse.getClass().getName();
+            throw new JolokiaException("Invalid JSON response for a single request (expected a Map but got " + msg + ")");
         }
+
+        return extractResponse((JSONObject) jsonResponse, pRequest, pProcessingOptions, pResponseExtractor);
     }
 
     // methods for sending multiple JolokiaRequests and retrieve related JolokiaResponses
@@ -257,7 +251,7 @@ public class JolokiaClient implements Closeable {
      * @param pRequests requests to execute
      * @param <REQ>     request type
      * @param <RESP>    response type
-     * @return list of responses, one response for each request
+     * @return list of responses, one response for each request. Empty response results in a {@link JolokiaException}
      * @throws JolokiaException when a communication error occurs
      */
     public <RESP extends JolokiaResponse<REQ>, REQ extends JolokiaRequest>
@@ -274,7 +268,7 @@ public class JolokiaClient implements Closeable {
      * @param pProcessingOptions processing options to use
      * @param <REQ>              request type
      * @param <RESP>             response type
-     * @return list of responses, one response for each request
+     * @return list of responses, one response for each request. Empty response results in a {@link JolokiaException}
      * @throws JolokiaException when a communication error occurs
      */
     public <RESP extends JolokiaResponse<REQ>, REQ extends JolokiaRequest>
@@ -291,7 +285,7 @@ public class JolokiaClient implements Closeable {
      * @param pRequests requests to execute
      * @param <REQ>     request type
      * @param <RESP>    response type
-     * @return list of responses, one response for each request
+     * @return list of responses, one response for each request. Empty response results in a {@link JolokiaException}
      * @throws JolokiaException when a communication error occurs
      */
     @SafeVarargs
@@ -311,28 +305,24 @@ public class JolokiaClient implements Closeable {
      * @param pResponseExtractor use this for custom extraction handling
      * @param <REQ>              request type
      * @param <RESP>             response type
-     * @return list of responses, one response for each request
+     * @return list of responses, one response for each request. Empty response results in a {@link JolokiaException}
      * @throws JolokiaException when a communication error occurs
      */
     public <RESP extends JolokiaResponse<REQ>, REQ extends JolokiaRequest>
     List<RESP> execute(List<REQ> pRequests, Map<JolokiaQueryParameter, String> pProcessingOptions, JolokiaResponseExtractor pResponseExtractor)
             throws JolokiaException {
-        try {
-            JSONStructure jsonResponse = httpClient.execute(pRequests, pProcessingOptions, targetConfig);
-            if (!(jsonResponse instanceof JSONArray)) {
-                if (jsonResponse instanceof JSONObject errorObject) {
-                    // bulk response may end with single JSONObject, let's check if it's a "proper error"
-                    if (!errorObject.containsKey("status") || ((Number) errorObject.get("status")).intValue() != 200) {
-                        throw new JolokiaRemoteException(null, errorObject);
-                    }
+        JSONStructure jsonResponse = httpClient.execute(pRequests, pProcessingOptions, targetConfig);
+        if (!(jsonResponse instanceof JSONArray)) {
+            if (jsonResponse instanceof JSONObject errorObject) {
+                // bulk response may end with single JSONObject, let's check if it's a "proper error"
+                if (!errorObject.containsKey("status") || ((Number) errorObject.get("status")).intValue() != 200) {
+                    throw new JolokiaRemoteException(null, errorObject);
                 }
-                throw new JolokiaException("Invalid JSON response for a bulk request (expected an array but got a " + jsonResponse.getClass().getName() + ")");
             }
-
-            return extractResponses((JSONArray) jsonResponse, pRequests, pProcessingOptions, pResponseExtractor);
-        } catch (IOException e) {
-            throw mapException(e);
+            throw new JolokiaException("Invalid JSON response for a bulk request (expected an array but got a " + jsonResponse.getClass().getName() + ")");
         }
+
+        return extractResponses((JSONArray) jsonResponse, pRequests, pProcessingOptions, pResponseExtractor);
     }
 
     @Override
@@ -424,21 +414,6 @@ public class JolokiaClient implements Closeable {
 
         // here we have all successful responses
         return ret;
-    }
-
-    /**
-     * Translate {@link IOException} to {@link JolokiaException}
-     *
-     * @param ex
-     * @return
-     */
-    private JolokiaException mapException(IOException ex) {
-        if (ex instanceof ConnectException cex) {
-            String msg = "Cannot connect to " + jolokiaAgentUrl + (ex.getMessage() != null ? ": " + ex.getMessage() : "");
-            return new JolokiaConnectException(msg, cex);
-        } else {
-            return new JolokiaException("IO-Error during connection to " + jolokiaAgentUrl + ": " + ex.getMessage(), ex);
-        }
     }
 
 }

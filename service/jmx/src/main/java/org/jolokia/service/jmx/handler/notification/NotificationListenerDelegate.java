@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2013 Roland Huss
+ * Copyright 2009-2026 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.jolokia.service.jmx.handler.notification;
 
 import java.io.IOException;
@@ -50,7 +49,7 @@ class NotificationListenerDelegate implements NotificationListener {
     // Managed clients
     private final Map<String, Client> clients;
 
-    // Backendmanager holding the backends
+    // Backend manager holding the backends
     private final NotificationBackendManager backendManager;
 
     /**
@@ -69,7 +68,7 @@ class NotificationListenerDelegate implements NotificationListener {
      * @return client id
      */
     String register() {
-        String uuid = createClientId();
+        String uuid = UUID.randomUUID().toString();
         clients.put(uuid, new Client(uuid));
         return uuid;
     }
@@ -85,7 +84,7 @@ class NotificationListenerDelegate implements NotificationListener {
      * @throws ReflectionException
      */
     void unregister(MBeanServerAccess pExecutor, String pClient)
-            throws MBeanException, IOException, ReflectionException {
+        throws JMException, IOException {
         Client client = getClient(pClient);
         for (String handle : client.getHandles()) {
             removeListener(pExecutor, pClient, handle);
@@ -124,7 +123,7 @@ class NotificationListenerDelegate implements NotificationListener {
      * @throws ReflectionException
      */
     String addListener(MBeanServerAccess pExecutor, final AddCommand pCommand)
-            throws MBeanException, IOException, ReflectionException {
+        throws JMException, IOException {
 
         // Fetch client and backend
         Client client = getClient(pCommand.getClient());
@@ -176,7 +175,7 @@ class NotificationListenerDelegate implements NotificationListener {
      * @throws ReflectionException
      */
     void removeListener(MBeanServerAccess pExecutor, String pClient, String pHandle)
-            throws MBeanException, IOException, ReflectionException {
+        throws JMException, IOException {
         Client client = getClient(pClient);
         final ListenerRegistration registration = client.get(pHandle);
         pExecutor.each(registration.getMBeanName(), new MBeanServerAccess.MBeanEachCallback() {
@@ -185,7 +184,7 @@ class NotificationListenerDelegate implements NotificationListener {
                 try {
                     pConn.removeNotificationListener(pName.getObjectName(), NotificationListenerDelegate.this, registration.getFilter(), registration);
                 } catch (ListenerNotFoundException e) {
-                    // We tried it. If not there, thats ok, too.
+                    // We tried it. If not there, that's ok, too.
                 }
             }
         });
@@ -215,7 +214,7 @@ class NotificationListenerDelegate implements NotificationListener {
      * @param pOldest last refresh timestamp which should be kept
      */
     void cleanup(MBeanServerAccess pExecutor, long pOldest)
-            throws MBeanException, IOException, ReflectionException {
+        throws JMException, IOException {
         for (Map.Entry<String,Client> client : clients.entrySet()) {
             if (client.getValue().getLastRefresh() < pOldest) {
                 unregister(pExecutor,client.getKey());
@@ -230,7 +229,7 @@ class NotificationListenerDelegate implements NotificationListener {
      * The back channel is obtained
      * @param pCommand command used for opening this channel
      */
-    void openChannel(OpenCommand pCommand) throws IOException, EmptyResponseException {
+    void openChannel(OpenCommand pCommand) throws IOException {
         String clientId = pCommand.getClient();
         Client client = getClient(clientId);
         String mode = pCommand.getMode();
@@ -245,9 +244,7 @@ class NotificationListenerDelegate implements NotificationListener {
             backend.channelInit(client, channel);
             client.setBackChannel(mode, channel);
         }
-        throw new EmptyResponseException();
     }
-
 
     /**
      * List all listener registered by a client along with its configuration parameters
@@ -275,20 +272,11 @@ class NotificationListenerDelegate implements NotificationListener {
         callback.handleNotification(notification, registration.getHandback());
     }
 
-    // =========================================================================================================
-
-    // Create a unique client ID
-    private String createClientId() {
-        return UUID.randomUUID().toString();
-    }
-
-    // Extract the client config from the internal map and throw and exception
-    // if not present
     private Client getClient(String pClient) {
-        Client client = clients.get(pClient);
-        if (client == null) {
-            throw new IllegalArgumentException("No client " + pClient + " registered");
+        if (pClient == null || !clients.containsKey(pClient)) {
+            throw new IllegalArgumentException("No client " + (pClient == null ? "<null>" : pClient) + " registered");
         }
-        return client;
+        return clients.get(pClient);
     }
+
 }

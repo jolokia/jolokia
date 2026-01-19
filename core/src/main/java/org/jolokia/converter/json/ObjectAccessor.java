@@ -111,9 +111,10 @@ public interface ObjectAccessor {
      * @param pAttribute attribute of the object to set. (For arrays or lists it should be an index.)
      * @param pValue     the new value to set after {@link Converter#convert conversion}
      * @return the old value of the changed attribute
-     * @throws IllegalAccessException    if the attribute to set to is not accessible
-     * @throws InvocationTargetException reflection error
-     * @throws IllegalArgumentException  if the attribute can't be converted to desired kind (like array index number)
+     * @throws IllegalAccessException if the reflection error occurs when setting the value (BeanAccessor only)
+     * @throws InvocationTargetException if the reflection error occurs when setting the value (BeanAccessor only)
+     * @throws IllegalArgumentException if the attribute can't be converted to desired kind (like array index number)
+     * @throws UnsupportedOperationException if the object doesn't allow setting "inner" values (like {@link Enum})
      */
     Object setObjectValue(Converter<String> pConverter, Object pObject, String pAttribute, Object pValue)
         throws IllegalAccessException, InvocationTargetException, IllegalArgumentException;

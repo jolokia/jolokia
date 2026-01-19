@@ -83,8 +83,7 @@ public class ListAccessor implements org.jolokia.converter.json.ObjectAccessor {
      * @throws InvocationTargetException
      */
     @Override
-    public Object setObjectValue(Converter<String> pConverter, Object pList, String pIndex, Object pValue)
-            throws IllegalAccessException, InvocationTargetException {
+    public Object setObjectValue(Converter<String> pConverter, Object pList, String pIndex, Object pValue) {
         if (!(pList instanceof List)) {
             throw new IllegalArgumentException("ListAccessor can't access objects of type " + pList.getClass());
         }

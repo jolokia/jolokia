@@ -23,7 +23,7 @@ public interface Serializer extends JolokiaService<Serializer> {
      * @param pPathParts path parts to use for extraction
      * @param pOptions options used for parsing
      * @return the converter object. This either a subclass of {@link org.jolokia.json.JSONStructure} or a basic data type like String or Long.
-     * @throws AttributeNotFoundException if within an path an attribute could not be found
+     * @throws AttributeNotFoundException if within a path an attribute could not be found
      */
     Object serialize(Object pValue, List<String> pPathParts, org.jolokia.core.service.serializer.SerializeOptions pOptions)
             throws AttributeNotFoundException;

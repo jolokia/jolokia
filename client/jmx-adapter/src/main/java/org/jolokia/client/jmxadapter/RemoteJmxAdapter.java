@@ -25,7 +25,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
+import java.util.logging.Logger;
 import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.AttributeNotFoundException;
@@ -56,7 +59,6 @@ import org.jolokia.client.JolokiaClientBuilder;
 import org.jolokia.client.exception.JolokiaBulkRemoteException;
 import org.jolokia.client.exception.JolokiaException;
 import org.jolokia.client.exception.JolokiaRemoteException;
-import org.jolokia.client.exception.UncheckedJmxAdapterException;
 import org.jolokia.client.request.HttpMethod;
 import org.jolokia.client.request.JolokiaExecRequest;
 import org.jolokia.client.request.JolokiaListRequest;
@@ -85,15 +87,25 @@ import org.jolokia.json.JSONObject;
  */
 public class RemoteJmxAdapter implements MBeanServerConnection {
 
-    // Information retrieved from Jolokia "version" request.
-    private String agentVersion;
-    private String protocolVersion;
+    private static final Logger LOG = Logger.getLogger("org.jolokia.client.jmx");
+
+    /** Agent ID from Jolokia {@code /version} endpoint */
     private String agentId;
 
-    private final JolokiaClient connector;
-    private HashMap<JolokiaQueryParameter, String> defaultProcessingOptions;
-    protected final Map<ObjectName, MBeanInfo> mbeanInfoCache = new HashMap<>();
+    /** {@link JolokiaClient} to communicate with the remote Jolokia Agent using JSON/HTTP protocol */
+    private final JolokiaClient client;
 
+    /** A set of options sent with every Jolokia request */
+    private Map<JolokiaQueryParameter, String> defaultProcessingOptions;
+
+    /**
+     * When a client of {@link JMXConnector} uses the related {@link MBeanServerConnection}, it's often
+     * required to get an {@link MBeanInfo} for some {@link ObjectName}. It's always worth caching it.
+     */
+    protected final Map<ObjectName, MBeanInfo> mbeanInfoCache = new ConcurrentHashMap<>();
+
+    // helper cache for javax.management.MBeanServerConnection.isInstanceOf()
+    // see https://github.com/jolokia/jolokia/issues/666
     private static final Map<ObjectName, Set<String>> platformMBeanInterfaces = new HashMap<>();
     private static ObjectName platformGarbageCollectorMBeanPattern;
 
@@ -199,35 +211,41 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
     }
 
     /**
-     * Create Jolokia backed {@link MBeanServerConnection} using existing {@link JolokiaClient}
+     * Create Jolokia backed {@link MBeanServerConnection} using existing, pre-configured {@link JolokiaClient}
      *
-     * @param connector
+     * @param client
      * @throws IOException
      */
-    public RemoteJmxAdapter(final JolokiaClient connector) throws IOException {
-        this.connector = connector;
+    public RemoteJmxAdapter(final JolokiaClient client) throws IOException {
+        this.client = client;
         try {
             JolokiaVersionResponse response = this.unwrapExecute(new JolokiaVersionRequest());
-            this.agentVersion = response.getAgentVersion();
-            this.protocolVersion = response.getProtocolVersion();
+            // Information retrieved from Jolokia "version" request.
+            String agentVersion = response.getAgentVersion();
+            String protocolVersion = response.getProtocolVersion();
             JSONObject value = response.getValue();
             JSONObject config = (JSONObject) value.get("config");
-            this.agentId = String.valueOf(config.get("agentId"));
+            this.agentId = String.valueOf(config == null ? "jolokia-agent" : config.get("agentId"));
         } catch (InstanceNotFoundException ignore) {
         }
     }
 
+    // hashCode and equals are important, because instances of this connector are cached in
+    // com.sun.jmx.mbeanserver.MXBeanLookup.mbscToLookup
+
     @Override
     public int hashCode() {
-        return this.connector.getUri().hashCode();
+        return this.client.getUri().hashCode();
     }
 
     @Override
     public boolean equals(Object o) {
-        //as long as we refer to the same agent, we may be seen as equivalent
-        return o instanceof RemoteJmxAdapter && this.connector.getUri()
-            .equals(((RemoteJmxAdapter) o).connector.getUri());
+        // as long as we refer to the same agent, we may be seen as equivalent
+        return o instanceof RemoteJmxAdapter && this.client.getUri()
+            .equals(((RemoteJmxAdapter) o).client.getUri());
     }
+
+    // --- Unsupported methods of javax.management.MBeanServerConnection
 
     @Override
     public ObjectInstance createMBean(String className, ObjectName name) {
@@ -245,8 +263,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
     }
 
     @Override
-    public ObjectInstance createMBean(String className, ObjectName name,
-                                      ObjectName loaderName, Object[] params, String[] signature) {
+    public ObjectInstance createMBean(String className, ObjectName name, ObjectName loaderName, Object[] params, String[] signature) {
         throw new UnsupportedOperationException("createMBean not supported over Jolokia");
     }
 
@@ -255,10 +272,12 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
         throw new UnsupportedOperationException("unregisterMBean not supported over Jolokia");
     }
 
-    @Override
-    public ObjectInstance getObjectInstance(ObjectName name)
-        throws InstanceNotFoundException, IOException {
+    // --- Supported methods of javax.management.MBeanServerConnection
 
+    // ------ ObjectInstance, MBeanInfo methods
+
+    @Override
+    public ObjectInstance getObjectInstance(ObjectName name) throws InstanceNotFoundException, IOException {
         JolokiaListResponse listResponse = this.unwrapExecute(new JolokiaListRequest(name), () -> {
             Map<JolokiaQueryParameter, String> options = defaultProcessingOptions();
             // handled by Jolokia 2.5.0+
@@ -266,6 +285,101 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
             return options;
         });
         return new ObjectInstance(name, listResponse.getClassName(name));
+    }
+
+    @Override
+    public boolean isRegistered(ObjectName name) throws IOException {
+        return !queryNames(name, null).isEmpty();
+    }
+
+    @Override
+    public boolean isInstanceOf(ObjectName name, String className) throws InstanceNotFoundException, IOException {
+        // the algorithm from the JavaDoc mentions:
+        // > let:
+        // > X be the MBean named by name
+        // > L be the ClassLoader of X
+        // there's no way to get the "L" even if we get a full JSON representation of MBeanInfo using
+        // Jolokia's list() operation. So we can't do any classloading.
+        JolokiaListResponse listResponse = this.unwrapExecute(new JolokiaListRequest(name), () -> {
+            Map<JolokiaQueryParameter, String> options = defaultProcessingOptions();
+            // handled by Jolokia 2.5.0+
+            options.put(JolokiaQueryParameter.LIST_INTERFACES, "true");
+            return options;
+        });
+        JSONObject info = listResponse.getJSONMbeanInfo(name);
+        if (info == null) {
+            // no support from the server side, so we can't do much
+            return false;
+        }
+        String mbeanClassName = (String) info.get("class");
+
+        boolean interfacesInfo = false;
+        final Set<String> interfaces = new HashSet<>();
+        if (info.containsKey("interfaces")) {
+            Object interfacesValue = info.get("interfaces");
+            if (interfacesValue instanceof JSONArray array) {
+                interfacesInfo = true;
+                array.forEach(i -> {
+                    if (i instanceof String iName) {
+                        interfaces.add(iName);
+                    }
+                });
+            }
+        }
+        if (interfacesInfo) {
+            // easier with Jolokia 2.5.0+
+            return interfaces.contains(className);
+        } else {
+            // this method may be used by jconsole when crating proxies for platform MBeans. So we can
+            // use some hardcoded information
+            Set<String> knownInterfaces = platformMBeanInterfaces.get(name);
+            if (knownInterfaces != null) {
+                return knownInterfaces.contains(className);
+            } else {
+                if (platformGarbageCollectorMBeanPattern.apply(name)) {
+                    // special pattern matching for GarbageCollector MBean
+                    return java.lang.management.GarbageCollectorMXBean.class.getName().equals(className);
+                }
+                // the only thing we can do is direct check
+                return className.equals(mbeanClassName);
+            }
+        }
+    }
+
+    @Override
+    public MBeanInfo getMBeanInfo(ObjectName name) throws InstanceNotFoundException, IOException {
+        MBeanInfo result = this.mbeanInfoCache.get(name);
+        //cache in case client queries a lot for MBean info
+        if (result == null) {
+            synchronized (mbeanInfoCache) {
+                result = this.mbeanInfoCache.get(name);
+                if (result == null) {
+                    final JolokiaListResponse response = this.unwrapExecute(new JolokiaListRequest(name));
+                    result = response.getMbeanInfo(name);
+                    if (result != null) {
+                        this.mbeanInfoCache.put(name, result);
+                        for (MBeanAttributeInfo attr : result.getAttributes()) {
+                            final String qualifiedName = name + "." + attr.getName();
+                            try {
+                                if (ToOpenTypeConverter.cachedType(qualifiedName) == null) {
+                                    ToOpenTypeConverter
+                                        .cacheType(ToOpenTypeConverter.typeFor(attr.getType()), qualifiedName);
+                                }
+                            } catch (OpenDataException | InvalidOpenTypeException ignore) {
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    // ------ Metadata methods
+
+    @Override
+    public Integer getMBeanCount() throws IOException {
+        return this.queryNames(null, null).size();
     }
 
     private List<ObjectInstance> listObjectInstances(ObjectName name) throws IOException {
@@ -283,6 +397,22 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
     }
 
     @Override
+    public String getDefaultDomain() {
+        return "DefaultDomain";
+    }
+
+    @Override
+    public String[] getDomains() throws IOException {
+        Set<String> domains = new TreeSet<>();
+        for (final ObjectName name : this.queryNames(null, null)) {
+            domains.add(name.getDomain());
+        }
+        return domains.toArray(new String[0]);
+    }
+
+    // ------ Query methods
+
+    @Override
     public Set<ObjectInstance> queryMBeans(ObjectName name, QueryExp query) throws IOException {
         final HashSet<ObjectInstance> result = new HashSet<>();
 
@@ -296,7 +426,6 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
 
     @Override
     public Set<ObjectName> queryNames(ObjectName name, QueryExp query) throws IOException {
-
         final HashSet<ObjectName> result = new HashSet<>();
         // if name is null, use list instead of search
         if (name == null) {
@@ -337,6 +466,301 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
         }
     }
 
+    // ------ MBean operation/attribute methods
+
+    @Override
+    public Object getAttribute(ObjectName name, String attribute)
+        throws AttributeNotFoundException, InstanceNotFoundException, IOException {
+        try {
+            final Object rawValue = unwrapExecute(new JolokiaReadRequest(name, attribute)).getValue();
+            return adaptJsonToOptimalResponseValue(name, attribute, rawValue, getAttributeTypeFromMBeanInfo(name, attribute));
+        } catch (UncheckedJmxAdapterException e) {
+            if (e.getCause() instanceof JolokiaRemoteException
+                && "javax.management.AttributeNotFoundException"
+                .equals(((JolokiaRemoteException) e.getCause()).getErrorType())) {
+                throw new AttributeNotFoundException((e.getCause().getMessage()));
+            } else {
+                throw e;
+            }
+        } catch (UnsupportedOperationException e) {
+            //JConsole does not seem to like unsupported operation while looking up attributes
+            throw new AttributeNotFoundException();
+        }
+    }
+
+    @Override
+    public AttributeList getAttributes(ObjectName name, String[] attributes) throws InstanceNotFoundException, IOException {
+        AttributeList result = new AttributeList();
+
+        List<JolokiaReadRequest> requests = new ArrayList<>(attributes.length);
+
+        Object item = unwrapExecute(new JolokiaReadRequest(name, attributes), () -> {
+            Map<JolokiaQueryParameter, String> options = defaultProcessingOptions();
+            // handled by Jolokia 2.5.0+
+            options.put(JolokiaQueryParameter.IGNORE_ERRORS, "true");
+            return options;
+        });
+        if (item instanceof JolokiaReadResponse value) {
+            for (String a : value.getAttributes()) {
+                result.add(new Attribute(a,
+                    adaptJsonToOptimalResponseValue(name, a, value.getValue(), getAttributeTypeFromMBeanInfo(name, a))));
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public void setAttribute(ObjectName name, Attribute attribute)
+        throws InstanceNotFoundException, AttributeNotFoundException, InvalidAttributeValueException,
+        IOException {
+        final JolokiaWriteRequest request =
+            new JolokiaWriteRequest(name, attribute.getName(), attribute.getValue());
+        try {
+            this.unwrapExecute(request);
+        } catch (UncheckedJmxAdapterException e) {
+            if (e.getCause() instanceof JolokiaRemoteException remote) {
+                if ("javax.management.AttributeNotFoundException".equals(remote.getErrorType())) {
+                    throw new AttributeNotFoundException((e.getCause().getMessage()));
+                }
+                if ("java.lang.IllegalArgumentException".equals(remote.getErrorType())
+                    && remote
+                    .getMessage()
+                    .matches(
+                        "Error: java.lang.IllegalArgumentException : Invalid value .+ for attribute .+")) {
+                    throw new InvalidAttributeValueException(remote.getMessage());
+                }
+            }
+            throw e;
+        }
+    }
+
+    @Override
+    public AttributeList setAttributes(ObjectName name, AttributeList attributes)
+        throws InstanceNotFoundException, IOException {
+
+        List<JolokiaWriteRequest> attributeWrites = new ArrayList<>(attributes.size());
+        for (Attribute attribute : attributes.asList()) {
+            attributeWrites.add(new JolokiaWriteRequest(name, attribute.getName(), attribute.getValue()));
+        }
+        try {
+            this.client.execute(attributeWrites);
+        } catch (JolokiaException e) {
+            handleException(e);
+        }
+
+        return attributes;
+    }
+
+    @Override
+    public Object invoke(ObjectName name, String operationName, Object[] params, String[] signature)
+        throws InstanceNotFoundException, MBeanException, IOException {
+        // JVisualVM may send null for no parameters
+        if (params == null && (signature == null || signature.length == 0)) {
+            params = new Object[0];
+        }
+        try {
+            final JolokiaExecResponse response =
+                unwrapExecute(
+                    new JolokiaExecRequest(name, operationName + makeSignature(signature), params));
+            return adaptJsonToOptimalResponseValue(name, operationName, response.getValue(), getOperationTypeFromMBeanInfo(name, operationName, signature));
+        } catch (UncheckedJmxAdapterException e) {
+            if (e.getCause() instanceof JolokiaRemoteException) {
+                throw new MBeanException((Exception) e.getCause());
+            }
+            throw e;
+        }
+    }
+
+    // ------ Notification methods
+
+    @Override
+    public void addNotificationListener(ObjectName name, NotificationListener listener, NotificationFilter filter, Object handback) {
+        if (!isRunningInJConsole() && !isRunningInJVisualVm() && !isRunningInJmc()) {
+            // just ignore in JConsole/JVisualVM as it wrecks the MBean page
+            throw new UnsupportedOperationException("addNotificationListener not supported for Jolokia");
+        }
+    }
+
+    @Override
+    public void addNotificationListener(ObjectName name, ObjectName listener, NotificationFilter filter, Object handback) {
+        throw new UnsupportedOperationException("addNotificationListener not supported for Jolokia");
+    }
+
+    @Override
+    public void removeNotificationListener(ObjectName name, ObjectName listener) {
+        throw new UnsupportedOperationException("removeNotificationListener not supported for Jolokia");
+    }
+
+    @Override
+    public void removeNotificationListener(ObjectName name, ObjectName listener, NotificationFilter filter, Object handback) {
+        throw new UnsupportedOperationException("removeNotificationListener not supported by Jolokia");
+    }
+
+    @Override
+    public void removeNotificationListener(ObjectName name, NotificationListener listener) {
+        if (!isRunningInJmc() && !isRunningInJConsole() && !isRunningInJVisualVm()) {
+            throw new UnsupportedOperationException("removeNotificationListener not supported by Jolokia");
+        }
+    }
+
+    @Override
+    public void removeNotificationListener(ObjectName name, NotificationListener listener, NotificationFilter filter, Object handback) {
+        throw new UnsupportedOperationException("removeNotificationListener not supported by Jolokia");
+    }
+
+    private boolean isRunningInJConsole() {
+        return System.getProperty("jconsole.showOutputViewer") != null;
+    }
+
+    private boolean isRunningInJVisualVm() {
+        final String version = System.getProperty("netbeans.productversion");
+        return version != null && version.contains("VisualVM");
+    }
+
+    private boolean isRunningInJmc() {
+        return System.getProperty("running.in.jmc") != null;
+    }
+
+    // ------ Private/helper methods
+
+    /**
+     * Call {@link JolokiaClient#execute(JolokiaRequest)} sending a prepared {@link JolokiaRequest} and handling
+     * possible exceptions.
+     *
+     * @param pRequest
+     * @return
+     * @param <RESP>
+     * @param <REQ>
+     */
+    private <RESP extends JolokiaResponse<REQ>, REQ extends JolokiaRequest>
+    RESP unwrapExecute(REQ pRequest)
+            throws IOException, InstanceNotFoundException {
+        return unwrapExecute(pRequest, new Supplier<>() {
+            @Override
+            public Map<JolokiaQueryParameter, String> get() {
+                return defaultProcessingOptions();
+            }
+        });
+    }
+
+    /**
+     * Call {@link JolokiaClient#execute(JolokiaRequest)} sending a prepared {@link JolokiaRequest} and handling
+     * possible exceptions. This methods accepts a {@link Supplier} to customize Jolokia request options.
+     *
+     * @param pRequest
+     * @param optionsProvider
+     * @return
+     * @param <RESP>
+     * @param <REQ>
+     */
+    private <RESP extends JolokiaResponse<REQ>, REQ extends JolokiaRequest>
+    RESP unwrapExecute(REQ pRequest, Supplier<Map<JolokiaQueryParameter, String>> optionsProvider)
+            throws IOException, InstanceNotFoundException {
+        try {
+            LOG.info("Sending: " + pRequest.toJson().toJSONString());
+
+            pRequest.setPreferredHttpMethod(HttpMethod.POST);
+            Map<JolokiaQueryParameter, String> options = optionsProvider == null ? defaultProcessingOptions() : optionsProvider.get();
+            RESP response = this.client.execute(pRequest, options);
+            LOG.info("Received: " + response.asJSONObject().toJSONString());
+            return response;
+        } catch (JolokiaException e) {
+            handleException(e);
+            // not-reachable
+            return null;
+        }
+    }
+
+    private <RESP extends JolokiaResponse<REQ>, REQ extends JolokiaRequest>
+    List<RESP> unwrapExecute(List<REQ> pRequests)
+            throws IOException, InstanceNotFoundException, JolokiaBulkRemoteException {
+        return unwrapExecute(pRequests, new Supplier<>() {
+            @Override
+            public Map<JolokiaQueryParameter, String> get() {
+                return defaultProcessingOptions();
+            }
+        });
+    }
+
+    /**
+     * Call {@link JolokiaClient#execute(List)} sending a prepared bulk {@link JolokiaRequest} and handling
+     * possible exceptions. This methods accepts a {@link Supplier} to customize Jolokia request options.
+     *
+     * @param pRequests
+     * @param optionsProvider
+     * @return
+     * @param <RESP>
+     * @param <REQ>
+     */
+    private <RESP extends JolokiaResponse<REQ>, REQ extends JolokiaRequest>
+    List<RESP> unwrapExecute(List<REQ> pRequests, Supplier<Map<JolokiaQueryParameter, String>> optionsProvider)
+            throws IOException, InstanceNotFoundException {
+        try {
+            LOG.info("Sending (bulk):");
+            pRequests.forEach(r -> LOG.info("    " + r.toJson().toJSONString()));
+
+            Map<JolokiaQueryParameter, String> options = optionsProvider == null ? defaultProcessingOptions() : optionsProvider.get();
+            List<RESP> responses = this.client.execute(pRequests, options);
+            LOG.info("Received (bulk):");
+            responses.forEach(r -> LOG.info("    " + r.asJSONObject().toJSONString()));
+            return responses;
+        } catch (JolokiaException e) {
+            handleException(e);
+            // not-reachable
+            return null;
+        }
+    }
+
+    /**
+     * Handle the exception from remote Jolokia call by throwing an appropriate exception for
+     * {@link MBeanServerConnection} interface.
+     *
+     * @param e
+     * @throws IOException
+     * @throws InstanceNotFoundException
+     */
+    protected void handleException(JolokiaException e) throws IOException, InstanceNotFoundException {
+        // Here's the summary of the exceptions thrown by supported/implemented methods of MBeanServerConnection:
+        // - getObjectInstance: IOException, InstanceNotFoundException
+        // - isRegistered:      IOException
+        // - isInstanceOf:      IOException, InstanceNotFoundException
+        // - getMBeanInfo:      IOException, InstanceNotFoundException, IntrospectionException, ReflectionException
+        // - getMBeanCount:     IOException
+        // - getDefaultDomain:  IOException
+        // - getDomains:        IOException
+        // - queryMBeans:       IOException
+        // - queryNames:        IOException
+        // - getAttribute   IOException, InstanceNotFoundException, ReflectionException, MBeanException, AttributeNotFoundException
+        // - getAttributes: IOException, InstanceNotFoundException, ReflectionException
+        // - setAttribute:  IOException, InstanceNotFoundException, ReflectionException, MBeanException, AttributeNotFoundException, InvalidAttributeValueException
+        // - setAttributes: IOException, InstanceNotFoundException, ReflectionException
+        // - invoke:        IOException, InstanceNotFoundException, ReflectionException, MBeanException
+        // - addNotificationListener:    IOException, InstanceNotFoundException
+        // - removeNotificationListener: IOException, InstanceNotFoundException, ListenerNotFoundException
+        // and that's what we're trying to recover from the error JSON response
+
+        if (e.getCause() instanceof IOException ioException) {
+            throw ioException;
+        } else if (e.getCause() instanceof RuntimeException runtimeException) {
+            throw runtimeException;
+        } else if (e.getCause() instanceof Error error) {
+            throw error;
+        } else if (e instanceof JolokiaRemoteException) {
+            if (Collections.singleton("java.lang.UnsupportedOperationException").contains(((JolokiaRemoteException) e).getErrorType())) {
+            // we may have some extra information
+            throw new RuntimeMBeanException(
+                ClassUtil.newInstance(((JolokiaRemoteException) e).getErrorType(), e.getMessage()));
+
+            }
+            throw new UncheckedJmxAdapterException(e);
+        } else if (e.getMessage()
+            .matches("Error: java.lang.IllegalArgumentException : No MBean '.+' found")) {
+            throw new InstanceNotFoundException();
+        } else {
+            throw new UncheckedJmxAdapterException(e);
+        }
+    }
+
     /**
      * Query evaluation requires an MBeanServer but only to figure out objectInstance
      *
@@ -357,27 +781,6 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
                 });
     }
 
-    private <RESP extends JolokiaResponse<REQ>, REQ extends JolokiaRequest> RESP unwrapExecute(REQ pRequest)
-            throws IOException, InstanceNotFoundException {
-        return unwrapExecute(pRequest, new Supplier<>() {
-            @Override
-            public Map<JolokiaQueryParameter, String> get() {
-                return defaultProcessingOptions();
-            }
-        });
-    }
-
-    @SuppressWarnings("unchecked")
-    private <RESP extends JolokiaResponse<REQ>, REQ extends JolokiaRequest> RESP unwrapExecute(REQ pRequest, Supplier<Map<JolokiaQueryParameter, String>> optionsProvider)
-            throws IOException, InstanceNotFoundException {
-        try {
-            pRequest.setPreferredHttpMethod(HttpMethod.POST);
-            return this.connector.execute(pRequest, optionsProvider == null ? defaultProcessingOptions() : optionsProvider.get());
-        } catch (JolokiaException e) {
-            return (RESP) unwrapException(e);
-        }
-    }
-
     private Map<JolokiaQueryParameter, String> defaultProcessingOptions() {
         if (defaultProcessingOptions == null) {
             defaultProcessingOptions = new HashMap<>();
@@ -385,60 +788,6 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
             defaultProcessingOptions.put(JolokiaQueryParameter.SERIALIZE_EXCEPTION, "true");
         }
         return defaultProcessingOptions;
-    }
-
-    private static final Set<String> UNCHECKED_REMOTE_EXCEPTIONS =
-        Collections.singleton("java.lang.UnsupportedOperationException");
-
-    @SuppressWarnings("rawtypes")
-    protected JolokiaResponse unwrapException(JolokiaException e) throws IOException, InstanceNotFoundException {
-        if (e.getCause() instanceof IOException) {
-            throw (IOException) e.getCause();
-        } else if (e.getCause() instanceof RuntimeException) {
-            throw (RuntimeException) e.getCause();
-        } else if (e.getCause() instanceof Error) {
-            throw (Error) e.getCause();
-        } else if (e.getMessage()
-            .matches("Error: java.lang.IllegalArgumentException : No MBean '.+' found")) {
-            throw new InstanceNotFoundException();
-        } else if (e instanceof JolokiaRemoteException
-            && UNCHECKED_REMOTE_EXCEPTIONS.contains(((JolokiaRemoteException) e).getErrorType())) {
-            throw new RuntimeMBeanException(
-                ClassUtil.newInstance(((JolokiaRemoteException) e).getErrorType(), e.getMessage()));
-        } else {
-            throw new UncheckedJmxAdapterException(e);
-        }
-    }
-
-    @Override
-    public boolean isRegistered(ObjectName name) throws IOException {
-
-        return !queryNames(name, null).isEmpty();
-    }
-
-    @Override
-    public Integer getMBeanCount() throws IOException {
-        return this.queryNames(null, null).size();
-    }
-
-    @Override
-    public Object getAttribute(ObjectName name, String attribute)
-        throws AttributeNotFoundException, InstanceNotFoundException, IOException {
-        try {
-            final Object rawValue = unwrapExecute(new JolokiaReadRequest(name, attribute)).getValue();
-            return adaptJsonToOptimalResponseValue(name, attribute, rawValue, getAttributeTypeFromMBeanInfo(name, attribute));
-        } catch (UncheckedJmxAdapterException e) {
-            if (e.getCause() instanceof JolokiaRemoteException
-                && "javax.management.AttributeNotFoundException"
-                .equals(((JolokiaRemoteException) e.getCause()).getErrorType())) {
-                throw new AttributeNotFoundException((e.getCause().getMessage()));
-            } else {
-                throw e;
-            }
-        } catch (UnsupportedOperationException e) {
-            //JConsole does not seem to like unsupported operation while looking up attributes
-            throw new AttributeNotFoundException();
-        }
     }
 
     private Object adaptJsonToOptimalResponseValue(
@@ -495,97 +844,6 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
         }
     }
 
-    @Override
-    public AttributeList getAttributes(ObjectName name, String[] attributes)
-        throws InstanceNotFoundException, IOException {
-        AttributeList result = new AttributeList();
-
-        List<JolokiaReadRequest> requests = new ArrayList<>(attributes.length);
-
-        for (String attribute : attributes) {
-            requests.add(new JolokiaReadRequest(name, attribute));
-        }
-        List<?> responses = Collections.emptyList();
-        try {
-            responses = this.connector.execute(requests, this.defaultProcessingOptions());
-
-        } catch (JolokiaBulkRemoteException e) {
-            responses = e.getResults();
-        } catch (JolokiaException ignore) {
-            //will result in empty return
-        }
-        for (Object item : responses) {
-            if (item instanceof JolokiaReadResponse value) {
-                final String attribute = value.getRequest().getAttribute();
-                result.add(new Attribute(attribute,
-                    adaptJsonToOptimalResponseValue(name, attribute, value.getValue(), getAttributeTypeFromMBeanInfo(name, attribute))));
-            }
-        }
-        return result;
-    }
-
-    @Override
-    public void setAttribute(ObjectName name, Attribute attribute)
-        throws InstanceNotFoundException, AttributeNotFoundException, InvalidAttributeValueException,
-        IOException {
-        final JolokiaWriteRequest request =
-            new JolokiaWriteRequest(name, attribute.getName(), attribute.getValue());
-        try {
-            this.unwrapExecute(request);
-        } catch (UncheckedJmxAdapterException e) {
-            if (e.getCause() instanceof JolokiaRemoteException remote) {
-                if ("javax.management.AttributeNotFoundException".equals(remote.getErrorType())) {
-                    throw new AttributeNotFoundException((e.getCause().getMessage()));
-                }
-                if ("java.lang.IllegalArgumentException".equals(remote.getErrorType())
-                    && remote
-                    .getMessage()
-                    .matches(
-                        "Error: java.lang.IllegalArgumentException : Invalid value .+ for attribute .+")) {
-                    throw new InvalidAttributeValueException(remote.getMessage());
-                }
-            }
-            throw e;
-        }
-    }
-
-    @Override
-    public AttributeList setAttributes(ObjectName name, AttributeList attributes)
-        throws InstanceNotFoundException, IOException {
-
-        List<JolokiaWriteRequest> attributeWrites = new ArrayList<>(attributes.size());
-        for (Attribute attribute : attributes.asList()) {
-            attributeWrites.add(new JolokiaWriteRequest(name, attribute.getName(), attribute.getValue()));
-        }
-        try {
-            this.connector.execute(attributeWrites);
-        } catch (JolokiaException e) {
-            unwrapException(e);
-        }
-
-        return attributes;
-    }
-
-    @Override
-    public Object invoke(ObjectName name, String operationName, Object[] params, String[] signature)
-        throws InstanceNotFoundException, MBeanException, IOException {
-        // JVisualVM may send null for no parameters
-        if (params == null && (signature == null || signature.length == 0)) {
-            params = new Object[0];
-        }
-        try {
-            final JolokiaExecResponse response =
-                unwrapExecute(
-                    new JolokiaExecRequest(name, operationName + makeSignature(signature), params));
-            return adaptJsonToOptimalResponseValue(name, operationName, response.getValue(), getOperationTypeFromMBeanInfo(name, operationName, signature));
-        } catch (UncheckedJmxAdapterException e) {
-            if (e.getCause() instanceof JolokiaRemoteException) {
-                throw new MBeanException((Exception) e.getCause());
-            }
-            throw e;
-        }
-    }
-
     private String getOperationTypeFromMBeanInfo(ObjectName name, String operationName, String[] signature)
         throws IOException, InstanceNotFoundException {
         final MBeanInfo mBeanInfo = getMBeanInfo(name);
@@ -617,92 +875,6 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
         return builder.toString();
     }
 
-    @Override
-    public String getDefaultDomain() {
-        return "DefaultDomain";
-    }
-
-    @Override
-    public String[] getDomains() throws IOException {
-        Set<String> domains = new HashSet<>();
-        for (final ObjectName name : this.queryNames(null, null)) {
-            domains.add(name.getDomain());
-        }
-        return domains.toArray(new String[0]);
-    }
-
-    @Override
-    public void addNotificationListener(ObjectName name, NotificationListener listener, NotificationFilter filter, Object handback) {
-        if (!isRunningInJConsole() && !isRunningInJVisualVm() && !isRunningInJmc()) {
-            // just ignore in JConsole/JVisualVM as it wrecks the MBean page
-            throw new UnsupportedOperationException("addNotificationListener not supported for Jolokia");
-        }
-    }
-
-    @Override
-    public void addNotificationListener(ObjectName name, ObjectName listener, NotificationFilter filter, Object handback) {
-        throw new UnsupportedOperationException("addNotificationListener not supported for Jolokia");
-    }
-
-    @Override
-    public void removeNotificationListener(ObjectName name, ObjectName listener) {
-        throw new UnsupportedOperationException("removeNotificationListener not supported for Jolokia");
-    }
-
-    @Override
-    public void removeNotificationListener(ObjectName name, ObjectName listener, NotificationFilter filter, Object handback) {
-        throw new UnsupportedOperationException("removeNotificationListener not supported by Jolokia");
-    }
-
-    @Override
-    public void removeNotificationListener(ObjectName name, NotificationListener listener) {
-        if (!isRunningInJmc() && !isRunningInJConsole() && !isRunningInJVisualVm()) {
-            throw new UnsupportedOperationException("removeNotificationListener not supported by Jolokia");
-        }
-    }
-
-    @Override
-    public void removeNotificationListener(ObjectName name, NotificationListener listener, NotificationFilter filter, Object handback) {
-        throw new UnsupportedOperationException("removeNotificationListener not supported by Jolokia");
-    }
-
-    private boolean isRunningInJVisualVm() {
-        final String version = System.getProperty("netbeans.productversion");
-        return version != null && version.contains("VisualVM");
-    }
-
-    private boolean isRunningInJConsole() {
-        return System.getProperty("jconsole.showOutputViewer") != null;
-    }
-
-    private boolean isRunningInJmc() {
-        return System.getProperty("running.in.jmc") != null;
-    }
-
-    @Override
-    public MBeanInfo getMBeanInfo(ObjectName name) throws InstanceNotFoundException, IOException {
-        MBeanInfo result = this.mbeanInfoCache.get(name);
-        //cache in case client queries a lot for MBean info
-        if (result == null) {
-            final JolokiaListResponse response = this.unwrapExecute(new JolokiaListRequest(name));
-            result = response.getMbeanInfo(name);
-            if (result != null) {
-                this.mbeanInfoCache.put(name, result);
-                for (MBeanAttributeInfo attr : result.getAttributes()) {
-                    final String qualifiedName = name + "." + attr.getName();
-                    try {
-                        if (ToOpenTypeConverter.cachedType(qualifiedName) == null) {
-                            ToOpenTypeConverter
-                                .cacheType(ToOpenTypeConverter.typeFor(attr.getType()), qualifiedName);
-                        }
-                    } catch (OpenDataException | InvalidOpenTypeException ignore) {
-                    }
-                }
-            }
-        }
-        return result;
-    }
-
     private String getAttributeTypeFromMBeanInfo(final ObjectName name, final String attributeName)
         throws IOException, InstanceNotFoundException {
         final MBeanInfo mBeanInfo = getMBeanInfo(name);
@@ -712,60 +884,6 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
             }
         }
         return null;
-    }
-
-    @Override
-    public boolean isInstanceOf(ObjectName name, String className) throws InstanceNotFoundException, IOException {
-        // the algorithm from the JavaDoc mentions:
-        // > let:
-        // > X be the MBean named by name
-        // > L be the ClassLoader of X
-        // there's no way to get the "L" even if we get a full JSON representation of MBeanInfo using
-        // Jolokia's list() operation. So we can't do any classloading.
-        JolokiaListResponse listResponse = this.unwrapExecute(new JolokiaListRequest(name), () -> {
-            Map<JolokiaQueryParameter, String> options = defaultProcessingOptions();
-            // handled by Jolokia 2.5.0+
-            options.put(JolokiaQueryParameter.LIST_INTERFACES, "true");
-            return options;
-        });
-        JSONObject info = listResponse.getJSONMbeanInfo(name);
-        if (info == null) {
-            // no support from the server side, so we can't do much
-            return false;
-        }
-        String mbeanClassName = (String) info.get("class");
-
-        boolean interfacesInfo = false;
-        final Set<String> interfaces = new HashSet<>();
-        if (info.containsKey("interfaces")) {
-            Object interfacesValue = info.get("interfaces");
-            if (interfacesValue instanceof JSONArray array) {
-                interfacesInfo = true;
-                array.forEach(i -> {
-                    if (i instanceof String iName) {
-                        interfaces.add(iName);
-                    }
-                });
-            }
-        }
-        if (interfacesInfo) {
-            // easier with Jolokia 2.5.0+
-            return interfaces.contains(className);
-        } else {
-            // this method may be used by jconsole when crating proxies for platform MBeans. So we can
-            // use some hardcoded information
-            Set<String> knownInterfaces = platformMBeanInterfaces.get(name);
-            if (knownInterfaces != null) {
-                return knownInterfaces.contains(className);
-            } else {
-                if (platformGarbageCollectorMBeanPattern.apply(name)) {
-                    // special pattern matching for GarbageCollector MBean
-                    return java.lang.management.GarbageCollectorMXBean.class.getName().equals(className);
-                }
-                // the only thing we can do is direct check
-                return className.equals(mbeanClassName);
-            }
-        }
     }
 
     String getId() {

@@ -110,8 +110,7 @@ public class DateAccessor implements org.jolokia.converter.json.ObjectAccessor {
      * @throws InvocationTargetException
      */
     @Override
-    public Object setObjectValue(Converter<String> pConverter, Object pDate, String pAttribute, Object pValue)
-            throws IllegalAccessException, InvocationTargetException {
+    public Object setObjectValue(Converter<String> pConverter, Object pDate, String pAttribute, Object pValue) {
         Date date = (Date) pDate;
         if ("time".equals(pAttribute)) {
             long time;

@@ -262,7 +262,7 @@ public class HistoryStore {
                     pJson.put(KEY_HISTORY,history);
                 }
             }
-        } else if (pJmxReq.isMultiAttributeMode() || !pJmxReq.hasAttribute()) {
+        } else if (pJmxReq.isMultiAttributeMode()) {
             // Multiple attributes, but a single bean.
             // Value has the following structure:
             // attribute_key -> attribute_value

@@ -98,9 +98,8 @@ public abstract class SimplifierAccessor<T> implements ObjectAccessor {
      * Always throws {@link IllegalArgumentException} since a simplifier cannot be used to write values to objects.
      */
     @Override
-    public final Object setObjectValue(Converter<String> pConverter, Object pObject, String pAttribute, Object pValue)
-            throws IllegalAccessException, InvocationTargetException {
-        throw new IllegalArgumentException("A simplifier can't be used to set a value");
+    public final Object setObjectValue(Converter<String> pConverter, Object pObject, String pAttribute, Object pValue) {
+        throw new UnsupportedOperationException("A simplifier can't be used to set a value");
     }
 
     /**

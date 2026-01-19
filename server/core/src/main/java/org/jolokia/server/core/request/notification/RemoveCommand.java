@@ -20,6 +20,7 @@ import java.util.Deque;
 import java.util.Map;
 
 import org.jolokia.json.JSONObject;
+import org.jolokia.server.core.request.BadRequestException;
 
 /**
  * Remove a listener by its handle
@@ -37,10 +38,10 @@ public class RemoveCommand extends ClientCommand {
      *
      * @param pStack path stack
      */
-    RemoveCommand(Deque<String> pStack) {
+    RemoveCommand(Deque<String> pStack) throws BadRequestException {
         super(NotificationCommandType.REMOVE, pStack);
         if (pStack.isEmpty()) {
-            throw new IllegalArgumentException("No notification handle given for " + NotificationCommandType.REMOVE);
+            throw new BadRequestException("No notification handle given for " + NotificationCommandType.REMOVE);
         }
         handle = pStack.pop();
     }
@@ -51,11 +52,11 @@ public class RemoveCommand extends ClientCommand {
      *
      * @param pMap request map
      */
-    RemoveCommand(Map<String, ?> pMap) {
+    RemoveCommand(Map<String, ?> pMap) throws BadRequestException {
         super(NotificationCommandType.REMOVE, pMap);
         handle = (String) pMap.get("handle");
         if (handle == null) {
-            throw new IllegalArgumentException("No notification handle given for " + NotificationCommandType.REMOVE);
+            throw new BadRequestException("No notification handle given for " + NotificationCommandType.REMOVE);
         }
     }
 
@@ -69,4 +70,5 @@ public class RemoveCommand extends ClientCommand {
         ret.put("handle",handle);
         return ret;
     }
+
 }

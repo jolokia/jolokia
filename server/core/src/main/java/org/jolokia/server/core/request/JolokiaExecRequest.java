@@ -1,7 +1,5 @@
-package org.jolokia.server.core.request;
-
 /*
- * Copyright 2009-2013 Roland Huss
+ * Copyright 2009-2026 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +13,10 @@ package org.jolokia.server.core.request;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.server.core.request;
 
 import java.util.*;
 
-import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import org.jolokia.core.util.EscapeUtil;
@@ -45,32 +43,32 @@ public class JolokiaExecRequest extends JolokiaObjectNameRequest {
     private boolean pathCreated;
 
     /**
-     * Constructor for creating a JmxRequest resulting from an HTTP GET request
+     * Constructor for creating a {@link JolokiaExecRequest} resulting from an HTTP GET request
      *
      * @param pObjectName name of MBean to execute the operation upon. Must not be null.
      * @param pOperation name of the operation to execute. Must not be null.
      * @param pArguments arguments to to used for executing the request. Can be null
      * @param pParams optional params used for processing the request.
-     * @throws MalformedObjectNameException if the object name is not in proper format
+     * @throws BadRequestException if the object name is not in proper format
      */
     JolokiaExecRequest(String pObjectName, String pOperation, List<?> pArguments,
-                       ProcessingParameters pParams) throws MalformedObjectNameException {
+                       ProcessingParameters pParams) throws BadRequestException {
         super(RequestType.EXEC, pObjectName, null /* path is not supported for exec requests */, pParams, true);
         operation = pOperation;
         arguments = pArguments;
     }
 
     /**
-     * Constructor for creating a JmxRequest resulting from an HTTP POST request
+     * Constructor for creating a {@link JolokiaExecRequest} resulting from an HTTP POST request
      *
      * @param pRequestMap request in object format
      * @param pParams optional processing parameters
-     * @throws MalformedObjectNameException if the object name is not in proper format
+     * @throws BadRequestException if the object name is not in proper format
      */
-    JolokiaExecRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) throws MalformedObjectNameException {
+    JolokiaExecRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) throws BadRequestException {
         super(pRequestMap, pParams, true);
-        arguments = (List<?>) pRequestMap.get("arguments");
         operation = (String) pRequestMap.get("operation");
+        arguments = (List<?>) pRequestMap.get("arguments");
     }
 
     /**
@@ -83,7 +81,9 @@ public class JolokiaExecRequest extends JolokiaObjectNameRequest {
     public JolokiaExecRequest withChangedObjectName(ObjectName name) {
         try {
             return new JolokiaExecRequest(name.getCanonicalName(), operation, arguments, this.processingConfig);
-        } catch (MalformedObjectNameException e) {
+        } catch (BadRequestException e) {
+            // should not really happen, because we're dealing with existing ObjectName
+            // so this is "special" IllegalArgumentException
             throw new IllegalArgumentException(e.getMessage(), e);
         }
     }
@@ -144,8 +144,11 @@ public class JolokiaExecRequest extends JolokiaObjectNameRequest {
      */
     static RequestCreator<JolokiaExecRequest> newCreator() {
         return new RequestCreator<>() {
-            /** {@inheritDoc} */
-            public JolokiaExecRequest create(Deque<String> pStack, ProcessingParameters pParams) throws MalformedObjectNameException {
+            @Override
+            public JolokiaExecRequest create(Deque<String> pStack, ProcessingParameters pParams) throws BadRequestException {
+                if (pStack == null || pStack.size() < 2) {
+                    throw new BadRequestException("Exec GET requests require at least two path elements");
+                }
                 return new JolokiaExecRequest(
                         pStack.pop(), // Object name
                         pStack.pop(), // Operation name
@@ -153,15 +156,24 @@ public class JolokiaExecRequest extends JolokiaObjectNameRequest {
                         pParams);
             }
 
-            /** {@inheritDoc} */
+            @Override
             public JolokiaExecRequest create(JSONObject requestMap, ProcessingParameters pParams)
-                    throws MalformedObjectNameException {
+                    throws BadRequestException {
+                if (requestMap == null) {
+                    throw new BadRequestException("Can't create Exec POST request");
+                }
+                if (!requestMap.containsKey("mbean")) {
+                    throw new BadRequestException("Exec POST requests require an ObjectName to invoke");
+                }
+                if (!requestMap.containsKey("operation")) {
+                    throw new BadRequestException("Exec POST requests require an operation name to invoke");
+                }
                 return new JolokiaExecRequest(requestMap, pParams);
             }
         };
     }
 
-    // Conver string tags if required
+    // Convert string tags if required
     private static List<String> convertSpecialStringTags(List<String> extraArgs) {
         if (extraArgs == null) {
             return null;
@@ -176,7 +188,7 @@ public class JolokiaExecRequest extends JolokiaObjectNameRequest {
 
     @Override
     public String toString() {
-        StringBuilder ret = new StringBuilder("JmxExecRequest[");
+        StringBuilder ret = new StringBuilder("JolokiaExecRequest[");
         ret.append("operation=").append(getOperation());
         if (arguments != null && !arguments.isEmpty()) {
             ret.append(", arguments=").append(getArguments());

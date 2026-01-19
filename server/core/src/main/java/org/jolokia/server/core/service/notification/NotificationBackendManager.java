@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2013 Roland Huss
+ * Copyright 2009-2026 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.jolokia.server.core.service.notification;
 
 import java.util.HashMap;
@@ -97,4 +96,5 @@ public class NotificationBackendManager {
             backend.unregister(pClient);
         }
     }
+
 }

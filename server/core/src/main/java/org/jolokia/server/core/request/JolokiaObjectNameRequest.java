@@ -1,7 +1,5 @@
-package org.jolokia.server.core.request;
-
 /*
- * Copyright 2009-2013 Roland Huss
+ * Copyright 2009-2026 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +13,7 @@ package org.jolokia.server.core.request;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.server.core.request;
 
 import java.util.List;
 import java.util.Map;
@@ -49,12 +48,12 @@ public abstract class JolokiaObjectNameRequest extends JolokiaRequest {
      * @param pPathParts parts of an path
      * @param pProcessingParams optional init params
      * @param pExclusive  whether the request is an 'exclusive' request or not handled by a single handler only
-     * @throws MalformedObjectNameException if the given MBean name is not a valid object name
+     * @throws BadRequestException if the given MBean name is not a valid object name
      */
     protected JolokiaObjectNameRequest(RequestType pType, String pName, List<String> pPathParts,
                                        ProcessingParameters pProcessingParams, boolean pExclusive)
-            throws MalformedObjectNameException {
-        super(pType,pPathParts,pProcessingParams,pExclusive);
+            throws BadRequestException {
+        super(pType, pPathParts, pProcessingParams, pExclusive);
         initObjectName(pName);
     }
 
@@ -64,17 +63,16 @@ public abstract class JolokiaObjectNameRequest extends JolokiaRequest {
      * @param pRequestMap object representation of the request
      * @param pParams processing parameters
      * @param pExclusive  whether the request is an 'exclusive' request or not handled by a single handler only
-     * @throws MalformedObjectNameException if the given name (key: "name")
+     * @throws BadRequestException if the given name (key: "name")
      *        is not a valid object name (with the provider part removed if given).
      */
     protected JolokiaObjectNameRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams, boolean pExclusive)
-            throws MalformedObjectNameException {
+            throws BadRequestException {
         super(pRequestMap, pParams, pExclusive);
         initObjectName((String) pRequestMap.get("mbean"));
     }
 
 
-    /** {@inheritDoc} */
     @Override
     public JSONObject toJSON() {
         JSONObject ret = super.toJSON();
@@ -146,9 +144,15 @@ public abstract class JolokiaObjectNameRequest extends JolokiaRequest {
         }
     }
 
-    private void initObjectName(String pObjectName) throws MalformedObjectNameException {
-        ProviderUtil.ProviderObjectNamePair pair = ProviderUtil.extractProvider(pObjectName);
+    private void initObjectName(String pObjectName) throws BadRequestException {
+        ProviderUtil.ProviderObjectNamePair pair;
+        try {
+            pair = ProviderUtil.extractProvider(pObjectName);
+        } catch (MalformedObjectNameException e) {
+            throw new BadRequestException(e.getMessage());
+        }
         provider = pair.getProvider();
         objectName = pair.getObjectName();
     }
+
 }

@@ -1,14 +1,3 @@
-package org.jolokia.server.core.request;
-
-import java.util.*;
-
-import javax.management.MalformedObjectNameException;
-
-import org.jolokia.json.JSONArray;
-import org.jolokia.json.JSONObject;
-import org.jolokia.core.util.EscapeUtil;
-import org.jolokia.server.core.util.RequestType;
-
 /*
  * Copyright 2009-2013 Roland Huss
  *
@@ -24,6 +13,18 @@ import org.jolokia.server.core.util.RequestType;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.server.core.request;
+
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.jolokia.core.util.EscapeUtil;
+import org.jolokia.json.JSONArray;
+import org.jolokia.json.JSONObject;
+import org.jolokia.server.core.util.RequestType;
 
 /**
  * Factory for creating {@link JolokiaRequest Jolokia requests}
@@ -88,27 +89,24 @@ public final class JolokiaRequestFactory {
      * @param pProcessingParameters processing parameters. Must not be null/
      * @return a newly created {@link JolokiaRequest}
      */
-    public static <R extends JolokiaRequest> R createGetRequest(String pPathInfo, ProcessingParameters pProcessingParameters) {
-        RequestType type = null;
+    public static <R extends JolokiaRequest> R createGetRequest(String pPathInfo, ProcessingParameters pProcessingParameters)
+            throws BadRequestException {
+        String pathInfo = extractPathInfo(pPathInfo, pProcessingParameters);
+
+        // Get all path elements as a reverse stack
+        Deque<String> elements = EscapeUtil.extractElementsFromPath(pathInfo);
+
+        // Use version by default if no type is given - consumes (pop) one element from the path
+        RequestType type;
         try {
-            String pathInfo = extractPathInfo(pPathInfo, pProcessingParameters);
-
-            // Get all path elements as a reverse stack
-            Deque<String> elements = EscapeUtil.extractElementsFromPath(pathInfo);
-
-            // Use version by default if no type is given - consumes (pop) one element from the path
             type = !elements.isEmpty() ? RequestType.getTypeByName(elements.pop()) : RequestType.VERSION;
-
-            // Parse request
-            RequestCreator<R> creator = getCreator(type);
-            return creator.create(elements, pProcessingParameters);
-        } catch (MalformedObjectNameException e) {
-            throw new IllegalArgumentException("Invalid object name. " + e.getMessage(),e);
-        } catch (NoSuchElementException exp) {
-            // TODO: this should be handled better
-            throw new IllegalArgumentException("Invalid arguments in pathinfo \"" + pPathInfo + "\""
-                + (type != null ? " for command " + type : ""),exp);
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException(e.getMessage());
         }
+
+        // Parse request
+        RequestCreator<R> creator = getCreator(type);
+        return creator.create(elements, pProcessingParameters);
     }
 
     /**
@@ -118,19 +116,21 @@ public final class JolokiaRequestFactory {
      * @param pProcessingParams additional map of operational parameters. Must not be null.
      * @return the created {@link JolokiaRequest}
      */
-    public static <R extends JolokiaRequest> R createPostRequest(JSONObject pRequestMap, ProcessingParameters pProcessingParams) {
+    public static <R extends JolokiaRequest> R createPostRequest(JSONObject pRequestMap, ProcessingParameters pProcessingParams)
+            throws BadRequestException {
+        // "config" should be a map - we don't support any other type for "config" field
+        Object config = pRequestMap.get("config");
+        ProcessingParameters paramsMerged = config instanceof JSONObject
+            ? pProcessingParams.mergedParams((JSONObject) pRequestMap.get("config"))
+            : pProcessingParams;
+        RequestType type;
         try {
-            // "config" should be a map - we don't support any other type for "config" field
-            Object config = pRequestMap.get("config");
-            ProcessingParameters paramsMerged = config instanceof JSONObject
-                ? pProcessingParams.mergedParams((JSONObject) pRequestMap.get("config"))
-                : pProcessingParams;
-            RequestType type = RequestType.getTypeByName((String) pRequestMap.get("type"));
-            RequestCreator<R> creator = getCreator(type);
-            return creator.create(pRequestMap, paramsMerged);
-        } catch (MalformedObjectNameException e) {
-            throw new IllegalArgumentException("Invalid object name. " + e.getMessage(),e);
+            type = RequestType.getTypeByName((String) pRequestMap.get("type"));
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException(e.getMessage());
         }
+        RequestCreator<R> creator = getCreator(type);
+        return creator.create(pRequestMap, paramsMerged);
     }
 
     /**
@@ -140,7 +140,8 @@ public final class JolokiaRequestFactory {
      * @param pProcessingParams processing options. Must not be null.
      * @return list with one or more {@link JolokiaRequest}
      */
-    public static List<JolokiaRequest> createPostRequests(JSONArray pJsonRequests, ProcessingParameters pProcessingParams) {
+    public static List<JolokiaRequest> createPostRequests(JSONArray pJsonRequests, ProcessingParameters pProcessingParams)
+            throws BadRequestException {
         List<JolokiaRequest> ret = new ArrayList<>();
         for (Object o : pJsonRequests) {
             if (!(o instanceof JSONObject)) {

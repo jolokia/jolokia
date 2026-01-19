@@ -68,14 +68,14 @@ public class Jsr160RequestHandlerTest {
     }
 
     @Test
-    public void canHandle() {
+    public void canHandle() throws BadRequestException {
         assertFalse(dispatcher.canHandle(JolokiaRequestFactory.createGetRequest("/read/java.lang:type=Memory", new TestProcessingParameters())));
         JolokiaRequest req = preparePostReadRequest(null);
         assertTrue(dispatcher.canHandle(req));
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
-    public void illegalDispatch() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException, EmptyResponseException {
+    public void illegalDispatch() throws JMException, IOException, NotChangedException, EmptyResponseException, BadRequestException {
         dispatcher.handleRequest(JolokiaRequestFactory.createGetRequest("/read/java.lang:type=Memory/HeapMemoryUsage", new TestProcessingParameters()), null);
     }
 
@@ -92,7 +92,7 @@ public class Jsr160RequestHandlerTest {
     }
 
     @Test
-    public void simpleDispatch() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException, EmptyResponseException {
+    public void simpleDispatch() throws JMException, IOException, NotChangedException, EmptyResponseException, BadRequestException {
         JolokiaReadRequest req =  preparePostReadRequest(null);
         @SuppressWarnings("unchecked")
         Map<String, ?> result = (Map<String, ?>) dispatcher.handleRequest(req, null);
@@ -100,13 +100,13 @@ public class Jsr160RequestHandlerTest {
     }
 
     @Test
-    public void simpleDispatchForSingleAttribute() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException, EmptyResponseException {
+    public void simpleDispatchForSingleAttribute() throws JMException, IOException, NotChangedException, EmptyResponseException, BadRequestException {
         JolokiaReadRequest req = preparePostReadRequest(null, "HeapMemoryUsage");
         assertNotNull(dispatcher.handleRequest(req,null));
     }
 
     @Test
-    public void simpleDispatchWithUser() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException, EmptyResponseException {
+    public void simpleDispatchWithUser() throws JMException, IOException, NotChangedException, EmptyResponseException, BadRequestException {
         System.setProperty("TEST_WITH_USER","roland");
         try {
             JolokiaRequest req = preparePostReadRequest("roland");
@@ -121,11 +121,11 @@ public class Jsr160RequestHandlerTest {
 
     // =========================================================================================================
 
-    private JolokiaReadRequest preparePostReadRequest(String pUser, String... pAttribute) {
+    private JolokiaReadRequest preparePostReadRequest(String pUser, String... pAttribute) throws BadRequestException {
         return preparePostReadRequestWithServiceUrl("service:jmx:test:///jndi/rmi://localhost:9999/jmxrmi", pUser, pAttribute);
     }
 
-    private JolokiaReadRequest preparePostReadRequestWithServiceUrl(String pJmxServiceUrl, String pUser, String... pAttribute) {
+    private JolokiaReadRequest preparePostReadRequestWithServiceUrl(String pJmxServiceUrl, String pUser, String... pAttribute) throws BadRequestException {
         JSONObject params = new JSONObject();
         JSONObject target = new JSONObject();
         target.put("url",pJmxServiceUrl);
@@ -181,10 +181,10 @@ public class Jsr160RequestHandlerTest {
     public void simpleWhiteListWithSysProp() throws Exception {
         String whiteListPath = getFilePathFor("/pattern-whitelist.txt");
         try {
-            System.setProperty(Jsr160RequestHandler.ALLOWED_TARGETS_SYSPROP, whiteListPath);
+            System.setProperty(ConfigKey.JSR160_PROXY_ALLOWED_TARGETS.asSystemProperty(), whiteListPath);
             runWhiteListTest(null);
         } finally {
-            System.getProperties().remove(Jsr160RequestHandler.ALLOWED_TARGETS_SYSPROP);
+            System.getProperties().remove(ConfigKey.JSR160_PROXY_ALLOWED_TARGETS.asSystemProperty());
         }
     }
 
@@ -213,7 +213,7 @@ public class Jsr160RequestHandlerTest {
         }
     }
 
-    private void runWhiteListTest(Configuration config) throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, NotChangedException, EmptyResponseException {
+    private void runWhiteListTest(Configuration config) throws JMException, NotChangedException, EmptyResponseException, BadRequestException {
         Jsr160RequestHandler dispatcher = createDispatcherPointingToLocalMBeanServer(config);
 
         Object[] testData = new Object[] {

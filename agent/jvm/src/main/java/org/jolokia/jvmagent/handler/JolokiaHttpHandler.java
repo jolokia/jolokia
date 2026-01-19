@@ -66,7 +66,7 @@ public class JolokiaHttpHandler implements HttpHandler {
     private final HttpRequestHandler requestHandler;
 
     // Context of this request
-    private String contextPath;
+    private final String contextPath;
 
     // Content type matching
     private final Pattern contentTypePattern = Pattern.compile(".*;\\s*charset=([^;,]+)\\s*.*");
@@ -74,8 +74,12 @@ public class JolokiaHttpHandler implements HttpHandler {
     // Global context
     private final JolokiaContext jolokiaContext;
 
+    // whether to allow reverse DNS lookup for checking the remote host
+    private final boolean allowDnsReverseLookup;
+
     // Backchannel Thread Pool (TODO: Optimize that for backchannel handling)
     private final Executor backChannelThreadPool = Executors.newCachedThreadPool();
+
     /**
      * Create a new HttpHandler for processing HTTP request
      *
@@ -87,10 +91,12 @@ public class JolokiaHttpHandler implements HttpHandler {
         contextPath = jolokiaContext.getConfig(ConfigKey.AGENT_CONTEXT);
 
         requestHandler = new HttpRequestHandler(jolokiaContext);
+        allowDnsReverseLookup = Boolean.parseBoolean(jolokiaContext.getConfig(ConfigKey.ALLOW_DNS_REVERSE_LOOKUP));
     }
 
     /**
-     * Handler a request. If the handler is not yet started, an exception is thrown
+     * Handle an incoming HTTP request. If the handler is not yet started, an exception is thrown. This is the
+     * {@code com.sun.net.httpserver} equivalent of {@code org.jolokia.server.core.http.AgentServlet#handle()}.
      *
      * @param pHttpExchange the request/response object
      * @throws IOException if something fails during handling
@@ -106,25 +112,9 @@ public class JolokiaHttpHandler implements HttpHandler {
             }  else {
                 doHandle(pHttpExchange);
             }
-        } catch (BadRequestException exp) {
-            sendBadRequestError(pHttpExchange, exp);
         } catch (SecurityException exp) {
+            // Can happen only if a subclass implements checkAuthentication which actually throws a SecurityException
             sendForbidden(pHttpExchange, exp);
-        }
-    }
-
-    // run as privileged action
-    private void doHandleAs(Subject subject, final HttpExchange pHttpExchange) {
-        try {
-            Subject.doAs(subject, (PrivilegedExceptionAction<Void>) () -> {
-                doHandle(pHttpExchange);
-                return null;
-            });
-        } catch (PrivilegedActionException e) {
-            if (e.getCause() instanceof BadRequestException) {
-                throw (BadRequestException) e.getCause();
-            }
-            throw new SecurityException("Security exception: " + e.getCause(),e.getCause());
         }
     }
 
@@ -140,70 +130,104 @@ public class JolokiaHttpHandler implements HttpHandler {
     protected void checkAuthentication(HttpExchange pHttpExchange) throws SecurityException { }
 
     /**
-     * Handler a request. If the handler is not yet started, an exception is thrown
+     * Handle the incoming request within a {@link java.security.PrivilegedAction} when a {@link Subject} was found.
+     *
+     * @param subject
+     * @param pHttpExchange
+     * @throws BadRequestException
+     */
+    private void doHandleAs(Subject subject, final HttpExchange pHttpExchange) throws IOException {
+        try {
+            Subject.doAs(subject, (PrivilegedExceptionAction<Void>) () -> {
+                doHandle(pHttpExchange);
+                return null;
+            });
+        } catch (PrivilegedActionException | SecurityException e) {
+            // PrivilegedActionException happens _only_ when the action has thrown an checked exception.
+            // But we handle all java.lang.Throwables in the doHandle() method anyway.
+            // SecurityException happens _only_ under a SecurityManager and it's being removed anyway.
+            sendInternalServerError(pHttpExchange, new Exception(e.getMessage() == null ? e.getClass().getName() : e.getMessage()));
+        }
+    }
+
+    /**
+     * Handle the incoming request. All exceptions during request processing are caught and turned into a Jolokia
+     * JSON error. The only exception thrown is when the handled exception (turned into JSON) can't be sent back.
      *
      * @param pExchange the request/response object
-     * @throws IOException if something fails during handling
-     * @throws IllegalStateException if the handler has not yet been started
+     * @throws IOException thrown only if there's an issue sending the response.
      */
-    @SuppressWarnings({"PMD.AvoidCatchingThrowable", "PMD.AvoidInstanceofChecksInCatchClause"})
     public void doHandle(HttpExchange pExchange) throws IOException {
         JSONStructure json = null;
         URI uri = pExchange.getRequestURI();
         ParsedUri parsedUri = new ParsedUri(uri, contextPath);
+
         try {
-            // Set back channel
+            // Set back channel - for notification handling
             prepareBackChannel(pExchange);
 
             // Check access policy
-            InetSocketAddress address = pExchange.getRemoteAddress();
             String scheme = pExchange instanceof HttpsExchange ? "https" : "http";
-            requestHandler.checkAccess(scheme,
-                                       getHostName(address),
-                                       address.getAddress().getHostAddress(),
-                                       extractOriginOrReferer(pExchange));
-            String method = pExchange.getRequestMethod();
+            InetSocketAddress address = pExchange.getRemoteAddress();
+            String remoteHost = allowDnsReverseLookup ? address.getHostName() : null;
+            requestHandler.checkAccess(scheme, remoteHost, address.getAddress().getHostAddress(), extractOriginOrReferer(pExchange));
 
             // If a callback is given, check this is a valid javascript function name
             validateCallbackIfGiven(parsedUri);
 
             // Dispatch for the proper HTTP request method
+            String method = pExchange.getRequestMethod();
             if ("GET".equalsIgnoreCase(method)) {
                 setHeaders(pExchange);
                 json = executeGetRequest(parsedUri);
             } else if ("POST".equalsIgnoreCase(method)) {
                 setHeaders(pExchange);
-                json = executePostRequest(pExchange, parsedUri);
+                json = executePostRequest(parsedUri, pExchange);
             } else if ("OPTIONS".equalsIgnoreCase(method)) {
                 performCorsPreflightCheck(pExchange);
             } else {
-                throw new IllegalArgumentException("HTTP Method " + method + " is not supported.");
+                throw new BadRequestException("HTTP Method " + method + " is not supported.");
             }
             if (jolokiaContext.isDebug()) {
                 jolokiaContext.debug("Response: " + json);
             }
         } catch (BadRequestException exp) {
-            throw exp;
+            String response = "400 (Bad Request)\n";
+            if (exp.getMessage() != null) {
+                response += "\n" + exp.getMessage() + "\n";
+            }
+            pExchange.getResponseHeaders().add("Content-Type", "text/plain; charset=utf-8");
+            pExchange.sendResponseHeaders(400, response.length());
+            OutputStream os = pExchange.getResponseBody();
+            os.write(response.getBytes());
+            os.close();
+            return;
         } catch (EmptyResponseException exp) {
-            // No response needed, will answer later ...
+            // Don't close the connection, this is used for `Content-Type: text/event-stream` for notifications
+            // which will be sent using org.jolokia.service.notif.sse.SseHeartBeat
             return;
         } catch (Throwable exp) {
+            // handle exception not handled by org.jolokia.server.core.http.HttpRequestHandler()
+            // so for example should not be JMX exceptions
             json = requestHandler.handleThrowable(exp);
         } finally {
             releaseBackChannel();
         }
-        sendResponse(pExchange, parsedUri, json);
+
+        if (json == null) {
+            sendInternalServerError(pExchange, new Exception("Internal Server Error (no JSON response)"));
+        } else {
+            sendResponse(pExchange, parsedUri, json);
+        }
     }
 
     private void prepareBackChannel(HttpExchange pExchange) {
-        BackChannelHolder.set(new HttpExchangeBackChannel(pExchange,backChannelThreadPool));
+        BackChannelHolder.set(new HttpExchangeBackChannel(pExchange, backChannelThreadPool));
     }
 
     private void releaseBackChannel() {
         BackChannelHolder.remove();
     }
-
-
 
     private void validateCallbackIfGiven(ParsedUri pUri) {
         String callback = pUri.getParameter(ConfigKey.CALLBACK.getKeyValue());
@@ -224,19 +248,32 @@ public class JolokiaHttpHandler implements HttpHandler {
         return origin != null ? origin.replaceAll("[\\n\\r]*","") : null;
     }
 
-    // Return hostname of given address, but only when reverse DNS lookups are allowed
-    private String getHostName(InetSocketAddress address) {
-        return Boolean.parseBoolean(jolokiaContext.getConfig(ConfigKey.ALLOW_DNS_REVERSE_LOOKUP)) ? address.getHostName() : null;
+    /**
+     * Handle a GET request, where all the parameters come from the URI/headers
+     *
+     * @param parsedUri
+     * @return
+     * @throws EmptyResponseException
+     * @throws BadRequestException
+     */
+    private JSONStructure executeGetRequest(ParsedUri parsedUri) throws EmptyResponseException, BadRequestException {
+        return requestHandler.handleGetRequest(parsedUri.getUri().toString(), parsedUri.getPathInfo(), parsedUri.getParameterMap());
     }
 
-    private JSONStructure executeGetRequest(ParsedUri parsedUri) throws EmptyResponseException {
-        return requestHandler.handleGetRequest(parsedUri.getUri().toString(),parsedUri.getPathInfo(), parsedUri.getParameterMap());
-    }
-
-    private JSONStructure executePostRequest(HttpExchange pExchange, ParsedUri pUri) throws IOException, EmptyResponseException {
+    /**
+     * Handle a POST request, where the incoming data should also be read from the HTTP request body
+     *
+     * @param pUri
+     * @param pExchange
+     * @return
+     * @throws IOException
+     * @throws EmptyResponseException
+     * @throws BadRequestException
+     */
+    private JSONStructure executePostRequest(ParsedUri pUri, HttpExchange pExchange) throws IOException, EmptyResponseException, BadRequestException {
         String encoding = null;
         Headers headers = pExchange.getRequestHeaders();
-        String cType =  headers.getFirst("Content-Type");
+        String cType = headers.getFirst("Content-Type");
         if (cType != null) {
             Matcher matcher = contentTypePattern.matcher(cType);
             if (matcher.matches()) {
@@ -244,9 +281,14 @@ public class JolokiaHttpHandler implements HttpHandler {
             }
         }
         InputStream is = pExchange.getRequestBody();
-        return requestHandler.handlePostRequest(pUri.toString(),is, encoding, pUri.getParameterMap());
+        return requestHandler.handlePostRequest(pUri.toString(), is, encoding, pUri.getParameterMap());
     }
 
+    /**
+     * Handle OPTIONS request (CORS)
+     *
+     * @param pExchange
+     */
     private void performCorsPreflightCheck(HttpExchange pExchange) {
         Headers requestHeaders = pExchange.getRequestHeaders();
         Map<String,String> respHeaders =
@@ -282,24 +324,40 @@ public class JolokiaHttpHandler implements HttpHandler {
         headers.set("Expires",formatHeaderDate(cal.getTime()));
     }
 
-    private void sendBadRequestError(HttpExchange pExchange, BadRequestException badRequestException) throws IOException {
-        String response = "400 (Bad Request)\n";
-        if (badRequestException != null && badRequestException.getMessage() != null) {
-            response += "\n" + badRequestException.getMessage() + "\n";
-        }
-        pExchange.getResponseHeaders().add("Content-Type", "text/plain; charset=utf-8");
-        pExchange.sendResponseHeaders(400, response.length());
-        OutputStream os = pExchange.getResponseBody();
-        os.write(response.getBytes());
-        os.close();
-    }
-
+    /**
+     * Should be used only under a SecurityManager or if this handler is reimplemented with special
+     * {@link #checkAuthentication(HttpExchange)}
+     *
+     * @param pExchange
+     * @param securityException
+     * @throws IOException
+     */
     private void sendForbidden(HttpExchange pExchange, SecurityException securityException) throws IOException {
         String response = "403 (Forbidden)\n";
         if (securityException != null && securityException.getMessage() != null) {
             response += "\n" + securityException.getMessage() + "\n";
         }
+        pExchange.getResponseHeaders().add("Content-Type", "text/plain; charset=utf-8");
         pExchange.sendResponseHeaders(403, response.length());
+        OutputStream os = pExchange.getResponseBody();
+        os.write(response.getBytes());
+        os.close();
+    }
+
+    /**
+     * Called when we can't produce a Jolokia JSON response or error.
+     *
+     * @param pExchange
+     * @param exception
+     * @throws IOException
+     */
+    private void sendInternalServerError(HttpExchange pExchange, Exception exception) throws IOException {
+        String response = "500 (Internal Server Error)\n";
+        if (exception != null && exception.getMessage() != null) {
+            response += "\n" + exception.getMessage() + "\n";
+        }
+        pExchange.getResponseHeaders().add("Content-Type", "text/plain; charset=utf-8");
+        pExchange.sendResponseHeaders(500, response.length());
         OutputStream os = pExchange.getResponseBody();
         os.write(response.getBytes());
         os.close();

@@ -1,29 +1,54 @@
+/*
+ * Copyright 2009-2026 Roland Huss
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.jolokia.service.jmx.api;
 
 import java.io.IOException;
+import javax.management.JMException;
+import javax.management.JMRuntimeException;
+import javax.management.MBeanServerConnection;
 
-import javax.management.*;
-
-import org.jolokia.server.core.request.*;
+import org.jolokia.server.core.request.BadRequestException;
+import org.jolokia.server.core.request.EmptyResponseException;
+import org.jolokia.server.core.request.JolokiaRequest;
+import org.jolokia.server.core.request.NotChangedException;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.util.RequestType;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 
 /**
+ * Final abstraction layer for handling Jolokia requests - actual implementation of Jolokia <em>verbs</em>.
+ * Methods may throw {@link JMException} or {@link JMRuntimeException} exceptions to be handled down the stack. JMX
+ * exceptions are explicit here, because most of the commands are about interacting with MBeans.
+ *
  * @author roland
  * @since 09.03.14
  */
 public interface CommandHandler<R extends JolokiaRequest> {
+
     /**
-     * The type of request which can be served by this handler
-     * @return the request typ of this handler
+     * The type of request which can be handled
+     * @return the request type of this handler
      */
     RequestType getType();
 
     /**
-     * Override this if you want all servers as list in the argument, e.g.
-     * to query each server on your own. By default, dispatching of the servers
-     * are done for you
+     * Override this if you want all available MBeanServers to be passed to this command handler, e.g.,
+     * to query each server on your own. By default, iteration over the available MBeanServers is done by
+     * the {@link org.jolokia.server.core.service.request.RequestHandler} and this command handler
+     * is called through {@link #handleSingleServerRequest(MBeanServerConnection, JolokiaRequest)}.
      *
      * @param pRequest request to decide on whether to handle all request at once
      * @return whether you want to have
@@ -34,27 +59,25 @@ public interface CommandHandler<R extends JolokiaRequest> {
     boolean handleAllServersAtOnce(R pRequest);
 
     /**
-     * Handle a request for a single server and throw an
-     * {@link javax.management.InstanceNotFoundException}
-     * if the request cannot be handle by the provided server.
-     * Does a check for restrictions as well
+     * Handle a request for a single {@link MBeanServerConnection}. Coordination of the servers and
+     * other request handlers is taken care of externally.
      *
-     * @param pServer server to try
+     * @param pServer server to send the request to
      * @param pRequest request to process
-     * @return the object result from the request
-     *
-     * @throws InstanceNotFoundException if the provided server cant handle the request
-     * @throws AttributeNotFoundException
-     * @throws ReflectionException
-     * @throws MBeanException
-     * @throws java.io.IOException
+     * @return the result of sending a request to the MBean server
+     * @throws IOException when there's an error invoking {@link javax.management.MBeanServerConnection}
+     * @throws JMException JMX checked exception, because most requests are handled by dealing with MBeans
+     * @throws JMRuntimeException JMX unchecked exception, because most requests are handled by dealing with MBeans
+     * @throws NotChangedException when (according to request parameters) user wants HTTP 304 if nothing has changed
+     * @throws BadRequestException because some commands do more user input parsing in addition to what was checked when the {@link JolokiaRequest} was created
+     * @throws EmptyResponseException if the response should not be closed (expecting further async/stream data)
      */
     Object handleSingleServerRequest(MBeanServerConnection pServer, R pRequest)
-            throws InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, IOException,
-                   NotChangedException, EmptyResponseException;
+            throws IOException, JMException, NotChangedException, BadRequestException, EmptyResponseException;
 
     /**
-     * Override this if you want to have all servers at once for processing the request
+     * Override this if you want to iterate over all available servers and potentially use a result from a previous
+     * {@link org.jolokia.server.core.service.request.RequestHandler}at once for processing the request
      * (like need for merging info as for a <code>list</code> command). This method
      * is only called when {@link #handleAllServersAtOnce(JolokiaRequest)} returns <code>true</code>
      *
@@ -63,14 +86,13 @@ public interface CommandHandler<R extends JolokiaRequest> {
      * @param pPreviousResult a previous result which for merging requests can be used to merge files
      * @return the object found
      * @throws IOException
-     * @throws AttributeNotFoundException
-     * @throws InstanceNotFoundException
-     * @throws MBeanException
-     * @throws ReflectionException
+     * @throws JMException for any JMX exception
+     * @throws NotChangedException for Jolokia handling of 304 (not changed)
+     * @throws BadRequestException when processing of user input (like path in LIST command) fails
+     * @throws EmptyResponseException for Jolokia notification stream handling
      */
     Object handleAllServerRequest(MBeanServerAccess pServerManager, R request, Object pPreviousResult)
-            throws ReflectionException, InstanceNotFoundException, MBeanException, AttributeNotFoundException,
-                   IOException, NotChangedException, EmptyResponseException;
+            throws IOException, JMException, NotChangedException, BadRequestException, EmptyResponseException;
 
     /**
      * Lifecycle method in order to initialize the handler
@@ -86,4 +108,5 @@ public interface CommandHandler<R extends JolokiaRequest> {
      * a handler if required.
      */
     void destroy() throws JMException;
+
 }

@@ -1,4 +1,4 @@
-package org.jolokia.client.exception;
+package org.jolokia.client.jmxadapter;
 
 public class UncheckedJmxAdapterException extends RuntimeException {
 

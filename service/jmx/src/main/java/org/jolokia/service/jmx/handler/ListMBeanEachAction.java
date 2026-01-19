@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2024 Roland Huss
+ * Copyright 2009-2026 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.jolokia.service.jmx.handler;
 import java.io.IOException;
 import java.util.Deque;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedSet;
 import javax.management.InstanceNotFoundException;
 import javax.management.IntrospectionException;
@@ -27,10 +26,13 @@ import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 
+import org.jolokia.json.JSONObject;
+import org.jolokia.server.core.config.ConfigKey;
+import org.jolokia.server.core.request.JolokiaListRequest;
+import org.jolokia.server.core.service.api.DataUpdater;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 import org.jolokia.service.jmx.api.CacheKeyProvider;
-import org.jolokia.server.core.service.api.DataUpdater;
 import org.jolokia.service.jmx.handler.list.MBeanInfoData;
 
 /**
@@ -51,20 +53,22 @@ class ListMBeanEachAction implements MBeanServerAccess.MBeanEachCallback, MBeanS
     /**
      * Handler used during iterations whe collecting MBean Meta data
      *
-     * @param pMaxDepth         max depth for the list tree to return
+     * @param pRequest          incoming Jolokia LIST request
      * @param pPathStack        optional stack for picking out a certain path from the list tree
-     * @param pUseCanonicalName whether to use a canonical naming for the MBean property lists or the original
-     * @param pListKeys         whether to dissect {@link ObjectName#getKeyPropertyList()} into MBean information
-     * @param pListCache        whether optimized {@code list()} operation is performed
-     * @param listInterfaces
      * @param pProvider         provider to prepend to any domain (if not null)
      * @param pContext          {@link JolokiaContext} for filtering MBeans
      */
-    public ListMBeanEachAction(int pMaxDepth, Deque<String> pPathStack, boolean pUseCanonicalName,
-                               boolean pListKeys, boolean pListCache, boolean listInterfaces, String pProvider, JolokiaContext pContext) {
+    public ListMBeanEachAction(JolokiaListRequest pRequest, Deque<String> pPathStack, String pProvider, JolokiaContext pContext) {
         context = pContext;
+        int maxDepth = pRequest.getParameterAsInt(ConfigKey.MAX_DEPTH);
+        boolean useCanonicalName = pRequest.getParameterAsBool(ConfigKey.CANONICAL_NAMING);
+        boolean listKeys = pRequest.getParameterAsBool(ConfigKey.LIST_KEYS);
+        boolean listCache = pRequest.getParameterAsBool(ConfigKey.LIST_CACHE);
+        boolean listInterfaces = pRequest.getParameterAsBool(ConfigKey.LIST_INTERFACES);
+
         // TOCHECK: MBeanInfoData can be filled with pre-cached, long-lived MBeans
-        infoData = new MBeanInfoData(pMaxDepth, pPathStack, pUseCanonicalName, pListKeys, pListCache, listInterfaces, pProvider);
+        infoData = new MBeanInfoData(maxDepth, pPathStack, useCanonicalName, listKeys, listCache, listInterfaces, pProvider);
+
         customUpdaters = context.getServices(DataUpdater.class);
         cacheKeyProviders = context.getServices(CacheKeyProvider.class);
     }
@@ -79,7 +83,7 @@ class ListMBeanEachAction implements MBeanServerAccess.MBeanEachCallback, MBeanS
      * @throws IOException
      */
     public void callback(MBeanServerConnection pConn, ObjectInstance pInstance)
-        throws ReflectionException, InstanceNotFoundException, IOException {
+            throws ReflectionException, InstanceNotFoundException, IOException {
         lookupMBeanInfo(pConn, pInstance);
     }
 
@@ -87,7 +91,7 @@ class ListMBeanEachAction implements MBeanServerAccess.MBeanEachCallback, MBeanS
      * Add the MBeanInfo for a single MBean
      *
      * @param pConn     MBeanServer on which the action should be performed
-     * @param pName     an objectname interpreted specifically by the action
+     * @param pName     an {@link ObjectName} interpreted specifically by the action
      * @param extraArgs any extra args given as context from the outside
      * @return
      * @throws ReflectionException
@@ -95,7 +99,7 @@ class ListMBeanEachAction implements MBeanServerAccess.MBeanEachCallback, MBeanS
      * @throws IOException
      */
     public Void execute(MBeanServerConnection pConn, ObjectName pName, Object... extraArgs)
-        throws ReflectionException, InstanceNotFoundException, IOException {
+            throws ReflectionException, InstanceNotFoundException, IOException {
         lookupMBeanInfo(pConn, new ObjectInstance(pName, null));
         return null;
     }
@@ -129,14 +133,11 @@ class ListMBeanEachAction implements MBeanServerAccess.MBeanEachCallback, MBeanS
      * @param pBaseMap the base map to merge in the result
      * @return the meta data suitable for JSON serialization
      */
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    public Object getResult(Map pBaseMap) {
-
+    public Object getResult(JSONObject pBaseMap) {
         Object result = infoData.applyPath();
-        if (pBaseMap != null && result instanceof Map) {
+        if (pBaseMap != null && result instanceof JSONObject resultMap) {
             // Its not a final value, so we merge it in at the top level
-            Map resultMap = (Map) result;
-            for (Map.Entry entry : (Set<Map.Entry>) resultMap.entrySet()) {
+            for (Map.Entry<String, Object> entry : resultMap.entrySet()) {
                 pBaseMap.put(entry.getKey(), entry.getValue());
             }
             return pBaseMap;
@@ -144,4 +145,5 @@ class ListMBeanEachAction implements MBeanServerAccess.MBeanEachCallback, MBeanS
             return result;
         }
     }
+
 }

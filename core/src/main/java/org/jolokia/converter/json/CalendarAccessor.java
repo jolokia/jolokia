@@ -93,8 +93,7 @@ public class CalendarAccessor implements org.jolokia.converter.json.ObjectAccess
     }
 
     @Override
-    public Object setObjectValue(Converter<String> pConverter, Object pCalendar, String pAttribute, Object pValue)
-            throws IllegalAccessException, InvocationTargetException, IllegalArgumentException {
+    public Object setObjectValue(Converter<String> pConverter, Object pCalendar, String pAttribute, Object pValue) {
         Calendar cal = (Calendar) pCalendar;
         if ("time".equals(pAttribute)) {
             long time;

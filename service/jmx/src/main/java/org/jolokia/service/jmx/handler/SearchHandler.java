@@ -1,17 +1,5 @@
-package org.jolokia.service.jmx.handler;
-
-import java.io.IOException;
-import java.util.*;
-
-import javax.management.*;
-
-import org.jolokia.server.core.request.JolokiaSearchRequest;
-import org.jolokia.server.core.request.NotChangedException;
-import org.jolokia.server.core.util.RequestType;
-import org.jolokia.server.core.util.jmx.MBeanServerAccess;
-
 /*
- * Copyright 2009-2013 Roland Huss
+ * Copyright 2009-2026 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +13,19 @@ import org.jolokia.server.core.util.jmx.MBeanServerAccess;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.service.jmx.handler;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Set;
+import javax.management.MBeanServerConnection;
+import javax.management.ObjectName;
+
+import org.jolokia.server.core.request.JolokiaSearchRequest;
+import org.jolokia.server.core.request.NotChangedException;
+import org.jolokia.server.core.util.RequestType;
+import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 
 /**
  * Handler responsible for searching for MBean names.
@@ -34,28 +34,36 @@ import org.jolokia.server.core.util.jmx.MBeanServerAccess;
  */
 public class SearchHandler extends AbstractCommandHandler<JolokiaSearchRequest> {
 
-    /** {@inheritDoc} */
+    @Override
     public RequestType getType() {
         return RequestType.SEARCH;
     }
 
-    /** {@inheritDoc} */
     @Override
     protected void checkForRestriction(JolokiaSearchRequest pRequest) {
         checkType();
     }
 
-    // Previous result must be a Collection
-    /** {@inheritDoc} */
     @Override
-    @SuppressWarnings("PMD.ReplaceHashtableWithMap")
+    public boolean handleAllServersAtOnce(JolokiaSearchRequest pRequest) {
+        return true;
+    }
+
+    @Override
+    protected Object doHandleSingleServerRequest(MBeanServerConnection server, JolokiaSearchRequest request) {
+        // because we returned true in handleAllServersAtOnce()
+        throw new UnsupportedOperationException("Internal: Method must not be called when all MBeanServers are handled at once");
+    }
+
+    @Override
     public Object doHandleAllServerRequest(MBeanServerAccess serverManager, JolokiaSearchRequest request, Object pPreviousResult)
             throws IOException, NotChangedException {
-        checkForModifiedSince(serverManager,request);
+        checkForModifiedSince(serverManager, request);
+
         Set<ObjectName> names = serverManager.queryNames(request.getObjectName());
 
         @SuppressWarnings("unchecked")
-        Collection<String> ret = pPreviousResult != null ? (Collection<String>) pPreviousResult : new ArrayList<>();
+        Collection<String> ret = pPreviousResult instanceof Collection<?> previousResult ? (Collection<String>) previousResult : new ArrayList<>();
         for (ObjectName name : names) {
             if (isObjectNameHidden(name)) {
                 continue;
@@ -66,15 +74,4 @@ public class SearchHandler extends AbstractCommandHandler<JolokiaSearchRequest> 
         return ret;
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean handleAllServersAtOnce(JolokiaSearchRequest pRequest) {
-        return true;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    protected Object doHandleSingleServerRequest(MBeanServerConnection server, JolokiaSearchRequest request) {
-        throw new UnsupportedOperationException("Internal: Method must not be called when all MBeanServers are handled at once");
-    }
 }

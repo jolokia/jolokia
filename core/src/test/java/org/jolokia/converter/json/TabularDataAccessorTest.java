@@ -76,8 +76,8 @@ public class TabularDataAccessorTest {
         assertFalse(extractor.canSetValue());
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = ".*written to.*")
-    public void setValue() throws InvocationTargetException, IllegalAccessException {
+    @Test(expectedExceptions = UnsupportedOperationException.class, expectedExceptionsMessageRegExp = ".*written to.*")
+    public void setValue() {
         extractor.setObjectValue(new ObjectToObjectConverter(), new Object(), "bla", "blub");
     }
 

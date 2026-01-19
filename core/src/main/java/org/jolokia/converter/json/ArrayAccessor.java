@@ -81,8 +81,7 @@ public class ArrayAccessor implements org.jolokia.converter.json.ObjectAccessor 
      * @throws InvocationTargetException
      */
     @Override
-    public Object setObjectValue(Converter<String> pConverter, Object pArray, String pIndex, Object pValue)
-            throws IllegalAccessException, InvocationTargetException {
+    public Object setObjectValue(Converter<String> pConverter, Object pArray, String pIndex, Object pValue) {
         Class<?> clazz = pArray.getClass();
         if (!clazz.isArray()) {
             throw new IllegalArgumentException("Not an array to set a value, but " + clazz +
@@ -105,7 +104,7 @@ public class ArrayAccessor implements org.jolokia.converter.json.ObjectAccessor 
 
     /**
      * Serialize given array into a {@link JSONArray} recursively, limited by
-     * {@link SerializeOptions}
+     * {@link org.jolokia.core.service.serializer.SerializeOptions}
      *
      * @param pConverter
      * @param pArray

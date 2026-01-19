@@ -1,7 +1,5 @@
-package org.jolokia.server.core.request;
-
 /*
- * Copyright 2009-2013 Roland Huss
+ * Copyright 2009-20126 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +13,10 @@ package org.jolokia.server.core.request;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.server.core.request;
 
 import java.util.Deque;
 import java.util.Map;
-
-import javax.management.MalformedObjectNameException;
 
 import org.jolokia.json.JSONObject;
 import org.jolokia.server.core.util.RequestType;
@@ -39,9 +36,9 @@ public class JolokiaSearchRequest extends JolokiaObjectNameRequest {
      *
      * @param pObjectName object name pattern to search for. If it's null, it's used as {@code *:*} pattern.
      * @param pParams optional processing parameters
-     * @throws MalformedObjectNameException if the name is not a proper object name
+     * @throws BadRequestException if the name is not a proper object name
      */
-    JolokiaSearchRequest(String pObjectName, ProcessingParameters pParams) throws MalformedObjectNameException {
+    JolokiaSearchRequest(String pObjectName, ProcessingParameters pParams) throws BadRequestException {
         super(RequestType.SEARCH, pObjectName, null, pParams, false);
     }
 
@@ -50,16 +47,16 @@ public class JolokiaSearchRequest extends JolokiaObjectNameRequest {
      *
      * @param pRequestMap object representation of the request
      * @param pParams processing parameters
-     * @throws MalformedObjectNameException if the name is not a proper object name
+     * @throws BadRequestException if the name is not a proper object name
      */
-    JolokiaSearchRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) throws MalformedObjectNameException {
+    JolokiaSearchRequest(Map<String, ?> pRequestMap, ProcessingParameters pParams) throws BadRequestException {
         super(pRequestMap, pParams, false);
     }
 
 
     @Override
     public String toString() {
-        StringBuilder ret = new StringBuilder("JmxSearchRequest[");
+        StringBuilder ret = new StringBuilder("JolokiaSearchRequest[");
         String baseInfo = getInfo();
         if (baseInfo != null) {
             ret.append(baseInfo);
@@ -77,16 +74,17 @@ public class JolokiaSearchRequest extends JolokiaObjectNameRequest {
      */
     static RequestCreator<JolokiaSearchRequest> newCreator() {
         return new RequestCreator<>() {
-            /** {@inheritDoc} */
-            public JolokiaSearchRequest create(Deque<String> pStack, ProcessingParameters pParams) throws MalformedObjectNameException {
-                return new JolokiaSearchRequest(pStack.isEmpty() ? null : pStack.pop(),pParams);
+            @Override
+            public JolokiaSearchRequest create(Deque<String> pStack, ProcessingParameters pParams) throws BadRequestException {
+                return new JolokiaSearchRequest(pStack.isEmpty() ? null : pStack.pop(), pParams);
             }
 
-            /** {@inheritDoc} */
-            public JolokiaSearchRequest create(JSONObject requestMap, ProcessingParameters pParams)
-                    throws MalformedObjectNameException {
-                return new JolokiaSearchRequest(requestMap,pParams);
+            @Override
+            public JolokiaSearchRequest create(JSONObject requestMap, ProcessingParameters pParams) throws BadRequestException {
+                // we accept empty mbean parameter - means "search for all"
+                return new JolokiaSearchRequest(requestMap, pParams);
             }
         };
     }
+
 }

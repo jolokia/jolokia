@@ -110,7 +110,7 @@ public class JolokiaJmxConnector implements JMXConnector {
         // from system properties / env variables as a fallback
         // see: https://github.com/jolokia/jolokia/issues/911
 
-        Map<String, Object> copy = new HashMap<>(env);
+        Map<String, Object> copy = env == null ? new HashMap<>() : new HashMap<>(env);
 
         // dedicated support for "jmx.remote.credentials" parameter
         // com.sun.jmx.remote.security.JMXPluggableAuthenticator supports String[] type of credentials

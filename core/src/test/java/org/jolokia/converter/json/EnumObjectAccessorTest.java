@@ -61,8 +61,8 @@ public class EnumObjectAccessorTest {
         assertEquals(result,TestEnum.EINS);
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
-    public void setValue() throws InvocationTargetException, IllegalAccessException {
+    @Test(expectedExceptions = UnsupportedOperationException.class)
+    public void setValue() {
         enumExtractor.setObjectValue(null,null,null,null);
     }
 

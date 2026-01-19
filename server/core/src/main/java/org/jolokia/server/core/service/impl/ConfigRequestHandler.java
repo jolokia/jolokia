@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2025 Roland Huss
+ * Copyright 2009-2026 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,10 @@
  */
 package org.jolokia.server.core.service.impl;
 
-import java.io.IOException;
-import javax.management.JMException;
-
 import org.jolokia.json.JSONObject;
 import org.jolokia.server.core.Version;
 import org.jolokia.server.core.config.ConfigKey;
-import org.jolokia.server.core.request.EmptyResponseException;
 import org.jolokia.server.core.request.JolokiaRequest;
-import org.jolokia.server.core.request.NotChangedException;
 import org.jolokia.server.core.service.api.AbstractJolokiaService;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.request.RequestHandler;
@@ -57,7 +52,7 @@ public class ConfigRequestHandler extends AbstractJolokiaService<RequestHandler>
     }
 
     @Override
-    public <R extends JolokiaRequest> Object handleRequest(R pJmxReq, Object pPreviousResult) throws JMException, IOException, NotChangedException, EmptyResponseException {
+    public <R extends JolokiaRequest> Object handleRequest(R pJmxReq, Object pPreviousResult) {
         JSONObject ret = new JSONObject();
 
         // basic information - shared with /version endpoint

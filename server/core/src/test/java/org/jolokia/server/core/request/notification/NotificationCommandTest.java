@@ -17,10 +17,10 @@
 package org.jolokia.server.core.request.notification;
 
 import java.util.*;
-import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import org.jolokia.json.JSONArray;
+import org.jolokia.server.core.request.BadRequestException;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
@@ -157,14 +157,14 @@ public class NotificationCommandTest {
         assertEquals(command.getConfig().get("fcn"),"meister");
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*\\{not parsable\\{.*")
+    @Test(expectedExceptions = BadRequestException.class,expectedExceptionsMessageRegExp = ".*\\{not parsable\\{.*")
     public void addWithConfigMapUnparsable() throws Exception {
         Map<String, Object> args = prepareAddTestMap();
         args.put("config","{not parsable{");
         NotificationCommandFactory.createCommand(args);
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*\\[\"array\"].*")
+    @Test(expectedExceptions = BadRequestException.class,expectedExceptionsMessageRegExp = ".*\\[\"array\"].*")
     public void addWithConfigMapWrongType() throws Exception {
         Map<String, Object> args = prepareAddTestMap();
         args.put("config","[\"array\"]");
@@ -180,7 +180,7 @@ public class NotificationCommandTest {
         return args;
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*MBean.*")
+    @Test(expectedExceptions = BadRequestException.class,expectedExceptionsMessageRegExp = ".*MBean.*")
     public void addWithoutMBeanStack() throws Exception {
         Deque<String> args = new LinkedList<>();
         args.push("pull");
@@ -190,7 +190,7 @@ public class NotificationCommandTest {
     }
 
     @Test
-    public void addWithEmptyFilterAndConfig() throws MalformedObjectNameException {
+    public void addWithEmptyFilterAndConfig() throws BadRequestException {
         Deque<String> args = new LinkedList<>();
         args.push("{}");
         args.push(" ");
@@ -204,7 +204,7 @@ public class NotificationCommandTest {
         assertEquals(config.size(),0);
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*MBean.*")
+    @Test(expectedExceptions = BadRequestException.class,expectedExceptionsMessageRegExp = ".*MBean.*")
     public void addWithoutMBeanMap() throws Exception {
         Map<String,String> args = new HashMap<>();
         args.put("client",UUID.randomUUID().toString());
@@ -212,7 +212,7 @@ public class NotificationCommandTest {
         args.put("mode","pull");
         NotificationCommandFactory.createCommand(args);
     }
-    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*mode.*")
+    @Test(expectedExceptions = BadRequestException.class,expectedExceptionsMessageRegExp = ".*mode.*")
     public void addWithoutModeStack() throws Exception {
         Deque<String> args = new LinkedList<>();
         args.push(UUID.randomUUID().toString());
@@ -220,7 +220,7 @@ public class NotificationCommandTest {
         NotificationCommandFactory.createCommand(args);
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*mode.*")
+    @Test(expectedExceptions = BadRequestException.class,expectedExceptionsMessageRegExp = ".*mode.*")
     public void addWithoutModeMap() throws Exception {
         Map<String,String> args = new HashMap<>();
         args.put("client",UUID.randomUUID().toString());
@@ -245,7 +245,7 @@ public class NotificationCommandTest {
                 }
         );
     }
-    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*handle.*")
+    @Test(expectedExceptions = BadRequestException.class,expectedExceptionsMessageRegExp = ".*handle.*")
     public void removeNoHandleStack() throws Exception {
         Deque<String> args = new LinkedList<>();
         args.push(UUID.randomUUID().toString());
@@ -253,7 +253,7 @@ public class NotificationCommandTest {
         NotificationCommandFactory.createCommand(args);
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*handle.*")
+    @Test(expectedExceptions = BadRequestException.class,expectedExceptionsMessageRegExp = ".*handle.*")
     public void removeNoHandleMap() throws Exception {
         Map<String,String> args = new HashMap<>();
         args.put("client",UUID.randomUUID().toString());
@@ -295,7 +295,7 @@ public class NotificationCommandTest {
     // ========================================================================================================
 
     @SuppressWarnings("unchecked")
-    private <T extends NotificationCommand> void check(Object[] pArgs, Checkable<T> pCheckable) throws MalformedObjectNameException {
+    private <T extends NotificationCommand> void check(Object[] pArgs, Checkable<T> pCheckable) throws BadRequestException {
         pCheckable.check((T) NotificationCommandFactory.createCommand(getMap(pArgs)));
         pCheckable.check((T) NotificationCommandFactory.createCommand(getStack(pArgs)));
     }

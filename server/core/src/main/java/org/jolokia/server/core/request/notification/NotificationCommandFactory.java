@@ -18,7 +18,7 @@ package org.jolokia.server.core.request.notification;
 
 import java.util.*;
 
-import javax.management.MalformedObjectNameException;
+import org.jolokia.server.core.request.BadRequestException;
 
 /**
  * This factory produces {@link NotificationCommand} objects which specify a certain aspect
@@ -43,9 +43,9 @@ public final class NotificationCommandFactory {
      *
      * @param pStack string stack with various path parts specifying the command detail.
      * @return the created command
-     * @throws MalformedObjectNameException if an objectname part has an invalid format
+     * @throws BadRequestException if an {@link javax.management.ObjectName} part has an invalid format
      */
-    public static NotificationCommand createCommand(Deque<String> pStack) throws MalformedObjectNameException {
+    public static NotificationCommand createCommand(Deque<String> pStack) throws BadRequestException {
         String command = pStack.pop();
         NotificationCommandType type = NotificationCommandType.getTypeByName(command);
         return CREATORS.get(type).create(pStack, null);
@@ -58,9 +58,9 @@ public final class NotificationCommandFactory {
      *
      * @param pCommandMap parameter from which to extract the command
      * @return the created command
-     * @throws MalformedObjectNameException if an objectname part has an invalid format
+     * @throws BadRequestException if an {@link javax.management.ObjectName} part has an invalid format
      */
-    public static NotificationCommand createCommand(Map<String, ?> pCommandMap) throws MalformedObjectNameException {
+    public static NotificationCommand createCommand(Map<String, ?> pCommandMap) throws BadRequestException {
         String command = (String) pCommandMap.get("command");
         NotificationCommandType type = NotificationCommandType.getTypeByName(command);
         return CREATORS.get(type).create(null,pCommandMap);
@@ -75,7 +75,7 @@ public final class NotificationCommandFactory {
         /**
          * Create the command either from the given stack (checked first) or a given map
          */
-        NotificationCommand create(Deque<String> pStack,Map<String,?> pMap) throws MalformedObjectNameException;
+        NotificationCommand create(Deque<String> pStack, Map<String,?> pMap) throws BadRequestException;
     }
 
     // Build up the lookup map
@@ -87,8 +87,6 @@ public final class NotificationCommandFactory {
         CREATORS.put(NotificationCommandType.PING, (pStack, pMap) -> pStack != null ? new PingCommand(pStack) : new PingCommand(pMap));
         CREATORS.put(NotificationCommandType.OPEN, (pStack, pMap) -> pStack != null ? new OpenCommand(pStack) : new OpenCommand(pMap));
         CREATORS.put(NotificationCommandType.LIST, (pStack, pMap) -> pStack != null ? new ListCommand(pStack) : new ListCommand(pMap));
-
-
     }
 
 }

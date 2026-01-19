@@ -1,7 +1,5 @@
-package org.jolokia.service.jmx.handler;
-
 /*
- * Copyright 2009-2013 Roland Huss
+ * Copyright 2009-2026 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +13,7 @@ package org.jolokia.service.jmx.handler;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.service.jmx.handler;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -24,6 +23,7 @@ import javax.management.*;
 
 import org.jolokia.json.JSONObject;
 import org.jolokia.server.core.config.ConfigKey;
+import org.jolokia.server.core.request.BadRequestException;
 import org.jolokia.server.core.request.JolokiaReadRequest;
 import org.jolokia.server.core.request.JolokiaRequestBuilder;
 import org.jolokia.server.core.service.api.Restrictor;
@@ -78,7 +78,6 @@ public class ReadHandlerTest extends BaseHandlerTest {
                 attribute(null).
                 build();
 
-
         MBeanServer server = createMBeanServer();
         String[] attrs = new String[] {"attr0","atrr1","attr2"};
         String[] vals = new String[] {"val0", "val1", "val2"};
@@ -95,7 +94,6 @@ public class ReadHandlerTest extends BaseHandlerTest {
         verify(server);
         for (int i=0;i<attrs.length;i++) {
             assertEquals(vals[i],res.get(attrs[i]));
-
         }
     }
 
@@ -104,7 +102,6 @@ public class ReadHandlerTest extends BaseHandlerTest {
         JolokiaReadRequest request = new JolokiaRequestBuilder(READ, testBeanName.getCanonicalName()).
                 attributes(Arrays.asList("attr0","attr1")).
                 build();
-
 
         MBeanServer server = createMBeanServer();
         expect(server.isRegistered(testBeanName)).andStubReturn(true);
@@ -133,8 +130,13 @@ public class ReadHandlerTest extends BaseHandlerTest {
         expect(server.getAttributes(testBeanName,new String[] {"attr0", "attr1"})).andReturn(new AttributeList(List.of(
             new Attribute("attr0", "val0")
         )));
+        expect(server.getAttribute(testBeanName, "attr0")).andReturn(new Attribute("attr0", "val0"));
         expect(server.getAttribute(testBeanName,"attr1")).andThrow(new AttributeNotFoundException("Couldn't find attr1"));
-        replay(server);
+        MBeanInfo mBeanInfoMock = createMock(MBeanInfo.class);
+        expect(server.getMBeanInfo(request.getObjectName())).andReturn(mBeanInfoMock);
+        expect(mBeanInfoMock.getAttributes()).andReturn(new MBeanAttributeInfo[] {
+        });
+        replay(server, mBeanInfoMock);
 
         @SuppressWarnings("unchecked")
         Map<String, ?> res = (Map<String, ?>) handler.handleAllServerRequest(getMBeanServerManager(server),request,null);
@@ -163,8 +165,6 @@ public class ReadHandlerTest extends BaseHandlerTest {
         assertTrue(result instanceof JSONObject);
         assertTrue(((String) ((JSONObject) result).get("error")).contains("Couldn't find attr1"));
     }
-
-    // ======================================================================================================
 
     @Test
     public void searchPatternNoMatch() throws Exception {
@@ -273,11 +273,9 @@ public class ReadHandlerTest extends BaseHandlerTest {
         Map<String, ?> res = (Map<String, ?>) handler.handleAllServerRequest(getMBeanServerManager(server), request, null);
 
         // Only a single entry fetched
-        assertEquals(res.size(),1);
+        assertEquals(1, res.size());
         verify(server);
     }
-
-
 
     @Test
     public void searchPatternNoMatchingAttribute() throws Exception {
@@ -294,7 +292,7 @@ public class ReadHandlerTest extends BaseHandlerTest {
         replay(server);
         try {
             handler.handleAllServerRequest(getMBeanServerManager(server), request, null);
-        } catch (IllegalArgumentException exp) {
+        } catch (AttributeNotFoundException exp) {
             // expected
         }
         verify(server);
@@ -324,7 +322,6 @@ public class ReadHandlerTest extends BaseHandlerTest {
         assertEquals("gcval3",((Map<String, ?>) res.get("java.lang:type=GarbageCollection")).get("gc3"));
     }
 
-
     @Test
     public void searchPatternMultiAttributes3() throws Exception {
         ObjectName patternMBean = new ObjectName("java.lang:type=*");
@@ -343,7 +340,7 @@ public class ReadHandlerTest extends BaseHandlerTest {
             @SuppressWarnings("unchecked")
             Map<String, ?> res = (Map<String, ?>) handler.handleAllServerRequest(getMBeanServerManager(server), request, null);
             fail("Request should fail since attribute name doesn't match any MBean's attribute");
-        } catch (IllegalArgumentException exp) {
+        } catch (AttributeNotFoundException exp) {
             // Expect this since no MBean matches the given attribute
         }
     }
@@ -386,9 +383,8 @@ public class ReadHandlerTest extends BaseHandlerTest {
         return server;
     }
 
-    // ==============================================================================================================
     @Test
-    public void handleAllServersAtOnceTest() throws MalformedObjectNameException {
+    public void handleAllServersAtOnceTest() throws BadRequestException {
         JolokiaReadRequest request = new JolokiaRequestBuilder(READ, testBeanName).
                 attribute("attr").
                 build();
@@ -407,27 +403,33 @@ public class ReadHandlerTest extends BaseHandlerTest {
         assertTrue(handler.handleAllServersAtOnce(request));
     }
 
-
-    // ==============================================================================================================
-
-   @Test
+    @Test
     public void restrictAccess() throws Exception {
         Restrictor restrictor = createMock(Restrictor.class);
-        expect(restrictor.isAttributeReadAllowed(testBeanName,"attr")).andReturn(false);
+        expect(restrictor.isAttributeReadAllowed(testBeanName, "attr")).andReturn(false);
         expect(restrictor.isHttpMethodAllowed(HttpMethod.POST)).andReturn(true);
         ctx = new TestJolokiaContext.Builder().restrictor(restrictor).build();
         handler = new ReadHandler();
-        handler.init(ctx,null);
+        handler.init(ctx, null);
         JolokiaReadRequest request = new JolokiaRequestBuilder(READ, testBeanName).
-                attribute("attr").
-                build();
+            attribute("attr").
+            build();
         MBeanServer server = createMBeanServer();
-        replay(restrictor,server);
+        MBeanInfo mBeanInfoMock = createMock(MBeanInfo.class);
+        MBeanAttributeInfo attrMock = createMock(MBeanAttributeInfo.class);
+        expect(server.getMBeanInfo(request.getObjectName())).andReturn(mBeanInfoMock);
+        expect(mBeanInfoMock.getAttributes()).andReturn(new MBeanAttributeInfo[] {
+            attrMock
+        }).anyTimes();
+        expect(attrMock.isReadable()).andReturn(true);
+        expect(attrMock.getName()).andReturn("attr");
+        replay(restrictor, server, mBeanInfoMock, attrMock);
         try {
             handler.handleAllServerRequest(getMBeanServerManager(server), request, null);
             fail("Restrictor should forbid access");
-        } catch (SecurityException ignored) {}
-        verify(restrictor,server);
+        } catch (SecurityException ignored) {
+        }
+        verify(restrictor, server);
     }
 
     @Test
@@ -452,8 +454,6 @@ public class ReadHandlerTest extends BaseHandlerTest {
     private MBeanServer createMBeanServer() {
         return createMock(MBeanServer.class);
     }
-
-    // ==============================================================================================================
 
     private MBeanAttributeInfo[] prepareMBeanInfos(MBeanServerConnection pConnection, ObjectName pObjectName, String[] pAttrs)
         throws InstanceNotFoundException, ReflectionException, IOException, IntrospectionException {

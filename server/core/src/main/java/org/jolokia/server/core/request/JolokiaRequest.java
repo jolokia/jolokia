@@ -61,7 +61,7 @@ public abstract class JolokiaRequest {
      * is an 'exclusive' request, i.e. whether the processing is done exclusively by
      * a handler or whether multiple requests handlers can add to the result.
      * Good examples are "list" requests which collects the results from multiple request
-     * handlers whereas "read" only reads the values from a single requesthandler
+     * handlers whereas "read" only reads the values from a single request handler
      *
      * @param pType request type
      * @param pPathParts an optional path, split up in parts. Not all requests do handle a path.
@@ -69,7 +69,8 @@ public abstract class JolokiaRequest {
      *                    to influence the processing.
      * @param pExclusive whether the request is an 'exclusive' request or not.
      */
-    protected JolokiaRequest(RequestType pType, List<String> pPathParts, ProcessingParameters pProcessingParams, boolean pExclusive) {
+    protected JolokiaRequest(RequestType pType, List<String> pPathParts, ProcessingParameters pProcessingParams, boolean pExclusive)
+            throws BadRequestException {
         this(pType, HttpMethod.GET, pPathParts, pProcessingParams, pExclusive);
     }
 
@@ -81,8 +82,9 @@ public abstract class JolokiaRequest {
      *        JSON request)
      * @param pExclusive  whether the request is an 'exclusive' request or not handled by a single handler only
      */
-    protected JolokiaRequest(Map<String, ?> pMap, ProcessingParameters pProcessingParams, boolean pExclusive) {
-        this(RequestType.getTypeByName((String) pMap.get("type")),
+    protected JolokiaRequest(Map<String, ?> pMap, ProcessingParameters pProcessingParams, boolean pExclusive)
+            throws BadRequestException {
+        this((String) pMap.get("type"),
              HttpMethod.POST,
              org.jolokia.core.util.EscapeUtil.parsePath((String) pMap.get("path")),
              pProcessingParams,
@@ -109,7 +111,24 @@ public abstract class JolokiaRequest {
     }
 
     // Common parts of both constructors
-    private JolokiaRequest(RequestType pType, HttpMethod pMethod, List<String> pPathParts, ProcessingParameters pProcessingParams, boolean pExclusive) {
+
+    private JolokiaRequest(String pType, HttpMethod pMethod, List<String> pPathParts, ProcessingParameters pProcessingParams, boolean pExclusive)
+            throws BadRequestException {
+        method = pMethod;
+        try {
+            type = RequestType.getTypeByName(pType);
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException(e.getMessage());
+        }
+        verifyPath(pPathParts);
+        pathParts = pPathParts;
+        exclusive = pExclusive;
+
+        initParameters(pProcessingParams);
+    }
+
+    private JolokiaRequest(RequestType pType, HttpMethod pMethod, List<String> pPathParts, ProcessingParameters pProcessingParams, boolean pExclusive)
+            throws BadRequestException {
         method = pMethod;
         type = pType;
         verifyPath(pPathParts);
@@ -170,7 +189,7 @@ public abstract class JolokiaRequest {
      * obtain the JSR-160 target information.
      *
      * @param pKey get the option for this key
-     * @return the specificied option or or null if no such option was set
+     * @return the specified option or or null if no such option was set
      */
     @SuppressWarnings("unchecked")
     public <T> T getOption(String pKey) {
@@ -219,7 +238,6 @@ public abstract class JolokiaRequest {
         return true;
     }
 
-
     /**
      * Textual description of this request containing base information. Can be used in toString() methods
      * of subclasses.
@@ -238,7 +256,7 @@ public abstract class JolokiaRequest {
             }
             ret.append("}");
         }
-        return ret.length() > 0 ? ret.toString() : null;
+        return !ret.isEmpty() ? ret.toString() : null;
     }
 
     /**

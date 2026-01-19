@@ -32,6 +32,7 @@ import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.message.BasicStatusLine;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
+import org.jolokia.core.util.ErrorUtil;
 import org.jolokia.json.JSONObject;
 
 import io.fabric8.kubernetes.api.model.Status;
@@ -169,8 +170,8 @@ public class MinimalHttpClientAdapter implements HttpClient {
                     syntethicException = new KubernetesClientException(convertResponseBody(response));
                 } catch (Exception ignored) {
                 }
-                errorResponse.put("error_type", syntethicException.getClass().getName());
-                errorResponse.put("error", syntethicException.getMessage());
+                ErrorUtil.addBasicErrorResponseInformation(errorResponse, syntethicException);
+
                 final StringWriter stacktrace = new StringWriter();
                 syntethicException.printStackTrace(new PrintWriter(
                     stacktrace));

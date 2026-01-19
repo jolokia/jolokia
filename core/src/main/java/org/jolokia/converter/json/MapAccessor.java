@@ -86,8 +86,7 @@ public class MapAccessor implements org.jolokia.converter.json.ObjectAccessor {
      * @throws InvocationTargetException
      */
     @Override
-    public Object setObjectValue(Converter<String> pConverter, Object pMap, String pKey, Object pValue)
-            throws IllegalAccessException, InvocationTargetException {
+    public Object setObjectValue(Converter<String> pConverter, Object pMap, String pKey, Object pValue) {
         if (!(pMap instanceof Map)) {
             throw new IllegalArgumentException("MapAccessor can't access objects of type " + pMap.getClass());
         }

@@ -42,9 +42,12 @@ import org.jolokia.server.core.request.ProcessingParameters;
 import org.jolokia.server.core.service.api.JolokiaContext;
 
 /**
- * Request handler with no dependency on the servlet API, but designed for handling HTTP requests.
+ * <p>Request handler with no dependency on the servlet API, but designed for handling HTTP requests.
  * It can be used in several different web environments (like for the Sun JDK 11+
- * {@link com.sun.net.httpserver.HttpServer}) or Servlet container.
+ * {@link com.sun.net.httpserver.HttpServer}) or Servlet container.</p>
+ *
+ * <p>Methods of this interface produce a JSON response to be sent to sender, but the sending should be done
+ * by the caller.</p>
  *
  * @author roland
  * @since Mar 3, 2010
@@ -66,10 +69,13 @@ public class HttpRequestHandler extends BaseRequestHandler {
      *
      * @param pUri          URI leading to this request
      * @param pPathInfo     path of the request
-     * @param pParameterMap parameters of the GET request  @return the response
+     * @param pParameterMap parameters of the GET request
+     * @return the JSON response
+     * @throws BadRequestException if there's a parsing error or parameter processing error (always sender's fault)
+     * @throws EmptyResponseException if the connection should not be closed (only for notifications)
      */
     public JSONStructure handleGetRequest(String pUri, String pPathInfo, Map<String, String[]> pParameterMap)
-        throws EmptyResponseException {
+            throws EmptyResponseException, BadRequestException {
         String pathInfo = extractPathInfo(pUri, pPathInfo);
 
         JolokiaRequest jmxReq =
@@ -92,10 +98,12 @@ public class HttpRequestHandler extends BaseRequestHandler {
      * @param pParameterMap additional processing parameters
      * @return the JSON object containing the json results for one or more {@link JolokiaRequest} contained
      * within the answer.
-     * @throws IOException if reading from the input stream fails
+     * @throws IOException if reading from the input stream fails - so it doesn't have to be sender's fault
+     * @throws BadRequestException if there's a parsing error or parameter processing error (always sender's fault)
+     * @throws EmptyResponseException if the connection should not be closed (only for notifications)
      */
     public JSONStructure handlePostRequest(String pUri, InputStream pInputStream, String pEncoding, Map<String, String[]> pParameterMap)
-        throws IOException, EmptyResponseException {
+            throws IOException, BadRequestException, EmptyResponseException {
         if (jolokiaCtx.isDebug()) {
             jolokiaCtx.debug("URI: " + pUri);
         }
@@ -150,7 +158,16 @@ public class HttpRequestHandler extends BaseRequestHandler {
         return ret;
     }
 
-    private Object extractJsonRequest(InputStream pInputStream, String pEncoding) throws IOException {
+    /**
+     * Extract JSON data from the incoming {@link InputStream}.
+     *
+     * @param pInputStream
+     * @param pEncoding
+     * @return
+     * @throws IOException when there's a non-parser related issue with the incoming stream
+     * @throws BadRequestException when the stream can be properly read, but JSON parsing fails
+     */
+    private Object extractJsonRequest(InputStream pInputStream, String pEncoding) throws IOException, BadRequestException {
         InputStreamReader reader;
         try {
             reader =
@@ -198,7 +215,7 @@ public class HttpRequestHandler extends BaseRequestHandler {
 
     /**
      * Check whether for the given host is a cross-browser request allowed. This check is delegated to the
-     * backendmanager which is responsible for the security configuration.
+     * backend manager which is responsible for the security configuration.
      * Also, some sanity checks are applied.
      *
      * @param pOrigin the origin URL to check against

@@ -78,9 +78,8 @@ public class CollectionAccessor implements org.jolokia.converter.json.ObjectAcce
      * Setting of an object value is not supported for the collection converter
      */
     @Override
-    public Object setObjectValue(Converter<String> pConverter, Object pObject, String pAttribute, Object pValue)
-            throws IllegalAccessException, InvocationTargetException {
-        throw new IllegalArgumentException("A collection (beside Lists and Maps) cannot be modified");
+    public Object setObjectValue(Converter<String> pConverter, Object pObject, String pAttribute, Object pValue) {
+        throw new UnsupportedOperationException("A collection (except Lists and Maps) cannot be modified");
     }
 
     /**

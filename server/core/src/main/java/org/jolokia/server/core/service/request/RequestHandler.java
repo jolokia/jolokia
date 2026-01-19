@@ -1,14 +1,5 @@
-package org.jolokia.server.core.service.request;
-
-import java.io.IOException;
-
-import javax.management.JMException;
-
-import org.jolokia.server.core.request.*;
-import org.jolokia.server.core.service.api.JolokiaService;
-
 /*
- * Copyright 2009-2013 Roland Huss
+ * Copyright 2009-2026 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,62 +13,64 @@ import org.jolokia.server.core.service.api.JolokiaService;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.server.core.service.request;
 
+import java.io.IOException;
+
+import javax.management.JMException;
+import javax.management.JMRuntimeException;
+
+import org.jolokia.server.core.request.*;
+import org.jolokia.server.core.service.api.JolokiaService;
 
 /**
- * Interface for dispatching a request to a certain backend.
+ * Interface for handling certain {@link JolokiaRequest Jolokia requests}
  *
  * @author roland
  * @since Nov 11, 2009
  */
 public interface RequestHandler extends JolokiaService<RequestHandler> {
-    /**
-     * Dispatch a {@link JolokiaRequest} to a certain backend
-     * and return the result of the JMX action. Request can be divided can be in two categories:
-     * One which are dealt exclusively with a single handler within a single provider and others which response
-     * is merged from the outcome from several request handlers.
-     *
-     * For non-exclusive requests, multiple request handlers are called in sequence,
-     * where a latter request handler gets the result from a former as argument. In this
-     * case the request handler must either update the give object or return a new object
-     * from the same type with its own results appended.
-     *
-     * Each request type has a fixed type for the
-     * result objects (given and to be returned):
-     *
-     * <dl
-     *     <dt><code>list</code></dt>
-     *     <dd>java.util.Map</dd>
-     *
-     *     <dt><code>search</code></dt>
-     *     <dd>java.util.List</dd>
-     * </dl>
-     *
-     * For exclusive requests, the given object is null
-     *
-     * @param pJmxReq the request to dispatch
-     * @param pPreviousResult a result object from a previous {@link #handleRequest(R, Object)} call when
-     *                {@link JolokiaRequest#isExclusive()} is <code>false</code>. This argument can be <code>null</code>
-     * @return result object
-     * @throws JMException if performing of the actions failes
-     * @throws IOException if handling fails
-     * @throws NotChangedException if the handled request's response hasnt changed (and the appropriate request parameter
-     *         has been set).
-     * @throws EmptyResponseException when no response should be created
-     */
-    <R extends JolokiaRequest>  Object handleRequest(R pJmxReq, Object pPreviousResult)
-            throws JMException, IOException, NotChangedException, EmptyResponseException;
 
     /**
-     * Check whether current dispatcher can handle the given request
+     * First, check whether this {@link RequestHandler} actually handles given {@link JolokiaRequest}. There
+     * may be handlers for certain types of requests or requests with some specific parameters.
      *
      * @param pJolokiaRequest request to check
-     * @return true if this dispatcher can handle the request
+     * @return true if this {@link RequestHandler} can handle the request
      */
     boolean canHandle(JolokiaRequest pJolokiaRequest);
 
     /**
-     * Get the provider for which this handler is responsible
+     * <p>Handle a {@link JolokiaRequest} using specific backend (local/remote JMX, Spring application context, ...)
+     * and return the result.</p>
+     *
+     * <p>Request can be divided can be in these categories:<ul>
+     *     <li>Meta-requests - asking for configuration, version, ...</li>
+     *     <li>{@link JolokiaRequest#isExclusive() Exclusive requests} which are handled by first {@link RequestHandler}
+     *     and returned without checking other handlers</li>
+     *     <li>Non-exclusive requests which are handled by all
+     *     {@link RequestHandler#canHandle(JolokiaRequest) handlers that support the request} and a result from previous
+     *     handler is passed as a 2nd argument to the next handler (so a cumulative response can be built.</li>
+     * </ul></p>
+     *
+     * @param pJmxReq the {@link JolokiaRequest} to handle
+     * @param pPreviousResult a result object from a previous {@link #handleRequest(R, Object)} call when
+     *                {@link JolokiaRequest#isExclusive()} is {@code false}. This argument can be {@code null}.
+     * @return result object
+     * @throws IOException when there's an error invoking {@link javax.management.MBeanServerConnection} for some commands (which may be remote)
+     * @throws JMException JMX checked exception, because most requests are handled by dealing with MBeans
+     * @throws JMRuntimeException JMX unchecked exception, because most requests are handled by dealing with MBeans
+     * @throws NotChangedException when (according to request parameters) user wants HTTP 304 if nothing has changed
+     * @throws BadRequestException because some commands do more user input parsing in addition to what was checked when the {@link JolokiaRequest} was created
+     * @throws EmptyResponseException if the response should not be closed (expecting further async/stream data)
+     */
+    <R extends JolokiaRequest> Object handleRequest(R pJmxReq, Object pPreviousResult)
+            throws IOException, JMException, JMRuntimeException, NotChangedException, BadRequestException, EmptyResponseException;
+
+    /**
+     * Get the <em>identifier</em> (provider) of this {@link RequestHandler}. This allows some requests to
+     * target given {@link RequestHandler} by such provider ID. The most important ones are {@code jmx} for
+     * <em>local</em> JMX request handler and {@code proxy} for <em>remote</em> JMX request handler.
      *
      * @return provider name for which this handler is responsible.
      */
@@ -85,9 +78,10 @@ public interface RequestHandler extends JolokiaService<RequestHandler> {
 
     /**
      * Any extra runtime associated with this handler, which is used in a "version" request
-     * to get information about request handlers
+     * to get information about request handlers. This means this method is not part of every request handling path.
      *
      * @return a object containing extra information and which must be serializable
      */
     Object getRuntimeInfo();
+
 }

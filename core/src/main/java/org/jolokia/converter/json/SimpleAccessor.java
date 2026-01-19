@@ -68,9 +68,8 @@ public class SimpleAccessor implements org.jolokia.converter.json.ObjectAccessor
     }
 
     @Override
-    public Object setObjectValue(Converter<String> pConverter, Object pObject, String pAttribute, Object pValue)
-            throws IllegalAccessException, InvocationTargetException, IllegalArgumentException {
-        throw new IllegalArgumentException("Basic type is immutable and cannot change its value");
+    public Object setObjectValue(Converter<String> pConverter, Object pObject, String pAttribute, Object pValue) {
+        throw new UnsupportedOperationException("Basic type is immutable and cannot change its value");
     }
 
 }
