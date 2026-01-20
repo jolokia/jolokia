@@ -227,7 +227,7 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
                 mBeanServerHandlerName = new ObjectName(MBeanServerHandlerMBean.OBJECT_NAME + ",agent=" + getAgentDetails().getAgentId());
                 jolokiaContext.registerMBean(mBeanServerHandler, mBeanServerHandlerName.toString());
             } catch (JMException e) {
-                jolokiaContext.error("Cannot register MBean " + mBeanServerHandlerName + ": " + e, e);
+                jolokiaContext.error("Cannot register MBean " + mBeanServerHandlerName + ": " + e.getMessage(), e);
             }
 
             // Initialize all services in the proper order
@@ -280,7 +280,7 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
             try {
                 mbeanRegistry.destroy();
             } catch (JMException e) {
-                logHandler.error("Cannot unregister own MBeans: " + e, e);
+                logHandler.error("Cannot unregister own MBeans: " + e.getMessage(), e);
             }
             if (mBeanServerHandlerName != null) {
                 try {
@@ -298,7 +298,7 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
                         try {
                             service.destroy();
                         } catch (Exception e) {
-                            logHandler.error("Error while stopping service " + service + " of type " + service.getType() + ": " + e,e);
+                            logHandler.error("Error while stopping service " + service + " of type " + service.getType() + ": " + e.getMessage(), e);
                         }
                     }
 
@@ -434,7 +434,7 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
             try {
                 return new JSONParser().parse(optionString, JSONObject.class);
             } catch (Exception e) {
-                logHandler.error("Could not parse detetctor options '" + optionString + "' as JSON object: " + e, e);
+                logHandler.error("Could not parse detector options '" + optionString + "' as JSON object: " + e.getMessage(), e);
             }
         } else {
             return Collections.emptyMap();

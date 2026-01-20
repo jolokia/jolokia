@@ -197,7 +197,7 @@ public final class MulticastUtil {
                     pLogHandler.debug(source + " --> " + target + " - Couldn't send discovery request: " + exp.getMessage());
                 } else {
                     // Didn't worked a given address, which can happen e.g. when multicast is not routed or in other cases
-                    // throw new IOException("Error while performing a discovery call " + e,e);
+                    // throw new IOException("Error while performing a discovery call " + e.getMessage(), e);
                     pLogHandler.debug("Exception during lookup: " + e);
                 }
             } catch (TimeoutException e) {

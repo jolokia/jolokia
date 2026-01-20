@@ -460,9 +460,9 @@ public class JolokiaServer {
             server.setHttpsConfigurator(new JolokiaHttpsConfigurator(sslContext, pConfig));
             return server;
         } catch (GeneralSecurityException e) {
-            throw new IllegalStateException("Cannot use keystore for https communication: " + e,e);
+            throw new IllegalStateException("Cannot use keystore for https communication: " + e.getMessage(), e);
         } catch (IOException e) {
-            throw new IllegalStateException("Cannot open keystore for https communication: " + e,e);
+            throw new IllegalStateException("Cannot open keystore for https communication: " + e.getMessage(), e);
         }
     }
 

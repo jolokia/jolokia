@@ -132,7 +132,7 @@ public class OsgiJolokiaServiceFactory implements JolokiaServiceLookup {
                 context.ungetService(reference);
                 jolokiaService.destroy();
             } catch (Exception e) {
-                throw new ServiceException("destroy() on JolokiaService " + service + " failed" + e,e);
+                throw new ServiceException("destroy() on JolokiaService " + service + " failed" + e.getMessage(), e);
             }
         }
     }

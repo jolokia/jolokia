@@ -728,7 +728,7 @@ public class JolokiaServerConfig {
                 address = InetAddress.getByName(null); // secure alternative -- if no host, use *loopback*
             }
         } catch (UnknownHostException e) {
-            throw new IllegalArgumentException("Can not lookup " + (host != null ? host : "loopback interface") + ": " + e,e);
+            throw new IllegalArgumentException("Can not lookup " + (host != null ? host : "loopback interface") + ": " + e.getMessage(), e);
         }
     }
 
@@ -742,7 +742,7 @@ public class JolokiaServerConfig {
             props.load(pIs);
             props.forEach((key, value) -> ret.put((String) key, (String) value));
         } catch (IOException e) {
-            throw new IllegalArgumentException("jolokia: Cannot load properties " + pLabel + " : " + e, e);
+            throw new IllegalArgumentException("jolokia: Cannot load properties " + pLabel + " : " + e.getMessage(), e);
         }
         return ret;
     }

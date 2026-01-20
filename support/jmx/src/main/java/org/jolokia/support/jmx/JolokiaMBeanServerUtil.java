@@ -64,7 +64,7 @@ public final class JolokiaMBeanServerUtil {
                 jolokiaMBeanServer = JolokiaMBeanServerHolder.registerJolokiaMBeanServerHolderMBean(server, serializer);
             }
         } catch (JMException e) {
-            throw new IllegalStateException("Internal: Cannot get JolokiaMBean server via JMX lookup: " + e,e);
+            throw new IllegalStateException("Internal: Cannot get JolokiaMBean server via JMX lookup: " + e.getMessage(), e);
         }
         return jolokiaMBeanServer;
     }

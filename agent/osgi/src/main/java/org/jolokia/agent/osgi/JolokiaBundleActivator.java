@@ -51,7 +51,7 @@ public class JolokiaBundleActivator implements BundleActivator {
             try {
                 activator.start(pContext);
             } catch (Exception exp) {
-                logError(pContext, "Error during start with " + activator + ": " + exp,exp);
+                logError(pContext, "Error during start with " + activator + ": " + exp.getMessage(), exp);
             }
         }
     }
@@ -61,7 +61,7 @@ public class JolokiaBundleActivator implements BundleActivator {
            try {
                activator.stop(pContext);
            } catch (Exception exp) {
-               logError(pContext, "Error during stop for " + activator + ": " + exp,exp);
+               logError(pContext, "Error during stop for " + activator + ": " + exp.getMessage(), exp);
            }
         }
     }

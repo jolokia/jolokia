@@ -881,7 +881,7 @@ public class ObjectToObjectConverter implements Converter<String> {
             try {
                 return new URL(pValue);
             } catch (MalformedURLException e) {
-                throw new IllegalArgumentException("Cannot parse URL " + pValue + ": " + e, e);
+                throw new IllegalArgumentException("Cannot parse URL " + pValue + ": " + e.getMessage(), e);
             }
         }
     }
@@ -938,7 +938,7 @@ public class ObjectToObjectConverter implements Converter<String> {
                 // parser can give us JSONStructure, but also just Strings, Numbers or null
                 return new org.jolokia.json.parser.JSONParser().parse(pValue);
             } catch (ParseException | IOException e) {
-                throw new IllegalArgumentException("Cannot parse JSON " + pValue + ": " + e, e);
+                throw new IllegalArgumentException("Cannot parse JSON " + pValue + ": " + e.getMessage(), e);
             }
         }
     }

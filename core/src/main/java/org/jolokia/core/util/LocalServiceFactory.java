@@ -123,7 +123,7 @@ public final class LocalServiceFactory {
                 readServiceDefinitionFromUrl(pClassLoader, pExtractorMap, url);
             }
         } catch (IOException e) {
-            throw new IllegalStateException("Cannot load extractor from " + pDefPath + ": " + e,e);
+            throw new IllegalStateException("Cannot load extractor from " + pDefPath + ": " + e.getMessage(), e);
         }
     }
 
@@ -185,7 +185,7 @@ public final class LocalServiceFactory {
                     ext = clazz.getConstructor().newInstance();
                     pExtractorMap.put(entry,ext);
                 } catch (InvocationTargetException e) {
-                    throw new IllegalArgumentException("Can not instantiate " + entry.getClassName() + ": " + e,e);
+                    throw new IllegalArgumentException("Can not instantiate " + entry.getClassName() + ": " + e.getMessage(), e);
                 }
             }
         }

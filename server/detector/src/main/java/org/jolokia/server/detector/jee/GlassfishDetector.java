@@ -211,16 +211,16 @@ public class GlassfishDetector extends AbstractServerDetector {
                  });
                  return true;
              } catch (InstanceNotFoundException e) {
-                 jolokiaContext.error("No bootAmx MBean found: " + e, e);
+                 jolokiaContext.error("No bootAmx MBean found: " + e.getMessage(), e);
                  // Can happen, when a call to bootAmx comes to early before the bean
                  // is registered
                  return false;
              } catch (IllegalArgumentException e) {
-                 jolokiaContext.error("Exception while booting AMX: " + e, e);
+                 jolokiaContext.error("Exception while booting AMX: " + e.getMessage(), e);
                  // We dont try it again
                  return true;
              } catch (Exception e) {
-                 jolokiaContext.error("Exception while executing bootAmx: " + e, e);
+                 jolokiaContext.error("Exception while executing bootAmx: " + e.getMessage(), e);
             // dito
                  return true;
              }

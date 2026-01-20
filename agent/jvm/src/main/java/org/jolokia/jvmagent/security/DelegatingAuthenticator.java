@@ -41,7 +41,7 @@ public class DelegatingAuthenticator extends Authenticator {
                 disableSSLCertificateChecking();
             }
         } catch (MalformedURLException exp) {
-            throw new IllegalArgumentException("Invalid delegation url '" + pUrl + "' given: " + exp,exp);
+            throw new IllegalArgumentException("Invalid delegation url '" + pUrl + "' given: " + exp.getMessage(), exp);
         }
     }
 
@@ -77,11 +77,11 @@ public class DelegatingAuthenticator extends Authenticator {
                 return new Failure(401);
             }
         } catch (final IOException e) {
-            return prepareFailure(pHttpExchange, "Cannot call delegate url " + delegateURL + ": " + e, 503);
+            return prepareFailure(pHttpExchange, "Cannot call delegate url " + delegateURL + ": " + e.getMessage(), 503);
         } catch (final IllegalArgumentException e) {
-            return prepareFailure(pHttpExchange, "Illegal Argument: " + e, 400);
+            return prepareFailure(pHttpExchange, "Illegal Argument: " + e.getMessage(), 400);
         } catch (ParseException e) {
-            return prepareFailure(pHttpExchange, "Invalid JSON response: " + e, 422);
+            return prepareFailure(pHttpExchange, "Invalid JSON response: " + e.getMessage(), 422);
         }
     }
 
@@ -177,7 +177,7 @@ public class DelegatingAuthenticator extends Authenticator {
             // Create all-trusting host name verifier
             hostnameVerifier = (hostname, session) -> true;
         } catch (KeyManagementException | NoSuchAlgorithmException e) {
-            throw new IllegalArgumentException("Disabling SSL certificate failed: " + e,e);
+            throw new IllegalArgumentException("Disabling SSL certificate failed: " + e.getMessage(), e);
         }
     }
 }

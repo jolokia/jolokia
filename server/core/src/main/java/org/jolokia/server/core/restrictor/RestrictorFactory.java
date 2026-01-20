@@ -70,7 +70,7 @@ public final class RestrictorFactory {
             }
         } catch (IOException e) {
             log.error("Error while accessing access restrictor at " + policyLocation +
-                      ". Denying all access to MBeans for security reasons. Exception: " + e, e);
+                      ". Denying all access to MBeans for security reasons. Exception: " + e.getMessage(), e);
             return new DenyAllRestrictor();
         }
     }

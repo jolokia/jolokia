@@ -43,7 +43,7 @@ final class JolokiaHttpsConfigurator extends HttpsConfigurator {
 
             params.setSSLParameters(defaultSSLParameters);
         } catch (NoSuchAlgorithmException e) {
-            throw new IllegalArgumentException("jolokia: Exception while configuring SSL context: " + e,e);
+            throw new IllegalArgumentException("jolokia: Exception while configuring SSL context: " + e.getMessage(), e);
         }
     }
 }

@@ -102,7 +102,7 @@ public abstract class AbstractJolokiaService<T extends JolokiaService<?>> implem
         try {
             return jolokiaContext.registerMBean(pMBean,objectNameS);
         } catch (JMException e) {
-            jolokiaContext.error("Cannot register MBean " + objectNameS + ": " + e,e);
+            jolokiaContext.error("Cannot register MBean " + objectNameS + ": " + e.getMessage(), e);
             return null;
         }
     }
@@ -118,7 +118,7 @@ public abstract class AbstractJolokiaService<T extends JolokiaService<?>> implem
             try {
                 jolokiaContext.unregisterMBean(oName);
             } catch (MBeanRegistrationException e) {
-                jolokiaContext.error("Cannot unregister MBean " + oName + ": " + e,e);
+                jolokiaContext.error("Cannot unregister MBean " + oName + ": " + e.getMessage(), e);
             }
         }
     }

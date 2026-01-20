@@ -55,7 +55,7 @@ public class MBeanRegistry {
                 mBeanHandles.add(new MBeanHandle(server,registeredName));
                 return registeredName;
             } catch (RuntimeException exp) {
-                throw new IllegalStateException("Could not register " + pMBean + ": " + exp, exp);
+                throw new IllegalStateException("Could not register " + pMBean + ": " + exp.getMessage(), exp);
             }
         }
     }

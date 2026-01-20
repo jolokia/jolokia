@@ -49,7 +49,7 @@ public class DiscoveryMulticastResponder extends AbstractJolokiaService<JolokiaS
                 thread.start();
                 listenerThread = thread;
             } catch (IOException e) {
-                pContext.error("Cannot start multicast discovery listener thread on " + multicastBindAddress + ": " + e, e);
+                pContext.error("Cannot start multicast discovery listener thread on " + multicastBindAddress + ": " + e.getMessage(), e);
             }
         }
     }

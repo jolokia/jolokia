@@ -169,7 +169,7 @@ public class JolokiaCipher {
                 try (in) {
                     return new BufferedReader(new InputStreamReader(in)).readLine();
                 } catch (IOException e) {
-                    throw new IllegalStateException("Can not read password from " + JOLOKIA_CYPHER_PASSWORD_FILE + ": " + e, e);
+                    throw new IllegalStateException("Can not read password from " + JOLOKIA_CYPHER_PASSWORD_FILE + ": " + e.getMessage(), e);
                 }
             } else {
                 return "`x%_rDL9T'&ENuyA{LPcc(UDv`NzzY6NZF\"F=rba-9Ftg,HJr.y@E;amfr>B4z<UqQg}2_4kq\\Y@6mNJEpwGx#CT;&?%%.$T_br`(&%3)2vC:5?3f9ptX?KR9kYQu2;#".substring(40, 72);

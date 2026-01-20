@@ -84,10 +84,10 @@ public class JolokiaMBeanServerHolder implements JolokiaMBeanServerHolderMBean {
                 jolokiaMBeanServer = (MBeanServer) pServer.getAttribute(holderName,JOLOKIA_MBEAN_SERVER_ATTRIBUTE);
             } catch (JMException e1) {
                 throw new IllegalStateException("Internal: Cannot get JolokiaMBean server in fallback JMX lookup " +
-                                                "while trying to register the holder MBean: " + e,e);
+                                                "while trying to register the holder MBean: " + e.getMessage(), e);
             }
         } catch (JMException e) {
-            throw new IllegalStateException("Internal: JolokiaMBeanHolder cannot be registered to JMX: " + e,e);
+            throw new IllegalStateException("Internal: JolokiaMBeanHolder cannot be registered to JMX: " + e.getMessage(), e);
         }
         return jolokiaMBeanServer;
     }
@@ -111,7 +111,7 @@ public class JolokiaMBeanServerHolder implements JolokiaMBeanServerHolderMBean {
         } catch (InstanceNotFoundException e) {
             // Silently ignore if not already registered ....
         } catch (MBeanRegistrationException e) {
-            throw new IllegalStateException("Cannot unregister " + MBEAN_SERVER_HOLDER_OBJECTNAME + ": " + e,e);
+            throw new IllegalStateException("Cannot unregister " + MBEAN_SERVER_HOLDER_OBJECTNAME + ": " + e.getMessage(), e);
         }
     }
 }

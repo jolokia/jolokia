@@ -157,7 +157,7 @@ public class MBeanServers implements NotificationListener {
                     (MBeanServer) server.getAttribute(JOLOKIA_MBEAN_SERVER_ONAME, "JolokiaMBeanServer") :
                     null;
         } catch (JMException e) {
-            throw new IllegalStateException("Internal: Cannot get Jolokia MBeanServer via JMX lookup: " + e, e);
+            throw new IllegalStateException("Internal: Cannot get Jolokia MBeanServer via JMX lookup: " + e.getMessage(), e);
         }
     }
 

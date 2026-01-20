@@ -119,7 +119,7 @@ class ListMBeanEachAction implements MBeanServerAccess.MBeanEachCallback, MBeanS
             } catch (IllegalStateException exp) {
                 infoData.handleException(objectName, exp);
             } catch (IntrospectionException exp) {
-                throw new IllegalArgumentException("Cannot extra MBeanInfo for " + objectName + ": " + exp, exp);
+                throw new IllegalArgumentException("Cannot extra MBeanInfo for " + objectName + ": " + exp.getMessage(), exp);
             }
         }
     }

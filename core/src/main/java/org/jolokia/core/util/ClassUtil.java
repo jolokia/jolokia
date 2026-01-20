@@ -164,7 +164,7 @@ public final class ClassUtil {
                 throw new IllegalArgumentException("Given class must not be null");
             }
         } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-            throw new IllegalArgumentException("Cannot instantiate " + pClass + ": " + e,e);
+            throw new IllegalArgumentException("Cannot instantiate " + pClass + ": " + e.getMessage(), e);
         }
     }
 
@@ -292,7 +292,7 @@ public final class ClassUtil {
             Method method = extractMethod(pMethod, clazz, pArgs);
             return method.invoke(pObject,pArgs);
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-            throw new IllegalArgumentException("Cannot call method " + pMethod + " on " + pObject + ": " + e,e);
+            throw new IllegalArgumentException("Cannot call method " + pMethod + " on " + pObject + ": " + e.getMessage(), e);
         }
     }
 

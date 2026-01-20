@@ -161,7 +161,7 @@ public class HistoryStore {
             bOut.close();
             return bOut.size();
         } catch (IOException e) {
-            throw new IllegalStateException("Cannot serialize internal store: " + e,e);
+            throw new IllegalStateException("Cannot serialize internal store: " + e.getMessage(), e);
         }
     }
 

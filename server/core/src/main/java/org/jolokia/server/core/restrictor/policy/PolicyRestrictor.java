@@ -81,7 +81,7 @@ public class PolicyRestrictor implements Restrictor {
         }
 
         if (exp != null) {
-            throw new SecurityException("Cannot parse policy file: " + exp,exp);
+            throw new SecurityException("Cannot parse policy file: " + exp.getMessage(), exp);
         }
     }
 
