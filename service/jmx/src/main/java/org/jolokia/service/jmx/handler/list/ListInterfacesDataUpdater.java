@@ -41,15 +41,22 @@ class ListInterfacesDataUpdater extends DataUpdater {
         return INTERFACES.getKey();
     }
 
+    /**
+     * This updater uses special {@code update()} method which accepts {@link MBeanServer} for local access.
+     * @param mBeanServer
+     * @param pMap
+     * @param pObjectName
+     * @param pMBeanInfo
+     * @param pPathStack
+     */
     public void update(MBeanServer mBeanServer, Map<String, Object> pMap, ObjectName pObjectName, MBeanInfo pMBeanInfo, Deque<String> pPathStack) {
-        super.update(pMap, pObjectName, pMBeanInfo, pPathStack);
         try {
             ClassLoader loader = mBeanServer.getClassLoaderFor(pObjectName);
             String className = pMBeanInfo.getClassName();
             Class<?> clazz = loader == null ? Class.forName(className) : Class.forName(className, false, loader);
             Set<Class<?>> interfaces = new HashSet<>();
             collectInterfaces(clazz, interfaces);
-            pMap.put(getKey(), new JSONArray(interfaces.stream().map(Class::getName).collect(Collectors.toSet())));
+            pMap.put(getKey(), new JSONArray(interfaces.stream().map(Class::getName).collect(Collectors.toList())));
         } catch (InstanceNotFoundException | ClassNotFoundException ignored) {
         }
     }
@@ -63,8 +70,8 @@ class ListInterfacesDataUpdater extends DataUpdater {
         } else {
             collectInterfaces(clazz.getSuperclass(), interfaces);
         }
-        for (Class<?> parent : clazz.getInterfaces()) {
-            collectInterfaces(parent, interfaces);
+        for (Class<?> iface : clazz.getInterfaces()) {
+            collectInterfaces(iface, interfaces);
         }
     }
 

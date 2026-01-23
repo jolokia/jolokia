@@ -29,15 +29,39 @@ public class JDKManagementCacheKeyProvider extends CacheKeyProvider {
     @Override
     public String determineKey(ObjectInstance objectInstance) {
         ObjectName name = objectInstance.getObjectName();
+
+        // we have these "platform managed objects" available in public packages and which are MXBeans:
+        //  - java.lang.management.BufferPoolMXBean
+        //  - java.lang.management.ClassLoadingMXBean
+        //  - java.lang.management.CompilationMXBean
+        //  - java.lang.management.GarbageCollectorMXBean
+        //  - java.lang.management.MemoryManagerMXBean
+        //  - java.lang.management.MemoryMXBean
+        //  - java.lang.management.MemoryPoolMXBean
+        //  - java.lang.management.OperatingSystemMXBean
+        //  - java.lang.management.PlatformLoggingMXBean
+        //  - java.lang.management.RuntimeMXBean
+        //  - java.lang.management.ThreadMXBean
+        //  - jdk.management.jfr.FlightRecorderMXBean
+        // only 4 of these have multiple MXBeans registered, so no need to cache others
+
+        if ("java.lang".equals(name.getDomain()) && "GarbageCollector".equals(name.getKeyProperty("type"))) {
+            // interface is com.sun.management.GarbageCollectorMXBean
+            // class is com.sun.management.internal.GarbageCollectorExtImpl
+            return "java.lang:GarbageCollector";
+        }
         if ("java.lang".equals(name.getDomain()) && "MemoryPool".equals(name.getKeyProperty("type"))) {
+            // interface is java.lang.management.MemoryPoolMXBean
             // class is sun.management.MemoryPoolImpl
             return "java.lang:MemoryPool";
         }
         if ("java.lang".equals(name.getDomain()) && "MemoryManager".equals(name.getKeyProperty("type"))) {
+            // interface is java.lang.management.MemoryManagerMXBean
             // class is sun.management.MemoryManagerImpl
             return "java.lang:MemoryManager";
         }
         if ("java.nio".equals(name.getDomain()) && "BufferPool".equals(name.getKeyProperty("type"))) {
+            // interface is java.lang.management.BufferPoolMXBean
             // class is sun.management.ManagementFactoryHelper$1
             return "java.nio:BufferPool";
         }

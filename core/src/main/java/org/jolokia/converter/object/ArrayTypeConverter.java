@@ -95,7 +95,7 @@ class ArrayTypeConverter extends OpenTypeConverter<ArrayType<?>> {
                     // returns a name starting with "[" if the dimensions are 2 or more
                     elementClass = Class.forName(pElementType.getClassName().substring(1));
                 } else {
-                    // here we'll never attempt to load an element class for "[I]".substring(1), because
+                    // here we'll never attempt to load an element class for "[I".substring(1), because
                     // it'll be handled by javax.management.openmbean.ArrayType.getElementOpenType().getClassName()
                     elementClass = Class.forName(elementType.getClassName());
                     if (((ArrayType<?>) pElementType).isPrimitiveArray() && !elementClass.isPrimitive()) {

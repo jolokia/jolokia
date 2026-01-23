@@ -16,12 +16,19 @@ package org.jolokia.service.jmx.handler.list;
  *  limitations under the License.
  */
 
-import javax.management.*;
+import javax.management.MBeanInfo;
+import javax.management.MBeanOperationInfo;
+import javax.management.MBeanParameterInfo;
+import javax.management.ObjectName;
+import javax.management.openmbean.OpenMBeanOperationInfo;
+import javax.management.openmbean.OpenMBeanParameterInfo;
+import javax.management.openmbean.OpenType;
 
-import org.jolokia.server.core.service.api.DataUpdater;
-import org.jolokia.server.core.util.JsonUtil;
+import org.jolokia.converter.object.OpenTypeHelper;
 import org.jolokia.json.JSONArray;
 import org.jolokia.json.JSONObject;
+import org.jolokia.server.core.service.api.DataUpdater;
+import org.jolokia.server.core.util.JsonUtil;
 
 import static org.jolokia.service.jmx.handler.list.DataKeys.*;
 /**
@@ -56,10 +63,26 @@ class OperationDataUpdater extends DataUpdater {
                     args.put(DESCRIPTION.getKey(), paramInfo.getDescription());
                     args.put(NAME.getKey(), paramInfo.getName());
                     args.put(TYPE.getKey(), paramInfo.getType());
+                    if (paramInfo instanceof OpenMBeanParameterInfo openMBeanParameterInfo) {
+                        args.put(OPEN_TYPE.getKey(), OpenTypeHelper.toJSON(openMBeanParameterInfo.getOpenType(), paramInfo));
+                    } else {
+                        OpenType<?> openType = OpenTypeHelper.findOpenType(paramInfo.getDescriptor());
+                        if (openType != null) {
+                            args.put(OPEN_TYPE.getKey(), OpenTypeHelper.toJSON(openType, paramInfo));
+                        }
+                    }
                     argList.add(args);
                 }
                 map.put(ARGS.getKey(), argList);
                 map.put(RETURN_TYPE.getKey(), opInfo.getReturnType());
+                if (opInfo instanceof OpenMBeanOperationInfo openMBeanOperationInfo) {
+                    map.put(RETURN_OPEN_TYPE.getKey(), OpenTypeHelper.toJSON(openMBeanOperationInfo.getReturnOpenType(), opInfo));
+                } else {
+                    OpenType<?> openType = OpenTypeHelper.findOpenType(opInfo.getDescriptor());
+                    if (openType != null) {
+                        map.put(RETURN_OPEN_TYPE.getKey(), OpenTypeHelper.toJSON(openType, opInfo));
+                    }
+                }
                 map.put(DESCRIPTION.getKey(), opInfo.getDescription());
                 JsonUtil.addJSONObjectToJSONObject(opMap, opInfo.getName(), map);
             }

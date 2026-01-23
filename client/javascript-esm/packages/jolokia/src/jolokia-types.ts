@@ -416,15 +416,25 @@ export type JolokiaSuccessResponse = JolokiaResponse & {
 }
 
 /**
- * Jolokia error response
+ * Error information shared between various messages
  */
-export type JolokiaErrorResponse = JolokiaResponse & {
-  /** Original request for this response if it could be parsed */
-  request?: JolokiaRequest
+export type BasicErrorResponseInformation = {
+  /** An error _flag_ for quick check if a response is an error */
+  ".error"?: boolean
   /** Short error message */
   error: string
   /** Exception class name that caused this error response */
   error_type: string
+  /** Exception (or cause) if it's a JMX Exception */
+  error_type_jmx?: string
+}
+
+/**
+ * Jolokia error response
+ */
+export type JolokiaErrorResponse = JolokiaResponse & BasicErrorResponseInformation & {
+  /** Original request for this response if it could be parsed */
+  request?: JolokiaRequest
   /** Stack trace as string value when `allowErrorDetails` is `true` and `includeStackTrace` is `true` or `runtime` */
   stacktrace?: string
   /** JSON value of an Exception created by bean extractor (using `java.lang.Exception` getters) */
@@ -608,14 +618,14 @@ export type MBeanInfo = {
   notif?: Record<string, MBeanNotification>
   /** Map of ObjectName key/values (if `listKeys` parameter is set) */
   keys?: Record<string, string>
+  /** Possible fields from custom data updaters */
+  [key: string]: unknown
 }
 
 /**
  * Information about single MBean in case there's a problem getting such information
  */
-export type MBeanInfoError = {
-  error: string
-}
+export type MBeanInfoError = BasicErrorResponseInformation
 
 // --------- List response types related to JMX attribute, operation and notification descriptors
 //           These also may be strings like (for {"type":"list","path":"java.lang/type=Memory"} and maxDepth=1):
@@ -634,6 +644,8 @@ export type MBeanInfoError = {
 export type MBeanAttribute = {
   /** Java type */
   type: string
+  /** Open type */
+  openType?: OpenType
   /** Description */
   desc: string
   /** Read-Write flag */
@@ -655,6 +667,7 @@ export type MBeanConstructor = {
   /** Description */
   desc: string
 }
+
 /**
  * Description of a single MBean operation
  */
@@ -663,6 +676,8 @@ export type MBeanOperation = {
   args: MBeanOperationArgument[]
   /** Java return type */
   ret: string
+  /** OpenType return type */
+  openRet?: OpenType
   /** Description */
   desc: string
 }
@@ -677,6 +692,8 @@ export type MBeanOperationArgument = {
   name: string
   /** Argument type */
   type: string
+  /** Argument Open type */
+  openType?: OpenType
 }
 
 /**
@@ -689,6 +706,57 @@ export type MBeanNotification = {
   desc: string
   /** Notification Java types */
   types: string[]
+}
+
+/**
+ * JSON representation of `javax.management.openmbean.OpenType`. Can be recursive and should allow for great
+ * flexibility in handling complex types.
+ */
+export type OpenType = SimpleOpenType | ArrayOpenType | CompositeOpenType | TabularOpenType
+
+export type BasicOpenType = {
+  /** There are only four kinds of an open type */
+  kind: 'simple' | 'array' | 'composite' | 'tabular'
+  /**
+   * Full Java class name for a type - primitive types use wrapped class names instead.
+   * Composite types are _always_ `javax.management.openmbean.CompositeData`
+   * Tabular types are _always_ `javax.management.openmbean.TabularData`
+   */
+  class: string
+  /**
+   * Actual type name - possibly with type information, like `java.util.Map<java.lang.String, java.lang.Integer>`
+   * This is generated using `com.sun.jmx.mbeanserver.MXBeanIntrospector.typeName()`
+   */
+  type?: string
+  /** Optional `javax.management.openmbean.OpenType.description` */
+  desc?: string
+}
+
+/** `javax.management.openmbean.SimpleType` - no need to use `kind: simple` and repeat the same data for class/type/desc */
+export type SimpleOpenType = string
+
+/** `javax.management.openmbean.ArrayType` */
+export type ArrayOpenType = BasicOpenType & {
+  /** Is the array using primitive elements? */
+  primitive: boolean
+  /** Dimension of the array */
+  dimension: number
+  /** OpenType element of the array */
+  elemType: OpenType
+}
+
+/** `javax.management.openmbean.CompositeType` */
+export type CompositeOpenType = BasicOpenType & {
+  /** CompositeType items as a record with String item names as keys */
+  items: Record<string, OpenType>
+}
+
+/** `javax.management.openmbean.TabularType` */
+export type TabularOpenType = BasicOpenType & {
+  /** Ordered list of items from a `rowType` that build the index of TabularType */
+  index: string[]
+  /** Rows are always composite types */
+  rowType: CompositeOpenType
 }
 
 // ------ Notification response

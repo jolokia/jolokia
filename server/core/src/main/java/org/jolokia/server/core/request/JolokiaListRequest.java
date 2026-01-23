@@ -51,7 +51,7 @@ public class JolokiaListRequest extends JolokiaRequest {
 
     @Override
     public String toString() {
-        StringBuilder ret = new StringBuilder("JmxListRequest[");
+        StringBuilder ret = new StringBuilder("JolokiaListRequest[");
         String baseInfo = getInfo();
         if (baseInfo != null) {
             ret.append(baseInfo);

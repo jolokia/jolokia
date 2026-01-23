@@ -27,7 +27,7 @@ import javax.management.ObjectName;
 import javax.management.ReflectionException;
 
 import org.jolokia.json.JSONObject;
-import org.jolokia.server.core.config.ConfigKey;
+import org.jolokia.server.core.request.BadRequestException;
 import org.jolokia.server.core.request.JolokiaListRequest;
 import org.jolokia.server.core.service.api.DataUpdater;
 import org.jolokia.server.core.service.api.JolokiaContext;
@@ -53,21 +53,17 @@ class ListMBeanEachAction implements MBeanServerAccess.MBeanEachCallback, MBeanS
     /**
      * Handler used during iterations whe collecting MBean Meta data
      *
-     * @param pRequest          incoming Jolokia LIST request
-     * @param pPathStack        optional stack for picking out a certain path from the list tree
-     * @param pProvider         provider to prepend to any domain (if not null)
-     * @param pContext          {@link JolokiaContext} for filtering MBeans
+     * @param pRequest   incoming Jolokia LIST request
+     * @param pPathStack optional stack for picking out a certain path from the list tree
+     * @param pProvider  provider to prepend to any domain (if not null)
+     * @param pContext   {@link JolokiaContext} for filtering MBeans
+     * @param pCache
      */
-    public ListMBeanEachAction(JolokiaListRequest pRequest, Deque<String> pPathStack, String pProvider, JolokiaContext pContext) {
+    public ListMBeanEachAction(JolokiaListRequest pRequest, Deque<String> pPathStack, String pProvider, JolokiaContext pContext, Map<ObjectName, JSONObject> pCache                            ) throws BadRequestException {
         context = pContext;
-        int maxDepth = pRequest.getParameterAsInt(ConfigKey.MAX_DEPTH);
-        boolean useCanonicalName = pRequest.getParameterAsBool(ConfigKey.CANONICAL_NAMING);
-        boolean listKeys = pRequest.getParameterAsBool(ConfigKey.LIST_KEYS);
-        boolean listCache = pRequest.getParameterAsBool(ConfigKey.LIST_CACHE);
-        boolean listInterfaces = pRequest.getParameterAsBool(ConfigKey.LIST_INTERFACES);
 
-        // TOCHECK: MBeanInfoData can be filled with pre-cached, long-lived MBeans
-        infoData = new MBeanInfoData(maxDepth, pPathStack, useCanonicalName, listKeys, listCache, listInterfaces, pProvider);
+        // This will be our "collector" used for all available MBeanServerConnections and ObjectNames to list
+        infoData = new MBeanInfoData(pPathStack, pProvider, pRequest, pCache);
 
         customUpdaters = context.getServices(DataUpdater.class);
         cacheKeyProviders = context.getServices(CacheKeyProvider.class);

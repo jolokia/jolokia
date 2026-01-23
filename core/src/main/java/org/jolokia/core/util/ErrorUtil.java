@@ -47,6 +47,8 @@ public class ErrorUtil {
      * @param exception
      */
     public static void addBasicErrorResponseInformation(JSONObject result, Throwable exception) {
+        // JavaScript marker
+        result.put(".error", true);
         // Error type is a FQCN of the exception - potentially to be reconstructed at the client side
         result.put("error_type", exception.getClass().getName());
         // Error message

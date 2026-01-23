@@ -167,6 +167,28 @@ public class ObjectToObjectConverter implements Converter<String> {
     }
 
     /**
+     * Helper methods to reuse the static type mapping contained in this converter
+     * @param typeName
+     * @return
+     */
+    public static Class<?> knownTypeByName(String typeName) {
+        if (typeName == null || typeName.trim().isEmpty()) {
+            return null;
+        }
+        if (PRIMITIVE_TYPE_MAP.containsKey(typeName)) {
+            return PRIMITIVE_TYPE_MAP.get(typeName);
+        }
+        if (typeName.length() == 1 && TYPE_SIGNATURE_MAP.containsKey(typeName)) {
+            return PRIMITIVE_TYPE_MAP.get(TYPE_SIGNATURE_MAP.get(typeName).getName());
+        }
+        if (!typeName.contains(".") && typeName.startsWith("[")) {
+            return ClassUtil.classForName(typeName);
+        }
+
+        return null;
+    }
+
+    /**
      * When this converter is configured with {@link CoreConfiguration}, we can get configuration of some
      * conversion-related properties like date format.
      *

@@ -15,10 +15,17 @@
  */
 package org.jolokia.converter.object;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import javax.management.ObjectName;
 import javax.management.openmbean.OpenType;
+import javax.management.openmbean.SimpleType;
 
 /**
  * <p>Dedicated {@link org.jolokia.converter.object.Converter} which specifies target type as {@link OpenType}. It handles null values
@@ -50,10 +57,38 @@ import javax.management.openmbean.OpenType;
  */
 public class ObjectToOpenTypeConverter implements Converter<OpenType<?>> {
 
+    private static final Map<Class<?>, SimpleType<?>> SIMPLE_OPENTYPE_MAP = new HashMap<>();
+
     protected final boolean forgiving;
 
     // List of converters used
     private final List<OpenTypeConverter<? extends OpenType<?>>> converters;
+
+    static {
+        // All known simple OpenTypes
+        SIMPLE_OPENTYPE_MAP.put(boolean.class, SimpleType.BOOLEAN);
+        SIMPLE_OPENTYPE_MAP.put(char.class, SimpleType.CHARACTER);
+        SIMPLE_OPENTYPE_MAP.put(byte.class, SimpleType.BYTE);
+        SIMPLE_OPENTYPE_MAP.put(short.class, SimpleType.SHORT);
+        SIMPLE_OPENTYPE_MAP.put(int.class, SimpleType.INTEGER);
+        SIMPLE_OPENTYPE_MAP.put(long.class, SimpleType.LONG);
+        SIMPLE_OPENTYPE_MAP.put(float.class, SimpleType.FLOAT);
+        SIMPLE_OPENTYPE_MAP.put(double.class, SimpleType.DOUBLE);
+        SIMPLE_OPENTYPE_MAP.put(Boolean.class, SimpleType.BOOLEAN);
+        SIMPLE_OPENTYPE_MAP.put(Character.class, SimpleType.CHARACTER);
+        SIMPLE_OPENTYPE_MAP.put(Byte.class, SimpleType.BYTE);
+        SIMPLE_OPENTYPE_MAP.put(Short.class, SimpleType.SHORT);
+        SIMPLE_OPENTYPE_MAP.put(Integer.class, SimpleType.INTEGER);
+        SIMPLE_OPENTYPE_MAP.put(Long.class, SimpleType.LONG);
+        SIMPLE_OPENTYPE_MAP.put(Float.class, SimpleType.FLOAT);
+        SIMPLE_OPENTYPE_MAP.put(Double.class, SimpleType.DOUBLE);
+        SIMPLE_OPENTYPE_MAP.put(String.class, SimpleType.STRING);
+        SIMPLE_OPENTYPE_MAP.put(ObjectName.class, SimpleType.OBJECTNAME);
+        SIMPLE_OPENTYPE_MAP.put(Void.class, SimpleType.VOID);
+        SIMPLE_OPENTYPE_MAP.put(Date.class, SimpleType.DATE);
+        SIMPLE_OPENTYPE_MAP.put(BigInteger.class, SimpleType.BIGINTEGER);
+        SIMPLE_OPENTYPE_MAP.put(BigDecimal.class, SimpleType.BIGDECIMAL);
+    }
 
     /**
      * Constructor
@@ -68,6 +103,10 @@ public class ObjectToOpenTypeConverter implements Converter<OpenType<?>> {
             new TabularDataConverter(this)
         );
         this.forgiving = pForgiving;
+    }
+
+    public static SimpleType<?> knownSimpleType(Class<?> cls) {
+        return SIMPLE_OPENTYPE_MAP.get(cls);
     }
 
     /**

@@ -58,12 +58,12 @@ public class CommandHandlerManager {
      */
     public CommandHandlerManager(JolokiaContext pCtx, String pProvider) {
         List<CommandHandler<?>> handlers =
-                LocalServiceFactory.createServices (this.getClass().getClassLoader(),"META-INF/jolokia/command-handlers");
+            LocalServiceFactory.createServices(this.getClass().getClassLoader(), "META-INF/jolokia/command-handlers");
 
         if (JolokiaServicesValidator.validateServices(handlers, pCtx)) {
             for (CommandHandler<?> handler : handlers) {
-                handler.init(pCtx,pProvider);
-                requestHandlerMap.put(handler.getType(),handler);
+                handler.init(pCtx, pProvider);
+                requestHandlerMap.put(handler.getType(), handler);
             }
         }
     }

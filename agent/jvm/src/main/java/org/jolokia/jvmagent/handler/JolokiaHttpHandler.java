@@ -188,9 +188,6 @@ public class JolokiaHttpHandler implements HttpHandler {
             } else {
                 throw new BadRequestException("HTTP Method " + method + " is not supported.");
             }
-            if (jolokiaContext.isDebug()) {
-                jolokiaContext.debug("Response: " + json);
-            }
         } catch (BadRequestException exp) {
             String response = "400 (Bad Request)\n";
             if (exp.getMessage() != null) {

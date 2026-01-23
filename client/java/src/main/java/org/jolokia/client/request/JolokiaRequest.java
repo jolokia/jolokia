@@ -86,7 +86,9 @@ public abstract class JolokiaRequest {
      */
     private static final Converter<OpenType<?>> objectToOpenTypeConverter;
 
-    // From object to json:
+    /**
+     * Serializer to JSON values which are sent using {@link org.jolokia.client.JolokiaClient}
+     */
     private static final ObjectToJsonConverter toJsonConverter;
 
     static {
@@ -246,7 +248,7 @@ public abstract class JolokiaRequest {
         try {
             return toJsonConverter.serialize(pArg, null, SerializeOptions.DEFAULT);
         } catch (AttributeNotFoundException e) {
-            throw new RuntimeException(e);
+            throw new IllegalArgumentException(e);
         }
     }
 

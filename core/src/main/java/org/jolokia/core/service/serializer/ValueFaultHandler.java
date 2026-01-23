@@ -50,9 +50,7 @@ public interface ValueFaultHandler {
          */
         public <T extends Throwable> Object handleException(T exception) {
             JSONObject result = new JSONObject();
-            // JavaScript marker
-            result.put(".error", true);
-            // Basic information
+            // Just some basic information
             ErrorUtil.addBasicErrorResponseInformation(result, exception);
 
             return result;

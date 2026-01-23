@@ -58,7 +58,7 @@ public abstract class DataUpdater extends AbstractJolokiaService<DataUpdater> im
         String filter = pPathStack != null && !pPathStack.isEmpty() ? pPathStack.pop() : null;
         verifyThatPathIsEmpty(pPathStack);
 
-        JSONObject attrMap = extractData(pObjectName, pMBeanInfo,filter);
+        JSONObject attrMap = extractData(pObjectName, pMBeanInfo, filter);
 
         if (!attrMap.isEmpty()) {
             pMap.put(getKey(), attrMap);

@@ -26,11 +26,11 @@ public enum DataKeys {
 
     DESCRIPTION("desc"),
     CLASSNAME("class"),
-    ERROR("error"),
     NAME("name"),
     TYPES("types"),
     ARGS("args"),
     RETURN_TYPE("ret"),
+    RETURN_OPEN_TYPE("openRet"),
     CONSTRUCTORS("ctor"),
     OPERATIONS("op"),
     ATTRIBUTES("attr"),
@@ -38,6 +38,7 @@ public enum DataKeys {
     INTERFACES("interfaces"),
     NOTIFICATIONS("notif"),
     TYPE("type"),
+    OPEN_TYPE("openType"),
     // attribute information
     IS("is"),
     READ("r"),

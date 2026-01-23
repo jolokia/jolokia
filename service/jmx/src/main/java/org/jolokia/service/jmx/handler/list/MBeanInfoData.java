@@ -32,7 +32,11 @@ import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 
+import org.jolokia.core.util.ErrorUtil;
 import org.jolokia.json.JSONObject;
+import org.jolokia.server.core.config.ConfigKey;
+import org.jolokia.server.core.request.BadRequestException;
+import org.jolokia.server.core.request.JolokiaListRequest;
 import org.jolokia.server.core.service.api.DataUpdater;
 import org.jolokia.service.jmx.api.CacheKeyProvider;
 
@@ -142,6 +146,8 @@ public class MBeanInfoData {
     // whether to use optimized list() response (with cache/domain)
     private boolean listCache;
 
+    private final Map<ObjectName, JSONObject> cache;
+
     static {
         for (DataUpdater updater : new DataUpdater[] {
                 new DescriptionDataUpdater(),
@@ -164,21 +170,21 @@ public class MBeanInfoData {
      * up. The tree will be truncated if it gets larger than this value. A <em>path</em> (in form of a stack)
      * can be given, in which only a sub information (subtree or leaf value) is returned
      *
-     * @param pMaxDepth         max depth
-     * @param pPathStack        the stack for restricting the information to add. The given stack will be cloned
-     *                          and is left untouched.
-     * @param pUseCanonicalName whether to use canonical name in listings
-     * @param pListKeys
-     * @param pListCache
-     * @param pListInterfaces
+     * @param pPathStack the stack for restricting the information to add. The given stack will be cloned
+     *                   and is left untouched.
      * @param pProvider
+     * @param pRequest
+     * @param pMBeanInfoCache
      */
-    public MBeanInfoData(int pMaxDepth, Deque<String> pPathStack, boolean pUseCanonicalName, boolean pListKeys, boolean pListCache, boolean pListInterfaces, String pProvider) {
-        maxDepth = pMaxDepth;
-        useCanonicalName = pUseCanonicalName;
-        listKeys = pListKeys;
-        listCache = pListCache;
-        listInterfaces = pListInterfaces;
+    public MBeanInfoData(Deque<String> pPathStack, String pProvider, JolokiaListRequest pRequest, Map<ObjectName, JSONObject> pMBeanInfoCache) throws BadRequestException {
+        // these properties may come different with each request
+        maxDepth = pRequest.getParameterAsInt(ConfigKey.MAX_DEPTH);
+        useCanonicalName = pRequest.getParameterAsBool(ConfigKey.CANONICAL_NAMING);
+        listKeys = pRequest.getParameterAsBool(ConfigKey.LIST_KEYS);
+        listCache = pRequest.getParameterAsBool(ConfigKey.LIST_CACHE);
+        listInterfaces = pRequest.getParameterAsBool(ConfigKey.LIST_INTERFACES);
+
+        cache = pMBeanInfoCache;
 
         // Stack of path elements for Jolokia list operation. Two first elements are for {@link ObjectName#getDomain()}
         // and {@link ObjectName#getCanonicalKeyPropertyListString()}, 3rd element is to select single updater to use
@@ -237,7 +243,7 @@ public class MBeanInfoData {
         }
 
         if (!pathStack.isEmpty()) {
-            throw new IllegalArgumentException("List operation supports only 3 path segments for MBean domain," +
+            throw new BadRequestException("List operation supports only 3 path segments for MBean domain," +
                 "canonical list of ObjectName properties and updater to use. Remaining path: " + String.join(", ", pathStack));
         }
     }
@@ -427,9 +433,10 @@ public class MBeanInfoData {
 
     // Add an exception to the info map
     private void addException(ObjectName pName, Exception pExp) {
-        Map<String, Object> domain = getOrCreateJSONObject(infoMap, addProviderIfNeeded(pName.getDomain()));
-        Map<String, Object> mbean = getOrCreateJSONObject(domain, getKeyPropertyString(pName));
-        mbean.put(DataKeys.ERROR.getKey(), pExp.toString());
+        JSONObject domain = getOrCreateJSONObject(infoMap, addProviderIfNeeded(pName.getDomain()));
+        JSONObject mbean = getOrCreateJSONObject(domain, getKeyPropertyString(pName));
+
+        ErrorUtil.addBasicErrorResponseInformation(mbean, pExp);
     }
 
     /**
@@ -465,11 +472,20 @@ public class MBeanInfoData {
      * @param pName
      * @param customUpdaters
      */
-    private void addFullMBeanInfo(MBeanServerConnection pConn, Map<String, Object> pMBeanMap, ObjectName pObjectName, MBeanInfo pMBeanInfo, ObjectName pName, Set<DataUpdater> customUpdaters) {
+    public void addFullMBeanInfo(MBeanServerConnection pConn, Map<String, Object> pMBeanMap, ObjectName pObjectName, MBeanInfo pMBeanInfo, ObjectName pName, Set<DataUpdater> customUpdaters) {
+        JSONObject cached = cache != null ? cache.get(pObjectName) : null;
         boolean updaterFound = false;
+        // built-in updaters first
         for (DataUpdater updater : UPDATERS.values()) {
-            if (selectedUpdater == null || updater.getKey().equals(selectedUpdater)) {
-                updater.update(pMBeanMap, pObjectName, pMBeanInfo, null);
+            String key = updater.getKey();
+            if (selectedUpdater == null || key.equals(selectedUpdater)) {
+                if (cached != null && cached.containsKey(key)) {
+                    // from cache
+                    pMBeanMap.put(key, cached.get(key));
+                } else {
+                    // by doing introspection
+                    updater.update(pMBeanMap, pObjectName, pMBeanInfo, null);
+                }
                 updaterFound = true;
             }
         }
@@ -478,7 +494,7 @@ public class MBeanInfoData {
             updaterFound = true;
         }
         if (listInterfaces && (selectedUpdater == null || LIST_INTERFACES_UPDATER.getKey().equals(selectedUpdater))) {
-            // we can get all the interfaces of MBean's implementation only if working locally
+            // we can get all the interfaces of MBean's implementation only if working locally (needed classLoader)
             if (pConn instanceof MBeanServer mBeanServer) {
                 // we can check the kind of MBean we have by checking the MBeanInfo:
                 // - javax.management.openmbean.OpenMBeanInfo
@@ -489,6 +505,7 @@ public class MBeanInfoData {
                 updaterFound = true;
             }
         }
+        // custom updaters later - without cache
         for (DataUpdater customUpdater : customUpdaters) {
             if (selectedUpdater == null || customUpdater.getKey().equals(selectedUpdater)) {
                 customUpdater.update(pMBeanMap, pObjectName, pMBeanInfo, null);
@@ -507,7 +524,7 @@ public class MBeanInfoData {
      * @param pKey
      * @return
      */
-    private Map<String, Object> getOrCreateJSONObject(Map<String, Object> pMap, String pKey) {
+    private JSONObject getOrCreateJSONObject(Map<String, Object> pMap, String pKey) {
         JSONObject nMap = (JSONObject) pMap.get(pKey);
         if (nMap == null) {
             nMap = new JSONObject();
@@ -565,4 +582,5 @@ public class MBeanInfoData {
 
         return innerMap;
     }
+
 }
