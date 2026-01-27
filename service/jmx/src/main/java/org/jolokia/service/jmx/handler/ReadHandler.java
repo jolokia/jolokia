@@ -223,9 +223,8 @@ public class ReadHandler extends AbstractCommandHandler<JolokiaReadRequest> {
                 // fault handler is inserted.
                 result.put(attribute, pFaultHandler.handleException(e));
             } catch (RuntimeException e) {
-                if (e.getCause() instanceof UnsupportedOperationException) {
-                    // special and not beautiful
-                    result.put(attribute, "Unsupported");
+                if (e.getCause() instanceof UnsupportedOperationException unsupportedOperationException) {
+                    result.put(attribute, pFaultHandler.handleException(unsupportedOperationException));
                 } else {
                     result.put(attribute, pFaultHandler.handleException(e));
                 }
