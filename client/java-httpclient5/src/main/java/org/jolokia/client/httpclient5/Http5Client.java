@@ -240,7 +240,7 @@ public class Http5Client implements HttpClientSpi<HttpClient> {
                         JSONStructure json = HttpUtil.parseJsonResponse(entity.getContent(), encoding);
                         return new ProcessedResponse(response, json, null, response.getCode());
                     }
-                    // nothing to parse
+                    // nothing to parse, but no exception...
                     return new ProcessedResponse(response, null, null, response.getCode());
                 } catch (ParseException e) {
                     return new ProcessedResponse(response, null, e, response.getCode());
@@ -254,15 +254,16 @@ public class Http5Client implements HttpClientSpi<HttpClient> {
 
             if (errorCode != 200) {
                 // no need to parse, because Jolokia JSON responses for errors are sent with HTTP 200 code
-                throw new JolokiaRemoteException(jolokiaRequest, "HTTP error " + errorCode + " sending " + requestType + " Jolokia request",
-                    null, null, errorCode, null, null);
+                throw new JolokiaException("HTTP error " + errorCode + " sending " + requestType + " Jolokia request");
             }
 
             Exception e = response.exception();
             if (e != null) {
-                // we know that the only exception we can get here is ParseException, so we can't
-                // throw JolokiaRemoteException because it wraps actual data from JSON error
-                throw new JolokiaException("Error processing " + requestType + " response: " + e.getMessage(), e);
+                // we know that the only exception we can get here is ParseException, so we shouldn't
+                // throw JolokiaRemoteException - but for compatibility reasons we do that
+                String errorType = e.getClass().getName();
+                String message = "Error parsing " + requestType + " response: " + e.getMessage();
+                throw new JolokiaException(message);
             }
 
             JSONStructure json = response.json();
@@ -271,7 +272,7 @@ public class Http5Client implements HttpClientSpi<HttpClient> {
             }
 
             // no data at all
-            throw new JolokiaException("ASD");
+            throw new JolokiaException("No data received from the remote Jolokia Agent for " + requestType);
         } catch (ConnectException e) {
             String msg = "Cannot connect to " + jolokiaAgentUrl + ": " + e.getMessage();
             throw new JolokiaConnectException(msg, e);

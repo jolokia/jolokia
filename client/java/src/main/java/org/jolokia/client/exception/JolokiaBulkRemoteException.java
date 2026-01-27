@@ -40,7 +40,7 @@ public class JolokiaBulkRemoteException extends JolokiaException {
      * @param pResults list of results which should be of type {@link JolokiaResponse}
      */
     public JolokiaBulkRemoteException(List<Object> pResults) {
-        super("Bulk request failed remotely");
+        super("Bulk response contains JSON error responses");
         results = pResults;
     }
 

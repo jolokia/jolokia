@@ -314,7 +314,7 @@ public class JolokiaClient implements Closeable {
         JSONStructure jsonResponse = httpClient.execute(pRequests, pProcessingOptions, targetConfig);
         if (!(jsonResponse instanceof JSONArray)) {
             if (jsonResponse instanceof JSONObject errorObject) {
-                // bulk response may end with single JSONObject, let's check if it's a "proper error"
+                // bulk response may end with a single JSONObject, let's check if it's a "proper error"
                 if (!errorObject.containsKey("status") || ((Number) errorObject.get("status")).intValue() != 200) {
                     throw new JolokiaRemoteException(null, errorObject);
                 }
@@ -399,7 +399,8 @@ public class JolokiaClient implements Closeable {
         }
 
         if (exceptionFound) {
-            // we've collected some responses, but will "return" them in the bulk exception thrown
+            // we've collected some responses, but will "return" them in the bulk exception thrown. This
+            // semi-exception contains mixed JSON responses and errors
             List<Object> responsesAndErrors = new ArrayList<>();
             for (int i = 0; i < pRequests.size(); i++) {
                 JolokiaRemoteException exp = remoteExceptions[i];

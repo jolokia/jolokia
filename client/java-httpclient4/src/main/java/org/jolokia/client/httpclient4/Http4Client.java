@@ -208,29 +208,31 @@ public class Http4Client implements HttpClientSpi<HttpClient> {
 
             if (errorCode != 200) {
                 // no need to parse, because Jolokia JSON responses for errors are sent with HTTP 200 code
-                throw new JolokiaRemoteException(jolokiaRequest, "HTTP error " + errorCode + " sending " + requestType + " Jolokia request",
-                    null, null, errorCode, null, null);
+                throw new JolokiaException("HTTP error " + errorCode + " sending " + requestType + " Jolokia request");
             }
 
             HttpEntity entity = response.getEntity();
-            try {
-                Charset encoding;
-                Header contentEncoding = entity.getContentEncoding();
-                if (contentEncoding == null) {
-                    encoding = config.contentCharset() == null ? StandardCharsets.ISO_8859_1 : config.contentCharset();
-                } else {
-                    encoding = Charset.forName(contentEncoding.getValue());
-                }
-                return HttpUtil.parseJsonResponse(entity.getContent(), encoding);
-            } catch (ParseException e) {
-                // JSON parsing error - convert to Jolokia exception
-                String errorType = e.getClass().getName();
-                String message = "Error parsing " + requestType + " response: " + e.getMessage();
-                throw new JolokiaRemoteException(jolokiaRequest, message, errorType, null, errorCode, null, null);
-            } finally {
-                if (entity != null) {
+            if (entity != null) {
+                try {
+                    Charset encoding;
+                    Header contentEncoding = entity.getContentEncoding();
+                    if (contentEncoding == null) {
+                        encoding = config.contentCharset() == null ? StandardCharsets.ISO_8859_1 : config.contentCharset();
+                    } else {
+                        encoding = Charset.forName(contentEncoding.getValue());
+                    }
+                    return HttpUtil.parseJsonResponse(entity.getContent(), encoding);
+                } catch (ParseException e) {
+                    // JSON parsing error - convert to Jolokia exception
+                    String errorType = e.getClass().getName();
+                    String message = "Error parsing " + requestType + " response: " + e.getMessage();
+                    throw new JolokiaException(message);
+                } finally {
                     EntityUtils.consume(entity);
                 }
+            } else {
+                // no data at all
+                throw new JolokiaException("No data received from the remote Jolokia Agent for " + requestType);
             }
         } catch (ConnectException e) {
             String msg = "Cannot connect to " + jolokiaAgentUrl + ": " + e.getMessage();

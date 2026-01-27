@@ -49,29 +49,7 @@ public class JolokiaRemoteException extends JolokiaException {
     private final JSONObject errorValue;
 
     // the entire response JSON object
-    private JSONObject response;
-
-    /**
-     * Constructor for a remote exception, where the details are passed directly
-     *
-     * @param pJolokiaRequest {@link JolokiaRequest} that ended with an error
-     * @param pMessage        error message of the exception occurred remotely
-     * @param pErrorType      kind of error used
-     * @param pErrorTypeJmx   kind of JMX error used
-     * @param pStatus         status code
-     * @param pStacktrace     stacktrace of the remote exception
-     * @param pErrorValue     the error JSON object
-     */
-    public JolokiaRemoteException(JolokiaRequest pJolokiaRequest, String pMessage, String pErrorType,
-                                  String pErrorTypeJmx, int pStatus, String pStacktrace, JSONObject pErrorValue) {
-        super(pMessage);
-        status = pStatus;
-        errorType = pErrorType;
-        errorTypeJmx = pErrorTypeJmx;
-        remoteStacktrace = pStacktrace;
-        request = pJolokiaRequest;
-        errorValue = pErrorValue;
-    }
+    private final JSONObject response;
 
     /**
      * Constructor for a remote exception, where the error details are passed as {@link JSONObject} received
@@ -102,8 +80,12 @@ public class JolokiaRemoteException extends JolokiaException {
             return "Error: " + pJsonRespObject.get("error");
         }
         Object o = pJsonRespObject.get("status");
-        if (o != null && !(o instanceof Number)) {
-            return "Invalid status of type " + o.getClass().getName() + " ('" + o + "') received. Expected a number.";
+        if (o != null) {
+            if (o instanceof Number n) {
+                return "Error code " + n;
+            } else {
+                return "Invalid status of type " + o.getClass().getName() + " ('" + o + "') received. Expected a number.";
+            }
         }
 
         return "Invalid response received";
