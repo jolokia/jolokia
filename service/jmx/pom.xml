@@ -90,6 +90,7 @@
               <!-- jolokia-json -->
               org.jolokia.json;version="[2.5,3)",
               <!-- jolokia-core -->
+              org.jolokia.converter.object;version="[2.5,3)",
               org.jolokia.core.api;version="[2.5,3)",
               org.jolokia.core.service.serializer;version="[2.5,3)",
               org.jolokia.core.util;version="[2.5,3)",

@@ -160,10 +160,17 @@
             <Import-Package>
               <!-- JDK -->
               javax.management,
+              javax.management.openmbean,
               javax.net.ssl,
               <!-- jolokia-json -->
               org.jolokia.json;version="[2.5,3)",
-              org.jolokia.json.parser;version="[2.5,3)"
+              org.jolokia.json.parser;version="[2.5,3)",
+              <!-- jolokia-core -->
+              org.jolokia.converter.json;version="[2.5,3)",
+              org.jolokia.converter.object;version="[2.5,3)",
+              org.jolokia.core.config;version="[2.5,3)",
+              org.jolokia.core.service.serializer;version="[2.5,3)",
+              org.jolokia.core.util;version="[2.5,3)"
             </Import-Package>
             <Export-Package>
               org.jolokia.client,

@@ -38,33 +38,33 @@
     <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-json</artifactId>
-      <scope>test</scope>
+      <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-core</artifactId>
-      <scope>test</scope>
+      <scope>runtime</scope>
     </dependency>
 
     <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-server-core</artifactId>
-      <scope>test</scope>
+      <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-service-jmx</artifactId>
-      <scope>test</scope>
+      <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-service-serializer</artifactId>
-      <scope>test</scope>
+      <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-agent-osgi</artifactId>
-      <scope>test</scope>
+      <scope>runtime</scope>
     </dependency>
 
     <!-- JakartaEE dependencies -->

@@ -130,6 +130,9 @@
               <!-- jolokia-json -->
               org.jolokia.json;version="[2.5,3)",
               <!-- jolokia-core -->
+              org.jolokia.converter.json;version="[2.5,3)",
+              org.jolokia.converter.object;version="[2.5,3)",
+              org.jolokia.core.config;version="[2.5,3)",
               org.jolokia.core.util;version="[2.5,3)",
               <!-- jolokia-client-java -->
               org.jolokia.client;version="[2.5,3)",
