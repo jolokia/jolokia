@@ -15,14 +15,30 @@
  */
 package org.jolokia.client.jmxadapter;
 
+import java.io.IOException;
+import javax.management.JMRuntimeException;
+
 /**
  * Exception class to make exception handling in {@link javax.management.MBeanServerConnection} implementation
- * easier
+ * easier. The cause should never be an {@link java.io.IOException}.
  */
 public class UncheckedJmxAdapterException extends RuntimeException {
 
     public UncheckedJmxAdapterException(Exception e) {
         super(e);
+        if (e instanceof IOException) {
+            throw new IllegalArgumentException("UncheckedJmxAdapterException should not wrap IOExceptions");
+        }
+    }
+
+    /**
+     * Throws the {@link #getCause()} wrapped in {@link javax.management.JMRuntimeException}
+     */
+    public void throwGenericJMRuntimeCause() throws JMRuntimeException {
+        Throwable cause = getCause();
+        JMRuntimeException ex = new JMRuntimeException(cause.getMessage());
+        ex.initCause(cause);
+        throw ex;
     }
 
 }

@@ -17,6 +17,7 @@ package org.jolokia.client.request;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
@@ -58,36 +59,86 @@ public class JolokiaReadRequest extends JolokiaMBeanRequest {
     /** Attribute names to retrieve. For {@link HttpMethod#GET} only single attribute can be retrieved */
     private final List<String> attributes;
 
+    /** Whether to use {@link javax.management.MBeanServer#getAttributes} or {@link javax.management.MBeanServer#getAttribute} */
+    private final boolean multiAttributes;
+
     /** Path to retrieve an inner value of the response */
     private String path;
 
     /**
-     * Create a READ request to request one or more attributes from the remote Jolokia Agent
+     * Create a READ request to request one attribute from the remote Jolokia Agent. This translates to
+     * {@link javax.management.MBeanServer#getAttribute} call for single attribute and if it doesn't exist, an
+     * {@link javax.management.AttributeNotFoundException} is thrown.
      *
      * @param pObjectName Name of the MBean to request, which can be a pattern in
      *                    which case the given attributes are looked at all MBeans matched
      *                    by this pattern. If an attribute does not fit to a matched MBean it is
      *                    ignored.
-     * @param pAttribute  one or more attributes to request.
+     * @param pAttribute  one specific attribute to request.
      */
-    public JolokiaReadRequest(ObjectName pObjectName, String... pAttribute) {
+    public JolokiaReadRequest(ObjectName pObjectName, String pAttribute) {
         this(null, pObjectName, pAttribute);
     }
 
     /**
-     * Create a READ request to request one or more attributes
-     * from the remote Jolokia Agent
+     * Create a READ request to request one or more attributes from the remote Jolokia Agent with the intention
+     * to use {@link javax.management.MBeanServer#getAttributes} call which ignores missing attributes.
+     *
+     * @param pObjectName Name of the MBean to request, which can be a pattern in
+     *                    which case the given attributes are looked at all MBeans matched
+     *                    by this pattern. If an attribute does not fit to a matched MBean it is
+     *                    ignored.
+     * @param pAttributes one or more attributes to request
+     */
+    public JolokiaReadRequest(ObjectName pObjectName, String... pAttributes) {
+        this(null, pObjectName, pAttributes);
+    }
+
+    /**
+     * Create a READ request to request one attribute from the remote Jolokia Agent. This translates to
+     * {@link javax.management.MBeanServer#getAttribute} call for single attribute and if it doesn't exist, an
+     * {@link javax.management.AttributeNotFoundException} is thrown.
      *
      * @param pTargetConfig proxy target configuration or {@code null} if no proxy should be used
      * @param pObjectName   Name of the MBean to request, which can be a pattern in
      *                      which case the given attributes are looked at all MBeans matched
      *                      by this pattern. If an attribute does not fit to a matched MBean it is
      *                      ignored.
-     * @param pAttribute    one or more attributes to request.
+     * @param pAttribute    one specific attribute to request.
      */
-    public JolokiaReadRequest(JolokiaTargetConfig pTargetConfig, ObjectName pObjectName, String... pAttribute) {
+    public JolokiaReadRequest(JolokiaTargetConfig pTargetConfig, ObjectName pObjectName, String pAttribute) {
         super(JolokiaOperation.READ, pObjectName, pTargetConfig);
-        attributes = Arrays.asList(pAttribute);
+        attributes = Collections.singletonList(pAttribute);
+        multiAttributes = false;
+    }
+
+    /**
+     * Create a READ request to request one or more attributes from the remote Jolokia Agent with the intention
+     * to use {@link javax.management.MBeanServer#getAttributes} call which ignores missing attributes.
+     *
+     * @param pTargetConfig proxy target configuration or {@code null} if no proxy should be used
+     * @param pObjectName   Name of the MBean to request, which can be a pattern in
+     *                      which case the given attributes are looked at all MBeans matched
+     *                      by this pattern. If an attribute does not fit to a matched MBean it is
+     *                      ignored.
+     * @param pAttributes   one or more attributes to request.
+     */
+    public JolokiaReadRequest(JolokiaTargetConfig pTargetConfig, ObjectName pObjectName, String... pAttributes) {
+        super(JolokiaOperation.READ, pObjectName, pTargetConfig);
+        attributes = Arrays.asList(pAttributes);
+        multiAttributes = true;
+    }
+
+    /**
+     * Create a READ request to request one attribute from the remote Jolokia Agent, MBean name is specified
+     * as String.
+     *
+     * @param pObjectName object name as sting which gets converted to a {@link javax.management.ObjectName}
+     * @param pAttribute  one specific attribute to request.
+     * @throws javax.management.MalformedObjectNameException when argument is not a valid object name
+     */
+    public JolokiaReadRequest(String pObjectName, String pAttribute) throws MalformedObjectNameException {
+        this(null, pObjectName, pAttribute);
     }
 
     /**
@@ -95,11 +146,24 @@ public class JolokiaReadRequest extends JolokiaMBeanRequest {
      * as String.
      *
      * @param pObjectName object name as sting which gets converted to a {@link javax.management.ObjectName}
-     * @param pAttribute  zero, one or more attributes to request.
+     * @param pAttributes zero, one or more attributes to request.
      * @throws javax.management.MalformedObjectNameException when argument is not a valid object name
      */
-    public JolokiaReadRequest(String pObjectName, String... pAttribute) throws MalformedObjectNameException {
-        this(null, pObjectName, pAttribute);
+    public JolokiaReadRequest(String pObjectName, String... pAttributes) throws MalformedObjectNameException {
+        this(null, pObjectName, pAttributes);
+    }
+
+    /**
+     * Create a READ request to request one specific attribute from the remote Jolokia Agent, MBean name is specified
+     * as String.
+     *
+     * @param pTargetConfig proxy target configuration or <code>null</code> if no proxy should be used
+     * @param pObjectName   object name as sting which gets converted to a {@link javax.management.ObjectName}}
+     * @param pAttribute    one specific attribute to request.
+     * @throws javax.management.MalformedObjectNameException when argument is not a valid object name
+     */
+    public JolokiaReadRequest(JolokiaTargetConfig pTargetConfig, String pObjectName, String pAttribute) throws MalformedObjectNameException {
+        this(pTargetConfig, new ObjectName(pObjectName), pAttribute);
     }
 
     /**
@@ -108,11 +172,11 @@ public class JolokiaReadRequest extends JolokiaMBeanRequest {
      *
      * @param pTargetConfig proxy target configuration or <code>null</code> if no proxy should be used
      * @param pObjectName   object name as sting which gets converted to a {@link javax.management.ObjectName}}
-     * @param pAttribute    zero, one or more attributes to request.
+     * @param pAttributes   zero, one or more attributes to request.
      * @throws javax.management.MalformedObjectNameException when argument is not a valid object name
      */
-    public JolokiaReadRequest(JolokiaTargetConfig pTargetConfig, String pObjectName, String... pAttribute) throws MalformedObjectNameException {
-        this(pTargetConfig, new ObjectName(pObjectName), pAttribute);
+    public JolokiaReadRequest(JolokiaTargetConfig pTargetConfig, String pObjectName, String... pAttributes) throws MalformedObjectNameException {
+        this(pTargetConfig, new ObjectName(pObjectName), pAttributes);
     }
 
     /**
@@ -166,8 +230,8 @@ public class JolokiaReadRequest extends JolokiaMBeanRequest {
         if (hasSingleAttribute()) {
             // single attribute as string
             ret.put("attribute", attributes.get(0));
-        } else if (!hasAllAttributes()) {
-            // single attribute as array of strings
+        } else {
+            // single attribute field sent as array of strings (can be empty == all attributes)
             JSONArray attrs = new JSONArray(attributes.size());
             attrs.addAll(attributes);
             ret.put("attribute", attrs);
@@ -192,7 +256,7 @@ public class JolokiaReadRequest extends JolokiaMBeanRequest {
      * @return true if the client request is for a single attribute
      */
     public boolean hasSingleAttribute() {
-        return attributes.size() == 1;
+        return !multiAttributes;
     }
 
     /**
@@ -201,7 +265,7 @@ public class JolokiaReadRequest extends JolokiaMBeanRequest {
      * @return true if all attributes should be fetched
      */
     public boolean hasAllAttributes() {
-        return attributes.isEmpty() || attributes.contains(null) || attributes.contains("*");
+        return multiAttributes || attributes.isEmpty() || attributes.contains(null) || attributes.contains("*");
     }
 
     /**

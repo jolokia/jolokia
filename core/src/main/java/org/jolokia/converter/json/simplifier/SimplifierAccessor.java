@@ -15,7 +15,6 @@
  */
 package org.jolokia.converter.json.simplifier;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 import javax.management.AttributeNotFoundException;

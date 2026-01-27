@@ -22,7 +22,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+import javax.management.Descriptor;
+import javax.management.ImmutableDescriptor;
 import javax.management.InstanceNotFoundException;
+import javax.management.JMX;
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanConstructorInfo;
 import javax.management.MBeanInfo;
@@ -35,8 +38,19 @@ import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.QueryExp;
 import javax.management.RuntimeOperationsException;
+import javax.management.openmbean.OpenDataException;
+import javax.management.openmbean.OpenMBeanAttributeInfoSupport;
+import javax.management.openmbean.OpenMBeanConstructorInfoSupport;
+import javax.management.openmbean.OpenMBeanOperationInfo;
+import javax.management.openmbean.OpenMBeanOperationInfoSupport;
+import javax.management.openmbean.OpenMBeanParameterInfo;
+import javax.management.openmbean.OpenMBeanParameterInfoSupport;
+import javax.management.openmbean.OpenType;
+import javax.management.openmbean.SimpleType;
 
 import org.jolokia.client.request.JolokiaListRequest;
+import org.jolokia.converter.object.OpenTypeHelper;
+import org.jolokia.core.util.PropertyUtil;
 import org.jolokia.json.JSONArray;
 import org.jolokia.json.JSONObject;
 
@@ -369,9 +383,8 @@ public final class JolokiaListResponse extends JolokiaResponse<JolokiaListReques
      * @param name {@link ObjectName} passed as {@link org.jolokia.client.JolokiaOperation#LIST} argument. May
      *             be a pattern. The response contains all matching MBeans, so no need to filter the response again
      * @return
-     * @throws MalformedObjectNameException
      */
-    public List<ObjectInstance> getObjectInstances(ObjectName name) throws MalformedObjectNameException {
+    public List<ObjectInstance> getObjectInstances(ObjectName name) {
         List<ObjectInstance> result = new LinkedList<>();
 
         // already recombined return value
@@ -382,7 +395,12 @@ public final class JolokiaListResponse extends JolokiaResponse<JolokiaListReques
                 for (Entry<String, Object> e2: mbeans.entrySet()) {
                     String mbean = e2.getKey();
                     if (e2.getValue() instanceof JSONObject data && data.get("class") instanceof String cls) {
-                        result.add(new ObjectInstance(new ObjectName(domain + ":" + mbean), cls));
+                        try {
+                            result.add(new ObjectInstance(new ObjectName(domain + ":" + mbean), cls));
+                        } catch (MalformedObjectNameException e) {
+                            // should come from valid list response, so change into a runtime exception
+                            throw new IllegalStateException("Cannot convert list result '" + name + "' to an ObjectName", e);
+                        }
                     }
                 }
             }
@@ -437,7 +455,7 @@ public final class JolokiaListResponse extends JolokiaResponse<JolokiaListReques
      * @return
      * @throws InstanceNotFoundException
      */
-    public MBeanInfo getMbeanInfo(ObjectName name) throws InstanceNotFoundException {
+    public MBeanInfo getMBeanInfo(ObjectName name) throws InstanceNotFoundException {
         if (name == null) {
             // com.sun.jmx.interceptor.DefaultMBeanServerInterceptor.getMBean throws an exception
             throw new RuntimeOperationsException(new IllegalArgumentException("Object name can't be null"));
@@ -475,7 +493,7 @@ public final class JolokiaListResponse extends JolokiaResponse<JolokiaListReques
      * @return
      * @throws InstanceNotFoundException
      */
-    public JSONObject getJSONMbeanInfo(ObjectName name) throws InstanceNotFoundException {
+    public JSONObject getJSONMBeanInfo(ObjectName name) throws InstanceNotFoundException {
         if (name == null) {
             // com.sun.jmx.interceptor.DefaultMBeanServerInterceptor.getMBean throws an exception
             throw new RuntimeOperationsException(new IllegalArgumentException("Object name can't be null"));
@@ -549,7 +567,7 @@ public final class JolokiaListResponse extends JolokiaResponse<JolokiaListReques
         if (constructorsV == null || constructorsV instanceof JSONObject) {
             constructors = constructorsFrom((JSONObject) constructorsV);
         } else {
-            throw new IllegalStateException("Constructors from MBeanInfo of " + name + " are invalid: " + operationsV);
+            throw new IllegalStateException("Constructors from MBeanInfo of " + name + " are invalid: " + constructorsV);
         }
         if (notificationsV == null || notificationsV instanceof JSONObject) {
             notifications = notificationsFrom((JSONObject) notificationsV);
@@ -570,7 +588,7 @@ public final class JolokiaListResponse extends JolokiaResponse<JolokiaListReques
         if (attributes == null || attributes.isEmpty()) {
             return new MBeanAttributeInfo[0];
         }
-        //sort alphabetically to match native MBeanServer
+        // sort alphabetically to match native MBeanServer
         Map<String, Object> sorted = new TreeMap<>(attributes);
         final MBeanAttributeInfo[] result = new MBeanAttributeInfo[sorted.size()];
 
@@ -599,6 +617,29 @@ public final class JolokiaListResponse extends JolokiaResponse<JolokiaListReques
         boolean rw = json.get("rw") instanceof Boolean rwV ? rwV : false;
         boolean is = json.get("is") instanceof Boolean isV ? isV : false;
 
+        // new in Jolokia 2.5.0 - OpenType support
+        try {
+            OpenType<?> openType = OpenTypeHelper.fromJSON(json.get("openType"));
+            if (openType != null) {
+                // com.sun.jmx.mbeanserver.MXBeanIntrospector.canUseOpenInfo() is used for attributes/operations
+                // and according to JSR 174, primitive types NEVER use javax.management.openmbean.OpenMBeanAttributeInfo even
+                // if they could. The only connection to open type is in javax.management.MBeanFeatureInfo.descriptor which
+                // contains "openType" field.
+                Descriptor descriptor = new ImmutableDescriptor(Map.of(
+                    JMX.OPEN_TYPE_FIELD, openType
+                ));
+                if (SimpleType.class.isAssignableFrom(openType.getClass())) {
+                    return new MBeanAttributeInfo(name, type, desc, r, w, is, descriptor);
+                } else {
+                    return new OpenMBeanAttributeInfoSupport(name, desc, openType, r, w, is, descriptor);
+                }
+            }
+        } catch (OpenDataException ignored) {
+        }
+
+        // for example we can know only that the type is CompositeData, but we can't know the structure
+        // without seeing an example data - and that's how jolokia-client-jmx-adapter worked before
+        // list operation started returning actual OpenType information
         return new MBeanAttributeInfo(name, type, desc, r, w, is);
     }
 
@@ -645,7 +686,7 @@ public final class JolokiaListResponse extends JolokiaResponse<JolokiaListReques
         String desc = json.get("desc") instanceof String descV ? descV : "";
         String type = json.get("ret") instanceof String typeV ? typeV : "<unknown>";
         Object parametersV = json.get("args");
-        MBeanParameterInfo[] parameters;
+        Object parameters;
 
         if (parametersV instanceof JSONArray pJson) {
             parameters = parametersFrom(name, pJson);
@@ -653,7 +694,25 @@ public final class JolokiaListResponse extends JolokiaResponse<JolokiaListReques
             throw new IllegalStateException("Parameters from operation " + name + " are invalid: " + parametersV);
         }
 
-        return new MBeanOperationInfo(name, desc, parameters, type, MBeanOperationInfo.UNKNOWN);
+        // new in Jolokia 2.5.0 - OpenType support
+        try {
+            OpenType<?> openRetType = OpenTypeHelper.fromJSON(json.get("openRet"));
+            if (openRetType != null) {
+                if (parameters instanceof OpenMBeanParameterInfo[] openParams) {
+                    return new OpenMBeanOperationInfoSupport(name, desc, openParams, openRetType, MBeanOperationInfo.UNKNOWN);
+                } else {
+                    // normal parameters, but we can still sneak in the OpenType return information
+                    MBeanParameterInfo[] normalParams = (MBeanParameterInfo[]) parameters;
+                    Descriptor descriptor = new ImmutableDescriptor(Map.of(
+                        JMX.OPEN_TYPE_FIELD, openRetType
+                    ));
+                    return new MBeanOperationInfo(name, desc, normalParams, type, MBeanOperationInfo.UNKNOWN, descriptor);
+                }
+            }
+        } catch (OpenDataException ignored) {
+        }
+
+        return new MBeanOperationInfo(name, desc, (MBeanParameterInfo[]) parameters, type, MBeanOperationInfo.UNKNOWN);
     }
 
     /**
@@ -664,16 +723,24 @@ public final class JolokiaListResponse extends JolokiaResponse<JolokiaListReques
      * @param args
      * @return
      */
-    private MBeanParameterInfo[] parametersFrom(String operation, JSONArray args) {
-        final MBeanParameterInfo[] result = new MBeanParameterInfo[args.size()];
+    private Object parametersFrom(String operation, JSONArray args) {
+        final List<MBeanParameterInfo> params = new ArrayList<>(args.size());
+        boolean allOpenTypeParams = !args.isEmpty();
         for (int i = 0; i < args.size(); i++) {
             if (args.get(i) instanceof JSONObject arg) {
-                result[i] = parameterFrom(i, arg);
+                MBeanParameterInfo paramInfo = parameterFrom(i, arg);
+                params.add(paramInfo);
+                allOpenTypeParams &= paramInfo instanceof OpenMBeanParameterInfo;
             } else {
                 throw new IllegalStateException("Parameter " + i + " from operation " + operation + " is invalid: " + args.get(i));
             }
         }
-        return result;
+
+        if (allOpenTypeParams) {
+            return params.stream().map(OpenMBeanParameterInfo.class::cast).toArray(OpenMBeanParameterInfo[]::new);
+        } else {
+            return params.toArray(MBeanParameterInfo[]::new);
+        }
     }
 
     /**
@@ -687,6 +754,16 @@ public final class JolokiaListResponse extends JolokiaResponse<JolokiaListReques
         String name = parameter.get("name") instanceof String nameV ? nameV : "p" + pn;
         String type = parameter.get("type") instanceof String typeV ? typeV : "<unknown>";
         String desc = parameter.get("desc") instanceof String descV ? descV : "p" + pn;
+
+        // new in Jolokia 2.5.0 - OpenType support
+        try {
+            OpenType<?> openType = OpenTypeHelper.fromJSON(parameter.get("openType"));
+            if (openType != null) {
+                return new OpenMBeanParameterInfoSupport(name, desc, openType);
+            }
+        } catch (OpenDataException ignored) {
+        }
+
         return new MBeanParameterInfo(name, type, desc);
     }
 
@@ -732,7 +809,7 @@ public final class JolokiaListResponse extends JolokiaResponse<JolokiaListReques
     private MBeanConstructorInfo constructorFrom(String name, JSONObject json) {
         String desc = json.get("desc") instanceof String descV ? descV : "";
         Object parametersV = json.get("args");
-        MBeanParameterInfo[] parameters;
+        Object parameters;
 
         if (parametersV instanceof JSONArray pJson) {
             parameters = parametersFrom(name, pJson);
@@ -740,7 +817,11 @@ public final class JolokiaListResponse extends JolokiaResponse<JolokiaListReques
             throw new IllegalStateException("Parameters from constructor " + name + " are invalid: " + parametersV);
         }
 
-        return new MBeanConstructorInfo(name, desc, parameters);
+        if (parameters instanceof OpenMBeanParameterInfo[] openParams) {
+            return new OpenMBeanConstructorInfoSupport(name, desc, openParams);
+        } else {
+            return new MBeanConstructorInfo(name, desc, (MBeanParameterInfo[]) parameters);
+        }
     }
 
     /**

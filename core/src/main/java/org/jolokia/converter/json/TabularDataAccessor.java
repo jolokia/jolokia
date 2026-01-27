@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2013 Roland Huss
+ * Copyright 2009-2026 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 package org.jolokia.converter.json;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
@@ -157,7 +156,7 @@ public class TabularDataAccessor implements org.jolokia.converter.json.ObjectAcc
      *
      * <p>For {@link TabularData} of type <strong>#1</strong>, conforming to {@link javax.management.MXBean}
      * specification, a path access with the single {@code key} value will return the content of the {@code value}
-     * item. For non-{@link javax.management.MXBean} {@link TabularType tabular types}, w need proper path
+     * item. For non-{@link javax.management.MXBean} {@link TabularType tabular types}, we need proper path
      * specification.</p>
      *
      * @param pConverter   the global converter in order to be able do dispatch for

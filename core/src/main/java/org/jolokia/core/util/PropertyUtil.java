@@ -15,9 +15,24 @@
  */
 package org.jolokia.core.util;
 
+import java.io.InputStream;
+import java.util.Properties;
+
 public class PropertyUtil {
 
+    public static String VERSION;
+
     private PropertyUtil() {}
+
+    static {
+        try (InputStream is = PropertyUtil.class.getResourceAsStream("/jolokia-core-version.properties")) {
+            Properties props = new Properties();
+            props.load(is);
+            VERSION = props.getProperty("version");
+        } catch (Exception e) {
+            VERSION = "<unknown>";
+        }
+    }
 
     /**
      * Used to determine a system property name for Jolokia option. For example changes {@code debugMaxEntries}

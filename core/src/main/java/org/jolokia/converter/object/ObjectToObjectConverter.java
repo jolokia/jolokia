@@ -36,6 +36,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import org.jolokia.converter.json.DateFormatConfiguration;
@@ -611,7 +612,6 @@ public class ObjectToObjectConverter implements Converter<String> {
         public boolean supports(Class<?> pValueClass, Object pValue) {
             return noIntegerOverflow(pValue, Long.class, 63, Long.MIN_VALUE, Long.MAX_VALUE);
         }
-
     }
 
     private static class FloatParser implements Parser {
@@ -635,6 +635,9 @@ public class ObjectToObjectConverter implements Converter<String> {
             }
             if (pValue instanceof BigDecimal bi) {
                 return bi.compareTo(MAX_FLOAT) >= 0 && bi.compareTo(MIN_FLOAT) >= 0;
+            } else if (pValue instanceof BigInteger bi) {
+                BigDecimal bd = new BigDecimal(bi.toString());
+                return bd.compareTo(MAX_FLOAT) <= 0 && bd.compareTo(MIN_FLOAT) >= 0;
             } else if (pValue instanceof Double) {
                 double v = (double) pValue;
                 return v >= Float.MIN_VALUE && v <= Float.MAX_VALUE;
@@ -662,8 +665,11 @@ public class ObjectToObjectConverter implements Converter<String> {
             if (pValue.getClass() == Double.class) {
                 return true;
             }
-            if (pValue instanceof BigDecimal bi) {
-                return bi.compareTo(MAX_DOUBLE) <= 0 && bi.compareTo(MIN_DOUBLE) >= 0;
+            if (pValue instanceof BigDecimal bd) {
+                return bd.compareTo(MAX_DOUBLE) <= 0 && bd.compareTo(MIN_DOUBLE) >= 0;
+            } else if (pValue instanceof BigInteger bi) {
+                BigDecimal bd = new BigDecimal(bi.toString());
+                return bd.compareTo(MAX_DOUBLE) <= 0 && bd.compareTo(MIN_DOUBLE) >= 0;
             } else if (pValue instanceof Float) {
                 return true;
             }
@@ -846,6 +852,16 @@ public class ObjectToObjectConverter implements Converter<String> {
         public Object parse(String pValue) {
             return new BigInteger(pValue);
         }
+
+        @Override
+        public Object parse(Object pValue) {
+            return new BigInteger(pValue.toString());
+        }
+
+        @Override
+        public boolean supports(Class<?> pValueClass, Object pValue) {
+            return pValue instanceof Number && !(pValue instanceof BigDecimal) && !(pValue instanceof Double) && !(pValue instanceof Float);
+        }
     }
 
     private static class DateParser implements Parser, DateFormatConfigurationAware {
@@ -887,6 +903,25 @@ public class ObjectToObjectConverter implements Converter<String> {
             } catch (javax.management.MalformedObjectNameException e) {
                 throw new IllegalArgumentException("Cannot parse ObjectName " + pValue + ": " + e.getMessage(), e);
             }
+        }
+
+        @Override
+        public boolean supports(Class<?> pValueClass, Object pValue) {
+            return JSONObject.class == pValueClass && pValue instanceof JSONObject json && json.size() == 1 && json.containsKey("objectName");
+        }
+
+        @Override
+        public Object parse(Object pValue) {
+            // reverse of org.jolokia.converter.json.simplifier.ObjectNameSimplifier
+            if (pValue instanceof JSONObject json && json.get("objectName") instanceof String name) {
+                try {
+                    return ObjectName.getInstance(name);
+                } catch (MalformedObjectNameException e) {
+                    throw new IllegalArgumentException(e.getMessage(), e);
+                }
+            }
+
+            return Parser.super.parse(pValue);
         }
     }
 

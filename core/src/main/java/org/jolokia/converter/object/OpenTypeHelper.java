@@ -15,19 +15,25 @@
  */
 package org.jolokia.converter.object;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import javax.management.Descriptor;
 import javax.management.JMX;
 import javax.management.MBeanFeatureInfo;
 import javax.management.openmbean.ArrayType;
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenMBeanAttributeInfo;
 import javax.management.openmbean.OpenMBeanOperationInfo;
 import javax.management.openmbean.OpenMBeanParameterInfo;
 import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
+import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularType;
 
+import org.jolokia.core.util.ClassUtil;
 import org.jolokia.json.JSONArray;
 import org.jolokia.json.JSONObject;
 
@@ -75,6 +81,8 @@ public class OpenTypeHelper {
         Object v = descriptor == null ? null : descriptor.getFieldValue(JMX.OPEN_TYPE_FIELD);
         return v instanceof OpenType<?> openType ? openType : null;
     }
+
+    // ---- MBeanXXXInfo to JSON representation to be produced by DataUpdater services at server side
 
     public static Object toJSON(OpenType<?> type, MBeanFeatureInfo featureInfo) {
         if (type instanceof SimpleType<?> simpleType) {
@@ -160,8 +168,167 @@ public class OpenTypeHelper {
         return v;
     }
 
+    // ---- JSON representation to MBeanXXXInfo fetched by JolokiaClient and consumed by client-jmx-adapter
+    //      we expect unexpected and fail gently by returning null
+
+    public static OpenType<?> fromJSON(Object openType) throws OpenDataException {
+        // We have two options - it's either a String (SimpleType) or JSONObject (Array/Composite/Tabular)
+        if (openType instanceof String simpleOpenType) {
+            Class<Object> cls = ClassUtil.classForName(simpleOpenType);
+            if (cls != null) {
+                return ObjectToOpenTypeConverter.knownSimpleType(cls);
+            } else {
+                return null;
+            }
+        } else if (openType instanceof JSONObject complexOpenType) {
+            // array/composite/tabular types
+            Object kindV = complexOpenType.get(FIELD_KIND);
+            if (kindV instanceof String kind) {
+                Kind k = Kind.from(kind);
+                if (k == null || k == Kind.simple) {
+                    return null;
+                }
+                return switch (k) {
+                    case array -> fromJSONToArray(complexOpenType);
+                    case composite -> fromJSONToComposite(complexOpenType);
+                    case tabular -> fromJSONToTabular(complexOpenType);
+                    default -> null;
+                };
+            }
+        }
+
+        return null;
+    }
+
+    private static OpenType<?> fromJSONToArray(JSONObject complexOpenType) throws OpenDataException {
+        Object classV = complexOpenType.get(FIELD_CLASS);
+        if (!(classV instanceof String)) {
+            return null;
+        }
+        Object elemTypeV = complexOpenType.get(FIELD_ARRAY_ELEMENT_TYPE);
+        Object elemJsonType;
+        Object dimensionV = complexOpenType.get(FIELD_ARRAY_DIMENSION);
+        Object primitiveV = complexOpenType.get(FIELD_ARRAY_PRIMITIVE);
+        if (elemTypeV instanceof String || elemTypeV instanceof JSONObject) {
+            elemJsonType = elemTypeV;
+        } else {
+            return null;
+        }
+
+        if (dimensionV instanceof Number dimension && primitiveV instanceof Boolean primitive) {
+            OpenType<?> elemType = fromJSON(elemJsonType);
+            if (elemType != null) {
+                if (primitive) {
+                    // the "class" should be something like "[[I" which we can pass directly to Class.forName()
+                    Class<?> cls = ClassUtil.classForName((String) classV);
+                    return cls == null ? null : ArrayType.getPrimitiveArrayType(cls);
+                } else {
+                    return new ArrayType<>(dimension.intValue(), elemType);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private static OpenType<?> fromJSONToComposite(JSONObject complexOpenType) throws OpenDataException {
+        Object typeV = complexOpenType.get(FIELD_TYPE);
+        Object classV = complexOpenType.get(FIELD_CLASS);
+        Object descV = complexOpenType.get(FIELD_DESCRIPTION);
+        if (!(classV instanceof String && CompositeData.class.getName().equals(classV))) {
+            // only this one is expected
+            return null;
+        }
+        if (!(typeV instanceof String)) {
+            return null;
+        }
+        Object itemsV = complexOpenType.get(FIELD_COMPOSITE_ITEMS);
+        if (itemsV instanceof JSONObject items) {
+            List<String> names = new ArrayList<>(items.size());
+            List<String> descriptions = new ArrayList<>(items.size());
+            List<OpenType<?>> types = new ArrayList<>(items.size());
+
+            boolean allTypes = true;
+            for (Map.Entry<String, Object> e : items.entrySet()) {
+                String key = e.getKey();
+                Object value = e.getValue();
+
+                OpenType<?> itemType = fromJSON(value);
+                if (itemType == null) {
+                    allTypes = false;
+                    break;
+                }
+                names.add(key);
+                descriptions.add(key);
+                types.add(itemType);
+            }
+
+            if (allTypes) {
+                return new CompositeType((String) typeV, descV instanceof String desc ? desc : "",
+                    names.toArray(String[]::new),
+                    descriptions.toArray(String[]::new),
+                    types.toArray(OpenType<?>[]::new));
+            }
+        }
+
+        return null;
+    }
+
+    private static OpenType<?> fromJSONToTabular(JSONObject complexOpenType) throws OpenDataException {
+        Object typeV = complexOpenType.get(FIELD_TYPE);
+        Object classV = complexOpenType.get(FIELD_CLASS);
+        Object descV = complexOpenType.get(FIELD_DESCRIPTION);
+        if (!(classV instanceof String && TabularData.class.getName().equals(classV))) {
+            // only this one is expected
+            return null;
+        }
+        if (!(typeV instanceof String)) {
+            return null;
+        }
+        Object indexV = complexOpenType.get(FIELD_TABULAR_INDEX);
+        Object rowTypeV = complexOpenType.get(FIELD_TABULAR_ROW_TYPE);
+        if (indexV instanceof JSONArray index && rowTypeV instanceof JSONObject rowType) {
+            List<String> idx = new ArrayList<>(index.size());
+
+            boolean isFine = true;
+            for (Object item : index) {
+                if (!(item instanceof String)) {
+                    isFine = false;
+                    break;
+                } else {
+                    idx.add((String) item);
+                }
+            }
+
+            OpenType<?> compositeRowType = fromJSON(rowType);
+
+            if (isFine && compositeRowType instanceof CompositeType rowCompositeType) {
+                return new TabularType((String) typeV, descV instanceof String desc ? desc : "", rowCompositeType,
+                    idx.toArray(String[]::new));
+            }
+        }
+
+        return null;
+    }
+
     public enum Kind {
-        simple, array, composite, tabular
+        simple, array, composite, tabular;
+
+        public static Kind from(String kind) {
+            if (simple.name().equals(kind)) {
+                return simple;
+            }
+            if (array.name().equals(kind)) {
+                return array;
+            }
+            if (composite.name().equals(kind)) {
+                return composite;
+            }
+            if (tabular.name().equals(kind)) {
+                return tabular;
+            }
+            return null;
+        }
     }
 
 }

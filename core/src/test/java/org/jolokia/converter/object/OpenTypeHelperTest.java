@@ -26,7 +26,6 @@ import javax.management.MBeanOperationInfo;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.openmbean.ArrayType;
-import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenMBeanAttributeInfo;
 import javax.management.openmbean.OpenMBeanOperationInfo;
 import javax.management.openmbean.OpenType;
@@ -35,6 +34,7 @@ import javax.management.openmbean.TabularType;
 
 import org.jolokia.json.JSONArray;
 import org.jolokia.json.JSONObject;
+import org.jolokia.json.parser.JSONParser;
 import org.testng.SkipException;
 import org.testng.annotations.Test;
 
@@ -101,6 +101,14 @@ public class OpenTypeHelperTest {
     }
 
     @Test
+    public void fromJsonRepresentationOfSimpleTypes() throws Exception {
+        OpenType<?> type = OpenTypeHelper.fromJSON("java.lang.Short");
+        assertSame(type, SimpleType.SHORT);
+        type = OpenTypeHelper.fromJSON(ObjectName.class.getName());
+        assertSame(type, SimpleType.OBJECTNAME);
+    }
+
+    @Test
     public void jsonRepresentationOfArrayTypes() throws Exception {
         ArrayType<int[]> primitive1DIntegerArray = ArrayType.getPrimitiveArrayType(int[].class);
         JSONObject primitive1DIntegerArrayJSON = OpenTypeHelper.toJSON(primitive1DIntegerArray, null);
@@ -155,6 +163,24 @@ public class OpenTypeHelperTest {
     }
 
     @Test
+    public void fromJsonRepresentationOfArrayTypes() throws Exception {
+        ArrayType<int[]> primitive1DIntegerArray = ArrayType.getPrimitiveArrayType(int[].class);
+        ArrayType<int[][]> primitive2DIntegerArray = ArrayType.getPrimitiveArrayType(int[][].class);
+        ArrayType<int[]> wrapper1DIntegerArray = new ArrayType<>(1, SimpleType.INTEGER);
+        ArrayType<Integer[][]> wrapper2DIntegerArray = new ArrayType<>(2, SimpleType.INTEGER);
+
+        OpenType<?> t1 = OpenTypeHelper.fromJSON(new JSONParser().parse("{\"kind\":\"array\",\"class\":\"[I\",\"type\":\"[I\",\"primitive\":true,\"dimension\":1,\"elemType\":\"java.lang.Integer\"}"));
+        OpenType<?> t2 = OpenTypeHelper.fromJSON(new JSONParser().parse("{\"kind\":\"array\",\"class\":\"[[I\",\"type\":\"[[I\",\"primitive\":true,\"dimension\":2,\"elemType\":\"java.lang.Integer\"}"));
+        OpenType<?> t3 = OpenTypeHelper.fromJSON(new JSONParser().parse("{\"kind\":\"array\",\"class\":\"[Ljava.lang.Integer;\",\"type\":\"[Ljava.lang.Integer;\",\"primitive\":false,\"dimension\":1,\"elemType\":\"java.lang.Integer\"}"));
+        OpenType<?> t4 = OpenTypeHelper.fromJSON(new JSONParser().parse("{\"kind\":\"array\",\"class\":\"[[Ljava.lang.Integer;\",\"type\":\"[[Ljava.lang.Integer;\",\"primitive\":false,\"dimension\":2,\"elemType\":\"java.lang.Integer\"}"));
+
+        assertEquals(t1, primitive1DIntegerArray);
+        assertEquals(t2, primitive2DIntegerArray);
+        assertEquals(t3, wrapper1DIntegerArray);
+        assertEquals(t4, wrapper2DIntegerArray);
+    }
+
+    @Test
     public void jsonRepresentationOfCompositeTypes() throws Exception {
         MBeanInfo info = ManagementFactory.getPlatformMBeanServer().getMBeanInfo(new ObjectName(ManagementFactory.MEMORY_MXBEAN_NAME));
         Optional<MBeanAttributeInfo> v = Arrays.stream(info.getAttributes()).filter(i -> "HeapMemoryUsage".equals(i.getName())).findFirst();
@@ -171,6 +197,8 @@ public class OpenTypeHelperTest {
             } else {
                 fail("Expected a map of items");
             }
+
+            assertEquals(OpenTypeHelper.fromJSON(json), openMBeanAttributeInfo.getOpenType());
         } else {
             fail("Expected OpenMBeanAttributeInfo for \"HeapMemoryUsage\"");
         }
@@ -197,6 +225,8 @@ public class OpenTypeHelperTest {
             assertEquals(json.get("type"), "java.util.List<jdk.management.jfr.EventTypeInfo>");
             assertEquals(json.get("primitive"), false);
             assertEquals(json.get("dimension"), 1);
+
+            assertEquals(OpenTypeHelper.fromJSON(json), openMBeanAttributeInfo.getOpenType());
 
             Object elemType = json.get("elemType");
             if (elemType instanceof JSONObject elem) {
@@ -259,9 +289,12 @@ public class OpenTypeHelperTest {
         //     ((OpenMBeanOperationInfo) operationInfo).getReturnOpenType();
         // but this should work too
         JSONObject json = (JSONObject) OpenTypeHelper.toJSON((OpenType<?>) operationInfo.getDescriptor().getFieldValue(JMX.OPEN_TYPE_FIELD), operationInfo);
+
         assertEquals(json.get("kind"), OpenTypeHelper.Kind.tabular.name());
         assertEquals(json.get("index"), new JSONArray(List.of("key")));
         assertEquals(json.get("rowType"), OpenTypeHelper.toJSON(((TabularType) operationInfo.getDescriptor().getFieldValue(JMX.OPEN_TYPE_FIELD)).getRowType(), null));
+
+        assertEquals(OpenTypeHelper.fromJSON(json), operationInfo.getDescriptor().getFieldValue(JMX.OPEN_TYPE_FIELD));
     }
 
 }
