@@ -71,6 +71,7 @@ public class ClientReadIntegrationTest extends AbstractClientIntegrationTest {
             // all fine
         }
     }
+
     @Test
     public void error404ConnectionTest() throws Exception {
         final JolokiaReadRequest req = new JolokiaReadRequest(itSetup.getAttributeMBean(),"LongSeconds");
@@ -79,8 +80,8 @@ public class ClientReadIntegrationTest extends AbstractClientIntegrationTest {
             startWithoutAgent();
             jolokiaClient.execute(req);
             fail();
-        } catch (JolokiaRemoteException exp) {
-            assertEquals(exp.getStatus(), 404);
+        } catch (JolokiaHttpException exp) {
+            assertEquals(exp.getHttpStatus(), 404);
         }
         stop();
         start();

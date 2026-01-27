@@ -256,7 +256,7 @@ public class JolokiaReadRequest extends JolokiaMBeanRequest {
      * @return true if the client request is for a single attribute
      */
     public boolean hasSingleAttribute() {
-        return !multiAttributes;
+        return !multiAttributes || attributes.size() == 1;
     }
 
     /**
@@ -265,7 +265,7 @@ public class JolokiaReadRequest extends JolokiaMBeanRequest {
      * @return true if all attributes should be fetched
      */
     public boolean hasAllAttributes() {
-        return multiAttributes || attributes.isEmpty() || attributes.contains(null) || attributes.contains("*");
+        return attributes.isEmpty() || attributes.contains(null) || attributes.contains("*");
     }
 
     /**

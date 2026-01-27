@@ -359,9 +359,8 @@ public class JolokiaServerTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*password.*")
-    public void invalidConfig() throws IOException, InterruptedException {
+    public void invalidConfig() throws IOException {
         JvmAgentConfig cfg = new JvmAgentConfig("user=roland,port=" + EnvTestUtil.getFreePort());
-        Thread.sleep(1000);
         new JolokiaServer(cfg);
     }
 

@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
+import org.jolokia.core.util.ClassUtil;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -127,9 +128,13 @@ public class ClassUtilTest {
         org.jolokia.core.util.ClassUtil.newInstance("blubber.bla");
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*NoSuchMethodException.*")
+    @Test
     public void testNewInstanceFail2() {
-        org.jolokia.core.util.ClassUtil.newInstance("java.lang.String",Boolean.TRUE);
+        try {
+            ClassUtil.newInstance("java.lang.String",Boolean.TRUE);
+        } catch (IllegalArgumentException e) {
+            assertTrue(e.getCause() instanceof NoSuchMethodException);
+        }
     }
 
     @Test
@@ -168,24 +173,35 @@ public class ClassUtilTest {
         org.jolokia.core.util.ClassUtil.applyMethod(test,"setStringProp",new Object[] { null });
         assertNull(test.stringProp);
     }
-    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*NoSuchMethod.*")
+
+    @Test
     public void testApplyWithArgsFail1() {
         Map<String,String> map = new HashMap<>();
-        org.jolokia.core.util.ClassUtil.applyMethod(map, "putBlubber", "hello", "world");
+        try {
+            ClassUtil.applyMethod(map, "putBlubber", "hello", "world");
+        } catch (IllegalArgumentException e) {
+            assertTrue(e.getCause() instanceof NoSuchMethodException);
+        }
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*NoSuchMethod.*")
+    @Test
     public void testApplyWithFail2() {
         ClassUtilTest test = new ClassUtilTest();
-        org.jolokia.core.util.ClassUtil.applyMethod(test,"setStringProp",Boolean.TRUE);
+        try {
+            ClassUtil.applyMethod(test,"setStringProp",Boolean.TRUE);
+        } catch (IllegalArgumentException e) {
+            assertTrue(e.getCause() instanceof NoSuchMethodException);
+        }
     }
 
-
-    @Test(expectedExceptions = IllegalArgumentException.class,expectedExceptionsMessageRegExp = ".*NoSuchMethodException.*")
+    @Test
     public void testApplyFail1() {
-        org.jolokia.core.util.ClassUtil.applyMethod(new Object(),"bullablu");
+        try {
+            ClassUtil.applyMethod(new Object(), "bullablu");
+        } catch (IllegalArgumentException e) {
+            assertTrue(e.getCause() instanceof NoSuchMethodException);
+        }
     }
-
 
     @Test
     public void testNewInstanceWithConstructor() {

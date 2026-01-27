@@ -35,7 +35,7 @@ import org.jolokia.server.core.util.jmx.*;
 public class TestJolokiaContext implements JolokiaContext {
 
     // Switch on for more debugging
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     Map<Class<?>, SortedSet<?>> services;
     org.jolokia.core.api.LogHandler logHandler;

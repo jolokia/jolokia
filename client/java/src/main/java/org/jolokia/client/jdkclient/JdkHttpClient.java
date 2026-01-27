@@ -40,7 +40,7 @@ import org.jolokia.client.JolokiaQueryParameter;
 import org.jolokia.client.JolokiaTargetConfig;
 import org.jolokia.client.exception.JolokiaConnectException;
 import org.jolokia.client.exception.JolokiaException;
-import org.jolokia.client.exception.JolokiaRemoteException;
+import org.jolokia.client.exception.JolokiaHttpException;
 import org.jolokia.client.exception.JolokiaTimeoutException;
 import org.jolokia.client.request.HttpMethod;
 import org.jolokia.client.request.JolokiaRequest;
@@ -240,15 +240,15 @@ public class JdkHttpClient implements HttpClientSpi<HttpClient> {
             HttpResponse<InputStream> response = client.send(httpRequest, responseHandler);
             int errorCode = response.statusCode();
 
+            if (errorCode != 200) {
+                // no need to parse, because Jolokia JSON responses for errors are sent with HTTP 200 code
+                throw new JolokiaHttpException("HTTP error " + errorCode + " sending " + requestType + " Jolokia request", errorCode);
+            }
+
             // just parse without interpretation
             InputStream stream = response.body();
             if (stream != null) {
                 try (InputStream body = stream) {
-                    if (errorCode != 200) {
-                        // no need to parse, because Jolokia JSON responses for errors are sent with HTTP 200 code
-                        throw new JolokiaException("HTTP error " + errorCode + " sending " + requestType + " Jolokia request");
-                    }
-
                     Optional<String> encoding = response.headers().firstValue("Content-Encoding");
                     if (encoding.isEmpty()) {
                         encoding = Optional.of((config.contentCharset() == null ? StandardCharsets.ISO_8859_1 : config.contentCharset()).name());

@@ -109,7 +109,9 @@ public class ListHandlerMockTest extends BaseHandlerTest {
         @SuppressWarnings("unchecked")
         Map<String, ?> rt = (Map<String, ?>) jl.get("type=Runtime");
         assertNotNull(rt.get("error"));
-        assertEquals(rt.size(),1);
+        assertNotNull(rt.get(".error"));
+        assertNotNull(rt.get("error_type"));
+        assertEquals(rt.size(), 3);
     }
 
     @Test(expectedExceptions = {IOException.class})
