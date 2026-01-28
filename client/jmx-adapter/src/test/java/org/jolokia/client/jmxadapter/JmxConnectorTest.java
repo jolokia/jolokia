@@ -17,6 +17,8 @@ package org.jolokia.client.jmxadapter;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadInfo;
+import java.lang.management.ThreadMXBean;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Map;
@@ -35,6 +37,7 @@ import javax.management.MBeanServer;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 import javax.management.StandardMBean;
+import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenDataException;
@@ -531,6 +534,25 @@ public class JmxConnectorTest {
         assertEquals(list.size(), 1);
 
         platform.unregisterMBean(name);
+    }
+
+    @Test
+    public void invokeKnownMXBean() throws Exception {
+        ObjectName threading = new ObjectName(ManagementFactory.THREAD_MXBEAN_NAME);
+        long id = Thread.currentThread().getId();
+
+        // proxy access
+        ThreadMXBean proxy = JMX.newMXBeanProxy(connector.getMBeanServerConnection(), threading, ThreadMXBean.class);
+        ThreadInfo info = proxy.getThreadInfo(id);
+        assertEquals(info.getThreadName(), Thread.currentThread().getName());
+
+        // OpenType access
+        Object info2 = connector.getMBeanServerConnection().invoke(threading, "getThreadInfo", new Object[]{id}, new String[]{"long"});
+        if (info2 instanceof CompositeData cd) {
+            assertEquals(cd.get("threadName"), Thread.currentThread().getName());
+        } else {
+            fail("Expected CompositedData, got " + info2.getClass().getName());
+        }
     }
 
 }
