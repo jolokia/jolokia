@@ -260,7 +260,15 @@ public class CryptoUtil {
             return new RSAPrivateCrtKeySpec(modulus, publicExponent, privateExponent, primeP, primeQ,
                 primeExponentP, primeExponentQ, crtCoefficient);
         } else if (cryptoStructure.hint == StructureHint.DSA_PRIVATE_KEY) {
-            // Looking for (can't find RFC or ASN.1 grammar):
+            // Looking for this structure - only in https://datatracker.ietf.org/doc/html/draft-woodhouse-cert-best-practice-01#appendix-B:
+            // DSAPrivateKey ::= SEQUENCE {
+            //     version  INTEGER, -- should be zero
+            //     p        INTEGER,
+            //     q        INTEGER,
+            //     g        INTEGER,
+            //     pub      INTEGER, -- public
+            //     priv     INTEGER, -- private
+            // }
             // $ openssl asn1parse -inform der -in DSA-legacy.der
             //    0:d=0  hl=4 l= 845 cons: SEQUENCE
             //    4:d=1  hl=2 l=   1 prim: INTEGER           :00
@@ -304,7 +312,7 @@ public class CryptoUtil {
                 intCount++;
             }
 
-            BigInteger probablyVersion = ((DERInteger) seq[0]).asBigInteger();
+            BigInteger version = ((DERInteger) seq[0]).asBigInteger();
             BigInteger p = ((DERInteger) seq[1]).asBigInteger();
             BigInteger q = ((DERInteger) seq[2]).asBigInteger();
             BigInteger g = ((DERInteger) seq[3]).asBigInteger();
