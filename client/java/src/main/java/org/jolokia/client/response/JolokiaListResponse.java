@@ -41,7 +41,6 @@ import javax.management.RuntimeOperationsException;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenMBeanAttributeInfoSupport;
 import javax.management.openmbean.OpenMBeanConstructorInfoSupport;
-import javax.management.openmbean.OpenMBeanOperationInfo;
 import javax.management.openmbean.OpenMBeanOperationInfoSupport;
 import javax.management.openmbean.OpenMBeanParameterInfo;
 import javax.management.openmbean.OpenMBeanParameterInfoSupport;
@@ -49,8 +48,8 @@ import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
 
 import org.jolokia.client.request.JolokiaListRequest;
+import org.jolokia.converter.object.ObjectToOpenTypeConverter;
 import org.jolokia.converter.object.OpenTypeHelper;
-import org.jolokia.core.util.PropertyUtil;
 import org.jolokia.json.JSONArray;
 import org.jolokia.json.JSONObject;
 
@@ -629,7 +628,14 @@ public final class JolokiaListResponse extends JolokiaResponse<JolokiaListReques
                     JMX.OPEN_TYPE_FIELD, openType
                 ));
                 if (SimpleType.class.isAssignableFrom(openType.getClass())) {
-                    return new MBeanAttributeInfo(name, type, desc, r, w, is, descriptor);
+                    SimpleType<?> simpleType = ObjectToOpenTypeConverter.knownPrimitiveType(type);
+                    if (simpleType != null) {
+                        // this is really a primitive type
+                        return new MBeanAttributeInfo(name, type, desc, r, w, is, descriptor);
+                    } else {
+                        // this should be a wrapped type, so can be open attribute info
+                        return new OpenMBeanAttributeInfoSupport(name, desc, openType, r, w, is, descriptor);
+                    }
                 } else {
                     return new OpenMBeanAttributeInfoSupport(name, desc, openType, r, w, is, descriptor);
                 }
@@ -759,7 +765,22 @@ public final class JolokiaListResponse extends JolokiaResponse<JolokiaListReques
         try {
             OpenType<?> openType = OpenTypeHelper.fromJSON(parameter.get("openType"));
             if (openType != null) {
-                return new OpenMBeanParameterInfoSupport(name, desc, openType);
+                Descriptor descriptor = new ImmutableDescriptor(Map.of(
+                    JMX.OPEN_TYPE_FIELD, openType
+                ));
+
+                if (SimpleType.class.isAssignableFrom(openType.getClass())) {
+                    SimpleType<?> simpleType = ObjectToOpenTypeConverter.knownPrimitiveType(type);
+                    if (simpleType != null) {
+                        // this is really a primitive type
+                        return new MBeanParameterInfo(name, type, desc, descriptor);
+                    } else {
+                        // this should be a wrapped type, so can be open attribute info
+                        return new OpenMBeanParameterInfoSupport(name, desc, openType, descriptor);
+                    }
+                } else {
+                    return new OpenMBeanParameterInfoSupport(name, desc, openType, descriptor);
+                }
             }
         } catch (OpenDataException ignored) {
         }

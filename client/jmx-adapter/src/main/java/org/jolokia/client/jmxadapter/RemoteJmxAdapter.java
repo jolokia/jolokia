@@ -95,6 +95,7 @@ import org.jolokia.json.JSONObject;
  * are supported and the remaining ones throw an {@link UnsupportedOperationException} (for example we can't call
  * {@link MBeanServerConnection#createMBean(String, ObjectName)}).</p>
  */
+@SuppressWarnings("DuplicatedCode")
 public class RemoteJmxAdapter implements MBeanServerConnection {
 
     private static final Logger LOG = Logger.getLogger("org.jolokia.client.jmx");
@@ -118,9 +119,6 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
 
     /** Agent ID from Jolokia {@code /version} endpoint */
     private String agentId;
-
-    /** Agent version from Jolokia {@code /version} endpoint */
-    private String agentVersion = "<unknown>";
 
     /** {@link JolokiaClient} to communicate with the remote Jolokia Agent using JSON/HTTP protocol */
     private final JolokiaClient client;
@@ -268,10 +266,11 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
             String protocolVersion = response.getProtocolVersion();
             JSONObject value = response.getValue();
             JSONObject config = (JSONObject) value.get("config");
-            this.agentId = String.valueOf(config == null ? "jolokia-agent" : config.get("agentId"));
+            agentId = String.valueOf(config == null ? "jolokia-agent" : config.get("agentId"));
             Object version = value.get("agent");
+            LOG.info("Remote Agent ID: " + agentId);
             if (version instanceof String v) {
-                this.agentVersion = v;
+                LOG.info("Remote Agent version: " + v);
             }
         } catch (UncheckedJmxAdapterException e) {
             Throwable cause = e.getCause();
@@ -620,8 +619,11 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
                 if (info == null) {
                     throw new AttributeNotFoundException("Can't find MBeanAttributeInfo for " + attribute + " attribute of " + name);
                 }
-                return convertValue(name, TypeHelper.attributeKey(name, info), info.getType(),
-                    info instanceof OpenMBeanAttributeInfo openInfo ? openInfo.getOpenType() : null, value);
+                OpenType<?> openType = info instanceof OpenMBeanAttributeInfo openInfo ? openInfo.getOpenType() : null;
+                if (openType == null) {
+                    openType = OpenTypeHelper.findOpenType(info.getDescriptor());
+                }
+                return convertValue(name, TypeHelper.attributeKey(name, info), info.getType(), openType, value);
             }
         } catch (UncheckedJmxAdapterException e) {
             Throwable cause = e.getCause();
@@ -675,8 +677,12 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
                     // any other value/type is a proper value
                     MBeanAttributeInfo info = getAttributeTypeFromMBeanInfo(name, attribute);
                     if (info != null) {
+                        OpenType<?> openType = info instanceof OpenMBeanAttributeInfo openInfo ? openInfo.getOpenType() : null;
+                        if (openType == null) {
+                            openType = OpenTypeHelper.findOpenType(info.getDescriptor());
+                        }
                         result.add(new Attribute(attribute, convertValue(name, TypeHelper.attributeKey(name, info), info.getType(),
-                            info instanceof OpenMBeanAttributeInfo openInfo ? openInfo.getOpenType() : null, v)));
+                            openType, v)));
                     }
                 }
             }
@@ -775,8 +781,12 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
                     MBeanAttributeInfo info = getAttributeTypeFromMBeanInfo(name, attribute);
                     if (info != null) {
                         // remember to use new value - Jolokia returns old value
+                        OpenType<?> openType = info instanceof OpenMBeanAttributeInfo openInfo ? openInfo.getOpenType() : null;
+                        if (openType == null) {
+                            openType = OpenTypeHelper.findOpenType(info.getDescriptor());
+                        }
                         Object value = convertValue(res.getRequest().getObjectName(), TypeHelper.attributeKey(name, info), info.getType(),
-                            info instanceof OpenMBeanAttributeInfo openInfo ? openInfo.getOpenType() : null, res.getValue());
+                            openType, res.getValue());
                         result.add(new Attribute(attribute, value));
                     }
                 }
@@ -801,27 +811,56 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
         return result;
     }
 
-            @Override
-            public Object invoke(ObjectName name, String operationName, Object[] params, String[] signature)
-                    throws InstanceNotFoundException, MBeanException, IOException {
-                validateNonPatternObjectName(name);
-                // JVisualVM may send null for no parameters. For us, the signature is more important
-                if (signature == null || signature.length == 0) {
-                    params = new Object[0];
-                }
-                try {
-                    final JolokiaExecResponse response =
-                        unwrapExecute(
-                            new JolokiaExecRequest(name, operationName + TypeHelper.buildSignature(signature), params));
+    @Override
+    public Object invoke(ObjectName name, String operationName, Object[] params, String[] signature)
+            throws InstanceNotFoundException, MBeanException, ReflectionException, IOException {
+        validateNonPatternObjectName(name);
 
-                    return null;//convertValue(name, operationName, response.getValue(), getOperationTypeFromMBeanInfo(name, operationName, signature));
-                } catch (UncheckedJmxAdapterException e) {
-                    if (e.getCause() instanceof JolokiaRemoteException) {
-                        throw new MBeanException((Exception) e.getCause());
-                    }
-                    throw e;
+        // JVisualVM may send null for no parameters. For us, the signature is more important
+        if (signature == null || signature.length == 0) {
+            params = new Object[0];
+        }
+
+        try {
+            JolokiaExecRequest request = new JolokiaExecRequest(name, operationName + TypeHelper.buildSignature(signature), params);
+            final JolokiaExecResponse execResponse = unwrapExecute(request);
+            if (execResponse != null) {
+                Object value = execResponse.getValue();
+                handleJolokiaResponseExceptions(request, value);
+
+                MBeanOperationInfo info = getOperationTypeFromMBeanInfo(name, operationName, signature);
+                if (info == null) {
+                    // see com.sun.jmx.mbeanserver.PerInterface.noSuchMethod
+                    throw new MBeanException(new ReflectionException(new NoSuchMethodException("Can't find MBeanOperationInfo for " + operationName + " operation of " + name)));
                 }
+                OpenType<?> retOpenType = info instanceof OpenMBeanOperationInfo openInfo ? openInfo.getReturnOpenType() : null;
+                if (retOpenType == null) {
+                    retOpenType = OpenTypeHelper.findOpenType(info.getDescriptor());
+                }
+                return convertValue(name, TypeHelper.operationKey(name, info), info.getReturnType(), retOpenType, value);
             }
+        } catch (UncheckedJmxAdapterException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof InstanceNotFoundException instanceNotFoundException) {
+                throw instanceNotFoundException;
+            }
+            if (cause instanceof MBeanException mBeanException) {
+                throw mBeanException;
+            }
+            if (cause instanceof ReflectionException reflectionException) {
+                throw reflectionException;
+            }
+            if (cause instanceof RuntimeException runtimeException) {
+                throw runtimeException;
+            }
+            if (cause instanceof JMException || cause instanceof JolokiaRemoteException) {
+                // panic - handleJolokiaResponseExceptions couldn't find any exception to throw...
+                e.throwGenericJMRuntimeCause();
+            }
+        }
+
+        throw new MBeanException(new ReflectionException(new NoSuchMethodException("Can't invoke " + operationName + " of " + name + " (No response received)")));
+    }
 
     // ------ Notification methods
 
@@ -1131,6 +1170,33 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
                 return attribute;
             }
         }
+
+        return null;
+    }
+
+    /**
+     * Get an {@link MBeanOperationInfo} for an operation of an MBean
+     *
+     * @param objectName
+     * @param operationName
+     * @param signature
+     * @return
+     * @throws IOException
+     * @throws InstanceNotFoundException
+     */
+    private MBeanOperationInfo getOperationTypeFromMBeanInfo(ObjectName objectName, String operationName, String[] signature)
+            throws IOException, InstanceNotFoundException {
+        final MBeanInfo mBeanInfo = getMBeanInfo(objectName);
+        if (signature == null) {
+            signature = new String[0];
+        }
+        for (final MBeanOperationInfo operation : mBeanInfo.getOperations()) {
+            if (operationName.equals(operation.getName()) &&
+                Arrays.equals(Arrays.stream(operation.getSignature()).map(MBeanParameterInfo::getType).toArray(String[]::new), signature)) {
+                return operation;
+            }
+        }
+
         return null;
     }
 
@@ -1210,23 +1276,6 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
         } catch (MalformedObjectNameException e) {
             throw new UncheckedJmxAdapterException(e);
         }
-    }
-
-    private String getOperationTypeFromMBeanInfo(ObjectName name, String operationName, String[] signature)
-        throws IOException, InstanceNotFoundException {
-        final MBeanInfo mBeanInfo = getMBeanInfo(name);
-        if (signature == null) {
-            signature = new String[0];
-        }
-        for (final MBeanOperationInfo operation : mBeanInfo.getOperations()) {
-            if (operationName.equals(operation.getName()) &&
-                Arrays.equals(
-                    Arrays.stream(operation.getSignature()).map(MBeanParameterInfo::getType).toArray(String[]::new),
-                    signature)) {
-                return operation.getReturnType();
-            }
-        }
-        return null;
     }
 
     String getId() {

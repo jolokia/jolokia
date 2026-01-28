@@ -18,6 +18,7 @@ package org.jolokia.client.jmxadapter;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Logger;
@@ -25,18 +26,25 @@ import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
+import javax.management.JMX;
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanInfo;
+import javax.management.MBeanOperationInfo;
+import javax.management.MBeanParameterInfo;
 import javax.management.MBeanServer;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 import javax.management.StandardMBean;
+import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenMBeanAttributeInfo;
 import javax.management.openmbean.OpenMBeanAttributeInfoSupport;
+import javax.management.openmbean.OpenMBeanOperationInfoSupport;
 import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
+import javax.management.openmbean.TabularData;
+import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
@@ -48,7 +56,9 @@ import org.jolokia.client.jmxadapter.beans.Custom2;
 import org.jolokia.client.jmxadapter.beans.CustomDynamic;
 import org.jolokia.client.jmxadapter.beans.CustomDynamicMBean;
 import org.jolokia.client.jmxadapter.beans.ManyTypes;
+import org.jolokia.client.jmxadapter.beans.Mixed;
 import org.jolokia.client.jmxadapter.beans.Settable1;
+import org.jolokia.client.jmxadapter.beans.Settable1MXBean;
 import org.jolokia.client.jmxadapter.beans.SimpleIllegal1;
 import org.jolokia.client.jmxadapter.beans.SimpleIllegal2;
 import org.jolokia.client.jmxadapter.beans.SimpleIllegal3;
@@ -61,9 +71,13 @@ import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
 
-public class JolokiaJmxConnectorTest {
+/**
+ * Tests that compare results from {@link MBeanServer platform MBeanServer} and Jolokia implementation
+ * of {@link javax.management.MBeanServerConnection}.
+ */
+public class JmxConnectorTest {
 
-    private static final Logger LOG = Logger.getLogger(JolokiaJmxConnectorTest.class.getName());
+    private static final Logger LOG = Logger.getLogger(JmxConnectorTest.class.getName());
 
     private JolokiaServer server;
     private MBeanServer platform;
@@ -73,6 +87,8 @@ public class JolokiaJmxConnectorTest {
     private ObjectName allOpenTypesName;
     private ObjectName manyTypesName;
     private ObjectName customDynamicName;
+    private ObjectName jfr;
+    private ObjectName mixedName;
 
     @BeforeClass
     public void startJVMAgent() throws Exception {
@@ -87,11 +103,16 @@ public class JolokiaJmxConnectorTest {
 
         platform = ManagementFactory.getPlatformMBeanServer();
 
+        jfr = ObjectName.getInstance("jdk.management.jfr:type=FlightRecorder");
+
         allOpenTypesName = ObjectName.getInstance("jolokia:test=JolokiaJmxConnectorTest1");
         platform.registerMBean(new AllOpenTypes(), allOpenTypesName);
 
         manyTypesName = ObjectName.getInstance("jolokia:test=JolokiaJmxConnectorTest2");
         platform.registerMBean(new ManyTypes(), manyTypesName);
+
+        mixedName = ObjectName.getInstance("jolokia:test=Mixed>");
+        platform.registerMBean(new Mixed(), mixedName);
 
         // non-MXBean which should not be assumed to use key+value items for the rowType of TabularType
         customDynamicName = ObjectName.getInstance("jolokia:test=CustomDynamic");
@@ -156,6 +177,66 @@ public class JolokiaJmxConnectorTest {
         assertTrue(byteArrayPrimitiveValue instanceof byte[]);
         byteArrayValue = connector.getMBeanServerConnection().getAttribute(manyTypesName, "ByteArray");
         assertTrue(byteArrayValue instanceof Byte[]);
+    }
+
+    @Test
+    public void getMixedInfoForIntrospection() throws Exception {
+        MBeanInfo platformInfo = platform.getMBeanInfo(mixedName);
+        MBeanInfo jolokiaInfo = connector.getMBeanServerConnection().getMBeanInfo(mixedName);
+
+        Map<String, MBeanAttributeInfo> platformAttrs = new TreeMap<>();
+        Arrays.stream(platformInfo.getAttributes()).forEach(attr -> platformAttrs.put(attr.getName(), attr));
+        Arrays.stream(jolokiaInfo.getAttributes()).forEach(attr -> {
+            MBeanAttributeInfo p = platformAttrs.get(attr.getName());
+            assertEquals(attr.getType(), p.getType());
+            if (attr instanceof OpenMBeanAttributeInfoSupport openAttr) {
+                assertEquals(openAttr.getOpenType(), ((OpenMBeanAttributeInfoSupport) p).getOpenType());
+            }
+        });
+
+        Map<String, MBeanOperationInfo> platformOps = new TreeMap<>();
+        Arrays.stream(platformInfo.getOperations()).forEach(op -> {
+            String sig = TypeHelper.buildSignature(Arrays.stream(op.getSignature()).map(MBeanParameterInfo::getType).toArray(String[]::new));
+            platformOps.put(op.getName() + sig, op);
+        });
+        Arrays.stream(jolokiaInfo.getOperations()).forEach(op -> {
+            String sig = TypeHelper.buildSignature(Arrays.stream(op.getSignature()).map(MBeanParameterInfo::getType).toArray(String[]::new));
+            MBeanOperationInfo p = platformOps.get(op.getName() + sig);
+            assertEquals(op.getReturnType(), p.getReturnType());
+            if (op instanceof OpenMBeanOperationInfoSupport openOp) {
+                assertEquals(openOp.getReturnOpenType(), ((OpenMBeanOperationInfoSupport) p).getReturnOpenType());
+            }
+        });
+    }
+
+    @Test
+    public void getJFRInfoForIntrospection() throws Exception {
+        MBeanInfo platformInfo = platform.getMBeanInfo(jfr);
+        MBeanInfo jolokiaInfo = connector.getMBeanServerConnection().getMBeanInfo(jfr);
+
+        Map<String, MBeanAttributeInfo> platformAttrs = new TreeMap<>();
+        Arrays.stream(platformInfo.getAttributes()).forEach(attr -> platformAttrs.put(attr.getName(), attr));
+        Arrays.stream(jolokiaInfo.getAttributes()).forEach(attr -> {
+            MBeanAttributeInfo p = platformAttrs.get(attr.getName());
+            assertEquals(attr.getType(), p.getType());
+            if (attr instanceof OpenMBeanAttributeInfoSupport openAttr) {
+                assertEquals(openAttr.getOpenType(), ((OpenMBeanAttributeInfoSupport) p).getOpenType());
+            }
+        });
+
+        Map<String, MBeanOperationInfo> platformOps = new TreeMap<>();
+        Arrays.stream(platformInfo.getOperations()).forEach(op -> {
+            String sig = TypeHelper.buildSignature(Arrays.stream(op.getSignature()).map(MBeanParameterInfo::getType).toArray(String[]::new));
+            platformOps.put(op.getName() + sig, op);
+        });
+        Arrays.stream(jolokiaInfo.getOperations()).forEach(op -> {
+            String sig = TypeHelper.buildSignature(Arrays.stream(op.getSignature()).map(MBeanParameterInfo::getType).toArray(String[]::new));
+            MBeanOperationInfo p = platformOps.get(op.getName() + sig);
+            assertEquals(op.getReturnType(), p.getReturnType());
+            if (op instanceof OpenMBeanOperationInfoSupport openOp) {
+                assertEquals(openOp.getReturnOpenType(), ((OpenMBeanOperationInfoSupport) p).getReturnOpenType());
+            }
+        });
     }
 
     @Test
@@ -230,20 +311,30 @@ public class JolokiaJmxConnectorTest {
     }
 
     @Test
-    public void getMBeanInfo() throws Exception {
+    public void getMBeanInfoForKnownMBean() throws Exception {
         ObjectName cl = ObjectName.getInstance("java.lang:type=Memory");
-        javax.management.MBeanInfo info = connector.getMBeanServerConnection().getMBeanInfo(cl);
+        MBeanInfo jolokiaInfo = connector.getMBeanServerConnection().getMBeanInfo(cl);
         MBeanInfo platformInfo = platform.getMBeanInfo(cl);
-        assertNotNull(info);
 
-        assertEquals(info.getClassName(), platformInfo.getClassName());
-        assertEquals(info.getDescription(), platformInfo.getDescription());
-        assertEquals(info.getAttributes().length, platformInfo.getAttributes().length);
+        Object usage1 = platform.getAttribute(cl, "HeapMemoryUsage");
+        Object usage2 = connector.getMBeanServerConnection().getAttribute(cl, "HeapMemoryUsage");
+        // previously Martin was "recursively" building types by checking some hardcoded data
+        // he used javax.management.openmbean.SimpleType.isValue() for example - good to remember!
+        // of course it fails if there's some missing data (optional fields in CompositeData or no rows in TabularData)
+        assertNotNull(usage1);
+        assertNotNull(usage2);
+
+        // we can almost do this:
+        //assertEquals(info2, info1);
+        // but the issue is with the Descriptor fields which are not reconstructed 1:1
+        assertEquals(jolokiaInfo.getClassName(), platformInfo.getClassName());
+        assertEquals(jolokiaInfo.getDescription(), platformInfo.getDescription());
+        assertEquals(jolokiaInfo.getAttributes().length, platformInfo.getAttributes().length);
 
         Map<String, MBeanAttributeInfo> m1 = new TreeMap<>();
         Map<String, MBeanAttributeInfo> m2 = new TreeMap<>();
-        for (int a = 0; a < info.getAttributes().length; a++) {
-            m1.put(info.getAttributes()[a].getName(), info.getAttributes()[a]);
+        for (int a = 0; a < jolokiaInfo.getAttributes().length; a++) {
+            m1.put(jolokiaInfo.getAttributes()[a].getName(), jolokiaInfo.getAttributes()[a]);
             m2.put(platformInfo.getAttributes()[a].getName(), platformInfo.getAttributes()[a]);
         }
         for (String a : m1.keySet()) {
@@ -310,19 +401,6 @@ public class JolokiaJmxConnectorTest {
     }
 
     @Test
-    public void getCompositeAttributeFromKnownMBean() throws Exception {
-        ObjectName cl = ObjectName.getInstance("java.lang:type=Memory");
-        Object usage1 = platform.getAttribute(cl, "HeapMemoryUsage");
-        Object usage2 = connector.getMBeanServerConnection().getAttribute(cl, "HeapMemoryUsage");
-
-        // previously Martin was "recursively" building types by checking some hardcoded data
-        // he used javax.management.openmbean.SimpleType.isValue() for example - good to remember!
-        // of course it fails if there's some missing data (optional fields in CompositeData or no rows in TabularData)
-        assertNotNull(usage1);
-        assertNotNull(usage2);
-    }
-
-    @Test
     public void firstGetAttributesCallFromJConsole() throws Exception {
         // when debugging JConsole with Jolokia adapter, I found this call to be the first (LoadedClassCount attr)
         ObjectName cl = ObjectName.getInstance("java.lang:type=ClassLoading");
@@ -354,6 +432,52 @@ public class JolokiaJmxConnectorTest {
 
         connector.getMBeanServerConnection().setAttribute(name, new Attribute("BigIntValue", BigInteger.TEN));
         assertEquals(bean.bigIntValue, BigInteger.TEN);
+
+        platform.unregisterMBean(name);
+    }
+
+    @Test
+    public void setTabularAttribute() throws Exception {
+        Settable1 bean = new Settable1();
+        ObjectName name = new ObjectName("jolokia:type=Settable1");
+        platform.registerMBean(bean, name);
+
+        MBeanInfo info = connector.getMBeanServerConnection().getMBeanInfo(name);
+        MBeanAttributeInfo[] attrs = info.getAttributes();
+        MBeanAttributeInfo attrInfo = Arrays.stream(attrs).filter(a -> a.getName().equals("Mapping")).findFirst().orElseThrow(AttributeNotFoundException::new);
+        assertTrue(attrInfo instanceof OpenMBeanAttributeInfo);
+        OpenType<?> type = ((OpenMBeanAttributeInfo) attrInfo).getOpenType();
+        assertTrue(type instanceof TabularType);
+
+        TabularData td = new TabularDataSupport((TabularType) type);
+        td.put(new CompositeDataSupport(td.getTabularType().getRowType(), Map.of(
+            "key", "item1",
+            "value", ObjectName.getInstance(ManagementFactory.MEMORY_MXBEAN_NAME)
+        )));
+        td.put(new CompositeDataSupport(td.getTabularType().getRowType(), Map.of(
+            "key", "item2",
+            "value", ObjectName.getInstance(ManagementFactory.RUNTIME_MXBEAN_NAME)
+        )));
+        connector.getMBeanServerConnection().setAttribute(name, new Attribute("Mapping", td));
+        assertEquals(bean.getMapping().get("item2").getCanonicalName(), ManagementFactory.RUNTIME_MXBEAN_NAME);
+
+        platform.unregisterMBean(name);
+    }
+
+    @Test
+    public void setTabularAttributeViaMXBeanProxy() throws Exception {
+        Settable1 bean = new Settable1();
+        ObjectName name = new ObjectName("jolokia:type=Settable1");
+        platform.registerMBean(bean, name);
+
+        Settable1MXBean settable = JMX.newMXBeanProxy(connector.getMBeanServerConnection(), name, Settable1MXBean.class);
+
+        settable.setMapping(Map.of(
+            "item1", ObjectName.getInstance(ManagementFactory.MEMORY_MXBEAN_NAME),
+            "item2", ObjectName.getInstance(ManagementFactory.RUNTIME_MXBEAN_NAME)
+        ));
+
+        assertEquals(bean.getMapping().get("item2").getCanonicalName(), ManagementFactory.RUNTIME_MXBEAN_NAME);
 
         platform.unregisterMBean(name);
     }

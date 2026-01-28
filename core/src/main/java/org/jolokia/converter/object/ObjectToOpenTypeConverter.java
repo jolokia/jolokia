@@ -57,6 +57,7 @@ import javax.management.openmbean.SimpleType;
  */
 public class ObjectToOpenTypeConverter implements Converter<OpenType<?>> {
 
+    private static final Map<String, SimpleType<?>> PRIMITIVE_OPENTYPE_MAP = new HashMap<>();
     private static final Map<Class<?>, SimpleType<?>> SIMPLE_OPENTYPE_MAP = new HashMap<>();
 
     protected final boolean forgiving;
@@ -66,6 +67,15 @@ public class ObjectToOpenTypeConverter implements Converter<OpenType<?>> {
 
     static {
         // All known simple OpenTypes
+        PRIMITIVE_OPENTYPE_MAP.put(boolean.class.getName(), SimpleType.BOOLEAN);
+        PRIMITIVE_OPENTYPE_MAP.put(char.class.getName(), SimpleType.CHARACTER);
+        PRIMITIVE_OPENTYPE_MAP.put(byte.class.getName(), SimpleType.BYTE);
+        PRIMITIVE_OPENTYPE_MAP.put(short.class.getName(), SimpleType.SHORT);
+        PRIMITIVE_OPENTYPE_MAP.put(int.class.getName(), SimpleType.INTEGER);
+        PRIMITIVE_OPENTYPE_MAP.put(long.class.getName(), SimpleType.LONG);
+        PRIMITIVE_OPENTYPE_MAP.put(float.class.getName(), SimpleType.FLOAT);
+        PRIMITIVE_OPENTYPE_MAP.put(double.class.getName(), SimpleType.DOUBLE);
+
         SIMPLE_OPENTYPE_MAP.put(boolean.class, SimpleType.BOOLEAN);
         SIMPLE_OPENTYPE_MAP.put(char.class, SimpleType.CHARACTER);
         SIMPLE_OPENTYPE_MAP.put(byte.class, SimpleType.BYTE);
@@ -103,6 +113,10 @@ public class ObjectToOpenTypeConverter implements Converter<OpenType<?>> {
             new TabularDataConverter(this)
         );
         this.forgiving = pForgiving;
+    }
+
+    public static SimpleType<?> knownPrimitiveType(String type) {
+        return PRIMITIVE_OPENTYPE_MAP.get(type);
     }
 
     public static SimpleType<?> knownSimpleType(Class<?> cls) {
