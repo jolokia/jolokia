@@ -118,6 +118,12 @@ public class ClientReadIntegrationTest extends AbstractClientIntegrationTest {
     }
 
     private JolokiaReadRequest[] readRequests(String mbean, String ... attributes) throws MalformedObjectNameException {
+        if (attributes.length == 1) {
+            return new JolokiaReadRequest[] {
+                    new JolokiaReadRequest(mbean,attributes[0]),
+                    new JolokiaReadRequest(getTargetProxyConfig(),mbean,attributes[0])
+            };
+        }
         return new JolokiaReadRequest[] {
                 new JolokiaReadRequest(mbean,attributes),
                 new JolokiaReadRequest(getTargetProxyConfig(),mbean,attributes)

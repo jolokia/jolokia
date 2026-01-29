@@ -273,7 +273,7 @@ public final class JolokiaListResponse extends JolokiaResponse<JolokiaListReques
         JSONObject value = getValue();
         // cache was turned on by sending listCache=true processing parameter, but we can find this out by
         // checking the response structure
-        useCache = value.size() == 2 && pJsonResponse.containsKey("cache") && pJsonResponse.containsKey("domains");
+        useCache = value.size() == 2 && value.containsKey("cache") && value.containsKey("domains");
         rebuildResponse();
     }
 

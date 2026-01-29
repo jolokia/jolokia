@@ -52,6 +52,7 @@ import javax.management.ObjectName;
 import javax.management.QueryEval;
 import javax.management.QueryExp;
 import javax.management.ReflectionException;
+import javax.management.RuntimeMBeanException;
 import javax.management.RuntimeOperationsException;
 import javax.management.openmbean.OpenMBeanAttributeInfo;
 import javax.management.openmbean.OpenMBeanOperationInfo;
@@ -120,6 +121,9 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
     /** Agent ID from Jolokia {@code /version} endpoint */
     private String agentId;
 
+    String agentVersion;
+    String protocolVersion;
+
     /** {@link JolokiaClient} to communicate with the remote Jolokia Agent using JSON/HTTP protocol */
     private final JolokiaClient client;
 
@@ -130,7 +134,8 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
         // generic converter of any values (primitive, basic like dates and arrays)
         objectToObjectConverter = new ObjectToObjectConverter();
 
-        objectToOpenTypeConverter = new ObjectToOpenTypeConverter(objectToObjectConverter, false);
+        // set as forgiving, because MBeanInfo for GcInfoCompositeData is inconsistent
+        objectToOpenTypeConverter = new ObjectToOpenTypeConverter(objectToObjectConverter, true);
 
         // default version where CoreConfiguration is not available
         toJsonConverter = new ObjectToJsonConverter((ObjectToObjectConverter) objectToObjectConverter,
@@ -262,8 +267,8 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
         try {
             JolokiaVersionResponse response = this.unwrapExecute(new JolokiaVersionRequest());
             // Information from Jolokia "version" request.
-            String agentVersion = response.getAgentVersion();
-            String protocolVersion = response.getProtocolVersion();
+            agentVersion = response.getAgentVersion();
+            protocolVersion = response.getProtocolVersion();
             JSONObject value = response.getValue();
             JSONObject config = (JSONObject) value.get("config");
             agentId = String.valueOf(config == null ? "jolokia-agent" : config.get("agentId"));
@@ -347,7 +352,8 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
         } catch (UncheckedJmxAdapterException e) {
             Throwable cause = e.getCause();
             if (cause instanceof RuntimeException runtimeException) {
-                throw runtimeException;
+                // see com.sun.jmx.interceptor.DefaultMBeanServerInterceptor.rethrow()
+                throw new RuntimeMBeanException(runtimeException, runtimeException.getMessage());
             }
             if (cause instanceof InstanceNotFoundException instanceNotFoundException) {
                 throw instanceNotFoundException;
@@ -408,7 +414,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
                 }
                 if (interfacesInfo) {
                     // easier with Jolokia 2.5.0+
-                    return interfaces.contains(className);
+                    return interfaces.contains(className) || className.equals(mbeanClassName);
                 } else {
                     // this method may be used by jconsole when crating proxies for platform MBeans. So we can
                     // use some hardcoded information
@@ -428,7 +434,8 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
         } catch (UncheckedJmxAdapterException e) {
             Throwable cause = e.getCause();
             if (cause instanceof RuntimeException runtimeException) {
-                throw runtimeException;
+                // see com.sun.jmx.interceptor.DefaultMBeanServerInterceptor.rethrow()
+                throw new RuntimeMBeanException(runtimeException, runtimeException.getMessage());
             }
             if (cause instanceof InstanceNotFoundException instanceNotFoundException) {
                 throw instanceNotFoundException;
@@ -490,7 +497,8 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
                     } catch (UncheckedJmxAdapterException e) {
                         Throwable cause = e.getCause();
                         if (cause instanceof RuntimeException runtimeException) {
-                            throw runtimeException;
+                            // see com.sun.jmx.interceptor.DefaultMBeanServerInterceptor.rethrow()
+                            throw new RuntimeMBeanException(runtimeException, runtimeException.getMessage());
                         }
                         if (cause instanceof InstanceNotFoundException instanceNotFoundException) {
                             throw instanceNotFoundException;
@@ -540,7 +548,8 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
         } catch (UncheckedJmxAdapterException e) {
             Throwable cause = e.getCause();
             if (cause instanceof RuntimeException runtimeException) {
-                throw runtimeException;
+                // see com.sun.jmx.interceptor.DefaultMBeanServerInterceptor.rethrow()
+                throw new RuntimeMBeanException(runtimeException, runtimeException.getMessage());
             }
             if (cause instanceof JMException || cause instanceof JolokiaRemoteException) {
                 // panic - handleJolokiaResponseExceptions couldn't find any exception to throw...
@@ -574,7 +583,8 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
         } catch (UncheckedJmxAdapterException e) {
             Throwable cause = e.getCause();
             if (cause instanceof RuntimeException runtimeException) {
-                throw runtimeException;
+                // see com.sun.jmx.interceptor.DefaultMBeanServerInterceptor.rethrow()
+                throw new RuntimeMBeanException(runtimeException, runtimeException.getMessage());
             }
             if (cause instanceof JMException || cause instanceof JolokiaRemoteException) {
                 // panic - handleJolokiaResponseExceptions couldn't find any exception to throw...
@@ -640,7 +650,8 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
                 throw reflectionException;
             }
             if (cause instanceof RuntimeException runtimeException) {
-                throw runtimeException;
+                // see com.sun.jmx.interceptor.DefaultMBeanServerInterceptor.rethrow()
+                throw new RuntimeMBeanException(runtimeException, runtimeException.getMessage());
             }
             if (cause instanceof JMException || cause instanceof JolokiaRemoteException) {
                 // panic - handleJolokiaResponseExceptions couldn't find any exception to throw...
@@ -668,7 +679,8 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
             if (readResponse != null) {
                 Object value = readResponse.getValue();
                 handleJolokiaResponseExceptions(request, value);
-                for (String attribute : readResponse.getAttributes()) {
+                List<String> ordered = request.hasSingleAttribute() ? List.of(request.getAttribute()) : new ArrayList<>(request.getAttributes());
+                for (String attribute : ordered) {
                     Object v = readResponse.getValue(attribute);
                     if (v instanceof JSONObject json && isJolokiaError(json)) {
                         // just ignore according to javax.management.MBeanServerConnection.getAttributes()
@@ -695,7 +707,8 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
                 throw reflectionException;
             }
             if (cause instanceof RuntimeException runtimeException) {
-                throw runtimeException;
+                // see com.sun.jmx.interceptor.DefaultMBeanServerInterceptor.rethrow()
+                throw new RuntimeMBeanException(runtimeException, runtimeException.getMessage());
             }
             if (cause instanceof JMException || cause instanceof JolokiaRemoteException) {
                 // panic - handleJolokiaResponseExceptions couldn't find any exception to throw...
@@ -738,7 +751,8 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
                 throw reflectionException;
             }
             if (cause instanceof RuntimeException runtimeException) {
-                throw runtimeException;
+                // see com.sun.jmx.interceptor.DefaultMBeanServerInterceptor.rethrow()
+                throw new RuntimeMBeanException(runtimeException, runtimeException.getMessage());
             }
             if (cause instanceof JMException || cause instanceof JolokiaRemoteException) {
                 // panic - handleJolokiaResponseExceptions couldn't find any exception to throw...
@@ -800,7 +814,8 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
                 throw reflectionException;
             }
             if (cause instanceof RuntimeException runtimeException) {
-                throw runtimeException;
+                // see com.sun.jmx.interceptor.DefaultMBeanServerInterceptor.rethrow()
+                throw new RuntimeMBeanException(runtimeException, runtimeException.getMessage());
             }
             if (cause instanceof JMException || cause instanceof JolokiaRemoteException) {
                 // panic - handleJolokiaResponseExceptions couldn't find any exception to throw...
@@ -851,7 +866,8 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
                 throw reflectionException;
             }
             if (cause instanceof RuntimeException runtimeException) {
-                throw runtimeException;
+                // see com.sun.jmx.interceptor.DefaultMBeanServerInterceptor.rethrow()
+                throw new RuntimeMBeanException(runtimeException, runtimeException.getMessage());
             }
             if (cause instanceof JMException || cause instanceof JolokiaRemoteException) {
                 // panic - handleJolokiaResponseExceptions couldn't find any exception to throw...
@@ -1261,7 +1277,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
             // happen for example with non-MXBeans which return CompositeData/TabularData directly.
             // real MXBeans should return Maps/Lists/Objects which are converted to "easy" tabular/composite data
             // with "key" and "value" items.
-
+            // TODO: DOTO
         }
         if (entry.openType() != null) {
             return objectToOpenTypeConverter.convert(entry.openType(), rawValue);

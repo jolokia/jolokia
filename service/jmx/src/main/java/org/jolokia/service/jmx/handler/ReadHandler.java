@@ -19,7 +19,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -131,7 +132,7 @@ public class ReadHandler extends AbstractCommandHandler<JolokiaReadRequest> {
         // pattern is used to search for actual names
         Set<ObjectName> names = searchMBeans(jmxAccess, pName);
 
-        Map<String, Object> result = new HashMap<>();
+        Map<String, Object> result = new LinkedHashMap<>();
 
         for (ObjectName name : names) {
             try {
@@ -168,7 +169,7 @@ public class ReadHandler extends AbstractCommandHandler<JolokiaReadRequest> {
     private Map<String, Object> fetchAttributesForMBean(MBeanServerAccess jmxAccess, ObjectName pName, JolokiaReadRequest pRequest, ValueFaultHandler pFaultHandler, ResolveMode pMode)
             throws IOException, JMException {
 
-        Map<String, Object> result = new HashMap<>();
+        Map<String, Object> result = new LinkedHashMap<>();
 
         // "resolve" attributes, so we can work with actually available attributes. We still can fail
         // fetching their values
@@ -298,7 +299,7 @@ public class ReadHandler extends AbstractCommandHandler<JolokiaReadRequest> {
         }
 
         // filter and check
-        Set<String> available = new HashSet<>(allAvailable);
+        Set<String> available = new LinkedHashSet<>(allAvailable);
         List<String> result = new ArrayList<>();
         List<String> unknown = new ArrayList<>();
         for (String name : attributes) {

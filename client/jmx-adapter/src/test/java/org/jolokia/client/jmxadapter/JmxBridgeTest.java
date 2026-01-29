@@ -1,62 +1,66 @@
+/*
+ * Copyright 2009-2026 Roland Huss
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.jolokia.client.jmxadapter;
 
-import static org.awaitility.Awaitility.await;
-
 import java.io.IOException;
-import java.lang.management.ClassLoadingMXBean;
-import java.lang.management.CompilationMXBean;
 import java.lang.management.ManagementFactory;
-import java.lang.management.MemoryMXBean;
-import java.lang.management.OperatingSystemMXBean;
-import java.lang.management.RuntimeMXBean;
-import java.lang.management.ThreadMXBean;
+import java.lang.management.PlatformManagedObject;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.ConnectException;
-import java.rmi.UnmarshalException;
-import java.util.Arrays;
-import java.util.Collection;
+import java.rmi.registry.LocateRegistry;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.AttributeNotFoundException;
-import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
-import javax.management.IntrospectionException;
 import javax.management.InvalidAttributeValueException;
 import javax.management.MBeanAttributeInfo;
-import javax.management.MBeanException;
 import javax.management.MBeanInfo;
 import javax.management.MBeanOperationInfo;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
-import javax.management.MalformedObjectNameException;
-import javax.management.NotCompliantMBeanException;
 import javax.management.NotificationListener;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.Query;
 import javax.management.QueryExp;
-import javax.management.ReflectionException;
 import javax.management.RuntimeMBeanException;
-import javax.management.openmbean.CompositeDataSupport;
-import javax.management.openmbean.OpenDataException;
+import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
-import javax.management.openmbean.TabularDataSupport;
+import javax.management.openmbean.TabularData;
 import javax.management.remote.JMXConnectionNotification;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
+import javax.management.remote.JMXConnectorServer;
+import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
-import org.jolokia.client.JolokiaClient;
+
 import org.jolokia.client.JolokiaClientBuilder;
-import org.jolokia.client.request.JolokiaVersionRequest;
-import org.jolokia.core.util.ClassUtil;
-import org.testng.Assert;
+import org.jolokia.client.jmxadapter.beans.MBeanExample;
+import org.jolokia.jvmagent.JolokiaServer;
+import org.jolokia.jvmagent.JolokiaServerConfig;
+import org.jolokia.server.core.Version;
+import org.jolokia.test.util.EnvTestUtil;
 import org.testng.SkipException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -64,298 +68,147 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
+import static org.testng.Assert.*;
+
 /**
- * I test the Jolokia Jmx adapter by comparing results with a traditional MBeanConnection To test in
- * IDE ensure the same command line options as when running in mvn are in place
- * <p>
- * -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=45888
- * -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false
- * -Djava.rmi.server.hostname=localhost
- * <p>
- * It is very possible that some comparison tests may fail on certain JVMs If you experience this,
- * please report on github.
+ * <p>Tests that operate on 3 different {@link MBeanServerConnection servers}:<ul>
+ *     <li>{@link ManagementFactory#getPlatformMBeanServer() direct platform MBeanServer}</li>
+ *     <li>{@link javax.management.remote.rmi.RMIConnector RMI implementation} of {@link JMXConnector}</li>
+ *     <li>{@link RemoteJmxAdapter Jolokia implementation} of {@link JMXConnector}</li>
+ * </ul></p>
+ *
+ * <p>{@link javax.management.remote.rmi.RMIConnector} used to be configured with properties like
+ * {@code -Dcom.sun.management.jmxremote.port} but now we configure it programmatically.</p>
  */
-@Ignore("Review pending - needs to be more resilient")
 public class JmxBridgeTest {
 
-    private RemoteJmxAdapter adapter;
+    private static final Logger LOG = Logger.getLogger(JmxBridgeTest.class.getName());
 
-    private static final ObjectName RUNTIME =
-        RemoteJmxAdapter.getObjectName("java.lang:type=Runtime");
+    private static final ObjectName RUNTIME = RemoteJmxAdapter.getObjectName(ManagementFactory.RUNTIME_MXBEAN_NAME);
+    private static final ObjectName THREADING = RemoteJmxAdapter.getObjectName(ManagementFactory.THREAD_MXBEAN_NAME);
+    private static final ObjectName MEMORY = RemoteJmxAdapter.getObjectName(ManagementFactory.MEMORY_MXBEAN_NAME);
+    private static final ObjectName DIAGNOSTICS = RemoteJmxAdapter.getObjectName("com.sun.management:type=DiagnosticCommand");
+    private static final ObjectName HOTSPOT_DIAGNOSTICS = RemoteJmxAdapter.getObjectName("com.sun.management:type=HotSpotDiagnostic");
 
-    private static final QueryExp QUERY =
-        Query.or(
-            Query.anySubString(Query.classattr(), Query.value("Object")),
-            Query.anySubString(Query.classattr(), Query.value("String")));
+    private JolokiaServer server;
 
-    // attributes that for some reason (typically live data) cannot be used for 1:1 testing between
-    // native and jolokia
-    private static final Collection<String> ATTRIBUTES_NOT_SAFE_FOR_DIRECT_COMPARISON = Set.of(
-        "java.lang:type=Threading.CurrentThreadUserTime",
-        "java.lang:type=OperatingSystem.ProcessCpuLoad",
-        "java.lang:type=Threading.CurrentThreadCpuTime",
-        "java.lang:type=Threading.TotalThreadAllocatedBytes",
-        "java.lang:type=Runtime.FreePhysicalMemorySize",
-        "java.lang:type=OperatingSystem.ProcessCpuTime",
-        "java.lang:type=MemoryPool,name=Metaspace.PeakUsage",
-        "java.lang:type=MemoryPool,name=PS Eden Space.Usage",
-        "java.lang:type=MemoryPool,name=Metaspace.Usage",
-        "java.lang:type=Memory.NonHeapMemoryUsage",
-        "java.lang:type=MemoryPool,name=Code Cache.PeakUsage",
-        "java.lang:type=Compilation.TotalCompilationTime",
-        "java.lang:type=Memory.HeapMemoryUsage",
-        "java.lang:type=MemoryPool,name=Code Cache.Usage",
-        "java.lang:type=OperatingSystem.FreePhysicalMemorySize",
-        "java.lang:type=OperatingSystem.SystemCpuLoad",
-        "java.lang:type=OperatingSystem.CommittedVirtualMemorySize",
-        "java.lang:type=MemoryPool,name=Compressed Class Space.PeakUsage",
-        "java.lang:type=GarbageCollector,name=PS Scavenge.LastGcInfo",
-        "java.lang:type=Runtime.Uptime",
-        "java.lang:type=GarbageCollector,name=PS MarkSweep.LastGcInfo",
-        "java.lang:type=MemoryPool,name=PS Eden Space.PeakUsage",
-        "java.lang:type=MemoryPool,name=Compressed Class Space.Usage",
-        "java.lang:type=MemoryPool,name=PS Perm Gen.Usage",
-        "java.lang:type=OperatingSystem.FreeSwapSpaceSize",
-        "java.lang:type=MemoryPool,name=PS Perm Gen.PeakUsage",
-        "java.lang:type=ClassLoading.TotalLoadedClassCount",
-        "java.lang:type=ClassLoading.LoadedClassCount",
-        "java.util.logging:type=Logging.LoggerNames",
-        "java.lang:type=Threading.PeakThreadCount",
-        // tabular format is too complex for direct comparison
-        "java.lang:type=Runtime.SystemProperties",
-        // jolokia mbean server is returned as an actual complex object
-        // have no intention of supporting that
-        "jolokia:type=MBeanServer.JolokiaMBeanServer",
-        // appears to contain a timestamp that differ when running in surefire
-        // could be something with several of the tests starting agents etc.
-        "JMImplementation:type=MBeanServerDelegate.MBeanServerId",
-        //Not really concerned that the actual composite types are not 100% identical for a constructed test class
-        "jolokia.test:name=MBeanExample.Field",
-        //Various more dynamic fields discovered while running a script to test all Oracle and openjdk versions 7-14
-        "java.lang:name=G1 Old Gen,type=MemoryPool.CollectionUsage",
-        "java.lang:name=G1 Old Generation,type=GarbageCollector.LastGcInfo",
-        "java.lang:name=G1 Survivor Space,type=MemoryPool.CollectionUsage",
-        "java.lang:name=Metaspace,type=MemoryPool.PeakUsage",
-        "java.lang:name=Metaspace,type=MemoryPool.Usage",
-        "java.lang:name=CodeHeap 'profiled nmethods',type=MemoryPool.PeakUsage",
-        "java.lang:name=CodeHeap 'profiled nmethods',type=MemoryPool.Usage",
-        "java.lang:name=CodeHeap 'non-nmethods',type=MemoryPool.PeakUsage",
-        "java.lang:name=CodeHeap 'non-nmethods',type=MemoryPool.Usage",
-        "java.lang:name=Compressed Class Space,type=MemoryPool.PeakUsage",
-        "java.lang:name=G1 Eden Space,type=MemoryPool.CollectionUsage",
-        "java.lang:name=G1 Eden Space,type=MemoryPool.PeakUsage",
-        "java.lang:name=G1 Eden Space,type=MemoryPool.Usage",
-        "java.lang:type=Threading.CurrentThreadAllocatedBytes",
-        "java.lang:type=OperatingSystem.CpuLoad",
-        "java.lang:name=G1 Young Generation,type=GarbageCollector.CollectionTime",
-        "java.lang:name=G1 Young Generation,type=GarbageCollector.LastGcInfo",
-        "java.lang:name=G1 Young Generation,type=GarbageCollector.CollectionCount",
-        "java.lang:name=G1 Old Gen,type=MemoryPool.PeakUsage",
-        "java.lang:name=G1 Old Gen,type=MemoryPool.Usage",
-        "java.lang:name=G1 Survivor Space,type=MemoryPool.PeakUsage",
-        "java.lang:name=G1 Survivor Space,type=MemoryPool.Usage",
-        "java.lang:name=G1 Concurrent GC,type=GarbageCollector.LastGcInfo",
-        "java.lang:name=Compressed Class Space,type=MemoryPool.Usage",
-        "java.lang:name=CodeHeap 'non-profiled nmethods',type=MemoryPool.PeakUsage",
-        "java.lang:name=CodeHeap 'non-profiled nmethods',type=MemoryPool.Usage",
-        "java.lang:type=OperatingSystem.FreeMemorySize",
-        //we are not able to make this composite type (not value) 100% equals compatible
-        "jdk.management.jfr:type=FlightRecorder.Configurations",
-        "jdk.management.jfr:type=FlightRecorder.EventTypes",
-        //openj9 follows
-        "com.ibm.lang.management:type=JvmCpuMonitor.ThreadsCpuUsage",
-        "java.lang:type=GarbageCollector,name=scavenge.CollectionTime",
-        "java.lang:type=GarbageCollector,name=scavenge.LastCollectionStartTime",
-        "java.lang:type=MemoryPool,name=nursery-allocate.CollectionUsage",
-        "java.lang:type=MemoryPool,name=miscellaneous non-heap storage.Usage",
-        "java.lang:type=GarbageCollector,name=scavenge.CollectionCount",
-        "java.lang:type=MemoryPool,name=nursery-allocate.PreCollectionUsage",
-        "java.lang:type=MemoryPool,name=nursery-allocate.Usage",
-        "java.lang:type=GarbageCollector,name=scavenge.LastGcInfo",
-        "java.lang:type=GarbageCollector,name=global.LastGcInfo",
-        "java.lang:type=OperatingSystem.ProcessCpuTimeByNS",
-        "java.lang:type=OperatingSystem.ProcessPhysicalMemorySize",
-        "java.lang:type=OperatingSystem.ProcessPrivateMemorySize",
-        "java.lang:type=OperatingSystem.ProcessVirtualMemorySize",
-        "java.lang:type=Memory.GCMasterThreadCpuUsed",
-        "java.lang:type=OperatingSystem.SystemLoadAverage",
-        "java.lang:type=OperatingSystem.OpenFileDescriptorCount",
-        "java.lang:type=MemoryPool,name=JIT code cache.Usage");
+    private MBeanServerConnection platform;
 
-    //Attributes that give runtime exception on some JVM versions and therefore not suitable for brute force tests
-    private static final Collection<String> UNSAFE_ATTRIBUTES = Set.of(
-        "CollectionUsageThreshold",
-        "CollectionUsageThresholdCount",
-        "CollectionUsageThresholdExceeded",
-        "UsageThreshold",
-        "UsageThresholdCount",
-        "UsageThresholdExceeded",
-        "BootClassPath",
-        "DumpOptions",
-        "HardwareEmulated",
-        "HardwareModel");
+    private JMXServiceURL jolokiaConnectorURL;
+    private JMXConnector jolokiaConnector;
+    private RemoteJmxAdapter jolokia;
+
+    private JMXConnectorServer rmiConnectorServer;
+    private JMXConnector rmiConnector;
+    private MBeanServerConnection rmi;
+
+    private static final QueryExp QUERY = Query.or(
+        Query.anySubString(Query.classattr(), Query.value("Object")),
+        Query.anySubString(Query.classattr(), Query.value("String"))
+    );
 
     // Safe values for testing setting attributes
     private static final Map<String, Object> ATTRIBUTE_REPLACEMENTS = Map.of(
-        "jolokia:type=Config.Debug", true,
-        "jolokia:type=Config.HistoryMaxEntries", 20,
-        "jolokia:type=Config.MaxDebugEntries", 50,
-        "java.lang:type=ClassLoading.Verbose", true,
-        "java.lang:type=Threading.ThreadContentionMonitoringEnabled", true);
+            "jolokia:type=Config.Debug", true,
+            "jolokia:type=Config.HistoryMaxEntries", 20,
+            "jolokia:type=Config.MaxDebugEntries", 50,
+            "java.lang:type=ClassLoading.Verbose", true,
+            "java.lang:type=Threading.ThreadContentionMonitoringEnabled", true
+    );
 
     private int agentPort;
-    private MBeanServerConnection alternativeConnection;
+    private int rmiConnectorPort;
+    private int rmiRegistryPort;
+
+    private ObjectName jfr;
+    private boolean jfrAvailable;
+    private static ObjectName mBeanExampleName;
+
+    @BeforeClass
+    public void startAgent() throws Exception {
+        int agentPort = EnvTestUtil.getFreePort();
+        JolokiaServerConfig config = new JolokiaServerConfig(Map.of(
+            "port", Integer.toString(agentPort),
+            "agentId", "local-jvm",
+            "debug", "false"
+        ));
+        server = new JolokiaServer(config);
+        server.start(false);
+        LOG.info("Jolokia JVM Agent (test) started on port " + agentPort);
+
+        platform = ManagementFactory.getPlatformMBeanServer();
+
+        jfr = ObjectName.getInstance("jdk.management.jfr:type=FlightRecorder");
+        jfrAvailable = platform.isRegistered(jfr);
+
+        int rmiConnectorPort = EnvTestUtil.getFreePort();
+        int rmiRegistryPort = EnvTestUtil.getFreePort();
+
+        // RMI Registry - usually at port 1099
+        LocateRegistry.createRegistry(rmiRegistryPort);
+
+        mBeanExampleName = ObjectName.getInstance("jolokia.test:name=MBeanExample");
+        platform.createMBean(MBeanExample.class.getName(), mBeanExampleName);
+
+        // RMI Connector - JMX over RMI
+        JMXServiceURL rmiConnectorURL = new JMXServiceURL("rmi", "localhost", rmiConnectorPort, "/jndi/rmi://127.0.0.1:" + rmiRegistryPort + "/jmxrmi");
+        rmiConnectorServer = JMXConnectorServerFactory.newJMXConnectorServer(rmiConnectorURL, Collections.emptyMap(), (MBeanServer) platform);
+        rmiConnectorServer.start();
+        rmiConnector = JMXConnectorFactory.connect(rmiConnectorURL);
+        rmi = rmiConnector.getMBeanServerConnection();
+
+        // Jolokia Connector - JMX over Jolokia Client
+        jolokiaConnectorURL = new JMXServiceURL("jolokia+http", "127.0.0.1", agentPort, "/jolokia");
+        jolokiaConnector = JMXConnectorFactory.connect(jolokiaConnectorURL);
+        jolokia = (RemoteJmxAdapter) jolokiaConnector.getMBeanServerConnection();
+
+//        ToOpenTypeConverter.cacheType(
+//            ToOpenTypeConverter.introspectComplexTypeFrom(FieldWithMoreElementsThanTheType.class),
+//            "jolokia.test:name=MBeanExample.Field");
+    }
+
+    @AfterClass
+    public void stopAgent() throws Exception {
+        jolokiaConnector.close();
+        rmiConnector.close();
+        rmiConnectorServer.stop();
+        server.stop();
+        LOG.info("Jolokia JVM Agent (test) stopped");
+    }
+
+    // ---- Data providers for executing @Test methods with parameters
 
     @DataProvider
     public static Object[][] nameAndQueryCombinations() {
-        return new Object[][]{
-            {null, null},
-            {RUNTIME, null},
-            {null, QUERY},
-            {RUNTIME, QUERY}
+        return new Object[][] {
+                { null, null },
+                { RUNTIME, null },
+                { null, QUERY },
+                { RUNTIME, QUERY }
         };
-    }
-
-    @DataProvider
-    public static Object[][] unsafeAttributesForDirectComparison()
-        throws MalformedObjectNameException {
-        final Object[][] data = new Object[ATTRIBUTES_NOT_SAFE_FOR_DIRECT_COMPARISON.size()][2];
-
-        int i=0;
-        for(final String nameAndAttribute : ATTRIBUTES_NOT_SAFE_FOR_DIRECT_COMPARISON) {
-            final int separator=nameAndAttribute.lastIndexOf('.');
-            data[i][0]=new ObjectName(nameAndAttribute.substring(0, separator));
-            data[i++][1]=nameAndAttribute.substring(separator+1);
-        }
-        return data;
     }
 
     /**
-     * This relies on java 1.7 classes, and will test on such a vm, if building on 1.6 it will come
-     * out with a predefined list
+     * A list of all known {@code java.lang:type=Xxx} MBeans - platform MBeans.
+     * See {@code org.jolokia.service.jmx.handler.ListHandler#cachePlatformMbeans()}.
      */
-    @SuppressWarnings("unchecked")
     @DataProvider
-    public static Object[][] platformMBeans() throws MalformedObjectNameException {
-        try {
-            final Collection<Class<?>> list = (Collection<Class<?>>) ManagementFactory.class
-                .getDeclaredMethod("getPlatformManagementInterfaces").invoke(null);
-            final Method objectNameMethod = ClassUtil
-                .classForName("java.lang.management.PlatformManagedObject")
-                .getDeclaredMethod("getObjectName");
-            final Method getMbeans = ManagementFactory.class
-                .getDeclaredMethod("getPlatformMXBeans", Class.class);
-            List<Object> testData = new LinkedList<>();
-            for (Class<?> klass : list) {
-                for (Object mbean : (Collection<?>) getMbeans.invoke(null, klass)) {
-                    testData.add(new Object[]{objectNameMethod.invoke(mbean), klass});
-                }
+    public static Object[][] platformMBeans() {
+        List<Object[]> testData = new LinkedList<>();
+        for (Class<? extends PlatformManagedObject> cls : ManagementFactory.getPlatformManagementInterfaces()) {
+            for (PlatformManagedObject managedObject : ManagementFactory.getPlatformMXBeans(cls)) {
+                testData.add(new Object[] { managedObject.getObjectName(), cls });
             }
-            //noinspection SuspiciousToArrayCall
-            return testData.toArray(new Object[0][0]);
-        } catch (Exception ignore) {
-            return new Object[][]{
-                {new ObjectName(ManagementFactory.CLASS_LOADING_MXBEAN_NAME), ClassLoadingMXBean.class},
-                {new ObjectName(ManagementFactory.COMPILATION_MXBEAN_NAME), CompilationMXBean.class},
-                {new ObjectName(ManagementFactory.MEMORY_MXBEAN_NAME), MemoryMXBean.class},
-                {new ObjectName(ManagementFactory.OPERATING_SYSTEM_MXBEAN_NAME), OperatingSystemMXBean.class},
-                {new ObjectName(ManagementFactory.RUNTIME_MXBEAN_NAME), RuntimeMXBean.class},
-                {new ObjectName(ManagementFactory.THREAD_MXBEAN_NAME), ThreadMXBean.class},
-            };
         }
+        return testData.toArray(new Object[testData.size()][2]);
     }
 
-
+    /**
+     * A list of all available MBeans - hopefully it's not very dynamic during the test execution. Remember
+     * that a lot of them provide highly dynamic data (memory, cpu, ...)
+     */
     @DataProvider
-    public static Object[][] safeOperationsToCall() {
-        String version = System.getProperty("java.specification.version");
-        if (version.contains(".")) {
-            version = version.substring(version.lastIndexOf('.') + 1);
-        }
-        int v = Integer.parseInt(version);
-        if (v <= 6) {
-            return new Object[][]{
-                {
-                    RemoteJmxAdapter.getObjectName("java.lang:type=Threading"),
-                    "findDeadlockedThreads",
-                    null
-                },
-                {RemoteJmxAdapter.getObjectName("java.lang:type=Memory"), "gc", null},
-                {
-                    RemoteJmxAdapter.getObjectName("jolokia.test:name=MBeanExample"),
-                    "doMapOperation",
-                    null
-                },
-                {
-                    RemoteJmxAdapter.getObjectName("jolokia.test:name=MBeanExample"),
-                    "doEmptySetOperation",
-                    null
-                }
-            };
-        }
-        return new Object[][]{
-            {
-                RemoteJmxAdapter.getObjectName("java.lang:type=Threading"),
-                "findDeadlockedThreads",
-                null
-            },
-            {RemoteJmxAdapter.getObjectName("java.lang:type=Memory"), "gc", null},
-            {
-                RemoteJmxAdapter.getObjectName("com.sun.management:type=DiagnosticCommand"),
-                "vmCommandLine",
-                null
-            },
-            {
-                RemoteJmxAdapter.getObjectName("com.sun.management:type=HotSpotDiagnostic"),
-                "getVMOption",
-                new Object[]{"MinHeapFreeRatio"}
-            },
-            {
-                RemoteJmxAdapter.getObjectName("com.sun.management:type=HotSpotDiagnostic"),
-                "setVMOption",
-                new Object[]{"HeapDumpOnOutOfMemoryError", "true"}
-            },
-            {
-                RemoteJmxAdapter.getObjectName("jolokia.test:name=MBeanExample"),
-                "doMapOperation",
-                null
-            },
-            {
-                RemoteJmxAdapter.getObjectName("jolokia.test:name=MBeanExample"),
-                "doEmptySetOperation",
-                null
-            }
-        };
-    }
-
-    @DataProvider
-    public static Object[][] threadOperationsToCompare() {
-        return new Object[][]{
-            {RemoteJmxAdapter.getObjectName("java.lang:type=Threading"),
-                "getThreadInfo",
-                new Object[]{Thread.currentThread().getId()},
-                new String[]{"long"}},
-            {RemoteJmxAdapter.getObjectName("java.lang:type=Threading"),
-                "getThreadInfo",
-                new Object[]{Thread.currentThread().getId(), 10},
-                new String[]{"long", "int"}},
-            {RemoteJmxAdapter.getObjectName("java.lang:type=Threading"),
-                "getThreadInfo",
-                new Object[]{new long[]{Thread.currentThread().getId()}},
-                new String[]{"[J"}},
-            {RemoteJmxAdapter.getObjectName("java.lang:type=Threading"),
-                "getThreadInfo",
-                new Object[]{new long[]{Thread.currentThread().getId()}, 10},
-                new String[]{"[J", "int"}},
-            {RemoteJmxAdapter.getObjectName("java.lang:type=Threading"),
-                "getThreadInfo",
-                new Object[]{new long[]{Thread.currentThread().getId()}, true, true},
-                new String[]{"[J", "boolean", "boolean"}}
-        };
-    }
-
-    @DataProvider
-    public static Object[][] allNames() {
+    public static Object[][] allAvailableMBeans() {
         final Set<ObjectName> names = ManagementFactory.getPlatformMBeanServer().queryNames(null, null);
         final Object[][] result = new Object[names.size()][1];
         int index = 0;
@@ -365,156 +218,77 @@ public class JmxBridgeTest {
         return result;
     }
 
-    @BeforeClass
-    public void startAgent()
-        throws MBeanException, ReflectionException, IOException, InstanceAlreadyExistsException,
-        NotCompliantMBeanException, OpenDataException {
-
-        MBeanServer localServer = ManagementFactory.getPlatformMBeanServer();
-        // ADD potentially problematic MBeans here (if errors are discovered to uncover other cases that
-        // should be managed)
-        localServer.createMBean(
-            MBeanExample.class.getName(),
-            RemoteJmxAdapter.getObjectName("jolokia.test:name=MBeanExample"));
-//        JvmAgent.agentmain("port=" + (agentPort = EnvTestUtil.getFreePort()) + ",agentId=local-jvm", null);
-        final JolokiaClient connector =
-            new JolokiaClientBuilder().url("http://localhost:" + this.agentPort + "/jolokia/").build();
-        // wait for agent to be running
-        await().until(() -> {
-            //will throw exception if connection is not ready
-            connector.execute(new JolokiaVersionRequest());
-            return true;
-        });
-        this.adapter = new RemoteJmxAdapter(connector);
-        //see javadoc above if this line fails while running tests
-        JMXConnector rmiConnector = JMXConnectorFactory
-            .connect(new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:45888/jmxrmi"));
-        rmiConnector.connect();
-        this.alternativeConnection = rmiConnector.getMBeanServerConnection();
-        //simulate a time with a more basic interface that what is used in this JVM
-        //lazy initialize
-        ToOpenTypeConverter.cachedType("ignore");
-        ToOpenTypeConverter.cacheType(
-            ToOpenTypeConverter.introspectComplexTypeFrom(FieldWithMoreElementsThanTheType.class),
-            "jolokia.test:name=MBeanExample.Field");
+    @DataProvider
+    public static Object[][] threadOperationsToCompare() {
+        return new Object[][] {
+                {
+                        THREADING,
+                        "getThreadInfo",
+                        new Object[] { Thread.currentThread().getId() },
+                        new String[] { "long" } },
+                {
+                        THREADING,
+                        "getThreadInfo",
+                        new Object[] { Thread.currentThread().getId(), 10 },
+                        new String[] { "long", "int" } },
+                {
+                        THREADING,
+                        "getThreadInfo",
+                        new Object[] { new long[] { Thread.currentThread().getId() } },
+                        new String[] { "[J" } },
+                {
+                        THREADING,
+                        "getThreadInfo",
+                        new Object[] { new long[] { Thread.currentThread().getId() }, 10 },
+                        new String[] { "[J", "int" } },
+                {
+                        THREADING,
+                        "getThreadInfo",
+                        new Object[] { new long[] { Thread.currentThread().getId() }, true, true },
+                        new String[] { "[J", "boolean", "boolean" } }
+        };
     }
 
-    @Test
-    public void testRecordingSettings()
-        throws MalformedObjectNameException, IOException, MBeanException, InstanceNotFoundException {
-        final ObjectName objectName = new ObjectName("jdk.management.jfr:type=FlightRecorder");
-        try {
-            final MBeanInfo mBeanInfo = this.adapter.getMBeanInfo(objectName);
-        } catch (InstanceNotFoundException e) {
-            throw new SkipException("Flight recorder bean is not available in this Java version");
-        }
-        final Object newRecording = this.adapter.invoke(objectName, "newRecording", new Object[0], new String[0]);
-
-        final Object recordingOptions = this.adapter
-            .invoke(objectName, "getRecordingOptions", new Object[]{newRecording},
-                new String[]{"long"});
-        Assert.assertTrue(recordingOptions instanceof TabularDataSupport);
-        TabularDataSupport recordingOptionsTabularData = (TabularDataSupport) recordingOptions;
-        if (recordingOptionsTabularData.containsKey(new String[] { "destination" })) {//The field is not present in all JVM
-            OpenType<?> descriptionType = recordingOptionsTabularData.get(new String[] { "destination" }).getCompositeType().getType("value");
-            Assert.assertEquals(descriptionType, SimpleType.STRING);
-        }
+    @DataProvider
+    public static Object[][] safeOperationsToCall() {
+        return new Object[][] {
+                { THREADING, "findDeadlockedThreads", null },
+                { MEMORY, "gc", null },
+                { DIAGNOSTICS, "vmCommandLine", null },
+                { HOTSPOT_DIAGNOSTICS, "getVMOption", new Object[] { "MinHeapFreeRatio" } },
+                { HOTSPOT_DIAGNOSTICS, "setVMOption", new Object[] { "HeapDumpOnOutOfMemoryError", "true" } },
+                { mBeanExampleName, "doMapOperation", null },
+                { mBeanExampleName, "doEmptySetOperation", null }
+        };
     }
 
-    private MBeanServerConnection getNativeConnection() {
-        return this.alternativeConnection;
-    }
-
-    @Test(dataProvider = "unsafeAttributesForDirectComparison" )
-    public void testTypesOfUnsafeAttributes(final ObjectName objectName, final String attributeName)
-        throws ReflectionException, MBeanException, IOException {
-        try {
-            final Object nativeObject = getNativeConnection().getAttribute(objectName,
-                attributeName);
-            final Object jolokiaObject = adapter.getAttribute(objectName, attributeName);
-            recursiveCompareTypes(nativeObject, jolokiaObject, objectName.toString() + "." + attributeName);
-        } catch(InstanceNotFoundException | AttributeNotFoundException | UnmarshalException ignore) {
-            //May not be present in a certain JVM
-        }
-    }
-
-    private void recursiveCompareTypes(final Object nativeObject, final Object jolokiaObject,
-        String path) {
-        if(nativeObject == null && jolokiaObject == null) {
-            return;
-        }
-
-        if(jolokiaObject == null && nativeObject instanceof Double) {
-            //These attributes are suspect, https://github.com/jolokia/jolokia/issues/800
-            if(Arrays.asList("java.lang:type=OperatingSystem.SystemCpuLoad", "java.lang:type=OperatingSystem.CpuLoad").contains(path)) {
-                return;
-            }
-        }
-        if(nativeObject instanceof CompositeDataSupport) {
-            for(final String key : ((CompositeDataSupport) nativeObject).getCompositeType().keySet()) {
-                recursiveCompareTypes(((CompositeDataSupport) nativeObject).get(key), ((CompositeDataSupport)jolokiaObject).get(key),
-                    path + "." + key);
-            }
-            return;
-        }
-
-        if(nativeObject instanceof TabularDataSupport) {
-            final TabularDataSupport nativeTabular = (TabularDataSupport) nativeObject;
-            if(jolokiaObject instanceof TabularDataSupport) {
-                final Object[] nativeValues = nativeTabular.values()
-                    .toArray();
-                final Object[] jolokiaValues = ((TabularDataSupport) jolokiaObject).values()
-                    .toArray();
-                Assert.assertEquals(jolokiaValues.length, nativeValues.length,
-                    "Table contains the same amount of rows: " + path);
-                for (int i = 0; i < nativeValues.length; i++) {
-                    recursiveCompareTypes(nativeValues[i], jolokiaValues[i],
-                        path + ".[" + i++ + "]");
-                }
-            } else if(jolokiaObject instanceof CompositeDataSupport && path.contains("type=GarbageCollector.LastGcInfo")) {
-                //This one is strange, the native object is sometimes tabular data and sometimes composite data (?!)
-                //for these garbage collection objects
-                //still, attempt to recursively compare types in the case where native is tabular and we return composite
-                final CompositeDataSupport compositeJolokiaObject = (CompositeDataSupport) jolokiaObject;
-                Assert.assertEquals(compositeJolokiaObject.values().size(), nativeTabular.size(), "Table contains the same amount of items: " + path);
-                for(Map.Entry<Object,Object> entry : nativeTabular.entrySet()) {
-                    //The key is a "list of keyes"
-                    @SuppressWarnings("unchecked") String key=((List<String>)entry.getKey()).get(0);
-                    //Need to unwrap the composite value from the table column/cell
-                    final Object actualNativeValue = ((CompositeDataSupport)entry.getValue()).values().toArray()[1];
-                    recursiveCompareTypes(compositeJolokiaObject.get(key), actualNativeValue, path + "." + key);
-                }
-            }
-            return;
-        }
-        Assert.assertEquals(jolokiaObject.getClass(), nativeObject.getClass(), "Mismatch in returned type for attribute path : " + path);
-    }
+    // ---- Tests using @DataProviders
 
     @Test(dataProvider = "platformMBeans")
-    public void testInstanceOf(final ObjectName objectName, final Class<?> klass)
-        throws IOException, InstanceNotFoundException, IllegalAccessException {
+    public void testInstanceOf(final ObjectName objectName, final Class<?> klass) throws Exception {
         final String className = klass.getName();
-        Assert.assertEquals(getNativeConnection().isInstanceOf(objectName, className),
-            this.adapter.isInstanceOf(objectName, className),
-            objectName.getCanonicalName() + " instanceof " + klass);
-        final Object proxy = klass.cast(ManagementFactory
-            .newPlatformMXBeanProxy(this.adapter, objectName.getCanonicalName(), klass));
-        //test at least one method through the proxy to ensure it works
+        assertEquals(platform.isInstanceOf(objectName, className), jolokia.isInstanceOf(objectName, className),
+                objectName.getCanonicalName() + " instanceof " + klass);
+
+        // MXBean proxy using Jolokia JMXConnector
+        final Object proxy = klass.cast(ManagementFactory.newPlatformMXBeanProxy(jolokia, objectName.getCanonicalName(), klass));
+
+        // test at least one method through the proxy to ensure it works
         for (final Method method : klass.getDeclaredMethods()) {
-            if ((method.getName().startsWith("get") || method.getName().startsWith("is"))
-                && method.getParameterTypes().length == 0) {
+            if ((method.getName().startsWith("get") || method.getName().startsWith("is")) && method.getParameterTypes().length == 0) {
                 try {
                     method.invoke(proxy);
                 } catch (InvocationTargetException e) {
-                    if (!(e
-                        .getCause() instanceof UnsupportedOperationException)) {//some MBeans have unsupported methods, ignore
+                    if (!(e.getCause() instanceof UnsupportedOperationException)) {
+                        // some MBeans have unsupported methods, ignore
                         // try to call the same on on platform mbean server and see if we get the same error there
                         // this issue occurs for some JDK internal MBeans. For example
                         // com.sun.management.internal.GcInfoCompositeData.getBaseGcInfoCompositeType constructs
                         // the composite type arbitrarily and Jolokia uses generic algorithm
+                        // also there's a problem with EventTypes attribute for JFR: https://bugs.openjdk.org/browse/JDK-8308877
                         final Object nativeProxy = ManagementFactory
-                            .newPlatformMXBeanProxy(ManagementFactory.getPlatformMBeanServer(),
-                                objectName.getCanonicalName(), klass);
+                                .newPlatformMXBeanProxy(ManagementFactory.getPlatformMBeanServer(),
+                                        objectName.getCanonicalName(), klass);
                         try {
                             method.invoke(nativeProxy);
                             System.err.println("Failed calling " + method + " on " + objectName + " but succeeds with native proxy ");
@@ -528,135 +302,48 @@ public class JmxBridgeTest {
     }
 
     @Test
-    public void testThreadingDetails()
-        throws ReflectionException, MBeanException, InstanceNotFoundException, IOException, AttributeNotFoundException {
-        ObjectName name = RemoteJmxAdapter.getObjectName("java.lang:type=Threading");
-        final MBeanServerConnection nativeServer = getNativeConnection();
-        long[] ids = (long[]) nativeServer.getAttribute(name, "AllThreadIds");
-        for (long id : ids) {
-            this.adapter.invoke(name, "getThreadInfo", new Object[]{id}, new String[]{"long"});
-        }
-        this.adapter.invoke(name, "findDeadlockedThreads", new Object[0], new String[0]);
-
+    @Ignore("Tests comparing platform and Jolokia access are in JmxConnectorTest.java now")
+    public void testTypesOfUnsafeAttributes(final ObjectName objectName, final String attributeName) {
     }
 
     @Test(dataProvider = "nameAndQueryCombinations")
     public void testNames(ObjectName name, QueryExp query) throws IOException {
-        final MBeanServerConnection nativeServer = getNativeConnection();
-        Assert.assertEquals(nativeServer.queryNames(name, query), this.adapter.queryNames(name, query));
+        assertEquals(platform.queryNames(name, query), jolokia.queryNames(name, query));
     }
 
     @Test(dataProvider = "nameAndQueryCombinations")
     public void testInstances(ObjectName name, QueryExp query) throws IOException {
-        final MBeanServerConnection nativeServer = getNativeConnection();
-        Assert.assertEquals(
-            nativeServer.queryMBeans(name, query), this.adapter.queryMBeans(name, query));
-    }
-
-    @Test(expectedExceptions = InstanceNotFoundException.class)
-    public void testNonExistentMBeanInstance() throws IOException, InstanceNotFoundException {
-        this.adapter.getObjectInstance(
-            RemoteJmxAdapter.getObjectName("notexistant.domain:type=NonSense"));
-    }
-
-    @Test(expectedExceptions = InstanceNotFoundException.class)
-    public void testNonExistentMBeanInfo() throws IOException, InstanceNotFoundException {
-        this.adapter.getMBeanInfo(RemoteJmxAdapter.getObjectName("notexistant.domain:type=NonSense"));
-    }
-
-    @Test(expectedExceptions = RuntimeMBeanException.class)
-    public void testFeatureNotSupportedOnServerSide()
-        throws IOException, InstanceNotFoundException, MBeanException {
-        this.adapter.invoke(
-            RemoteJmxAdapter.getObjectName("jolokia.test:name=MBeanExample"),
-            "unsupportedOperation",
-            new Object[0],
-            new String[0]);
-    }
-
-    @Test(expectedExceptions = MBeanException.class)
-    public void testUnexpectedlyFailingOperation()
-        throws IOException, InstanceNotFoundException, MBeanException {
-        this.adapter.invoke(
-            RemoteJmxAdapter.getObjectName("jolokia.test:name=MBeanExample"),
-            "unexpectedFailureMethod",
-            new Object[0],
-            new String[0]);
-    }
-
-    @Test(expectedExceptions = IOException.class)
-    public void ensureThatIOExceptionIsChanneledOut() throws IOException {
-        new RemoteJmxAdapter(new JolokiaClientBuilder().url("http://localhost:10/jolokia").build())
-            .queryMBeans(null, null);
-    }
-
-    @Test(expectedExceptions = AttributeNotFoundException.class)
-    public void testGetNonExistentAttribute()
-        throws IOException, AttributeNotFoundException, InstanceNotFoundException {
-        this.adapter.getAttribute(RUNTIME, "DoesNotExist");
-    }
-
-    @Test(expectedExceptions = AttributeNotFoundException.class)
-    public void testSetNonExistantAttribute()
-        throws IOException, AttributeNotFoundException, InstanceNotFoundException,
-        InvalidAttributeValueException {
-        this.adapter.setAttribute(RUNTIME, new Attribute("DoesNotExist", false));
-    }
-
-    @Test(expectedExceptions = InvalidAttributeValueException.class)
-    public void testSetInvalidAttributeValue()
-        throws IOException, AttributeNotFoundException, InstanceNotFoundException,
-        InvalidAttributeValueException {
-        this.adapter.setAttribute(
-            RemoteJmxAdapter.getObjectName("jolokia:type=History,agent=local-jvm"),
-            new Attribute("HistoryMaxEntries", null));
-    }
-
-    @Test
-    public void testThatWeAreAbleToInvokeOperationWithOverloadedSignature()
-        throws IOException, InstanceNotFoundException, MBeanException {
-        // Invoke method that has both primitive and boxed Long as possible input
-        this.adapter.invoke(
-            RemoteJmxAdapter.getObjectName("java.lang:type=Threading"),
-            "getThreadInfo",
-            new Object[]{1L},
-            new String[]{"long"});
-        this.adapter.invoke(
-            RemoteJmxAdapter.getObjectName("java.lang:type=Threading"),
-            "getThreadInfo",
-            new Object[]{new long[]{1L}},
-            new String[]{"[J"});
+        assertEquals(platform.queryMBeans(name, query), jolokia.queryMBeans(name, query));
     }
 
     @Test(dataProvider = "threadOperationsToCompare")
-    public void testCompareThreadMethods(ObjectName name, String operation, Object[] arguments,
-                                         String[] signature)
-        throws MBeanException, InstanceNotFoundException, IOException, ReflectionException {
-        Assert.assertEquals(
-            this.adapter.invoke(name, operation, arguments, signature).getClass(),
-            getNativeConnection().invoke(name, operation, arguments, signature).getClass()
+    public void testCompareThreadMethods(ObjectName name, String operation, Object[] arguments, String[] signature)
+            throws Exception {
+        assertEquals(
+            jolokia.invoke(name, operation, arguments, signature).getClass(),
+            platform.invoke(name, operation, arguments, signature).getClass()
         );
     }
 
     @Test(dataProvider = "safeOperationsToCall")
-    public void testInvoke(ObjectName name, String operation, Object[] arguments)
-        throws IOException, ReflectionException, MBeanException {
-        final MBeanServerConnection nativeServer = getNativeConnection();
+    public void testInvoke(ObjectName name, String operation, Object[] arguments) throws Exception {
         try {
-            for (MBeanOperationInfo operationInfo : this.adapter.getMBeanInfo(name).getOperations()) {
+            for (MBeanOperationInfo operationInfo : jolokia.getMBeanInfo(name).getOperations()) {
                 if (operationInfo.getName().equals(operation)
-                    && argumentCountIsCompatible(arguments, operationInfo.getSignature().length)) {
+                        && argumentCountIsCompatible(arguments, operationInfo.getSignature().length)) {
                     String[] signature = createSignature(operationInfo);
-                    Assert.assertEquals(
-                        this.adapter.invoke(name, operation, arguments, signature),
-                        nativeServer.invoke(name, operation, arguments, signature));
+                    assertEquals(
+                            jolokia.invoke(name, operation, arguments, signature),
+                            platform.invoke(name, operation, arguments, signature));
                 }
             }
         } catch (InstanceNotFoundException e) {
-            System.out.println(
-                name + " not found in JVM " + System.getProperty("java.runtime.name") + " " + System
-                    .getProperty("java.runtime.version") + " skipping");
+            throw new SkipException(e.getMessage());
         }
+    }
+
+    private boolean argumentCountIsCompatible(Object[] arguments, int argumentCount) {
+        return (arguments == null && argumentCount == 0) || arguments != null && argumentCount == arguments.length;
     }
 
     private String[] createSignature(MBeanOperationInfo operationInfo) {
@@ -670,57 +357,41 @@ public class JmxBridgeTest {
         return signature;
     }
 
-    private boolean argumentCountIsCompatible(Object[] arguments, int argumentCount) {
-        return (arguments == null && argumentCount == 0) || arguments != null && argumentCount == arguments.length;
-    }
+    @Test(dataProvider = "allAvailableMBeans")
+    public void testInstances(ObjectName name) throws Exception {
+        final ObjectInstance nativeInstance = platform.getObjectInstance(name);
+        final ObjectInstance jolokiaInstance = jolokia.getObjectInstance(name);
+        assertEquals(jolokiaInstance, nativeInstance);
 
-    @Test(dataProvider = "allNames")
-    public void testInstances(ObjectName name) throws InstanceNotFoundException, IOException {
-        final MBeanServerConnection nativeServer = getNativeConnection();
-        final ObjectInstance nativeInstance = nativeServer.getObjectInstance(name);
-        final ObjectInstance jolokiaInstance = this.adapter.getObjectInstance(name);
-        Assert.assertEquals(jolokiaInstance, nativeInstance);
+        assertEquals(
+                platform.isInstanceOf(jolokiaInstance.getObjectName(), jolokiaInstance.getClassName()),
+                jolokia.isInstanceOf(jolokiaInstance.getObjectName(), jolokiaInstance.getClassName()));
 
-        Assert.assertEquals(
-            nativeServer.isInstanceOf(jolokiaInstance.getObjectName(), jolokiaInstance.getClassName()),
-            this.adapter.isInstanceOf(jolokiaInstance.getObjectName(), jolokiaInstance.getClassName()));
+        assertEquals(platform.isRegistered(name), jolokia.isRegistered(name));
 
-        Assert.assertEquals(nativeServer.isRegistered(name), this.adapter.isRegistered(name));
-
-        try {
-            final Class<?> klass = Class.forName(jolokiaInstance.getClassName());
-            // check that inheritance works the same for both interfaces
-            if (klass.getSuperclass() != null) {
-                Assert.assertEquals(
-                    nativeServer.isInstanceOf(
-                        jolokiaInstance.getObjectName(), klass.getSuperclass().toString()),
-                    this.adapter.isInstanceOf(
-                        jolokiaInstance.getObjectName(), klass.getSuperclass().toString()));
-                if (klass.getInterfaces().length > 0) {
-                    Assert.assertEquals(
-                        nativeServer.isInstanceOf(
-                            jolokiaInstance.getObjectName(), klass.getInterfaces()[0].toString()),
-                        this.adapter.isInstanceOf(
-                            jolokiaInstance.getObjectName(), klass.getInterfaces()[0].toString()));
-                }
+        final Class<?> klass = Class.forName(jolokiaInstance.getClassName());
+        // check that inheritance works the same for both interfaces
+        if (klass.getSuperclass() != null) {
+            assertEquals(
+                    platform.isInstanceOf(jolokiaInstance.getObjectName(), klass.getSuperclass().toString()),
+                    jolokia.isInstanceOf(jolokiaInstance.getObjectName(), klass.getSuperclass().toString()));
+            if (klass.getInterfaces().length > 0) {
+                assertEquals(
+                        platform.isInstanceOf(jolokiaInstance.getObjectName(), klass.getInterfaces()[0].toString()),
+                        jolokia.isInstanceOf(jolokiaInstance.getObjectName(), klass.getInterfaces()[0].toString()));
             }
-        } catch (ClassNotFoundException ignore) {
         }
     }
 
-    @Test(dataProvider = "allNames")
-    public void testMBeanInfo(ObjectName name)
-        throws IntrospectionException, ReflectionException, InstanceNotFoundException, IOException,
-        AttributeNotFoundException, MBeanException, InvalidAttributeValueException {
-        final MBeanServerConnection nativeServer = getNativeConnection();
-        final MBeanInfo jolokiaMBeanInfo = this.adapter.getMBeanInfo(name);
-        final MBeanInfo nativeMBeanInfo = nativeServer.getMBeanInfo(name);
-        Assert.assertEquals(jolokiaMBeanInfo.getDescription(), nativeMBeanInfo.getDescription());
-        Assert.assertEquals(jolokiaMBeanInfo.getClassName(), nativeMBeanInfo.getClassName());
-        Assert.assertEquals(
-            jolokiaMBeanInfo.getAttributes().length, nativeMBeanInfo.getAttributes().length);
-        Assert.assertEquals(
-            jolokiaMBeanInfo.getOperations().length, nativeMBeanInfo.getOperations().length);
+    @Test(dataProvider = "allAvailableMBeans")
+    public void testMBeanInfo(ObjectName name) throws Exception {
+        final MBeanInfo jolokiaMBeanInfo = jolokia.getMBeanInfo(name);
+        final MBeanInfo nativeMBeanInfo = platform.getMBeanInfo(name);
+
+        assertEquals(jolokiaMBeanInfo.getDescription(), nativeMBeanInfo.getDescription());
+        assertEquals(jolokiaMBeanInfo.getClassName(), nativeMBeanInfo.getClassName());
+        assertEquals(jolokiaMBeanInfo.getAttributes().length, nativeMBeanInfo.getAttributes().length);
+        assertEquals(jolokiaMBeanInfo.getOperations().length, nativeMBeanInfo.getOperations().length);
 
         final AttributeList replacementValues = new AttributeList();
         final AttributeList originalValues = new AttributeList();
@@ -728,201 +399,281 @@ public class JmxBridgeTest {
 
         for (MBeanAttributeInfo attribute : jolokiaMBeanInfo.getAttributes()) {
             final String qualifiedName = name + "." + attribute.getName();
-            if (UNSAFE_ATTRIBUTES.contains(attribute.getName())) { // skip known failing attributes
-                continue;
-            }
-            if (ATTRIBUTES_NOT_SAFE_FOR_DIRECT_COMPARISON.contains(qualifiedName)) {
-                this.adapter.getAttribute(name, attribute.getName());
-                continue;
-            }
-            final Object jolokiaAttributeValue = this.adapter.getAttribute(name, attribute.getName());
-            final Object nativeAttributeValue = nativeServer.getAttribute(name, attribute.getName());
-            // data type probably not so important (ie. long vs integer), as long as value is close enough
-            if (jolokiaAttributeValue instanceof Double) {
-                Assert.assertEquals(
-                    ((Number) jolokiaAttributeValue).doubleValue(),
-                    ((Number) nativeAttributeValue).doubleValue(),
-                    0.1,
-                    "Attribute mismatch: " + qualifiedName);
-            } else {
-                Assert.assertEquals(
-                    jolokiaAttributeValue, nativeAttributeValue, "Attribute mismatch: " + qualifiedName);
-            }
-            if (attribute.isWritable()) {
-                final Object newValue = ATTRIBUTE_REPLACEMENTS.get(qualifiedName);
+            try {
+                final Object jolokiaAttributeValue = jolokia.getAttribute(name, attribute.getName());
+                final Object nativeAttributeValue = platform.getAttribute(name, attribute.getName());
+                // data type probably not so important (ie. long vs integer), as long as value is close enough
+                if (jolokiaAttributeValue instanceof Number jn && nativeAttributeValue instanceof Number nn) {
+                    // let's simply check if they are of the same sign
+                    assertTrue(jn.doubleValue() * nn.doubleValue() >= 0);
+                } else if (jolokiaAttributeValue instanceof CompositeData jcd && nativeAttributeValue instanceof CompositeData ncd) {
+                    // com.sun.management.internal.GcInfoCompositeData is messing the comparison
+                    assertTrue(ncd.getCompositeType().keySet().containsAll(jcd.getCompositeType().keySet()));
+                } else {
+                    assertEquals(jolokiaAttributeValue, nativeAttributeValue, "Attribute mismatch: " + qualifiedName);
+                }
+                if (attribute.isWritable()) {
+                    final Object newValue = ATTRIBUTE_REPLACEMENTS.get(qualifiedName);
 
-                if (newValue != null) {
-                    final Attribute newAttribute = new Attribute(attribute.getName(), newValue);
-                    replacementValues.add(newAttribute);
-                    this.adapter.setAttribute(name, newAttribute);
-                    // use native connection and verify that attribute is now new value
-                    Assert.assertEquals(nativeServer.getAttribute(name, attribute.getName()), newValue);
-                    // restore original value
-                    final Attribute restoreAttribute =
-                        new Attribute(attribute.getName(), nativeAttributeValue);
-                    this.adapter.setAttribute(name, restoreAttribute);
-                    originalValues.add(restoreAttribute);
-                    attributeNames.add(attribute.getName());
-                    // now do multi argument setting
-                    this.adapter.setAttributes(name, replacementValues);
-                    Assert.assertEquals(nativeServer.getAttribute(name, attribute.getName()), newValue);
-                    // and restore
-                    this.adapter.setAttributes(name, originalValues);
-                    this.adapter.getAttributes(name, attributeNames.toArray(new String[0]));
+                    if (newValue != null) {
+                        final Attribute newAttribute = new Attribute(attribute.getName(), newValue);
+                        replacementValues.add(newAttribute);
+                        jolokia.setAttribute(name, newAttribute);
+                        // use native connection and verify that attribute is now new value
+                        assertEquals(platform.getAttribute(name, attribute.getName()), newValue);
+                        // restore original value
+                        final Attribute restoreAttribute =
+                                new Attribute(attribute.getName(), nativeAttributeValue);
+                        jolokia.setAttribute(name, restoreAttribute);
+                        originalValues.add(restoreAttribute);
+                        attributeNames.add(attribute.getName());
+                        // now do multi argument setting
+                        jolokia.setAttributes(name, replacementValues);
+                        assertEquals(platform.getAttribute(name, attribute.getName()), newValue);
+                        // and restore
+                        jolokia.setAttributes(name, originalValues);
+                        jolokia.getAttributes(name, attributeNames.toArray(new String[0]));
+                    }
+                }
+            } catch (RuntimeMBeanException e) {
+                if (!(e.getCause() instanceof UnsupportedOperationException)) {
+                    throw new RuntimeException(e.getCause());
                 }
             }
         }
+    }
+
+    // ---- Tests not using @DataProviders
+
+    @Test
+    public void testRecordingSettings() throws Exception {
+        if (!jfrAvailable) {
+            throw new SkipException("FlightRecorder bean is not available");
+        }
+
+        Object newRecording = jolokia.invoke(jfr, "newRecording", new Object[0], new String[0]);
+        Object recordingOptions = jolokia.invoke(jfr, "getRecordingOptions", new Object[] { newRecording }, new String[] { "long" });
+
+        if (recordingOptions instanceof TabularData td) {
+            if (td.containsKey(new String[] { "destination" })) {
+                OpenType<?> descriptionType = td.get(new String[] { "destination" }).getCompositeType().getType("value");
+                assertEquals(descriptionType, SimpleType.STRING);
+            }
+        } else {
+            fail("Expected TabularData from getRecordingOptions");
+        }
+    }
+
+    @Test
+    public void testThreadingDetails() throws Exception {
+        long[] ids = (long[]) platform.getAttribute(THREADING, "AllThreadIds");
+        for (long id : ids) {
+            jolokia.invoke(THREADING, "getThreadInfo", new Object[] { id }, new String[] { "long" });
+        }
+        jolokia.invoke(THREADING, "findDeadlockedThreads", new Object[0], new String[0]);
+    }
+
+    @Test(expectedExceptions = InstanceNotFoundException.class)
+    public void testNonExistentMBeanInstance() throws Exception {
+        jolokia.getObjectInstance(RemoteJmxAdapter.getObjectName("notexistant.domain:type=NonSense"));
+    }
+
+    @Test(expectedExceptions = InstanceNotFoundException.class)
+    public void testNonExistentMBeanInfo() throws Exception {
+        jolokia.getMBeanInfo(RemoteJmxAdapter.getObjectName("notexistant.domain:type=NonSense"));
+    }
+
+    @Test
+    public void testFeatureNotSupportedOnServerSide() throws Exception {
+        try {
+            platform.invoke(mBeanExampleName, "unsupportedOperation", new Object[0], new String[0]);
+            fail("Expected RuntimeMBeanException");
+        } catch (RuntimeMBeanException expected) {
+        }
+        try {
+            jolokia.invoke(mBeanExampleName, "unsupportedOperation", new Object[0], new String[0]);
+            fail("Expected RuntimeMBeanException");
+        } catch (RuntimeMBeanException expected) {
+        }
+        try {
+            rmi.invoke(mBeanExampleName, "unsupportedOperation", new Object[0], new String[0]);
+            fail("Expected RuntimeMBeanException");
+        } catch (RuntimeMBeanException expected) {
+        }
+    }
+
+    @Test
+    public void testUnexpectedlyFailingOperation() throws Exception {
+        try {
+            platform.invoke(mBeanExampleName, "unexpectedFailureMethod", new Object[0], new String[0]);
+            fail("Expected RuntimeMBeanException");
+        } catch (RuntimeMBeanException expected) {
+            assertTrue(expected.getCause() instanceof NullPointerException);
+        }
+        try {
+            jolokia.invoke(mBeanExampleName, "unexpectedFailureMethod", new Object[0], new String[0]);
+            fail("Expected RuntimeMBeanException");
+        } catch (RuntimeMBeanException expected) {
+            assertTrue(expected.getCause() instanceof NullPointerException);
+        }
+        try {
+            rmi.invoke(mBeanExampleName, "unexpectedFailureMethod", new Object[0], new String[0]);
+            fail("Expected RuntimeMBeanException");
+        } catch (RuntimeMBeanException expected) {
+            assertTrue(expected.getCause() instanceof NullPointerException);
+        }
+    }
+
+    @Test(expectedExceptions = IOException.class)
+    public void ensureThatIOExceptionIsChanneledOut() throws IOException {
+        new RemoteJmxAdapter(new JolokiaClientBuilder().url("http://localhost:10/jolokia").build()).queryMBeans(null, null);
+    }
+
+    @Test(expectedExceptions = AttributeNotFoundException.class)
+    public void testGetNonExistentAttribute() throws Exception {
+        jolokia.getAttribute(RUNTIME, "DoesNotExist");
+    }
+
+    @Test(expectedExceptions = AttributeNotFoundException.class)
+    public void testSetNonExistentAttribute() throws Exception {
+        jolokia.setAttribute(RUNTIME, new Attribute("DoesNotExist", false));
+    }
+
+    @Test(expectedExceptions = InvalidAttributeValueException.class)
+    public void testSetInvalidAttributeValue() throws Exception {
+        jolokia.setAttribute(RemoteJmxAdapter.getObjectName("jolokia:type=History,agent=local-jvm"), new Attribute("HistoryMaxEntries", null));
+    }
+
+    @Test
+    public void testThatWeAreAbleToInvokeOperationWithOverloadedSignature() throws Exception {
+        // Invoke method that has both primitive and boxed Long as possible input
+        jolokia.invoke(THREADING, "getThreadInfo", new Object[] { 1L }, new String[] { "long" });
+        jolokia.invoke(THREADING, "getThreadInfo", new Object[] { new long[] { 1L } }, new String[] { "[J" });
     }
 
     @Test
     public void verifyUnsupportedFunctions() {
         // ensure that methods give the expected exception and nothing else
         try {
-            this.adapter.createMBean("java.lang.Object", RUNTIME);
-            Assert.fail("Operation should not be supported by adapter");
-        } catch (UnsupportedOperationException ignore) {
+            jolokia.createMBean("java.lang.Object", RUNTIME);
+            fail("Operation should not be supported by adapter");
+        } catch (UnsupportedOperationException expected) {
         }
         try {
-            this.adapter.createMBean("java.lang.Object", RUNTIME, RUNTIME);
-            Assert.fail("Operation should not be supported by adapter");
-        } catch (UnsupportedOperationException ignore) {
+            jolokia.createMBean("java.lang.Object", RUNTIME, RUNTIME);
+            fail("Operation should not be supported by adapter");
+        } catch (UnsupportedOperationException expected) {
         }
         try {
-            this.adapter.createMBean("java.lang.Object", RUNTIME, new Object[0], new String[0]);
-            Assert.fail("Operation should not be supported by adapter");
-        } catch (UnsupportedOperationException ignore) {
+            jolokia.createMBean("java.lang.Object", RUNTIME, new Object[0], new String[0]);
+            fail("Operation should not be supported by adapter");
+        } catch (UnsupportedOperationException expected) {
         }
         try {
-            this.adapter.createMBean("java.lang.Object", RUNTIME, RUNTIME, new Object[0], new String[0]);
-            Assert.fail("Operation should not be supported by adapter");
-        } catch (UnsupportedOperationException ignore) {
+            jolokia.createMBean("java.lang.Object", RUNTIME, RUNTIME, new Object[0], new String[0]);
+            fail("Operation should not be supported by adapter");
+        } catch (UnsupportedOperationException expected) {
         }
         try {
-            this.adapter.unregisterMBean(RUNTIME);
-            Assert.fail("Operation should not be supported by adapter");
-        } catch (UnsupportedOperationException ignore) {
+            jolokia.unregisterMBean(RUNTIME);
+            fail("Operation should not be supported by adapter");
+        } catch (UnsupportedOperationException expected) {
         }
         try {
-            this.adapter.addNotificationListener(RUNTIME, (NotificationListener) null, null, null);
-            Assert.fail("Operation should not be supported by adapter");
-        } catch (UnsupportedOperationException ignore) {
+            jolokia.addNotificationListener(RUNTIME, (NotificationListener) null, null, null);
+            fail("Operation should not be supported by adapter");
+        } catch (UnsupportedOperationException expected) {
         }
         try {
-            this.adapter.addNotificationListener(RUNTIME, RUNTIME, null, null);
-            Assert.fail("Operation should not be supported by adapter");
-        } catch (UnsupportedOperationException ignore) {
+            jolokia.addNotificationListener(RUNTIME, RUNTIME, null, null);
+            fail("Operation should not be supported by adapter");
+        } catch (UnsupportedOperationException expected) {
         }
         try {
-            this.adapter.removeNotificationListener(RUNTIME, RUNTIME);
-            Assert.fail("Operation should not be supported by adapter");
-        } catch (UnsupportedOperationException ignore) {
+            jolokia.removeNotificationListener(RUNTIME, RUNTIME);
+            fail("Operation should not be supported by adapter");
+        } catch (UnsupportedOperationException expected) {
         }
         try {
-            this.adapter.removeNotificationListener(RUNTIME, RUNTIME, null, null);
-            Assert.fail("Operation should not be supported by adapter");
-        } catch (UnsupportedOperationException ignore) {
+            jolokia.removeNotificationListener(RUNTIME, RUNTIME, null, null);
+            fail("Operation should not be supported by adapter");
+        } catch (UnsupportedOperationException expected) {
         }
         try {
-            this.adapter.removeNotificationListener(RUNTIME, (NotificationListener) null);
-            Assert.fail("Operation should not be supported by adapter");
-        } catch (UnsupportedOperationException ignore) {
+            jolokia.removeNotificationListener(RUNTIME, (NotificationListener) null);
+            fail("Operation should not be supported by adapter");
+        } catch (UnsupportedOperationException expected) {
         }
         try {
-            this.adapter.removeNotificationListener(RUNTIME, (NotificationListener) null, null, null);
-            Assert.fail("Operation should not be supported by adapter");
-        } catch (UnsupportedOperationException ignore) {
+            jolokia.removeNotificationListener(RUNTIME, (NotificationListener) null, null, null);
+            fail("Operation should not be supported by adapter");
+        } catch (UnsupportedOperationException expected) {
         }
     }
 
     @Test
     public void testOverallOperations() throws IOException {
-        final MBeanServerConnection nativeServer = getNativeConnection();
-        Assert.assertEquals(
-            this.adapter.getMBeanCount(),
-            nativeServer.getMBeanCount(),
-            "Number of MBeans are the same");
+        assertEquals(jolokia.getMBeanCount(), platform.getMBeanCount(), "Number of MBeans are the same");
+        assertEquals(jolokia.getDefaultDomain(), platform.getDefaultDomain(), "Default domain");
 
-        Assert.assertEqualsNoOrder(
-            this.adapter.getDomains(),
-            nativeServer.getDomains(),
-            "Domain list is the same");
+        assertEqualsNoOrder(jolokia.getDomains(), platform.getDomains(), "Domain list is the same");
 
-        Assert.assertEquals(
-            this.adapter.getDefaultDomain(), nativeServer.getDefaultDomain(), "Default domain");
+        assertEquals(jolokia.agentVersion, Version.getAgentVersion());
+        assertEquals(jolokia.protocolVersion, Version.getProtocolVersion());
 
-//        Assert.assertEquals(this.adapter.agentVersion, Version.getAgentVersion());
-//        Assert.assertEquals(this.adapter.protocolVersion, Version.getProtocolVersion());
-        Assert.assertTrue(this.adapter.getId().endsWith("-jvm"));
-
+        assertTrue(jolokia.getId().endsWith("-jvm"));
     }
 
     @Test
     public void testConnector() throws IOException {
-        JMXServiceURL serviceURL = new JMXServiceURL("jolokia", "localhost", agentPort, "/jolokia/");
-        final Map<String, Object> environment = Collections.emptyMap();
-        JMXConnector connector = new JolokiaJmxConnectionProvider().newJMXConnector(
-            serviceURL,
-            environment);
+        JMXConnector connector = JMXConnectorFactory.newJMXConnector(jolokiaConnectorURL, Collections.emptyMap());
+
         final List<JMXConnectionNotification> receivedNotifications = new LinkedList<>();
+
         final Object handback = "foobar";
+
         connector.addConnectionNotificationListener((notification, hb) -> {
-            Assert.assertTrue(notification instanceof JMXConnectionNotification);
+            assertTrue(notification instanceof JMXConnectionNotification);
             receivedNotifications.add((JMXConnectionNotification) notification);
         }, null, handback);
         connector.connect();
-        Assert.assertEquals(((JolokiaJmxConnector)connector).getJolokiaProtocol(), "http");
-        Assert.assertEquals(receivedNotifications.get(0).getSource(), connector);
-        Assert.assertEquals(receivedNotifications.get(0).getType(), JMXConnectionNotification.OPENED);
+        assertEquals(((JolokiaJmxConnector) connector).getJolokiaProtocol(), "http");
+        assertEquals(receivedNotifications.get(0).getSource(), connector);
+        assertEquals(receivedNotifications.get(0).getType(), JMXConnectionNotification.OPENED);
+        assertEquals(connector.getMBeanServerConnection(), jolokia);
+
         receivedNotifications.clear();
-        Assert.assertEquals(
-            connector.getMBeanServerConnection(),
-            this.adapter);
+
         connector.close();
-        Assert.assertEquals(receivedNotifications.get(0).getSource(), connector);
-        Assert.assertEquals(receivedNotifications.get(0).getType(), JMXConnectionNotification.CLOSED);
-        connector.connect(environment);
-        Assert.assertEquals(
-            connector.getMBeanServerConnection(),
-            this.adapter);
+        assertEquals(receivedNotifications.get(0).getSource(), connector);
+        assertEquals(receivedNotifications.get(0).getType(), JMXConnectionNotification.CLOSED);
+        connector.connect(Collections.emptyMap());
+        assertEquals(connector.getMBeanServerConnection(), jolokia);
     }
 
     @Test(expectedExceptions = ConnectException.class)
     public void testConnectorIPv6() throws IOException {
         JMXServiceURL serviceURL = new JMXServiceURL("jolokia", "[::1]", agentPort, "/jolokia/");
-        final Map<String, Object> environment = Collections.emptyMap();
-        JMXConnector connector = new JolokiaJmxConnectionProvider().newJMXConnector(
-            serviceURL,
-            environment);
-        final List<JMXConnectionNotification> receivedNotifications = new LinkedList<>();
-        final Object handback = "foobar";
-        connector.addConnectionNotificationListener((notification, hb) -> {
-            Assert.assertTrue(notification instanceof JMXConnectionNotification);
-            receivedNotifications.add((JMXConnectionNotification) notification);
-        }, null, handback);
+        JMXConnector connector = JMXConnectorFactory.newJMXConnector(serviceURL, Collections.emptyMap());
+
+        connector.addConnectionNotificationListener((notification, hb) -> assertTrue(notification instanceof JMXConnectionNotification), null, "foobar");
         connector.connect();
+        connector.close();
     }
 
     @Test
-    public void testGetAttributes()
-        throws IOException, InstanceNotFoundException, ReflectionException {
-        ObjectName name = RUNTIME;
-        final String[] bothValidAndInvalid = new String[]{"Name", "Starttime", "StartTime"};
-        Assert.assertEquals(this.adapter.getAttributes(name, bothValidAndInvalid),
-            getNativeConnection().getAttributes(name, bothValidAndInvalid));
-        final String[] onlyInvalid = new String[]{"Starttime"};
-        Assert.assertEquals(this.adapter.getAttributes(name, onlyInvalid),
-            getNativeConnection().getAttributes(name, onlyInvalid));
-        final String[] singleValid = new String[]{"StartTime"};
-        Assert.assertEquals(this.adapter.getAttributes(name, singleValid),
-            getNativeConnection().getAttributes(name, singleValid));
-        final String[] multipleValid = new String[]{"Name", "StartTime"};
-        Assert.assertEquals(this.adapter.getAttributes(name, multipleValid),
-            getNativeConnection().getAttributes(name, multipleValid));
+    public void testGetAttributes() throws Exception {
+        final String[] bothValidAndInvalid = new String[] { "Name", "Starttime", "StartTime" };
+        assertEquals(jolokia.getAttributes(RUNTIME, bothValidAndInvalid), platform.getAttributes(RUNTIME, bothValidAndInvalid));
+
+        final String[] onlyInvalid = new String[] { "Starttime" };
+        assertEquals(jolokia.getAttributes(RUNTIME, onlyInvalid), platform.getAttributes(RUNTIME, onlyInvalid));
+
+        final String[] singleValid = new String[] { "StartTime" };
+        assertEquals(jolokia.getAttributes(RUNTIME, singleValid), platform.getAttributes(RUNTIME, singleValid));
+
+        final String[] multipleValid = new String[] { "Name", "StartTime" };
+        assertEquals(jolokia.getAttributes(RUNTIME, multipleValid), platform.getAttributes(RUNTIME, multipleValid));
     }
 
-
-    @AfterClass
-    public void stopAgent() {
-//        JvmAgent.agentmain("mode=stop", null);
-    }
 }

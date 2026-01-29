@@ -85,7 +85,7 @@ public class JmxConnectorTest {
     private JolokiaServer server;
     private MBeanServer platform;
 
-    JMXConnector connector;
+    private JMXConnector connector;
 
     private ObjectName allOpenTypesName;
     private ObjectName manyTypesName;

@@ -276,6 +276,11 @@ public class ObjectToObjectConverter implements Converter<String> {
             return convertCollectionToArray(pExpectedClass, (Collection<?>) pValue);
         }
 
+        // sets, if converting from collections
+        if (pExpectedClass.isAssignableFrom(Set.class) && pValue instanceof Collection collection) {
+            return new HashSet<>(collection);
+        }
+
         if (pExpectedClass.isPrimitive()) {
             Class<?> wrapperClass = PRIMITIVE_TYPE_MAP.get(pExpectedClass.getName());
             if (wrapperClass.isAssignableFrom(pValue.getClass())) {

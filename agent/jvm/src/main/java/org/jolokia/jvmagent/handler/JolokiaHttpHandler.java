@@ -80,6 +80,8 @@ public class JolokiaHttpHandler implements HttpHandler {
     // Backchannel Thread Pool (TODO: Optimize that for backchannel handling)
     private final Executor backChannelThreadPool = Executors.newCachedThreadPool();
 
+    private final SimpleDateFormat rfc1123Format;
+
     /**
      * Create a new HttpHandler for processing HTTP request
      *
@@ -92,6 +94,8 @@ public class JolokiaHttpHandler implements HttpHandler {
 
         requestHandler = new HttpRequestHandler(jolokiaContext);
         allowDnsReverseLookup = Boolean.parseBoolean(jolokiaContext.getConfig(ConfigKey.ALLOW_DNS_REVERSE_LOOKUP));
+
+        rfc1123Format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
     }
 
     /**
@@ -411,7 +415,6 @@ public class JolokiaHttpHandler implements HttpHandler {
 
 
     private String formatHeaderDate(Date date) {
-        DateFormat rfc1123Format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
         rfc1123Format.setTimeZone(TimeZone.getTimeZone("GMT"));
         return rfc1123Format.format(date);
     }

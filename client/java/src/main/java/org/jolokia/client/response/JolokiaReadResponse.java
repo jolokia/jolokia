@@ -181,7 +181,7 @@ public final class JolokiaReadResponse extends JolokiaResponse<JolokiaReadReques
                     requestBean.getCanonicalName() + ")");
         }
         // The attribute names are the same as from the request
-        if (request.hasSingleAttribute()) {
+        if (request.hasSingleAttribute() && !request.isMultiAttributes()) {
             // Contains only a single attribute:
             if (pAttribute != null && !pAttribute.equals(request.getAttribute())) {
                 throw new IllegalArgumentException("Given attribute " + pAttribute + " doesnt match single attribute " +

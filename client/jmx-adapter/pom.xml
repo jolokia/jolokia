@@ -76,10 +76,6 @@
         </exclusion>
         <exclusion>
           <groupId>org.jolokia</groupId>
-          <artifactId>jolokia-service-history</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.jolokia</groupId>
           <artifactId>jolokia-service-jsr160</artifactId>
         </exclusion>
         <exclusion>
@@ -91,14 +87,6 @@
           <artifactId>jolokia-service-notif-sse</artifactId>
         </exclusion>
       </exclusions>
-    </dependency>
-
-    <!-- Test dependencies -->
-
-    <dependency>
-      <groupId>org.awaitility</groupId>
-      <artifactId>awaitility</artifactId>
-      <scope>test</scope>
     </dependency>
 
     <!-- Other dependencies -->
@@ -208,11 +196,12 @@
           <!-- for IJ: https://www.jetbrains.com/help/idea/running-tests.html -->
           <argLine>
             -Djava.util.logging.config.file=target/test-classes/logging.properties
-            -Dcom.sun.management.jmxremote
-            -Dcom.sun.management.jmxremote.port=45888
-            -Dcom.sun.management.jmxremote.authenticate=false
-            -Dcom.sun.management.jmxremote.ssl=false
-            -Djava.rmi.server.hostname=localhost
+            <!-- We used to need these properties in surefire configuration, but now we control the RMI Connector programmatically -->
+<!--            -Dcom.sun.management.jmxremote-->
+<!--            -Dcom.sun.management.jmxremote.port=45888-->
+<!--            -Dcom.sun.management.jmxremote.authenticate=false-->
+<!--            -Dcom.sun.management.jmxremote.ssl=false-->
+<!--            -Djava.rmi.server.hostname=localhost-->
           </argLine>
         </configuration>
       </plugin>

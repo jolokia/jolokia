@@ -227,7 +227,7 @@ public class JolokiaReadRequest extends JolokiaMBeanRequest {
     @Override
     public JSONObject toJson() {
         JSONObject ret = super.toJson();
-        if (hasSingleAttribute()) {
+        if (hasSingleAttribute() && !multiAttributes) {
             // single attribute as string
             ret.put("attribute", attributes.get(0));
         } else {
@@ -257,6 +257,14 @@ public class JolokiaReadRequest extends JolokiaMBeanRequest {
      */
     public boolean hasSingleAttribute() {
         return !multiAttributes || attributes.size() == 1;
+    }
+
+    /**
+     * Whether there's an array of attributes used (even one element)
+     * @return
+     */
+    public boolean isMultiAttributes() {
+        return multiAttributes;
     }
 
     /**
