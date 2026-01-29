@@ -34,6 +34,7 @@ import java.util.HashMap;
 
 import org.jolokia.client.JolokiaClientBuilder;
 import org.jolokia.client.JolokiaClientOption;
+import org.jolokia.client.JolokiaQueryParameter;
 import org.jolokia.core.util.CryptoUtil;
 
 import javax.management.ListenerNotFoundException;
@@ -148,6 +149,9 @@ public class JolokiaJmxConnector implements JMXConnector {
         }
 
         this.adapter = new RemoteJmxAdapter(clientBuilder.build());
+
+        boolean fetchOpenTypes = booleanProperty(copy, JolokiaClientOption.OPEN_TYPES, true);
+        this.adapter.defaultProcessingOptions().put(JolokiaQueryParameter.OPEN_TYPES, fetchOpenTypes ? "true" : "false");
 
         postCreateAdapter();
     }
@@ -307,6 +311,30 @@ public class JolokiaJmxConnector implements JMXConnector {
         String env = System.getenv(option.asEnvVariable());
         if (env != null && !env.trim().isEmpty()) {
             value = Integer.parseInt(env);
+        }
+
+        return value;
+    }
+
+    static boolean booleanProperty(Map<String, Object> config, JolokiaClientOption option, boolean defaultValue) {
+        Object v = config.get(option.asSystemProperty());
+        boolean value = defaultValue;
+        if (v instanceof String) {
+            value = Boolean.parseBoolean((String) v);
+        } else if (v instanceof Boolean b) {
+            value = b;
+        } else if (v != null) {
+            throw new IllegalArgumentException(option.asSystemProperty() + " should be a Boolean value");
+        }
+
+        String sys = System.getProperty(option.asSystemProperty());
+        if (sys != null && !sys.trim().isEmpty()) {
+            value = Boolean.parseBoolean(sys);
+        }
+
+        String env = System.getenv(option.asEnvVariable());
+        if (env != null && !env.trim().isEmpty()) {
+            value = Boolean.parseBoolean(env);
         }
 
         return value;

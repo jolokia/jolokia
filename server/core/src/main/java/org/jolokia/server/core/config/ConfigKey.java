@@ -443,7 +443,13 @@ public enum ConfigKey {
      * implemented by the MBean's class. This may be used to implement {@link javax.management.MBeanServerConnection#isInstanceOf}
      * method (see jolokia/jolokia#666).
      */
-    LIST_INTERFACES("listInterfaces", false, true, Constants.FALSE, Boolean.class);
+    LIST_INTERFACES("listInterfaces", false, true, Constants.FALSE, Boolean.class),
+
+    /**
+     * A request parameter for {@code list} operation, which tells Jolokia to add information about
+     * {@link javax.management.openmbean.OpenType} used by an attribute, method argument or return value.
+     */
+    OPEN_TYPES("openTypes", false, true, Constants.FALSE, Boolean.class);
 
     /**
      * JAAS Subject to attach to an HTTP request as attribute if JAAS based authentication is in use.

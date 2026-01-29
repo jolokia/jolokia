@@ -24,6 +24,7 @@ import javax.management.openmbean.OpenType;
 import org.jolokia.converter.object.OpenTypeHelper;
 import org.jolokia.json.JSONObject;
 import org.jolokia.server.core.service.api.DataUpdater;
+import org.jolokia.server.core.service.api.OpenTypeAwareDataUpdate;
 
 import static org.jolokia.service.jmx.handler.list.DataKeys.*;
 
@@ -33,7 +34,7 @@ import static org.jolokia.service.jmx.handler.list.DataKeys.*;
  * @author roland
  * @since 13.09.11
  */
-class AttributeDataUpdater extends DataUpdater {
+class AttributeDataUpdater extends DataUpdater implements OpenTypeAwareDataUpdate {
 
     protected AttributeDataUpdater() {
         super(100);
@@ -50,8 +51,19 @@ class AttributeDataUpdater extends DataUpdater {
 
         for (MBeanAttributeInfo attrInfo : pMBeanInfo.getAttributes()) {
             if (attribute == null || attrInfo.getName().equals(attribute)) {
-                JSONObject map = new JSONObject();
-                map.put(TYPE.getKey(), attrInfo.getType());
+                attrMap.put(attrInfo.getName(), basicData(attrInfo));
+            }
+        }
+        return attrMap;
+    }
+
+    @Override
+    public JSONObject extractDataWithOpenTypes(ObjectName pObjectName, MBeanInfo pMBeanInfo, String attribute) {
+        JSONObject attrMap = new JSONObject();
+
+        for (MBeanAttributeInfo attrInfo : pMBeanInfo.getAttributes()) {
+            if (attribute == null || attrInfo.getName().equals(attribute)) {
+                JSONObject map = basicData(attrInfo);
                 if (attrInfo instanceof OpenMBeanAttributeInfo openMBeanAttributeInfo) {
                     map.put(OPEN_TYPE.getKey(), OpenTypeHelper.toJSON(openMBeanAttributeInfo.getOpenType(), attrInfo));
                 } else {
@@ -60,15 +72,21 @@ class AttributeDataUpdater extends DataUpdater {
                         map.put(OPEN_TYPE.getKey(), OpenTypeHelper.toJSON(openType, attrInfo));
                     }
                 }
-                map.put(DESCRIPTION.getKey(), attrInfo.getDescription());
-                map.put(READ.getKey(), attrInfo.isReadable());
-                map.put(WRITE.getKey(), attrInfo.isWritable());
-                map.put(READ_WRITE.getKey(), attrInfo.isWritable() && attrInfo.isReadable());
-                map.put(IS.getKey(), attrInfo.isIs());
                 attrMap.put(attrInfo.getName(), map);
             }
         }
         return attrMap;
+    }
+
+    private static JSONObject basicData(MBeanAttributeInfo attrInfo) {
+        JSONObject map = new JSONObject();
+        map.put(TYPE.getKey(), attrInfo.getType());
+        map.put(DESCRIPTION.getKey(), attrInfo.getDescription());
+        map.put(READ.getKey(), attrInfo.isReadable());
+        map.put(WRITE.getKey(), attrInfo.isWritable());
+        map.put(READ_WRITE.getKey(), attrInfo.isWritable() && attrInfo.isReadable());
+        map.put(IS.getKey(), attrInfo.isIs());
+        return map;
     }
 
 }

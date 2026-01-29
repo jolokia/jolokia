@@ -53,17 +53,21 @@ class ListMBeanEachAction implements MBeanServerAccess.MBeanEachCallback, MBeanS
     /**
      * Handler used during iterations whe collecting MBean Meta data
      *
-     * @param pRequest   incoming Jolokia LIST request
-     * @param pPathStack optional stack for picking out a certain path from the list tree
-     * @param pProvider  provider to prepend to any domain (if not null)
-     * @param pContext   {@link JolokiaContext} for filtering MBeans
+     * @param pRequest        incoming Jolokia LIST request
+     * @param pPathStack      optional stack for picking out a certain path from the list tree
+     * @param pProvider       provider to prepend to any domain (if not null)
+     * @param pContext        {@link JolokiaContext} for filtering MBeans
      * @param pCache
+     * @param pNoOpenTypeCache
      */
-    public ListMBeanEachAction(JolokiaListRequest pRequest, Deque<String> pPathStack, String pProvider, JolokiaContext pContext, Map<ObjectName, JSONObject> pCache                            ) throws BadRequestException {
+    public ListMBeanEachAction(JolokiaListRequest pRequest, Deque<String> pPathStack, String pProvider,
+                               JolokiaContext pContext,
+                               Map<ObjectName, JSONObject> pCache,
+                               Map<ObjectName, JSONObject> pNoOpenTypeCache) throws BadRequestException {
         context = pContext;
 
         // This will be our "collector" used for all available MBeanServerConnections and ObjectNames to list
-        infoData = new MBeanInfoData(pPathStack, pProvider, pRequest, pCache);
+        infoData = new MBeanInfoData(pPathStack, pProvider, pRequest, pCache, pNoOpenTypeCache);
 
         customUpdaters = context.getServices(DataUpdater.class);
         cacheKeyProviders = context.getServices(CacheKeyProvider.class);

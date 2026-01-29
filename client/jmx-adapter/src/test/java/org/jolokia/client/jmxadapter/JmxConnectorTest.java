@@ -21,6 +21,7 @@ import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Logger;
@@ -135,7 +136,11 @@ public class JmxConnectorTest {
         }, customDynamicName);
 
         JMXServiceURL serviceURL = new JMXServiceURL("jolokia+http", "127.0.0.1", port, "/jolokia");
-        connector = JMXConnectorFactory.connect(serviceURL);
+        connector = JMXConnectorFactory.connect(serviceURL, env());
+    }
+
+    protected Map<String, Object> env() {
+        return Collections.emptyMap();
     }
 
     @AfterClass

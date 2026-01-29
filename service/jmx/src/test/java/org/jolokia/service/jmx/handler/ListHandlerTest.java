@@ -212,11 +212,41 @@ public class ListHandlerTest extends BaseHandlerTest {
 
     @Test
     public void attrPath() throws Exception {
-        JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST).pathParts("java.lang","type=Memory",
-                                                                                           ATTRIBUTES.getKey()).build();
+        JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST)
+                .pathParts("java.lang","type=Memory", ATTRIBUTES.getKey())
+                .build();
 
         JSONObject res = execute(handler, request);
         assertTrue(res.containsKey("HeapMemoryUsage"));
+        if (res.get("HeapMemoryUsage") instanceof JSONObject json) {
+            assertFalse(json.containsKey("openType"));
+        } else {
+            fail("Expected JSON object");
+        }
+
+        res = execute(handlerWithRealm, request);
+        checkKeys(res);
+
+        request = new JolokiaRequestBuilder(RequestType.LIST).pathParts("proxy@java.lang","type=Memory",ATTRIBUTES.getKey())
+                                                             .build();
+        res = execute(handlerWithRealm, request);
+        assertTrue(res.containsKey("HeapMemoryUsage"));
+    }
+
+    @Test
+    public void attrPathWithOpenType() throws Exception {
+        JolokiaListRequest request = new JolokiaRequestBuilder(RequestType.LIST)
+                .option(ConfigKey.OPEN_TYPES, "true")
+                .pathParts("java.lang","type=Memory", ATTRIBUTES.getKey())
+                .build();
+
+        JSONObject res = execute(handler, request);
+        assertTrue(res.containsKey("HeapMemoryUsage"));
+        if (res.get("HeapMemoryUsage") instanceof JSONObject json) {
+            assertTrue(json.containsKey("openType"));
+        } else {
+            fail("Expected JSON object");
+        }
 
         res = execute(handlerWithRealm, request);
         checkKeys(res);

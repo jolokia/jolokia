@@ -69,7 +69,10 @@ public enum JolokiaClientOption {
     CONNECTION_TIMEOUT("connectionTimeout"),
 
     /** Read (socket) timeout */
-    READ_TIMEOUT("readTimeout");
+    READ_TIMEOUT("readTimeout"),
+
+    /** Whether to get {@link javax.management.openmbean.OpenType} information with {@code list} operation */
+    OPEN_TYPES("openTimeout");
 
     private final String option;
 

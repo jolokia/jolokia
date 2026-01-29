@@ -53,12 +53,30 @@ public abstract class DataUpdater extends AbstractJolokiaService<DataUpdater> im
      * @param pPathStack stack for further constraining the result
      */
     public void update(Map<String, Object> pMap, ObjectName pObjectName, MBeanInfo pMBeanInfo, Deque<String> pPathStack) {
+        update(pMap, pObjectName, pMBeanInfo, pPathStack, false);
+    }
 
+    /**
+     * Update the given map object with the data extracted from the given
+     * MBeanInfo
+     *
+     * @param pMap map to update
+     * @param pObjectName {@link ObjectName} of the {@link MBeanInfo} to extract from
+     * @param pMBeanInfo info to extract from
+     * @param pPathStack stack for further constraining the result
+     * @param pOpenTypes add {@link javax.management.openmbean.OpenType} if available
+     */
+    public void update(Map<String, Object> pMap, ObjectName pObjectName, MBeanInfo pMBeanInfo, Deque<String> pPathStack, boolean pOpenTypes) {
         boolean isPathEmpty = pPathStack == null || pPathStack.isEmpty();
         String filter = pPathStack != null && !pPathStack.isEmpty() ? pPathStack.pop() : null;
         verifyThatPathIsEmpty(pPathStack);
 
-        JSONObject attrMap = extractData(pObjectName, pMBeanInfo, filter);
+        JSONObject attrMap;
+        if (pOpenTypes) {
+            attrMap = extractDataWithOpenTypes(pObjectName, pMBeanInfo, filter);
+        } else {
+            attrMap = extractData(pObjectName, pMBeanInfo, filter);
+        }
 
         if (!attrMap.isEmpty()) {
             pMap.put(getKey(), attrMap);
@@ -72,11 +90,24 @@ public abstract class DataUpdater extends AbstractJolokiaService<DataUpdater> im
      * in its default implementation it returns an empty map
      *
      * @param pObjectName {@link ObjectName} of the {@link MBeanInfo} to extract from
-     * @param pMBeanInfo the info object to examine
-     * @param pFilter any additional filter to apply
+     * @param pMBeanInfo  the info object to examine
+     * @param pFilter     any additional filter to apply
      * @return the extracted data as an JSON object
      */
-    public JSONObject extractData(ObjectName pObjectName, MBeanInfo pMBeanInfo,String pFilter) {
+    public JSONObject extractData(ObjectName pObjectName, MBeanInfo pMBeanInfo, String pFilter) {
+        return new JSONObject();
+    }
+
+    /**
+     * Do the real work by extracting the data from the MBeanInfo. This method should be overridden,
+     * in its default implementation it returns an empty map
+     *
+     * @param pObjectName {@link ObjectName} of the {@link MBeanInfo} to extract from
+     * @param pMBeanInfo  the info object to examine
+     * @param pFilter     any additional filter to apply
+     * @return the extracted data as an JSON object
+     */
+    public JSONObject extractDataWithOpenTypes(ObjectName pObjectName, MBeanInfo pMBeanInfo, String pFilter) {
         return new JSONObject();
     }
 

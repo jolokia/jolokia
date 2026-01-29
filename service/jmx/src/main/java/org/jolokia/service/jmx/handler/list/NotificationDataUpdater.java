@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2013 Roland Huss
+ * Copyright 2009-2026 Roland Huss
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.jolokia.service.jmx.handler.list;
 
 import java.util.Collections;
@@ -39,13 +38,11 @@ class NotificationDataUpdater extends DataUpdater {
         super(100);
     }
 
-    /** {@inheritDoc} */
     @Override
     public String getKey() {
         return NOTIFICATIONS.getKey();
     }
 
-    /** {@inheritDoc} */
     @Override
     public JSONObject extractData(ObjectName pObjectName, MBeanInfo pMBeanInfo, String pNotification) {
         JSONObject notMap = new JSONObject();
@@ -63,4 +60,5 @@ class NotificationDataUpdater extends DataUpdater {
         }
         return notMap;
     }
+
 }

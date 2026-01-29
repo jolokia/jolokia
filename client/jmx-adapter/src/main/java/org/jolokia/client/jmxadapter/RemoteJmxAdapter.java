@@ -956,7 +956,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
      * Default set of options to pass to {@link JolokiaClient#execute(JolokiaRequest, Map)}
      * @return
      */
-    private Map<JolokiaQueryParameter, String> defaultProcessingOptions() {
+    Map<JolokiaQueryParameter, String> defaultProcessingOptions() {
         if (defaultProcessingOptions == null) {
             defaultProcessingOptions = new HashMap<>();
             defaultProcessingOptions.put(JolokiaQueryParameter.LIST_CACHE, "true");

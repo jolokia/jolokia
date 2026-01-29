@@ -38,6 +38,7 @@ import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.request.BadRequestException;
 import org.jolokia.server.core.request.JolokiaListRequest;
 import org.jolokia.server.core.service.api.DataUpdater;
+import org.jolokia.server.core.service.api.OpenTypeAwareDataUpdate;
 import org.jolokia.service.jmx.api.CacheKeyProvider;
 
 /**
@@ -104,7 +105,7 @@ import org.jolokia.service.jmx.api.CacheKeyProvider;
 public class MBeanInfoData {
 
     // max depth for map to return
-    private final int maxDepth;
+    private int maxDepth;
 
     /**
      * ObjectName or pattern recreated from the passed pathStack. Used to filter response elements. {@code null}
@@ -143,10 +144,14 @@ public class MBeanInfoData {
     // whether to add a map of interfaces implemented by the MBean
     private final boolean listInterfaces;
 
+    // add OpenType information to list response?
+    private final boolean listOpenTypes;
+
     // whether to use optimized list() response (with cache/domain)
     private boolean listCache;
 
     private final Map<ObjectName, JSONObject> cache;
+    private final Map<ObjectName, JSONObject> noOpenTypeCache;
 
     static {
         for (DataUpdater updater : new DataUpdater[] {
@@ -170,21 +175,29 @@ public class MBeanInfoData {
      * up. The tree will be truncated if it gets larger than this value. A <em>path</em> (in form of a stack)
      * can be given, in which only a sub information (subtree or leaf value) is returned
      *
-     * @param pPathStack the stack for restricting the information to add. The given stack will be cloned
-     *                   and is left untouched.
+     * @param pPathStack       the stack for restricting the information to add. The given stack will be cloned
+     *                         and is left untouched.
      * @param pProvider
      * @param pRequest
      * @param pMBeanInfoCache
+     * @param pNoOpenTypeCache
      */
-    public MBeanInfoData(Deque<String> pPathStack, String pProvider, JolokiaListRequest pRequest, Map<ObjectName, JSONObject> pMBeanInfoCache) throws BadRequestException {
+    public MBeanInfoData(Deque<String> pPathStack, String pProvider, JolokiaListRequest pRequest,
+                         Map<ObjectName, JSONObject> pMBeanInfoCache, Map<ObjectName, JSONObject> pNoOpenTypeCache) throws BadRequestException {
         // these properties may come different with each request
         maxDepth = pRequest.getParameterAsInt(ConfigKey.MAX_DEPTH);
         useCanonicalName = pRequest.getParameterAsBool(ConfigKey.CANONICAL_NAMING);
         listKeys = pRequest.getParameterAsBool(ConfigKey.LIST_KEYS);
         listCache = pRequest.getParameterAsBool(ConfigKey.LIST_CACHE);
         listInterfaces = pRequest.getParameterAsBool(ConfigKey.LIST_INTERFACES);
+        listOpenTypes = pRequest.getParameterAsBool(ConfigKey.OPEN_TYPES);
+        if (listOpenTypes) {
+            // well - we need a BIG maxDepth
+            maxDepth = 0;
+        }
 
         cache = pMBeanInfoCache;
+        noOpenTypeCache = pNoOpenTypeCache;
 
         // Stack of path elements for Jolokia list operation. Two first elements are for {@link ObjectName#getDomain()}
         // and {@link ObjectName#getCanonicalKeyPropertyListString()}, 3rd element is to select single updater to use
@@ -260,7 +273,7 @@ public class MBeanInfoData {
      * @return true if the object name has been added and {@link MBeanServerConnection#getMBeanInfo} is not needed
      */
     public boolean handleFirstOrSecondLevel(ObjectName pName) {
-        if (maxDepth > 2) {
+        if (maxDepth > 2 || maxDepth == 0) {
             // full or partial serialization of MBeanInfo
             return false;
         }
@@ -474,17 +487,25 @@ public class MBeanInfoData {
      */
     public void addFullMBeanInfo(MBeanServerConnection pConn, Map<String, Object> pMBeanMap, ObjectName pObjectName, MBeanInfo pMBeanInfo, ObjectName pName, Set<DataUpdater> customUpdaters) {
         JSONObject cached = cache != null ? cache.get(pObjectName) : null;
+        JSONObject cachedWithoutOpenType = noOpenTypeCache != null ? noOpenTypeCache.get(pObjectName) : null;
         boolean updaterFound = false;
         // built-in updaters first
         for (DataUpdater updater : UPDATERS.values()) {
             String key = updater.getKey();
             if (selectedUpdater == null || key.equals(selectedUpdater)) {
-                if (cached != null && cached.containsKey(key)) {
+                if (listOpenTypes && cached != null && cached.containsKey(key)) {
                     // from cache
                     pMBeanMap.put(key, cached.get(key));
+                } else if (!listOpenTypes && cachedWithoutOpenType != null && cachedWithoutOpenType.containsKey(key)) {
+                    // from cache - but without OpenTypes
+                    pMBeanMap.put(key, cachedWithoutOpenType.get(key));
                 } else {
                     // by doing introspection
-                    updater.update(pMBeanMap, pObjectName, pMBeanInfo, null);
+                    if (updater instanceof OpenTypeAwareDataUpdate updater2) {
+                        updater2.update(pMBeanMap, pObjectName, pMBeanInfo, null, listOpenTypes);
+                    } else {
+                        updater.update(pMBeanMap, pObjectName, pMBeanInfo, null);
+                    }
                 }
                 updaterFound = true;
             }
@@ -508,7 +529,11 @@ public class MBeanInfoData {
         // custom updaters later - without cache
         for (DataUpdater customUpdater : customUpdaters) {
             if (selectedUpdater == null || customUpdater.getKey().equals(selectedUpdater)) {
-                customUpdater.update(pMBeanMap, pObjectName, pMBeanInfo, null);
+                if (customUpdater instanceof OpenTypeAwareDataUpdate updater2) {
+                    customUpdater.update(pMBeanMap, pObjectName, pMBeanInfo, null, listOpenTypes);
+                } else {
+                    customUpdater.update(pMBeanMap, pObjectName, pMBeanInfo, null);
+                }
                 updaterFound = true;
             }
         }

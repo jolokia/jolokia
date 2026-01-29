@@ -17,6 +17,7 @@ package org.jolokia.service.jmx.handler;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.LinkedList;
@@ -34,6 +35,7 @@ import javax.management.ObjectName;
 
 import org.jolokia.core.util.EscapeUtil;
 import org.jolokia.json.JSONObject;
+import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.request.BadRequestException;
 import org.jolokia.server.core.request.JolokiaListRequest;
 import org.jolokia.server.core.request.JolokiaRequestFactory;
@@ -63,6 +65,11 @@ public class ListHandler extends AbstractCommandHandler<JolokiaListRequest> {
      * but we can cache any object.
      */
     private final Map<ObjectName, JSONObject> cache = new ConcurrentHashMap<>();
+
+    /**
+     * Cache without {@link javax.management.openmbean.OpenType} information
+     */
+    private final Map<ObjectName, JSONObject> noOpenTypeCache = new ConcurrentHashMap<>();
 
     @Override
     public RequestType getType() {
@@ -122,7 +129,7 @@ public class ListHandler extends AbstractCommandHandler<JolokiaListRequest> {
             }
 
             // this action is the full implementation of Jolokia LIST operation
-            ListMBeanEachAction action = new ListMBeanEachAction(pRequest, pathStack, pProvider, context, cache);
+            ListMBeanEachAction action = new ListMBeanEachAction(pRequest, pathStack, pProvider, context, cache, noOpenTypeCache);
 
             if (oName == null || oName.isPattern()) {
                 // needed, because MBeanServerAccess will query for all matching MBeans and call our action
@@ -187,83 +194,89 @@ public class ListHandler extends AbstractCommandHandler<JolokiaListRequest> {
         );
 
         try {
-            JolokiaListRequest list = JolokiaRequestFactory.createGetRequest("list", new ProcessingParameters(Collections.emptyMap()));
-            MBeanInfoData data = new MBeanInfoData(null, null, list, null);
+            JolokiaListRequest list1 = JolokiaRequestFactory.createGetRequest("list", new ProcessingParameters(Collections.emptyMap()));
+            JolokiaListRequest list2 = JolokiaRequestFactory.createGetRequest("list", new ProcessingParameters(Map.of(ConfigKey.OPEN_TYPES, "true")));
 
-            // known MBeans like java.lang:type=Runtime
-            for (String name : platformMBeans) {
-                try {
-                    jmxAccess.call(ObjectName.getInstance(name), new MBeanServerAccess.MBeanAction<>() {
-                        @Override
-                        public Void execute(MBeanServerConnection jmx, ObjectName objectName, Object... extraArgs) throws IOException, JMException {
-                            data.addMBeanInfo(jmx, new ObjectInstance(objectName, null), Collections.emptySet(), Collections.emptySet());
-                            return null;
-                        }
-                    });
-                } catch (IOException | JMException ignored) {
-                }
-            }
-            // optional MBeans
-            for (String name : optionalMBeans) {
-                try {
-                    jmxAccess.call(ObjectName.getInstance(name), new MBeanServerAccess.MBeanAction<>() {
-                        @Override
-                        public Void execute(MBeanServerConnection jmx, ObjectName objectName, Object... extraArgs) throws IOException, JMException {
-                            if (jmx.isRegistered(objectName)) {
+            for (JolokiaListRequest list : Arrays.asList(list1, list2)) {
+                boolean withOpenTypes = list.getParameterAsBool(ConfigKey.OPEN_TYPES);
+                Map<ObjectName, JSONObject> c = withOpenTypes ? cache : noOpenTypeCache;
+                MBeanInfoData data = new MBeanInfoData(null, null, list, null, null);
+
+                // known MBeans like java.lang:type=Runtime
+                for (String name : platformMBeans) {
+                    try {
+                        jmxAccess.call(ObjectName.getInstance(name), new MBeanServerAccess.MBeanAction<>() {
+                            @Override
+                            public Void execute(MBeanServerConnection jmx, ObjectName objectName, Object... extraArgs) throws IOException, JMException {
                                 data.addMBeanInfo(jmx, new ObjectInstance(objectName, null), Collections.emptySet(), Collections.emptySet());
-                            }
-                            return null;
-                        }
-                    });
-                } catch (IOException | JMException ignored) {
-                }
-            }
-            // only first from a group, for example java.lang:type=MemoryPool,name=Metaspace
-            for (String name : platformMBeanGroups) {
-                try {
-                    for (MBeanServerConnection server : jmxAccess.getMBeanServers()) {
-                        Set<ObjectName> names = server.queryNames(ObjectName.getInstance(name + ",*"), null);
-                        if (names != null && !names.isEmpty()) {
-                            data.addMBeanInfo(server, new ObjectInstance(names.iterator().next(), null), Collections.emptySet(), Collections.emptySet());
-                            break;
-                        }
-                    }
-                } catch (IOException | JMException ignored) {
-                }
-            }
-
-            if (data.applyPath() instanceof JSONObject result) {
-                result.forEach((domain, domainData) -> {
-                    if (domainData instanceof JSONObject mBeansData) {
-                        mBeansData.forEach((keys, mBeanData) -> {
-                            if (mBeanData instanceof JSONObject json) {
-                                try {
-                                    ObjectName platformMBeanName = ObjectName.getInstance(domain + ":" + keys);
-                                    cache.put(platformMBeanName, json);
-                                } catch (MalformedObjectNameException ignored) {
-                                }
+                                return null;
                             }
                         });
+                    } catch (IOException | JMException ignored) {
                     }
-                });
-            }
-
-            // cache remaining MBeans from the known groups based on what we've already cached
-            for (String name : platformMBeanGroups) {
-                for (ObjectName cached : cache.keySet()) {
+                }
+                // optional MBeans which may not be available
+                for (String name : optionalMBeans) {
                     try {
-                        if (ObjectName.getInstance(name + ",*").apply(cached)) {
-                            for (MBeanServerConnection server : jmxAccess.getMBeanServers()) {
-                                boolean found = false;
-                                Set<ObjectName> names = server.queryNames(ObjectName.getInstance(name + ",*"), null);
-                                for (ObjectName n : names) {
-                                    if (!cache.containsKey(n)) {
-                                        cache.put(n, cache.get(cached));
+                        jmxAccess.call(ObjectName.getInstance(name), new MBeanServerAccess.MBeanAction<>() {
+                            @Override
+                            public Void execute(MBeanServerConnection jmx, ObjectName objectName, Object... extraArgs) throws IOException, JMException {
+                                if (jmx.isRegistered(objectName)) {
+                                    data.addMBeanInfo(jmx, new ObjectInstance(objectName, null), Collections.emptySet(), Collections.emptySet());
+                                }
+                                return null;
+                            }
+                        });
+                    } catch (IOException | JMException ignored) {
+                    }
+                }
+                // only first from a group, for example java.lang:type=MemoryPool,name=Metaspace
+                for (String name : platformMBeanGroups) {
+                    try {
+                        for (MBeanServerConnection server : jmxAccess.getMBeanServers()) {
+                            Set<ObjectName> names = server.queryNames(ObjectName.getInstance(name + ",*"), null);
+                            if (names != null && !names.isEmpty()) {
+                                data.addMBeanInfo(server, new ObjectInstance(names.iterator().next(), null), Collections.emptySet(), Collections.emptySet());
+                                break;
+                            }
+                        }
+                    } catch (IOException | JMException ignored) {
+                    }
+                }
+
+                if (data.applyPath() instanceof JSONObject result) {
+                    result.forEach((domain, domainData) -> {
+                        if (domainData instanceof JSONObject mBeansData) {
+                            mBeansData.forEach((keys, mBeanData) -> {
+                                if (mBeanData instanceof JSONObject json) {
+                                    try {
+                                        ObjectName platformMBeanName = ObjectName.getInstance(domain + ":" + keys);
+                                        c.put(platformMBeanName, json);
+                                    } catch (MalformedObjectNameException ignored) {
+                                    }
+                                }
+                            });
+                        }
+                    });
+                }
+
+                // cache remaining MBeans from the known groups based on what we've already cached
+                for (String name : platformMBeanGroups) {
+                    for (ObjectName cached : c.keySet()) {
+                        try {
+                            if (ObjectName.getInstance(name + ",*").apply(cached)) {
+                                for (MBeanServerConnection server : jmxAccess.getMBeanServers()) {
+                                    boolean found = false;
+                                    Set<ObjectName> names = server.queryNames(ObjectName.getInstance(name + ",*"), null);
+                                    for (ObjectName n : names) {
+                                        if (!c.containsKey(n)) {
+                                            c.put(n, c.get(cached));
+                                        }
                                     }
                                 }
                             }
+                        } catch (IOException | MalformedObjectNameException ignored) {
                         }
-                    } catch (IOException | MalformedObjectNameException ignored) {
                     }
                 }
             }

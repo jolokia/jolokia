@@ -125,7 +125,13 @@ public enum JolokiaQueryParameter {
      * A request parameter for {@code list} operation, which tells Jolokia to return a list of all the interfaces
      * implemented by the MBean's class.
      */
-    LIST_INTERFACES("listInterfaces");
+    LIST_INTERFACES("listInterfaces"),
+
+    /**
+     * A request parameter for {@code list} operation, which tells Jolokia to add information about
+     * {@link javax.management.openmbean.OpenType} used by an attribute, method argument or return value.
+     */
+    OPEN_TYPES("openTypes");
 
     private final String param;
 
