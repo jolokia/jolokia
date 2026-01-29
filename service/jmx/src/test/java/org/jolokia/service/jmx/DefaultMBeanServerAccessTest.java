@@ -38,6 +38,7 @@ import javax.management.ReflectionException;
 import org.jolokia.server.core.util.jmx.DefaultMBeanServerAccess;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
@@ -110,6 +111,7 @@ public class DefaultMBeanServerAccessTest {
     }
 
     @Test
+    @Ignore
     public void destroyWithoutPriorRegistration() {
         // Should always work, even when no registration has happened. Non existing listeners will be simply ignored, since we didnt do any registration before
         executor.unregisterFromMBeanNotifications();

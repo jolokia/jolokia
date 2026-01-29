@@ -611,9 +611,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
         validateNonPatternObjectName(name);
 
         try {
-            // we call "getAttributes()" with one attribute for manual error handling (so we know
-            // if given attribute is available or not - but with more potential exception details)
-            JolokiaReadRequest request = new JolokiaReadRequest(name, new String[]{attribute});
+            JolokiaReadRequest request = new JolokiaReadRequest(name, attribute);
             final JolokiaReadResponse readResponse = unwrapExecute(request, () -> {
                 Map<JolokiaQueryParameter, String> options = defaultProcessingOptions();
                 // we want to adhere to getAttributes() protocol to ignore missing attributes and instead get
