@@ -64,6 +64,7 @@ public class ObjectToObjectConverter implements Converter<String> {
 
     private static final Map<String, Class<?>> TYPE_SIGNATURE_MAP = new HashMap<>();
     private static final Map<String, Class<?>> PRIMITIVE_TYPE_MAP = new HashMap<>();
+    private static final Map<String, Class<?>> PRIMITIVE_TYPES = new HashMap<>();
     private static final Map<String, Parser> PARSER_MAP = new HashMap<>();
 
     // String parser is special, because it can be configured with discovered simplifiers
@@ -90,6 +91,15 @@ public class ObjectToObjectConverter implements Converter<String> {
         TYPE_SIGNATURE_MAP.put("J", long.class);
         TYPE_SIGNATURE_MAP.put("F", float.class);
         TYPE_SIGNATURE_MAP.put("D", double.class);
+
+        PRIMITIVE_TYPES.put(boolean.class.getName(), Boolean.TYPE);
+        PRIMITIVE_TYPES.put(char.class.getName(), Character.TYPE);
+        PRIMITIVE_TYPES.put(byte.class.getName(), Byte.TYPE);
+        PRIMITIVE_TYPES.put(short.class.getName(), Short.TYPE);
+        PRIMITIVE_TYPES.put(int.class.getName(), Integer.TYPE);
+        PRIMITIVE_TYPES.put(long.class.getName(), Long.TYPE);
+        PRIMITIVE_TYPES.put(float.class.getName(), Float.TYPE);
+        PRIMITIVE_TYPES.put(double.class.getName(), Double.TYPE);
 
         PRIMITIVE_TYPE_MAP.put(boolean.class.getName(), Boolean.class);
         PRIMITIVE_TYPE_MAP.put(char.class.getName(), Character.class);
@@ -176,11 +186,11 @@ public class ObjectToObjectConverter implements Converter<String> {
         if (typeName == null || typeName.trim().isEmpty()) {
             return null;
         }
-        if (PRIMITIVE_TYPE_MAP.containsKey(typeName)) {
-            return PRIMITIVE_TYPE_MAP.get(typeName);
+        if (PRIMITIVE_TYPES.containsKey(typeName)) {
+            return PRIMITIVE_TYPES.get(typeName);
         }
         if (typeName.length() == 1 && TYPE_SIGNATURE_MAP.containsKey(typeName)) {
-            return PRIMITIVE_TYPE_MAP.get(TYPE_SIGNATURE_MAP.get(typeName).getName());
+            return PRIMITIVE_TYPES.get(TYPE_SIGNATURE_MAP.get(typeName).getName());
         }
         if (!typeName.contains(".") && typeName.startsWith("[")) {
             return ClassUtil.classForName(typeName);

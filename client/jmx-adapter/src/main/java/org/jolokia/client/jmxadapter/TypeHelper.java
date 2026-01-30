@@ -35,13 +35,16 @@ import org.jolokia.converter.object.ObjectToOpenTypeConverter;
 import org.jolokia.core.util.ClassUtil;
 
 /**
- * Helper methods for dealing with types and type conversion for {@link RemoteJmxAdapter}
+ * Helper methods for dealing with types and type conversion for {@link RemoteJmxAdapter}. Helps with known
+ * types, but also when type information has to be discovered from actual data (which is usually the case
+ * with {@link CompositeData} and {@link TabularData}.
  */
 public class TypeHelper {
 
     /**
-     * Cache of String representation of types (from {@link MBeanAttributeInfo#getType()},
-     * {@link MBeanOperationInfo#getReturnType()} and {@link MBeanParameterInfo#getType()}.
+     * Cache for String representation of types (from {@link MBeanAttributeInfo#getType()},
+     * {@link MBeanOperationInfo#getReturnType()} and {@link MBeanParameterInfo#getType()}) which are unique
+     * and don't have <em>internal structure</em>.
      * For {@link javax.management.openmbean.CompositeType} and {@link javax.management.openmbean.TabularType},
      * {@link #CACHE} is used. {@link ArrayType} depends only on dimensions and class/type, so can be cached here.
      */
@@ -50,7 +53,7 @@ public class TypeHelper {
     /**
      * Cache of the resolved types by arbitrary keys. The reason is that resolution of some {@link OpenType Open types}
      * may depend on particular MBean. This is true for {@link javax.management.openmbean.CompositeType}
-     * and {@link javax.management.openmbean.TabularType}
+     * and {@link javax.management.openmbean.TabularType}.
      */
     private static final Map<String, CachedType> CACHE = new ConcurrentHashMap<>();
 
@@ -102,10 +105,17 @@ public class TypeHelper {
     /**
      * <p>Caching function that translates the {@code type} into a {@link Class} and potentially {@link OpenType}.</p>
      *
-     * <p>Mind that in the context of {@link org.jolokia.client.JolokiaClient}, we don't have (maybe
-     * after <a href="https://github.com/jolokia/jolokia/issues/966">#966</a>) a full type information with
-     * details about {@link javax.management.openmbean.CompositeType} or
-     * {@link javax.management.openmbean.TabularType}. That's why we cache by the key, not by the type.</p>
+     * <p>After implementing <a href="https://github.com/jolokia/jolokia/issues/966">#966</a>) we may have
+     * a full type information with details about {@link javax.management.openmbean.CompositeType} or
+     * {@link javax.management.openmbean.TabularType}. But when connecting to older Jolokia Agents, this information
+     * may be missing.</p>
+     *
+     * <p>This method operates on two different caches:<ul>
+     *     <li>Cache by {@code type} - when there's simple, unambiguous mapping</li>
+     *     <li>Cache by {@code key} - when the type information depends on an MBean/attribute/operation
+     *     being used - this is true for {@link CompositeData} and {@link TabularData}, where the class of the data
+     *     is not sufficient to get full type information.</li>
+     * </ul></p>
      *
      * @param key
      * @param type
@@ -117,7 +127,13 @@ public class TypeHelper {
         }
 
         if (CACHE.containsKey(key)) {
-            return CACHE.get(key);
+            CachedType cached = CACHE.get(key);
+            if (cached.openType() == null && foundOpenType != null) {
+                // let's replace the worse entry with a better one
+                CACHE.remove(key);
+            } else {
+                return cached;
+            }
         }
         if (TYPE_CACHE.containsKey(type)) {
             return TYPE_CACHE.get(type);
@@ -140,9 +156,8 @@ public class TypeHelper {
             return unknownType;
         }
 
-        // is it an OpenType?
+        // is it a data which can be cached without ambiguities?
         boolean cacheType = cls != CompositeData.class && cls != TabularData.class;
-
         String nonArrayType = type;
         if (nonArrayType.startsWith("[") && nonArrayType.endsWith(";")) {
             while (nonArrayType.startsWith("[")) {
@@ -156,17 +171,19 @@ public class TypeHelper {
 
         OpenType<?> openType = foundOpenType == null ? ObjectToOpenTypeConverter.knownSimpleType(cls) : foundOpenType;
         if (openType == null) {
+            // some discovery, but we can't do much about CompositeData and TabularData without known OpenType
+            // we can only handle arrays
             if (cls.isArray()) {
-                Class<?> cc = cls;
+                Class<?> componentType = cls;
                 int dim = 0;
-                while (cc.isArray()) {
+                while (componentType.isArray()) {
                     dim++;
-                    cc = cc.getComponentType();
+                    componentType = componentType.getComponentType();
                 }
-                if (cc.isPrimitive()) {
+                if (componentType.isPrimitive()) {
                     openType = ArrayType.getPrimitiveArrayType(cls);
                 } else {
-                    SimpleType<?> componentOpenType = ObjectToOpenTypeConverter.knownSimpleType(cc);
+                    SimpleType<?> componentOpenType = ObjectToOpenTypeConverter.knownSimpleType(componentType);
                     if (componentOpenType != null) {
                         try {
                             openType = new ArrayType<>(dim, componentOpenType);
@@ -174,18 +191,43 @@ public class TypeHelper {
                         }
                     }
                 }
-            } else if (cls == CompositeData.class) {
-            } else if (cls == TabularData.class) {
+//            } else if (cls == CompositeData.class) {
+//            } else if (cls == TabularData.class) {
             }
         }
 
         if (cacheType) {
-            TYPE_CACHE.put(type, new CachedType(cls, openType, openType == null ? type : openType.getTypeName()));
+            if (openType instanceof SimpleType) {
+                // special, so we can distinguish "short" and "java.lang.Short"
+                TYPE_CACHE.put(type, new CachedType(cls, openType, type));
+            } else {
+                TYPE_CACHE.put(type, new CachedType(cls, openType, openTypeName(openType, type)));
+            }
             return TYPE_CACHE.get(type);
         } else {
-            CACHE.put(key, new CachedType(cls, openType, openType == null ? type : openType.getTypeName()));
+            CACHE.put(key, new CachedType(cls, openType, openTypeName(openType, type)));
             return CACHE.get(key);
         }
+    }
+
+    /**
+     * Prepare nice name for the {@link OpenType} which makes array type names better.
+     * @param openType
+     * @param defaultName
+     * @return
+     */
+    private static String openTypeName(OpenType<?> openType, String defaultName) {
+        if (openType == null) {
+            return defaultName;
+        }
+        String typeName;
+        if (openType instanceof ArrayType<?> arrayType && !arrayType.isPrimitiveArray()) {
+            typeName = "[".repeat(arrayType.getDimension()) + "L" + arrayType.getElementOpenType().getTypeName() + ";";
+        } else {
+            typeName = openType.getTypeName();
+        }
+
+        return typeName;
     }
 
 }

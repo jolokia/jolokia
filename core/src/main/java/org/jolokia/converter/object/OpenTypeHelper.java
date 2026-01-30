@@ -39,7 +39,8 @@ import org.jolokia.json.JSONObject;
 
 /**
  * <p>Helper class to convert between {@link javax.management.openmbean.OpenType Open types}, JSON representation for
- * Jolokia protocol and {@link javax.management.MBeanInfo} information.</p>
+ * Jolokia protocol and {@link javax.management.MBeanInfo} information. Conversion doesn't require particular
+ * values and rely only on type information.</p>
  *
  * <p>This class is an implementation of <a href="https://github.com/jolokia/jolokia/issues/966">#966</a> which
  * enhances the information found in Jolokia {@code list} responses.</p>
