@@ -177,7 +177,7 @@ public class OpenTypeHelper {
         if (openType instanceof String simpleOpenType) {
             Class<Object> cls = ClassUtil.classForName(simpleOpenType);
             if (cls != null) {
-                return ObjectToOpenTypeConverter.knownSimpleType(cls);
+                return ObjectToOpenTypeConverter.knownSimpleOpenType(cls);
             } else {
                 return null;
             }

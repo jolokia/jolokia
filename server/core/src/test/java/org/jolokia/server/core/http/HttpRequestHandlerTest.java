@@ -200,7 +200,7 @@ public class HttpRequestHandlerTest {
             new AttributeNotFoundException(), 404, 500,
             new UnsupportedOperationException(), 500, 500,
             new IOException(), 500, 500,
-            new IllegalArgumentException(), 500, 500, // because all user's fault is turned into BadRequestException
+            new IllegalArgumentException(), 500, 500,
             new SecurityException(), 403, 403,
             new RuntimeMBeanException(new NullPointerException()), 500, 500,
             new JMException(), 500, 500

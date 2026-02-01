@@ -362,7 +362,7 @@ public class JfrApiTest {
 
     @Test
     public void remoteRecordingStreamWithPlatformServerAndJMXProxyWithJolokia() throws Exception {
-        MBeanServerConnection jolokia = platform;//connector.getMBeanServerConnection();
+        MBeanServerConnection jolokia = connector.getMBeanServerConnection();
 
         FlightRecorderMXBean jfr = JMX.newMXBeanProxy(jolokia, this.jfr, FlightRecorderMXBean.class);
         long id = jfr.newRecording();

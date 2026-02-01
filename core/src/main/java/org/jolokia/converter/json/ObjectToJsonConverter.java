@@ -277,7 +277,7 @@ public final class ObjectToJsonConverter {
                 return pathStack.isEmpty() ?
                     null :
                     stackContext.getValueFaultHandler().handleException(
-                        new AttributeNotFoundException("Cannot apply a path to an null value"));
+                        new AttributeNotFoundException("Cannot apply a path to a null value"));
             }
 
             stackContext.push(pValue);

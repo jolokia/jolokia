@@ -115,11 +115,11 @@ public class ObjectToOpenTypeConverter implements Converter<OpenType<?>> {
         this.forgiving = pForgiving;
     }
 
-    public static SimpleType<?> knownPrimitiveType(String type) {
+    public static SimpleType<?> knownPrimitiveOpenType(String type) {
         return PRIMITIVE_OPENTYPE_MAP.get(type);
     }
 
-    public static SimpleType<?> knownSimpleType(Class<?> cls) {
+    public static SimpleType<?> knownSimpleOpenType(Class<?> cls) {
         return SIMPLE_OPENTYPE_MAP.get(cls);
     }
 

@@ -27,6 +27,7 @@ public class User {
     @ConstructorParameters({ "name", "address" })
     public User(String name, Address address) {
         this.name = name;
+        this.address = address;
     }
 
     public String getName() {

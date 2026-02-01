@@ -628,7 +628,7 @@ public final class JolokiaListResponse extends JolokiaResponse<JolokiaListReques
                     JMX.OPEN_TYPE_FIELD, openType
                 ));
                 if (SimpleType.class.isAssignableFrom(openType.getClass())) {
-                    SimpleType<?> simpleType = ObjectToOpenTypeConverter.knownPrimitiveType(type);
+                    SimpleType<?> simpleType = ObjectToOpenTypeConverter.knownPrimitiveOpenType(type);
                     if (simpleType != null) {
                         // this is really a primitive type
                         return new MBeanAttributeInfo(name, type, desc, r, w, is, descriptor);
@@ -770,7 +770,7 @@ public final class JolokiaListResponse extends JolokiaResponse<JolokiaListReques
                 ));
 
                 if (SimpleType.class.isAssignableFrom(openType.getClass())) {
-                    SimpleType<?> simpleType = ObjectToOpenTypeConverter.knownPrimitiveType(type);
+                    SimpleType<?> simpleType = ObjectToOpenTypeConverter.knownPrimitiveOpenType(type);
                     if (simpleType != null) {
                         // this is really a primitive type
                         return new MBeanParameterInfo(name, type, desc, descriptor);

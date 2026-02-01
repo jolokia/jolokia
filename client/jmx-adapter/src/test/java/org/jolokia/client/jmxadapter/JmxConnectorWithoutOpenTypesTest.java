@@ -35,6 +35,11 @@ public class JmxConnectorWithoutOpenTypesTest extends JmxConnectorTest {
         return Map.of(JolokiaClientOption.OPEN_TYPES.asSystemProperty(), "false");
     }
 
+    @Override
+    protected boolean useOpenTypeInformation() {
+        return false;
+    }
+
     // These overrides look silly, but I added them here to make it easier to run the tests from IDE
 
     @Test

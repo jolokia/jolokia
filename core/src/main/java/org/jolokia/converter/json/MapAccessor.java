@@ -133,10 +133,12 @@ public class MapAccessor implements org.jolokia.converter.json.ObjectAccessor {
         for (Map.Entry<?, ?> entry : pMap.entrySet()) {
             Deque<String> paths = new LinkedList<>(pPath);
             try {
-                // we need to convert they key to a String in a better way than .toString()
+                // we need to convert the key to a String in a better way than .toString()
                 //  - key is explicitly converted into String, skipping the "extraction", because we don't
                 //    want simplifiers to kick in (for example turning File into a map of properties like length
-                //    and canonical name)
+                //    and canonical name). This means that some keys are explicitly forbidden - for example
+                //    Map<Long[], String> will not work with Jolokia, unless when being registered
+                //    as MXBean - we'd get TabularType with different behavior
                 //  - value is extracted as JSON value
                 ret.put((String) pConverter.getConverter().convert(String.class.getName(), entry.getKey()),
                     pConverter.extractObject(entry.getValue(), paths, true));

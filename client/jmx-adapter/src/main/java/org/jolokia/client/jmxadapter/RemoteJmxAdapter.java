@@ -140,6 +140,8 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
         // default version where CoreConfiguration is not available
         toJsonConverter = new ObjectToJsonConverter((ObjectToObjectConverter) objectToObjectConverter,
             (ObjectToOpenTypeConverter) objectToOpenTypeConverter, null);
+
+        TypeHelper.converter = objectToObjectConverter;
     }
 
     /**
@@ -450,7 +452,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
     }
 
     @Override
-    public MBeanInfo getMBeanInfo(ObjectName name) throws InstanceNotFoundException, IOException {
+    public MBeanInfo getMBeanInfo(ObjectName name) throws InstanceNotFoundException, ReflectionException, IOException {
         MBeanInfo result = this.mbeanInfoCache.get(name);
         if (result == null) {
             synchronized (mbeanInfoCache) {
@@ -631,7 +633,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
                 if (openType == null) {
                     openType = OpenTypeHelper.findOpenType(info.getDescriptor());
                 }
-                return convertValue(name, TypeHelper.attributeKey(name, info), info.getType(), openType, value);
+                return convertValue(TypeHelper.attributeKey(name, info), info.getType(), openType, value);
             }
         } catch (UncheckedJmxAdapterException e) {
             Throwable cause = e.getCause();
@@ -691,7 +693,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
                         if (openType == null) {
                             openType = OpenTypeHelper.findOpenType(info.getDescriptor());
                         }
-                        result.add(new Attribute(attribute, convertValue(name, TypeHelper.attributeKey(name, info), info.getType(),
+                        result.add(new Attribute(attribute, convertValue(TypeHelper.attributeKey(name, info), info.getType(),
                             openType, v)));
                     }
                 }
@@ -797,7 +799,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
                         if (openType == null) {
                             openType = OpenTypeHelper.findOpenType(info.getDescriptor());
                         }
-                        Object value = convertValue(res.getRequest().getObjectName(), TypeHelper.attributeKey(name, info), info.getType(),
+                        Object value = convertValue(TypeHelper.attributeKey(name, info), info.getType(),
                             openType, res.getValue());
                         result.add(new Attribute(attribute, value));
                     }
@@ -844,13 +846,14 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
                 MBeanOperationInfo info = getOperationTypeFromMBeanInfo(name, operationName, signature);
                 if (info == null) {
                     // see com.sun.jmx.mbeanserver.PerInterface.noSuchMethod
-                    throw new MBeanException(new ReflectionException(new NoSuchMethodException("Can't find MBeanOperationInfo for " + operationName + " operation of " + name)));
+                    NoSuchMethodException cause = new NoSuchMethodException("Can't find MBeanOperationInfo for " + operationName + " operation of " + name);
+                    throw new MBeanException(new ReflectionException(cause, cause.getMessage()));
                 }
                 OpenType<?> retOpenType = info instanceof OpenMBeanOperationInfo openInfo ? openInfo.getReturnOpenType() : null;
                 if (retOpenType == null) {
                     retOpenType = OpenTypeHelper.findOpenType(info.getDescriptor());
                 }
-                return convertValue(name, TypeHelper.operationKey(name, info), info.getReturnType(), retOpenType, value);
+                return convertValue(TypeHelper.operationKey(name, info), info.getReturnType(), retOpenType, value);
             }
         } catch (UncheckedJmxAdapterException e) {
             Throwable cause = e.getCause();
@@ -873,7 +876,8 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
             }
         }
 
-        throw new MBeanException(new ReflectionException(new NoSuchMethodException("Can't invoke " + operationName + " of " + name + " (No response received)")));
+        NoSuchMethodException cause = new NoSuchMethodException("Can't invoke " + operationName + " of " + name + " (No response received)");
+        throw new MBeanException(new ReflectionException(cause, cause.getMessage()));
     }
 
     // ------ Notification methods
@@ -1177,7 +1181,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
      * @throws InstanceNotFoundException
      */
     private MBeanAttributeInfo getAttributeTypeFromMBeanInfo(final ObjectName objectName, final String attributeName)
-            throws IOException, InstanceNotFoundException {
+            throws IOException, InstanceNotFoundException, ReflectionException {
         final MBeanInfo mBeanInfo = getMBeanInfo(objectName);
         for (final MBeanAttributeInfo attribute : mBeanInfo.getAttributes()) {
             if (attributeName.equals(attribute.getName())) {
@@ -1199,7 +1203,7 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
      * @throws InstanceNotFoundException
      */
     private MBeanOperationInfo getOperationTypeFromMBeanInfo(ObjectName objectName, String operationName, String[] signature)
-            throws IOException, InstanceNotFoundException {
+            throws IOException, InstanceNotFoundException, ReflectionException {
         final MBeanInfo mBeanInfo = getMBeanInfo(objectName);
         if (signature == null) {
             signature = new String[0];
@@ -1257,30 +1261,40 @@ public class RemoteJmxAdapter implements MBeanServerConnection {
     /**
      * Handle data conversion using type information collected from {@link MBeanInfo}.
      *
-     * @param name
-     * @param cacheKey
-     * @param typeName
+     * @param cacheKey Jolokia-specific cache key for attribute or operation (overloaded)
+     * @param typeName from {@link MBeanAttributeInfo#getType()} or from {@link MBeanOperationInfo#getReturnType()}
      * @param rawValue
      * @return
      * @throws ReflectionException
      */
-    private Object convertValue(ObjectName name, String cacheKey, String typeName, OpenType<?> openType, Object rawValue) throws ReflectionException {
+    Object convertValue(String cacheKey, String typeName, OpenType<?> openType, Object rawValue) throws ReflectionException {
         CachedType entry = TypeHelper.cache(cacheKey, typeName, openType);
         if (entry.type() == null) {
             // cached as unresolved type
-            throw new ReflectionException(new ClassNotFoundException("Can't resolve " + entry.typeName()));
+            ClassNotFoundException cause = new ClassNotFoundException("Can't resolve " + entry.typeName());
+            throw new ReflectionException(cause, cause.getMessage());
         }
         if (entry.openType() == null) {
             // we don't have a real OpenType to convert to; all we need is the data itself. This may
             // happen for example with non-MXBeans which return CompositeData/TabularData directly.
             // real MXBeans should return Maps/Lists/Objects which are converted to "easy" tabular/composite data
             // with "key" and "value" items.
-            // TODO: DOTO
+            // Jolokia 2.5.0 can return OpenType information with list responses, but we want to be able to
+            // use older Jolokia Agents too
+            OpenType<?> discoveredOpenType = TypeHelper.buildOpenType(typeName, rawValue);
+            if (discoveredOpenType != null) {
+                // we can fix the cache with a new OpenType for this key
+                entry = TypeHelper.cache(cacheKey, typeName, discoveredOpenType);
+            }
         }
-        if (entry.openType() != null) {
-            return objectToOpenTypeConverter.convert(entry.openType(), rawValue);
-        } else {
-            return objectToObjectConverter.convert(entry.type().getName(), rawValue);
+        try {
+            if (entry.openType() != null) {
+                return objectToOpenTypeConverter.convert(entry.openType(), rawValue);
+            } else {
+                return objectToObjectConverter.convert(entry.type().getName(), rawValue);
+            }
+        } catch (IllegalArgumentException e) {
+            throw new UncheckedJmxAdapterException(new ReflectionException(e, e.getMessage()));
         }
     }
 

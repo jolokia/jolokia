@@ -286,7 +286,8 @@ public class ObjectToObjectConverter implements Converter<String> {
             return convertCollectionToArray(pExpectedClass, (Collection<?>) pValue);
         }
 
-        // sets, if converting from collections
+        // sets, if converting from collections - latest addition, not needed until I started
+        // refactoring jolokia-client-jmx-adapter
         if (pExpectedClass.isAssignableFrom(Set.class) && pValue instanceof Collection collection) {
             return new HashSet<>(collection);
         }
@@ -649,7 +650,7 @@ public class ObjectToObjectConverter implements Converter<String> {
                 return true;
             }
             if (pValue instanceof BigDecimal bi) {
-                return bi.compareTo(MAX_FLOAT) >= 0 && bi.compareTo(MIN_FLOAT) >= 0;
+                return bi.compareTo(MAX_FLOAT) <= 0 && bi.compareTo(MIN_FLOAT) >= 0;
             } else if (pValue instanceof BigInteger bi) {
                 BigDecimal bd = new BigDecimal(bi.toString());
                 return bd.compareTo(MAX_FLOAT) <= 0 && bd.compareTo(MIN_FLOAT) >= 0;

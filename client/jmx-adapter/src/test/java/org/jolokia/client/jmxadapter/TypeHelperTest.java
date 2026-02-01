@@ -15,10 +15,15 @@
  */
 package org.jolokia.client.jmxadapter;
 
+import java.io.File;
 import java.lang.management.ManagementFactory;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,6 +32,7 @@ import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanInfo;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
+import javax.management.ReflectionException;
 import javax.management.StandardMBean;
 import javax.management.openmbean.ArrayType;
 import javax.management.openmbean.CompositeData;
@@ -34,6 +40,7 @@ import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenMBeanAttributeInfo;
 import javax.management.openmbean.OpenMBeanInfo;
+import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularData;
 
@@ -42,14 +49,31 @@ import org.jolokia.client.jmxadapter.beans.Example1MXBean;
 import org.jolokia.client.jmxadapter.beans.Example2;
 import org.jolokia.client.jmxadapter.beans.Example2MBean;
 import org.jolokia.client.jmxadapter.beans.User;
+import org.jolokia.converter.json.ObjectToJsonConverter;
+import org.jolokia.converter.object.ObjectToObjectConverter;
+import org.jolokia.converter.object.ObjectToOpenTypeConverter;
+import org.jolokia.core.service.serializer.SerializeOptions;
+import org.testng.SkipException;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
 
 public class TypeHelperTest {
 
+    private static ObjectToJsonConverter toJsonConverter;
+
+    @BeforeClass
+    public void setup() {
+        ObjectToObjectConverter objectToObjectConverter = new ObjectToObjectConverter();
+        ObjectToOpenTypeConverter objectToOpenTypeConverter = new ObjectToOpenTypeConverter(objectToObjectConverter, true);
+        toJsonConverter = new ObjectToJsonConverter(objectToObjectConverter, objectToOpenTypeConverter, null);
+        TypeHelper.converter = objectToObjectConverter;
+        TypeHelper.CACHE.clear();
+    }
+
     @Test
-    public void uniqueTypeCaching() throws OpenDataException {
+    public void uniqueTypeCaching() throws OpenDataException, ReflectionException {
         // checking types which do not use CompositeType / TabularType
 
         assertSame(TypeHelper.cache("t1a", "Z", null).type(), Boolean.TYPE);
@@ -92,7 +116,7 @@ public class TypeHelperTest {
     }
 
     @Test
-    public void ambiguousTypeCaching() {
+    public void ambiguousTypeCaching() throws Exception {
         // checking types which can't be dissected without particular data objects
 
         CachedType t = TypeHelper.cache("t1", CompositeData.class.getName(), null);
@@ -127,6 +151,7 @@ public class TypeHelperTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void typeCachingFromMBeanInfo() throws Exception {
         MBeanServer jmx = ManagementFactory.getPlatformMBeanServer();
 
@@ -136,6 +161,11 @@ public class TypeHelperTest {
         ObjectName example2b = new ObjectName("jolokia:test=TypeHelperTest,name=example2b");
 
         // 1 wrapped in com.sun.jmx.mbeanserver.MXBeanSupport
+        for (ObjectName name: List.of(example1a, example1b, example2a, example2b)) {
+            if (jmx.isRegistered(name)) {
+                jmx.unregisterMBean(name);
+            }
+        }
         jmx.registerMBean(new Example1(), example1a);
         // 3 wrapped in com.sun.jmx.mbeanserver.StandardMBeanSupport
         jmx.registerMBean(new StandardMBean(new Example1(), Example1MXBean.class), example1b);
@@ -151,7 +181,9 @@ public class TypeHelperTest {
         MBeanInfo info2b = jmx.getMBeanInfo(example2b);
         assertFalse(info2b instanceof OpenMBeanInfo);
 
-        // 1a
+        // The below is NOT AI-generated
+
+        // 1a - MXBean
 
         MBeanAttributeInfo i1aShort = attrInfo(info1a, "Short");
         assertEquals(TypeHelper.cache("i1aShort", i1aShort.getType(), null).type(), Short.class);
@@ -181,13 +213,24 @@ public class TypeHelperTest {
         MBeanAttributeInfo i1aProperTabularType = attrInfo(info1a, "ProperTabularType");
         assertEquals(TypeHelper.cache("i1aProperTabularType", i1aProperTabularType.getType(), null).type(), TabularData.class);
         assertEquals(TypeHelper.cache("i1aProperTabularType", i1aProperTabularType.getType(), null).typeName(), TabularData.class.getName());
-        assertEquals(i1aProperTabularType.getDescriptor().getFieldValue(JMX.OPEN_TYPE_FIELD), Example1.typeOfProperTabularTypeAttribute());
+        assertEquals(i1aProperTabularType.getDescriptor().getFieldValue(JMX.OPEN_TYPE_FIELD), Example1.typeOfMXTabularDataAttribute());
         assertNull(TypeHelper.cache("i1aProperTabularType", i1aProperTabularType.getType(), null).openType());
         MBeanAttributeInfo i1aProperTabularTypeArray = attrInfo(info1a, "ProperTabularTypeArray");
         assertEquals(TypeHelper.cache("i1aProperTabularTypeArray", i1aProperTabularTypeArray.getType(), null).type(), TabularData[].class);
         assertEquals(TypeHelper.cache("i1aProperTabularTypeArray", i1aProperTabularTypeArray.getType(), null).typeName(), "[Ljavax.management.openmbean.TabularData;");
-        assertEquals(i1aProperTabularTypeArray.getDescriptor().getFieldValue(JMX.OPEN_TYPE_FIELD), new ArrayType<>(1, Example1.typeOfProperTabularTypeAttribute()));
+        assertEquals(i1aProperTabularTypeArray.getDescriptor().getFieldValue(JMX.OPEN_TYPE_FIELD), new ArrayType<>(1, Example1.typeOfMXTabularDataAttribute()));
         assertNull(TypeHelper.cache("i1aProperTabularTypeArray", i1aProperTabularTypeArray.getType(), null).openType());
+        MBeanAttributeInfo i1aAlmostProperTabularType = attrInfo(info1a, "AlmostProperTabularType");
+        assertEquals(TypeHelper.cache("i1aAlmostProperTabularType", i1aAlmostProperTabularType.getType(), null).type(), TabularData.class);
+        assertEquals(TypeHelper.cache("i1aAlmostProperTabularType", i1aAlmostProperTabularType.getType(), null).typeName(), TabularData.class.getName());
+        assertEquals(i1aAlmostProperTabularType.getDescriptor().getFieldValue(JMX.OPEN_TYPE_FIELD), Example1.typeOfAlmostProperTabularDataAttribute());
+        assertNull(TypeHelper.cache("i1aAlmostProperTabularType", i1aAlmostProperTabularType.getType(), null).openType());
+        MBeanAttributeInfo i1aComplexKeyedTabularType = attrInfo(info1a, "ComplexKeyedTabularType");
+        assertEquals(TypeHelper.cache("i1aComplexKeyedTabularType", i1aComplexKeyedTabularType.getType(), null).type(), TabularData.class);
+        assertEquals(TypeHelper.cache("i1aComplexKeyedTabularType", i1aComplexKeyedTabularType.getType(), null).typeName(), TabularData.class.getName());
+        assertEquals(i1aComplexKeyedTabularType.getDescriptor().getFieldValue(JMX.OPEN_TYPE_FIELD), Example1.typeOfComplexKeyedTabularDataAttribute());
+        assertNull(TypeHelper.cache("i1aComplexKeyedTabularType", i1aComplexKeyedTabularType.getType(), null).openType());
+
         MBeanAttributeInfo i1aList = attrInfo(info1a, "List");
         assertEquals(TypeHelper.cache("i1aList", i1aList.getType(), null).type(), String[].class);
         assertEquals(TypeHelper.cache("i1aList", i1aList.getType(), null).typeName(), "[Ljava.lang.String;");
@@ -220,11 +263,31 @@ public class TypeHelperTest {
         assertEquals(TypeHelper.cache("i1aCompositeDataArray", i1aCompositeDataArray.getType(), null).type(), CompositeData[].class);
         assertEquals(TypeHelper.cache("i1aCompositeDataArray", i1aCompositeDataArray.getType(), null).typeName(), "[Ljavax.management.openmbean.CompositeData;");
         assertNull(TypeHelper.cache("i1aCompositeDataArray", i1aCompositeDataArray.getType(), null).openType());
-        @SuppressWarnings("unchecked")
         ArrayType<CompositeData> i1aArrayType = (ArrayType<CompositeData>) ((OpenMBeanAttributeInfo) i1aCompositeDataArray).getOpenType();
         assertEquals(TypeHelper.cache("i1aCompositeDataArray2", i1aCompositeDataArray.getType(), i1aArrayType).type(), CompositeData[].class);
         assertEquals(TypeHelper.cache("i1aCompositeDataArray2", i1aCompositeDataArray.getType(), i1aArrayType).typeName(), CompositeData[].class.getName());
         assertEquals(TypeHelper.cache("i1aCompositeDataArray2", i1aCompositeDataArray.getType(), i1aArrayType).openType(), i1aArrayType);
+        i1aCompositeType = (CompositeType) i1aArrayType.getElementOpenType();
+        assertEquals(i1aCompositeType.keySet().size(), 1);
+        assertTrue(i1aCompositeType.containsKey("compositeType"));
+        i1aCompositeData = attrInfo(info1a, "CompositeMXData");
+        assertEquals(TypeHelper.cache("i1aCompositeMXData", i1aCompositeData.getType(), null).type(), CompositeData.class);
+        assertEquals(TypeHelper.cache("i1aCompositeMXData", i1aCompositeData.getType(), null).typeName(), CompositeData.class.getName());
+        assertNull(TypeHelper.cache("i1aCompositeMXData", i1aCompositeData.getType(), null).openType());
+        i1aCompositeType = (CompositeType) ((OpenMBeanAttributeInfo) i1aCompositeData).getOpenType();
+        assertEquals(TypeHelper.cache("i1aCompositeMXData2", i1aCompositeData.getType(), i1aCompositeType).type(), CompositeData.class);
+        assertEquals(TypeHelper.cache("i1aCompositeMXData2", i1aCompositeData.getType(), i1aCompositeType).typeName(), CompositeData.class.getName());
+        assertEquals(TypeHelper.cache("i1aCompositeMXData2", i1aCompositeData.getType(), i1aCompositeType).openType(), i1aCompositeType);
+        assertEquals(i1aCompositeType.keySet().size(), 1);
+        assertTrue(i1aCompositeType.containsKey("compositeType"));
+        i1aCompositeDataArray = attrInfo(info1a, "CompositeMXDataArray");
+        assertEquals(TypeHelper.cache("i1aCompositeMXDataArray", i1aCompositeDataArray.getType(), null).type(), CompositeData[].class);
+        assertEquals(TypeHelper.cache("i1aCompositeMXDataArray", i1aCompositeDataArray.getType(), null).typeName(), "[Ljavax.management.openmbean.CompositeData;");
+        assertNull(TypeHelper.cache("i1aCompositeMXDataArray", i1aCompositeDataArray.getType(), null).openType());
+        i1aArrayType = (ArrayType<CompositeData>) ((OpenMBeanAttributeInfo) i1aCompositeDataArray).getOpenType();
+        assertEquals(TypeHelper.cache("i1aCompositeMXDataArray2", i1aCompositeDataArray.getType(), i1aArrayType).type(), CompositeData[].class);
+        assertEquals(TypeHelper.cache("i1aCompositeMXDataArray2", i1aCompositeDataArray.getType(), i1aArrayType).typeName(), CompositeData[].class.getName());
+        assertEquals(TypeHelper.cache("i1aCompositeMXDataArray2", i1aCompositeDataArray.getType(), i1aArrayType).openType(), i1aArrayType);
         i1aCompositeType = (CompositeType) i1aArrayType.getElementOpenType();
         assertEquals(i1aCompositeType.keySet().size(), 1);
         assertTrue(i1aCompositeType.containsKey("compositeType"));
@@ -246,12 +309,36 @@ public class TypeHelperTest {
         assertEquals(TypeHelper.cache("i1aTabularDataArray", i1aTabularDataArray.getType(), null).type(), CompositeData[].class);
         assertEquals(TypeHelper.cache("i1aTabularDataArray", i1aTabularDataArray.getType(), null).typeName(), "[Ljavax.management.openmbean.CompositeData;");
         assertNull(TypeHelper.cache("i1aTabularDataArray", i1aTabularDataArray.getType(), null).openType());
-        @SuppressWarnings("unchecked")
         ArrayType<CompositeData> i1aArrayType2 = (ArrayType<CompositeData>) ((OpenMBeanAttributeInfo) i1aTabularDataArray).getOpenType();
         assertEquals(TypeHelper.cache("i1aTabularDataArray2", i1aTabularDataArray.getType(), i1aArrayType2).type(), CompositeData[].class);
         // we do some Jolokia special conversion in org.jolokia.converter.object.OpenTypeHelper.toJSON(javax.management.openmbean.ArrayType<?>, javax.management.MBeanFeatureInfo) too
         assertEquals(TypeHelper.cache("i1aTabularDataArray2", i1aTabularDataArray.getType(), i1aArrayType2).typeName(), /*CompositeData[].class.getName()*/TabularData[].class.getName());
         assertEquals(TypeHelper.cache("i1aTabularDataArray2", i1aTabularDataArray.getType(), i1aArrayType2).openType(), i1aArrayType2);
+        i1aCompositeType = (CompositeType) i1aArrayType2.getElementOpenType();
+        assertEquals(i1aCompositeType.keySet().size(), 2);
+        assertTrue(i1aCompositeType.containsKey("tabularType"));
+        assertTrue(i1aCompositeType.containsKey("empty"));
+        i1aTabularData = attrInfo(info1a, "TabularMXData");
+        assertEquals(TypeHelper.cache("i1aTabularMXData", i1aTabularData.getType(), null).type(), CompositeData.class);
+        assertEquals(TypeHelper.cache("i1aTabularMXData", i1aTabularData.getType(), null).typeName(), CompositeData.class.getName());
+        assertNull(TypeHelper.cache("i1aTabularMXData", i1aTabularData.getType(), null).openType());
+        i1aCompositeType = (CompositeType) ((OpenMBeanAttributeInfo) i1aTabularData).getOpenType();
+        assertEquals(TypeHelper.cache("i1aTabularMXData2", i1aTabularData.getType(), i1aCompositeType).type(), CompositeData.class);
+        // typeName comes from OpenType, so it's actually TabularData, not CompositeData
+        assertEquals(TypeHelper.cache("i1aTabularMXData2", i1aTabularData.getType(), i1aCompositeType).typeName(), TabularData.class.getName());
+        assertEquals(TypeHelper.cache("i1aTabularMXData2", i1aTabularData.getType(), i1aCompositeType).openType(), i1aCompositeType);
+        assertEquals(i1aCompositeType.keySet().size(), 2);
+        assertTrue(i1aCompositeType.containsKey("tabularType"));
+        assertTrue(i1aCompositeType.containsKey("empty"));
+        i1aTabularDataArray = attrInfo(info1a, "TabularMXDataArray");
+        assertEquals(TypeHelper.cache("i1aTabularMXDataArray", i1aTabularDataArray.getType(), null).type(), CompositeData[].class);
+        assertEquals(TypeHelper.cache("i1aTabularMXDataArray", i1aTabularDataArray.getType(), null).typeName(), "[Ljavax.management.openmbean.CompositeData;");
+        assertNull(TypeHelper.cache("i1aTabularMXDataArray", i1aTabularDataArray.getType(), null).openType());
+        i1aArrayType2 = (ArrayType<CompositeData>) ((OpenMBeanAttributeInfo) i1aTabularDataArray).getOpenType();
+        assertEquals(TypeHelper.cache("i1aTabularMXDataArray2", i1aTabularDataArray.getType(), i1aArrayType2).type(), CompositeData[].class);
+        // we do some Jolokia special conversion in org.jolokia.converter.object.OpenTypeHelper.toJSON(javax.management.openmbean.ArrayType<?>, javax.management.MBeanFeatureInfo) too
+        assertEquals(TypeHelper.cache("i1aTabularMXDataArray2", i1aTabularDataArray.getType(), i1aArrayType2).typeName(), /*CompositeData[].class.getName()*/TabularData[].class.getName());
+        assertEquals(TypeHelper.cache("i1aTabularMXDataArray2", i1aTabularDataArray.getType(), i1aArrayType2).openType(), i1aArrayType2);
         i1aCompositeType = (CompositeType) i1aArrayType2.getElementOpenType();
         assertEquals(i1aCompositeType.keySet().size(), 2);
         assertTrue(i1aCompositeType.containsKey("tabularType"));
@@ -280,7 +367,6 @@ public class TypeHelperTest {
         assertEquals(TypeHelper.cache("i1aUsers", i1aUsers.getType(), null).type(), CompositeData[].class);
         assertEquals(TypeHelper.cache("i1aUsers", i1aUsers.getType(), null).typeName(), CompositeData[].class.getName());
         assertNull(TypeHelper.cache("i1aUsers", i1aUsers.getType(), null).openType());
-        @SuppressWarnings("unchecked")
         ArrayType<CompositeData> i1aArrayType3 = (ArrayType<CompositeData>) ((OpenMBeanAttributeInfo) i1aUsers).getOpenType();
         assertEquals(TypeHelper.cache("i1aUsers2", i1aUsers.getType(), i1aArrayType3).type(), CompositeData[].class);
         assertEquals(TypeHelper.cache("i1aUsers2", i1aUsers.getType(), i1aArrayType3).typeName(), User[].class.getName());
@@ -296,259 +382,225 @@ public class TypeHelperTest {
         assertTrue(i1aCompositeType.containsKey("zip"));
         assertEquals(i1aCompositeType.getType("zip"), SimpleType.LONG);
 
-        // 1b
+        // 1b, 2a, 2b - all non-MXBeans
 
-        MBeanAttributeInfo i1bShort = attrInfo(info1b, "Short");
-        assertEquals(TypeHelper.cache("i1bShort", i1bShort.getType(), null).type(), Short.class);
-        assertEquals(TypeHelper.cache("i1bShort", i1bShort.getType(), null).typeName(), "java.lang.Short");
-        assertEquals(TypeHelper.cache("i1bShort", i1bShort.getType(), null).openType(), SimpleType.SHORT);
-        MBeanAttributeInfo i1bPrimitiveShort = attrInfo(info1b, "PrimitiveShort");
-        assertEquals(TypeHelper.cache("i1bPrimitiveShort", i1bPrimitiveShort.getType(), null).type(), Short.TYPE);
-        assertEquals(TypeHelper.cache("i1bPrimitiveShort", i1bPrimitiveShort.getType(), null).typeName(), "short");
-        assertEquals(TypeHelper.cache("i1bPrimitiveShort", i1bPrimitiveShort.getType(), null).openType(), SimpleType.SHORT);
-        MBeanAttributeInfo i1bPrimitiveShortArray = attrInfo(info1b, "PrimitiveShortArray");
-        assertEquals(TypeHelper.cache("i1bPrimitiveShortArray", i1bPrimitiveShortArray.getType(), null).type(), short[].class);
-        assertEquals(TypeHelper.cache("i1bPrimitiveShortArray", i1bPrimitiveShortArray.getType(), null).typeName(), "[S");
-        assertEquals(TypeHelper.cache("i1bPrimitiveShortArray", i1bPrimitiveShortArray.getType(), null).openType(), ArrayType.getPrimitiveArrayType(short[].class));
-        MBeanAttributeInfo i1bShortArray = attrInfo(info1b, "ShortArray");
-        assertEquals(TypeHelper.cache("i1bShortArray", i1bShortArray.getType(), null).type(), Short[].class);
-        assertEquals(TypeHelper.cache("i1bShortArray", i1bShortArray.getType(), null).typeName(), "[Ljava.lang.Short;");
-        assertEquals(TypeHelper.cache("i1bShortArray", i1bShortArray.getType(), null).openType(), new ArrayType<>(1, SimpleType.SHORT));
-        MBeanAttributeInfo i1bPrimitiveShort2DArray = attrInfo(info1b, "PrimitiveShort2DArray");
-        assertEquals(TypeHelper.cache("i1bPrimitiveShort2DArray", i1bPrimitiveShort2DArray.getType(), null).type(), short[][].class);
-        assertEquals(TypeHelper.cache("i1bPrimitiveShort2DArray", i1bPrimitiveShort2DArray.getType(), null).typeName(), "[[S");
-        assertEquals(TypeHelper.cache("i1bPrimitiveShort2DArray", i1bPrimitiveShort2DArray.getType(), null).openType(), ArrayType.getPrimitiveArrayType(short[][].class));
-        MBeanAttributeInfo i1bShort2DArray = attrInfo(info1b, "Short2DArray");
-        assertEquals(TypeHelper.cache("i1bShort2DArray", i1bShort2DArray.getType(), null).type(), Short[][].class);
-        assertEquals(TypeHelper.cache("i1bShort2DArray", i1bShort2DArray.getType(), null).typeName(), "[[Ljava.lang.Short;");
-        assertEquals(TypeHelper.cache("i1bShort2DArray", i1bShort2DArray.getType(), null).openType(), new ArrayType<>(2, SimpleType.SHORT));
+        for (MBeanInfo mbInfo : new MBeanInfo[] { info1b, info2a, info2b }) {
+            MBeanAttributeInfo iShort = attrInfo(mbInfo, "Short");
+            assertEquals(TypeHelper.cache("iShort", iShort.getType(), null).type(), Short.class);
+            assertEquals(TypeHelper.cache("iShort", iShort.getType(), null).typeName(), "java.lang.Short");
+            assertEquals(TypeHelper.cache("iShort", iShort.getType(), null).openType(), SimpleType.SHORT);
+            MBeanAttributeInfo iPrimitiveShort = attrInfo(mbInfo, "PrimitiveShort");
+            assertEquals(TypeHelper.cache("iPrimitiveShort", iPrimitiveShort.getType(), null).type(), Short.TYPE);
+            assertEquals(TypeHelper.cache("iPrimitiveShort", iPrimitiveShort.getType(), null).typeName(), "short");
+            assertEquals(TypeHelper.cache("iPrimitiveShort", iPrimitiveShort.getType(), null).openType(), SimpleType.SHORT);
+            MBeanAttributeInfo iPrimitiveShortArray = attrInfo(mbInfo, "PrimitiveShortArray");
+            assertEquals(TypeHelper.cache("iPrimitiveShortArray", iPrimitiveShortArray.getType(), null).type(), short[].class);
+            assertEquals(TypeHelper.cache("iPrimitiveShortArray", iPrimitiveShortArray.getType(), null).typeName(), "[S");
+            assertEquals(TypeHelper.cache("iPrimitiveShortArray", iPrimitiveShortArray.getType(), null).openType(), ArrayType.getPrimitiveArrayType(short[].class));
+            MBeanAttributeInfo iShortArray = attrInfo(mbInfo, "ShortArray");
+            assertEquals(TypeHelper.cache("iShortArray", iShortArray.getType(), null).type(), Short[].class);
+            assertEquals(TypeHelper.cache("iShortArray", iShortArray.getType(), null).typeName(), "[Ljava.lang.Short;");
+            assertEquals(TypeHelper.cache("iShortArray", iShortArray.getType(), null).openType(), new ArrayType<>(1, SimpleType.SHORT));
+            MBeanAttributeInfo iPrimitiveShort2DArray = attrInfo(mbInfo, "PrimitiveShort2DArray");
+            assertEquals(TypeHelper.cache("iPrimitiveShort2DArray", iPrimitiveShort2DArray.getType(), null).type(), short[][].class);
+            assertEquals(TypeHelper.cache("iPrimitiveShort2DArray", iPrimitiveShort2DArray.getType(), null).typeName(), "[[S");
+            assertEquals(TypeHelper.cache("iPrimitiveShort2DArray", iPrimitiveShort2DArray.getType(), null).openType(), ArrayType.getPrimitiveArrayType(short[][].class));
+            MBeanAttributeInfo iShort2DArray = attrInfo(mbInfo, "Short2DArray");
+            assertEquals(TypeHelper.cache("iShort2DArray", iShort2DArray.getType(), null).type(), Short[][].class);
+            assertEquals(TypeHelper.cache("iShort2DArray", iShort2DArray.getType(), null).typeName(), "[[Ljava.lang.Short;");
+            assertEquals(TypeHelper.cache("iShort2DArray", iShort2DArray.getType(), null).openType(), new ArrayType<>(2, SimpleType.SHORT));
 
-        MBeanAttributeInfo i1bProperTabularType = attrInfo(info1b, "ProperTabularType");
-        assertEquals(TypeHelper.cache("i1bProperTabularType", i1bProperTabularType.getType(), null).type(), Map.class);
-        assertEquals(TypeHelper.cache("i1bProperTabularType", i1bProperTabularType.getType(), null).typeName(), Map.class.getName());
-        assertNull(i1bProperTabularType.getDescriptor().getFieldValue(JMX.OPEN_TYPE_FIELD));
-        assertNull(TypeHelper.cache("i1bProperTabularType", i1bProperTabularType.getType(), null).openType());
-        MBeanAttributeInfo i1bProperTabularTypeArray = attrInfo(info1b, "ProperTabularTypeArray");
-        assertEquals(TypeHelper.cache("i1bProperTabularTypeArray", i1bProperTabularTypeArray.getType(), null).type(), Map[].class);
-        assertEquals(TypeHelper.cache("i1bProperTabularTypeArray", i1bProperTabularTypeArray.getType(), null).typeName(), "[Ljava.util.Map;");
-        assertNull(i1bProperTabularTypeArray.getDescriptor().getFieldValue(JMX.OPEN_TYPE_FIELD));
-        assertNull(TypeHelper.cache("i1bProperTabularTypeArray", i1bProperTabularTypeArray.getType(), null).openType());
-        MBeanAttributeInfo i1bList = attrInfo(info1b, "List");
-        assertEquals(TypeHelper.cache("i1bList", i1bList.getType(), null).type(), List.class);
-        assertEquals(TypeHelper.cache("i1bList", i1bList.getType(), null).typeName(), "java.util.List");
-        assertNull(TypeHelper.cache("i1bList", i1bList.getType(), null).openType());
-        MBeanAttributeInfo i1bLists = attrInfo(info1b, "Lists");
-        assertEquals(TypeHelper.cache("i1bLists", i1bLists.getType(), null).type(), List[].class);
-        assertEquals(TypeHelper.cache("i1bLists", i1bLists.getType(), null).typeName(), "[Ljava.util.List;");
-        assertNull(TypeHelper.cache("i1bLists", i1bLists.getType(), null).openType());
-        MBeanAttributeInfo i1bSet = attrInfo(info1b, "Set");
-        assertEquals(TypeHelper.cache("i1bSet", i1bSet.getType(), null).type(), Set.class);
-        assertEquals(TypeHelper.cache("i1bSet", i1bSet.getType(), null).typeName(), "java.util.Set");
-        assertNull(TypeHelper.cache("i1bSet", i1bSet.getType(), null).openType());
-        MBeanAttributeInfo i1bSets = attrInfo(info1b, "Sets");
-        assertEquals(TypeHelper.cache("i1bSet", i1bSets.getType(), null).type(), Set[].class);
-        assertEquals(TypeHelper.cache("i1bSet", i1bSets.getType(), null).typeName(), "[Ljava.util.Set;");
-        assertNull(TypeHelper.cache("i1bSet", i1bSets.getType(), null).openType());
-        MBeanAttributeInfo i1bCompositeData = attrInfo(info1b, "CompositeData");
-        assertEquals(TypeHelper.cache("i1bCompositeData", i1bCompositeData.getType(), null).type(), CompositeData.class);
-        assertEquals(TypeHelper.cache("i1bCompositeData", i1bCompositeData.getType(), null).typeName(), CompositeData.class.getName());
-        assertNull(TypeHelper.cache("i1bCompositeData", i1bCompositeData.getType(), null).openType());
-        assertFalse(i1bCompositeData instanceof OpenMBeanAttributeInfo);
-        MBeanAttributeInfo i1bCompositeDataArray = attrInfo(info1b, "CompositeDataArray");
-        assertEquals(TypeHelper.cache("i1bCompositeDataArray", i1bCompositeDataArray.getType(), null).type(), CompositeData[].class);
-        assertEquals(TypeHelper.cache("i1bCompositeDataArray", i1bCompositeDataArray.getType(), null).typeName(), CompositeData[].class.getName());
-        assertNull(TypeHelper.cache("i1bCompositeDataArray", i1bCompositeDataArray.getType(), null).openType());
-        assertFalse(i1bCompositeDataArray instanceof OpenMBeanAttributeInfo);
-        MBeanAttributeInfo i1bTabularData = attrInfo(info1b, "TabularData");
-        assertEquals(TypeHelper.cache("i1bTabularData", i1bTabularData.getType(), null).type(), TabularData.class);
-        assertEquals(TypeHelper.cache("i1bTabularData", i1bTabularData.getType(), null).typeName(), TabularData.class.getName());
-        assertNull(TypeHelper.cache("i1bTabularData", i1bTabularData.getType(), null).openType());
-        assertFalse(i1bTabularData instanceof OpenMBeanAttributeInfo);
-        MBeanAttributeInfo i1bTabularDataArray = attrInfo(info1b, "TabularDataArray");
-        assertEquals(TypeHelper.cache("i1bTabularDataArray", i1bTabularDataArray.getType(), null).type(), TabularData[].class);
-        assertEquals(TypeHelper.cache("i1bTabularDataArray", i1bTabularDataArray.getType(), null).typeName(), TabularData[].class.getName());
-        assertNull(TypeHelper.cache("i1bTabularDataArray", i1bTabularDataArray.getType(), null).openType());
-        assertFalse(i1bTabularDataArray instanceof OpenMBeanAttributeInfo);
-        MBeanAttributeInfo i1bUser = attrInfo(info1b, "User");
-        assertEquals(TypeHelper.cache("i1bUser", i1bUser.getType(), null).type(), User.class);
-        assertEquals(TypeHelper.cache("i1bUser", i1bUser.getType(), null).typeName(), User.class.getName());
-        assertNull(TypeHelper.cache("i1bUser", i1bUser.getType(), null).openType());
-        MBeanAttributeInfo i1bUsers = attrInfo(info1b, "Users");
-        assertEquals(TypeHelper.cache("i1bUsers", i1bUsers.getType(), null).type(), User[].class);
-        assertEquals(TypeHelper.cache("i1bUsers", i1bUsers.getType(), null).typeName(), User[].class.getName());
-        assertNull(TypeHelper.cache("i1bUsers", i1bUsers.getType(), null).openType());
+            MBeanAttributeInfo iProperTabularType = attrInfo(mbInfo, "ProperTabularType");
+            assertEquals(TypeHelper.cache("iProperTabularType", iProperTabularType.getType(), null).type(), Map.class);
+            assertEquals(TypeHelper.cache("iProperTabularType", iProperTabularType.getType(), null).typeName(), Map.class.getName());
+            assertNull(iProperTabularType.getDescriptor().getFieldValue(JMX.OPEN_TYPE_FIELD));
+            assertNull(TypeHelper.cache("iProperTabularType", iProperTabularType.getType(), null).openType());
+            MBeanAttributeInfo iProperTabularTypeArray = attrInfo(mbInfo, "ProperTabularTypeArray");
+            assertEquals(TypeHelper.cache("iProperTabularTypeArray", iProperTabularTypeArray.getType(), null).type(), Map[].class);
+            assertEquals(TypeHelper.cache("iProperTabularTypeArray", iProperTabularTypeArray.getType(), null).typeName(), "[Ljava.util.Map;");
+            assertNull(iProperTabularTypeArray.getDescriptor().getFieldValue(JMX.OPEN_TYPE_FIELD));
+            assertNull(TypeHelper.cache("iProperTabularTypeArray", iProperTabularTypeArray.getType(), null).openType());
+            MBeanAttributeInfo iAlmostProperTabularType = attrInfo(mbInfo, "AlmostProperTabularType");
+            assertEquals(TypeHelper.cache("iAlmostProperTabularType", iAlmostProperTabularType.getType(), null).type(), Map.class);
+            assertEquals(TypeHelper.cache("iAlmostProperTabularType", iAlmostProperTabularType.getType(), null).typeName(), Map.class.getName());
+            assertNull(iAlmostProperTabularType.getDescriptor().getFieldValue(JMX.OPEN_TYPE_FIELD));
+            assertNull(TypeHelper.cache("iAlmostProperTabularType", iAlmostProperTabularType.getType(), null).openType());
+            MBeanAttributeInfo iComplexKeyedTabularType = attrInfo(mbInfo, "ComplexKeyedTabularType");
+            assertEquals(TypeHelper.cache("iComplexKeyedTabularType", iComplexKeyedTabularType.getType(), null).type(), Map.class);
+            assertEquals(TypeHelper.cache("iComplexKeyedTabularType", iComplexKeyedTabularType.getType(), null).typeName(), Map.class.getName());
+            assertNull(iComplexKeyedTabularType.getDescriptor().getFieldValue(JMX.OPEN_TYPE_FIELD));
+            assertNull(TypeHelper.cache("iComplexKeyedTabularType", iComplexKeyedTabularType.getType(), null).openType());
 
-        // 2a
+            MBeanAttributeInfo iList = attrInfo(mbInfo, "List");
+            assertEquals(TypeHelper.cache("iList", iList.getType(), null).type(), List.class);
+            assertEquals(TypeHelper.cache("iList", iList.getType(), null).typeName(), "java.util.List");
+            assertNull(TypeHelper.cache("iList", iList.getType(), null).openType());
+            MBeanAttributeInfo iLists = attrInfo(mbInfo, "Lists");
+            assertEquals(TypeHelper.cache("iLists", iLists.getType(), null).type(), List[].class);
+            assertEquals(TypeHelper.cache("iLists", iLists.getType(), null).typeName(), "[Ljava.util.List;");
+            assertNull(TypeHelper.cache("iLists", iLists.getType(), null).openType());
+            MBeanAttributeInfo iSet = attrInfo(mbInfo, "Set");
+            assertEquals(TypeHelper.cache("iSet", iSet.getType(), null).type(), Set.class);
+            assertEquals(TypeHelper.cache("iSet", iSet.getType(), null).typeName(), "java.util.Set");
+            assertNull(TypeHelper.cache("iSet", iSet.getType(), null).openType());
+            MBeanAttributeInfo iSets = attrInfo(mbInfo, "Sets");
+            assertEquals(TypeHelper.cache("iSet", iSets.getType(), null).type(), Set[].class);
+            assertEquals(TypeHelper.cache("iSet", iSets.getType(), null).typeName(), "[Ljava.util.Set;");
+            assertNull(TypeHelper.cache("iSet", iSets.getType(), null).openType());
+            MBeanAttributeInfo iCompositeData = attrInfo(mbInfo, "CompositeData");
+            assertEquals(TypeHelper.cache("iCompositeData", iCompositeData.getType(), null).type(), CompositeData.class);
+            assertEquals(TypeHelper.cache("iCompositeData", iCompositeData.getType(), null).typeName(), CompositeData.class.getName());
+            assertNull(TypeHelper.cache("iCompositeData", iCompositeData.getType(), null).openType());
+            assertFalse(iCompositeData instanceof OpenMBeanAttributeInfo);
+            MBeanAttributeInfo iCompositeDataArray = attrInfo(mbInfo, "CompositeDataArray");
+            assertEquals(TypeHelper.cache("iCompositeDataArray", iCompositeDataArray.getType(), null).type(), CompositeData[].class);
+            assertEquals(TypeHelper.cache("iCompositeDataArray", iCompositeDataArray.getType(), null).typeName(), CompositeData[].class.getName());
+            assertNull(TypeHelper.cache("iCompositeDataArray", iCompositeDataArray.getType(), null).openType());
+            assertFalse(iCompositeDataArray instanceof OpenMBeanAttributeInfo);
+            MBeanAttributeInfo iCompositeMXData = attrInfo(mbInfo, "CompositeMXData");
+            assertEquals(TypeHelper.cache("iCompositeMXData", iCompositeMXData.getType(), null).type(), CompositeData.class);
+            assertEquals(TypeHelper.cache("iCompositeMXData", iCompositeMXData.getType(), null).typeName(), CompositeData.class.getName());
+            assertNull(TypeHelper.cache("iCompositeMXData", iCompositeMXData.getType(), null).openType());
+            assertFalse(iCompositeMXData instanceof OpenMBeanAttributeInfo);
+            MBeanAttributeInfo iCompositeMXDataArray = attrInfo(mbInfo, "CompositeMXDataArray");
+            assertEquals(TypeHelper.cache("iCompositeMXDataArray", iCompositeMXDataArray.getType(), null).type(), CompositeData[].class);
+            assertEquals(TypeHelper.cache("iCompositeMXDataArray", iCompositeMXDataArray.getType(), null).typeName(), CompositeData[].class.getName());
+            assertNull(TypeHelper.cache("iCompositeMXDataArray", iCompositeMXDataArray.getType(), null).openType());
+            assertFalse(iCompositeMXDataArray instanceof OpenMBeanAttributeInfo);
+            MBeanAttributeInfo iTabularData = attrInfo(mbInfo, "TabularData");
+            assertEquals(TypeHelper.cache("iTabularData", iTabularData.getType(), null).type(), TabularData.class);
+            assertEquals(TypeHelper.cache("iTabularData", iTabularData.getType(), null).typeName(), TabularData.class.getName());
+            assertNull(TypeHelper.cache("iTabularData", iTabularData.getType(), null).openType());
+            assertFalse(iTabularData instanceof OpenMBeanAttributeInfo);
+            MBeanAttributeInfo iTabularDataArray = attrInfo(mbInfo, "TabularDataArray");
+            assertEquals(TypeHelper.cache("iTabularDataArray", iTabularDataArray.getType(), null).type(), TabularData[].class);
+            assertEquals(TypeHelper.cache("iTabularDataArray", iTabularDataArray.getType(), null).typeName(), TabularData[].class.getName());
+            assertNull(TypeHelper.cache("iTabularDataArray", iTabularDataArray.getType(), null).openType());
+            assertFalse(iTabularDataArray instanceof OpenMBeanAttributeInfo);
+            MBeanAttributeInfo iTabularMXData = attrInfo(mbInfo, "TabularMXData");
+            assertEquals(TypeHelper.cache("iTabularMXData", iTabularMXData.getType(), null).type(), TabularData.class);
+            assertEquals(TypeHelper.cache("iTabularMXData", iTabularMXData.getType(), null).typeName(), TabularData.class.getName());
+            assertNull(TypeHelper.cache("iTabularMXData", iTabularMXData.getType(), null).openType());
+            assertFalse(iTabularMXData instanceof OpenMBeanAttributeInfo);
+            MBeanAttributeInfo iTabularMXDataArray = attrInfo(mbInfo, "TabularMXDataArray");
+            assertEquals(TypeHelper.cache("iTabularMXDataArray", iTabularMXDataArray.getType(), null).type(), TabularData[].class);
+            assertEquals(TypeHelper.cache("iTabularMXDataArray", iTabularMXDataArray.getType(), null).typeName(), TabularData[].class.getName());
+            assertNull(TypeHelper.cache("iTabularMXDataArray", iTabularMXDataArray.getType(), null).openType());
+            assertFalse(iTabularMXDataArray instanceof OpenMBeanAttributeInfo);
+            MBeanAttributeInfo iUser = attrInfo(mbInfo, "User");
+            assertEquals(TypeHelper.cache("iUser", iUser.getType(), null).type(), User.class);
+            assertEquals(TypeHelper.cache("iUser", iUser.getType(), null).typeName(), User.class.getName());
+            assertNull(TypeHelper.cache("iUser", iUser.getType(), null).openType());
+            MBeanAttributeInfo iUsers = attrInfo(mbInfo, "Users");
+            assertEquals(TypeHelper.cache("iUsers", iUsers.getType(), null).type(), User[].class);
+            assertEquals(TypeHelper.cache("iUsers", iUsers.getType(), null).typeName(), User[].class.getName());
+            assertNull(TypeHelper.cache("iUsers", iUsers.getType(), null).openType());
+        }
+    }
 
-        MBeanAttributeInfo i2aShort = attrInfo(info2a, "Short");
-        assertEquals(TypeHelper.cache("i2aShort", i2aShort.getType(), null).type(), Short.class);
-        assertEquals(TypeHelper.cache("i2aShort", i2aShort.getType(), null).typeName(), "java.lang.Short");
-        assertEquals(TypeHelper.cache("i2aShort", i2aShort.getType(), null).openType(), SimpleType.SHORT);
-        MBeanAttributeInfo i2aPrimitiveShort = attrInfo(info2a, "PrimitiveShort");
-        assertEquals(TypeHelper.cache("i2aPrimitiveShort", i2aPrimitiveShort.getType(), null).type(), Short.TYPE);
-        assertEquals(TypeHelper.cache("i2aPrimitiveShort", i2aPrimitiveShort.getType(), null).typeName(), "short");
-        assertEquals(TypeHelper.cache("i2aPrimitiveShort", i2aPrimitiveShort.getType(), null).openType(), SimpleType.SHORT);
-        MBeanAttributeInfo i2aPrimitiveShortArray = attrInfo(info2a, "PrimitiveShortArray");
-        assertEquals(TypeHelper.cache("i2aPrimitiveShortArray", i2aPrimitiveShortArray.getType(), null).type(), short[].class);
-        assertEquals(TypeHelper.cache("i2aPrimitiveShortArray", i2aPrimitiveShortArray.getType(), null).typeName(), "[S");
-        assertEquals(TypeHelper.cache("i2aPrimitiveShortArray", i2aPrimitiveShortArray.getType(), null).openType(), ArrayType.getPrimitiveArrayType(short[].class));
-        MBeanAttributeInfo i2aShortArray = attrInfo(info2a, "ShortArray");
-        assertEquals(TypeHelper.cache("i2aShortArray", i2aShortArray.getType(), null).type(), Short[].class);
-        assertEquals(TypeHelper.cache("i2aShortArray", i2aShortArray.getType(), null).typeName(), "[Ljava.lang.Short;");
-        assertEquals(TypeHelper.cache("i2aShortArray", i2aShortArray.getType(), null).openType(), new ArrayType<>(1, SimpleType.SHORT));
-        MBeanAttributeInfo i2aPrimitiveShort2DArray = attrInfo(info2a, "PrimitiveShort2DArray");
-        assertEquals(TypeHelper.cache("i2aPrimitiveShort2DArray", i2aPrimitiveShort2DArray.getType(), null).type(), short[][].class);
-        assertEquals(TypeHelper.cache("i2aPrimitiveShort2DArray", i2aPrimitiveShort2DArray.getType(), null).typeName(), "[[S");
-        assertEquals(TypeHelper.cache("i2aPrimitiveShort2DArray", i2aPrimitiveShort2DArray.getType(), null).openType(), ArrayType.getPrimitiveArrayType(short[][].class));
-        MBeanAttributeInfo i2aShort2DArray = attrInfo(info2a, "Short2DArray");
-        assertEquals(TypeHelper.cache("i2aShort2DArray", i2aShort2DArray.getType(), null).type(), Short[][].class);
-        assertEquals(TypeHelper.cache("i2aShort2DArray", i2aShort2DArray.getType(), null).typeName(), "[[Ljava.lang.Short;");
-        assertEquals(TypeHelper.cache("i2aShort2DArray", i2aShort2DArray.getType(), null).openType(), new ArrayType<>(2, SimpleType.SHORT));
+    @Test
+    public void detectSimpleTypes() throws Exception {
+        OpenType<?> openType;
+        ObjectName name = new ObjectName("a:b=1");
+        openType = TypeHelper.buildOpenType(String.class.getName(), "Hello");
+        assertTrue(openType instanceof SimpleType);
+        assertEquals(openType.getClassName(), String.class.getName());
+        assertSame(openType, SimpleType.STRING);
 
-        MBeanAttributeInfo i2aProperTabularType = attrInfo(info2a, "ProperTabularType");
-        assertEquals(TypeHelper.cache("i2aProperTabularType", i2aProperTabularType.getType(), null).type(), Map.class);
-        assertEquals(TypeHelper.cache("i2aProperTabularType", i2aProperTabularType.getType(), null).typeName(), Map.class.getName());
-        assertNull(i2aProperTabularType.getDescriptor().getFieldValue(JMX.OPEN_TYPE_FIELD));
-        assertNull(TypeHelper.cache("i2aProperTabularType", i2aProperTabularType.getType(), null).openType());
-        MBeanAttributeInfo i2aProperTabularTypeArray = attrInfo(info2a, "ProperTabularTypeArray");
-        assertEquals(TypeHelper.cache("i2aProperTabularTypeArray", i2aProperTabularTypeArray.getType(), null).type(), Map[].class);
-        assertEquals(TypeHelper.cache("i2aProperTabularTypeArray", i2aProperTabularTypeArray.getType(), null).typeName(), "[Ljava.util.Map;");
-        assertNull(i2aProperTabularTypeArray.getDescriptor().getFieldValue(JMX.OPEN_TYPE_FIELD));
-        assertNull(TypeHelper.cache("i2aProperTabularTypeArray", i2aProperTabularTypeArray.getType(), null).openType());
-        MBeanAttributeInfo i2aList = attrInfo(info2a, "List");
-        assertEquals(TypeHelper.cache("i2aList", i2aList.getType(), null).type(), List.class);
-        assertEquals(TypeHelper.cache("i2aList", i2aList.getType(), null).typeName(), "java.util.List");
-        assertNull(TypeHelper.cache("i2aList", i2aList.getType(), null).openType());
-        MBeanAttributeInfo i2aLists = attrInfo(info2a, "Lists");
-        assertEquals(TypeHelper.cache("i2aLists", i2aLists.getType(), null).type(), List[].class);
-        assertEquals(TypeHelper.cache("i2aLists", i2aLists.getType(), null).typeName(), "[Ljava.util.List;");
-        assertNull(TypeHelper.cache("i2aLists", i2aLists.getType(), null).openType());
-        MBeanAttributeInfo i2aSet = attrInfo(info2a, "Set");
-        assertEquals(TypeHelper.cache("i2aSet", i2aSet.getType(), null).type(), Set.class);
-        assertEquals(TypeHelper.cache("i2aSet", i2aSet.getType(), null).typeName(), "java.util.Set");
-        assertNull(TypeHelper.cache("i2aSet", i2aSet.getType(), null).openType());
-        MBeanAttributeInfo i2aSets = attrInfo(info2a, "Sets");
-        assertEquals(TypeHelper.cache("i2aSet", i2aSets.getType(), null).type(), Set[].class);
-        assertEquals(TypeHelper.cache("i2aSet", i2aSets.getType(), null).typeName(), "[Ljava.util.Set;");
-        assertNull(TypeHelper.cache("i2aSet", i2aSets.getType(), null).openType());
-        MBeanAttributeInfo i2aCompositeData = attrInfo(info2a, "CompositeData");
-        assertEquals(TypeHelper.cache("i2aCompositeData", i2aCompositeData.getType(), null).type(), CompositeData.class);
-        assertEquals(TypeHelper.cache("i2aCompositeData", i2aCompositeData.getType(), null).typeName(), CompositeData.class.getName());
-        assertNull(TypeHelper.cache("i2aCompositeData", i2aCompositeData.getType(), null).openType());
-        assertFalse(i2aCompositeData instanceof OpenMBeanAttributeInfo);
-        MBeanAttributeInfo i2aCompositeDataArray = attrInfo(info2a, "CompositeDataArray");
-        assertEquals(TypeHelper.cache("i2aCompositeDataArray", i2aCompositeDataArray.getType(), null).type(), CompositeData[].class);
-        assertEquals(TypeHelper.cache("i2aCompositeDataArray", i2aCompositeDataArray.getType(), null).typeName(), CompositeData[].class.getName());
-        assertNull(TypeHelper.cache("i2aCompositeDataArray", i2aCompositeDataArray.getType(), null).openType());
-        assertFalse(i2aCompositeDataArray instanceof OpenMBeanAttributeInfo);
-        MBeanAttributeInfo i2aTabularData = attrInfo(info2a, "TabularData");
-        assertEquals(TypeHelper.cache("i2aTabularData", i2aTabularData.getType(), null).type(), TabularData.class);
-        assertEquals(TypeHelper.cache("i2aTabularData", i2aTabularData.getType(), null).typeName(), TabularData.class.getName());
-        assertNull(TypeHelper.cache("i2aTabularData", i2aTabularData.getType(), null).openType());
-        assertFalse(i2aTabularData instanceof OpenMBeanAttributeInfo);
-        MBeanAttributeInfo i2aTabularDataArray = attrInfo(info2a, "TabularDataArray");
-        assertEquals(TypeHelper.cache("i2aTabularDataArray", i2aTabularDataArray.getType(), null).type(), TabularData[].class);
-        assertEquals(TypeHelper.cache("i2aTabularDataArray", i2aTabularDataArray.getType(), null).typeName(), TabularData[].class.getName());
-        assertNull(TypeHelper.cache("i2aTabularDataArray", i2aTabularDataArray.getType(), null).openType());
-        assertFalse(i2aTabularDataArray instanceof OpenMBeanAttributeInfo);
-        MBeanAttributeInfo i2aUser = attrInfo(info2a, "User");
-        assertEquals(TypeHelper.cache("i2aUser", i2aUser.getType(), null).type(), User.class);
-        assertEquals(TypeHelper.cache("i2aUser", i2aUser.getType(), null).typeName(), User.class.getName());
-        assertNull(TypeHelper.cache("i2aUser", i2aUser.getType(), null).openType());
-        MBeanAttributeInfo i2aUsers = attrInfo(info2a, "Users");
-        assertEquals(TypeHelper.cache("i2aUsers", i2aUsers.getType(), null).type(), User[].class);
-        assertEquals(TypeHelper.cache("i2aUsers", i2aUsers.getType(), null).typeName(), User[].class.getName());
-        assertNull(TypeHelper.cache("i2aUsers", i2aUsers.getType(), null).openType());
-        MBeanAttributeInfo i2aCollection = attrInfo(info2a, "Collection");
-        assertEquals(TypeHelper.cache("i2aCollection", i2aCollection.getType(), null).type(), Collection.class);
-        assertEquals(TypeHelper.cache("i2aCollection", i2aCollection.getType(), null).typeName(), Collection.class.getName());
-        assertNull(TypeHelper.cache("i2aCollection", i2aCollection.getType(), null).openType());
+        assertSame(TypeHelper.buildOpenType(BigDecimal.class.getName(), BigDecimal.TEN), SimpleType.BIGDECIMAL);
+        assertSame(TypeHelper.buildOpenType(BigInteger.class.getName(), BigInteger.TEN), SimpleType.BIGINTEGER);
+        assertSame(TypeHelper.buildOpenType(Long.class.getName(), 10L), SimpleType.LONG);
+        assertSame(TypeHelper.buildOpenType(Integer.class.getName(), 10), SimpleType.INTEGER);
+        assertSame(TypeHelper.buildOpenType(Short.class.getName(), (short) 10), SimpleType.SHORT);
+        assertSame(TypeHelper.buildOpenType(Byte.class.getName(), (byte) 10), SimpleType.BYTE);
+        assertSame(TypeHelper.buildOpenType(long.class.getName(), 10L), SimpleType.LONG);
+        assertSame(TypeHelper.buildOpenType(int.class.getName(), 10), SimpleType.INTEGER);
+        assertSame(TypeHelper.buildOpenType(short.class.getName(), (short) 10), SimpleType.SHORT);
+        assertSame(TypeHelper.buildOpenType(byte.class.getName(), (byte) 10), SimpleType.BYTE);
+        assertSame(TypeHelper.buildOpenType(Double.class.getName(), 42.0d), SimpleType.DOUBLE);
+        assertSame(TypeHelper.buildOpenType(double.class.getName(), 42.0d), SimpleType.DOUBLE);
+        assertSame(TypeHelper.buildOpenType(Float.class.getName(), 42.0f), SimpleType.FLOAT);
+        assertSame(TypeHelper.buildOpenType(float.class.getName(), 42.0f), SimpleType.FLOAT);
+        assertSame(TypeHelper.buildOpenType(Boolean.class.getName(), Boolean.TRUE), SimpleType.BOOLEAN);
+        assertSame(TypeHelper.buildOpenType(boolean.class.getName(), false), SimpleType.BOOLEAN);
+        assertSame(TypeHelper.buildOpenType(Character.class.getName(), 'c'), SimpleType.CHARACTER);
+        assertSame(TypeHelper.buildOpenType(char.class.getName(), 'c'), SimpleType.CHARACTER);
+        assertSame(TypeHelper.buildOpenType(Date.class.getName(), new Date()), SimpleType.DATE);
+        assertNull(TypeHelper.buildOpenType(java.sql.Date.class.getName(), new java.sql.Date(1L)));
+        assertSame(TypeHelper.buildOpenType(ObjectName.class.getName(), new ObjectName("A:B=C")), SimpleType.OBJECTNAME);
+    }
 
-        // 2b
+    @Test
+    public void detectSimpleArrayTypes() throws Exception {
+        // arrays of types other than CompositeData/TabularData don't need investigation
+        assertEquals(TypeHelper.cache("x", "[Ljava.lang.String;", null).openType(), new ArrayType<>(1, SimpleType.STRING));
+        assertEquals(TypeHelper.cache("x", "[[[Ljava.lang.String;", null).openType(), new ArrayType<>(3, SimpleType.STRING));
 
-        MBeanAttributeInfo i2bShort = attrInfo(info2b, "Short");
-        assertEquals(TypeHelper.cache("i2bShort", i2bShort.getType(), null).type(), Short.class);
-        assertEquals(TypeHelper.cache("i2bShort", i2bShort.getType(), null).typeName(), "java.lang.Short");
-        assertEquals(TypeHelper.cache("i2bShort", i2bShort.getType(), null).openType(), SimpleType.SHORT);
-        MBeanAttributeInfo i2bPrimitiveShort = attrInfo(info2b, "PrimitiveShort");
-        assertEquals(TypeHelper.cache("i2bPrimitiveShort", i2bPrimitiveShort.getType(), null).type(), Short.TYPE);
-        assertEquals(TypeHelper.cache("i2bPrimitiveShort", i2bPrimitiveShort.getType(), null).typeName(), "short");
-        assertEquals(TypeHelper.cache("i2bPrimitiveShort", i2bPrimitiveShort.getType(), null).openType(), SimpleType.SHORT);
-        MBeanAttributeInfo i2bPrimitiveShortArray = attrInfo(info2b, "PrimitiveShortArray");
-        assertEquals(TypeHelper.cache("i2bPrimitiveShortArray", i2bPrimitiveShortArray.getType(), null).type(), short[].class);
-        assertEquals(TypeHelper.cache("i2bPrimitiveShortArray", i2bPrimitiveShortArray.getType(), null).typeName(), "[S");
-        assertEquals(TypeHelper.cache("i2bPrimitiveShortArray", i2bPrimitiveShortArray.getType(), null).openType(), ArrayType.getPrimitiveArrayType(short[].class));
-        MBeanAttributeInfo i2bShortArray = attrInfo(info2b, "ShortArray");
-        assertEquals(TypeHelper.cache("i2bShortArray", i2bShortArray.getType(), null).type(), Short[].class);
-        assertEquals(TypeHelper.cache("i2bShortArray", i2bShortArray.getType(), null).typeName(), "[Ljava.lang.Short;");
-        assertEquals(TypeHelper.cache("i2bShortArray", i2bShortArray.getType(), null).openType(), new ArrayType<>(1, SimpleType.SHORT));
-        MBeanAttributeInfo i2bPrimitiveShort2DArray = attrInfo(info2b, "PrimitiveShort2DArray");
-        assertEquals(TypeHelper.cache("i2bPrimitiveShort2DArray", i2bPrimitiveShort2DArray.getType(), null).type(), short[][].class);
-        assertEquals(TypeHelper.cache("i2bPrimitiveShort2DArray", i2bPrimitiveShort2DArray.getType(), null).typeName(), "[[S");
-        assertEquals(TypeHelper.cache("i2bPrimitiveShort2DArray", i2bPrimitiveShort2DArray.getType(), null).openType(), ArrayType.getPrimitiveArrayType(short[][].class));
-        MBeanAttributeInfo i2bShort2DArray = attrInfo(info2b, "Short2DArray");
-        assertEquals(TypeHelper.cache("i2bShort2DArray", i2bShort2DArray.getType(), null).type(), Short[][].class);
-        assertEquals(TypeHelper.cache("i2bShort2DArray", i2bShort2DArray.getType(), null).typeName(), "[[Ljava.lang.Short;");
-        assertEquals(TypeHelper.cache("i2bShort2DArray", i2bShort2DArray.getType(), null).openType(), new ArrayType<>(2, SimpleType.SHORT));
+        ObjectName name = new ObjectName("a:b=1");
 
-        MBeanAttributeInfo i2bProperTabularType = attrInfo(info2b, "ProperTabularType");
-        assertEquals(TypeHelper.cache("i2bProperTabularType", i2bProperTabularType.getType(), null).type(), Map.class);
-        assertEquals(TypeHelper.cache("i2bProperTabularType", i2bProperTabularType.getType(), null).typeName(), Map.class.getName());
-        assertNull(i2bProperTabularType.getDescriptor().getFieldValue(JMX.OPEN_TYPE_FIELD));
-        assertNull(TypeHelper.cache("i2bProperTabularType", i2bProperTabularType.getType(), null).openType());
-        MBeanAttributeInfo i2bProperTabularTypeArray = attrInfo(info2b, "ProperTabularTypeArray");
-        assertEquals(TypeHelper.cache("i2bProperTabularTypeArray", i2bProperTabularTypeArray.getType(), null).type(), Map[].class);
-        assertEquals(TypeHelper.cache("i2bProperTabularTypeArray", i2bProperTabularTypeArray.getType(), null).typeName(), "[Ljava.util.Map;");
-        assertNull(i2bProperTabularTypeArray.getDescriptor().getFieldValue(JMX.OPEN_TYPE_FIELD));
-        assertNull(TypeHelper.cache("i2bProperTabularTypeArray", i2bProperTabularTypeArray.getType(), null).openType());
-        MBeanAttributeInfo i2bList = attrInfo(info2b, "List");
-        assertEquals(TypeHelper.cache("i2bList", i2bList.getType(), null).type(), List.class);
-        assertEquals(TypeHelper.cache("i2bList", i2bList.getType(), null).typeName(), "java.util.List");
-        assertNull(TypeHelper.cache("i2bList", i2bList.getType(), null).openType());
-        MBeanAttributeInfo i2bLists = attrInfo(info2b, "Lists");
-        assertEquals(TypeHelper.cache("i2bLists", i2bLists.getType(), null).type(), List[].class);
-        assertEquals(TypeHelper.cache("i2bLists", i2bLists.getType(), null).typeName(), "[Ljava.util.List;");
-        assertNull(TypeHelper.cache("i2bLists", i2bLists.getType(), null).openType());
-        MBeanAttributeInfo i2bSet = attrInfo(info2b, "Set");
-        assertEquals(TypeHelper.cache("i2bSet", i2bSet.getType(), null).type(), Set.class);
-        assertEquals(TypeHelper.cache("i2bSet", i2bSet.getType(), null).typeName(), "java.util.Set");
-        assertNull(TypeHelper.cache("i2bSet", i2bSet.getType(), null).openType());
-        MBeanAttributeInfo i2bSets = attrInfo(info2b, "Sets");
-        assertEquals(TypeHelper.cache("i2bSet", i2bSets.getType(), null).type(), Set[].class);
-        assertEquals(TypeHelper.cache("i2bSet", i2bSets.getType(), null).typeName(), "[Ljava.util.Set;");
-        assertNull(TypeHelper.cache("i2bSet", i2bSets.getType(), null).openType());
-        MBeanAttributeInfo i2bCompositeData = attrInfo(info2b, "CompositeData");
-        assertEquals(TypeHelper.cache("i2bCompositeData", i2bCompositeData.getType(), null).type(), CompositeData.class);
-        assertEquals(TypeHelper.cache("i2bCompositeData", i2bCompositeData.getType(), null).typeName(), CompositeData.class.getName());
-        assertNull(TypeHelper.cache("i2bCompositeData", i2bCompositeData.getType(), null).openType());
-        assertFalse(i2bCompositeData instanceof OpenMBeanAttributeInfo);
-        MBeanAttributeInfo i2bCompositeDataArray = attrInfo(info2b, "CompositeDataArray");
-        assertEquals(TypeHelper.cache("i2bCompositeDataArray", i2bCompositeDataArray.getType(), null).type(), CompositeData[].class);
-        assertEquals(TypeHelper.cache("i2bCompositeDataArray", i2bCompositeDataArray.getType(), null).typeName(), CompositeData[].class.getName());
-        assertNull(TypeHelper.cache("i2bCompositeDataArray", i2bCompositeDataArray.getType(), null).openType());
-        assertFalse(i2bCompositeDataArray instanceof OpenMBeanAttributeInfo);
-        MBeanAttributeInfo i2bTabularData = attrInfo(info2b, "TabularData");
-        assertEquals(TypeHelper.cache("i2bTabularData", i2bTabularData.getType(), null).type(), TabularData.class);
-        assertEquals(TypeHelper.cache("i2bTabularData", i2bTabularData.getType(), null).typeName(), TabularData.class.getName());
-        assertNull(TypeHelper.cache("i2bTabularData", i2bTabularData.getType(), null).openType());
-        assertFalse(i2bTabularData instanceof OpenMBeanAttributeInfo);
-        MBeanAttributeInfo i2bTabularDataArray = attrInfo(info2b, "TabularDataArray");
-        assertEquals(TypeHelper.cache("i2bTabularDataArray", i2bTabularDataArray.getType(), null).type(), TabularData[].class);
-        assertEquals(TypeHelper.cache("i2bTabularDataArray", i2bTabularDataArray.getType(), null).typeName(), TabularData[].class.getName());
-        assertNull(TypeHelper.cache("i2bTabularDataArray", i2bTabularDataArray.getType(), null).openType());
-        assertFalse(i2bTabularDataArray instanceof OpenMBeanAttributeInfo);
-        MBeanAttributeInfo i2bUser = attrInfo(info2b, "User");
-        assertEquals(TypeHelper.cache("i2bUser", i2bUser.getType(), null).type(), User.class);
-        assertEquals(TypeHelper.cache("i2bUser", i2bUser.getType(), null).typeName(), User.class.getName());
-        assertNull(TypeHelper.cache("i2bUser", i2bUser.getType(), null).openType());
-        MBeanAttributeInfo i2bUsers = attrInfo(info2b, "Users");
-        assertEquals(TypeHelper.cache("i2bUsers", i2bUsers.getType(), null).type(), User[].class);
-        assertEquals(TypeHelper.cache("i2bUsers", i2bUsers.getType(), null).typeName(), User[].class.getName());
-        assertNull(TypeHelper.cache("i2bUsers", i2bUsers.getType(), null).openType());
-        MBeanAttributeInfo i2bCollection = attrInfo(info2b, "Collection");
-        assertEquals(TypeHelper.cache("i2bCollection", i2bCollection.getType(), null).type(), Collection.class);
-        assertEquals(TypeHelper.cache("i2bCollection", i2bCollection.getType(), null).typeName(), Collection.class.getName());
-        assertNull(TypeHelper.cache("i2bCollection", i2bCollection.getType(), null).openType());
+        // but still we should handle this without checking the value
+        assertEquals(TypeHelper.buildOpenType("[[Ljava.lang.String;", null), new ArrayType<>(2, SimpleType.STRING));
+        assertEquals(TypeHelper.buildOpenType("[[[[[Ljava.lang.String;", null), new ArrayType<>(5, SimpleType.STRING));
+        assertEquals(TypeHelper.buildOpenType("[[[[[L" + ObjectName.class.getName() + ";", null), new ArrayType<>(5, SimpleType.OBJECTNAME));
+    }
+
+    @Test
+    public void detectComplexArrayTypesWithoutDataToCheck() throws Exception {
+        ObjectName name = new ObjectName("a:b=1");
+
+        // Only for CompositeData/TabularData (or arrays of these) we need a value
+        assertNull(TypeHelper.buildOpenType(CompositeData.class.getName(), null));
+        assertNull(TypeHelper.buildOpenType("[[[[[L" + CompositeData.class.getName() + ";", null));
+        assertNull(TypeHelper.buildOpenType(TabularData.class.getName(), null));
+        assertNull(TypeHelper.buildOpenType("[[[[[L" + TabularData.class.getName() + ";", null));
+    }
+
+    @Test
+    public void detectNonOpenArrayTypes() throws Exception {
+        ObjectName name = new ObjectName("a:b=1");
+
+        assertNull(TypeHelper.buildOpenType(File.class.getName(), null));
+        assertNull(TypeHelper.buildOpenType("[[[[[L" + URL.class.getName() + ";", null));
+    }
+
+    @Test
+    public void detectQuoteKnownQuoteCompositeType() throws Exception {
+        MBeanServer jmx = ManagementFactory.getPlatformMBeanServer();
+        ObjectName name = new ObjectName(ManagementFactory.MEMORY_MXBEAN_NAME);
+        MBeanInfo info = jmx.getMBeanInfo(name);
+        MBeanAttributeInfo usage = attrInfo(info, "HeapMemoryUsage");
+
+        Object jsonValue = toJsonConverter.serialize(jmx.getAttribute(name, "HeapMemoryUsage"), null, SerializeOptions.DEFAULT);
+        assertNotNull(TypeHelper.buildOpenType(usage.getType(), jsonValue));
+    }
+
+    @Test
+    public void detectQuoteKnownQuoteTabularTypeInsideCompositeType() throws Exception {
+        MBeanServer jmx = ManagementFactory.getPlatformMBeanServer();
+        Set<ObjectName> names = jmx.queryNames(new ObjectName(ManagementFactory.GARBAGE_COLLECTOR_MXBEAN_DOMAIN_TYPE + ",name=*"), null);
+        if (names.isEmpty()) {
+            throw new SkipException("Can't find GC MBeans");
+        }
+        MBeanInfo info = jmx.getMBeanInfo(names.iterator().next());
+        OpenMBeanAttributeInfo usage = (OpenMBeanAttributeInfo) attrInfo(info, "LastGcInfo");
+
+        System.gc();
+
+        boolean found = false;
+        for (ObjectName name : names) {
+            Object lastGcInfo = jmx.getAttribute(name, "LastGcInfo");
+            if (lastGcInfo == null) {
+                continue;
+            }
+            found = true;
+            Object jsonValue = toJsonConverter.serialize(lastGcInfo, new LinkedList<>(List.of("memoryUsageBeforeGc")), SerializeOptions.DEFAULT);
+            CompositeType ct = (CompositeType) usage.getOpenType();
+            assertNotNull(TypeHelper.buildOpenType(ct.getType("memoryUsageBeforeGc").getClassName(), jsonValue));
+        }
+
+        if (!found) {
+            throw new SkipException("Can't find GC MBeans which return any data from LastGcInfo");
+        }
     }
 
     private MBeanAttributeInfo attrInfo(MBeanInfo info, String name) {
