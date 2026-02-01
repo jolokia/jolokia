@@ -32,7 +32,7 @@
     "prepack": "npm run check && npm test && npm run build"
   },
   "dependencies": {
-    "jquery": "^3.7.1"
+    "jquery": "^4.0.0"
   },
   "peerDependencies": {
     "cubism": "^1.6.0",
