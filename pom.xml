@@ -1207,7 +1207,7 @@
 
     <!-- Versions of build-related dependencies -->
 
-    <version.org.apache.bcel>6.11.0</version.org.apache.bcel>
+    <version.org.apache.bcel>6.12.0</version.org.apache.bcel>
     <version.org.apache.maven.wagon>2.7</version.org.apache.maven.wagon>
     <!-- https://nodejs.org/en/about/previous-releases#looking-for-latest-release-of-a-version-branch -->
     <version.nodejs>v20.9.0</version.nodejs>
@@ -1219,14 +1219,14 @@
     <version.com.fasterxml.jackson>2.20.1</version.com.fasterxml.jackson>
     <version.jakarta.annotation-api>3.0.0</version.jakarta.annotation-api>
     <version.jakarta.authentication-api>3.1.0</version.jakarta.authentication-api>
-    <version.net.bytebuddy>1.18.3</version.net.bytebuddy>
+    <version.net.bytebuddy>1.18.4</version.net.bytebuddy>
     <version.org.apache.felix.configadmin>1.9.26</version.org.apache.felix.configadmin>
     <version.org.apache.felix.framework>7.0.5</version.org.apache.felix.framework>
     <version.org.apache.felix.http.jetty12>1.0.36</version.org.apache.felix.http.jetty12>
     <version.org.awaitility>4.3.0</version.org.awaitility>
     <version.org.easymock>5.6.0</version.org.easymock>
     <version.org.eclipse.jetty>12.1.4</version.org.eclipse.jetty>
-    <version.org.testng>7.11.0</version.org.testng>
+    <version.org.testng>7.12.0</version.org.testng>
     <version.org.wiremock>3.13.2</version.org.wiremock>
     <version.org.apache.servicemix.bundles.javax-inject>1_3</version.org.apache.servicemix.bundles.javax-inject>
     <version.org.ops4j.pax.exam>4.14.0</version.org.ops4j.pax.exam>
@@ -1240,8 +1240,8 @@
 
     <!-- Versions of actual Maven dependencies for Jolokia core/service/client libraries -->
 
-    <version.commons-codec>1.20.0</version.commons-codec>
-    <version.io.fabric8.kubernetes-client>7.5.0</version.io.fabric8.kubernetes-client>
+    <version.commons-codec>1.21.0</version.commons-codec>
+    <version.io.fabric8.kubernetes-client>7.5.2</version.io.fabric8.kubernetes-client>
     <version.jakarta.servlet-api>5.0.0</version.jakarta.servlet-api>
     <version.jakarta.servlet-api6>6.1.0</version.jakarta.servlet-api6>
     <version.org.apache.httpcomponents.client5>5.6</version.org.apache.httpcomponents.client5>
