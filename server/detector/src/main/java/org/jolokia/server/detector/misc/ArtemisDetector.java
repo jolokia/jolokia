@@ -85,6 +85,17 @@ public class ArtemisDetector extends AbstractServerDetector {
                 Properties props = new Properties();
                 props.load(is);
                 artemisVersion = props.getProperty("version");
+                return;
+            } catch (IOException ignored) {
+            }
+        }
+        // 2.50.0+
+        artemisMavenPropertiesLocation = getClass().getClassLoader().getResource("META-INF/maven/org.apache.artemis/artemis-boot/pom.properties");
+        if (artemisMavenPropertiesLocation != null) {
+            try (InputStream is = artemisMavenPropertiesLocation.openStream()) {
+                Properties props = new Properties();
+                props.load(is);
+                artemisVersion = props.getProperty("version");
             } catch (IOException ignored) {
             }
         }
