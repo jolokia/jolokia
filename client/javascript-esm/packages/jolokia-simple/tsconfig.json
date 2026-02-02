@@ -25,6 +25,7 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "noEmit": true,
+    "outDir": "dist",
     "strict": true,
     "sourceMap": false,
     // https://www.typescriptlang.org/docs/handbook/modules/reference.html#implied-and-enforced-options
