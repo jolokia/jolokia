@@ -66,13 +66,21 @@
     <module>client/kubernetes</module>
 
     <module>support/jmx</module>
-    <module>support/spring</module>
+    <!-- Support for Spring Boot 4.x and later -->
+    <module>support/springboot</module>
+    <!-- Support for Spring Boot 3.x -->
+    <module>support/springboot3</module>
 
     <module>examples/osgi-restrictor</module>
     <module>examples/client-javascript-test-app</module>
+    <!-- Examples for Spring Boot 4 / Spring Framework 7 -->
     <module>examples/spring</module>
     <module>examples/spring-boot</module>
     <module>examples/spring-boot-actuator</module>
+    <!-- Examples for Spring Boot 3 / Spring Framework 6 -->
+    <module>examples/spring6</module>
+    <module>examples/spring-boot3</module>
+    <module>examples/spring-boot3-actuator</module>
   </modules>
 
   <build>
@@ -835,7 +843,12 @@
       </dependency>
       <dependency>
         <groupId>org.jolokia</groupId>
-        <artifactId>jolokia-support-spring</artifactId>
+        <artifactId>jolokia-support-springboot</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-support-springboot3</artifactId>
         <version>${project.version}</version>
       </dependency>
 
@@ -1026,6 +1039,12 @@
         <groupId>org.ops4j.pax.exam</groupId>
         <artifactId>pax-exam-link-mvn</artifactId>
         <version>${version.org.ops4j.pax.exam}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
 
       <dependency>
@@ -1258,10 +1277,10 @@
     <!-- Versions of Maven dependencies for Jolokia Spring-related libraries (JDK17 only) -->
 
     <!-- Spring Framework and Spring Boot should be aligned -->
-    <version.org.springframework>6.2.15</version.org.springframework>
-    <version.org.springframework.boot>3.5.10</version.org.springframework.boot>
-<!--    <version.org.springframework>7.0.1</version.org.springframework>-->
-<!--    <version.org.springframework.boot>4.0.0</version.org.springframework.boot>-->
+    <version.org.springframework6>6.2.15</version.org.springframework6>
+    <version.org.springframework.boot3>3.5.10</version.org.springframework.boot3>
+    <version.org.springframework7>7.0.3</version.org.springframework7>
+    <version.org.springframework.boot4>4.0.2</version.org.springframework.boot4>
   </properties>
 
   <profiles>

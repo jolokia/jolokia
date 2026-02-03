@@ -76,7 +76,7 @@
             <phase>generate-resources</phase>
             <configuration>
               <nodeVersion>${version.nodejs}</nodeVersion>
-              <npmVersion>${version.npm}</npmVersion>
+              <npmVersion>10.8.1</npmVersion>
             </configuration>
           </execution>
           <execution>

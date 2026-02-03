@@ -1,0 +1,45 @@
+<!--
+  Copyright 2009-2025 Roland Huss
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Jolokia Web</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<h3>Jolokia Web Application</h3>
+<div id="app">
+    <button id="clear">Clear Console</button>
+    <hr />
+    <button id="version">Check version</button>
+    <hr />
+    <button id="search">Jolokia search()</button>
+    <hr />
+    <button id="stats">jolokia.example:type=Standard/Statistics</button>
+    <button id="stats-spring">jolokia.example:type=SpringManagedResource/Statistics</button>
+    <hr />
+    <button id="stats-json">get jolokia.example:type=JsonMBean/Statistics</button><br>
+    <label id="statistics-editor-label" for="statistics-editor">JSON value for statistics</label><br>
+    <textarea id="statistics-editor"></textarea><br>
+    <button id="set-stats-json">update jolokia.example:type=JsonMBean/Statistics</button>
+</div>
+<div id="console"></div>
+<script src="js/jolokia.cjs"></script>
+<script src="js/jolokia-simple.cjs"></script>
+<script src="app.js"></script>
+</body>
+</html>

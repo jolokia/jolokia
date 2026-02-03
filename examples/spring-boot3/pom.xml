@@ -18,11 +18,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>jolokia-example-spring-boot</artifactId>
+  <artifactId>jolokia-example-spring-boot3</artifactId>
   <version>2.5.0-SNAPSHOT</version>
 
   <name>jolokia-example-spring-boot</name>
-  <description>Jolokia :: Support :: Spring Boot :: Sample</description>
+  <description>Jolokia :: Support :: Spring Boot 3 :: Sample</description>
 
   <parent>
     <groupId>org.jolokia</groupId>
@@ -46,14 +46,14 @@
       <dependency>
         <groupId>org.springframework</groupId>
         <artifactId>spring-framework-bom</artifactId>
-        <version>${version.org.springframework7}</version>
+        <version>${version.org.springframework6}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
-        <version>${version.org.springframework.boot4}</version>
+        <version>${version.org.springframework.boot3}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -67,7 +67,7 @@
 
     <dependency>
       <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-support-springboot</artifactId>
+      <artifactId>jolokia-support-springboot3</artifactId>
     </dependency>
 
     <!-- Other dependencies -->
@@ -85,10 +85,6 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-autoconfigure</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-tomcat</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>

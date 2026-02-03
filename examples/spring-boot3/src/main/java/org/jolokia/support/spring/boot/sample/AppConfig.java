@@ -27,23 +27,25 @@ import org.jolokia.support.jmx.JolokiaMBeanServerUtil;
 import org.jolokia.support.spring.boot.sample.mbeans.Example;
 import org.jolokia.support.spring.boot.sample.mbeans.Jolokia;
 import org.jolokia.support.spring.boot.sample.mbeans.SpringExample;
-import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.tomcat.servlet.TomcatServletWebServerFactory;
+import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ApplicationContextEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.core.io.PathResource;
 import org.springframework.http.CacheControl;
 import org.springframework.jmx.export.MBeanExporter;
 import org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource;
 import org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler;
 import org.springframework.jmx.export.metadata.JmxAttributeSource;
 import org.springframework.jmx.export.naming.MetadataNamingStrategy;
+import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
@@ -71,7 +73,7 @@ public class AppConfig implements WebMvcConfigurer, WebServerFactoryCustomizer<T
             @Override
             public void onApplicationEvent(@NonNull ApplicationContextEvent event) {
                 if (event instanceof ContextRefreshedEvent contextRefreshedEvent) {
-                    LOG.info("Context refreshed: {}", event.getSource().getDisplayName());
+                    LOG.info("Context refreshed: {}", ((ApplicationContext) event.getSource()).getDisplayName());
                     try {
                         JolokiaMBeanServerUtil.registerMBean(new Example(), new ObjectName("jolokia.example:type=Standard"));
                         JolokiaMBeanServerUtil.registerMBean(new Jolokia(), new ObjectName("jolokia.example:type=JsonMBean"));
@@ -108,12 +110,12 @@ public class AppConfig implements WebMvcConfigurer, WebServerFactoryCustomizer<T
         if (here != null && "file".equals(here.getProtocol())) {
             File jsPackages = new File(here.getFile(), "../../../../client/javascript-esm/packages");
             registry.addResourceHandler("/js/**")
-                .addResourceLocations(new File(jsPackages, "jolokia/dist/").getAbsolutePath())
-                .addResourceLocations(new File(jsPackages, "jolokia-simple/dist/").getAbsolutePath())
+                .addResourceLocations(new PathResource(new File(jsPackages, "jolokia/dist").toPath()))
+                .addResourceLocations(new PathResource(new File(jsPackages, "jolokia-simple/dist").toPath()))
                 .setCachePeriod(0)
                 .setCacheControl(CacheControl.noCache());
             registry.addResourceHandler("/**")
-                .addResourceLocations(new File(here.getFile(), "../../src/main/webapp").getAbsolutePath())
+                .addResourceLocations(new PathResource(new File(here.getFile(), "../../src/main/webapp").toPath()))
                 .setCachePeriod(0)
                 .setCacheControl(CacheControl.noCache());
         }
@@ -121,7 +123,7 @@ public class AppConfig implements WebMvcConfigurer, WebServerFactoryCustomizer<T
 
     @Override
     public void customize(TomcatServletWebServerFactory factory) {
-        factory.getSettings().getMimeMappings().add("cjs", "application/javascript");
+        factory.getMimeMappings().add("cjs", "application/javascript");
 
     }
 

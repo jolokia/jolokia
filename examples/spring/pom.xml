@@ -46,7 +46,7 @@
       <dependency>
         <groupId>org.springframework</groupId>
         <artifactId>spring-framework-bom</artifactId>
-        <version>${version.org.springframework}</version>
+        <version>${version.org.springframework7}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -69,7 +69,7 @@
     </dependency>
     <dependency>
       <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-support-spring</artifactId>
+      <artifactId>jolokia-support-springboot3</artifactId>
     </dependency>
 
     <!-- Other dependencies -->
