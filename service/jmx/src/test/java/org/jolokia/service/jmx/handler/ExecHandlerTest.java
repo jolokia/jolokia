@@ -119,7 +119,7 @@ public class ExecHandlerTest {
         handler.handleSingleServerRequest(getMBeanServer(), request);
     }
 
-    @Test(expectedExceptions = { BadRequestException.class })
+    @Test(expectedExceptions = { ReflectionException.class })
     public void illegalOperationName() throws JMException, IOException, NotChangedException, EmptyResponseException, BadRequestException {
         JolokiaExecRequest request = new JolokiaRequestBuilder(EXEC, oName).operation("koan titel").build();
         handler.handleSingleServerRequest(getMBeanServer(), request);

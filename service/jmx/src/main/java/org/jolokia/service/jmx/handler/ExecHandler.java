@@ -33,6 +33,7 @@ import javax.management.MBeanOperationInfo;
 import javax.management.MBeanParameterInfo;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
+import javax.management.ReflectionException;
 import javax.management.openmbean.OpenMBeanParameterInfo;
 import javax.management.openmbean.OpenType;
 
@@ -249,7 +250,7 @@ public class ExecHandler extends AbstractCommandHandler<JolokiaExecRequest> {
      */
     private List<MBeanParameterInfo[]> extractMBeanParameterInfos(MBeanServerConnection pServer, JolokiaExecRequest pRequest,
                                                                   String pOperation)
-            throws IOException, JMException, BadRequestException {
+            throws IOException, JMException {
         MBeanInfo mBeanInfo = pServer.getMBeanInfo(pRequest.getObjectName());
         List<MBeanParameterInfo[]> paramInfos = new ArrayList<>();
         for (MBeanOperationInfo opInfo : mBeanInfo.getOperations()) {
@@ -258,8 +259,9 @@ public class ExecHandler extends AbstractCommandHandler<JolokiaExecRequest> {
             }
         }
         if (paramInfos.isEmpty()) {
-            throw new BadRequestException("No operation " + pOperation +
-                    " found on MBean " + pRequest.getObjectNameAsString());
+            // see com.sun.jmx.mbeanserver.PerInterface.noSuchMethod
+            final NoSuchMethodException cause = new NoSuchMethodException(pOperation);
+            throw new ReflectionException(cause, cause.getMessage());
         }
         return paramInfos;
     }
