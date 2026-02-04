@@ -108,12 +108,12 @@ public class AppConfig implements WebMvcConfigurer, WebServerFactoryCustomizer<T
         if (here != null && "file".equals(here.getProtocol())) {
             File jsPackages = new File(here.getFile(), "../../../../client/javascript-esm/packages");
             registry.addResourceHandler("/js/**")
-                .addResourceLocations(new File(jsPackages, "jolokia/dist/").getAbsolutePath())
-                .addResourceLocations(new File(jsPackages, "jolokia-simple/dist/").getAbsolutePath())
+                .addResourceLocations(new File(jsPackages, "jolokia/dist/").toURI().toString())
+                .addResourceLocations(new File(jsPackages, "jolokia-simple/dist/").toURI().toString())
                 .setCachePeriod(0)
                 .setCacheControl(CacheControl.noCache());
             registry.addResourceHandler("/**")
-                .addResourceLocations(new File(here.getFile(), "../../src/main/webapp").getAbsolutePath())
+                .addResourceLocations(new File(here.getFile(), "../../src/main/webapp/").toURI().toString())
                 .setCachePeriod(0)
                 .setCacheControl(CacheControl.noCache());
         }
