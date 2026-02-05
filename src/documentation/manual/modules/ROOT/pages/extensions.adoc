@@ -26,7 +26,7 @@ Only implementations of detectors and simplifiers were detected respectively fro
 * `META-INF/detectors[-default]` (implementations of `org.jolokia.detector.ServerDetector`)
 * `META-INF/simplifiers[-default]` (implementations of `org.jolokia.converter.json.Extractor`)
 
-In Jolokia 2 there's another resource checked - `services[-default]` and additionaly the declaration files were moved to more specific location:
+In Jolokia 2 there's another resource checked - `services[-default]` and additionally the declaration files were moved to more specific location:
 
 * `META-INF/jolokia/detectors[-default]` (implementations of `org.jolokia.server.core.detector.ServerDetector`)
 * `META-INF/jolokia/simplifiers[-default]` (implementations of `org.jolokia.converter.json.ObjectAccessor`)
@@ -36,11 +36,11 @@ For example, what was a dedicated `org.jolokia.history.HistoryStore` in Jolokia 
 
 == A note about _Service Loader_ approach
 
-`META-INF/jolokia/services` is a little similar approach to Java standard `java.util.ServiceLoader` API, where services are _declared_ in `META-INF/services/interface-name`.
+`META-INF/jolokia/services` is a bit similar approach to Java standard `java.util.ServiceLoader` API, where the services are _declared_ in `META-INF/services/interface-name`.
 
-The most important aspect is that the instantiation of such services is performed by JDK itself (or Jolokia itself) and if 3rd party applications use more sophisticated _service registries_ (like CDI or Spring DI), then we can't avoid static fields...
+The most important aspect is that the instantiation of such services is performed by the JDK (or Jolokia) itself and if 3rd party applications use more sophisticated _service registries_ (like CDI or Spring DI), then we can't avoid static fields...
 
-So if a Jolokia service extension needs to use other dependencies, it's up to the application to provide necessary integration. Static fields is the easiest (but not super-clean) option.
+So if a Jolokia service extension needs to use other dependencies, it's up to the application to provide necessary integration. Static fields is the easiest (but not a super-clean) option.
 
 == Extension points in Jolokia 2
 
@@ -65,6 +65,7 @@ Service order is used to prioritize the services of the same interface - the low
 
 In the following sections we describe various services that may be declared by 3rd party libraries.
 
+[#_mbean_info_cache]
 === MBeanInfo cache
 
 Jolokia is first and foremost a _JMX protocol adaptor_ (see xref:architecture.adoc[]). This means that whatever is registered in local (or remote) MBeanServer, is accessible using "JSON over HTTP".
@@ -108,7 +109,7 @@ we provide a _smarter_ (a bit more complex, but much smaller) structure:
   ...
 ----
 
-Basically instead of duplicating the same JSONified `javax.management.MBeanInfo` over and over again for the same MBeans (2x10,000 times for 10,000 Artemis queues), we do some optimization here:
+Basically instead of duplicating the same JSON representation of `javax.management.MBeanInfo` over and over again for the same MBeans (2x10,000 times for 10,000 Artemis queues), we do some optimization here:
 
 1. Jolokia calls `javax.management.MBeanServerConnection.queryMBeans()` normally, getting a set of `javax.management.ObjectInstance` objects.
 2. Each `ObjectInstance` carries an `ObjectName` and `className`.
@@ -116,7 +117,7 @@ Basically instead of duplicating the same JSONified `javax.management.MBeanInfo`
 4. However, both `ObjectName` and ``ObjectInstance``'s class can be used to obtain a _key_ (or a _hint_) which determines that some MBeans may _share_ its `javax.management.MBeanInfo` with other MBeans.
 5. When a non-null key for an MBean is obtained, its MBeanInfo is cached under `"cache"` field and related MBean under `"domains"` field simply points to cached JSON data of `javax.management.MBeanInfo`.
 
-In order to use such variant of `list()` operation, a new processing request parameter has to be specified. This is done using `listCache=true` paramater (defaults to `false` for compatibility reasons).
+In order to use such variant of `list()` operation, a new processing request parameter has to be specified. This is done using `listCache=true` parameter (defaults to `false` for compatibility reasons).
 
 When optimization is enabled, Jolokia uses `org.jolokia.service.jmx.api.CacheKeyProvider` services. if `determineKey(ObjectInstance)` method returns non-null key, it is used to share common JSON MBean information with other MBeans that produce the same cache key.
 
@@ -233,11 +234,12 @@ We can imagine Artemis adding a cache key provider for `org.apache.activemq.arte
 
 See https://github.com/jolokia/jolokia/discussions/705[jolokia/jolokia#705,role=externalLink,window=_blank] for the rationale behind new Jolokia protocol version.
 
+[#_data_updaters]
 === Data updaters
 
 Previous section described services that may affect the structure of _entire_ `list()` response. This section is about services that affect single MBeanInfo of any MBean.
 
-`org.jolokia.server.core.service.api.DataUpdater` is an interface used by `list()` operation. Normally when invoking xref:jolokia_protocol.adoc#list[list] operation, we get a JSON tree with a structure like this:
+`org.jolokia.server.core.service.api.DataUpdater` is an interface used by the `list()` operation. Normally when invoking xref:jolokia_protocol.adoc#list[list] operation, we get a JSON tree with a structure like this:
 
 [,json]
 ----
@@ -260,9 +262,9 @@ Such JSON contains information obtained from `javax.management.MBeanInfo` object
 
 Built-in implementations of `org.jolokia.server.core.service.api.DataUpdater` interface simply add these fields (`attr`, `op`, ...) to the JSON data.
 
-However, there may be scenarios where for each MBean we need some additional data - for example the security roles assigned to given MBean (to implement a form of Role-Based Access Control (RBAC)). Jolokia isn't aware of the way an application implements security mechanisms, but should allow for any extension of the basic MBean data.
+However, there may be scenarios where for each MBean we need some additional data - for example the security roles assigned to the given MBean (to implement a form of Role-Based Access Control (RBAC)). Jolokia isn't aware of the way an application implements security mechanisms, but should allow for any extension of the basic MBean data.
 
-We can provide an extension module, add it on the CLASSPATH and declare additional _data updaters_ in `META-INF/jolokia/services`. `org.jolokia.server.core.service.api.DataUpdater` is already an implementation of `org.jolokia.server.core.service.api.JolokiaService` and it's an abstract class we can extend. For example:
+We can provide an extension module, add it to the CLASSPATH and declare additional _data updaters_ in `META-INF/jolokia/services`. `org.jolokia.server.core.service.api.DataUpdater` is already an implementation of `org.jolokia.server.core.service.api.JolokiaService` and it's an abstract class we can extend. For example:
 
 [source,java]
 ----
@@ -276,7 +278,7 @@ public class MyUpdater extends org.jolokia.server.core.service.api.DataUpdater {
 
     @Override
     public String getKey() {
-        return "my";
+        return "time";
     }
 
     @Override
@@ -289,7 +291,7 @@ public class MyUpdater extends org.jolokia.server.core.service.api.DataUpdater {
 }
 ----
 
-This _updater_ adds `my` field to the JSON info for an MBean with current timestamp, but we can imagine any other kind of _updater_. It is declared using the below line in `META-INF/jolokia/services` resource:
+This _updater_ adds `time` field to the JSON info for an MBean with current timestamp, but we can imagine any other kind of _updater_. It is declared using the below line in `META-INF/jolokia/services` resource:
 
 ----
 com.example.MyUpdater
@@ -323,3 +325,89 @@ With this parameter we can get the below response:
 ----
 
 This may be used to save time parsing object key-list like `name=CodeHeap 'non-nmethods',type=MemoryPool`.
+
+[#_jolokia_server_detectors]
+== Jolokia Server Detectors
+
+Jolokia used `org.jolokia.server.core.detector.ServerDetector` interface for a long time. Jolokia included server
+detectors for several products like ActiveMQ, JBoss, WebLogic, WebSphere and other. Product-specific detectors
+provide:
+
+* special `javax.management.MBeanServerConnection` instances for MBean servers not detected by `java.lang.management.ManagementFactory`
+* `org.jolokia.server.core.service.request.RequestInterceptor` services to handle the requests in product-specific way (there is only one Glassfish-specific interceptor)
+* `org.jolokia.server.core.service.api.ServerHandle` with product-specific information (name, version)
+
+https://github.com/jolokia/jolokia/issues/258[jolokia#258,role=externalLink,window=_blank] added new responsibility to
+the server detector, so Jolokia JVM agent could actively wait for some conditions before proceeding. This is used
+to wait for some classes or services to be available. The detectors can wait and additionally return ... a `java.lang.ClassLoader` instance:
+
+[,java]
+----
+public interface ServerDetector extends JolokiaService<ServerDetector>, Comparable<ServerDetector> {
+
+    ...
+    ClassLoader jvmAgentStartup(Instrumentation instrumentation);
+
+}
+----
+
+This may sound complex and unnecessary, but the concept is quite clear:
+
+* let the detectors wait for initialization
+* if the detector returns a `ClassLoader`, this loader will then ne used by Jolokia service to perform initialization (including looking up additional services).
+
+This is important when using Jolokia JVM Agent in containers like Tomcat or Artemis, where the application (boot) classpath usually consists
+of some kind of _bootstrap_ JARs which role is only to create a _full_ `ClassLoader` with JARs and resources from `lib/` directory (or other).
+
+* see Tomcat's `${catalina.home}/lib` directory
+* see Artemis' `${artemis.instance}/lib` and `${artemis.home}/lib` directories
+
+And recently in Jolokia 2.1.2, with https://github.com/jolokia/jolokia/issues/754[jolokia#754,role=externalLink,window=_blank] we've introduced
+the concept of a `org.jolokia.server.core.service.container.ContainerLocator`:
+
+[,java]
+----
+public interface ContainerLocator extends JolokiaService<ContainerLocator> {
+
+    /**
+     * Returns an instance of a <em>runtime</em> or <em>container</em> specific class to be used by
+     * a dedicated Jolokia service.
+     *
+     * @param clazz A class guard to ensure that the returned instance is of proper class
+     * @return
+     * @param <T>
+     */
+    <T> T locate(Class<T> clazz);
+
+}
+----
+
+Currently only `org.jolokia.server.detector.misc.ArtemisDetector` returns special `ContainerLocator`, but this locator is
+not used by Jolokia itself.
+
+The role of this interface is to give access to server-specific services/interfaces/classes from other services - usually 3rd party libraries.
+See the following <<_jolokia_integration_project>> section.
+
+Jolokia itself should not depend on any special classes and interfaces from other projects. Note that classes like `org.jolokia.server.detector.misc.ArtemisDetector` may use reflection or other form of dynamic discovery, but there are no Maven dependencies on (in this case) Artemis.
+
+[#_jolokia_integration_project]
+== Jolokia Integration project
+
+https://github.com/jolokia/jolokia-integration[Jolokia Integration,role=externalLink,window=_blank] is a special project built on the concepts mentioned in this chapter:
+
+* <<_mbean_info_cache>> and <<_data_updaters>> may be implemented by external services
+* <<_jolokia_server_detectors>> may reflectively/dynamically make Jolokia aware of the environment where the Agent is running
+
+Specifically:
+
+* Jolokia should not statically (with Maven dependencies) depend on projects like Artemis or Tomcat
+* Projects like Artemis or Tomcat should not depend on Jolokia (when not needed)
+
+Currently https://github.com/jolokia/jolokia-integration[Jolokia Integration,role=externalLink,window=_blank] should be treated as _technical preview_ project, but it is https://issues.apache.org/jira/browse/ARTEMIS-5427[already actively used with Apache Artemis,role=externalLink,window=_blank].
+
+As of the latest version 0.8.0, Jolokia-Integration provides two services:
+
+* `org.jolokia.integration.artemis.ArtemisCacheKeyProvider` - optimizes the JSON size for the MBeans which are known to come in huge amounts (like queues and addresses)
+* `org.jolokia.integration.artemis.ArtemisDataUpdater` - adds `canInvoke` flag for each MBean, MBean operation and MBean attribute based on https://artemis.apache.org/components/artemis/documentation/latest/management.html#jmx-authorization-in-broker-xml[RBAC configuration provided by Artemis,role=externalLink,window=_blank].
+
+There are plans to include similar integration with https://camel.apache.org/[Apache Camel,role=externalLink,window=_blank].

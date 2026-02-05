@@ -69,7 +69,7 @@ public interface ServerDetector extends JolokiaService<ServerDetector>, Comparab
      * Detect the server. A {@link ServerHandle} descriptor is returned
      * in case of a successful detection, <code>null</code> otherwise.
      *
-     * @param pMBeanServerAccess a set of MBeanServers which can be used for detecting server informations
+     * @param pMBeanServerAccess a set of MBeanServers which can be used for detecting server information
      * @return the server descriptor or <code>null</code> it this implementation cant detect 'its' server.
      */
     ServerHandle detect(MBeanServerAccess pMBeanServerAccess);
@@ -83,7 +83,7 @@ public interface ServerDetector extends JolokiaService<ServerDetector>, Comparab
     Set<MBeanServerConnection> getMBeanServers();
 
     /**
-     * Get an request interceptor to add for dealing with server specific workarounds or behaviour
+     * Get an request interceptor to add for dealing with server specific workarounds or behavior
      *
      * @param pMBeanServerAccess  for accessing the JMX subsystem
      * @return a request interceptor to apply for this server or <code>null</code> if none is necessary.
@@ -100,7 +100,7 @@ public interface ServerDetector extends JolokiaService<ServerDetector>, Comparab
 
     /**
      * <p>Notify detector that the JVM is about to start. A detector can, if needed, block and wait for some condition but
-     * should ultimatevely return at some point or throw an exception. This notification is executed
+     * should ultimately return at some point or throw an exception. This notification is executed
      * in a very early stage (premain of the Jolokia JVM agent) before the main class of the Server is executed.</p>
      *
      * <p>A detector may return a {@link ClassLoader} instance if desired. This ClassLoader is usually an app-specific
@@ -108,7 +108,7 @@ public interface ServerDetector extends JolokiaService<ServerDetector>, Comparab
      * the classloader created for {@code -classpath} option includes only bootstrap.jar and tomcat-juli.jar, while
      * the actual classloader is created based on {@code etc/catalina.properties}.</p>
      *
-     * <p>Such classloader may then be used to detect more Jolokia services than it'd be possible with initial/app
+     * <p>Such classloader may then be used to detect more Jolokia services than it'd be possible with the initial/app
      * classloader.</p>
      *
      * @param instrumentation the Instrumentation implementation

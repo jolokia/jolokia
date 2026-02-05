@@ -63,7 +63,7 @@ For all the agents, Jolokia uses the same set of classes for two kinds of proces
 `org.jolokia.core.api.LogHandler`:: an interface used for logging, delegates to underlying (Servlet, OSGi Logging, `stdout`) logging mechanism
 `org.jolokia.server.core.service.api.JolokiaServiceManager`:: an interface used to configure and discover services used throughout Jolokia
 `org.jolokia.server.core.service.api.JolokiaContext`:: single access point to access configuration, Jolokia services and register MBeans in platform MBeanServer
-`org.jolokia.server.core.detector.ServerDetector`:: is used to detect platofm-specific `javax.management.MBeanServer` instances (which may not be detected using `javax.management.MBeanServerFactory.findMBeanServer(null)`)
+`org.jolokia.server.core.detector.ServerDetector`:: is used to detect platform-specific `javax.management.MBeanServer` instances (which may not be detected using `javax.management.MBeanServerFactory.findMBeanServer(null)`)
 
 ===== Request processing stage
 

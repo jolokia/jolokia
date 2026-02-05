@@ -18,10 +18,10 @@ package org.jolokia.server.core.service.container;
 import org.jolokia.server.core.service.api.JolokiaService;
 
 /**
- * <p>A locator Joloka serivce that can be registered by {@link org.jolokia.server.core.detector.ServerDetector}
+ * <p>A locator Jolokia service that can be registered by {@link org.jolokia.server.core.detector.ServerDetector}
  * during initialization phase.
  * This service can be used by other Jolokia services which may use container services/configuration
- * to controll how Jolokia works.</p>
+ * to control how Jolokia works.</p>
  *
  * <p>Original use case is Artemis server detector which finds an instance of Artemis broker to be used
  * by list optimizers that augment MBeanInfo with RBAC information.</p>

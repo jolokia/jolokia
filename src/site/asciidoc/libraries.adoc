@@ -154,7 +154,7 @@ Core Jolokia library discovers services in libraries available on `CLASSPATH`.
 |Artifact ID|Description
 
 |`jolokia-server-detector`
-|S set of built-in services which can be used to detect extra, non-discoverable (see `javax.management.MBeanServerFactory.findMBeanServer()`) `MBeanServer` instances, specific to given application server
+|A set of built-in services which can be used to detect extra, non-discoverable (see `javax.management.MBeanServerFactory.findMBeanServer()`) `MBeanServer` instances, specific to given application server
 
 |`jolokia-service-discovery`
 |Registers `jolokia:type=Discovery` MBean and starts UDP multicast listener to detect other Jolokia Agent processes

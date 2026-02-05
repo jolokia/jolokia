@@ -146,9 +146,10 @@ public class ArtemisDetector extends AbstractServerDetector {
         //    AND remove `<authorisation>` element from etc/management.xml
         //
         // in #1 org.apache.activemq.artemis.core.server.management.ArtemisMBeanServerBuilder is used
-        // in #2 org.apache.activemq.artemis.core.server.management.ArtemisRbacMBeanServerBuilder is used
-        // https://activemq.apache.org/components/artemis/documentation/latest/management.html#jmx-authorization-in-broker-xml
+        //    https://artemis.apache.org/components/artemis/documentation/latest/management.html#jmx-authorisation-in-management-xml
         boolean oldArtemisBuilderUsed = oldJmxBuilderClass.equals(System.getProperty("javax.management.builder.initial"));
+        // in #2 org.apache.activemq.artemis.core.server.management.ArtemisRbacMBeanServerBuilder is used
+        //    https://artemis.apache.org/components/artemis/documentation/latest/management.html#jmx-authorization-in-broker-xml
         boolean newArtemisBuilderUsed = newJmxBuilderClass.equals(System.getProperty("javax.management.builder.initial"));
 
         AtomicBoolean brokerClassLoaded = new AtomicBoolean(false);
