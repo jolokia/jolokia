@@ -14,11 +14,7 @@
   limitations under the License.
 ////
 [#client-java]
-== Java Client Library
-
-NOTE: This documentation section is related to the current Jolokia version.
-For previous Jolokia versions the chapter is available here:
-xref:client/java-old.adoc[Java Client Library (Jolokia versions before 2.4.0)]
+== Java Client Library (Jolokia versions before 2.4.0)
 
 The Java client library provides an easy access to the Jolokia
 agent from within Java. Since JSR-160 connectors themselves
@@ -78,17 +74,17 @@ which finally is printed out to standard output.
 
 [,java]
 ----
-import org.jolokia.client.JolokiaClient;
+import org.jolokia.client.J4pClient;
+import org.jolokia.client.J4pClientBuilder;
 import org.jolokia.client.request.*;
 
 public class MemoryDemo {
   public static void main(String[] args) {
-    JolokiaClient client = new JolokiaClientBuilder().url("http://localhost:8080/jolokia")
-        .user("jolokia")
-        .password("jolokia")
-        .build();
-    J4pReadRequest request =
-        new J4pReadRequest("java.lang:type=Memory", "HeapMemoryUsage");
+    J4pClient client = new J4pClientBuilder().url("http://localhost:7778/jolokia")
+            .user("jolokia")
+            .password("jolokia")
+            .build();
+    J4pReadRequest request = new J4pReadRequest("java.lang:type=Memory", "HeapMemoryUsage");
     request.setPath("used");
     J4pReadResponse response = client.execute(request);
     System.out.println("Memory used: " + response.getValue());
@@ -96,7 +92,7 @@ public class MemoryDemo {
 }
 ----
 
-In order to compile and run this example, `jolokia-client-java.jar` library is needed (see link:/download.html[Download]) as well as
+In order to compile and run this example, `jolokia-client-java-2.3.0.jar` library is needed (see link:/download.html[Download]) as well as
 some additional support libraries:
 
 * https://repo1.maven.org/maven2/org/jolokia/jolokia-json/2.3.0/jolokia-json-2.3.0.jar[jolokia-json-2.3.0.jar,role=externalLink,window=_blank]
@@ -113,25 +109,25 @@ the other as transitive dependencies):
 <dependency>
     <groupId>org.jolokia</groupId>
     <artifactId>jolokia-client-java</artifactId>
-    <version>{jolokia-version}</version>
+    <version>2.3.0</version>
 </dependency>
 ----
 
 [#client-client]
 === JolokiaClient
 
-`JolokiaClient` is the entry point for sending
+`org.jolokia.client.J4pClient` is the entry point for sending
 requests to a remote Jolokia agent. It can be created in multiple
 ways. For simple cases, public constructors are provided taking
 the mandatory Jolokia agent URL and optionally a
 `org.apache.http.client.HttpClient`
 instance which is used for the HTTP business. The recommended style
-is to use the `JolokiaClientBuilder`, though. This way, all
+is to use the `org.jolokia.client.J4pClientBuilder`, though. This way, all
 parameters for the HTTP communication can easily be set:
 
 [,java]
 ----
-JolokiaClient j4p = new JolokiaClientBuilder().url("http://localhost:8080/jolokia")
+J4pClient j4p = new J4pClientBuilder().url("http://localhost:8080/jolokia")
   .user("roland")
   .password("s!cr!t")
   .authenticator(new BasicAuthenticator().preemptive())
@@ -163,8 +159,8 @@ must be set, too
 |
 
 |`authenticator`
-|Implementation of `J4pClientCustomizer`. The Java client comes with
-one implementation `BasicClientCustomizer` for using basic authentication.
+|Implementation of `org.jolokia.client.J4pAuthenticator`. The Java client comes with
+one implementation `org.jolokia.client.BasicAuthenticator` for using basic authentication.
 This class supports also _preemptive_ authentication. Call `preemptive()` to
 switch this on (see above for an example). Basic authentication is the default if no other
 authenticator is set.Only used when `user` is set, too.
@@ -198,7 +194,7 @@ infinite timeout.
 connection manager, which is thread safe and can service
 connection requests from multiples threads
 simultaneously. This is important if the
-`JolokiaClient` is to be used in a multi
+`J4pClient` is to be used in a multi
 threaded context. The size of the pool is restricted by the
 parameter `maxTotalConnection`.
 `ThreadSafeClientConnManager` is the
@@ -209,7 +205,7 @@ default.
 |`singleConnection`
 |Specifies that single connection should be used which
 maintains only one active connection at a time.  Even though
-`JolokiaClient` is still thread-safe it
+`J4pClient` is still thread-safe it
 ought to be used by one execution thread only. The
 underlying connection manager is
 `SingleClientConnManager` Pooled
@@ -291,12 +287,12 @@ Example: `\http://tom:sEcReT@my.proxy.com:8080`
 |`responseExtractor`
 |A response objectAccessor can be used for hooking into the JSON
 deserialization process when a JSON response is converted
-into a `JolokiaResponse` object. By
+into a `J4pResponse` object. By
 default, the received JSON object is examined for a status
 code of 200 and only then creates a response
 object. Otherwise an exception is thrown. An objectAccessor is
 specified by the interface
-`JolokiaResponseExtractor`. Beside the
+`J4pResponseExtractor`. Beside the
 default objectAccessor, an alternate objectAccessor
 `ValidatingResponseExtractor` can be
 used, which instead of throwing an exception returns a
@@ -318,7 +314,7 @@ execute method, too.
 |`org.apache.http.conn.ssl.SSLConnectionSocketFactory`
 |===
 
-The `JolokiaClient` provides various variants
+The `J4pClient` provides various variants
 of a `execute()` method, which take
 either one single request or a list of requests. For a single
 request, the preferred HTTP method (GET or POST) can be
@@ -398,25 +394,25 @@ the requests using index number - responses come in the same order as requests. 
 
 For each request type a dedicated request object is provided
 which all are subclasses from
-`JolokiaRequest`. For all requests it can be
+`J4pRequest`. For all requests it can be
 specified which HTTP method is to be used by setting the
 property `preferredHttpMethod` to either
 `GET` or `POST`.
 
 Each request type has a corresponding response type which used
 for the return values of the
-`JolokiaClient.execute()`.
+`J4pClient.execute()`.
 
 The constructor of each kind of request can take a
-`JolokiaTargetConfig` as argument for using a
+`J4pTargetConfig` as argument for using a
 request in xref:proxy_mode.adoc[]. This
 configurational object holds the JMX service url and
 (optionally) credentials for JSR-160 authentication. When
 given, this proxy target specification overrides any default
 proxy configuration set during the initialization of the
-`JolokiaClient`.
+`J4pClient`.
 
-`JolokiaReadRequest` and `JolokiaReadResponse`:: `JolokiaReadRequest` is a read request to
+`J4pReadRequest` and `J4pReadResponse`:: `J4pReadRequest` is a read request to
 get one or more attributes from one or more MBeans within
 a single request. Various constructor variants can be used
 to specify one or more attributes along with the
@@ -424,7 +420,7 @@ ObjectName (which can be a pattern). A
 `path` can be set as property for
 specifying an _inner path_, too.
 +
-`JolokiaReadResponse` is the
+`J4pReadResponse` is the
 corresponding response type and allows typed access to the
 fetched value for a single attribute fetch or to multiple
 values for a multi attribute read. In the latter case, the
@@ -434,9 +430,9 @@ well.
 For more information on fetching the value of multiple
 attributes and multiple MBeans at once, please refer to
 xref:protocol/read.adoc[Reading attributes (read)] or the Javadoc of
-`JolokiaReadResponse`.
+`J4pReadResponse`.
 
-`JolokiaWriteRequest` and `JolokiaWriteResponse`:: A `JolokiaWriteRequest` is used to set
+`J4pWriteRequest` and `J4pWriteResponse`:: A `J4pWriteRequest` is used to set
 the value of an MBean attribute. Beside the mandatory
 object and attribute name the value must be give in the
 constructor as well. Optionally a `path`
@@ -444,9 +440,9 @@ can be provided, too. Only certain types for the given
 value can be serialized properly for calling the Jolokia
 agent as described in xref:jolokia_protocol.adoc#serialization-request[Request parameter serialization].
 +
-The old value is returned as ``JolokiaWriteResponse``'s value.
+The old value is returned as ``J4pWriteResponse``'s value.
 
-`JolokiaExecRequest` and `JolokiaExecResponse`:: ``JolokiaExecRequest``'s are used for
+`J4pExecRequest` and `J4pExecResponse`:: ``J4pExecRequest``'s are used for
 executing operation on MBeans. The constructor takes as
 mandatory arguments the MBean's object name, the operation
 name and any arguments required by the operation. Only
@@ -454,18 +450,18 @@ certain types for the given arguments can be serialized
 properly for calling the Jolokia agent as described in
 xref:jolokia_protocol.adoc#serialization-request[Request parameter serialization].
 +
-The returned `JolokiaExecResponse`
+The returned `J4pExecResponse`
 contains the return value of the operation called.
 
-`JolokiaSearchRequest` and `JolokiaSearchResponse`:: A `JolokiaSearchRequest` contains a
+`J4pSearchRequest` and `J4pSearchResponse`:: A `J4pSearchRequest` contains a
 valid single MBean object name pattern which is used for
 searching MBeans.
 +
-The `JolokiaSearchResponse` holds a
+The `J4pSearchResponse` holds a
 list of found object names.
 
-`JolokiaListRequest` and `JolokiaListResponse`:: For obtaining meta data on MBeans a
-`JolokiaListRequest` should be used. It
+`J4pListRequest` and `J4pListResponse`:: For obtaining meta data on MBeans a
+`J4pListRequest` should be used. It
 can be used with a _inner path_ to
 obtain only a subtree of the response, otherwise the whole
 tree as described in xref:jolokia_protocol.adoc#response-list[List response] is
@@ -474,15 +470,15 @@ returned. With the query parameter
 depth of returned tree.
 +
 The single value of a
-`JolokiaListResponse` is a tree (or
+`J4pListResponse` is a tree (or
 subtree) as a JSON object, which has the format described
 in xref:jolokia_protocol.adoc#response-list[List response].
 
-`JolokiaVersionRequest` and `JolokiaVersionResponse`:: A `JolokiaVersionRequest` request the
+`J4pVersionRequest` and `J4pVersionResponse`:: A `J4pVersionRequest` request the
 Jolokia agent's version information and takes no
 argument.
 +
-The `JolokiaVersionResponse` returns the
+The `J4pVersionResponse` returns the
 agent's version (`agentVersion`), the
 protocol version (`protocolVersion`), the
 application server product name
@@ -495,28 +491,28 @@ the Jolokia is running on.
 === Exceptions
 
 In case of an error when executing a request a
-`JolokiaException` or one its subclass is
+`J4pException` or one its subclass is
 thrown.
 
-`JolokiaConnectException`:: Exception thrown when the connection to the server
+`J4pConnectException`:: Exception thrown when the connection to the server
 fails. It contains the original
 `ConnectException` as nested value.
 
-`JolokiaTimeoutException`:: Exception thrown in case of an timeout. The nested
+`J4pTimeoutException`:: Exception thrown in case of an timeout. The nested
 exception is of type
 `ConnectTimeoutException`.
 
-`JolokiaRemoteException`:: Generic exception thrown when an exception occurred on the
+`J4pRemoteException`:: Generic exception thrown when an exception occurred on the
 remote side. This is the case when the JSON response
 obtained is an error response as described in
 xref:jolokia_protocol.adoc#responses[Responses]. The error type, error value, the
 status, the request leading to this error and the remote
 stacktrace as string) can be obtained from this exception.
 
-`JolokiaBulkRemoteException`:: Exception thrown when a bulk request fails on the remote
+`J4pBulkRemoteException`:: Exception thrown when a bulk request fails on the remote
 side. This contains a mixed list which contains the
-`JolokiaRemoteException` occurred as well
-as the `JolokiaResponse` objects for the
+`J4pRemoteException` occurred as well
+as the `J4pResponse` objects for the
 requests, which succeeded. The list obtained by
 `getResults()` contains these
 objects in the same order as the list of requests given to
@@ -524,6 +520,6 @@ objects in the same order as the list of requests given to
 exceptions can also be obtained separately in homogeneous
 lists.
 
-`JolokiaException`:: Base exception thrown, when no other exception fits,
+`J4pException`:: Base exception thrown, when no other exception fits,
 i.e. when the exception happened on the client side. The
 original exception is contained as nested exception.
