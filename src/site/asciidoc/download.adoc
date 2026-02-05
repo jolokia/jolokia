@@ -49,11 +49,17 @@ from Maven Central:
 |JVM-Agent
 |https://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-agent-jvm/{jolokia-version}/jolokia-agent-jvm-{jolokia-version}-javaagent.jar[jolokia-jvm-{jolokia-version}-javaagent.jar,role=externalLink,window=_blank]
 
-|Java Client Library
+|Java Client Library (using JDK HTTP Client)
 |https://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-client-java/{jolokia-version}/jolokia-client-java-{jolokia-version}.jar[jolokia-client-java-{jolokia-version}.jar,role=externalLink,window=_blank]
 
+|Java Client Library (using Apache HttpClient4)
+|https://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-client-java-httpclient4/{jolokia-version}/jolokia-client-java-httpclient4-{jolokia-version}.jar[jolokia-client-java-httpclient4-{jolokia-version}.jar,role=externalLink,window=_blank]
+
+|Java Client Library (using Apache HttpClient5)
+|https://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-client-java-httpclient5/{jolokia-version}/jolokia-client-java-httpclient5-{jolokia-version}.jar[jolokia-client-java-httpclient5-{jolokia-version}.jar,role=externalLink,window=_blank]
+
 |Jolokia JSR-160 JMX Adapter
-|https://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-client-jmx-adapter/{jolokia-version}/jolokia-client-jmx-adapter-{jolokia-version}.jar[jolokia-client-jmx-adapter-{jolokia-version}.jar,role=externalLink,window=_blank]
+|https://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-client-jmx-adapter/{jolokia-version}/jolokia-client-jmx-adapter-{jolokia-version}-standalone.jar[jolokia-client-jmx-adapter-{jolokia-version}-standalone.jar,role=externalLink,window=_blank]
 
 |Jolokia JSR-160 JMX Adapter Kubernetes Extension
 |https://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-client-kubernetes/{jolokia-version}/jolokia-client-kubernetes-{jolokia-version}.jar[jolokia-client-kubernetes-{jolokia-version}.jar,role=externalLink,window=_blank]

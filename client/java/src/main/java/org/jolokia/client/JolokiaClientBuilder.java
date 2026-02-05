@@ -256,7 +256,7 @@ public class JolokiaClientBuilder {
                 // Load with App classloader
                 clientBuilder = ServiceLoader.load(HttpClientBuilder.class, null).findFirst();
             }
-            // discovered, default builder based on JDK HTTP Client
+            // discovered or default builder based on JDK HTTP Client
             httpClientBuilder = clientBuilder.orElseGet(JdkHttpClientBuilder::new);
         } catch (ServiceConfigurationError ignored) {
             httpClientBuilder = new JdkHttpClientBuilder();

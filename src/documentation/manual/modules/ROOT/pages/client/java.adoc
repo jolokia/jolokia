@@ -1,5 +1,5 @@
 ////
-  Copyright 2009-2023 Roland Huss
+  Copyright 2009-2026 Roland Huss
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -21,23 +21,24 @@ For previous Jolokia versions the chapter is available here:
 xref:client/java-old.adoc[Java Client Library (Jolokia versions before 2.4.0)]
 
 The Java client library provides an easy access to the Jolokia
-agent from within Java. Since JSR-160 connectors themselves
-provide Java based remote access to MBeans one might wonder about
-the benefits of  a Jolokia Java binding. There are several,
+Agent using Java API. +
+Sure, https://jcp.org/en/jsr/detail?id=160[JSR-160, JMX Remote API] also provides a
+Java based remote access to MBeans and one might wonder about
+the benefits of another Jolokia Java binding. There are several,
 though:
 
 * It provides a typeless access to remote MBeans. The big
 advantage is that for any non-OpenMBean access to custom typed
 objects is still possible without having the type information
 locally in the classpath.
-* Jolokia can be used in setups where JSR-160 connectors can not
+* Jolokia can be used in scenarios where JSR-160 connectors can not
 be used. I.e. in firewall secured environments it is much easier
-to get through to a Jolokia Agent than to a JSR-160 connector
+to get through to a Jolokia Agent using HTTP than to a JSR-160 connector
 using RMI as the transport protocol.
 * _Remoteness_ is explicit in this API instead
 of JSR-160 connector's seeked _transparent
-remoteness_. RMI has some arguable conceptually
-advantages, but hiding all remote aspects proved to have quite
+remoteness_. RMI has some arguable conceptual
+advantages, but hiding all the remote aspects proved to have quite
 some disadvantages when it comes to the programming
 model. Explicit awareness of a 'heavy-weight' remote call is
 better than false transparency in order to know the price tag.
@@ -46,35 +47,49 @@ The Java client library follows a strict request-response
 paradigm, much like the underlying HTTP. It uses generics heavily
 and can be centered around three classes:
 
-* `org.jolokia.client.J4pClient` is the client side class, which
+* `org.jolokia.client.JolokiaClient` is the client side class, which
 has various variants of an `execute()` methods for
 sending requests.
 * These methods take one or more
-`org.jolokia.client.request.J4pRequest` objects as arguments and
-* return one or more `org.jolokia.client.request.J4pResponse` objects as a result.
+`org.jolokia.client.request.JolokiaRequest` objects as arguments and
+* return one or more `org.jolokia.client.request.JolokiaResponse` objects as a result.
 
-.What is "J4p"?
-****
-That's a reminiscence to Jolokia's roots which are in
-https://metacpan.org/dist/jmx4perl[Jmx4Perl,role=externalLink,window=_blank]. It is always good
-to remember where one comes from ;-)
-****
+=== JolokiaClient SPI
 
-But before we got into the details, the next section gives a first
-tutorial to get a feeling how the API can be used.
+Since the initial Jolokia release https://github.com/jolokia/jolokia/commits/v0.80/[in 2010,role=externalLink,window=_blank], Jolokia
+Client was implemented using https://hc.apache.org/httpcomponents-client-4.5.x/index.html[Apache HttpClient 4,role=externalLink,window=_blank]. +
+This gives us 4 external dependencies: HttpClient4, HttpCore4, Commons Codec and Commons Logging.
+
+https://openjdk.org/jeps/321[JEP 321,role=externalLink,window=_blank] introduced real HTTP Client API available in the JDK itself.
+`java.net.HttpURLConnection` was not suitable for more serious scenarios.
+
+https://github.com/jolokia/jolokia/issues/565[jolokia#565] was created in 2023, but it took a while to find a way to use JDK HTTP Client in Jolokia. While we _could_ consider Apache HttpClient4 as deprecated and move entirely to JDK HTTP Client, it turned out that it's possible to support both. +
+And more.
+
+Jolokia 2.4.0 introduced a breaking API change (violating a bit the https://semver.org/[Semantic Versioning guidelines,role=externalLink,window=_blank]), because we wanted to achieve few goals:
+
+* rename `J4pClient` to `JolokiaClient`
+* keep the Jolokia Client API as a set of `execute()` methods that accept _Jolokia request(s)_ and return _Jolokia response(s)_
+* remove strict dependency of `JolokiaClient` on particular HTTP Client implementation (for example `org.apache.http.client.HttpClient` was used as an argument of `J4pClient` constructor and `J4pClientBuilder` was accepting `org.apache.http.client.CookieStore`)
+* make `JolokiaClient` interface implementation-agnostic, but allow implementation-specific customization
+
+Effectively we broke the API by renaming the class and removing the HttpClient4-specific arguments (renaming wouldn't happen without the removal).
+
+The goals were achieved by:
+
+* introducing `org.jolokia.client.spi.HttpClientSpi` SPI interface
+* providing default implementation of this SPI interface based on JDK HTTP Client
+* moving the implementation from Jolokia 2.3.0 to an SPI implementation based on https://hc.apache.org/httpcomponents-client-4.5.x/index.html[Apache HttpClient 4,role=externalLink,window=_blank]
+* creating a new implementation based on https://hc.apache.org/httpcomponents-client-5.5.x/index.html[Apache HttpClient 5,role=externalLink,window=_blank]
+* leveraging `/META-INF/services/org.jolokia.client.spi.HttpClientBuilder` https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/ServiceLoader.html[Service Loader,role=externalLink,window=_blank] interface.
+
+Now, starting from Jolokia 2.4.0, users can create and call Jolokia Client, while the particular HTTP Client implementation
+will be discovered automatically. And with default implementation (based on JDK HTTP Client) we no longer need _any_ external dependencies.
 
 [#client-java-tutorial]
 === Tutorial
 
-As seen in the following example, the usage is quite easy. First
-a, client object `client` is created pointing
-to a Jolokia agent at `\http://localhost:8080/jolokia`.
-A read request for querying the heap memory usage from the
-`java.lang.management.MemoryMXBean` is created and then send using
-the `execute()` method to the agent. The
-response returned is of type
-`org.jolokia.client.request.J4pReadResponse` and holds the result
-which finally is printed out to standard output.
+Here is a sample application using `JolokiaClient` to get the amount of used heap memory:
 
 [,java]
 ----
@@ -83,30 +98,30 @@ import org.jolokia.client.request.*;
 
 public class MemoryDemo {
   public static void main(String[] args) {
-    JolokiaClient client = new JolokiaClientBuilder().url("http://localhost:8080/jolokia")
+    JolokiaClient client = new JolokiaClientBuilder().url("http://localhost:7778/jolokia")
         .user("jolokia")
         .password("jolokia")
-        .build();
-    J4pReadRequest request =
-        new J4pReadRequest("java.lang:type=Memory", "HeapMemoryUsage");
-    request.setPath("used");
-    J4pReadResponse response = client.execute(request);
-    System.out.println("Memory used: " + response.getValue());
+        .build(); <1>
+    JolokiaReadRequest request
+        = new JolokiaReadRequest("java.lang:type=Memory", "HeapMemoryUsage"); <2>
+    request.setPath("used"); <3>
+    JolokiaReadResponse response = client.execute(request); <4>
+    System.out.println("Memory used: " + response.getValue()); <5>
   }
 }
 ----
+<1> `JolokiaClient` object is used using a `JolokiaClientBuilder` builder
+<2> A `JolokiaReadRequest` is created to specify an MBean name and its attribute to fetch
+<3> A _path_ into the complex structure (here: `java.lang.management.MemoryUsage`) is specified
+<4> The request is sent using the Jolokia Client and a related `JolokiaReadResponse` is obtained
+<5> A value is printed from the response
 
-In order to compile and run this example, `jolokia-client-java.jar` library is needed (see link:/download.html[Download]) as well as
-some additional support libraries:
+In order to compile and run this example, we need only one library: `jolokia-client-java-{jolokia-version}.jar`. See link:/download.html[Download].
 
-* https://repo1.maven.org/maven2/org/jolokia/jolokia-json/2.3.0/jolokia-json-2.3.0.jar[jolokia-json-2.3.0.jar,role=externalLink,window=_blank]
-* https://repo1.maven.org/maven2/org/apache/httpcomponents/httpclient/4.5.14/httpclient-4.5.14.jar[httpclient-4.5.14.jar,role=externalLink,window=_blank]
-* https://repo1.maven.org/maven2/org/apache/httpcomponents/httpcore/4.4.16/httpcore-4.4.16.jar[httpcore-4.4.16.jar,role=externalLink,window=_blank]
-* https://repo1.maven.org/maven2/commons-logging/commons-logging/1.2/commons-logging-1.2.jar[commons-logging-1.2.jar,role=externalLink,window=_blank]
-* https://repo1.maven.org/maven2/commons-codec/commons-codec/1.19.0/commons-codec-1.19.0.jar[commons-codec-1.19.0.jar,role=externalLink,window=_blank]
+For Maven users, the following dependency is sufficient. It will use two transitive Jolokia dependencies:
 
-For Maven users, the following dependency is sufficient (it will include
-the other as transitive dependencies):
+* `jolokia-json-{jolokia-version}.jar` - for JSON serialization
+* `jolokia-core-{jolokia-version}.jar` - for data conversion
 
 [,xml,subs="attributes,verbatim"]
 ----
@@ -117,26 +132,53 @@ the other as transitive dependencies):
 </dependency>
 ----
 
+=== Using other HTTP Client implementation
+
+If we want to use HTTP Client implementation from external library (instead of the one provided by the JDK itself), it's enough to add one of
+these dependencies to the `CLASSPATH`:
+
+.Use Apache Http Client 4
+[,xml,subs="attributes,verbatim"]
+----
+<dependency>
+    <groupId>org.jolokia</groupId>
+    <artifactId>jolokia-client-java-httpclient4</artifactId>
+    <version>{jolokia-version}</version>
+</dependency>
+----
+
+.Use Apache Http Client 5
+[,xml,subs="attributes,verbatim"]
+----
+<dependency>
+    <groupId>org.jolokia</groupId>
+    <artifactId>jolokia-client-java-httpclient5</artifactId>
+    <version>{jolokia-version}</version>
+</dependency>
+----
+
 [#client-client]
-=== JolokiaClient
+=== JolokiaClient and JavaClientBuilder API
 
 `JolokiaClient` is the entry point for sending
 requests to a remote Jolokia agent. It can be created in multiple
 ways. For simple cases, public constructors are provided taking
-the mandatory Jolokia agent URL and optionally a
-`org.apache.http.client.HttpClient`
-instance which is used for the HTTP business. The recommended style
+the mandatory Jolokia agent URI and optionally an explicitly selected implementation
+of `org.jolokia.client.spi.HttpClientSpi` SPI interface (to skip the autodiscovery mechanism).
+
+The recommended style
 is to use the `JolokiaClientBuilder`, though. This way, all
-parameters for the HTTP communication can easily be set:
+the parameters for HTTP communication can easily be set:
 
 [,java]
 ----
-JolokiaClient j4p = new JolokiaClientBuilder().url("http://localhost:8080/jolokia")
-  .user("roland")
-  .password("s!cr!t")
-  .authenticator(new BasicAuthenticator().preemptive())
-  .connectionTimeout(3000)
-  .build();
+JolokiaClient client = new JolokiaClientBuilder().url("http://localhost:7778/jolokia")
+    .user("jolokia")
+    .password("jolokia")
+    .socketBufferSize(16384)
+    .socketTimeout(5000)
+    // ...
+    .build();
 ----
 
 The builder supports the following parameters with the given
@@ -148,7 +190,7 @@ defaults:
 |Parameter|Description|Default
 
 |`url`
-|The URL to the Jolokia agent. This is the only mandatory parameter.
+|The URL to the Jolokia agent. This is the only mandatory parameter. Can be specified as a String or a `java.net.URI` object.
 |
 
 |`user`
@@ -160,14 +202,6 @@ must be set, too
 |`password`
 |Password used for authentication. Only used when
 `user` is set.
-|
-
-|`authenticator`
-|Implementation of `J4pClientCustomizer`. The Java client comes with
-one implementation `BasicClientCustomizer` for using basic authentication.
-This class supports also _preemptive_ authentication. Call `preemptive()` to
-switch this on (see above for an example). Basic authentication is the default if no other
-authenticator is set.Only used when `user` is set, too.
 |
 
 |`target`
@@ -192,6 +226,13 @@ authentication is used for JSR-160 communication.
 established. A timeout value of zero is interpreted as an
 infinite timeout.
 |`20000`
+
+|`socketTimeout`
+|Defines the socket timeout (`SO_TIMEOUT`) in milliseconds,
+which is the timeout for waiting for data  or, put differently,
+a maximum period inactivity between two consecutive data packets.
+A timeout value of zero is interpreted as an infinite timeout.
+|`0`
 
 |`pooledConnection`
 |Specifies, that the underlying HttpClient should use pooled
@@ -233,13 +274,6 @@ used.
 from the pool. This parameter is only used when
 `pooledConnections` are used.
 |`500`
-
-|`socketTimeout`
-|Defines the socket timeout (`SO_TIMEOUT`) in milliseconds,
-which is the timeout for waiting for data  or, put differently,
-a maximum period inactivity between two consecutive data packets.
-A timeout value of zero is interpreted as an infinite timeout.
-|`0`
 
 |`contentCharset`
 |Defines the charset to be used per default for encoding
@@ -303,19 +337,38 @@ used, which instead of throwing an exception returns a
 `null` object when the response has a status of
 404. An objectAccessor can be specified as extra argument to the
 execute method, too.
-|
+|`org.jolokia.client.response.ValidatingResponseExtractor`
 
 |`defaultHttpHeaders`
 |A map of default HTTP headers that should be sent with Jolokia requests.
 |
 
-|`cookieStore`
-|HttpClient4 cookie store to use
-|`org.apache.http.impl.client.BasicCookieStore`
+|`keystore`
+|A keystore with client credentials to be used with HTTPS connections. The keystore
+can be specified either as `java.nio.file.Path` or `java.security.KeyStore`
+|
 
-|`sslConnectionSocketFactory`
-|`org.apache.http.conn.socket.ConnectionSocketFactory` to use with HttpClient4
-|`org.apache.http.conn.ssl.SSLConnectionSocketFactory`
+|`keystorePassword`
+|Password to the keystore
+|
+
+|`keyPassword`
+|Password to the Client key inside the keystore
+|
+
+|`truststore`
+|A truststore with server certificates to be used with HTTPS connections. The truststore
+can be specified either as `java.nio.file.Path` or `java.security.KeyStore`
+|
+
+|`truststorePassword`
+|Password to the truststore
+|
+
+|`protocolVersion`
+|TLS protocol version to be used with HTTPS connections. When this option is not set,
+SSL configuration won't be used. We can use for example `TLSv1.3`.
+|
 |===
 
 The `JolokiaClient` provides various variants
@@ -328,8 +381,8 @@ i.e. for multiple requests of the same time. Otherwise an
 untyped list must be used.
 
 Each request can be tuned by giving a map of processing options
-along with their values to the `execute`
-method. The possible options are shown in table
+along with their values to the `execute()`
+method. The possible options are specified using `org.jolokia.client.JolokiaQueryParameter` enum and are shown in the below table:
 <<client-java-queryopts>>.
 
 [#client-java-queryopts]
@@ -349,6 +402,10 @@ If larger, a collection is truncated to this size.
 
 |`MAX_OBJECTS`
 |Maximum number of objects returned in the response's value.
+
+|`SERIALIZE_LONG`
+|An option about how to serialize `long` values. We have an option to use `number` or `string`.
+This is more relevant for JavaScript, where the maximum value of a `long` type is different than in Java.
 
 |`IGNORE_ERRORS`
 |Option for ignoring errors during JMX operations and JSON
@@ -380,18 +437,69 @@ order (== alphabetical sorted) is used or
 `false` for getting the keys as
 registered. Default is `true`
 
-|`IF_MODIFIED_SINCE`
-|Can be specified as milliseconds of the UNIX epoch for `list`
-requests. If there were no changes after this timestamp in the
-registered MBeans, a response with HTTP 304 return code is returned.
+|`MIME_TYPE`
+|Which MIME type to use with the response. only `text/plain` and `application/json` are supported.
+This is not very important for the Java Client.
 
 |`INCLUDE_REQUEST`
 |Whether the response object should contain related request object. +
 This option may be configured globally and overridden at request time.
 When `false`, bulk responses have to be correlated with requests by matching
 the requests using index number - responses come in the same order as requests. +
-*Added since Jolokia 2.1.0*
+*Available since Jolokia 2.1.0*
+
+|`LIST_KEYS`
+|Whether to enable `org.jolokia.service.jmx.handler.list.ListKeysDataUpdater`, so the object names are split
+into `key=value` pairs in the response
+
+|`IF_MODIFIED_SINCE`
+|Can be specified as milliseconds of the UNIX epoch for `list`
+requests. If there were no changes after this timestamp in the
+registered MBeans, a response with HTTP 304 return code is returned.
+
+|`LIST_CACHE`
+|Whether to use optimized version of the `list` response. It is _critical_ for the scenarios where the
+Jolokia Agent has access to a lot of different MBeans of the same MBean interface. +
+*Available since Jolokia 2.1.0*
+
+|`LIST_INTERFACES`
+|Whether the `list` response should add information about all the interfaces implemented by MBeans. This options was added to support `javax.management.MBeanServerConnection.isInstanceOf()` method in `jolokia-client-jmx-adapter` +
+*Available since Jolokia 2.5.0*
+
+|`OPEN_TYPES`
+|Whether the `list` response should return information about ``javax.management.openmbean.OpenType``s used by
+the MBeans. This allows much better insight into the complex data structures used by the MBeans. +
+*Available since Jolokia 2.5.0*
 |===
+
+=== Implementation specific configuration
+
+Because Jolokia Client supports now (since version 2.5.0) 3 different implementations, we've added a way to configure
+implementation-specific details. For example the connection pool can be configured for Apache HttpClient using Java API, but
+for JDK HTTP Client, system properties are used.
+
+We can pass a _customizer_ to `org.jolokia.client.JolokiaClientBuilder` and here's an example of calling Apache HttpClient5
+specific methods when configuring Jolokia Client. We can also grab an instance of actual implementation:
+
+[,java]
+----
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.jolokia.client.JolokiaClient;
+import org.jolokia.client.JolokiaClientBuilder;
+
+public class App {
+
+  public static void main(String[] args) throws Exception {
+    JolokiaClient client = new JolokiaClientBuilder().url("http://localhost:8080/jolokia")
+        .withCustomizer(HttpClientBuilder.class, (HttpClientBuilder builder) -> {
+            builder.setUserAgent("My Client based on HttpClient 5");
+            called[0] = true;
+        }).build();
+    HttpClient realClient = client.getHttpClient(HttpClient.class);
+  }
+}
+----
 
 [#client-java-requests]
 === Request types
@@ -500,11 +608,14 @@ thrown.
 
 `JolokiaConnectException`:: Exception thrown when the connection to the server
 fails. It contains the original
-`ConnectException` as nested value.
+`java.net.ConnectException` as nested value.
 
 `JolokiaTimeoutException`:: Exception thrown in case of an timeout. The nested
-exception is of type
-`ConnectTimeoutException`.
+exception depends on the HTTP Client implementation used, but should be an instance of
+`java.io.IOException`
+
+`JolokiaHttpException`:: Exception thrown in when the HTTP response is not delivered using
+HTTP status code 200. In such case, the response does not contain JSON body.
 
 `JolokiaRemoteException`:: Generic exception thrown when an exception occurred on the
 remote side. This is the case when the JSON response

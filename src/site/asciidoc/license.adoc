@@ -35,7 +35,8 @@ the agents. These are
 * The reference guide's stylesheets are using https://gitlab.com/antora/antora-ui-default[Antora Default UI,role=externalLink,window=_blank] with minor CSS changes
 * `jolokia-client-kubernetes` is using https://github.com/fabric8io/kubernetes-client/[Fabric8 Kubernetes Client,role=externalLink,window=_blank] under the Apache License 2.0
 * `jolokia-support-spring` and Spring-related examples are using https://spring.io/projects/spring-framework[Spring Framework] and https://spring.io/projects/spring-boot[Spring Boot,role=externalLink,window=_blank] under the Apache License 2.0
-* `jolokia-client-java` is based on https://hc.apache.org/httpcomponents-client-4.5.x/index.html[Apache HTTP Client 4,role=externalLink,window=_blank] under the Apache License 2.0
+* `jolokia-client-java-httpclient4` is based on https://hc.apache.org/httpcomponents-client-4.5.x/index.html[Apache HTTP Client 4,role=externalLink,window=_blank] under the Apache License 2.0
+* `jolokia-client-java-httpclient5` is based on https://hc.apache.org/httpcomponents-client-5.5.x/index.html[Apache HTTP Client 5,role=externalLink,window=_blank] under the Apache License 2.0
 
 === Apache License
 

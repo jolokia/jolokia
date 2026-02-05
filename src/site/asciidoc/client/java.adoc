@@ -35,3 +35,12 @@ System.out.println("Memory used: " + resp.getValue());
 This client library is described in detail with all
 configuration options in the
 link:../reference/html/manual/clients.html#client-java[reference manual].
+
+The documentation chapter provide much more information about how to configure the Jolokia Client and how
+to choose the implementation of HTTP Client library.
+
+Jolokia can use 3 implementations of the HTTP Client:
+
+* https://docs.oracle.com/en/java/javase/17/docs/api/java.net.http/java/net/http/HttpClient.html[JDK HTTP Client,role=externalLink,window=_blank]
+* https://hc.apache.org/httpcomponents-client-4.5.x/index.html[Apache HttpClient 4,role=externalLink,window=_blank]
+* https://hc.apache.org/httpcomponents-client-5.5.x/index.html[Apache HttpClient 5,role=externalLink,window=_blank]
