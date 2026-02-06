@@ -1226,6 +1226,10 @@
     <!-- https://nodejs.org/en/about/previous-releases#looking-for-latest-release-of-a-version-branch -->
     <version.nodejs>v20.9.0</version.nodejs>
     <version.npm>10.8.1</version.npm>
+    <!--
+      this is strange, but irrelevant. install-node-and-corepack somehow fails,
+      but install-node-and-yarn works with actual package manager defined in package.json
+    -->
     <version.yarn>v1.22.22</version.yarn>
 
     <!-- Versions of test-related dependencies -->

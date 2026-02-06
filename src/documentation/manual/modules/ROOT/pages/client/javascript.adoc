@@ -16,6 +16,8 @@
 [#client-javascript]
 == JavaScript Client Library
 
+NOTE: Documentation for the previous version (pre-NPM, not based on TypeScript) of JavaScript library is available here: xref:client/javascript-old.adoc[JavaScript Client Library (before ES modules)].
+
 Notable difference from previous version (pre 2.1.0) are:
 
 * The code is developed now using TypeScript language and processed using https://rollupjs.org/[Rollup JS] into ESM version (`jolokia.mjs` to be used with `import` statement) and UMD version (`jolokia.js` - to be used with browsers when not loading the script as `type="module"`)
@@ -34,7 +36,7 @@ All methods of this library are available via the
 `Jolokia` client object, which needs to be
 instantiated up-front. In the following example a client object is
 created and the used heap memory is requested synchronously via
-the simple API. The agent is deployed within the same webarchive
+the simple API. The agent is deployed within the same web archive
 which also serves this script.
 
 Here's a sample code fragment that uses global `Jolokia` class which is used to create a `jolokia`
