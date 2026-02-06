@@ -630,6 +630,7 @@ This section is about `javax.management.remote.JMXConnector` part of the remote 
 
 in <<_jmx_over_rmi_implementation>> we've learned about `javax.management.remote.JMXConnectorServerFactory.newJMXConnectorServer()` factory method. We have the client-side equivalent too.
 
+[#_obtaining_rmi_jmx_connector]
 ==== Obtaining an RMI JMX connector (client)
 
 Here's an example about how to use a `JMXServiceURL` _recipe_ and `JMXConnectorFactory` factory to access a remote MBeanServer
@@ -651,7 +652,9 @@ System.out.println("runtime name: " + runtimeName);
 connector.close();
 ----
 
-Not much to add. The `JMXServiceURL` matches the same _recipe_ used at the server side to create and export the server side of the remote JMX Connector.
+Not much to add. The `JMXServiceURL` matches the same _recipe_ used at the server side (which creates and exports the server side of the remote JMX Connector). This time the `protocol` part of the `JMXServiceURL` is used to locate a `javax.management.remote.JMXConnectorProvider` by a `javax.management.remote.JMXConnectorFactory`.
+
+NOTE: Jolokia provides two implementations of `JMXConnectorProvider` - `org.jolokia.client.jmxadapter.JolokiaJmxConnectionProvider` and `org.jolokia.kubernetes.client.KubernetesJmxConnectionProvider`.
 
 There's however _one_ interesting thing. Actually it is specific to RMI implementation. Noticed that there are _two_ ports in the JMX Service URL? Port `44444` (at `localhost`) is where the `sun.rmi.transport.tcp.TCPEndpoint` is accepting the connections for the exported `javax.management.remote.rmi.RMIJRMPServerImpl`. But this information is already available in the _stub_ retrieved from the RMI registry running at `localhost:1099` where the `javax.management.remote.rmi.RMIServer` is bound under `my-mbean-server` name!
 
@@ -674,7 +677,7 @@ Yes - `service:jmx:rmi:///jndi/rmi://localhost:1099/my-mbean-server` has enough 
 
 Jolokia doesn't implement _entire_ JMX Connector, only the client-side part of it.
 
-* `org.jolokia.client.jmxadapter.JolokiaJmxConnector` for `service:jmx:jolokia:` JMX Service URLs
+* `org.jolokia.client.jmxadapter.JolokiaJmxConnector` for `service:jmx:jolokia[+http[s]]:` JMX Service URLs
 * `org.jolokia.kubernetes.client.KubernetesJmxConnector` for `service:jmx:kubernetes:` JMX Service URLs
 
 See the details in xref:clients.adoc#client-jmx-adapter[Jolokia JMX Connector Client].

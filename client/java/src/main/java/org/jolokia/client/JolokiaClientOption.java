@@ -65,14 +65,14 @@ public enum JolokiaClientOption {
     /** Password for Basic authentication */
     PASSWORD("password"),
 
-    /** Connection (establishment) timeout */
+    /** Connection (establishment) timeout in milliseconds */
     CONNECTION_TIMEOUT("connectionTimeout"),
 
-    /** Read (socket) timeout */
+    /** Read (socket) timeout in milliseconds */
     READ_TIMEOUT("readTimeout"),
 
     /** Whether to get {@link javax.management.openmbean.OpenType} information with {@code list} operation */
-    OPEN_TYPES("openTimeout");
+    OPEN_TYPES("openTypes");
 
     private final String option;
 

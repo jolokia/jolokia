@@ -1,5 +1,5 @@
 ////
-  Copyright 2009-2023 Roland Huss
+  Copyright 2009-2026 Roland Huss
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -14,10 +14,16 @@
   limitations under the License.
 ////
 [#client-jmx-adapter]
-== MBeanServerConnection adapter
+== Jolokia JMX Connector Client
 
-The JMX adapter library simulates a local or remote `MBeanServerConnection` by using the Jolokia protocol for connecting to a Jolokia agent.
-This allows you to use tools that leverage a JSR-160 `MBeanServerConnection` such as JConsole, Visual VM or Java Mission Control for connecting to a Jolokia endpoint.
+The xref:jmx_remote_guide.adoc[] provides in-depth information about https://jcp.org/en/jsr/detail?id=160[JSR-160,role=externalLink,window=_blank] - the remote part of the https://jcp.org/en/jsr/detail?id=3[JMX specification,role=externalLink,window=_blank]. +
+A JMX Connector is specified as a way to access a remote MBeanServer using `javax.management.MBeanServerConnection` interface, as if it was available locally. The default implementation shipped with standard JDK is based on RMI protocol and uses `javax.management.remote.rmi.RMIServer` (RMI) remote interface.
+
+Jolokia Agent is an implementation of JMX Protocol Adaptor, but additionally provides a _client part_ of the JMX Connector. This means we can access a remote JVM where a Jolokia agent is running using `javax.management.MBeanServerConnection` interface. +
+Internally invocations of `MBeanServerConnection` interface are translated into Jolokia Client library calls.
+
+This allows you to use tools that leverage a JSR-160 `MBeanServerConnection` such as https://docs.oracle.com/en/java/javase/17/management/using-jconsole.html[JConsole,role=externalLink,window=_blank], https://visualvm.github.io/[Visual VM,role=externalLink,window=_blank] or
+https://www.oracle.com/java/technologies/jdk-mission-control.html[Java Mission Control,role=externalLink,window=_blank] for connecting to a Jolokia endpoint.
 
 .Recommended plugins
 ****
@@ -26,51 +32,189 @@ https://github.com/skarsaune/jmc-cloud-extensions/[role=externalLink,window=_bla
 Java Visual VM a Jolokia plugin can be downloaded from https://skarsaune.github.io/jolokia-jmc-update-site/visualvm/org-jolokia-jmx-plugin.nbm[role=externalLink,window=_blank]
 ****
 
-[#remote-jmx-example]
-=== JSR-160 Connection to Jolokia
+NOTE: Starting with version 9.1.0, Java Mission Control https://www.oracle.com/java/technologies/javase/jmc9-release-notes.html#R9_1_0[provides built-in Jolokia support,role=externalLink,window=_blank].
 
-The example below shows how to connect programmatically via a JSR-160 `JMXConnector` to a Jolokia enabled Java process listening on `localhost:8778`.
+[#remote-jmx-example]
+=== Connecting to a Jolokia Agent using JSR-160 JMX Connector Client
+
+Chapter xref:jmx_remote_guide.adoc#_obtaining_rmi_jmx_connector[Obtaining an RMI JMX connector (client)] shows how the JMX code uses the `protocol`
+part of `JMXServiceURL` to locate a `javax.management.remote.JMXConnectorProvider` which is used to create a `JMXConnector` implementation. Refer to the entire xref:jmx_remote_guide.adoc[] chapter for more details.
+
+The example below shows how to connect programmatically to a Jolokia enabled Java process listening on `localhost:8778` using the _canonical_ JSR-160 API code.
 
 For this example to work you need the following prerequisites:
 
-* Jolokia's `remote-jmx-adapter-{jolokia-version}-javaagent.jar`
+* Jolokia's `jolokia-client-jmx-adapter-{jolokia-version}-standalone.jar`
 must be on the classpath. See the link:/download.html[Download page] for the latest versions of this adapter jar.
-* Jolokia has to be accessible running at
-http://localhost:8778/jolokia/. If user/password authentication is enabled for the agent, uncomment the line below and insert your credentials.
+* Jolokia has to be accessible, running at
+http://localhost:8778/jolokia/. If user/password authentication is enabled for the agent, pass the credentials using `javax.management.remote.JMXConnector.CREDENTIALS` option (which is standard for remote JMX).
 
 [,java]
 ----
-import javax.management.remote.*;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
-import java.util.Arrays;
+import javax.management.openmbean.CompositeData;
+import javax.management.remote.JMXConnector;
+import javax.management.remote.JMXConnectorFactory;
+import javax.management.remote.JMXServiceURL;
 
 public class ConnectWithJolokiaDemo {
-  public static void main(String[] args) throws Exception {
-    Map<String, Object> options = new HashMap<>();
-    // Add user & password if the Agent is secured:
-    options.put(JMXConnector.CREDENTIALS, new String[] { "jolokia", "jolokia" });
+    public static void main(String[] args) throws Exception {
+        Map<String, Object> options = new HashMap<>();
+        // Add user & password if the Agent is secured:
+        options.put(JMXConnector.CREDENTIALS, new String[] { "jolokia", "jolokia" });
 
-    // https will be used if port number fits the pattern *443
-    // or if options contains "jmx.remote.x.check.stub"->"true"
-    JMXConnector connector = JMXConnectorFactory.connect(
-        new JMXServiceURL("service:jmx:jolokia://localhost:8778/jolokia/"),
-        options);
-    connector.connect();
-    System.out.println("Memory used: " +
-        connector.getMBeanServerConnection().getAttribute(
-            ObjectName.getInstance("java.lang:type=Memory"),"HeapMemoryUsage"));
-  }
+        JMXConnector connector = JMXConnectorFactory.connect(
+                new JMXServiceURL("service:jmx:jolokia+http://localhost:7778/jolokia"),
+                options);
+
+        MBeanServerConnection connection = connector.getMBeanServerConnection();
+        CompositeData heapMemoryUsage = (CompositeData) connection
+                .getAttribute(ObjectName.getInstance("java.lang:type=Memory"), "HeapMemoryUsage");
+        System.out.println("Memory used: " + heapMemoryUsage.get("used"));
+
+        connector.close();
+    }
 }
 ----
 
-NOTE: When running Jolokia as JVM agent, using `-javaagent` JVM option, be careful to append trailing slash to the URL, like `service:jmx:jolokia://localhost:8778/jolokia/`. Without it, built-in JDK HTTP server won't pass the request to Jolokia HTTP handler.
+`javax.management.MBeanServerConnection` interface is a base interface for `javax.management.MBeanServer` with almost
+the same methods. However, as mentioned in xref:jmx_remote_guide.adoc#_jmx_remote_rmi_connector_details[JMX Remote RMI Connector - the details],
+the important differences are:
+
+* all the methods throw `java.io.IOException` to indicate that the call should be treated as remote (expect I/O exceptions)
+* there are no `registerMBean()` and `unregisterMBean()` methods
+
+=== Connecting to a remote Jolokia Agent using JConsole
+
+By providing an implementation of `javax.management.remote.JMXConnector` and `javax.management.MBeanServerConnection`, Jolokia can easily
+be used with tools that rely on these interfaces!
+
+One of these tools is https://docs.oracle.com/en/java/javase/17/management/using-jconsole.html[JConsole,role=externalLink,window=_blank] which is shipped
+with JDK distribution and is available in `$JAVA_HOME/bin` directory.
+
+JConsole access remote JVM processes using a JMX Connector which is discovered by providing proper `JMXServiceURL` in this connection dialog:
+
+image::jconsole2.png["jconsole connection dialog",role=text-center]
+
+Jolokia Agent may run on plain HTTP connection or may use HTTPS with or without certificate authentication. Before Jolokia 2.5.0 we could
+only use one form of JMXServiceURL: `service:jmx:jolokia://<host>:<port>/<path>` and HTTPS was used only if the port ended with `443`.
+
+Because https://www.ietf.org/rfc/rfc2609.html#section-2.1[RFC 2609] allows `+` sign in the `resname` component of the service URI, we've decided to support additional forms of Jolokia URIs:
+
+* `service:jmx:jolokia://<host>:<port>/<path>` - compatible with previous behavior - switching to HTTPS if the port ends with `443`
+* `service:jmx:jolokia+http://<host>:<port>/<path>` - using HTTP explicitly
+* `service:jmx:jolokia+https://<host>:<port>/<path>` - using HTTPS explicitly
+
+Of course for HTTPS connection we should be able to configure more than just the URL. Remember that Jolokia Client is a Java API, so developers
+using this API directly in their Java code can configure various aspects programmatically. With JConsole all we have is the command line, system properties and environment variables - and this is how Jolokia 2.5.0 and later allows to configure more options.
+
+First - we need to tell JConsole how to find Jolokia JMX Connector classes and here's how to do it:
+
+----
+$ jconsole -J-Djava.class.path=$HOME/.m2/repository/org/jolokia/jolokia-client-jmx-adapter/{jolokia-version}/jolokia-client-jmx-adapter-{jolokia-version}-standalone.jar
+----
+
+NOTE: If you have problems with running JConsole (which is a Java Swing application) on Linux with Gtk L&F or on 4K monitor, please use these additional options: `-J-Dswing.defaultlaf=javax.swing.plaf.metal.MetalLookAndFeel -J-Dsun.java2d.uiScale=3`
+
+No additional options are needed when using HTTP. +
+This is enough to connect to remote JVM process and get all the information needed by JConsole! Jolokia JMX Connector
+properly translates all the complex types available in JMX MBeanServer, for example Flight Recorder:
+
+image::jconsole-jfr.png["jconsole connection dialog",role=text-center]
+
+==== TLS Configuration for JConsole and Jolokia JMX Connector
+
+Traditionally the TLS configuration for Java uses _stores_ of two types:
+
+* a _keystore_ contains client certificate(s) and private key(s)
+* a _truststore_ contains server issuer certificate(s) and/or Certificate Authority (CA) certificates
+
+Java supports two kinds of keystore/truststore formats - proprietary JKS and standard PKCS#12. +
+However Jolokia (see https://github.com/jolokia/jolokia/issues/911[role=externalLink,window=_blank]) gives users more options - we can now specify certificates and keys in other formats:
+
+* X.509 certificates not embedded in Java keystores/truststores
+* PKCS#1 RSA keys
+* DSA keys
+* PKCS#8 RSA, DSA and EC keys
+* PKCS#5 (PBE) encrypted RSA, DSA and EC keys
+* all in either DER or PEM formats
+
+We've introduced these system properties for Jolokia JMX Connector
+
+
+|===
+|System property |Description
+
+|`jolokia.keystore`
+|Location (path) to a Java keystore with client certificate and private key
+
+|`jolokia.keystorePassword`
+|Password for the entire keystore
+
+|`jolokia.keystoreAlias`
+|Alias for the keystore for a private-key entry that should be used for client TLS authentication
+
+|`jolokia.truststore`
+|Location (path) to a Java keystore with server/ca data to validate the server
+
+|`jolokia.truststorePassword`
+|Password for the truststore
+
+|`jolokia.clientCertificate`
+|Location of a X.509 client certificate (PEM or DER) when not using a Java keystore
+
+|`jolokia.clientKey`
+|Location of PKCS#1 (RSA) or PKCS#8 private key (PEM or DER, encrypted or not) matching the client certificate
+
+|`jolokia.clientKeyAlgorithm`
+|Algorithm to be used for `java.security.KeyFactory#getInstance()` which usually can be deduced from PKCS#1/PKCS#8/PKCS#5 structure
+
+|`jolokia.clientKeyPassword`
+|Password for the private key specified separately or for a key inside the client keystore
+
+|`jolokia.caCertificate`
+|Location of a CA certificate (PEM or DER) when not using the truststore
+
+|`jolokia.username`
+|Username for Basic authentication
+
+|`jolokia.password`
+|Password for Basic authentication - mind that Basic Authentication should **not** be used without TLS
+
+|`jolokia.connectionTimeout`
+|Connection (establishment) timeout in milliseconds
+
+|`jolokia.readTimeout`
+|Read (socket) timeout in milliseconds
+|===
+
+What's more - all the above options can be specified as environmental variables too! We just have to switch to proper convention - for example `jolokia.readTimeout` system property name becomes `JOLOKIA_READ_TIMEOUT` environmental property name.
+
+Here's an example to run JConsole with TLS client authentication:
+
+----
+$ JOLOKIA_CLIENT_KEY_PASSWORD=jolokia \
+    jconsole \
+    -J-Dswing.defaultlaf=javax.swing.plaf.metal.MetalLookAndFeel \
+    -J-Dsun.java2d.uiScale=3 \
+    -J-Djava.class.path=$HOME/.m2/repository/org/jolokia/jolokia-client-jmx-adapter/{jolokia-version}/jolokia-client-jmx-adapter-{jolokia-version}-standalone.jar \
+    -J-Djolokia.caCertificate=ca.cer.pem \
+    -J-Djolokia.clientCertificate=client.cer.pem \
+    -J-Djolokia.clientKey=client-private.key-pk8.pem
+----
+
+Here, `client-private.key-pk8.pem` is a PEM file with a `-----BEGIN ENCRYPTED PRIVATE KEY-----` header and Jolokia can properly decrypt it using a password specified using `JOLOKIA_CLIENT_KEY_PASSWORD` environmental variable.
 
 [#kubernetes-jmx-example]
 === JSR-160 Connection to a JVM running in Kubernetes
 
 If you are running a Jolokia-enabled JVM within a Kubernetes Pod, you can directly connect to this JVM from your local machine with the Jolokia JSR-160 connector. See the runnable example below for more details.
 
-Before compiling and running the example below, please check that the following prerequesites are met:
+Before compiling and running the example below, please check that the following prerequisites are met:
 
 * Jolokia's `remote-jmx-adapter-{jolokia-version}-javaagent.jar`
 must be on the classpath. See the link:/download.html[Download page] for the latest versions of this adapter jar.
