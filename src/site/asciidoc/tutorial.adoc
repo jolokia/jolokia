@@ -18,51 +18,48 @@
 
 In this tutorial, it will be demonstrated how easily a WAR agent
 can be installed on a fresh Tomcat, how to verify the
-installation and how to access the client.
+installation and how to access the Agent using Jolokia Client.
 
 === Preparation
 
 In order to start on a green field, we are installing a
-fresh Tomcat in which the agent-war is going to be
-installed. Download Tomcat 10 from its
-https://tomcat.apache.org/download-10.cgi[site,role=externalLink,window=_blank] and
+fresh Tomcat in which the Jolokia WAR Agent is going to be
+installed. Download Tomcat 11 from its
+https://tomcat.apache.org/download-11.cgi[site,role=externalLink,window=_blank] and
 extract it:
 
 [source,bash]
 ----
-$ unzip apache-tomcat-10.1.16.zip
-$ cd apache-tomcat-10.1.16/
+$ unzip apache-tomcat-11.0.18.zip
+$ cd apache-tomcat-11.0.18/
 $ TC=$(pwd)
 ----
 
-Download the Jolokia WAR-agent and copy it into Tomcat's
+Download the Jolokia WAR-agent (without enabled security for the test purpose) and copy it into Tomcat's
 `webapps/` directory:
 
 [source,bash,subs="attributes,verbatim"]
 ----
-$ artifact=jolokia-agent-war
+$ artifact=jolokia-agent-war-unsecured
 $ version={jolokia-version}
 $ wget https://repo1.maven.org/maven2/org/jolokia/$artifact/$version/$artifact-$version.war \
 -O $TC/webapps/jolokia.war
 ----
 
-If `jolokia-agent-war-unsecured-{jolokia-version}.war` was used, it's be everything, but for standard WAR Agent we have to ensure that Tomcat has a user with `jolokia` role is configured in security realm.
-
-Just add:
+If `jolokia-agent-war-{jolokia-version}.war` was used, we'd need additional configuration. We need a user defined in
+Tomcat's `UserDatabaseRealm` realm with `jolokia` role. Just add this line to `${TC}/conf/tomcat-users.xml`:
 [source,xml]
 ----
 <user username="jolokia" password="jolokia" roles="jolokia"/>
 ----
 
-to `${TC}/conf/tomcat-users.xml`.
-
 === Startup and Verification
 
-Now the container can be started with:
+Now we can start Tomcat:
 
 [source,bash]
 ----
-$ $TC/bin/catalina.sh start
+$ ${TC}/bin/catalina.sh start
 ----
 
 In order to verify the installation, point your browser to http://localhost:8080/jolokia/version[] which should show (after authenticating using `jolokia/jolokia` credentials) something like:
@@ -73,17 +70,17 @@ We can also access the agent using `curl` command:
 
 [source,bash]
 ----
-$ curl -u jolokia:jolokia -i http://localhost:8080/jolokia/read/java.lang:type=Runtime/Name
-HTTP/1.1 200
-Cache-Control: no-cache
-Pragma: no-cache
-Date: Mon, 04 Dec 2023 11:02:59 GMT
-Expires: Mon, 04 Dec 2023 10:02:59 GMT
-Content-Type: text/plain;charset=utf-8
-Transfer-Encoding: chunked
-
-{"request":{"mbean":"java.lang:type=Runtime","attribute":"Name","type":"read"},
-    "value":"78033@everfree.forest","status":200,"timestamp":1701687779}
+$ curl -u jolokia:jolokia -s http://localhost:8080/jolokia/read/java.lang:type=Runtime/VmVersion | jq .
+{
+  "request": {
+    "mbean": "java.lang:type=Runtime",
+    "attribute": "VmVersion",
+    "type": "read"
+  },
+  "value": "17.0.18+8",
+  "status": 200,
+  "timestamp": 1770372762
+}
 ----
 
 === A simple Java Client
@@ -96,36 +93,34 @@ print out the memory usage of your Tomcat server:
 import java.util.Map;
 
 import org.jolokia.client.JolokiaClient;
+import org.jolokia.client.JolokiaClientBuilder;
 import org.jolokia.client.request.JolokiaReadRequest;
-import org.jolokia.client.request.JolokiaReadResponse;
+import org.jolokia.client.response.JolokiaReadResponse;
 
 public class JolokiaDemo {
 
     public static void main(String[] args) throws Exception {
-        JolokiaClient jolokiaClient = new JolokiaClientBuilder().url("http://localhost:8080/jolokia")
+        JolokiaClient client = new JolokiaClientBuilder().url("http://localhost:8080/jolokia")
                 .user("jolokia")
                 .password("jolokia")
                 .build();
-        JolokiaReadRequest req = new JolokiaReadRequest("java.lang:type=Memory", "HeapMemoryUsage");
-        JolokiaReadResponse resp = jolokiaClient.execute(req);
-        Map<String, Long> vals = resp.getValue();
+        JolokiaReadRequest request = new JolokiaReadRequest("java.lang:type=Memory", "HeapMemoryUsage");
+        JolokiaReadResponse response = client.execute(request);
+        Map<String, Long> vals = response.getValue();
         long used = vals.get("used");
         long max = vals.get("max");
-        int usage = (int) (used * 100 / max);
-        System.out.println("Memory usage: used: " + used + " / max: " + max + " = " + usage + "%");
+        double usage = ((double) used * 100 / max);
+        System.out.printf("Memory usage: used:%d/max:%d = %f%%%n", used, max, usage);
+        client.close();
     }
-
 }
 ----
 
 Save this code-snippet under `JolokiaDemo.java`. Then download
 
 * https://repo1.maven.org/maven2/org/jolokia/jolokia-json/{jolokia-version}/jolokia-json-{jolokia-version}.jar[jolokia-json-{jolokia-version},role=externalLink,window=_blank]
+* https://repo1.maven.org/maven2/org/jolokia/jolokia-core/{jolokia-version}/jolokia-core-{jolokia-version}.jar[jolokia-core-{jolokia-version},role=externalLink,window=_blank]
 * https://repo1.maven.org/maven2/org/jolokia/jolokia-client-java/{jolokia-version}/jolokia-client-java-{jolokia-version}.jar[jolokia-client-java-{jolokia-version},role=externalLink,window=_blank]
-* https://repo1.maven.org/maven2/org/apache/httpcomponents/httpclient/4.5.14/httpclient-4.5.14.jar[httpclient-4.5.14.jar,role=externalLink,window=_blank]
-* https://repo1.maven.org/maven2/org/apache/httpcomponents/httpcore/4.4.16/httpcore-4.4.16.jar[httpcore-4.4.16.jar,role=externalLink,window=_blank]
-* https://repo1.maven.org/maven2/commons-logging/commons-logging/1.2/commons-logging-1.2.jar[commons-logging-1.2.jar,role=externalLink,window=_blank]
-* https://repo1.maven.org/maven2/commons-codec/commons-codec/1.18.0/commons-codec-1.18.0.jar[commons-codec-1.18.0.jar,role=externalLink,window=_blank]
 
 and put these libraries into the same directory as this demo class. Finally, compile the demo and let it run:
 
@@ -133,19 +128,16 @@ and put these libraries into the same directory as this demo class. Finally, com
 ----
 $ export CLASSPATH=.:\
 jolokia-json-{jolokia-version}.jar:\
-jolokia-client-java-{jolokia-version}.jar:\
-httpclient-4.5.14.jar:\
-httpcore-4.4.16.jar:\
-commons-logging-1.2.jar:\
-commons-codec-1.18.0.jar
+jolokia-core-{jolokia-version}.jar:\
+jolokia-client-java-{jolokia-version}.jar
 
 $ javac JolokiaDemo.java
 
 $ java JolokiaDemo
-Memory usage: used: 53792744 / max: 8334082048 = 0%
+Memory usage: used:26709664/max:16492003328 = 0.161955%
 ----
 
-If you are using Maven, it is enough to include single dependency:
+If you are using Maven, it is enough to include a single dependency:
 [,xml,subs="attributes,verbatim"]
 ----
 <dependency>
@@ -155,16 +147,13 @@ If you are using Maven, it is enough to include single dependency:
 </dependency>
 ----
 
-Remaining dependencies are available transitively:
+Other required dependencies will be available transitively:
 
 [,subs="attributes,verbatim"]
 ----
 +- org.jolokia:jolokia-client-java:jar:{jolokia-version}:compile
    +- org.jolokia:jolokia-json:jar:{jolokia-version}:compile
-   +- org.apache.httpcomponents:httpcore:jar:4.4.16:compile
-   +- org.apache.httpcomponents:httpclient:jar:4.5.14:compile
-   |  \- commons-logging:commons-logging:jar:1.2:compile
-   \- commons-codec:commons-codec:jar:1.18.0:compile
+   \- org.jolokia:jolokia-core:jar:{jolokia-version}:compile
 ----
 
 === Install Jmx4Perl
