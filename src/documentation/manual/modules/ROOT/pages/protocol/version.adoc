@@ -52,30 +52,27 @@ The response value for a version request looks like:
     "type": "version"
   },
   "value": {
-    "agent": "{jolokia-version}",
-    "protocol": "7.2",
+    "agent": "2.5.0",
+    "protocol": "8.2",
+    "decorators": {},
     "details": {
-      "agent_version": "{jolokia-version}",
-      "agent_id": "192.168.0.221-21185-5ce94d31-servlet",
-      "server_product": "tomcat",
-      "server_vendor": "Apache",
-      "server_version": "10.1.16",
-      "secured": true,
-      "url": "http://192.168.0.221:8080/jolokia"
+      "agent_version": "2.5.0",
+      "agent_id": "jolokia-7778",
+      "secured": false,
+      "url": "http://192.168.0.166:7778/jolokia"
     },
-    "id": "192.168.0.221-21185-5ce94d31-servlet",
+    "id": "jolokia-7778",
     "config": {
       "maxDepth": "15",
-      "discoveryEnabled": "false",
-      "agentId": "192.168.0.221-21185-5ce94d31-servlet",
+      "discoveryEnabled": "true",
       "maxCollectionSize": "0",
-      "debug": "false",
+      "agentId": "jolokia-7778",
+      "debug": "true",
       "canonicalNaming": "false",
+      "dateFormat": "yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSSXXX",
+      "agentContext": "/jolokia",
       "historyMaxEntries": "10",
-      "serializeException": "false",
-      "includeStackTrace": "false",
       "maxObjects": "0",
-      "detectorOptions": "{}",
       "debugMaxEntries": "100"
     },
     "info": {
@@ -84,7 +81,7 @@ The response value for a version request looks like:
     }
   },
   "status": 200,
-  "timestamp": 1702482830
+  "timestamp": 1770638947
 }
 ----
 

@@ -17,7 +17,7 @@
 [#list]
 === Listing MBeans (list)
 
-The list operation collects information about accessible
+The list operation collects information about available
 MBeans. This information includes the MBean names, their
 attributes, operations and notifications along with type
 information and description (as far as they are provided by the
@@ -109,7 +109,15 @@ The `value` has the following format:
             "types": [ "<type1>", "<type2>", ... ]
         },
         ...
-      }
+      },
+      "class": "fully qualified class name",
+      "desc": "description",
+      "ctor": {
+        ...
+      },
+      "interfaces": [
+        ...
+      ]
     },
     ...
   },
@@ -169,27 +177,42 @@ results in an answer
     },
     "attr": {
       "ObjectPendingFinalizationCount": {
+        "r": true,
         "rw": false,
+        "w": false,
+        "is": false,
         "type": "int",
         "desc": "ObjectPendingFinalizationCount"
       },
       "Verbose": {
+        "r": true,
         "rw": true,
+        "w": true,
+        "is": true,
         "type": "boolean",
         "desc": "Verbose"
       },
       "HeapMemoryUsage": {
+        "r": true,
         "rw": false,
+        "w": false,
+        "is": false,
         "type": "javax.management.openmbean.CompositeData",
         "desc": "HeapMemoryUsage"
       },
       "NonHeapMemoryUsage": {
+        "r": true,
         "rw": false,
+        "w": false,
+        "is": false,
         "type": "javax.management.openmbean.CompositeData",
         "desc": "NonHeapMemoryUsage"
       },
       "ObjectName": {
+        "r": true,
         "rw": false,
+        "w": false,
+        "is": false,
         "type": "javax.management.ObjectName",
         "desc": "ObjectName"
       }
@@ -198,13 +221,13 @@ results in an answer
     "desc": "Information on the management interface of the MBean"
   },
   "status": 200,
-  "timestamp": 1702463340
+  "timestamp": 1770643662
 }
 ----
 
 NOTE:: Since Jolokia 2.1.0 we can use `includeRequest` parameter to tell Jolokia to exclude `request` field from the response.
 
-==== Restrict depth of the returned tree
+==== Restrict the depth of the returned tree
 
 The optional parameter `maxDepth` can be used
 to restrict the depth of the return tree. Two value are
@@ -219,11 +242,12 @@ meaning and are dummy values.
 
 When returning `list()` results, Jolokia translates each MBean's `javax.management.MBeanInfo` information into a JSON fragment. Standard fields of this fragment are:
 
-* `class`
-* `desc`
-* `attr`
-* `op`
-* `notif`
+* `class` - information about the class of an MBean
+* `desc` - the description
+* `attr` - attributes of an MBean
+* `op` - operations of an MBean
+* `notif` - notifications supported by an MBean
+* `ctor` - constructors of an MBean
 
 These fields are added by default, built-in implementations of `org.jolokia.server.core.service.api.DataUpdater`.
 
@@ -241,19 +265,89 @@ One additional built-in _data updater_ is `org.jolokia.service.jmx.handler.list.
   },
   "value": {
     "name=G1 Survivor Space,type=MemoryPool": {
-      "op": {
-        "resetPeakUsage": {
-          "args": [],
-          "ret": "void",
-          "desc": "resetPeakUsage"
-        }
-      },
+      ...
       "keys": {
         "name": "G1 Survivor Space",
         "type": "MemoryPool"
       },
 ...
 ----
+
+Since Jolokia 2.5.0, we can use `listInterfaces=true` parameter to get information about the interfaces implemented by an MBean:
+
+[,json]
+----
+{
+  "request": {
+    "path": "java.lang/type=Memory",
+    "type": "list"
+  },
+  "value": {
+    ...
+    "interfaces": [
+      "javax.management.NotificationEmitter",
+      "java.lang.management.PlatformManagedObject",
+      "javax.management.NotificationBroadcaster",
+      "java.lang.management.MemoryMXBean"
+    ],
+    ...
+----
+
+Another big addition to Jolokia 2.5.0 is new processing parameter. When sending `openTypes=true`, we get full information about
+the composite/tabular Open Types used by the MBean (attributes or method parameters and return values). For example:
+
+[,json]
+----
+{
+  "request": {
+    "path": "java.lang/type=Memory",
+    "type": "list"
+  },
+  "value": {
+    ...
+    "attr": {
+      "ObjectPendingFinalizationCount": {
+        "r": true,
+        "rw": false,
+        "w": false,
+        "is": false,
+        "type": "int",
+        "desc": "ObjectPendingFinalizationCount",
+        "openType": "java.lang.Integer"
+      },
+      "Verbose": {
+        "r": true,
+        "rw": true,
+        "w": true,
+        "is": true,
+        "type": "boolean",
+        "desc": "Verbose",
+        "openType": "java.lang.Boolean"
+      },
+      "HeapMemoryUsage": {
+        "r": true,
+        "rw": false,
+        "w": false,
+        "is": false,
+        "type": "javax.management.openmbean.CompositeData",
+        "desc": "HeapMemoryUsage",
+        "openType": {
+          "kind": "composite",
+          "type": "java.lang.management.MemoryUsage",
+          "class": "javax.management.openmbean.CompositeData",
+          "items": {
+            "init": "java.lang.Long",
+            "committed": "java.lang.Long",
+            "max": "java.lang.Long",
+            "used": "java.lang.Long"
+          },
+          "desc": "java.lang.management.MemoryUsage"
+        }
+      },
+      ...
+----
+
+In the above example, we can see the actual type structure of `HeapMemoryUsage` attribute.
 
 [#optimized-response-list]
 ==== Optimized List response

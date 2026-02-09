@@ -15,7 +15,7 @@
 ////
 
 [#notification]
-=== Using JMX notifications (notification) #new in Jolokia 2#
+=== Using JMX notifications (notification)
 
 A new feature of Jolokia 2 is access to https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/Notification.html[JMX notifications,role=externalLink,window=_blank].
 While reading/writing attributes, executing operations or listing/searching MBeans is implemented as single request-response operation, with notifications the flow of messages is more complex.
@@ -38,7 +38,7 @@ The GET URL for client registration has the following format:
 <base-url>/notification/register
 ----
 
-The equivalend POST JSON payload is:
+The equivalent POST JSON payload is:
 
 [,json]
 ----
@@ -110,7 +110,7 @@ The GET URL for client registration has the following format:
 |`d77475dc-c7a7-4f71-b988-52b7f0252ca3`
 |===
 
-The equivalend POST JSON payload is:
+The equivalent POST JSON payload is:
 
 [,json]
 ----
@@ -304,7 +304,7 @@ The GET URL for listing client listener registrations has the following format:
 |`d77475dc-c7a7-4f71-b988-52b7f0252ca3`
 |===
 
-The equivalend POST JSON payload is:
+The equivalent POST JSON payload is:
 
 [,json]
 ----
@@ -387,7 +387,7 @@ The GET URL for removing client listener registrations has the following format:
 |`1`
 |===
 
-The equivalend POST JSON payload is:
+The equivalent POST JSON payload is:
 
 [,json]
 ----
@@ -526,7 +526,7 @@ Instead of providing us with Mbean name to access when needed (_pull_ the notifi
 
 When calling `open` command for `sse` backed notifications, the request (`HttpServletRequest`) is put into https://jakarta.ee/specifications/servlet/5.0/jakarta-servlet-spec-5.0#asynchronous-processing[asynchronous mode,role=externalLink,window=_blank] and connection is not closed.
 
-The GET URL for openning a backend channel for notification acces is:
+The GET URL for opening a backend channel for notification access is:
 
 ----
 <base-url>/notification/open/<client-id>/<mode>
@@ -546,7 +546,7 @@ The GET URL for openning a backend channel for notification acces is:
 |`sse`
 |===
 
-The equivalend POST JSON payload is:
+The equivalent POST JSON payload is:
 
 [,json]
 ----
