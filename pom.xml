@@ -760,8 +760,8 @@
       <dependency>
         <groupId>org.jolokia</groupId>
         <artifactId>jolokia-agent-jvm</artifactId>
-        <version>${project.version}</version>
         <classifier>javaagent</classifier>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.jolokia</groupId>
@@ -828,6 +828,12 @@
       <dependency>
         <groupId>org.jolokia</groupId>
         <artifactId>jolokia-client-jmx-adapter</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jolokia</groupId>
+        <artifactId>jolokia-client-jmx-adapter</artifactId>
+        <classifier>standalone</classifier>
         <version>${project.version}</version>
       </dependency>
       <dependency>

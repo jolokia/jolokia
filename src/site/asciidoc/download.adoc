@@ -72,10 +72,7 @@ The Jolokia JavaScript client library comes in two variants:
 with its `request()` for sending JSON
 requests. `jolokia-simple.js` adds on this code
 and provides a simplified API for Jolokia request, but is
-slightly less powerful. Finally,
-`jolokia-cubism.js` contains the Jolokia
-https://square.github.com/cubism/[Cubism,role=externalLink,window=_blank] integration which adds Jolokia as a data
-source. The `-min` versions are
+slightly less powerful. The `-min` versions are
 compressed with all documentation stripped off and
 recommended for production use.
 
@@ -85,22 +82,16 @@ recommended for production use.
 |Download
 
 |Base script
-|https://github.com/jolokia/jolokia/releases/download/v{jolokia-version}/jolokia.js[jolokia.js,role=externalLink,window=_blank]
+|https://github.com/jolokia/jolokia/releases/download/v{jolokia-version}/jolokia.cjs[jolokia.cjs,role=externalLink,window=_blank]
 
 |Base script, compressed
-|https://github.com/jolokia/jolokia/releases/download/v{jolokia-version}/jolokia-min.js[jolokia-min.js,role=externalLink,window=_blank]
+|https://github.com/jolokia/jolokia/releases/download/v{jolokia-version}/jolokia.min.cjs[jolokia.min.cjs,role=externalLink,window=_blank]
 
 |Simplified API
-|https://github.com/jolokia/jolokia/releases/download/v{jolokia-version}/jolokia-simple.js[jolokia-simple.js,role=externalLink,window=_blank]
+|https://github.com/jolokia/jolokia/releases/download/v{jolokia-version}/jolokia-simple.cjs[jolokia-simple.cjs,role=externalLink,window=_blank]
 
 |Simplified API, compressed
-|https://github.com/jolokia/jolokia/releases/download/v{jolokia-version}/jolokia-simple-min.js[jolokia-simple-min.js,role=externalLink,window=_blank]
-
-|Jolokia Cubism Integration
-|https://github.com/jolokia/jolokia/releases/download/v{jolokia-version}/jolokia-cubism.js[jolokia-cubism.js,role=externalLink,window=_blank]
-
-|Jolokia Cubism Integration, compressed
-|https://github.com/jolokia/jolokia/releases/download/v{jolokia-version}/jolokia-cubism-min.js[jolokia-cubism-min.js,role=externalLink,window=_blank]
+|https://github.com/jolokia/jolokia/releases/download/v{jolokia-version}/jolokia-simple.min.cjs[jolokia-simple.min.cjs,role=externalLink,window=_blank]
 |===
 
 Jolokia JavaScript library is also available in https://www.npmjs.com/package/jolokia.js[NPM Registry,role=externalLink,window=_blank]. In your project you just need to use `npm` or `yarn`

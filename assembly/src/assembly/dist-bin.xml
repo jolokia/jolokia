@@ -77,6 +77,36 @@
       <useTransitiveDependencies>false</useTransitiveDependencies>
       <useProjectArtifact>false</useProjectArtifact>
     </dependencySet>
+    <dependencySet>
+      <includes>
+        <include>org.jolokia:jolokia-client-java-httpclient4</include>
+      </includes>
+      <outputFileNameMapping>jolokia-client-java-httpclient4.jar</outputFileNameMapping>
+      <outputDirectory>clients/java</outputDirectory>
+      <unpack>false</unpack>
+      <useTransitiveDependencies>false</useTransitiveDependencies>
+      <useProjectArtifact>false</useProjectArtifact>
+    </dependencySet>
+    <dependencySet>
+      <includes>
+        <include>org.jolokia:jolokia-client-java-httpclient5</include>
+      </includes>
+      <outputFileNameMapping>jolokia-client-java-httpclient5.jar</outputFileNameMapping>
+      <outputDirectory>clients/java</outputDirectory>
+      <unpack>false</unpack>
+      <useTransitiveDependencies>false</useTransitiveDependencies>
+      <useProjectArtifact>false</useProjectArtifact>
+    </dependencySet>
+    <dependencySet>
+      <includes>
+        <include>org.jolokia:jolokia-client-jmx-adapter:jar:standalone</include>
+      </includes>
+      <outputFileNameMapping>jolokia-client-jmx-adapter-standalone.jar</outputFileNameMapping>
+      <outputDirectory>clients/jmx</outputDirectory>
+      <unpack>false</unpack>
+      <useTransitiveDependencies>false</useTransitiveDependencies>
+      <useProjectArtifact>false</useProjectArtifact>
+    </dependencySet>
     <!-- support -->
     <dependencySet>
       <includes>
@@ -90,9 +120,19 @@
     </dependencySet>
     <dependencySet>
       <includes>
-        <include>org.jolokia:jolokia-support-spring</include>
+        <include>org.jolokia:jolokia-support-springboot</include>
       </includes>
-      <outputFileNameMapping>jolokia-support-spring.jar</outputFileNameMapping>
+      <outputFileNameMapping>jolokia-support-springboot.jar</outputFileNameMapping>
+      <outputDirectory>support</outputDirectory>
+      <unpack>false</unpack>
+      <useTransitiveDependencies>false</useTransitiveDependencies>
+      <useProjectArtifact>false</useProjectArtifact>
+    </dependencySet>
+    <dependencySet>
+      <includes>
+        <include>org.jolokia:jolokia-support-springboot3</include>
+      </includes>
+      <outputFileNameMapping>jolokia-support-springboot3.jar</outputFileNameMapping>
       <outputDirectory>support</outputDirectory>
       <unpack>false</unpack>
       <useTransitiveDependencies>false</useTransitiveDependencies>
