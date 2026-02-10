@@ -118,15 +118,24 @@
 <div class="paragraph">
 <p>The main focus of Jolokia is to allow easy access to JMX MBeans
 from everywhere. MBeans can be provided by the JVM itself, by an
-application server or an application itself, where each MBean is
-registered at a specific MBeanServer. Multiple MBeanServers can
+application server or an application. See <a href="jmx_guide.html#_mbeans_and_metadata" class="xref page">MBeans and metadata</a>
+for more details.</p>
+</div>
+<div class="paragraph">
+<p>Each MBean is
+registered at a specific <code>MBeanServer</code>. Multiple MBeanServers can
 co-exist in a single JVM. The so called
 <em>PlatformMBeanServer</em> is always present and is
 created by the JVM during startup. Especially application servers
-often create additional MBeanServers for various purposes. When
-accessing an MBean remotely via JSR-160, the MBeanServer holding
-the requested MBean must be known before. Jolokia instead
-<em>merges</em> all MBeanServers it can find to give a
+often create additional MBeanServers for various purposes. The details are presented in
+<a href="jmx_guide.html#_how_to_create_more_mbeanservers" class="xref page">How to create more MBeanServers?</a></p>
+</div>
+<div class="paragraph">
+<p>When
+accessing an MBean remotely via JSR-160 <em>Connector Server</em>, the MBeanServer holding
+the requested MBean is the one <em>attached</em> to the connector. Jolokia being a <em>JMX protocol adaptor</em>
+(see <a href="architecture.html" class="xref page">Architecture</a>)
+<em>merges</em> all MBeanServers it can find in the JVM to give a
 single view on all MBeans. The merging algorithm is described in
 <a href="#mbeanserver-merging">MBeanServer merging</a>.</p>
 </div>
@@ -144,6 +153,44 @@ easier, more
 provides an easy, declarative way for firing up a Jolokia JVM
 agent merely by including some Jolokia specific Spring
 configuration. This is described in <a href="spring.html" class="xref page">Spring Support</a>.</p>
+</div>
+<div class="paragraph">
+<p>Here&#8217;s the overview of how Jolokia fits into the picture of JMX architecture in a single JVM and what is the place for the <a href="#jolokia-mbeanserver">Jolokia MBeanServer</a> and <a href="#json-mbean">@JsonMBean</a>:</p>
+</div>
+<div class="paragraph">
+<p><span class="image"><img src="_images/jolokia-mbeanserver.png" alt="jolokia mbeanserver"></span></p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Platform MBeanServer</dt>
+<dd>
+<p>This is the <em>main</em> MBeanServer where MBeans like <code>java.lang:type=Runtime</code> are registered.</p>
+</dd>
+<dt class="hdlist1">MBeanServer</dt>
+<dd>
+<p>We can have more MBeanServers created using <code>javax.management.MBeanServerFactory.newMBeanServer()</code></p>
+</dd>
+<dt class="hdlist1">Connector Server</dt>
+<dd>
+<p>JSR-160 connector <em>attached</em> to an MBeanServer to allow remote access to the MBeans registered there. Each Connector Server is attached to exactly one MBeanServers and more connectors can be attached to a single MBeanServer (including Platform MBeanServer).</p>
+</dd>
+<dt class="hdlist1">Jolokia MBeanServer</dt>
+<dd>
+<p>Also created using <code>MBeanServerFactory.newMBeanServer()</code> but <em>never</em> attached to a JSR-160 Connector. This means that MBeans registered in this MBeanServer will never be accessible remotely using JSR-160 Connector.</p>
+</dd>
+<dt class="hdlist1">Jolokia JMX Protocol Adaptor</dt>
+<dd>
+<p>An agent component that allows remote access, but operates on a <em>unified view</em> of all discovered MBeanServers. So it&#8217;s not a JMX Connector Server. See <a href="architecture.html" class="xref page">Architecture</a>.</p>
+</dd>
+<dt class="hdlist1">Unified View</dt>
+<dd>
+<p>When accessing MBeans using Jolokia Protocol Adapter (the Agent), we can access all MBeans registered in all discovered MBeanServers. There&#8217;s an order defined in which the MBeanServers are checked.</p>
+</dd>
+<dt class="hdlist1">@JsonMBean</dt>
+<dd>
+<p>Special kind of MBean - when an MBean (standard, dynamic, open, model) is registered in the Jolokia MBeanServer (and not elsewhere), Jolokia registers <em>additional</em> Dynamic MBean in the Platform MBeanServer. THe original and the dynamic one are <em>related</em>. See below for more details.</p>
+</dd>
+</dl>
 </div>
 </div>
 </div>
@@ -163,7 +210,7 @@ configuration. This is described in <a href="spring.html" class="xref page">Spri
 calling <code>javax.management.MBeanServerFactory.findMBeanServer()</code>.</p>
 </div>
 <div class="paragraph">
-<p>This server is treated specially by a Jolokia Agent:</p>
+<p>This MBeanServer is treated specially by a Jolokia Agent:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -182,18 +229,18 @@ present. See below for more details.</p>
 called <em>JSON MBeans</em>. These are MBeans
 annotated with <code>@JsonMBean</code> on the class
 level. JSON MBean are explained in
-<a href="#json-mbean">@JsonMBean</a></p>
+<a href="#json-mbean">@JsonMBean</a>.</p>
 </li>
 </ul>
 </div>
 <div class="sect2">
 <h3 id="mbeanserver-merging"><a class="anchor" href="#mbeanserver-merging"></a>MBeanServer merging</h3>
 <div class="paragraph">
-<p>Jolokia tries hard to detect as many MBeanServer as available
+<p>Jolokia tries hard to detect as many MBeanServers as available
 in a JVM. Beside the always present
-<code>PlatformMBeanServer</code> many
-application servers create own MBeanServer which not always
-can be found with standard mechanisms. Therefore Jolokia comes
+<em>Platform MBeanServer</em>, many
+application servers create own MBeanServer(s) which not always
+can be found using standard mechanisms. Therefore Jolokia comes
 with so called <code>ServerDetector</code>s for many
 known brands of applications server. These server detectors
 know how to find MBeanServer by application server specific
@@ -203,13 +250,13 @@ means.</p>
 <p>The set of available of MBeanServers is detected during
 startup and kept, except for the Jolokia MBeanServer which can
 kick in and out at any time. For Jolokia operations, all these
-MBeanServers are tried according the order given below.</p>
+MBeanServers are tried according the order given below. Jolokia provides
+a <em>unified view</em> of all MBeanServers.</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p><strong>Jolokia <code>MBeanServer</code></strong> is queried first,
-if available.</p>
+<p><strong>Jolokia <code>MBeanServer</code></strong> is queried first, if available.</p>
 </li>
 <li>
 <p>Next every <code>MBeanServer</code> as detected by the <em>server
@@ -252,11 +299,11 @@ an MBean for JSR-160 connectors (see below).</p>
 <div class="sectionbody">
 <div class="paragraph">
 <p>JMX 1.4 introduced
-<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/MXBean.html" class="externalLink" target="<em>blank">MXBeans</a>
-which allow for nearly arbitrary data to be translated into so
-called _OpenData</em> which are accessible via JMX. For example,
+<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.management/javax/management/MXBean.html" class="externalLink" target="_blank" rel="noopener">MXBeans</a>
+which allow for nearly arbitrary data to be translated into so called <em>OpenData</em>
+which are accessible via JMX. For example,
 arbitrary Java Beans are translated into a
-<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/openmbean/CompositeData.html" class="externalLink" target="_blank" rel="noopener"><code>CompositeData</code></a>
+<code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.management/javax/management/openmbean/CompositeData.html" class="externalLink" target="_blank" rel="noopener">CompositeData</a></code>
 structure with property names as keys and their values in
 OpenData values.</p>
 </div>
@@ -274,9 +321,46 @@ newer.</p>
 </div>
 <div id="fig-jconsole-json-mbean" class="imageblock">
 <div class="content">
-<img src="_images/jconsole-json-mbean.png" alt="jconsole json mbean">
+<img src="_images/jconsole-json-mbean2.png" alt="jconsole json mbean2">
 </div>
-<div class="title">Figure 1. A JsonMBean in jconsole</div>
+<div class="title">Figure 1. A @JsonMBean in jconsole</div>
+</div>
+<div class="paragraph">
+<p>As presented in the <code>jconsole</code> attribute view, the type of the attribute is simply <code>java.lang.String</code> even if the original attribute is <code>ComplexTestData</code> bean defined as:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@JsonMBean
+public class JsonChecking implements JsonCheckingMBean {
+
+    ComplexTestData data;
+
+    public JsonChecking() {
+        data = new ComplexTestData();
+    }
+
+    public ComplexTestData getData() {
+        return data;
+    }
+}
+
+public class ComplexTestData {
+    private int number;
+    private String string;
+    private Map&lt;String,Boolean&gt; map;
+    private Set&lt;Integer&gt; set;
+    private String[] stringArray;
+    private List&lt;Boolean&gt; list;
+    private Map&lt;String,List&lt;Map&lt;String,String&gt;&gt;&gt; complex;
+
+    ...
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The actual instance of <code>JsonChecking</code> is registered in the Jolokia MBeanServer and what is registered in the
+Platform MBeanServer (accessible to <code>jconsole</code> using JSR-160 RMI Connector) is a Dynamic MBean (implementing <code>javax.management.DynamicMBean</code> interface). This dynamic MBean translates the string input (for writing attributes and passing operation arguments) and output (for reading attributes and operation return values) into actual data types
+required by the original MBean annotated with <code>@JsonMBean</code>.</p>
 </div>
 <div class="paragraph">
 <p>JsonMBean and MXBean are quite similar as both do a translation
@@ -330,7 +414,7 @@ Maven module <code>jolokia-support-jmx</code>.</p>
   </div>
 <footer class="footer">
   This page was built using the Antora default UI. The source code for this UI is licensed under the terms of the MPL-2.0 license. | Copyright © 2010 -
-  2023 Roland Huß
+  2025 Roland Huß
 </footer>
 <script id="site-script" src="../_/js/site.js" data-ui-root-path="../_"></script>
 <script async src="../_/js/vendor/highlight.js"></script>

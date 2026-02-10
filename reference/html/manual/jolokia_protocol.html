@@ -118,7 +118,9 @@
 <div class="paragraph">
 <p>Jolokia uses a JSON-over-HTTP protocol which is described in
 this chapter. The communication is based on a request-response
-paradigm, where each request results in a single response.</p>
+paradigm, where each HTTP request (which may contain multiple Jolokia requests)
+results in a single HTTP response (containing one Jolokia response for each incoming
+Jolokia request).</p>
 </div>
 <div class="sidebarblock">
 <div class="content">
@@ -131,7 +133,8 @@ often bloats server logs.</p>
 </div>
 <div class="paragraph">
 <p>Another important aspect is that some ObjectNames may be complex (for example in Camel or ActiveMQ/Artemis) and POST
-request is much more suitable when working with such MBeans.</p>
+request is much more suitable when working with such MBeans. This is even more important
+for complex values used when setting attributes and invoking operations.</p>
 </div>
 </div>
 </div>
@@ -139,10 +142,11 @@ request is much more suitable when working with such MBeans.</p>
 <p>Jolokia requests can be sent in two ways: Either as a HTTP GET
 request, in which case the request parameters are encoded
 completely in the URL. Or as a POST request where the request is
-put into a JSON payload in the HTTP request&#8217;s body. GET based
-requests are mostly suitable for simple use cases and for
+put into a JSON payload in the HTTP request&#8217;s body.<br>
+GET based requests are mostly suitable for simple use cases and for
 testing the agent via a browser. The focus here is on
-simplicity. POST based requests uses a JSON representation of
+simplicity.<br>
+POST based requests use a JSON representation of
 the request within the HTTP body. They are more appropriate for
 complex requests and provide some additional features (e.g. bulk
 requests are only possible with POST).</p>
@@ -169,7 +173,7 @@ used in different contexts which should be
 distinguished from one another. <em>Jolokia operations</em> denote
 the various kind of Jolokia requests (<code>read</code>, <code>exec</code>, &#8230;&#8203;), whereas <em>JMX
 operations</em> are methods which can be invoked on an JMX
-MBean. Whenever the context requires it, this documents uses
+MBean (as opposed to MBean attributes). Whenever the context requires it, this documents uses
 <em>Jolokia</em> or <em>JMX</em> as prefix.
 </td>
 </tr>
@@ -193,10 +197,10 @@ like<sup class="footnote" id="_footnote_rest-comment">[<a id="_footnoteref_1" cl
 <div class="sect2">
 <h3 id="servlet-api-concepts"><a class="anchor" href="#servlet-api-concepts"></a>Some Servlet API concepts</h3>
 <div class="paragraph">
-<p>Before proceeding, let&#8217;s review some important concepts from <a href="https://jakarta.ee/specifications/servlet/5.0/jakarta-servlet-spec-5.0" class="externalLink" target="_blank" rel="noopener">Jakarta Servlet Specification 5</a>.</p>
+<p>Before proceeding, let&#8217;s review some important concepts from <a href="https://jakarta.ee/specifications/servlet/5.0/jakarta-servlet-spec-5.0" class="externalLink" target="_blank" rel="noopener">Jakarta Servlet Specification 5</a> (and later).</p>
 </div>
 <div class="paragraph">
-<p><a href="https://jakarta.ee/specifications/servlet/5.0/jakarta-servlet-spec-5.0#request-path-elements" class="externalLink" target="_blank" rel="noopener">Chapter 3.5. Request Path Elements</a> splits full URI used to access Java Servlet container into three parts (query string is not included here):</p>
+<p><a href="https://jakarta.ee/specifications/servlet/5.0/jakarta-servlet-spec-5.0#request-path-elements" class="externalLink" target="_blank" rel="noopener">Chapter 3.5. Request Path Elements</a> splits full URI used to access the Java Servlet container into three parts (query string is not included here):</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -204,7 +208,7 @@ like<sup class="footnote" id="_footnote_rest-comment">[<a id="_footnoteref_1" cl
 </div>
 </div>
 <div class="paragraph">
-<p>These 4 elements are accessed using these API calls:</p>
+<p>These 4 components are accessed using these API calls:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -223,19 +227,19 @@ like<sup class="footnote" id="_footnote_rest-comment">[<a id="_footnoteref_1" cl
 <dl>
 <dt class="hdlist1">Request URI</dt>
 <dd>
-<p>this is simply full URI without query string</p>
+<p>this is simply a full URI without query string</p>
 </dd>
 <dt class="hdlist1">Context path</dt>
 <dd>
-<p>this fragment selects the web application (one of potentially many running in single Servlet container). On Tomcat it is derived from the file name of WAR archive in <code>webapps/</code> directory. It may be <code>/</code> (for special <code>ROOT.war</code> on Tomcat).</p>
+<p>this fragment selects the web application (one of potentially many running in a single Servlet container). In Tomcat it is derived from the file name of a WAR archive in the <code>webapps/</code> directory. It may be <code>/</code> (for special <code>ROOT.war</code> on Tomcat).</p>
 </dd>
 <dt class="hdlist1">Servlet path</dt>
 <dd>
-<p>this is more complicated, as it indicates part of the URI that is used to select single servlet within single web application. When servlet mapping (<code>&lt;servlet-mapping&gt;/&lt;url-pattern&gt;</code> element in <code>WEB-INF/web.xml</code>) is <code>/path</code> or <code>/path/*</code>, servlet path is <code>/path</code>. Jolokia Agent WAR uses <code>/*</code>  mapping, so servlet path is empty.</p>
+<p>this is more complicated, as it indicates part of the URI that is used to select a single servlet within an individual web application. When the servlet mapping (<code>&lt;servlet-mapping&gt;/&lt;url-pattern&gt;</code> element in <code>WEB-INF/web.xml</code>) is <code>/path</code> or <code>/path/*</code>, servlet path is <code>/path</code>. Jolokia Agent WAR uses <code>/*</code>  mapping, so servlet path is empty.</p>
 </dd>
 <dt class="hdlist1">Path info</dt>
 <dd>
-<p>this is the URI part after servlet path, so for Jolokia, it is simply everything after <code>/jolokia</code> (when WAR agent is deployed to Tomcat as <code>webapps/jolokia.war</code>).</p>
+<p>this is the URI part after the servlet path, so for Jolokia, it is simply everything after <code>/jolokia</code> (when WAR agent is deployed to Tomcat as <code>webapps/jolokia.war</code>).</p>
 </dd>
 </dl>
 </div>
@@ -252,7 +256,7 @@ parameters within the access URL. Jolokia uses
 the <em>path info</em> part of an URL to extract the
 parameters. Within the <em>path info</em>, each part is separated by
 a slash (<code>/</code>). In general, the request URL
-looks like</p>
+looks like this:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -300,7 +304,7 @@ reachable under the base URL
 <p>GET requests are easy and straightforward - you can easily type them in browser address bar, bookmark or use with <code>curl</code>. However, there are limitations.</p>
 </div>
 <div class="paragraph">
-<p><a href="https://datatracker.ietf.org/doc/html/rfc2396#section-3.3" class="externalLink" target="_blank" rel="noopener">RFC 2396</a> and newer <a href="https://datatracker.ietf.org/doc/html/rfc3986#section-3.3" class="externalLink" target="_blank" rel="noopener">RFC 3986</a> specify what is and what is not allowed in the URL (which is a subset of URI). <a href="https://datatracker.ietf.org/doc/html/rfc7230#section-2.7.3" class="externalLink" target="_blank" rel="noopener">RFC 7230</a> specifies usage of URIs within HTTP protocol.</p>
+<p><a href="https://datatracker.ietf.org/doc/html/rfc2396#section-3.3" class="externalLink" target="_blank" rel="noopener">RFC 2396</a> and newer <a href="https://datatracker.ietf.org/doc/html/rfc3986#section-3.3" class="externalLink" target="_blank" rel="noopener">RFC 3986</a> specify what is and what is not allowed in the URL (which is a subset of URI). <a href="https://datatracker.ietf.org/doc/html/rfc7230#section-2.7.3" class="externalLink" target="_blank" rel="noopener">RFC 7230</a> specifies usage of URIs within the HTTP protocol.</p>
 </div>
 <div class="paragraph">
 <p>As mentioned in <a href="#servlet-api-concepts">Some Servlet API concepts</a>, Jolokia uses <em>path info</em> to identify the type of operation to perform and its specific arguments (mbean names, attribute names for <code>read</code>/<code>write</code> operations or method name and arguments for <code>exec</code> operations).</p>
@@ -319,13 +323,13 @@ reachable under the base URL
 </ul>
 </div>
 <div class="paragraph">
-<p>Also (and RFC 2396 says this explictly, while newer RFC 3986 only highlights the convention), some characters in the segments may have special meaning (usually to implement the <em>path parameters</em>). These are <code>;</code>, <code>,</code> and <code>=</code>. Finally, by the definition, <code>?</code> separates the path part from the query part, so <code>?</code> can&#8217;t be part of the path (and any segment of the path).</p>
+<p>Also (and RFC 2396 says this explicitly, while newer RFC 3986 only highlights the convention), some characters in the segments may have special meaning (usually to implement the <em>path parameters</em>). These are <code>;</code>, <code>,</code> and <code>=</code>. Finally, by the definition, <code>?</code> separates the path part from the query part, so <code>?</code> can&#8217;t be part of the path (and any segment of the path).</p>
 </div>
 <div class="paragraph">
-<p>The problem is that mbean names or attribute values may use various characters which are illegal from the point of view of URI or HTTP specifications.</p>
+<p>The problem is that mbean names or attribute values may use various characters which are illegal from the point of view of the URI or HTTP specifications.</p>
 </div>
 <div class="paragraph">
-<p>That&#8217;s where Jolokia URI encoding steps in. In theory <a href="https://en.wikipedia.org/wiki/Percent-encoding" class="externalLink" target="_blank" rel="noopener">URI encoding</a> should be sufficient, but it simply is not.</p>
+<p>That&#8217;s where Jolokia URI encoding steps in. In theory <a href="https://en.wikipedia.org/wiki/Percent-encoding" class="externalLink" target="_blank" rel="noopener">URI encoding</a> should be sufficient, but it is not.</p>
 </div>
 <div class="sidebarblock">
 <div class="content">
@@ -333,8 +337,8 @@ reachable under the base URL
 <p>You might wonder why simple URI encoding isn&#8217;t enough for
 escaping slashes. The reason is simple - security.
 For example, Tomcat returns HTTP error 400 with <code>Invalid URI: [The encoded slash character is not allowed]</code> message if you encode <code>/</code> as <code>%2F</code>. Jetty returns <code>Bad Message 400, reason: Ambiguous URI empty segment</code> when two slashes are used (<code>//</code>).
-Other appservers might exhibit a similar
-behaviour, so Jolokia uses an own escaping mechanism.</p>
+Other application servers might exhibit a similar
+behavior, so Jolokia uses its own escaping mechanism.</p>
 </div>
 </div>
 </div>
@@ -348,8 +352,7 @@ for escaping. Any other character preceded by an exclamation
 mark is taken literally. Table
 <a href="#escape-rules">Table 1, &#8220;Escaping rules&#8221;</a> illustrates the escape rules as
 used in GET requests. Also, if quotes are part of an GET
-request the need to be escaped  with
-<code>!"</code>.</p>
+request they need to be escaped with <code>!"</code>.</p>
 </div>
 <table id="escape-rules" class="tableblock frame-all grid-all stretch">
 <caption class="title">Table 1. Escaping rules</caption>
@@ -390,12 +393,12 @@ access URL like this has to be constructed:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>.../read/jboss.jmx:alias=jmx!/rmi!/RMIAdaptor/State</pre>
+<pre>&lt;base-url&gt;/read/jboss.jmx:alias=jmx!/rmi!/RMIAdaptor/State</pre>
 </div>
 </div>
 <div class="paragraph">
 <p>Client libraries like
-<a href="https://search.cpan.org/~roland/jmx4perl" class="externalLink" target="_blank" rel="noopener">JMX::Jmx4Perl</a>
+<a href="https://search.cpan.org/~roland/jmx4perl" class="externalLink" target="_blank" rel="noopener">JMX::Jmx4Perl</a> or Jolokia Client
 do this sort of escaping transparently.</p>
 </div>
 <div class="paragraph">
@@ -423,12 +426,12 @@ backslashes can not be sent as part of an URL at all.</p>
 <div class="sect2">
 <h3 id="post-requests"><a class="anchor" href="#post-requests"></a>POST requests</h3>
 <div class="paragraph">
-<p>POST requests are the most powerful way to communicate
+<p>POST requests are the most powerful and flexible way to communicate
 with the Jolokia agent. There are fewer escaping issues and it
 allows for features which are not available with GET
 requests. POST requests use a single Jolokia URL and put their payload
 within the HTTP request&#8217;s body. This payload is represented
-in <a href="https://www.json.org" class="externalLink" target="_blank" rel="noopener">JSON</a>, a
+using <a href="https://www.json.org" class="externalLink" target="_blank" rel="noopener">JSON</a>, a
 data serialization format originating from the JavaScript
 world.</p>
 </div>
@@ -436,35 +439,36 @@ world.</p>
 <p>The JSON format for a single request is a JSON object, which
 is essentially a map with keys (or
 <em>attributes</em>) and values. All requests
-have a common mandatory attribute,
-<code>type</code>, which specifies the kind of JMX
-operation to perform. The other attributes are either
+have a common mandatory attribute
+<code>type</code>, which specifies the kind of Jolokia
+operation to perform.<br>
+The other attributes are either
 operation specific as described in
 <a href="#jolokia-operations">Jolokia operations</a> or are <em>processing
-parameters</em> which influence the overall behaviour
-and can be mixed in to any request. See
-<a href="#processing-parameters">Processing parameters</a> for details. Operation specific attributes
-can be either mandatory or optional and depend on the operation type.
-In the following, if not mentioned otherwise, attributes are mandatory.
+parameters</em> which influence the overall behavior
+and can be used with any request. See
+<a href="#processing-parameters">Processing parameters</a> for details.<br>
+Operation specific attributes
+can be either mandatory or optional and depend on the operation type.<br>
+In the following examples, if not mentioned otherwise, attributes are mandatory.
 Processing parameters are always optional, though.</p>
 </div>
 <div class="paragraph">
 <p>A sample read request in JSON format looks like the
 following example. It has a <code>type</code>
-<code>read</code>
-(case doesn&#8217;t matter) and the three attributes
+<code>read</code> and the three attributes:
 <code>mbean</code>, <code>attribute</code>
-and <code>path</code> which are specific to a read
+and <code>path</code> which are specific to the read
 request.</p>
 </div>
 <div id="request-example" class="listingblock">
 <div class="title">JSON Request</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "type" : "read",
-  "mbean" : "java.lang:type=Memory",
-  "attribute" : "HeapMemoryUsage",
-  "path" : "used"
+  "type": "read",
+  "mbean": "java.lang:type=Memory",
+  "attribute": "HeapMemoryUsage",
+  "path": "used"
 }</code></pre>
 </div>
 </div>
@@ -479,20 +483,20 @@ Jolokia requests into a JSON array:</p>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">[
   {
-    "type" : "read",
-    "attribute" : "HeapMemoryUsage",
-    "mbean" : "java.lang:type=Memory",
-    "path" : "used"
+    "type": "read",
+    "attribute": "HeapMemoryUsage",
+    "mbean": "java.lang:type=Memory",
+    "path": "used"
   },
   {
-    "type" : "search",
-    "mbean" : "*:type=Memory,*"
+    "type": "search",
+    "mbean": "*:type=Memory,*"
   }
 ]</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>This request will result in a JSON array containing multiple
+<p>This request will result in a JSON array result containing multiple
 JSON responses within the HTTP response. They are returned
 in same order as the requests in the initial bulk request.</p>
 </div>
@@ -500,25 +504,26 @@ in same order as the requests in the initial bulk request.</p>
 <div class="sect2">
 <h3 id="responses"><a class="anchor" href="#responses"></a>Responses</h3>
 <div class="paragraph">
-<p>All responses are delivered as HTTP responses, but there&#8217;s clear distinction about HTTP and Jolokia error responses.
+<p>All responses are delivered as HTTP responses, but there&#8217;s a clear distinction between HTTP and Jolokia error responses.
 Generally we have 3 kinds of responses:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>suucessful response, which always is delivered with <code>HTTP 200</code> (or in special case with <code>HTTP 30x</code>) code and contains JSON object (whether the request was single request or bulk request).</p>
+<p>successful response, which is always delivered with <code>HTTP 200</code> (or in special case with <code>HTTP 30x</code>) code and contains JSON object (whether the request was a single request or a bulk request).</p>
 </li>
 <li>
-<p>error response delivered with <code>HTTP 200</code> code - this kind of error is related to problems at JMX level, when everything that&#8217;s needed to perform JMX operation is successfully extracted from HTTP request. For these responses, JMX error may be delivered in JSON response or part of the JSON response where bulk request was sent</p>
+<p>error response delivered with <code>HTTP 200</code> code - this kind of error is related to problems at JMX level, when everything that&#8217;s needed to perform a JMX operation is successfully extracted from the HTTP request. For these responses, JMX error may be delivered in a JSON response or a part of the JSON response when the bulk request was sent. This is called a <em>Jolokia error response</em> (as opposed to <em>HTTP error response</em>).</p>
 </li>
 <li>
-<p>error response delivered with <code>HTTP 4xx/5xx</code> codes - this happens when client sends invalid JSON (and Jolokia can&#8217;t even determine what should be done) or mismatched request parameters (for example <code>maxDepth=fourty-two</code>).</p>
+<p>error response delivered with <code>HTTP 4xx/5xx</code> codes - this happens when client sends invalid JSON (and Jolokia can&#8217;t even determine what should be done) or mismatched request parameters (for example <code>maxDepth=fourty-two</code>). When illegal parameters are used or the JSON is not well-formed, an HTTP 400
+error is returned (<code>Bad Request</code>) indicating a user error. When there&#8217;s some issue at server side, HTTP 500 is returned.</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>Jolokia responses are always encoded in UTF-8 JSON, regardless whether the
-request was a GET or POST request.  In general, two kinds of
+<p>Jolokia responses are always encoded in UTF-8 JSON format, whether the
+request was a GET or POST request. In general, two kinds of
 responses can be classified: In the normal case, an HTTP
 Response with response code <code>200</code> is returned, containing the
 result of the operation as a JSON payload. In case of an
@@ -528,15 +533,14 @@ occurred (e.g. <code>404</code> means "not found"). (See
 <a href="https://en.wikipedia.org/wiki/List_of_HTTP_status_codes" class="externalLink" target="_blank" rel="noopener">this page</a>
 for more information about HTTP error codes..). If the processing option
 <code>ifModifiedSince</code> is given and the requested
-value as been not changed since then, a response code of 304 is returned.
+value has not changed since then, a response code of 304 is returned.
 This option is currently only supported by the <code>list</code> request, for
 other request types the value is always fetched.</p>
 </div>
 <div class="paragraph">
 <p>In the non-error case a JSON response looks mostly the same
 for each request type except for the
-<code>value</code> attribute which is request type
-specific.</p>
+<code>value</code> attribute which depends on the operation being performed.</p>
 </div>
 <div class="paragraph">
 <p>The format of a single Jolokia response is:</p>
@@ -545,7 +549,7 @@ specific.</p>
 <div class="title">JSON Response</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "value": .... ,
+  "value": ....,
   "status" : 200,
   "timestamp" : 1702391068,
   "request": {
@@ -564,59 +568,66 @@ specific.</p>
 </div>
 <div class="paragraph">
 <p>For successful requests, the <code>status</code> is
-always <code>200</code> (the HTTP success code). The
-<code>timestamp</code> contains the epoch
+always <code>200</code>.<br>
+The <code>timestamp</code> contains the epoch
 time<sup class="footnote" id="_footnote_epoch-time">[<a id="_footnoteref_3" class="footnote" href="#_footnotedef_3" title="View footnote.">3</a>]</sup>
 when the
-request has been handled. The request leading to this
+request has been handled.<br>
+The request for this
 response can be found under the attribute
-<code>request</code>. Finally and optionally, if
-history tracking is switched on (see
+<code>request</code> (though this can be omitted if <code>includeRequest=false</code> parameter is sent).<br>
+Finally and optionally, if
+history tracking is enabled (see
 <a href="#history">Tracking historical values</a>), an entry with key
 <code>history</code> contains a list of historical
 values along with their timestamps. History tracking is only
 available for certain type of requests
 (<code>read</code>, <code>write</code> and
-<code>exec</code>). The <code>value</code>
+<code>exec</code>).<br>
+The <code>value</code>
 is specific for the type of request, it can be a single
-scalar value or a monster JSON structure.</p>
+scalar value or a complex JSON structure.</p>
 </div>
 <div class="paragraph">
 <p>If an error occurs, the <code>status</code> will be
 a number different from <code>200</code>. An error
-response looks like</p>
+response looks like this:</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  ".error": true,
   "error_type": "java.lang.UnsupportedOperationException",
-  "error": "java.lang.UnsupportedOperationException : No type with name 'java.lang:type=Memory' exists",
+  "error_type_jmx": "javax.management.InstanceNotFoundException",
+  "error": "No type with name 'java.lang:type=Memory' exists",
   "status": 400
 }</code></pre>
 </div>
 </div>
 <div class="paragraph">
 <p>For status codes it is important to distinguish status
-codes as they appear in Jolokia JSON response objects
+codes as they appear in the Jolokia JSON response objects
 and the HTTP status code of the (outer) HTTP
 response. There can be many Jolokia status codes, one for
-each Jolokia request contained in the single HTTP request. The
-HTTP status code merely reflect the status of agent itself
+each Jolokia request contained in a single HTTP request. The
+HTTP status code merely reflect the status of the agent itself
 (i.e. whether it could perform the operation at all), whereas the
 Jolokia response status reflects the result of the
 operation (e.g. whether the performed operation throws an
 exception). So it is not uncommon to have an HTTP status
-code of 200, but the contained JSON response(s) indicate
+code of 200, but the contained JSON response(s) indicating
 some errors.</p>
 </div>
 <div class="paragraph">
 <p>I.e. the <code>status</code> has a code in the range
 <code>400 .. 499</code> or <code>500 .. 599</code>
-<a href="https://en.wikipedia.org/wiki/List_of_HTTP_status_codes" class="externalLink" target="_blank" rel="noopener">as it is specified for HTTP return codes</a>.
+<a href="https://en.wikipedia.org/wiki/List_of_HTTP_status_codes" class="externalLink" target="_blank" rel="noopener">as it is specified for HTTP return codes</a>.<br>
 The <code>error</code> JSON field contains an error
 description. This is typically the message of an exception
-occurred on the agent side<sup class="footnote" id="_footnote_mbeanexception-wrapping">[<a id="_footnoteref_4" class="footnote" href="#_footnotedef_4" title="View footnote.">4</a>]</sup>. Finally, <code>error_type</code> contains the Java class name
-of the exception occurred.
+occurred on the agent side<sup class="footnote" id="_footnote_mbeanexception-wrapping">[<a id="_footnoteref_4" class="footnote" href="#_footnotedef_4" title="View footnote.">4</a>]</sup>.<br>
+<code>error_type</code> contains the Java class name
+of the exception occurred and if the exception (or a wrapped exception) is a JMX exception,
+it is explicitly put into <code>error_type_jmx</code> field.<br>
 The <code>stacktrace</code> contains a Java stacktrace
 occurred on the server side (if any stacktrace is available and <code>includeStackTrace</code> option is set to <code>true</code>).</p>
 </div>
@@ -630,7 +641,7 @@ occurred on the server side (if any stacktrace is available and <code>includeSta
 <h3 id="paths"><a class="anchor" href="#paths"></a>Paths</h3>
 <div class="paragraph">
 <p>An <em>inner path</em> points to a certain
-substructure (plain value, array, hash) within a a complex
+substructure (plain value, array, map) within a complex
 JSON value. Think of it as something like "XPath lite". This
 is best explained by an example:</p>
 </div>
@@ -645,9 +656,9 @@ which returns a complex JSON structure like</p>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
   "request": {
+    "type": "read"
     "mbean": "java.lang:type=Memory",
     "attribute": "HeapMemoryUsage",
-    "type": "read"
   },
   "value": {
     "init": 524288000,
@@ -661,7 +672,7 @@ which returns a complex JSON structure like</p>
 </div>
 </div>
 <div class="paragraph">
-<p>In order to get to the value for used heap memory you should
+<p>In order to get to the value for <em>used</em> heap memory you should
 specify an inner path <code>used</code>, so that the
 request
 <code>http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage/used</code>
@@ -688,7 +699,7 @@ index (0 based) as part of the inner path if you want to
 traverse into this array.</p>
 </div>
 <div class="paragraph">
-<p>For both, GET and POST requests, paths must be escaped as
+<p>For both, GET and POST requests, path segments must be escaped as
 described in <a href="#escape-rules">Table 1, &#8220;Escaping rules&#8221;</a> when they
 contain slashes (<code>/</code>) or exclamation marks
 (<code>!</code>).</p>
@@ -1554,7 +1565,7 @@ input for other requests.</p>
 <div class="sect2">
 <h3 id="list"><a class="anchor" href="#list"></a>Listing MBeans (list)</h3>
 <div class="paragraph">
-<p>The list operation collects information about accessible
+<p>The list operation collects information about available
 MBeans. This information includes the MBean names, their
 attributes, operations and notifications along with type
 information and description (as far as they are provided by the
@@ -1663,7 +1674,15 @@ complete response.</p>
             "types": [ "&lt;type1&gt;", "&lt;type2&gt;", ... ]
         },
         ...
-      }
+      },
+      "class": "fully qualified class name",
+      "desc": "description",
+      "ctor": {
+        ...
+      },
+      "interfaces": [
+        ...
+      ]
     },
     ...
   },
@@ -1727,27 +1746,42 @@ bean only. For example, a request</p>
     },
     "attr": {
       "ObjectPendingFinalizationCount": {
+        "r": true,
         "rw": false,
+        "w": false,
+        "is": false,
         "type": "int",
         "desc": "ObjectPendingFinalizationCount"
       },
       "Verbose": {
+        "r": true,
         "rw": true,
+        "w": true,
+        "is": true,
         "type": "boolean",
         "desc": "Verbose"
       },
       "HeapMemoryUsage": {
+        "r": true,
         "rw": false,
+        "w": false,
+        "is": false,
         "type": "javax.management.openmbean.CompositeData",
         "desc": "HeapMemoryUsage"
       },
       "NonHeapMemoryUsage": {
+        "r": true,
         "rw": false,
+        "w": false,
+        "is": false,
         "type": "javax.management.openmbean.CompositeData",
         "desc": "NonHeapMemoryUsage"
       },
       "ObjectName": {
+        "r": true,
         "rw": false,
+        "w": false,
+        "is": false,
         "type": "javax.management.ObjectName",
         "desc": "ObjectName"
       }
@@ -1756,7 +1790,7 @@ bean only. For example, a request</p>
     "desc": "Information on the management interface of the MBean"
   },
   "status": 200,
-  "timestamp": 1702463340
+  "timestamp": 1770643662
 }</code></pre>
 </div>
 </div>
@@ -1770,7 +1804,7 @@ bean only. For example, a request</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_restrict_depth_of_the_returned_tree"><a class="anchor" href="#_restrict_depth_of_the_returned_tree"></a>Restrict depth of the returned tree</h4>
+<h4 id="_restrict_the_depth_of_the_returned_tree"><a class="anchor" href="#_restrict_the_depth_of_the_returned_tree"></a>Restrict the depth of the returned tree</h4>
 <div class="paragraph">
 <p>The optional parameter <code>maxDepth</code> can be used
 to restrict the depth of the return tree. Two value are
@@ -1790,19 +1824,22 @@ meaning and are dummy values.</p>
 <div class="ulist">
 <ul>
 <li>
-<p><code>class</code></p>
+<p><code>class</code> - information about the class of an MBean</p>
 </li>
 <li>
-<p><code>desc</code></p>
+<p><code>desc</code> - the description</p>
 </li>
 <li>
-<p><code>attr</code></p>
+<p><code>attr</code> - attributes of an MBean</p>
 </li>
 <li>
-<p><code>op</code></p>
+<p><code>op</code> - operations of an MBean</p>
 </li>
 <li>
-<p><code>notif</code></p>
+<p><code>notif</code> - notifications supported by an MBean</p>
+</li>
+<li>
+<p><code>ctor</code> - constructors of an MBean</p>
 </li>
 </ul>
 </div>
@@ -1825,19 +1862,92 @@ Potential use-case may be information related to RBAC (Role-based Access Control
   },
   "value": {
     "name=G1 Survivor Space,type=MemoryPool": {
-      "op": {
-        "resetPeakUsage": {
-          "args": [],
-          "ret": "void",
-          "desc": "resetPeakUsage"
-        }
-      },
+      ...
       "keys": {
         "name": "G1 Survivor Space",
         "type": "MemoryPool"
       },
 ...</code></pre>
 </div>
+</div>
+<div class="paragraph">
+<p>Since Jolokia 2.5.0, we can use <code>listInterfaces=true</code> parameter to get information about the interfaces implemented by an MBean:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "request": {
+    "path": "java.lang/type=Memory",
+    "type": "list"
+  },
+  "value": {
+    ...
+    "interfaces": [
+      "javax.management.NotificationEmitter",
+      "java.lang.management.PlatformManagedObject",
+      "javax.management.NotificationBroadcaster",
+      "java.lang.management.MemoryMXBean"
+    ],
+    ...</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Another big addition to Jolokia 2.5.0 is new processing parameter. When sending <code>openTypes=true</code>, we get full information about
+the composite/tabular Open Types used by the MBean (attributes or method parameters and return values). For example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "request": {
+    "path": "java.lang/type=Memory",
+    "type": "list"
+  },
+  "value": {
+    ...
+    "attr": {
+      "ObjectPendingFinalizationCount": {
+        "r": true,
+        "rw": false,
+        "w": false,
+        "is": false,
+        "type": "int",
+        "desc": "ObjectPendingFinalizationCount",
+        "openType": "java.lang.Integer"
+      },
+      "Verbose": {
+        "r": true,
+        "rw": true,
+        "w": true,
+        "is": true,
+        "type": "boolean",
+        "desc": "Verbose",
+        "openType": "java.lang.Boolean"
+      },
+      "HeapMemoryUsage": {
+        "r": true,
+        "rw": false,
+        "w": false,
+        "is": false,
+        "type": "javax.management.openmbean.CompositeData",
+        "desc": "HeapMemoryUsage",
+        "openType": {
+          "kind": "composite",
+          "type": "java.lang.management.MemoryUsage",
+          "class": "javax.management.openmbean.CompositeData",
+          "items": {
+            "init": "java.lang.Long",
+            "committed": "java.lang.Long",
+            "max": "java.lang.Long",
+            "used": "java.lang.Long"
+          },
+          "desc": "java.lang.management.MemoryUsage"
+        }
+      },
+      ...</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In the above example, we can see the actual type structure of <code>HeapMemoryUsage</code> attribute.</p>
 </div>
 </div>
 <div class="sect3">
@@ -1897,7 +2007,7 @@ Potential use-case may be information related to RBAC (Role-based Access Control
 </div>
 </div>
 <div class="sect2">
-<h3 id="notification"><a class="anchor" href="#notification"></a>Using JMX notifications (notification) <mark>new in Jolokia 2</mark></h3>
+<h3 id="notification"><a class="anchor" href="#notification"></a>Using JMX notifications (notification)</h3>
 <div class="paragraph">
 <p>A new feature of Jolokia 2 is access to <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/Notification.html" class="externalLink" target="_blank" rel="noopener">JMX notifications</a>.
 While reading/writing attributes, executing operations or listing/searching MBeans is implemented as single request-response operation, with notifications the flow of messages is more complex.</p>
@@ -1935,7 +2045,7 @@ While reading/writing attributes, executing operations or listing/searching MBea
 </div>
 </div>
 <div class="paragraph">
-<p>The equivalend POST JSON payload is:</p>
+<p>The equivalent POST JSON payload is:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -2047,7 +2157,7 @@ While reading/writing attributes, executing operations or listing/searching MBea
 </tbody>
 </table>
 <div class="paragraph">
-<p>The equivalend POST JSON payload is:</p>
+<p>The equivalent POST JSON payload is:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -2326,7 +2436,7 @@ notifications, a space (<code>%20</code>) or empty string (<code>%22%22</code>) 
 </tbody>
 </table>
 <div class="paragraph">
-<p>The equivalend POST JSON payload is:</p>
+<p>The equivalent POST JSON payload is:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -2442,7 +2552,7 @@ notifications, a space (<code>%20</code>) or empty string (<code>%22%22</code>) 
 </tbody>
 </table>
 <div class="paragraph">
-<p>The equivalend POST JSON payload is:</p>
+<p>The equivalent POST JSON payload is:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -2603,7 +2713,7 @@ calling an MBean operation on an MBean representing the backend. The details are
 <p>When calling <code>open</code> command for <code>sse</code> backed notifications, the request (<code>HttpServletRequest</code>) is put into <a href="https://jakarta.ee/specifications/servlet/5.0/jakarta-servlet-spec-5.0#asynchronous-processing" class="externalLink" target="_blank" rel="noopener">asynchronous mode</a> and connection is not closed.</p>
 </div>
 <div class="paragraph">
-<p>The GET URL for openning a backend channel for notification acces is:</p>
+<p>The GET URL for opening a backend channel for notification access is:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -2638,7 +2748,7 @@ calling an MBean operation on an MBean representing the backend. The details are
 </tbody>
 </table>
 <div class="paragraph">
-<p>The equivalend POST JSON payload is:</p>
+<p>The equivalent POST JSON payload is:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -2758,30 +2868,27 @@ provided as path info.</p>
     "type": "version"
   },
   "value": {
-    "agent": "2.4.2",
-    "protocol": "7.2",
+    "agent": "2.5.0",
+    "protocol": "8.2",
+    "decorators": {},
     "details": {
-      "agent_version": "2.4.2",
-      "agent_id": "192.168.0.221-21185-5ce94d31-servlet",
-      "server_product": "tomcat",
-      "server_vendor": "Apache",
-      "server_version": "10.1.16",
-      "secured": true,
-      "url": "http://192.168.0.221:8080/jolokia"
+      "agent_version": "2.5.0",
+      "agent_id": "jolokia-7778",
+      "secured": false,
+      "url": "http://192.168.0.166:7778/jolokia"
     },
-    "id": "192.168.0.221-21185-5ce94d31-servlet",
+    "id": "jolokia-7778",
     "config": {
       "maxDepth": "15",
-      "discoveryEnabled": "false",
-      "agentId": "192.168.0.221-21185-5ce94d31-servlet",
+      "discoveryEnabled": "true",
       "maxCollectionSize": "0",
-      "debug": "false",
+      "agentId": "jolokia-7778",
+      "debug": "true",
       "canonicalNaming": "false",
+      "dateFormat": "yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSSXXX",
+      "agentContext": "/jolokia",
       "historyMaxEntries": "10",
-      "serializeException": "false",
-      "includeStackTrace": "false",
       "maxObjects": "0",
-      "detectorOptions": "{}",
       "debugMaxEntries": "100"
     },
     "info": {
@@ -2790,7 +2897,7 @@ provided as path info.</p>
     }
   },
   "status": 200,
-  "timestamp": 1702482830
+  "timestamp": 1770638947
 }</code></pre>
 </div>
 </div>
@@ -2813,18 +2920,98 @@ optionally some extra information added by the server detector).</p>
 </div>
 </div>
 </div>
+<div class="sect2">
+<h3 id="version"><a class="anchor" href="#version"></a>Getting the basic configuration (config)</h3>
+<div class="paragraph">
+<p>The Jolokia command <code>config</code> is provided to get unauthenticated information about the agent.
+It duplicates (a bit) the information from the <code>version</code> operation, but is meant to be more universal and generic.</p>
+</div>
+<div class="paragraph">
+<p>It serves similar purpose as <code>/.well-known/openid-configuration</code> endpoint for OpenID Connect providers.</p>
+</div>
+<div class="sect3">
+<h4 id="get-version"><a class="anchor" href="#get-version"></a>GET version request</h4>
+<div class="paragraph">
+<p>The GET URL for a config request has the following format:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;base-url&gt;/config</pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="post-version"><a class="anchor" href="#post-version"></a>POST version request</h4>
+<div class="paragraph">
+<p>A version POST request has only a single key
+<code>type</code> which has to be set to
+<strong><code>config</code></strong>.</p>
+</div>
+<div class="paragraph">
+<p>However, GET requests are preferred for <code>config</code> operation. The reason is that it&#8217;s easier to configure restricted
+access in Servlet applications for GET requests (and remove the constraints for one specific URI). See <a href="https://jakarta.ee/specifications/servlet/5.0/jakarta-servlet-spec-5.0#security" class="externalLink" target="_blank" rel="noopener">Security chapter</a>
+of Java Servlet API specification.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="response-version"><a class="anchor" href="#response-version"></a>Config response</h4>
+<div class="paragraph">
+<p>The response value for a <code>config</code> request looks like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "request": {
+    "type": "config"
+  },
+  "value": {
+    "agent": "2.5.0-SNAPSHOT",
+    "protocol": "8.1",
+    "security": {
+      "authentication": [
+        {
+          "method": "basic",
+          "realm": "jolokia"
+        }
+      ]
+    },
+    "id": "jolokia-7778"
+  },
+  "status": 200,
+  "timestamp": 1770641830
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Jolokia only returns information for:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>agent version</p>
+</li>
+<li>
+<p>protocol version</p>
+</li>
+<li>
+<p>security mechanisms used (could be <code>basic</code> authentication or <code>mtls</code>)</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="processing-parameters"><a class="anchor" href="#processing-parameters"></a>Processing parameters</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Jolokia operations can be influenced by so-called
+<p>Jolokia operations can be controlled by so-called
 <em>processing parameters</em>. These parameters
 are provided differently for POST and GET requests.</p>
 </div>
 <div class="paragraph">
-<p>For GET request, the processing parameter are given as normal
+<p>For a GET request, the processing parameters are given as normal
 query parameters:</p>
 </div>
 <div class="listingblock">
@@ -2841,11 +3028,11 @@ query parameters:</p>
 </div>
 </div>
 <div class="paragraph">
-<p>will limit the response to at max 100 values.</p>
+<p>will limit the response to at most 100 values.</p>
 </div>
 <div class="paragraph">
-<p>POST request take the processing instructions within the
-JSON request below the key <code>config</code>:</p>
+<p>POST requests take the processing instructions within the
+JSON request under the <code>config</code> field:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -2858,7 +3045,7 @@ JSON request below the key <code>config</code>:</p>
 </div>
 </div>
 <div class="paragraph">
-<p>If a POST request carries also query parameters in the URL, these processing parameters
+<p>If a POST request also includes query parameters in the URL, these processing parameters
 are merged with the ones given within the request body. Configuration options given in the
 request body take precedence over the ones given as query parameters.</p>
 </div>
@@ -2885,13 +3072,13 @@ can be configured in the agent&#8217;s configuration.</p>
 </dd>
 <dt class="hdlist1"><code>serializeLong</code></dt>
 <dd>
-<p>How to serialize long values in the JSON response: <code>number</code> or <code>string</code>.
+<p>How to serialize long numeric values in the JSON response: <code>number</code> or <code>string</code>.
 The default <code>number</code> simply serializes longs as numbers in JSON.
 If set to <code>string</code>, longs are serialized as strings.
 It can be useful when a JavaScript client consumes the JSON response,
 because numbers greater than the max safe integer don&#8217;t retain their precision
 in JavaScript.
-<strong>Added since Jolokia 2.0.3</strong></p>
+<strong>Available since Jolokia 2.0.3</strong></p>
 </dd>
 <dt class="hdlist1"><code>ignoreErrors</code></dt>
 <dd>
@@ -2900,42 +3087,6 @@ error if an JMX operation fails, but includes the
 exception message as value. This is useful for e.g. the
 read operation when requesting multiple attributes'
 values. Default: <code>false</code></p>
-</dd>
-<dt class="hdlist1"><code>mimeType</code></dt>
-<dd>
-<p>The MIME type to return for the response. By default,
-this is <code>text/plain</code>, but it can be
-useful for some tools to change it to
-<code>application/json</code>. Init parameters can
-be used to change the default mime type.
-Only <code>text/plain</code> and <code>application/json</code> are allowed.
-For any other value Jolokia will fallback to <code>text/plain</code>.</p>
-</dd>
-<dt class="hdlist1"><code>includeRequest</code></dt>
-<dd>
-<p>A flag (defaults to <code>true</code>) which controls whether the incoming
-request should be included in the response (under <code>request</code> key).<br>
-When <code>false</code>, bulk responses have to be correlated with requests by matching
-the requests using index number - responses come in the same order as requests.<br>
-<strong>Added since Jolokia 2.1.0</strong></p>
-</dd>
-<dt class="hdlist1"><code>listKeys</code></dt>
-<dd>
-<p>A flag (defaults to <code>false</code>) to specify whether the response object for <code>list()</code> operation should contain <code>keys</code> field
-that lists all the keys obtained from each <code>javax.management.ObjectName</code> of the response.
-This may save you time parsing the name yourself.<br>
-<strong>Added since Jolokia 2.1.0</strong></p>
-</dd>
-<dt class="hdlist1"><code>listCache</code></dt>
-<dd>
-<p>A flag (defaults to <code>false</code>) to enable <em>optimized list response</em>.<br>
-With this flag enabled, <code>list()</code> operation returns a bit different structure (that&#8217;s why we&#8217;ve upgraded protocol version to <code>8.0</code>) where some MBeans may <em>point to</em> cached, shared MBeanInfo JSON fragment. This heavily decreases the size of <code>list()</code> response.
-<strong>Added since Jolokia 2.1.0</strong></p>
-</dd>
-<dt class="hdlist1"><code>canonicalNaming</code></dt>
-<dd>
-<p>Defaults to <code>false</code> to return the defined (at creation time) format of property lists.
-If set to <code>true</code> then the default sorted property list is returned.</p>
 </dd>
 <dt class="hdlist1"><code>includeStackTrace</code></dt>
 <dd>
@@ -2954,6 +3105,38 @@ the response value. By default this is set to
 <code>false</code> except when the agent global
 configuration option is configured otherwise.</p>
 </dd>
+<dt class="hdlist1"><code>canonicalNaming</code></dt>
+<dd>
+<p>Defaults to <code>false</code> to return the defined (at creation time) format of key-values of
+an <code>ObjectName</code>.
+If set to <code>true</code> then the default sorted property list is returned.</p>
+</dd>
+<dt class="hdlist1"><code>mimeType</code></dt>
+<dd>
+<p>The MIME type to return for the response. By default,
+this is <code>text/plain</code>, but it can be
+useful for some tools to change it to
+<code>application/json</code>. Init parameters can
+be used to change the default mime type.
+Only <code>text/plain</code> and <code>application/json</code> are allowed.
+For any other value Jolokia will fallback to <code>text/plain</code>.</p>
+</dd>
+<dt class="hdlist1"><code>includeRequest</code></dt>
+<dd>
+<p>A flag (defaults to <code>true</code>) which controls whether the incoming
+request should be included in the response (under the <code>request</code> key).<br>
+When <code>false</code>, bulk responses have to be correlated with requests by matching
+the requests using index number - responses come in the same order as requests. But
+this may save the bandwidth for big requests.<br>
+<strong>Available since Jolokia 2.1.0</strong></p>
+</dd>
+<dt class="hdlist1"><code>listKeys</code></dt>
+<dd>
+<p>A flag (defaults to <code>false</code>) to specify whether the response object for <code>list()</code> operation should contain <code>keys</code> field
+that lists all the keys obtained from each <code>javax.management.ObjectName</code> of the response.
+This may save you time parsing the MBean name yourself.<br>
+<strong>Available since Jolokia 2.1.0</strong></p>
+</dd>
 <dt class="hdlist1"><code>ifModifiedSince</code></dt>
 <dd>
 <p>If this parameter is given, its value is interpreted as epoch time (seconds since 1.1.1970) and
@@ -2961,6 +3144,25 @@ if the requested value did not change since this time, an empty response (with n
 is returned and the response status code is set to 304 ("Not modified"). This
 option is currently only supported for <code>list</code> requests. The time value can be
 extracted from a previous' response <code>timestamp</code>.</p>
+</dd>
+<dt class="hdlist1"><code>listCache</code></dt>
+<dd>
+<p>A flag (defaults to <code>false</code>) to enable <em>optimized list response</em>.<br>
+With this flag enabled, <code>list()</code> operation returns a bit different structure (that&#8217;s why we&#8217;ve upgraded protocol version to <code>8.0</code>) where some MBeans may <em>point to</em> a cached, shared MBeanInfo JSON fragment. This heavily decreases the size of the <code>list()</code> response.<br>
+<strong>Available since Jolokia 2.1.0</strong></p>
+</dd>
+<dt class="hdlist1"><code>listInterfaces</code></dt>
+<dd>
+<p>A flag for <code>list</code> operation, which tells Jolokia to return a list of all the interfaces
+implemented by the MBean&#8217;s class. This is used by Jolokia JMX Connector for <code>isInstanceOf()</code> operation.<br>
+<strong>Available since Jolokia 2.5.0</strong></p>
+</dd>
+<dt class="hdlist1"><code>openTypes</code></dt>
+<dd>
+<p>A flag for <code>list</code> operation, which tells Jolokia to include information about OpenTypes used
+by the MBeans. This is especially useful for Jolokia implementation of JMX Connector, but also may
+greatly improve the way applications present the data in a visual way.<br>
+<strong>Available since Jolokia 2.5.0</strong></p>
 </dd>
 </dl>
 </div>
@@ -2973,43 +3175,58 @@ extracted from a previous' response <code>timestamp</code>.</p>
 <p>Jolokia has some object serialization facilities in order to
 convert complex Java data types to JSON and vice
 versa. Serialization works in both ways in requests and
-responses, but the capabilities differ.</p>
-</div>
-<div class="paragraph">
-<p>Complex data types returned from the agent can be serialized
-completely into a JSON value object. It can detect cycles in
-the object graph and provides a way to limit the depth of
-serialization. For certain types (like
-<code>File</code> or
-<code>ObjectName</code>) it uses a service <code>org.jolokia.converter.json.simplifier.SimplifierAccessor</code> to not
-expose internal and redundant information.</p>
-</div>
-<div class="paragraph">
-<p>Object values used for values in
-<code>write</code> operations and arguments in
-<code>exec</code>, type support is limited to a
-handful of data types.</p>
-</div>
-<div class="sect2">
-<h3 id="serialization-response"><a class="anchor" href="#serialization-response"></a>Response value serialization</h3>
-<div class="paragraph">
-<p>Jolokia can serialize any object into a JSON representation
-when generating the response. It uses some specific
-converters for certain well known data type with a generic
-bean converter as fallback.</p>
-</div>
-<div class="paragraph">
-<p>The following types are directly supported:</p>
+responses and starting with Jolokia 2.5.0, the same (de)serialization mechanism
+is used in 3 Jolokia layers:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>Arrays and <code>java.util.List</code> are converted to JSON arrays</p>
+<p>Server-side (the agent)</p>
 </li>
 <li>
-<p><code>java.util.Map</code> gets
-converted into a JSON object. Note, however, that JSON
-Object keys are <em>always strings</em>.</p>
+<p>Jolokia Client which is used to access the agent in loosely typed manner (only as JSON)</p>
+</li>
+<li>
+<p>Jolokia JMX Connector Client, which uses Jolokia Client and additional deserialization into actual Java objects</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Complex data types returned from the agent can be serialized
+completely into a JSON value object. Jolokia can detect cycles in
+the object graph and provides a way to limit the depth of
+serialization. For certain types (like
+<code>File</code> or
+<code>ObjectName</code>) special <code>org.jolokia.converter.json.simplifier.SimplifierAccessor</code> service
+is used to prevent
+exposing internal and redundant information.</p>
+</div>
+<div class="paragraph">
+<p>Before Jolokia 2.5.0, object values used for setting attributes (<code>write</code> operation) and
+passing operation parameters (<code>exec</code> operation) were limited to a
+handful of data types. Jolokia 2.5.0 unifies the serialization mechanism.</p>
+</div>
+<div class="sect2">
+<h3 id="serialization-response"><a class="anchor" href="#serialization-response"></a>Unified data serialization</h3>
+<div class="paragraph">
+<p>Jolokia can serialize any object into a JSON representation
+when generating the response (at the agent side) or passing attributes and parameter values
+(at the client side). It uses some specific
+converters for certain well known data type with a generic
+bean converter as a fallback.</p>
+</div>
+<div class="paragraph">
+<p>The following types are directly supported (recursively):</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Arrays, lists and collections (like sets) are converted to JSON arrays</p>
+</li>
+<li>
+<p><code>java.util.Map</code> are converted into JSON object. Note, however, that JSON
+Object keys are <em>always strings</em> (though if there is a "to string" conversion for certain
+data types, it is used).</p>
 </li>
 <li>
 <p>Enums are converted to their canonical name<sup class="footnote" id="_footnote_enum-serial-jboss">[<a id="_footnoteref_5" class="footnote" href="#_footnotedef_5" title="View footnote.">5</a>]</sup>.</p>
@@ -3017,8 +3234,8 @@ Object keys are <em>always strings</em>.</p>
 <li>
 <p><code>javax.management.openmbean.CompositeData</code>
 is converted in a JSON object, with the keys taken from
-the `CompositeData&#8217;s key set and
-the value are its values.</p>
+the <code>CompositeData</code>'s key set and
+the value are the items' values serialized accordingly.</p>
 </li>
 <li>
 <p><code>javax.management.openmbean.TabularData</code>
@@ -3033,6 +3250,15 @@ name) and <code>interfaces</code> (the implemented
 interfaces, if any)</p>
 </li>
 <li>
+<p><code>org.w3c.dom.Element</code> is translated
+into a JSON object with the properties
+<code>name</code>, <code>value</code> and
+<code>hasChildNodes</code>.</p>
+</li>
+<li>
+<p><code>java.net.InetAddress</code> is serialized as a string value containing the host address</p>
+</li>
+<li>
 <p><code>java.io.File</code> becomes a JSON
 object with keys <code>name</code> (file name),
 <code>modified</code> (date of last modification),
@@ -3040,6 +3266,9 @@ object with keys <code>name</code> (file name),
 <code>directory</code> (whether the file is a directory),
 <code>canonicalPath</code> (the canonical path)
 and <code>exists</code>.</p>
+</li>
+<li>
+<p><code>java.lang.Module</code> and <code>java.lang.Package</code> objects are serialized simply as their names</p>
 </li>
 <li>
 <p><code>javax.management.ObjectName</code> is
@@ -3059,17 +3288,6 @@ an ISO-8601 format. When used with a path
 Since <strong>Jolokia 2.1.0</strong> the format for date/time serialization is configurable
 and we also support <code>java.util.Calendar</code> and <code>java.time.Temporal</code> implementations.</p>
 </li>
-<li>
-<p><code>org.w3c.dom.Element</code> is translated
-into a JSON object with the properties
-<code>name</code>, <code>value</code> and
-<code>hasChildNodes</code>.</p>
-</li>
-<li>
-<p><code>java.math.BigInteger</code> becomes a JSON
-object with the key <code>bigint</code> containing
-the big integer value as String.</p>
-</li>
 </ul>
 </div>
 <div class="paragraph">
@@ -3081,96 +3299,8 @@ the object and the values are serialized (recursively) as
 described.</p>
 </div>
 <div class="paragraph">
-<p><code>TabularData</code> serialization depends on
-the type of the index. It is serialized into one or multiple
-nested JSON objects where the keys are derived from its
-<code>TabularType.indexNames()</code>. If there is
-a single valued index with a simple type (i.e. an instance of
-<code>javax.management.openmbean.SimpleType</code>),
-the index&#8217;s value is the key and a
-<code>TabularData</code>'s row (which in turn is a
-<code>CompositeData</code>) is a map. With multi
-valued, simple typed, keys, the map is nested (first level:
-first index&#8217;s value, second level: second index&#8217;s value and
-so on). For the serialization of
-<code>TabularData</code> resulting from a
-<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/MXBean.html" class="externalLink" target="_blank" rel="noopener">MXBean</a>
-translation for maps, see
-<a href="#serialization-mxbean">Jolokia and MXBeans</a>. If any of the declared
-index keys of a <code>TabularData</code> is a
-complex type (i.e. not a <code>SimpleType</code>),
-then this simple serialization into maps of maps is not
-possible anymore, since for JSON, map keys must be simple
-types. In this case, a more generic serialization is used in
-which case an JSON object with two keys is returned:
-<code>indexNames</code> is an array with the
-<code>TabularData</code>'s indexes as names and
-<code>values</code> is the array containing the
-values as JSON object with the corresponding rows as values
-(including the indexes).</p>
-</div>
-<div class="paragraph">
-<p>For example if there is a single valued key
-<code>key</code>, then the returned JSON looks like</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "mykey1" : { "key" : "mkey1", "item" : "value1", .... },
-  "mykey2" : { "key" : "mkey2", "item" : "value2", .... },
-  ...
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>For multi valued keys of simple open types
-(i.e. <code>TabularType.getIndexNames()</code>)
-is a list with more than one element but all of them are
-simple types), the returned JSON structure looks like (index
-names here are <code>key</code> and
-<code>innerkey</code>):</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "mykey1" : {
-    "myinner1" : { "key" : "mkey1", "innerkey" : "myinner1", "item" : "value1", .... },
-    "myinner2" : { "key" : "mkey1", "innerkey" : "myinner2", "item" : "value1", .... },
-    ....
-  },
-  "mykey2" : {
-    "second1" : { "key" : "mkey2", "innerkey" : "second1", "item" : "value1", .... },
-    "second2" : { "key" : "mkey2", "innerkey" : "second2", "item" : "value1", .... },
-    ....
-  },
-  ....
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>If keys are used, which themselves are complex objects (like
-<code>CompositeData</code>), this hierarchical map structure can not be
-used. In this case an object with two keys is returned:
-<code>indexNames</code> holds the name of the key
-index and <code>values</code> is an array of all
-rows which are represented as JSON objects:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "indexNames" : [ "key", "innerkey" ],
-  "values" : [
-    { "key" : "mykey1", "innerkey" : { "name" : "a", "number" : 4711 }, "item" : "value1", .... },
-    { "key" : "mykey2", "innerkey" : { "name" : "b", "number" : 815 }, "item" : "value2", .... },
-    ...
-  ]
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Beside this special behaviour for
-<code>TabularData</code>, serialization can be
-influenced by certain processing parameters given with the
+<p>Serialization at the agent side can be
+influenced by certain processing parameters sent with the
 request (see
 <a href="#processing-parameters">Processing parameters</a>). I.e. the recursive
 process of JSON serialization can be stopped when the data
@@ -3209,320 +3339,207 @@ the object are not deserialized further.  (see
 </div>
 </div>
 <div class="sect2">
-<h3 id="serialization-request"><a class="anchor" href="#serialization-request"></a>Request parameter serialization</h3>
+<h3 id="_tabulardata_serialization"><a class="anchor" href="#_tabulardata_serialization"></a>TabularData serialization</h3>
 <div class="paragraph">
-<p>Serialization in the upstream direction (i.e. when sending
-values for <code>write</code> operations or arguments
-for <code>exec</code> operations) differs from
-from the object serializaton as used as response values
-which is described in
-<a href="#serialization-response">Response value serialization</a>. Not all types are
-supported for upstream serialization <sup class="footnote" id="_footnote_upstream-serialization-comment">[<a id="_footnoteref_6" class="footnote" href="#_footnotedef_6" title="View footnote.">6</a>]</sup>
-and the capabilities differ also for POST and GET requests.
-<code>GET</code> upstream serialization is limited to
-basic types and simple arrays. POST requests on the other
-support a much large set of types, including the
-serialization of <code>Map</code>s,
-<code>List</code>s and all
-<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/openmbean/OpenType.html" class="externalLink" target="_blank" rel="noopener">Open Types</a>.</p>
-</div>
-<div class="sect3">
-<h4 id="_get_request_values"><a class="anchor" href="#_get_request_values"></a>GET request values</h4>
-<div class="paragraph">
-<p>Since parameters get encoded in the URL for GET request,
-only the following types can used for values and arguments
-in <code>write</code> and
-<code>exec</code> requests:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>String</p>
-</li>
-<li>
-<p>Integer / int</p>
-</li>
-<li>
-<p>Long / long</p>
-</li>
-<li>
-<p>Byte / byte</p>
-</li>
-<li>
-<p>Short / short</p>
-</li>
-<li>
-<p>Float / float</p>
-</li>
-<li>
-<p>Double / double</p>
-</li>
-<li>
-<p>BigDecimal / BigInteger</p>
-</li>
-<li>
-<p>char</p>
-</li>
-<li>
-<p>Boolean / boolean</p>
-</li>
-<li>
-<p>Date</p>
-</li>
-<li>
-<p>java.time.Instant, java.time.OffsetDateTime, java.time.ZonedDateTime (since <strong>2.1.0</strong>)</p>
-</li>
-<li>
-<p>URL</p>
-</li>
-<li>
-<p>Enums (whose type is accessible to the agent, see below)</p>
-</li>
-<li>
-<p>Any type, that is accessible to the agent, and
-has a public constructor with one String parameter</p>
-</li>
-</ul>
+<p><code>javax.management.openmbean.TabularType</code> is one of the complex types used by Open MBeans specification.</p>
 </div>
 <div class="paragraph">
-<p>The serialized value is simply the string representation
-of those types. Dates can be set either by an long value
-(epoch milliseconds) or with a string value (ISO-8601
-format). Arrays of the given types are serialized as a
-comma separated list.
-When setting <code>java.time</code> values, we handle serialization of these <code>Temporal</code> instances
-which support <code>ChronoField.INSTANT_SECONDS</code>, so full information (date, time, zone and nanoseconds) can
-be sent to the server.
-When deserializing <code>java.time</code> values, we use configurable DateTime format (both for <code>java.util.Date</code>) and
-for new (since JDK 8) <code>java.time</code> classes.</p>
+<p><code>TabularData</code> serialization depends on
+the type of the index used. There are three different serialization <em>flavors</em> of tabular types.</p>
 </div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-The array support is somewhat limited since it makes a
-native split on commas. It does not yet take into account
-any quoting or escaping. For a much safer way to transport
-arrays to the agent, please consider using POST requests.<br>
-For multi-dimensional arrays, <code>POST</code> method is mandatory.
-</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>Certain <em>tag values</em> are used to mark special
-values.  A <code>null</code> value has to be
-serialized as <code>[null]</code>, an empty String
-as <code>""</code>. Tag values are not required for
-POST requests.</p>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_post_request_values"><a class="anchor" href="#_post_request_values"></a>POST request values</h4>
-<div class="paragraph">
-<p>POST request take advantage of the JSON type of the value
-transfered. These are basic types for numbers
-(<code>42</code> or <code>23.5</code>),
-booleans (<code>true</code> or
-<code>false</code>) and strings
-(<code>"habanero"</code>). Also, JSON knows about
-<code>null</code> values so no special 'tags' like
-for GET requests are not required. Since JSON supports
-intrinsically key-value maps and array types, these can be
-used directly, too. I.e. if the JMX operation to execute
-takes a <code>Map</code> argument, the argument
-can be given as a JSON object. Be aware, however, that JSON
-maps (objects) only support strings as keys.</p>
-</div>
-<div class="paragraph">
-<p>The agent knows how to convert a JSON array to Java
-Arrays (of a basic type) or Lists, depending on the
-requirement as dictated by the MBeans operation or
-attribute signature. Numbers in JSON are always transfered
-as long or double values and are as well tried to fit
-to the MBean&#8217;s signature. In case of an overflow
-(e.g. when trying to treat a long with a too large value
-as int), an exception is raised.</p>
-</div>
-<div class="paragraph">
-<p>Enums can be converted from their canonical name. The
-prerequisite for this is, that the Jolokia agent has
-access to the Enum&#8217;s class. This is true for all Enums
-shipped with the JDK (like
-<code>TimeUnit</code>). Custom enums can not be
-used for upstream serialization by default since the
-Jolokia Agent is not able to construct an instance of it
-because of missing type information.</p>
-</div>
-<div class="paragraph">
-<p>Upstream serialization also supports
-<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/openmbean/OpenType.html" class="externalLink" target="_blank" rel="noopener">Open Types</a>.
-If the signature of JMX exec operation or the value type
-of a JMX attribute is a <code>OpenType</code>,
-they are serialized as follows:</p>
-</div>
-<div class="ulist">
-<ul>
+<div class="olist arabic">
+<ol class="arabic">
 <li>
-<p><code>SimpleType</code>s are extracted from their corresponding JSON type.</p>
-</li>
-<li>
-<p><code>ArrayType</code> is extracted from a
-<code>JSONArray</code> where the elements are
-serialized recursively with this algorithms.
-<code>ArrayType</code>s with element type
-<code>CompositeType</code> or
-<code>SimpleType</code> are supported. Jolokia also supports multi-dimensional <code>ArrayType</code>s.</p>
-</li>
-<li>
-<p><code>CompositeType</code> is extracted
-recursively from a <code>JSONObject</code>
-where there the string keys must fit to the
-<code>CompositeType</code>'s item names and
-the values must be serializable as open types.</p>
-</li>
-<li>
-<p><code>TabularType</code> is converted from
-<code>JSONObject</code>. If it is single index
-(i.e. has only one single index name), the
-<code>JSONObject</code> must have the index
-values as string keys and the map values are other
-<code>JSONObject</code>'s representing the row
-data. For <code>TabularType</code>'s with more
-than one index name, the incoming
-<code>JSONObject</code> must be a nested
-object with each index as an additional
-layer. E.g. the following JSON object works for
-a <code>TabularType</code> with the two
-index names <code>lastname</code> and
-<code>firstname</code>, which are both of type <code>SimpleType.STRING</code>:</p>
-</li>
-</ul>
-</div>
+<p>If the row type of a <code>TabularType</code> is conforming to <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.management/javax/management/MXBean.html" class="externalLink" target="<em>blank">MXBean</a> specification, the <code>TabularData</code> object of such <code>TabularType</code> is serialized as a _normal</em> map. Each row
+of such tabular data contains only two items - <code>key</code> and <code>value</code>, which is turned into single map entry with the name from <code>key</code> item and the
+value from the <code>value</code> item. For example:</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "Mann": {
-    "Thomas": {
-      "lastname": "Mann",
-      "firstname": "Thomas",
-      "birth": 1875
-    },
-    "Heinrich": {
-      "lastname": "Mann",
-      "firstname": "Heinrich",
-      "birth": 1871
-    }
-  }
+  "mykey1" : { "f1" : "v1", "f2" : "v2", .... },
+  "mykey2" : { ... },
+  ...
 }</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p><code>TabularType</code> used by the MXBean
-framework for serialization of Maps are translated
-directly from maps. More details are explained in the
-next section <a href="#serialization-mxbean">Jolokia and MXBeans</a>.</p>
+<p>Each value of such JSON has the same structure (type).</p>
+</div>
+</li>
+<li>
+<p>If the index of a <code>TabularType</code> includes only simple types (types with supported serialization into a String value), then Jolokia
+serializes the <code>TabularData</code> values of such <code>TabularType</code> type as nested JSON object with two simple rules:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>each index <em>value</em> because a key of a nested JSON object</p>
+</li>
+<li>
+<p>the leaves of the full JSON object are full records (maps, objects) containing all the key-value pairs</p>
+</li>
+</ul>
 </div>
 <div class="paragraph">
-<p><code>TabularType</code>'s with index values
-which are <em>not</em> of type
-<code>SimpleType</code> can be used, too.
-However, in this case this simple nested map structure
-is not enough, since keys of complex types
-(e.g. <code>CompositeData</code> types) can
-not be represented as JSON map keys. Instead, a
-generic representation for
-<code>TabularTypes</code> must be used. A
-JSON object with two keys:
-<code>indexNames</code> with an array of the
-index names and <code>values</code> with an
-array of rows containing objects which include the
-index values plus any other values of the rows'
-<code>CompositeType</code>. E.g. if in the
-example above, the index would have been an
-<code>User</code> with first- and lastname,
-the JSON structure for setting the <code>TabularData</code> should
-look like</p>
+<p>Here&#8217;s an example:</p>
+</div>
+<div class="paragraph">
+<p>+</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "indexNames": [ "user" ],
+  "mykey1" : {
+    "myinner1" : { "key" : "mkey1", "innerkey" : "myinner1", "item" : "value1", .... },
+    "myinner2" : { "key" : "mkey2", "innerkey" : "myinner2", "item" : "value2", .... },
+    ....
+  },
+  "mykey2" : {
+    "second1" : { "key" : "mkey3", "innerkey" : "second3", "item" : "value3", .... },
+    "second2" : { "key" : "mkey4", "innerkey" : "second4", "item" : "value4", .... },
+    ....
+  },
+  ....
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>A Key/Value of the final map like <code>"key":"mkey1"</code> provides one of the upper-level keys (here: <code>"mkey1"</code>).</p>
+</div>
+</li>
+<li>
+<p>If the index includes complex data types (arrays, composite, tabular), then there&#8217;s a more direct for of <code>TabularData</code> serialization, where
+Jolokia returns an object with two fields: <code>indexNames</code> and <code>values</code>. Index names provide information about which items of a row type
+constitute a key and the <code>values</code> field contains <em>an array</em> of rows. Here&#8217;s an example:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "indexNames" : [ "key", "innerkey" ],
   "values" : [
-    { "user" : { "lastname": "Mann", "firstname": "Thomas" }, "birth": 1875 },
-    { "user" : { "lastname": "Mann", "firstname": "Heinrich" }, "birth": 1871 }
+    { "key" : "mykey1", "innerkey" : { "name" : "a", "number" : 4711 }, "item" : "value1", .... },
+    { "key" : "mykey2", "innerkey" : { "name" : "b", "number" : 815 }, "item" : "value2", .... },
+    ...
   ]
 }</code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p>As you can see, <code>innerKey</code> is a complex data, so we can&#8217;t use form #1 or #2.</p>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="serialization-request"><a class="anchor" href="#serialization-request"></a>Request parameter serialization</h3>
+<div class="paragraph">
+<p>Jolokia Client is used to send:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>MBean attribute values to set</p>
+</li>
+<li>
+<p>MBean operation arguments to pass for the invocation</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Serialization of Java objects is performed under the hood and uses the same mechanism as it&#8217;s used at the agent side.</p>
+</div>
+<div class="paragraph">
+<p>The only difference is when GET method is used.<br>
+Since the parameters get encoded in the URL itself,
+only the types which have proper "to string" converters available are supported. This means we
+can&#8217;t pass maps, lists or arrays with GET requests.</p>
+</div>
+<div class="paragraph">
+<p>This limitation with GET requests is another (besides the limitation of the URI itself where some encoding rules are required)
+reason that it&#8217;s much better and easier to use POST requests.</p>
 </div>
 </div>
 <div class="sect2">
 <h3 id="serialization-mxbean"><a class="anchor" href="#serialization-mxbean"></a>Jolokia and MXBeans</h3>
 <div class="paragraph">
-<p>The <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/MXBean.html" class="externalLink" target="_blank" rel="noopener">MXBean Framework</a> is available in
-the JDK since version 6 and allows for easy creation and
-registration of own MBeans. MXBeans are some what the
-successor for standard MBeans and support an annotation driven
-as well as a naming convention driven programming model. The
-most important difference to standard MBeans it the
-restriction of MXBean to reference only open types.</p>
+<p>JMX specification includes special chapter about <em>Open MBeans</em>. Initially the JMX specification was designed to <em>expose</em>
+tha management interface (represented by a set of MBeans) while arguments and return values were supposed to use
+Java serialization mechanism.</p>
 </div>
 <div class="paragraph">
-<p>Although to the outside only open types are exposed by the
-MXBean framework, MXBean themselves can use more complex
-data types. The framework will translate forth and back
-between the custom and open types according to certain rules
-as declared in the MXBean
-<a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.management/javax/management/MXBean.html" class="externalLink" target="_blank" rel="noopener">specification</a>.
-Most of the translations to open types fits naturally to
-Jolokia&#8217;s serialization, except for the translation of <code>Map</code>.</p>
+<p>However Java serialization is specific to Java platform itself and it&#8217;s not that easy to use ith with other tools
+and programming languages. Additionally, even if two JVM applications connect, Java serialization requires that
+some classes are available in both applications. Remote classloading is no longer considered a secure approach though.</p>
 </div>
 <div class="paragraph">
-<p>When an MXBean references a map, the MXBean framework
-translates this map into a
-<code>TabularData</code> with a fixed internal
-structure, i.e. with an index <code>key</code> and
-rows with keys <code>key</code> and
-<code>value</code>. This leads directly to a JSON
-representation which is quite artificial. E.g a map with
-two keys <code>kind</code> and
-<code>hotness</code> will be converted by the MXBean
-framework to a TabularData object which in turn would be
-translated by Jolokia to the following JSON structure</p>
+<p>That&#8217;s where <em>Open MBeans</em> show their benefits - remote class loading is no longer required and all the complex data
+structures can be represented using strict, small set of data types. There are 4 data types covered by the Open MBeans specification:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>simple types (numbers, strings, dates, object names, booleans)</p>
+</li>
+<li>
+<p>array types (ordered sets of other Open types)</p>
+</li>
+<li>
+<p>composite types - key-value pairs</p>
+</li>
+<li>
+<p>tabular types - designed on the basis of database tables, where a set of <em>keys</em> uniquely identify <em>rows</em> which in turn
+contain unordered sets of values of other Open Types.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>What is more important from developer&#8217;s perspective is how values of the 4 data types are used to represent types like maps, lists
+or Java beans.<br>
+Surprisingly, the details are available in <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.management/javax/management/MXBean.html" class="externalLink" target="_blank" rel="noopener">MXBean Framework</a> JavaDoc and not in the JMX specification itself.</p>
+</div>
+<div class="paragraph">
+<p>For example, <code>java.util.Map</code> is always translated into a <code>javax.management.openmbean.TabularData</code> value confirming to
+a <code>javax.management.openmbean.TabularType</code> with these characteristics:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>row type of the tabular type is a <code>javax.management.openmbean.CompositeType</code> using <code>key</code> and <code>value</code> items</p>
+</li>
+<li>
+<p>the index of the tabular type uses only the <code>key</code> item</p>
+</li>
+<li>
+<p><code>key</code> item uses a javax.management.openmbean.SimpleType.STRING` type</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>For example this Java map:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "kind" : {
-    "key": "kind",
-    "value": "Habanero"
-  },
-  "hotness" : {
-    "key": "hotness",
-    "value": 10
-  }
-}</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Map&lt;String, Integer&gt; days2026 = Map.of(
+    "January", 31,
+    "February", 28,
+    ...
+);</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Since this representation of a simple map is unnecessarily
-complicated, Jolokia treats <code>TabularData</code>
-of this kind (i.e. one index <code>key</code> and rows
-with properties <code>key</code> and
-<code>value</code>) specially in order to translate it
-back (and forth) to</p>
+<p>is represented by a tabular data with 12 <em>rows</em>:</p>
 </div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "kind" : "Habanero",
-  "hotness" : 10
-}</code></pre>
-</div>
+<div class="ulist">
+<ul>
+<li>
+<p>row 1: <code>key</code> = <code>January</code>, <code>value</code> = <code>31</code></p>
+</li>
+<li>
+<p>row 2: <code>key</code> = <code>February</code>, <code>value</code> = <code>28</code></p>
+</li>
+<li>
+<p>&#8230;&#8203;</p>
+</li>
+</ul>
 </div>
 </div>
 </div>
@@ -3566,9 +3583,9 @@ values are the history arrays as described above.</p>
 <h2 id="protocol-proxy"><a class="anchor" href="#protocol-proxy"></a>Proxy requests</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>For proxy requests, POST must be used as HTTP method so that
+<p>For proxy requests, only the POST HTTP method can be used so that
 the given JSON request can contain an extra section for the
-target which should be finally reached via this proxy
+<em>target</em>, which should be finally reached via this proxy
 request. A typical proxy request looks like</p>
 </div>
 <div class="listingblock">
@@ -3598,7 +3615,7 @@ for the JSR-160 Remote communication.</p>
 <h2 id="discovery"><a class="anchor" href="#discovery"></a>Agent Discovery</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Jolokia agents are able to respond to certain multicast
+<p>Jolokia agents are able to respond to certain UDP multicast
 requests in order to allow clients to detect automatically
 connection parameters. The agent URL to expose can be either
 manually configured for an agent or an agent can try to detect
@@ -3660,7 +3677,7 @@ the following format</p>
 <div class="listingblock">
 <div class="content">
 <pre>$ echo '{"type":"query"}' | socat STDIO UDP4-DATAGRAM:239.192.48.84:24884
-{"agent_version":"2.4.2","agent_id":"jolokia-7778","type":"response","secured":false,"url":"http://192.168.0.165:7778/jolokia/"}{"agent_version":"2.4.2","agent_id":"jolokia-7779","type":"response","secured":false,"url":"http://192.168.0.165:7778/jolokia/"}</pre>
+{"agent_version":"2.5.0","agent_id":"jolokia-7778","type":"response","secured":false,"url":"http://192.168.0.165:7778/jolokia/"}{"agent_version":"2.5.0","agent_id":"jolokia-7779","type":"response","secured":false,"url":"http://192.168.0.165:7778/jolokia/"}</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -3669,7 +3686,7 @@ the following format</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "agent_version": "2.4.2",
+  "agent_version": "2.5.0",
   "agent_id": "192.168.0.221-67980-7e985ce9-servlet",
   "server_product": "tomcat",
   "type": "response",
@@ -3778,11 +3795,20 @@ protocol version <strong><code>8.0</code></strong>.</p>
 </div>
 <div class="dlist">
 <dl>
+<dt class="hdlist1"><strong>8.2 (since 2.5.0)</strong></dt>
+<dd>
+<p>New <code>openTypes</code> processing parameter for <code>list</code> operations to return information about OpenTypes used for MBean attributes and operations. Also error values are unified and contain additional <code>.error</code> and <code>error_type_jmx</code> fields.</p>
+</dd>
+<dt class="hdlist1"><strong>8.1 (since 2.4.0)</strong></dt>
+<dd>
+<p>Added new <code>/config</code> endpoint where some really basic information is returned (agent id and version and some security declaration (which auth methods are supported)). <code>/version</code> endpoint no longer returns values for <code>username</code> and <code>password</code> properties and returns information about
+used <em>data updaters</em>.</p>
+</dd>
 <dt class="hdlist1"><strong>8.0 (since 2.1.0)</strong></dt>
 <dd>
 <p>We can now disable <code>request</code> field in the response
 using <code>includeRequest</code> option. There&#8217;s new <code>listCache</code> parameter that
-enables <em>optimized list response</em>. There&#8217;s also a <code>listKeys</code> parameter that adds <code>"keys"</code> field to MBeanInfo for an MBean - it contains keys obtained from Mbean&#8217;s ObjectName.</p>
+enables <em>optimized list response</em>. There&#8217;s also a <code>listKeys</code> parameter that adds <code>"keys"</code> field to MBeanInfo for an MBean - it contains keys obtained from MBean&#8217;s <code>ObjectName</code>.</p>
 </dd>
 <dt class="hdlist1"><strong>7.3 (since 2.0.0)</strong></dt>
 <dd>
@@ -3906,9 +3932,6 @@ implemented by jmx4perl.</p>
 <div class="footnote" id="_footnotedef_5">
 <a href="#_footnoteref_5">5</a>. For JBoss older than version 7, there might be use cases when custom enums need to be serialized. In this case, the type information must be available to the agent, too. For the standard PlatformMBeanServer serialization should work always, regardless whether the customer enum type is accessible by the agent or not.
 </div>
-<div class="footnote" id="_footnotedef_6">
-<a href="#_footnoteref_6">6</a>. Conversion from a typed system to an untyped representation is obviously much easier than vice versa. Please note, that Jolokia does not replace a full blown JSON object serialization framework like Jackson. Nor does it use one in order to keep the agent small and simple with a low dependency count.
-</div>
 </div>
 <nav class="pagination">
   <span class="prev"><a href="proxy_mode.html">Proxy Mode</a></span>
@@ -3918,7 +3941,7 @@ implemented by jmx4perl.</p>
   </div>
 <footer class="footer">
   This page was built using the Antora default UI. The source code for this UI is licensed under the terms of the MPL-2.0 license. | Copyright © 2010 -
-  2023 Roland Huß
+  2025 Roland Huß
 </footer>
 <script id="site-script" src="../_/js/site.js" data-ui-root-path="../_"></script>
 <script async src="../_/js/vendor/highlight.js"></script>

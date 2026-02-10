@@ -145,7 +145,7 @@
 </ul>
 </div>
 <div class="paragraph">
-<p>In Jolokia 2 there&#8217;s another resource checked - <code>services[-default]</code> and additionaly the declaration files were moved to more specific location:</p>
+<p>In Jolokia 2 there&#8217;s another resource checked - <code>services[-default]</code> and additionally the declaration files were moved to more specific location:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -169,13 +169,13 @@
 <h2 id="_a_note_about_service_loader_approach"><a class="anchor" href="#_a_note_about_service_loader_approach"></a>A note about <em>Service Loader</em> approach</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><code>META-INF/jolokia/services</code> is a little similar approach to Java standard <code>java.util.ServiceLoader</code> API, where services are <em>declared</em> in <code>META-INF/services/interface-name</code>.</p>
+<p><code>META-INF/jolokia/services</code> is a bit similar approach to Java standard <code>java.util.ServiceLoader</code> API, where the services are <em>declared</em> in <code>META-INF/services/interface-name</code>.</p>
 </div>
 <div class="paragraph">
-<p>The most important aspect is that the instantiation of such services is performed by JDK itself (or Jolokia itself) and if 3rd party applications use more sophisticated <em>service registries</em> (like CDI or Spring DI), then we can&#8217;t avoid static fields&#8230;&#8203;</p>
+<p>The most important aspect is that the instantiation of such services is performed by the JDK (or Jolokia) itself and if 3rd party applications use more sophisticated <em>service registries</em> (like CDI or Spring DI), then we can&#8217;t avoid static fields&#8230;&#8203;</p>
 </div>
 <div class="paragraph">
-<p>So if a Jolokia service extension needs to use other dependencies, it&#8217;s up to the application to provide necessary integration. Static fields is the easiest (but not super-clean) option.</p>
+<p>So if a Jolokia service extension needs to use other dependencies, it&#8217;s up to the application to provide necessary integration. Static fields is the easiest (but not a super-clean) option.</p>
 </div>
 </div>
 </div>
@@ -224,7 +224,7 @@
 <p>In the following sections we describe various services that may be declared by 3rd party libraries.</p>
 </div>
 <div class="sect2">
-<h3 id="_mbeaninfo_cache"><a class="anchor" href="#_mbeaninfo_cache"></a>MBeanInfo cache</h3>
+<h3 id="_mbean_info_cache"><a class="anchor" href="#_mbean_info_cache"></a>MBeanInfo cache</h3>
 <div class="paragraph">
 <p>Jolokia is first and foremost a <em>JMX protocol adaptor</em> (see <a href="architecture.html" class="xref page">Architecture</a>). This means that whatever is registered in local (or remote) MBeanServer, is accessible using "JSON over HTTP".</p>
 </div>
@@ -281,7 +281,7 @@
 </div>
 </div>
 <div class="paragraph">
-<p>Basically instead of duplicating the same JSONified <code>javax.management.MBeanInfo</code> over and over again for the same MBeans (2x10,000 times for 10,000 Artemis queues), we do some optimization here:</p>
+<p>Basically instead of duplicating the same JSON representation of <code>javax.management.MBeanInfo</code> over and over again for the same MBeans (2x10,000 times for 10,000 Artemis queues), we do some optimization here:</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
@@ -303,7 +303,7 @@
 </ol>
 </div>
 <div class="paragraph">
-<p>In order to use such variant of <code>list()</code> operation, a new processing request parameter has to be specified. This is done using <code>listCache=true</code> paramater (defaults to <code>false</code> for compatibility reasons).</p>
+<p>In order to use such variant of <code>list()</code> operation, a new processing request parameter has to be specified. This is done using <code>listCache=true</code> parameter (defaults to <code>false</code> for compatibility reasons).</p>
 </div>
 <div class="paragraph">
 <p>When optimization is enabled, Jolokia uses <code>org.jolokia.service.jmx.api.CacheKeyProvider</code> services. if <code>determineKey(ObjectInstance)</code> method returns non-null key, it is used to share common JSON MBean information with other MBeans that produce the same cache key.</p>
@@ -448,7 +448,7 @@
 <p>Previous section described services that may affect the structure of <em>entire</em> <code>list()</code> response. This section is about services that affect single MBeanInfo of any MBean.</p>
 </div>
 <div class="paragraph">
-<p><code>org.jolokia.server.core.service.api.DataUpdater</code> is an interface used by <code>list()</code> operation. Normally when invoking <a href="jolokia_protocol.html#list" class="xref page">list</a> operation, we get a JSON tree with a structure like this:</p>
+<p><code>org.jolokia.server.core.service.api.DataUpdater</code> is an interface used by the <code>list()</code> operation. Normally when invoking <a href="jolokia_protocol.html#list" class="xref page">list</a> operation, we get a JSON tree with a structure like this:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -474,10 +474,10 @@
 <p>Built-in implementations of <code>org.jolokia.server.core.service.api.DataUpdater</code> interface simply add these fields (<code>attr</code>, <code>op</code>, &#8230;&#8203;) to the JSON data.</p>
 </div>
 <div class="paragraph">
-<p>However, there may be scenarios where for each MBean we need some additional data - for example the security roles assigned to given MBean (to implement a form of Role-Based Access Control (RBAC)). Jolokia isn&#8217;t aware of the way an application implements security mechanisms, but should allow for any extension of the basic MBean data.</p>
+<p>However, there may be scenarios where for each MBean we need some additional data - for example the security roles assigned to the given MBean (to implement a form of Role-Based Access Control (RBAC)). Jolokia isn&#8217;t aware of the way an application implements security mechanisms, but should allow for any extension of the basic MBean data.</p>
 </div>
 <div class="paragraph">
-<p>We can provide an extension module, add it on the CLASSPATH and declare additional <em>data updaters</em> in <code>META-INF/jolokia/services</code>. <code>org.jolokia.server.core.service.api.DataUpdater</code> is already an implementation of <code>org.jolokia.server.core.service.api.JolokiaService</code> and it&#8217;s an abstract class we can extend. For example:</p>
+<p>We can provide an extension module, add it to the CLASSPATH and declare additional <em>data updaters</em> in <code>META-INF/jolokia/services</code>. <code>org.jolokia.server.core.service.api.DataUpdater</code> is already an implementation of <code>org.jolokia.server.core.service.api.JolokiaService</code> and it&#8217;s an abstract class we can extend. For example:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -491,7 +491,7 @@ public class MyUpdater extends org.jolokia.server.core.service.api.DataUpdater {
 
     @Override
     public String getKey() {
-        return "my";
+        return "time";
     }
 
     @Override
@@ -505,7 +505,7 @@ public class MyUpdater extends org.jolokia.server.core.service.api.DataUpdater {
 </div>
 </div>
 <div class="paragraph">
-<p>This <em>updater</em> adds <code>my</code> field to the JSON info for an MBean with current timestamp, but we can imagine any other kind of <em>updater</em>. It is declared using the below line in <code>META-INF/jolokia/services</code> resource:</p>
+<p>This <em>updater</em> adds <code>time</code> field to the JSON info for an MBean with current timestamp, but we can imagine any other kind of <em>updater</em>. It is declared using the below line in <code>META-INF/jolokia/services</code> resource:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -554,6 +554,153 @@ It contains a map of keys obtained from the <code>ObjectName</code> itself using
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="_jolokia_server_detectors"><a class="anchor" href="#_jolokia_server_detectors"></a>Jolokia Server Detectors</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Jolokia used <code>org.jolokia.server.core.detector.ServerDetector</code> interface for a long time. Jolokia included server
+detectors for several products like ActiveMQ, JBoss, WebLogic, WebSphere and other. Product-specific detectors
+provide:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>special <code>javax.management.MBeanServerConnection</code> instances for MBean servers not detected by <code>java.lang.management.ManagementFactory</code></p>
+</li>
+<li>
+<p><code>org.jolokia.server.core.service.request.RequestInterceptor</code> services to handle the requests in product-specific way (there is only one Glassfish-specific interceptor)</p>
+</li>
+<li>
+<p><code>org.jolokia.server.core.service.api.ServerHandle</code> with product-specific information (name, version)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><a href="https://github.com/jolokia/jolokia/issues/258" class="externalLink" target="_blank" rel="noopener">jolokia#258</a> added new responsibility to
+the server detector, so Jolokia JVM agent could actively wait for some conditions before proceeding. This is used
+to wait for some classes or services to be available. The detectors can wait and additionally return &#8230;&#8203; a <code>java.lang.ClassLoader</code> instance:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public interface ServerDetector extends JolokiaService&lt;ServerDetector&gt;, Comparable&lt;ServerDetector&gt; {
+
+    ...
+    ClassLoader jvmAgentStartup(Instrumentation instrumentation);
+
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This may sound complex and unnecessary, but the concept is quite clear:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>let the detectors wait for initialization</p>
+</li>
+<li>
+<p>if the detector returns a <code>ClassLoader</code>, this loader will then ne used by Jolokia service to perform initialization (including looking up additional services).</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>This is important when using Jolokia JVM Agent in containers like Tomcat or Artemis, where the application (boot) classpath usually consists
+of some kind of <em>bootstrap</em> JARs which role is only to create a <em>full</em> <code>ClassLoader</code> with JARs and resources from <code>lib/</code> directory (or other).</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>see Tomcat&#8217;s <code>${catalina.home}/lib</code> directory</p>
+</li>
+<li>
+<p>see Artemis' <code>${artemis.instance}/lib</code> and <code>${artemis.home}/lib</code> directories</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>And recently in Jolokia 2.1.2, with <a href="https://github.com/jolokia/jolokia/issues/754" class="externalLink" target="_blank" rel="noopener">jolokia#754</a> we&#8217;ve introduced
+the concept of a <code>org.jolokia.server.core.service.container.ContainerLocator</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public interface ContainerLocator extends JolokiaService&lt;ContainerLocator&gt; {
+
+    /**
+     * Returns an instance of a &lt;em&gt;runtime&lt;/em&gt; or &lt;em&gt;container&lt;/em&gt; specific class to be used by
+     * a dedicated Jolokia service.
+     *
+     * @param clazz A class guard to ensure that the returned instance is of proper class
+     * @return
+     * @param &lt;T&gt;
+     */
+    &lt;T&gt; T locate(Class&lt;T&gt; clazz);
+
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Currently only <code>org.jolokia.server.detector.misc.ArtemisDetector</code> returns special <code>ContainerLocator</code>, but this locator is
+not used by Jolokia itself.</p>
+</div>
+<div class="paragraph">
+<p>The role of this interface is to give access to server-specific services/interfaces/classes from other services - usually 3rd party libraries.
+See the following <a href="#_jolokia_integration_project">Jolokia Integration project</a> section.</p>
+</div>
+<div class="paragraph">
+<p>Jolokia itself should not depend on any special classes and interfaces from other projects. Note that classes like <code>org.jolokia.server.detector.misc.ArtemisDetector</code> may use reflection or other form of dynamic discovery, but there are no Maven dependencies on (in this case) Artemis.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_jolokia_integration_project"><a class="anchor" href="#_jolokia_integration_project"></a>Jolokia Integration project</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><a href="https://github.com/jolokia/jolokia-integration" class="externalLink" target="_blank" rel="noopener">Jolokia Integration</a> is a special project built on the concepts mentioned in this chapter:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="#_mbean_info_cache">MBeanInfo cache</a> and <a href="#_data_updaters">Data updaters</a> may be implemented by external services</p>
+</li>
+<li>
+<p><a href="#_jolokia_server_detectors">Jolokia Server Detectors</a> may reflectively/dynamically make Jolokia aware of the environment where the Agent is running</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Specifically:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Jolokia should not statically (with Maven dependencies) depend on projects like Artemis or Tomcat</p>
+</li>
+<li>
+<p>Projects like Artemis or Tomcat should not depend on Jolokia (when not needed)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Currently <a href="https://github.com/jolokia/jolokia-integration" class="externalLink" target="<em>blank">Jolokia Integration</a> should be treated as _technical preview</em> project, but it is <a href="https://issues.apache.org/jira/browse/ARTEMIS-5427" class="externalLink" target="_blank" rel="noopener">already actively used with Apache Artemis</a>.</p>
+</div>
+<div class="paragraph">
+<p>As of the latest version 0.8.0, Jolokia-Integration provides two services:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>org.jolokia.integration.artemis.ArtemisCacheKeyProvider</code> - optimizes the JSON size for the MBeans which are known to come in huge amounts (like queues and addresses)</p>
+</li>
+<li>
+<p><code>org.jolokia.integration.artemis.ArtemisDataUpdater</code> - adds <code>canInvoke</code> flag for each MBean, MBean operation and MBean attribute based on <a href="https://artemis.apache.org/components/artemis/documentation/latest/management.html#jmx-authorization-in-broker-xml" class="externalLink" target="_blank" rel="noopener">RBAC configuration provided by Artemis</a>.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>There are plans to include similar integration with <a href="https://camel.apache.org/" class="externalLink" target="_blank" rel="noopener">Apache Camel</a>.</p>
+</div>
+</div>
+</div>
 <nav class="pagination">
   <span class="prev"><a href="jolokia_mbeans.html">Jolokia MBeans</a></span>
   <span class="next"><a href="clients.html">Clients</a></span>
@@ -562,7 +709,7 @@ It contains a map of keys obtained from the <code>ObjectName</code> itself using
   </div>
 <footer class="footer">
   This page was built using the Antora default UI. The source code for this UI is licensed under the terms of the MPL-2.0 license. | Copyright © 2010 -
-  2023 Roland Huß
+  2025 Roland Huß
 </footer>
 <script id="site-script" src="../_/js/site.js" data-ui-root-path="../_"></script>
 <script async src="../_/js/vendor/highlight.js"></script>

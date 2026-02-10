@@ -109,7 +109,7 @@
 <div class="sect2">
 <h3 id="list"><a class="anchor" href="#list"></a>Listing MBeans (list)</h3>
 <div class="paragraph">
-<p>The list operation collects information about accessible
+<p>The list operation collects information about available
 MBeans. This information includes the MBean names, their
 attributes, operations and notifications along with type
 information and description (as far as they are provided by the
@@ -218,7 +218,15 @@ complete response.</p>
             "types": [ "&lt;type1&gt;", "&lt;type2&gt;", ... ]
         },
         ...
-      }
+      },
+      "class": "fully qualified class name",
+      "desc": "description",
+      "ctor": {
+        ...
+      },
+      "interfaces": [
+        ...
+      ]
     },
     ...
   },
@@ -282,27 +290,42 @@ bean only. For example, a request</p>
     },
     "attr": {
       "ObjectPendingFinalizationCount": {
+        "r": true,
         "rw": false,
+        "w": false,
+        "is": false,
         "type": "int",
         "desc": "ObjectPendingFinalizationCount"
       },
       "Verbose": {
+        "r": true,
         "rw": true,
+        "w": true,
+        "is": true,
         "type": "boolean",
         "desc": "Verbose"
       },
       "HeapMemoryUsage": {
+        "r": true,
         "rw": false,
+        "w": false,
+        "is": false,
         "type": "javax.management.openmbean.CompositeData",
         "desc": "HeapMemoryUsage"
       },
       "NonHeapMemoryUsage": {
+        "r": true,
         "rw": false,
+        "w": false,
+        "is": false,
         "type": "javax.management.openmbean.CompositeData",
         "desc": "NonHeapMemoryUsage"
       },
       "ObjectName": {
+        "r": true,
         "rw": false,
+        "w": false,
+        "is": false,
         "type": "javax.management.ObjectName",
         "desc": "ObjectName"
       }
@@ -311,7 +334,7 @@ bean only. For example, a request</p>
     "desc": "Information on the management interface of the MBean"
   },
   "status": 200,
-  "timestamp": 1702463340
+  "timestamp": 1770643662
 }</code></pre>
 </div>
 </div>
@@ -325,7 +348,7 @@ bean only. For example, a request</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_restrict_depth_of_the_returned_tree"><a class="anchor" href="#_restrict_depth_of_the_returned_tree"></a>Restrict depth of the returned tree</h4>
+<h4 id="_restrict_the_depth_of_the_returned_tree"><a class="anchor" href="#_restrict_the_depth_of_the_returned_tree"></a>Restrict the depth of the returned tree</h4>
 <div class="paragraph">
 <p>The optional parameter <code>maxDepth</code> can be used
 to restrict the depth of the return tree. Two value are
@@ -345,19 +368,22 @@ meaning and are dummy values.</p>
 <div class="ulist">
 <ul>
 <li>
-<p><code>class</code></p>
+<p><code>class</code> - information about the class of an MBean</p>
 </li>
 <li>
-<p><code>desc</code></p>
+<p><code>desc</code> - the description</p>
 </li>
 <li>
-<p><code>attr</code></p>
+<p><code>attr</code> - attributes of an MBean</p>
 </li>
 <li>
-<p><code>op</code></p>
+<p><code>op</code> - operations of an MBean</p>
 </li>
 <li>
-<p><code>notif</code></p>
+<p><code>notif</code> - notifications supported by an MBean</p>
+</li>
+<li>
+<p><code>ctor</code> - constructors of an MBean</p>
 </li>
 </ul>
 </div>
@@ -380,19 +406,92 @@ Potential use-case may be information related to RBAC (Role-based Access Control
   },
   "value": {
     "name=G1 Survivor Space,type=MemoryPool": {
-      "op": {
-        "resetPeakUsage": {
-          "args": [],
-          "ret": "void",
-          "desc": "resetPeakUsage"
-        }
-      },
+      ...
       "keys": {
         "name": "G1 Survivor Space",
         "type": "MemoryPool"
       },
 ...</code></pre>
 </div>
+</div>
+<div class="paragraph">
+<p>Since Jolokia 2.5.0, we can use <code>listInterfaces=true</code> parameter to get information about the interfaces implemented by an MBean:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "request": {
+    "path": "java.lang/type=Memory",
+    "type": "list"
+  },
+  "value": {
+    ...
+    "interfaces": [
+      "javax.management.NotificationEmitter",
+      "java.lang.management.PlatformManagedObject",
+      "javax.management.NotificationBroadcaster",
+      "java.lang.management.MemoryMXBean"
+    ],
+    ...</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Another big addition to Jolokia 2.5.0 is new processing parameter. When sending <code>openTypes=true</code>, we get full information about
+the composite/tabular Open Types used by the MBean (attributes or method parameters and return values). For example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "request": {
+    "path": "java.lang/type=Memory",
+    "type": "list"
+  },
+  "value": {
+    ...
+    "attr": {
+      "ObjectPendingFinalizationCount": {
+        "r": true,
+        "rw": false,
+        "w": false,
+        "is": false,
+        "type": "int",
+        "desc": "ObjectPendingFinalizationCount",
+        "openType": "java.lang.Integer"
+      },
+      "Verbose": {
+        "r": true,
+        "rw": true,
+        "w": true,
+        "is": true,
+        "type": "boolean",
+        "desc": "Verbose",
+        "openType": "java.lang.Boolean"
+      },
+      "HeapMemoryUsage": {
+        "r": true,
+        "rw": false,
+        "w": false,
+        "is": false,
+        "type": "javax.management.openmbean.CompositeData",
+        "desc": "HeapMemoryUsage",
+        "openType": {
+          "kind": "composite",
+          "type": "java.lang.management.MemoryUsage",
+          "class": "javax.management.openmbean.CompositeData",
+          "items": {
+            "init": "java.lang.Long",
+            "committed": "java.lang.Long",
+            "max": "java.lang.Long",
+            "used": "java.lang.Long"
+          },
+          "desc": "java.lang.management.MemoryUsage"
+        }
+      },
+      ...</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In the above example, we can see the actual type structure of <code>HeapMemoryUsage</code> attribute.</p>
 </div>
 </div>
 <div class="sect3">
@@ -455,7 +554,7 @@ Potential use-case may be information related to RBAC (Role-based Access Control
   </div>
 <footer class="footer">
   This page was built using the Antora default UI. The source code for this UI is licensed under the terms of the MPL-2.0 license. | Copyright © 2010 -
-  2023 Roland Huß
+  2025 Roland Huß
 </footer>
 <script id="site-script" src="../../_/js/site.js" data-ui-root-path="../../_"></script>
 <script async src="../../_/js/vendor/highlight.js"></script>

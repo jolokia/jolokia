@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Untitled :: Jolokia</title>
-    <link rel="canonical" href="https://jolokia.org/manual/protocol/version.html">
+    <link rel="canonical" href="https://jolokia.org/manual/protocol/config.html">
     <meta name="generator" content="Antora 3.1.4">
     <link rel="stylesheet" href="../../_/css/site.css">
     <link rel="stylesheet" href="../../_/css/jolokia.css">
@@ -99,7 +99,7 @@
   <a href="../index.html" class="home-link"></a>
 <nav class="breadcrumbs" aria-label="breadcrumbs">
 </nav>
-<div class="edit-this-page"><a href="https://github.com/jolokia/jolokia/tree/main/src/documentation/manual/modules/ROOT/pages/protocol/version.adoc">Help improving this page</a></div>
+<div class="edit-this-page"><a href="https://github.com/jolokia/jolokia/tree/main/src/documentation/manual/modules/ROOT/pages/protocol/config.adoc">Help improving this page</a></div>
 </div>
   <div class="content">
 <aside class="toc sidebar" data-title="Contents" data-levels="2">
@@ -107,25 +107,23 @@
 </aside>
 <article class="doc">
 <div class="sect2">
-<h3 id="version"><a class="anchor" href="#version"></a>Getting the agent version (version)</h3>
+<h3 id="version"><a class="anchor" href="#version"></a>Getting the basic configuration (config)</h3>
 <div class="paragraph">
-<p>The Jolokia command <code>version</code> returns the version of
-the Jolokia agent along with the protocol version.</p>
+<p>The Jolokia command <code>config</code> is provided to get unauthenticated information about the agent.
+It duplicates (a bit) the information from the <code>version</code> operation, but is meant to be more universal and generic.</p>
+</div>
+<div class="paragraph">
+<p>It serves similar purpose as <code>/.well-known/openid-configuration</code> endpoint for OpenID Connect providers.</p>
 </div>
 <div class="sect3">
 <h4 id="get-version"><a class="anchor" href="#get-version"></a>GET version request</h4>
 <div class="paragraph">
-<p>The GET URL for a version request has the following format:</p>
+<p>The GET URL for a config request has the following format:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>&lt;base-url&gt;/version</pre>
+<pre>&lt;base-url&gt;/config</pre>
 </div>
-</div>
-<div class="paragraph">
-<p>For GET request the <code>version</code> part can be
-omitted since this is the default command if no command is
-provided as path info.</p>
 </div>
 </div>
 <div class="sect3">
@@ -133,70 +131,58 @@ provided as path info.</p>
 <div class="paragraph">
 <p>A version POST request has only a single key
 <code>type</code> which has to be set to
-<strong><code>version</code></strong>.</p>
+<strong><code>config</code></strong>.</p>
+</div>
+<div class="paragraph">
+<p>However, GET requests are preferred for <code>config</code> operation. The reason is that it&#8217;s easier to configure restricted
+access in Servlet applications for GET requests (and remove the constraints for one specific URI). See <a href="https://jakarta.ee/specifications/servlet/5.0/jakarta-servlet-spec-5.0#security" class="externalLink" target="_blank" rel="noopener">Security chapter</a>
+of Java Servlet API specification.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="response-version"><a class="anchor" href="#response-version"></a>Version response</h4>
+<h4 id="response-version"><a class="anchor" href="#response-version"></a>Config response</h4>
 <div class="paragraph">
-<p>The response value for a version request looks like:</p>
+<p>The response value for a <code>config</code> request looks like this:</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
   "request": {
-    "type": "version"
+    "type": "config"
   },
   "value": {
-    "agent": "2.5.0",
-    "protocol": "8.2",
-    "decorators": {},
-    "details": {
-      "agent_version": "2.5.0",
-      "agent_id": "jolokia-7778",
-      "secured": false,
-      "url": "http://192.168.0.166:7778/jolokia"
+    "agent": "2.5.0-SNAPSHOT",
+    "protocol": "8.1",
+    "security": {
+      "authentication": [
+        {
+          "method": "basic",
+          "realm": "jolokia"
+        }
+      ]
     },
-    "id": "jolokia-7778",
-    "config": {
-      "maxDepth": "15",
-      "discoveryEnabled": "true",
-      "maxCollectionSize": "0",
-      "agentId": "jolokia-7778",
-      "debug": "true",
-      "canonicalNaming": "false",
-      "dateFormat": "yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSSXXX",
-      "agentContext": "/jolokia",
-      "historyMaxEntries": "10",
-      "maxObjects": "0",
-      "debugMaxEntries": "100"
-    },
-    "info": {
-      "proxy": {},
-      "jmx": {}
-    }
+    "id": "jolokia-7778"
   },
   "status": 200,
-  "timestamp": 1770638947
+  "timestamp": 1770641830
 }</code></pre>
 </div>
 </div>
-<div class="dlist">
-<dl>
-<dt class="hdlist1">NOTE</dt>
-<dd>
-<p>Since Jolokia 2.1.0 we can use <code>includeRequest</code> parameter to tell Jolokia to exclude <code>request</code> field from the response.</p>
-</dd>
-</dl>
-</div>
 <div class="paragraph">
-<p><code>protocol</code> in the response value contains the
-protocol version used, <code>agent</code> is the version of
-the Jolokia agent. See <a href="../jolokia_protocol.html#versions" class="xref page">Jolokia protocol versions</a> for the various
-protocol versions and the interoperability. If the agent is able
-to detect the server, additional meta information about this
-server is returned (i.e. the product name, the vendor and
-optionally some extra information added by the server detector).</p>
+<p>Jolokia only returns information for:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>agent version</p>
+</li>
+<li>
+<p>protocol version</p>
+</li>
+<li>
+<p>security mechanisms used (could be <code>basic</code> authentication or <code>mtls</code>)</p>
+</li>
+</ul>
 </div>
 </div>
 </div>

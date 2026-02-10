@@ -115,10 +115,10 @@
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>A lot has changed since Jolokia initial release. While Spring Framework was already popular back then, in the meantime we&#8217;ve observed a general shift away from XML into Java and annotation-based configuration.</p>
+<p>A lot has changed since the initial Jolokia release in 2011 (version 1.0.0). While Spring Framework was already popular back then, in the meantime we&#8217;ve observed a general shift away from XML into Java and annotation-based configuration.</p>
 </div>
 <div class="paragraph">
-<p>We also can&#8217;t forget about popularity of <a href="https://spring.io/projects/spring-boot" class="externalLink" target="_blank" rel="noopener">Spring Boot</a>.</p>
+<p>Spring Framework is also the fundament on which <a href="https://spring.io/projects/spring-boot" class="externalLink" target="_blank" rel="noopener">Spring Boot</a> was built and released as version 1.0 <a href="https://spring.io/blog/2014/04/01/spring-boot-1-0-ga-released">in 2014</a>.</p>
 </div>
 </div>
 </div>
@@ -126,59 +126,358 @@
 <h2 id="_support_for_jolokia_in_spring_boot"><a class="anchor" href="#_support_for_jolokia_in_spring_boot"></a>Support for Jolokia in Spring Boot</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Jolokia support was added to Spring Boot <a href="https://github.com/spring-projects/spring-boot/commit/2d058570ca9834b24b43e3d6387ef5aa5264d0e4" class="externalLink" target="_blank" rel="noopener">in version 0.5.0</a>. It was <a href="https://github.com/spring-projects/spring-boot/commit/86334403ed547ade2cff7376ac327a773d0dafc7" class="externalLink" target="_blank" rel="noopener">Jolokia 1.1.5</a>.</p>
+<p>Jolokia support was added to <a href="https://github.com/spring-projects/spring-boot/commit/2d058570ca9834b24b43e3d6387ef5aa5264d0e4" class="externalLink" target="_blank" rel="noopener">Spring Boot version 0.5.0</a>. It was <a href="https://github.com/spring-projects/spring-boot/commit/86334403ed547ade2cff7376ac327a773d0dafc7" class="externalLink" target="_blank" rel="noopener">Jolokia 1.1.5</a>.</p>
 </div>
 <div class="paragraph">
-<p>Jolokia integration with Spring Boot is based on the concept of <a href="https://docs.spring.io/spring-boot/docs/2.7.18/reference/html/actuator.html#actuator.jmx.jolokia" class="externalLink" target="_blank" rel="noopener"><em>actuator</em></a> and when Spring Boot detects Jolokia libraries on the CLASSPATH, special <code>/actuator/jolokia</code> endpoint becomes available.</p>
+<p>Jolokia integration with Spring Boot is based on the concept of <a href="https://docs.spring.io/spring-boot/docs/2.7.18/reference/html/actuator.html#actuator.jmx.jolokia" class="externalLink" target="_blank" rel="noopener"><em>actuator</em></a> and when Spring Boot detects Jolokia libraries on the <code>CLASSPATH</code>, special <code>/actuator/jolokia</code> endpoint becomes available.</p>
 </div>
 <div class="paragraph">
-<p>Spring Boot uses auto-configuration to detect potential <code>@Configuration</code> classes and this mechanism is described in <a href="https://docs.spring.io/spring-boot/docs/2.7.18/reference/htmlsingle/#features.developing-auto-configuration.locating-auto-configuration-candidates" class="externalLink" target="_blank" rel="noopener">Locating Auto-configuration Candidates</a> chapter of Spring Boot documentation.</p>
+<p>Spring Boot finds and processes the so-called <em>auto-configurations</em> using a mechanism described in the <a href="https://docs.spring.io/spring-boot/3.5/reference/features/developing-auto-configuration.html#features.developing-auto-configuration.locating-auto-configuration-candidates" class="externalLink" target="_blank" rel="noopener">Locating Auto-configuration Candidates</a> chapter of Spring Boot documentation.<br>
+With this mechanism, Jolokia was simply providing an implementation of Agent Servlet and Spring Boot was doing the rest.</p>
 </div>
 <div class="paragraph">
-<p>In particular, <code>org.springframework.boot:spring-boot-actuator-autoconfigure</code> library declares <a href="https://docs.spring.io/spring-boot/docs/2.7.18/api/org/springframework/boot/actuate/autoconfigure/jolokia/JolokiaEndpointAutoConfiguration.html" class="externalLink" target="_blank" rel="noopener">org.springframework.boot.actuate.autoconfigure.jolokia.JolokiaEndpointAutoConfiguration</a> in <code>/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports</code> and when Jolokia libraries are available on the CLASSPATH, special <code>org.springframework.boot.actuate.autoconfigure.jolokia.JolokiaEndpoint</code> annotated with <code>@org.springframework.boot.actuate.endpoint.web.annotation.ServletEndpoint</code> is available. This makes Jolokia&#8217;s AgentServlet part of actuator infrastructure of Spring Boot.</p>
+<p>However, Spring Boot 3, which <a href="https://spring.io/blog/2022/05/24/preparing-for-spring-boot-3-0" class="externalLink" target="_blank" rel="noopener">moved to JDK 17 and JakartaEE 9+</a> removed support for Jolokia in the sense, that it no longer included <em>auto-configuration</em> for Jolokia. See <a href="https://github.com/spring-projects/spring-boot/issues/28704" class="externalLink" target="_blank" rel="noopener">this issue</a> for more details.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+An attempt to <a href="https://github.com/spring-projects/spring-boot/issues/37568" class="externalLink" target="_blank" rel="noopener">bring back Spring Boot 3 support for Jolokia 2 was closed</a>, with <a href="https://github.com/jolokia/jolokia/issues/568#issuecomment-1786634151" class="externalLink" target="_blank" rel="noopener">a good explanation</a>.
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
-<p>However, Spring Boot 3, which <a href="https://spring.io/blog/2022/05/24/preparing-for-spring-boot-3-0" class="externalLink" target="_blank" rel="noopener">moved to JDK 17 and JakartaEE 9+</a> removed support for Jolokia in <code>org.springframework.boot:spring-boot-actuator-autoconfigure</code>. See <a href="https://github.com/spring-projects/spring-boot/issues/28704" class="externalLink" target="_blank" rel="noopener">this issue</a> for more details.</p>
+<p>Because Spring Boot (and Spring Framework) no longer provides <em>auto-configuration</em> for Jolokia and <a href="https://repo1.maven.org/maven2/org/springframework/boot/spring-boot-dependencies/" class="externalLink" target="<em>blank">Spring Boot BOM</a> no longer includes a dependency for Jolokia we had to add this
+_auto-configuration</em> mechanism to Jolokia itself.</p>
 </div>
 <div class="paragraph">
-<p>To get fuller picture, <a href="https://github.com/spring-projects/spring-boot/issues/37568" class="externalLink" target="_blank" rel="noopener">an attempt to restore Spring Boot 3 support for Jolokia 2 was closed</a>, with <a href="https://github.com/jolokia/jolokia/issues/568#issuecomment-1786634151" class="externalLink" target="_blank" rel="noopener">good explanation</a>.</p>
+<p>The benefit is that users who want to use Jolokia with Spring Boot can simply use the latest (supported) version
+of Spring Boot and Jolokia.</p>
 </div>
 <div class="paragraph">
-<p>The following paragraphs describe support for Spring Framework and Spring Boot in Jolokia (so the opposite of the above, where it was Spring that provided support for Jolokia).</p>
+<p>Starting with Jolokia 2.5.0 we provide two modules:</p>
 </div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>org.jolokia:jolokia-support-springboot3</code> for using Jolokia with Spring Boot 3.x</p>
+</li>
+<li>
+<p><code>org.jolokia:jolokia-support-springboot</code> for using Jolokia with Spring Boot 4.x</p>
+</li>
+</ul>
 </div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Before Jolokia 2.5.0 there was only one module for Spring Boot 3 and (for legacy reasons) it was just called <code>org.jolokia:jolokia-support-spring</code>.
+</td>
+</tr>
+</table>
 </div>
-<div class="sect1">
-<h2 id="_adding_jolokia_spring_support_library"><a class="anchor" href="#_adding_jolokia_spring_support_library"></a>Adding Jolokia Spring support library</h2>
-<div class="sectionbody">
 <div class="paragraph">
-<p>Maven users can simply add this dependency to their project:</p>
+<p>Both modules declare Spring dependencies with <code>provided</code> scope, so it&#8217;s up to the user to add proper Spring dependencies. Here are the templates:</p>
+</div>
+<div class="listingblock">
+<div class="title">Using Jolokia with Spring Boot 4:</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependencyManagement&gt;
+  &lt;dependencies&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
+      &lt;artifactId&gt;jolokia-bom&lt;/artifactId&gt;
+      &lt;version&gt;2.5.0&lt;/version&gt;
+      &lt;type&gt;pom&lt;/type&gt;
+      &lt;scope&gt;import&lt;/scope&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+      &lt;artifactId&gt;spring-boot-dependencies&lt;/artifactId&gt;
+      &lt;version&gt;${spring-boot-4-version}&lt;/version&gt;
+      &lt;type&gt;pom&lt;/type&gt;
+      &lt;scope&gt;import&lt;/scope&gt;
+    &lt;/dependency&gt;
+  &lt;/dependencies&gt;
+&lt;/dependencyManagement&gt;
+
+&lt;dependencies&gt;
+  &lt;dependency&gt;
+    &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
+    &lt;artifactId&gt;jolokia-support-springboot&lt;/artifactId&gt;
+  &lt;/dependency&gt;
+  &lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-autoconfigure&lt;/artifactId&gt;
+  &lt;/dependency&gt;
+  &lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-actuator-autoconfigure&lt;/artifactId&gt;
+  &lt;/dependency&gt;
+  &lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-webmvc&lt;/artifactId&gt;
+  &lt;/dependency&gt;
+  &lt;!-- other Spring Boot starters and dependencies --&gt;
+&lt;/dependencies&gt;</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Using Jolokia with Spring Boot 3:</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependencyManagement&gt;
+  &lt;dependencies&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
+      &lt;artifactId&gt;jolokia-bom&lt;/artifactId&gt;
+      &lt;version&gt;2.5.0&lt;/version&gt;
+      &lt;type&gt;pom&lt;/type&gt;
+      &lt;scope&gt;import&lt;/scope&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+      &lt;artifactId&gt;spring-boot-dependencies&lt;/artifactId&gt;
+      &lt;version&gt;${spring-boot-3-version}&lt;/version&gt;
+      &lt;type&gt;pom&lt;/type&gt;
+      &lt;scope&gt;import&lt;/scope&gt;
+    &lt;/dependency&gt;
+  &lt;/dependencies&gt;
+&lt;/dependencyManagement&gt;
+
+&lt;dependencies&gt;
+  &lt;dependency&gt;
+    &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
+    &lt;artifactId&gt;jolokia-support-springboot3&lt;/artifactId&gt;
+  &lt;/dependency&gt;
+  &lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-autoconfigure&lt;/artifactId&gt;
+  &lt;/dependency&gt;
+  &lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-actuator-autoconfigure&lt;/artifactId&gt;
+  &lt;/dependency&gt;
+  &lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+  &lt;/dependency&gt;
+  &lt;!-- other Spring Boot starters and dependencies --&gt;
+&lt;/dependencies&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Jolokia provides 6 examples related to Spring:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>jolokia-example-spring6</code> - using Jolokia with Spring Framework 6 (no Spring Boot)</p>
+</li>
+<li>
+<p><code>jolokia-example-spring7</code> - using Jolokia with Spring Framework 6 (no Spring Boot)</p>
+</li>
+<li>
+<p><code>jolokia-example-springboot3</code> - using Jolokia with Spring Boot 3 and Spring Web MVC</p>
+</li>
+<li>
+<p><code>jolokia-example-springboot4</code> - using Jolokia with Spring Boot 4 and Spring Web MVC</p>
+</li>
+<li>
+<p><code>jolokia-example-springboot3-actuator</code> - using Jolokia with Spring Boot 3 and actuator endpoint</p>
+</li>
+<li>
+<p><code>jolokia-example-springboot4-actuator</code> - using Jolokia with Spring Boot 4 and actuator endpoint</p>
+</li>
+</ul>
+</div>
+<div class="sect2">
+<h3 id="_using_jolokia_with_spring"><a class="anchor" href="#_using_jolokia_with_spring"></a>Using Jolokia with Spring</h3>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+This section is valid both for Spring Boot 3 and Spring Boot 4. The details are internal and are related to <a href="https://spring.io/blog/2025/10/28/modularizing-spring-boot" class="externalLink" target="_blank" rel="noopener">Spring Boot 4 modularization</a>.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>It&#8217;s beyond the scope of this chapter to provide information about how to develop or configure applications using Spring Boot.
+<a href="https://spring.io/guides" class="externalLink" target="_blank" rel="noopener">Spring guides</a> are the best source for developers.</p>
+</div>
+<div class="paragraph">
+<p>The below sections present programmer&#8217;s details about how to use Jolokia with Spring Boot and Spring Framework alone. Normally
+it&#8217;s enough to use the above Maven dependencies and Jolokia will be started correctly. But we may also want to declare
+the Spring beans ourselves.</p>
+</div>
+<div class="sect3">
+<h4 id="_registering_agent_servlet_as_spring_bean"><a class="anchor" href="#_registering_agent_servlet_as_spring_bean"></a>Registering Agent servlet as Spring bean</h4>
+<div class="paragraph">
+<p><a href="https://docs.spring.io/spring-boot/docs/3.2.0/reference/htmlsingle/#web.servlet.embedded-container.servlets-filters-listeners" class="externalLink" target="_blank" rel="noopener">Servlets, Filters, and Listeners</a> can be registered directly as <code>@Bean</code> annotated beans and Spring Boot will register them directly into embedded servlet container.</p>
+</div>
+<div class="paragraph">
+<p>In the simplest form we could use:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
-  &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
-  &lt;artifactId&gt;jolokia-support-spring&lt;/artifactId&gt;
-  &lt;version&gt;2.4.2&lt;/version&gt;
-&lt;/dependency&gt;</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Configuration
+public class AppConfig {
+
+  @Bean
+  public AgentServlet jolokia() {
+    return new AgentServlet();
+  }
+
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Transitive dependencies for Jolokia core and service libraries will be automatically available.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_support_for_spring_framework_in_jolokia"><a class="anchor" href="#_support_for_spring_framework_in_jolokia"></a>Support for Spring Framework in Jolokia</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Fundamental support for integrating Jolokia with Spring Framework application is through <a href="https://docs.spring.io/spring-framework/reference/core/appendix/xml-custom.html" class="externalLink" target="_blank" rel="noopener">XML Schema Authoring</a>.</p>
+<p>However without a way to specify URL mapping we may conflict with registration of Spring&#8217;s own <code>DispatcherServlet</code>.</p>
 </div>
 <div class="paragraph">
-<p>Using custom XML Schema <a href="https://jolokia.org/jolokia-config.xsd">available here</a> we can author Spring XML configuration files where Jolokia agent can easily be declared.</p>
+<p>This is why it&#8217;s better to declare beans of <code>org.springframework.boot.web.servlet.ServletRegistrationBean</code> class:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Configuration
+public class AppConfig {
+
+  @Bean
+  public ServletRegistrationBean&lt;AgentServlet&gt; jolokia() {
+    ServletRegistrationBean&lt;AgentServlet&gt; jolokiaServlet = new ServletRegistrationBean&lt;&gt;(new AgentServlet(), "/jolokia/*");
+    jolokiaServlet.setLoadOnStartup(0);
+    jolokiaServlet.setAsyncSupported(true);
+    jolokiaServlet.setInitParameters(Map.of(ConfigKey.DEBUG.getKeyValue(), "true"));
+    jolokiaServlet.setInitParameters(Map.of(ConfigKey.AGENT_DESCRIPTION.getKeyValue(), "Spring Servlet Jolokia Agent"));
+    return jolokiaServlet;
+  }
+
+}</code></pre>
+</div>
 </div>
 <div class="paragraph">
-<p>Here&#8217;s an example Spring XML configuration which starts <code>org.jolokia.support.spring.SpringJolokiaAgent</code> (an extension of <a href="agents/jvm.html" class="xref page">Jolokia JVM Agent</a>'s <code>org.jolokia.jvmagent.JolokiaServer</code>). This agent
+<p>This is enough for Spring Boot with <code>org.springframework.boot:spring-boot-starter-web</code> starter to register Jolokia Servlet under <code>/jolokia/*</code> mapping.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_registering_agent_servlet_under_spring_boot_actuator"><a class="anchor" href="#_registering_agent_servlet_under_spring_boot_actuator"></a>Registering Agent servlet under Spring Boot actuator</h4>
+<div class="paragraph">
+<p>To let Jolokia be registered as an actuator endpoint, we can simply run a Spring Boot application without any Jolokia bean configuration. This is entire <code>main()</code> method:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@SpringBootApplication
+public class Application {
+
+  public static void main(String[] args) {
+    SpringApplication.run(Application.class);
+  }
+
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And this is the <code>application.properties</code> configuration file:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>server.port = 8181
+
+management.endpoint.jolokia.config.debug = true
+management.endpoint.jolokia.config.agentDescription = Jolokia Spring Boot Actuator agent
+
+management.endpoints.web.exposure.include = health, jolokia</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Since Jolokia 2.2.9, we can also have a <code>@Bean</code> that declares <code>org.jolokia.server.core.service.api.Restrictor</code> to be used by Jolokia Agent servlet:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Bean
+public Restrictor customRestrictor() {
+    return new CustomReestrictor(...);
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We can also still use the default location from which the restrictor XML config is loaded, which is <code>classpath:/jolokia-access.xml</code>. Please refer to <a href="security.html" class="xref page">Security</a> for more information about the Jolokia restrictor.</p>
+</div>
+<div class="paragraph">
+<p>We may now access Jolokia Agent using <code>http://localhost:8181/actuator/jolokia</code> URL:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ curl -s 'http://localhost:8181/actuator/jolokia' | jq .
+{
+  "request": {
+    "type": "version"
+  },
+  "value": {
+    "agent": "2.5.0",
+    "protocol": "8.1",
+    "decorators": {},
+    "details": {
+      "agent_version": "2.5.0",
+      "agent_id": "192.168.0.166-213501-93e80ea-servlet",
+      "agent_description": "Jolokia Spring Boot Actuator agent",
+      "secured": false,
+      "url": "http://192.168.0.166:8181/actuator/jolokia"
+    },
+    "id": "192.168.0.166-213501-93e80ea-servlet",
+    "config": {
+      "agentId": "192.168.0.166-213501-93e80ea-servlet",
+      "debug": "true",
+      "dateFormat": "yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSSXXX",
+      "agentDescription": "Jolokia Spring Boot Actuator agent"
+    },
+    "info": {
+      "proxy": {},
+      "jmx": {}
+    }
+  },
+  "status": 200,
+  "timestamp": 1770213286
+}</pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>/jolokia</code> actuator is listed under <a href="http://localhost:8181/actuator" class="bare">http://localhost:8181/actuator</a>:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/jolokia-endpoints-json.png" alt="jolokia endpoints json">
+</div>
+</div>
+<div class="paragraph">
+<p>What&#8217;s more, with IDE support, Jolokia configuration properties are suggested:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="_images/jolokia-actuator-endpoint.png" alt="jolokia actuator endpoint">
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_using_jolokia_without_spring_boot"><a class="anchor" href="#_using_jolokia_without_spring_boot"></a>Using Jolokia without Spring Boot</h4>
+<div class="paragraph">
+<p>Support for integrating Jolokia with Spring Framework alone is provided using <a href="https://docs.spring.io/spring-framework/reference/core/appendix/xml-custom.html" class="externalLink" target="_blank" rel="noopener">XML Schema Authoring</a>.</p>
+</div>
+<div class="paragraph">
+<p>Using custom XML Schema <a href="https://jolokia.org/jolokia-config.xsd" class="externalLink" target="_blank" rel="noopener">available here</a> we can author Spring XML configuration files where Jolokia agent can easily be declared.</p>
+</div>
+<div class="paragraph">
+<p>Here&#8217;s an example Spring XML configuration which starts the <code>org.jolokia.support.spring.SpringJolokiaAgent</code> (an extension of <a href="agents/jvm.html" class="xref page">Jolokia JVM Agent</a>'s <code>org.jolokia.jvmagent.JolokiaServer</code>). This agent
 uses JDK&#8217;s own HTTP Server which comes with OpenJDK/Oracle JVMs (Version 1.6 or later).</p>
 </div>
 <div class="listingblock">
@@ -260,7 +559,9 @@ only base Spring bean configurations (including an Spring EL expression):</p>
 <p>Jolokia custom XML Schema supports few top-level elements which are described next.</p>
 </div>
 <div class="paragraph">
-<p>An example of application based on pure Spring Framework is available at <code>examples/spring</code> in <a href="https://github.com/jolokia/jolokia" class="externalLink" target="_blank" rel="noopener">Jolokia GitHub repository</a>.</p>
+<p>An example of application based on pure Spring Framework is available at <code>examples/spring7</code> in <a href="https://github.com/jolokia/jolokia" class="externalLink" target="_blank" rel="noopener">Jolokia GitHub repository</a>.</p>
+</div>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_jolokiaagent"><a class="anchor" href="#_jolokiaagent"></a><code>&lt;jolokia:agent&gt;</code></h3>
@@ -405,195 +706,8 @@ except when annotated with <code>@JsonMBean</code>.</p>
 &lt;/beans&gt;</code></pre>
 </div>
 </div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_support_for_spring_boot_in_jolokia"><a class="anchor" href="#_support_for_spring_boot_in_jolokia"></a>Support for Spring Boot in Jolokia</h2>
-<div class="sectionbody">
 <div class="paragraph">
-<p><a href="https://spring.io/projects/spring-boot" class="externalLink" target="_blank" rel="noopener">Spring Boot</a> is using all functionality from Spring Framework and adds a lot of convenient programming and architecture patterns (idioms) for developers.</p>
-</div>
-<div class="paragraph">
-<p>With pure Spring Framework, we had to declare <code>org.jolokia.support.spring.SpringJolokiaAgent</code> directly or using <code>&lt;jolokia:agent&gt;</code> custom element. We could also use <code>@Configuration</code> and <code>@Bean</code> annotations. However Spring Boot provides several other methods for bringing Jolokia functionality into your Spring application.</p>
-</div>
-<div class="sect2">
-<h3 id="_registering_agent_servlet_as_spring_bean"><a class="anchor" href="#_registering_agent_servlet_as_spring_bean"></a>Registering Agent servlet as Spring bean</h3>
-<div class="paragraph">
-<p><a href="https://docs.spring.io/spring-boot/docs/3.2.0/reference/htmlsingle/#web.servlet.embedded-container.servlets-filters-listeners" class="externalLink" target="_blank" rel="noopener">Servlets, Filters, and Listeners</a> can be registered directly as <code>@Bean</code> annotated beans and Spring Boot will register them directly into embedded servlet container.</p>
-</div>
-<div class="paragraph">
-<p>In simplest form we could use:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Configuration
-public class AppConfig {
-
-  @Bean
-  public AgentServlet jolokia() {
-    return new AgentServlet();
-  }
-
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>However without a way to specify URL mapping we may conflict with registration of Spring&#8217;s own <code>DispatcherServlet</code>.</p>
-</div>
-<div class="paragraph">
-<p>This is why it&#8217;s better to declare beans of <code>org.springframework.boot.web.servlet.ServletRegistrationBean</code> class:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Configuration
-public class AppConfig {
-
-  @Bean
-  public ServletRegistrationBean&lt;AgentServlet&gt; jolokia() {
-    ServletRegistrationBean&lt;AgentServlet&gt; jolokiaServlet = new ServletRegistrationBean&lt;&gt;(new AgentServlet(), "/jolokia/*");
-    jolokiaServlet.setLoadOnStartup(0);
-    jolokiaServlet.setAsyncSupported(true);
-    jolokiaServlet.setInitParameters(Map.of(ConfigKey.DEBUG.getKeyValue(), "true"));
-    jolokiaServlet.setInitParameters(Map.of(ConfigKey.AGENT_DESCRIPTION.getKeyValue(), "Spring Servlet Jolokia Agent"));
-    return jolokiaServlet;
-  }
-
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>This is enough for Spring Boot with <code>org.springframework.boot:spring-boot-starter-web</code> starter to register Jolokia Servlet under <code>/jolokia/*</code> mapping.</p>
-</div>
-<div class="paragraph">
-<p>An example of application using Spring Boot is available at <code>examples/spring-boot</code> in <a href="https://github.com/jolokia/jolokia" class="externalLink" target="_blank" rel="noopener">Jolokia GitHub repository</a>.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_registering_agent_servlet_under_spring_boot_actuator"><a class="anchor" href="#_registering_agent_servlet_under_spring_boot_actuator"></a>Registering Agent servlet under Spring Boot actuator</h3>
-<div class="paragraph">
-<p><a href="https://docs.spring.io/spring-boot/docs/3.2.0/reference/htmlsingle/#actuator.endpoints" class="externalLink" target="_blank" rel="noopener">Spring Boot actuator endpoints</a> allow to access various controls in your application.</p>
-</div>
-<div class="paragraph">
-<p>While Spring Boot 3 removed auto-configuration of Jolokia 1 actuator endpoint (because of JakartaEE 9+ incompatibility with Jolokia 1 Servlet API), Jolokia 2 now provides own auto-configuration in <code>org.jolokia:jolokia-support-spring</code>.</p>
-</div>
-<div class="paragraph">
-<p>With just few dependencies:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
-  &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
-  &lt;artifactId&gt;jolokia-support-spring&lt;/artifactId&gt;
-  &lt;version&gt;2.4.2&lt;/version&gt;
-&lt;/dependency&gt;
-
-&lt;dependency&gt;
-  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-  &lt;artifactId&gt;spring-boot-starter-actuator&lt;/artifactId&gt;
-  &lt;version&gt;${version.spring-boot}&lt;/version&gt;
-&lt;/dependency&gt;
-&lt;dependency&gt;
-  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-  &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
-  &lt;version&gt;${version.spring-boot}&lt;/version&gt;
-&lt;/dependency&gt;</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>We can run a Spring Boot application without single Jolokia bean configuration. This is entire <code>main()</code> method:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@SpringBootApplication
-public class Application {
-
-  public static void main(String[] args) {
-    SpringApplication.run(Application.class);
-  }
-
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>And this is the <code>application.properties</code> configuration file:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>server.port = 8181
-
-management.endpoint.jolokia.config.debug = true
-management.endpoint.jolokia.config.agentDescription = Jolokia Spring Boot Actuator agent
-
-management.endpoints.web.exposure.include = health, jolokia</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Since Jolokia 2.2.9, we can also have a <code>@Bean</code> that declares <code>org.jolokia.server.core.service.api.Restrictor</code> to be used by Jolokia Agent servlet:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Bean
-public Restrictor customRestrictor() {
-    return new CustomReestrictor(...);
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Having all this, Spring Boot with actuator enabled will discover Jolokia own auto-configuration.
-Because <a href="https://docs.spring.io/spring-boot/docs/3.2.0/reference/htmlsingle/#actuator.endpoints.exposing" class="externalLink" target="_blank" rel="noopener">Jolokia is properly exposed</a>, we may now access Jolokia Agent using <code>http://localhost:8181/actuator/jolokia</code> URL:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>$ curl -s 'http://localhost:8181/actuator/jolokia' | jq .
-{
-  "request": {
-    "type": "version"
-  },
-  "value": {
-    "agent": "2.4.2",
-    "protocol": "7.2",
-    "details": {
-      "agent_version": "2.4.2",
-      "agent_id": "192.168.0.221-91398-4ee6c0f5-servlet",
-      "agent_description": "Jolokia Spring Boot Actuator agent",
-      "secured": false,
-      "url": "http://192.168.0.221:8181/actuator/jolokia"
-    },
-    "id": "192.168.0.221-91398-4ee6c0f5-servlet",
-    "config": {
-      "agentId": "192.168.0.221-91398-4ee6c0f5-servlet",
-      "debug": "true",
-      "agentDescription": "Jolokia Spring Boot Actuator agent"
-    },
-    "info": {
-      "proxy": {},
-      "jmx": {}
-    }
-  },
-  "status": 200,
-  "timestamp": 1702653722
-}</pre>
-</div>
-</div>
-<div class="paragraph">
-<p><code>/jolokia</code> actuator is listed under <a href="http://localhost:8181/actuator" class="bare">http://localhost:8181/actuator</a>:</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="_images/jolokia-endpoints-json.png" alt="jolokia endpoints json">
-</div>
-</div>
-<div class="paragraph">
-<p>What&#8217;s more, with IDE support, Jolokia configuration properties are suggested:</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="_images/jolokia-actuator-endpoint.png" alt="jolokia actuator endpoint">
-</div>
-</div>
-<div class="paragraph">
-<p>An example of application using Spring Boot and its actuator features is available at <code>examples/spring-boot-actuator</code> in <a href="https://github.com/jolokia/jolokia" class="externalLink" target="_blank" rel="noopener">Jolokia GitHub repository</a>.</p>
+<p>~</p>
 </div>
 </div>
 </div>
@@ -605,7 +719,7 @@ Because <a href="https://docs.spring.io/spring-boot/docs/3.2.0/reference/htmlsin
   </div>
 <footer class="footer">
   This page was built using the Antora default UI. The source code for this UI is licensed under the terms of the MPL-2.0 license. | Copyright © 2010 -
-  2023 Roland Huß
+  2025 Roland Huß
 </footer>
 <script id="site-script" src="../_/js/site.js" data-ui-root-path="../_"></script>
 <script async src="../_/js/vendor/highlight.js"></script>
