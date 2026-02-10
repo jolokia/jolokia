@@ -1,5 +1,5 @@
 ////
-  Copyright 2009-2024 Jolokia Team
+  Copyright 2009-2026 Jolokia Team
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -14,6 +14,160 @@
   limitations under the License.
 ////
 == News
+
+=== Jolokia 2.5.0 released
+
+[.news-date]
+2026-02-10
+
+We're happy to announce a new big release of Jolokia 2.5.0!
+
+==== A word on Semantic Versioning
+
+First - a little apology for breaking https://semver.org/[Semantic Versioning] principles. Jolokia 2.4 and now 2.5 introduced some API
+changes related to refactoring and introduction of SPI interface for Jolokia Client (with 3 built-in implementations).
+
+Jolokia is not a single library - it includes:
+
+* Agent modules - for running Jolokia Agent as a Web Application in a https://jakarta.ee/specifications/servlet/6.1/jakarta-servlet-spec-6.1[Servlet Container], https://docs.spring.io/spring-boot/3.5/reference/actuator/endpoints.html[Spring Boot Actuator endpoint] or standalone Agent using https://docs.oracle.com/en/java/javase/17/docs/api/jdk.httpserver/module-summary.html[JDK HTTP Server].
+* Java Client libraries - for accessing the Agent using HTTP Client libraries (now - 3 different implementations)
+* JavaScript NPM packages - for accessing the Agent using JavaScript
+* https://docs.oracle.com/en/java/javase/17/docs/api/java.management/javax/management/remote/JMXConnector.html[JMX Connector (Client)] implementation
+* A Jolokia protocol specification (format of JSON messages) with own versioning scheme
+
+Traditionally Jolokia didn't change the major version too often and we've decided to continue this tradition. +
+Indeed, Jolokia Client API has changed, but the migration should be straightforward (just change `J4p` to `Jolokia` prefix for several client-related classes). The main reason for the change was the introduction of SPI interface (`org.jolokia.client.spi.HttpClientSpi`) and removing direct dependency on https://hc.apache.org/httpcomponents-client-4.5.x/index.html[Apache HttpClient 4] API.
+
+==== Module reorganization
+
+Jolokia 2.4.0 introduced new Jolokia Client based on SPI interface and discoverable implementations. This change is combined with a refactoring of _serialization mechanisms_. Before Jolokia 2.4.0, we had three different mechanisms:
+
+* Server (Agent) code was using the _best_ (de)serialization for all required complex data structures (based on Open Types from JMX)
+* Jolokia Client was used simplified serialization (object to JSON) mechanism for setting MBean attributes and invoking MBean operations
+* JMX Adapter (https://docs.oracle.com/en/java/javase/17/docs/api/java.management/javax/management/remote/JMXConnector.html[JMX Connector (Client)] implementation) was using simplified deserialization mechanism for building Java object from JSON data retrieved using Jolokia Client
+
+Jolokia 2.5.0 removes this difference and now a single, unified (de)serialization mechanism is used in all these areas. This allows use to use Jolokia JMX Adapter with more complex MBeans like Java Flight Recorder.
+
+A new `org.jolokia:jolokia-core` module is introduced - it contains common utilities (escaping, serialization, logging) to be reused throughout other Jolokia modules.
+
+==== Open Types discovery
+
+https://docs.oracle.com/en/java/javase/17/docs/api/java.management/javax/management/MXBean.html[MXBean Specification] has clear, strict, but very flexible rules for Java object representation using _Open Types_. +
+In Jolokia 2.5.0 we can use the `list` operation to retrieve actual structure of the complex Open Types used by M(X)Bean attributes and operations.
+
+A picture is worth 1000 words, so here are the attributes for `java.lang:type=Memory` MBean before 2.5.0:
+
+[,json]
+----
+{
+  "request": {
+    "path": "java.lang/type=Memory/attr",
+    "type": "list"
+  },
+  "value": {
+    ...
+    "HeapMemoryUsage": {
+      "r": true,
+      "rw": false,
+      "w": false,
+      "is": false,
+      "type": "javax.management.openmbean.CompositeData",
+      "desc": "HeapMemoryUsage"
+    },
+    "NonHeapMemoryUsage": {
+      "r": true,
+      "rw": false,
+      "w": false,
+      "is": false,
+      "type": "javax.management.openmbean.CompositeData",
+      "desc": "NonHeapMemoryUsage"
+    },
+    ...
+  },
+  "status": 200,
+  "timestamp": 1770722333
+}
+----
+
+And here's what we get with Jolokia 2.5.0:
+
+[,json]
+----
+{
+  "request": {
+    "path": "java.lang/type=Memory/attr",
+    "type": "list"
+  },
+  "value": {
+    ...
+    "HeapMemoryUsage": {
+      "r": true,
+      "rw": false,
+      "w": false,
+      "is": false,
+      "type": "javax.management.openmbean.CompositeData",
+      "desc": "HeapMemoryUsage",
+      "openType": {
+        "kind": "composite",
+        "type": "java.lang.management.MemoryUsage",
+        "class": "javax.management.openmbean.CompositeData",
+        "items": {
+          "init": "java.lang.Long",
+          "committed": "java.lang.Long",
+          "max": "java.lang.Long",
+          "used": "java.lang.Long"
+        },
+        "desc": "java.lang.management.MemoryUsage"
+      }
+    },
+    ...
+  },
+  "status": 200,
+  "timestamp": 1770722390
+}
+----
+
+==== JMX Adaptor improvements
+
+We've reviewed entire code for https://docs.oracle.com/en/java/javase/17/docs/api/java.management/javax/management/remote/JMXConnector.html[JMX Connector (Client)] implementation. +
+Unified (de)serialization mechanism is now used in this module. With additional information on the Open Types used by the MBeans, Jolokia works much better with tools like JConsole.
+
+Additionally we've introduced a declarative way of configuring the Jolokia Client used by Jolokia JMX Adaptor. When using JConsole with Jolokia, we can easily configure TLS support using system properties or environment variables.
+
+For example we can run `jconsole` with this command line:
+[,shell]
+----
+$ JOLOKIA_CLIENT_KEY_PASSWORD=jolokia \
+    jconsole \
+    -J-Dswing.defaultlaf=javax.swing.plaf.metal.MetalLookAndFeel \
+    -J-Dsun.java2d.uiScale=3 \
+    -J-Djava.class.path=$HOME/.m2/repository/org/jolokia/jolokia-client-jmx-adapter/2.5.0/jolokia-client-jmx-adapter-2.5.0-standalone.jar \
+    -J-Djolokia.caCertificate=ca.cer.pem \
+    -J-Djolokia.clientCertificate=client.cer.pem \
+    -J-Djolokia.clientKey=client-private.key-pk8.pem
+----
+
+Certificates and private keys (DER or PEM format, encrypted or plain) can be used without a need to build Java keystores.
+
+==== Improved exception handling
+
+We've reviewed exception handling code. All errors caused by malformed using input (invalid JSON, unknown processing parameters) cause HTTP 400 error (`Bad Request`). +
+All JMX errors (except security issues) cause Jolokia error which include an actual JMX exception - so we can better implement the `javax.management.MBeanServerConnection` contract.
+
+==== Spring Boot 4 / Spring Framework 7 support
+
+Due to https://spring.io/blog/2025/10/28/modularizing-spring-boot[Spring Boot 4 modularization effort], we had to alter the way Jolokia is registered as an actuator endpoint. We didn't stop supporting Spring Boot 3, but we now include two separate modules:
+
+* `org.jolokia:jolokia-support-springboot3` - for legacy Spring Boot 3 support
+* `org.jolokia:jolokia-support-springboot` - for Spring Boot 4 (and hopefully next versions)
+
+Before Jolokia 2.5.0 we had only one `org.jolokia:jolokia-support-spring` module. And again, breaking (a bit) Semantic Versioning principles, we've renamed the module to highlight that it's actually for Spring Boot (and not only for Spring Framework).
+
+==== Documentation improvements
+
+And last, but not least, we've finally reviewed the documentation updating chapters about Jolokia Client, serialization, the Jolokia protocol and others.
+
+Refer to https://jolokia.org/changes-report.html#a2.5.0[changelog] and https://github.com/jolokia/jolokia/releases/tag/v2.5.0[GitHub release notes] for more details.
 
 === Jolokia 2.4.2 released
 

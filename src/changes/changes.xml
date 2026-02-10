@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright 2009-2019 Roland Huss
+  ~ Copyright 2009-2026 Roland Huss
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -17,12 +17,89 @@
 
 <document xmlns="http://maven.apache.org/changes/1.0.0"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-          xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 http://maven.apache.org/xsd/changes-1.0.0.xsd">
+          xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 https://maven.apache.org/xsd/changes-1.0.0.xsd">
   <properties>
     <title>Jolokia</title>
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
+    <release version="2.5.0" description="Release 2.5.0" date="2026-02-10">
+      <action dev="ggrzybek" type="add" issue="974">
+        ArtemisDetector should handle new groupId for Artemis
+      </action>
+      <action dev="ggrzybek" type="add" issue="966">
+        Retrieve OpenType information in Jolokia list requestsBig
+      </action>
+      <action dev="ggrzybek" type="add" issue="965">
+        Incorporate unified Jolokia serialization in jolokia-client-jmx-adapter
+      </action>
+      <action dev="ggrzybek" type="add" issue="964">
+        Consider supporting java.util.logging for Jolokia Client
+      </action>
+      <action dev="ggrzybek" type="fix" issue="962">
+        Review Jolokia exception handling
+      </action>
+      <action dev="ggrzybek" type="fix" issue="953">
+        UnsupportedOperationException: Usage threshold is not supported
+      </action>
+      <action dev="tommystendahl" type="fix" issue="951">
+        IPv6 addresses in JolokiaJmxConnector give IllegalArgumentException
+      </action>
+      <action dev="ggrzybek" type="fix" issue="950">
+        Jobs should handle HTTP/fetch errors too in a configurable way
+      </action>
+      <action dev="ggrzybek" type="fix" issue="940">
+        jolokia-support-spring fails if actuators aren't running on separate management port
+      </action>
+      <action dev="ggrzybek" type="fix" issue="937">
+        Registered jobs are delayed till the next refreshRate tick
+      </action>
+      <action dev="ggrzybek" type="fix" issue="934">
+        ObjectToJsonConverter throws NumberFormatException when converting NaN metrics
+      </action>
+      <action dev="ggrzybek" type="add" issue="931">
+        Support for Spring Boot 4
+      </action>
+      <action dev="ggrzybek" type="add" issue="923">
+        Update Spring Support documentation
+      </action>
+      <action dev="ggrzybek" type="add" issue="916">
+        Document the changes in protocol version 8.1 and 8.2
+      </action>
+      <action dev="ggrzybek" type="fix" issue="914">
+        Skip assertion if issue with Jolokia conversion
+      </action>
+      <action dev="ggrzybek" type="add" issue="913">
+        Document changes to Jolokia Java Client (JDK, HttpClient4, HttpClient5)
+      </action>
+      <action dev="ggrzybek" type="add" issue="911">
+        SSL Configuration in jolokia-adapter
+      </action>
+      <action dev="ggrzybek" type="add" issue="892">
+        Make OSGi dependencies optional
+      </action>
+      <action dev="ggrzybek" type="add" issue="888">
+        Improve Jolokia serialization and use it in jolokia-client-java
+      </action>
+      <action dev="ggrzybek" type="add" issue="767">
+        Document ServerDetector improvements (runtime-specific classloader)
+      </action>
+      <action dev="ggrzybek" type="fix" issue="666">
+        RemoteJmxAdapter.isInstanceOf should handle NoClassDefFoundError, not just ClassNotFoundException
+      </action>
+      <action dev="ggrzybek" type="fix" issue="613">
+        Issues with flight recordings over JMX adapter
+      </action>
+      <action dev="ggrzybek" type="add" issue="471">
+        Document Configuring JMX Adapter
+      </action>
+      <action dev="ggrzybek" type="add" issue="376">
+        Document how to use @jsonmbean?
+      </action>
+      <action dev="ggrzybek" type="fix" issue="65">
+        Change default behaviours
+      </action>
+    </release>
     <release version="2.4.2" description="Release 2.4.2" date="2025-11-17">
       <action dev="ggrzybek" type="fix" issue="932">
         Handle exceptions when fetching multiple attributes

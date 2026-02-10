@@ -1169,7 +1169,7 @@
     <sonar.projectKey>org.jolokia:jolokia-2.0</sonar.projectKey>
 
     <!-- A version used in documentation -->
-    <currentStableVersion>2.4.2</currentStableVersion>
+    <currentStableVersion>2.5.0</currentStableVersion>
     <!-- Jolokia protocol version -->
     <protocolVersion>8.2</protocolVersion>
 
