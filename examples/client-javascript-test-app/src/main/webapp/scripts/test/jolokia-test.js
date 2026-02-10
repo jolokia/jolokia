@@ -16,7 +16,7 @@
 
 $(document).ready(function () {
 
-    let j4p = new Jolokia("/jolokia");
+    let j4p = new Jolokia({ url: "/jolokia", ignoreErrors: true });
 
     // Single requests
     const configs = [
@@ -205,7 +205,7 @@ $(document).ready(function () {
             j4p.request(
                 [
                     { type: "version" },
-                    { type: "exec", mbean: "Blub:type=Bla" },
+                    { type: "exec", mbean: "Blub:type=Bla", operation: "any" },
                     { type: "read", mbean: "java.lang:type=Runtime", attribute: "Name" }
                 ],
                 {
@@ -247,8 +247,10 @@ $(document).ready(function () {
         });
         QUnit.test("Simple request with Jolokia Error", async assert => {
             const done = assert.async();
-            let resp = await j4p.request({ type: "READ", mbean: "bla" });
-            assert.equal(resp["error_type"], "java.lang.IllegalArgumentException", "Illegal Argument");
+            let resp = await j4p.request({ type: "READ", mbean: "bla" }).catch(e => {
+                assert.equal(e.status, 400)
+                return null
+            });
             done()
         });
         QUnit.test("Simple request with HTTP Error", async assert => {

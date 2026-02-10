@@ -16,7 +16,7 @@
 
 $(document).ready(function () {
 
-    let j4p = new Jolokia("/jolokia");
+    let j4p = new Jolokia({ url: "/jolokia", ignoreErrors: true });
 
     QUnit.module("Simplified requests");
 
@@ -178,8 +178,8 @@ $(document).ready(function () {
     QUnit.test("search (sync with error)", async assert => {
         const done = assert.async();
         let value = await j4p.search("jolokia.it:type=*=a*", {
-            error: function (resp) {
-                assert.ok(resp.error != null, "Error occured");
+            fetchError: function (resp) {
+                assert.equal(resp.status, 400, "Error occurred");
                 done();
             }, success: log
         });
@@ -236,7 +236,7 @@ $(document).ready(function () {
         const done = assert.async();
         let value = await j4p.list("java.lang/type=Bla", {
             error: function (resp) {
-                assert.equal(resp.error_type, "java.lang.IllegalArgumentException", "java.lang.IllegalArgumentException");
+                assert.equal(resp.error_type, "javax.management.InstanceNotFoundException", "javax.management.InstanceNotFoundException");
                 done();
             }
         });
