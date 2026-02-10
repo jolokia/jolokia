@@ -28,7 +28,7 @@
         ArtemisDetector should handle new groupId for Artemis
       </action>
       <action dev="ggrzybek" type="add" issue="966">
-        Retrieve OpenType information in Jolokia list requestsBig
+        Retrieve OpenType information in Jolokia list requests
       </action>
       <action dev="ggrzybek" type="add" issue="965">
         Incorporate unified Jolokia serialization in jolokia-client-jmx-adapter
