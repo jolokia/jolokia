@@ -1284,8 +1284,8 @@
     <!-- Spring Framework and Spring Boot should be aligned -->
     <version.org.springframework6>6.2.15</version.org.springframework6>
     <version.org.springframework.boot3>3.5.10</version.org.springframework.boot3>
-    <version.org.springframework7>7.0.3</version.org.springframework7>
-    <version.org.springframework.boot4>4.0.2</version.org.springframework.boot4>
+    <version.org.springframework7>7.0.5</version.org.springframework7>
+    <version.org.springframework.boot4>4.0.3</version.org.springframework.boot4>
   </properties>
 
   <profiles>
