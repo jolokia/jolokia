@@ -1240,7 +1240,7 @@
 
     <!-- Versions of test-related dependencies -->
 
-    <version.com.fasterxml.jackson>2.21.0</version.com.fasterxml.jackson>
+    <version.com.fasterxml.jackson>2.21.1</version.com.fasterxml.jackson>
     <version.jakarta.annotation-api>3.0.0</version.jakarta.annotation-api>
     <version.jakarta.authentication-api>3.1.0</version.jakarta.authentication-api>
     <version.net.bytebuddy>1.18.4</version.net.bytebuddy>
