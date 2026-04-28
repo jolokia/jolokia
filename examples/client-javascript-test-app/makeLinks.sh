@@ -5,8 +5,8 @@
 # $ mvn clean package jetty:run-war
 #
 # On first Maven build:
-#  - com.devspan.mojo.javascript:javascript-maven-plugin:war-package goal unpacks org.jolokia:jolokia-client-javascript jar
-#    and puts jolokia.js, jolokia-simple.js and jolokia-cubism.js into target/<web-archive-location>/scripts/lib
+#  - maven-dependency-plugin unpacks org.jolokia:jolokia-client-javascript-esm jar
+#    and puts jolokia.js and jolokia-simple.js into target/<web-archive-location>/scripts/lib
 #  - org.eclipse.jetty.ee10:jetty-ee10-maven-plugin:run-war goal starts Jetty pointing to target/<web-archive-location>
 #    web application
 #

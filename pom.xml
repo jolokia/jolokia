@@ -60,7 +60,6 @@
     <module>client/java</module>
     <module>client/java-httpclient4</module>
     <module>client/java-httpclient5</module>
-    <module>client/javascript</module>
     <module>client/javascript-esm</module>
     <module>client/jmx-adapter</module>
     <module>client/kubernetes</module>
@@ -359,12 +358,6 @@
           <groupId>com.github.github</groupId>
           <artifactId>site-maven-plugin</artifactId>
           <version>${plugin.com.github.site-maven-plugin}</version>
-        </plugin>
-
-        <plugin>
-          <groupId>com.devspan.mojo.javascript</groupId>
-          <artifactId>javascript-maven-plugin</artifactId>
-          <version>${plugin.com.devspan.mojo.javascript-maven-plugin}</version>
         </plugin>
 
         <plugin>
@@ -809,24 +802,6 @@
       </dependency>
       <dependency>
         <groupId>org.jolokia</groupId>
-        <artifactId>jolokia-client-javascript</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jolokia</groupId>
-        <artifactId>jolokia-client-javascript</artifactId>
-        <!-- This type is required by com.devspan.mojo.javascript:javascript-maven-plugin -->
-        <type>javascript</type>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jolokia</groupId>
-        <artifactId>jolokia-client-javascript</artifactId>
-        <classifier>compressed</classifier>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jolokia</groupId>
         <artifactId>jolokia-client-javascript-esm</artifactId>
         <version>${project.version}</version>
       </dependency>
@@ -1216,7 +1191,6 @@
 
     <!-- Versions of Maven plugins (other plugins) -->
 
-    <plugin.com.devspan.mojo.javascript-maven-plugin>0.9.3</plugin.com.devspan.mojo.javascript-maven-plugin>
     <plugin.com.github.eirslett.frontend-maven-plugin>2.0.0</plugin.com.github.eirslett.frontend-maven-plugin>
     <plugin.com.github.site-maven-plugin>0.12</plugin.com.github.site-maven-plugin>
     <plugin.org.apache.felix.maven-bundle-plugin>5.1.9</plugin.org.apache.felix.maven-bundle-plugin>
@@ -1426,7 +1400,6 @@
                   <arguments>
                     antora generate
                     --attribute jolokia-version=${currentStableVersion}
-                    --attribute javascript-maven-plugin-version=${plugin.com.devspan.mojo.javascript-maven-plugin}
                     antora-playbook.yml
                   </arguments>
                   <workingDirectory>src/documentation</workingDirectory>
@@ -1480,30 +1453,6 @@
                       <directory>src/site/asciidoc</directory>
                       <includes>
                         <include>images/**/*</include>
-                      </includes>
-                    </resource>
-                  </resources>
-                </configuration>
-              </execution>
-              <execution>
-                <!--
-                  Jolokia Javascript files are copied into documentation to be used by some examples
-                -->
-                <id>copy-javascript</id>
-                <phase>pre-site</phase>
-                <goals>
-                  <goal>copy-resources</goal>
-                </goals>
-                <inherited>false</inherited>
-                <configuration>
-                  <outputDirectory>${project.build.directory}/site/js</outputDirectory>
-                  <resources>
-                    <resource>
-                      <directory>client/javascript/src/main/javascript</directory>
-                      <includes>
-                        <include>jolokia.js</include>
-                        <include>jolokia-cubism.js</include>
-                        <include>jolokia-simple.js</include>
                       </includes>
                     </resource>
                   </resources>
