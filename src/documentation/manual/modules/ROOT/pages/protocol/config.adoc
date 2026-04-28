@@ -14,7 +14,7 @@
   limitations under the License.
 ////
 
-[#version]
+[#config]
 === Getting the basic configuration (config)
 
 The Jolokia command `config` is provided to get unauthenticated information about the agent.
@@ -22,7 +22,7 @@ It duplicates (a bit) the information from the `version` operation, but is meant
 
 It serves similar purpose as `/.well-known/openid-configuration` endpoint for OpenID Connect providers.
 
-[#get-version]
+[#get-config]
 ==== GET version request
 
 The GET URL for a config request has the following format:
@@ -31,7 +31,7 @@ The GET URL for a config request has the following format:
 <base-url>/config
 ----
 
-[#post-version]
+[#post-config]
 ==== POST version request
 
 A version POST request has only a single key
@@ -42,7 +42,7 @@ However, GET requests are preferred for `config` operation. The reason is that i
 access in Servlet applications for GET requests (and remove the constraints for one specific URI). See https://jakarta.ee/specifications/servlet/5.0/jakarta-servlet-spec-5.0#security[Security chapter,role=externalLink,window=_blank]
 of Java Servlet API specification.
 
-[#response-version]
+[#response-config]
 ==== Config response
 
 The response value for a `config` request looks like this:

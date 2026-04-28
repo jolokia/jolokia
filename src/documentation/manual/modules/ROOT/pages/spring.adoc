@@ -63,7 +63,7 @@ Both modules declare Spring dependencies with `provided` scope, so it's up to th
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-dependencies</artifactId>
-      <version>${spring-boot-4-version}</version>
+      <version>$\{spring-boot-4-version}</version>
       <type>pom</type>
       <scope>import</scope>
     </dependency>
@@ -106,7 +106,7 @@ Both modules declare Spring dependencies with `provided` scope, so it's up to th
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-dependencies</artifactId>
-      <version>${spring-boot-3-version}</version>
+      <version>$\{spring-boot-3-version}</version>
       <type>pom</type>
       <scope>import</scope>
     </dependency>
