@@ -179,9 +179,6 @@ Client modules are used to connect to running Jolokia Agents.
 |`jolokia-client-javascript-esm`
 |Maven module containing modern Javascript libraries based on TypeScript, bundlers and ESM modules.
 
-|`jolokia-client-javascript`
-|Maven module containing legacy Javascript libraries
-
 |`jolokia-client-jmx-adapter`
 |Special _reversed_ client library. It contains implementation of `javax.management.remote.JMXConnectorProvider` allowing to use standard JMX Remote API to access external Jolokia Agent. It can be used in tools like JConsole or https://www.oracle.com/java/technologies/jdk-mission-control.html[Java Mission Control,role=externalLink,window=_blank]. It uses JMX URIs in the form of `service:jmx:jolokia://<host>:<port>/jolokia/<path>`.
 

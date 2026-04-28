@@ -905,7 +905,7 @@ be used within a `pom.xml`:
       <plugin>
         <groupId>com.devspan.mojo.javascript</groupId>
         <artifactId>javascript-maven-plugin</artifactId>
-        <version>{javascript-maven-plugin-version}</version>
+        <version>0.9.3</version>
         <extensions>true</extensions>
         <configuration>
           <useArtifactId>false</useArtifactId>

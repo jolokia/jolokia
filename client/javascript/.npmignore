@@ -1,6 +1,0 @@
-.*
-src/
-target/
-scripts/
-jest.config.js
-pom.xml
