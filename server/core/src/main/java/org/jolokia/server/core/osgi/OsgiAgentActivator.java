@@ -6,6 +6,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import jakarta.servlet.Servlet;
 import jakarta.servlet.http.HttpServlet;
@@ -75,6 +77,8 @@ public class OsgiAgentActivator implements BundleActivator, ServiceTrackerCustom
     private ServiceRegistration<ServletContextHelper> contextRegistration = null;
     private ServiceRegistration<?> servletRegistration = null;
 
+    private final Lock lock = new ReentrantLock();
+
     /** {@inheritDoc} */
     @SuppressWarnings("deprecation")
     public void start(BundleContext pBundleContext) {
@@ -92,7 +96,12 @@ public class OsgiAgentActivator implements BundleActivator, ServiceTrackerCustom
 
         // Whiteboard servlet
         if (Boolean.parseBoolean(getConfiguration(REGISTER_WHITEBOARD_SERVLET, LISTEN_FOR_HTTP_SERVICE))) {
-            registerWhiteboardServlet(pBundleContext);
+            try {
+                lock.lock();
+                registerWhiteboardServlet(pBundleContext);
+            } finally {
+                lock.unlock();
+            }
         }
     }
 
@@ -357,9 +366,14 @@ public class OsgiAgentActivator implements BundleActivator, ServiceTrackerCustom
         public void updated(Dictionary<String, ?> properties) {
             // configuration is updated - we don't pass new dictionary, because servlet registration will
             // refer to configuration admin directly anyway (at least in first implementation)
-            unregisterWhiteboardServlet();
+            try {
+                lock.lock();
+                unregisterWhiteboardServlet();
 
-            registerWhiteboardServlet(bundleContext);
+                registerWhiteboardServlet(bundleContext);
+            } finally {
+                lock.unlock();
+            }
         }
 
     }
