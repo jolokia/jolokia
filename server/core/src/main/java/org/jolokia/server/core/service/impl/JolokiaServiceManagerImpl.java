@@ -16,12 +16,11 @@
 
 package org.jolokia.server.core.service.impl;
 
-import java.security.PrivilegedAction;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.stream.*;
 
 import javax.management.*;
-import javax.security.auth.Subject;
 
 import org.jolokia.json.JSONObject;
 import org.jolokia.server.core.auth.JolokiaAgentPrincipal;
@@ -35,12 +34,14 @@ import org.jolokia.server.core.service.container.ContainerLocator;
 import org.jolokia.server.core.service.request.RequestHandler;
 import org.jolokia.server.core.service.request.RequestInterceptor;
 import org.jolokia.server.core.util.DebugStore;
+import org.jolokia.server.core.util.SubjectAccess;
+import org.jolokia.server.core.util.SubjectAccessProvider;
 import org.jolokia.server.core.util.jmx.DefaultMBeanServerAccess;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 import org.jolokia.json.parser.JSONParser;
 
 /**
- * The service manager for handling all the service organisation stuff.
+ * The service manager for handling all the service organization stuff.
  *
  * @author roland
  * @since 28.03.13
@@ -105,6 +106,8 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
      */
     private Set<String> disabledServices;
 
+    private final SubjectAccess subjectAccess;
+
     /**
      * Create the implementation of a service manager
      *
@@ -126,6 +129,9 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
         serviceLookups = new ArrayList<>();
         staticServices = new HashMap<>();
         staticLowServices = new HashMap<>();
+
+        subjectAccess = SubjectAccessProvider.getSubjectAccess();
+
         detectorLookup = pDetectorLookup != null ? pDetectorLookup : new ClasspathServerDetectorLookup();
         // The version request handler must be always present and always be first
         addService(new VersionRequestHandler());
@@ -199,18 +205,23 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
     /** {@inheritDoc} */
     public synchronized JolokiaContext start() {
         if (!isInitialized) {
-            ServerHandle handle = Subject.doAs(JolokiaAgentPrincipal.asSubject(), new PrivilegedAction<>() {
-                @Override
-                public ServerHandle run() {
-                    SortedSet<ServerDetector> detectors = new TreeSet<>();
-                    if (!Boolean.parseBoolean(configuration.getConfig(ConfigKey.DISABLE_DETECTORS))) {
-                        detectors = detectorLookup.lookup(logHandler);
+            try {
+                ServerHandle handle = subjectAccess.callAs(JolokiaAgentPrincipal.asSubject(), new Callable<>() {
+                    @Override
+                    public ServerHandle call() {
+                        SortedSet<ServerDetector> detectors = new TreeSet<>();
+                        if (!Boolean.parseBoolean(configuration.getConfig(ConfigKey.DISABLE_DETECTORS))) {
+                            detectors = detectorLookup.lookup(logHandler);
+                        }
+                        mbeanServerAccess = createMBeanServerAccess(detectors);
+                        return detect(getDetectorOptions(), detectors, mbeanServerAccess);
                     }
-                    mbeanServerAccess = createMBeanServerAccess(detectors);
-                    return detect(getDetectorOptions(), detectors, mbeanServerAccess);
-                }
-            });
-            agentDetails = new AgentDetails(configuration,handle);
+                });
+                agentDetails = new AgentDetails(configuration, handle);
+            } catch (Exception e) {
+                jolokiaContext.error("Cannot detect ServerHandle: " + e.getMessage(), e);
+                agentDetails = new AgentDetails(configuration, ServerHandle.NULL_SERVER_HANDLE);
+            }
 
             securityDetails = configuration.getSecurityDetails();
 
@@ -266,13 +277,17 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
 
     /** {@inheritDoc} */
     public synchronized void stop() {
-        Subject.doAs(JolokiaAgentPrincipal.asSubject(), new PrivilegedAction<>() {
-            @Override
-            public Object run() {
-                stopInternal();
-                return null;
-            }
-        });
+        try {
+            subjectAccess.callAs(JolokiaAgentPrincipal.asSubject(), new Callable<>() {
+                @Override
+                public Object call() {
+                    stopInternal();
+                    return null;
+                }
+            });
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private synchronized void stopInternal() {

@@ -233,6 +233,7 @@
               org.jolokia.server.core.service.request,
               org.jolokia.server.core.service.serializer,
               org.jolokia.server.core.util,
+              org.jolokia.server.core.util.jaas,
               org.jolokia.server.core.util.jmx,
               org.jolokia.server.core.vm
             </Export-Package>

@@ -1,11 +1,9 @@
 package org.jolokia.service.history;
 
 import java.lang.management.ManagementFactory;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
+import java.util.concurrent.Callable;
 
 import javax.management.*;
-import javax.security.auth.Subject;
 
 import org.jolokia.server.core.auth.JolokiaAgentPrincipal;
 import org.jolokia.server.core.config.ConfigKey;
@@ -13,6 +11,8 @@ import org.jolokia.server.core.request.JolokiaRequest;
 import org.jolokia.server.core.service.api.*;
 import org.jolokia.server.core.service.request.RequestInterceptor;
 import org.jolokia.json.JSONObject;
+import org.jolokia.server.core.util.SubjectAccess;
+import org.jolokia.server.core.util.SubjectAccessProvider;
 
 /**
  * @author roland
@@ -23,6 +23,8 @@ public class HistoryMBeanRequestInterceptor extends AbstractJolokiaService<Reque
     // ObjectName for updating the history
     private ObjectName historyObjectName;
 
+    private final SubjectAccess subjectAccess;
+
     /**
      * Construction of a base service for a given type and order
      *
@@ -30,6 +32,7 @@ public class HistoryMBeanRequestInterceptor extends AbstractJolokiaService<Reque
      */
     public HistoryMBeanRequestInterceptor(int pOrderId) {
         super(RequestInterceptor.class, pOrderId);
+        subjectAccess = SubjectAccessProvider.getSubjectAccess();
     }
 
     /** {@inheritDoc} */
@@ -65,9 +68,9 @@ public class HistoryMBeanRequestInterceptor extends AbstractJolokiaService<Reque
         MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
         if (historyObjectName != null) {
             try {
-                Subject.doAs(JolokiaAgentPrincipal.asSubject(), new PrivilegedExceptionAction<>() {
+                subjectAccess.callAs(JolokiaAgentPrincipal.asSubject(), new Callable<>() {
                     @Override
-                    public Object run() {
+                    public Object call() {
                         try {
                             mBeanServer.invoke(historyObjectName,
                                 "updateAndAdd",
@@ -83,7 +86,7 @@ public class HistoryMBeanRequestInterceptor extends AbstractJolokiaService<Reque
                         return null;
                     }
                 });
-            } catch (PrivilegedActionException ignored) {
+            } catch (Exception ignored) {
                 // wraps unchecked (non Runtime) exceptions
             }
         }

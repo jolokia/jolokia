@@ -25,8 +25,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -61,6 +59,8 @@ import org.jolokia.core.util.ClassUtil;
 import org.jolokia.server.core.util.IoUtil;
 import org.jolokia.server.core.util.MimeTypeUtil;
 import org.jolokia.server.core.util.NetworkUtil;
+import org.jolokia.server.core.util.SubjectAccess;
+import org.jolokia.server.core.util.SubjectAccessProvider;
 
 /**
  * Agent servlet which connects to a local JMX MBeanServer for
@@ -116,6 +116,8 @@ public class AgentServlet extends HttpServlet {
     // whether to allow reverse DNS lookup for checking the remote host
     private boolean allowDnsReverseLookup;
 
+    private final SubjectAccess subjectAccess;
+
     /**
      * No argument constructor, used e.g. by a servlet
      * descriptor when creating the servlet out of web.xml
@@ -133,6 +135,7 @@ public class AgentServlet extends HttpServlet {
      */
     public AgentServlet(Restrictor pRestrictor) {
         initRestrictor = pRestrictor;
+        subjectAccess = SubjectAccessProvider.getSubjectAccess();
     }
 
     /**
@@ -385,12 +388,12 @@ public class AgentServlet extends HttpServlet {
     private void doHandleAs(Subject pSubject, final ServletRequestHandler pReqHandler, final HttpServletRequest pReq, final HttpServletResponse pResp)
             throws IOException {
         try {
-            Subject.doAs(pSubject, (PrivilegedExceptionAction<Void>) () -> {
+            subjectAccess.callAs(pSubject, () -> {
                 doHandle(pReqHandler,pReq, pResp);
                 return null;
             });
-        } catch (PrivilegedActionException | SecurityException e) {
-            // PrivilegedActionException happens _only_ when the action has thrown an checked exception.
+        } catch (Exception e) {
+            // Exception happens _only_ when the action has thrown an checked exception.
             // But we handle all java.lang.Throwables in the doHandle() method anyway.
             // SecurityException happens _only_ under a SecurityManager and it's being removed anyway.
             sendInternalServerError(pResp, new Exception(e.getMessage() == null ? e.getClass().getName() : e.getMessage()));

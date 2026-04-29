@@ -1,5 +1,3 @@
-package org.jolokia.jvmagent.handler;
-
 /*
  * Copyright 2009-2013 Roland Huss
  *
@@ -15,6 +13,7 @@ package org.jolokia.jvmagent.handler;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.jvmagent.handler;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,9 +23,6 @@ import java.io.Writer;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -53,6 +49,8 @@ import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.util.IoUtil;
 import org.jolokia.server.core.util.MimeTypeUtil;
 import org.jolokia.json.JSONStructure;
+import org.jolokia.server.core.util.SubjectAccess;
+import org.jolokia.server.core.util.SubjectAccessProvider;
 
 /**
  * HttpHandler for handling a Jolokia request
@@ -82,6 +80,8 @@ public class JolokiaHttpHandler implements HttpHandler {
 
     private final SimpleDateFormat rfc1123Format;
 
+    private final SubjectAccess subjectAccess;
+
     /**
      * Create a new HttpHandler for processing HTTP request
      *
@@ -96,6 +96,8 @@ public class JolokiaHttpHandler implements HttpHandler {
         allowDnsReverseLookup = Boolean.parseBoolean(jolokiaContext.getConfig(ConfigKey.ALLOW_DNS_REVERSE_LOOKUP));
 
         rfc1123Format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
+
+        subjectAccess = SubjectAccessProvider.getSubjectAccess();
     }
 
     /**
@@ -142,12 +144,12 @@ public class JolokiaHttpHandler implements HttpHandler {
      */
     private void doHandleAs(Subject subject, final HttpExchange pHttpExchange) throws IOException {
         try {
-            Subject.doAs(subject, (PrivilegedExceptionAction<Void>) () -> {
+            subjectAccess.callAs(subject, () -> {
                 doHandle(pHttpExchange);
                 return null;
             });
-        } catch (PrivilegedActionException | SecurityException e) {
-            // PrivilegedActionException happens _only_ when the action has thrown an checked exception.
+        } catch (Exception e) {
+            // Exception happens _only_ when the action has thrown an checked exception.
             // But we handle all java.lang.Throwables in the doHandle() method anyway.
             // SecurityException happens _only_ under a SecurityManager and it's being removed anyway.
             sendInternalServerError(pHttpExchange, new Exception(e.getMessage() == null ? e.getClass().getName() : e.getMessage()));
