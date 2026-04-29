@@ -266,7 +266,7 @@ $(document).ready(function () {
             assert.ok(resp == null, "No response should be returned");
             done()
         });
-        QUnit.test("GET Write test with newlines", async assert => {
+        QUnit.test("POST Write test with newlines", async assert => {
             const done = assert.async();
             let value = "Max\nMorlock";
             let resp = await j4p.request({
@@ -274,13 +274,13 @@ $(document).ready(function () {
                 mbean: "jolokia.it:type=attribute",
                 attribute: "Name",
                 value: value
-            }, { method: "GET" });
+            }, { method: "POST" });
             assert.equal(resp.status, 200);
             resp = await j4p.request({ type: "READ", mbean: "jolokia.it:type=attribute", attribute: "Name" });
             assert.equal(resp.value, value);
             done()
         });
-        QUnit.test("GET Exec test with newlines", async assert => {
+        QUnit.test("POST Exec test with newlines", async assert => {
             const done = assert.async();
             let args = [["Max\nMorlock", "dummy"], "extra"];
             let resp = await j4p.request({
@@ -288,7 +288,7 @@ $(document).ready(function () {
                 mbean: "jolokia.it:type=operation",
                 operation: "arrayArguments",
                 arguments: args
-            }, { method: "GET" });
+            }, { method: "POST" });
             assert.equal(resp.status, 200);
             assert.equal(resp.value, "Max\nMorlock");
             done()
@@ -399,7 +399,7 @@ $(document).ready(function () {
                 }
             );
         });
-        QUnit.test("Complex name with GET", assert => {
+        QUnit.test("Complex name with POST", assert => {
             const done = assert.async();
             j4p.request(
                 { type: "READ", mbean: "jolokia.it:type=naming/,name=\"jdbc/testDB\"", attribute: "Ok" },
@@ -412,7 +412,7 @@ $(document).ready(function () {
                     error: function (resp) {
                         throw new Error("Cannot read attribute " + JSON.stringify(resp));
                     },
-                    method: "get"
+                    method: "post"
                 }
             );
         });
