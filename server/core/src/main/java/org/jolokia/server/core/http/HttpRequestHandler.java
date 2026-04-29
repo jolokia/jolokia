@@ -250,7 +250,7 @@ public class HttpRequestHandler extends BaseRequestHandler {
             Matcher matcher = PATH_PREFIX_PATTERN.matcher(pPathInfo);
             if (matcher.find()) {
                 String prefix = matcher.group();
-                String pathInfoEncoded = pUri.replaceFirst("^.*?" + prefix, prefix);
+                String pathInfoEncoded = pUri.replaceFirst("^.*?" + Pattern.quote(prefix), prefix);
                 return URLDecoder.decode(pathInfoEncoded, StandardCharsets.UTF_8);
             }
         }
