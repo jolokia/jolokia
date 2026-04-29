@@ -16,6 +16,7 @@
 
 {
   "compilerOptions": {
+    "rootDir": "../../",
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "allowImportingTsExtensions": false,
@@ -33,6 +34,6 @@
     "declarationDir": "dist/dts",
     "types": [ "node" ]
   },
-  "include": [ "src", "test" ],
+  "include": [ "./src/**/*", "./test/**/*" ],
   "$schema": "https://json.schemastore.org/tsconfig"
 }

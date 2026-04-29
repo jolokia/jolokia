@@ -27,8 +27,16 @@ const defaultOutput = {
 }
 
 const configJolokia = {
-  input: "src/jolokia.ts",
-  plugins: [ nodeResolve(), typescript({ include: [ "src/*" ] }) ],
+  input: "./src/jolokia.ts",
+  plugins: [
+    nodeResolve(),
+    typescript({
+      include: ["./**/*.ts"],
+      compilerOptions: {
+        "rootDir": "./src"
+      }
+    })
+  ],
   output: [
     {
       ...defaultOutput,

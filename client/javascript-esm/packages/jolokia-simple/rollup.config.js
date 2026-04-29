@@ -30,8 +30,16 @@ const defaultSimpleOutput = {
 }
 
 const configJolokiaSimple = {
-  input: "src/jolokia-simple.ts",
-  plugins: [ nodeResolve(), typescript({ include: [ "src/*" ] }) ],
+  input: "./src/jolokia-simple.ts",
+  plugins: [
+    nodeResolve(),
+    typescript({
+      include: ["./**/*.ts"],
+      compilerOptions: {
+        "rootDir": "./src"
+      }
+    })
+  ],
   external: [ "jolokia.js" ],
   output: [
     {

@@ -102,8 +102,8 @@ export type ProcessingParameters = {
    */
   ifModifiedSince?: number
   /**
-   * Whether to provide optimized list response, where instead of domains and mbeans, we return a cache and domains,
-   * where domains' mbeans may refer to cached MBeanInfo instead of a copy (important when we have multiple
+   * Whether to provide optimized list response, where instead of domains and mbeans, we return a cache and domains.
+   * domains' mbeans may refer to cached MBeanInfo instead of a copy (important when we have multiple
    * mbeans with the same MBeanInfo)
    */
   listCache?: boolean
@@ -827,11 +827,11 @@ export type JMXNotification = {
 //     (background) tasks/jobs, so we allow then for jolokia.request() as well (promise is not returned in this case)
 //     when using jolokia.request(), we can pass either a request or an array of requests (bulk request).
 //
-//     In both cases we can specify a callback or an array of callbacks and for bulk requests callbacks will be called
-//     in round-robin fashion (for bulk-request of 3 and array of 2 callbacks, first callback will be called with
-//     response 0 and 2, while callback 1 will be called with response 1)
+//     In both cases we can specify a callback or an array of callbacks and for bulk requests callbacks will be called.
+//     In round-robin fashion (for bulk-request of 3 and array of 2 callbacks, first callback will be called with
+//     response 0 and 2, while callback 1 will be called with response 1).
 //
-//     for registered jobs, we can specify a generic callback, which will be called with all the responses. This
+//     For registered jobs, we can specify a generic callback which will be called with all the responses. This
 //     is not possible with normal jolokia.request() call
 
 export type GenericCallback = (response: JolokiaResponse, index: number) => void

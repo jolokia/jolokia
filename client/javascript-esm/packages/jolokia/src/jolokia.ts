@@ -1015,8 +1015,9 @@ function extractMethod(request: BaseRequest | BaseRequest[], params: RequestOpti
       method = "get"
     } else if (methodGiven !== "post") {
       throw new Error("Illegal method \"" + methodGiven + "\"")
+    } else {
+      method = "post"
     }
-    method = "post"
   } else {
     // Determine method dynamically
     if (Array.isArray(request)
