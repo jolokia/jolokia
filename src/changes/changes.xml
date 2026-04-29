@@ -23,6 +23,17 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
+    <release version="2.6.0" description="Release 2.6.0" date="2026-04-29">
+      <action dev="ggrzybek" type="remove" issue="1003">
+        Remove old client/javascript
+      </action>
+      <action dev="ggrzybek" type="add" issue="1002">
+        Calling javax.security.auth.Subject using JDK25 friendly API
+      </action>
+      <action dev="ggrzybek" type="fix" issue="999">
+        Misleading bundle symbolic names for Java client libraries
+      </action>
+    </release>
     <release version="2.5.1" description="Release 2.5.1" date="2026-02-18">
       <action dev="ggrzybek" type="fix" issue="976">
         Missing OpenType information for CompositeType items

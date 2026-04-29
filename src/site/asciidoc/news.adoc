@@ -15,6 +15,22 @@
 ////
 == News
 
+=== Jolokia 2.6.0 released
+
+[.news-date]
+2026-04-29
+
+New minor (but not micro) release of Jolokia is released. The important change is the removal of `org.jolokia:jolokia-client-javascript`
+module which included Jolokia.js library in original form. Since Jolokia 2.1.0 we include the _modern_ JavaScript library
+written in TypeScript and published https://www.npmjs.com/package/jolokia.js[to npmjs.com]. Starting with Jolokia 2.6.0 we
+no longer have to include the old versions (security scanners were less and less happy with the related `package.json`...).
+
+Additional important change is related to https://openjdk.org/jeps/411[JEP-411: Deprecate the Security Manager for Removal].
+While Jolokia did not use SecurityManager, JEP-411 also includes breaking change to `javax.security.auth.Subject` API and we now
+ensure that Jolokia works with latest JDK (where `javax.security.auth.Subject.getSubject()` throws `UnsupportedOperationException`).
+
+Refer to https://jolokia.org/changes-report.html#a2.6.0[changelog] and https://github.com/jolokia/jolokia/releases/tag/v2.6.0[GitHub release notes] for more details.
+
 === Jolokia 2.5.1 released
 
 [.news-date]
