@@ -7,7 +7,7 @@
     <link rel="canonical" href="https://jolokia.org/manual/jolokia_protocol.html">
     <link rel="prev" href="proxy_mode.html">
     <link rel="next" href="jolokia_mbeans.html">
-    <meta name="generator" content="Antora 3.1.4">
+    <meta name="generator" content="Antora 3.1.14">
     <link rel="stylesheet" href="../_/css/site.css">
     <link rel="stylesheet" href="../_/css/jolokia.css">
   </head>
@@ -2921,7 +2921,7 @@ optionally some extra information added by the server detector).</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="version"><a class="anchor" href="#version"></a>Getting the basic configuration (config)</h3>
+<h3 id="config"><a class="anchor" href="#config"></a>Getting the basic configuration (config)</h3>
 <div class="paragraph">
 <p>The Jolokia command <code>config</code> is provided to get unauthenticated information about the agent.
 It duplicates (a bit) the information from the <code>version</code> operation, but is meant to be more universal and generic.</p>
@@ -2930,7 +2930,7 @@ It duplicates (a bit) the information from the <code>version</code> operation, b
 <p>It serves similar purpose as <code>/.well-known/openid-configuration</code> endpoint for OpenID Connect providers.</p>
 </div>
 <div class="sect3">
-<h4 id="get-version"><a class="anchor" href="#get-version"></a>GET version request</h4>
+<h4 id="get-config"><a class="anchor" href="#get-config"></a>GET version request</h4>
 <div class="paragraph">
 <p>The GET URL for a config request has the following format:</p>
 </div>
@@ -2941,7 +2941,7 @@ It duplicates (a bit) the information from the <code>version</code> operation, b
 </div>
 </div>
 <div class="sect3">
-<h4 id="post-version"><a class="anchor" href="#post-version"></a>POST version request</h4>
+<h4 id="post-config"><a class="anchor" href="#post-config"></a>POST version request</h4>
 <div class="paragraph">
 <p>A version POST request has only a single key
 <code>type</code> which has to be set to
@@ -2954,7 +2954,7 @@ of Java Servlet API specification.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="response-version"><a class="anchor" href="#response-version"></a>Config response</h4>
+<h4 id="response-config"><a class="anchor" href="#response-config"></a>Config response</h4>
 <div class="paragraph">
 <p>The response value for a <code>config</code> request looks like this:</p>
 </div>
@@ -3677,7 +3677,7 @@ the following format</p>
 <div class="listingblock">
 <div class="content">
 <pre>$ echo '{"type":"query"}' | socat STDIO UDP4-DATAGRAM:239.192.48.84:24884
-{"agent_version":"2.5.1","agent_id":"jolokia-7778","type":"response","secured":false,"url":"http://192.168.0.165:7778/jolokia/"}{"agent_version":"2.5.1","agent_id":"jolokia-7779","type":"response","secured":false,"url":"http://192.168.0.165:7778/jolokia/"}</pre>
+{"agent_version":"2.6.0","agent_id":"jolokia-7778","type":"response","secured":false,"url":"http://192.168.0.165:7778/jolokia/"}{"agent_version":"2.6.0","agent_id":"jolokia-7779","type":"response","secured":false,"url":"http://192.168.0.165:7778/jolokia/"}</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -3686,7 +3686,7 @@ the following format</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "agent_version": "2.5.1",
+  "agent_version": "2.6.0",
   "agent_id": "192.168.0.221-67980-7e985ce9-servlet",
   "server_product": "tomcat",
   "type": "response",

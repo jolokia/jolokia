@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Untitled :: Jolokia</title>
     <link rel="canonical" href="https://jolokia.org/manual/protocol/config.html">
-    <meta name="generator" content="Antora 3.1.4">
+    <meta name="generator" content="Antora 3.1.14">
     <link rel="stylesheet" href="../../_/css/site.css">
     <link rel="stylesheet" href="../../_/css/jolokia.css">
   </head>
@@ -107,7 +107,7 @@
 </aside>
 <article class="doc">
 <div class="sect2">
-<h3 id="version"><a class="anchor" href="#version"></a>Getting the basic configuration (config)</h3>
+<h3 id="config"><a class="anchor" href="#config"></a>Getting the basic configuration (config)</h3>
 <div class="paragraph">
 <p>The Jolokia command <code>config</code> is provided to get unauthenticated information about the agent.
 It duplicates (a bit) the information from the <code>version</code> operation, but is meant to be more universal and generic.</p>
@@ -116,7 +116,7 @@ It duplicates (a bit) the information from the <code>version</code> operation, b
 <p>It serves similar purpose as <code>/.well-known/openid-configuration</code> endpoint for OpenID Connect providers.</p>
 </div>
 <div class="sect3">
-<h4 id="get-version"><a class="anchor" href="#get-version"></a>GET version request</h4>
+<h4 id="get-config"><a class="anchor" href="#get-config"></a>GET version request</h4>
 <div class="paragraph">
 <p>The GET URL for a config request has the following format:</p>
 </div>
@@ -127,7 +127,7 @@ It duplicates (a bit) the information from the <code>version</code> operation, b
 </div>
 </div>
 <div class="sect3">
-<h4 id="post-version"><a class="anchor" href="#post-version"></a>POST version request</h4>
+<h4 id="post-config"><a class="anchor" href="#post-config"></a>POST version request</h4>
 <div class="paragraph">
 <p>A version POST request has only a single key
 <code>type</code> which has to be set to
@@ -140,7 +140,7 @@ of Java Servlet API specification.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="response-version"><a class="anchor" href="#response-version"></a>Config response</h4>
+<h4 id="response-config"><a class="anchor" href="#response-config"></a>Config response</h4>
 <div class="paragraph">
 <p>The response value for a <code>config</code> request looks like this:</p>
 </div>
