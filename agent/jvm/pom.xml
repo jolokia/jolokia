@@ -121,8 +121,8 @@
     <dependency>
       <groupId>jakarta.servlet</groupId>
       <artifactId>jakarta.servlet-api</artifactId>
-      <!-- version 6.1.0 for Jetty 12.1 -->
-      <version>6.1.0</version>
+      <!-- version 6.0.0 for Jetty 12.1 -->
+      <version>6.0.0</version>
       <scope>test</scope>
     </dependency>
 
