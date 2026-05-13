@@ -1,0 +1,52 @@
+{
+  "reflection": [
+    {
+      "type": "org.jolokia.server.detector.jee.GeronimoDetector",
+      "allPublicConstructors": true
+    },
+    {
+      "type": "org.jolokia.server.detector.jee.GlassfishDetector",
+      "allPublicConstructors": true
+    },
+    {
+      "type": "org.jolokia.server.detector.jee.JBossDetector",
+      "allPublicConstructors": true
+    },
+    {
+      "type": "org.jolokia.server.detector.jee.JettyDetector",
+      "allPublicConstructors": true
+    },
+    {
+      "type": "org.jolokia.server.detector.jee.TomcatDetector",
+      "allPublicConstructors": true
+    },
+    {
+      "type": "org.jolokia.server.detector.jee.WeblogicDetector",
+      "allPublicConstructors": true
+    },
+    {
+      "type": "org.jolokia.server.detector.jee.WebsphereDetector",
+      "allPublicConstructors": true
+    },
+    {
+      "type": "org.jolokia.server.detector.misc.ActiveMQDetector",
+      "allPublicConstructors": true
+    },
+    {
+      "type": "org.jolokia.server.detector.misc.ArtemisDetector",
+      "allPublicConstructors": true
+    },
+    {
+      "type": "org.jolokia.server.detector.misc.LightstreamerDetector",
+      "allPublicConstructors": true
+    }
+  ],
+  "resources": [
+    {
+      "glob": "META-INF/jolokia/detectors-default"
+    },
+    {
+      "glob": "META-INF/jolokia/detectors"
+    }
+  ]
+}
