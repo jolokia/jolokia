@@ -34,11 +34,11 @@
     "jolokia.js": "2.6.0"
   },
   "devDependencies": {
-    "@jest/globals": "^30.3.0",
+    "@jest/globals": "^30.4.1",
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-terser": "^1.0.0",
-    "jest": "^30.3.0",
-    "rollup": "^4.60.2"
+    "jest": "30.4.2",
+    "rollup": "^4.60.4"
   },
   "publishConfig": {
     "access": "public"
