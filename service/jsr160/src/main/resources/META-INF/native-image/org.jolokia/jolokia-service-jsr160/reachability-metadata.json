@@ -1,0 +1,16 @@
+{
+  "reflection": [
+    {
+      "type": "org.jolokia.service.jsr160.Jsr160RequestHandler",
+      "allPublicConstructors": true
+    }
+  ],
+  "resources": [
+    {
+      "glob": "META-INF/jolokia/services-default"
+    },
+    {
+      "glob": "META-INF/jolokia/services"
+    }
+  ]
+}

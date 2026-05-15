@@ -1,0 +1,47 @@
+{
+  "reflection": [
+    {
+      "type": "org.jolokia.converter.json.simplifier.ClassSimplifier",
+      "allPublicConstructors": true
+    },
+    {
+      "type": "org.jolokia.converter.json.simplifier.DomElementSimplifier",
+      "allPublicConstructors": true
+    },
+    {
+      "type": "org.jolokia.converter.json.simplifier.FileSimplifier",
+      "allPublicConstructors": true
+    },
+    {
+      "type": "org.jolokia.converter.json.simplifier.InetAddressSimplifier",
+      "allPublicConstructors": true
+    },
+    {
+      "type": "org.jolokia.converter.json.simplifier.ModuleSimplifier",
+      "allPublicConstructors": true
+    },
+    {
+      "type": "org.jolokia.converter.json.simplifier.ObjectNameSimplifier",
+      "allPublicConstructors": true
+    },
+    {
+      "type": "org.jolokia.converter.json.simplifier.PackageSimplifier",
+      "allPublicConstructors": true
+    },
+    {
+      "type": "org.jolokia.converter.json.simplifier.UrlSimplifier",
+      "allPublicConstructors": true
+    }
+  ],
+  "resources": [
+    {
+      "glob": "jolokia-core-version.properties"
+    },
+    {
+      "glob": "META-INF/jolokia/simplifiers-default"
+    },
+    {
+      "glob": "META-INF/jolokia/simplifiers"
+    }
+  ]
+}
