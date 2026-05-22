@@ -54,7 +54,7 @@
 
     <dependency>
       <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-client-java-httpclient4</artifactId>
+      <artifactId>jolokia-client-java</artifactId>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -137,9 +137,8 @@
               org.jolokia.core.util;version="[2.5,3)",
               <!-- jolokia-client-java -->
               org.jolokia.client;version="[2.5,3)",
+              org.jolokia.client.jdkclient;version="[2.5,3)",
               org.jolokia.client.spi;version="[2.5,3)",
-              <!-- jolokia-client-java-httpclient4 -->
-              org.jolokia.client.httpclient4;version="[2.5,3)",
               <!-- jolokia-client-jmx-adapter -->
               org.jolokia.client.jmxadapter;version="[2.5,3)",
               <!-- jolokia-server-core -->
@@ -151,19 +150,8 @@
               io.fabric8.kubernetes.client.dsl,
               io.fabric8.kubernetes.client.dsl.internal,
               io.fabric8.kubernetes.client.http,
-              io.fabric8.kubernetes.client.utils,
               <!-- okhttp (even if it's not OSGi and brings Kotlin runtime...) -->
-              okhttp3,
-              <!-- httpcore -->
-              org.apache.http;version="[4.4,5)",
-              org.apache.http.entity;version="[4.4,5)",
-              org.apache.http.message;version="[4.4,5)",
-              org.apache.http.params;version="[4.4,5)",
-              org.apache.http.protocol;version="[4.4,5)",
-              <!-- httpclient -->
-              org.apache.http.client;version="[4.5,5)",
-              org.apache.http.client.methods;version="[4.5,5)",
-              org.apache.http.conn;version="[4.5,5)"
+              okhttp3
             </Import-Package>
             <Export-Package>
               org.jolokia.kubernetes.client
