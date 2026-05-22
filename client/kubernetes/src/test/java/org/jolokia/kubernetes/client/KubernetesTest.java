@@ -3,8 +3,12 @@ package org.jolokia.kubernetes.client;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.Options;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import javax.management.AttributeNotFoundException;
@@ -16,10 +20,6 @@ import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXServiceURL;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
@@ -42,17 +42,23 @@ public class KubernetesTest {
     // Ensure we get a fresh config
     KubernetesJmxConnector.resetKubernetesConfig();
 
-    try (final CloseableHttpClient client = HttpClients.createDefault()) {
-      final CloseableHttpResponse configResponse = client
-          .execute(new HttpGet(wireMockServer.baseUrl() + "/mock-kube-config.yml"));
-      Assert.assertEquals(configResponse.getStatusLine().getStatusCode(), 200);
-      final File configFile = File.createTempFile("mock-kube-config", ".yml");
-      configResponse.getEntity().writeTo(new FileOutputStream(configFile));
-      // Setting taken from:
-      // https://github.com/fabric8io/kubernetes-client/blob/77a65f7d40f31a5dc37492cd9de3c317c2702fb4/kubernetes-client-api/src/main/java/io/fabric8/kubernetes/client/Config.java#L120,
-      // unlikely to change
-      System.setProperty("kubeconfig", configFile.getAbsolutePath());
+    HttpClient client = HttpClient.newHttpClient();
+    HttpResponse<byte[]> configResponse;
+    try {
+      configResponse = client.send(
+          HttpRequest.newBuilder(URI.create(wireMockServer.baseUrl() + "/mock-kube-config.yml")).GET().build(),
+          HttpResponse.BodyHandlers.ofByteArray());
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      throw new IOException(e);
     }
+    Assert.assertEquals(configResponse.statusCode(), 200);
+    final File configFile = File.createTempFile("mock-kube-config", ".yml");
+    Files.write(configFile.toPath(), configResponse.body());
+    // Setting taken from:
+    // https://github.com/fabric8io/kubernetes-client/blob/77a65f7d40f31a5dc37492cd9de3c317c2702fb4/kubernetes-client-api/src/main/java/io/fabric8/kubernetes/client/Config.java#L120,
+    // unlikely to change
+    System.setProperty("kubeconfig", configFile.getAbsolutePath());
     Assert.assertNotNull(jolokiaConnection = getKubernetesMBeanConnector());
   }
 
