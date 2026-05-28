@@ -20,8 +20,6 @@ import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.http.HttpResponse;
 import org.jolokia.client.JolokiaClient;
-import org.jolokia.client.JolokiaClientBuilder;
-import org.jolokia.client.jdkclient.JdkHttpClient;
 import org.jolokia.client.jmxadapter.JolokiaJmxConnector;
 import org.jolokia.client.jmxadapter.RemoteJmxAdapter;
 
@@ -163,16 +161,8 @@ public class KubernetesJmxConnector extends JolokiaJmxConnector {
                 proxyPath,
                 "{\"type\":\"version\"}".getBytes(), null, headers);
       if (response.isSuccessful()) {
-        // JDK HttpRequest.newBuilder().uri(...) requires an absolute URI with a scheme,
-        // even though the adapter routes through fabric8 (urlPath) and ignores the URI.
-        String master = client.getMasterUrl().toString();
-        if (master.endsWith("/")) {
-          master = master.substring(0, master.length() - 1);
-        }
-        URI proxyUri = URI.create(master + proxyPath);
-        JdkHttpClient jdkClient = new JdkHttpClient(new MinimalHttpClientAdapter(client, proxyPath, env),
-            JolokiaClientBuilder.Configuration.withUrl(proxyUri));
-        return new JolokiaClient(proxyUri, jdkClient);
+        URI proxyUri = URI.create(proxyPath);
+        return new JolokiaClient(proxyUri, new MinimalHttpClientAdapter(client, proxyPath, env));
       }
     } catch (IOException | InterruptedException | ExecutionException ignore) {
     }

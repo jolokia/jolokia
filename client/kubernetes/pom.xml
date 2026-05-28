@@ -133,11 +133,12 @@
               javax.management.remote,
               <!-- jolokia-json -->
               org.jolokia.json;version="[2.5,3)",
-              <!-- jolokia-core -->
-              org.jolokia.core.util;version="[2.5,3)",
+              org.jolokia.json.parser;version="[2.5,3)",
               <!-- jolokia-client-java -->
               org.jolokia.client;version="[2.5,3)",
-              org.jolokia.client.jdkclient;version="[2.5,3)",
+              org.jolokia.client.exception;version="[2.5,3)",
+              org.jolokia.client.request;version="[2.5,3)",
+              org.jolokia.client.response;version="[2.5,3)",
               org.jolokia.client.spi;version="[2.5,3)",
               <!-- jolokia-client-jmx-adapter -->
               org.jolokia.client.jmxadapter;version="[2.5,3)",

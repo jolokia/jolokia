@@ -1,60 +1,51 @@
 package org.jolokia.kubernetes.client;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.net.Authenticator;
-import java.net.CookieHandler;
-import java.net.ProxySelector;
 import java.net.URL;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpHeaders;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.net.http.HttpResponse.BodyHandler;
-import java.net.http.HttpResponse.BodySubscriber;
-import java.net.http.HttpResponse.ResponseInfo;
-import java.net.http.WebSocket;
-import java.nio.ByteBuffer;
-import java.time.Duration;
-import java.util.ArrayList;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Flow;
 
 import javax.management.remote.JMXConnector;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLParameters;
-import javax.net.ssl.SSLSession;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.dsl.internal.OperationSupport;
 import okhttp3.HttpUrl;
+import org.jolokia.client.HttpUtil;
+import org.jolokia.client.JolokiaQueryParameter;
+import org.jolokia.client.JolokiaTargetConfig;
+import org.jolokia.client.exception.JolokiaException;
+import org.jolokia.client.exception.JolokiaHttpException;
+import org.jolokia.client.request.HttpMethod;
+import org.jolokia.client.request.JolokiaRequest;
+import org.jolokia.client.response.JolokiaResponse;
+import org.jolokia.client.spi.HttpClientSpi;
+import org.jolokia.json.JSONArray;
+import org.jolokia.json.JSONObject;
+import org.jolokia.json.JSONStructure;
+import org.jolokia.json.parser.ParseException;
 
 /**
- * Minimum implementation of the JDK {@link HttpClient} that routes requests through a
- * fabric8 {@link KubernetesClient} instead of opening direct sockets. Intended for
- * use with {@code org.jolokia.client.jdkclient.JdkHttpClient}.
- *
- * Only the synchronous {@link #send(HttpRequest, BodyHandler)} path is implemented;
- * async send and websocket support are not used by JolokiaClient and throw UOE.
+ * {@link HttpClientSpi} implementation that routes Jolokia requests through a fabric8
+ * {@link KubernetesClient} so that requests reach a Jolokia agent via the Kubernetes
+ * API server's pod proxy. All requests are sent as POST against the fixed proxy path
+ * the connector was opened with - the JSON Jolokia protocol works the same way for
+ * single and bulk requests.
  */
-public class MinimalHttpClientAdapter extends HttpClient {
+public class MinimalHttpClientAdapter implements HttpClientSpi<KubernetesClient> {
 
     public static final String JOLOKIA_ALTERNATE_AUTHORIZATION_HEADER = "X-jolokia-authorization";
 
     private final KubernetesClient client;
     private final String urlPath;
-    private String user;
-    private String password;
+    private final String user;
+    private final String password;
 
     public MinimalHttpClientAdapter(KubernetesClient client, String urlPath, Map<String, Object> env) {
         this.client = client;
@@ -63,6 +54,9 @@ public class MinimalHttpClientAdapter extends HttpClient {
         if (credentials != null) {
             this.user = credentials[0];
             this.password = credentials[1];
+        } else {
+            this.user = null;
+            this.password = null;
         }
     }
 
@@ -75,38 +69,87 @@ public class MinimalHttpClientAdapter extends HttpClient {
     }
 
     @Override
-    public <T> HttpResponse<T> send(HttpRequest request, BodyHandler<T> responseBodyHandler)
-            throws IOException, InterruptedException {
-        byte[] requestBody = drainBody(request);
-        Map<String, String> headers = flattenHeaders(request);
+    public KubernetesClient getClient(Class<KubernetesClient> clientClass) {
+        if (clientClass.isAssignableFrom(client.getClass())) {
+            return clientClass.cast(client);
+        }
+        return null;
+    }
+
+    @Override
+    public <REQ extends JolokiaRequest, RES extends JolokiaResponse<REQ>>
+    JSONStructure execute(REQ pRequest, HttpMethod method, Map<JolokiaQueryParameter, String> parameters,
+                          JolokiaTargetConfig targetConfig) throws JolokiaException {
+        JolokiaTargetConfig effectiveTarget = HttpUtil.determineTargetConfig(pRequest, targetConfig);
+        JSONObject body = HttpUtil.getJsonRequestContent(pRequest, effectiveTarget);
+        return send(body.toJSONString(), HttpUtil.toQueryString(parameters), pRequest.getType().getValue());
+    }
+
+    @Override
+    public <REQ extends JolokiaRequest, RES extends JolokiaResponse<REQ>>
+    JSONStructure execute(List<REQ> pRequests, Map<JolokiaQueryParameter, String> parameters,
+                          JolokiaTargetConfig targetConfig) throws JolokiaException {
+        JSONArray bulk = new JSONArray(pRequests.size());
+        for (REQ r : pRequests) {
+            bulk.add(HttpUtil.getJsonRequestContent(r, HttpUtil.determineTargetConfig(r, targetConfig)));
+        }
+        return send(bulk.toJSONString(), HttpUtil.toQueryString(parameters), "bulk");
+    }
+
+    @Override
+    public void close() {
+        // KubernetesClient is owned by the caller (cached in KubernetesJmxConnector)
+    }
+
+    private JSONStructure send(String jsonBody, String query, String requestType) throws JolokiaException {
+        Map<String, String> headers = new HashMap<>();
         authenticate(headers, user, password);
 
-        final io.fabric8.kubernetes.client.http.HttpResponse<byte[]> kubeResp;
+        io.fabric8.kubernetes.client.http.HttpResponse<byte[]> kubeResp;
         try {
-            kubeResp = performRequest(client, urlPath, requestBody, request.uri().getQuery(), headers);
+            kubeResp = performRequest(client, urlPath, jsonBody.getBytes(StandardCharsets.UTF_8), query, headers);
         } catch (KubernetesClientException e) {
-            throw new IOException(e);
+            throw new JolokiaException("Kubernetes API error sending " + requestType + " request: " + e.getMessage(), e);
         } catch (ExecutionException e) {
             Throwable cause = e.getCause() != null ? e.getCause() : e;
-            throw new IOException(cause);
+            throw new JolokiaException("Error sending " + requestType + " request: " + cause.getMessage(), cause);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new JolokiaException("Interrupted while sending " + requestType + " request", e);
+        } catch (IOException e) {
+            throw new JolokiaException("I/O error sending " + requestType + " request: " + e.getMessage(), e);
         }
 
-        final HttpHeaders responseHeaders = convertHeaders(kubeResp);
-        final int statusCode = kubeResp.code();
-        final byte[] bodyBytes = kubeResp.body() == null ? new byte[0] : kubeResp.body();
+        int code = kubeResp.code();
+        if (code != 200) {
+            throw new JolokiaHttpException("HTTP error " + code + " sending " + requestType + " Jolokia request", code);
+        }
 
-        T body = applyBodyHandler(responseBodyHandler, statusCode, responseHeaders, bodyBytes);
+        byte[] body = kubeResp.body();
+        if (body == null || body.length == 0) {
+            throw new JolokiaException("No data received from the remote Jolokia Agent for " + requestType);
+        }
+        Charset charset = charsetFromContentType(kubeResp.header("Content-Type"));
+        try {
+            return HttpUtil.parseJsonResponse(new java.io.ByteArrayInputStream(body), charset);
+        } catch (ParseException | IOException e) {
+            throw new JolokiaException("Error parsing " + requestType + " response: " + e.getMessage());
+        }
+    }
 
-        return new HttpResponse<T>() {
-            @Override public int statusCode() { return statusCode; }
-            @Override public HttpRequest request() { return request; }
-            @Override public Optional<HttpResponse<T>> previousResponse() { return Optional.empty(); }
-            @Override public HttpHeaders headers() { return responseHeaders; }
-            @Override public T body() { return body; }
-            @Override public Optional<SSLSession> sslSession() { return Optional.empty(); }
-            @Override public URI uri() { return request.uri(); }
-            @Override public Version version() { return Version.HTTP_1_1; }
-        };
+    private static Charset charsetFromContentType(String contentType) {
+        if (contentType != null) {
+            int idx = contentType.toLowerCase().indexOf("charset=");
+            if (idx >= 0) {
+                String name = contentType.substring(idx + "charset=".length()).split("[;\\s]")[0];
+                try {
+                    return Charset.forName(name);
+                } catch (Exception ignored) {
+                    // fall through to default
+                }
+            }
+        }
+        return StandardCharsets.UTF_8;
     }
 
     public static io.fabric8.kubernetes.client.http.HttpResponse<byte[]> performRequest(KubernetesClient client,
@@ -144,128 +187,4 @@ public class MinimalHttpClientAdapter extends HttpClient {
         }
         return builder.build().url();
     }
-
-    private static <T> T applyBodyHandler(BodyHandler<T> handler, int statusCode,
-                                          HttpHeaders responseHeaders, byte[] bodyBytes)
-            throws IOException {
-        BodySubscriber<T> subscriber = handler.apply(new ResponseInfo() {
-            @Override public int statusCode() { return statusCode; }
-            @Override public HttpHeaders headers() { return responseHeaders; }
-            @Override public Version version() { return Version.HTTP_1_1; }
-        });
-        subscriber.onSubscribe(new Flow.Subscription() {
-            @Override public void request(long n) { }
-            @Override public void cancel() { }
-        });
-        subscriber.onNext(List.of(ByteBuffer.wrap(bodyBytes)));
-        subscriber.onComplete();
-        try {
-            return subscriber.getBody().toCompletableFuture().get();
-        } catch (ExecutionException e) {
-            Throwable cause = e.getCause() != null ? e.getCause() : e;
-            if (cause instanceof IOException) throw (IOException) cause;
-            throw new IOException(cause);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new IOException(e);
-        }
-    }
-
-    private static byte[] drainBody(HttpRequest request) throws IOException {
-        Optional<HttpRequest.BodyPublisher> bp = request.bodyPublisher();
-        if (bp.isEmpty()) {
-            return new byte[0];
-        }
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        CompletableFuture<Void> done = new CompletableFuture<>();
-        bp.get().subscribe(new Flow.Subscriber<>() {
-            private Flow.Subscription subscription;
-            @Override public void onSubscribe(Flow.Subscription s) {
-                this.subscription = s;
-                s.request(Long.MAX_VALUE);
-            }
-            @Override public void onNext(ByteBuffer buf) {
-                byte[] chunk = new byte[buf.remaining()];
-                buf.get(chunk);
-                try {
-                    out.write(chunk);
-                } catch (IOException e) {
-                    subscription.cancel();
-                    done.completeExceptionally(e);
-                }
-            }
-            @Override public void onError(Throwable t) { done.completeExceptionally(t); }
-            @Override public void onComplete() { done.complete(null); }
-        });
-        try {
-            done.get();
-        } catch (ExecutionException e) {
-            Throwable cause = e.getCause() != null ? e.getCause() : e;
-            if (cause instanceof IOException) throw (IOException) cause;
-            throw new IOException(cause);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new IOException(e);
-        }
-        return out.toByteArray();
-    }
-
-    private static Map<String, String> flattenHeaders(HttpRequest request) {
-        Map<String, String> result = new HashMap<>();
-        for (Map.Entry<String, List<String>> e : request.headers().map().entrySet()) {
-            if (!e.getValue().isEmpty()) {
-                result.put(e.getKey(), String.join(",", e.getValue()));
-            }
-        }
-        return result;
-    }
-
-    private static HttpHeaders convertHeaders(io.fabric8.kubernetes.client.http.HttpResponse<?> resp) {
-        Map<String, List<String>> map = new HashMap<>();
-        for (String name : resp.headers().keySet()) {
-            List<String> values = resp.headers(name);
-            if (values != null && !values.isEmpty()) {
-                map.put(name, new ArrayList<>(values));
-            } else {
-                String single = resp.header(name);
-                if (single != null) {
-                    map.put(name, List.of(single));
-                }
-            }
-        }
-        return HttpHeaders.of(map, (a, b) -> true);
-    }
-
-    // --- async / websocket: not used by JolokiaClient -------------------------
-
-    @Override
-    public <T> CompletableFuture<HttpResponse<T>> sendAsync(HttpRequest request, BodyHandler<T> handler) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public <T> CompletableFuture<HttpResponse<T>> sendAsync(HttpRequest request, BodyHandler<T> handler,
-                                                            HttpResponse.PushPromiseHandler<T> pushHandler) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public WebSocket.Builder newWebSocketBuilder() {
-        throw new UnsupportedOperationException();
-    }
-
-    // --- metadata: sensible defaults; the kube transport owns the real config -
-
-    @Override public Optional<CookieHandler> cookieHandler()      { return Optional.empty(); }
-    @Override public Optional<Duration> connectTimeout()          { return Optional.empty(); }
-    @Override public Redirect followRedirects()                   { return Redirect.NEVER; }
-    @Override public Optional<ProxySelector> proxy()              { return Optional.empty(); }
-    @Override public SSLContext sslContext() {
-        try { return SSLContext.getDefault(); }
-        catch (Exception e) { throw new UncheckedIOException(new IOException(e)); }
-    }
-    @Override public SSLParameters sslParameters()                { return new SSLParameters(); }
-    @Override public Optional<Authenticator> authenticator()      { return Optional.empty(); }
-    @Override public Version version()                            { return Version.HTTP_1_1; }
-    @Override public Optional<Executor> executor()                { return Optional.empty(); }
 }
