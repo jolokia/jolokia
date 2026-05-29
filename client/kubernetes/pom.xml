@@ -51,12 +51,6 @@
   <dependencies>
 
     <!-- Jolokia own artifacts -->
-
-    <dependency>
-      <groupId>org.jolokia</groupId>
-      <artifactId>jolokia-client-java</artifactId>
-      <scope>provided</scope>
-    </dependency>
     <dependency>
       <groupId>org.jolokia</groupId>
       <artifactId>jolokia-client-jmx-adapter</artifactId>
