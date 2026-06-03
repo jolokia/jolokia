@@ -16,6 +16,8 @@ import javax.management.remote.JMXConnector;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.dsl.internal.OperationSupport;
+import io.fabric8.kubernetes.client.http.HttpRequest;
+import io.fabric8.kubernetes.client.http.HttpResponse;
 import okhttp3.HttpUrl;
 import org.jolokia.client.HttpUtil;
 import org.jolokia.client.JolokiaQueryParameter;
@@ -105,7 +107,7 @@ public class Fabric8KubernetesClient implements HttpClientSpi<KubernetesClient> 
         Map<String, String> headers = new HashMap<>();
         authenticate(headers, user, password);
 
-        io.fabric8.kubernetes.client.http.HttpResponse<byte[]> kubeResp;
+        HttpResponse<byte[]> kubeResp;
         try {
             kubeResp = performRequest(client, urlPath, jsonBody.getBytes(StandardCharsets.UTF_8), query, headers);
         } catch (KubernetesClientException e) {
@@ -152,19 +154,19 @@ public class Fabric8KubernetesClient implements HttpClientSpi<KubernetesClient> 
         return StandardCharsets.UTF_8;
     }
 
-    public static io.fabric8.kubernetes.client.http.HttpResponse<byte[]> performRequest(KubernetesClient client,
+    public static HttpResponse<byte[]> performRequest(KubernetesClient client,
             String path, byte[] body, String query, Map<String, String> headers)
             throws IOException, InterruptedException, ExecutionException {
 
-        final io.fabric8.kubernetes.client.http.HttpRequest.Builder requestBuilder = client.getHttpClient()
+        final HttpRequest.Builder requestBuilder = client.getHttpClient()
             .newHttpRequestBuilder();
         requestBuilder.method("POST", "application/json", new String(body)).url(buildHttpUri(client, path, query));
         for (Map.Entry<String, String> header : headers.entrySet()) {
             requestBuilder.header(header.getKey(), header.getValue());
         }
 
-        io.fabric8.kubernetes.client.http.HttpRequest request = requestBuilder.build();
-        CompletableFuture<io.fabric8.kubernetes.client.http.HttpResponse<byte[]>> futureResponse = client
+        HttpRequest request = requestBuilder.build();
+        CompletableFuture<HttpResponse<byte[]>> futureResponse = client
             .getHttpClient().sendAsync(request, byte[].class).thenApply(response -> {
                 try {
                     return response;
