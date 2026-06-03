@@ -38,7 +38,7 @@ import org.jolokia.json.parser.ParseException;
  * the connector was opened with - the JSON Jolokia protocol works the same way for
  * single and bulk requests.
  */
-public class MinimalHttpClientAdapter implements HttpClientSpi<KubernetesClient> {
+public class Fabric8KubernetesClient implements HttpClientSpi<KubernetesClient> {
 
     public static final String JOLOKIA_ALTERNATE_AUTHORIZATION_HEADER = "X-jolokia-authorization";
 
@@ -47,7 +47,7 @@ public class MinimalHttpClientAdapter implements HttpClientSpi<KubernetesClient>
     private final String user;
     private final String password;
 
-    public MinimalHttpClientAdapter(KubernetesClient client, String urlPath, Map<String, Object> env) {
+    public Fabric8KubernetesClient(KubernetesClient client, String urlPath, Map<String, Object> env) {
         this.client = client;
         this.urlPath = urlPath;
         String[] credentials = (String[]) env.get(JMXConnector.CREDENTIALS);

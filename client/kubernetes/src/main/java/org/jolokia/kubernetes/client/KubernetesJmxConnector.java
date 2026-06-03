@@ -144,7 +144,7 @@ public class KubernetesJmxConnector extends JolokiaJmxConnector {
     final HashMap<String, String> headers = new HashMap<>();
     String[] credentials = (String[]) env.get(JMXConnector.CREDENTIALS);
     if (credentials != null) {
-      MinimalHttpClientAdapter.authenticate(headers, credentials[0], credentials[1]);
+      Fabric8KubernetesClient.authenticate(headers, credentials[0], credentials[1]);
     }
     return headers;
   }
@@ -157,12 +157,12 @@ public class KubernetesJmxConnector extends JolokiaJmxConnector {
       HashMap<String, String> headers) {
     try {
       final String proxyPath = url.toString();
-            HttpResponse<byte[]> response = MinimalHttpClientAdapter.performRequest(client,
+            HttpResponse<byte[]> response = Fabric8KubernetesClient.performRequest(client,
                 proxyPath,
                 "{\"type\":\"version\"}".getBytes(), null, headers);
       if (response.isSuccessful()) {
         URI proxyUri = URI.create(proxyPath);
-        return new JolokiaClient(proxyUri, new MinimalHttpClientAdapter(client, proxyPath, env));
+        return new JolokiaClient(proxyUri, new Fabric8KubernetesClient(client, proxyPath, env));
       }
     } catch (IOException | InterruptedException | ExecutionException ignore) {
     }
