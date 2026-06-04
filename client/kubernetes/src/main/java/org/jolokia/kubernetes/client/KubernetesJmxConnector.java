@@ -20,7 +20,6 @@ import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.http.HttpResponse;
 import org.jolokia.client.JolokiaClient;
-import org.jolokia.client.exception.JolokiaException;
 import org.jolokia.client.jmxadapter.JolokiaJmxConnector;
 import org.jolokia.client.jmxadapter.RemoteJmxAdapter;
 
@@ -159,7 +158,13 @@ public class KubernetesJmxConnector extends JolokiaJmxConnector {
                                              StringBuilder url,
                                              HashMap<String, String> headers) {
       try {
-          return probeProxyPathUnsafe(env, client, url, headers);
+          HttpResponse<byte[]> response = performSimpleVersionRequest(env, client, url, headers);
+          if (response.isSuccessful()) {
+              URI proxyUri = URI.create(url.toString());
+              return new JolokiaClient(proxyUri, new Fabric8KubernetesClient(client, url.toString(), env));
+          } else {
+              return null;
+          }
       } catch (ExecutionException | KubernetesClientException ignore) {
           return null;
       } catch (InterruptedException e) {
@@ -169,18 +174,12 @@ public class KubernetesJmxConnector extends JolokiaJmxConnector {
   }
 
     /**
+     * Do a simple Jolokia version request to check if the connection works
      * @see #probeProxyPath(Map, KubernetesClient, StringBuilder, HashMap)
      */
-  public static JolokiaClient probeProxyPathUnsafe(Map<String, Object> env, KubernetesClient client, StringBuilder url, Map<String, String> headers) throws InterruptedException, ExecutionException {
-      final String proxyPath = url.toString();
-      HttpResponse<byte[]> response = Fabric8KubernetesClient.performRequest(client,
-          proxyPath,
+  public static HttpResponse<byte[]> performSimpleVersionRequest(Map<String, Object> env, KubernetesClient client, StringBuilder url, Map<String, String> headers) throws InterruptedException, ExecutionException {
+      return Fabric8KubernetesClient.performRequest(client,
+          url.toString(),
           "{\"type\":\"version\"}".getBytes(), null, headers);
-    if (response.isSuccessful()) {
-      URI proxyUri = URI.create(proxyPath);
-      return new JolokiaClient(proxyUri, new Fabric8KubernetesClient(client, proxyPath, env));
-    } else {
-    return null;
-    }
   }
 }
