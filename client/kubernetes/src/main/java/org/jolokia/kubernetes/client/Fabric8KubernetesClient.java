@@ -2,7 +2,6 @@ package org.jolokia.kubernetes.client;
 
 import java.io.IOException;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashMap;
@@ -110,16 +109,8 @@ public class Fabric8KubernetesClient implements HttpClientSpi<KubernetesClient> 
         HttpResponse<byte[]> kubeResp;
         try {
             kubeResp = performRequest(client, urlPath, jsonBody.getBytes(StandardCharsets.UTF_8), query, headers);
-        } catch (KubernetesClientException e) {
-            throw new JolokiaException("Kubernetes API error sending " + requestType + " request: " + e.getMessage(), e);
-        } catch (ExecutionException e) {
-            Throwable cause = e.getCause() != null ? e.getCause() : e;
-            throw new JolokiaException("Error sending " + requestType + " request: " + cause.getMessage(), cause);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new JolokiaException("Interrupted while sending " + requestType + " request", e);
-        } catch (IOException e) {
-            throw new JolokiaException("I/O error sending " + requestType + " request: " + e.getMessage(), e);
+        } catch (InterruptedException | ExecutionException | KubernetesClientException e) {
+            throw new JolokiaException("Error sending " + requestType + " request: " + e.getMessage(), e);
         }
 
         int code = kubeResp.code();
@@ -131,32 +122,16 @@ public class Fabric8KubernetesClient implements HttpClientSpi<KubernetesClient> 
         if (body == null || body.length == 0) {
             throw new JolokiaException("No data received from the remote Jolokia Agent for " + requestType);
         }
-        Charset charset = charsetFromContentType(kubeResp.header("Content-Type"));
         try {
-            return HttpUtil.parseJsonResponse(new java.io.ByteArrayInputStream(body), charset);
+            return HttpUtil.parseJsonResponse(new java.io.ByteArrayInputStream(body), StandardCharsets.UTF_8);
         } catch (ParseException | IOException e) {
             throw new JolokiaException("Error parsing " + requestType + " response: " + e.getMessage());
         }
     }
 
-    private static Charset charsetFromContentType(String contentType) {
-        if (contentType != null) {
-            int idx = contentType.toLowerCase().indexOf("charset=");
-            if (idx >= 0) {
-                String name = contentType.substring(idx + "charset=".length()).split("[;\\s]")[0];
-                try {
-                    return Charset.forName(name);
-                } catch (Exception ignored) {
-                    // fall through to default
-                }
-            }
-        }
-        return StandardCharsets.UTF_8;
-    }
-
     public static HttpResponse<byte[]> performRequest(KubernetesClient client,
             String path, byte[] body, String query, Map<String, String> headers)
-            throws IOException, InterruptedException, ExecutionException {
+            throws InterruptedException, ExecutionException {
 
         final HttpRequest.Builder requestBuilder = client.getHttpClient()
             .newHttpRequestBuilder();

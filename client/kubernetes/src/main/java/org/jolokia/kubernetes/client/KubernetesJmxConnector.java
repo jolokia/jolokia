@@ -164,7 +164,7 @@ public class KubernetesJmxConnector extends JolokiaJmxConnector {
         URI proxyUri = URI.create(proxyPath);
         return new JolokiaClient(proxyUri, new Fabric8KubernetesClient(client, proxyPath, env));
       }
-    } catch (IOException | InterruptedException | ExecutionException ignore) {
+    } catch (InterruptedException | ExecutionException | KubernetesClientException ignore) {
     }
     return null;
   }
