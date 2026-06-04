@@ -77,6 +77,7 @@ public class Fabric8KubernetesClient implements HttpClientSpi<KubernetesClient> 
         return null;
     }
 
+    @SuppressWarnings({"java:S2326", "java:S119"}) // NOSONAR RES type parameter is unused, type names are not idiomatic
     @Override
     public <REQ extends JolokiaRequest, RES extends JolokiaResponse<REQ>>
     JSONStructure execute(REQ pRequest, HttpMethod method, Map<JolokiaQueryParameter, String> parameters,
@@ -86,6 +87,7 @@ public class Fabric8KubernetesClient implements HttpClientSpi<KubernetesClient> 
         return send(body.toJSONString(), HttpUtil.toQueryString(parameters), pRequest.getType().getValue());
     }
 
+    @SuppressWarnings({"java:S2326", "java:S119"})  // NOSONAR RES type parameter is unused, type names are not idiomatic
     @Override
     public <REQ extends JolokiaRequest, RES extends JolokiaResponse<REQ>>
     JSONStructure execute(List<REQ> pRequests, Map<JolokiaQueryParameter, String> parameters,
@@ -109,8 +111,11 @@ public class Fabric8KubernetesClient implements HttpClientSpi<KubernetesClient> 
         HttpResponse<byte[]> kubeResp;
         try {
             kubeResp = performRequest(client, urlPath, jsonBody.getBytes(StandardCharsets.UTF_8), query, headers);
-        } catch (InterruptedException | ExecutionException | KubernetesClientException e) {
+        } catch (ExecutionException | KubernetesClientException e) {
             throw new JolokiaException("Error sending " + requestType + " request: " + e.getMessage(), e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new JolokiaException("Interrupted while sending " + requestType + " request", e);
         }
 
         int code = kubeResp.code();
@@ -131,7 +136,7 @@ public class Fabric8KubernetesClient implements HttpClientSpi<KubernetesClient> 
 
     public static HttpResponse<byte[]> performRequest(KubernetesClient client,
             String path, byte[] body, String query, Map<String, String> headers)
-            throws InterruptedException, ExecutionException {
+        throws ExecutionException, InterruptedException {
 
         final HttpRequest.Builder requestBuilder = client.getHttpClient()
             .newHttpRequestBuilder();
