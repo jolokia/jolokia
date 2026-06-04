@@ -20,6 +20,7 @@ import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.http.HttpResponse;
 import org.jolokia.client.JolokiaClient;
+import org.jolokia.client.exception.JolokiaException;
 import org.jolokia.client.jmxadapter.JolokiaJmxConnector;
 import org.jolokia.client.jmxadapter.RemoteJmxAdapter;
 
@@ -31,7 +32,7 @@ public class KubernetesJmxConnector extends JolokiaJmxConnector {
   private static final Map<String,KubernetesClient> apiClients = Collections.synchronizedMap(new HashMap<>());
   public static String KUBERNETES_CLIENT_CONTEXT ="kubernetes.client.context";
 
-  public KubernetesJmxConnector(JMXServiceURL serviceURL, Map<String, ?> environment) throws IOException {
+  public KubernetesJmxConnector(JMXServiceURL serviceURL, Map<String, ?> environment) {
     super(serviceURL, environment);
   }
 
@@ -155,19 +156,22 @@ public class KubernetesJmxConnector extends JolokiaJmxConnector {
      * @return a Jolokia client if the connection is successful
    */
   public static JolokiaClient probeProxyPath(Map<String, Object> env, KubernetesClient client,
-      StringBuilder url,
-      HashMap<String, String> headers) {
-    try {
-            return probeProxyPathUnsafe(env, client, url, headers);
-        } catch (InterruptedException | ExecutionException | KubernetesClientException ignore) {
-            return null;
-        }
-    }
+                                             StringBuilder url,
+                                             HashMap<String, String> headers) {
+      try {
+          return probeProxyPathUnsafe(env, client, url, headers);
+      } catch (ExecutionException | KubernetesClientException ignore) {
+          return null;
+      } catch (InterruptedException e) {
+          Thread.currentThread().interrupt();
+          return null;
+      }
+  }
 
     /**
      * @see #probeProxyPath(Map, KubernetesClient, StringBuilder, HashMap)
      */
-  public static JolokiaClient probeProxyPathUnsafe(Map<String, Object> env, KubernetesClient client, StringBuilder url, HashMap<String, String> headers) throws InterruptedException, ExecutionException {
+  public static JolokiaClient probeProxyPathUnsafe(Map<String, Object> env, KubernetesClient client, StringBuilder url, Map<String, String> headers) throws InterruptedException, ExecutionException {
       final String proxyPath = url.toString();
       HttpResponse<byte[]> response = Fabric8KubernetesClient.performRequest(client,
           proxyPath,
