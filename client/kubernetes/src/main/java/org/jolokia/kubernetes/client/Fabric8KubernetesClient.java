@@ -14,7 +14,6 @@ import javax.management.remote.JMXConnector;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
-import io.fabric8.kubernetes.client.dsl.internal.OperationSupport;
 import io.fabric8.kubernetes.client.http.HttpRequest;
 import io.fabric8.kubernetes.client.http.HttpResponse;
 import okhttp3.HttpUrl;
@@ -139,24 +138,12 @@ public class Fabric8KubernetesClient implements HttpClientSpi<KubernetesClient> 
         throws ExecutionException, InterruptedException {
 
         final HttpRequest.Builder requestBuilder = client.getHttpClient()
-            .newHttpRequestBuilder();
-        requestBuilder.method("POST", "application/json", new String(body)).url(buildHttpUri(client, path, query));
-        for (Map.Entry<String, String> header : headers.entrySet()) {
-            requestBuilder.header(header.getKey(), header.getValue());
-        }
+            .newHttpRequestBuilder()
+            .method("POST", "application/json", new String(body))
+            .url(buildHttpUri(client, path, query));
+        headers.forEach(requestBuilder::header);
 
-        HttpRequest request = requestBuilder.build();
-        CompletableFuture<HttpResponse<byte[]>> futureResponse = client
-            .getHttpClient().sendAsync(request, byte[].class).thenApply(response -> {
-                try {
-                    return response;
-                } catch (KubernetesClientException e) {
-                    throw e;
-                } catch (Exception e) {
-                    throw OperationSupport.requestException(request, e);
-                }
-            });
-        return futureResponse.get();
+        return client.getHttpClient().sendAsync(requestBuilder.build(), byte[].class).get();
     }
 
     private static URL buildHttpUri(KubernetesClient client, String resourcePath, String query) {
