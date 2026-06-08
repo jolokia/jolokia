@@ -158,7 +158,7 @@ public class KubernetesJmxConnector extends JolokiaJmxConnector {
                                              StringBuilder url,
                                              HashMap<String, String> headers) {
       try {
-          HttpResponse<byte[]> response = performSimpleVersionRequest(env, client, url, headers);
+          HttpResponse<byte[]> response = performSimpleVersionRequest(client, url, headers);
           if (response.isSuccessful()) {
               URI proxyUri = URI.create(url.toString());
               return new JolokiaClient(proxyUri, new Fabric8KubernetesClient(client, url.toString(), env));
@@ -177,7 +177,7 @@ public class KubernetesJmxConnector extends JolokiaJmxConnector {
      * Do a simple Jolokia version request to check if the connection works
      * @see #probeProxyPath(Map, KubernetesClient, StringBuilder, HashMap)
      */
-  public static HttpResponse<byte[]> performSimpleVersionRequest(Map<String, Object> env, KubernetesClient client, StringBuilder url, Map<String, String> headers) throws InterruptedException, ExecutionException {
+  public static HttpResponse<byte[]> performSimpleVersionRequest(KubernetesClient client, StringBuilder url, Map<String, String> headers) throws InterruptedException, ExecutionException {
       return Fabric8KubernetesClient.performRequest(client,
           url.toString(),
           "{\"type\":\"version\"}".getBytes(), null, headers);
