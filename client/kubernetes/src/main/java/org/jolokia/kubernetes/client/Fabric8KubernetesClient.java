@@ -1,5 +1,6 @@
 package org.jolokia.kubernetes.client;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -127,7 +128,7 @@ public class Fabric8KubernetesClient implements HttpClientSpi<KubernetesClient> 
             throw new JolokiaException("No data received from the remote Jolokia Agent for " + requestType);
         }
         try {
-            return HttpUtil.parseJsonResponse(new java.io.ByteArrayInputStream(body), StandardCharsets.UTF_8);
+            return HttpUtil.parseJsonResponse(new ByteArrayInputStream(body), StandardCharsets.UTF_8);
         } catch (ParseException | IOException e) {
             throw new JolokiaException("Error parsing " + requestType + " response: " + e.getMessage());
         }
