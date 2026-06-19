@@ -28,8 +28,8 @@ public class KubernetesJmxConnector extends JolokiaJmxConnector {
   private static final Pattern POD_PATTERN = Pattern
       .compile(
           "/?(?<namespace>[^/]+)/(?<protocol>https?:)?(?<podPattern>[^/^:]+)(?<port>:[^/]+)?/(?<path>.+)");
-  private static final Map<String,KubernetesClient> apiClients = Collections.synchronizedMap(new HashMap<>());
-  public static String KUBERNETES_CLIENT_CONTEXT ="kubernetes.client.context";
+  private static final Map<String, KubernetesClient> apiClients = Collections.synchronizedMap(new HashMap<>());
+  public static String KUBERNETES_CLIENT_CONTEXT = "kubernetes.client.context";
 
   public KubernetesJmxConnector(JMXServiceURL serviceURL, Map<String, ?> environment) {
     super(serviceURL, environment);
@@ -63,8 +63,8 @@ public class KubernetesJmxConnector extends JolokiaJmxConnector {
     final String key = String.valueOf(context);
     KubernetesClient client = apiClients.get(key);
 
-    if(client == null){
-      client=new KubernetesClientBuilder().withConfig(Config.autoConfigure(context)).build();
+    if (client == null) {
+      client = new KubernetesClientBuilder().withConfig(Config.autoConfigure(context)).build();
       apiClients.put(key, client);
     }
     return client;
@@ -83,7 +83,7 @@ public class KubernetesJmxConnector extends JolokiaJmxConnector {
   protected JolokiaClient expandAndProbeUrl(KubernetesClient client,
       Map<String, Object> env) throws MalformedURLException {
     String proxyPath = this.serviceUrl.getURLPath();
-      JolokiaClient connection;
+    JolokiaClient connection;
     final HashMap<String, String> headersForProbe = createHeadersForProbe(env);
     try {
       if (POD_PATTERN.matcher(proxyPath).matches()) {
@@ -127,12 +127,12 @@ public class KubernetesJmxConnector extends JolokiaJmxConnector {
       url.append(protocol);
     }
     url.append(metadata.getName());
-    if(port!=null){
+    if (port != null) {
       url.append(port);
     }
     url.append("/proxy");
 
-    if(!path.startsWith("/")) {
+    if (!path.startsWith("/")) {
       url.append('/');
     }
     url.append(path);
@@ -151,35 +151,35 @@ public class KubernetesJmxConnector extends JolokiaJmxConnector {
 
   /**
    * Probe whether we find Jolokia behind a given proxy URL
-     *
-     * @return a Jolokia client if the connection is successful
+   *
+   * @return a Jolokia client if the connection is successful
    */
   public static JolokiaClient probeProxyPath(Map<String, Object> env, KubernetesClient client,
                                              StringBuilder url,
                                              HashMap<String, String> headers) {
-      try {
-          HttpResponse<byte[]> response = performSimpleVersionRequest(client, url, headers);
-          if (response.isSuccessful()) {
-              URI proxyUri = URI.create(url.toString());
-              return new JolokiaClient(proxyUri, new Fabric8KubernetesClient(client, url.toString(), env));
-          } else {
-              return null;
-          }
-      } catch (ExecutionException | KubernetesClientException ignore) {
-          return null;
-      } catch (InterruptedException e) {
-          Thread.currentThread().interrupt();
-          return null;
+    try {
+      HttpResponse<byte[]> response = performSimpleVersionRequest(client, url, headers);
+      if (response.isSuccessful()) {
+        URI proxyUri = URI.create(url.toString());
+        return new JolokiaClient(proxyUri, new Fabric8KubernetesClient(client, url.toString(), env));
+      } else {
+        return null;
       }
+    } catch (ExecutionException | KubernetesClientException ignore) {
+      return null;
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      return null;
+    }
   }
 
-    /**
-     * Do a simple Jolokia version request to check if the connection works
-     * @see #probeProxyPath(Map, KubernetesClient, StringBuilder, HashMap)
-     */
+  /**
+   * Do a simple Jolokia version request to check if the connection works
+   * @see #probeProxyPath(Map, KubernetesClient, StringBuilder, HashMap)
+   */
   public static HttpResponse<byte[]> performSimpleVersionRequest(KubernetesClient client, StringBuilder url, Map<String, String> headers) throws InterruptedException, ExecutionException {
-      return Fabric8KubernetesClient.performRequest(client,
-          url.toString(),
-          "{\"type\":\"version\"}".getBytes(), null, headers);
+    return Fabric8KubernetesClient.performRequest(client,
+        url.toString(),
+        "{\"type\":\"version\"}".getBytes(), null, headers);
   }
 }
