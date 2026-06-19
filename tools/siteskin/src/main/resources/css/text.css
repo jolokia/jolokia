@@ -35,7 +35,7 @@ a.externalLink {
   padding-right: 15px;
 }
 
-code { font-family: monospace }
+code { font-family: monospace; white-space: pre-wrap }
 strong { font-weight: bold }
 em { font-style: italic }
 
