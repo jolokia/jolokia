@@ -1,0 +1,22 @@
+{
+  "reflection": [
+    {
+      "type": {
+        "proxy": [
+          "javax.management.MBeanServer"
+        ]
+      }
+    },
+    {
+      "type": "org.jolokia.support.jmx.JolokiaMBeanServerHolderMBean",
+      "allDeclaredMethods": true
+    },
+    {
+      "type": {
+        "proxy": [
+          "org.jolokia.support.jmx.JolokiaMBeanServerHolderMBean"
+        ]
+      }
+    }
+  ]
+}
