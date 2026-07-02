@@ -132,6 +132,7 @@ public class AgentServletTest {
         expect(config.getServletContext()).andStubReturn(context);
         expect(config.getServletName()).andStubReturn("jolokia");
         expect(context.getAttribute(AgentServlet.EXTERNAL_BASIC_AUTH_REALM)).andReturn(null).anyTimes();
+        expect(context.getAttribute(AgentServlet.EXTERNAL_DISABLE_CORS)).andReturn(null).anyTimes();
         replay(config, context);
 
         servlet.init(config);
@@ -661,6 +662,7 @@ public class AgentServletTest {
         expectLastCall().anyTimes();
 
         expect(context.getAttribute(AgentServlet.EXTERNAL_BASIC_AUTH_REALM)).andReturn(null).anyTimes();
+        expect(context.getAttribute(AgentServlet.EXTERNAL_DISABLE_CORS)).andReturn(null).anyTimes();
     }
 
     private String[] prepareDebugLogging(String[] pInitParams) {

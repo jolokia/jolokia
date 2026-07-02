@@ -61,6 +61,7 @@ public class OsgiAgentServletTest {
         expectLastCall().anyTimes();
         expect(bundleContext.getServiceReferences((String) anyObject(), anyObject())).andReturn(null).anyTimes();
         expect(servletContext.getAttribute(AgentServlet.EXTERNAL_BASIC_AUTH_REALM)).andReturn(null).anyTimes();
+        expect(servletContext.getAttribute(AgentServlet.EXTERNAL_DISABLE_CORS)).andReturn(null).anyTimes();
     }
 
     @Test

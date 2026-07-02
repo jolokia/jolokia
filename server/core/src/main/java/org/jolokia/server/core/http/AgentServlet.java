@@ -88,6 +88,13 @@ public class AgentServlet extends HttpServlet {
      */
     public static final String EXTERNAL_BASIC_AUTH_REALM = ".jolokia.basicAuth.realm";
 
+    /**
+     * A key for a {@link jakarta.servlet.ServletContext#getAttribute} which can be set by applications
+     * that use this servlet if such application provides its own CORS handling. By default Jolokia
+     * properly handles CORS requests and preflight OPTIONS requests.
+     */
+    public static final String EXTERNAL_DISABLE_CORS = ".jolokia.cors.disable";
+
     // POST- and GET- HttpRequestHandler
     private ServletRequestHandler httpGetHandler, httpPostHandler;
 
@@ -117,6 +124,10 @@ public class AgentServlet extends HttpServlet {
     private boolean allowDnsReverseLookup;
 
     private final SubjectAccess subjectAccess;
+
+    // Whether the application that instantiates this servlet provides its own CORS support (in which case
+    // Jolokia should not send any CORS headers
+    private boolean disableCors = false;
 
     /**
      * No argument constructor, used e.g. by a servlet
@@ -163,6 +174,19 @@ public class AgentServlet extends HttpServlet {
         // Start it up, all static (non-OSGi) services should be available/discovered already ....
         jolokiaContext = serviceManager.start();
         requestHandler = new HttpRequestHandler(jolokiaContext, restrictor, config.getSecurityDetails().isAuthenticationEnabled());
+
+        Object disableCorsAttribute = pServletConfig != null
+                ? pServletConfig.getServletContext().getAttribute(EXTERNAL_DISABLE_CORS) : null;
+        boolean disableCors = false;
+        if (disableCorsAttribute instanceof String s && "true".equalsIgnoreCase(s)) {
+            disableCors = true;
+        } else if (disableCorsAttribute instanceof Boolean b && b) {
+            disableCors = true;
+        }
+        if (disableCors) {
+            this.disableCors = disableCors;
+        }
+
         allowDnsReverseLookup = Boolean.parseBoolean(config.getConfig(ConfigKey.ALLOW_DNS_REVERSE_LOOKUP));
 
         // Different HTTP request handlers
@@ -418,7 +442,7 @@ public class AgentServlet extends HttpServlet {
             String scheme = pReq.getScheme();
             requestHandler.checkAccess(scheme, remoteHost, pReq.getRemoteAddr(), extractOrigin(pReq, true));
 
-            if (pReqHandler == null && "OPTIONS".equals(pReq.getMethod())) {
+            if (!disableCors && pReqHandler == null && "OPTIONS".equals(pReq.getMethod())) {
                 String requestOrigin = extractOrigin(pReq, false);
                 String requestMethod = pReq.getHeader("Access-Control-Request-Method");
                 if (requestOrigin != null && !requestOrigin.trim().isEmpty()
@@ -454,7 +478,11 @@ public class AgentServlet extends HttpServlet {
             if (pReqHandler != null) {
                 json = pReqHandler.handleRequest(pReq);
             } else {
-                throw new BadRequestException("HTTP Method OPTIONS is supported only for CORS preflight requests.");
+                if (disableCors) {
+                    throw new BadRequestException("HTTP Method OPTIONS is not supported (CORS is disabled in Jolokia).");
+                } else {
+                    throw new BadRequestException("HTTP Method OPTIONS is supported only for CORS preflight requests.");
+                }
             }
         } catch (BadRequestException exp) {
             String response = "400 (Bad Request)\n";
@@ -478,7 +506,9 @@ public class AgentServlet extends HttpServlet {
         } finally {
             releaseBackChannel();
             if (!corsPreflight) {
-                setCorsResponseHeaders(pReq, pResp);
+                if (!disableCors) {
+                    setCorsResponseHeaders(pReq, pResp);
+                }
                 setNoCacheHeaders(pResp);
             }
         }
