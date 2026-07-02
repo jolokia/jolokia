@@ -26,6 +26,7 @@ import java.util.*;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import org.easymock.EasyMock;
+import org.jolokia.jvmagent.security.CorsFilter;
 import org.jolokia.server.core.backend.BackendManager;
 import org.jolokia.server.core.backend.RequestDispatcher;
 import org.jolokia.server.core.config.ConfigKey;
@@ -33,6 +34,7 @@ import org.jolokia.server.core.http.HttpRequestHandler;
 import org.jolokia.server.core.request.BadRequestException;
 import org.jolokia.server.core.request.BaseRequestHandler;
 import org.jolokia.server.core.request.JolokiaRequestBuilder;
+import org.jolokia.server.core.restrictor.AllowAllRestrictor;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.serializer.Serializer;
 import org.jolokia.server.core.util.*;
@@ -67,7 +69,7 @@ public class JolokiaHttpHandlerTest {
         requestDispatcher = new TestRequestDispatcher.Builder()
                 .request(new JolokiaRequestBuilder(RequestType.READ, "java.lang:type=Memory").attribute("HeapMemoryUsage").build())
                 .andReturnMapValue("used",4711L).build();
-        handler = new JolokiaHttpHandler(ctx);
+        handler = new JolokiaHttpHandler(ctx, new AllowAllRestrictor(), true);
         // Not optimal since diving into internal, but the overall test is not very
         // optimal.
         injectRequestDispatcher(handler,requestDispatcher);
@@ -245,15 +247,19 @@ public class JolokiaHttpHandlerTest {
     @Test
     public void preflightCheck() throws URISyntaxException, IOException {
         HttpExchange exchange = prepareExchange("http://localhost:8080/",
-                                                "Origin","http://localhost:8080/",
-                                                "Access-Control-Request-Headers","X-Bla, X-Blub");
+                "Origin", "http://localhost:8080/",
+                "Access-Control-Request-Method", "POST",
+                "Access-Control-Request-Headers", "X-Bla, X-Blub");
+        CorsFilter.corsPreflight.set(true);
         expect(exchange.getRequestMethod()).andReturn("OPTIONS");
 
         Headers header = new Headers();
         ByteArrayOutputStream out = prepareResponse(exchange, header);
         handler.handle(exchange);
-        assertEquals(header.getFirst("Access-Control-Allow-Origin"),"http://localhost:8080/");
-        assertEquals(header.getFirst("Access-Control-Allow-Headers"),"X-Bla, X-Blub");
+        assertEquals(header.getFirst("Access-Control-Allow-Origin"), "http://localhost:8080/");
+        assertEquals(header.getFirst("Access-Control-Allow-Headers"), "X-Bla, X-Blub");
+        assertEquals(header.getFirst("Access-Control-Allow-Methods"), "GET, POST");
+        assertEquals(header.getFirst("Access-Control-Allow-Credentials"), "true");
         assertNotNull(header.getFirst("Access-Control-Max-Age"));
     }
 

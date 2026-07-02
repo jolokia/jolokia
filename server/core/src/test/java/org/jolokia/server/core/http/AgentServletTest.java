@@ -68,7 +68,7 @@ public class AgentServletTest {
     }
 
     @Test
-    public void initWithAcessRestriction() throws ServletException {
+    public void initWithAccessRestriction() throws ServletException {
         servlet = new AgentServlet();
         initConfigMocks(new String[]{ConfigKey.POLICY_LOCATION.getKeyValue(), "classpath:/access-sample1.xml"},
                         null,
@@ -105,7 +105,7 @@ public class AgentServletTest {
         servlet.init(config);
         servlet.destroy();
 
-        Configuration cfg = servlet.createWebConfig();
+        Configuration cfg = servlet.createWebConfig(null);
         assertEquals(cfg.getConfig(ConfigKey.AGENT_CONTEXT), "/j0l0k14");
         assertEquals(cfg.getConfig(ConfigKey.MAX_DEPTH), "10");
         assertEquals(cfg.getConfig(ConfigKey.MAX_OBJECTS), "20");
@@ -428,33 +428,45 @@ public class AgentServletTest {
     }
 
     @Test
-    public void corsPreflightCheck() throws ServletException {
+    public void corsPreflightCheck() throws ServletException, IOException {
         checkCorsOriginPreflight("http://bla.com", "http://bla.com");
     }
 
     @Test
-    public void corsPreflightCheckWithNullOrigin() throws ServletException {
+    public void corsPreflightCheckWithNullOrigin() throws ServletException, IOException {
         checkCorsOriginPreflight("null", "*");
     }
 
-    private void checkCorsOriginPreflight(String in, String out) throws ServletException {
+    private void checkCorsOriginPreflight(String in, String out) throws ServletException, IOException {
         prepareStandardInitialisation();
         request = createMock(HttpServletRequest.class);
         response = createMock(HttpServletResponse.class);
 
-        expect(request.getHeader("Origin")).andReturn(in);
+        expect(request.getScheme()).andReturn("http");
+        expect(request.getHeader("Origin")).andReturn(in).anyTimes();
+        expect(request.getHeader("Access-Control-Request-Method")).andReturn("POST");
         expect(request.getHeader("Access-Control-Request-Headers")).andReturn(null);
+        expect(request.getRemoteHost()).andReturn("localhost");
+        expect(request.getRemoteAddr()).andReturn("127.0.0.1");
+        expect(request.getRequestURI()).andReturn("/jolokia/").times(2);
+        expect(request.getRequestURL()).andReturn(new StringBuffer("http://localhost/jolokia"));
+        expect(request.getContextPath()).andReturn("/jolokia");
+        expect(request.getAuthType()).andReturn(null);
+        expect(request.getParameterMap()).andReturn(null);
+        expect(request.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE)).andReturn(null).anyTimes();
+        expect(request.getAttribute("subject")).andReturn(null);
+        expect(request.getMethod()).andReturn("OPTIONS");
 
         response.setHeader(eq("Access-Control-Max-Age"), anyObject());
         response.setHeader("Access-Control-Allow-Origin", out);
-        response.setHeader("Access-Control-Allow-Credentials", "true");
+        response.setHeader("Access-Control-Allow-Credentials", "false");
+        response.setHeader("Access-Control-Allow-Methods", "GET, POST");
 
         replay(request, response);
 
         servlet.doOptions(request, response);
         servlet.destroy();
     }
-
 
     @Test
     public void corsHeaderGetCheck() throws ServletException, IOException {
@@ -480,12 +492,12 @@ public class AgentServletTest {
                     expect(request.getContextPath()).andReturn("/jolokia");
                     expect(request.getAuthType()).andReturn(null);
                     expect(request.getParameterMap()).andReturn(null);
-                    expect(request.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE)).andReturn(null);
+                    expect(request.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE)).andReturn(null).anyTimes();
                     expect(request.getAttribute("subject")).andReturn(null);
                 },
                 () -> {
                     response.setHeader("Access-Control-Allow-Origin", out);
-                    response.setHeader("Access-Control-Allow-Credentials","true");
+                    response.setHeader("Access-Control-Allow-Credentials","false");
                     response.setCharacterEncoding("utf-8");
                     response.setContentType("text/plain");
                     response.setStatus(200);

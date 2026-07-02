@@ -151,17 +151,9 @@ public class AgentServlet extends HttpServlet {
         super.init(pServletConfig);
 
         // Create configuration, log handler and restrictor early in the lifecycle
-        // and explicitly
-        Configuration config = createWebConfig();
+        Configuration config = createWebConfig(pServletConfig);
         LogHandler logHandler = createLogHandler(pServletConfig, config);
         Restrictor restrictor = createRestrictor(config, logHandler);
-
-        Object realmAttribute = pServletConfig.getServletContext().getAttribute(EXTERNAL_BASIC_AUTH_REALM);
-        if (realmAttribute instanceof String realm) {
-            // this is how Hawtio can tell Jolokia that it's accessible using Basic authentication
-            // not perfect and we may change it later
-            config.getSecurityDetails().registerAuthenticationMethod(SecurityDetails.AuthMethod.BASIC, realm);
-        }
 
         // Create the service manager and initialize
         serviceManager =
@@ -170,7 +162,7 @@ public class AgentServlet extends HttpServlet {
 
         // Start it up, all static (non-OSGi) services should be available/discovered already ....
         jolokiaContext = serviceManager.start();
-        requestHandler = new HttpRequestHandler(jolokiaContext);
+        requestHandler = new HttpRequestHandler(jolokiaContext, restrictor, config.getSecurityDetails().isAuthenticationEnabled());
         allowDnsReverseLookup = Boolean.parseBoolean(config.getConfig(ConfigKey.ALLOW_DNS_REVERSE_LOOKUP));
 
         // Different HTTP request handlers
@@ -201,7 +193,6 @@ public class AgentServlet extends HttpServlet {
         pServiceManager.addServices(new ClasspathServiceCreator(AgentServlet.class.getClassLoader(), "services"));
     }
 
-
     /**
      * Hook for allowing a custom detector lookup
      *
@@ -218,9 +209,10 @@ public class AgentServlet extends HttpServlet {
      * This method can be subclassed in order to provide an own mechanism for
      * providing a configuration.
      *
+     * @param pServletConfig
      * @return generated configuration
      */
-    protected Configuration createWebConfig() throws ServletException {
+    protected Configuration createWebConfig(ServletConfig pServletConfig) throws ServletException {
         StaticConfiguration config = new StaticConfiguration(
                 Collections.singletonMap(ConfigKey.AGENT_ID.getKeyValue(),
                                          NetworkUtil.getAgentId(this.hashCode(), "servlet")));
@@ -230,9 +222,17 @@ public class AgentServlet extends HttpServlet {
         config.update(new ServletContextFacade(getServletContext()));
 
         String basicRealm = config.getConfig(ConfigKey.BASIC_AUTHENTICATION_REALM);
+        // this special attribute may be set by "deployer" which uses Jolokia AgentServlet (like Hawtio)
+        // see https://github.com/jolokia/jolokia/issues/917
+        Object realmAttribute = pServletConfig != null
+                ? pServletConfig.getServletContext().getAttribute(EXTERNAL_BASIC_AUTH_REALM) : null;
+        if (realmAttribute instanceof String realm) {
+            basicRealm = realm;
+        }
         if (basicRealm != null && !basicRealm.isEmpty()) {
             config.addSupportedAuthentication(SecurityDetails.AuthMethod.BASIC, basicRealm);
         }
+
         String mtlsEnabled = config.getConfig(ConfigKey.MTLS_AUTHENTICATION_ENABLED);
         if (mtlsEnabled != null && !(ConfigKey.enabledValues.contains(mtlsEnabled) || ConfigKey.disabledValues.contains(mtlsEnabled))) {
             throw new ServletException("Invalid value of " + ConfigKey.MTLS_AUTHENTICATION_ENABLED.getKeyValue() + " parameter");
@@ -340,20 +340,16 @@ public class AgentServlet extends HttpServlet {
     }
 
     /**
-     * OPTION requests are treated as CORS preflight requests
+     * <em>Some</em> {@code OPTION} requests are treated as CORS preflight requests and to be consistent
+     * with JVM Agent using JDK HTTP server, we should call {@link HttpRequestHandler#checkAccess} before
+     * and verify if it's an actual preflight CORS request.
      *
      * @param req the original request
      * @param resp the response the answer are written to
      * */
     @Override
-    protected void doOptions(HttpServletRequest req, HttpServletResponse resp) {
-        Map<String,String> responseHeaders =
-                requestHandler.handleCorsPreflightRequest(
-                        extractOriginOrReferer(req),
-                        req.getHeader("Access-Control-Request-Headers"));
-        for (Map.Entry<String,String> entry : responseHeaders.entrySet()) {
-            resp.setHeader(entry.getKey(),entry.getValue());
-        }
+    protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        handle(null, req, resp);
     }
 
     /**
@@ -404,14 +400,15 @@ public class AgentServlet extends HttpServlet {
      * Handle the incoming request. All exceptions during request processing are caught and turned into a Jolokia
      * JSON error. The only exception thrown is when the handled exception (turned into JSON) can't be sent back.
      *
-     * @param pReqHandler
+     * @param pReqHandler can be {@code null} for methods other than {@code GET}/{@code POST}
      * @param pReq
      * @param pResp
      * @throws IOException thrown only if there's an issue sending the response.
      */
     private void doHandle(ServletRequestHandler pReqHandler, HttpServletRequest pReq, HttpServletResponse pResp) throws IOException {
-        JSONStructure json;
+        JSONStructure json = null;
 
+        boolean corsPreflight = false;
         try {
             // Set back channel - for notification handling
             prepareBackChannel(pReq);
@@ -419,7 +416,26 @@ public class AgentServlet extends HttpServlet {
             // Check access policy
             String remoteHost = allowDnsReverseLookup ? pReq.getRemoteHost() : null;
             String scheme = pReq.getScheme();
-            requestHandler.checkAccess(scheme, remoteHost, pReq.getRemoteAddr(), extractOriginOrReferer(pReq));
+            requestHandler.checkAccess(scheme, remoteHost, pReq.getRemoteAddr(), extractOrigin(pReq, true));
+
+            if (pReqHandler == null && "OPTIONS".equals(pReq.getMethod())) {
+                String requestOrigin = extractOrigin(pReq, false);
+                String requestMethod = pReq.getHeader("Access-Control-Request-Method");
+                if (requestOrigin != null && !requestOrigin.trim().isEmpty()
+                        && ("GET".equals(requestMethod) || "POST".equals(requestMethod))) {
+                    // we don't care about Access-Control-Request-Method - we'll simply return what we allow
+                    // and browser will simply not send the actual request when something doesn't match
+                    String requestHeaders = pReq.getHeader("Access-Control-Request-Headers");
+
+                    Map<String, String> responseHeaders =
+                            requestHandler.handleCorsPreflightRequest(requestOrigin, requestHeaders);
+                    for (Map.Entry<String, String> entry : responseHeaders.entrySet()) {
+                        pResp.setHeader(entry.getKey(), entry.getValue());
+                    }
+                    corsPreflight = true;
+                    return;
+                }
+            }
 
             // If a callback is given, check this is a valid javascript function name
             validateCallbackIfGiven(pReq);
@@ -429,7 +445,9 @@ public class AgentServlet extends HttpServlet {
 
             // Dispatch for the proper HTTP request method - the returned JSON object may be a proper Jolokia JSON
             // response or error Jolokia JSON response
-            json = pReqHandler.handleRequest(pReq);
+            if (pReqHandler != null) {
+                json = pReqHandler.handleRequest(pReq);
+            }
         } catch (BadRequestException exp) {
             String response = "400 (Bad Request)\n";
             if (exp.getMessage() != null) {
@@ -451,7 +469,10 @@ public class AgentServlet extends HttpServlet {
             json = requestHandler.handleThrowable(exp);
         } finally {
             releaseBackChannel();
-            setCorsHeader(pReq, pResp);
+            if (!corsPreflight) {
+                setCorsResponseHeaders(pReq, pResp);
+                setNoCacheHeaders(pResp);
+            }
         }
 
         if (json == null) {
@@ -469,12 +490,22 @@ public class AgentServlet extends HttpServlet {
         BackChannelHolder.remove();
     }
 
-    private String extractOriginOrReferer(HttpServletRequest pReq) {
+    private String extractOrigin(HttpServletRequest pReq) {
+        return extractOrigin(pReq, true);
+    }
+
+    /**
+     * Get the value of {@code Origin} header (possibly defaulted to {@code Referer}) sanitizing the value.
+     * @param pReq
+     * @param fallbackToReferer
+     * @return
+     */
+    private String extractOrigin(HttpServletRequest pReq, boolean fallbackToReferer) {
         String origin = pReq.getHeader("Origin");
-        if (origin == null) {
+        if (origin == null && fallbackToReferer) {
             origin = pReq.getHeader("Referer");
         }
-        return origin != null ? origin.replaceAll("[\\n\\r]*","") : null;
+        return origin != null ? origin.trim().replaceAll("[\\n\\r]*","") : null;
     }
 
     // Update the agent URL in the agent details if not already done
@@ -554,12 +585,18 @@ public class AgentServlet extends HttpServlet {
         return uri.substring(0, len);
     }
 
-    // Set an appropriate CORS header if requested and if allowed
-    private void setCorsHeader(HttpServletRequest pReq, HttpServletResponse pResp) {
-        String origin = requestHandler.extractCorsOrigin(pReq.getHeader("Origin"));
-        if (origin != null) {
-            pResp.setHeader("Access-Control-Allow-Origin",origin);
-            pResp.setHeader("Access-Control-Allow-Credentials","true");
+    /**
+     * Set CORS response headers for non-preflight requests. These headers are set only if there's incoming
+     * {@code Origin} request header
+     *
+     * @param pReq
+     * @param pResp
+     */
+    private void setCorsResponseHeaders(HttpServletRequest pReq, HttpServletResponse pResp) {
+        String origin = extractOrigin(pReq, false);
+        Map<String, String> corsHeaders = requestHandler.prepareCorsResponseHeaders(origin);
+        if (corsHeaders != null) {
+            corsHeaders.forEach(pResp::setHeader);
         }
     }
 
@@ -644,7 +681,6 @@ public class AgentServlet extends HttpServlet {
         }
         setContentType(res, "text/plain");
         res.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        setNoCacheHeaders(res);
         OutputStream os = res.getOutputStream();
         os.write(response.getBytes());
         os.close();
@@ -658,7 +694,6 @@ public class AgentServlet extends HttpServlet {
                            pReq.getParameter(ConfigKey.MIME_TYPE.getKeyValue()),
                            configMimeType, callback));
         pResp.setStatus(HttpServletResponse.SC_OK);
-        setNoCacheHeaders(pResp);
         if (pJson == null) {
             pResp.setContentLength(-1);
         } else {

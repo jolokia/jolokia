@@ -184,6 +184,7 @@
     <web-resource-collection>
       <web-resource-name>Jolokia-Agent Access</web-resource-name>
       <url-pattern>/*</url-pattern>
+      <http-method-omission>OPTIONS</http-method-omission>
     </web-resource-collection>
     <auth-constraint>
       <role-name>jolokia</role-name>

@@ -28,10 +28,10 @@ import java.util.concurrent.*;
 
 import javax.net.ssl.*;
 
-import com.sun.net.httpserver.Authenticator;
 import com.sun.net.httpserver.*;
 import org.jolokia.core.util.LocalServiceFactory;
 import org.jolokia.jvmagent.handler.JolokiaHttpHandler;
+import org.jolokia.jvmagent.security.CorsFilter;
 import org.jolokia.jvmagent.security.KeyStoreUtil;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.config.Configuration;
@@ -71,6 +71,7 @@ public class JolokiaServer {
 
     // Service Manager in use
     private JolokiaServiceManager serviceManager;
+    private Restrictor restrictor;
 
     // Whether we are using our own HTTP Server
     private boolean useOwnServer = false;
@@ -268,11 +269,12 @@ public class JolokiaServer {
                                  jolokiaCfg.getConfig(ConfigKey.LOGHANDLER_NAME),
                                  Boolean.parseBoolean(jolokiaCfg.getConfig(ConfigKey.DEBUG)));
 
+        this.restrictor = RestrictorFactory.createRestrictor(jolokiaCfg, log);
         serviceManager =
                 JolokiaServiceManagerFactory.createJolokiaServiceManager(
                         jolokiaCfg,
                         log,
-                        RestrictorFactory.createRestrictor(jolokiaCfg, log),
+                        restrictor,
                         pLookup);
 
         // loader used to load services - may be configured by one of the detectors
@@ -299,7 +301,7 @@ public class JolokiaServer {
     // Startup the context and create the HttpHandler
     private HttpHandler startupJolokiaContext() {
         JolokiaContext jolokiaContext = serviceManager.start();
-        JolokiaHttpHandler jolokiaHttpHandler = new JolokiaHttpHandler(jolokiaContext);
+        JolokiaHttpHandler jolokiaHttpHandler = new JolokiaHttpHandler(jolokiaContext, restrictor, config.getAuthenticator() != null);
         updateAgentUrl(jolokiaContext);
         return jolokiaHttpHandler;
 }
@@ -314,13 +316,18 @@ public class JolokiaServer {
 
     // Prepare the authentication
     private void setupAuthentication() {
-        // Add authentication if configured
-        final Authenticator authenticator = config.getAuthenticator();
-        if (authenticator != null) {
-            httpContext.setAuthenticator(authenticator);
-        }
-        // explicitly setting no authentication for /config handling
-        httpConfigContext.setAuthenticator(null);
+        // because sun.net.httpserver.AuthFilter is available in com.sun.net.httpserver.HttpContext
+        // as the first system filter and we can't prepend any system filter, we have to do a delegation
+        // to properly handle CORS preflight requests by never authenticating them
+        // Actual setup of CORS response headers will be performed in JolokiaHttpHandler
+
+        String realm = config.getJolokiaConfig().getConfig(ConfigKey.REALM);
+        boolean useAuth = config.getAuthenticator() != null;
+
+        httpContext.setAuthenticator(new CorsFilter(config.getAuthenticator(), realm, restrictor, useAuth));
+
+        // explicitly setting no authentication for /config handling (but still with CORS handling)
+        httpConfigContext.setAuthenticator(new CorsFilter(null, realm, restrictor, useAuth));
     }
 
     // If running an own server, we need to check that shutdown properly

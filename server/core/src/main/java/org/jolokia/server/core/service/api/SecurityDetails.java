@@ -27,6 +27,8 @@ public class SecurityDetails {
     private final JSONObject details;
     private final JSONArray methods;
 
+    private boolean authenticationEnabled = false;
+
     public SecurityDetails() {
         details = new JSONObject();
         methods = new JSONArray();
@@ -41,10 +43,15 @@ public class SecurityDetails {
             m.put("realm", realm);
         }
         methods.add(m);
+        authenticationEnabled = true;
     }
 
     public JSONObject toJSONObject() {
         return details;
+    }
+
+    public boolean isAuthenticationEnabled() {
+        return authenticationEnabled;
     }
 
     /**

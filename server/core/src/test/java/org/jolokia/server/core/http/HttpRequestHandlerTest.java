@@ -152,7 +152,7 @@ public class HttpRequestHandlerTest {
     }
 
     @Test
-    public void preflightCheck() {
+    public void preflightCheck() throws BadRequestException {
         String origin = "http://bla.com";
         String headers ="X-Data: Test";
         //expect(backend.isCorsAccessAllowed(origin)).andReturn(true);
@@ -309,7 +309,7 @@ public class HttpRequestHandlerTest {
                 .services(RequestHandler.class,services)
                 .services(Serializer.class,new TestSerializer())
                 .build();
-        handler = new HttpRequestHandler(ctx);
+        handler = new HttpRequestHandler(ctx, pRestrictor, false);
     }
 
     private void prepareDispatcher() throws Exception {

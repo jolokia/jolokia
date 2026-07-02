@@ -93,8 +93,8 @@
   <!--
   Cross origin protection (CORS).
 
-  You can configure which cross origins are given allowance by the browser.
-  With strict-checking, the Origin: header can be also be checked on the server side,
+  You can configure which origins are given allowance by the browser.
+  With strict-checking, the Origin: header can be also checked on the server side,
   which results in an error if it doesn't match any specified pattern.
   With ignore-scheme, we allow Origin headers using https scheme when the protocol
   is actually "http" - this may be required in TLS-proxy scenario.
@@ -108,7 +108,7 @@
       <allow-origin>http://www.jolokia.org</allow-origin>
       <allow-origin>*://*.jmx4perl.org</allow-origin>
 
-      <strict-checking/>
+      <strict-checking />
       <ignore-scheme />
   </cors>
   -->

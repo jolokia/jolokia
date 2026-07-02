@@ -110,6 +110,14 @@ public class PolicyRestrictor implements Restrictor {
         return factory.newDocumentBuilder().parse(pInput);
     }
 
+    public CorsChecker getCorsChecker() {
+        return corsChecker;
+    }
+
+    public HttpMethodChecker getHttpMethodChecker() {
+        return httpChecker;
+    }
+
     /** {@inheritDoc} */
     public boolean isHttpMethodAllowed(HttpMethod method) {
         return httpChecker.check(method);

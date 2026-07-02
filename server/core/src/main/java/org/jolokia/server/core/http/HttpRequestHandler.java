@@ -22,9 +22,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -39,7 +42,12 @@ import org.jolokia.server.core.request.EmptyResponseException;
 import org.jolokia.server.core.request.JolokiaRequest;
 import org.jolokia.server.core.request.JolokiaRequestFactory;
 import org.jolokia.server.core.request.ProcessingParameters;
+import org.jolokia.server.core.restrictor.policy.CorsChecker;
+import org.jolokia.server.core.restrictor.policy.HttpMethodChecker;
+import org.jolokia.server.core.restrictor.policy.PolicyRestrictor;
 import org.jolokia.server.core.service.api.JolokiaContext;
+import org.jolokia.server.core.service.api.Restrictor;
+import org.jolokia.server.core.util.HttpMethod;
 
 /**
  * <p>Request handler with no dependency on the servlet API, but designed for handling HTTP requests.
@@ -54,14 +62,22 @@ import org.jolokia.server.core.service.api.JolokiaContext;
  */
 public class HttpRequestHandler extends BaseRequestHandler {
 
+    // restrictor which we'll use (traditionally) to control CORS responses
+    private final Restrictor restrictor;
+    // whether authentication is enabled (for CORS purposes)
+    private final boolean authenticationEnabled;
+
     /**
      * Request handler for parsing HTTP request and dispatching to the appropriate
      * request handler (with help of the backend manager)
      *
-     * @param context jolokia context
+     * @param context     jolokia context
+     * @param pRestrictor
      */
-    public HttpRequestHandler(JolokiaContext context) {
+    public HttpRequestHandler(JolokiaContext context, Restrictor pRestrictor, boolean pAuthenticationEnabled) {
         super(context);
+        this.restrictor = pRestrictor;
+        this.authenticationEnabled = pAuthenticationEnabled;
     }
 
     /**
@@ -132,30 +148,117 @@ public class HttpRequestHandler extends BaseRequestHandler {
     }
 
     /**
-     * Handling an option request which is used for preflight checks before a CORS based browser request is
-     * sent (for certain circumstances).
+     * Handling an {@code OPTIONS} request which is used for preflight checks before a CORS based browser request is
+     * sent (for certain circumstances). {@link JolokiaContext#isOriginAllowed} is already called, so no need
+     * to call it again. Just check if it's non null - without {@code Origin} header we should not send any CORS
+     * response headers.
      * <p>
      * See the <a href="http://www.w3.org/TR/cors/">CORS specification</a>
      * (section 'preflight checks') for more details.
      *
-     * @param pOrigin         the origin to check. If <code>null</code>, no headers are returned
-     * @param pRequestHeaders extra headers to check against
-     * @return headers to set
+     * @param pOrigin             the origin to check. If <code>null</code>, no headers are returned
+     * @param pCorsRequestHeaders incoming {@code Access-Control-Request-Headers} (not yet validated/sanitized)
+     * @return headers to set in a response for proper CORS preflight request
      */
-    public Map<String, String> handleCorsPreflightRequest(String pOrigin, String pRequestHeaders) {
-        Map<String, String> ret = new HashMap<>();
-        if (jolokiaCtx.isOriginAllowed(pOrigin, false)) {
-            // CORS is allowed, we set exactly the origin in the header, so there are no problems with authentication
-            ret.put("Access-Control-Allow-Origin", pOrigin == null || "null".equals(pOrigin) ? "*" : pOrigin);
-            if (pRequestHeaders != null) {
-                ret.put("Access-Control-Allow-Headers", pRequestHeaders);
-            }
-            // Fix for CORS with authentication (#104)
-            ret.put("Access-Control-Allow-Credentials", "true");
-            // Allow for one year. Changes in access.xml are reflected directly in the CORS request itself
-            ret.put("Access-Control-Max-Age", "" + 3600 * 24 * 365);
+    public Map<String, String> handleCorsPreflightRequest(String pOrigin, String pCorsRequestHeaders)
+            throws BadRequestException {
+
+        validateHeader(pCorsRequestHeaders);
+
+        if (pOrigin == null || pOrigin.trim().isEmpty() || "null".equals(pOrigin.trim())) {
+            return Collections.emptyMap();
         }
+
+        // these are the CORS preflight response headers:
+        // https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS#the_http_response_headers
+        // + Access-Control-Allow-Credentials
+        //   we'll send true only if Jolokia is configured with authentication
+        // + Access-Control-Allow-Headers
+        //   the practice is to reflect incoming Access-Control-Request-Headers and let the browser control
+        //   the response with Access-Control-Allow-Origin
+        // + Access-Control-Allow-Methods
+        //   we'll return whatever is present in jolokia-access.xml
+        // + Access-Control-Allow-Origin
+        //   this is tricky in Jolokia, because org.jolokia.server.core.restrictor.policy.CorsChecker uses
+        //   regexp patterns and we can only return '*' or actual origin
+        // + Access-Control-Max-Age
+        //   no need to configure - we'll stick to the default from Chrome (2 hours. Firefox has 1 day)
+
+        Map<String, String> ret = new HashMap<>();
+        if (pCorsRequestHeaders != null) {
+            // in theory if Authorization is not requested, when we return http 401, browser will send another
+            // preflight request announcing the Authorization header
+            ret.put("Access-Control-Allow-Headers", pCorsRequestHeaders);
+        }
+        ret.put("Access-Control-Max-Age", Integer.toString(2 * 60 * 60));
+        ret.put("Access-Control-Allow-Credentials", Boolean.toString(this.authenticationEnabled));
+
+        if (restrictor instanceof PolicyRestrictor pr) {
+            HttpMethodChecker httpMethodConfig = pr.getHttpMethodChecker();
+            Set<String> methods = new HashSet<>();
+            if (httpMethodConfig == null) {
+                methods.add("GET");
+                methods.add("POST");
+            } else {
+                if (httpMethodConfig.check(HttpMethod.GET)) {
+                    methods.add("GET");
+                }
+                if (httpMethodConfig.check(HttpMethod.POST)) {
+                    methods.add("POST");
+                }
+            }
+            if (!methods.isEmpty()) {
+                ret.put("Access-Control-Allow-Methods", String.join(", ", methods));
+            }
+        } else {
+            ret.put("Access-Control-Allow-Methods", "GET, POST");
+        }
+
+        // Passing false for "only if strict checking" means that we always check actually configured origins.
+        // This is a call for actual CORS handling from JavaScript code calling fetch() in a modern browser
+        if (restrictor.isOriginAllowed(pOrigin, false)) {
+            // we allow a give origin also when there are no <cors>/<allow-origin> elements configured
+            // for the policy restrictor (or the configured restrictor simply allows the access)
+            ret.put("Access-Control-Allow-Origin", pOrigin);
+        }
+
         return ret;
+    }
+
+    /**
+     * This method prepares CORS response headers for non-preflight requests
+     *
+     * @param pOrigin
+     * @return non null Map of headers values if there's a need to set CORS response headers
+     */
+    public Map<String, String> prepareCorsResponseHeaders(String pOrigin) {
+        if (pOrigin == null || pOrigin.trim().isEmpty() || "null".equals(pOrigin.trim())) {
+            // no incoming Origin - no CORS response headers
+            return Collections.emptyMap();
+        }
+
+        Map<String, String> ret = new HashMap<>();
+        ret.put("Access-Control-Allow-Credentials", Boolean.toString(this.authenticationEnabled));
+        if (restrictor.isOriginAllowed(pOrigin, false)) {
+            // we allow a give origin also when there are no <cors>/<allow-origin> elements configured
+            // for the policy restrictor (or the configured restrictor simply allows the access)
+            ret.put("Access-Control-Allow-Origin", pOrigin);
+        }
+
+        return ret;
+    }
+
+    /**
+     * Do some security validation on the incoming header before we process it
+     * @param incomingHeader
+     */
+    private void validateHeader(String incomingHeader) throws BadRequestException {
+        if (incomingHeader == null || incomingHeader.trim().isEmpty()) {
+            return;
+        }
+        if (incomingHeader.contains("\r") || incomingHeader.contains("\n")) {
+            throw new BadRequestException("Illegal HTTP header value");
+        }
     }
 
     /**
@@ -183,7 +286,13 @@ public class HttpRequestHandler extends BaseRequestHandler {
     }
 
     /**
-     * Check whether the given host and/or address is allowed to access this agent.
+     * <p>Check whether the given host and/or address is allowed to access this agent. Additional access check
+     * is performed against {@code Origin} or {@code Referer} headers which can't be controlled using JavaScript
+     * in the browser (when calling {@code fetch()} API).</p>
+     *
+     * <p>{@code Origin} or {@code Referer} is <strong>not</strong> a protection at all when using other
+     * clients like {@code curl}. Additionally {@code Origin} header is not used for handling preflight CORS
+     * requests here.</p>
      *
      * @param pRequestScheme scheme used to make the request ('http' or 'https')
      * @param pHost          host to check
@@ -194,6 +303,9 @@ public class HttpRequestHandler extends BaseRequestHandler {
         if (!jolokiaCtx.isRemoteAccessAllowed(pHost != null ? new String[]{pHost, pAddress} : new String[]{pAddress})) {
             throw new SecurityException("No access from client " + pAddress + " allowed");
         }
+        // passing true for "only if strict checking" means that the access can be granted if there's
+        // no Origin (or Referer) header included. This is used for handling requests not related to "real" CORS protocol
+        // for protecting JavaScript running in a browser
         if (!jolokiaCtx.isOriginAllowed(pOrigin, true)) {
             throw new SecurityException("Origin " + pOrigin + " is not allowed to call this agent");
         }
@@ -214,9 +326,12 @@ public class HttpRequestHandler extends BaseRequestHandler {
     }
 
     /**
-     * Check whether for the given host is a cross-browser request allowed. This check is delegated to the
+     * <p>Check whether for the given host is a cross-browser request allowed. This check is delegated to the
      * backend manager which is responsible for the security configuration.
-     * Also, some sanity checks are applied.
+     * Also, some sanity checks are applied.</p>
+     *
+     * <p>This method calls {@link JolokiaContext#isOriginAllowed} so should not be called in normal flow. We
+     * keep it for compatibility reasons (it's a public method).</p>
      *
      * @param pOrigin the origin URL to check against
      * @return the origin to put in the response header or null if none is to be set

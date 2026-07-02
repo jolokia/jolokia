@@ -1,5 +1,3 @@
-package org.jolokia.server.core.restrictor;
-
 /*
  * Copyright 2009-2011 Roland Huss
  *
@@ -15,6 +13,7 @@ package org.jolokia.server.core.restrictor;
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+package org.jolokia.server.core.restrictor;
 
 import javax.management.ObjectName;
 
@@ -23,7 +22,7 @@ import org.jolokia.server.core.util.HttpMethod;
 import org.jolokia.server.core.util.RequestType;
 
 /**
- * Base restrictor which alway returns the constant given
+ * Base restrictor which always returns the constant given
  * at construction time
  *
  * @author roland

@@ -580,17 +580,17 @@ public class JolokiaServerConfig {
                 if (count > 1) {
                     // there's no single authentication methods, so let's skip
                 } else if (count == 1) {
-                    possibleRegisterAuthenticationMethod(multi.getAuthenticators().get(0));
+                    possiblyRegisterAuthenticationMethod(multi.getAuthenticators().get(0));
                 }
             } else {
                 // any - so register all exposable
                 for (Authenticator authenticator : multi.getAuthenticators()) {
-                    possibleRegisterAuthenticationMethod(authenticator);
+                    possiblyRegisterAuthenticationMethod(authenticator);
                 }
             }
         } else {
             // there's a single one
-            possibleRegisterAuthenticationMethod(authenticator);
+            possiblyRegisterAuthenticationMethod(authenticator);
         }
     }
 
@@ -600,7 +600,7 @@ public class JolokiaServerConfig {
      *
      * @param authenticator
      */
-    private void possibleRegisterAuthenticationMethod(Authenticator authenticator) {
+    private void possiblyRegisterAuthenticationMethod(Authenticator authenticator) {
         if (authenticator instanceof BasicAuthenticator basic) {
             jolokiaConfig.addSupportedAuthentication(SecurityDetails.AuthMethod.BASIC, basic.getRealm());
         } else if (authenticator instanceof ClientCertAuthenticator mtls) {

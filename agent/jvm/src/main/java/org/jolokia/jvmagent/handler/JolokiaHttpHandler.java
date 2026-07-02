@@ -40,12 +40,14 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpsExchange;
 import org.jolokia.jvmagent.ParsedUri;
+import org.jolokia.jvmagent.security.CorsFilter;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.http.BackChannelHolder;
 import org.jolokia.server.core.http.HttpRequestHandler;
 import org.jolokia.server.core.request.BadRequestException;
 import org.jolokia.server.core.request.EmptyResponseException;
 import org.jolokia.server.core.service.api.JolokiaContext;
+import org.jolokia.server.core.service.api.Restrictor;
 import org.jolokia.server.core.util.IoUtil;
 import org.jolokia.server.core.util.MimeTypeUtil;
 import org.jolokia.json.JSONStructure;
@@ -88,11 +90,22 @@ public class JolokiaHttpHandler implements HttpHandler {
      * @param pJolokiaContext jolokia context
      */
     public JolokiaHttpHandler(JolokiaContext pJolokiaContext) {
+        this(pJolokiaContext, null, false);
+    }
+
+    /**
+     * Create a new HttpHandler for processing HTTP request
+     *
+     * @param pJolokiaContext jolokia context
+     * @param pRestrictor configured restrictor
+     * @param pAuthenticationEnabled whether authenticator has been configured (for CORS purposes)
+     */
+    public JolokiaHttpHandler(JolokiaContext pJolokiaContext, Restrictor pRestrictor, boolean pAuthenticationEnabled) {
         jolokiaContext = pJolokiaContext;
 
         contextPath = jolokiaContext.getConfig(ConfigKey.AGENT_CONTEXT);
 
-        requestHandler = new HttpRequestHandler(jolokiaContext);
+        requestHandler = new HttpRequestHandler(jolokiaContext, pRestrictor, pAuthenticationEnabled);
         allowDnsReverseLookup = Boolean.parseBoolean(jolokiaContext.getConfig(ConfigKey.ALLOW_DNS_REVERSE_LOOKUP));
 
         rfc1123Format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
@@ -164,7 +177,7 @@ public class JolokiaHttpHandler implements HttpHandler {
      * @throws IOException thrown only if there's an issue sending the response.
      */
     public void doHandle(HttpExchange pExchange) throws IOException {
-        JSONStructure json = null;
+        JSONStructure json;
         URI uri = pExchange.getRequestURI();
         ParsedUri parsedUri = new ParsedUri(uri, contextPath);
 
@@ -176,7 +189,14 @@ public class JolokiaHttpHandler implements HttpHandler {
             String scheme = pExchange instanceof HttpsExchange ? "https" : "http";
             InetSocketAddress address = pExchange.getRemoteAddress();
             String remoteHost = allowDnsReverseLookup ? address.getHostName() : null;
-            requestHandler.checkAccess(scheme, remoteHost, address.getAddress().getHostAddress(), extractOriginOrReferer(pExchange));
+            requestHandler.checkAccess(scheme, remoteHost, address.getAddress().getHostAddress(), extractOrigin(pExchange));
+
+            Boolean corsPreflight = CorsFilter.corsPreflight.get();
+            if (corsPreflight != null && corsPreflight) {
+                handleCorsPreflightRequest(pExchange);
+                CorsFilter.corsPreflight.remove();
+                return;
+            }
 
             // If a callback is given, check this is a valid javascript function name
             validateCallbackIfGiven(parsedUri);
@@ -190,7 +210,7 @@ public class JolokiaHttpHandler implements HttpHandler {
                 setHeaders(pExchange);
                 json = executePostRequest(parsedUri, pExchange);
             } else if ("OPTIONS".equalsIgnoreCase(method)) {
-                performCorsPreflightCheck(pExchange);
+                throw new BadRequestException("HTTP Method OPTIONS is supported only for CORS preflight requests.");
             } else {
                 throw new BadRequestException("HTTP Method " + method + " is not supported.");
             }
@@ -242,13 +262,18 @@ public class JolokiaHttpHandler implements HttpHandler {
     // ========================================================================
 
     // Used for checking origin or referer is an origin policy is enabled
-    private String extractOriginOrReferer(HttpExchange pExchange) {
+    private String extractOrigin(HttpExchange pExchange) {
+        return extractOrigin(pExchange, true);
+    }
+
+    // Used for checking origin or referer is an origin policy is enabled
+    private String extractOrigin(HttpExchange pExchange, boolean fallbackToReferer) {
         Headers headers = pExchange.getRequestHeaders();
         String origin = headers.getFirst("Origin");
-        if (origin == null) {
+        if (origin == null && fallbackToReferer) {
             origin = headers.getFirst("Referer");
         }
-        return origin != null ? origin.replaceAll("[\\n\\r]*","") : null;
+        return origin != null ? origin.trim().replaceAll("[\\n\\r]*","") : null;
     }
 
     /**
@@ -288,29 +313,48 @@ public class JolokiaHttpHandler implements HttpHandler {
     }
 
     /**
-     * Handle OPTIONS request (CORS)
+     * Handle preflight CORS request after detecting that proper headers are present.
      *
      * @param pExchange
      */
-    private void performCorsPreflightCheck(HttpExchange pExchange) {
+    private void handleCorsPreflightRequest(HttpExchange pExchange) throws IOException, BadRequestException {
         Headers requestHeaders = pExchange.getRequestHeaders();
-        Map<String,String> respHeaders =
-                requestHandler.handleCorsPreflightRequest(extractOriginOrReferer(pExchange),
-                                                          requestHeaders.getFirst("Access-Control-Request-Headers"));
+
+        // should not be empty when this method is called
+        String origin = extractOrigin(pExchange, false);
+        // we don't care about Access-Control-Request-Method - we'll simply return what we allow
+        // and browser will simply not send the actual request when something doesn't match
+        String preflightRequestHeaders = requestHeaders.getFirst("Access-Control-Request-Headers");
+
+        Map<String, String> respHeaders
+                = requestHandler.handleCorsPreflightRequest(origin, preflightRequestHeaders);
+
         Headers responseHeaders = pExchange.getResponseHeaders();
-        for (Map.Entry<String,String> entry : respHeaders.entrySet()) {
+        for (Map.Entry<String, String> entry : respHeaders.entrySet()) {
             responseHeaders.set(entry.getKey(), entry.getValue());
         }
+
+        // always send 200 - browser will reject the preflight response (and not perform the actual request)
+        // by checking the Access-Control-Allow-* headers - not HTTP response code
+        pExchange.sendResponseHeaders(200, -1);
+        pExchange.getResponseBody().close();
     }
 
+    /**
+     * Set response headers for non-preflight requests. This method combines configuration of CORS headers
+     * and cache related headers.
+     *
+     * @param pExchange
+     */
     private void setHeaders(HttpExchange pExchange) {
-        String origin = requestHandler.extractCorsOrigin(pExchange.getRequestHeaders().getFirst("Origin"));
+        String origin = extractOrigin(pExchange, false);
+        Map<String, String> corsHeaders = requestHandler.prepareCorsResponseHeaders(origin);
         Headers headers = pExchange.getResponseHeaders();
-        if (origin != null) {
-            headers.set("Access-Control-Allow-Origin",origin);
-            headers.set("Access-Control-Allow-Credentials","true");
+        if (corsHeaders != null) {
+            corsHeaders.forEach(headers::set);
         }
 
+        // the below headers are the same as in org.jolokia.server.core.http.AgentServlet.setNoCacheHeaders()
         // Avoid caching at all costs
         headers.set("Cache-Control", "no-cache");
 
@@ -378,6 +422,7 @@ public class JolokiaHttpHandler implements HttpHandler {
         } else {
             headers.set("Content-Type", "text/plain");
             pExchange.sendResponseHeaders(200,-1);
+            pExchange.getResponseBody().close();
         }
     }
 
