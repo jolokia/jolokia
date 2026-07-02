@@ -331,12 +331,17 @@ public class JolokiaHttpHandler implements HttpHandler {
 
         Headers responseHeaders = pExchange.getResponseHeaders();
         for (Map.Entry<String, String> entry : respHeaders.entrySet()) {
-            responseHeaders.set(entry.getKey(), entry.getValue());
+            String name = entry.getKey();
+            if ("Vary".equalsIgnoreCase(name)) {
+                responseHeaders.add(entry.getKey(), entry.getValue());
+            } else {
+                responseHeaders.set(entry.getKey(), entry.getValue());
+            }
         }
 
-        // always send 200 - browser will reject the preflight response (and not perform the actual request)
+        // always send 204 - browser will reject the preflight response (and not perform the actual request)
         // by checking the Access-Control-Allow-* headers - not HTTP response code
-        pExchange.sendResponseHeaders(200, -1);
+        pExchange.sendResponseHeaders(204, -1);
         pExchange.getResponseBody().close();
     }
 
@@ -351,7 +356,13 @@ public class JolokiaHttpHandler implements HttpHandler {
         Map<String, String> corsHeaders = requestHandler.prepareCorsResponseHeaders(origin);
         Headers headers = pExchange.getResponseHeaders();
         if (corsHeaders != null) {
-            corsHeaders.forEach(headers::set);
+            corsHeaders.forEach((name, value) -> {
+                if ("Vary".equals(name)) {
+                    headers.add(name, value);
+                } else {
+                    headers.set(name, value);
+                }
+            });
         }
 
         // the below headers are the same as in org.jolokia.server.core.http.AgentServlet.setNoCacheHeaders()

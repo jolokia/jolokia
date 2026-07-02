@@ -172,7 +172,7 @@ public class HttpRequestHandler extends BaseRequestHandler {
         // these are the CORS preflight response headers:
         // https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS#the_http_response_headers
         // + Access-Control-Allow-Credentials
-        //   we'll send true only if Jolokia is configured with authentication
+        //   we'll send true only if Jolokia is configured with authentication and don't send the header otherwise
         // + Access-Control-Allow-Headers
         //   the practice is to reflect incoming Access-Control-Request-Headers and let the browser control
         //   the response with Access-Control-Allow-Origin
@@ -191,7 +191,10 @@ public class HttpRequestHandler extends BaseRequestHandler {
             ret.put("Access-Control-Allow-Headers", pCorsRequestHeaders);
         }
         ret.put("Access-Control-Max-Age", Integer.toString(2 * 60 * 60));
-        ret.put("Access-Control-Allow-Credentials", Boolean.toString(this.authenticationEnabled));
+        if (this.authenticationEnabled) {
+            // omit the header entirely if not allowed
+            ret.put("Access-Control-Allow-Credentials", "true");
+        }
 
         if (restrictor instanceof PolicyRestrictor pr) {
             HttpMethodChecker httpMethodConfig = pr.getHttpMethodChecker();
@@ -221,6 +224,8 @@ public class HttpRequestHandler extends BaseRequestHandler {
             // for the policy restrictor (or the configured restrictor simply allows the access)
             ret.put("Access-Control-Allow-Origin", pOrigin);
         }
+        // whether or not the origin is allowed, mark the response as dependant on the incoming "Origin" header
+        ret.put("Vary", "Origin");
 
         return ret;
     }
@@ -238,12 +243,13 @@ public class HttpRequestHandler extends BaseRequestHandler {
         }
 
         Map<String, String> ret = new HashMap<>();
-        ret.put("Access-Control-Allow-Credentials", Boolean.toString(this.authenticationEnabled));
+        if (this.authenticationEnabled) {
+            ret.put("Access-Control-Allow-Credentials", "true");
+        }
         if (restrictor.isOriginAllowed(pOrigin, false)) {
-            // we allow a give origin also when there are no <cors>/<allow-origin> elements configured
-            // for the policy restrictor (or the configured restrictor simply allows the access)
             ret.put("Access-Control-Allow-Origin", pOrigin);
         }
+        ret.put("Vary", "Origin");
 
         return ret;
     }

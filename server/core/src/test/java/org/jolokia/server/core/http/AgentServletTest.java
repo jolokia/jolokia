@@ -458,9 +458,10 @@ public class AgentServletTest {
         expect(request.getMethod()).andReturn("OPTIONS");
 
         response.setHeader(eq("Access-Control-Max-Age"), anyObject());
+        response.addHeader("Vary", "Origin");
         response.setHeader("Access-Control-Allow-Origin", out);
-        response.setHeader("Access-Control-Allow-Credentials", "false");
         response.setHeader("Access-Control-Allow-Methods", "GET, POST");
+        response.setStatus(204);
 
         replay(request, response);
 
@@ -496,8 +497,8 @@ public class AgentServletTest {
                     expect(request.getAttribute("subject")).andReturn(null);
                 },
                 () -> {
+                    response.addHeader("Vary", "Origin");
                     response.setHeader("Access-Control-Allow-Origin", out);
-                    response.setHeader("Access-Control-Allow-Credentials","false");
                     response.setCharacterEncoding("utf-8");
                     response.setContentType("text/plain");
                     response.setStatus(200);

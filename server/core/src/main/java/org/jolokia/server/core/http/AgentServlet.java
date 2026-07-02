@@ -430,9 +430,15 @@ public class AgentServlet extends HttpServlet {
                     Map<String, String> responseHeaders =
                             requestHandler.handleCorsPreflightRequest(requestOrigin, requestHeaders);
                     for (Map.Entry<String, String> entry : responseHeaders.entrySet()) {
-                        pResp.setHeader(entry.getKey(), entry.getValue());
+                        String name = entry.getKey();
+                        if ("Vary".equalsIgnoreCase(name)) {
+                            pResp.addHeader(entry.getKey(), entry.getValue());
+                        } else {
+                            pResp.setHeader(entry.getKey(), entry.getValue());
+                        }
                     }
                     corsPreflight = true;
+                    pResp.setStatus(HttpServletResponse.SC_NO_CONTENT);
                     return;
                 }
             }
@@ -447,6 +453,8 @@ public class AgentServlet extends HttpServlet {
             // response or error Jolokia JSON response
             if (pReqHandler != null) {
                 json = pReqHandler.handleRequest(pReq);
+            } else {
+                throw new BadRequestException("HTTP Method OPTIONS is supported only for CORS preflight requests.");
             }
         } catch (BadRequestException exp) {
             String response = "400 (Bad Request)\n";
@@ -476,7 +484,9 @@ public class AgentServlet extends HttpServlet {
         }
 
         if (json == null) {
-            sendInternalServerError(pResp, new Exception("Internal Server Error (no JSON response)"));
+            if (pReqHandler != null) {
+                sendInternalServerError(pResp, new Exception("Internal Server Error (no JSON response)"));
+            }
         } else {
             sendResponse(pResp, pReq, json);
         }
@@ -596,7 +606,13 @@ public class AgentServlet extends HttpServlet {
         String origin = extractOrigin(pReq, false);
         Map<String, String> corsHeaders = requestHandler.prepareCorsResponseHeaders(origin);
         if (corsHeaders != null) {
-            corsHeaders.forEach(pResp::setHeader);
+            corsHeaders.forEach((name, value) -> {
+                if ("Vary".equals(name)) {
+                    pResp.addHeader(name, value);
+                } else {
+                    pResp.setHeader(name, value);
+                }
+            });
         }
     }
 
