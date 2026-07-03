@@ -51,6 +51,7 @@ import org.jolokia.server.core.service.api.Restrictor;
 import org.jolokia.server.core.util.IoUtil;
 import org.jolokia.server.core.util.MimeTypeUtil;
 import org.jolokia.json.JSONStructure;
+import org.jolokia.server.core.util.ProxyHeaderUtil;
 import org.jolokia.server.core.util.SubjectAccess;
 import org.jolokia.server.core.util.SubjectAccessProvider;
 
@@ -84,6 +85,10 @@ public class JolokiaHttpHandler implements HttpHandler {
 
     private final SubjectAccess subjectAccess;
 
+    // Whether to trust incoming X-Forwarded-For/X-Real-IP/Forwarded header, assuming that the top-most
+    // trusted proxy discarded untrusted incoming values of these headers and initiated trusted value chain
+    private boolean trustProxyHeaders = false;
+
     /**
      * Create a new HttpHandler for processing HTTP request
      *
@@ -111,6 +116,8 @@ public class JolokiaHttpHandler implements HttpHandler {
         rfc1123Format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
 
         subjectAccess = SubjectAccessProvider.getSubjectAccess();
+
+        trustProxyHeaders = Boolean.parseBoolean(jolokiaContext.getConfig(ConfigKey.TRUST_PROXY_HEADERS));
     }
 
     /**
@@ -189,7 +196,15 @@ public class JolokiaHttpHandler implements HttpHandler {
             String scheme = pExchange instanceof HttpsExchange ? "https" : "http";
             InetSocketAddress address = pExchange.getRemoteAddress();
             String remoteHost = allowDnsReverseLookup ? address.getHostName() : null;
-            requestHandler.checkAccess(scheme, remoteHost, address.getAddress().getHostAddress(), extractOrigin(pExchange));
+
+            Headers headers = pExchange.getRequestHeaders();
+
+            String realIp = headers.getFirst("X-Real-IP");
+            String forwardedFor = headers.getFirst("X-Forwarded-For");
+            String forwarded = headers.getFirst("Forwarded");
+            String[] addressChain = ProxyHeaderUtil.addressChain(trustProxyHeaders, address.getAddress().getHostAddress(), realIp, forwardedFor, forwarded);
+
+            requestHandler.checkAccess(scheme, remoteHost, addressChain, extractOrigin(pExchange));
 
             Boolean corsPreflight = CorsFilter.corsPreflight.get();
             if (corsPreflight != null && corsPreflight) {

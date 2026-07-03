@@ -1,5 +1,3 @@
-package org.jolokia.server.core.util;
-
 /*
  * Copyright 2009-2013 Roland Huss
  *
@@ -15,13 +13,13 @@ package org.jolokia.server.core.util;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+package org.jolokia.server.core.util;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 /**
- * Checks whether a certain ip adresse is either equal another
+ * Checks whether a certain ip address is either equal another
  * address or falls within a subnet
  *
  * @author roland
@@ -30,14 +28,14 @@ import java.net.UnknownHostException;
 
 public final class IpChecker {
 
-    private static int[] masks = new int[] {0x00, 0x80, 0xc0, 0xe0, 0xf0, 0xf8, 0xfc, 0xfe};
+    private static final int[] masks = new int[] {0x00, 0x80, 0xc0, 0xe0, 0xf0, 0xf8, 0xfc, 0xfe};
 
     private IpChecker() { }
 
     /**
-     * Check whether a given IP Adress falls within a subnet or is equal to
+     * Check whether a given IP Address falls within a subnet or is equal to
      *
-     * @param pExpected either a simple IP adress (without "/") or a net specification
+     * @param pExpected either a simple IP address (without "/") or a net specification
      *        including a CIDR specification (e.g "/24" or "/255.255.255.0" (only for IPv4))
      * @param pToCheck the ip address to check
      * @return true if either the address to check is the same as the address expected
@@ -49,7 +47,7 @@ public final class IpChecker {
             return pExpected.contains(":") && matchesIPv6(pExpected, pToCheck);
         }
 
-        String[] parts = pExpected.split("/",2);
+        String[] parts = pExpected.split("/", 2);
         if (parts.length == 1) {
             // No Net part given, check for equality ...
             // Check for valid ips
@@ -72,7 +70,7 @@ public final class IpChecker {
             }
             return true;
         } else {
-            throw new IllegalArgumentException("Invalid IP adress specification " + pExpected);
+            throw new IllegalArgumentException("Invalid IP address specification " + pExpected);
         }
     }
 
@@ -90,12 +88,12 @@ public final class IpChecker {
                 InetAddress checked = InetAddress.getByName(pToCheck);
                 return expected.equals(checked);
             } catch (UnknownHostException e) {
-                throw new IllegalArgumentException("Invalid IP adress specification " + pExpected);
+                throw new IllegalArgumentException("Invalid IP address specification " + pExpected);
             }
         } else {
             int prefix = Integer.parseInt(parts[1]);
             if (prefix < 0 || prefix > 128) {
-                throw new IllegalArgumentException("Invalid IP adress specification " + pExpected);
+                throw new IllegalArgumentException("Invalid IP address specification " + pExpected);
             }
             try {
                 InetAddress expected = InetAddress.getByName(parts[0]);
@@ -115,7 +113,7 @@ public final class IpChecker {
                 }
                 return true;
             } catch (UnknownHostException e) {
-                throw new IllegalArgumentException("Invalid IP adress specification " + pExpected);
+                throw new IllegalArgumentException("Invalid IP address specification " + pExpected);
             }
         }
     }
@@ -146,17 +144,17 @@ public final class IpChecker {
     private static int[] convertToIntTuple(String pAddress) {
         String[] parts = pAddress.split("\\.");
         if (parts.length != 4) {
-            throw new IllegalArgumentException("Invalid IP-Adresse " + pAddress);
+            throw new IllegalArgumentException("Invalid IP-Address " + pAddress);
         }
         int[] ret = new int[4];
         for (int i = 0; i < 4; i++) {
             try {
                 ret[i] = Integer.parseInt(parts[i]);
                 if (ret[i] < 0 || ret[i] > 255) {
-                    throw new IllegalArgumentException("Invalid IP-Adresse " + pAddress);
+                    throw new IllegalArgumentException("Invalid IP-Address " + pAddress);
                 }
             } catch (NumberFormatException exp) {
-                throw new IllegalArgumentException("Invalid IP-Adresse " + pAddress,exp);
+                throw new IllegalArgumentException("Invalid IP-Address " + pAddress,exp);
             }
         }
         return ret;

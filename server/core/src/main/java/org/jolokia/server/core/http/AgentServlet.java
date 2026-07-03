@@ -59,6 +59,7 @@ import org.jolokia.core.util.ClassUtil;
 import org.jolokia.server.core.util.IoUtil;
 import org.jolokia.server.core.util.MimeTypeUtil;
 import org.jolokia.server.core.util.NetworkUtil;
+import org.jolokia.server.core.util.ProxyHeaderUtil;
 import org.jolokia.server.core.util.SubjectAccess;
 import org.jolokia.server.core.util.SubjectAccessProvider;
 
@@ -129,6 +130,10 @@ public class AgentServlet extends HttpServlet {
     // Jolokia should not send any CORS headers
     private boolean disableCors = false;
 
+    // Whether to trust incoming X-Forwarded-For/X-Real-IP/Forwarded header, assuming that the top-most
+    // trusted proxy discarded untrusted incoming values of these headers and initiated trusted value chain
+    private boolean trustProxyHeaders = false;
+
     /**
      * No argument constructor, used e.g. by a servlet
      * descriptor when creating the servlet out of web.xml
@@ -186,6 +191,7 @@ public class AgentServlet extends HttpServlet {
         if (disableCors) {
             this.disableCors = disableCors;
         }
+        trustProxyHeaders = Boolean.parseBoolean(config.getConfig(ConfigKey.TRUST_PROXY_HEADERS));
 
         allowDnsReverseLookup = Boolean.parseBoolean(config.getConfig(ConfigKey.ALLOW_DNS_REVERSE_LOOKUP));
 
@@ -440,7 +446,12 @@ public class AgentServlet extends HttpServlet {
             // Check access policy
             String remoteHost = allowDnsReverseLookup ? pReq.getRemoteHost() : null;
             String scheme = pReq.getScheme();
-            requestHandler.checkAccess(scheme, remoteHost, pReq.getRemoteAddr(), extractOrigin(pReq, true));
+
+            String realIp = pReq.getHeader("X-Real-IP");
+            String forwardedFor = pReq.getHeader("X-Forwarded-For");
+            String forwarded = pReq.getHeader("Forwarded");
+            String[] addressChain = ProxyHeaderUtil.addressChain(trustProxyHeaders, pReq.getRemoteAddr(), realIp, forwardedFor, forwarded);
+            requestHandler.checkAccess(scheme, remoteHost, addressChain, extractOrigin(pReq, true));
 
             if (!disableCors && pReqHandler == null && "OPTIONS".equals(pReq.getMethod())) {
                 String requestOrigin = extractOrigin(pReq, false);

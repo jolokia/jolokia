@@ -181,7 +181,7 @@ the response is returned as plain text without parsing. The client is then
 responsible for parsing the response. This can be useful when a custom JSON
 parsing is necessary. +
 Jolokia Simple API (jolokia-simple.js) doesn't support `text` as dataType. +
-*Added since jolokia.js 2.0.2*
+*Added in jolokia.js 2.0.2*
 
 |`jsonp`
 |Whether the request should be sent via JSONP (a technique
@@ -244,7 +244,7 @@ If set to `string`, longs are serialized as strings.
 It can be useful when a JavaScript client consumes the JSON response,
 because numbers greater than the max safe integer don't retain their precision
 in JavaScript. +
-*Added since Jolokia 2.0.3*
+*Added in Jolokia 2.0.3*
 
 |`ignoreErrors`
 |If set to "true", errors during JMX operations and JSON
@@ -261,18 +261,18 @@ reads.
 This option may be configured globally and overridden at request time.
 When `false`, bulk responses have to be correlated with requests by matching
 the requests using index number - responses come in the same order as requests. +
-*Added since Jolokia 2.1.0*
+*Added in Jolokia 2.1.0*
 
 |`listKeys`
 |Whether the response object for `list()` operation should contain `keys` field
 that lists all the keys obtained from each `javax.management.ObjectName` of the response.
 This may save you time parsing the name yourself. +
-*Added since Jolokia 2.1.0*
+*Added in Jolokia 2.1.0*
 
 |`listCache`
 |A flag (defaults to `false`) to enable _optimized list response_. +
 With this flag enabled, `list()` operation returns a bit different structure (that's why we've upgraded protocol version to `8.0`) where some MBeans may _point to_ cached, shared MBeanInfo JSON fragment. This heavily decreases the size of `list()` response. +
-*Added since Jolokia 2.1.0*
+*Added in Jolokia 2.1.0*
 
 |`serializeException`
 |If true then in case of an error, the exception itself is returned in

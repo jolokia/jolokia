@@ -447,6 +447,9 @@ public class AgentServletTest {
         expect(request.getHeader("Origin")).andReturn(in).anyTimes();
         expect(request.getHeader("Access-Control-Request-Method")).andReturn("POST");
         expect(request.getHeader("Access-Control-Request-Headers")).andReturn(null);
+        expect(request.getHeader("X-Real-IP")).andReturn(null);
+        expect(request.getHeader("X-Forwarded-For")).andReturn(null);
+        expect(request.getHeader("Forwarded")).andReturn(null);
         expect(request.getRemoteHost()).andReturn("localhost");
         expect(request.getRemoteAddr()).andReturn("127.0.0.1");
         expect(request.getRequestURI()).andReturn("/jolokia/").times(2);
@@ -581,6 +584,9 @@ public class AgentServletTest {
                     expect(request.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE)).andReturn(null);
                     expect(request.getScheme()).andStubReturn("http");
                     expect(request.getHeader("Origin")).andReturn(null);
+                    expect(request.getHeader("X-Real-IP")).andReturn(null);
+                    expect(request.getHeader("X-Forwarded-For")).andReturn(null);
+                    expect(request.getHeader("Forwarded")).andReturn(null);
                     expect(request.getRemoteAddr()).andThrow(new IllegalStateException());
                 },
                 getTextPlainResponseSetup());
@@ -766,6 +772,9 @@ public class AgentServletTest {
             expect(request.getScheme()).andStubReturn("http");
             expect(request.getHeader("Origin")).andStubReturn(null);
             expect(request.getHeader("Referer")).andStubReturn(null);
+            expect(request.getHeader("X-Real-IP")).andStubReturn(null);
+            expect(request.getHeader("X-Forwarded-For")).andStubReturn(null);
+            expect(request.getHeader("Forwarded")).andStubReturn(null);
             expect(request.getRemoteHost()).andStubReturn("localhost");
             expect(request.getRemoteAddr()).andStubReturn("127.0.0.1");
             expect(request.getRequestURI()).andReturn("/jolokia/");
@@ -790,6 +799,9 @@ public class AgentServletTest {
             expect(request.getScheme()).andStubReturn("http");
             expect(request.getHeader("Origin")).andStubReturn(null);
             expect(request.getHeader("Referer")).andStubReturn(null);
+            expect(request.getHeader("X-Real-IP")).andStubReturn(null);
+            expect(request.getHeader("X-Forwarded-For")).andStubReturn(null);
+            expect(request.getHeader("Forwarded")).andStubReturn(null);
             expect(request.getRemoteHost()).andReturn("localhost");
             expect(request.getRemoteAddr()).andReturn("127.0.0.1");
             expect(request.getRequestURI()).andReturn("/jolokia/");

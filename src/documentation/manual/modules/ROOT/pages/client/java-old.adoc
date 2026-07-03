@@ -386,7 +386,7 @@ registered MBeans, a response with HTTP 304 return code is returned.
 This option may be configured globally and overridden at request time.
 When `false`, bulk responses have to be correlated with requests by matching
 the requests using index number - responses come in the same order as requests. +
-*Added since Jolokia 2.1.0*
+*Added in Jolokia 2.1.0*
 |===
 
 [#client-java-requests]

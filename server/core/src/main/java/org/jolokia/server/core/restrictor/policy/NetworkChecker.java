@@ -66,7 +66,8 @@ public class NetworkChecker extends AbstractChecker<String[]> {
     public NetworkChecker(Document pDoc) {
         NodeList nodes = pDoc.getElementsByTagName("remote");
         if (nodes.getLength() == 0) {
-            // No restrictions found
+            // No restrictions found - no <remote> at all means "allow all"
+            // Empty <remote> (no <host> children) would mean "allow none"
             allowedHostsSet = null;
             allowedIP6HostsSet = null;
             return;
@@ -113,32 +114,65 @@ public class NetworkChecker extends AbstractChecker<String[]> {
      * Check for one or more hosts.
      *
      * @param pHostOrAddresses array of host names or IP addresses
-     * @return true if one of the given name passes this checker.
+     * @return true if all the given names pass this checker.
      */
     @Override
     public boolean check(String[] pHostOrAddresses) {
         if (allowedHostsSet == null) {
+            // No <remote> section in policy - allow all
             return true;
         }
+        // Null or empty array - no information about source (client) address/name, don't trust
+        if (pHostOrAddresses == null || pHostOrAddresses.length == 0) {
+            return false;
+        }
+        // each incoming address (original client and proxies) must be trusted
         for (String addr : pHostOrAddresses) {
-            if (allowedHostsSet.contains(addr)) {
-                return true;
-            }
-            try {
-                InetAddress ip6 = Inet6Address.getByName(addr);
-                if (ip6 instanceof Inet6Address && allowedIP6HostsSet.contains(ip6)) {
-                    return true;
-                }
-            } catch (UnknownHostException e) {
+            if (!isAllowed(addr)) {
                 return false;
             }
-            if (allowedSubnetsSet != null) {
-                if (IP_PATTERN.matcher(addr).matches() || IP6_PATTERN.matcher(addr).matches()) {
-                    for (String subnet : allowedSubnetsSet) {
-                        if (IpChecker.matches(subnet, addr)) {
-                            return true;
-                        }
+        }
+        return true;
+    }
+
+    /**
+     * Verify single IP address/host name
+     * @param addr
+     * @return
+     */
+    private boolean isAllowed(String addr) {
+        // 1. Plain hostname / IPv4 literal match
+        if (allowedHostsSet.contains(addr)) {
+            return true;
+        }
+        // 2. IPv6 address match (normalises e.g. ffff::1 == ffff:0:0:0:0:0:0:1)
+        //    Strip any scope ID suffix first (e.g. "fe80::1%2" or "fe80::1%eth0") so that
+        //    Inet6Address.equals() — which includes scope in its comparison — matches policy
+        //    entries that were stored without a scope.
+        try {
+            InetAddress resolved = Inet6Address.getByName(addr);
+            if (resolved instanceof Inet6Address ip6) {
+                if (ip6.getScopedInterface() != null || ip6.getScopeId() > 0) {
+                    int percent = addr.indexOf('%');
+                    if (percent != -1) {
+                        addr = addr.substring(0, percent);
+                        // resolve again before we move to subnet matching
+                        resolved = Inet6Address.getByName(addr);
                     }
+                }
+                if (resolved instanceof Inet6Address ip6resolved && allowedIP6HostsSet.contains(ip6resolved)) {
+                    return true;
+                }
+            }
+        } catch (UnknownHostException e) {
+            return false;
+        }
+        // 3. Subnet match (IPv4 or IPv6 literals only)
+        if (allowedSubnetsSet != null &&
+                (IP_PATTERN.matcher(addr).matches() || IP6_PATTERN.matcher(addr).matches())) {
+            for (String subnet : allowedSubnetsSet) {
+                if (IpChecker.matches(subnet, addr)) {
+                    return true;
                 }
             }
         }

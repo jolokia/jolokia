@@ -56,7 +56,7 @@ public class HttpRequestHandlerTest {
         expect(restrictor.ignoreScheme()).andReturn(false);
         replay(restrictor);
         init(restrictor);
-        handler.checkAccess("http", "localhost", "127.0.0.1", null);
+        handler.checkAccess("http", "localhost", new String[] { "127.0.0.1" }, null);
         verify(restrictor);
     }
 
@@ -68,7 +68,7 @@ public class HttpRequestHandlerTest {
         expect(restrictor.ignoreScheme()).andReturn(false);
         replay(restrictor);
         init(restrictor);
-        handler.checkAccess("https", "localhost", "127.0.0.1", "http://www.jolokia.org");
+        handler.checkAccess("https", "localhost", new String[] { "127.0.0.1" }, "http://www.jolokia.org");
         verify(restrictor);
     }
 
@@ -79,7 +79,7 @@ public class HttpRequestHandlerTest {
         replay(restrictor);
         init(restrictor);
 
-        handler.checkAccess("http", "localhost", "127.0.0.1", null);
+        handler.checkAccess("http", "localhost", new String[] { "127.0.0.1" }, null);
         verify(restrictor);
     }
 
@@ -91,7 +91,7 @@ public class HttpRequestHandlerTest {
         replay(restrictor);
         init(restrictor);
 
-        handler.checkAccess("http", "localhost", "127.0.0.1", "http://www.jolokia.org");
+        handler.checkAccess("http", "localhost", new String[] { "127.0.0.1" }, "http://www.jolokia.org");
     }
 
     @Test(expectedExceptions = { SecurityException.class })
@@ -103,7 +103,7 @@ public class HttpRequestHandlerTest {
         replay(restrictor);
         init(restrictor);
 
-        handler.checkAccess("http", "localhost", "127.0.0.1", "https://www.jolokia.org");
+        handler.checkAccess("http", "localhost", new String[] { "127.0.0.1" }, "https://www.jolokia.org");
     }
 
     @Test
@@ -115,7 +115,7 @@ public class HttpRequestHandlerTest {
         replay(restrictor);
         init(restrictor);
 
-        handler.checkAccess("http", "localhost", "127.0.0.1", "https://www.jolokia.org");
+        handler.checkAccess("http", "localhost", new String[] { "127.0.0.1" }, "https://www.jolokia.org");
     }
 
     @Test
@@ -325,9 +325,8 @@ public class HttpRequestHandlerTest {
         if (pRequest instanceof JolokiaRequest) {
             expect(requestHandler.handleRequest((JolokiaRequest) pRequest,anyObject())).andReturn("hello").times(i);
         }
-        else if (pRequest instanceof String[]) {
-            String[] a = (String[]) pRequest;
-            expect(requestHandler.handleRequest(eqReadRequest(a[0], a[1]),anyObject())).andReturn("hello").times(i);
+        else if (pRequest instanceof String[] tab) {
+            expect(requestHandler.handleRequest(eqReadRequest(tab[0], tab[1]),anyObject())).andReturn("hello").times(i);
         } else {
             expect(requestHandler.handleRequest(isA(JolokiaRequest.class),anyObject())).andReturn("hello").times(i);
         }

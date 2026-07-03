@@ -449,7 +449,21 @@ public enum ConfigKey {
      * A request parameter for {@code list} operation, which tells Jolokia to add information about
      * {@link javax.management.openmbean.OpenType} used by an attribute, method argument or return value.
      */
-    OPEN_TYPES("openTypes", false, true, Constants.FALSE, Boolean.class);
+    OPEN_TYPES("openTypes", false, true, Constants.FALSE, Boolean.class),
+
+    /**
+     * <p>Global parameter to configure if the incoming {@code X-Forwarded-For}/{@code Forwarded}/{@code X-Real-IP}
+     * headers are trusted or not.</p>
+     * <ul>
+     *     <li>If not trusted (default), Jolokia will verify all the values including the incoming remote IP (which
+     *     could be original client or last reverse-proxy)</li>
+     *     <li>If trusted, Jolokia assumes that these headers are not malicious and some trusted proxy (like nginx)
+     *     used an option like {@code proxy_set_header X-Forwarded-For $remote_addr;}</li>
+     * </ul>
+     * Even if these headers are trusted, Jolokia will still validate the incoming source address (which may be a proxy
+     * or the actual client).
+     */
+    TRUST_PROXY_HEADERS("trustProxyHeaders", true, false, Constants.FALSE, Boolean.class);
 
     /**
      * JAAS Subject to attach to an HTTP request as attribute if JAAS based authentication is in use.

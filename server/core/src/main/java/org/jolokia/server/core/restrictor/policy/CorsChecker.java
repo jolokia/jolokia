@@ -1,5 +1,3 @@
-package org.jolokia.server.core.restrictor.policy;
-
 /*
  * Copyright 2009-2013 Roland Huss
  *
@@ -15,6 +13,7 @@ package org.jolokia.server.core.restrictor.policy;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.server.core.restrictor.policy;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +35,7 @@ public class CorsChecker extends AbstractChecker<String> {
     private List<Pattern> patterns;
 
     /**
-     * Constructor buiilding up this checker from the XML document provided.
+     * Constructor building up this checker from the XML document provided.
      * CORS sections look like
      * <pre>
      *     &lt;cors&gt;

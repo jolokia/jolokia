@@ -42,7 +42,6 @@ import org.jolokia.server.core.request.EmptyResponseException;
 import org.jolokia.server.core.request.JolokiaRequest;
 import org.jolokia.server.core.request.JolokiaRequestFactory;
 import org.jolokia.server.core.request.ProcessingParameters;
-import org.jolokia.server.core.restrictor.policy.CorsChecker;
 import org.jolokia.server.core.restrictor.policy.HttpMethodChecker;
 import org.jolokia.server.core.restrictor.policy.PolicyRestrictor;
 import org.jolokia.server.core.service.api.JolokiaContext;
@@ -302,12 +301,18 @@ public class HttpRequestHandler extends BaseRequestHandler {
      *
      * @param pRequestScheme scheme used to make the request ('http' or 'https')
      * @param pHost          host to check
-     * @param pAddress       address to check
+     * @param pAddresses     addresses to check
      * @param pOrigin        (optional) origin header to check also.
      */
-    public void checkAccess(String pRequestScheme, String pHost, String pAddress, String pOrigin) {
-        if (!jolokiaCtx.isRemoteAccessAllowed(pHost != null ? new String[]{pHost, pAddress} : new String[]{pAddress})) {
-            throw new SecurityException("No access from client " + pAddress + " allowed");
+    public void checkAccess(String pRequestScheme, String pHost, String[] pAddresses, String pOrigin) {
+        String[] toCheck = pAddresses;
+        if (pHost != null) {
+            toCheck = new String[toCheck.length + 1];
+            toCheck[0] = pHost;
+            System.arraycopy(pAddresses, 0, toCheck, 1, pAddresses.length);
+        }
+        if (!jolokiaCtx.isRemoteAccessAllowed(toCheck)) {
+            throw new SecurityException("No access from client [chain: " + String.join(" -> ", toCheck) + "] allowed");
         }
         // passing true for "only if strict checking" means that the access can be granted if there's
         // no Origin (or Referer) header included. This is used for handling requests not related to "real" CORS protocol

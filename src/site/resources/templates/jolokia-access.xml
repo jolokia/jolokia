@@ -32,9 +32,13 @@
       (respecting further restrictions, though). If <remote> ... </remote> is given
       without any host no access is allowed at all (probably not what you want).
 
-      You can also specify a subnetmask behind a numeric IP adress in which case any
+      You can also specify a subnet mask behind a numeric IP address in which case any
       host within the specified subnet is allowed to access the agent. The netmask can
       be given either in CIDR format (e.g "/16") or as a full netmask (e.g. "/255.255.0.0" - for IPv4 only)
+
+      The address to check is "client address" - and it can be detected from HTTP proxy headers
+      like standard (RFC 7239) "Forwarded" header or de-facto standard X-Forwarded-For header. This
+      is also subject to security settings which allow proxy chain to be trusted or not.
   -->
   <!--
   <remote>

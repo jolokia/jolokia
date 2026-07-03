@@ -56,6 +56,31 @@ IP addresses access is denied. IPv6 addresses are also supported.
 </remote>
 ----
 
+Starting with Jolokia 2.6.1, the client IP address can be detected even if Jolokia runs behind
+a reverse proxy. Typical https://nginx.org/en/docs/http/ngx_http_proxy_module.html[NGinx reverse proxy] setup uses:
+[listing]
+----
+location ^~ /jolokia {
+    proxy_pass http://<internal_ip>:<port>/jolokia;
+
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    # or for the "most external trusted proxy"
+    proxy_set_header X-Forwarded-For $remote_addr;
+}
+----
+
+Jolokia can obtain the _client IP address_ from the incoming `X-Forwarded-For` header, but headers like
+`X-Real-IP` and `Forwarded` (from https://datatracker.ietf.org/doc/html/rfc7239[RFC 7239]) are also checked.
+From security perspective, the incoming headers should not be trusted blindly, so Jolokia _always_ checks the
+actual incoming client IP address (whether it's a browser address or the address of a reverse proxy).
+
+In a complex scenario, where the actual user connects through multiple reverse proxies, `X-Forwarded-For` and
+`Forwarded` headers may contain a list of "remote addresses" for each _hop_ along the route.
+
+There's a special configuration option named `trustProxyHeaders` (defaults to `false`) which can be used to
+declare that there's a trusted reverse proxy which set a correct client (or untrusted reverse proxy) IP
+address as the "most external known remote address". By default the entire list of addresses is validated and if _any_ of the addresses fails to match a pattern from `<remote>/<host>` list, the request is rejected.
+
 === Commands
 
 This section specifies the Jolokia commands for which access

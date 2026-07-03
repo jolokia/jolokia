@@ -200,7 +200,7 @@ If set to `string`, longs are serialized as strings.
 It can be useful when a JavaScript client consumes the JSON response,
 because numbers greater than the max safe integer don't retain their precision
 in JavaScript. +
-*Added since Jolokia 2.0.3*
+*Added in Jolokia 2.0.3*
 
 |`org.jolokia.includeRequest`
 |`true`
@@ -208,7 +208,7 @@ in JavaScript. +
 request should be included in the response (under `request` key). +
 This applies to bulk requests too, so correlation should be done by index
 of requests and responses (these are guaranteed to be matching). +
-*Added since Jolokia 2.1.0*
+*Added in Jolokia 2.1.0*
 
 |`org.jolokia.dateFormat`
 |Default: `yyyy-MM-dd'T'HH:mm:ssXXX` (ISO 8601 format)
@@ -219,12 +219,12 @@ Additionally we can use:
 * `time`, `millis`, `long` to serialize dates as Unix epoch time in milliseconds
 * `nanos` to serialize dates as Unix epoch time in nanoseconds
 
-*Added since Jolokia 2.1.0*
+*Added in Jolokia 2.1.0*
 
 |`org.jolokia.dateFormatTimeZone`
 |Default: local time zone
 |A time zone specifier used for date formatters, like `UTC` +
-*Added since Jolokia 2.1.0*
+*Added in Jolokia 2.1.0*
 
 |`org.jolokia.historyMaxEntries`
 |`10`
@@ -342,6 +342,17 @@ When no user is set and the `authMode` is either `service-all` or
 OSGi service registry. If more then one of such service is registered, `service-all` requires
 that all authenticators succeed, for `service-any` it is sufficient that one authenticator
 successfully authenticates. In any case if no such Authenticator service can be found, the request is rejected.
+
+|`org.jolokia.trustProxyHeaders`
+|`false`
+|Normally, Jolokia can obtain the IP of the caller from Servlet or JDK HTTP Server API.
+But when Jolokia Agent runs behind a reverse proxy, using such API gives us the IP address
+of the proxy itself. Since Jolokia 2.6.1 headers like `Forwarded`, `X-Forwarded-For` and `X-Real-IP` are
+read (in that order) and all are validated against configured "allowed client addresses" (in the
+restrictor configuration). Normally, all found addresses are checked and all must be configured as trusted. +
+With this option set to `true`, Jolokia trusts that the _first_ IP address in `Forwarded`/`X-Forwarded-For` header
+is assumed to be set by a trusted reverse proxy. This means that all the following addresses are actually
+addresses of downstream reverse proxies which are trusted.
 |===
 
 This bundle also exports the service
