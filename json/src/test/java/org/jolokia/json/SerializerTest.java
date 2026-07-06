@@ -31,7 +31,7 @@ import static org.testng.Assert.assertEquals;
 public class SerializerTest {
 
     @Test
-    public void serilizeCharactersWithEscaping() throws IOException {
+    public void serializeCharactersWithEscaping() throws IOException {
         StringWriter sw = new StringWriter();
         JSONWriter.serialize('\b', sw);
         assertEquals(sw.toString(), "\"\\b\"");
@@ -39,6 +39,14 @@ public class SerializerTest {
         sw = new StringWriter();
         JSONWriter.serialize((char) 0x04, sw);
         assertEquals(sw.toString(), "\"\\u0004\"");
+
+        sw = new StringWriter();
+        JSONWriter.serialize((char) 0x14, sw);
+        assertEquals(sw.toString(), "\"\\u0014\"");
+
+        sw = new StringWriter();
+        JSONWriter.serialize((char) 0x1C, sw);
+        assertEquals(sw.toString(), "\"\\u001C\"");
 
         sw = new StringWriter();
         JSONWriter.serialize('"', sw);
@@ -65,7 +73,7 @@ public class SerializerTest {
     public void serializeStrings() throws IOException {
         StringWriter sw = new StringWriter();
         JSONWriter.serialize("Hello World! ąあ\n\\\"/", sw);
-        assertEquals("\"Hello World! ąあ\\n\\\\\\\"/\"", sw.toString());
+        assertEquals(sw.toString(), "\"Hello World! ąあ\\n\\\\\\\"/\"");
     }
 
     @Test
