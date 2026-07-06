@@ -1,5 +1,3 @@
-package org.jolokia.jvmagent.client.util;
-
 /*
  * Copyright 2009-2013 Roland Huss
  *
@@ -15,6 +13,7 @@ package org.jolokia.jvmagent.client.util;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.jvmagent.client.util;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -22,6 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.regex.Pattern;
+
+import static org.jolokia.jvmagent.client.util.VirtualMachineHandlerOperations.getPidErrorMessage;
 
 /**
  * A handler for dealing with <code>VirtualMachine</code> without directly referencing internally
@@ -68,19 +69,12 @@ class VirtualMachineHandler implements VirtualMachineHandlerOperations {
         } catch (NoSuchMethodException e) {
             throw new ProcessingException("Internal: No method 'attach' found on " + vmClass,e,options);
         } catch (InvocationTargetException e) {
-            throw new ProcessingException(getPidErrorMesssage(pid,"InvocationTarget",vmClass),e,options);
+            throw new ProcessingException(getPidErrorMessage(pid, "InvocationTarget", vmClass), e, options);
         } catch (IllegalAccessException e) {
-            throw new ProcessingException(getPidErrorMesssage(pid, "IllegalAccessException", vmClass),e,options);
+            throw new ProcessingException(getPidErrorMessage(pid, "IllegalAccessException", vmClass), e, options);
         } catch (IllegalArgumentException e) {
             throw new ProcessingException("Illegal Argument",e,options);
         }
-    }
-
-    private String getPidErrorMesssage(String pid, String label, Class<?> vmClass) {
-        return pid != null ?
-            String.format("Cannot attach to process-ID %s (%s %s).\nSee --help for possible reasons.",
-                          pid, label, vmClass.getName()) :
-            String.format("%s %s",label, vmClass.getName());
     }
 
     /**
@@ -173,7 +167,7 @@ class VirtualMachineHandler implements VirtualMachineHandlerOperations {
             throw new ProcessingException(
                     "Cannot find classes from tools.jar. The heuristics for loading tools.jar which contains\n" +
                     "essential classes (i.e. com.sun.tools.attach.VirtualMachine) for attaching to a running JVM\n" +
-                    " ould not locate the necessary jar file.\n" +
+                    " could not locate the necessary jar file.\n" +
                     "\n" +
                     "Please call this launcher with a qualified classpath on the command line like\n" +
                     "\n" +
@@ -183,6 +177,4 @@ class VirtualMachineHandler implements VirtualMachineHandlerOperations {
         }
     }
 
-
 }
-

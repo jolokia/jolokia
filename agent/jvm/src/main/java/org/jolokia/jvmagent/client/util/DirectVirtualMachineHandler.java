@@ -1,5 +1,3 @@
-package org.jolokia.jvmagent.client.util;
-
 /*
  * Copyright 2009-2021 Roland Huss
  *
@@ -15,6 +13,7 @@ package org.jolokia.jvmagent.client.util;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.jvmagent.client.util;
 
 import com.sun.tools.attach.AgentInitializationException;
 import com.sun.tools.attach.AgentLoadException;
@@ -27,6 +26,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.regex.Pattern;
+
+import static org.jolokia.jvmagent.client.util.VirtualMachineHandlerOperations.getPidErrorMessage;
 
 /**
  * A handler for dealing with <code>VirtualMachine</code> directly accessing {@link com.sun.tools.attach.VirtualMachine}
@@ -52,19 +53,12 @@ class DirectVirtualMachineHandler implements VirtualMachineHandlerOperations {
         try {
             return VirtualMachine.attach(pid);
         } catch (AttachNotSupportedException e) {
-            throw new ProcessingException(getPidErrorMesssage(pid, "AttachNotSupportedException"), e, options);
+            throw new ProcessingException(getPidErrorMessage(pid, "AttachNotSupportedException", VirtualMachine.class), e, options);
         } catch (IOException e) {
-            throw new ProcessingException(getPidErrorMesssage(pid, "InvocationTarget"), e, options);
+            throw new ProcessingException(getPidErrorMessage(pid, "InvocationTarget", VirtualMachine.class), e, options);
         } catch (IllegalArgumentException e) {
             throw new ProcessingException("Illegal Argument", e, options);
         }
-    }
-
-    private String getPidErrorMesssage(String pid, String label) {
-        return pid != null ?
-                String.format("Cannot attach to process-ID %s (%s %s).\nSee --help for possible reasons.",
-                        pid, label, VirtualMachine.class.getName()) :
-                String.format("%s %s",label, VirtualMachine.class.getName());
     }
 
     @Override

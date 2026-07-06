@@ -1,5 +1,3 @@
-package org.jolokia.jvmagent.client.util;
-
 /*
  * Copyright 2009-2021 Roland Huss
  *
@@ -15,6 +13,7 @@ package org.jolokia.jvmagent.client.util;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.jvmagent.client.util;
 
 import java.util.List;
 import java.util.Properties;
@@ -81,5 +80,27 @@ public interface VirtualMachineHandlerOperations {
      * @return system properties of the remote VM
      */
     Properties getSystemProperties(Object pVm);
+
+    static String getPidErrorMessage(String pid, String label, Class<?> vmClass) {
+        if (pid == null) {
+            return String.format("%s %s", label, vmClass.getName());
+        }
+
+        // sanity check for user permission
+        ProcessHandle current = ProcessHandle.current();
+        ProcessHandle other = ProcessHandle.of(Long.parseLong(pid)).orElse(null);
+        if (current != null && other != null) {
+            String currentUser = current.info().user().orElse(null);
+            String otherUser = other.info().user().orElse(null);
+            if (currentUser != null && otherUser != null && !currentUser.equals(otherUser)) {
+                return String.format("Cannot attach to process-ID %s (%s %s).\n" +
+                                "Attaching as user \"%s\" to a process of user \"%s\".\n" +
+                                "See --help for possible reasons.",
+                        pid, label, vmClass.getName(), currentUser, otherUser);
+            }
+        }
+        return String.format("Cannot attach to process-ID %s (%s %s).\nSee --help for possible reasons.",
+                pid, label, vmClass.getName());
+    }
 
 }

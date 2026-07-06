@@ -1,5 +1,3 @@
-package org.jolokia.jvmagent.client.util;
-
 /*
  * Copyright 2009-2021 Roland Huss
  *
@@ -15,8 +13,8 @@ package org.jolokia.jvmagent.client.util;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jolokia.jvmagent.client.util;
 
-import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -60,13 +58,10 @@ public class PlatformUtils {
         }
     }
 
-    // Try to find out own process id. This is platform dependent and works on Sun/Oracl/OpeneJDKs like the
-    // whole agent, so it should be safe
+    // Try to find out own process id. Since JDK 9 we no longer have to do the
+    // ManagementFactory.getRuntimeMXBean().getName().split("@")[1] trick
     static String getOwnProcessId() {
-        // Format of name is : <pid>@<host>
-        String name = ManagementFactory.getRuntimeMXBean().getName();
-        int endIdx = name.indexOf('@');
-        return endIdx != -1 ? name.substring(0,endIdx) : name;
+        return Long.toString(ProcessHandle.current().pid());
     }
 
     public static ProcessDescription findProcess(Pattern pPattern, List<ProcessDescription> processes) {
@@ -98,7 +93,7 @@ public class PlatformUtils {
      * (but not this java process)
      *
      * @param pHandler platform-specific way to invoke operations on VM
-     * @param pOpts used to get eithe the process ID ({@link OptionsAndArgs#getPid()} or the pattern for matching a
+     * @param pOpts used to get either the process ID ({@link OptionsAndArgs#getPid()} or the pattern for matching a
      *        process name ({@link OptionsAndArgs#getProcessPattern()})
      * @return the numeric id as string
      * @throws IllegalArgumentException if a pattern is used and no or more than one process name matches.
