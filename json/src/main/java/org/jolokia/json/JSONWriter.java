@@ -109,6 +109,7 @@ public class JSONWriter {
                     writer.write("null");
                 }
             } else {
+                // BigDecimal, BigInteger
                 writer.write(num.toString());
             }
         } else if (value instanceof Character c) {
@@ -139,7 +140,7 @@ public class JSONWriter {
      * When writing string values we have to escape characters. This method uses a sliding-window
      * approach to track contiguous blocks of unescaped characters.
      * The output is enclosed in double quotes.
-     * @param characters
+     * @param str
      * @param writer
      * @throws IOException
      */

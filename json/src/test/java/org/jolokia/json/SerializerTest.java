@@ -46,7 +46,7 @@ public class SerializerTest {
 
         sw = new StringWriter();
         JSONWriter.serialize((char) 0x1C, sw);
-        assertEquals(sw.toString(), "\"\\u001C\"");
+        assertEquals(sw.toString(), "\"\\u001c\"");
 
         sw = new StringWriter();
         JSONWriter.serialize('"', sw);
