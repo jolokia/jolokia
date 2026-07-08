@@ -53,6 +53,8 @@ import org.jolokia.server.core.util.*;
  */
 public class JolokiaServer {
 
+    private static final String JDK_HTTP_REQUEST_TIMEOUT_PROPERTY = "sun.net.httpserver.maxReqTime";
+
     // Overall configuration
     private JolokiaServerConfig config;
 
@@ -416,9 +418,15 @@ public class JolokiaServer {
         InetAddress address = pConfig.getAddress();
         InetSocketAddress socketAddress = new InetSocketAddress(address,port);
 
-        HttpServer server = pConfig.useHttps() ?
-                        createHttpsServer(socketAddress, pConfig) :
-                        HttpServer.create(socketAddress, pConfig.getBacklog());
+        String previousRequestTimeout = applyRequestTimeoutProperty(pConfig);
+        HttpServer server;
+        try {
+            server = pConfig.useHttps() ?
+                            createHttpsServer(socketAddress, pConfig) :
+                            HttpServer.create(socketAddress, pConfig.getBacklog());
+        } finally {
+            restoreSystemProperty(JDK_HTTP_REQUEST_TIMEOUT_PROPERTY, previousRequestTimeout);
+        }
 
         // Thread factory which creates only daemon threads
         ThreadFactory daemonThreadFactory = new DaemonThreadFactory(pConfig.getThreadNamePrefix());
@@ -435,6 +443,24 @@ public class JolokiaServer {
         server.setExecutor(executor);
 
         return server;
+    }
+
+    private String applyRequestTimeoutProperty(JolokiaServerConfig pConfig) {
+        if (pConfig.getRequestTimeoutSeconds() <= 0) {
+            return null;
+        }
+
+        String previousValue = System.getProperty(JDK_HTTP_REQUEST_TIMEOUT_PROPERTY);
+        System.setProperty(JDK_HTTP_REQUEST_TIMEOUT_PROPERTY, String.valueOf(pConfig.getRequestTimeoutSeconds()));
+        return previousValue;
+    }
+
+    private void restoreSystemProperty(String propertyName, String previousValue) {
+        if (previousValue == null) {
+            System.clearProperty(propertyName);
+        } else {
+            System.setProperty(propertyName, previousValue);
+        }
     }
 
     // =========================================================================================================

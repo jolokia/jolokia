@@ -94,6 +94,8 @@ public class HelpCommand extends AbstractBaseCommand {
 "                                    (default: jolokia-)\n" +
 "    --threadNr <nr threads>         Number of fixed threads if \"fixed\" is used as executor\n" +
 "    --backlog <backlog>             How many request to keep in the backlog (default: 10)\n" +
+"    --requestTimeoutSeconds <sec>   Timeout in seconds for receiving a complete HTTP request\n" +
+"                                    with the embedded JDK HttpServer (disabled by default)\n" +
 "    --protocol <http|https>         Protocol which must be either \"http\" or \"https\" (default: http)\n" +
 "    --keystore <keystore>           Path to keystore (https only)\n" +
 "    --keystorePassword <pwd>        Password to the keystore (https only)\n" +

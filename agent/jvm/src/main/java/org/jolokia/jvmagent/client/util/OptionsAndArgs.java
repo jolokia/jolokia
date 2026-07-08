@@ -41,7 +41,7 @@ public final class OptionsAndArgs {
             // JVM Agent options:
             "host", "port", "agentContext", "user", "password",
             "quiet!", "verbose!", "version!", "executor", "threadNamePrefix", "threadNr",
-            "backlog", "hide!", "protocol", "authMode", "authClass",
+            "backlog", "requestTimeoutSeconds", "hide!", "protocol", "authMode", "authClass",
             "authUrl", "authPrincipalSpec", "authIgnoreCerts!",
             "startTimeout",
             //https options:

@@ -195,6 +195,12 @@ a|Threading model of the HTTP server:
 `fixed` execution model is chosen.
 |`5`
 
+|`requestTimeoutSeconds`
+|Timeout in seconds for receiving a complete HTTP request with the embedded JDK HttpServer.
+This is useful for closing incomplete requests before they occupy the default single-thread executor.
+When not set, the timeout is disabled.
+|
+
 |`keystore`
 |Path to the SSL keystore to use (https only)
 |

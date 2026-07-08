@@ -72,6 +72,7 @@ public class JolokiaServerConfig {
     private String        executor;
     private String        threadNamePrefix;
     private int           threadNr;
+    private int           requestTimeoutSeconds;
     private String        keystore;
     private String        context;
     private boolean       useSslClientAuthentication;
@@ -285,6 +286,16 @@ public class JolokiaServerConfig {
     }
 
     /**
+     * Timeout in seconds for receiving a complete HTTP request with the embedded
+     * JDK HttpServer. A value less than or equal to zero means disabled.
+     *
+     * @return request timeout in seconds or a non-positive value when disabled.
+     */
+    public int getRequestTimeoutSeconds() {
+        return requestTimeoutSeconds;
+    }
+
+    /**
      * When the protocol is 'https' then this property indicates whether SSL client certificate
      * authentication should be used or not
      *
@@ -426,6 +437,7 @@ public class JolokiaServerConfig {
         initExecutor(agentConfig);
         initThreadNamePrefix(agentConfig);
         initThreadNr(agentConfig);
+        initRequestTimeoutSeconds(agentConfig);
         initHttpsRelatedSettings(agentConfig);
         // authenticator may use custom "authClass" with a class that's not available very early,
         // so we have to delay this initialization phase. initAuthenticator() has to be called later
@@ -691,6 +703,19 @@ public class JolokiaServerConfig {
         // Thread-Nr
         String threadNrS =  pAgentConfig.get("threadNr");
         threadNr = threadNrS != null ? Integer.parseInt(threadNrS) : 5;
+    }
+
+    private void initRequestTimeoutSeconds(Map<String, String> agentConfig) {
+        String requestTimeoutSecondsValue = agentConfig.get("requestTimeoutSeconds");
+        if (requestTimeoutSecondsValue == null) {
+            requestTimeoutSeconds = -1;
+            return;
+        }
+
+        requestTimeoutSeconds = Integer.parseInt(requestTimeoutSecondsValue);
+        if (requestTimeoutSeconds <= 0) {
+            throw new IllegalArgumentException("requestTimeoutSeconds must be greater than 0");
+        }
     }
 
     private void initExecutor(Map<String, String> agentConfig) {
