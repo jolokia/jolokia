@@ -50,6 +50,7 @@ import {
   SearchRequest,
   SseNotificationClientConfig,
   TextResponseCallback,
+  UsedFetchOptions,
   VersionRequest,
   WriteRequest,
 } from "./jolokia-types.js"
@@ -555,6 +556,18 @@ function prepareRequest(request: JolokiaRequest | JolokiaRequest[], agentOptions
   // - signal (created based on the timeout option)
   // some of the options are taken from agentOptions
   const fetchOptions: RequestInit = Object.assign({}, DEFAULT_FETCH_PARAMS)
+  const overrides: UsedFetchOptions | undefined = opts
+  if (overrides) {
+    if (overrides.credentials) {
+      fetchOptions.credentials = overrides.credentials
+    }
+    if (overrides.cache) {
+      fetchOptions.cache = overrides.cache
+    }
+    if (overrides.redirect) {
+      fetchOptions.redirect = overrides.redirect
+    }
+  }
   fetchOptions.headers = {}
 
   const method = extractMethod(request, opts)
