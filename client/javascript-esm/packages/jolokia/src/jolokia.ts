@@ -581,7 +581,7 @@ function prepareRequest(request: JolokiaRequest | JolokiaRequest[], agentOptions
 
   if (method === "post") {
     fetchOptions.method = "POST"
-    Object.assign(fetchOptions.headers, { "Content-Type": "text/json" })
+    Object.assign(fetchOptions.headers, { "Content-Type": "application/json" })
   } else {
     fetchOptions.method = "GET"
     // request can't be an array
@@ -662,7 +662,7 @@ async function performRequest(args: RequestArguments):
           return undefined
         }
         const ct = response.headers.get("content-type")
-        if (dataType === "text" || !ct || !(ct.startsWith("text/json") || ct.startsWith("application/json"))) {
+        if (dataType === "text" || !ct || !(ct.startsWith("application/json"))) {
           // text response - no parsing, single call
           const textResponse = await response.text()
           void (successCb as TextResponseCallback)(textResponse)
@@ -701,7 +701,7 @@ async function performRequest(args: RequestArguments):
             throw response
           }
           const ct = response.headers.get("content-type")
-          if (dataType === "text" || !ct || !(ct.startsWith("text/json") || ct.startsWith("application/json"))) {
+          if (dataType === "text" || !ct || !(ct.startsWith("application/json"))) {
             return response.text()
           }
           return response.json()

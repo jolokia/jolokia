@@ -44,7 +44,7 @@ app.use(/\/jolokia-timeout/, (_req, res) => {
 // a Jolokia endpoint that doesn't return proper JSON
 app.use("/jolokia-bad-json", (_req, res) => {
   res.status(200)
-  res.set("Content-Type", "text/json")
+  res.set("Content-Type", "application/json")
   res.send("<!doctype html><html lang='en'></html>")
 })
 
