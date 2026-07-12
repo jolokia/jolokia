@@ -75,7 +75,7 @@ public class DelegatingAuthenticatorTest extends BaseAuthenticatorTest {
                 if (auth == null || !auth.equals("Bearer blub")) {
                     resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 } else {
-                    resp.setContentType("text/json");
+                    resp.setContentType("application/json");
                     Writer writer = resp.getWriter();
                     if (req.getPathInfo() != null && req.getPathInfo().contains("invalid")) {
                         writer.append("{\"Invalid JSON\"");
