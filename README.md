@@ -15,7 +15,7 @@ Multiple agents are provided for different environments:
   is packaged as a bundle and comes in two flavors (minimal,
   all-in-one).
 * **JVM Agent** which can be used with any JVM,
-  Version 11 or later and which is able to attach to a running Java process 
+  Version 17 or later and which is able to attach to a running Java process
   dynamically. 
 
 
