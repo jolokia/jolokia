@@ -2,6 +2,8 @@ package org.jolokia.server.core.util;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Writer;
 
 import org.jolokia.json.JSONStructure;
@@ -49,4 +51,16 @@ public class IoUtil {
             pWriter.close();
         }
     }
+
+    public static void copy(OutputStream out, InputStream in) throws IOException {
+        try (out; in) {
+            byte[] buffer = new byte[8192];
+            int bytesRead;
+            while ((bytesRead = in.read(buffer)) != -1) {
+                out.write(buffer, 0, bytesRead);
+            }
+            out.flush();
+        }
+    }
+
 }

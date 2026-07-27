@@ -79,6 +79,7 @@ public class JolokiaServer {
     // HttpContext created when we start it up
     private HttpContext httpContext;
     private HttpContext httpConfigContext;
+    private HttpContext httpRootContext;
 
     private final List<File> filesToWatch = new ArrayList<>();
 
@@ -159,6 +160,7 @@ public class JolokiaServer {
         }
         httpConfigContext = httpServer.createContext(base + "/config", jolokiaHttpHandler);
         httpContext = httpServer.createContext(base, jolokiaHttpHandler);
+        httpRootContext = httpServer.createContext("/favicon.ico", jolokiaHttpHandler);
 
         setupAuthentication();
         if (useOwnServer) {
@@ -170,8 +172,9 @@ public class JolokiaServer {
      * Stop the HTTP server
      */
     public void stop() {
-        httpServer.removeContext(httpContext);
         httpServer.removeContext(httpConfigContext);
+        httpServer.removeContext(httpContext);
+        httpServer.removeContext(httpRootContext);
         serviceManager.stop();
 
         if (cleaner != null) {
@@ -328,6 +331,8 @@ public class JolokiaServer {
 
         // explicitly setting no authentication for /config handling (but still with CORS handling)
         httpConfigContext.setAuthenticator(new CorsFilter(null, realm, restrictor, useAuth));
+
+        httpRootContext.setAuthenticator(null);
     }
 
     // If running an own server, we need to check that shutdown properly

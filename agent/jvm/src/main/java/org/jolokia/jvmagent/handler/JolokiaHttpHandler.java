@@ -188,6 +188,11 @@ public class JolokiaHttpHandler implements HttpHandler {
         URI uri = pExchange.getRequestURI();
         ParsedUri parsedUri = new ParsedUri(uri, contextPath);
 
+        if (uri.getPath().startsWith("/favicon.ico")) {
+            handleFavicon(pExchange, uri);
+            return;
+        }
+
         try {
             // Set back channel - for notification handling
             prepareBackChannel(pExchange);
@@ -447,7 +452,7 @@ public class JolokiaHttpHandler implements HttpHandler {
             IoUtil.streamResponseAndClose(writer, pJson, callback != null && MimeTypeUtil.isValidCallback(callback) ? callback : null);
         } else {
             headers.set("Content-Type", "text/plain");
-            pExchange.sendResponseHeaders(200,-1);
+            pExchange.sendResponseHeaders(200, -1);
             pExchange.getResponseBody().close();
         }
     }
@@ -462,12 +467,12 @@ public class JolokiaHttpHandler implements HttpHandler {
                 String callback = pParsedUri.getParameter(ConfigKey.CALLBACK.getKeyValue());
                 String content = callback != null && MimeTypeUtil.isValidCallback(callback) ? callback + "(" + json + ");" : json;
                 byte[] response = content.getBytes(StandardCharsets.UTF_8);
-                pExchange.sendResponseHeaders(200,response.length);
+                pExchange.sendResponseHeaders(200, response.length);
                 out = pExchange.getResponseBody();
                 out.write(response);
             } else {
                 headers.set("Content-Type", "text/plain");
-                pExchange.sendResponseHeaders(200,-1);
+                pExchange.sendResponseHeaders(200, -1);
             }
         } finally {
             if (out != null) {
@@ -491,4 +496,30 @@ public class JolokiaHttpHandler implements HttpHandler {
         rfc1123Format.setTimeZone(TimeZone.getTimeZone("GMT"));
         return rfc1123Format.format(date);
     }
+    
+    private void handleFavicon(HttpExchange pExchange, URI uri) throws IOException {
+        Headers headers = pExchange.getResponseHeaders();
+        headers.set("Connection", "close");
+        if (uri.getPath().equals("/favicon.ico")) {
+            // even if we should use IANA's image/vnd.microsoft.icon
+            headers.set("Content-Type", "image/x-icon");
+            Writer writer = new OutputStreamWriter(pExchange.getResponseBody(), StandardCharsets.UTF_8);
+
+            try {
+                InputStream icon = getClass().getClassLoader().getResourceAsStream("favicon.ico");
+                if (icon == null) {
+                    pExchange.sendResponseHeaders(404, -1);
+                    return;
+                }
+                pExchange.sendResponseHeaders(200, 0);
+                IoUtil.copy(pExchange.getResponseBody(), icon);
+            } finally {
+                pExchange.getResponseBody().close();
+            }
+        } else {
+            pExchange.sendResponseHeaders(404, -1);
+            pExchange.getResponseBody().close();
+        }
+    }
+
 }
