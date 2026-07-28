@@ -433,14 +433,10 @@ public class JolokiaServerConfig {
         // org.jolokia.jvmagent.JvmAgent.awaitServerInitialization())
 //        initAuthenticator();
 
-        if (!agentConfig.containsKey("useCertificateReload")) {
+        try {
+            useCertificateReload = Integer.parseInt(agentConfig.getOrDefault("useCertificateReload", "-1"));
+        } catch (NumberFormatException ignored) {
             useCertificateReload = -1;
-        } else {
-            try {
-                useCertificateReload = Integer.parseInt(agentConfig.get("useCertificateReload"));
-            } catch (NumberFormatException ignored) {
-                useCertificateReload = -1;
-            }
         }
     }
 
@@ -689,8 +685,8 @@ public class JolokiaServerConfig {
 
     private void initThreadNr(Map<String, String> pAgentConfig) {
         // Thread-Nr
-        String threadNrS =  pAgentConfig.get("threadNr");
-        threadNr = threadNrS != null ? Integer.parseInt(threadNrS) : 5;
+        String threadNrS =  pAgentConfig.getOrDefault("threadNr", "5");
+        threadNr = Integer.parseInt(threadNrS);
     }
 
     private void initExecutor(Map<String, String> agentConfig) {

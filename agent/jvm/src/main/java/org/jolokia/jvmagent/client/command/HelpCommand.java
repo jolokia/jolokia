@@ -89,7 +89,7 @@ public class HelpCommand extends AbstractBaseCommand {
 "    --executor <executor>           Executor policy for HTTP Threads to use (default: single)\n" +
 "                                     \"fixed\"  -- Thread pool with a fixed number of threads (default: 5)\n" +
 "                                     \"cached\" -- Cached Thread Pool, creates threads on demand\n" +
-"                                     \"single\" -- Single Thread\n" +
+"                                     \"single\" -- Single Thread - minimal resource consumption, but not recommended in production\n" +
 "    --threadNamePrefix <prefix>     Thread name prefix that executor will use while creating new thread(s)\n" +
 "                                    (default: jolokia-)\n" +
 "    --threadNr <nr threads>         Number of fixed threads if \"fixed\" is used as executor\n" +

@@ -183,7 +183,7 @@ a|Threading model of the HTTP server:
 
 `fixed`:: Thread pool with a fixed number of threads (see also `threadNr`)
 `cached`:: Cached thread pool which creates threads on demand
-`single`:: A single thread only
+`single`:: A single thread only. This is the default value, but (as the name suggests) it limits the throughput of Jolokia Agent. This value should not be used in production configuration.
 |`single`
 
 |`threadNamePrefix`
