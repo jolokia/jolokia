@@ -1,0 +1,27 @@
+{
+  "reflection": [
+    {
+      "type": "org.jolokia.service.notif.pull.PullNotificationBackend",
+      "allPublicConstructors": true
+    },
+    {
+      "type": "org.jolokia.service.notif.pull.PullNotificationStoreMBean",
+      "allDeclaredMethods": true
+    },
+    {
+      "type": {
+        "proxy": [
+          "org.jolokia.service.notif.pull.PullNotificationStoreMBean"
+        ]
+      }
+    }
+  ],
+  "resources": [
+    {
+      "glob": "META-INF/jolokia/services-default"
+    },
+    {
+      "glob": "META-INF/jolokia/services"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "resources": [
+    {
+      "glob": "default-jolokia-agent.properties"
+    },
+    {
+      "glob": "jolokia-agent-version.properties"
+    }
+  ]
+}

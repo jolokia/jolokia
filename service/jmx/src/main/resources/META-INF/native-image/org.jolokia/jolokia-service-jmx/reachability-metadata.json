@@ -1,0 +1,47 @@
+{
+  "reflection": [
+    {
+      "type": "org.jolokia.service.jmx.LocalRequestHandler",
+      "allPublicConstructors": true
+    },
+    {
+      "type": "org.jolokia.service.jmx.handler.ExecHandler",
+      "allPublicConstructors": true
+    },
+    {
+      "type": "org.jolokia.service.jmx.handler.ListHandler",
+      "allPublicConstructors": true
+    },
+    {
+      "type": "org.jolokia.service.jmx.handler.NotificationHandler",
+      "allPublicConstructors": true
+    },
+    {
+      "type": "org.jolokia.service.jmx.handler.ReadHandler",
+      "allPublicConstructors": true
+    },
+    {
+      "type": "org.jolokia.service.jmx.handler.SearchHandler",
+      "allPublicConstructors": true
+    },
+    {
+      "type": "org.jolokia.service.jmx.handler.WriteHandler",
+      "allPublicConstructors": true
+    },
+    {
+      "type": "org.jolokia.service.jmx.handler.list.JDKManagementCacheKeyProvider",
+      "allPublicConstructors": true
+    }
+  ],
+  "resources": [
+    {
+      "glob": "META-INF/jolokia/command-handlers"
+    },
+    {
+      "glob": "META-INF/jolokia/services-default"
+    },
+    {
+      "glob": "META-INF/jolokia/services"
+    }
+  ]
+}

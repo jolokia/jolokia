@@ -1,0 +1,41 @@
+{
+  "reflection": [
+    {
+      "type": "org.jolokia.server.core.backend.ConfigMBean",
+      "allDeclaredMethods": true
+    },
+    {
+      "type": {
+        "proxy": [
+          "org.jolokia.server.core.backend.ConfigMBean"
+        ]
+      }
+    },
+    {
+      "type": "org.jolokia.server.core.backend.MBeanServerHandlerMBean",
+      "allDeclaredMethods": true
+    },
+    {
+      "type": "org.jolokia.server.core.http.AgentServlet",
+      "allDeclaredConstructors": true
+    },
+    {
+      "type": {
+        "proxy": [
+          "org.jolokia.server.core.backend.MBeanServerHandlerMBean"
+        ]
+      }
+    }
+  ],
+  "resources": [
+    {
+      "glob": "version.properties"
+    },
+    {
+      "glob": "jolokia-restrictor.xsd"
+    },
+    {
+      "glob": "META-INF/jolokia/services"
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "reflection": [
+    {
+      "type": "org.jolokia.service.discovery.DiscoveryMulticastResponder",
+      "allPublicConstructors": true
+    },
+    {
+      "type": "org.jolokia.service.discovery.JolokiaDiscovery",
+      "allPublicConstructors": true
+    },
+    {
+      "type": "org.jolokia.service.discovery.JolokiaDiscoveryMBean",
+      "allDeclaredMethods": true
+    },
+    {
+      "type": {
+        "proxy": [
+          "org.jolokia.service.discovery.JolokiaDiscoveryMBean"
+        ]
+      }
+    }
+  ],
+  "resources": [
+    {
+      "glob": "META-INF/jolokia/services-default"
+    },
+    {
+      "glob": "META-INF/jolokia/services"
+    }
+  ]
+}

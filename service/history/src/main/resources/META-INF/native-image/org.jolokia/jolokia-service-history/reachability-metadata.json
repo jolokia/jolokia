@@ -1,0 +1,27 @@
+{
+  "reflection": [
+    {
+      "type": "org.jolokia.service.history.HistoryMBean",
+      "allDeclaredMethods": true
+    },
+    {
+      "type": {
+        "proxy": [
+          "org.jolokia.service.history.HistoryMBean"
+        ]
+      }
+    },
+    {
+      "type": "org.jolokia.service.history.HistoryMBeanRequestInterceptor",
+      "allPublicConstructors": true
+    }
+  ],
+  "resources": [
+    {
+      "glob": "META-INF/jolokia/services-default"
+    },
+    {
+      "glob": "META-INF/jolokia/services"
+    }
+  ]
+}
