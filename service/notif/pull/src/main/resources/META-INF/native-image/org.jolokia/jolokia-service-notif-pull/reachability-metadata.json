@@ -19,9 +19,6 @@
   "resources": [
     {
       "glob": "META-INF/jolokia/services-default"
-    },
-    {
-      "glob": "META-INF/jolokia/services"
     }
   ]
 }

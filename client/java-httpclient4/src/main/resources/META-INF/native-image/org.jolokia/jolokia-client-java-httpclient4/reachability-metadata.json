@@ -1,0 +1,13 @@
+{
+  "reflection": [
+    {
+      "type": "org.jolokia.client.httpclient4.Http4ClientBuilder",
+      "allPublicConstructors": true
+    }
+  ],
+  "resources": [
+    {
+      "glob": "META-INF/services/org.jolokia.client.spi.HttpClientBuilder"
+    }
+  ]
+}

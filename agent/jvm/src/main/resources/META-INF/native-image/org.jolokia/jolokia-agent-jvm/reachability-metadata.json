@@ -4,6 +4,9 @@
       "glob": "default-jolokia-agent.properties"
     },
     {
+      "glob": "favicon.ico"
+    },
+    {
       "glob": "jolokia-agent-version.properties"
     }
   ]

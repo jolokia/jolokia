@@ -44,9 +44,6 @@
   "resources": [
     {
       "glob": "META-INF/jolokia/detectors-default"
-    },
-    {
-      "glob": "META-INF/jolokia/detectors"
     }
   ]
 }

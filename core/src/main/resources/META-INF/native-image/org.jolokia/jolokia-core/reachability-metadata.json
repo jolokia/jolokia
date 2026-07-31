@@ -39,9 +39,6 @@
     },
     {
       "glob": "META-INF/jolokia/simplifiers-default"
-    },
-    {
-      "glob": "META-INF/jolokia/simplifiers"
     }
   ]
 }

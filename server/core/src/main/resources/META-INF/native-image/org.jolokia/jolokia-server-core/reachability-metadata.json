@@ -16,15 +16,15 @@
       "allDeclaredMethods": true
     },
     {
-      "type": "org.jolokia.server.core.http.AgentServlet",
-      "allDeclaredConstructors": true
-    },
-    {
       "type": {
         "proxy": [
           "org.jolokia.server.core.backend.MBeanServerHandlerMBean"
         ]
       }
+    },
+    {
+      "type": "org.jolokia.server.core.http.AgentServlet",
+      "allDeclaredConstructors": true
     }
   ],
   "resources": [
@@ -33,9 +33,6 @@
     },
     {
       "glob": "jolokia-restrictor.xsd"
-    },
-    {
-      "glob": "META-INF/jolokia/services"
     }
   ]
 }
