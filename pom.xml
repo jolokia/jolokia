@@ -76,6 +76,7 @@
     <module>examples/spring7</module>
     <module>examples/springboot4</module>
     <module>examples/springboot4-actuator</module>
+    <module>examples/springboot4-native</module>
     <!-- Examples for Spring Boot 3 / Spring Framework 6 -->
     <module>examples/spring6</module>
     <module>examples/springboot3</module>
@@ -1197,6 +1198,8 @@
     <plugin.org.vafer.jdeb>1.14</plugin.org.vafer.jdeb>
     <plugin.org.apache.servicemix.tooling>1.5.0</plugin.org.apache.servicemix.tooling>
     <plugin.sonatype.central-publishing-maven-plugin>0.11.0</plugin.sonatype.central-publishing-maven-plugin>
+    <plugin.org.graalvm.buildtools.native>1.1.6</plugin.org.graalvm.buildtools.native>
+    <plugin.dependency.maven-shared-utils>3.4.2</plugin.dependency.maven-shared-utils>
 
     <!-- Versions of build-related dependencies -->
 
