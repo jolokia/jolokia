@@ -305,7 +305,7 @@ public class JolokiaHttpHandlerTest {
         exchange.sendResponseHeaders(anyInt(),anyLong());
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        expect(exchange.getResponseBody()).andReturn(out);
+        expect(exchange.getResponseBody()).andReturn(out).anyTimes();
         replay(exchange);
         return out;
     }

@@ -450,6 +450,9 @@ public class AgentServletTest {
         expect(request.getHeader("X-Real-IP")).andReturn(null);
         expect(request.getHeader("X-Forwarded-For")).andReturn(null);
         expect(request.getHeader("Forwarded")).andReturn(null);
+        expect(request.getHeader("Sec-Fetch-Site")).andReturn(null);
+        expect(request.getHeader("Sec-Fetch-Mode")).andReturn(null);
+        expect(request.getHeader("Sec-Fetch-Dest")).andReturn(null);
         expect(request.getRemoteHost()).andReturn("localhost");
         expect(request.getRemoteAddr()).andReturn("127.0.0.1");
         expect(request.getRequestURI()).andReturn("/jolokia/").times(2);
@@ -465,6 +468,8 @@ public class AgentServletTest {
         response.addHeader("Vary", "Origin");
         response.setHeader("Access-Control-Allow-Origin", out);
         response.setHeader("Access-Control-Allow-Methods", "GET, POST");
+        response.setHeader("Cache-Control", "no-cache");
+        response.setDateHeader(eq("Date"), anyLong());
         response.setStatus(204);
 
         replay(request, response);
@@ -775,6 +780,9 @@ public class AgentServletTest {
             expect(request.getHeader("X-Real-IP")).andStubReturn(null);
             expect(request.getHeader("X-Forwarded-For")).andStubReturn(null);
             expect(request.getHeader("Forwarded")).andStubReturn(null);
+            expect(request.getHeader("Sec-Fetch-Site")).andReturn(null);
+            expect(request.getHeader("Sec-Fetch-Mode")).andReturn(null);
+            expect(request.getHeader("Sec-Fetch-Dest")).andReturn(null);
             expect(request.getRemoteHost()).andStubReturn("localhost");
             expect(request.getRemoteAddr()).andStubReturn("127.0.0.1");
             expect(request.getRequestURI()).andReturn("/jolokia/");
@@ -802,6 +810,9 @@ public class AgentServletTest {
             expect(request.getHeader("X-Real-IP")).andStubReturn(null);
             expect(request.getHeader("X-Forwarded-For")).andStubReturn(null);
             expect(request.getHeader("Forwarded")).andStubReturn(null);
+            expect(request.getHeader("Sec-Fetch-Site")).andReturn(null);
+            expect(request.getHeader("Sec-Fetch-Mode")).andReturn(null);
+            expect(request.getHeader("Sec-Fetch-Dest")).andReturn(null);
             expect(request.getRemoteHost()).andReturn("localhost");
             expect(request.getRemoteAddr()).andReturn("127.0.0.1");
             expect(request.getRequestURI()).andReturn("/jolokia/");
