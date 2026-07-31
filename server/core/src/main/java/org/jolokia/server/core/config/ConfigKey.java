@@ -456,14 +456,24 @@ public enum ConfigKey {
      * headers are trusted or not.</p>
      * <ul>
      *     <li>If not trusted (default), Jolokia will verify all the values including the incoming remote IP (which
-     *     could be original client or last reverse-proxy)</li>
+     *     could be the original client or the last reverse-proxy)</li>
      *     <li>If trusted, Jolokia assumes that these headers are not malicious and some trusted proxy (like nginx)
-     *     used an option like {@code proxy_set_header X-Forwarded-For $remote_addr;}</li>
+     *     used an option like {@code proxy_set_header X-Forwarded-For $remote_addr;} and trimmed down all incoming,
+     *     potentially forged values in {@code X-Forwarded-For}.</li>
      * </ul>
-     * Even if these headers are trusted, Jolokia will still validate the incoming source address (which may be a proxy
-     * or the actual client).
+     * <p>Even if these headers are trusted, Jolokia will still validate the incoming source address (which may be a proxy
+     * or the actual client).</p>
      */
-    TRUST_PROXY_HEADERS("trustProxyHeaders", true, false, Constants.FALSE, Boolean.class);
+    TRUST_PROXY_HEADERS("trustProxyHeaders", true, false, Constants.FALSE, Boolean.class),
+
+    /**
+     * <p>Global option to specify whether Jolokia agent processes {@code Sec-Fetch-*} headers which are related
+     * to <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Fetch_metadata">Fetch Metadata</a>.</p>
+     * <p>This is another component of a composite protection against some kinds of CSRF attacks. This option is
+     * enabled by default. It means the requests <em>marked</em> as top-level navigation can be rejected without
+     * affecting the behavior for tools like {@code curl} (which never send these headers).</p>
+     */
+    USE_FETCH_METADATA_HEADERS("useFetchMetadata", true, false, Constants.TRUE, Boolean.class);
 
     /**
      * JAAS Subject to attach to an HTTP request as attribute if JAAS based authentication is in use.

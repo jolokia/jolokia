@@ -462,6 +462,43 @@ completely denied. If a classpath lookup fails then access
 is globally granted and a warning is given on standard
 output.
 
+== Browser and HTTP Client security
+
+There's an important aspect of HTTP security worth mentioning. Jolokia Agent is an HTTP server, so it can be used by any HTTP client.
+
+Programmatic HTTP clients (like `curl` or https://hc.apache.org/httpcomponents-client-5.6.x/index.html[Apache HTTP Client 5]) can be fully controlled by the user/developer. Any HTTP configuration can be used, including any values for any supported (and unsupported) HTTP headers. In order to restrict access for these clients, Jolokia provides means documented in <<security-policy>> section.
+
+Web Browsers should be treated differently and there's one important reason - developers creating web pages using HTML, CSS and JavaScript do _not_ have full control over the HTTP headers being sent to the server.
+
+This section is added simply because sometimes it's easiest to access the Jolokia agent by pasting a GET URL into the browser.
+
+Let's just highlight two important concepts.
+
+https://developer.mozilla.org/en-US/docs/Glossary/Forbidden_request_header[Forbidden request headers]::
+
+When using `fetch()` API or `xhr` API, we can set various HTTP headers to be sent with the requests, but we can't set some _forbidden_ ones. It simply means that some _may_ be treated as trusted (or coming from non-browser clients).
+
+https://developer.mozilla.org/en-US/docs/Web/Security/Defenses/Secure_Contexts[Secure browser contexts]::
+
+Without going into details and special cases, there are 3 kinds of URLs (sites, origins) that make the _context_ secure or not:
+
+* `https://` addresses are secure
+* localhost addresses are secure
+* non-localhost `http://` addresses (IP or name) are not secure.
+
+Security context may limit the availability of some browser APIs (like crypto API) and affect the headers that are sent together with `fetch()` requests.
+
+=== Fetch Metadata
+
+Starting from Jolokia 2.6.1, Jolokia handles (by default, but it can be turned off using `useFetchMetadata` global option) the set of HTTP headers known as https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Fetch_metadata[Fetch Metadata]. There are 4 headers that modern browsers send in https://developer.mozilla.org/en-US/docs/Web/Security/Defenses/Secure_Contexts[secure contexts]:
+
+* `Sec-Fetch-Site` - indicates a relation between the origin of the page that initiates the request (through CSS urls, `<img>`, `<a>` HTML elements or `fetch()` API calls) and the actual target origin of the request. This allows to detect same or cross origin requests.
+* `Sec-Fetch-Mode` - indicates a mode of the request, which allows to distinguish between users selecting a bookmarked (or pasted) URL and the browser performing a request to fetch an image for `<img>` HTML element
+* `Sec-Fetch-Dest` - more detailed indication of the _source_ of the request. Most importantly `empty` means the request comes from `fetch()`/`xhr` APIS.
+* `Sec-Fetch-User` - indicates an explicit user action
+
+While this is not a one-stop solution for security, Jolokia can restrict access when it is not a proper one. Definitely Jolokia URLs should not be valid when used beyond `fetch()` API or direct user navigation.
+
 [#security-restrictor]
 == Jolokia Restrictors
 

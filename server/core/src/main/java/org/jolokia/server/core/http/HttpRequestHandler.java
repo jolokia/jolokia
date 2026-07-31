@@ -36,6 +36,8 @@ import org.jolokia.json.JSONObject;
 import org.jolokia.json.JSONStructure;
 import org.jolokia.json.parser.JSONParser;
 import org.jolokia.json.parser.ParseException;
+import org.jolokia.server.core.config.ConfigKey;
+import org.jolokia.server.core.http.security.FetchMetadata;
 import org.jolokia.server.core.request.BadRequestException;
 import org.jolokia.server.core.request.BaseRequestHandler;
 import org.jolokia.server.core.request.EmptyResponseException;
@@ -65,6 +67,8 @@ public class HttpRequestHandler extends BaseRequestHandler {
     private final Restrictor restrictor;
     // whether authentication is enabled (for CORS purposes)
     private final boolean authenticationEnabled;
+    // whether to use Sec-Fetch-* headers for partial access control
+    private final boolean useFetchMetadata;
 
     /**
      * Request handler for parsing HTTP request and dispatching to the appropriate
@@ -77,6 +81,8 @@ public class HttpRequestHandler extends BaseRequestHandler {
         super(context);
         this.restrictor = pRestrictor;
         this.authenticationEnabled = pAuthenticationEnabled;
+
+        this.useFetchMetadata = Boolean.parseBoolean(context.getConfig(ConfigKey.USE_FETCH_METADATA_HEADERS));
     }
 
     /**
@@ -190,10 +196,6 @@ public class HttpRequestHandler extends BaseRequestHandler {
             ret.put("Access-Control-Allow-Headers", pCorsRequestHeaders);
         }
         ret.put("Access-Control-Max-Age", Integer.toString(2 * 60 * 60));
-        if (this.authenticationEnabled) {
-            // omit the header entirely if not allowed
-            ret.put("Access-Control-Allow-Credentials", "true");
-        }
 
         if (restrictor instanceof PolicyRestrictor pr) {
             HttpMethodChecker httpMethodConfig = pr.getHttpMethodChecker();
@@ -222,6 +224,10 @@ public class HttpRequestHandler extends BaseRequestHandler {
             // we allow a give origin also when there are no <cors>/<allow-origin> elements configured
             // for the policy restrictor (or the configured restrictor simply allows the access)
             ret.put("Access-Control-Allow-Origin", pOrigin);
+            if (this.authenticationEnabled) {
+                // omit the header entirely if not allowed
+                ret.put("Access-Control-Allow-Credentials", "true");
+            }
         }
         // whether or not the origin is allowed, mark the response as dependant on the incoming "Origin" header
         ret.put("Vary", "Origin");
@@ -242,11 +248,11 @@ public class HttpRequestHandler extends BaseRequestHandler {
         }
 
         Map<String, String> ret = new HashMap<>();
-        if (this.authenticationEnabled) {
-            ret.put("Access-Control-Allow-Credentials", "true");
-        }
         if (restrictor.isOriginAllowed(pOrigin, false)) {
             ret.put("Access-Control-Allow-Origin", pOrigin);
+            if (this.authenticationEnabled) {
+                ret.put("Access-Control-Allow-Credentials", "true");
+            }
         }
         ret.put("Vary", "Origin");
 
@@ -303,8 +309,10 @@ public class HttpRequestHandler extends BaseRequestHandler {
      * @param pHost          host to check
      * @param pAddresses     addresses to check
      * @param pOrigin        (optional) origin header to check also.
+     * @param pFetchMetadata incoming {@code Sec-Fetch-*} headers
      */
-    public void checkAccess(String pRequestScheme, String pHost, String[] pAddresses, String pOrigin) {
+    public void checkAccess(String pRequestScheme, String pHost, String[] pAddresses, String pOrigin,
+                            FetchMetadata pFetchMetadata) {
         String[] toCheck = pAddresses;
         if (pHost != null) {
             toCheck = new String[toCheck.length + 1];
@@ -315,10 +323,27 @@ public class HttpRequestHandler extends BaseRequestHandler {
             throw new SecurityException("No access from client [chain: " + String.join(" -> ", toCheck) + "] allowed");
         }
         // passing true for "only if strict checking" means that the access can be granted if there's
-        // no Origin (or Referer) header included. This is used for handling requests not related to "real" CORS protocol
-        // for protecting JavaScript running in a browser
+        // no Origin (or Referer) header included. Without <strict-checking> any origin will pass and <cors>
+        // configuration will be used only for CORS protocol handling (sending proper Access-Control-Allow-* headers)
         if (!jolokiaCtx.isOriginAllowed(pOrigin, true)) {
             throw new SecurityException("Origin " + pOrigin + " is not allowed to call this agent");
+        }
+
+        String dest = pFetchMetadata != null ? pFetchMetadata.dest() : null;
+        if (useFetchMetadata && dest != null) {
+            String site = pFetchMetadata.site();
+            String mode = pFetchMetadata.mode();
+
+            if (!"empty".equals(dest)) {
+                // "empty" is for fetch()/xhr. In such case we should rely on trusted origins and
+                // not disable <strict-checking>
+                if (!("document".equals(dest) && "none".equals(site) && "navigate".equals(mode))) {
+                    // allow only explicit top-level navigation (bookmarks or url bar)
+                    // clicking <a> gives site="cross-site"
+                    throw new SecurityException("Access Denied");
+                }
+            } else {
+            }
         }
 
         // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Origin

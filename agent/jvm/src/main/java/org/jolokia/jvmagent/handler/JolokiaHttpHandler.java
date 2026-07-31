@@ -44,6 +44,7 @@ import org.jolokia.jvmagent.security.CorsFilter;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.http.BackChannelHolder;
 import org.jolokia.server.core.http.HttpRequestHandler;
+import org.jolokia.server.core.http.security.FetchMetadata;
 import org.jolokia.server.core.request.BadRequestException;
 import org.jolokia.server.core.request.EmptyResponseException;
 import org.jolokia.server.core.service.api.JolokiaContext;
@@ -208,8 +209,13 @@ public class JolokiaHttpHandler implements HttpHandler {
             String forwardedFor = headers.getFirst("X-Forwarded-For");
             String forwarded = headers.getFirst("Forwarded");
             String[] addressChain = ProxyHeaderUtil.addressChain(trustProxyHeaders, address.getAddress().getHostAddress(), realIp, forwardedFor, forwarded);
-
-            requestHandler.checkAccess(scheme, remoteHost, addressChain, extractOrigin(pExchange));
+            String fmSite = headers.getFirst("Sec-Fetch-Site");
+            String fmMode = headers.getFirst("Sec-Fetch-Mode");
+            String fmDest = headers.getFirst("Sec-Fetch-Dest");
+            FetchMetadata fetchMetadata = new FetchMetadata(fmSite, fmMode, fmDest);
+            // for the purpose of checking access (not for CORS handling) we indeed fallback to Referer when
+            // there's no Origin
+            requestHandler.checkAccess(scheme, remoteHost, addressChain, extractOrigin(pExchange, true), fetchMetadata);
 
             Boolean corsPreflight = CorsFilter.corsPreflight.get();
             if (corsPreflight != null && corsPreflight) {
@@ -280,11 +286,6 @@ public class JolokiaHttpHandler implements HttpHandler {
     }
 
     // ========================================================================
-
-    // Used for checking origin or referer is an origin policy is enabled
-    private String extractOrigin(HttpExchange pExchange) {
-        return extractOrigin(pExchange, true);
-    }
 
     // Used for checking origin or referer is an origin policy is enabled
     private String extractOrigin(HttpExchange pExchange, boolean fallbackToReferer) {

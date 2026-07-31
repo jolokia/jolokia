@@ -44,6 +44,7 @@ import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.config.Configuration;
 import org.jolokia.server.core.config.StaticConfiguration;
 import org.jolokia.server.core.detector.ServerDetectorLookup;
+import org.jolokia.server.core.http.security.FetchMetadata;
 import org.jolokia.server.core.request.BadRequestException;
 import org.jolokia.server.core.request.EmptyResponseException;
 import org.jolokia.server.core.restrictor.RestrictorFactory;
@@ -451,7 +452,13 @@ public class AgentServlet extends HttpServlet {
             String forwardedFor = pReq.getHeader("X-Forwarded-For");
             String forwarded = pReq.getHeader("Forwarded");
             String[] addressChain = ProxyHeaderUtil.addressChain(trustProxyHeaders, pReq.getRemoteAddr(), realIp, forwardedFor, forwarded);
-            requestHandler.checkAccess(scheme, remoteHost, addressChain, extractOrigin(pReq, true));
+            String fmSite = pReq.getHeader("Sec-Fetch-Site");
+            String fmMode = pReq.getHeader("Sec-Fetch-Mode");
+            String fmDest = pReq.getHeader("Sec-Fetch-Dest");
+            FetchMetadata fetchMetadata = new FetchMetadata(fmSite, fmMode, fmDest);
+            // for the purpose of checking access (not for CORS handling) we indeed fallback to Referer when
+            // there's no Origin
+            requestHandler.checkAccess(scheme, remoteHost, addressChain, extractOrigin(pReq, true), fetchMetadata);
 
             if (!disableCors && pReqHandler == null && "OPTIONS".equals(pReq.getMethod())) {
                 String requestOrigin = extractOrigin(pReq, false);

@@ -1,5 +1,3 @@
-package org.jolokia.server.core.http;
-
 /*
  * Copyright 2009-2011 Roland Huss
  *
@@ -15,6 +13,7 @@ package org.jolokia.server.core.http;
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+package org.jolokia.server.core.http;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,6 +23,7 @@ import javax.management.*;
 
 import org.easymock.*;
 import org.jolokia.server.core.config.ConfigKey;
+import org.jolokia.server.core.http.security.FetchMetadata;
 import org.jolokia.server.core.request.*;
 import org.jolokia.server.core.restrictor.AllowAllRestrictor;
 import org.jolokia.server.core.service.api.Restrictor;
@@ -56,7 +56,7 @@ public class HttpRequestHandlerTest {
         expect(restrictor.ignoreScheme()).andReturn(false);
         replay(restrictor);
         init(restrictor);
-        handler.checkAccess("http", "localhost", new String[] { "127.0.0.1" }, null);
+        handler.checkAccess("http", "localhost", new String[] { "127.0.0.1" }, null, null);
         verify(restrictor);
     }
 
@@ -68,7 +68,7 @@ public class HttpRequestHandlerTest {
         expect(restrictor.ignoreScheme()).andReturn(false);
         replay(restrictor);
         init(restrictor);
-        handler.checkAccess("https", "localhost", new String[] { "127.0.0.1" }, "http://www.jolokia.org");
+        handler.checkAccess("https", "localhost", new String[] { "127.0.0.1" }, "http://www.jolokia.org", null);
         verify(restrictor);
     }
 
@@ -79,7 +79,7 @@ public class HttpRequestHandlerTest {
         replay(restrictor);
         init(restrictor);
 
-        handler.checkAccess("http", "localhost", new String[] { "127.0.0.1" }, null);
+        handler.checkAccess("http", "localhost", new String[] { "127.0.0.1" }, null, null);
         verify(restrictor);
     }
 
@@ -91,7 +91,7 @@ public class HttpRequestHandlerTest {
         replay(restrictor);
         init(restrictor);
 
-        handler.checkAccess("http", "localhost", new String[] { "127.0.0.1" }, "http://www.jolokia.org");
+        handler.checkAccess("http", "localhost", new String[] { "127.0.0.1" }, "http://www.jolokia.org", null);
     }
 
     @Test(expectedExceptions = { SecurityException.class })
@@ -103,7 +103,7 @@ public class HttpRequestHandlerTest {
         replay(restrictor);
         init(restrictor);
 
-        handler.checkAccess("http", "localhost", new String[] { "127.0.0.1" }, "https://www.jolokia.org");
+        handler.checkAccess("http", "localhost", new String[] { "127.0.0.1" }, "https://www.jolokia.org", null);
     }
 
     @Test
@@ -115,7 +115,50 @@ public class HttpRequestHandlerTest {
         replay(restrictor);
         init(restrictor);
 
-        handler.checkAccess("http", "localhost", new String[] { "127.0.0.1" }, "https://www.jolokia.org");
+        handler.checkAccess("http", "localhost", new String[] { "127.0.0.1" }, "https://www.jolokia.org", null);
+    }
+
+    private void restrictorForFetchMetadataChecks() throws Exception {
+        Restrictor restrictor = createMock(Restrictor.class);
+        expect(restrictor.isRemoteAccessAllowed("localhost", "127.0.0.1")).andReturn(true);
+        expect(restrictor.isOriginAllowed("http://www.jolokia.org", true)).andReturn(true);
+        expect(restrictor.ignoreScheme()).andReturn(true);
+        replay(restrictor);
+        init(restrictor);
+    }
+
+    @Test
+    public void noFetchMetadata() throws Exception {
+        restrictorForFetchMetadataChecks();
+
+        handler.checkAccess("http", "localhost", new String[] { "127.0.0.1" }, "http://www.jolokia.org", null);
+    }
+
+    @Test
+    public void fetchMetadataTopLevelNavigation() throws Exception {
+        restrictorForFetchMetadataChecks();
+
+        // Sec-Fetch-Site: none, cross-site, same-origin, same-site
+        // Sec-Fetch-Mode: cors, navigate, no-cors, same-origin, websocket
+        // Sec-Fetch-Dest: audio, audioworklet, document, ..., empty, ..., image, ..., script, ...
+        FetchMetadata fmd = new FetchMetadata("none", "navigate", "document");
+        handler.checkAccess("http", "localhost", new String[] { "127.0.0.1" }, "http://www.jolokia.org", fmd);
+    }
+
+    @Test(expectedExceptions = { SecurityException.class })
+    public void fetchMetadataImage() throws Exception {
+        restrictorForFetchMetadataChecks();
+
+        FetchMetadata fmd = new FetchMetadata("none", "navigate", "image");
+        handler.checkAccess("http", "localhost", new String[] { "127.0.0.1" }, "http://www.jolokia.org", fmd);
+    }
+
+    @Test
+    public void fetchMetadataXhr() throws Exception {
+        restrictorForFetchMetadataChecks();
+
+        FetchMetadata fmd = new FetchMetadata("cross-site", "cors", "empty");
+        handler.checkAccess("http", "localhost", new String[] { "127.0.0.1" }, "http://www.jolokia.org", fmd);
     }
 
     @Test
@@ -133,7 +176,6 @@ public class HttpRequestHandlerTest {
         verifyDispatcher(response);
     }
 
-
     @Test
     public void singlePost() throws Exception {
         prepareDispatcher();
@@ -141,7 +183,6 @@ public class HttpRequestHandlerTest {
         JSONObject response = (JSONObject) handler.handlePostRequest("/jolokia", is, "utf-8", null);
         verifyDispatcher(response);
     }
-
 
     @Test
     public void doublePost() throws Exception {
