@@ -88,7 +88,7 @@ public class JolokiaHttpHandler implements HttpHandler {
 
     // Whether to trust incoming X-Forwarded-For/X-Real-IP/Forwarded header, assuming that the top-most
     // trusted proxy discarded untrusted incoming values of these headers and initiated trusted value chain
-    private boolean trustProxyHeaders = false;
+    private final boolean trustProxyHeaders;
 
     /**
      * Create a new HttpHandler for processing HTTP request
@@ -436,6 +436,7 @@ public class JolokiaHttpHandler implements HttpHandler {
             response += "\n" + exception.getMessage() + "\n";
         }
         pExchange.getResponseHeaders().add("Content-Type", "text/plain; charset=utf-8");
+        pExchange.getResponseHeaders().add("Connection", "close");
         pExchange.sendResponseHeaders(500, response.length());
         OutputStream os = pExchange.getResponseBody();
         os.write(response.getBytes());
@@ -446,13 +447,16 @@ public class JolokiaHttpHandler implements HttpHandler {
         Headers headers = pExchange.getResponseHeaders();
         if (pJson != null) {
             headers.set("Content-Type", getMimeType(pParsedUri) + "; charset=utf-8");
+            headers.add("Connection", "close");
             pExchange.sendResponseHeaders(200, 0);
             Writer writer = new OutputStreamWriter(pExchange.getResponseBody(), StandardCharsets.UTF_8);
 
             String callback = pParsedUri.getParameter(ConfigKey.CALLBACK.getKeyValue());
             IoUtil.streamResponseAndClose(writer, pJson, callback != null && MimeTypeUtil.isValidCallback(callback) ? callback : null);
+            pExchange.getResponseBody().close();
         } else {
             headers.set("Content-Type", "text/plain");
+            headers.add("Connection", "close");
             pExchange.sendResponseHeaders(200, -1);
             pExchange.getResponseBody().close();
         }
@@ -497,7 +501,7 @@ public class JolokiaHttpHandler implements HttpHandler {
         rfc1123Format.setTimeZone(TimeZone.getTimeZone("GMT"));
         return rfc1123Format.format(date);
     }
-    
+
     private void handleFavicon(HttpExchange pExchange, URI uri) throws IOException {
         Headers headers = pExchange.getResponseHeaders();
         headers.set("Connection", "close");
