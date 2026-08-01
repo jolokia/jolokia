@@ -1239,7 +1239,7 @@
 
     <!-- Versions of actual Maven dependencies for Jolokia core/service/client libraries -->
 
-    <version.commons-codec>1.22.0</version.commons-codec>
+    <version.commons-codec>1.22.1</version.commons-codec>
     <version.io.fabric8.kubernetes-client>7.8.0</version.io.fabric8.kubernetes-client>
     <version.jakarta.servlet-api>5.0.0</version.jakarta.servlet-api>
     <version.jakarta.servlet-api6>6.1.0</version.jakarta.servlet-api6>
