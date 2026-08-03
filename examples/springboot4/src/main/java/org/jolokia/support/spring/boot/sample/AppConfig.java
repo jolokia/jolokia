@@ -60,8 +60,8 @@ public class AppConfig implements WebMvcConfigurer, WebServerFactoryCustomizer<T
         ServletRegistrationBean<AgentServlet> jolokiaServlet = new ServletRegistrationBean<>(new AgentServlet(), "/jolokia/*");
         jolokiaServlet.setLoadOnStartup(0);
         jolokiaServlet.setAsyncSupported(true);
-        jolokiaServlet.setInitParameters(Map.of(ConfigKey.DEBUG.getKeyValue(), "true"));
-        jolokiaServlet.setInitParameters(Map.of(ConfigKey.AGENT_DESCRIPTION.getKeyValue(), "Spring Servlet Jolokia Agent"));
+        jolokiaServlet.addInitParameter(ConfigKey.DEBUG.getKeyValue(), "true");
+        jolokiaServlet.addInitParameter(ConfigKey.AGENT_DESCRIPTION.getKeyValue(), "Spring Servlet Jolokia Agent");
         return jolokiaServlet;
     }
 
@@ -75,7 +75,8 @@ public class AppConfig implements WebMvcConfigurer, WebServerFactoryCustomizer<T
                     try {
                         JolokiaMBeanServerUtil.registerMBean(new Example(), new ObjectName("jolokia.example:type=Standard"));
                         JolokiaMBeanServerUtil.registerMBean(new Jolokia(), new ObjectName("jolokia.example:type=JsonMBean"));
-                    } catch (Exception ignored) {
+                    } catch (Exception e) {
+                        LOG.error(e.getMessage(), e);
                     }
                 }
             }

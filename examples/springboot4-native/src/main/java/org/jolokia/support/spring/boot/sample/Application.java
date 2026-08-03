@@ -16,20 +16,6 @@
  */
 package org.jolokia.support.spring.boot.sample;
 
-import java.lang.management.ManagementFactory;
-import javax.management.InstanceNotFoundException;
-import javax.management.JMX;
-import javax.management.MBeanException;
-import javax.management.MBeanServer;
-import javax.management.ObjectInstance;
-import javax.management.ObjectName;
-import javax.management.ReflectionException;
-
-import org.jolokia.client.JolokiaClient;
-import org.jolokia.client.JolokiaClientBuilder;
-import org.jolokia.client.request.JolokiaReadRequest;
-import org.jolokia.client.response.JolokiaResponse;
-import org.jolokia.server.core.backend.MBeanServerHandlerMBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -40,52 +26,8 @@ public class Application {
 
     public static final Logger LOG = LoggerFactory.getLogger(Application.class);
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) {
         SpringApplication.run(Application.class);
-
-        Thread.sleep(1000);
-
-        MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-        ObjectName name = null;
-        for (ObjectInstance ins : server.queryMBeans(null, null)) {
-            if (ins.getObjectName().getKeyProperty("type").equals("ServerHandler") && ins.getObjectName().getDomain().equals("jolokia")) {
-                name = ins.getObjectName();
-                break;
-            }
-        }
-
-        try {
-            System.out.printf("With JMX.newMXBeanProxy%n");
-            if (name != null) {
-                MBeanServerHandlerMBean bean = JMX.newMXBeanProxy(server, name, MBeanServerHandlerMBean.class);
-                System.out.printf("%s%n", bean.mBeanServersInfo());
-            } else {
-                System.out.println("No MBeanServerHandlerMBean found");
-            }
-        } catch (Throwable e) {
-            LOG.error(e.getMessage(), e);
-        }
-
-        try {
-            System.out.printf("With MBeanServer%n");
-            if (name != null) {
-                System.out.printf("%s%n", server.invoke(name, "mBeanServersInfo", new Object[0], new String[0]));
-            } else {
-                System.out.println("No MBeanServerHandlerMBean found");
-            }
-        } catch (Throwable e) {
-            LOG.error(e.getMessage(), e);
-        }
-
-        try {
-            System.out.printf("Checking Jolokia Client based on HttpClient5%n");
-            try (JolokiaClient client = new JolokiaClientBuilder().url("http://localhost:8181/jolokia").build()) {
-                JolokiaResponse<JolokiaReadRequest> response = client.execute(new JolokiaReadRequest("java.lang:type=Runtime", "VmVendor"));
-                System.out.printf("java.lang:type=Runtime/VmVendor: %s%n", (String) response.getValue());
-            }
-        } catch (Throwable e) {
-            LOG.error(e.getMessage(), e);
-        }
     }
 
 }

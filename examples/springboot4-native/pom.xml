@@ -199,7 +199,11 @@
                 </goals>
                 <configuration>
                   <buildArgs>
-                    <buildArg>--enable-monitoring=jmxserver,jmxclient,threaddump,jfr,jvmstat</buildArg>
+                    <!--
+                      "jmxserver" and "jmxclient" are specified in org.jolokia:jolokia-server-core in
+                      /META-INF/native-image/org.jolokia/jolokia-server-core/native-image.properties
+                    -->
+                    <buildArg>--enable-monitoring=threaddump,jfr,jvmstat</buildArg>
                   </buildArgs>
                 </configuration>
               </execution>

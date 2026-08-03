@@ -72,6 +72,24 @@ document.addEventListener("DOMContentLoaded", () => {
             debug(JSON.stringify(j))
         })
     }
+    function jmxAccess() {
+        fetch("/jmx")
+            .then(r => {
+                if (r.ok) {
+                    r.text().then(text => {
+                        debug(text)
+                    })
+                    .catch(e => {
+                        debug(e)
+                    })
+                } else {
+                    debug(`${r.status}: ${r.statusText}`)
+                }
+            })
+            .catch(e => {
+                debug(e)
+            })
+    }
 
     debug("Jolokia test application started")
 
@@ -83,4 +101,5 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("stats-json").addEventListener("click", statsJsonMBean)
     document.getElementById("set-stats-json").addEventListener("click", setStatsJsonMBean)
     document.getElementById("properties").addEventListener("click", properties)
+    document.getElementById("jmx-access").addEventListener("click", jmxAccess)
 })

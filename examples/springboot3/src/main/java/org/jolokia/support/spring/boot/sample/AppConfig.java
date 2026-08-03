@@ -77,7 +77,8 @@ public class AppConfig implements WebMvcConfigurer, WebServerFactoryCustomizer<T
                     try {
                         JolokiaMBeanServerUtil.registerMBean(new Example(), new ObjectName("jolokia.example:type=Standard"));
                         JolokiaMBeanServerUtil.registerMBean(new Jolokia(), new ObjectName("jolokia.example:type=JsonMBean"));
-                    } catch (Exception ignored) {
+                    } catch (Exception e) {
+                        LOG.error(e.getMessage(), e);
                     }
                 }
             }
