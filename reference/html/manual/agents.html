@@ -7,7 +7,7 @@
     <link rel="canonical" href="https://jolokia.org/manual/agents.html">
     <link rel="prev" href="jmx_remote_guide.html">
     <link rel="next" href="security.html">
-    <meta name="generator" content="Antora 3.1.14">
+    <meta name="generator" content="Antora 3.1.15">
     <link rel="stylesheet" href="../_/css/site.css">
     <link rel="stylesheet" href="../_/css/jolokia.css">
   </head>
@@ -286,11 +286,6 @@ content like:</p>
 </dd>
 </dl>
 </div>
-<div class="paragraph">
-<p>Additionally, the configuration options <code>discoveryEnabled</code> and
-<code>discoveryAgentUrl</code> can be provided via environment
-variables or system properties, too. See below for details.</p>
-</div>
 <table id="agent-war-init-params" class="tableblock frame-all grid-all stretch">
 <caption class="title">Table 1. Servlet init parameters</caption>
 <colgroup>
@@ -427,7 +422,7 @@ If set to <code>string</code>, longs are serialized as strings.
 It can be useful when a JavaScript client consumes the JSON response,
 because numbers greater than the max safe integer don&#8217;t retain their precision
 in JavaScript.<br>
-<strong>Added since Jolokia 2.0.3</strong></p></td>
+<strong>Added in Jolokia 2.0.3</strong></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>number</code></p></td>
 </tr>
 <tr>
@@ -436,7 +431,7 @@ in JavaScript.<br>
 request should be included in the response (under <code>request</code> key).<br>
 This applies to bulk requests too, so correlation should be done by index
 of requests and responses (these are guaranteed to be matching).<br>
-<strong>Added since Jolokia 2.1.0</strong></p></td>
+<strong>Added in Jolokia 2.1.0</strong></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>true</code></p></td>
 </tr>
 <tr>
@@ -459,14 +454,14 @@ Additionally we can use:</p>
 </ul>
 </div>
 <div class="paragraph">
-<p><strong>Added since Jolokia 2.1.0</strong></p>
+<p><strong>Added in Jolokia 2.1.0</strong></p>
 </div></div></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>yyyy-MM-dd&#8217;T&#8217;HH:mm:ssXXX</code> (ISO 8601 format)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>dateFormatTimeZone</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">A time zone specifier used for date formatters, like <code>UTC</code><br>
-<strong>Added since Jolokia 2.1.0</strong></p></td>
+<strong>Added in Jolokia 2.1.0</strong></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Default: local time zone</p></td>
 </tr>
 <tr>
@@ -600,6 +595,23 @@ this value.</p></td>
 present a human readable label for this agent.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Monitoring agent</code></p></td>
 </tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>trustProxyHeaders</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Normally, Jolokia can obtain the IP of the caller from Servlet or JDK HTTP Server API.
+But when Jolokia Agent runs behind a reverse proxy, using such API gives us the IP address
+of the proxy itself. Since Jolokia 2.6.1 headers like <code>Forwarded</code>, <code>X-Forwarded-For</code> and <code>X-Real-IP</code> are
+read (in that order) and all are validated against configured "allowed client addresses" (in the
+restrictor configuration). Normally, all found addresses are checked and all must be configured as trusted.<br>
+With this option set to <code>true</code>, Jolokia trusts that the <em>first</em> IP address in <code>Forwarded</code>/<code>X-Forwarded-For</code> header
+is assumed to be set by a trusted reverse proxy. This means that all the following addresses are actually
+addresses of downstream reverse proxies which are trusted.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>false</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>useFetchMetadata</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">This option (enabled by default) tells Jolokia to process <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Fetch_metadata">Fetch Metadata</a> headers. These headers are sent by modern browsers in <a href="https://developer.mozilla.org/en-US/docs/Web/Security/Defenses/Secure_Contexts">secure contexts</a> (i.e., over https or for local addresses, which means these are _not_sent for addresses like <code><a href="http://192.168.0.1" class="bare">http://192.168.0.1</a></code> or <code><a href="http://example.com" class="bare">http://example.com</a></code>). These headers are browser hints for the type of navigation (top-level? <code>&lt;img&gt;</code>? <code>fetch()</code>/<code>xhr</code>?) and can be used to detect unwanted cross-site requests.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>true</code></p></td>
+</tr>
 </tbody>
 </table>
 <div class="paragraph">
@@ -608,7 +620,7 @@ version of an application server it is running in. This version
 is revealed with the <code>version</code> command. With
 the configuration parameter <code>detectorOptions</code>
 extra options can be passed to the detectors. These options take
-the form of a JSON object, where the keys are productnames and
+the form of a JSON object, where the keys are product names and
 the values other JSON objects containing the specific
 configuration. This configuration is feed to a successful
 detector which can do some extra initialization on agent
@@ -731,7 +743,7 @@ dependency on this jar artifact:</p>
     &lt;dependency&gt;
       &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
       &lt;artifactId&gt;jolokia-server-core&lt;/artifactId&gt;
-      &lt;version&gt;2.6.0&lt;/version&gt;
+      &lt;version&gt;2.6.1&lt;/version&gt;
     &lt;/dependency&gt;
   &lt;/dependencies&gt;
   &lt;!-- .... --&gt;
@@ -1008,7 +1020,7 @@ If set to <code>string</code>, longs are serialized as strings.
 It can be useful when a JavaScript client consumes the JSON response,
 because numbers greater than the max safe integer don&#8217;t retain their precision
 in JavaScript.<br>
-<strong>Added since Jolokia 2.0.3</strong></p></td>
+<strong>Added in Jolokia 2.0.3</strong></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.jolokia.includeRequest</code></p></td>
@@ -1017,7 +1029,7 @@ in JavaScript.<br>
 request should be included in the response (under <code>request</code> key).<br>
 This applies to bulk requests too, so correlation should be done by index
 of requests and responses (these are guaranteed to be matching).<br>
-<strong>Added since Jolokia 2.1.0</strong></p></td>
+<strong>Added in Jolokia 2.1.0</strong></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.jolokia.dateFormat</code></p></td>
@@ -1040,14 +1052,14 @@ Additionally we can use:</p>
 </ul>
 </div>
 <div class="paragraph">
-<p><strong>Added since Jolokia 2.1.0</strong></p>
+<p><strong>Added in Jolokia 2.1.0</strong></p>
 </div></div></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.jolokia.dateFormatTimeZone</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Default: local time zone</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">A time zone specifier used for date formatters, like <code>UTC</code><br>
-<strong>Added since Jolokia 2.1.0</strong></p></td>
+<strong>Added in Jolokia 2.1.0</strong></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.jolokia.historyMaxEntries</code></p></td>
@@ -1182,6 +1194,23 @@ OSGi service registry. If more then one of such service is registered, <code>ser
 that all authenticators succeed, for <code>service-any</code> it is sufficient that one authenticator
 successfully authenticates. In any case if no such Authenticator service can be found, the request is rejected.</p></td>
 </tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.jolokia.trustProxyHeaders</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>false</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Normally, Jolokia can obtain the IP of the caller from Servlet or JDK HTTP Server API.
+But when Jolokia Agent runs behind a reverse proxy, using such API gives us the IP address
+of the proxy itself. Since Jolokia 2.6.1 headers like <code>Forwarded</code>, <code>X-Forwarded-For</code> and <code>X-Real-IP</code> are
+read (in that order) and all are validated against configured "allowed client addresses" (in the
+restrictor configuration). Normally, all found addresses are checked and all must be configured as trusted.<br>
+With this option set to <code>true</code>, Jolokia trusts that the <em>first</em> IP address in <code>Forwarded</code>/<code>X-Forwarded-For</code> header
+is assumed to be set by a trusted reverse proxy. This means that all the following addresses are actually
+addresses of downstream reverse proxies which are trusted.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>useFetchMetadata</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>true</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">This option (enabled by default) tells Jolokia to process <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Fetch_metadata">Fetch Metadata</a> headers. These headers are sent by modern browsers in <a href="https://developer.mozilla.org/en-US/docs/Web/Security/Defenses/Secure_Contexts">secure contexts</a> (i.e., over https or for local addresses, which means these are _not_sent for addresses like <code><a href="http://192.168.0.1" class="bare">http://192.168.0.1</a></code> or <code><a href="http://example.com" class="bare">http://example.com</a></code>). These headers are browser hints for the type of navigation (top-level? <code>&lt;img&gt;</code>? <code>fetch()</code>/<code>xhr</code>?) and can be used to detect unwanted cross-site requests.</p></td>
+</tr>
 </tbody>
 </table>
 <div class="paragraph">
@@ -1257,7 +1286,7 @@ maven project can be found in the Jolokia source at
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>karaf@root()&gt; install -s mvn:org.jolokia/jolokia-example-osgi-restrictor/2.6.0
+<pre>karaf@root()&gt; install -s mvn:org.jolokia/jolokia-example-osgi-restrictor/2.6.1
 Register sample restrictor service
 Bundle ID: 68
 
@@ -1357,7 +1386,7 @@ performance. See below for details.</p>
 <p><code>agent.jar</code> is the filename of the Jolokia
 JVM agent. The agent can be downloaded like the others from the <a href="https://jolokia.org/download.html" class="externalLink" target="_blank" rel="noopener">download page</a>.
 When downloading from a Maven repository you need to check for the classifier <code>javaagent</code> (i.e. the
-jar to download looks like <code>jolokia-agent-jvm-2.6.0-javaagent.jar</code>, not <code>jolokia-agent-jvm-2.6.0.jar</code>).
+jar to download looks like <code>jolokia-agent-jvm-2.6.1-javaagent.jar</code>, not <code>jolokia-agent-jvm-2.6.1.jar</code>).
 Options can be appended as a comma separated
 list. The available options are the same as described in
 <a href="agents/war.html#agent-war-init-params" class="xref page">Servlet init parameters</a> plus the one described in
@@ -1543,7 +1572,7 @@ additional configuration options.</p></td>
 </dd>
 <dt class="hdlist1"><code>single</code></dt>
 <dd>
-<p>A single thread only</p>
+<p>A single thread only. This is the default value, but (as the name suggests) it limits the throughput of Jolokia Agent. This value should not be used in production configuration.</p>
 </dd>
 </dl>
 </div></div></td>
@@ -1764,7 +1793,7 @@ If set to <code>string</code>, longs are serialized as strings.
 It can be useful when a JavaScript client consumes the JSON response,
 because numbers greater than the max safe integer don&#8217;t retain their precision
 in JavaScript.<br>
-<strong>Added since Jolokia 2.0.3</strong></p></td>
+<strong>Added in Jolokia 2.0.3</strong></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>number</code></p></td>
 </tr>
 <tr>
@@ -1773,7 +1802,7 @@ in JavaScript.<br>
 request should be included in the response (under <code>request</code> key).<br>
 This applies to bulk requests too, so correlation should be done by index
 of requests and responses (these are guaranteed to be matching).<br>
-<strong>Added since Jolokia 2.1.0</strong></p></td>
+<strong>Added in Jolokia 2.1.0</strong></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>true</code></p></td>
 </tr>
 <tr>
@@ -1796,20 +1825,38 @@ Additionally we can use:</p>
 </ul>
 </div>
 <div class="paragraph">
-<p><strong>Added since Jolokia 2.1.0</strong></p>
+<p><strong>Added in Jolokia 2.1.0</strong></p>
 </div></div></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>yyyy-MM-dd&#8217;T&#8217;HH:mm:ssXXX</code> (ISO 8601 format)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>dateFormatTimeZone</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">A time zone specifier used for date formatters, like <code>UTC</code><br>
-<strong>Added since Jolokia 2.1.0</strong></p></td>
+<strong>Added in Jolokia 2.1.0</strong></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Default: local time zone</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>policyLocation</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Path to the XML policy file</p></td>
 <td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>trustProxyHeaders</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Normally, Jolokia can obtain the IP of the caller from Servlet or JDK HTTP Server API.
+But when Jolokia Agent runs behind a reverse proxy, using such API gives us the IP address
+of the proxy itself. Since Jolokia 2.6.1 headers like <code>Forwarded</code>, <code>X-Forwarded-For</code> and <code>X-Real-IP</code> are
+read (in that order) and all are validated against configured "allowed client addresses" (in the
+restrictor configuration). Normally, all found addresses are checked and all must be configured as trusted.<br>
+With this option set to <code>true</code>, Jolokia trusts that the <em>first</em> IP address in <code>Forwarded</code>/<code>X-Forwarded-For</code> header
+is assumed to be set by a trusted reverse proxy. This means that all the following addresses are actually
+addresses of downstream reverse proxies which are trusted.<br>
+<strong>Added in Jolokia 2.6.1</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>false</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>useFetchMetadata</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">This option (enabled by default) tells Jolokia to process <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Fetch_metadata">Fetch Metadata</a> headers. These headers are sent by modern browsers in <a href="https://developer.mozilla.org/en-US/docs/Web/Security/Defenses/Secure_Contexts">secure contexts</a> (i.e., over https or for local addresses, which means these are _not_sent for addresses like <code><a href="http://192.168.0.1" class="bare">http://192.168.0.1</a></code> or <code><a href="http://example.com" class="bare">http://example.com</a></code>). These headers are browser hints for the type of navigation (top-level? <code>&lt;img&gt;</code>? <code>fetch()</code>/<code>xhr</code>?) and can be used to detect unwanted cross-site requests.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>true</code></p></td>
 </tr>
 </tbody>
 </table>
@@ -1851,12 +1898,12 @@ application which can be reached via the
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>$ java -jar jolokia-agent-jvm-2.6.0-javaagent.jar --help
+<pre>$ java -jar jolokia-agent-jvm-2.6.1-javaagent.jar --help
 
 Jolokia Agent Launcher
 ======================
 
-Usage: java -jar jolokia-agent-jvm-2.6.0-javaagent.jar [options] &lt;command&gt; &lt;pid/regexp&gt;
+Usage: java -jar jolokia-agent-jvm-2.6.1-javaagent.jar [options] &lt;command&gt; &lt;pid/regexp&gt;
 
 where &lt;command&gt; is one of
     start     -- Start a Jolokia agent for the process specified
@@ -1942,7 +1989,7 @@ where &lt;command&gt; is one of
     --dateFormatTimeZone &lt;tz&gt;       TimeZone to use for formatting dates/times/calendars/temporals (default: local time zone)
     --config &lt;configfile&gt;           Path to a property file from where to read the configuration
     --help                          This help documentation
-    --version                       Version of this agent (it's 2.6.0 btw :)
+    --version                       Version of this agent (it's 2.6.1 btw :)
 
 &lt;pid/regexp&gt; can be either a numeric process id or a regular expression. A regular expression is matched
 against the processes' names (ignoring case) and must be specific enough to select exactly one process.
@@ -2052,7 +2099,7 @@ shot scripts are possible <sup class="footnote" id="_footnote_rest-comment">[<a 
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#!/bin/sh
 
-url=`java -jar jolokia-agent-jvm-2.6.0-javaagent.jar start $1 | tail -1`
+url=`java -jar jolokia-agent-jvm-2.6.1-javaagent.jar start $1 | tail -1`
 
 memory_url="${url}read/java.lang:type=Memory/HeapMemoryUsage"
 used=`curl -s "${memory_url}/used" | jq .value`
@@ -2060,7 +2107,7 @@ max=`curl -s "${memory_url}/max" | jq .value`
 usage=$((${used}*100/${max}))
 echo "Memory Usage: $usage %"
 
-java -jar jolokia-agent-jvm-2.6.0-javaagent.jar --quiet stop $1</code></pre>
+java -jar jolokia-agent-jvm-2.6.1-javaagent.jar --quiet stop $1</code></pre>
 </div>
 </div>
 </div>

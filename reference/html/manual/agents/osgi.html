@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Untitled :: Jolokia</title>
     <link rel="canonical" href="https://jolokia.org/manual/agents/osgi.html">
-    <meta name="generator" content="Antora 3.1.14">
+    <meta name="generator" content="Antora 3.1.15">
     <link rel="stylesheet" href="../../_/css/site.css">
     <link rel="stylesheet" href="../../_/css/jolokia.css">
   </head>
@@ -355,7 +355,7 @@ If set to <code>string</code>, longs are serialized as strings.
 It can be useful when a JavaScript client consumes the JSON response,
 because numbers greater than the max safe integer don&#8217;t retain their precision
 in JavaScript.<br>
-<strong>Added since Jolokia 2.0.3</strong></p></td>
+<strong>Added in Jolokia 2.0.3</strong></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.jolokia.includeRequest</code></p></td>
@@ -364,7 +364,7 @@ in JavaScript.<br>
 request should be included in the response (under <code>request</code> key).<br>
 This applies to bulk requests too, so correlation should be done by index
 of requests and responses (these are guaranteed to be matching).<br>
-<strong>Added since Jolokia 2.1.0</strong></p></td>
+<strong>Added in Jolokia 2.1.0</strong></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.jolokia.dateFormat</code></p></td>
@@ -387,14 +387,14 @@ Additionally we can use:</p>
 </ul>
 </div>
 <div class="paragraph">
-<p><strong>Added since Jolokia 2.1.0</strong></p>
+<p><strong>Added in Jolokia 2.1.0</strong></p>
 </div></div></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.jolokia.dateFormatTimeZone</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Default: local time zone</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">A time zone specifier used for date formatters, like <code>UTC</code><br>
-<strong>Added since Jolokia 2.1.0</strong></p></td>
+<strong>Added in Jolokia 2.1.0</strong></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.jolokia.historyMaxEntries</code></p></td>
@@ -529,6 +529,23 @@ OSGi service registry. If more then one of such service is registered, <code>ser
 that all authenticators succeed, for <code>service-any</code> it is sufficient that one authenticator
 successfully authenticates. In any case if no such Authenticator service can be found, the request is rejected.</p></td>
 </tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>org.jolokia.trustProxyHeaders</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>false</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Normally, Jolokia can obtain the IP of the caller from Servlet or JDK HTTP Server API.
+But when Jolokia Agent runs behind a reverse proxy, using such API gives us the IP address
+of the proxy itself. Since Jolokia 2.6.1 headers like <code>Forwarded</code>, <code>X-Forwarded-For</code> and <code>X-Real-IP</code> are
+read (in that order) and all are validated against configured "allowed client addresses" (in the
+restrictor configuration). Normally, all found addresses are checked and all must be configured as trusted.<br>
+With this option set to <code>true</code>, Jolokia trusts that the <em>first</em> IP address in <code>Forwarded</code>/<code>X-Forwarded-For</code> header
+is assumed to be set by a trusted reverse proxy. This means that all the following addresses are actually
+addresses of downstream reverse proxies which are trusted.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>useFetchMetadata</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>true</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">This option (enabled by default) tells Jolokia to process <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Fetch_metadata">Fetch Metadata</a> headers. These headers are sent by modern browsers in <a href="https://developer.mozilla.org/en-US/docs/Web/Security/Defenses/Secure_Contexts">secure contexts</a> (i.e., over https or for local addresses, which means these are _not_sent for addresses like <code><a href="http://192.168.0.1" class="bare">http://192.168.0.1</a></code> or <code><a href="http://example.com" class="bare">http://example.com</a></code>). These headers are browser hints for the type of navigation (top-level? <code>&lt;img&gt;</code>? <code>fetch()</code>/<code>xhr</code>?) and can be used to detect unwanted cross-site requests.</p></td>
+</tr>
 </tbody>
 </table>
 <div class="paragraph">
@@ -604,7 +621,7 @@ maven project can be found in the Jolokia source at
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>karaf@root()&gt; install -s mvn:org.jolokia/jolokia-example-osgi-restrictor/2.6.0
+<pre>karaf@root()&gt; install -s mvn:org.jolokia/jolokia-example-osgi-restrictor/2.6.1
 Register sample restrictor service
 Bundle ID: 68
 

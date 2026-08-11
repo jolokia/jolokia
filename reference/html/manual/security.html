@@ -7,7 +7,7 @@
     <link rel="canonical" href="https://jolokia.org/manual/security.html">
     <link rel="prev" href="agents.html">
     <link rel="next" href="proxy_mode.html">
-    <meta name="generator" content="Antora 3.1.14">
+    <meta name="generator" content="Antora 3.1.15">
     <link rel="stylesheet" href="../_/css/site.css">
     <link rel="stylesheet" href="../_/css/jolokia.css">
   </head>
@@ -160,6 +160,36 @@ IP addresses access is denied. IPv6 addresses are also supported.</p>
 &lt;/remote&gt;</code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p>Starting with Jolokia 2.6.1, the client IP address can be detected even if Jolokia runs behind
+a reverse proxy. Typical <a href="https://nginx.org/en/docs/http/ngx_http_proxy_module.html">NGinx reverse proxy</a> setup uses:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>location ^~ /jolokia {
+    proxy_pass http://&lt;internal_ip&gt;:&lt;port&gt;/jolokia;
+
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    # or for the "most external trusted proxy"
+    proxy_set_header X-Forwarded-For $remote_addr;
+}</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Jolokia can obtain the <em>client IP address</em> from the incoming <code>X-Forwarded-For</code> header, but headers like
+<code>X-Real-IP</code> and <code>Forwarded</code> (from <a href="https://datatracker.ietf.org/doc/html/rfc7239">RFC 7239</a>) are also checked.
+From security perspective, the incoming headers should not be trusted blindly, so Jolokia <em>always</em> checks the
+actual incoming client IP address (whether it&#8217;s a browser address or the address of a reverse proxy).</p>
+</div>
+<div class="paragraph">
+<p>In a complex scenario, where the actual user connects through multiple reverse proxies, <code>X-Forwarded-For</code> and
+<code>Forwarded</code> headers may contain a list of "remote addresses" for each <em>hop</em> along the route.</p>
+</div>
+<div class="paragraph">
+<p>There&#8217;s a special configuration option named <code>trustProxyHeaders</code> (defaults to <code>false</code>) which can be used to
+declare that there&#8217;s a trusted reverse proxy which set a correct client (or untrusted reverse proxy) IP
+address as the "most external known remote address". By default the entire list of addresses is validated and if <em>any</em> of the addresses fails to match a pattern from <code>&lt;remote&gt;/&lt;host&gt;</code> list, the request is rejected.</p>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_commands"><a class="anchor" href="#_commands"></a>Commands</h3>
@@ -294,22 +324,125 @@ completely, any HTTP method can be used.</p>
 <div class="sect2">
 <h3 id="_cross_origin_resource_sharing_cors_restrictions"><a class="anchor" href="#_cross_origin_resource_sharing_cors_restrictions"></a>Cross-Origin Resource Sharing (CORS) restrictions</h3>
 <div class="paragraph">
-<p>Jolokia (since version 1.0.3) supports the W3C specification
-for <a href="https://www.w3.org/TR/cors/" class="externalLink" target="<em>blank">Cross-Origin Resource Sharing</a> (also known as "CORS") which allows
+<p>Jolokia (since version 1.0.3) supports the WHATWG (formerly W3C) specification
+for <a href="https://fetch.spec.whatwg.org/#http-cors-protocol" class="externalLink" target="_blank" rel="noopener">Cross-Origin Resource Sharing</a> (also known as "CORS") which allows
 browser to access resources which are located on a different
 server than the calling script is loaded from. This
 specification provides a controlled way to come around the
-_same origin policy</em>. Most
+<em>same origin policy</em>. Most
 <a href="https://caniuse.com/#search=CORS" class="externalLink" target="_blank" rel="noopener">contemporary browsers</a> support CORS.</p>
 </div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Traditionally, HTML <code>&lt;form&gt;</code> elements were always allowed to send data to other
+origins. CORS is required when accessing (sending data to and receiving data from) different origins
+from scripts using <a href="https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API" class="externalLink" target="_blank" rel="noopener">fetch() API</a> and
+<a href="https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest" class="externalLink" target="_blank" rel="noopener">XMLHttpRequest API</a>.
+</td>
+</tr>
+</table>
+</div>
 <div class="paragraph">
-<p>By default Jolokia allows cross origin access from any
+<p>Jolokia does not provide any web application even if it provides a JavaScript client that can be used
+in a web application. What&#8217;s also important is that Jolokia may be configured with authentication, but never
+uses <em>server side sessions</em> to keep the state (including the authentication state).<br>
+This means that Jolokia by itself never requires any CORS response headers. Tools like <code>curl</code>, <code>wget</code> or
+other non-browser HTTP clients are never involved in the CORS protocol.</p>
+</div>
+<div class="paragraph">
+<p>However Jolokia JavaScript client library can be used in any web application. Because this library uses
+<code>fetch()</code> API, Jolokia server has to support CORS protocol.</p>
+</div>
+<div class="paragraph">
+<p>Jolokia provides <em>CORS configuration</em> for two distinct scenarios:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Because <code>&lt;cors&gt;</code> element is part of the <em>policy restrictor</em>, this configuration is used to <em>restrict</em> access to Jolokia from any client (when using <code>&lt;strict-checking&gt;</code>). When the access is not granted, Jolokia returns HTTP 403 status. This is <em>not</em> a real protection when the client like <code>curl</code> can send any <code>Origin</code> header, but
+it is part of security features when Jolokia is used in the browser. With <code>fetch()</code> and <code>XHR</code> APIs, we can&#8217;t really set headers like <code>Origin</code> or <code>Access-Control-Request-Method</code>. Thus in browser environment we can partially
+restrict access to the server trusting that <code>Origin</code> is a legitimate header.</p>
+</li>
+<li>
+<p>We also use <code>&lt;cors&gt;/&lt;allow-origin&gt;</code> for actual <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS">CORS protocol</a>. In this case, it&#8217;s not about restricting access to the server, but about responding with proper <code>Access-Control-*</code> HTTP response headers to let browsers deal with cross-origin requests in a more secure fashion. It&#8217;s about protecting the client (browser application) from <em>reading</em> the response of a cross-origin request. CORS response headers allow responses to declare they can be shared with other origins.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Here&#8217;s a more detailed explanation of the protection provided by CORS protocol:</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>Imagine there&#8217;s a web application available at <code><a href="http://example.com" class="bare">http://example.com</a></code> which uses Jolokia JS client library to
+access remote Jolokia JVM Agent running at <code><a href="http://jolokia.api.com/jolokia" class="bare">http://jolokia.api.com/jolokia</a></code>.</p>
+</div>
+<div class="paragraph">
+<p>The remote Jolokia JVM Agent uses basic authentication, but doesn&#8217;t use cookies and sessions. This implies two things:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>we can&#8217;t rely on one of the protection methods against CSRF, which is <code>SameSite=strict</code> cookie policy, because no cookies are involved</p>
+</li>
+<li>
+<p>when the target site has associated (cached) credentials, the credentials are sent with each request to the remote agent</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Now imagine a second, <strong>malicious</strong> web page at <code><a href="http://evil.com" class="bare">http://evil.com</a></code>. Its JavaScript could try to do:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">fetch("http://jolokia.api.com/jolokia/read/java.lang:type=Memory", {
+  credentials: "include" // tell the browser to include credentials for cross-origin requests
+})
+.then(r =&gt; r.json())
+.then(data =&gt; sendToAttacker(data)); // read and steal the response</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When the user is properly authenticated in <code><a href="http://example.com" class="bare">http://example.com</a></code> page and to <code><a href="http://jolokia.api.com/jolokia" class="bare">http://jolokia.api.com/jolokia</a></code> API, the credentials for <code><a href="http://jolokia.api.com/jolokia" class="bare">http://jolokia.api.com/jolokia</a></code> are already associated by the browser with this origin. An attacker cannot steal the credentials, but can force the browser to use them with a crafted request from a malicious page, effectively acting on the user&#8217;s behalf without the user being aware of this.</p>
+</div>
+<div class="paragraph">
+<p>With proper CORS implementation, <code><a href="http://jolokia.api.com/jolokia" class="bare">http://jolokia.api.com/jolokia</a></code> will <em>not</em> send <code>Access-Control-Allow-Origin: <a href="http://evil.com" class="bare">http://evil.com</a></code> so the malicious page could not get the <code>data</code> value from the response. Even if the response is actually delivered (which may be the most confusing part of CORS protocol), the access to the response is forbidden.</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Even if the attacker could trick a real user to navigate to a malicious page which could call the remote Jolokia agent, <code>fetch()</code> API does not allow to replace or remove the <code>Origin</code> header being sent. There&#8217;s no way to disable CORS protocol at this level. Unless Jolokia responds with <code>Access-Control-Allow-Origin: <a href="http://evil.com" class="bare">http://evil.com</a></code>, the attacker can not read the data.</p>
+</div>
+<div class="paragraph">
+<p>And to make the server protected too (remember - CORS is for protecting the client from allowing the data to be stolen), Jolokia may use <code>&lt;strict-checking&gt;</code> option, so the sent <code>Origin</code> (which can not be forged by an attacker) leads to a proper HTTP response with HTTP status code 403 (<code>Forbidden</code>).</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+To protect against attackers using <code>curl</code>, proper authentication mechanism must be enabled at Jolokia side. CORS won&#8217;t help here at all.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>By default, when no restrictor is specified, Jolokia allows cross origin access from any
 host. This can be limited to certain hosts by using
 <code>&lt;allow-origin&gt;</code> sections within a
-<code>&lt;cors&gt;</code> sections. This tags can
+<code>&lt;cors&gt;</code> sections. These tags can
 contain the origin URL provided by browsers with the
 <code>Origin:</code> header literally or a
-wildcard specification with <code>*</code>.</p>
+wildcard specification that uses <code>*</code> to match any number of characters.
+When the browser application is accessible at a non-standard port number, the <code>Origin</code> header
+will include it, so the patterns used must take this into account.</p>
 </div>
 <div class="paragraph">
 <p>Since Jolokia 2.1.3 we also support IPv6 origins. These have to be specified with bracket notation like <code>[::ffff:7f00:1]</code>.</p>
@@ -327,12 +460,14 @@ wildcard specification with <code>*</code>.</p>
 <pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;cors&gt;
   &lt;!-- Allow cross origin access from www.jolokia.org ... --&gt;
   &lt;allow-origin&gt;https://www.jolokia.org&lt;/allow-origin&gt;
-
-  &lt;!-- ... and all servers from jmx4perl.org with any protocol --&gt;
+  &lt;!-- ... and all servers from jmx4perl.org with any protocol and subdomain --&gt;
   &lt;allow-origin&gt;*://*.jmx4perl.org&lt;/allow-origin&gt;
+  &lt;!-- IP6 addresses are also supported --&gt;
   &lt;allow-origin&gt;*://[::ffff:7f00:1]&lt;/allow-origin&gt;
+  &lt;!-- Port numbers may also be included --&gt;
+  &lt;allow-origin&gt;http://localhost:*&lt;/allow-origin&gt;
 
-  &lt;!-- Check for the proper origin on the server side, too --&gt;
+  &lt;!-- Check for the proper origin on the server side for a form of access control --&gt;
   &lt;strict-checking/&gt;
 
   &lt;!-- Use if Origin header can use https while the protocol is http (e.g., with TLS proxy) --&gt;
@@ -341,10 +476,30 @@ wildcard specification with <code>*</code>.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>If the option <code>&lt;strict-checking/&gt;</code> is given in this section, too, then the given patterns
+<p>Next two subsections provide more details about these two interpretations of "cross origin request handling" by Jolokia. Some information may be repeated, but with more details.</p>
+</div>
+<div class="sect3">
+<h4 id="_access_restriction"><a class="anchor" href="#_access_restriction"></a>Access restriction</h4>
+<div class="paragraph">
+<p>In order to use this configuration for access control, <code>&lt;strict-checking /&gt;</code> has to be specified. If it&#8217;s not,
+there&#8217;s no <em>access control</em> based on <code>Origin</code> (or <code>Referer</code>) header performed at the server side.</p>
+</div>
+<div class="paragraph">
+<p><code>&lt;allow-origin&gt;</code> elements are used to define patterns for <a href="https://developer.mozilla.org/en-US/docs/Glossary/Origin">Origins</a> that are allowed to call Jolokia. This is <em>not</em> a generic protection
+mechanism - we can simply use <code>curl -H&#8217;Origin: &lt;any value&gt;</code> or configure any programmatic HTTP client to send any request header.<br>
+It may be used for some kind (but still not sufficient) protection for the code running in the browser, where cross-origin requests are always sent with <code>Origin</code> header.</p>
+</div>
+<div class="paragraph">
+<p>Additionally (because it&#8217;s not a security breach), when <code>Origin</code> header is missing, Jolokia takes the <em>origin</em> from the <code>Referer</code> header - this is a proper implementation for requests coming from the browser.</p>
+</div>
+<div class="paragraph">
+<p>When no <code>&lt;allow-origin&gt;</code> is specified, Jolokia permits access from <em>any</em> origin (which means - for any HTTP requests with any <code>Origin</code> value).</p>
+</div>
+<div class="paragraph">
+<p>If the option <code>&lt;strict-checking/&gt;</code> is given in this section, then the given patterns
 are not only used for CORS checking but also every request is checked on the server side whether the
 <code>Origin:</code> or <code>Referer:</code> header matches one of the given patterns.
-If neither <code>Origin:</code> nor <code>Referer:</code> is given and strict checking is enabled, then the access is denied. This useful for protecting against Cross-Site Request Forgery.</p>
+If neither <code>Origin:</code> nor <code>Referer:</code> is given and strict checking is enabled, then the access is denied. This is useful for protecting against Cross-Site Request Forgery.</p>
 </div>
 <div class="paragraph">
 <p>Please note that <code>&lt;strict-checking/&gt;</code> might not be good enough because of potential
@@ -357,6 +512,50 @@ on the session cookie.</p>
 </div>
 <div class="paragraph">
 <p>If the option <code>&lt;ignore-scheme/&gt;</code> is specified (it defaults to <code>false</code> when not used), <code>Origin</code> header using <code>https</code> scheme is not restricted to be used with <code>https</code> protocol only. This option may be required when Jolokia resides behind TLS proxy.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_cors_response_headers_and_preflight_requests"><a class="anchor" href="#_cors_response_headers_and_preflight_requests"></a>CORS response headers and preflight requests</h4>
+<div class="paragraph">
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS">CORS protocol</a> is about preventing (or allowing)
+scripts running in one <em>origin</em> to access data from a different <em>origin</em>. Browsers apply <a href="https://developer.mozilla.org/en-US/docs/Web/Security/Defenses/Same-origin_policy">Same Origin Policy</a> for some (but not all) requests sent (for example we can use <code>&lt;img src=""&gt;</code> with different origins, but we can&#8217;t easily use <code>fetch()</code>
+API in cross-origin scenario).<br>
+It&#8217;s all about protecting the client, not the server (where we should protect against <a href="https://developer.mozilla.org/en-US/docs/Glossary/CSRF">Cross-Site Request Forgery attacks</a>).</p>
+</div>
+<div class="paragraph">
+<p>Because Jolokia includes a JavaScript library, which uses <code>fetch()</code> API, we may want to allow web pages loaded
+from one origin (a server providing your <code>index.html</code> page) to use it to access remote Jolokia agents.</p>
+</div>
+<div class="paragraph">
+<p>CORS is about preventing access to data returned by <code>fetch()</code> if there are no proper <code>Access-Control-*</code> headers.<br>
+Additionally some requests interpreted as <em>non-simple</em> (with non trivial <code>Content-Type</code> or with additional headers) are sent only after sending an implicit <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS#preflighted_requests">preflight request</a>. Jolokia should never perform
+authentication on these special requests (that use <code>OPTIONS</code> HTTP method), because browsers <em>never</em> send any credentials with these preflight requests.</p>
+</div>
+<div class="paragraph">
+<p>Here&#8217;s a list of the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS#the_http_response_headers">CORS response headers</a> supported by Jolokia:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>Access-Control-Allow-Credentials</code>: set to <code>true</code> if Jolokia has authentication enabled</p>
+</li>
+<li>
+<p><code>Access-Control-Allow-Headers</code>: set to incoming <code>Access-Control-Request-Headers</code></p>
+</li>
+<li>
+<p><code>Access-Control-Allow-Methods</code>: set to <code>GET, POST</code> by default, but may return a value specified with <code>&lt;http&gt;/&lt;method&gt;</code></p>
+</li>
+<li>
+<p><code>Access-Control-Allow-Origin</code>: set to the incoming <code>Origin</code> header only of check for allowed origins passes (<code>&lt;cors&gt;/&lt;allow-origin&gt;</code>). Mind that with <code>&lt;strict-checking&gt;</code> the CORS request is rejected and CORS response headers are not set</p>
+</li>
+<li>
+<p><code>Access-Control-Max-Age</code>: set to 2 hours (default for Chrome browsers)</p>
+</li>
+<li>
+<p><code>Access-Control-Expose-Headers</code>: Jolokia doesn&#8217;t set this header at all</p>
+</li>
+</ul>
+</div>
 </div>
 </div>
 <div class="sect2">
@@ -554,6 +753,79 @@ target policy file could not be found then access is
 completely denied. If a classpath lookup fails then access
 is globally granted and a warning is given on standard
 output.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_browser_and_http_client_security"><a class="anchor" href="#_browser_and_http_client_security"></a>Browser and HTTP Client security</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>There&#8217;s an important aspect of HTTP security worth mentioning. Jolokia Agent is an HTTP server, so it can be used by any HTTP client.</p>
+</div>
+<div class="paragraph">
+<p>Programmatic HTTP clients (like <code>curl</code> or <a href="https://hc.apache.org/httpcomponents-client-5.6.x/index.html">Apache HTTP Client 5</a>) can be fully controlled by the user/developer. Any HTTP configuration can be used, including any values for any supported (and unsupported) HTTP headers. In order to restrict access for these clients, Jolokia provides means documented in <a href="#security-policy">Policy based security</a> section.</p>
+</div>
+<div class="paragraph">
+<p>Web Browsers should be treated differently and there&#8217;s one important reason - developers creating web pages using HTML, CSS and JavaScript do <em>not</em> have full control over the HTTP headers being sent to the server.</p>
+</div>
+<div class="paragraph">
+<p>This section is added simply because sometimes it&#8217;s easiest to access the Jolokia agent by pasting a GET URL into the browser.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s just highlight two important concepts.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><a href="https://developer.mozilla.org/en-US/docs/Glossary/Forbidden_request_header">Forbidden request headers</a></dt>
+<dd>
+<p>When using <code>fetch()</code> API or <code>xhr</code> API, we can set various HTTP headers to be sent with the requests, but we can&#8217;t set some <em>forbidden</em> ones. It simply means that some <em>may</em> be treated as trusted (or coming from non-browser clients).</p>
+</dd>
+<dt class="hdlist1"><a href="https://developer.mozilla.org/en-US/docs/Web/Security/Defenses/Secure_Contexts">Secure browser contexts</a></dt>
+<dd>
+<p>Without going into details and special cases, there are 3 kinds of URLs (sites, origins) that make the <em>context</em> secure or not:</p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>https://</code> addresses are secure</p>
+</li>
+<li>
+<p>localhost addresses are secure</p>
+</li>
+<li>
+<p>non-localhost <code>http://</code> addresses (IP or name) are not secure.</p>
+</li>
+</ul>
+</div>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>Security context may limit the availability of some browser APIs (like crypto API) and affect the headers that are sent together with <code>fetch()</code> requests.</p>
+</div>
+<div class="sect2">
+<h3 id="_fetch_metadata"><a class="anchor" href="#_fetch_metadata"></a>Fetch Metadata</h3>
+<div class="paragraph">
+<p>Starting from Jolokia 2.6.1, Jolokia handles (by default, but it can be turned off using <code>useFetchMetadata</code> global option) the set of HTTP headers known as <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Fetch_metadata">Fetch Metadata</a>. There are 4 headers that modern browsers send in <a href="https://developer.mozilla.org/en-US/docs/Web/Security/Defenses/Secure_Contexts">secure contexts</a>:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>Sec-Fetch-Site</code> - indicates a relation between the origin of the page that initiates the request (through CSS urls, <code>&lt;img&gt;</code>, <code>&lt;a&gt;</code> HTML elements or <code>fetch()</code> API calls) and the actual target origin of the request. This allows to detect same or cross origin requests.</p>
+</li>
+<li>
+<p><code>Sec-Fetch-Mode</code> - indicates a mode of the request, which allows to distinguish between users selecting a bookmarked (or pasted) URL and the browser performing a request to fetch an image for <code>&lt;img&gt;</code> HTML element</p>
+</li>
+<li>
+<p><code>Sec-Fetch-Dest</code> - more detailed indication of the <em>source</em> of the request. Most importantly <code>empty</code> means the request comes from <code>fetch()</code>/<code>xhr</code> APIS.</p>
+</li>
+<li>
+<p><code>Sec-Fetch-User</code> - indicates an explicit user action</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>While this is not a one-stop solution for security, Jolokia can restrict access when it is not a proper one. Definitely Jolokia URLs should not be valid when used beyond <code>fetch()</code> API or direct user navigation.</p>
 </div>
 </div>
 </div>

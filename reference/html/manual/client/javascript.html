@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Untitled :: Jolokia</title>
     <link rel="canonical" href="https://jolokia.org/manual/client/javascript.html">
-    <meta name="generator" content="Antora 3.1.14">
+    <meta name="generator" content="Antora 3.1.15">
     <link rel="stylesheet" href="../../_/css/site.css">
     <link rel="stylesheet" href="../../_/css/jolokia.css">
   </head>
@@ -222,8 +222,8 @@ Then we can refer to the scripts from HTML page:</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;head&gt;
-  &lt;script src="jolokia-2.6.0.min.js"&gt;&lt;/script&gt;
-  &lt;script src="jolokia-simple-2.6.0.min.js"&gt;&lt;/script&gt;
+  &lt;script src="jolokia-2.6.1.min.js"&gt;&lt;/script&gt;
+  &lt;script src="jolokia-simple-2.6.1.min.js"&gt;&lt;/script&gt;
 &lt;/head&gt;</code></pre>
 </div>
 </div>
@@ -457,7 +457,7 @@ the response is returned as plain text without parsing. The client is then
 responsible for parsing the response. This can be useful when a custom JSON
 parsing is necessary. The value is returned as Promise&#8217;s resolution value.<br>
 Jolokia Simple API (jolokia-simple.js) doesn&#8217;t support <code>text</code> as dataType.<br>
-<strong>Added since jolokia.js 2.0.2</strong></p></td>
+<strong>Added in jolokia.js 2.0.2</strong></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>success</code></p></td>
@@ -523,7 +523,7 @@ If set to <code>string</code>, longs are serialized as strings.
 It can be useful when a JavaScript client consumes the JSON response,
 because numbers greater than the max safe integer don&#8217;t retain their precision
 in JavaScript.<br>
-<strong>Added since Jolokia 2.0.3</strong></p></td>
+<strong>Added in Jolokia 2.0.3</strong></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>ignoreErrors</code></p></td>
@@ -543,20 +543,20 @@ reads.</p></td>
 This option may be configured globally and overridden at request time.
 When <code>false</code>, bulk responses have to be correlated with requests by matching
 the requests using index number - responses come in the same order as requests.<br>
-<strong>Added since Jolokia 2.1.0</strong></p></td>
+<strong>Added in Jolokia 2.1.0</strong></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>listKeys</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Whether the response object for <code>list()</code> operation should contain <code>keys</code> field
 that lists all the keys obtained from each <code>javax.management.ObjectName</code> of the response.
 This may save you time parsing the name yourself.<br>
-<strong>Added since Jolokia 2.1.0</strong></p></td>
+<strong>Added in Jolokia 2.1.0</strong></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>listCache</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">A flag (defaults to <code>false</code>) to enable <em>optimized list response</em>.<br>
 With this flag enabled, <code>list()</code> operation returns a bit different structure (that&#8217;s why we&#8217;ve upgraded protocol version to <code>8.0</code>) where some MBeans may <em>point to</em> cached, shared MBeanInfo JSON fragment. This heavily decreases the size of <code>list()</code> response.<br>
-<strong>Added since Jolokia 2.1.0</strong></p></td>
+<strong>Added in Jolokia 2.1.0</strong></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>serializeException</code></p></td>
@@ -909,7 +909,7 @@ method.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "agent": "2.6.0",
+  "agent": "2.6.1",
   "protocol": "8.0",
   "details": {
     "agent_version": "2.1.0-SNAPSHOT",
