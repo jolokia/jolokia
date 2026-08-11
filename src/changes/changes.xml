@@ -30,7 +30,7 @@
       <action dev="ggrzybek" type="fix" issue="267">
         Provide better error message when attaching to a JVM with a different UID
       </action>
-      <action dev="ggrzybek" type="add" issue="550">
+      <action dev="sondemar" type="add" issue="550">
         Support GraalVM native builds
       </action>
       <action dev="ggrzybek" type="add" issue="621">
