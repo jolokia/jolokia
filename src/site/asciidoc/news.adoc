@@ -15,6 +15,28 @@
 ////
 == News
 
+=== Jolokia 2.6.1 released
+
+[.news-date]
+2026-08-11
+
+We want to announce a new release of Jolokia that adds and fixes some really old issues.
+
+https://github.com/skarsaune[Martin Skarsaune] improved Jolokia Kubernetes JMX adapter which no longer depends on https://hc.apache.org/httpcomponents-client-4.5.x/index.html[Apache Http Client 4].
+
+https://github.com/GChuf[Gašper Čefarin] fixed some problems and optimized Jolokia's own JSON parser.
+
+In the area of Security:
+
+* Jolokia adds support for https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Fetch_metadata[Fetch Metadata]
+* CORS protocol handling in Jolokia properly responds to pre-flight `OPTIONS` request
+* Jolokia.js client library fixes handling of credentials in cross-origin requests
+* Jolokia supports reverse proxy headers (like `X-Forwarded-For`) and there's a new dedicated section in https://jolokia.org/reference/html/manual/security.html#_ip_based_restrictions[the security chapter of Jolokia Reference Manual].
+
+And finally, there's a surprising addition to Jolokia JVM Agent based on JDK HTTP Server - we now provide proper ... `favicon.ico` resource. The reason is related to how this JDK HTTP Server handles non-http traffic and how Firefox tries to fetch the icon over https first... See more details under https://github.com/jolokia/jolokia/issues/1029[jolokia/jolokia#1029].
+
+Refer to https://jolokia.org/changes-report.html#a2.6.1[changelog] and https://github.com/jolokia/jolokia/releases/tag/v2.6.1[GitHub release notes] for more details.
+
 === Jolokia 2.6.0 released
 
 [.news-date]

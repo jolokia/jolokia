@@ -23,6 +23,35 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
+    <release version="2.6.1" description="Release 2.6.1" date="2026-08-1">
+      <action dev="ggrzybek" type="fix" issue="143">
+        Improve CORS protocol handling.
+      </action>
+      <action dev="ggrzybek" type="fix" issue="267">
+        Provide better error message when attaching to a JVM with a different UID
+      </action>
+      <action dev="ggrzybek" type="add" issue="550">
+        Support GraalVM native builds
+      </action>
+      <action dev="ggrzybek" type="add" issue="621">
+        Support proxy headers (X-Forwarded-*)
+      </action>
+      <action dev="skarsaune" type="fix" issue="989">
+        Eliminate need for Apache http client 4 in kubernetes adapter, improvements to Kubernetes adapter.
+      </action>
+      <action dev="GChuf" type="fix" issue="1021">
+        Json escaping and serializing improvements
+      </action>
+      <action dev="ggrzybek" type="fix" issue="1027">
+        credentials: "include" can never override default credentials: "same-origin" for fetch() API
+      </action>
+      <action dev="ggrzybek" type="add" issue="1028">
+        Implement Fetch Metadata
+      </action>
+      <action dev="ggrzybek" type="fix" issue="1029">
+        Improve and document current single-thread JVM Agent usage
+      </action>
+    </release>
     <release version="2.6.0" description="Release 2.6.0" date="2026-04-29">
       <action dev="ggrzybek" type="remove" issue="1003">
         Remove old client/javascript
