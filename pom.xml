@@ -385,6 +385,12 @@
           <version>${plugin.sonatype.central-publishing-maven-plugin}</version>
         </plugin>
 
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>flatten-maven-plugin</artifactId>
+          <version>${plugin.org.codehaus.mojo.flatten-maven-plugin}</version>
+        </plugin>
+
       </plugins>
     </pluginManagement>
 
@@ -1193,6 +1199,7 @@
     <!-- Please stay at 3.1.0. With 3.2.0 we have "[INFO] Issues found in: null" -->
     <plugin.org.asciidoctor.asciidoctor-maven-plugin>3.1.0</plugin.org.asciidoctor.asciidoctor-maven-plugin>
     <plugin.org.codehaus.mojo.build-helper-maven-plugin>3.6.1</plugin.org.codehaus.mojo.build-helper-maven-plugin>
+    <plugin.org.codehaus.mojo.flatten-maven-plugin>1.8.0</plugin.org.codehaus.mojo.flatten-maven-plugin>
     <plugin.org.codehaus.mojo.versions-maven-plugin>2.21.0</plugin.org.codehaus.mojo.versions-maven-plugin>
     <plugin.org.jacoco.jacoco-maven-plugin>0.7.6.201602180812</plugin.org.jacoco.jacoco-maven-plugin>
     <plugin.org.vafer.jdeb>1.14</plugin.org.vafer.jdeb>
