@@ -385,4 +385,33 @@
     </dependencies>
   </dependencyManagement>
 
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>flatten-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>flatten</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>flatten</goal>
+            </goals>
+            <configuration>
+              <flattenMode>bom</flattenMode>
+              <pomElements>
+                <build>remove</build>
+                <ciManagement>remove</ciManagement>
+                <issueManagement>remove</issueManagement>
+                <properties>remove</properties>
+                <scm>remove</scm>
+              </pomElements>
+              <outputDirectory>${project.build.directory}</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
 </project>
