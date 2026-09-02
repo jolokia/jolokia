@@ -60,7 +60,24 @@ public class PullNotificationBackendTest {
     public void testConfig() {
         JSONObject cfg = (JSONObject) backend.getConfig();
         Assert.assertEquals(cfg.get("store"), "jolokia:type=NotificationStore,agent=test");
-        Assert.assertTrue(cfg.containsKey("maxEntries"));
+        Assert.assertEquals(cfg.get("maxEntries"), 100);
+    }
+
+    @Test
+    public void testCustomMaxEntries() throws Exception {
+        TestJolokiaContext customContext = new TestJolokiaContext.Builder()
+                .config(ConfigKey.AGENT_ID, "test-custom",
+                        ConfigKey.NOTIFICATION_MAX_ENTRIES, "50")
+                .build();
+        PullNotificationBackend customBackend = new PullNotificationBackend(0);
+        try {
+            customBackend.init(customContext);
+            JSONObject cfg = (JSONObject) customBackend.getConfig();
+            Assert.assertEquals(cfg.get("maxEntries"), 50);
+        } finally {
+            customBackend.destroy();
+            customContext.destroy();
+        }
     }
 
    @Test

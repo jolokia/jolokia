@@ -5,6 +5,7 @@ import java.util.Map;
 import javax.management.Notification;
 import javax.management.ObjectName;
 
+import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.http.BackChannel;
 import org.jolokia.server.core.service.api.AbstractJolokiaService;
 import org.jolokia.server.core.service.api.JolokiaContext;
@@ -25,7 +26,7 @@ public class PullNotificationBackend extends AbstractJolokiaService<Notification
     private PullNotificationStore store;
 
     // maximal number of entries *per* notification subscription
-    private final int maxEntries = 100;
+    private int maxEntries;
 
     // name as the MBean has been registered
     private ObjectName objectName;
@@ -44,9 +45,17 @@ public class PullNotificationBackend extends AbstractJolokiaService<Notification
     public synchronized void init(JolokiaContext pContext) {
         if (getJolokiaContext() == null) {
             super.init(pContext);
-            // TODO: Get configuration parameter for maxEntries
+            maxEntries = getMaxEntries(pContext);
             store = new PullNotificationStore(maxEntries);
-            objectName = registerJolokiaMBean(OBJECT_NAME,store);
+            objectName = registerJolokiaMBean(OBJECT_NAME, store);
+        }
+    }
+
+    private int getMaxEntries(JolokiaContext pCtx) {
+        try {
+            return Integer.parseInt(pCtx.getConfig(ConfigKey.NOTIFICATION_MAX_ENTRIES));
+        } catch (NumberFormatException exp) {
+            return Integer.parseInt(ConfigKey.NOTIFICATION_MAX_ENTRIES.getDefaultValue());
         }
     }
 

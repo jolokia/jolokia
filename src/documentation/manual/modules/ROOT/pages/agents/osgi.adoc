@@ -231,6 +231,11 @@ Additionally we can use:
 |Number of entries to keep in the history. This can be changed at
 runtime via the Jolokia config MBean.
 
+|`org.jolokia.notificationMaxEntries`
+|`100`
+|Maximum number of entries to keep per notification
+subscription in the pull notification store.
+
 |`org.jolokia.registerWhiteboardServlet`
 |`true`
 |If `true` the bundle registers `org.jolokia.server.core.osgi.OsgiAgentServlet` OSGi service. If `false`, it's your

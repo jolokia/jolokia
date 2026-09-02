@@ -40,6 +40,11 @@ public enum ConfigKey {
     HISTORY_MAX_ENTRIES("historyMaxEntries",true, false, "10"),
 
     /**
+     * Maximum number of entries to keep per notification subscription in the pull notification store
+     */
+    NOTIFICATION_MAX_ENTRIES("notificationMaxEntries", true, false, "100"),
+
+    /**
      * Whether debug is switched on or not
      */
     DEBUG("debug",true, false, Constants.FALSE),
