@@ -15,6 +15,23 @@
 ////
 == News
 
+=== Jolokia 2.6.2 released
+
+[.news-date]
+2026-09-02
+
+New version of Jolokia comes with a fix for https://nvd.nist.gov/vuln/detail/cve-2026-84218[CVE-2026-84218]. This
+CVE is a complete fix for previous https://nvd.nist.gov/vuln/detail/cve-2018-1000130[CVE-2018-1000130] related to
+Jolokia JSR-160 proxy. Previous regular-expression based deny-list was not covering all cases.
+
+Now _all_ target JMX Service URLs are denied by default and the only way to allow _any_ target URL is to use
+`jsr160ProxyAllowedTargets` option. It allows to point to a file (or classpath resource) with a list of allowed
+JMX Service URL patterns.
+
+Additionally the `jolokia-bom` is now _flattened_ (thanks https://github.com/mrozanc[Marc Rozanc]!).
+
+Refer to https://jolokia.org/changes-report.html#a2.6.2[changelog] and https://github.com/jolokia/jolokia/releases/tag/v2.6.2[GitHub release notes] for more details.
+
 === Jolokia 2.6.1 released
 
 [.news-date]

@@ -23,7 +23,15 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
-    <release version="2.6.1" description="Release 2.6.1" date="2026-08-1">
+    <release version="2.6.2" description="Release 2.6.2" date="2026-09-01">
+      <action dev="ggrzybek" type="fix" issue="1049">
+        Fix CVE-2026-84218 and complete the fix for CVE-2018-1000130. Deny all target JMX URLs for Jolokia proxy.
+      </action>
+      <action dev="ggrzybek" type="add" issue="1041">
+        Flatten the Jolokia BOM and make it standalone (no parent).
+      </action>
+    </release>
+    <release version="2.6.1" description="Release 2.6.1" date="2026-08-11">
       <action dev="ggrzybek" type="fix" issue="143">
         Improve CORS protocol handling.
       </action>
