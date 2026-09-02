@@ -15,7 +15,7 @@
 ////
 == News
 
-=== Jolokia 2.6.2 released with security fixes
+=== Jolokia 2.6.2 and 1.7.3 released with security fixes
 
 [.news-date]
 2026-09-02
@@ -29,7 +29,9 @@ Now _all_ target JMX Service URLs are denied by default and the only way to allo
 `jsr160ProxyAllowedTargets` option. It allows to point to a file (or classpath resource) with a list of allowed
 JMX Service URL patterns.
 
-Additionally the `jolokia-bom` is now _flattened_ (thanks https://github.com/mrozanc[Marc Rozanc]!).
+While Jolokia 1.x should be fully replaced by Jolokia 2, we've also released a security update for this old branch in version 1.7.3.
+
+Additionally (only in 2.6.2) the `jolokia-bom` is now _flattened_ (thanks https://github.com/mrozanc[Marc Rozanc]!).
 
 Refer to https://jolokia.org/changes-report.html#a2.6.2[changelog] and https://github.com/jolokia/jolokia/releases/tag/v2.6.2[GitHub release notes] for more details.
 
