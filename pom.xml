@@ -19,7 +19,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jolokia</groupId>
   <artifactId>jolokia</artifactId>
-  <version>1.7.3</version>
+  <version>1.7.4-SNAPSHOT</version>
   <name>jolokia-parent</name>
   <description>jolokia parent pom</description>
 
@@ -356,7 +356,7 @@
   <scm>
     <connection>scm:git:git://github.com/jolokia/jolokia.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/jolokia/jolokia.git</developerConnection>
-    <tag>v1.7.3</tag>
+    <tag>HEAD</tag>
     <url>git://github.com/jolokia/jolokia.git</url>
   </scm>
 
