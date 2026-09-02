@@ -23,7 +23,7 @@
 New version of Jolokia comes with a fix for https://nvd.nist.gov/vuln/detail/cve-2026-84218[CVE-2026-84218]. This
 CVE is a complete fix for previous https://nvd.nist.gov/vuln/detail/cve-2018-1000130[CVE-2018-1000130] related to
 Jolokia JSR-160 proxy. Previous regular-expression based deny-list was not covering all cases. +
-The report was created by https://github.com/ByteHackr[Sandipan Roy (Red Hat)].
+The report was created by https://github.com/ByteHackr[Sandipan Roy (Red Hat)] and Mirko Swillus (https://alpha-omega.dev[]).
 
 Now _all_ target JMX Service URLs are denied by default and the only way to allow _any_ target URL is to use
 `jsr160ProxyAllowedTargets` option. It allows to point to a file (or classpath resource) with a list of allowed
