@@ -52,10 +52,12 @@ public class PullNotificationBackend extends AbstractJolokiaService<Notification
     }
 
     private int getMaxEntries(JolokiaContext pCtx) {
+        int fallback = Integer.parseInt(ConfigKey.NOTIFICATION_MAX_ENTRIES.getDefaultValue());
         try {
-            return Integer.parseInt(pCtx.getConfig(ConfigKey.NOTIFICATION_MAX_ENTRIES));
+            int value = Integer.parseInt(pCtx.getConfig(ConfigKey.NOTIFICATION_MAX_ENTRIES));
+            return value > 0 ? value : fallback;
         } catch (NumberFormatException exp) {
-            return Integer.parseInt(ConfigKey.NOTIFICATION_MAX_ENTRIES.getDefaultValue());
+            return fallback;
         }
     }
 

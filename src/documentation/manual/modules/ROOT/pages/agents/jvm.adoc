@@ -363,6 +363,11 @@ network traffic. Nevertheless, when set to 0
 no limit is imposed.
 |Default: `0`
 
+|`notificationMaxEntries`
+|Maximum number of entries to keep per notification
+subscription in the pull notification store.
+|Default: `100`
+
 |`serializeLong`
 |How to serialize long values in the JSON response: `number` or `string`.
 The default `number` simply serializes longs as numbers in JSON.

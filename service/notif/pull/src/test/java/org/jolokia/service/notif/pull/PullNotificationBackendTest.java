@@ -80,6 +80,40 @@ public class PullNotificationBackendTest {
         }
     }
 
+    @Test
+    public void testInvalidMaxEntriesFallsBackToDefault() throws Exception {
+        TestJolokiaContext customContext = new TestJolokiaContext.Builder()
+                .config(ConfigKey.AGENT_ID, "test-invalid",
+                        ConfigKey.NOTIFICATION_MAX_ENTRIES, "not-a-number")
+                .build();
+        PullNotificationBackend customBackend = new PullNotificationBackend(0);
+        try {
+            customBackend.init(customContext);
+            JSONObject cfg = (JSONObject) customBackend.getConfig();
+            Assert.assertEquals(cfg.get("maxEntries"), 100);
+        } finally {
+            customBackend.destroy();
+            customContext.destroy();
+        }
+    }
+
+    @Test
+    public void testZeroMaxEntriesFallsBackToDefault() throws Exception {
+        TestJolokiaContext customContext = new TestJolokiaContext.Builder()
+                .config(ConfigKey.AGENT_ID, "test-zero",
+                        ConfigKey.NOTIFICATION_MAX_ENTRIES, "0")
+                .build();
+        PullNotificationBackend customBackend = new PullNotificationBackend(0);
+        try {
+            customBackend.init(customContext);
+            JSONObject cfg = (JSONObject) customBackend.getConfig();
+            Assert.assertEquals(cfg.get("maxEntries"), 100);
+        } finally {
+            customBackend.destroy();
+            customContext.destroy();
+        }
+    }
+
    @Test
    public void testSubscription() throws Exception {
        String client = UUID.randomUUID().toString();
