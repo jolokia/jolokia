@@ -130,6 +130,11 @@ a|Default: `org.jolokia`
 runtime via the config MBean.
 |Default: `10`
 
+|`notificationMaxEntries`
+|Maximum number of entries to keep per notification
+subscription in the pull notification store.
+|Default: `100`
+
 |`debugMaxEntries`
 |Maximum number of entries to keep in the local
 debug history (if enabled). Can be changed via
