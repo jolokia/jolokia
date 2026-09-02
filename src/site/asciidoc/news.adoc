@@ -600,7 +600,7 @@ Grzegorz, Aurélien and all the other fine folks from Red Hat
 who started to revive Jolokia. Also, Jolokia 2.0 becomes a realistic
 option again. Stay tuned!
 
-[#Security_fixes_with_1_5_0]
+[id="Security_fixes_with_1.5.0"]
 === Security fixes with 1.5.0
 
 [.news-date]
