@@ -216,7 +216,7 @@
 <h2 id="news">News</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="jolokia_2_6_2_released_with_security_fixes">Jolokia 2.6.2 released with security fixes</h3>
+<h3 id="jolokia_2_6_2_and_1_7_3_released_with_security_fixes">Jolokia 2.6.2 and 1.7.3 released with security fixes</h3>
 <div class="paragraph news-date">
 <p>2026-09-02</p>
 </div>
@@ -224,7 +224,7 @@
 <p>New version of Jolokia comes with a fix for <a href="https://nvd.nist.gov/vuln/detail/cve-2026-84218">CVE-2026-84218</a>. This
 CVE is a complete fix for previous <a href="https://nvd.nist.gov/vuln/detail/cve-2018-1000130">CVE-2018-1000130</a> related to
 Jolokia JSR-160 proxy. Previous regular-expression based deny-list was not covering all cases.<br/>
-The report was created by <a href="https://github.com/ByteHackr">Sandipan Roy (Red Hat)</a>.</p>
+The report was created by <a href="https://github.com/ByteHackr">Sandipan Roy (Red Hat)</a> and Mirko Swillus (<a href="https://alpha-omega.dev" class="bare">https://alpha-omega.dev</a>).</p>
 </div>
 <div class="paragraph">
 <p>Now <em>all</em> target JMX Service URLs are denied by default and the only way to allow <em>any</em> target URL is to use
@@ -232,7 +232,10 @@ The report was created by <a href="https://github.com/ByteHackr">Sandipan Roy (R
 JMX Service URL patterns.</p>
 </div>
 <div class="paragraph">
-<p>Additionally the <code>jolokia-bom</code> is now <em>flattened</em> (thanks <a href="https://github.com/mrozanc">Marc Rozanc</a>!).</p>
+<p>While Jolokia 1.x should be fully replaced by Jolokia 2, we&#8217;ve also released a security update for this old branch in version 1.7.3.</p>
+</div>
+<div class="paragraph">
+<p>Additionally (only in 2.6.2) the <code>jolokia-bom</code> is now <em>flattened</em> (thanks <a href="https://github.com/mrozanc">Marc Rozanc</a>!).</p>
 </div>
 <div class="paragraph">
 <p>Refer to <a href="https://jolokia.org/changes-report.html#a2.6.2">changelog</a> and <a href="https://github.com/jolokia/jolokia/releases/tag/v2.6.2">GitHub release notes</a> for more details.</p>
@@ -1103,7 +1106,7 @@ option again. Stay tuned!</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="Security_fixes_with_1_5_0">Security fixes with 1.5.0</h3>
+<h3 id="Security_fixes_with_1.5.0">Security fixes with 1.5.0</h3>
 <div class="paragraph news-date">
 <p>2018-02-08</p>
 </div>
