@@ -404,7 +404,6 @@
                 <ciManagement>remove</ciManagement>
                 <issueManagement>remove</issueManagement>
                 <properties>remove</properties>
-                <scm>remove</scm>
               </pomElements>
               <outputDirectory>${project.build.directory}</outputDirectory>
             </configuration>
