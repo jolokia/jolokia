@@ -192,6 +192,13 @@
   </security-constraint>
   <security-constraint>
     <web-resource-collection>
+      <web-resource-name>Jolokia-Agent CORS Preflight Access</web-resource-name>
+      <url-pattern>/*</url-pattern>
+      <http-method>OPTIONS</http-method>
+    </web-resource-collection>
+  </security-constraint>
+  <security-constraint>
+    <web-resource-collection>
       <web-resource-name>Jolokia-Agent Anonymous Access</web-resource-name>
       <url-pattern>/config</url-pattern>
     </web-resource-collection>

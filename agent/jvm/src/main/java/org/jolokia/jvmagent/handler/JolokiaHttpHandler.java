@@ -218,9 +218,9 @@ public class JolokiaHttpHandler implements HttpHandler {
             requestHandler.checkAccess(scheme, remoteHost, addressChain, extractOrigin(pExchange, true), fetchMetadata);
 
             Boolean corsPreflight = CorsFilter.corsPreflight.get();
+            CorsFilter.corsPreflight.remove();
             if (corsPreflight != null && corsPreflight) {
                 handleCorsPreflightRequest(pExchange);
-                CorsFilter.corsPreflight.remove();
                 return;
             }
 
