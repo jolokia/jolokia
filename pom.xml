@@ -450,7 +450,7 @@
   <scm>
     <connection>scm:git:git://github.com/jolokia/jolokia.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/jolokia/jolokia.git</developerConnection>
-    <tag>v2.6.0</tag>
+    <tag>HEAD</tag>
     <url>git://github.com/jolokia/jolokia.git</url>
   </scm>
 
