@@ -20,6 +20,8 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -46,6 +48,7 @@ import org.jolokia.handler.RequestHandlerManager;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.request.ProxyTargetConfig;
 import org.jolokia.restrictor.Restrictor;
+import org.jolokia.util.ClassUtil;
 
 /**
  * Dispatcher for calling JSR-160 connectors
@@ -62,7 +65,6 @@ public class Jsr160RequestDispatcher implements RequestDispatcher {
     // White and blacklist for patterns to match the JMX Service URL against
     // Pattern matching is done case insensitive
     private final Set<String> whiteList;
-    private final Set<String> blackList;
 
     private RequestHandlerManager requestHandlerManager;
 
@@ -79,7 +81,6 @@ public class Jsr160RequestDispatcher implements RequestDispatcher {
                                    Configuration pConfig) {
         requestHandlerManager = new RequestHandlerManager(pConverters, pServerInfo, pRestrictor);
         whiteList = extractWhiteList(pConfig);
-        blackList = extractBlackList(pConfig);
     }
 
     /**
@@ -121,15 +122,14 @@ public class Jsr160RequestDispatcher implements RequestDispatcher {
         if (targetConfig == null) {
             throw new IllegalArgumentException("No proxy configuration in request " + pJmxReq);
         }
-        String urlS = targetConfig.getUrl();
-        if (!acceptTargetUrl(urlS)) {
-            throw new SecurityException(String.format("Target URL %s is not allowed by configuration", urlS));
+        String url = targetConfig.getUrl();
+        JMXServiceURL accepted = acceptTargetUrl(url);
+        if (accepted == null) {
+            throw new SecurityException(String.format("Target URL %s is not allowed by configuration", url));
         }
 
-        JMXServiceURL url = new JMXServiceURL(urlS);
-
         Map<String,Object> env = prepareEnv(targetConfig.getEnv());
-        return JMXConnectorFactory.newJMXConnector(url,env);
+        return JMXConnectorFactory.newJMXConnector(accepted,env);
     }
 
     private void releaseConnector(JMXConnector pConnector) throws IOException {
@@ -178,20 +178,27 @@ public class Jsr160RequestDispatcher implements RequestDispatcher {
         return handler.useReturnValueWithPath();
     }
 
-    // Whether a given JMX Service URL is acceptable
-    private boolean acceptTargetUrl(String urlS) {
-        // Whitelist has precedence. Only patterns on the white list are allowed
-        if (whiteList != null) {
-            return checkPattern(whiteList, urlS, true);
-        }
+    /**
+     * Check whether the passed URL for remote JMX connector server is allowed. Return null if not.
+     * @param url
+     * @return
+     */
+    private JMXServiceURL acceptTargetUrl(String url) {
+        try {
+            // Whitelist has precedence. Only patterns on the white list are allowed
+            if (whiteList != null) {
+                if (checkPattern(whiteList, url, true)) {
+                    return new JMXServiceURL(url);
+                }
+            }
 
-        // Then blacklist: Everything on this list is forbidden
-        if (blackList != null) {
-            return checkPattern(blackList, urlS, false);
+            // a "normal" URI would be service:jmx:rmi://<ignored host+port>/jndi/rmi://localhost:1099/jmxrmi
+            // and paths like /jndi/ldap:// or /stub/<base64> should be rejected, but we simply reject everything
+            // which is not allowlisted
+            return null;
+        } catch (Exception ignored) {
+            return null;
         }
-
-        // If no list is configured, then everything is allowed
-        return true;
     }
 
     private boolean checkPattern(Set<String> patterns, String urlS, boolean isPositive) {
@@ -223,8 +230,16 @@ public class Jsr160RequestDispatcher implements RequestDispatcher {
         BufferedReader reader = null;
         List<String> ret = new ArrayList<String>();
         Pattern commentPattern = Pattern.compile("^\\s*#.*$");
+        boolean isClasspathResource = pPath.startsWith("classpath:");
+        if (isClasspathResource) {
+            pPath = pPath.substring("classpath:".length());
+            while (pPath.startsWith("/")) {
+                pPath = pPath.substring(1);
+            }
+        }
+
         try {
-            reader = new BufferedReader(new FileReader(pPath));
+            reader = new BufferedReader(isClasspathResource ? new InputStreamReader(classpathResource(pPath)) : new FileReader(pPath));
             String line = reader.readLine();
             while (line != null) {
                 if (!commentPattern.matcher(line).matches()) {
@@ -246,6 +261,14 @@ public class Jsr160RequestDispatcher implements RequestDispatcher {
                 // we tried
             }
         }
+    }
+
+    private InputStream classpathResource(String path) {
+        InputStream is = ClassUtil.getResourceAsStream(path);
+        if (is == null) {
+            is = Jsr160RequestDispatcher.class.getResourceAsStream(path);
+        }
+        return is;
     }
 
     private Set<String> extractBlackList(Configuration pConfig) {

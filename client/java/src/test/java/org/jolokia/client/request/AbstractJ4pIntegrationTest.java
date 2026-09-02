@@ -18,6 +18,7 @@ package org.jolokia.client.request;
 
 import org.jolokia.client.J4pClient;
 import org.jolokia.client.BasicAuthenticator;
+import org.jolokia.config.ConfigKey;
 import org.jolokia.http.AgentServlet;
 import org.jolokia.it.ItSetup;
 import org.jolokia.test.util.EnvTestUtil;
@@ -55,6 +56,7 @@ abstract public class AbstractJ4pIntegrationTest {
             Context jettyContext = new Context(jettyServer, "/");
             ServletHolder holder = new ServletHolder(new AgentServlet());
             holder.setInitParameter("dispatcherClasses", "org.jolokia.jsr160.Jsr160RequestDispatcher");
+            holder.setInitParameter(ConfigKey.JSR160_PROXY_ALLOWED_TARGETS.getKeyValue(), "src/test/resources/allow-remote-jmx.txt");
             jettyContext.addServlet(holder, "/j4p/*");
 
             SecurityHandler securityHandler = createSecurityHandler();

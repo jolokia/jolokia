@@ -49,7 +49,7 @@ public class Jsr160RequestDispatcherTest {
 
     @BeforeTest
     private void setup() {
-        dispatcher = createDispatcherPointingToLocalMBeanServer(null);
+        dispatcher = createDispatcherPointingToLocalMBeanServer(new Configuration(ConfigKey.JSR160_PROXY_ALLOWED_TARGETS, "classpath:test-protocol-pattern-whitelist.txt"));
         procParams = new Configuration().getProcessingParameters(new HashMap<String, String>());
     }
 
@@ -70,7 +70,7 @@ public class Jsr160RequestDispatcherTest {
         dispatcher.dispatchRequest(JmxRequestFactory.createGetRequest("/read/java.lang:type=Memory/HeapMemoryUsage", procParams));
     }
 
-    @Test(expectedExceptions = IOException.class)
+    @Test(expectedExceptions = SecurityException.class)
     public void simpleDispatchFail() throws InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException, NotChangedException {
         JmxRequest req = preparePostReadRequest(null);
         getOriginalDispatcher().dispatchRequest(req);
@@ -135,9 +135,39 @@ public class Jsr160RequestDispatcherTest {
     }
 
     @Test
+    public void disallowedIfNotAllowlisted() throws Exception {
+        String blackListedUrl = "service:jmx:rmi:///jndi/rmi://localhost:1099/jmxrmi";
+        JmxReadRequest req = preparePostReadRequestWithServiceUrl(blackListedUrl, null);
+        try {
+            dispatcher.dispatchRequest(req);
+            fail("Exception should have been thrown for " + blackListedUrl);
+        } catch (SecurityException exp) {
+            assertTrue(exp.getMessage().contains(blackListedUrl));
+        }
+    }
+
+    @Test
     public void defaultBlackList() throws Exception {
         String blackListedUrl = "service:jmx:rmi:///jndi/ldap://localhost:9092/jmxrmi";
         JmxReadRequest req = preparePostReadRequestWithServiceUrl(blackListedUrl, null);
+        try {
+            dispatcher.dispatchRequest(req);
+            fail("Exception should have been thrown for " + blackListedUrl);
+        } catch (SecurityException exp) {
+            assertTrue(exp.getMessage().contains(blackListedUrl));
+        }
+
+        blackListedUrl = "service:jmx:rmi://localhost:44444/jndi/ldap://localhost:9092/jmxrmi";
+        req = preparePostReadRequestWithServiceUrl(blackListedUrl, null);
+        try {
+            dispatcher.dispatchRequest(req);
+            fail("Exception should have been thrown for " + blackListedUrl);
+        } catch (SecurityException exp) {
+            assertTrue(exp.getMessage().contains(blackListedUrl));
+        }
+
+        blackListedUrl = "service:jmx:rmi:///jndi/ldaps://localhost:9092/jmxrmi";
+        req = preparePostReadRequestWithServiceUrl(blackListedUrl, null);
         try {
             dispatcher.dispatchRequest(req);
             fail("Exception should have been thrown for " + blackListedUrl);
@@ -154,6 +184,16 @@ public class Jsr160RequestDispatcherTest {
             "service:jmx:test:///jndi/rmi://localhost:9999/jmxrmi", true,
             "service:jmx:test:///jndi/rmi://jolokia.org:8888/jmxrmi", true,
             "service:jmx:rmi:///jndi/ldap://localhost:9999/jmxrmi", true,
+            "service:jmx:rmi:jndi/ldap://devil.com:9999/jmxrmi", false,
+            "service:jmx:rmi:/jndi/ldap://devil.com:9999/jmxrmi", false,
+            "service:jmx:rmi://jndi/ldap://devil.com:9999/jmxrmi", false,
+            "service:jmx:rmi:jndi/ldaps://devil.com:9999/jmxrmi", false,
+            "service:jmx:rmi:/jndi/ldaps://devil.com:9999/jmxrmi", false,
+            "service:jmx:rmi://jndi/ldaps://devil.com:9999/jmxrmi", false,
+            "service:jmx:rmi:///jndi/ldaps://devil.com:9999/jmxrmi", false,
+            "service:jmx:rmi://localhost:44444/jndi/ldap://devil.com:9999/jmxrmi", false,
+            "service:jmx:rmi://localhost:44444/jndi/ldaps://devil.com:9999/jmxrmi", false,
+            "service:jmx:rmi:///stub/aGVsbG8K", false,
             "service:jmx:test:///jndi/ad://localhost:9999/jmxrmi", false,
             "service:jmx:rmi:///jndi/ldap://localhost:9092/jmxrmi", true
         };

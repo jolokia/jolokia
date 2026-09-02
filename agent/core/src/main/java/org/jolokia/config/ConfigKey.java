@@ -55,6 +55,7 @@ public enum ConfigKey {
     /**
      * Path to a white list of patterns which are matched against possible
      * JMX service URL for incoming requests
+     * Can also use {@code classpath:[/]resource/on/classpath} syntax.
      */
     JSR160_PROXY_ALLOWED_TARGETS("jsr160ProxyAllowedTargets", true, false),
 
