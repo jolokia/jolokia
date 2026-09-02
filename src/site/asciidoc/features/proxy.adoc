@@ -88,7 +88,8 @@ http://jolokia-proxy:8080/jolokia
 Additionally an allow list has to be configured, so target `service:jmx:rmi:///jndi/rmi://localhost:1099/jmxrmi` URL
 can be accepted by Jolokia. We can use either system property (`jolokia.jsr160ProxyAllowedTargets`), environment variable
 (`JOLOKIA_JSR160_PROXY_ALLOWED_TARGETS`) or (in case of JVM Agent) the `jsr160ProxyAllowedTargets` option. The value
-of this option should be a file containing regular expressions for allowed JMX Service URLs. For example:
+of this option should be a file (or classpath resource when using `classpath:` prefix) containing regular expressions
+for allowed JMX Service URLs. For example it can contain:
 
 ----
 service:jmx:rmi:///jndi/rmi://localhost:[0-9]+/jmxrmi

@@ -48,7 +48,7 @@ public class Jsr160RequestHandlerTest {
     private void setup() {
         //private ProcessingParameters procParams;
         TestJolokiaContext ctx = new TestJolokiaContext.Builder()
-                .config(ConfigKey.JSR160_PROXY_ALLOWED_TARGETS, getFilePathFor("/test-protocol-pattern-whitelist.txt"))
+                .config(ConfigKey.JSR160_PROXY_ALLOWED_TARGETS, "classpath:test-protocol-pattern-whitelist.txt")
                 .build();
         dispatcher = new Jsr160RequestHandler(0) {
             @Override

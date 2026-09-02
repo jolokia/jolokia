@@ -72,10 +72,10 @@ content like:
 |Parameter|Description|Example
 
 |`jsr160ProxyAllowedTargets`
-|Path to a white list of patterns which are matched against possible
+|Path to an allow list of patterns which are matched against possible
 JMX service URL for incoming requests. If no white list is specified, no target URL is allowed at all
 which effectively disables the proxy.
-|`/opt/jolokia/jsr160-proxy-allowed-patterns.txt`
+|`/opt/jolokia/jsr160-proxy-allowed-patterns.txt`, `classpath:/jsr160-proxy-allowed-patterns.txt`
 
 |`policyLocation`
 |Location of the policy file to use. This is either a URL

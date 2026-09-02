@@ -19,6 +19,8 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -40,6 +42,7 @@ import javax.management.remote.JMXServiceURL;
 import javax.naming.Context;
 import javax.rmi.ssl.SslRMIClientSocketFactory;
 
+import org.jolokia.core.util.ClassUtil;
 import org.jolokia.json.JSONObject;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.request.BadRequestException;
@@ -248,7 +251,15 @@ public class Jsr160RequestHandler extends AbstractRequestHandler {
     private List<? extends String> readPatterns(String pPath) {
         List<String> ret = new ArrayList<>();
         Pattern commentPattern = Pattern.compile("^\\s*#.*$");
-        try (BufferedReader reader = new BufferedReader(new FileReader(pPath))) {
+        boolean isClasspathResource = pPath.startsWith("classpath:");
+        if (isClasspathResource) {
+            pPath = pPath.substring("classpath:".length());
+            while (pPath.startsWith("/")) {
+                pPath = pPath.substring(1);
+            }
+        }
+        try (BufferedReader reader = new BufferedReader(isClasspathResource
+                ? new InputStreamReader(classpathResource(pPath)) : new FileReader(pPath))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 if (!line.trim().startsWith("#")) {
@@ -261,6 +272,14 @@ public class Jsr160RequestHandler extends AbstractRequestHandler {
         } catch (IOException e) {
             throw new IllegalStateException(String.format("Error while reading pattern file %s: %s", pPath, e.getMessage()));
         }
+    }
+
+    private InputStream classpathResource(String path) {
+        InputStream is = ClassUtil.getResourceAsStream(path);
+        if (is == null) {
+            is = Jsr160RequestHandler.class.getResourceAsStream(path);
+        }
+        return is;
     }
 
 }
