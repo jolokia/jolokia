@@ -133,6 +133,7 @@ with client certificate authentication.
 See the link:reference/html/manual/agents.html#agents-jvm[reference manual,role=externalLink,window=_blank] for all
 security options.
 
+[#Security_fixes_with_1_5_0]
 === Security fixes with 1.5.0
 
 [.news-date]
