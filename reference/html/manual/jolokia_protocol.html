@@ -7,7 +7,7 @@
     <link rel="canonical" href="https://jolokia.org/manual/jolokia_protocol.html">
     <link rel="prev" href="proxy_mode.html">
     <link rel="next" href="jolokia_mbeans.html">
-    <meta name="generator" content="Antora 3.1.15">
+    <meta name="generator" content="Antora 3.2.0">
     <link rel="stylesheet" href="../_/css/site.css">
     <link rel="stylesheet" href="../_/css/jolokia.css">
   </head>
@@ -3607,7 +3607,8 @@ request. A typical proxy request looks like</p>
 section is a JSR-160 service URL for the target server
 reachable from within the proxy agent. <code>user</code>
 and <code>password</code> are optional credentials used
-for the JSR-160 Remote communication.</p>
+for the JSR-160 Remote communication. The URL is validated
+and is rejected if not included in an allow list.</p>
 </div>
 </div>
 </div>
@@ -3677,7 +3678,7 @@ the following format</p>
 <div class="listingblock">
 <div class="content">
 <pre>$ echo '{"type":"query"}' | socat STDIO UDP4-DATAGRAM:239.192.48.84:24884
-{"agent_version":"2.6.1","agent_id":"jolokia-7778","type":"response","secured":false,"url":"http://192.168.0.165:7778/jolokia/"}{"agent_version":"2.6.1","agent_id":"jolokia-7779","type":"response","secured":false,"url":"http://192.168.0.165:7778/jolokia/"}</pre>
+{"agent_version":"2.6.2","agent_id":"jolokia-7778","type":"response","secured":false,"url":"http://192.168.0.165:7778/jolokia/"}{"agent_version":"2.6.2","agent_id":"jolokia-7779","type":"response","secured":false,"url":"http://192.168.0.165:7778/jolokia/"}</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -3686,7 +3687,7 @@ the following format</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "agent_version": "2.6.1",
+  "agent_version": "2.6.2",
   "agent_id": "192.168.0.221-67980-7e985ce9-servlet",
   "server_product": "tomcat",
   "type": "response",

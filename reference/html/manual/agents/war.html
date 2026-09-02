@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Untitled :: Jolokia</title>
     <link rel="canonical" href="https://jolokia.org/manual/agents/war.html">
-    <meta name="generator" content="Antora 3.1.15">
+    <meta name="generator" content="Antora 3.2.0">
     <link rel="stylesheet" href="../../_/css/site.css">
     <link rel="stylesheet" href="../../_/css/jolokia.css">
   </head>
@@ -186,10 +186,10 @@ content like:</p>
 <tbody>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>jsr160ProxyAllowedTargets</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Path to a white list of patterns which are matched against possible
-JMX service URL for incoming requests. If no white list is specified, default blacklist is effective which
-includes <code>service:jmx:rmi:///jndi/ldap:.*</code>.</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>/opt/jolokia/jsr160-proxy-allowed-patterns.txt</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Path to an allow list of patterns which are matched against possible
+JMX service URL for incoming requests. If no white list is specified, no target URL is allowed at all
+which effectively disables the proxy.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>/opt/jolokia/jsr160-proxy-allowed-patterns.txt</code>, <code>classpath:/jsr160-proxy-allowed-patterns.txt</code></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>policyLocation</code></p></td>
@@ -626,7 +626,7 @@ dependency on this jar artifact:</p>
     &lt;dependency&gt;
       &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
       &lt;artifactId&gt;jolokia-server-core&lt;/artifactId&gt;
-      &lt;version&gt;2.6.1&lt;/version&gt;
+      &lt;version&gt;2.6.2&lt;/version&gt;
     &lt;/dependency&gt;
   &lt;/dependencies&gt;
   &lt;!-- .... --&gt;

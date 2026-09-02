@@ -7,7 +7,7 @@
     <link rel="canonical" href="https://jolokia.org/manual/proxy_mode.html">
     <link rel="prev" href="security.html">
     <link rel="next" href="jolokia_protocol.html">
-    <meta name="generator" content="Antora 3.1.15">
+    <meta name="generator" content="Antora 3.2.0">
     <link rel="stylesheet" href="../_/css/site.css">
     <link rel="stylesheet" href="../_/css/jolokia.css">
   </head>
@@ -137,14 +137,16 @@ Tomcat, Jetty or Undertow).</p>
 <p>In Jolokia 1.x, proxy mode is turned on or off depending on <code>dispatcherClasses</code> option. If it contains <code>org.jolokia.jsr160.Jsr160RequestDispatcher</code>, proxy mode will be enabled, because this special dispatcher will be used.</p>
 </div>
 <div class="paragraph">
-<p>In Jolokia 2, <code>org.jolokia.service.jsr160.Jsr160RequestHandler</code> is detected as Jolokia service, so it&#8217;s a matter of having <code>jolokia-service-jsr160.jar</code> on the CLASSPATH.</p>
+<p>In Jolokia 2, <code>org.jolokia.service.jsr160.Jsr160RequestHandler</code> is detected as Jolokia service, so it&#8217;s a matter of having <code>jolokia-service-jsr160.jar</code> on the CLASSPATH. This enables proxy support, but no target URL is permitted by default.
+An allow list (by default it&#8217;s empty) is used to select which target URLs are allowed to be used with JMX Connector Client
+created by Jolokia.</p>
 </div>
 <div class="paragraph">
-<p><code>jolokia-agent-war.war</code> includes <code>WEB-INF/lib/jolokia-service-jsr160.jar</code>, so proxy mode is enabled. If you want to remove
-proxy support, you have to repackage <code>jolokia-agent-war.war</code> without this library.</p>
+<p><code>jolokia-agent-war.war</code> includes <code>WEB-INF/lib/jolokia-service-jsr160.jar</code>, so proxy mode is enabled. If you don&#8217;t want to include proxy support, you have to repackage <code>jolokia-agent-war.war</code> without this library. But still, without an allow list configured, no target
+Jolokia can be reached via this proxy.</p>
 </div>
 <div class="paragraph">
-<p>Additionally you can configured a white list with patterns for all allowed JMX service URL in a Jolokia Request.
+<p>You can configured a white list with patterns for all allowed JMX service URL in a Jolokia Request.
 This white list is a plain text file which contains
 <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/regex/Pattern.html" class="externalLink" target="_blank" rel="noopener">RegExp patterns</a> line by line. Lines starting with <code>#</code> are ignored.
 Pattern matching is performed case insensitive. This file can be configured in various ways:</p>
@@ -154,31 +156,36 @@ Pattern matching is performed case insensitive. This file can be configured in v
 <li>
 <p>Repackaging the <code>jolokia-agent-war.war</code> and adapt <code>web.xml</code> to
 include the init option <code>jsr160ProxyAllowedTargets</code> with a file path to the white list. This should
-be an absolute path or a relative path if you know where your Jakarta EE server sets the current directory.</p>
+be an absolute path or a relative path if you know where your Jakarta EE server sets the current directory. <code>classpath:/resource.txt</code>
+syntax is also supported, so the configuration file can be provided on the CLASSPATH.</p>
 </li>
 <li>
-<p>Set the system property <code>jolokia.jsr160ProxyAllowedTargets</code> to the path of the whitelist</p>
+<p>Set the system property <code>jolokia.jsr160ProxyAllowedTargets</code> to the path of the allow list.</p>
 </li>
 <li>
 <p>Set the environment variable <code>JOLOKIA_JSR160_PROXY_ALLOWED_TARGETS</code> to the path of the
-whitelist.</p>
+allow list.</p>
+</li>
+<li>
+<p>Set the <code>jsr160ProxyAllowedTargets</code> option for JVM Agent.</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>By default the following patterns are disallowed, but you can re-enable them when providing them in the whitelist:</p>
+<p>By default no target URLs are allowed, but you can specify the allowed list like this:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre># Disallow all JNDI lookups via LDAP
-service:jmx:rmi:///jndi/ldap:.*</pre>
+<pre># Allow access to remote JMX Connector Servers using RMI protocol using stubs obtained from RMI registries
+# running on localhost or hosts from .dev domain on port 1099
+service:jmx:rmi:///jndi/rmi:(localhost|.*\.dev):1099/jmxrmi</pre>
 </div>
 </div>
 <div class="paragraph">
 <p>In any case it is highly recommended to use a dedicated Jakarta EE servlet server for the JSR-160 proxy which
-is secured by configuring the server authentication properly for this servlet. An unprotected Jolokia proxy can be
-tricked to execute local code by a malicious attacker. As said previously, the Jolokia proxy should be avoided if
-possible in favor of direct access over the Jolokia protocol.</p>
+is secured by configuring the server authentication properly for this servlet. An unprotected Jolokia proxy
+with too permissive allow list can be tricked to execute local code by a malicious attacker.
+As said previously, the Jolokia proxy should be avoided if possible in favor of direct access over the Jolokia protocol.</p>
 </div>
 <div class="paragraph">
 <p>All client libraries (jmx4perl, Java and JavaScript) support the
