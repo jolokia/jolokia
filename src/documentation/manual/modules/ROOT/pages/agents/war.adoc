@@ -73,8 +73,8 @@ content like:
 
 |`jsr160ProxyAllowedTargets`
 |Path to a white list of patterns which are matched against possible
-JMX service URL for incoming requests. If no white list is specified, default blacklist is effective which
-includes `pass:[service:jmx:rmi:///jndi/ldap:.*]`.
+JMX service URL for incoming requests. If no white list is specified, no target URL is allowed at all
+which effectively disables the proxy.
 |`/opt/jolokia/jsr160-proxy-allowed-patterns.txt`
 
 |`policyLocation`

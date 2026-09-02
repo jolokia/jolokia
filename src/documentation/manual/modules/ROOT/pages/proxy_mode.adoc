@@ -34,12 +34,14 @@ Tomcat, Jetty or Undertow).
 
 In Jolokia 1.x, proxy mode is turned on or off depending on `dispatcherClasses` option. If it contains `org.jolokia.jsr160.Jsr160RequestDispatcher`, proxy mode will be enabled, because this special dispatcher will be used.
 
-In Jolokia 2, `org.jolokia.service.jsr160.Jsr160RequestHandler` is detected as Jolokia service, so it's a matter of having `jolokia-service-jsr160.jar` on the CLASSPATH.
+In Jolokia 2, `org.jolokia.service.jsr160.Jsr160RequestHandler` is detected as Jolokia service, so it's a matter of having `jolokia-service-jsr160.jar` on the CLASSPATH. This enables proxy support, but any target URL is rejected by default.
+An allow list (by default it's empty) is used to select which target URLs are allowed to be used with JMX Connector Client
+created by Jolokia.
 
-`jolokia-agent-war.war` includes `WEB-INF/lib/jolokia-service-jsr160.jar`, so proxy mode is enabled. If you want to remove
-proxy support, you have to repackage `jolokia-agent-war.war` without this library.
+`jolokia-agent-war.war` includes `WEB-INF/lib/jolokia-service-jsr160.jar`, so proxy mode is enabled. If you don't want to include proxy support, you have to repackage `jolokia-agent-war.war` without this library. But still, without an allow list configured, no target
+Jolokia can be reached via this proxy.
 
-Additionally you can configured a white list with patterns for all allowed JMX service URL in a Jolokia Request.
+You can configured a white list with patterns for all allowed JMX service URL in a Jolokia Request.
 This white list is a plain text file which contains
 https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/regex/Pattern.html[RegExp patterns,role=externalLink,window=_blank] line by line. Lines starting with `#` are ignored.
 Pattern matching is performed case insensitive. This file can be configured in various ways:
@@ -50,18 +52,20 @@ be an absolute path or a relative path if you know where your Jakarta EE server 
 * Set the system property `jolokia.jsr160ProxyAllowedTargets` to the path of the whitelist
 * Set the environment variable `JOLOKIA_JSR160_PROXY_ALLOWED_TARGETS` to the path of the
 whitelist.
+* Set the `jsr160ProxyAllowedTargets` option for JVM Agent.
 
-By default the following patterns are disallowed, but you can re-enable them when providing them in the whitelist:
+By default no target URLs are allowed, but you can specify the allowed list like this:
 
 ----
-# Disallow all JNDI lookups via LDAP
-service:jmx:rmi:///jndi/ldap:.*
+# Allow access to remote JMX Connector Servers using RMI protocol using stubs obtained from RMI registries
+# running on localhost or hosts from .dev domain on port 1099
+service:jmx:rmi:///jndi/rmi:(localhost|.*\.dev):1099/jmxrmi
 ----
 
 In any case it is highly recommended to use a dedicated Jakarta EE servlet server for the JSR-160 proxy which
-is secured by configuring the server authentication properly for this servlet. An unprotected Jolokia proxy can be
-tricked to execute local code by a malicious attacker. As said previously, the Jolokia proxy should be avoided if
-possible in favor of direct access over the Jolokia protocol.
+is secured by configuring the server authentication properly for this servlet. An unprotected Jolokia proxy
+with too permissive allow list can be tricked to execute local code by a malicious attacker.
+As said previously, the Jolokia proxy should be avoided if possible in favor of direct access over the Jolokia protocol.
 
 All client libraries (jmx4perl, Java and JavaScript) support the
 usage of proxy mode in its API.

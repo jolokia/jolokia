@@ -67,7 +67,6 @@ public class Jsr160RequestHandler extends AbstractRequestHandler {
 
     // Allowlist and denylist for patterns to match the JMX Service URL against
     private Set<String> allowList;
-    private Set<String> denyList;
 
     /**
      * Create a new <em>proxy</em> request handler which accesses remote MBeans.
@@ -87,7 +86,6 @@ public class Jsr160RequestHandler extends AbstractRequestHandler {
     public void init(JolokiaContext pContext) {
         commandHandlerManager = new CommandHandlerManager(pContext, getProvider());
         allowList = extractAllowList(pContext);
-        denyList = extractDenyList(pContext);
     }
 
     /**
@@ -138,15 +136,14 @@ public class Jsr160RequestHandler extends AbstractRequestHandler {
     // TODO: Add connector to a pool and release it on demand. For now, simply close it.
     private JMXConnector createConnector(JolokiaRequest pJmxReq) throws IOException {
         ProxyTargetConfig targetConfig = new ProxyTargetConfig(pJmxReq.getOption("target"));
-        String urlS = targetConfig.getUrl();
-        if (!acceptTargetUrl(urlS)) {
-            throw new SecurityException(String.format("Target URL %s is not allowed by configuration", urlS));
+        String url = targetConfig.getUrl();
+        JMXServiceURL accepted = acceptTargetUrl(url);
+        if (accepted == null) {
+            throw new SecurityException(String.format("Target URL %s is not allowed by configuration", url));
         }
 
-        JMXServiceURL url = new JMXServiceURL(urlS);
-
         Map<String, Object> env = prepareEnv(targetConfig.getEnv());
-        return JMXConnectorFactory.newJMXConnector(url, env);
+        return JMXConnectorFactory.newJMXConnector(accepted, env);
     }
 
     private void releaseConnector(JMXConnector pConnector) throws IOException {
@@ -192,19 +189,28 @@ public class Jsr160RequestHandler extends AbstractRequestHandler {
     }
 
     // Whether a given JMX Service URL is acceptable
-    private boolean acceptTargetUrl(String urlS) {
-        // Whitelist has precedence. Only patterns on the white list are allowed
-        if (allowList != null) {
-            return checkPattern(allowList, urlS, true);
-        }
 
-        // Then blacklist: Everything on this list is forbidden
-        if (denyList != null) {
-            return checkPattern(denyList, urlS, false);
-        }
+    /**
+     * Check whether the passed URL for remote JMX connector server is allowed. Return null if not.
+     * @param url
+     * @return
+     */
+    private JMXServiceURL acceptTargetUrl(String url) {
+        try {
+            // Whitelist has precedence. Only patterns on the white list are allowed
+            if (allowList != null) {
+                if (checkPattern(allowList, url, true)) {
+                    return new JMXServiceURL(url);
+                }
+            }
 
-        // If no list is configured, then everything is allowed
-        return true;
+            // a "normal" URI would be service:jmx:rmi://<ignored host+port>/jndi/rmi://localhost:1099/jmxrmi
+            // and paths like /jndi/ldap:// or /stub/<base64> should be rejected, but we simply reject everything
+            // which is not allowlisted
+            return null;
+        } catch (Exception ignored) {
+            return null;
+        }
     }
 
     private boolean checkPattern(Set<String> patterns, String urlS, boolean isPositive) {

@@ -936,7 +936,8 @@ request. A typical proxy request looks like
 section is a JSR-160 service URL for the target server
 reachable from within the proxy agent. `user`
 and `password` are optional credentials used
-for the JSR-160 Remote communication.
+for the JSR-160 Remote communication. The URL is validated
+and is rejected if not included in an allow list.
 
 [#discovery]
 == Agent Discovery

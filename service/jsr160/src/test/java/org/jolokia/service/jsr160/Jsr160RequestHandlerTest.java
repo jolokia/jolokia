@@ -47,7 +47,9 @@ public class Jsr160RequestHandlerTest {
     @BeforeMethod
     private void setup() {
         //private ProcessingParameters procParams;
-        TestJolokiaContext ctx = new TestJolokiaContext.Builder().build();
+        TestJolokiaContext ctx = new TestJolokiaContext.Builder()
+                .config(ConfigKey.JSR160_PROXY_ALLOWED_TARGETS, getFilePathFor("/test-protocol-pattern-whitelist.txt"))
+                .build();
         dispatcher = new Jsr160RequestHandler(0) {
             @Override
             protected Map<String, Object> prepareEnv(Map<String, String> pTargetConfig) {
@@ -79,7 +81,7 @@ public class Jsr160RequestHandlerTest {
         dispatcher.handleRequest(JolokiaRequestFactory.createGetRequest("/read/java.lang:type=Memory/HeapMemoryUsage", new TestProcessingParameters()), null);
     }
 
-    @Test(expectedExceptions = IOException.class)
+    @Test(expectedExceptions = SecurityException.class)
     public void simpleDispatchFail() throws Exception {
         JolokiaRequest req = preparePostReadRequest(null);
         destroy();
@@ -202,9 +204,39 @@ public class Jsr160RequestHandlerTest {
     }
 
     @Test
+    public void disallowedIfNotAllowlisted() throws Exception {
+        String blackListedUrl = "service:jmx:rmi:///jndi/rmi://localhost:1099/jmxrmi";
+        JolokiaRequest req = preparePostReadRequestWithServiceUrl(blackListedUrl, null);
+        try {
+            dispatcher.handleRequest(req,null);
+            fail("Exception should have been thrown for " + blackListedUrl);
+        } catch (SecurityException exp) {
+            assertTrue(exp.getMessage().contains(blackListedUrl));
+        }
+    }
+
+    @Test
     public void defaultBlackList() throws Exception {
         String blackListedUrl = "service:jmx:rmi:///jndi/ldap://localhost:9092/jmxrmi";
         JolokiaRequest req = preparePostReadRequestWithServiceUrl(blackListedUrl, null);
+        try {
+            dispatcher.handleRequest(req,null);
+            fail("Exception should have been thrown for " + blackListedUrl);
+        } catch (SecurityException exp) {
+            assertTrue(exp.getMessage().contains(blackListedUrl));
+        }
+
+        blackListedUrl = "service:jmx:rmi://localhost:44444/jndi/ldap://localhost:9092/jmxrmi";
+        req = preparePostReadRequestWithServiceUrl(blackListedUrl, null);
+        try {
+            dispatcher.handleRequest(req,null);
+            fail("Exception should have been thrown for " + blackListedUrl);
+        } catch (SecurityException exp) {
+            assertTrue(exp.getMessage().contains(blackListedUrl));
+        }
+
+        blackListedUrl = "service:jmx:rmi:///jndi/ldaps://localhost:9092/jmxrmi";
+        req = preparePostReadRequestWithServiceUrl(blackListedUrl, null);
         try {
             dispatcher.handleRequest(req,null);
             fail("Exception should have been thrown for " + blackListedUrl);
@@ -217,10 +249,21 @@ public class Jsr160RequestHandlerTest {
         Jsr160RequestHandler dispatcher = createDispatcherPointingToLocalMBeanServer(config);
 
         Object[] testData = new Object[] {
+                // "pattern", "should be allowed"
                 "service:jmx:test:///jndi/rmi://devil.com:6666/jmxrmi", false,
                 "service:jmx:test:///jndi/rmi://localhost:9999/jmxrmi", true,
                 "service:jmx:test:///jndi/rmi://jolokia.org:8888/jmxrmi", true,
                 "service:jmx:rmi:///jndi/ldap://localhost:9999/jmxrmi", true,
+                "service:jmx:rmi:jndi/ldap://devil.com:9999/jmxrmi", false,
+                "service:jmx:rmi:/jndi/ldap://devil.com:9999/jmxrmi", false,
+                "service:jmx:rmi://jndi/ldap://devil.com:9999/jmxrmi", false,
+                "service:jmx:rmi:jndi/ldaps://devil.com:9999/jmxrmi", false,
+                "service:jmx:rmi:/jndi/ldaps://devil.com:9999/jmxrmi", false,
+                "service:jmx:rmi://jndi/ldaps://devil.com:9999/jmxrmi", false,
+                "service:jmx:rmi:///jndi/ldaps://devil.com:9999/jmxrmi", false,
+                "service:jmx:rmi://localhost:44444/jndi/ldap://devil.com:9999/jmxrmi", false,
+                "service:jmx:rmi://localhost:44444/jndi/ldaps://devil.com:9999/jmxrmi", false,
+                "service:jmx:rmi:///stub/aGVsbG8K", false,
                 "service:jmx:test:///jndi/ad://localhost:9999/jmxrmi", false,
                 "service:jmx:rmi:///jndi/ldap://localhost:9092/jmxrmi", true
         };

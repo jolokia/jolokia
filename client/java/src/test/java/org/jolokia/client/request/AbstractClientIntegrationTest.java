@@ -57,6 +57,7 @@ import org.jolokia.client.JolokiaClient;
 import org.jolokia.client.JolokiaClientBuilder;
 import org.jolokia.client.JolokiaTargetConfig;
 import org.jolokia.it.core.ItSetup;
+import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.http.AgentServlet;
 import org.jolokia.test.util.EnvTestUtil;
 import org.slf4j.Logger;
@@ -118,6 +119,7 @@ abstract public class AbstractClientIntegrationTest {
             jettyContext.getServletHandler().setDecodeAmbiguousURIs(true);
             ServletHolder holder = new ServletHolder(new AgentServlet());
             holder.setInitParameter("includeStackTrace", "true");
+            holder.setInitParameter(ConfigKey.JSR160_PROXY_ALLOWED_TARGETS.getKeyValue(), "src/test/resources/allow-remote-jmx.txt");
             jettyContext.addServlet(holder, "/j4p/*");
             jettyContext.addFilter(new FilterHolder(new HttpFilter() {
                 @Override

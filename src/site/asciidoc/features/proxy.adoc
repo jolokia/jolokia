@@ -68,7 +68,7 @@ Knowing the above, the typical JMX URI of the remote MBean Server is:
 service:jmx:rmi:///jndi/rmi://localhost:1099/jmxrmi
 ----
 
-NOTE: `jmxrmi` is a name explicitly used by `sun.management.jmxremote.ConnectorBootstrap.exportMBeanServer()` and the first `host:port` part are omitted becase we only care about the RMI registry where `javax.management.remote.rmi.RMIServer` is bound.
+NOTE: `jmxrmi` is a name explicitly used by `sun.management.jmxremote.ConnectorBootstrap.exportMBeanServer()` and the first `host:port` part are omitted because we only care about the RMI registry where `javax.management.remote.rmi.RMIServer` is bound.
 
 With this technology, what JVM actually _exposes_ as a remote view of `javax.management.remote.rmi.RMIServer` interface which can be used to obtain `javax.management.remote.rmi.RMIConnection` interface which finally can be used to get/set MBean attributes, call MBean operations, etc.
 
@@ -83,6 +83,15 @@ something like
 
 ----
 http://jolokia-proxy:8080/jolokia
+----
+
+Additionally an allow list has to be configured, so target `service:jmx:rmi:///jndi/rmi://localhost:1099/jmxrmi` URL
+can be accepted by Jolokia. We can use either system property (`jolokia.jsr160ProxyAllowedTargets`), environment variable
+(`JOLOKIA_JSR160_PROXY_ALLOWED_TARGETS`) or (in case of JVM Agent) the `jsr160ProxyAllowedTargets` option. The value
+of this option should be a file containing regular expressions for allowed JMX Service URLs. For example:
+
+----
+service:jmx:rmi:///jndi/rmi://localhost:[0-9]+/jmxrmi
 ----
 
 and the POST payload of the request is
