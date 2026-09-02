@@ -152,7 +152,9 @@ abstract public class EclipseMuleAgentHttpServer implements MuleAgentHttpServer 
     private HashLoginService getLoginService(String pUser, String pPassword, String pRole) {
     	Credential credential = Credential.getCredential(pPassword);
     	HashLoginService loginService = new HashLoginService("jolokia Realm");
-    	loginService.putUser(pUser, credential, new String[] {pRole});
+        UserStore userStore = new UserStore();
+        userStore.addUser(pUser, credential, new String[] {pRole});
+        loginService.setUserStore(userStore);
     	return loginService;
     }
 

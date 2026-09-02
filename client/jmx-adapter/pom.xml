@@ -65,7 +65,7 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpcore</artifactId>
-            <version>4.4.7</version>
+            <version>4.4.16</version>
         </dependency>
 
         <dependency>
@@ -84,7 +84,7 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient-osgi</artifactId>
-            <version>4.5.3</version>
+            <version>4.5.14</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.httpcomponents</groupId>
@@ -98,7 +98,7 @@
         <dependency>
             <groupId>commons-logging</groupId>
             <artifactId>commons-logging</artifactId>
-            <version>1.1.1</version>
+            <version>1.4.0</version>
         </dependency>
 
 
@@ -188,7 +188,7 @@
                     <dependency>
                         <groupId>org.awaitility</groupId>
                         <artifactId>awaitility</artifactId>
-                        <version>4.2.0</version>
+                        <version>4.3.0</version>
                     </dependency>
                 </dependencies>
             </dependencyManagement>
