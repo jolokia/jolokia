@@ -26,7 +26,7 @@ approach. Along the way JMX concepts are introduced and discussed. Eventually we
 
 This section is about the obvious and inherent nature of Java, which is an object oriented language.
 
-When writing Java applications, we always deal with objects, which may be implement interfaces. This is a fundamental aspect
+When writing Java applications, we always deal with objects, which may be implementing interfaces. This is a fundamental aspect
 of Java. It is so natural that we hardly even think about this.
 
 Object oriented principals state that we invoke methods on objects. The most primitive ways to _get_ these objects
@@ -91,11 +91,11 @@ System.out.println("Memory usage: " + memory.getHeapMemoryUsage());
 In this example, we still use `java.lang.management.MemoryMXBean` interface, but this time it is _not_ bound to any _real_
 object of some particular class. The implementation behind proxy is dynamic, represented by `InvocationHandler.invoke()` method. +
 In this simple example we just create a result directly, but the implementation may be much more sophisticated. For example we can
-check the the memory usage of a remote JVM by reaching out to another Java application using network (yes - it's a hint for upcoming JMX and Jolokia sections).
+check the memory usage of a remote JVM by reaching out to another Java application using the network (yes - it's a hint for upcoming JMX and Jolokia sections).
 
 === How objects are obtained?
 
-`java.lang.management.ManagementFactory.getMemoryMXBean()` method is using _service locator_ pattern, where we know the _locator_ (`ManagementFactory` class) and a way to get particular object of a desired interface (`getMemoryMXBean()` method).
+`java.lang.management.ManagementFactory.getMemoryMXBean()` method is using the _service locator_ pattern, where we know the _locator_ (`ManagementFactory` class) and a way to get particular object of a desired interface (`getMemoryMXBean()` method).
 
 But again - there's more. We can get the implementation (the object) _injected_ by some Dependency Injection framework like:
 
