@@ -23,6 +23,11 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
+    <release version="2.6.3" description="Release 2.6.3" date="2026-09-21">
+      <action dev="ggrzybek" type="fix" issue="1053">
+        Jolokia 2.6.1+ causes error message regarding security constraints in Tomcat 10.1.59/11.0.25
+      </action>
+    </release>
     <release version="2.6.2" description="Release 2.6.2" date="2026-09-02">
       <action dev="ggrzybek" type="fix" issue="1049">
         Fix CVE-2026-84218 and complete the fix for CVE-2018-1000130. Deny all target JMX URLs for Jolokia proxy.

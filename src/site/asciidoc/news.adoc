@@ -15,6 +15,16 @@
 ////
 == News
 
+=== Jolokia 2.6.3 released
+
+[.news-date]
+2026-09-21
+
+A new version of Jolokia has been released with fixed security declaration for `/config` endpoint. Apache Tomcat verifies
+if all the combinations of URI mappings and methods are _covered_ and now Jolokia provides a full coverage.
+
+Refer to https://jolokia.org/changes-report.html#a2.6.3[changelog] and https://github.com/jolokia/jolokia/releases/tag/v2.6.3[GitHub release notes] for more details.
+
 === Jolokia 2.6.2 and 1.7.3 released with security fixes
 
 [.news-date]
