@@ -269,6 +269,12 @@ runtime via the config MBean.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>10</code></p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>notificationMaxEntries</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Maximum number of entries to keep per notification
+subscription in the pull notification store.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Default: <code>100</code></p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>debugMaxEntries</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Maximum number of entries to keep in the local
 debug history (if enabled). Can be changed via
@@ -626,7 +632,7 @@ dependency on this jar artifact:</p>
     &lt;dependency&gt;
       &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
       &lt;artifactId&gt;jolokia-server-core&lt;/artifactId&gt;
-      &lt;version&gt;2.6.2&lt;/version&gt;
+      &lt;version&gt;2.6.3&lt;/version&gt;
     &lt;/dependency&gt;
   &lt;/dependencies&gt;
   &lt;!-- .... --&gt;

@@ -2943,14 +2943,7 @@ It duplicates (a bit) the information from the <code>version</code> operation, b
 <div class="sect3">
 <h4 id="post-config"><a class="anchor" href="#post-config"></a>POST version request</h4>
 <div class="paragraph">
-<p>A version POST request has only a single key
-<code>type</code> which has to be set to
-<strong><code>config</code></strong>.</p>
-</div>
-<div class="paragraph">
-<p>However, GET requests are preferred for <code>config</code> operation. The reason is that it&#8217;s easier to configure restricted
-access in Servlet applications for GET requests (and remove the constraints for one specific URI). See <a href="https://jakarta.ee/specifications/servlet/5.0/jakarta-servlet-spec-5.0#security" class="externalLink" target="_blank" rel="noopener">Security chapter</a>
-of Java Servlet API specification.</p>
+<p><code>config</code> command is not supported with POST requests. Only GET requests are allowed.</p>
 </div>
 </div>
 <div class="sect3">
@@ -3678,7 +3671,7 @@ the following format</p>
 <div class="listingblock">
 <div class="content">
 <pre>$ echo '{"type":"query"}' | socat STDIO UDP4-DATAGRAM:239.192.48.84:24884
-{"agent_version":"2.6.2","agent_id":"jolokia-7778","type":"response","secured":false,"url":"http://192.168.0.165:7778/jolokia/"}{"agent_version":"2.6.2","agent_id":"jolokia-7779","type":"response","secured":false,"url":"http://192.168.0.165:7778/jolokia/"}</pre>
+{"agent_version":"2.6.3","agent_id":"jolokia-7778","type":"response","secured":false,"url":"http://192.168.0.165:7778/jolokia/"}{"agent_version":"2.6.3","agent_id":"jolokia-7779","type":"response","secured":false,"url":"http://192.168.0.165:7778/jolokia/"}</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -3687,7 +3680,7 @@ the following format</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "agent_version": "2.6.2",
+  "agent_version": "2.6.3",
   "agent_id": "192.168.0.221-67980-7e985ce9-servlet",
   "server_product": "tomcat",
   "type": "response",

@@ -132,7 +132,7 @@ approach. Along the way JMX concepts are introduced and discussed. Eventually we
 <p>This section is about the obvious and inherent nature of Java, which is an object oriented language.</p>
 </div>
 <div class="paragraph">
-<p>When writing Java applications, we always deal with objects, which may be implement interfaces. This is a fundamental aspect
+<p>When writing Java applications, we always deal with objects, which may be implementing interfaces. This is a fundamental aspect
 of Java. It is so natural that we hardly even think about this.</p>
 </div>
 <div class="paragraph">
@@ -212,13 +212,13 @@ System.out.println("Memory usage: " + memory.getHeapMemoryUsage());</code></pre>
 <p>In this example, we still use <code>java.lang.management.MemoryMXBean</code> interface, but this time it is <em>not</em> bound to any <em>real</em>
 object of some particular class. The implementation behind proxy is dynamic, represented by <code>InvocationHandler.invoke()</code> method.<br>
 In this simple example we just create a result directly, but the implementation may be much more sophisticated. For example we can
-check the the memory usage of a remote JVM by reaching out to another Java application using network (yes - it&#8217;s a hint for upcoming JMX and Jolokia sections).</p>
+check the memory usage of a remote JVM by reaching out to another Java application using the network (yes - it&#8217;s a hint for upcoming JMX and Jolokia sections).</p>
 </div>
 </div>
 <div class="sect2">
 <h3 id="_how_objects_are_obtained"><a class="anchor" href="#_how_objects_are_obtained"></a>How objects are obtained?</h3>
 <div class="paragraph">
-<p><code>java.lang.management.ManagementFactory.getMemoryMXBean()</code> method is using <em>service locator</em> pattern, where we know the <em>locator</em> (<code>ManagementFactory</code> class) and a way to get particular object of a desired interface (<code>getMemoryMXBean()</code> method).</p>
+<p><code>java.lang.management.ManagementFactory.getMemoryMXBean()</code> method is using the <em>service locator</em> pattern, where we know the <em>locator</em> (<code>ManagementFactory</code> class) and a way to get particular object of a desired interface (<code>getMemoryMXBean()</code> method).</p>
 </div>
 <div class="paragraph">
 <p>But again - there&#8217;s more. We can get the implementation (the object) <em>injected</em> by some Dependency Injection framework like:</p>
