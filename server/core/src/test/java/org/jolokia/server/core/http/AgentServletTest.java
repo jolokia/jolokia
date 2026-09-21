@@ -229,7 +229,7 @@ public class AgentServletTest {
         prepareStandardInitialisation();
 
         ByteArrayOutputStream sw = initRequestResponseMocks();
-        expect(request.getPathInfo()).andReturn(HttpTestUtil.VERSION_GET_REQUEST);
+        expect(request.getPathInfo()).andReturn(HttpTestUtil.VERSION_GET_REQUEST).anyTimes();
         expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
         expect(request.getAttribute("subject")).andReturn(null);
         replay(request, response);
@@ -293,7 +293,7 @@ public class AgentServletTest {
                 ConfigKey.ALLOW_DNS_REVERSE_LOOKUP.getKeyValue(),Boolean.toString(enabled));
         NoDnsLookupRestrictorChecker.expectedHosts = expectedHosts;
         ByteArrayOutputStream sw = initRequestResponseMocks();
-        expect(request.getPathInfo()).andReturn(HttpTestUtil.VERSION_GET_REQUEST);
+        expect(request.getPathInfo()).andReturn(HttpTestUtil.VERSION_GET_REQUEST).anyTimes();
         expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
         expect(request.getAttribute("subject")).andReturn(null);
         replay(request, response);
@@ -366,6 +366,7 @@ public class AgentServletTest {
         prepareStandardInitialisation();
 
         ByteArrayOutputStream responseWriter = initRequestResponseMocks();
+        expect(request.getPathInfo()).andReturn(null).anyTimes();
         expect(request.getCharacterEncoding()).andReturn("utf-8");
         expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
         expect(request.getAttribute("subject")).andReturn(null);
@@ -416,7 +417,7 @@ public class AgentServletTest {
                     response.setContentType("application/json; charset=utf-8");
                     response.setStatus(200);
                 });
-        expect(request.getPathInfo()).andReturn(HttpTestUtil.VERSION_GET_REQUEST);
+        expect(request.getPathInfo()).andReturn(HttpTestUtil.VERSION_GET_REQUEST).anyTimes();
         expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn(null);
         expect(request.getAttribute("subject")).andReturn(null);
 
@@ -462,7 +463,8 @@ public class AgentServletTest {
         expect(request.getParameterMap()).andReturn(null);
         expect(request.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE)).andReturn(null).anyTimes();
         expect(request.getAttribute("subject")).andReturn(null);
-        expect(request.getMethod()).andReturn("OPTIONS");
+        expect(request.getMethod()).andReturn("OPTIONS").anyTimes();
+        expect(request.getPathInfo()).andReturn(null).anyTimes();
 
         response.setHeader(eq("Access-Control-Max-Age"), anyObject());
         response.addHeader("Vary", "Origin");
@@ -593,6 +595,7 @@ public class AgentServletTest {
                     expect(request.getHeader("X-Forwarded-For")).andReturn(null);
                     expect(request.getHeader("Forwarded")).andReturn(null);
                     expect(request.getRemoteAddr()).andThrow(new IllegalStateException());
+                    expect(request.getPathInfo()).andReturn(null).anyTimes();
                 },
                 getTextPlainResponseSetup());
         expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
@@ -626,7 +629,8 @@ public class AgentServletTest {
         ByteArrayOutputStream sw = initRequestResponseMocks(
             getStandardRequestSetup(),
             getStandardResponseSetup());
-        expect(request.getPathInfo()).andReturn(HttpTestUtil.VERSION_GET_REQUEST);
+        expect(request.getMethod()).andReturn("GET");
+        expect(request.getPathInfo()).andReturn(HttpTestUtil.VERSION_GET_REQUEST).anyTimes();
         expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn(null);
         expect(request.getAttribute("subject")).andReturn(null);
         replay(request, response);
@@ -819,7 +823,7 @@ public class AgentServletTest {
             expect(request.getParameterMap()).andReturn(null);
             expect(request.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE)).andReturn(null);
 
-            expect(request.getPathInfo()).andReturn(HttpTestUtil.VERSION_GET_REQUEST);
+            expect(request.getPathInfo()).andReturn(HttpTestUtil.VERSION_GET_REQUEST).anyTimes();
             expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain").anyTimes();
             StringBuffer buf = new StringBuffer();
             buf.append(url).append(HttpTestUtil.VERSION_GET_REQUEST);

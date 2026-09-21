@@ -441,6 +441,11 @@ public class AgentServlet extends HttpServlet {
 
         boolean corsPreflight = false;
         try {
+            String pathInfo = pReq.getPathInfo();
+            if (pathInfo != null && pathInfo.startsWith("/config") && !"GET".equalsIgnoreCase(pReq.getMethod())) {
+                throw new BadRequestException("Configuration is available only for GET method");
+            }
+
             // Set back channel - for notification handling
             prepareBackChannel(pReq);
 

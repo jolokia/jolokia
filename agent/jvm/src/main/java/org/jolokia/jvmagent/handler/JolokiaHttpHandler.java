@@ -195,6 +195,10 @@ public class JolokiaHttpHandler implements HttpHandler {
         }
 
         try {
+            if (parsedUri.getPathInfo().startsWith("config") && !"GET".equalsIgnoreCase(pExchange.getRequestMethod())) {
+                throw new BadRequestException("Configuration is available only for GET method");
+            }
+
             // Set back channel - for notification handling
             prepareBackChannel(pExchange);
 

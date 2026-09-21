@@ -34,13 +34,7 @@ The GET URL for a config request has the following format:
 [#post-config]
 ==== POST version request
 
-A version POST request has only a single key
-`type` which has to be set to
-*`config`*.
-
-However, GET requests are preferred for `config` operation. The reason is that it's easier to configure restricted
-access in Servlet applications for GET requests (and remove the constraints for one specific URI). See https://jakarta.ee/specifications/servlet/5.0/jakarta-servlet-spec-5.0#security[Security chapter,role=externalLink,window=_blank]
-of Java Servlet API specification.
+`config` command is not supported with POST requests. Only GET requests are allowed.
 
 [#response-config]
 ==== Config response

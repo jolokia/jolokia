@@ -199,9 +199,18 @@
   </security-constraint>
   <security-constraint>
     <web-resource-collection>
-      <web-resource-name>Jolokia-Agent Anonymous Access</web-resource-name>
+      <web-resource-name>Jolokia-Agent Anonymous Configuration Access</web-resource-name>
       <url-pattern>/config</url-pattern>
+      <http-method>GET</http-method>
     </web-resource-collection>
+  </security-constraint>
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>Jolokia-Agent Invalid Configuration Access</web-resource-name>
+      <url-pattern>/config</url-pattern>
+      <http-method-omission>GET</http-method-omission>
+    </web-resource-collection>
+    <auth-constraint />
   </security-constraint>
 
   <security-role>
