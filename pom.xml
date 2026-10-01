@@ -1198,7 +1198,7 @@
     <plugin.org.apache.rat.apache-rat-plugin>0.18</plugin.org.apache.rat.apache-rat-plugin>
     <!-- Please stay at 3.1.0. With 3.2.0 we have "[INFO] Issues found in: null" -->
     <plugin.org.asciidoctor.asciidoctor-maven-plugin>3.1.0</plugin.org.asciidoctor.asciidoctor-maven-plugin>
-    <plugin.org.codehaus.mojo.build-helper-maven-plugin>3.6.1</plugin.org.codehaus.mojo.build-helper-maven-plugin>
+    <plugin.org.codehaus.mojo.build-helper-maven-plugin>3.6.2</plugin.org.codehaus.mojo.build-helper-maven-plugin>
     <plugin.org.codehaus.mojo.flatten-maven-plugin>1.8.0</plugin.org.codehaus.mojo.flatten-maven-plugin>
     <plugin.org.codehaus.mojo.versions-maven-plugin>2.22.0</plugin.org.codehaus.mojo.versions-maven-plugin>
     <plugin.org.jacoco.jacoco-maven-plugin>0.7.6.201602180812</plugin.org.jacoco.jacoco-maven-plugin>
