@@ -189,9 +189,8 @@ public class AgentServlet extends HttpServlet {
         } else if (disableCorsAttribute instanceof Boolean b && b) {
             disableCors = true;
         }
-        if (disableCors) {
-            this.disableCors = disableCors;
-        }
+        this.disableCors = disableCors;
+
         trustProxyHeaders = Boolean.parseBoolean(config.getConfig(ConfigKey.TRUST_PROXY_HEADERS));
 
         allowDnsReverseLookup = Boolean.parseBoolean(config.getConfig(ConfigKey.ALLOW_DNS_REVERSE_LOOKUP));
@@ -251,6 +250,7 @@ public class AgentServlet extends HttpServlet {
         config.update(new ServletConfigFacade(getServletConfig()));
         // from ServletContext - for entire web application (<context-param> in web.xml)
         config.update(new ServletContextFacade(getServletContext()));
+        config.normalizeProperties();
 
         String basicRealm = config.getConfig(ConfigKey.BASIC_AUTHENTICATION_REALM);
         // this special attribute may be set by "deployer" which uses Jolokia AgentServlet (like Hawtio)
@@ -437,13 +437,19 @@ public class AgentServlet extends HttpServlet {
      * @throws IOException thrown only if there's an issue sending the response.
      */
     private void doHandle(ServletRequestHandler pReqHandler, HttpServletRequest pReq, HttpServletResponse pResp) throws IOException {
-        JSONStructure json = null;
+        JSONStructure json;
 
         boolean corsPreflight = false;
         try {
             String pathInfo = pReq.getPathInfo();
             if (pathInfo != null && pathInfo.startsWith("/config") && !"GET".equalsIgnoreCase(pReq.getMethod())) {
                 throw new BadRequestException("Configuration is available only for GET method");
+            }
+
+            // for POST requests we really should not expect _any_ path info - the endpoint should be precisely the
+            // context path (or context path with trailing slash)
+            if ("POST".equalsIgnoreCase(pReq.getMethod()) && !(pathInfo == null || pathInfo.isEmpty() || "/".equals(pathInfo))) {
+                throw new BadRequestException("POST requests should be sent to root Jolokia URL");
             }
 
             // Set back channel - for notification handling

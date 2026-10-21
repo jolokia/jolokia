@@ -189,15 +189,8 @@ public class JolokiaHttpHandler implements HttpHandler {
         URI uri = pExchange.getRequestURI();
         ParsedUri parsedUri = new ParsedUri(uri, contextPath);
 
-        if (uri.getPath().startsWith("/favicon.ico")) {
-            handleFavicon(pExchange, uri);
-            return;
-        }
-
         try {
-            if (parsedUri.getPathInfo().startsWith("config") && !"GET".equalsIgnoreCase(pExchange.getRequestMethod())) {
-                throw new BadRequestException("Configuration is available only for GET method");
-            }
+            // no need to check for non-GET "config", as these are rejected by org.jolokia.jvmagent.security.ConfigEndpoint
 
             // Set back channel - for notification handling
             prepareBackChannel(pExchange);
@@ -324,6 +317,14 @@ public class JolokiaHttpHandler implements HttpHandler {
      * @throws BadRequestException
      */
     private JSONStructure executePostRequest(ParsedUri pUri, HttpExchange pExchange) throws IOException, EmptyResponseException, BadRequestException {
+        // for POST requests we really should not expect _any_ path info - the endpoint should be precisely the
+        // context path (or context path with trailing slash)
+        if (!pUri.getPathInfo().isEmpty()) {
+            pExchange.getResponseHeaders().add("Connection", "close");
+            pExchange.sendResponseHeaders(400, -1);
+            return null;
+        }
+
         String encoding = null;
         Headers headers = pExchange.getRequestHeaders();
         String cType = headers.getFirst("Content-Type");
@@ -504,31 +505,6 @@ public class JolokiaHttpHandler implements HttpHandler {
     private String formatHeaderDate(Date date) {
         rfc1123Format.setTimeZone(TimeZone.getTimeZone("GMT"));
         return rfc1123Format.format(date);
-    }
-
-    private void handleFavicon(HttpExchange pExchange, URI uri) throws IOException {
-        Headers headers = pExchange.getResponseHeaders();
-        headers.set("Connection", "close");
-        if (uri.getPath().equals("/favicon.ico")) {
-            // even if we should use IANA's image/vnd.microsoft.icon
-            headers.set("Content-Type", "image/x-icon");
-            Writer writer = new OutputStreamWriter(pExchange.getResponseBody(), StandardCharsets.UTF_8);
-
-            try {
-                InputStream icon = getClass().getClassLoader().getResourceAsStream("favicon.ico");
-                if (icon == null) {
-                    pExchange.sendResponseHeaders(404, -1);
-                    return;
-                }
-                pExchange.sendResponseHeaders(200, 0);
-                IoUtil.copy(pExchange.getResponseBody(), icon);
-            } finally {
-                pExchange.getResponseBody().close();
-            }
-        } else {
-            pExchange.sendResponseHeaders(404, -1);
-            pExchange.getResponseBody().close();
-        }
     }
 
 }

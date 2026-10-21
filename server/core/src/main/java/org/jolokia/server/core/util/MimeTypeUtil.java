@@ -64,7 +64,7 @@ public class MimeTypeUtil {
      * Check that a callback matches a javascript function name. The argument must be not null
      *
      * @param pCallback callback to verify
-     * @return true if valud, false otherwise
+     * @return true if valid, false otherwise
      */
     public static boolean isValidCallback(String pCallback) {
         Pattern validJavaScriptFunctionNamePattern =

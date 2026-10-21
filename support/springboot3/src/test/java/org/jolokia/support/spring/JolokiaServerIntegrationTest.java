@@ -38,7 +38,7 @@ public class JolokiaServerIntegrationTest extends BaseServerTest {
         ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("/spring-jolokia-context.xml");
         SpringJolokiaAgent server = (SpringJolokiaAgent) ctx.getBean("jolokia");
         JolokiaServerConfig cfg = server.getServerConfig();
-        assertEquals(cfg.getContextPath(),"/j4p/");
+        assertEquals(cfg.getContextPath(),"/j4p");
 
         MBeanServer mbeanServer = (MBeanServer) ctx.getBean("jolokiaMBeanServer");
         assertNotNull(mbeanServer);

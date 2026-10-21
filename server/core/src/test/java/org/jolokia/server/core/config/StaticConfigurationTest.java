@@ -196,4 +196,47 @@ public class StaticConfigurationTest {
         }
     }
 
+    @Test
+    public void normalizeContextPath() {
+        StaticConfiguration config = new StaticConfiguration(ConfigKey.AGENT_CONTEXT, "///");
+        config.normalizeProperties();
+        assertEquals(config.getConfig(ConfigKey.AGENT_CONTEXT), "/");
+
+        config = new StaticConfiguration(ConfigKey.AGENT_CONTEXT, "/");
+        config.normalizeProperties();
+        assertEquals(config.getConfig(ConfigKey.AGENT_CONTEXT), "/");
+
+        config = new StaticConfiguration(ConfigKey.AGENT_CONTEXT, "");
+        config.normalizeProperties();
+        assertEquals(config.getConfig(ConfigKey.AGENT_CONTEXT), "/");
+
+        config = new StaticConfiguration(ConfigKey.AGENT_CONTEXT, "/jolokia");
+        config.normalizeProperties();
+        assertEquals(config.getConfig(ConfigKey.AGENT_CONTEXT), "/jolokia");
+
+        config = new StaticConfiguration(ConfigKey.AGENT_CONTEXT, "/jolokia/");
+        config.normalizeProperties();
+        assertEquals(config.getConfig(ConfigKey.AGENT_CONTEXT), "/jolokia");
+
+        config = new StaticConfiguration(ConfigKey.AGENT_CONTEXT, "/jolokia///");
+        config.normalizeProperties();
+        assertEquals(config.getConfig(ConfigKey.AGENT_CONTEXT), "/jolokia");
+
+        config = new StaticConfiguration(ConfigKey.AGENT_CONTEXT, "///jolokia");
+        config.normalizeProperties();
+        assertEquals(config.getConfig(ConfigKey.AGENT_CONTEXT), "/jolokia");
+
+        config = new StaticConfiguration(ConfigKey.AGENT_CONTEXT, "/jolokia/path/");
+        config.normalizeProperties();
+        assertEquals(config.getConfig(ConfigKey.AGENT_CONTEXT), "/jolokia/path");
+
+        config = new StaticConfiguration(ConfigKey.AGENT_CONTEXT, "jolokia");
+        config.normalizeProperties();
+        assertEquals(config.getConfig(ConfigKey.AGENT_CONTEXT), "/jolokia");
+
+        config = new StaticConfiguration(ConfigKey.AGENT_CONTEXT, "jolokia/");
+        config.normalizeProperties();
+        assertEquals(config.getConfig(ConfigKey.AGENT_CONTEXT), "/jolokia");
+    }
+
 }

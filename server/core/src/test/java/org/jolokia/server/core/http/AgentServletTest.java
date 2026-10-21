@@ -232,6 +232,7 @@ public class AgentServletTest {
         expect(request.getPathInfo()).andReturn(HttpTestUtil.VERSION_GET_REQUEST).anyTimes();
         expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
         expect(request.getAttribute("subject")).andReturn(null);
+        expect(request.getMethod()).andReturn("GET").anyTimes();
         replay(request, response);
 
         servlet.doGet(request, response);
@@ -293,6 +294,7 @@ public class AgentServletTest {
                 ConfigKey.ALLOW_DNS_REVERSE_LOOKUP.getKeyValue(),Boolean.toString(enabled));
         NoDnsLookupRestrictorChecker.expectedHosts = expectedHosts;
         ByteArrayOutputStream sw = initRequestResponseMocks();
+        expect(request.getMethod()).andReturn("GET").anyTimes();
         expect(request.getPathInfo()).andReturn(HttpTestUtil.VERSION_GET_REQUEST).anyTimes();
         expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
         expect(request.getAttribute("subject")).andReturn(null);
@@ -366,6 +368,7 @@ public class AgentServletTest {
         prepareStandardInitialisation();
 
         ByteArrayOutputStream responseWriter = initRequestResponseMocks();
+        expect(request.getMethod()).andReturn("POST").anyTimes();
         expect(request.getPathInfo()).andReturn(null).anyTimes();
         expect(request.getCharacterEncoding()).andReturn("utf-8");
         expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
@@ -378,6 +381,52 @@ public class AgentServletTest {
         servlet.doPost(request, response);
 
         assertTrue(responseWriter.toString().contains(Version.getAgentVersion()));
+        servlet.destroy();
+    }
+
+    @Test
+    public void postWithExtraSlash() throws ServletException, IOException {
+        prepareStandardInitialisation();
+
+        ByteArrayOutputStream responseWriter = initRequestResponseMocks();
+        expect(request.getMethod()).andReturn("POST").anyTimes();
+        expect(request.getRequestURI()).andReturn("/jolokia/");
+        expect(request.getPathInfo()).andReturn(null).anyTimes();
+        expect(request.getCharacterEncoding()).andReturn("utf-8");
+        expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
+        expect(request.getAttribute("subject")).andReturn(null);
+
+        preparePostRequest(HttpTestUtil.VERSION_POST_REQUEST);
+
+        replay(request, response);
+
+        servlet.doPost(request, response);
+
+        assertTrue(responseWriter.toString().contains(Version.getAgentVersion()));
+        servlet.destroy();
+    }
+
+    @Test
+    public void postWithExtraPathInfo() throws ServletException, IOException {
+        prepareStandardInitialisation();
+
+        ByteArrayOutputStream responseWriter = initRequestResponseMocks();
+        expect(request.getMethod()).andReturn("POST").anyTimes();
+        expect(request.getRequestURI()).andReturn("/jolokia/x");
+        expect(request.getPathInfo()).andReturn("/config").anyTimes();
+        expect(request.getCharacterEncoding()).andReturn("utf-8");
+        expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
+        expect(request.getAttribute("subject")).andReturn(null);
+
+        response.addHeader("Content-Type", "text/plain; charset=utf-8");
+        response.setStatus(400);
+
+        preparePostRequest(HttpTestUtil.VERSION_POST_REQUEST);
+
+        replay(request, response);
+
+        servlet.doPost(request, response);
+
         servlet.destroy();
     }
 
@@ -417,6 +466,7 @@ public class AgentServletTest {
                     response.setContentType("application/json; charset=utf-8");
                     response.setStatus(200);
                 });
+        expect(request.getMethod()).andReturn("GET").anyTimes();
         expect(request.getPathInfo()).andReturn(HttpTestUtil.VERSION_GET_REQUEST).anyTimes();
         expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn(null);
         expect(request.getAttribute("subject")).andReturn(null);
@@ -565,6 +615,7 @@ public class AgentServletTest {
             "doSomethingEvil(); myCallback",
             getStandardRequestSetup(),
             getStandardResponseSetup());
+        expect(request.getMethod()).andReturn("GET").anyTimes();
         expect(request.getPathInfo()).andReturn(HttpTestUtil.VERSION_GET_REQUEST);
         expect(request.getAttribute("subject")).andReturn(null);
         expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn(null);
@@ -588,6 +639,7 @@ public class AgentServletTest {
         servlet.init(config);
         ByteArrayOutputStream sw = initRequestResponseMocks(
                 () -> {
+                    expect(request.getMethod()).andReturn("GET").anyTimes();
                     expect(request.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE)).andReturn(null);
                     expect(request.getScheme()).andStubReturn("http");
                     expect(request.getHeader("Origin")).andReturn(null);
@@ -629,7 +681,7 @@ public class AgentServletTest {
         ByteArrayOutputStream sw = initRequestResponseMocks(
             getStandardRequestSetup(),
             getStandardResponseSetup());
-        expect(request.getMethod()).andReturn("GET");
+        expect(request.getMethod()).andReturn("GET").anyTimes();
         expect(request.getPathInfo()).andReturn(HttpTestUtil.VERSION_GET_REQUEST).anyTimes();
         expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn(null);
         expect(request.getAttribute("subject")).andReturn(null);
@@ -808,6 +860,7 @@ public class AgentServletTest {
 
     private Runnable getDiscoveryRequestSetup(final String url) {
         return () -> {
+            expect(request.getMethod()).andReturn("GET").anyTimes();
             expect(request.getScheme()).andStubReturn("http");
             expect(request.getHeader("Origin")).andStubReturn(null);
             expect(request.getHeader("Referer")).andStubReturn(null);

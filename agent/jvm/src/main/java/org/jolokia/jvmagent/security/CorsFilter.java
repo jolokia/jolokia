@@ -24,6 +24,9 @@ import org.jolokia.server.core.service.api.Restrictor;
 /**
  * A wrapper for actual {@link Authenticator} that can properly handle CORS preflight
  * requests (which should never be subject to authentication).
+ *
+ * It's not a real {@link com.sun.net.httpserver.Filter}, because {@link Authenticator} is always
+ * invoked before any filter.
  */
 public class CorsFilter extends Authenticator {
 
@@ -68,7 +71,7 @@ public class CorsFilter extends Authenticator {
         return new Success(new HttpPrincipal("anonymous", realm));
     }
 
-    private boolean isCORSPreFlightRequest(HttpExchange exchange) {
+    static boolean isCORSPreFlightRequest(HttpExchange exchange) {
         String method = exchange.getRequestMethod();
         Headers headers = exchange.getRequestHeaders();
         String requestOrigin = headers.getFirst("Origin");

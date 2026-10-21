@@ -45,12 +45,12 @@ public class SpringJolokiaServerTest extends BaseServerTest {
 
     @Test
     public void systemProperties() throws Exception {
-        checkSystemPropertyMode("fallback","/jol/","/j4p/","/j4p/");
-        checkSystemPropertyMode("fallback","/jol/",null,"/jol/");
+        checkSystemPropertyMode("fallback","/jol/","/j4p/","/j4p");
+        checkSystemPropertyMode("fallback","/jol/",null,"/jol");
         checkSystemPropertyMode("fallback",null,null,"/jolokia");
 
-        checkSystemPropertyMode("override","/jol/","/j4p/","/jol/");
-        checkSystemPropertyMode("override","/jol/",null,"/jol/");
+        checkSystemPropertyMode("override","/jol/","/j4p/","/jol");
+        checkSystemPropertyMode("override","/jol/",null,"/jol");
         checkSystemPropertyMode("override",null,null,"/jolokia");
 
         checkSystemPropertyMode(null,"/jol/",null,"/jolokia");
@@ -96,7 +96,7 @@ public class SpringJolokiaServerTest extends BaseServerTest {
         JolokiaServerConfig cfg = server.getServerConfig();
         assertEquals(cfg.getExecutor(),"fixed");
         assertEquals(cfg.getThreadNr(),2);
-        assertEquals(cfg.getContextPath(),"/j4p/");
+        assertEquals(cfg.getContextPath(),"/j4p");
         checkServerAndStop(server);
     }
 

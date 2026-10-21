@@ -146,6 +146,8 @@ public class JolokiaServerConfig {
         // will now possible override these too
         jolokiaConfig.update(new MapConfigExtractor(pConfig), resolvedConfig);
 
+        jolokiaConfig.normalizeProperties();
+
         prepareDetectorOptions(resolvedConfig);
         addJolokiaId(resolvedConfig);
 
@@ -251,8 +253,9 @@ public class JolokiaServerConfig {
     }
 
     /**
-     * Context path under which the agent is reachable. This path will always end with a "/" for technical
-     * reasons.
+     * Context path under which the agent is reachable. This path is normalized to always start with single slash
+     * and never end with a slash. Before https://bugs.openjdk.org/browse/JDK-8377237 this "context path" is just
+     * a "path prefix" where "/" character is not treated as any special character.
      *
      * @return the context path.
      */

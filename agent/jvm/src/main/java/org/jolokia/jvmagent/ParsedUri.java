@@ -34,7 +34,7 @@ public class ParsedUri {
     // Map of parameters as parsed from an URL
     private final Map<String, String[]> parameters;
 
-    // Pathinfo contained in the URL
+    // Pathinfo contained in the URL - can be "/" or any longer path which does not start with "/"
     private String pathInfo;
 
     // Enclosed URI
@@ -57,6 +57,11 @@ public class ParsedUri {
 
         while (pathInfo.startsWith("/") && pathInfo.length() > 1) {
             pathInfo = pathInfo.substring(1);
+        }
+        // we don't need pathinfo = "/" because we split by "/" anyway for GET requests
+        // and we need no pathinfo at all for POST requests
+        while (pathInfo.endsWith("/")) {
+            pathInfo = pathInfo.substring(0, pathInfo.length() - 1);
         }
 
         if (pUri.getQuery() != null) {

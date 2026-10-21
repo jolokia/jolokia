@@ -86,8 +86,11 @@ public class StaticConfiguration implements Configuration {
 
     private final SystemPropertyMode systemPropertyMode;
 
-    // The global configuration provided in constructor - overrideable with update()
+    // The global configuration provided in constructor - overridable with update()
     private final Map<ConfigKey, String> configMap = new HashMap<>();
+
+    // if some properties are _normalized_ they're always available here and never looked again in sys/env/config
+    private final Map<ConfigKey, String> normalizedProperties = new HashMap<>();
 
     private final Set<ConfigKey> keys = new HashSet<>();
 
@@ -349,6 +352,10 @@ public class StaticConfiguration implements Configuration {
 
     /** {@inheritDoc} */
     public String getConfig(ConfigKey pKey) {
+        if (this.normalizedProperties.containsKey(pKey)) {
+            return this.normalizedProperties.get(pKey);
+        }
+
         String v;
         if (systemPropertyMode == SystemPropertyMode.OVERRIDE) {
             v = systemProperties.get(pKey);
@@ -394,6 +401,24 @@ public class StaticConfiguration implements Configuration {
     @Override
     public SecurityDetails getSecurityDetails() {
         return securityDetails;
+    }
+
+    /**
+     * Some properties need <em>normalization</em>.
+     */
+    public void normalizeProperties() {
+        String context = getConfig(ConfigKey.AGENT_CONTEXT);
+
+        while (context.endsWith("/") && context.length() > 1) {
+            context = context.substring(0, context.length() - 1);
+        }
+        while (context.startsWith("//")) {
+            context = context.substring(1);
+        }
+        if (!context.startsWith("/")) {
+            context = "/" + context;
+        }
+        this.normalizedProperties.put(ConfigKey.AGENT_CONTEXT, context);
     }
 
 }

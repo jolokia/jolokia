@@ -25,7 +25,6 @@ import java.util.*;
 
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
-import org.easymock.EasyMock;
 import org.jolokia.jvmagent.security.CorsFilter;
 import org.jolokia.server.core.backend.BackendManager;
 import org.jolokia.server.core.backend.RequestDispatcher;
@@ -43,10 +42,7 @@ import org.jolokia.json.parser.JSONParser;
 import org.jolokia.json.parser.ParseException;
 import org.testng.annotations.*;
 
-import static org.easymock.EasyMock.anyInt;
-import static org.easymock.EasyMock.anyLong;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
@@ -111,6 +107,25 @@ public class JolokiaHttpHandlerTest {
         String result = out.toString(StandardCharsets.UTF_8);
         assertTrue(result.endsWith("});"));
         assertTrue(result.startsWith("data({"));
+    }
+
+    @Test
+    public void testInvalidContextPath() throws IOException, URISyntaxException {
+        HttpExchange exchange = prepareExchange("http://localhost:8080/jolokia2/read/java.lang:type=Memory/HeapMemoryUsage");
+
+        // Simple GET method
+        expect(exchange.getRequestMethod()).andReturn("GET");
+
+        expect(exchange.getResponseHeaders()).andReturn(new Headers()).anyTimes();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        expect(exchange.getResponseBody()).andReturn(out).anyTimes();
+        exchange.sendResponseHeaders(eq(400), anyLong());
+
+        replay(exchange);
+
+        handler.handle(exchange);
+
+        verify(exchange);
     }
 
 
@@ -207,7 +222,7 @@ public class JolokiaHttpHandlerTest {
     }
 
     @Test
-    public void invalidMethod() throws URISyntaxException, IOException, ParseException {
+    public void invalidMethod() throws URISyntaxException, IOException {
         HttpExchange exchange = prepareExchange("http://localhost:8080/");
 
         // Simple GET method
@@ -264,7 +279,7 @@ public class JolokiaHttpHandlerTest {
     }
 
     @Test
-    public void usingStreamingJSON() throws IOException, URISyntaxException, ParseException, NoSuchFieldException, IllegalAccessException, BadRequestException {
+    public void usingStreamingJSON() throws IOException, URISyntaxException, ParseException, NoSuchFieldException, IllegalAccessException {
         handler = new JolokiaHttpHandler(getContext(ConfigKey.STREAMING, "true"));
         injectRequestDispatcher(handler,requestDispatcher);
 
@@ -287,7 +302,7 @@ public class JolokiaHttpHandlerTest {
     }
 
     static HttpExchange prepareExchange(String pUri,String ... pHeaders) throws URISyntaxException {
-        HttpExchange exchange = EasyMock.createMock(MockableHttpExchange.class);
+        HttpExchange exchange = createMock(MockableHttpExchange.class);
         URI uri = new URI(pUri);
         expect(exchange.getRequestURI()).andReturn(uri);
         expect(exchange.getRemoteAddress()).andReturn(new InetSocketAddress(8080));
@@ -316,7 +331,7 @@ public class JolokiaHttpHandlerTest {
         list.add(ConfigKey.AGENT_CONTEXT);
         list.add("/jolokia");
         list.add(ConfigKey.DEBUG);
-        list.add(debugToggle ? "true" : "false");
+        list.add(Boolean.toString(debugToggle));
         list.add(ConfigKey.AGENT_ID);
         list.add(UUID.randomUUID().toString());
         Collections.addAll(list, extra);

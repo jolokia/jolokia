@@ -30,7 +30,10 @@ import javax.net.ssl.*;
 
 import com.sun.net.httpserver.*;
 import org.jolokia.core.util.LocalServiceFactory;
+import org.jolokia.jvmagent.handler.FavIconHandler;
 import org.jolokia.jvmagent.handler.JolokiaHttpHandler;
+import org.jolokia.jvmagent.security.ConfigEndpointFilter;
+import org.jolokia.jvmagent.security.ContextPathEndpointFilter;
 import org.jolokia.jvmagent.security.CorsFilter;
 import org.jolokia.jvmagent.security.KeyStoreUtil;
 import org.jolokia.server.core.config.ConfigKey;
@@ -155,14 +158,22 @@ public class JolokiaServer {
         HttpHandler jolokiaHttpHandler = createJolokiaHttpHandler(pLazy);
 
         String base = config.getContextPath();
-        while (base.endsWith("/")) {
-            base = base.substring(0, base.length() - 1);
-        }
-        httpConfigContext = httpServer.createContext(base + "/config", jolokiaHttpHandler);
+        String configBase = "/".equals(base) ? "/config" : base + "/config";
+
+        // com.sun.net.httpserver.HttpServer.createContext() is an interesting API, because only after
+        // https://bugs.openjdk.org/browse/JDK-8377237 fixed in JDK 27 the path is a real path, not just a substring.
+        // Before JDK 27 we have to be careful, because /jolokia context doesn't only handle /jolokia, /jolokia/list,
+        // /jolokia/read, ..., but also /jolokia-anything/read, /jolokia42 or similar.
+        // /config endpoint is special and only needs to handle GET requests for /jolokia/config.
+
+        httpConfigContext = httpServer.createContext(configBase, jolokiaHttpHandler);
         httpContext = httpServer.createContext(base, jolokiaHttpHandler);
-        httpRootContext = httpServer.createContext("/favicon.ico", jolokiaHttpHandler);
+
+        // this special context with dedicated handler serves top-level favicon.ico whatever the context path is
+        httpRootContext = httpServer.createContext("/favicon.ico", new FavIconHandler());
 
         setupAuthentication();
+
         if (useOwnServer) {
             startCleanupThread();
         }
@@ -328,11 +339,15 @@ public class JolokiaServer {
         boolean useAuth = config.getAuthenticator() != null;
 
         httpContext.setAuthenticator(new CorsFilter(config.getAuthenticator(), realm, restrictor, useAuth));
+        // if context path is "/jolokia", we don't allow "/jolokiax" for example
+        // see JDK-8377237
+        httpContext.getFilters().add(0, new ContextPathEndpointFilter(config.getContextPath()));
 
         // explicitly setting no authentication for /config handling (but still with CORS handling)
         httpConfigContext.setAuthenticator(new CorsFilter(null, realm, restrictor, useAuth));
-
-        httpRootContext.setAuthenticator(null);
+        // there's no authentication in /config, be we should only handle GET requests and proper pre-flight OPTIONS
+        // requests, so we'll add a protection filter
+        httpConfigContext.getFilters().add(0, new ConfigEndpointFilter(config.getContextPath()));
     }
 
     // If running an own server, we need to check that shutdown properly

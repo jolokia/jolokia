@@ -91,6 +91,9 @@ public final class JolokiaRequestFactory {
      */
     public static <R extends JolokiaRequest> R createGetRequest(String pPathInfo, ProcessingParameters pProcessingParameters)
             throws BadRequestException {
+        // pathInfo here never starts with slash, so it shouldn't be treated as "path info" known from Servlet API
+        // this pathInfo split by "/" builds Jolokia GET request and first element should indicate the Jolokia operation
+        // like "exec", "read", ... Empty path is treated as "version" request
         String pathInfo = extractPathInfo(pPathInfo, pProcessingParameters);
 
         // Get all path elements as a reverse stack
@@ -172,7 +175,11 @@ public final class JolokiaRequestFactory {
     // Return always a non-null string and strip of leading slash
     private static String normalizePathInfo(String pPathInfo) {
         if (pPathInfo != null && !pPathInfo.isEmpty()) {
-            return pPathInfo.startsWith("/") ? pPathInfo.substring(1) : pPathInfo;
+            String result = pPathInfo;
+            while (result.startsWith("/")) {
+                result = result.substring(1);
+            }
+            return result;
         } else {
             return "";
         }
