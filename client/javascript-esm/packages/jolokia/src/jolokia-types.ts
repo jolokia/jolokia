@@ -478,7 +478,7 @@ export type WriteResponseValue = string | number | boolean | null | Record<strin
 // ------ Exec response
 
 /**
- * Generic response value for `write` request
+ * Generic response value for `exec` request
  */
 export type ExecResponseValue = string | number | boolean | null | Record<string, unknown>
 
