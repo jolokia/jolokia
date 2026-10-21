@@ -88,6 +88,11 @@ The following example shows a sample policy file:
     </mbean>
   </deny>
 
+  <filter>
+    <mbean>java.lang:type=MemoryPool</mbean>
+    <mbean>org.apache.logging.log4j2:*</mbean>
+  </filter>
+
 </restrict>
 ----
 

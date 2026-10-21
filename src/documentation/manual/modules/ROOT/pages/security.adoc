@@ -325,7 +325,7 @@ Here's a list of the https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CO
 * `Access-Control-Allow-Credentials`: set to `true` if Jolokia has authentication enabled
 * `Access-Control-Allow-Headers`: set to incoming `Access-Control-Request-Headers`
 * `Access-Control-Allow-Methods`: set to `GET, POST` by default, but may return a value specified with `<http>/<method>`
-* `Access-Control-Allow-Origin`: set to the incoming `Origin` header only of check for allowed origins passes (`<cors>/<allow-origin>`). Mind that with `<strict-checking>` the CORS request is rejected and CORS response headers are not set
+* `Access-Control-Allow-Origin`: set to the incoming `Origin` header only if the check for allowed origins passes (`<cors>/<allow-origin>`). Mind that with `<strict-checking>` the CORS request is rejected and CORS response headers are not set
 * `Access-Control-Max-Age`: set to 2 hours (default for Chrome browsers)
 * `Access-Control-Expose-Headers`: Jolokia doesn't set this header at all
 
@@ -374,11 +374,12 @@ restrictions:
 * Access is only allowed for clients coming from localhost
 * Only HTTP Post requests are allowed
 * By default, only `read` and `list` requests are allowed.
-* A single `exec` request is allowed for triggering garbage collection.
+* A single `exec` request is allowed for triggering garbage collection. Also `Verbose` attribute can be read (but not written).
 * Read access to the C3P0 connection pool is restricted to
 forbid fetching the pool's properties, which in fact
 contains the DB password as clear text.
 * Access to `jdk.management.jfr:type=FlightRecorder` MBean is denied (see https://nvd.nist.gov/vuln/detail/CVE-2022-41678[CVE-2022-41678,role=externalLink,window=_blank])
+* `java.lang:type=MemoryPool` MBeans and all MBeans from `org.apache.logging.log4j2` domain are not included in the `list` response.
 
 [,xml]
 ----
@@ -387,6 +388,10 @@ contains the DB password as clear text.
 
   <remote>
     <host>127.0.0.1</host>
+    <host>localhost</host>
+    <host>10.0.0.0/16</host>
+    <host>2001:db8::/32</host>
+    <host>[::ffff:7f00:1]</host>
   </remote>
 
   <http>
@@ -401,6 +406,7 @@ contains the DB password as clear text.
   <allow>
     <mbean>
       <name>java.lang:type=Memory</name>
+      <attribute mode="read">Verbose</attribute>
       <operation>gc</operation>
     </mbean>
   </allow>

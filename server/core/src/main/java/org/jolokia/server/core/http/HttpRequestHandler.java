@@ -221,7 +221,7 @@ public class HttpRequestHandler extends BaseRequestHandler {
         // Passing false for "only if strict checking" means that we always check actually configured origins.
         // This is a call for actual CORS handling from JavaScript code calling fetch() in a modern browser
         if (restrictor.isOriginAllowed(pOrigin, false)) {
-            // we allow a give origin also when there are no <cors>/<allow-origin> elements configured
+            // we allow a given origin also when there are no <cors>/<allow-origin> elements configured
             // for the policy restrictor (or the configured restrictor simply allows the access)
             ret.put("Access-Control-Allow-Origin", pOrigin);
             if (this.authenticationEnabled) {
@@ -323,8 +323,9 @@ public class HttpRequestHandler extends BaseRequestHandler {
             throw new SecurityException("No access from client [chain: " + String.join(" -> ", toCheck) + "] allowed");
         }
         // passing true for "only if strict checking" means that the access can be granted if there's
-        // no Origin (or Referer) header included. Without <strict-checking> any origin will pass and <cors>
+        // no Origin (or Referer) header included. Without <strict-checking> any origin will pass here and <cors>
         // configuration will be used only for CORS protocol handling (sending proper Access-Control-Allow-* headers)
+        // and not for a limited access control.
         if (!jolokiaCtx.isOriginAllowed(pOrigin, true)) {
             throw new SecurityException("Origin " + pOrigin + " is not allowed to call this agent");
         }
@@ -342,7 +343,6 @@ public class HttpRequestHandler extends BaseRequestHandler {
                     // clicking <a> gives site="cross-site"
                     throw new SecurityException("Access Denied");
                 }
-            } else {
             }
         }
 

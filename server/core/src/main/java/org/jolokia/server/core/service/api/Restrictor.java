@@ -91,7 +91,8 @@ public interface Restrictor {
      * for details
      *
      * @param pOrigin the "Origin:" header provided within the request
-     * @param pOnlyWhenStrictCheckingIsEnabled whether by-pass check when strict checking is disabled
+     * @param pOnlyWhenStrictCheckingIsEnabled whether to by-pass check when strict checking is disabled. {@code true}
+     *                                         is used only when restricting access for browser clients.
      * @return true if this cross browser request allowed, false otherwise
      */
     boolean isOriginAllowed(String pOrigin, boolean pOnlyWhenStrictCheckingIsEnabled);

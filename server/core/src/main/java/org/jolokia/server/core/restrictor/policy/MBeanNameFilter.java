@@ -35,7 +35,7 @@ public class MBeanNameFilter extends AbstractChecker<ObjectName> {
     private final List<Function<ObjectName, Boolean>> filters = new ArrayList<>();
 
     /**
-     * Constructor buiilding up this checker from the XML document provided.
+     * Constructor building up this checker from the XML document provided.
      * filter sections look like
      * <pre>
      *     &lt;filter&gt;

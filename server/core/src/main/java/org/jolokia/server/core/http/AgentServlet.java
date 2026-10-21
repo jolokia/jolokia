@@ -467,7 +467,7 @@ public class AgentServlet extends HttpServlet {
             String fmMode = pReq.getHeader("Sec-Fetch-Mode");
             String fmDest = pReq.getHeader("Sec-Fetch-Dest");
             FetchMetadata fetchMetadata = new FetchMetadata(fmSite, fmMode, fmDest);
-            // for the purpose of checking access (not for CORS handling) we indeed fallback to Referer when
+            // for the purpose of checking access (not for CORS handling) we may fallback to Referer header when
             // there's no Origin
             requestHandler.checkAccess(scheme, remoteHost, addressChain, extractOrigin(pReq, true), fetchMetadata);
 
