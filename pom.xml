@@ -1198,7 +1198,7 @@
     <plugin.org.apache.rat.apache-rat-plugin>0.18</plugin.org.apache.rat.apache-rat-plugin>
     <!-- Please stay at 3.1.0. With 3.2.0 we have "[INFO] Issues found in: null" -->
     <plugin.org.asciidoctor.asciidoctor-maven-plugin>3.1.0</plugin.org.asciidoctor.asciidoctor-maven-plugin>
-    <plugin.org.codehaus.mojo.build-helper-maven-plugin>3.6.1</plugin.org.codehaus.mojo.build-helper-maven-plugin>
+    <plugin.org.codehaus.mojo.build-helper-maven-plugin>3.6.2</plugin.org.codehaus.mojo.build-helper-maven-plugin>
     <plugin.org.codehaus.mojo.flatten-maven-plugin>1.8.0</plugin.org.codehaus.mojo.flatten-maven-plugin>
     <plugin.org.codehaus.mojo.versions-maven-plugin>2.23.0</plugin.org.codehaus.mojo.versions-maven-plugin>
     <plugin.org.jacoco.jacoco-maven-plugin>0.7.6.201602180812</plugin.org.jacoco.jacoco-maven-plugin>
@@ -1206,7 +1206,7 @@
     <plugin.org.apache.servicemix.tooling>1.5.0</plugin.org.apache.servicemix.tooling>
     <plugin.sonatype.central-publishing-maven-plugin>0.12.0</plugin.sonatype.central-publishing-maven-plugin>
     <plugin.org.graalvm.buildtools.native>1.1.14</plugin.org.graalvm.buildtools.native>
-    <plugin.dependency.maven-shared-utils>3.4.2</plugin.dependency.maven-shared-utils>
+    <plugin.dependency.maven-shared-utils>3.5.0</plugin.dependency.maven-shared-utils>
 
     <!-- Versions of build-related dependencies -->
 
