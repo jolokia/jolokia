@@ -156,6 +156,7 @@ public final class JvmAgent {
                     System.out.println("Jolokia: Agent" + v + " started with URL " + server.getUrl() + processId);
                 } catch (RuntimeException | IOException exp) {
                     System.err.println("Could not start Jolokia agent: " + exp);
+                    exp.printStackTrace(System.err);
                 }
             }
         };

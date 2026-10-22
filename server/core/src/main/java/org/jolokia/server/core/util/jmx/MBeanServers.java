@@ -19,6 +19,7 @@ import java.lang.management.ManagementFactory;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.management.JMException;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
@@ -39,7 +40,7 @@ public class MBeanServers implements NotificationListener {
     private final Set<MBeanServerConnection> detectedMBeanServers;
 
     // detectedMBeanServers + JolokiaMBeanServer (if available)
-    private final Set<MBeanServerConnection> allMBeanServers;
+    private final AtomicReference<Set<MBeanServerConnection>> allMBeanServers = new AtomicReference<>();
 
     // Notification listener to register to the JolokiaMBean server
     // which listens for MBean registration events
@@ -53,7 +54,7 @@ public class MBeanServers implements NotificationListener {
      */
     public static final String JOLOKIA_MBEAN_SERVER_NAME = "jolokia:type=MBeanServer";
 
-    private static final ObjectName JOLOKIA_MBEAN_SERVER_ONAME = JmxUtil.newObjectName(JOLOKIA_MBEAN_SERVER_NAME);
+    private static final ObjectName JOLOKIA_MBEAN_SERVER_OBJECT_NAME = JmxUtil.newObjectName(JOLOKIA_MBEAN_SERVER_NAME);
 
     /**
      * Constructor building up the list of available MBeanServers
@@ -81,11 +82,12 @@ public class MBeanServers implements NotificationListener {
         // Last entry is always the platform MBeanServer
         detectedMBeanServers.add(ManagementFactory.getPlatformMBeanServer());
 
-        allMBeanServers = new LinkedHashSet<>();
+        LinkedHashSet<MBeanServerConnection> allMBeanServers = new LinkedHashSet<>();
         if (jolokiaMBeanServer != null) {
             allMBeanServers.add(jolokiaMBeanServer);
         }
         allMBeanServers.addAll(detectedMBeanServers);
+        this.allMBeanServers.set(allMBeanServers);
     }
 
     /**
@@ -107,11 +109,12 @@ public class MBeanServers implements NotificationListener {
             jolokiaMBeanServer = null;
         }
 
-        allMBeanServers.clear();
+        LinkedHashSet<MBeanServerConnection> allMBeanServers = new LinkedHashSet<>();
         if (jolokiaMBeanServer != null) {
             allMBeanServers.add(jolokiaMBeanServer);
         }
         allMBeanServers.addAll(detectedMBeanServers);
+        this.allMBeanServers.set(allMBeanServers);
     }
 
     /**
@@ -119,7 +122,7 @@ public class MBeanServers implements NotificationListener {
      * @return the set of current MBeanServers
      */
     public Set<MBeanServerConnection> getMBeanServers() {
-        return allMBeanServers;
+        return allMBeanServers.get();
     }
 
     /**
@@ -128,7 +131,7 @@ public class MBeanServers implements NotificationListener {
      * @return information about the registered MBeanServers
      */
     public String dump() {
-        return MBeanServerDumper.dump(allMBeanServers);
+        return MBeanServerDumper.dump(allMBeanServers.get());
     }
 
     /**
@@ -153,8 +156,8 @@ public class MBeanServers implements NotificationListener {
     private MBeanServer lookupJolokiaMBeanServer() {
         MBeanServer server = ManagementFactory.getPlatformMBeanServer();
         try {
-            return server.isRegistered(JOLOKIA_MBEAN_SERVER_ONAME) ?
-                    (MBeanServer) server.getAttribute(JOLOKIA_MBEAN_SERVER_ONAME, "JolokiaMBeanServer") :
+            return server.isRegistered(JOLOKIA_MBEAN_SERVER_OBJECT_NAME) ?
+                    (MBeanServer) server.getAttribute(JOLOKIA_MBEAN_SERVER_OBJECT_NAME, "JolokiaMBeanServer") :
                     null;
         } catch (JMException e) {
             throw new IllegalStateException("Internal: Cannot get Jolokia MBeanServer via JMX lookup: " + e.getMessage(), e);
@@ -164,6 +167,6 @@ public class MBeanServers implements NotificationListener {
     // Register this executor as notification listener for the JolokiaMBeanServer at the PlatformMBeanServer
     private void addJolokiaMBeanServerRegistrationListener() {
         MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-        JmxUtil.addMBeanRegistrationListener(server,this,JOLOKIA_MBEAN_SERVER_ONAME);
+        JmxUtil.addMBeanRegistrationListener(server,this, JOLOKIA_MBEAN_SERVER_OBJECT_NAME);
     }
 }
