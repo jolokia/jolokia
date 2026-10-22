@@ -22,7 +22,10 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.nio.charset.Charset;
+import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.StandardCharsets;
+import java.nio.charset.UnsupportedCharsetException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -31,8 +34,6 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.security.auth.Subject;
 
 import com.sun.net.httpserver.Headers;
@@ -49,6 +50,7 @@ import org.jolokia.server.core.request.BadRequestException;
 import org.jolokia.server.core.request.EmptyResponseException;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.api.Restrictor;
+import org.jolokia.server.core.util.ContentTypeAndCharset;
 import org.jolokia.server.core.util.IoUtil;
 import org.jolokia.server.core.util.MimeTypeUtil;
 import org.jolokia.json.JSONStructure;
@@ -69,9 +71,6 @@ public class JolokiaHttpHandler implements HttpHandler {
 
     // Context of this request
     private final String contextPath;
-
-    // Content type matching
-    private final Pattern contentTypePattern = Pattern.compile(".*;\\s*charset=([^;,]+)\\s*.*");
 
     // Global context
     private final JolokiaContext jolokiaContext;
@@ -325,15 +324,23 @@ public class JolokiaHttpHandler implements HttpHandler {
             return null;
         }
 
-        String encoding = null;
         Headers headers = pExchange.getRequestHeaders();
-        String cType = headers.getFirst("Content-Type");
-        if (cType != null) {
-            Matcher matcher = contentTypePattern.matcher(cType);
-            if (matcher.matches()) {
-                encoding = matcher.group(1);
+        ContentTypeAndCharset parsed = MimeTypeUtil.parseContentType(headers.getFirst("Content-Type"));
+
+        if (!("application/json".equalsIgnoreCase(parsed.contentType()) || parsed.contentType() == null)) {
+            // null for programmatic clients (even `curl` sends "application/x-www-form-urlencoded" by default)
+            throw new BadRequestException("Unsupported Content-Type");
+        }
+
+        String encoding = parsed.charset();
+        if (encoding != null) {
+            try {
+                Charset.forName(encoding);
+            } catch (UnsupportedCharsetException | IllegalCharsetNameException e) {
+                throw new BadRequestException("Unsupported Content-Type charset");
             }
         }
+
         InputStream is = pExchange.getRequestBody();
         return requestHandler.handlePostRequest(pUri.toString(), is, encoding, pUri.getParameterMap());
     }

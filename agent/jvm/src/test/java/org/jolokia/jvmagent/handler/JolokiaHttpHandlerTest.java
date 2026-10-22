@@ -191,7 +191,7 @@ public class JolokiaHttpHandlerTest {
     @Test
     public void testCallbackPost() throws URISyntaxException, IOException, java.text.ParseException {
         HttpExchange exchange = prepareExchange("http://localhost:8080/jolokia?callback=data",
-                                                "Content-Type","text/plain; charset=UTF-8",
+                                                "Content-Type","application/json; charset=UTF-8",
                                                 "Origin",""
                                                );
 
@@ -237,7 +237,7 @@ public class JolokiaHttpHandlerTest {
     @Test
     public void simplePostRequestWithCors() throws URISyntaxException, IOException {
         HttpExchange exchange = prepareExchange("http://localhost:8080/jolokia",
-                                                "Content-Type","text/plain; charset=UTF-8",
+                                                "Content-Type","application/json; charset=UTF-8",
                                                 "Origin","http://localhost:8080/"
                                                );
 

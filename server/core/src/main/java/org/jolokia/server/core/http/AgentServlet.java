@@ -24,7 +24,10 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.nio.charset.Charset;
+import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.StandardCharsets;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -714,8 +717,23 @@ public class AgentServlet extends HttpServlet {
         return new ServletRequestHandler() {
             @Override
             public JSONStructure handleRequest(HttpServletRequest pReq) throws IOException, BadRequestException, EmptyResponseException {
+                String contentType = pReq.getContentType();
                 String encoding = pReq.getCharacterEncoding();
                 InputStream is = pReq.getInputStream();
+
+                if (!("application/json".equalsIgnoreCase(contentType) || contentType == null)) {
+                    // null for programmatic clients (even `curl` sends "application/x-www-form-urlencoded" by default)
+                    throw new BadRequestException("Unsupported Content-Type");
+                }
+
+                if (encoding != null) {
+                    try {
+                        Charset.forName(encoding);
+                    } catch (UnsupportedCharsetException | IllegalCharsetNameException e) {
+                        throw new BadRequestException("Unsupported Content-Type charset");
+                    }
+                }
+
                 return requestHandler.handlePostRequest(pReq.getRequestURI(), is, encoding, getParameterMap(pReq));
             }
         };

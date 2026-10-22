@@ -370,6 +370,7 @@ public class AgentServletTest {
         ByteArrayOutputStream responseWriter = initRequestResponseMocks();
         expect(request.getMethod()).andReturn("POST").anyTimes();
         expect(request.getPathInfo()).andReturn(null).anyTimes();
+        expect(request.getContentType()).andReturn("application/json");
         expect(request.getCharacterEncoding()).andReturn("utf-8");
         expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
         expect(request.getAttribute("subject")).andReturn(null);
@@ -392,6 +393,7 @@ public class AgentServletTest {
         expect(request.getMethod()).andReturn("POST").anyTimes();
         expect(request.getRequestURI()).andReturn("/jolokia/");
         expect(request.getPathInfo()).andReturn(null).anyTimes();
+        expect(request.getContentType()).andReturn("application/json");
         expect(request.getCharacterEncoding()).andReturn("utf-8");
         expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
         expect(request.getAttribute("subject")).andReturn(null);

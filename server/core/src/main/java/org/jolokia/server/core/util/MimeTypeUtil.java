@@ -20,7 +20,7 @@ public class MimeTypeUtil {
      * <li>Otherwise:
      * <ul>
      * <li>If a valid mimeType is given in the request ("text/plain", "application/json"), then this
-     * mimet type is returned</li>
+     * MIME type is returned</li>
      * <li>If another mimeType is given, then "text/plain" is used</li>
      * <li>If no mimeType is given then a given default mime type is used, but also sanitized
      * as described above</li>
@@ -46,6 +46,32 @@ public class MimeTypeUtil {
 
         // Use the given default mime type (possibly picked up from a configuration)
         return sanitize(defaultMimeType);
+    }
+
+    /**
+     * Gets the content type and charset from the HTTP header
+     * @param contentTypeHeader
+     * @return
+     */
+    public static ContentTypeAndCharset parseContentType(String contentTypeHeader) {
+        String contentType = null;
+        String encoding = null;
+
+        if (contentTypeHeader != null) {
+            int semicolon = contentTypeHeader.indexOf(';');
+            if (semicolon != -1) {
+                String remaining = contentTypeHeader.substring(semicolon).trim().toLowerCase();
+                if (remaining.startsWith(";charset=")) {
+                    encoding = remaining.substring(";charset=".length()).toLowerCase();
+                }
+                contentType = contentTypeHeader.substring(0, semicolon).trim();
+            } else {
+                contentType = contentTypeHeader.trim();
+            }
+            contentType = contentType.toLowerCase();
+        }
+
+        return new ContentTypeAndCharset(contentType, encoding);
     }
 
     private static String sanitize(String mimeType) {
