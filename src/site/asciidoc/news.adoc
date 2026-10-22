@@ -15,6 +15,20 @@
 ////
 == News
 
+=== Jolokia 2.6.4 released
+
+[.news-date]
+2026-10-22
+
+A new version of Jolokia has been released with reviewed POST/GET protocol handling. Even if the _path info_ was not
+used in POST request, it's explicitly rejected now. +
+Additionally we explicitly check for `Content-Type: application/json` in POST requests to put more discipline on the clients
+(this is not a security issue, because normal authentication and host/origin check is performed).
+
+We've also found one rare race condition when starting the JVM Agent.
+
+Refer to https://jolokia.org/changes-report.html#a2.6.4[changelog] and https://github.com/jolokia/jolokia/releases/tag/v2.6.4[GitHub release notes] for more details.
+
 === Jolokia 2.6.3 released
 
 [.news-date]

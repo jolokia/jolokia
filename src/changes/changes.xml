@@ -23,6 +23,17 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
+    <release version="2.6.4" description="Release 2.6.4" date="2026-10-22">
+      <action dev="ggrzybek" type="add" issue="1067">
+        Add dedicated HTTP Server filter for /config endpoint
+      </action>
+      <action dev="ggrzybek" type="fix" issue="1069">
+        Race condition in MBeanServer access at early stage
+      </action>
+      <action dev="ggrzybek" type="add" issue="1070">
+        Parse incoming JSON data only with proper Content-Type
+      </action>
+    </release>
     <release version="2.6.3" description="Release 2.6.3" date="2026-09-21">
       <action dev="ggrzybek" type="fix" issue="1053">
         Jolokia 2.6.1+ causes error message regarding security constraints in Tomcat 10.1.59/11.0.25
