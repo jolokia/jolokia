@@ -168,4 +168,9 @@
     </mbean>
   </deny>
 
+  <filter>
+    <!-- List of mbean patterns to remove from list responses -->
+    <mbean>org.apache.logging.log4j2:*</mbean>
+  </filter>
+
 </restrict>

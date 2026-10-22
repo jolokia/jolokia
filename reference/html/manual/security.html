@@ -351,7 +351,7 @@ from scripts using <a href="https://developer.mozilla.org/en-US/docs/Web/API/Fet
 <p>Jolokia does not provide any web application even if it provides a JavaScript client that can be used
 in a web application. What&#8217;s also important is that Jolokia may be configured with authentication, but never
 uses <em>server side sessions</em> to keep the state (including the authentication state).<br>
-This means that Jolokia by itself never requires any CORS response headers. Tools like <code>curl</code>, <code>wget</code> or
+This means that Jolokia Agent by itself never requires any CORS response headers. Tools like <code>curl</code>, <code>wget</code> or
 other non-browser HTTP clients are never involved in the CORS protocol.</p>
 </div>
 <div class="paragraph">
@@ -364,12 +364,13 @@ other non-browser HTTP clients are never involved in the CORS protocol.</p>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>Because <code>&lt;cors&gt;</code> element is part of the <em>policy restrictor</em>, this configuration is used to <em>restrict</em> access to Jolokia from any client (when using <code>&lt;strict-checking&gt;</code>). When the access is not granted, Jolokia returns HTTP 403 status. This is <em>not</em> a real protection when the client like <code>curl</code> can send any <code>Origin</code> header, but
-it is part of security features when Jolokia is used in the browser. With <code>fetch()</code> and <code>XHR</code> APIs, we can&#8217;t really set headers like <code>Origin</code> or <code>Access-Control-Request-Method</code>. Thus in browser environment we can partially
-restrict access to the server trusting that <code>Origin</code> is a legitimate header.</p>
+<p>Because <code>&lt;cors&gt;</code> element is part of the <em>policy restrictor</em>, this configuration is used to <em>restrict</em> access to Jolokia Agent from any client (when using <code>&lt;strict-checking&gt;</code>). When the access is not granted, Jolokia returns HTTP 403 status. This is <em>not</em> a real protection when the client like <code>curl</code> can send any <code>Origin</code> header, but
+it is part of security features when Jolokia is used in the browser. With <code>fetch()</code> and <code>XHR</code> APIs, developers can&#8217;t set headers like <code>Origin</code> or <code>Access-Control-Request-Method</code>. Thus in the browser environment we can partially
+restrict access to the server trusting that <code>Origin</code> is a legitimate header. This kind of <em>restriction</em> should be accompanied by
+actual authentication mechanism.</p>
 </li>
 <li>
-<p>We also use <code>&lt;cors&gt;/&lt;allow-origin&gt;</code> for actual <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS">CORS protocol</a>. In this case, it&#8217;s not about restricting access to the server, but about responding with proper <code>Access-Control-*</code> HTTP response headers to let browsers deal with cross-origin requests in a more secure fashion. It&#8217;s about protecting the client (browser application) from <em>reading</em> the response of a cross-origin request. CORS response headers allow responses to declare they can be shared with other origins.</p>
+<p>We also use <code>&lt;cors&gt;/&lt;allow-origin&gt;</code> elements for actual <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS">CORS protocol</a>. In this case, it&#8217;s not about restricting access to the server, but about responding with proper <code>Access-Control-*</code> HTTP response headers to let browsers deal with cross-origin requests in a more secure fashion. It&#8217;s about protecting the client (browser application) from <em>reading</em> the response of a cross-origin request. CORS response headers allow responses to declare they can be shared with other origins.</p>
 </li>
 </ol>
 </div>
@@ -391,12 +392,12 @@ access remote Jolokia JVM Agent running at <code><a href="http://jolokia.api.com
 <p>we can&#8217;t rely on one of the protection methods against CSRF, which is <code>SameSite=strict</code> cookie policy, because no cookies are involved</p>
 </li>
 <li>
-<p>when the target site has associated (cached) credentials, the credentials are sent with each request to the remote agent</p>
+<p>when the target site (<code><a href="http://example.com" class="bare">http://example.com</a></code> and/or <code><a href="http://jolokia.api.com/jolokia" class="bare">http://jolokia.api.com/jolokia</a></code>) has associated (cached in the browser) credentials, the credentials are sent with each request to the remote site.</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>Now imagine a second, <strong>malicious</strong> web page at <code><a href="http://evil.com" class="bare">http://evil.com</a></code>. Its JavaScript could try to do:</p>
+<p>Now imagine a second, <strong>malicious</strong> web page at <code><a href="http://evil.com" class="bare">http://evil.com</a></code>. Its JavaScript code could try to do:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -408,7 +409,7 @@ access remote Jolokia JVM Agent running at <code><a href="http://jolokia.api.com
 </div>
 </div>
 <div class="paragraph">
-<p>When the user is properly authenticated in <code><a href="http://example.com" class="bare">http://example.com</a></code> page and to <code><a href="http://jolokia.api.com/jolokia" class="bare">http://jolokia.api.com/jolokia</a></code> API, the credentials for <code><a href="http://jolokia.api.com/jolokia" class="bare">http://jolokia.api.com/jolokia</a></code> are already associated by the browser with this origin. An attacker cannot steal the credentials, but can force the browser to use them with a crafted request from a malicious page, effectively acting on the user&#8217;s behalf without the user being aware of this.</p>
+<p>When the user is properly authenticated in <code><a href="http://example.com" class="bare">http://example.com</a></code> page and to <code><a href="http://jolokia.api.com/jolokia" class="bare">http://jolokia.api.com/jolokia</a></code> API, the credentials for <code><a href="http://jolokia.api.com/jolokia" class="bare">http://jolokia.api.com/jolokia</a></code> are already associated by the browser with this origin. An attacker cannot steal the credentials, but can force the browser to use them with a crafted request from a malicious page (<code><a href="http://evil.com" class="bare">http://evil.com</a></code>), effectively acting on the user&#8217;s behalf without the user being aware of this. (How the user is tricked to browser to <code><a href="http://evil.com" class="bare">http://evil.com</a></code> is another story).</p>
 </div>
 <div class="paragraph">
 <p>With proper CORS implementation, <code><a href="http://jolokia.api.com/jolokia" class="bare">http://jolokia.api.com/jolokia</a></code> will <em>not</em> send <code>Access-Control-Allow-Origin: <a href="http://evil.com" class="bare">http://evil.com</a></code> so the malicious page could not get the <code>data</code> value from the response. Even if the response is actually delivered (which may be the most confusing part of CORS protocol), the access to the response is forbidden.</p>
@@ -419,7 +420,9 @@ access remote Jolokia JVM Agent running at <code><a href="http://jolokia.api.com
 <p>Even if the attacker could trick a real user to navigate to a malicious page which could call the remote Jolokia agent, <code>fetch()</code> API does not allow to replace or remove the <code>Origin</code> header being sent. There&#8217;s no way to disable CORS protocol at this level. Unless Jolokia responds with <code>Access-Control-Allow-Origin: <a href="http://evil.com" class="bare">http://evil.com</a></code>, the attacker can not read the data.</p>
 </div>
 <div class="paragraph">
-<p>And to make the server protected too (remember - CORS is for protecting the client from allowing the data to be stolen), Jolokia may use <code>&lt;strict-checking&gt;</code> option, so the sent <code>Origin</code> (which can not be forged by an attacker) leads to a proper HTTP response with HTTP status code 403 (<code>Forbidden</code>).</p>
+<p>However this scenario still makes it possible for the request to be delivered to the server, potentially leading to some action
+performed at the server side.<br>
+To make the server protected too (remember - CORS is for protecting the client from allowing the data to be stolen), Jolokia may use <code>&lt;strict-checking&gt;</code> option, so the sent <code>Origin</code> (which can not be forged by an attacker) leads to a proper HTTP response with HTTP status code 403 (<code>Forbidden</code>). This completes the security gap and prevents CSRF attacks.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -546,7 +549,7 @@ authentication on these special requests (that use <code>OPTIONS</code> HTTP met
 <p><code>Access-Control-Allow-Methods</code>: set to <code>GET, POST</code> by default, but may return a value specified with <code>&lt;http&gt;/&lt;method&gt;</code></p>
 </li>
 <li>
-<p><code>Access-Control-Allow-Origin</code>: set to the incoming <code>Origin</code> header only of check for allowed origins passes (<code>&lt;cors&gt;/&lt;allow-origin&gt;</code>). Mind that with <code>&lt;strict-checking&gt;</code> the CORS request is rejected and CORS response headers are not set</p>
+<p><code>Access-Control-Allow-Origin</code>: set to the incoming <code>Origin</code> header only if the check for allowed origins passes (<code>&lt;cors&gt;/&lt;allow-origin&gt;</code>). Mind that with <code>&lt;strict-checking&gt;</code> the CORS request is rejected and CORS response headers are not set</p>
 </li>
 <li>
 <p><code>Access-Control-Max-Age</code>: set to 2 hours (default for Chrome browsers)</p>
@@ -656,7 +659,7 @@ restrictions:</p>
 <p>By default, only <code>read</code> and <code>list</code> requests are allowed.</p>
 </li>
 <li>
-<p>A single <code>exec</code> request is allowed for triggering garbage collection.</p>
+<p>A single <code>exec</code> request is allowed for triggering garbage collection. Also <code>Verbose</code> attribute can be read (but not written).</p>
 </li>
 <li>
 <p>Read access to the C3P0 connection pool is restricted to
@@ -665,6 +668,9 @@ contains the DB password as clear text.</p>
 </li>
 <li>
 <p>Access to <code>jdk.management.jfr:type=FlightRecorder</code> MBean is denied (see <a href="https://nvd.nist.gov/vuln/detail/CVE-2022-41678" class="externalLink" target="_blank" rel="noopener">CVE-2022-41678</a>)</p>
+</li>
+<li>
+<p><code>java.lang:type=MemoryPool</code> MBeans and all MBeans from <code>org.apache.logging.log4j2</code> domain are not included in the <code>list</code> response.</p>
 </li>
 </ul>
 </div>
@@ -675,6 +681,10 @@ contains the DB password as clear text.</p>
 
   &lt;remote&gt;
     &lt;host&gt;127.0.0.1&lt;/host&gt;
+    &lt;host&gt;localhost&lt;/host&gt;
+    &lt;host&gt;10.0.0.0/16&lt;/host&gt;
+    &lt;host&gt;2001:db8::/32&lt;/host&gt;
+    &lt;host&gt;[::ffff:7f00:1]&lt;/host&gt;
   &lt;/remote&gt;
 
   &lt;http&gt;
@@ -689,6 +699,7 @@ contains the DB password as clear text.</p>
   &lt;allow&gt;
     &lt;mbean&gt;
       &lt;name&gt;java.lang:type=Memory&lt;/name&gt;
+      &lt;attribute mode="read"&gt;Verbose&lt;/attribute&gt;
       &lt;operation&gt;gc&lt;/operation&gt;
     &lt;/mbean&gt;
   &lt;/allow&gt;
@@ -787,7 +798,7 @@ output.</p>
 <div class="ulist">
 <ul>
 <li>
-<p><code>https://</code> addresses are secure</p>
+<p><code>https://</code> addresses are secure (subject to server certificate trust)</p>
 </li>
 <li>
 <p>localhost addresses are secure</p>
@@ -826,6 +837,39 @@ output.</p>
 </div>
 <div class="paragraph">
 <p>While this is not a one-stop solution for security, Jolokia can restrict access when it is not a proper one. Definitely Jolokia URLs should not be valid when used beyond <code>fetch()</code> API or direct user navigation.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_form_data"><a class="anchor" href="#_form_data"></a>Form data</h3>
+<div class="paragraph">
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/form">HTML &lt;form&gt; element</a> accepts only 3 values for <code>enctype</code> attribute for <code>POST</code> requests:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>application/x-www-form-urlencoded</code> (the default one)</p>
+</li>
+<li>
+<p><code>multipart/form-data</code> (when using <code>&lt;input type="file"&gt;</code>)</p>
+</li>
+<li>
+<p><code>text/plain</code> (for debugging purposes)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>There&#8217;s no way to set <code>application/json</code>. There&#8217;s a way to send JSON with <code>text/plain</code> using:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;form id="f" method="post" enctype="text/plain" action="http://localhost:7778/jolokia"&gt;
+    &lt;input type="hidden" name='{"type":"version","ignored":"' value='"}' /&gt;
+&lt;/form&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And browser will send <code>{"type":"version","ignored":"="}\r\n</code>. This is not a security problem for Jolokia when using proper
+configuration with restricted origins and authentication, but since Jolokia 2.6.4 only <code>Content-Type: application/json</code> is accepted.</p>
 </div>
 </div>
 </div>
