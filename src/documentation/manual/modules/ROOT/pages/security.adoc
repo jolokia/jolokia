@@ -197,7 +197,7 @@ https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest[XMLHttpRequest A
 Jolokia does not provide any web application even if it provides a JavaScript client that can be used
 in a web application. What's also important is that Jolokia may be configured with authentication, but never
 uses _server side sessions_ to keep the state (including the authentication state). +
-This means that Jolokia by itself never requires any CORS response headers. Tools like `curl`, `wget` or
+This means that Jolokia Agent by itself never requires any CORS response headers. Tools like `curl`, `wget` or
 other non-browser HTTP clients are never involved in the CORS protocol.
 
 However Jolokia JavaScript client library can be used in any web application. Because this library uses
@@ -205,10 +205,11 @@ However Jolokia JavaScript client library can be used in any web application. Be
 
 Jolokia provides _CORS configuration_ for two distinct scenarios:
 
-1. Because `<cors>` element is part of the _policy restrictor_, this configuration is used to _restrict_ access to Jolokia from any client (when using `<strict-checking>`). When the access is not granted, Jolokia returns HTTP 403 status. This is _not_ a real protection when the client like `curl` can send any `Origin` header, but
-it is part of security features when Jolokia is used in the browser. With `fetch()` and `XHR` APIs, we can't really set headers like `Origin` or `Access-Control-Request-Method`. Thus in browser environment we can partially
-restrict access to the server trusting that `Origin` is a legitimate header.
-2. We also use `<cors>/<allow-origin>` for actual https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS[CORS protocol]. In this case, it's not about restricting access to the server, but about responding with proper `Access-Control-*` HTTP response headers to let browsers deal with cross-origin requests in a more secure fashion. It's about protecting the client (browser application) from _reading_ the response of a cross-origin request. CORS response headers allow responses to declare they can be shared with other origins.
+1. Because `<cors>` element is part of the _policy restrictor_, this configuration is used to _restrict_ access to Jolokia Agent from any client (when using `<strict-checking>`). When the access is not granted, Jolokia returns HTTP 403 status. This is _not_ a real protection when the client like `curl` can send any `Origin` header, but
+it is part of security features when Jolokia is used in the browser. With `fetch()` and `XHR` APIs, developers can't set headers like `Origin` or `Access-Control-Request-Method`. Thus in the browser environment we can partially
+restrict access to the server trusting that `Origin` is a legitimate header. This kind of _restriction_ should be accompanied by
+actual authentication mechanism.
+2. We also use `<cors>/<allow-origin>` elements for actual https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS[CORS protocol]. In this case, it's not about restricting access to the server, but about responding with proper `Access-Control-*` HTTP response headers to let browsers deal with cross-origin requests in a more secure fashion. It's about protecting the client (browser application) from _reading_ the response of a cross-origin request. CORS response headers allow responses to declare they can be shared with other origins.
 
 Here's a more detailed explanation of the protection provided by CORS protocol:
 ====
@@ -218,9 +219,9 @@ access remote Jolokia JVM Agent running at `http://jolokia.api.com/jolokia`.
 The remote Jolokia JVM Agent uses basic authentication, but doesn't use cookies and sessions. This implies two things:
 
 * we can't rely on one of the protection methods against CSRF, which is `SameSite=strict` cookie policy, because no cookies are involved
-* when the target site has associated (cached) credentials, the credentials are sent with each request to the remote agent
+* when the target site (`http://example.com` and/or `http://jolokia.api.com/jolokia`) has associated (cached in the browser) credentials, the credentials are sent with each request to the remote site.
 
-Now imagine a second, *malicious* web page at `http://evil.com`. Its JavaScript could try to do:
+Now imagine a second, *malicious* web page at `http://evil.com`. Its JavaScript code could try to do:
 [,javascript]
 ----
 fetch("http://jolokia.api.com/jolokia/read/java.lang:type=Memory", {
@@ -230,14 +231,16 @@ fetch("http://jolokia.api.com/jolokia/read/java.lang:type=Memory", {
 .then(data => sendToAttacker(data)); // read and steal the response
 ----
 
-When the user is properly authenticated in `http://example.com` page and to `http://jolokia.api.com/jolokia` API, the credentials for `http://jolokia.api.com/jolokia` are already associated by the browser with this origin. An attacker cannot steal the credentials, but can force the browser to use them with a crafted request from a malicious page, effectively acting on the user's behalf without the user being aware of this.
+When the user is properly authenticated in `http://example.com` page and to `http://jolokia.api.com/jolokia` API, the credentials for `http://jolokia.api.com/jolokia` are already associated by the browser with this origin. An attacker cannot steal the credentials, but can force the browser to use them with a crafted request from a malicious page (`http://evil.com`), effectively acting on the user's behalf without the user being aware of this. (How the user is tricked to browser to `http://evil.com` is another story).
 
 With proper CORS implementation, `http://jolokia.api.com/jolokia` will _not_ send `Access-Control-Allow-Origin: http://evil.com` so the malicious page could not get the `data` value from the response. Even if the response is actually delivered (which may be the most confusing part of CORS protocol), the access to the response is forbidden.
 ====
 
 Even if the attacker could trick a real user to navigate to a malicious page which could call the remote Jolokia agent, `fetch()` API does not allow to replace or remove the `Origin` header being sent. There's no way to disable CORS protocol at this level. Unless Jolokia responds with `Access-Control-Allow-Origin: http://evil.com`, the attacker can not read the data.
 
-And to make the server protected too (remember - CORS is for protecting the client from allowing the data to be stolen), Jolokia may use `<strict-checking>` option, so the sent `Origin` (which can not be forged by an attacker) leads to a proper HTTP response with HTTP status code 403 (`Forbidden`).
+However this scenario still makes it possible for the request to be delivered to the server, potentially leading to some action
+performed at the server side. +
+To make the server protected too (remember - CORS is for protecting the client from allowing the data to be stolen), Jolokia may use `<strict-checking>` option, so the sent `Origin` (which can not be forged by an attacker) leads to a proper HTTP response with HTTP status code 403 (`Forbidden`). This completes the security gap and prevents CSRF attacks.
 
 NOTE: To protect against attackers using `curl`, proper authentication mechanism must be enabled at Jolokia side. CORS won't help here at all.
 
@@ -488,7 +491,7 @@ https://developer.mozilla.org/en-US/docs/Web/Security/Defenses/Secure_Contexts[S
 
 Without going into details and special cases, there are 3 kinds of URLs (sites, origins) that make the _context_ secure or not:
 
-* `https://` addresses are secure
+* `https://` addresses are secure (subject to server certificate trust)
 * localhost addresses are secure
 * non-localhost `http://` addresses (IP or name) are not secure.
 
@@ -504,6 +507,26 @@ Starting from Jolokia 2.6.1, Jolokia handles (by default, but it can be turned o
 * `Sec-Fetch-User` - indicates an explicit user action
 
 While this is not a one-stop solution for security, Jolokia can restrict access when it is not a proper one. Definitely Jolokia URLs should not be valid when used beyond `fetch()` API or direct user navigation.
+
+=== Form data
+
+https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/form[HTML <form> element] accepts only 3 values for `enctype` attribute for `POST` requests:
+
+* `application/x-www-form-urlencoded` (the default one)
+* `multipart/form-data` (when using `<input type="file">`)
+* `text/plain` (for debugging purposes)
+
+There's no way to set `application/json`. There's a way to send JSON with `text/plain` using:
+
+[source,html]
+----
+<form id="f" method="post" enctype="text/plain" action="http://localhost:7778/jolokia">
+    <input type="hidden" name='{"type":"version","ignored":"' value='"}' />
+</form>
+----
+
+And browser will send `{"type":"version","ignored":"="}\r\n`. This is not a security problem for Jolokia when using proper
+configuration with restricted origins and authentication, but since Jolokia 2.6.4 only `Content-Type: application/json` is accepted.
 
 [#security-restrictor]
 == Jolokia Restrictors
