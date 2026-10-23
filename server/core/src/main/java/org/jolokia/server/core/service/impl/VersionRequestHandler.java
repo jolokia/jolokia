@@ -48,7 +48,7 @@ public class VersionRequestHandler extends AbstractJolokiaService<RequestHandler
      * Constructor
      */
     VersionRequestHandler() {
-        // Must be always first
+        // Must be always second (after ConfigRequestHandler)
         super(RequestHandler.class,-1);
     }
 
@@ -59,6 +59,10 @@ public class VersionRequestHandler extends AbstractJolokiaService<RequestHandler
 
     @Override
     public Object handleRequest(JolokiaRequest pJmxReq, Object pPreviousResult) {
+        if (!context.isTypeAllowed(RequestType.VERSION)) {
+            throw new SecurityException("Command type " + RequestType.VERSION + " is not allowed");
+        }
+
         JSONObject ret = new JSONObject();
 
         // basic information - shared with /config endpoint

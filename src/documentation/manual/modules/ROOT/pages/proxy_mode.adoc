@@ -78,6 +78,10 @@ The proxy mode has some limitations compared to the direct
 agent mode, so it is recommended to use a
 direct agent deployment if possible. The limitations are:
 
+* `version` and `config` operations use dedicated implementations of
+`org.jolokia.server.core.service.request.RequestHandler` service interface with higher
+precedence and do not check the `target` option in the incoming requests. These
+metadata commands are always executed locally.
 * There is no automatic merging of JMX MBeanServers as in the case
 of the direct mode. Most application servers uses their own
 MBeanServer in addition to the

@@ -38,6 +38,7 @@ public class ConfigRequestHandler extends AbstractJolokiaService<RequestHandler>
     private JolokiaContext context;
 
     ConfigRequestHandler() {
+        // Must be always first
         super(RequestHandler.class, -2);
     }
 
@@ -53,6 +54,10 @@ public class ConfigRequestHandler extends AbstractJolokiaService<RequestHandler>
 
     @Override
     public <R extends JolokiaRequest> Object handleRequest(R pJmxReq, Object pPreviousResult) {
+        if (!context.isTypeAllowed(RequestType.CONFIG)) {
+            throw new SecurityException("Command type " + RequestType.CONFIG + " is not allowed");
+        }
+
         JSONObject ret = new JSONObject();
 
         // basic information - shared with /version endpoint

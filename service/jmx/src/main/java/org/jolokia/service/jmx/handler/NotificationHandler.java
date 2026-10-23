@@ -51,7 +51,8 @@ public class NotificationHandler extends AbstractCommandHandler<JolokiaNotificat
 
     @Override
     protected void checkForRestriction(JolokiaNotificationRequest pRequest) {
-        // Not used currently ...
+        // just coarse grained check for the "notification" command
+        checkType();
     }
 
     @Override

@@ -27,6 +27,7 @@ import org.jolokia.server.core.request.EmptyResponseException;
 import org.jolokia.server.core.request.JolokiaRequest;
 import org.jolokia.server.core.request.NotChangedException;
 import org.jolokia.server.core.service.api.JolokiaContext;
+import org.jolokia.server.core.util.RequestType;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 import org.jolokia.service.jmx.api.CommandHandler;
 
@@ -140,7 +141,7 @@ public abstract class AbstractCommandHandler<R extends JolokiaRequest> implement
      */
     protected void checkType() {
         if (!context.isTypeAllowed(getType())) {
-            throw new SecurityException("Command type " + getType() + " not allowed due to policy used");
+            throw new SecurityException("Command type " + getType() + " is not allowed");
         }
     }
 

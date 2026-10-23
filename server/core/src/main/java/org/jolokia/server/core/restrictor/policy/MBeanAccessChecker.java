@@ -27,7 +27,7 @@ import org.w3c.dom.*;
 
 /**
  * Checker, which checks for specific MBean attributes or operations which can be either
- * defined in an <code>&lt;allow&gt;</code> or <code>&lt;deny&gt;</code> seciton.
+ * defined in an <code>&lt;allow&gt;</code> or <code>&lt;deny&gt;</code> section.
  * <p>
  * MBean names can be specified either a full names or as patterns in which case the rule
  * applies to all MBeans matching this pattern. For attribute and operations names, the wildcard
@@ -69,7 +69,7 @@ public class MBeanAccessChecker extends AbstractChecker<MBeanAccessChecker.Arg> 
         for (String tag : new String[] { "allow", "mbeans" }) {
             NodeList nodes = pDoc.getElementsByTagName(tag);
             if (nodes.getLength() > 0) {
-                // "allow" and "mbeans" are synonyms
+                // "allow" and "MBeans" are synonyms
                 if (allow == null) {
                     allow = new MBeanPolicyConfig();
                 }
@@ -88,7 +88,7 @@ public class MBeanAccessChecker extends AbstractChecker<MBeanAccessChecker.Arg> 
     public boolean check(Arg pArg) {
         if (pArg.isTypeAllowed()) {
             // Its allowed in general, so we only need to check
-            // the denied section, whether its forbidded
+            // the denied section, whether its forbidden
             return deny == null || !matches(deny, pArg);
         } else {
             // Its forbidden by default, so we need to check the
@@ -245,7 +245,7 @@ public class MBeanAccessChecker extends AbstractChecker<MBeanAccessChecker.Arg> 
 
         /**
          * Value which is interpreted as operation or attribute name,
-         * dependening on the type
+         * depending on the type
          *
          * @return attribute/operation name
          */
