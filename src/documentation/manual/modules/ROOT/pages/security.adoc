@@ -177,6 +177,8 @@ requests only:
 It the `<http>` section is missing
 completely, any HTTP method can be used.
 
+NOTE: HTTP Method restriction is not performed for `config` and `version` operations.
+
 === Cross-Origin Resource Sharing (CORS) restrictions
 
 Jolokia (since version 1.0.3) supports the WHATWG (formerly W3C) specification

@@ -58,6 +58,9 @@ public class ConfigRequestHandler extends AbstractJolokiaService<RequestHandler>
             throw new SecurityException("Command type " + RequestType.CONFIG + " is not allowed");
         }
 
+        // explicitly don't check org.jolokia.server.core.service.api.Restrictor.isHttpMethodAllowed()
+        // for easier /jolokia/config access
+
         JSONObject ret = new JSONObject();
 
         // basic information - shared with /version endpoint

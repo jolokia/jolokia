@@ -63,6 +63,9 @@ public class VersionRequestHandler extends AbstractJolokiaService<RequestHandler
             throw new SecurityException("Command type " + RequestType.VERSION + " is not allowed");
         }
 
+        // explicitly don't check org.jolokia.server.core.service.api.Restrictor.isHttpMethodAllowed()
+        // for easier /jolokia/version access
+
         JSONObject ret = new JSONObject();
 
         // basic information - shared with /config endpoint
