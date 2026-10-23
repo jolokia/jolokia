@@ -386,6 +386,55 @@ public class AgentServletTest {
     }
 
     @Test
+    public void postWithCharsetParameter() throws ServletException, IOException {
+        prepareStandardInitialisation();
+
+        ByteArrayOutputStream responseWriter = initRequestResponseMocks();
+        expect(request.getMethod()).andReturn("POST").anyTimes();
+        expect(request.getPathInfo()).andReturn(null).anyTimes();
+        expect(request.getContentType()).andReturn("application/json; charset=UTF-8");
+        expect(request.getCharacterEncoding()).andReturn("UTF-8");
+        expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
+        expect(request.getAttribute("subject")).andReturn(null);
+
+        preparePostRequest(HttpTestUtil.VERSION_POST_REQUEST);
+
+        replay(request, response);
+
+        servlet.doPost(request, response);
+
+        assertTrue(responseWriter.toString().contains(Version.getAgentVersion()));
+        servlet.destroy();
+    }
+
+    @Test
+    public void postWithTextPlainIsRejected() throws ServletException, IOException {
+        prepareStandardInitialisation();
+
+        ByteArrayOutputStream responseWriter = initRequestResponseMocks();
+        expect(request.getMethod()).andReturn("POST").anyTimes();
+        expect(request.getPathInfo()).andReturn(null).anyTimes();
+        expect(request.getContentType()).andReturn("text/plain; charset=UTF-8");
+        expect(request.getCharacterEncoding()).andReturn("UTF-8");
+        expect(request.getParameter(ConfigKey.MIME_TYPE.getKeyValue())).andReturn("text/plain");
+        expect(request.getAttribute("subject")).andReturn(null);
+
+        response.addHeader("Content-Type", "text/plain; charset=utf-8");
+        response.setStatus(400);
+
+        preparePostRequest(HttpTestUtil.VERSION_POST_REQUEST);
+
+        replay(request, response);
+
+        servlet.doPost(request, response);
+
+        String body = responseWriter.toString();
+        assertTrue(body.startsWith("400 (Bad Request)"));
+        assertTrue(body.contains("Unsupported Content-Type"));
+        servlet.destroy();
+    }
+
+    @Test
     public void postWithExtraSlash() throws ServletException, IOException {
         prepareStandardInitialisation();
 

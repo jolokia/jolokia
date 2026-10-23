@@ -721,7 +721,8 @@ public class AgentServlet extends HttpServlet {
                 String encoding = pReq.getCharacterEncoding();
                 InputStream is = pReq.getInputStream();
 
-                if (!("application/json".equalsIgnoreCase(contentType) || contentType == null)) {
+                String mediaType = MimeTypeUtil.parseContentType(contentType).contentType();
+                if (mediaType != null && !"application/json".equals(mediaType)) {
                     // null for programmatic clients (even `curl` sends "application/x-www-form-urlencoded" by default)
                     throw new BadRequestException("Unsupported Content-Type");
                 }
