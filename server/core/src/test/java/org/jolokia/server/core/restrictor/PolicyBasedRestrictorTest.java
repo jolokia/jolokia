@@ -17,6 +17,9 @@ package org.jolokia.server.core.restrictor;
  */
 
 import java.io.InputStream;
+import java.net.Inet4Address;
+import java.net.Inet6Address;
+import java.net.InetAddress;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
@@ -50,6 +53,16 @@ public class PolicyBasedRestrictorTest {
     }
 
     @Test
+    public void ip4InIp6() throws Exception {
+        InetAddress a1 = Inet6Address.getByName("::ffff:7f00:1");
+        InetAddress a2 = Inet6Address.getByName("::ffff:7f01:1");
+        InetAddress a3 = Inet6Address.getByName("::fffe:7f00:1");
+        assertTrue(a1 instanceof Inet4Address);
+        assertTrue(a2 instanceof Inet4Address);
+        assertFalse(a3 instanceof Inet4Address);
+    }
+
+    @Test
     public void restrictIp() {
         InputStream is = getClass().getResourceAsStream("/access-sample1.xml");
         PolicyRestrictor restrictor = new PolicyRestrictor(is);
@@ -76,10 +89,13 @@ public class PolicyBasedRestrictorTest {
                 { "2001:db8:1:0:0:0:0:1", "true" },
                 { "2001:db8:2::1", "true" },
                 { "2001:db8:2::2", "true" },
+                { "::fffe:7f00:1", "true" },
+                { "127.0.0.1", "true" }, // should pass because of ::ffff:7f00:1
+                { "::0:fffe:7f00:1", "true" },
         };
 
         for (String[] check : ips) {
-            String res = restrictor.isRemoteAccessAllowed(check[0]) ? "true" : "false";
+            String res = Boolean.toString(restrictor.isRemoteAccessAllowed(check[0]));
             assertEquals("Ip " + check[0] + " is " +
                          (check[1].equals("false") ? "not " : "") +
                          "allowed",check[1],res);

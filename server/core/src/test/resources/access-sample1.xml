@@ -35,6 +35,9 @@
     <host>192.168.15.3/255.255.255.0</host>
     <host>2001:db8:1::1</host>
     <host>2001:db8:2::/48</host>
+    <host>[::fffe:7f00:1]</host>
+    <host>::ffff:7f00:1</host>
+    <host>[ffff:0:0:0:0:0:0:1]</host>
   </remote>
 
   Text is ignored

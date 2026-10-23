@@ -98,7 +98,13 @@ public class NetworkChecker extends AbstractChecker<String[]> {
                     if (host.contains(":")) {
                         // assume it may be IPv6 address, so we have to be able to match ffff::1 and ffff:0:0:0:0:0:0:1
                         try {
-                            allowedIP6HostsSet.add((Inet6Address) Inet6Address.getByName(host));
+                            InetAddress byName = Inet6Address.getByName(host);
+                            if (byName instanceof Inet6Address) {
+                                allowedIP6HostsSet.add((Inet6Address) byName);
+                            } else {
+                                // it could be a ::ffff:7f00:1 "mapped" address which is 127.0.0.1
+                                allowedHostsSet.add(byName.getHostAddress());
+                            }
                         } catch (UnknownHostException e) {
                             throw new IllegalArgumentException("Invalid IPv6 address \"" + host + "\"", e);
                         }
