@@ -24,6 +24,7 @@ import javax.management.*;
 import org.jolokia.json.JSONObject;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.request.BadRequestException;
+import org.jolokia.server.core.request.HttpSecurityException;
 import org.jolokia.server.core.request.JolokiaReadRequest;
 import org.jolokia.server.core.request.JolokiaRequestBuilder;
 import org.jolokia.server.core.service.api.Restrictor;
@@ -447,7 +448,7 @@ public class ReadHandlerTest extends BaseHandlerTest {
         try {
             handler.handleAllServerRequest(getMBeanServerManager(server),request, null);
             fail("Restrictor should forbid HTTP Method Access");
-        } catch (SecurityException ignored) {}
+        } catch (HttpSecurityException ignored) {}
         verify(restrictor,server);
     }
 

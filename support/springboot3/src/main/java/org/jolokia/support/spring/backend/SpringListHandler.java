@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.jolokia.json.JSONArray;
 import org.jolokia.json.JSONObject;
+import org.jolokia.server.core.request.HttpSecurityException;
 import org.jolokia.server.core.request.JolokiaListRequest;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.core.util.ClassUtil;
@@ -42,8 +43,8 @@ public class SpringListHandler extends SpringCommandHandler<JolokiaListRequest> 
     @Override
     public Object handleRequest(JolokiaListRequest pJmxReq, Object pPreviousResult) {
         if (!getJolokiaContext().isHttpMethodAllowed(pJmxReq.getHttpMethod())) {
-            throw new SecurityException("HTTP method " + pJmxReq.getHttpMethod().getMethod() +
-                    " is not allowed according to the installed security policy");
+            throw new HttpSecurityException("HTTP method " + pJmxReq.getHttpMethod().getMethod() +
+                    " is not allowed", 405);
         }
         if (!getJolokiaContext().isTypeAllowed(RequestType.LIST)) {
             throw new SecurityException("Command type " + RequestType.LIST + " is not allowed");

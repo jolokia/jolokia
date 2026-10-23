@@ -52,7 +52,7 @@ public class WriteHandler extends AbstractCommandHandler<JolokiaWriteRequest> {
     protected void checkForRestriction(JolokiaWriteRequest pRequest) {
         if (!context.isAttributeWriteAllowed(pRequest.getObjectName(),pRequest.getAttributeName())) {
             throw new SecurityException("Writing attribute " + pRequest.getAttributeName() +
-                    " forbidden for MBean " + pRequest.getObjectNameAsString());
+                    " is forbidden for MBean " + pRequest.getObjectNameAsString());
         }
     }
 

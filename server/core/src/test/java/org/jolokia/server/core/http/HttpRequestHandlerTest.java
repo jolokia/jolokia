@@ -72,7 +72,7 @@ public class HttpRequestHandlerTest {
         verify(restrictor);
     }
 
-    @Test(expectedExceptions = { SecurityException.class })
+    @Test(expectedExceptions = { HttpSecurityException.class })
     public void accessDenied() throws Exception {
         Restrictor restrictor = createMock(Restrictor.class);
         expect(restrictor.isRemoteAccessAllowed("localhost","127.0.0.1")).andReturn(false);
@@ -83,7 +83,7 @@ public class HttpRequestHandlerTest {
         verify(restrictor);
     }
 
-    @Test(expectedExceptions = { SecurityException.class })
+    @Test(expectedExceptions = { HttpSecurityException.class })
     public void accessDeniedViaOrigin() throws Exception {
         Restrictor restrictor = createMock(Restrictor.class);
         expect(restrictor.isRemoteAccessAllowed("localhost", "127.0.0.1")).andReturn(true);
@@ -94,7 +94,7 @@ public class HttpRequestHandlerTest {
         handler.checkAccess("http", "localhost", new String[] { "127.0.0.1" }, "http://www.jolokia.org", null);
     }
 
-    @Test(expectedExceptions = { SecurityException.class })
+    @Test(expectedExceptions = { HttpSecurityException.class })
     public void accessDeniedHttpsOriginOverHttp() throws Exception {
         Restrictor restrictor = createMock(Restrictor.class);
         expect(restrictor.isRemoteAccessAllowed("localhost", "127.0.0.1")).andReturn(true);
@@ -145,7 +145,7 @@ public class HttpRequestHandlerTest {
         handler.checkAccess("http", "localhost", new String[] { "127.0.0.1" }, "http://www.jolokia.org", fmd);
     }
 
-    @Test(expectedExceptions = { SecurityException.class })
+    @Test(expectedExceptions = { HttpSecurityException.class })
     public void fetchMetadataImage() throws Exception {
         restrictorForFetchMetadataChecks();
 

@@ -253,9 +253,10 @@ public abstract class BaseRequestHandler {
         } catch (JMException | JMRuntimeException e) {
             // all remaining JMX exceptions not handled earlier
             return getErrorJSON(500, e, pJmxReq);
-        } catch (BadRequestException | EmptyResponseException e) {
+        } catch (BadRequestException | EmptyResponseException | HttpSecurityException e) {
             // BadRequestException usually thrown when parsing ObjectNames from URI paths
             // rethrow to be handled by the caller
+            // HttpSecurityException is rethrown to be handled by sending actual HTTP 403
             throw e;
         } catch (Throwable e) {
             // Catch-All - this includes exceptions like IllegalStateException, when for example we

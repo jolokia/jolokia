@@ -6,6 +6,7 @@ import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
 
+import org.jolokia.server.core.request.HttpSecurityException;
 import org.jolokia.server.core.request.JolokiaReadRequest;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.util.RequestType;
@@ -26,8 +27,8 @@ public class SpringReadHandler extends SpringCommandHandler<JolokiaReadRequest> 
     @Override
     public Object handleRequest(JolokiaReadRequest pJmxReq, Object pPreviousResult) throws InstanceNotFoundException, AttributeNotFoundException {
         if (!getJolokiaContext().isHttpMethodAllowed(pJmxReq.getHttpMethod())) {
-            throw new SecurityException("HTTP method " + pJmxReq.getHttpMethod().getMethod() +
-                    " is not allowed according to the installed security policy");
+            throw new HttpSecurityException("HTTP method " + pJmxReq.getHttpMethod().getMethod() +
+                    " is not allowed", 405);
         }
         if (!getJolokiaContext().isTypeAllowed(RequestType.READ)) {
             throw new SecurityException("Command type " + RequestType.READ + " is not allowed");

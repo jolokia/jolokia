@@ -24,10 +24,10 @@ import javax.management.ObjectName;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.request.BadRequestException;
 import org.jolokia.server.core.request.EmptyResponseException;
+import org.jolokia.server.core.request.HttpSecurityException;
 import org.jolokia.server.core.request.JolokiaRequest;
 import org.jolokia.server.core.request.NotChangedException;
 import org.jolokia.server.core.service.api.JolokiaContext;
-import org.jolokia.server.core.util.RequestType;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 import org.jolokia.service.jmx.api.CommandHandler;
 
@@ -153,8 +153,8 @@ public abstract class AbstractCommandHandler<R extends JolokiaRequest> implement
      */
     private void checkHttpMethod(R pRequest) {
         if (!context.isHttpMethodAllowed(pRequest.getHttpMethod())) {
-            throw new SecurityException("HTTP method " + pRequest.getHttpMethod().getMethod() +
-                    " is not allowed according to the installed security policy");
+            throw new HttpSecurityException("HTTP method " + pRequest.getHttpMethod().getMethod() +
+                    " is not allowed", 405);
         }
     }
 

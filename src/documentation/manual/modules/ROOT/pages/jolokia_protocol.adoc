@@ -320,6 +320,7 @@ Generally we have 3 kinds of responses:
 * error response delivered with `HTTP 200` code - this kind of error is related to problems at JMX level, when everything that's needed to perform a JMX operation is successfully extracted from the HTTP request. For these responses, JMX error may be delivered in a JSON response or a part of the JSON response when the bulk request was sent. This is called a _Jolokia error response_ (as opposed to _HTTP error response_).
 * error response delivered with `HTTP 4xx/5xx` codes - this happens when client sends invalid JSON (and Jolokia can't even determine what should be done) or mismatched request parameters (for example `maxDepth=fourty-two`). When illegal parameters are used or the JSON is not well-formed, an HTTP 400
 error is returned (`Bad Request`) indicating a user error. When there's some issue at server side, HTTP 500 is returned.
+When there's a security exception like not-allowed remote host/address or `Origin`, HTTP 403 is returned.
 
 Jolokia responses are always encoded in UTF-8 JSON format, whether the
 request was a GET or POST request. In general, two kinds of
@@ -429,7 +430,7 @@ occurred on the server side (if any stacktrace is available and `includeStackTra
 
 For each type of operation, the format of the
 `value` entry is explained in
-<<jolokia-operations>>
+<<jolokia-operations>>.
 
 [#paths]
 === Paths

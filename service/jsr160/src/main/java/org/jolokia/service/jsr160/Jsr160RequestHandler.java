@@ -51,6 +51,7 @@ import org.jolokia.server.core.request.JolokiaRequest;
 import org.jolokia.server.core.request.NotChangedException;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.request.AbstractRequestHandler;
+import org.jolokia.server.core.util.HttpMethod;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 import org.jolokia.server.core.util.jmx.SingleMBeanServerAccess;
 import org.jolokia.service.jmx.api.CommandHandler;
@@ -97,7 +98,8 @@ public class Jsr160RequestHandler extends AbstractRequestHandler {
      */
     @Override
     public boolean canHandle(JolokiaRequest pJolokiaRequest) {
-        return pJolokiaRequest.getOption("target") instanceof JSONObject;
+        return pJolokiaRequest.getOption("target") instanceof JSONObject
+                && pJolokiaRequest.getHttpMethod() == HttpMethod.POST;
     }
 
     /**

@@ -50,6 +50,7 @@ import org.jolokia.server.core.detector.ServerDetectorLookup;
 import org.jolokia.server.core.http.security.FetchMetadata;
 import org.jolokia.server.core.request.BadRequestException;
 import org.jolokia.server.core.request.EmptyResponseException;
+import org.jolokia.server.core.request.HttpSecurityException;
 import org.jolokia.server.core.restrictor.RestrictorFactory;
 import org.jolokia.server.core.service.JolokiaServiceManagerFactory;
 import org.jolokia.server.core.service.api.AgentDetails;
@@ -516,6 +517,17 @@ public class AgentServlet extends HttpServlet {
                     throw new BadRequestException("HTTP Method OPTIONS is supported only for CORS preflight requests.");
                 }
             }
+        } catch (HttpSecurityException exp) {
+            String response = "Access Denied\n";
+            if (exp.getMessage() != null) {
+                response += "\n" + exp.getMessage() + "\n";
+            }
+            pResp.addHeader("Content-Type", "text/plain; charset=utf-8");
+            pResp.setStatus(exp.getCode());
+            OutputStream os = pResp.getOutputStream();
+            os.write(response.getBytes());
+            os.close();
+            return;
         } catch (BadRequestException exp) {
             String response = "400 (Bad Request)\n";
             if (exp.getMessage() != null) {

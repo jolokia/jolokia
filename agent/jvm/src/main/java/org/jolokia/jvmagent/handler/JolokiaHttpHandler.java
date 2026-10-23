@@ -48,6 +48,7 @@ import org.jolokia.server.core.http.HttpRequestHandler;
 import org.jolokia.server.core.http.security.FetchMetadata;
 import org.jolokia.server.core.request.BadRequestException;
 import org.jolokia.server.core.request.EmptyResponseException;
+import org.jolokia.server.core.request.HttpSecurityException;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.api.Restrictor;
 import org.jolokia.server.core.util.ContentTypeAndCharset;
@@ -236,6 +237,17 @@ public class JolokiaHttpHandler implements HttpHandler {
             } else {
                 throw new BadRequestException("HTTP Method " + method + " is not supported.");
             }
+        } catch (HttpSecurityException exp) {
+            String response = "Access Denied\n";
+            if (exp.getMessage() != null) {
+                response += "\n" + exp.getMessage() + "\n";
+            }
+            pExchange.getResponseHeaders().add("Content-Type", "text/plain; charset=utf-8");
+            pExchange.sendResponseHeaders(exp.getCode(), response.length());
+            OutputStream os = pExchange.getResponseBody();
+            os.write(response.getBytes());
+            os.close();
+            return;
         } catch (BadRequestException exp) {
             String response = "400 (Bad Request)\n";
             if (exp.getMessage() != null) {

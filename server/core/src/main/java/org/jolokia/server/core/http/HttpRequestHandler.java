@@ -41,6 +41,7 @@ import org.jolokia.server.core.http.security.FetchMetadata;
 import org.jolokia.server.core.request.BadRequestException;
 import org.jolokia.server.core.request.BaseRequestHandler;
 import org.jolokia.server.core.request.EmptyResponseException;
+import org.jolokia.server.core.request.HttpSecurityException;
 import org.jolokia.server.core.request.JolokiaRequest;
 import org.jolokia.server.core.request.JolokiaRequestFactory;
 import org.jolokia.server.core.request.ProcessingParameters;
@@ -319,15 +320,17 @@ public class HttpRequestHandler extends BaseRequestHandler {
             toCheck[0] = pHost;
             System.arraycopy(pAddresses, 0, toCheck, 1, pAddresses.length);
         }
+
         if (!jolokiaCtx.isRemoteAccessAllowed(toCheck)) {
-            throw new SecurityException("No access from client [chain: " + String.join(" -> ", toCheck) + "] allowed");
+            throw new HttpSecurityException("No access from client [chain: " + String.join(" -> ", toCheck) + "] allowed");
         }
+
         // passing true for "only if strict checking" means that the access can be granted if there's
         // no Origin (or Referer) header included. Without <strict-checking> any origin will pass here and <cors>
         // configuration will be used only for CORS protocol handling (sending proper Access-Control-Allow-* headers)
         // and not for a limited access control.
         if (!jolokiaCtx.isOriginAllowed(pOrigin, true)) {
-            throw new SecurityException("Origin " + pOrigin + " is not allowed to call this agent");
+            throw new HttpSecurityException("Origin " + pOrigin + " is not allowed to call this agent");
         }
 
         String dest = pFetchMetadata != null ? pFetchMetadata.dest() : null;
@@ -341,7 +344,7 @@ public class HttpRequestHandler extends BaseRequestHandler {
                 if (!("document".equals(dest) && "none".equals(site) && "navigate".equals(mode))) {
                     // allow only explicit top-level navigation (bookmarks or url bar)
                     // clicking <a> gives site="cross-site"
-                    throw new SecurityException("Access Denied");
+                    throw new HttpSecurityException("Access Denied");
                 }
             }
         }
@@ -353,7 +356,7 @@ public class HttpRequestHandler extends BaseRequestHandler {
                 // Requests with HTTPS origin should not be responded over HTTP,
                 // as it compromises data confidentiality and integrity.
                 if ("https".equals(originScheme)) {
-                    throw new SecurityException("Secure origin " + pOrigin + " should not be processed over HTTP");
+                    throw new HttpSecurityException("Secure origin " + pOrigin + " should not be processed over HTTP");
                 }
             } catch (MalformedURLException e) {
                 // Ignore it, should be safe as origin is not https anyway
