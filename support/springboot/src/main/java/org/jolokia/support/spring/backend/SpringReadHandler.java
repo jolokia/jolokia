@@ -25,6 +25,10 @@ public class SpringReadHandler extends SpringCommandHandler<JolokiaReadRequest> 
 
     @Override
     public Object handleRequest(JolokiaReadRequest pJmxReq, Object pPreviousResult) throws InstanceNotFoundException, AttributeNotFoundException {
+        if (!getJolokiaContext().isHttpMethodAllowed(pJmxReq.getHttpMethod())) {
+            throw new SecurityException("HTTP method " + pJmxReq.getHttpMethod().getMethod() +
+                    " is not allowed according to the installed security policy");
+        }
         if (!getJolokiaContext().isTypeAllowed(RequestType.READ)) {
             throw new SecurityException("Command type " + RequestType.READ + " is not allowed");
         }

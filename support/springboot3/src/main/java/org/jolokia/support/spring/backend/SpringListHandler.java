@@ -41,6 +41,10 @@ public class SpringListHandler extends SpringCommandHandler<JolokiaListRequest> 
 
     @Override
     public Object handleRequest(JolokiaListRequest pJmxReq, Object pPreviousResult) {
+        if (!getJolokiaContext().isHttpMethodAllowed(pJmxReq.getHttpMethod())) {
+            throw new SecurityException("HTTP method " + pJmxReq.getHttpMethod().getMethod() +
+                    " is not allowed according to the installed security policy");
+        }
         if (!getJolokiaContext().isTypeAllowed(RequestType.LIST)) {
             throw new SecurityException("Command type " + RequestType.LIST + " is not allowed");
         }
