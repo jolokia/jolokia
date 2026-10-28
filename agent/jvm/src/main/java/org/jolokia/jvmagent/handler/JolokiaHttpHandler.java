@@ -186,6 +186,8 @@ public class JolokiaHttpHandler implements HttpHandler {
      */
     public void doHandle(HttpExchange pExchange) throws IOException {
         JSONStructure json;
+        int returnCode = 200;
+
         URI uri = pExchange.getRequestURI();
         ParsedUri parsedUri = new ParsedUri(uri, contextPath);
 
@@ -237,17 +239,6 @@ public class JolokiaHttpHandler implements HttpHandler {
             } else {
                 throw new BadRequestException("HTTP Method " + method + " is not supported.");
             }
-        } catch (HttpSecurityException exp) {
-            String response = "Access Denied\n";
-            if (exp.getMessage() != null) {
-                response += "\n" + exp.getMessage() + "\n";
-            }
-            pExchange.getResponseHeaders().add("Content-Type", "text/plain; charset=utf-8");
-            pExchange.sendResponseHeaders(exp.getCode(), response.length());
-            OutputStream os = pExchange.getResponseBody();
-            os.write(response.getBytes());
-            os.close();
-            return;
         } catch (BadRequestException exp) {
             String response = "400 (Bad Request)\n";
             if (exp.getMessage() != null) {
@@ -267,6 +258,11 @@ public class JolokiaHttpHandler implements HttpHandler {
             // handle exception not handled by org.jolokia.server.core.http.HttpRequestHandler()
             // so for example should not be JMX exceptions
             json = requestHandler.handleThrowable(exp);
+            if (exp instanceof HttpSecurityException hse) {
+                // Historically, Jolokia was returning HTTP 200 even if the response had status=403.
+                // We could change it in the future.
+//                returnCode = hse.getCode();
+            }
         } finally {
             releaseBackChannel();
         }
@@ -274,7 +270,7 @@ public class JolokiaHttpHandler implements HttpHandler {
         if (json == null) {
             sendInternalServerError(pExchange, new Exception("Internal Server Error (no JSON response)"));
         } else {
-            sendResponse(pExchange, parsedUri, json);
+            sendResponse(pExchange, parsedUri, json, returnCode);
         }
     }
 
@@ -467,23 +463,16 @@ public class JolokiaHttpHandler implements HttpHandler {
         os.close();
     }
 
-    private void sendResponse(HttpExchange pExchange, ParsedUri pParsedUri, JSONStructure pJson) throws IOException {
+    private void sendResponse(HttpExchange pExchange, ParsedUri pParsedUri, JSONStructure pJson, int httpCode) throws IOException {
         Headers headers = pExchange.getResponseHeaders();
-        if (pJson != null) {
-            headers.set("Content-Type", getMimeType(pParsedUri) + "; charset=utf-8");
-            headers.add("Connection", "close");
-            pExchange.sendResponseHeaders(200, 0);
-            Writer writer = new OutputStreamWriter(pExchange.getResponseBody(), StandardCharsets.UTF_8);
+        headers.set("Content-Type", getMimeType(pParsedUri) + "; charset=utf-8");
+        headers.add("Connection", "close");
+        pExchange.sendResponseHeaders(httpCode, 0);
+        Writer writer = new OutputStreamWriter(pExchange.getResponseBody(), StandardCharsets.UTF_8);
 
-            String callback = pParsedUri.getParameter(ConfigKey.CALLBACK.getKeyValue());
-            IoUtil.streamResponseAndClose(writer, pJson, callback != null && MimeTypeUtil.isValidCallback(callback) ? callback : null);
-            pExchange.getResponseBody().close();
-        } else {
-            headers.set("Content-Type", "text/plain");
-            headers.add("Connection", "close");
-            pExchange.sendResponseHeaders(200, -1);
-            pExchange.getResponseBody().close();
-        }
+        String callback = pParsedUri.getParameter(ConfigKey.CALLBACK.getKeyValue());
+        IoUtil.streamResponseAndClose(writer, pJson, callback != null && MimeTypeUtil.isValidCallback(callback) ? callback : null);
+        pExchange.getResponseBody().close();
     }
 
     private void sendAllJSON(HttpExchange pExchange, ParsedUri pParsedUri, JSONStructure pJson) throws IOException {

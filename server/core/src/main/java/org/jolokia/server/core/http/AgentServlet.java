@@ -442,6 +442,7 @@ public class AgentServlet extends HttpServlet {
      */
     private void doHandle(ServletRequestHandler pReqHandler, HttpServletRequest pReq, HttpServletResponse pResp) throws IOException {
         JSONStructure json;
+        int returnCode = HttpServletResponse.SC_OK;
 
         boolean corsPreflight = false;
         try {
@@ -517,17 +518,6 @@ public class AgentServlet extends HttpServlet {
                     throw new BadRequestException("HTTP Method OPTIONS is supported only for CORS preflight requests.");
                 }
             }
-        } catch (HttpSecurityException exp) {
-            String response = "Access Denied\n";
-            if (exp.getMessage() != null) {
-                response += "\n" + exp.getMessage() + "\n";
-            }
-            pResp.addHeader("Content-Type", "text/plain; charset=utf-8");
-            pResp.setStatus(exp.getCode());
-            OutputStream os = pResp.getOutputStream();
-            os.write(response.getBytes());
-            os.close();
-            return;
         } catch (BadRequestException exp) {
             String response = "400 (Bad Request)\n";
             if (exp.getMessage() != null) {
@@ -547,6 +537,11 @@ public class AgentServlet extends HttpServlet {
             // handle exception not handled by org.jolokia.server.core.http.HttpRequestHandler()
             // so for example should not be JMX exceptions
             json = requestHandler.handleThrowable(exp);
+            if (exp instanceof HttpSecurityException hse) {
+                // Historically, Jolokia was returning HTTP 200 even if the response had status=403.
+                // We could change it in the future.
+//                returnCode = hse.getCode();
+            }
         } finally {
             releaseBackChannel();
             if (!corsPreflight) {
@@ -562,7 +557,7 @@ public class AgentServlet extends HttpServlet {
                 sendInternalServerError(pResp, new Exception("Internal Server Error (no JSON response)"));
             }
         } else {
-            sendResponse(pResp, pReq, json);
+            sendResponse(pResp, pReq, json, returnCode);
         }
     }
 
@@ -792,14 +787,14 @@ public class AgentServlet extends HttpServlet {
         os.close();
     }
 
-    private void sendResponse(HttpServletResponse pResp, HttpServletRequest pReq, JSONStructure pJson) throws IOException {
+    private void sendResponse(HttpServletResponse pResp, HttpServletRequest pReq, JSONStructure pJson, int httpCode) throws IOException {
         String callback = pReq.getParameter(ConfigKey.CALLBACK.getKeyValue());
 
         setContentType(pResp,
                        MimeTypeUtil.getResponseMimeType(
                            pReq.getParameter(ConfigKey.MIME_TYPE.getKeyValue()),
                            configMimeType, callback));
-        pResp.setStatus(HttpServletResponse.SC_OK);
+        pResp.setStatus(httpCode);
         if (pJson == null) {
             pResp.setContentLength(-1);
         } else {

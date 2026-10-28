@@ -8,9 +8,13 @@ import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import org.jolokia.server.core.restrictor.DenyAllRestrictor;
 import org.jolokia.server.core.util.TestJolokiaContext;
+import org.jolokia.json.JSONObject;
+import org.jolokia.json.parser.JSONParser;
+import org.jolokia.json.parser.ParseException;
 import org.testng.annotations.Test;
 
 import static org.easymock.EasyMock.expect;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 /**
@@ -20,13 +24,13 @@ import static org.testng.Assert.assertTrue;
 public class JolokiaHttpHandlerRestrictorTest {
 
     @Test
-    void denyAllRestrictor() throws IOException, URISyntaxException {
+    void denyAllRestrictor() throws IOException, ParseException, URISyntaxException {
         TestJolokiaContext testContext = new TestJolokiaContext.Builder()
                 .restrictor(new DenyAllRestrictor()).build();
         checkRestrictor("No access", testContext);
     }
 
-    private void checkRestrictor(String pParam, TestJolokiaContext pTestContext) throws URISyntaxException, IOException {
+    private void checkRestrictor(String pParam, TestJolokiaContext pTestContext) throws URISyntaxException, IOException, ParseException {
         JolokiaHttpHandler newHandler = new JolokiaHttpHandler(pTestContext);
         HttpExchange exchange = JolokiaHttpHandlerTest.prepareExchange("http://localhost:8080/jolokia/read/java.lang:type=Memory/HeapMemoryUsage");
         // Simple GET method
@@ -34,6 +38,9 @@ public class JolokiaHttpHandlerRestrictorTest {
         Headers header = new Headers();
         ByteArrayOutputStream out = JolokiaHttpHandlerTest.prepareResponse(exchange, header);
         newHandler.handle(exchange);
-        assertTrue(out.toString().contains("Access Denied"));
+        JSONObject resp = new JSONParser().parse(out.toString(), JSONObject.class);
+        assertTrue(resp.containsKey("error"));
+        assertTrue(((String) resp.get("error")).contains(pParam));
+        assertEquals(((long) resp.get("status")), 403L);
     }
 }

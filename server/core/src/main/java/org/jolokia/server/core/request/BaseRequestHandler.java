@@ -288,6 +288,8 @@ public abstract class BaseRequestHandler {
         if (throwable instanceof SecurityException) {
             // wipe out stacktrace
             return getErrorJSON(403, new Exception(throwable.getMessage()), null);
+        } else if (throwable instanceof HttpSecurityException hse) {
+            return getErrorJSON(hse.getCode(), new Exception(throwable.getMessage()), null);
         } else {
             // catch-all
             return getErrorJSON(500, throwable, null);

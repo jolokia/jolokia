@@ -316,13 +316,16 @@ in same order as the requests in the initial bulk request.
 All responses are delivered as HTTP responses, but there's a clear distinction between HTTP and Jolokia error responses.
 Generally we have 3 kinds of responses:
 
-* successful response, which is always delivered with `HTTP 200` (or in special case with `HTTP 30x`) code and contains JSON object (whether the request was a single request or a bulk request).
-* error response delivered with `HTTP 200` code - this kind of error is related to problems at JMX level, when everything that's needed to perform a JMX operation is successfully extracted from the HTTP request. For these responses, JMX error may be delivered in a JSON response or a part of the JSON response when the bulk request was sent. This is called a _Jolokia error response_ (as opposed to _HTTP error response_).
+* successful responses, which are always delivered with `HTTP 200` (or in special case with `HTTP 30x`) code and contain JSON object (whether the request was a single request or a bulk request - for bulk requests the JSON array is nested inside the main JSON object).
+* JSON error response delivered with `HTTP 200` code. There are two _flavors_ for such responses:
+** Errors at the JMX level, when everything that's needed to perform a JMX operation is successfully extracted from the HTTP request. For these responses, JMX error may be delivered in a JSON response or a part of the JSON response when the bulk request was sent. This is called a _Jolokia error response_. These errors may be related to missing JMX attribute, exception when invoking a JMX operation or policy violation related to denied MBeans.
+** Errors related to Jolokia policy violation not related to JMX. These errors are returned when source ip/host or origin is not allowed as well as the HTTP method is not permitted. +
+For compatibility reasons these are also delivered to the client as _Jolokia error response_ with HTTP 200 and the `status` field indicates
+mapped HTTP status code (like 403 when connecting from prohibited host or 405 when using not allowed HTTP method).
 * error response delivered with `HTTP 4xx/5xx` codes - this happens when client sends invalid JSON (and Jolokia can't even determine what should be done) or mismatched request parameters (for example `maxDepth=fourty-two`). When illegal parameters are used or the JSON is not well-formed, an HTTP 400
 error is returned (`Bad Request`) indicating a user error. When there's some issue at server side, HTTP 500 is returned.
-When there's a security exception like not-allowed remote host/address or `Origin`, HTTP 403 is returned.
 
-Jolokia responses are always encoded in UTF-8 JSON format, whether the
+Jolokia JSON responses are always encoded in UTF-8, whether the
 request was a GET or POST request. In general, two kinds of
 responses can be classified: In the normal case, an HTTP
 Response with response code `200` is returned, containing the

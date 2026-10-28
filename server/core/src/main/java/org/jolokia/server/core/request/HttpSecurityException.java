@@ -16,11 +16,17 @@
 package org.jolokia.server.core.request;
 
 /**
- * Historically, Jolokia was throwing {@link SecurityException} in several places. These exceptions
- * where translated to "Jolokia JSON error response".
- * However some errors should be transmitted directly with HTTP response code 403. So when Jolokia
- * rejects the request because of {@link org.jolokia.server.core.restrictor.policy.PolicyRestrictor} violations,
- * client should not get a JSON response.
+ * <p>A security exception related to HTTP protocol and network restrictions. Used for rejecting responses
+ * not related to JMX access policy (operation, MBean access, ...) but to a policy for client IP/hostname,
+ * Origin violation or restriction on HTTP method used.</p>
+ *
+ * <p>Historically, Jolokia was throwing a {@link SecurityException} when rejecting JMX access to a particular
+ * MBean or when rejecting entire request due to policy violation. These exceptions
+ * where translated to "Jolokia JSON error response" delivered as "error JSON", but the HTTP error was still 200.</p>
+ *
+ * <p>Some errors could be transmitted directly with HTTP response code 403 (or 405). For compatibility reasons
+ * we'll still be returning these "error JSON" responses with HTTP 200, but this dedicated exception class may be
+ * used to distinguish JMX rejections and HTTP rejections.</p>
  */
 public class HttpSecurityException extends RuntimeException {
 
