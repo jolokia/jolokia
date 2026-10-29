@@ -1,0 +1,6 @@
+<access>
+  <cors>
+    <allow-origin>http://allowed.example</allow-origin>
+    <strict-checking/>
+  </cors>
+</access>

@@ -15,11 +15,15 @@
  */
 package org.jolokia.support.spring.actuator;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletRegistration;
 import org.jolokia.server.core.http.AgentServlet;
+import org.jolokia.server.core.config.MapConfigExtractor;
+import org.jolokia.server.core.config.StaticConfiguration;
 import org.jolokia.server.core.service.api.Restrictor;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
@@ -72,7 +76,21 @@ public class JolokiaServletRegistration implements ServletContextInitializer {
         // restrictors can be taken from ApplicationContext (including its parent(s)) and Agent servlet will
         // decide which one to use (it'll have access to LogHandler, so we're not logging anything here)
         Map<String, Restrictor> restrictors = BeanFactoryUtils.beansOfTypeIncludingAncestors(applicationContext, Restrictor.class);
-        AgentServlet servlet = new AgentServlet();
+        boolean corsConfigured = JolokiaCorsPolicy.isConfigured(initParameters);
+        AgentServlet servlet;
+        if (corsConfigured && restrictors.isEmpty()) {
+            // Match AgentServlet.createWebConfig: sys/env, then servlet parameters, then context parameters.
+            StaticConfiguration configuration = new StaticConfiguration();
+            configuration.update(new MapConfigExtractor(initParameters));
+            Map<String, String> contextParameters = new HashMap<>();
+            for (String name : Collections.list(servletContext.getInitParameterNames())) {
+                contextParameters.put(name, servletContext.getInitParameter(name));
+            }
+            configuration.update(new MapConfigExtractor(contextParameters));
+            servlet = new AgentServlet(JolokiaCorsPolicy.create(initParameters, configuration));
+        } else {
+            servlet = new AgentServlet();
+        }
         servlet.getInitRestrictors().putAll(restrictors);
 
         ServletRegistration.Dynamic reg = servletContext.addServlet("jolokia", servlet);

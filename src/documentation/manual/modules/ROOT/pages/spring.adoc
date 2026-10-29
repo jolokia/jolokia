@@ -236,6 +236,45 @@ public Restrictor customRestrictor() {
 
 We can also still use the default location from which the restrictor XML config is loaded, which is `classpath:/jolokia-access.xml`. Please refer to xref:security.adoc[] for more information about the Jolokia restrictor.
 
+===== Configuring CORS policy with Spring Boot properties
+
+For the actuator endpoint, both Spring Boot 3 and Spring Boot 4 integrations support the
+CORS policy options in the existing `management.endpoint.jolokia.config` map:
+
+[,yaml]
+----
+management:
+  endpoint:
+    jolokia:
+      config:
+        allow-origin: "https://console.example.com, https://*.example.org"
+        strict-checking: true
+        ignore-scheme: false
+----
+
+Write `allow-origin` as a comma-separated string, not a YAML list. Empty entries between
+commas are rejected. An entirely empty value, or an omitted `allow-origin`, imposes no
+origin restriction, matching the XML policy behavior. Use XML or a custom `Restrictor`
+when a pattern itself contains a comma.
+
+`strict-checking` and `ignore-scheme` default to `false` and accept `true` or `false`;
+invalid values fail startup. Their behavior matches the XML `<cors>` section described
+in xref:security.adoc[]. In particular, `ignore-scheme` permits requests with an HTTPS
+origin to an HTTP agent; it does not remove scheme matching from `allow-origin` patterns.
+
+If none of these three keys is supplied, existing policy configuration is unchanged.
+Explicit `false` or an empty `allow-origin` value activates the Spring CORS policy.
+This CORS-only policy adds no MBean, IP address, or HTTP method restrictions.
+
+A custom `Restrictor` bean takes precedence; in that case the CORS settings are ignored.
+Otherwise, combining these settings with an explicit `policyLocation` or `restrictorClass`,
+or an existing default `classpath:/jolokia-access.xml`, fails application startup.
+This includes policy options supplied through Jolokia system properties, environment
+variables, and Servlet context parameters. XML and Spring policies are not merged.
+These checks apply only when the Jolokia actuator endpoint is available and exposed.
+
+===== Accessing the actuator endpoint
+
 We may now access Jolokia Agent using `\http://localhost:8181/actuator/jolokia` URL:
 
 [,subs="attributes,verbatim"]
