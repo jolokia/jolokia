@@ -15,16 +15,15 @@
  */
 package org.jolokia.support.spring.actuator;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletRegistration;
+import org.jolokia.core.api.LogHandler;
+import org.jolokia.server.core.config.Configuration;
 import org.jolokia.server.core.http.AgentServlet;
-import org.jolokia.server.core.config.MapConfigExtractor;
-import org.jolokia.server.core.config.StaticConfiguration;
 import org.jolokia.server.core.service.api.Restrictor;
+import org.jolokia.support.spring.actuator.JolokiaProperties.CorsConfiguration;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
 import org.springframework.boot.autoconfigure.web.servlet.DispatcherServletPath;
@@ -38,13 +37,20 @@ import org.springframework.context.ApplicationContext;
 public class JolokiaServletRegistration implements ServletContextInitializer {
 
     private final Map<String, String> initParameters;
+    private final CorsConfiguration cors;
     private final DispatcherServletPath dispatcherServletPath;
     private final WebEndpointProperties webEndpointProperties;
     private final ApplicationContext applicationContext;
 
     public JolokiaServletRegistration(Map<String, String> initParameters,
                                       WebEndpointProperties webEndpointProperties, DispatcherServletPath dispatcherServletPath, ApplicationContext applicationContext) {
+        this(initParameters, null, webEndpointProperties, dispatcherServletPath, applicationContext);
+    }
+
+    public JolokiaServletRegistration(Map<String, String> initParameters, CorsConfiguration cors,
+                                      WebEndpointProperties webEndpointProperties, DispatcherServletPath dispatcherServletPath, ApplicationContext applicationContext) {
         this.initParameters = initParameters;
+        this.cors = cors;
         this.dispatcherServletPath = dispatcherServletPath;
         this.webEndpointProperties = webEndpointProperties;
         this.applicationContext = applicationContext;
@@ -76,18 +82,14 @@ public class JolokiaServletRegistration implements ServletContextInitializer {
         // restrictors can be taken from ApplicationContext (including its parent(s)) and Agent servlet will
         // decide which one to use (it'll have access to LogHandler, so we're not logging anything here)
         Map<String, Restrictor> restrictors = BeanFactoryUtils.beansOfTypeIncludingAncestors(applicationContext, Restrictor.class);
-        boolean corsConfigured = JolokiaCorsPolicy.isConfigured(initParameters);
         AgentServlet servlet;
-        if (corsConfigured && restrictors.isEmpty()) {
-            // Match AgentServlet.createWebConfig: sys/env, then servlet parameters, then context parameters.
-            StaticConfiguration configuration = new StaticConfiguration();
-            configuration.update(new MapConfigExtractor(initParameters));
-            Map<String, String> contextParameters = new HashMap<>();
-            for (String name : Collections.list(servletContext.getInitParameterNames())) {
-                contextParameters.put(name, servletContext.getInitParameter(name));
-            }
-            configuration.update(new MapConfigExtractor(contextParameters));
-            servlet = new AgentServlet(JolokiaCorsPolicy.create(initParameters, configuration));
+        if (cors != null) {
+            servlet = new AgentServlet() {
+                @Override
+                protected Restrictor createRestrictor(Configuration config, LogHandler logHandler) {
+                    return new JolokiaCorsRestrictor(cors, super.createRestrictor(config, logHandler));
+                }
+            };
         } else {
             servlet = new AgentServlet();
         }

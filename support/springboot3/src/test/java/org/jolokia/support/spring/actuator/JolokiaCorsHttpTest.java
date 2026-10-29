@@ -22,6 +22,7 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.jolokia.json.JSONObject;
 import org.jolokia.json.parser.JSONParser;
@@ -36,7 +37,7 @@ import static org.testng.Assert.*;
 
 public class JolokiaCorsHttpTest {
 
-    private static final String PREFIX = "--management.endpoint.jolokia.config.";
+    private static final String PREFIX = "--management.endpoint.jolokia.cors.";
     private final HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
 
     @DataProvider
@@ -79,7 +80,7 @@ public class JolokiaCorsHttpTest {
             request.header("Access-Control-Request-Method", "POST");
         }
         request.method(method, "POST".equals(method)
-            ? HttpRequest.BodyPublishers.ofString("{\"type\":\"version\"}") : HttpRequest.BodyPublishers.noBody());
+            ? HttpRequest.BodyPublishers.ofString("{\"type\":\"read\",\"mbean\":\"java.lang:type=Runtime\",\"attribute\":\"Name\"}") : HttpRequest.BodyPublishers.noBody());
         return client.send(request.build(), HttpResponse.BodyHandlers.ofString());
     }
 
@@ -146,36 +147,61 @@ public class JolokiaCorsHttpTest {
         try (ConfigurableApplicationContext context = start(false,
                 "--management.endpoint.jolokia.config.policyLocation=classpath:/cors-policy.xml")) {
             assertJolokiaStatus(request(context, "GET", "http://allowed.example"), 200);
+            assertJolokiaStatus(request(context, "POST", "http://allowed.example"), 405);
+            assertEquals(request(context, "OPTIONS", "http://allowed.example").headers()
+                .firstValue("Access-Control-Allow-Methods").orElse(null), "GET");
             assertJolokiaStatus(request(context, "GET", "http://denied.example"), 403);
         }
     }
 
-    @Test
-    public void conflictPreventsStartup() {
-        RuntimeException error = expectThrows(RuntimeException.class, () -> {
-            try (ConfigurableApplicationContext ignored = start(false, PREFIX + "strict-checking=false",
-                    "--management.endpoint.jolokia.config.policyLocation=classpath:/cors-policy.xml")) {
-                fail("Conflicting policies must prevent startup");
-            }
-        });
-        Throwable cause = error;
-        while (cause.getCause() != null) {
-            cause = cause.getCause();
+    @Test(dataProvider = "ports")
+    public void externalCorsPreservesXmlRestrictions(boolean separatePort) throws Exception {
+        try (ConfigurableApplicationContext context = start(separatePort,
+                PREFIX + "allow-origin=http://override.example", PREFIX + "strict-checking=true",
+                "--management.endpoint.jolokia.config.policyLocation=classpath:/cors-policy.xml")) {
+            assertJolokiaStatus(request(context, "GET", "http://override.example"), 200);
+            assertJolokiaStatus(request(context, "GET", "http://allowed.example"), 403);
+            assertJolokiaStatus(request(context, "POST", "http://override.example"), 405);
+            HttpResponse<String> preflight = request(context, "OPTIONS", "http://override.example");
+            assertEquals(preflight.headers().firstValue("Access-Control-Allow-Origin").orElse(null), "http://override.example");
+            assertEquals(preflight.headers().firstValue("Access-Control-Allow-Methods").orElse(null), "GET");
         }
-        assertTrue(cause.getMessage().contains("cannot be combined"), error.toString());
     }
 
-    @Test
-    public void unexposedEndpointDoesNotCreatePolicy() throws Exception {
-        try (ConfigurableApplicationContext context = start(false, PREFIX + "strict-checking=true",
-                "--management.endpoint.jolokia.config.policyLocation=classpath:/cors-policy.xml",
-                "--management.endpoints.web.exposure.include=health")) {
-            assertEquals(request(context, "GET", null).statusCode(), 404);
+    @Test(dataProvider = "ports")
+    public void externalCorsPreservesBeanRestrictionsOverHttp(boolean separatePort) throws Exception {
+        try (ConfigurableApplicationContext context = start(separatePort,
+                "--test.custom-restrictor=true", PREFIX + "allow-origin=http://allowed.example",
+                PREFIX + "strict-checking=true")) {
+            assertJolokiaStatus(request(context, "GET", "http://allowed.example"), 200);
+            assertJolokiaStatus(request(context, "GET", "http://denied.example"), 403);
+            assertJolokiaStatus(request(context, "POST", "http://allowed.example"), 405);
+            HttpResponse<String> preflight = request(context, "OPTIONS", "http://allowed.example");
+            assertEquals(Set.of(preflight.headers().firstValue("Access-Control-Allow-Methods").orElseThrow().split(", *")),
+                Set.of("GET", "POST"));
+        }
+        try (ConfigurableApplicationContext context = start(separatePort, "--test.custom-restrictor=true")) {
+            assertJolokiaStatus(request(context, "GET", "http://allowed.example"), 403);
         }
     }
 
     @Configuration(proxyBeanMethods = false)
     @EnableAutoConfiguration
     public static class EndpointApplication {
+        @org.springframework.context.annotation.Bean
+        @org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name = "test.custom-restrictor", havingValue = "true")
+        public org.jolokia.server.core.service.api.Restrictor customRestrictor() {
+            return new org.jolokia.server.core.restrictor.AllowAllRestrictor() {
+                @Override
+                public boolean isOriginAllowed(String origin, boolean strictOnly) {
+                    return false;
+                }
+
+                @Override
+                public boolean isHttpMethodAllowed(org.jolokia.server.core.util.HttpMethod method) {
+                    return method != org.jolokia.server.core.util.HttpMethod.POST;
+                }
+            };
+        }
     }
 }

@@ -1,7 +1,9 @@
 management:
   endpoint:
     jolokia:
-      config:
-        allow-origin: "http://allowed.example, http://second.example"
+      cors:
+        allow-origin:
+          - http://allowed.example
+          - http://second.example
         strict-checking: true
         ignore-scheme: false

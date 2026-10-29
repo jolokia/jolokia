@@ -16,13 +16,21 @@
 package org.jolokia.support.spring.actuator;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import jakarta.servlet.Servlet;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletRegistration;
 import org.easymock.Capture;
+import org.jolokia.core.api.LogHandler;
+import org.jolokia.server.core.config.Configuration;
+import org.jolokia.server.core.config.StaticConfiguration;
+import org.jolokia.server.core.http.AgentServlet;
 import org.jolokia.server.core.restrictor.DenyAllRestrictor;
+import org.jolokia.server.core.service.api.Restrictor;
+import org.jolokia.server.core.util.HttpMethod;
+import org.jolokia.support.spring.actuator.JolokiaProperties.CorsConfiguration;
 import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
 import org.springframework.context.support.StaticApplicationContext;
 import org.testng.annotations.Test;
@@ -33,53 +41,46 @@ import static org.testng.Assert.*;
 public class JolokiaCorsRegistrationTest {
 
     @Test
-    public void parentBeanWinsBeforePolicyConflictChecks() {
+    public void externalCorsPreservesParentBeanRestrictions() throws Exception {
         try (StaticApplicationContext parent = new StaticApplicationContext();
              StaticApplicationContext child = new StaticApplicationContext(parent)) {
             DenyAllRestrictor custom = new DenyAllRestrictor();
             parent.getBeanFactory().registerSingleton("customRestrictor", custom);
-            ServletContext context = createMock(ServletContext.class);
-            ServletRegistration.Dynamic registration = createMock(ServletRegistration.Dynamic.class);
-            Capture<Servlet> servlet = newCapture();
-            expect(context.addServlet(eq("jolokia"), capture(servlet))).andReturn(registration);
-            Map<String, String> config = Map.of("policyLocation", "https://must-not-be-fetched.invalid/policy", "strict-checking", "invalid-but-ignored");
-            expect(registration.setInitParameters(config)).andReturn(Collections.emptySet());
-            expect(registration.addMapping("/actuator/jolokia/*")).andReturn(Collections.emptySet());
-            replay(context, registration);
-            new JolokiaServletRegistration(config, new WebEndpointProperties(), () -> "/", child).onStartup(context);
-            assertSame(((org.jolokia.server.core.http.AgentServlet) servlet.getValue())
-                .getInitRestrictors().get("customRestrictor"), custom);
-            verify(context, registration);
-        }
-    }
-
-    @Test
-    public void contextPolicyConflictsBeforeServletRegistration() {
-        try (StaticApplicationContext application = new StaticApplicationContext()) {
-            ServletContext context = createMock(ServletContext.class);
-            expect(context.getInitParameterNames()).andReturn(Collections.enumeration(java.util.List.of("policyLocation")));
-            expect(context.getInitParameter("policyLocation")).andReturn("classpath:/legacy.xml");
-            replay(context);
-            expectThrows(IllegalStateException.class, () -> new JolokiaServletRegistration(Map.of("strict-checking", "false"),
-                new WebEndpointProperties(), () -> "/", application).onStartup(context));
-            verify(context);
+            CorsConfiguration cors = new CorsConfiguration(List.of("http://allowed.example"), true, true);
+            AgentServlet servlet = register(child, Map.of(), cors);
+            var create = AgentServlet.class.getDeclaredMethod("createRestrictor", Configuration.class, LogHandler.class);
+            create.setAccessible(true);
+            Restrictor actual = (Restrictor) create.invoke(servlet, new StaticConfiguration(), createNiceMock(LogHandler.class));
+            assertNotSame(actual, custom);
+            assertTrue(actual.isOriginAllowed("http://allowed.example", true));
+            assertFalse(actual.isOriginAllowed("http://denied.example", true));
+            assertTrue(actual.ignoreScheme());
+            assertFalse(actual.isHttpMethodAllowed(HttpMethod.GET));
+            assertFalse(actual.isRemoteAccessAllowed("127.0.0.1"));
         }
     }
 
     @Test
     public void absentCorsKeepsLegacyRegistration() {
         try (StaticApplicationContext application = new StaticApplicationContext()) {
-            ServletContext context = createMock(ServletContext.class);
-            ServletRegistration.Dynamic registration = createMock(ServletRegistration.Dynamic.class);
-            expect(context.addServlet(eq("jolokia"), anyObject(Servlet.class))).andReturn(registration);
-            Map<String, String> config = Map.of("policyLocation", "classpath:/legacy.xml");
-            expect(registration.setInitParameters(config)).andReturn(Collections.emptySet());
-            expect(registration.addMapping("/actuator/jolokia/*")).andReturn(Collections.emptySet());
-            replay(context, registration);
-            JolokiaServletRegistration initializer = new JolokiaServletRegistration(config,
-                new WebEndpointProperties(), () -> "/", application);
-            initializer.onStartup(context);
-            verify(context, registration);
+            AgentServlet servlet = register(application, Map.of("policyLocation", "classpath:/legacy.xml"), null);
+            assertEquals(servlet.getClass(), AgentServlet.class);
         }
+    }
+
+    private AgentServlet register(StaticApplicationContext application, Map<String, String> config, CorsConfiguration cors) {
+        ServletContext context = createMock(ServletContext.class);
+        ServletRegistration.Dynamic registration = createMock(ServletRegistration.Dynamic.class);
+        Capture<Servlet> servlet = newCapture();
+        expect(context.addServlet(eq("jolokia"), capture(servlet))).andReturn(registration);
+        expect(registration.setInitParameters(config)).andReturn(Collections.emptySet());
+        expect(registration.addMapping("/actuator/jolokia/*")).andReturn(Collections.emptySet());
+        replay(context, registration);
+        JolokiaServletRegistration initializer = cors == null
+            ? new JolokiaServletRegistration(config, new WebEndpointProperties(), () -> "/", application)
+            : new JolokiaServletRegistration(config, cors, new WebEndpointProperties(), () -> "/", application);
+        initializer.onStartup(context);
+        verify(context, registration);
+        return (AgentServlet) servlet.getValue();
     }
 }

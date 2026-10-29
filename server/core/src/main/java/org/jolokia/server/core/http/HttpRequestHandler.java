@@ -24,7 +24,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -45,8 +45,6 @@ import org.jolokia.server.core.request.HttpSecurityException;
 import org.jolokia.server.core.request.JolokiaRequest;
 import org.jolokia.server.core.request.JolokiaRequestFactory;
 import org.jolokia.server.core.request.ProcessingParameters;
-import org.jolokia.server.core.restrictor.policy.HttpMethodChecker;
-import org.jolokia.server.core.restrictor.policy.PolicyRestrictor;
 import org.jolokia.server.core.service.api.JolokiaContext;
 import org.jolokia.server.core.service.api.Restrictor;
 import org.jolokia.server.core.util.HttpMethod;
@@ -198,25 +196,15 @@ public class HttpRequestHandler extends BaseRequestHandler {
         }
         ret.put("Access-Control-Max-Age", Integer.toString(2 * 60 * 60));
 
-        if (restrictor instanceof PolicyRestrictor pr) {
-            HttpMethodChecker httpMethodConfig = pr.getHttpMethodChecker();
-            Set<String> methods = new HashSet<>();
-            if (httpMethodConfig == null) {
-                methods.add("GET");
-                methods.add("POST");
-            } else {
-                if (httpMethodConfig.check(HttpMethod.GET)) {
-                    methods.add("GET");
-                }
-                if (httpMethodConfig.check(HttpMethod.POST)) {
-                    methods.add("POST");
-                }
-            }
-            if (!methods.isEmpty()) {
-                ret.put("Access-Control-Allow-Methods", String.join(", ", methods));
-            }
-        } else {
-            ret.put("Access-Control-Allow-Methods", "GET, POST");
+        Set<String> methods = new LinkedHashSet<>();
+        if (restrictor.isCorsMethodAllowed(HttpMethod.GET)) {
+            methods.add("GET");
+        }
+        if (restrictor.isCorsMethodAllowed(HttpMethod.POST)) {
+            methods.add("POST");
+        }
+        if (!methods.isEmpty()) {
+            ret.put("Access-Control-Allow-Methods", String.join(", ", methods));
         }
 
         // Passing false for "only if strict checking" means that we always check actually configured origins.

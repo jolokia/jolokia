@@ -238,40 +238,31 @@ We can also still use the default location from which the restrictor XML config 
 
 ===== Configuring CORS policy with Spring Boot properties
 
-For the actuator endpoint, both Spring Boot 3 and Spring Boot 4 integrations support the
-CORS policy options in the existing `management.endpoint.jolokia.config` map:
+For the actuator endpoint, both Spring Boot 3 and Spring Boot 4 integrations support
+CORS settings through the type-safe `management.endpoint.jolokia.cors` properties:
 
 [,yaml]
 ----
 management:
   endpoint:
     jolokia:
-      config:
-        allow-origin: "https://console.example.com, https://*.example.org"
+      cors:
+        allow-origin:
+          - "https://console.example.com"
+          - "https://*.example.org"
         strict-checking: true
         ignore-scheme: false
 ----
 
-Write `allow-origin` as a comma-separated string, not a YAML list. Empty entries between
-commas are rejected. An entirely empty value, or an omitted `allow-origin`, imposes no
-origin restriction, matching the XML policy behavior. Use XML or a custom `Restrictor`
-when a pattern itself contains a comma.
+`allow-origin` accepts a YAML list, indexed properties (`allow-origin[0]`), or a
+comma-separated string. Empty entries are rejected; an empty or omitted list imposes
+no origin restriction. `strict-checking` and `ignore-scheme` default to `false` and
+behave as described for XML CORS policies in xref:security.adoc[].
 
-`strict-checking` and `ignore-scheme` default to `false` and accept `true` or `false`;
-invalid values fail startup. Their behavior matches the XML `<cors>` section described
-in xref:security.adoc[]. In particular, `ignore-scheme` permits requests with an HTTPS
-origin to an HTTP agent; it does not remove scheme matching from `allow-origin` patterns.
-
-If none of these three keys is supplied, existing policy configuration is unchanged.
-Explicit `false` or an empty `allow-origin` value activates the Spring CORS policy.
-This CORS-only policy adds no MBean, IP address, or HTTP method restrictions.
-
-A custom `Restrictor` bean takes precedence; in that case the CORS settings are ignored.
-Otherwise, combining these settings with an explicit `policyLocation` or `restrictorClass`,
-or an existing default `classpath:/jolokia-access.xml`, fails application startup.
-This includes policy options supplied through Jolokia system properties, environment
-variables, and Servlet context parameters. XML and Spring policies are not merged.
-These checks apply only when the Jolokia actuator endpoint is available and exposed.
+These properties follow Spring Boot's external configuration precedence and override
+only the CORS settings of the selected restrictor. Other restrictions remain in effect.
+Omitted CORS fields use the defaults above, not values from the existing policy.
+Without CORS properties, the existing restrictor is used unchanged.
 
 ===== Accessing the actuator endpoint
 

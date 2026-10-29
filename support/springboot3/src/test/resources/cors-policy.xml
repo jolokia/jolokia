@@ -1,4 +1,7 @@
 <access>
+  <http>
+    <method>get</method>
+  </http>
   <cors>
     <allow-origin>http://allowed.example</allow-origin>
     <strict-checking/>
