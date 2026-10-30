@@ -1042,7 +1042,7 @@ interface JolokiaStatic {
    * Utility method which checks whether a response is a Jolokia error response (HTTP perspective). Jolokia error
    * is still delivered with HTTP response code 200, but the JSON response is a {@link JolokiaErrorResponse} type.
    * @param resp response to check
-   * @return true if response is a success
+   * @return true if response is an error
    */
   isResponseError(resp: unknown): resp is JolokiaErrorResponse
 

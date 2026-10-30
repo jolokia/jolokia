@@ -322,7 +322,7 @@ public class HttpRequestHandler extends BaseRequestHandler {
         }
 
         if (!jolokiaCtx.isRemoteAccessAllowed(toCheck)) {
-            throw new HttpSecurityException("No access from client [chain: " + String.join(" -> ", toCheck) + "] allowed");
+            throw new HttpSecurityException("No access from client [chain: " + String.join(" -> ", toCheck) + "] is allowed");
         }
 
         // passing true for "only if strict checking" means that the access can be granted if there's
