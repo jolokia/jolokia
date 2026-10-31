@@ -90,6 +90,12 @@
       <scope>provided</scope>
     </dependency>
 
+    <dependency>
+      <groupId>org.yaml</groupId>
+      <artifactId>snakeyaml</artifactId>
+      <scope>test</scope>
+    </dependency>
+
     <!-- Other dependencies -->
 
     <dependency>
