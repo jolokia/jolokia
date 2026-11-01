@@ -1182,7 +1182,7 @@
     <plugin.org.codehaus.mojo.flatten-maven-plugin>1.8.0</plugin.org.codehaus.mojo.flatten-maven-plugin>
     <plugin.org.codehaus.mojo.versions-maven-plugin>2.23.0</plugin.org.codehaus.mojo.versions-maven-plugin>
     <plugin.org.jacoco.jacoco-maven-plugin>0.7.6.201602180812</plugin.org.jacoco.jacoco-maven-plugin>
-    <plugin.org.vafer.jdeb>1.14</plugin.org.vafer.jdeb>
+    <plugin.org.vafer.jdeb>1.15</plugin.org.vafer.jdeb>
     <plugin.org.apache.servicemix.tooling>1.5.0</plugin.org.apache.servicemix.tooling>
     <plugin.sonatype.central-publishing-maven-plugin>0.12.0</plugin.sonatype.central-publishing-maven-plugin>
     <plugin.org.graalvm.buildtools.native>1.1.16</plugin.org.graalvm.buildtools.native>
