@@ -6,10 +6,10 @@ There are two major steps required to release Jolokia:
 
 ## Build and test
 
-Building the project is a straightforward step. Jolokia is a Maven project and there's nothing unusual in build configuration, no exotic plugins involved and no antrun tasks.
+Building the project is a straightforward step. Jolokia is a Maven project and there's nothing unusual in build configuration, no exotic plugins involved and no `antrun` tasks.
 
 ```console
-mvn clean install
+mvn clean install -Pexamples,tests
 ```
 
 Maven build will involve invocation of standard unit and integration tests. If you have a firewall enabled, there may
@@ -67,7 +67,7 @@ If the above commands do not work (as on Fedora 42, where `nftables` ownership c
 # firewall-cmd --zone=FedoraServer --add-rich-rule='rule family="ipv6" destination address="ff08::48:84" accept'
 ```
 
-There are however additional tests that should be run a bit outside of standard `mvn clean install`.
+There are however additional tests that should be run a bit outside of standard `mvn clean install -Pexamples,tests`.
 
 Instead of complex configuration that would be required for frameworks like [Selenium][1], Javascript tests are run
 from the web browser after running examples/client-javascript-test-app application:
@@ -257,9 +257,9 @@ values in the console.
 git clone git@github.com:jolokia/jolokia.git
 cd jolokia
 mvn -Dmaven.repo.local=/tmp/repo \
-    -DdevelopmentVersion=2.6.5-SNAPSHOT \
-    -DreleaseVersion=2.6.4 \
-    -Dtag=v2.6.4 \
+    -DdevelopmentVersion=2.6.6-SNAPSHOT \
+    -DreleaseVersion=2.6.5 \
+    -Dtag=v2.6.5 \
     -Pdist release:prepare
 mvn -Dmaven.repo.local=/tmp/repo \
     -Pdist release:perform
@@ -346,7 +346,7 @@ branch of Jolokia and pushed the changes:
 ```console
 git checkout gh-pages
 # copy changed site
-grep -lr 2.6.5-SNAPSHOT | xargs sed -i 's/2.6.5-SNAPSHOT/2.6.4/g'
+grep -lr 2.6.6-SNAPSHOT | xargs sed -i 's/2.6.6-SNAPSHOT/2.6.5/g'
 git add .
 git commit -m '[site] Generate new Jolokia site'
 git push origin HEAD
@@ -354,12 +354,12 @@ git push origin HEAD
 
 ## TL;DR - checklist
 
-1. `mvn clean install`
+1. `mvn clean install -Pexamples,tests`
 2. `mvn clean package -DskipTests jetty:run-war -f examples/client-javascript-test-app`, check http://localhost:8080/jolokia-all-test.html
 3. Set `<currentStableVersion>` to new released version in `pom.xml`
 4. If NPM packages are released, Set new JS version in `package.json` files and in `client/javascript-esm/packages/jolokia/src/jolokia.ts` for `CLIENT_VERSION` field
 5. Update `src/changes/changes.xml` and `src/site/asciidoc/news.adoc`
-6. `mvn -Dmaven.repo.local=/tmp/repo -DdevelopmentVersion=2.6.5-SNAPSHOT -DreleaseVersion=2.6.4 -Dtag=v2.6.4 -Pdist release:prepare`
+6. `mvn -Dmaven.repo.local=/tmp/repo -DdevelopmentVersion=2.6.6-SNAPSHOT -DreleaseVersion=2.6.5 -Dtag=v2.6.5 -Pdist release:prepare`
 7. `mvn -Dmaven.repo.local=/tmp/repo -Pdist release:perform`
 8. Create release at https://github.com/jolokia/jolokia/releases (`target/checkout/assembly/target`: `.tar.gz`, `.zip`, `.asc` and `agent/jvm/target`: `.deb`, `.asc`)
 9. Handle the release at https://central.sonatype.com/publishing/deployments
@@ -379,9 +379,9 @@ yarn npm publish
 git checkout gh-pages
 # copy changed site
 # change SNAPSHOT version - should be done better...
-grep -lr 2.6.5-SNAPSHOT | xargs sed -i 's/2.6.5-SNAPSHOT/2.6.4/g'
+grep -lr 2.6.6-SNAPSHOT | xargs sed -i 's/2.6.6-SNAPSHOT/2.6.5/g'
 git add .
-git commit -m '[site] Jolokia site for 2.6.4'
+git commit -m '[site] Jolokia site for 2.6.5'
 git push origin HEAD
 ```
 

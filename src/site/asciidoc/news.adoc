@@ -15,6 +15,22 @@
 ////
 == News
 
+=== Jolokia 2.6.5 released
+
+[.news-date]
+2026-11-02
+
+Jolokia 2.6.4 was released with a bug related to `Content-Type` handling (I'm not proud of it...). This issue was quickly
+fixed. When checking the request handling in more details, we found some places to improve related to how and when the
+policy restrictor is applied. While not a security issue at all (`version` and `config` operations are safe), we now
+consistently allow to configure these methods in a Policy Restrictor XML format.
+
+Additionally to be https://central.sonatype.org/publish/maven-central-publishing-limits/[a better Maven Central citizen],
+Jolokia no longer publishes test and example artifacts. These are of course available in the source tree, but there's
+no need to have them in Maven Central repository.
+
+Refer to https://jolokia.org/changes-report.html#a2.6.5[changelog] and https://github.com/jolokia/jolokia/releases/tag/v2.6.5[GitHub release notes] for more details.
+
 === Jolokia 2.6.4 released
 
 [.news-date]

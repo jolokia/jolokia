@@ -23,6 +23,26 @@
     <author email="roland@jolokia.org">Roland Huß</author>
   </properties>
   <body>
+    <release version="2.6.5" description="Release 2.6.5" date="2026-11-02">
+      <action dev="ggrzybek" type="fix" issue="1071">
+        AgentServlet rejects POST with "application/json; charset=UTF-8" since 2.6.4
+      </action>
+      <action dev="ggrzybek" type="add" issue="1073">
+        Trim down the release
+      </action>
+      <action dev="ggrzybek" type="fix" issue="1074">
+        version and config commands cannot be restricted
+      </action>
+      <action dev="ggrzybek" type="fix" issue="1075">
+        ClassCastException for IP6 address ::ffff:7f00:1
+      </action>
+      <action dev="ggrzybek" type="fix" issue="1076">
+        SpringRequestHandlers do not restrict operations and HTTP methods based on the restrictor
+      </action>
+      <action dev="ggrzybek" type="add" issue="1077">
+        Failed Origin or Host checks should use different exception class
+      </action>
+    </release>
     <release version="2.6.4" description="Release 2.6.4" date="2026-10-22">
       <action dev="ggrzybek" type="add" issue="1067">
         Add dedicated HTTP Server filter for /config endpoint
