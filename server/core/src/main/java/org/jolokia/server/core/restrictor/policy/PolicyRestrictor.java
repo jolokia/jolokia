@@ -119,6 +119,13 @@ public class PolicyRestrictor implements Restrictor {
     }
 
     /** {@inheritDoc} */
+    @Override
+    public boolean isCorsMethodAllowed(HttpMethod method) {
+        HttpMethodChecker checker = getHttpMethodChecker();
+        return checker == null || checker.check(method);
+    }
+
+    /** {@inheritDoc} */
     public boolean isHttpMethodAllowed(HttpMethod method) {
         return httpChecker.check(method);
     }

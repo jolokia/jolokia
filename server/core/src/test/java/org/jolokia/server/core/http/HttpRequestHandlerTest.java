@@ -15,8 +15,10 @@
  */
 package org.jolokia.server.core.http;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import javax.management.*;
@@ -26,6 +28,8 @@ import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.http.security.FetchMetadata;
 import org.jolokia.server.core.request.*;
 import org.jolokia.server.core.restrictor.AllowAllRestrictor;
+import org.jolokia.server.core.restrictor.policy.HttpMethodChecker;
+import org.jolokia.server.core.restrictor.policy.PolicyRestrictor;
 import org.jolokia.server.core.service.api.Restrictor;
 import org.jolokia.core.api.LogHandler;
 import org.jolokia.server.core.service.impl.StdoutLogHandler;
@@ -204,10 +208,43 @@ public class HttpRequestHandlerTest {
     }
 
     @Test
+    public void preflightPreservesCustomRestrictorDefaults() throws Exception {
+        init(new AllowAllRestrictor() {
+            @Override
+            public boolean isHttpMethodAllowed(HttpMethod method) {
+                return false;
+            }
+        });
+        assertEquals(handler.handleCorsPreflightRequest("http://example.com", null)
+            .get("Access-Control-Allow-Methods"), "GET, POST");
+    }
+
+    @Test
+    public void preflightPreservesXmlMethods() throws Exception {
+        for (String method : new String[] {"get", "post", ""}) {
+            String xml = "<access><http>" + (method.isEmpty() ? "" : "<method>" + method + "</method>")
+                + "</http></access>";
+            init(new PolicyRestrictor(new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8))));
+            assertEquals(handler.handleCorsPreflightRequest("http://example.com", null)
+                .get("Access-Control-Allow-Methods"), method.isEmpty() ? null : method.toUpperCase(Locale.ROOT));
+        }
+        init(new PolicyRestrictor(new ByteArrayInputStream("<access/>".getBytes(StandardCharsets.UTF_8))) {
+            @Override
+            public HttpMethodChecker getHttpMethodChecker() {
+                return null;
+            }
+        });
+        assertEquals(handler.handleCorsPreflightRequest("http://example.com", null)
+            .get("Access-Control-Allow-Methods"), "GET, POST");
+    }
+
+    @Test
     public void preflightCheckNegative() throws Exception {
         String origin = "http://bla.com";
         String headers ="X-Data: Test";
         Restrictor restrictor = createMock(Restrictor.class);
+        expect(restrictor.isCorsMethodAllowed(HttpMethod.GET)).andReturn(true);
+        expect(restrictor.isCorsMethodAllowed(HttpMethod.POST)).andReturn(true);
         expect(restrictor.isOriginAllowed(origin, false)).andReturn(false);
         replay(restrictor);
         init(restrictor);

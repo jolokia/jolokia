@@ -42,6 +42,17 @@ public interface Restrictor {
     boolean isHttpMethodAllowed(HttpMethod pMethod);
 
     /**
+     * Check whether to advertise a method in the CORS preflight response.
+     * By default both GET and POST are advertised, independently of actual request restrictions.
+     *
+     * @param pMethod method to advertise
+     * @return true if the method should be included in Access-Control-Allow-Methods
+     */
+    default boolean isCorsMethodAllowed(HttpMethod pMethod) {
+        return pMethod == HttpMethod.GET || pMethod == HttpMethod.POST;
+    }
+
+    /**
      * Check whether the provided command type is allowed in principal
      *
      * @param pType type to check
