@@ -510,10 +510,22 @@ Generally we have 3 kinds of responses:</p>
 <div class="ulist">
 <ul>
 <li>
-<p>successful response, which is always delivered with <code>HTTP 200</code> (or in special case with <code>HTTP 30x</code>) code and contains JSON object (whether the request was a single request or a bulk request).</p>
+<p>successful responses, which are always delivered with <code>HTTP 200</code> (or in special case with <code>HTTP 30x</code>) code and contain JSON object (whether the request was a single request or a bulk request - for bulk requests the JSON array is nested inside the main JSON object).</p>
 </li>
 <li>
-<p>error response delivered with <code>HTTP 200</code> code - this kind of error is related to problems at JMX level, when everything that&#8217;s needed to perform a JMX operation is successfully extracted from the HTTP request. For these responses, JMX error may be delivered in a JSON response or a part of the JSON response when the bulk request was sent. This is called a <em>Jolokia error response</em> (as opposed to <em>HTTP error response</em>).</p>
+<p>JSON error response delivered with <code>HTTP 200</code> code. There are two <em>flavors</em> for such responses:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Errors at the JMX level, when everything that&#8217;s needed to perform a JMX operation is successfully extracted from the HTTP request. For these responses, JMX error may be delivered in a JSON response or a part of the JSON response when the bulk request was sent. This is called a <em>Jolokia error response</em>. These errors may be related to missing JMX attribute, exception when invoking a JMX operation or policy violation related to denied MBeans.</p>
+</li>
+<li>
+<p>Errors related to Jolokia policy violation not related to JMX. These errors are returned when source ip/host or origin is not allowed as well as the HTTP method is not permitted.<br>
+For compatibility reasons these are also delivered to the client as <em>Jolokia error response</em> with HTTP 200 and the <code>status</code> field indicates
+mapped HTTP status code (like 403 when connecting from prohibited host or 405 when using not allowed HTTP method).</p>
+</li>
+</ul>
+</div>
 </li>
 <li>
 <p>error response delivered with <code>HTTP 4xx/5xx</code> codes - this happens when client sends invalid JSON (and Jolokia can&#8217;t even determine what should be done) or mismatched request parameters (for example <code>maxDepth=fourty-two</code>). When illegal parameters are used or the JSON is not well-formed, an HTTP 400
@@ -522,7 +534,7 @@ error is returned (<code>Bad Request</code>) indicating a user error. When there
 </ul>
 </div>
 <div class="paragraph">
-<p>Jolokia responses are always encoded in UTF-8 JSON format, whether the
+<p>Jolokia JSON responses are always encoded in UTF-8, whether the
 request was a GET or POST request. In general, two kinds of
 responses can be classified: In the normal case, an HTTP
 Response with response code <code>200</code> is returned, containing the
@@ -634,7 +646,7 @@ occurred on the server side (if any stacktrace is available and <code>includeSta
 <div class="paragraph">
 <p>For each type of operation, the format of the
 <code>value</code> entry is explained in
-<a href="#jolokia-operations">Jolokia operations</a></p>
+<a href="#jolokia-operations">Jolokia operations</a>.</p>
 </div>
 </div>
 <div class="sect2">
@@ -3671,7 +3683,7 @@ the following format</p>
 <div class="listingblock">
 <div class="content">
 <pre>$ echo '{"type":"query"}' | socat STDIO UDP4-DATAGRAM:239.192.48.84:24884
-{"agent_version":"2.6.4","agent_id":"jolokia-7778","type":"response","secured":false,"url":"http://192.168.0.165:7778/jolokia/"}{"agent_version":"2.6.4","agent_id":"jolokia-7779","type":"response","secured":false,"url":"http://192.168.0.165:7778/jolokia/"}</pre>
+{"agent_version":"2.6.5","agent_id":"jolokia-7778","type":"response","secured":false,"url":"http://192.168.0.165:7778/jolokia/"}{"agent_version":"2.6.5","agent_id":"jolokia-7779","type":"response","secured":false,"url":"http://192.168.0.165:7778/jolokia/"}</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -3680,7 +3692,7 @@ the following format</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "agent_version": "2.6.4",
+  "agent_version": "2.6.5",
   "agent_id": "192.168.0.221-67980-7e985ce9-servlet",
   "server_product": "tomcat",
   "type": "response",

@@ -72,6 +72,7 @@
       <xs:enumeration value="write" />
       <xs:enumeration value="exec" />
       <xs:enumeration value="version" />
+      <xs:enumeration value="config" />
       <xs:enumeration value="search" />
       <xs:enumeration value="notification" />
     </xs:restriction>

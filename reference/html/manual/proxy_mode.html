@@ -204,6 +204,12 @@ direct agent deployment if possible. The limitations are:</p>
 <div class="ulist">
 <ul>
 <li>
+<p><code>version</code> and <code>config</code> operations use dedicated implementations of
+<code>org.jolokia.server.core.service.request.RequestHandler</code> service interface with higher
+precedence and do not check the <code>target</code> option in the incoming requests. These
+metadata commands are always executed locally.</p>
+</li>
+<li>
 <p>There is no automatic merging of JMX MBeanServers as in the case
 of the direct mode. Most application servers uses their own
 MBeanServer in addition to the
