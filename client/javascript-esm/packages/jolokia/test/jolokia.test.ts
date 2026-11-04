@@ -20,6 +20,7 @@ import request from "supertest"
 import http from "node:http"
 import Jolokia, {
   IJolokia,
+  JolokiaRequest,
   JolokiaResponse,
   JolokiaSuccessResponse,
   NotificationPullValue,
@@ -624,6 +625,91 @@ describe("Jolokia notification tests", () => {
     success = await jolokia.unregisterNotificationClient()
     expect(success).toBe(true)
     expect(jolokia.jobs().length).toBe(0)
+  })
+
+})
+
+describe("Jolokia processing parameters tests", () => {
+
+  type Echo = JolokiaSuccessResponse & { request: JolokiaRequest, value: { query: Record<string, string> } }
+
+  const url = `http://localhost:${port}/jolokia-echo`
+
+  test("Processing parameters in the URL by default", async () => {
+    const jolokia = new Jolokia({ url, method: "post", maxDepth: 7, canonicalNaming: false, mimeType: "text/plain" })
+    const [ echo ] = await jolokia.request({ type: "version" }, { mimeType: "application/json" }) as Echo[]
+    expect(echo.value.query).toEqual({ maxDepth: "7", canonicalNaming: "false", mimeType: "application/json" })
+    expect(echo.request).toEqual({ type: "version" })
+  })
+
+  test("Processing parameters in the POST body", async () => {
+    const jolokia = new Jolokia({
+      url,
+      method: "post",
+      processingParametersInBody: true,
+      maxDepth: 7,
+      canonicalNaming: false,
+      mimeType: "application/json"
+    })
+    const request: VersionRequest = { type: "version", config: { maxDepth: 2 } }
+    const [ echo ] = await jolokia.request(request, { ignoreErrors: true }) as Echo[]
+    // mimeType is read by the agent only from the URL
+    expect(echo.value.query).toEqual({ mimeType: "application/json" })
+    expect(echo.request).toEqual({
+      type: "version",
+      config: { maxDepth: 2, canonicalNaming: false, ignoreErrors: true }
+    })
+    // the passed request is not modified
+    expect(request).toEqual({ type: "version", config: { maxDepth: 2 } })
+  })
+
+  test("Processing parameters in the POST body of a bulk request", async () => {
+    const jolokia = new Jolokia({ url, processingParametersInBody: true, maxDepth: 7 })
+    const echos = await jolokia.request([
+      { type: "version" },
+      { type: "search", mbean: "*:*", config: { maxDepth: 3 } }
+    ]) as Echo[]
+    expect(echos[0].value.query).toEqual({})
+    expect(echos.map(e => e.request)).toEqual([
+      { type: "version", config: { maxDepth: 7 } },
+      { type: "search", mbean: "*:*", config: { maxDepth: 3 } }
+    ])
+  })
+
+  test("Processing parameters in the URL for GET requests", async () => {
+    const jolokia = new Jolokia({ url, processingParametersInBody: true, maxDepth: 7 })
+    const [ echo ] = await jolokia.request({ type: "version" }, { method: "get" }) as Echo[]
+    expect(echo.value.query).toEqual({ maxDepth: "7" })
+  })
+
+  test("Processing parameters in the URL when disabled for a request", async () => {
+    const jolokia = new Jolokia({ url, method: "post", processingParametersInBody: true, maxDepth: 7 })
+    const [ echo ] = await jolokia.request({ type: "version" }, { processingParametersInBody: false }) as Echo[]
+    expect(echo.value.query).toEqual({ maxDepth: "7" })
+    expect(echo.request).toEqual({ type: "version" })
+  })
+
+  test("Processing parameters in the POST body of registered jobs", async () => {
+    const jolokia = new Jolokia({
+      url,
+      processingParametersInBody: true,
+      maxDepth: 7,
+      ignoreErrors: true,
+      mimeType: "application/json"
+    })
+    const request: JolokiaRequest = { type: "version" }
+    const echo = await new Promise<Echo>(resolve => {
+      jolokia.register({
+        success: response => resolve(response as Echo),
+        error: () => {},
+        config: { maxDepth: 3 }
+      }, request)
+    })
+    expect(echo.value.query).toEqual({ mimeType: "application/json" })
+    // job config takes precedence over the processing parameters of the Jolokia instance
+    expect(echo.request).toEqual({ type: "version", config: { maxDepth: 3, ignoreErrors: true } })
+    // processing parameters of the Jolokia instance are not stored in the registered request
+    expect(request.config).toEqual({ maxDepth: 3 })
   })
 
 })

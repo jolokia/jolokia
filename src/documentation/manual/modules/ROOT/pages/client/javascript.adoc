@@ -269,6 +269,14 @@ This callback can be specified both in _callback_ and _promise_ mode - both at `
 |`headers`
 | This option is passed directly to `fetch()` call. 
 
+|`processingParametersInBody`
+|If set to `true`, processing parameters (like `maxDepth`) of "post" requests are sent in the `config`
+of each request in the POST body instead of being added to the URL as query parameters. Values already present
+in the `config` of a request (or of a job registered with the request scheduler) take precedence.
+`mimeType` is always sent as a query parameter, because the agent reads it only from the URL.
+"get" requests have no body, so their processing parameters are always sent as query parameters. +
+*Added in jolokia.js 2.6.6*
+
 |`maxDepth`
 |Maximum traversal depth for serialization of complex return values
 
