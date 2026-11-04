@@ -151,6 +151,15 @@ export type BaseRequestOptions = ProcessingParameters & UsedFetchOptions & {
    * Timeout for the HTTP request
    */
   timeout?: number
+  /**
+   * When `true`, processing parameters (like `maxDepth`) of a `post` request are sent in the `config` of each
+   * request in the POST body instead of being added to the URL as query parameters. Values already present in
+   * the `config` of a request (or of a registered job) take precedence.
+   * `mimeType` is always sent as a query parameter, because the Jolokia agent reads it only from the URL.
+   * `get` requests have no body, so their processing parameters are always sent as query parameters.
+   * @since 2.6.6
+   */
+  processingParametersInBody?: boolean
 }
 
 /**

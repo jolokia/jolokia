@@ -66,6 +66,8 @@ type RequestArguments = {
   successCb?: ResponseCallback | TextResponseCallback | ErrorCallback
   errorCb?: ResponseCallback | TextResponseCallback | ErrorCallback
   fetchErrorCb?: FetchErrorCallback
+  // processing parameters to add to the `config` of each request in the POST body (instead of to the URL)
+  config?: ProcessingParameters
 }
 
 const CLIENT_VERSION = "2.6.1"
@@ -80,7 +82,9 @@ const DEFAULT_FETCH_PARAMS: RequestInit = {
   redirect: "error"
 }
 
-// Processing parameters which are added to the URL as query parameters if given as options
+// Processing parameters which are added to the URL as query parameters if given as options (or to the `config`
+// of each request in the POST body with `processingParametersInBody` option). `mimeType` isn't one of them,
+// because the Jolokia agent reads it only from the URL.
 const PROCESSING_PARAMS: string[] = [
   "maxDepth",
   "maxCollectionSize",
@@ -90,7 +94,6 @@ const PROCESSING_PARAMS: string[] = [
   "includeStackTrace",
   "serializeException",
   "canonicalNaming",
-  "mimeType",
   "includeRequest",
   "ifModifiedSince",
   "listCache"
@@ -144,7 +147,7 @@ const Jolokia = function (this: IJolokia, config: JolokiaConfiguration | string)
 
     // potentially time-consuming operation
     if (args.fetchOptions.method === "POST") {
-      args.fetchOptions.body = JSON.stringify(request)
+      args.fetchOptions.body = JSON.stringify(withProcessingParameters(request, args.config))
     }
 
     // In original jolokia.js at this stage there was different processing depending on the existence of
@@ -588,8 +591,16 @@ function prepareRequest(request: JolokiaRequest | JolokiaRequest[], agentOptions
     url += constructGetUrlPath(request as JolokiaRequest)
   }
 
-  // Add processing parameters as query parameters for GET or POST URL
-  url = addProcessingParameters(url, opts)
+  // Add processing parameters to URL or request body
+  let config: ProcessingParameters | undefined = undefined
+  if (method === "post" && opts.processingParametersInBody) {
+    config = addProcessingParametersToConfig(opts)
+  } else {
+    url = addProcessingParametersToURL(url, opts)
+  }
+  if (opts.mimeType != null) {
+    url += (url.indexOf("?") > 0 ? "&" : "?") + "mimeType=" + opts.mimeType
+  }
 
   // preemptive basic authentication if window.btoa is available
   // otherwise, if "WWW-Authenticate: Basic realm='realm-name'" is returned, native browser popup may be displayed
@@ -635,7 +646,7 @@ function prepareRequest(request: JolokiaRequest | JolokiaRequest[], agentOptions
     fetchErrorCb = opts.fetchError
   }
 
-  return { url, fetchOptions, dataType: opts.dataType, resolve: opts.resolve, successCb, errorCb, fetchErrorCb }
+  return { url, fetchOptions, dataType: opts.dataType, resolve: opts.resolve, successCb, errorCb, fetchErrorCb, config }
 }
 
 /**
@@ -802,7 +813,7 @@ function createJolokiaInvocation(jobs: Map<number, Job>, agentOptions: JolokiaCo
         const successCb = constructSuccessJobCallback(job, jobId, indexMapping)
         const errorCb = constructErrorJobCallback(job, jobId, indexMapping)
         for (let idx = 0; idx < reqsLen; idx++) {
-          requests.push(prepareJobRequest(job, idx))
+          requests.push(withProcessingParameters(prepareJobRequest(job, idx), requestArguments.config))
           successCbs.push(successCb)
           errorCbs.push(errorCb)
           indexMapping.push(idx)
@@ -820,14 +831,14 @@ function createJolokiaInvocation(jobs: Map<number, Job>, agentOptions: JolokiaCo
         const callbackConfiguration = constructJobCallbackConfiguration(job, jobId)
         // N-1 requests:
         for (let idx = 0; idx < reqsLen - 1; idx++) {
-          requests.push(prepareJobRequest(job, idx))
+          requests.push(withProcessingParameters(prepareJobRequest(job, idx), requestArguments.config))
           successCbs.push(callbackConfiguration.cb as ResponseCallback)
           errorCbs.push(callbackConfiguration.cb as ErrorCallback)
           // we won't be using index mapping for a job which uses a single `job.callback`
           indexMapping.push(-1)
         }
         // last request
-        requests.push(prepareJobRequest(job, reqsLen - 1))
+        requests.push(withProcessingParameters(prepareJobRequest(job, reqsLen - 1), requestArguments.config))
         successCbs.push(callbackConfiguration.lcb as ResponseCallback)
         errorCbs.push(callbackConfiguration.lcb as ErrorCallback)
         indexMapping.push(-1)
@@ -1070,7 +1081,7 @@ function ensureTrailingSlash(url: string | URL): string {
  * @param opts Request configuration object
  * @returns url with query parameters applied
  */
-function addProcessingParameters(url: string, opts: RequestOptions) {
+function addProcessingParametersToURL(url: string, opts: RequestOptions) {
   let sep = url.indexOf("?") > 0 ? "&" : "?"
   PROCESSING_PARAMS.forEach(function (key) {
     const v = opts[key as keyof RequestOptions]
@@ -1080,6 +1091,40 @@ function addProcessingParameters(url: string, opts: RequestOptions) {
     }
   })
   return url
+}
+
+/**
+ * Collect processing parameters given as request options, which can be sent in the `config` of a request
+ * in the POST body
+ * @param opts Request configuration object
+ * @returns processing parameters or `undefined` if there are none
+ */
+function addProcessingParametersToConfig(opts: RequestOptions): ProcessingParameters | undefined {
+  const config: Record<string, unknown> = {}
+  PROCESSING_PARAMS.forEach(function (key) {
+    const v = opts[key as keyof RequestOptions]
+    if (v != null) {
+      config[key] = v
+    }
+  })
+  return Object.keys(config).length > 0 ? config as ProcessingParameters : undefined
+}
+
+/**
+ * Add processing parameters to the `config` of a request (or of each request of a bulk request). Values already
+ * present in the `config` of a request take precedence. Passed requests are not modified.
+ * @param request single request or an array of requests
+ * @param config processing parameters to add
+ * @returns request(s) with processing parameters added
+ */
+function withProcessingParameters<R extends JolokiaRequest | JolokiaRequest[]>(request: R, config?: ProcessingParameters): R {
+  if (!config) {
+    return request
+  }
+  if (Array.isArray(request)) {
+    return request.map(r => withProcessingParameters(r, config)) as R
+  }
+  return { ...request, config: { ...config, ...request.config } }
 }
 
 /**
