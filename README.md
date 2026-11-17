@@ -1,6 +1,6 @@
 ![Jolokia - JMX on Capsaicin][1]
 
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.jolokia/jolokia-parent/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/org.jolokia/jolokia-parent/)
+[![Maven Central](https://img.shields.io/maven-central/v/org.jolokia/jolokia-bom?style=flat)](https://repo1.maven.org/maven2/org/jolokia/jolokia-bom/)
 [![Build Status](https://github.com/jolokia/jolokia/actions/workflows/ci.yaml/badge.svg?branch=2.0)](https://github.com/jolokia/jolokia/actions/workflows/ci.yaml)
 
 Jolokia is a fresh way to access JMX MBeans remotely. It is
