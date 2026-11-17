@@ -1,7 +1,7 @@
 ![Jolokia - JMX on Capsaicin][1]
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.jolokia/jolokia-bom?style=flat)](https://repo1.maven.org/maven2/org/jolokia/jolokia-bom/)
-[![Build Status](https://github.com/jolokia/jolokia/actions/workflows/ci.yaml/badge.svg?branch=2.0)](https://github.com/jolokia/jolokia/actions/workflows/ci.yaml)
+[![Build Status](https://github.com/jolokia/jolokia/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/jolokia/jolokia/actions/workflows/ci.yaml)
 
 Jolokia is a fresh way to access JMX MBeans remotely. It is
 different from JSR-160 connectors in that it is an agent-based
