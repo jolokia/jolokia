@@ -62,6 +62,17 @@ app.use("/bla", (_req, res) => {
   res.send("<!doctype html><html lang='en'></html>")
 })
 
+// a Jolokia endpoint that returns the received request(s) and query parameters in a bulk response
+app.use("/jolokia-echo", (req, res) => {
+  const requests = Array.isArray(req.body) ? req.body : [ req.body ]
+  res.status(200).json(requests.map(r => ({
+    status: 200,
+    timestamp: Date.now(),
+    request: r,
+    value: { query: req.query }
+  })))
+})
+
 // a Jolokia endpoint that returns values depending on some incoming HTTP headers
 app.use("/jolokia-introspection", (req, res) => {
   const rcv = req.get("J-Return-Code")
