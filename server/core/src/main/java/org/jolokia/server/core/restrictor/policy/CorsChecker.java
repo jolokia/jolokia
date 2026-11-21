@@ -35,6 +35,22 @@ public class CorsChecker extends AbstractChecker<String> {
     private List<Pattern> patterns;
 
     /**
+     * Construct a CORS checker without an XML policy document.
+     *
+     * @param allowedOrigins origin patterns using the same wildcard syntax as XML
+     * @param strictChecking whether to reject requests with missing or disallowed origins
+     * @param ignoreScheme whether HTTPS origins may access an HTTP agent
+     */
+    public CorsChecker(List<String> allowedOrigins, boolean strictChecking, boolean ignoreScheme) {
+        this.strictChecking = strictChecking;
+        this.ignoreScheme = ignoreScheme;
+        patterns = new ArrayList<>();
+        for (String origin : allowedOrigins) {
+            addOrigin(origin);
+        }
+    }
+
+    /**
      * Constructor building up this checker from the XML document provided.
      * CORS sections look like
      * <pre>
@@ -63,9 +79,7 @@ public class CorsChecker extends AbstractChecker<String> {
                     }
                     assertNodeName(node,"allow-origin", "strict-checking", "ignore-scheme");
                     if (node.getNodeName().equals("allow-origin")) {
-                        String p = node.getTextContent().trim().toLowerCase();
-                        p = Pattern.quote(p).replace("*", "\\E.*\\Q");
-                        patterns.add(Pattern.compile("^" + p + "$"));
+                        addOrigin(node.getTextContent());
                     } else if (node.getNodeName().equals("strict-checking")) {
                         strictChecking = true;
                     } else if (node.getNodeName().equals("ignore-scheme")) {
@@ -109,5 +123,10 @@ public class CorsChecker extends AbstractChecker<String> {
 
     public boolean ignoreScheme() {
         return ignoreScheme;
+    }
+
+    private void addOrigin(String origin) {
+        String pattern = Pattern.quote(origin.trim().toLowerCase()).replace("*", "\\E.*\\Q");
+        patterns.add(Pattern.compile("^" + pattern + "$"));
     }
 }

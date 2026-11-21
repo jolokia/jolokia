@@ -236,6 +236,36 @@ public Restrictor customRestrictor() {
 
 We can also still use the default location from which the restrictor XML config is loaded, which is `classpath:/jolokia-access.xml`. Please refer to xref:security.adoc[] for more information about the Jolokia restrictor.
 
+===== Configuring CORS policy with Spring Boot properties
+
+For the actuator endpoint, both Spring Boot 3 and Spring Boot 4 integrations support
+CORS settings through the type-safe `management.endpoint.jolokia.cors` properties:
+
+[,yaml]
+----
+management:
+  endpoint:
+    jolokia:
+      cors:
+        allow-origin:
+          - "https://console.example.com"
+          - "https://*.example.org"
+        strict-checking: true
+        ignore-scheme: false
+----
+
+`allow-origin` accepts a YAML list, indexed properties (`allow-origin[0]`), or a
+comma-separated string. Empty entries are rejected; an empty or omitted list imposes
+no origin restriction. `strict-checking` and `ignore-scheme` default to `false` and
+behave as described for XML CORS policies in xref:security.adoc[].
+
+These properties follow Spring Boot's external configuration precedence and override
+only the CORS settings of the selected restrictor. Other restrictions remain in effect.
+Omitted CORS fields use the defaults above, not values from the existing policy.
+Without CORS properties, the existing restrictor is used unchanged.
+
+===== Accessing the actuator endpoint
+
 We may now access Jolokia Agent using `\http://localhost:8181/actuator/jolokia` URL:
 
 [,subs="attributes,verbatim"]

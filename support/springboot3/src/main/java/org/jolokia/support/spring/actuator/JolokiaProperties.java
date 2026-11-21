@@ -16,6 +16,7 @@
 package org.jolokia.support.spring.actuator;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -28,8 +29,26 @@ public class JolokiaProperties {
      */
     private final Map<String, String> config = new HashMap<>();
 
+    /** CORS overrides; absent by default to preserve the selected restrictor. */
+    private CorsConfiguration cors;
+
+    public CorsConfiguration getCors() {
+        return cors;
+    }
+
+    public void setCors(CorsConfiguration cors) {
+        this.cors = cors;
+    }
+
     public Map<String, String> getConfig() {
         return this.config;
     }
 
+    /** Type-safe CORS policy settings, independent of the configuration source. */
+    public record CorsConfiguration(List<String> allowOrigin, boolean strictChecking, boolean ignoreScheme) {
+
+        public CorsConfiguration {
+            allowOrigin = allowOrigin == null ? List.of() : List.copyOf(allowOrigin);
+        }
+    }
 }

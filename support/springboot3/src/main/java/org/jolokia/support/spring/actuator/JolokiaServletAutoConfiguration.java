@@ -48,7 +48,7 @@ public class JolokiaServletAutoConfiguration {
     @Bean
     public JolokiaServletRegistration jolokiaServletRegistration(JolokiaProperties properties,
                                                       WebEndpointProperties webEndpointProperties, DispatcherServletPath dispatcherServletPath) {
-        return new JolokiaServletRegistration(properties.getConfig(), webEndpointProperties, dispatcherServletPath,
+        return new JolokiaServletRegistration(properties.getConfig(), properties.getCors(), webEndpointProperties, dispatcherServletPath,
             applicationContext);
     }
 
