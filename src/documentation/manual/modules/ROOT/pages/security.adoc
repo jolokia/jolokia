@@ -602,3 +602,37 @@ public Restrictor customRestrictor() {
 }
 ----
 
+== Jolokia JAAS usage
+
+https://docs.oracle.com/en/java/javase/17/security/java-authentication-authorization-service-jaas-reference-guide.html[JAAS - Java Authentication and Authorization Service] is a Java implementation of https://en.wikipedia.org/wiki/Pluggable_Authentication_Module[PAM - Pluggable Authentication Modules].
+
+Most importantly JAAS allows parts of the code to be invoked within explicitly guarded code which may use _current JAAS subject_ to determine the allowed permissions.
+
+Jolokia uses JAAS in two ways:
+
+1. JAAS authentication may be explicitly enabled for JVM Agent when `authMode` option is set to `jaas` and `realm` points to a valid JAAS [login configuration entry]. +
+For other agents (like WAR), JAAS may be configured at application server level, for example with https://tomcat.apache.org/tomcat-11.0-doc/realm-howto.html#JAASRealm[Tomcat JAAS Realm].
+2. Jolokia may access MBeanServer in demarked code using `javax.security.auth.Subject` API where the called code may determine access permissions based on the _current JAAS subject_.
+
+There are two distinct code paths, where Jolokia accesses `javax.management.MBeanServer`:
+
+1. Jolokia accesses MBeans on behalf of the user (HTTP client)
+2. Jolokia accesses MBeans on behalf of itself (mostly during initialization).
+
+Without JAAS, Jolokia may simply use HTTP Basic authentication and allow or reject the incoming HTTP request.
+
+With JAAS it is possible for Jolokia to use more sophisticated authentication mechanism without increasing its own complexity. Jolokia doesn't perform authentication or authorization, it is simply getting an access to _current JAAS subject_ which then may be checked by the code being invoked.
+
+One of the more important and real-world scenarios is when a Java application uses `javax.management.builder.initial` system property to set up dedicated implementation of `javax.management.MBeanServerBuilder`:
+
+* https://dlcdn.apache.org/karaf/documentation/4_x.html#_jmx_mbeanserver[Apache Karaf] may guard remote JMX access with RBAC rules for accessing MBeans by user and role names
+* https://artemis.apache.org/components/artemis/documentation/latest/management.html#configuring-jmx[Apache Artemis] provides own implementations of `javax.management.MBeanServerBuilder` which provides a proxy to the platform `MBeanServer` and also performs guarding by roles configured in Artemis configuration files
+
+When Jolokia calls JMX on behalf of the calling user (via HTTP), the _current JAAS subject_ is simply passed as-is. However when Jolokia uses JMX itself (for example to cache platform MBeans during initialization) we have new configuration options since Jolokia 2.7.0:
+
+* `jaasInternalUserPrincipalClass` - name for a class that implements `java.security.Principal` interface to be used by Jolokia as single, unique _user principal_
+* `jaasInternalUserName` - name of the _user principal_ to be used with `java.security.Principal` representing Jolokia's _identity_.
+* `jaasInternalRolePrincipalClass` - name for a class that implements `java.security.Principal` interface to be used by Jolokia for all the _role principals_ assigned to Jolokia itself
+* `jaasInternalRoleNames` - comma-separated list of names to be used as _role names_ for Jolokia
+
+With these options, even if the target platform (where Jolokia Agent is running) guards access to platform MBeanServer, Jolokia can access JMX adhering to platform's security configuration.

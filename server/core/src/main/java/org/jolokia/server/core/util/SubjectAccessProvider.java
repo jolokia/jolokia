@@ -15,6 +15,9 @@
  */
 package org.jolokia.server.core.util;
 
+import java.security.Principal;
+import java.util.List;
+
 import org.jolokia.server.core.util.jaas.LegacySubjectAccess;
 import org.jolokia.server.core.util.jaas.ModernSubjectAccess;
 
@@ -25,11 +28,11 @@ public class SubjectAccessProvider {
      * (removal of SecurityManager).
      * @return
      */
-    public static SubjectAccess getSubjectAccess() {
+    public static SubjectAccess getSubjectAccess(Principal userPrincipal, List<Principal> rolePrincipals) {
         try {
-            return new ModernSubjectAccess();
+            return new ModernSubjectAccess(userPrincipal, rolePrincipals);
         } catch (UnsupportedOperationException e) {
-            return new LegacySubjectAccess();
+            return new LegacySubjectAccess(userPrincipal, rolePrincipals);
         }
     }
 

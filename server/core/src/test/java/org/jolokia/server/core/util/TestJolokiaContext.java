@@ -209,6 +209,11 @@ public class TestJolokiaContext implements JolokiaContext {
         return TimeZone.getTimeZone(ConfigKey.DATE_FORMAT_ZONE.getDefaultValue());
     }
 
+    @Override
+    public SubjectAccess getSubjectAccess() {
+        return SubjectAccessProvider.getSubjectAccess(null, Collections.emptyList());
+    }
+
     // Should be called when MBeans were registered for the test. Not part of the JolokiaContext interface
     public void destroy() throws MBeanRegistrationException, InstanceNotFoundException {
         MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();

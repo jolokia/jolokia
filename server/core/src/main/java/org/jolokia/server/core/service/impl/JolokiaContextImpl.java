@@ -34,6 +34,7 @@ import org.jolokia.server.core.service.api.SecurityDetails;
 import org.jolokia.server.core.util.DebugStore;
 import org.jolokia.server.core.util.HttpMethod;
 import org.jolokia.server.core.util.RequestType;
+import org.jolokia.server.core.util.SubjectAccess;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 
 /**
@@ -47,6 +48,8 @@ public class JolokiaContextImpl implements JolokiaContext {
     // Service manager associated with the context
     private final JolokiaServiceManagerImpl serviceManager;
 
+    private final SubjectAccess subjectAccess;
+
     private DebugStore debugStore;
 
     /**
@@ -56,6 +59,7 @@ public class JolokiaContextImpl implements JolokiaContext {
      */
     JolokiaContextImpl(JolokiaServiceManagerImpl pServiceManager) {
         serviceManager = pServiceManager;
+        this.subjectAccess = serviceManager.getSubjectAccess();
     }
 
     public void setDebugStore(DebugStore debugStore) {
@@ -221,6 +225,11 @@ public class JolokiaContextImpl implements JolokiaContext {
     @Override
     public TimeZone dateFormatTimeZone() {
         return TimeZone.getTimeZone(serviceManager.getConfiguration().getConfig(ConfigKey.DATE_FORMAT_ZONE));
+    }
+
+    @Override
+    public SubjectAccess getSubjectAccess() {
+        return this.subjectAccess;
     }
 
 }

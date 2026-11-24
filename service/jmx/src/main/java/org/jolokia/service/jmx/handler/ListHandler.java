@@ -81,7 +81,14 @@ public class ListHandler extends AbstractCommandHandler<JolokiaListRequest> {
         super.init(pContext, pProvider);
 
         jmxAccess = pContext.getMBeanServerAccess();
-        cachePlatformMbeans();
+        try {
+            pContext.getSubjectAccess().callAsJolokia(() -> {
+                cachePlatformMbeans();
+                return null;
+            });
+        } catch (Exception e) {
+            pContext.error("Can't cache platform MBeans", e);
+        }
     }
 
     @Override

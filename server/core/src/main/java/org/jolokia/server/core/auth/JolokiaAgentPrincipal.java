@@ -16,21 +16,18 @@
 package org.jolokia.server.core.auth;
 
 import java.security.Principal;
-import java.util.Collections;
-import javax.security.auth.Subject;
 
 public final class JolokiaAgentPrincipal implements Principal {
 
-    public static final Principal INSTANCE = new JolokiaAgentPrincipal();
-    private static final Subject SUBJECT = new Subject(true, Collections.singleton(INSTANCE), Collections.emptySet(), Collections.emptySet());
+    private final String name;
+
+    public JolokiaAgentPrincipal(String name) {
+        this.name = name;
+    }
 
     @Override
     public String getName() {
-        return getClass().getSimpleName();
-    }
-
-    public static Subject asSubject() {
-        return SUBJECT;
+        return name;
     }
 
 }

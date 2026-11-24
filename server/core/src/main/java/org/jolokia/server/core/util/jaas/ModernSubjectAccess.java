@@ -18,6 +18,8 @@ package org.jolokia.server.core.util.jaas;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.security.Principal;
+import java.util.List;
 import java.util.concurrent.Callable;
 import javax.security.auth.Subject;
 
@@ -25,13 +27,19 @@ import org.jolokia.server.core.util.SubjectAccess;
 
 public class ModernSubjectAccess implements SubjectAccess {
 
+    private final Principal userPrincipal;
+    private final List<Principal> rolePrincipals;
+
+    private final MethodHandle current;
     private final MethodHandle callAs;
 
-    public ModernSubjectAccess() {
-        MethodHandle current;
+    public ModernSubjectAccess(Principal jolokiaPrincipal, List<Principal> rolePrincipals) {
+        this.userPrincipal = jolokiaPrincipal;
+        this.rolePrincipals = rolePrincipals;
+
         try {
             MethodHandles.Lookup lookup = MethodHandles.publicLookup();
-            current = lookup.findStatic(Subject.class, "current", MethodType.methodType(Subject.class));
+            this.current = lookup.findStatic(Subject.class, "current", MethodType.methodType(Subject.class));
             this.callAs = lookup.findStatic(Subject.class, "callAs", MethodType.methodType(Object.class, Subject.class, Callable.class));
         } catch (NoSuchMethodException | IllegalAccessException e) {
             throw new UnsupportedOperationException("Use legacy javax.security.auth.Subject API");
@@ -52,6 +60,31 @@ public class ModernSubjectAccess implements SubjectAccess {
             throw e;
         } catch (Throwable e) {
             throw new UnsupportedOperationException("Can't use JDK18+ (JEP 411) javax.security.auth.Subject.callAs() call", e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T callAsJolokia(Callable<T> callable) throws Exception {
+        try {
+            Subject subject = new Subject();
+            if (userPrincipal != null) {
+                subject.getPrincipals().add(userPrincipal);
+            }
+            subject.getPrincipals().addAll(rolePrincipals);
+            return (T) this.callAs.invoke(subject, callable);
+        } catch (Exception e) {
+            throw e;
+        } catch (Throwable e) {
+            throw new UnsupportedOperationException("Can't use JDK18+ (JEP 411) javax.security.auth.Subject.callAs() call", e);
+        }
+    }
+
+    @Override
+    public Subject currentSubject() {
+        try {
+            return (Subject) this.current.invoke();
+        } catch (Throwable e) {
+            throw new UnsupportedOperationException("Can't use JDK18+ (JEP 411) javax.security.auth.Subject.current() call", e);
         }
     }
 

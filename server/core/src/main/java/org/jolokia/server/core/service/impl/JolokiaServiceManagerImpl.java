@@ -16,6 +16,9 @@
 
 package org.jolokia.server.core.service.impl;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.security.Principal;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.stream.*;
@@ -23,7 +26,6 @@ import java.util.stream.*;
 import javax.management.*;
 
 import org.jolokia.json.JSONObject;
-import org.jolokia.server.core.auth.JolokiaAgentPrincipal;
 import org.jolokia.server.core.backend.MBeanServerHandler;
 import org.jolokia.server.core.backend.MBeanServerHandlerMBean;
 import org.jolokia.server.core.config.ConfigKey;
@@ -106,7 +108,7 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
      */
     private Set<String> disabledServices;
 
-    private final SubjectAccess subjectAccess;
+    private SubjectAccess subjectAccess;
 
     /**
      * Create the implementation of a service manager
@@ -129,8 +131,6 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
         serviceLookups = new ArrayList<>();
         staticServices = new HashMap<>();
         staticLowServices = new HashMap<>();
-
-        subjectAccess = SubjectAccessProvider.getSubjectAccess();
 
         detectorLookup = pDetectorLookup != null ? pDetectorLookup : new ClasspathServerDetectorLookup();
         // The version request handler must be always present and always be first
@@ -205,8 +205,11 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
     /** {@inheritDoc} */
     public synchronized JolokiaContext start() {
         if (!isInitialized) {
+            // obtain proper SubjectAccess, because we need it immediately
+            configureSubjectAccess();
+
             try {
-                ServerHandle handle = subjectAccess.callAs(JolokiaAgentPrincipal.asSubject(), new Callable<>() {
+                ServerHandle handle = subjectAccess.callAsJolokia(new Callable<>() {
                     @Override
                     public ServerHandle call() {
                         SortedSet<ServerDetector> detectors = new TreeSet<>();
@@ -275,10 +278,80 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
         return jolokiaContext;
     }
 
+    private void configureSubjectAccess() {
+        String userName = getJaasOption(ConfigKey.USER_PRINCIPAL_NAME);
+        String roleNames = getJaasOption(ConfigKey.ROLE_PRINCIPAL_NAMES);
+
+        String userPrincipalClass = getJaasOption(ConfigKey.USER_PRINCIPAL_CLASS);
+        String rolePrincipalClass = getJaasOption(ConfigKey.ROLE_PRINCIPAL_CLASS);
+
+        Principal jolokiaUserPrincipal = null;
+        List<Principal> jolokiaRolePrincipals = new ArrayList<>();
+
+        if (userPrincipalClass != null && userName != null) {
+            Class<Principal> clz = tryLoadClass(userPrincipalClass, Principal.class);
+            if (clz != null) {
+                try {
+                    Constructor<?> ctr = clz.getConstructor(String.class);
+                    jolokiaUserPrincipal = (Principal) ctr.newInstance(userName);
+                } catch (NoSuchMethodException | InstantiationException | IllegalAccessException |
+                         InvocationTargetException ignored) {
+                }
+            }
+        }
+
+        if (rolePrincipalClass != null && roleNames != null) {
+            Class<Principal> clz = tryLoadClass(rolePrincipalClass, Principal.class);
+            if (clz != null) {
+                try {
+                    Constructor<?> ctr = clz.getConstructor(String.class);
+                    String[] roles = roleNames.split("\\s*,\\s*");
+                    for (String role : roles) {
+                        if (!role.trim().isEmpty()) {
+                            jolokiaRolePrincipals.add((Principal) ctr.newInstance(role));
+                        }
+                    }
+                } catch (NoSuchMethodException | InstantiationException | IllegalAccessException |
+                         InvocationTargetException ignored) {
+                }
+            }
+        }
+
+        subjectAccess = SubjectAccessProvider.getSubjectAccess(jolokiaUserPrincipal, jolokiaRolePrincipals);
+    }
+
+    private String getJaasOption(ConfigKey key) {
+        String value = configuration.getConfig(key);
+        if (value == null) {
+            value = key.getDefaultValue();
+        } else if (value.trim().isEmpty()) {
+            // explicitly disabled
+            value = null;
+        }
+        return value == null ? null : value.trim();
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> Class<T> tryLoadClass(String roleClass, Class<T> clazz) {
+        for (ClassLoader cl: new ClassLoader[] {
+                getClass().getClassLoader(), Thread.currentThread().getContextClassLoader()
+        }) {
+            try {
+                Class<?> cls = cl.loadClass(roleClass);
+                if (clazz.isAssignableFrom(cls)) {
+                    return (Class<T>) cls;
+                }
+            } catch (ClassNotFoundException ignored) {
+            }
+        }
+
+        return null;
+    }
+
     /** {@inheritDoc} */
     public synchronized void stop() {
         try {
-            subjectAccess.callAs(JolokiaAgentPrincipal.asSubject(), new Callable<>() {
+            subjectAccess.callAsJolokia(new Callable<>() {
                 @Override
                 public Object call() {
                     stopInternal();
@@ -487,6 +560,10 @@ public class JolokiaServiceManagerImpl implements JolokiaServiceManager {
      */
     public SecurityDetails getSecurityDetails() {
         return securityDetails;
+    }
+
+    public SubjectAccess getSubjectAccess() {
+        return subjectAccess;
     }
 
     /**

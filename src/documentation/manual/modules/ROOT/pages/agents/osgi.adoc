@@ -359,9 +359,26 @@ With this option set to `true`, Jolokia trusts that the _first_ IP address in `F
 is assumed to be set by a trusted reverse proxy. This means that all the following addresses are actually
 addresses of downstream reverse proxies which are trusted.
 
-|`useFetchMetadata`
+|`org.jolokia.useFetchMetadata`
 |`true`
 |This option (enabled by default) tells Jolokia to process https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Fetch_metadata[Fetch Metadata] headers. These headers are sent by modern browsers in https://developer.mozilla.org/en-US/docs/Web/Security/Defenses/Secure_Contexts[secure contexts] (i.e., over https or for local addresses, which means these are _not_sent for addresses like `http://192.168.0.1` or `http://example.com`). These headers are browser hints for the type of navigation (top-level? `<img>`? `fetch()`/`xhr`?) and can be used to detect unwanted cross-site requests.
+
+|`org.jolokia.jaasInternalUserPrincipalClass`
+|
+|Name for a class that implements `java.security.Principal` interface to be used by Jolokia as single, unique _user principal_ when accessing JMX server on its own behalf.
+
+|`org.jolokia.jaasInternalUserName`
+|`jolokia`
+|Name of the _user principal_ to be used with `java.security.Principal` representing Jolokia's _identity_.
+It is used only if `jaasInternalUserPrincipalClass` is specified.
+
+|`org.jolokia.jaasInternalRolePrincipalClass`
+|`org.jolokia.server.core.auth.JolokiaAgentPrincipal`
+|Name for a class that implements `java.security.Principal` interface to be used by Jolokia for all the _role principals_ assigned to Jolokia itself
+
+|`org.jolokia.jaasInternalRoleNames`
+|`jolokia`
+|A comma-separated list of names to be used as _role names_ for Jolokia when accessing JMX server on its own behalf.
 |===
 
 This bundle also exports the service

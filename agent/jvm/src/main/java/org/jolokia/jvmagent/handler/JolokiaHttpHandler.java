@@ -116,7 +116,7 @@ public class JolokiaHttpHandler implements HttpHandler {
 
         rfc1123Format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
 
-        subjectAccess = SubjectAccessProvider.getSubjectAccess();
+        subjectAccess = pJolokiaContext.getSubjectAccess();
 
         trustProxyHeaders = Boolean.parseBoolean(jolokiaContext.getConfig(ConfigKey.TRUST_PROXY_HEADERS));
     }
@@ -133,8 +133,9 @@ public class JolokiaHttpHandler implements HttpHandler {
         try {
             checkAuthentication(pHttpExchange);
 
+            // check JAAS subject which may be set as an attribute by one of JDK HttpServer authenticator mechanisms.
             Subject subject = (Subject) pHttpExchange.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE);
-            if (subject != null)  {
+            if (subject != null && subjectAccess != null)  {
                 doHandleAs(subject, pHttpExchange);
             }  else {
                 doHandle(pHttpExchange);

@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.TimeZone;
 
 import org.jolokia.core.util.PropertyUtil;
+import org.jolokia.server.core.auth.JolokiaAgentPrincipal;
 
 /**
  * Enumeration defining the various configuration constant names which
@@ -298,7 +299,8 @@ public enum ConfigKey {
     AUTH_MATCH("authMatch",true, false, "any"),
 
     /**
-     * Custom authenticator to be used instead of default user/password one (JVM agent)
+     * Custom authenticator to be used instead of default user/password one (JVM agent). This class should
+     * implement {@link com.sun.net.httpserver.Authenticator}
      */
     AUTH_CLASS("authClass", true, false),
 
@@ -479,7 +481,41 @@ public enum ConfigKey {
      * enabled by default. It means the requests <em>marked</em> as top-level navigation can be rejected without
      * affecting the behavior for tools like {@code curl} (which never send these headers).</p>
      */
-    USE_FETCH_METADATA_HEADERS("useFetchMetadata", true, false, Constants.TRUE, Boolean.class);
+    USE_FETCH_METADATA_HEADERS("useFetchMetadata", true, false, Constants.TRUE, Boolean.class),
+
+    /**
+     * <p>A name of a class that implements {@link java.security.Principal} interface representing
+     * Jolokia's own identity. It will be used by Jolokia to invoke some internal operations during initialization.</p>
+     * <p>This is important when Jolokia is deployed in an environment where {@code -Djavax.management.builder.initial}
+     * may be used to wrap/intercept access to platform {@link javax.management.MBeanServer}.</p>
+     * <p>By default Jolokia doesn't add a user principal to JAAS {@link javax.security.auth.Subject}, just the
+     * roles.</p>
+     */
+    USER_PRINCIPAL_CLASS("jaasInternalUserPrincipalClass", true, false),
+
+    /**
+     * <p>A name of a class that implements {@link java.security.Principal} interface representing
+     * Jolokia's own roles assigned by the deployment platform. It will be used by Jolokia to invoke some
+     * internal operations during initialization.</p>
+     * <p>This is important when Jolokia is deployed in an environment where {@code -Djavax.management.builder.initial}
+     * may be used to wrap/intercept access to platform {@link javax.management.MBeanServer}.</p>
+     */
+    ROLE_PRINCIPAL_CLASS("jaasInternalRolePrincipalClass", true, false, JolokiaAgentPrincipal.class.getName()),
+
+    /**
+     * Single user's name to be used by Jolokia when adding a {@link java.security.Principal} to a
+     * {@link javax.security.auth.Subject} when invoking internal/initialization operations on platform
+     * {@link javax.management.MBeanServer}. The name will be used as <em>user identity</em> to identify Jolokia,
+     * when Jolokia performs protected operations on behalf of itself instead of an HTTP client.
+     */
+    USER_PRINCIPAL_NAME("jaasInternalUserName", true, false, "jolokia"),
+
+    /**
+     * A comma-separated list of role names to be used by Jolokia when adding a {@link java.security.Principal} to a
+     * {@link javax.security.auth.Subject} when invoking internal/initialization operations on platform
+     * {@link javax.management.MBeanServer}. The names will be used as <em>user roles</em> with role principals.
+     */
+    ROLE_PRINCIPAL_NAMES("jaasInternalRoleNames", true, false, "jolokia");
 
     /**
      * JAAS Subject to attach to an HTTP request as attribute if JAAS based authentication is in use.

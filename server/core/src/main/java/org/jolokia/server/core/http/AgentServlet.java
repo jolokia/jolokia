@@ -129,7 +129,7 @@ public class AgentServlet extends HttpServlet {
     // whether to allow reverse DNS lookup for checking the remote host
     private boolean allowDnsReverseLookup;
 
-    private final SubjectAccess subjectAccess;
+    private SubjectAccess subjectAccess;
 
     // Whether the application that instantiates this servlet provides its own CORS support (in which case
     // Jolokia should not send any CORS headers
@@ -156,7 +156,6 @@ public class AgentServlet extends HttpServlet {
      */
     public AgentServlet(Restrictor pRestrictor) {
         initRestrictor = pRestrictor;
-        subjectAccess = SubjectAccessProvider.getSubjectAccess();
     }
 
     /**
@@ -184,6 +183,9 @@ public class AgentServlet extends HttpServlet {
         // Start it up, all static (non-OSGi) services should be available/discovered already ....
         jolokiaContext = serviceManager.start();
         requestHandler = new HttpRequestHandler(jolokiaContext, restrictor, config.getSecurityDetails().isAuthenticationEnabled());
+
+        // initialize configured JAAS Subject handling tool
+        subjectAccess = jolokiaContext.getSubjectAccess();
 
         Object disableCorsAttribute = pServletConfig != null
                 ? pServletConfig.getServletContext().getAttribute(EXTERNAL_DISABLE_CORS) : null;
@@ -399,7 +401,7 @@ public class AgentServlet extends HttpServlet {
      */
     private void handle(ServletRequestHandler pReqHandler, HttpServletRequest pReq, HttpServletResponse pResp) throws IOException {
         Subject subject = (Subject) pReq.getAttribute(ConfigKey.JAAS_SUBJECT_REQUEST_ATTRIBUTE);
-        if (subject != null) {
+        if (subject != null && subjectAccess != null) {
             doHandleAs(subject, pReqHandler, pReq, pResp);
         } else {
             doHandle(pReqHandler, pReq, pResp);

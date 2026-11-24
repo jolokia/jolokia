@@ -18,7 +18,9 @@ package org.jolokia.server.core.util.jaas;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.security.Principal;
 import java.security.PrivilegedExceptionAction;
+import java.util.List;
 import java.util.concurrent.Callable;
 import javax.security.auth.Subject;
 
@@ -26,11 +28,17 @@ import org.jolokia.server.core.util.SubjectAccess;
 
 public class LegacySubjectAccess implements SubjectAccess {
 
+    private final Principal userPrincipal;
+    private final List<Principal> rolePrincipals;
+
     private final MethodHandle getContext;
     private final MethodHandle getSubject;
     private final MethodHandle doAs;
 
-    public LegacySubjectAccess() {
+    public LegacySubjectAccess(Principal jolokiaPrincipal, List<Principal> rolePrincipals) {
+        this.userPrincipal = jolokiaPrincipal;
+        this.rolePrincipals = rolePrincipals;
+
         try {
             MethodHandles.Lookup lookup = MethodHandles.publicLookup();
             Class<?> controllerClass = Class.forName("java.security.AccessController");
@@ -58,6 +66,32 @@ public class LegacySubjectAccess implements SubjectAccess {
             throw e;
         } catch (Throwable e) {
             throw new UnsupportedOperationException("Can't use legacy javax.security.auth.Subject.doAs() call", e);
+        }
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> T callAsJolokia(Callable<T> callable) throws Exception {
+        try {
+            Subject subject = new Subject();
+            if (userPrincipal != null) {
+                subject.getPrincipals().add(userPrincipal);
+            }
+            subject.getPrincipals().addAll(rolePrincipals);
+            return (T) this.doAs.invoke(subject, (PrivilegedExceptionAction<T>) callable::call);
+        } catch (Exception e) {
+            throw e;
+        } catch (Throwable e) {
+            throw new UnsupportedOperationException("Can't use legacy javax.security.auth.Subject.doAs() call", e);
+        }
+    }
+
+    @Override
+    public Subject currentSubject() {
+        try {
+            return (Subject) this.getSubject.invoke(getContext.invoke());
+        } catch (Throwable e) {
+            throw new UnsupportedOperationException("Can't use legacy javax.security.auth.Subject.getSubject() call", e);
         }
     }
 

@@ -8,6 +8,7 @@ import javax.management.*;
 import org.jolokia.core.api.LogHandler;
 import org.jolokia.core.config.CoreConfiguration;
 import org.jolokia.server.core.config.ConfigKey;
+import org.jolokia.server.core.util.SubjectAccess;
 import org.jolokia.server.core.util.jmx.MBeanServerAccess;
 
 /**
@@ -120,4 +121,15 @@ public interface JolokiaContext extends LogHandler, Restrictor, CoreConfiguratio
      * @return
      */
     boolean isServiceEnabled(String serviceClassName);
+
+    /**
+     * <p>Return {@link SubjectAccess} service for JDK version agnostic way of accessing {@link javax.security.auth.Subject}
+     * methods for invoking protected operations.</p>
+     *
+     * <p>Actual instance is created during context initialization</p>
+     *
+     * @return
+     */
+    SubjectAccess getSubjectAccess();
+
 }

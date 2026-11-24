@@ -33,4 +33,20 @@ public interface SubjectAccess {
      */
     <T> T callAs(Subject subject, Callable<T> callable) throws Exception;
 
+    /**
+     * Wrapper for {@code Subject#doAs} (JDK 17) or {@code Subject#callAs} (JDK 18+), where
+     * the Subject contains one pre-configured <em>Jolokia internal principal</em>.
+     * @param callable
+     * @return
+     * @param <T>
+     * @throws Exception
+     */
+    <T> T callAsJolokia(Callable<T> callable) throws Exception;
+
+    /**
+     * Wrapper for {@code Subject#getSubject} (JDK 17) or {@code Subject#current} (JDK 18+).
+     * @return
+     */
+    Subject currentSubject();
+
 }

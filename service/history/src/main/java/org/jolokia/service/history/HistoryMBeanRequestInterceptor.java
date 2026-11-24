@@ -5,14 +5,12 @@ import java.util.concurrent.Callable;
 
 import javax.management.*;
 
-import org.jolokia.server.core.auth.JolokiaAgentPrincipal;
 import org.jolokia.server.core.config.ConfigKey;
 import org.jolokia.server.core.request.JolokiaRequest;
 import org.jolokia.server.core.service.api.*;
 import org.jolokia.server.core.service.request.RequestInterceptor;
 import org.jolokia.json.JSONObject;
 import org.jolokia.server.core.util.SubjectAccess;
-import org.jolokia.server.core.util.SubjectAccessProvider;
 
 /**
  * @author roland
@@ -23,7 +21,7 @@ public class HistoryMBeanRequestInterceptor extends AbstractJolokiaService<Reque
     // ObjectName for updating the history
     private ObjectName historyObjectName;
 
-    private final SubjectAccess subjectAccess;
+    private SubjectAccess subjectAccess;
 
     /**
      * Construction of a base service for a given type and order
@@ -32,7 +30,6 @@ public class HistoryMBeanRequestInterceptor extends AbstractJolokiaService<Reque
      */
     public HistoryMBeanRequestInterceptor(int pOrderId) {
         super(RequestInterceptor.class, pOrderId);
-        subjectAccess = SubjectAccessProvider.getSubjectAccess();
     }
 
     /** {@inheritDoc} */
@@ -48,6 +45,8 @@ public class HistoryMBeanRequestInterceptor extends AbstractJolokiaService<Reque
 
             //int maxDebugEntries = configuration.getAsInt(ConfigKey.DEBUG_MAX_ENTRIES);
             //debugStore = new DebugStore(maxDebugEntries, configuration.getAsBoolean(ConfigKey.DEBUG));
+
+            subjectAccess = pCtx.getSubjectAccess();
         }
     }
 
@@ -68,7 +67,7 @@ public class HistoryMBeanRequestInterceptor extends AbstractJolokiaService<Reque
         MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
         if (historyObjectName != null) {
             try {
-                subjectAccess.callAs(JolokiaAgentPrincipal.asSubject(), new Callable<>() {
+                subjectAccess.callAsJolokia(new Callable<>() {
                     @Override
                     public Object call() {
                         try {
