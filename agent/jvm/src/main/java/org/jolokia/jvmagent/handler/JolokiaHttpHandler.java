@@ -90,6 +90,10 @@ public class JolokiaHttpHandler implements HttpHandler {
     // trusted proxy discarded untrusted incoming values of these headers and initiated trusted value chain
     private final boolean trustProxyHeaders;
 
+    // Whether to accept POST request with non-empty path info (ignored anyway) instead of returning HTTP 400
+    // (which is the default behavior since 2.6.4)
+    private final boolean acceptLegacyURLs;
+
     /**
      * Create a new HttpHandler for processing HTTP request
      *
@@ -119,6 +123,8 @@ public class JolokiaHttpHandler implements HttpHandler {
         subjectAccess = pJolokiaContext.getSubjectAccess();
 
         trustProxyHeaders = Boolean.parseBoolean(jolokiaContext.getConfig(ConfigKey.TRUST_PROXY_HEADERS));
+
+        acceptLegacyURLs = Boolean.parseBoolean(jolokiaContext.getConfig(ConfigKey.ALLOW_POST_REQUESTS_WITH_PATH_INFO));
     }
 
     /**
@@ -327,7 +333,7 @@ public class JolokiaHttpHandler implements HttpHandler {
     private JSONStructure executePostRequest(ParsedUri pUri, HttpExchange pExchange) throws IOException, EmptyResponseException, BadRequestException {
         // for POST requests we really should not expect _any_ path info - the endpoint should be precisely the
         // context path (or context path with trailing slash)
-        if (!pUri.getPathInfo().isEmpty()) {
+        if (!acceptLegacyURLs && !pUri.getPathInfo().isEmpty()) {
             pExchange.getResponseHeaders().add("Connection", "close");
             pExchange.sendResponseHeaders(400, -1);
             return null;

@@ -379,6 +379,11 @@ It is used only if `jaasInternalUserPrincipalClass` is specified.
 |`org.jolokia.jaasInternalRoleNames`
 |`jolokia`
 |A comma-separated list of names to be used as _role names_ for Jolokia when accessing JMX server on its own behalf.
+
+|`org.jolokia.acceptLegacyPostUrls`
+|`false`
+|By default, POST requests should be sent to _root URL_ of Jolokia (without path info). For compatibility
+with older clients, this option may be set to `true`. Path info will be ignored anyway for POST requests, but the request will be processed normally. By default, the new behavior is to reject the request with HTTP 400 code.
 |===
 
 This bundle also exports the service

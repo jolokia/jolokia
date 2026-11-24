@@ -515,7 +515,14 @@ public enum ConfigKey {
      * {@link javax.security.auth.Subject} when invoking internal/initialization operations on platform
      * {@link javax.management.MBeanServer}. The names will be used as <em>user roles</em> with role principals.
      */
-    ROLE_PRINCIPAL_NAMES("jaasInternalRoleNames", true, false, "jolokia");
+    ROLE_PRINCIPAL_NAMES("jaasInternalRoleNames", true, false, "jolokia"),
+
+    /**
+     * Jolokia explicitly checks if the incoming request URI for POST requests have empty "path info". When it's
+     * non-empty, HTTP 400 is returned. But some legacy applications may construct POST URLs differently. This option
+     * brings back previous behavior of accepting such URLs (the path info is ignored anyway).
+     */
+    ALLOW_POST_REQUESTS_WITH_PATH_INFO("acceptLegacyPostUrls", true, false, Constants.FALSE, Boolean.class);
 
     /**
      * JAAS Subject to attach to an HTTP request as attribute if JAAS based authentication is in use.

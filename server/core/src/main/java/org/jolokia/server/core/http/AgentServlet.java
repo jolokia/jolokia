@@ -139,6 +139,10 @@ public class AgentServlet extends HttpServlet {
     // trusted proxy discarded untrusted incoming values of these headers and initiated trusted value chain
     private boolean trustProxyHeaders = false;
 
+    // Whether to accept POST request with non-empty path info (ignored anyway) instead of returning HTTP 400
+    // (which is the default behavior since 2.6.4)
+    private boolean acceptLegacyURLs = false;
+
     /**
      * No argument constructor, used e.g. by a servlet
      * descriptor when creating the servlet out of web.xml
@@ -198,6 +202,8 @@ public class AgentServlet extends HttpServlet {
         this.disableCors = disableCors;
 
         trustProxyHeaders = Boolean.parseBoolean(config.getConfig(ConfigKey.TRUST_PROXY_HEADERS));
+
+        acceptLegacyURLs = Boolean.parseBoolean(jolokiaContext.getConfig(ConfigKey.ALLOW_POST_REQUESTS_WITH_PATH_INFO));
 
         allowDnsReverseLookup = Boolean.parseBoolean(config.getConfig(ConfigKey.ALLOW_DNS_REVERSE_LOOKUP));
 
@@ -455,7 +461,7 @@ public class AgentServlet extends HttpServlet {
 
             // for POST requests we really should not expect _any_ path info - the endpoint should be precisely the
             // context path (or context path with trailing slash)
-            if ("POST".equalsIgnoreCase(pReq.getMethod()) && !(pathInfo == null || pathInfo.isEmpty() || "/".equals(pathInfo))) {
+            if (!acceptLegacyURLs && "POST".equalsIgnoreCase(pReq.getMethod()) && !(pathInfo == null || pathInfo.isEmpty() || "/".equals(pathInfo))) {
                 throw new BadRequestException("POST requests should be sent to root Jolokia URL");
             }
 
