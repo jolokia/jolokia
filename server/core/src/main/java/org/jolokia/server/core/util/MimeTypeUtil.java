@@ -21,7 +21,7 @@ public class MimeTypeUtil {
      * <ul>
      * <li>If a valid mimeType is given in the request ("text/plain", "application/json"), then this
      * MIME type is returned</li>
-     * <li>If another mimeType is given, then "text/plain" is used</li>
+     * <li>If another mimeType is given, then default "application/json" is used</li>
      * <li>If no mimeType is given then a given default mime type is used, but also sanitized
      * as described above</li>
      * </ul>
@@ -83,7 +83,7 @@ public class MimeTypeUtil {
                 return accepted;
             }
         }
-        return "text/plain";
+        return "application/json";
     }
 
     /**

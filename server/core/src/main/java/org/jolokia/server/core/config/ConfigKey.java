@@ -172,8 +172,8 @@ public enum ConfigKey {
 
     /**
      * Mime Type to use for the response value. By default, this is
-     * <code>text/plain</code>, but it could be useful to return
-     * <code>application/json</code>, too. A request parameter overrides a global
+     * <code>application/json</code>, but it could be useful to return
+     * <code>text/plain</code>, too. A request parameter overrides a global
      * configuration.
      */
     MIME_TYPE("mimeType", true, true, "application/json", String.class),

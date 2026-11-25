@@ -243,7 +243,7 @@ public class AgentServletTest {
 
     @Test
     public void simpleGetWithWrongMimeType() throws ServletException, IOException {
-        checkMimeTypes("text/html", "text/plain");
+        checkMimeTypes("text/html", "application/json");
     }
 
     @Test
